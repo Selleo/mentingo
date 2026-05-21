@@ -446,18 +446,23 @@ Field placement:
   - max participants,
   - viewer permission toggles when online.
 - status/delivery badges remain readable.
-- Overview tab supports trainer management for users who can edit the Live Training and can search
-  users through the existing user-management endpoint.
+- Overview tab supports trainer management only for users who can edit the Live Training and have
+  user-management permission. Content creators do not assign trainers; they remain the sole trainer
+  on Live Trainings they create unless an admin/user manager assigns additional trainers.
 - Files tab remains file management only.
 - People block remains inline and compact:
   - author is always visible,
   - author cannot be removed,
-  - trainers can be added through an inline search popover,
-  - trainers can be removed from the people list,
+  - authorized user managers can add trainers through an inline search popover,
+  - authorized user managers can remove trainers from the people list,
   - duplicate author/trainer rows are merged into one person with multiple badges.
 - First pass uses the existing `GET /user/all` API, so the add-trainer control is shown only when
-  the user can both edit the training and manage/search users. A narrower trainer-candidate endpoint
-  is deferred for content creators who can edit their own trainings but should not manage all users.
+  the user can both edit the training and manage/search users.
+- Live Training UI actions are derived through a reusable capability mapper:
+  - edit metadata/materials: update-any or update-own author permission,
+  - manage people: edit permission plus user-management permission,
+  - manage session: author/trainer role or broad Live Training management permission,
+  - view all materials: author/trainer role or broad Live Training management permission.
 
 ### Validation Rules
 
@@ -509,6 +514,10 @@ Field placement:
 - [x] Add inline trainer management in the People section.
 - [x] Use infinite user search for adding trainers.
 - [x] Preserve backend-owned author locking by only sending editable trainer ids.
+- [x] Gate trainer assignment behind user-management permission and keep content creators as sole
+      trainers by default.
+- [x] Split frontend Live Training actions into reusable capabilities for edit, people management,
+      session management, and material visibility.
 - [ ] Add tests after the edit flow stabilizes.
 
 ## Manual Finish Requirement

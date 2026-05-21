@@ -47,6 +47,13 @@ export const liveTrainingUserSummarySchema = Type.Object({
   profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const liveTrainingHostCandidateSchema = Type.Intersect([
+  liveTrainingUserSummarySchema,
+  Type.Object({
+    email: Type.String(),
+  }),
+]);
+
 export const liveTrainingCourseSummarySchema = Type.Object({
   id: UUIDSchema,
   title: Type.String(),
@@ -57,9 +64,11 @@ export const liveTrainingMaterialSchema = Type.Object({
   title: Type.String(),
   description: Type.Union([Type.String(), Type.Null()]),
   contentType: Type.String(),
-  fileUrl: Type.String(),
+  size: Type.Union([Type.Number(), Type.Null()]),
   relationshipType: Type.Enum(LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES),
 });
+
+export const liveTrainingResourceDownloadSchema = Type.Object({ url: Type.String() });
 
 export const liveTrainingBaseSchema = Type.Object({
   id: UUIDSchema,
@@ -76,7 +85,7 @@ export const liveTrainingBaseSchema = Type.Object({
   status: liveTrainingStatusSchema,
   maxParticipants: Type.Number(),
   authorId: UUIDSchema,
-  trainerIds: Type.Array(UUIDSchema),
+  hostIds: Type.Array(UUIDSchema),
   linkedCourseIds: Type.Array(UUIDSchema),
 });
 
@@ -84,6 +93,8 @@ export const liveTrainingDeleteResponseSchema = Type.Object({ message: Type.Stri
 
 export type LiveTrainingBase = Static<typeof liveTrainingBaseSchema>;
 export type LiveTrainingUserSummary = Static<typeof liveTrainingUserSummarySchema>;
+export type LiveTrainingHostCandidate = Static<typeof liveTrainingHostCandidateSchema>;
 export type LiveTrainingCourseSummary = Static<typeof liveTrainingCourseSummarySchema>;
 export type LiveTrainingMaterial = Static<typeof liveTrainingMaterialSchema>;
+export type LiveTrainingResourceDownload = Static<typeof liveTrainingResourceDownloadSchema>;
 export type LiveTrainingDeleteResponse = Static<typeof liveTrainingDeleteResponseSchema>;

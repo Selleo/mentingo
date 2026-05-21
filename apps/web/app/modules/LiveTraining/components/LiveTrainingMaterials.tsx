@@ -1,109 +1,283 @@
-import { LIVE_TRAINING_STATUSES } from "@repo/shared";
-import { FileText, Lock } from "lucide-react";
+import { LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES, LIVE_TRAINING_STATUSES } from "@repo/shared";
+import { Download, FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteLiveTrainingResource } from "~/api/mutations/live-training/useDeleteLiveTrainingResource";
+import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOpenLiveTrainingResource";
+import { useUploadLiveTrainingResource } from "~/api/mutations/live-training/useUploadLiveTrainingResource";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
+import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
-import type { LiveTrainingDetails } from "~/modules/LiveTraining/liveTraining.types";
+import type { LiveTrainingResourceRelationshipType } from "@repo/shared";
+import type {
+  LiveTrainingDetails,
+  LiveTrainingUiActions,
+} from "~/modules/LiveTraining/liveTraining.types";
 
 type LiveTrainingMaterialsProps = {
   liveTraining: LiveTrainingDetails;
+  actions: LiveTrainingUiActions;
 };
 
-type MaterialPanelProps = {
+type LiveTrainingMaterial = LiveTrainingDetails["materials"]["before"][number];
+
+type MaterialCardProps = {
+  material: LiveTrainingMaterial;
+  isRemoving: boolean;
+  canEditMaterials: boolean;
+  onOpen: () => void;
+  onRemove: () => void;
+};
+
+type MaterialsSectionProps = {
   title: string;
-  description: string;
-  count: number;
-  emptyText: string;
-  locked?: boolean;
-  lockedText?: string;
+  materials: LiveTrainingMaterial[];
+  relationshipType: LiveTrainingResourceRelationshipType;
+  canEditMaterials: boolean;
+  isUploading: boolean;
+  isRemoving: boolean;
+  onUpload: (
+    files: FileList | null,
+    relationshipType: LiveTrainingResourceRelationshipType,
+  ) => void;
+  onOpen: (material: LiveTrainingMaterial) => void;
+  onRemove: (resourceId: string) => void;
 };
 
-function MaterialPanel({
-  title,
-  description,
-  count,
-  emptyText,
-  locked,
-  lockedText,
-}: MaterialPanelProps) {
+function MaterialCard({
+  material,
+  isRemoving,
+  canEditMaterials,
+  onOpen,
+  onRemove,
+}: MaterialCardProps) {
+  const { t } = useTranslation();
+  const size = material.size
+    ? t("liveTrainingView.files.sizeInMb", {
+        size: (material.size / (1024 * 1024)).toFixed(material.size >= 10 * 1024 * 1024 ? 0 : 1),
+      })
+    : null;
+
   return (
-    <div className="p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 className="text-base font-semibold text-neutral-950">{title}</h2>
-          <p className="mt-1 text-sm leading-6 text-neutral-600">{description}</p>
+    <div className="group/material relative flex min-h-28 min-w-0 flex-col justify-between rounded-md border border-neutral-200 bg-white p-3 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/40">
+      <div className="min-w-0">
+        <div className="mb-3 flex items-center gap-2">
+          <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+            <FileText className="size-4" />
+          </span>
+          <Badge variant="outline" fontWeight="normal" className="rounded px-2 py-0.5 text-xs">
+            {getReadableFileTypeLabel(material.contentType)}
+          </Badge>
         </div>
-        <span className="rounded bg-neutral-100 px-2 py-1 text-xs font-medium text-neutral-700">
-          {count}
-        </span>
+        <p
+          className="truncate text-sm font-medium leading-5 text-neutral-950"
+          title={material.title}
+        >
+          {material.title}
+        </p>
+        {size && <p className="mt-1 text-xs text-neutral-500">{size}</p>}
       </div>
 
-      <div className="mt-5 rounded-md border border-dashed border-neutral-200 bg-neutral-50/70 px-4 py-8 text-center">
-        {locked ? (
-          <Lock className="mx-auto size-5 text-neutral-400" />
-        ) : (
-          <FileText className="mx-auto size-5 text-neutral-400" />
-        )}
-        <p className="mt-2 text-sm text-neutral-500">{locked ? lockedText : emptyText}</p>
+      <div className="mt-3 flex justify-end">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="h-8 w-fit gap-1.5 px-2 text-xs text-neutral-600 hover:text-primary-700"
+          onClick={onOpen}
+        >
+          <Download className="size-3.5" />
+          {t("liveTrainingView.files.download")}
+        </Button>
       </div>
+
+      {canEditMaterials && (
+        <Button
+          type="button"
+          variant="ghost"
+          size="xs"
+          className="absolute right-2 top-2 size-7 bg-white/90 opacity-100 shadow-sm sm:opacity-0 sm:group-hover/material:opacity-100"
+          disabled={isRemoving}
+          aria-label={t("liveTrainingView.files.removeFile", { title: material.title })}
+          onClick={onRemove}
+        >
+          {isRemoving ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Trash2 className="size-3.5" />
+          )}
+        </Button>
+      )}
     </div>
   );
 }
 
-export function LiveTrainingMaterials({ liveTraining }: LiveTrainingMaterialsProps) {
-  const { t } = useTranslation();
-  const isAfterTabEnabled = liveTraining.status === LIVE_TRAINING_STATUSES.ENDED;
+function AddMaterialTile({
+  title,
+  isUploading,
+  onFilesSelected,
+}: {
+  title: string;
+  isUploading: boolean;
+  onFilesSelected: (files: FileList | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   return (
-    <section className="overflow-hidden rounded-md border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-200 px-5 py-4">
-        <h2 className="text-base font-semibold text-neutral-950">
-          {t("liveTrainingView.files.title")}
-        </h2>
-        <p className="mt-1 text-sm text-neutral-600">{t("liveTrainingView.files.description")}</p>
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        className="sr-only"
+        onChange={(event) => {
+          onFilesSelected(event.target.files);
+          event.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-visible:border-primary-500 focus-visible:bg-primary-50 focus-visible:text-primary-700 focus-visible:outline-none"
+        disabled={isUploading}
+        onClick={() => inputRef.current?.click()}
+      >
+        {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
+        <span>{title}</span>
+      </button>
+    </>
+  );
+}
+
+function MaterialsSection({
+  title,
+  materials,
+  relationshipType,
+  canEditMaterials,
+  isUploading,
+  isRemoving,
+  onUpload,
+  onOpen,
+  onRemove,
+}: MaterialsSectionProps) {
+  const { t } = useTranslation();
+
+  if (!canEditMaterials && materials.length === 0) return null;
+
+  return (
+    <section className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h2 className="text-sm font-semibold text-neutral-950">{title}</h2>
+        <Badge variant="outline" fontWeight="normal" className="rounded px-2 py-0.5 text-xs">
+          {materials.length}
+        </Badge>
       </div>
 
-      <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE}>
-        <div className="border-b border-neutral-200 px-5 py-3">
-          <TabsList className="h-auto bg-neutral-100 p-1">
-            <TabsTrigger value={LIVE_TRAINING_FILE_TABS.BEFORE}>
-              {t("liveTrainingView.files.beforeHeading")}
-            </TabsTrigger>
-            <TabsTrigger
-              value={LIVE_TRAINING_FILE_TABS.AFTER}
-              disabled={!isAfterTabEnabled}
-              className={cn({
-                "text-neutral-400": !isAfterTabEnabled,
-              })}
-            >
-              {t("liveTrainingView.files.afterHeading")}
-            </TabsTrigger>
-          </TabsList>
+      <div className="max-h-[22rem] overflow-y-auto pr-1">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
+          {materials.map((material) => (
+            <MaterialCard
+              key={material.resourceId}
+              material={material}
+              isRemoving={isRemoving}
+              canEditMaterials={canEditMaterials}
+              onOpen={() => onOpen(material)}
+              onRemove={() => onRemove(material.resourceId)}
+            />
+          ))}
+          {canEditMaterials && (
+            <AddMaterialTile
+              title={t("liveTrainingView.files.addFile")}
+              isUploading={isUploading}
+              onFilesSelected={(files) => onUpload(files, relationshipType)}
+            />
+          )}
         </div>
-
-        <TabsContent value={LIVE_TRAINING_FILE_TABS.BEFORE}>
-          <MaterialPanel
-            title={t("liveTrainingView.files.beforeHeading")}
-            description={t("liveTrainingView.files.beforeDescription")}
-            count={liveTraining.materials.before.length}
-            emptyText={t("liveTrainingView.files.empty")}
-          />
-        </TabsContent>
-
-        <TabsContent value={LIVE_TRAINING_FILE_TABS.AFTER}>
-          <MaterialPanel
-            title={t("liveTrainingView.files.afterHeading")}
-            description={t("liveTrainingView.files.afterDescription")}
-            count={liveTraining.materials.after.length}
-            emptyText={t("liveTrainingView.files.empty")}
-            locked={!isAfterTabEnabled}
-            lockedText={t("liveTrainingView.files.afterLocked")}
-          />
-        </TabsContent>
-      </Tabs>
+      </div>
     </section>
+  );
+}
+
+export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMaterialsProps) {
+  const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
+  const { mutateAsync: uploadResource, isPending: isUploading } = useUploadLiveTrainingResource();
+  const { mutate: openResource } = useOpenLiveTrainingResource();
+  const { mutate: deleteResource, isPending: isRemoving } = useDeleteLiveTrainingResource();
+  const isAfterTabLocked =
+    !actions.canViewAllMaterials && liveTraining.status !== LIVE_TRAINING_STATUSES.ENDED;
+
+  const handleUpload = async (
+    files: FileList | null,
+    relationshipType: LiveTrainingResourceRelationshipType,
+  ) => {
+    if (!files?.length) return;
+
+    for (const file of Array.from(files)) {
+      await uploadResource({
+        liveTrainingId: liveTraining.id,
+        file,
+        relationshipType,
+        language,
+      });
+    }
+  };
+
+  const handleOpen = (material: LiveTrainingMaterial) => {
+    openResource({
+      liveTrainingId: liveTraining.id,
+      resourceId: material.resourceId,
+      language,
+      filename: material.title,
+    });
+  };
+
+  const handleRemove = (resourceId: string) => {
+    deleteResource({ liveTrainingId: liveTraining.id, resourceId, language });
+  };
+
+  return (
+    <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE} className="grid gap-4">
+      <TabsList className="h-auto w-fit bg-neutral-100 p-1">
+        <TabsTrigger value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+          {t("liveTrainingView.files.beforeHeading")}
+        </TabsTrigger>
+        <TabsTrigger value={LIVE_TRAINING_FILE_TABS.AFTER} disabled={isAfterTabLocked}>
+          {t("liveTrainingView.files.afterHeading")}
+        </TabsTrigger>
+      </TabsList>
+
+      <TabsContent value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+        <MaterialsSection
+          title={t("liveTrainingView.files.beforeHeading")}
+          materials={liveTraining.materials.before}
+          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
+          canEditMaterials={actions.canEditMaterials}
+          isUploading={isUploading}
+          isRemoving={isRemoving}
+          onUpload={handleUpload}
+          onOpen={handleOpen}
+          onRemove={handleRemove}
+        />
+      </TabsContent>
+
+      <TabsContent value={LIVE_TRAINING_FILE_TABS.AFTER}>
+        <MaterialsSection
+          title={t("liveTrainingView.files.afterHeading")}
+          materials={liveTraining.materials.after}
+          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
+          canEditMaterials={actions.canEditMaterials}
+          isUploading={isUploading}
+          isRemoving={isRemoving}
+          onUpload={handleUpload}
+          onOpen={handleOpen}
+          onRemove={handleRemove}
+        />
+      </TabsContent>
+    </Tabs>
   );
 }

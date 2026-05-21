@@ -9,6 +9,7 @@ import {
   aiMentorLessons,
   chapters,
   courses,
+  liveLessons,
   lessons,
   questionAnswerOptions,
   questions,
@@ -397,6 +398,43 @@ export class AdminLessonRepository {
       )
       WHERE ${chapters.id} = ${chapterId}
     `);
+  }
+
+  async getLiveLessonByLessonId(lessonId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [liveLesson] = await dbInstance
+      .select({ id: liveLessons.id })
+      .from(liveLessons)
+      .where(eq(liveLessons.lessonId, lessonId));
+
+    return liveLesson ?? null;
+  }
+
+  async getLiveLessonByLiveTrainingLinkId(
+    liveTrainingLinkId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [liveLesson] = await dbInstance
+      .select({ id: liveLessons.id })
+      .from(liveLessons)
+      .where(eq(liveLessons.liveTrainingLinkId, liveTrainingLinkId));
+
+    return liveLesson ?? null;
+  }
+
+  async createLiveLesson(
+    data: {
+      lessonId: UUIDType;
+      liveTrainingId: UUIDType;
+      liveTrainingLinkId: UUIDType;
+    },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [liveLesson] = await dbInstance
+      .insert(liveLessons)
+      .values(data)
+      .returning({ id: liveLessons.id });
+
+    return liveLesson;
   }
 
   async updateLessonDisplayOrderAfterRemove(chapterId: UUIDType, dbInstance: DatabasePg = this.db) {

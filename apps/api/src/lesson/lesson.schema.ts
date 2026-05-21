@@ -7,8 +7,9 @@ import {
 import { Type } from "@sinclair/typebox";
 
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { UUIDSchema } from "src/common";
+import { UUIDSchema, type UUIDType } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { createLiveTrainingSchema } from "src/live-training/schemas/create-live-training.schema";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
@@ -111,6 +112,7 @@ export const adminLessonSchema = Type.Object({
   lessonResources: Type.Optional(Type.Array(lessonResourceSchema)),
   aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
   scormPackageLanguages: Type.Optional(Type.Array(supportedLanguagesSchema)),
+  liveTrainingId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
 });
 
 export const lessonSchema = Type.Object({
@@ -124,6 +126,7 @@ export const lessonSchema = Type.Object({
   fileType: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   questions: Type.Optional(Type.Array(adminQuestionSchema)),
   aiMentor: Type.Optional(Type.Union([aiMentorLessonSchema, Type.Null()])),
+  liveTrainingId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
   updatedAt: Type.Optional(Type.String()),
 });
 
@@ -156,6 +159,27 @@ export const createLessonSchema = Type.Intersect([
     contextId: Type.Optional(Type.String()),
   }),
 ]);
+
+const createLiveTrainingLessonLiveTrainingSchema = Type.Omit(createLiveTrainingSchema, [
+  "language",
+  "linkedCourseIds",
+]);
+
+export const createLiveTrainingLessonSchema = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  chapterId: UUIDSchema,
+  displayOrder: Type.Optional(Type.Number()),
+  contextId: Type.Optional(Type.String()),
+  liveTraining: Type.Optional(createLiveTrainingLessonLiveTrainingSchema),
+  liveTrainingId: Type.Optional(UUIDSchema),
+});
+
+export const createLiveTrainingLessonResponseDataSchema = Type.Object({
+  id: UUIDSchema,
+  liveTrainingId: UUIDSchema,
+  message: Type.String(),
+});
 
 export const createQuizLessonSchema = Type.Intersect([
   Type.Omit(lessonQuizSchema, ["id", "displayOrder"]),
@@ -345,6 +369,14 @@ export type InitializeLessonContextBody = Static<typeof initializeLessonContextS
 export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
 export type LessonForChapterSchema = Static<typeof lessonForChapterSchema>;
 export type CreateLessonBody = Static<typeof createLessonSchema>;
+export type CreateLiveTrainingLessonBody = Static<typeof createLiveTrainingLessonSchema>;
+export type CreateLiveTrainingLessonResponseData = Static<
+  typeof createLiveTrainingLessonResponseDataSchema
+>;
+export type CreateLiveTrainingLessonResult = {
+  lessonId: UUIDType;
+  liveTrainingId: UUIDType;
+};
 export type UpdateLessonBody = Static<typeof updateLessonSchema>;
 export type UpdateQuizLessonBody = Static<typeof updateQuizLessonSchema>;
 export type CreateQuizLessonBody = Static<typeof createQuizLessonSchema>;

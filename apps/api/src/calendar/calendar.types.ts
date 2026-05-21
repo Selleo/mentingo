@@ -50,7 +50,7 @@ export type CalendarEventLinkedCourseRow = CalendarEventLinkedCourse & {
   eventId: UUIDType;
 };
 
-export type CalendarEventTrainerRow = {
+export type CalendarEventHostRow = {
   eventId: UUIDType;
   userId: UUIDType;
   fullName: string | null;
@@ -83,5 +83,5 @@ export type CalendarEventLatestSessionRow = {
 
 export type CalendarEventRoleContext = {
   authorId: UUIDType;
-  trainerIds: UUIDType[];
+  hostIds: UUIDType[];
 };

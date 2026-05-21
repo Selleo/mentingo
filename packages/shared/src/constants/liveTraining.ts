@@ -46,7 +46,7 @@ export type LiveTrainingSessionStatus =
   (typeof LIVE_TRAINING_SESSION_STATUSES)[keyof typeof LIVE_TRAINING_SESSION_STATUSES];
 
 export const LIVE_TRAINING_MEMBER_ROLES = {
-  TRAINER: "trainer",
+  HOST: "host",
   CO_TRAINER: "co_trainer",
   MODERATOR: "moderator",
   OBSERVER: "observer",

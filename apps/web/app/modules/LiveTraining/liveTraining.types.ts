@@ -10,6 +10,10 @@ export type LiveTrainingUiActions = {
   canShowJoin: boolean;
   canShowFinish: boolean;
   canShowStatistics: boolean;
+  canEditMaterials: boolean;
+  canManagePeople: boolean;
+  canManageSession: boolean;
+  canViewAllMaterials: boolean;
 };
 
 export type LiveTrainingActionContext = {
@@ -26,7 +30,7 @@ export type LiveTrainingPerson = {
 
 export const LIVE_TRAINING_PERSON_ROLES = {
   AUTHOR: "author",
-  TRAINER: "trainer",
+  HOST: "host",
 } as const;
 
 export type LiveTrainingPersonRole =

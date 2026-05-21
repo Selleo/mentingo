@@ -5387,6 +5387,33 @@
         }
       }
     },
+    "/api/lesson/beta-create-lesson/live": {
+      "post": {
+        "operationId": "LessonController_betaCreateLiveTrainingLesson",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaCreateLiveTrainingLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaCreateLiveTrainingLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/initialize-lesson-context": {
       "post": {
         "operationId": "LessonController_initializeLessonContext",
@@ -6427,6 +6454,541 @@
         "responses": {
           "200": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/live-training": {
+      "get": {
+        "operationId": "LiveTrainingController_getLiveTrainings",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "scheduled",
+                  "type": "string"
+                },
+                {
+                  "const": "active",
+                  "type": "string"
+                },
+                {
+                  "const": "ended",
+                  "type": "string"
+                },
+                {
+                  "const": "cancelled",
+                  "type": "string"
+                },
+                {
+                  "const": "expired",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "deliveryType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "online",
+                  "type": "string"
+                },
+                {
+                  "const": "offline",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "start",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "end",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLiveTrainingsResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "LiveTrainingController_createLiveTraining",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLiveTrainingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateLiveTrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}": {
+      "get": {
+        "operationId": "LiveTrainingController_getLiveTraining",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLiveTrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "LiveTrainingController_updateLiveTraining",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLiveTrainingBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLiveTrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "LiveTrainingController_deleteLiveTraining",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteLiveTrainingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/host-candidates": {
+      "get": {
+        "operationId": "LiveTrainingController_getHostCandidates",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "type": "number"
+            }
+          },
+          {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetHostCandidatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/resources": {
+      "post": {
+        "operationId": "LiveTrainingController_uploadLiveTrainingResource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "relationshipType": {
+                    "type": "string",
+                    "enum": [
+                      "live_training_before",
+                      "live_training_after"
+                    ]
+                  },
+                  "language": {
+                    "type": "string",
+                    "enum": [
+                      "en",
+                      "pl",
+                      "de",
+                      "lt",
+                      "cs"
+                    ]
+                  }
+                },
+                "required": [
+                  "file",
+                  "relationshipType",
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadLiveTrainingResourceResponse"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Live Training resource uploaded successfully"
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/resources/{resourceId}/download": {
+      "get": {
+        "operationId": "LiveTrainingController_getLiveTrainingResourceDownloadUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLiveTrainingResourceDownloadUrlResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/live-training/{id}/resources/{resourceId}": {
+      "delete": {
+        "operationId": "LiveTrainingController_deleteLiveTrainingResource",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "resourceId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteLiveTrainingResourceResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -11586,287 +12148,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateSupportSessionResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/live-training": {
-      "get": {
-        "operationId": "LiveTrainingController_getLiveTrainings",
-        "parameters": [
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "status",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "scheduled",
-                  "type": "string"
-                },
-                {
-                  "const": "active",
-                  "type": "string"
-                },
-                {
-                  "const": "ended",
-                  "type": "string"
-                },
-                {
-                  "const": "cancelled",
-                  "type": "string"
-                },
-                {
-                  "const": "expired",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "deliveryType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "online",
-                  "type": "string"
-                },
-                {
-                  "const": "offline",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "start",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          {
-            "name": "end",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLiveTrainingsResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "operationId": "LiveTrainingController_createLiveTraining",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateLiveTrainingBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateLiveTrainingResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/live-training/{id}": {
-      "get": {
-        "operationId": "LiveTrainingController_getLiveTraining",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLiveTrainingResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "operationId": "LiveTrainingController_updateLiveTraining",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateLiveTrainingBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateLiveTrainingResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "LiveTrainingController_deleteLiveTraining",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DeleteLiveTrainingResponse"
                 }
               }
             }
@@ -20777,6 +21058,17 @@
                               }
                             ]
                           },
+                          "liveTrainingId": {
+                            "anyOf": [
+                              {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
                           "updatedAt": {
                             "type": "string"
                           }
@@ -23777,6 +24069,17 @@
                   }
                 ]
               },
+              "liveTrainingId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "updatedAt": {
                 "type": "string"
               }
@@ -23822,6 +24125,180 @@
             },
             "required": [
               "id",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "BetaCreateLiveTrainingLessonBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chapterId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "number"
+          },
+          "contextId": {
+            "type": "string"
+          },
+          "liveTraining": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "minLength": 1,
+                "maxLength": 120,
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "startsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "endsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "allDay": {
+                "type": "boolean"
+              },
+              "timezone": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deliveryType": {
+                "anyOf": [
+                  {
+                    "const": "online",
+                    "type": "string"
+                  },
+                  {
+                    "const": "offline",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxParticipants": {
+                "minimum": 1,
+                "maximum": 100,
+                "type": "number"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "viewerPermissions": {
+                    "type": "object",
+                    "properties": {
+                      "microphoneEnabled": {
+                        "type": "boolean"
+                      },
+                      "cameraEnabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "hostUserIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "beforeResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "afterResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "startsAt",
+              "endsAt",
+              "timezone",
+              "deliveryType"
+            ]
+          },
+          "liveTrainingId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "chapterId"
+        ]
+      },
+      "BetaCreateLiveTrainingLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "liveTrainingId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "liveTrainingId",
               "message"
             ]
           }
@@ -24194,6 +24671,17 @@
                       "ttsPreset",
                       "customTtsReference"
                     ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "liveTrainingId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
                   },
                   {
                     "type": "null"
@@ -24657,6 +25145,17 @@
                           "ttsPreset",
                           "customTtsReference"
                         ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "liveTrainingId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
                       },
                       {
                         "type": "null"
@@ -25814,6 +26313,17 @@
                       }
                     ]
                   },
+                  "liveTrainingId": {
+                    "anyOf": [
+                      {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
                   "updatedAt": {
                     "type": "string"
                   }
@@ -26832,6 +27342,1911 @@
           "data"
         ]
       },
+      "GetLiveTrainingsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "calendarEventId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "startsAt": {
+                  "type": "string"
+                },
+                "endsAt": {
+                  "type": "string"
+                },
+                "allDay": {
+                  "type": "boolean"
+                },
+                "timezone": {
+                  "type": "string"
+                },
+                "location": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "deliveryType": {
+                  "anyOf": [
+                    {
+                      "const": "online",
+                      "type": "string"
+                    },
+                    {
+                      "const": "offline",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "visibilityScope": {
+                  "anyOf": [
+                    {
+                      "const": "all",
+                      "type": "string"
+                    },
+                    {
+                      "const": "linked_courses",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "status": {
+                  "anyOf": [
+                    {
+                      "const": "scheduled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "active",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ended",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cancelled",
+                      "type": "string"
+                    },
+                    {
+                      "const": "expired",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "maxParticipants": {
+                  "type": "number"
+                },
+                "authorId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "hostIds": {
+                  "type": "array",
+                  "items": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                },
+                "linkedCourseIds": {
+                  "type": "array",
+                  "items": {
+                    "format": "uuid",
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "calendarEventId",
+                "title",
+                "description",
+                "startsAt",
+                "endsAt",
+                "allDay",
+                "timezone",
+                "location",
+                "deliveryType",
+                "visibilityScope",
+                "status",
+                "maxParticipants",
+                "authorId",
+                "hostIds",
+                "linkedCourseIds"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetLiveTrainingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "calendarEventId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "startsAt": {
+                    "type": "string"
+                  },
+                  "endsAt": {
+                    "type": "string"
+                  },
+                  "allDay": {
+                    "type": "boolean"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "deliveryType": {
+                    "anyOf": [
+                      {
+                        "const": "online",
+                        "type": "string"
+                      },
+                      {
+                        "const": "offline",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "visibilityScope": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "linked_courses",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "scheduled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cancelled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expired",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "maxParticipants": {
+                    "type": "number"
+                  },
+                  "authorId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "hostIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "linkedCourseIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "calendarEventId",
+                  "title",
+                  "description",
+                  "startsAt",
+                  "endsAt",
+                  "allDay",
+                  "timezone",
+                  "location",
+                  "deliveryType",
+                  "visibilityScope",
+                  "status",
+                  "maxParticipants",
+                  "authorId",
+                  "hostIds",
+                  "linkedCourseIds"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "viewerPermissions": {
+                        "type": "object",
+                        "properties": {
+                          "microphoneEnabled": {
+                            "type": "boolean"
+                          },
+                          "cameraEnabled": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "microphoneEnabled",
+                          "cameraEnabled"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "viewerPermissions"
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {}
+                    }
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "fullName": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "fullName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fullName",
+                        "profilePictureUrl"
+                      ]
+                    }
+                  },
+                  "linkedCourses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "materials": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      },
+                      "after": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ]
+                  }
+                },
+                "required": [
+                  "settings",
+                  "metadata",
+                  "author",
+                  "hosts",
+                  "linkedCourses",
+                  "materials"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateLiveTrainingBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          },
+          "title": {
+            "minLength": 1,
+            "maxLength": 120,
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "minLength": 1,
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startsAt": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "endsAt": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "allDay": {
+            "type": "boolean"
+          },
+          "timezone": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "deliveryType": {
+            "anyOf": [
+              {
+                "const": "online",
+                "type": "string"
+              },
+              {
+                "const": "offline",
+                "type": "string"
+              }
+            ]
+          },
+          "maxParticipants": {
+            "minimum": 1,
+            "maximum": 100,
+            "type": "number"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {
+              "viewerPermissions": {
+                "type": "object",
+                "properties": {
+                  "microphoneEnabled": {
+                    "type": "boolean"
+                  },
+                  "cameraEnabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          },
+          "hostUserIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "linkedCourseIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "beforeResourceIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "afterResourceIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "language",
+          "title",
+          "startsAt",
+          "endsAt",
+          "timezone",
+          "deliveryType"
+        ]
+      },
+      "CreateLiveTrainingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "calendarEventId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "startsAt": {
+                    "type": "string"
+                  },
+                  "endsAt": {
+                    "type": "string"
+                  },
+                  "allDay": {
+                    "type": "boolean"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "deliveryType": {
+                    "anyOf": [
+                      {
+                        "const": "online",
+                        "type": "string"
+                      },
+                      {
+                        "const": "offline",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "visibilityScope": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "linked_courses",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "scheduled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cancelled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expired",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "maxParticipants": {
+                    "type": "number"
+                  },
+                  "authorId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "hostIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "linkedCourseIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "calendarEventId",
+                  "title",
+                  "description",
+                  "startsAt",
+                  "endsAt",
+                  "allDay",
+                  "timezone",
+                  "location",
+                  "deliveryType",
+                  "visibilityScope",
+                  "status",
+                  "maxParticipants",
+                  "authorId",
+                  "hostIds",
+                  "linkedCourseIds"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "viewerPermissions": {
+                        "type": "object",
+                        "properties": {
+                          "microphoneEnabled": {
+                            "type": "boolean"
+                          },
+                          "cameraEnabled": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "microphoneEnabled",
+                          "cameraEnabled"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "viewerPermissions"
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {}
+                    }
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "fullName": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "fullName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fullName",
+                        "profilePictureUrl"
+                      ]
+                    }
+                  },
+                  "linkedCourses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "materials": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      },
+                      "after": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ]
+                  }
+                },
+                "required": [
+                  "settings",
+                  "metadata",
+                  "author",
+                  "hosts",
+                  "linkedCourses",
+                  "materials"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetHostCandidatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "allOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "fullName": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "profilePictureUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "fullName",
+                    "profilePictureUrl"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "email"
+                  ]
+                }
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "UpdateLiveTrainingBody": {
+        "type": "object",
+        "allOf": [
+          {
+            "type": "object",
+            "properties": {
+              "language": {
+                "default": "en",
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "language"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "title": {
+                "minLength": 1,
+                "maxLength": 120,
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "startsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "endsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "allDay": {
+                "type": "boolean"
+              },
+              "timezone": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deliveryType": {
+                "anyOf": [
+                  {
+                    "const": "online",
+                    "type": "string"
+                  },
+                  {
+                    "const": "offline",
+                    "type": "string"
+                  }
+                ]
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "scheduled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "ended",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cancelled",
+                    "type": "string"
+                  },
+                  {
+                    "const": "expired",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxParticipants": {
+                "minimum": 1,
+                "maximum": 100,
+                "type": "number"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "viewerPermissions": {
+                    "type": "object",
+                    "properties": {
+                      "microphoneEnabled": {
+                        "type": "boolean"
+                      },
+                      "cameraEnabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "hostUserIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "linkedCourseIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "beforeResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "afterResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "UpdateLiveTrainingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "allOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "calendarEventId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "startsAt": {
+                    "type": "string"
+                  },
+                  "endsAt": {
+                    "type": "string"
+                  },
+                  "allDay": {
+                    "type": "boolean"
+                  },
+                  "timezone": {
+                    "type": "string"
+                  },
+                  "location": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "deliveryType": {
+                    "anyOf": [
+                      {
+                        "const": "online",
+                        "type": "string"
+                      },
+                      {
+                        "const": "offline",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "visibilityScope": {
+                    "anyOf": [
+                      {
+                        "const": "all",
+                        "type": "string"
+                      },
+                      {
+                        "const": "linked_courses",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "scheduled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "active",
+                        "type": "string"
+                      },
+                      {
+                        "const": "ended",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cancelled",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expired",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "maxParticipants": {
+                    "type": "number"
+                  },
+                  "authorId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "hostIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  },
+                  "linkedCourseIds": {
+                    "type": "array",
+                    "items": {
+                      "format": "uuid",
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "calendarEventId",
+                  "title",
+                  "description",
+                  "startsAt",
+                  "endsAt",
+                  "allDay",
+                  "timezone",
+                  "location",
+                  "deliveryType",
+                  "visibilityScope",
+                  "status",
+                  "maxParticipants",
+                  "authorId",
+                  "hostIds",
+                  "linkedCourseIds"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "viewerPermissions": {
+                        "type": "object",
+                        "properties": {
+                          "microphoneEnabled": {
+                            "type": "boolean"
+                          },
+                          "cameraEnabled": {
+                            "type": "boolean"
+                          }
+                        },
+                        "required": [
+                          "microphoneEnabled",
+                          "cameraEnabled"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "viewerPermissions"
+                    ]
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(.*)$": {}
+                    }
+                  },
+                  "author": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "fullName": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "profilePictureUrl": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "fullName",
+                      "profilePictureUrl"
+                    ]
+                  },
+                  "hosts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "fullName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "profilePictureUrl": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "fullName",
+                        "profilePictureUrl"
+                      ]
+                    }
+                  },
+                  "linkedCourses": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title"
+                      ]
+                    }
+                  },
+                  "materials": {
+                    "type": "object",
+                    "properties": {
+                      "before": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      },
+                      "after": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "resourceId": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "contentType": {
+                              "type": "string"
+                            },
+                            "size": {
+                              "anyOf": [
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "relationshipType": {
+                              "anyOf": [
+                                {
+                                  "const": "live_training_before",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "live_training_after",
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "resourceId",
+                            "title",
+                            "description",
+                            "contentType",
+                            "size",
+                            "relationshipType"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "before",
+                      "after"
+                    ]
+                  }
+                },
+                "required": [
+                  "settings",
+                  "metadata",
+                  "author",
+                  "hosts",
+                  "linkedCourses",
+                  "materials"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteLiveTrainingResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UploadLiveTrainingResourceResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "resourceId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contentType": {
+                "type": "string"
+              },
+              "size": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "relationshipType": {
+                "anyOf": [
+                  {
+                    "const": "live_training_before",
+                    "type": "string"
+                  },
+                  {
+                    "const": "live_training_after",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "resourceId",
+              "title",
+              "description",
+              "contentType",
+              "size",
+              "relationshipType"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLiveTrainingResourceDownloadUrlResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteLiveTrainingResourceResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetChapterWithLessonResponse": {
         "type": "object",
         "properties": {
@@ -27421,6 +29836,17 @@
                         }
                       ]
                     },
+                    "liveTrainingId": {
+                      "anyOf": [
+                        {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
                     "updatedAt": {
                       "type": "string"
                     }
@@ -27903,6 +30329,17 @@
                                 "ttsPreset",
                                 "customTtsReference"
                               ]
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "liveTrainingId": {
+                          "anyOf": [
+                            {
+                              "format": "uuid",
+                              "type": "string"
                             },
                             {
                               "type": "null"
@@ -36315,1681 +38752,6 @@
           "data"
         ]
       },
-      "GetLiveTrainingsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "calendarEventId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "startsAt": {
-                  "type": "string"
-                },
-                "endsAt": {
-                  "type": "string"
-                },
-                "allDay": {
-                  "type": "boolean"
-                },
-                "timezone": {
-                  "type": "string"
-                },
-                "location": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "deliveryType": {
-                  "anyOf": [
-                    {
-                      "const": "online",
-                      "type": "string"
-                    },
-                    {
-                      "const": "offline",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "visibilityScope": {
-                  "anyOf": [
-                    {
-                      "const": "all",
-                      "type": "string"
-                    },
-                    {
-                      "const": "linked_courses",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "status": {
-                  "anyOf": [
-                    {
-                      "const": "scheduled",
-                      "type": "string"
-                    },
-                    {
-                      "const": "active",
-                      "type": "string"
-                    },
-                    {
-                      "const": "ended",
-                      "type": "string"
-                    },
-                    {
-                      "const": "cancelled",
-                      "type": "string"
-                    },
-                    {
-                      "const": "expired",
-                      "type": "string"
-                    }
-                  ]
-                },
-                "maxParticipants": {
-                  "type": "number"
-                },
-                "authorId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "trainerIds": {
-                  "type": "array",
-                  "items": {
-                    "format": "uuid",
-                    "type": "string"
-                  }
-                },
-                "linkedCourseIds": {
-                  "type": "array",
-                  "items": {
-                    "format": "uuid",
-                    "type": "string"
-                  }
-                }
-              },
-              "required": [
-                "id",
-                "calendarEventId",
-                "title",
-                "description",
-                "startsAt",
-                "endsAt",
-                "allDay",
-                "timezone",
-                "location",
-                "deliveryType",
-                "visibilityScope",
-                "status",
-                "maxParticipants",
-                "authorId",
-                "trainerIds",
-                "linkedCourseIds"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "GetLiveTrainingResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "calendarEventId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "startsAt": {
-                    "type": "string"
-                  },
-                  "endsAt": {
-                    "type": "string"
-                  },
-                  "allDay": {
-                    "type": "boolean"
-                  },
-                  "timezone": {
-                    "type": "string"
-                  },
-                  "location": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "deliveryType": {
-                    "anyOf": [
-                      {
-                        "const": "online",
-                        "type": "string"
-                      },
-                      {
-                        "const": "offline",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "visibilityScope": {
-                    "anyOf": [
-                      {
-                        "const": "all",
-                        "type": "string"
-                      },
-                      {
-                        "const": "linked_courses",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "scheduled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "active",
-                        "type": "string"
-                      },
-                      {
-                        "const": "ended",
-                        "type": "string"
-                      },
-                      {
-                        "const": "cancelled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "expired",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "maxParticipants": {
-                    "type": "number"
-                  },
-                  "authorId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "trainerIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  },
-                  "linkedCourseIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "calendarEventId",
-                  "title",
-                  "description",
-                  "startsAt",
-                  "endsAt",
-                  "allDay",
-                  "timezone",
-                  "location",
-                  "deliveryType",
-                  "visibilityScope",
-                  "status",
-                  "maxParticipants",
-                  "authorId",
-                  "trainerIds",
-                  "linkedCourseIds"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "settings": {
-                    "type": "object",
-                    "properties": {
-                      "viewerPermissions": {
-                        "type": "object",
-                        "properties": {
-                          "microphoneEnabled": {
-                            "type": "boolean"
-                          },
-                          "cameraEnabled": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "microphoneEnabled",
-                          "cameraEnabled"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "viewerPermissions"
-                    ]
-                  },
-                  "metadata": {
-                    "type": "object",
-                    "patternProperties": {
-                      "^(.*)$": {}
-                    }
-                  },
-                  "author": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "fullName": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "fullName",
-                      "profilePictureUrl"
-                    ]
-                  },
-                  "trainers": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "fullName": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "profilePictureUrl": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "fullName",
-                        "profilePictureUrl"
-                      ]
-                    }
-                  },
-                  "linkedCourses": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    }
-                  },
-                  "materials": {
-                    "type": "object",
-                    "properties": {
-                      "before": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      },
-                      "after": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      }
-                    },
-                    "required": [
-                      "before",
-                      "after"
-                    ]
-                  }
-                },
-                "required": [
-                  "settings",
-                  "metadata",
-                  "author",
-                  "trainers",
-                  "linkedCourses",
-                  "materials"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "CreateLiveTrainingBody": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "minLength": 1,
-            "maxLength": 120,
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "minLength": 1,
-                "maxLength": 500,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "startsAt": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "endsAt": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "allDay": {
-            "type": "boolean"
-          },
-          "timezone": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "location": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "deliveryType": {
-            "anyOf": [
-              {
-                "const": "online",
-                "type": "string"
-              },
-              {
-                "const": "offline",
-                "type": "string"
-              }
-            ]
-          },
-          "maxParticipants": {
-            "minimum": 1,
-            "maximum": 100,
-            "type": "number"
-          },
-          "settings": {
-            "type": "object",
-            "properties": {
-              "viewerPermissions": {
-                "type": "object",
-                "properties": {
-                  "microphoneEnabled": {
-                    "type": "boolean"
-                  },
-                  "cameraEnabled": {
-                    "type": "boolean"
-                  }
-                }
-              }
-            }
-          },
-          "trainerUserIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "linkedCourseIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "beforeResourceIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "afterResourceIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "language",
-          "title",
-          "startsAt",
-          "endsAt",
-          "timezone",
-          "deliveryType"
-        ]
-      },
-      "CreateLiveTrainingResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "calendarEventId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "startsAt": {
-                    "type": "string"
-                  },
-                  "endsAt": {
-                    "type": "string"
-                  },
-                  "allDay": {
-                    "type": "boolean"
-                  },
-                  "timezone": {
-                    "type": "string"
-                  },
-                  "location": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "deliveryType": {
-                    "anyOf": [
-                      {
-                        "const": "online",
-                        "type": "string"
-                      },
-                      {
-                        "const": "offline",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "visibilityScope": {
-                    "anyOf": [
-                      {
-                        "const": "all",
-                        "type": "string"
-                      },
-                      {
-                        "const": "linked_courses",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "scheduled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "active",
-                        "type": "string"
-                      },
-                      {
-                        "const": "ended",
-                        "type": "string"
-                      },
-                      {
-                        "const": "cancelled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "expired",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "maxParticipants": {
-                    "type": "number"
-                  },
-                  "authorId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "trainerIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  },
-                  "linkedCourseIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "calendarEventId",
-                  "title",
-                  "description",
-                  "startsAt",
-                  "endsAt",
-                  "allDay",
-                  "timezone",
-                  "location",
-                  "deliveryType",
-                  "visibilityScope",
-                  "status",
-                  "maxParticipants",
-                  "authorId",
-                  "trainerIds",
-                  "linkedCourseIds"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "settings": {
-                    "type": "object",
-                    "properties": {
-                      "viewerPermissions": {
-                        "type": "object",
-                        "properties": {
-                          "microphoneEnabled": {
-                            "type": "boolean"
-                          },
-                          "cameraEnabled": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "microphoneEnabled",
-                          "cameraEnabled"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "viewerPermissions"
-                    ]
-                  },
-                  "metadata": {
-                    "type": "object",
-                    "patternProperties": {
-                      "^(.*)$": {}
-                    }
-                  },
-                  "author": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "fullName": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "fullName",
-                      "profilePictureUrl"
-                    ]
-                  },
-                  "trainers": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "fullName": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "profilePictureUrl": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "fullName",
-                        "profilePictureUrl"
-                      ]
-                    }
-                  },
-                  "linkedCourses": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    }
-                  },
-                  "materials": {
-                    "type": "object",
-                    "properties": {
-                      "before": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      },
-                      "after": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      }
-                    },
-                    "required": [
-                      "before",
-                      "after"
-                    ]
-                  }
-                },
-                "required": [
-                  "settings",
-                  "metadata",
-                  "author",
-                  "trainers",
-                  "linkedCourses",
-                  "materials"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "UpdateLiveTrainingBody": {
-        "type": "object",
-        "allOf": [
-          {
-            "type": "object",
-            "properties": {
-              "language": {
-                "default": "en",
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "language"
-            ]
-          },
-          {
-            "type": "object",
-            "properties": {
-              "title": {
-                "minLength": 1,
-                "maxLength": 120,
-                "type": "string"
-              },
-              "description": {
-                "anyOf": [
-                  {
-                    "minLength": 1,
-                    "maxLength": 500,
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "startsAt": {
-                "minLength": 1,
-                "type": "string"
-              },
-              "endsAt": {
-                "minLength": 1,
-                "type": "string"
-              },
-              "allDay": {
-                "type": "boolean"
-              },
-              "timezone": {
-                "minLength": 1,
-                "type": "string"
-              },
-              "location": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "deliveryType": {
-                "anyOf": [
-                  {
-                    "const": "online",
-                    "type": "string"
-                  },
-                  {
-                    "const": "offline",
-                    "type": "string"
-                  }
-                ]
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "scheduled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "ended",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cancelled",
-                    "type": "string"
-                  },
-                  {
-                    "const": "expired",
-                    "type": "string"
-                  }
-                ]
-              },
-              "maxParticipants": {
-                "minimum": 1,
-                "maximum": 100,
-                "type": "number"
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "viewerPermissions": {
-                    "type": "object",
-                    "properties": {
-                      "microphoneEnabled": {
-                        "type": "boolean"
-                      },
-                      "cameraEnabled": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                }
-              },
-              "trainerUserIds": {
-                "type": "array",
-                "items": {
-                  "format": "uuid",
-                  "type": "string"
-                }
-              },
-              "linkedCourseIds": {
-                "type": "array",
-                "items": {
-                  "format": "uuid",
-                  "type": "string"
-                }
-              },
-              "beforeResourceIds": {
-                "type": "array",
-                "items": {
-                  "format": "uuid",
-                  "type": "string"
-                }
-              },
-              "afterResourceIds": {
-                "type": "array",
-                "items": {
-                  "format": "uuid",
-                  "type": "string"
-                }
-              }
-            }
-          }
-        ]
-      },
-      "UpdateLiveTrainingResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "allOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "calendarEventId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string"
-                  },
-                  "description": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "startsAt": {
-                    "type": "string"
-                  },
-                  "endsAt": {
-                    "type": "string"
-                  },
-                  "allDay": {
-                    "type": "boolean"
-                  },
-                  "timezone": {
-                    "type": "string"
-                  },
-                  "location": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "deliveryType": {
-                    "anyOf": [
-                      {
-                        "const": "online",
-                        "type": "string"
-                      },
-                      {
-                        "const": "offline",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "visibilityScope": {
-                    "anyOf": [
-                      {
-                        "const": "all",
-                        "type": "string"
-                      },
-                      {
-                        "const": "linked_courses",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "status": {
-                    "anyOf": [
-                      {
-                        "const": "scheduled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "active",
-                        "type": "string"
-                      },
-                      {
-                        "const": "ended",
-                        "type": "string"
-                      },
-                      {
-                        "const": "cancelled",
-                        "type": "string"
-                      },
-                      {
-                        "const": "expired",
-                        "type": "string"
-                      }
-                    ]
-                  },
-                  "maxParticipants": {
-                    "type": "number"
-                  },
-                  "authorId": {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  "trainerIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  },
-                  "linkedCourseIds": {
-                    "type": "array",
-                    "items": {
-                      "format": "uuid",
-                      "type": "string"
-                    }
-                  }
-                },
-                "required": [
-                  "id",
-                  "calendarEventId",
-                  "title",
-                  "description",
-                  "startsAt",
-                  "endsAt",
-                  "allDay",
-                  "timezone",
-                  "location",
-                  "deliveryType",
-                  "visibilityScope",
-                  "status",
-                  "maxParticipants",
-                  "authorId",
-                  "trainerIds",
-                  "linkedCourseIds"
-                ]
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "settings": {
-                    "type": "object",
-                    "properties": {
-                      "viewerPermissions": {
-                        "type": "object",
-                        "properties": {
-                          "microphoneEnabled": {
-                            "type": "boolean"
-                          },
-                          "cameraEnabled": {
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "microphoneEnabled",
-                          "cameraEnabled"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "viewerPermissions"
-                    ]
-                  },
-                  "metadata": {
-                    "type": "object",
-                    "patternProperties": {
-                      "^(.*)$": {}
-                    }
-                  },
-                  "author": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "fullName": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "profilePictureUrl": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "fullName",
-                      "profilePictureUrl"
-                    ]
-                  },
-                  "trainers": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "fullName": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        },
-                        "profilePictureUrl": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "fullName",
-                        "profilePictureUrl"
-                      ]
-                    }
-                  },
-                  "linkedCourses": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "format": "uuid",
-                          "type": "string"
-                        },
-                        "title": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "id",
-                        "title"
-                      ]
-                    }
-                  },
-                  "materials": {
-                    "type": "object",
-                    "properties": {
-                      "before": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      },
-                      "after": {
-                        "type": "array",
-                        "items": {
-                          "type": "object",
-                          "properties": {
-                            "resourceId": {
-                              "format": "uuid",
-                              "type": "string"
-                            },
-                            "title": {
-                              "type": "string"
-                            },
-                            "description": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ]
-                            },
-                            "contentType": {
-                              "type": "string"
-                            },
-                            "fileUrl": {
-                              "type": "string"
-                            },
-                            "relationshipType": {
-                              "anyOf": [
-                                {
-                                  "const": "live_training_before",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "live_training_after",
-                                  "type": "string"
-                                }
-                              ]
-                            }
-                          },
-                          "required": [
-                            "resourceId",
-                            "title",
-                            "description",
-                            "contentType",
-                            "fileUrl",
-                            "relationshipType"
-                          ]
-                        }
-                      }
-                    },
-                    "required": [
-                      "before",
-                      "after"
-                    ]
-                  }
-                },
-                "required": [
-                  "settings",
-                  "metadata",
-                  "author",
-                  "trainers",
-                  "linkedCourses",
-                  "materials"
-                ]
-              }
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "DeleteLiveTrainingResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "GetEventsResponse": {
         "type": "object",
         "properties": {
@@ -38417,7 +39179,7 @@
                               "email"
                             ]
                           },
-                          "trainers": {
+                          "hosts": {
                             "type": "array",
                             "items": {
                               "type": "object",
@@ -38641,7 +39403,7 @@
                         },
                         "required": [
                           "author",
-                          "trainers",
+                          "hosts",
                           "materials",
                           "latestSession"
                         ]

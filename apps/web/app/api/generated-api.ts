@@ -1840,6 +1840,7 @@ export interface GetBetaCourseByIdResponse {
           ttsPreset: "male" | "female";
           customTtsReference: string | null;
         } | null;
+        liveTrainingId?: string | null;
         updatedAt?: string;
       }[];
       completedLessonCount?: number;
@@ -2470,6 +2471,7 @@ export type BetaCreateLessonBody = {
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
   } | null;
+  liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
@@ -2482,6 +2484,59 @@ export interface BetaCreateLessonResponse {
   data: {
     /** @format uuid */
     id: string;
+    message: string;
+  };
+}
+
+export interface BetaCreateLiveTrainingLessonBody {
+  /** @minLength 1 */
+  title: string;
+  description?: string | null;
+  /** @format uuid */
+  chapterId: string;
+  displayOrder?: number;
+  contextId?: string;
+  liveTraining?: {
+    /**
+     * @minLength 1
+     * @maxLength 120
+     */
+    title: string;
+    description?: string | null;
+    /** @minLength 1 */
+    startsAt: string;
+    /** @minLength 1 */
+    endsAt: string;
+    allDay?: boolean;
+    /** @minLength 1 */
+    timezone: string;
+    location?: string | null;
+    deliveryType: "online" | "offline";
+    /**
+     * @min 1
+     * @max 100
+     */
+    maxParticipants?: number;
+    settings?: {
+      viewerPermissions?: {
+        microphoneEnabled?: boolean;
+        cameraEnabled?: boolean;
+      };
+    };
+    hostUserIds?: string[];
+    beforeResourceIds?: string[];
+    afterResourceIds?: string[];
+  };
+  /** @format uuid */
+  liveTrainingId?: string;
+}
+
+export interface BetaCreateLiveTrainingLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    liveTrainingId: string;
     message: string;
   };
 }
@@ -2550,6 +2605,7 @@ export type BetaCreateAiMentorLessonBody = {
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
   } | null;
+  liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
@@ -2629,6 +2685,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
   } | null;
+  liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
@@ -2832,6 +2889,7 @@ export type BetaUpdateLessonBody = ({
     ttsPreset: "male" | "female";
     customTtsReference: string | null;
   } | null;
+  liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   /** @format uuid */
@@ -3063,6 +3121,362 @@ export interface GetAllAssignedDocumentsForLessonResponse {
   }[];
 }
 
+export interface GetLiveTrainingsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    allDay: boolean;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    hostIds: string[];
+    linkedCourseIds: string[];
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface GetLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    allDay: boolean;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    hostIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    };
+    hosts: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export interface CreateLiveTrainingBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
+  title: string;
+  description?: string | null;
+  /** @minLength 1 */
+  startsAt: string;
+  /** @minLength 1 */
+  endsAt: string;
+  allDay?: boolean;
+  /** @minLength 1 */
+  timezone: string;
+  location?: string | null;
+  deliveryType: "online" | "offline";
+  /**
+   * @min 1
+   * @max 100
+   */
+  maxParticipants?: number;
+  settings?: {
+    viewerPermissions?: {
+      microphoneEnabled?: boolean;
+      cameraEnabled?: boolean;
+    };
+  };
+  hostUserIds?: string[];
+  linkedCourseIds?: string[];
+  beforeResourceIds?: string[];
+  afterResourceIds?: string[];
+}
+
+export interface CreateLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    allDay: boolean;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    hostIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    };
+    hosts: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export interface GetHostCandidatesResponse {
+  data: ({
+    /** @format uuid */
+    id: string;
+    fullName: string | null;
+    profilePictureUrl: string | null;
+  } & {
+    email: string;
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export type UpdateLiveTrainingBody = {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+} & {
+  /**
+   * @minLength 1
+   * @maxLength 120
+   */
+  title?: string;
+  description?: string | null;
+  /** @minLength 1 */
+  startsAt?: string;
+  /** @minLength 1 */
+  endsAt?: string;
+  allDay?: boolean;
+  /** @minLength 1 */
+  timezone?: string;
+  location?: string | null;
+  deliveryType?: "online" | "offline";
+  status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+  /**
+   * @min 1
+   * @max 100
+   */
+  maxParticipants?: number;
+  settings?: {
+    viewerPermissions?: {
+      microphoneEnabled?: boolean;
+      cameraEnabled?: boolean;
+    };
+  };
+  hostUserIds?: string[];
+  linkedCourseIds?: string[];
+  beforeResourceIds?: string[];
+  afterResourceIds?: string[];
+};
+
+export interface UpdateLiveTrainingResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    calendarEventId: string;
+    title: string;
+    description: string | null;
+    startsAt: string;
+    endsAt: string;
+    allDay: boolean;
+    timezone: string;
+    location: string | null;
+    deliveryType: "online" | "offline";
+    visibilityScope: "all" | "linked_courses";
+    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+    maxParticipants: number;
+    /** @format uuid */
+    authorId: string;
+    hostIds: string[];
+    linkedCourseIds: string[];
+  } & {
+    settings: {
+      viewerPermissions: {
+        microphoneEnabled: boolean;
+        cameraEnabled: boolean;
+      };
+    };
+    metadata: object;
+    author: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    };
+    hosts: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    linkedCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    materials: {
+      before: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+      after: {
+        /** @format uuid */
+        resourceId: string;
+        title: string;
+        description: string | null;
+        contentType: string;
+        size: number | null;
+        relationshipType: "live_training_before" | "live_training_after";
+      }[];
+    };
+  };
+}
+
+export interface DeleteLiveTrainingResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UploadLiveTrainingResourceResponse {
+  data: {
+    /** @format uuid */
+    resourceId: string;
+    title: string;
+    description: string | null;
+    contentType: string;
+    size: number | null;
+    relationshipType: "live_training_before" | "live_training_after";
+  };
+}
+
+export interface GetLiveTrainingResourceDownloadUrlResponse {
+  data: {
+    url: string;
+  };
+}
+
+export interface DeleteLiveTrainingResourceResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface GetChapterWithLessonResponse {
   data: {
     /** @format uuid */
@@ -3164,6 +3578,7 @@ export type BetaCreateChapterBody = {
       ttsPreset: "male" | "female";
       customTtsReference: string | null;
     } | null;
+    liveTrainingId?: string | null;
     updatedAt?: string;
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -3249,6 +3664,7 @@ export type UpdateChapterBody = ({
       ttsPreset: "male" | "female";
       customTtsReference: string | null;
     } | null;
+    liveTrainingId?: string | null;
     updatedAt?: string;
   }[];
   chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -5041,321 +5457,6 @@ export interface CreateSupportSessionResponse {
   };
 }
 
-export interface GetLiveTrainingsResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    calendarEventId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    deliveryType: "online" | "offline";
-    visibilityScope: "all" | "linked_courses";
-    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-    maxParticipants: number;
-    /** @format uuid */
-    authorId: string;
-    trainerIds: string[];
-    linkedCourseIds: string[];
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface GetLiveTrainingResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    calendarEventId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    deliveryType: "online" | "offline";
-    visibilityScope: "all" | "linked_courses";
-    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-    maxParticipants: number;
-    /** @format uuid */
-    authorId: string;
-    trainerIds: string[];
-    linkedCourseIds: string[];
-  } & {
-    settings: {
-      viewerPermissions: {
-        microphoneEnabled: boolean;
-        cameraEnabled: boolean;
-      };
-    };
-    metadata: object;
-    author: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    };
-    trainers: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    linkedCourses: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    materials: {
-      before: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-      after: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-    };
-  };
-}
-
-export interface CreateLiveTrainingBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs";
-  /**
-   * @minLength 1
-   * @maxLength 120
-   */
-  title: string;
-  description?: string | null;
-  /** @minLength 1 */
-  startsAt: string;
-  /** @minLength 1 */
-  endsAt: string;
-  allDay?: boolean;
-  /** @minLength 1 */
-  timezone: string;
-  location?: string | null;
-  deliveryType: "online" | "offline";
-  /**
-   * @min 1
-   * @max 100
-   */
-  maxParticipants?: number;
-  settings?: {
-    viewerPermissions?: {
-      microphoneEnabled?: boolean;
-      cameraEnabled?: boolean;
-    };
-  };
-  trainerUserIds?: string[];
-  linkedCourseIds?: string[];
-  beforeResourceIds?: string[];
-  afterResourceIds?: string[];
-}
-
-export interface CreateLiveTrainingResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    calendarEventId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    deliveryType: "online" | "offline";
-    visibilityScope: "all" | "linked_courses";
-    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-    maxParticipants: number;
-    /** @format uuid */
-    authorId: string;
-    trainerIds: string[];
-    linkedCourseIds: string[];
-  } & {
-    settings: {
-      viewerPermissions: {
-        microphoneEnabled: boolean;
-        cameraEnabled: boolean;
-      };
-    };
-    metadata: object;
-    author: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    };
-    trainers: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    linkedCourses: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    materials: {
-      before: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-      after: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-    };
-  };
-}
-
-export type UpdateLiveTrainingBody = {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs";
-} & {
-  /**
-   * @minLength 1
-   * @maxLength 120
-   */
-  title?: string;
-  description?: string | null;
-  /** @minLength 1 */
-  startsAt?: string;
-  /** @minLength 1 */
-  endsAt?: string;
-  allDay?: boolean;
-  /** @minLength 1 */
-  timezone?: string;
-  location?: string | null;
-  deliveryType?: "online" | "offline";
-  status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-  /**
-   * @min 1
-   * @max 100
-   */
-  maxParticipants?: number;
-  settings?: {
-    viewerPermissions?: {
-      microphoneEnabled?: boolean;
-      cameraEnabled?: boolean;
-    };
-  };
-  trainerUserIds?: string[];
-  linkedCourseIds?: string[];
-  beforeResourceIds?: string[];
-  afterResourceIds?: string[];
-};
-
-export interface UpdateLiveTrainingResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    calendarEventId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    deliveryType: "online" | "offline";
-    visibilityScope: "all" | "linked_courses";
-    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-    maxParticipants: number;
-    /** @format uuid */
-    authorId: string;
-    trainerIds: string[];
-    linkedCourseIds: string[];
-  } & {
-    settings: {
-      viewerPermissions: {
-        microphoneEnabled: boolean;
-        cameraEnabled: boolean;
-      };
-    };
-    metadata: object;
-    author: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    };
-    trainers: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    linkedCourses: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    materials: {
-      before: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-      after: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        fileUrl: string;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-    };
-  };
-}
-
-export interface DeleteLiveTrainingResponse {
-  data: {
-    message: string;
-  };
-}
-
 export interface GetEventsResponse {
   data: {
     events: {
@@ -5424,7 +5525,7 @@ export interface GetEventDetailsResponse {
           fullName: string | null;
           email: string;
         };
-        trainers: {
+        hosts: {
           /** @format uuid */
           userId: string;
           fullName: string | null;
@@ -8436,6 +8537,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LessonControllerBetaCreateLiveTrainingLesson
+     * @request POST:/api/lesson/beta-create-lesson/live
+     */
+    lessonControllerBetaCreateLiveTrainingLesson: (
+      data: BetaCreateLiveTrainingLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BetaCreateLiveTrainingLessonResponse, any>({
+        path: `/api/lesson/beta-create-lesson/live`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerInitializeLessonContext
      * @request POST:/api/lesson/initialize-lesson-context
      */
@@ -9042,6 +9162,213 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/ingestion/${documentLinkId}`,
         method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetLiveTrainings
+     * @request GET:/api/live-training
+     */
+    liveTrainingControllerGetLiveTrainings: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+        deliveryType?: "online" | "offline";
+        /** @minLength 1 */
+        start?: string;
+        /** @minLength 1 */
+        end?: string;
+        /** @format uuid */
+        courseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLiveTrainingsResponse, any>({
+        path: `/api/live-training`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerCreateLiveTraining
+     * @request POST:/api/live-training
+     */
+    liveTrainingControllerCreateLiveTraining: (
+      data: CreateLiveTrainingBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLiveTrainingResponse, any>({
+        path: `/api/live-training`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetLiveTraining
+     * @request GET:/api/live-training/{id}
+     */
+    liveTrainingControllerGetLiveTraining: (
+      id: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerUpdateLiveTraining
+     * @request PATCH:/api/live-training/{id}
+     */
+    liveTrainingControllerUpdateLiveTraining: (
+      id: string,
+      data: UpdateLiveTrainingBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerDeleteLiveTraining
+     * @request DELETE:/api/live-training/{id}
+     */
+    liveTrainingControllerDeleteLiveTraining: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteLiveTrainingResponse, any>({
+        path: `/api/live-training/${id}`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetHostCandidates
+     * @request GET:/api/live-training/{id}/host-candidates
+     */
+    liveTrainingControllerGetHostCandidates: (
+      id: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /**
+         * @min 1
+         * @max 100
+         */
+        perPage?: number;
+        keyword?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetHostCandidatesResponse, any>({
+        path: `/api/live-training/${id}/host-candidates`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerUploadLiveTrainingResource
+     * @request POST:/api/live-training/{id}/resources
+     */
+    liveTrainingControllerUploadLiveTrainingResource: (
+      id: string,
+      data: {
+        /** @format binary */
+        file: File;
+        relationshipType: "live_training_before" | "live_training_after";
+        language: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UploadLiveTrainingResourceResponse, any>({
+        path: `/api/live-training/${id}/resources`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerGetLiveTrainingResourceDownloadUrl
+     * @request GET:/api/live-training/{id}/resources/{resourceId}/download
+     */
+    liveTrainingControllerGetLiveTrainingResourceDownloadUrl: (
+      id: string,
+      resourceId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetLiveTrainingResourceDownloadUrlResponse, any>({
+        path: `/api/live-training/${id}/resources/${resourceId}/download`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingControllerDeleteLiveTrainingResource
+     * @request DELETE:/api/live-training/{id}/resources/{resourceId}
+     */
+    liveTrainingControllerDeleteLiveTrainingResource: (
+      id: string,
+      resourceId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteLiveTrainingResourceResponse, any>({
+        path: `/api/live-training/${id}/resources/${resourceId}`,
+        method: "DELETE",
+        query: query,
+        format: "json",
         ...params,
       }),
 
@@ -11538,114 +11865,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreateSupportSessionResponse, any>({
         path: `/api/super-admin/tenants/${id}/support-session`,
         method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LiveTrainingControllerGetLiveTrainings
-     * @request GET:/api/live-training
-     */
-    liveTrainingControllerGetLiveTrainings: (
-      query?: {
-        /** @min 1 */
-        page?: number;
-        /** @min 1 */
-        perPage?: number;
-        status?: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-        deliveryType?: "online" | "offline";
-        /** @minLength 1 */
-        start?: string;
-        /** @minLength 1 */
-        end?: string;
-        /** @format uuid */
-        courseId?: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetLiveTrainingsResponse, any>({
-        path: `/api/live-training`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LiveTrainingControllerCreateLiveTraining
-     * @request POST:/api/live-training
-     */
-    liveTrainingControllerCreateLiveTraining: (
-      data: CreateLiveTrainingBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateLiveTrainingResponse, any>({
-        path: `/api/live-training`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LiveTrainingControllerGetLiveTraining
-     * @request GET:/api/live-training/{id}
-     */
-    liveTrainingControllerGetLiveTraining: (
-      id: string,
-      query?: {
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetLiveTrainingResponse, any>({
-        path: `/api/live-training/${id}`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LiveTrainingControllerUpdateLiveTraining
-     * @request PATCH:/api/live-training/{id}
-     */
-    liveTrainingControllerUpdateLiveTraining: (
-      id: string,
-      data: UpdateLiveTrainingBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateLiveTrainingResponse, any>({
-        path: `/api/live-training/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name LiveTrainingControllerDeleteLiveTraining
-     * @request DELETE:/api/live-training/{id}
-     */
-    liveTrainingControllerDeleteLiveTraining: (id: string, params: RequestParams = {}) =>
-      this.request<DeleteLiveTrainingResponse, any>({
-        path: `/api/live-training/${id}`,
-        method: "DELETE",
         format: "json",
         ...params,
       }),

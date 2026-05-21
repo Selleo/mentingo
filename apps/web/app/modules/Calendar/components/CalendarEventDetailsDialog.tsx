@@ -94,7 +94,7 @@ export function CalendarEventDetailsDialog({
 
   const liveTraining = eventDetails?.payload.liveTraining;
   const linkedCourses = liveTraining?.linkedCourses ?? [];
-  const trainers = liveTraining?.trainers ?? [];
+  const hosts = liveTraining?.hosts ?? [];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -205,12 +205,12 @@ export function CalendarEventDetailsDialog({
                       </span>
                       <span
                         className={cn("text-neutral-600", {
-                          "text-neutral-400": trainers.length === 0,
+                          "text-neutral-400": hosts.length === 0,
                         })}
                       >
-                        {trainers.length
-                          ? t("calendarView.details.trainers", { count: trainers.length })
-                          : t("calendarView.details.noTrainers")}
+                        {hosts.length
+                          ? t("calendarView.details.hosts", { count: hosts.length })
+                          : t("calendarView.details.noHosts")}
                       </span>
                     </div>
                   }

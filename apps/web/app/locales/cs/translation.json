@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Tvůrce obsahu",
+      "trainer": "Trainer",
       "student": "Student"
     },
     "languages": {
@@ -381,6 +382,9 @@
       "trainers": "{{count}} trainer",
       "trainers_plural": "{{count}} trainers",
       "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training"
@@ -408,6 +412,7 @@
       "role": {
         "admin": "Admin",
         "author": "Author",
+        "host": "Host",
         "trainer": "Trainer",
         "observer": "Observer"
       }
@@ -465,6 +470,9 @@
       "peak": "Peak",
       "people": "People",
       "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
       "trainer": "Trainer",
       "trainers": "Trainers",
       "noTrainers": "No trainers assigned.",
@@ -474,6 +482,9 @@
       "visibility": "Visibility",
       "courses": "Linked courses",
       "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
@@ -496,7 +507,15 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished."
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Přidat soubor",
+      "download": "Stáhnout",
+      "removeFile": "Odebrat {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Soubor byl přidán.",
+        "removed": "Soubor byl odebrán."
+      }
     },
     "attendance": {
       "title": "Attendance",
@@ -1760,6 +1779,8 @@
           "scormLessonPackageAttachedSuccessfully": "Balíček SCORM byl úspěšně připojen",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
+          "liveTrainingLessonCreated": "Lekce Live Training byla úspěšně vytvořena",
+          "liveTrainingLessonUpdated": "Lekce Live Training byla úspěšně aktualizována",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
           "aiMentorLessonFileAddedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně nahrány",
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
@@ -1772,6 +1793,22 @@
           "embedLessonUpdatedSuccessfully": "Vložená lekce byla úspěšně aktualizována",
           "embedLessonCreateError": "Vytvoření vložené lekce se nezdařilo. Zkontrolujte prosím všechna pole a zkuste to znovu.",
           "embedLessonUpdateError": "Aktualizace lekce vložení se nezdařila. Zkontrolujte prosím všechna pole a zkuste to znovu."
+        },
+        "liveTraining": {
+          "createTitle": "Vytvořit lekci Live Training",
+          "editTitle": "Upravit lekci Live Training",
+          "lessonTitle": "Název lekce",
+          "lessonTitlePlaceholder": "Název lekce zobrazený v kurzu",
+          "createNewTab": "Vytvořit nový",
+          "linkExistingTab": "Propojit existující",
+          "linkExistingLoading": "Načítání naplánovaných Live Training...",
+          "linkExistingEmpty": "Nejsou dostupné žádné naplánované Live Training.",
+          "linkedTitle": "Propojený Live Training",
+          "linkedDescription": "Plán, trenéři, soubory a nastavení relace se spravují na stránce Live Training.",
+          "openLiveTraining": "Otevřít Live Training",
+          "validation": {
+            "liveTrainingRequired": "Vyberte naplánovaný Live Training k propojení."
+          }
         },
         "field": {
           "title": "Titul",
@@ -1840,6 +1877,7 @@
           "aiMentor": "AI mentor",
           "embed": "Vložit",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Opravit",
           "true": "Věrný",
           "false": "Falešný",
@@ -1859,6 +1897,7 @@
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
           "aiMentorLessonDescription": "Interaktivní rozhovor s virtuálním AI mentorem.",
           "scormLessonDescription": "Obsah lekce v balíčku SCORM.",
+          "liveTrainingLessonDescription": "Naplánovaná živá relace propojená s tímto kurzem.",
           "fillInTheBlanksDescription": "Tato otázka obsahuje větu; studenti musí přetáhnout správné slovo do prázdného místa.",
           "gapFillDescription": "Tato otázka bude obsahovat větu s chybějícími slovy, která studenti musí zadat.",
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
@@ -2822,7 +2861,7 @@
     "toast": {
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
+      "invalidFileType": "Neplatný typ souboru. Nahrajte podporovaný soubor.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru"
     },
     "import": {
@@ -3727,7 +3766,18 @@
       "invalidSchedule": "Čas konce musí být po čase začátku.",
       "invalidTrainer": "Jeden nebo více vybraných trenérů nebylo nalezeno.",
       "invalidCourse": "Jeden nebo více propojených kurzů nebylo nalezeno.",
-      "invalidResource": "Jeden nebo více vybraných zdrojů nebylo nalezeno."
+      "invalidResource": "Jeden nebo více vybraných zdrojů nebylo nalezeno.",
+      "resourceNotFound": "Soubor nebyl nalezen.",
+      "invalidResourceRelationshipType": "Vybraná sekce souborů je neplatná.",
+      "hostAssignmentForbidden": "Nemáte oprávnění přiřazovat hostitele.",
+      "hostMustHaveTrainerRole": "Přiřazení hostitelé musí mít roli Trainer.",
+      "trainerAssignmentForbidden": "Nemáte oprávnění přiřazovat trenéry.",
+      "linkNotCreated": "Propojení Live Training se nepodařilo vytvořit.",
+      "lessonAlreadyLinked": "Tato lekce již má propojený Live Training.",
+      "invalidLessonLinkMode": "Vyberte, zda chcete vytvořit nový Live Training, nebo propojit existující.",
+      "onlyScheduledCanBeLinked": "K lekcím lze propojit pouze naplánované Live Training.",
+      "trainingAlreadyLinkedToLesson": "Tento Live Training je v tomto kurzu již propojen s lekcí.",
+      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Live Training."
     }
   }
 }

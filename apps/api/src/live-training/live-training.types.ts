@@ -37,7 +37,7 @@ export type CreateLiveTrainingRecordInput = {
     maxParticipants: number;
     settings: LiveTrainingSettings;
   };
-  trainers: Array<{
+  hosts: Array<{
     userId: UUIDType;
     role: LiveTrainingMemberRole;
     displayOrder: number;
@@ -66,7 +66,7 @@ export type UpdateLiveTrainingRecordInput = {
     maxParticipants: number;
     settings: LiveTrainingSettings;
   }>;
-  trainers?: Array<{
+  hosts?: Array<{
     userId: UUIDType;
     role: LiveTrainingMemberRole;
     displayOrder: number;
@@ -95,7 +95,7 @@ export type LiveTrainingVisibilityRow = {
   visibilityScope: LiveTrainingVisibilityScope;
 };
 
-export type LiveTrainingVisibilityTrainer = {
+export type LiveTrainingVisibilityHost = {
   id: UUIDType;
 };
 
@@ -103,10 +103,21 @@ export type LiveTrainingVisibilityLinkedCourse = {
   id: UUIDType;
 };
 
+export type CreateCourseLinkedLiveTrainingResult = {
+  liveTrainingId: UUIDType;
+  liveTrainingLinkId: UUIDType;
+};
+
 export type CalendarEventUpdateInput = NonNullable<UpdateLiveTrainingRecordInput["calendarEvent"]>;
 
 export type LiveTrainingUpdateInput = NonNullable<UpdateLiveTrainingRecordInput["liveTraining"]>;
 
-export type LiveTrainingTrainerInput = NonNullable<UpdateLiveTrainingRecordInput["trainers"]>;
+export type LiveTrainingHostInput = NonNullable<UpdateLiveTrainingRecordInput["hosts"]>;
 
 export type LiveTrainingLinkInput = NonNullable<UpdateLiveTrainingRecordInput["links"]>;
+
+export type LiveTrainingHostCandidateQuery = {
+  keyword?: string;
+  page: number;
+  perPage: number;
+};

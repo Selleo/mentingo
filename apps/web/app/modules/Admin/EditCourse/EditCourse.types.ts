@@ -59,6 +59,7 @@ export interface Lesson {
   isExternal?: boolean;
   aiMentor?: AiMentor;
   scormPackageLanguages?: SupportedLanguages[];
+  liveTrainingId?: string | null;
 }
 
 export interface Chapter {
@@ -82,7 +83,8 @@ export const ContentTypes = {
   AI_MENTOR_FORM: "AI_MENTOR_FORM",
   EMBED_FORM: "EMBED_FORM",
   SCORM_LESSON_FORM: "SCORM_LESSON_FORM",
-};
+  LIVE_TRAINING_LESSON_FORM: "LIVE_TRAINING_LESSON_FORM",
+} as const;
 
 export type LessonIcons = "Content" | "Quiz" | "AiMentor" | "Embed" | "LiveTraining";
 

@@ -29,7 +29,7 @@ import type {
   CalendarEventLinkedCourse,
   CalendarEventMaterialRow,
   CalendarEventNormalizedRow,
-  CalendarEventTrainerRow,
+  CalendarEventHostRow,
 } from "./calendar.types";
 import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
 import type {
@@ -102,15 +102,15 @@ export class CalendarService {
       query.language,
     );
     const eventIds = rows.map((row) => row.id);
-    const [trainersByEventId, linkedCoursesByEventId] = await Promise.all([
-      this.getTrainersByEventId(eventIds),
+    const [hostsByEventId, linkedCoursesByEventId] = await Promise.all([
+      this.getHostsByEventId(eventIds),
       this.getLinkedCoursesByEventId(eventIds, query.language),
     ]);
 
     return rows.map((row) =>
       this.mapLiveTrainingListItem(
         row,
-        trainersByEventId.get(row.id),
+        hostsByEventId.get(row.id),
         linkedCoursesByEventId.get(row.id),
         currentUser,
       ),
@@ -136,8 +136,8 @@ export class CalendarService {
       return null;
     }
 
-    const [trainers, linkedCoursesByEventId, author, materials, latestSession] = await Promise.all([
-      this.calendarRepository.getLiveTrainingTrainerRows([row.id]),
+    const [hosts, linkedCoursesByEventId, author, materials, latestSession] = await Promise.all([
+      this.calendarRepository.getLiveTrainingHostRows([row.id]),
       this.getLinkedCoursesByEventId([row.id], language),
       this.calendarRepository.getLiveTrainingAuthorRow(row.id),
       this.calendarRepository.getLiveTrainingMaterialRows(
@@ -152,8 +152,8 @@ export class CalendarService {
     ]);
     const linkedCourses = linkedCoursesByEventId.get(row.id);
 
-    const listItem = this.mapLiveTrainingListItem(row, trainers, linkedCourses, currentUser);
-    const isPrivilegedViewer = this.isPrivilegedViewer(row, trainers, currentUser);
+    const listItem = this.mapLiveTrainingListItem(row, hosts, linkedCourses, currentUser);
+    const isPrivilegedViewer = this.isPrivilegedViewer(row, hosts, currentUser);
 
     return {
       ...listItem,
@@ -165,11 +165,11 @@ export class CalendarService {
             fullName: null,
             email: "",
           },
-          trainers: trainers.map((trainer) => ({
-            userId: trainer.userId,
-            fullName: trainer.fullName,
-            email: trainer.email,
-            role: trainer.role,
+          hosts: hosts.map((host) => ({
+            userId: host.userId,
+            fullName: host.fullName,
+            email: host.email,
+            role: host.role,
           })),
           materials: this.getVisibleMaterials(
             materials,
@@ -184,11 +184,11 @@ export class CalendarService {
 
   private mapLiveTrainingListItem(
     row: CalendarEventNormalizedRow,
-    trainers: CalendarEventTrainerRow[] = [],
+    hosts: CalendarEventHostRow[] = [],
     linkedCourses: CalendarEventLinkedCourse[] = [],
     currentUser: CurrentUserType,
   ): CalendarEventListItem {
-    const sourceRole = this.getSourceRole(row, trainers, currentUser);
+    const sourceRole = this.getSourceRole(row, hosts, currentUser);
 
     return {
       id: row.id,
@@ -213,21 +213,21 @@ export class CalendarService {
     };
   }
 
-  private async getTrainersByEventId(eventIds: UUIDType[]) {
+  private async getHostsByEventId(eventIds: UUIDType[]) {
     if (!eventIds.length) {
-      return new Map<UUIDType, CalendarEventTrainerRow[]>();
+      return new Map<UUIDType, CalendarEventHostRow[]>();
     }
 
-    const rows = await this.calendarRepository.getLiveTrainingTrainerRows(eventIds);
-    const trainersByEventId = new Map<UUIDType, CalendarEventTrainerRow[]>();
+    const rows = await this.calendarRepository.getLiveTrainingHostRows(eventIds);
+    const hostsByEventId = new Map<UUIDType, CalendarEventHostRow[]>();
 
     for (const row of rows) {
-      const trainers = trainersByEventId.get(row.eventId) ?? [];
-      trainers.push(row);
-      trainersByEventId.set(row.eventId, trainers);
+      const hosts = hostsByEventId.get(row.eventId) ?? [];
+      hosts.push(row);
+      hostsByEventId.set(row.eventId, hosts);
     }
 
-    return trainersByEventId;
+    return hostsByEventId;
   }
 
   private async getLinkedCoursesByEventId(eventIds: UUIDType[], language: SupportedLanguages) {
@@ -288,7 +288,7 @@ export class CalendarService {
     }
 
     const authorCondition = eq(liveTrainings.authorId, currentUser.userId);
-    const trainerCondition = sql`
+    const hostCondition = sql`
       EXISTS (
         SELECT 1
         FROM ${liveTrainingMembers}
@@ -313,7 +313,7 @@ export class CalendarService {
     `;
     const visibilityCondition = or(
       authorCondition,
-      trainerCondition,
+      hostCondition,
       allUsersCondition,
       enrolledCourseCondition,
     );
@@ -334,7 +334,7 @@ export class CalendarService {
 
   private getSourceRole(
     row: CalendarEventNormalizedRow,
-    trainers: CalendarEventTrainerRow[],
+    hosts: CalendarEventHostRow[],
     currentUser: CurrentUserType,
   ): CalendarEventSourceRole {
     if (this.canManageLiveTraining(currentUser)) {
@@ -345,7 +345,7 @@ export class CalendarService {
       return CALENDAR_EVENT_SOURCE_ROLES.AUTHOR;
     }
 
-    if (trainers.some((trainer) => trainer.userId === currentUser.userId)) {
+    if (hosts.some((host) => host.userId === currentUser.userId)) {
       return CALENDAR_EVENT_SOURCE_ROLES.TRAINER;
     }
 
@@ -386,13 +386,13 @@ export class CalendarService {
 
   private isPrivilegedViewer(
     row: CalendarEventNormalizedRow,
-    trainers: CalendarEventTrainerRow[],
+    hosts: CalendarEventHostRow[],
     currentUser: CurrentUserType,
   ) {
     if (this.canManageLiveTraining(currentUser)) return true;
     if (row.authorId === currentUser.userId) return true;
 
-    return trainers.some((trainer) => trainer.userId === currentUser.userId);
+    return hosts.some((host) => host.userId === currentUser.userId);
   }
 
   private canManageLiveTraining(currentUser: CurrentUserType) {

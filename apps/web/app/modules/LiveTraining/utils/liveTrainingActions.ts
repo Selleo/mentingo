@@ -1,8 +1,4 @@
-import {
-  LIVE_TRAINING_DELIVERY_TYPES,
-  LIVE_TRAINING_STATUSES,
-  PERMISSIONS,
-} from "@repo/shared";
+import { LIVE_TRAINING_DELIVERY_TYPES, LIVE_TRAINING_STATUSES, PERMISSIONS } from "@repo/shared";
 
 import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 
@@ -31,14 +27,19 @@ export const deriveLiveTrainingUiActions = ({
   currentUserId,
   permissions,
 }: LiveTrainingActionContext): LiveTrainingUiActions => {
-  const trainerIds = new Set(liveTraining.trainerIds);
+  const hostIds = new Set(liveTraining.hostIds);
   const isAuthor = liveTraining.authorId === currentUserId;
-  const isTrainer = trainerIds.has(currentUserId);
-  const isManager = isAuthor || isTrainer;
-  const hasBroadManagePermission = hasAnyPermission(permissions, BROAD_LIVE_TRAINING_MANAGE_PERMISSIONS);
+  const isHost = hostIds.has(currentUserId);
+  const hasHostRole = isAuthor || isHost;
+  const hasBroadManagePermission = hasAnyPermission(
+    permissions,
+    BROAD_LIVE_TRAINING_MANAGE_PERMISSIONS,
+  );
   const canUpdateAny = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_UPDATE);
   const canUpdateOwn = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_UPDATE_OWN) && isAuthor;
-  const canOperateSession = isManager || canUpdateAny || hasBroadManagePermission;
+  const canEditDetails = canUpdateAny || canUpdateOwn;
+  const canManageSession = hasHostRole || hasBroadManagePermission;
+  const canViewAllMaterials = hasHostRole || hasBroadManagePermission;
   const isActiveSession = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
   const isScheduled = liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED;
   const isJoinable =
@@ -47,13 +48,21 @@ export const deriveLiveTrainingUiActions = ({
     !isTerminalLiveTrainingStatus(liveTraining.status);
 
   return {
-    canShowEdit: canUpdateAny || canUpdateOwn,
+    canShowEdit: canEditDetails,
     canShowDelete: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE),
     canShowStart:
-      hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_START) && canOperateSession && isScheduled,
+      (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_START) || hasHostRole) &&
+      canManageSession &&
+      isScheduled,
     canShowJoin: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_JOIN) && isJoinable,
     canShowFinish:
-      hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_END) && canOperateSession && isActiveSession,
+      (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_END) || hasHostRole) &&
+      canManageSession &&
+      isActiveSession,
     canShowStatistics: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_STATISTICS),
+    canEditMaterials: canEditDetails,
+    canManagePeople: canEditDetails && hasPermission(permissions, PERMISSIONS.USER_MANAGE),
+    canManageSession,
+    canViewAllMaterials,
   };
 };

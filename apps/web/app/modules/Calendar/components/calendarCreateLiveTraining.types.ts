@@ -1,5 +1,5 @@
 import type { CALENDAR_CREATE_MODES } from "./calendarCreateLiveTraining.constants";
-import type { LiveTrainingDeliveryType } from "@repo/shared";
+import type { LiveTrainingFormState } from "~/modules/LiveTraining/liveTrainingForm.types";
 
 export type CalendarCreateMode = (typeof CALENDAR_CREATE_MODES)[keyof typeof CALENDAR_CREATE_MODES];
 
@@ -17,17 +17,4 @@ export type CalendarSelectedRange = {
   allDay: boolean;
 };
 
-export type CalendarCreateLiveTrainingFormState = {
-  title: string;
-  description: string;
-  allDay: boolean;
-  startDate: string;
-  startTime: string;
-  endDate: string;
-  endTime: string;
-  deliveryType: LiveTrainingDeliveryType;
-  location: string;
-  maxParticipants: number;
-  microphoneEnabled: boolean;
-  cameraEnabled: boolean;
-};
+export type CalendarCreateLiveTrainingFormState = LiveTrainingFormState;

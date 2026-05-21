@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateLiveTraining } from "~/api/mutations/live-training/useUpdateLiveTraining";
-import { useInfiniteUsers } from "~/api/queries/useUsers";
+import { useLiveTrainingHostCandidates } from "~/api/queries/live-training/useLiveTrainingHostCandidates";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -25,7 +25,7 @@ import {
   type LiveTrainingPersonRole,
 } from "~/modules/LiveTraining/liveTraining.types";
 import {
-  getLiveTrainingEditableTrainerIds,
+  getLiveTrainingEditableHostIds,
   getLiveTrainingPeopleList,
   getUserCandidateDisplayName,
 } from "~/modules/LiveTraining/utils/liveTrainingPeople";
@@ -108,13 +108,13 @@ export function LiveTrainingPeopleSection({
   const debouncedSearch = useDebounce(search, 300);
   const { mutateAsync: updateLiveTraining, isPending: isUpdating } = useUpdateLiveTraining();
   const people = getLiveTrainingPeopleList(liveTraining, t("liveTrainingView.sidebar.unknownUser"));
-  const editableTrainerIds = useMemo(
-    () => getLiveTrainingEditableTrainerIds(liveTraining),
+  const editableHostIds = useMemo(
+    () => getLiveTrainingEditableHostIds(liveTraining),
     [liveTraining],
   );
-  const trainerIds = useMemo(
-    () => new Set(liveTraining.trainers.map((trainer) => trainer.id)),
-    [liveTraining.trainers],
+  const hostIds = useMemo(
+    () => new Set(liveTraining.hosts.map((host) => host.id)),
+    [liveTraining.hosts],
   );
   const {
     data: userPages,
@@ -122,12 +122,11 @@ export function LiveTrainingPeopleSection({
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteUsers(
+  } = useLiveTrainingHostCandidates(
     {
+      id: liveTraining.id,
       keyword: debouncedSearch,
-      archived: false,
       perPage: 20,
-      sort: "firstName",
     },
     { enabled: isPopoverOpen && canEditPeople },
   );
@@ -138,27 +137,27 @@ export function LiveTrainingPeopleSection({
   const getRoleLabel = (role: LiveTrainingPersonRole) => {
     if (role === LIVE_TRAINING_PERSON_ROLES.AUTHOR) return t("liveTrainingView.sidebar.author");
 
-    return t("liveTrainingView.sidebar.trainer");
+    return t("liveTrainingView.sidebar.host");
   };
 
-  const updateTrainers = async (nextTrainerIds: string[]) => {
+  const updateHosts = async (nextHostIds: string[]) => {
     await updateLiveTraining({
       id: liveTraining.id,
       data: {
         language,
-        trainerUserIds: nextTrainerIds,
+        hostUserIds: nextHostIds,
       },
     });
   };
 
-  const handleAddTrainer = async (userId: string) => {
-    if (trainerIds.has(userId) || userId === liveTraining.author.id) return;
+  const handleAddHost = async (userId: string) => {
+    if (hostIds.has(userId) || userId === liveTraining.author.id) return;
 
-    await updateTrainers([...editableTrainerIds, userId]);
+    await updateHosts([...editableHostIds, userId]);
   };
 
-  const handleRemoveTrainer = async (userId: string) => {
-    await updateTrainers(editableTrainerIds.filter((trainerId) => trainerId !== userId));
+  const handleRemoveHost = async (userId: string) => {
+    await updateHosts(editableHostIds.filter((hostId) => hostId !== userId));
   };
 
   const emptyLabel = isLoading
@@ -190,17 +189,17 @@ export function LiveTrainingPeopleSection({
                   roles={person.roles}
                   canRemove={
                     canEditPeople &&
-                    person.roles.includes(LIVE_TRAINING_PERSON_ROLES.TRAINER) &&
+                    person.roles.includes(LIVE_TRAINING_PERSON_ROLES.HOST) &&
                     !person.roles.includes(LIVE_TRAINING_PERSON_ROLES.AUTHOR)
                   }
                   isRemoving={isUpdating}
                   getRoleLabel={getRoleLabel}
-                  removeLabel={t("liveTrainingView.sidebar.removeTrainer", { name: person.name })}
-                  onRemove={() => handleRemoveTrainer(person.id)}
+                  removeLabel={t("liveTrainingView.sidebar.removeHost", { name: person.name })}
+                  onRemove={() => handleRemoveHost(person.id)}
                 />
               ))
             ) : (
-              <p className="text-sm text-neutral-500">{t("liveTrainingView.sidebar.noTrainers")}</p>
+              <p className="text-sm text-neutral-500">{t("liveTrainingView.sidebar.noHosts")}</p>
             )}
           </div>
         </div>
@@ -215,7 +214,7 @@ export function LiveTrainingPeopleSection({
               )}
             >
               <UserPlus className="size-4" />
-              {t("liveTrainingView.sidebar.addTrainerHint")}
+              {t("liveTrainingView.sidebar.addHostHint")}
             </button>
           </PopoverTrigger>
         )}
@@ -240,15 +239,15 @@ export function LiveTrainingPeopleSection({
                 {users.map((user) => {
                   const name = getUserCandidateDisplayName(user);
                   const isAuthor = user.id === liveTraining.author.id;
-                  const isTrainer = trainerIds.has(user.id);
-                  const isSelected = isAuthor || isTrainer;
+                  const isHost = hostIds.has(user.id);
+                  const isSelected = isAuthor || isHost;
 
                   return (
                     <CommandItem
                       key={user.id}
                       value={user.id}
                       disabled={isSelected || isUpdating}
-                      onSelect={() => handleAddTrainer(user.id)}
+                      onSelect={() => handleAddHost(user.id)}
                     >
                       <UserAvatar
                         userName={name}

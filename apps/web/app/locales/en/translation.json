@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Content creator",
+      "trainer": "Trainer",
       "student": "Student"
     },
     "languages": {
@@ -388,6 +389,9 @@
       "trainers": "{{count}} trainer",
       "trainers_plural": "{{count}} trainers",
       "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training"
@@ -415,6 +419,7 @@
       "role": {
         "admin": "Admin",
         "author": "Author",
+        "host": "Host",
         "trainer": "Trainer",
         "observer": "Observer"
       }
@@ -472,6 +477,9 @@
       "peak": "Peak",
       "people": "People",
       "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
       "trainer": "Trainer",
       "trainers": "Trainers",
       "noTrainers": "No trainers assigned.",
@@ -481,6 +489,9 @@
       "visibility": "Visibility",
       "courses": "Linked courses",
       "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
@@ -503,7 +514,15 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished."
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Add file",
+      "download": "Download",
+      "removeFile": "Remove {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "File has been added.",
+        "removed": "File has been removed."
+      }
     },
     "attendance": {
       "title": "Attendance",
@@ -1827,6 +1846,8 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM package attached successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
+          "liveTrainingLessonCreated": "Live Training lesson created successfully",
+          "liveTrainingLessonUpdated": "Live Training lesson updated successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
           "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
@@ -1839,6 +1860,22 @@
           "embedLessonUpdatedSuccessfully": "Embed lesson updated successfully",
           "embedLessonCreateError": "Failed to create embed lesson. Please check all the fields and try again.",
           "embedLessonUpdateError": "Failed to update embed lesson. Please check all the fields and try again."
+        },
+        "liveTraining": {
+          "createTitle": "Create Live Training lesson",
+          "editTitle": "Edit Live Training lesson",
+          "lessonTitle": "Lesson title",
+          "lessonTitlePlaceholder": "Lesson title shown in the course",
+          "createNewTab": "Create new",
+          "linkExistingTab": "Link existing",
+          "linkExistingLoading": "Loading scheduled Live Trainings...",
+          "linkExistingEmpty": "No scheduled Live Trainings available.",
+          "linkedTitle": "Linked Live Training",
+          "linkedDescription": "Schedule, trainers, files, and session settings are managed on the Live Training page.",
+          "openLiveTraining": "Open Live Training",
+          "validation": {
+            "liveTrainingRequired": "Select a scheduled Live Training to link."
+          }
         },
         "field": {
           "title": "Title",
@@ -1907,6 +1944,7 @@
           "aiMentor": "AI Mentor",
           "embed": "Embed",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Correct",
           "true": "True",
           "false": "False",
@@ -1926,6 +1964,7 @@
           "quizLessonDescription": "A set of questions to check knowledge.",
           "aiMentorLessonDescription": "Interactive conversation with a virtual AI mentor.",
           "scormLessonDescription": "SCORM package lesson content.",
+          "liveTrainingLessonDescription": "Scheduled live session connected to this course.",
           "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",
@@ -2889,7 +2928,7 @@
     "toast": {
       "invalidData": "File upload failed - invalid file data",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
+      "invalidFileType": "Invalid file type. Please upload a supported file.",
       "missingTenantContext": "Missing tenant context for file upload"
     },
     "import": {
@@ -3796,7 +3835,18 @@
       "invalidSchedule": "End time must be after start time.",
       "invalidTrainer": "One or more selected trainers could not be found.",
       "invalidCourse": "One or more linked courses could not be found.",
-      "invalidResource": "One or more selected resources could not be found."
+      "invalidResource": "One or more selected resources could not be found.",
+      "resourceNotFound": "File was not found.",
+      "invalidResourceRelationshipType": "Selected file section is invalid.",
+      "hostAssignmentForbidden": "You do not have permission to assign hosts.",
+      "hostMustHaveTrainerRole": "Assigned hosts must have the Trainer role.",
+      "trainerAssignmentForbidden": "You do not have permission to assign trainers.",
+      "linkNotCreated": "Live Training link could not be created.",
+      "lessonAlreadyLinked": "This lesson already has a Live Training linked.",
+      "invalidLessonLinkMode": "Choose whether to create a new Live Training or link an existing one.",
+      "onlyScheduledCanBeLinked": "Only scheduled Live Trainings can be linked to lessons.",
+      "trainingAlreadyLinkedToLesson": "This Live Training is already linked to a lesson in this course.",
+      "lessonOnlyTitleEditable": "Only the lesson title can be edited here. Open Live Training to change session details."
     }
   }
 }

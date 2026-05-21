@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Inhaltsersteller",
+      "trainer": "Trainer",
       "student": "Student"
     },
     "languages": {
@@ -387,6 +388,9 @@
       "trainers": "{{count}} trainer",
       "trainers_plural": "{{count}} trainers",
       "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training"
@@ -414,6 +418,7 @@
       "role": {
         "admin": "Admin",
         "author": "Author",
+        "host": "Host",
         "trainer": "Trainer",
         "observer": "Observer"
       }
@@ -471,6 +476,9 @@
       "peak": "Peak",
       "people": "People",
       "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
       "trainer": "Trainer",
       "trainers": "Trainers",
       "noTrainers": "No trainers assigned.",
@@ -480,6 +488,9 @@
       "visibility": "Visibility",
       "courses": "Linked courses",
       "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
@@ -502,7 +513,15 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished."
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Datei hinzufügen",
+      "download": "Herunterladen",
+      "removeFile": "{{title}} entfernen",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Datei wurde hinzugefügt.",
+        "removed": "Datei wurde entfernt."
+      }
     },
     "attendance": {
       "title": "Attendance",
@@ -1766,6 +1785,8 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM-Paket erfolgreich angehängt",
           "quizLessonCreatedSuccessfully": "Quiz erfolgreich erstellt",
           "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
+          "liveTrainingLessonCreated": "Live-Training-Lektion erfolgreich erstellt",
+          "liveTrainingLessonUpdated": "Live-Training-Lektion erfolgreich aktualisiert",
           "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor-Lektionsdateien wurden erfolgreich hochgeladen",
           "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
@@ -1778,6 +1799,22 @@
           "embedLessonUpdatedSuccessfully": "Einbettungslektion erfolgreich aktualisiert",
           "embedLessonCreateError": "Einbettungslektion konnte nicht erstellt werden. Bitte überprüfen Sie alle Felder und versuchen Sie es erneut.",
           "embedLessonUpdateError": "Die Einbettungslektion konnte nicht aktualisiert werden. Bitte überprüfen Sie alle Felder und versuchen Sie es erneut."
+        },
+        "liveTraining": {
+          "createTitle": "Live-Training-Lektion erstellen",
+          "editTitle": "Live-Training-Lektion bearbeiten",
+          "lessonTitle": "Lektionstitel",
+          "lessonTitlePlaceholder": "Lektionstitel, der im Kurs angezeigt wird",
+          "createNewTab": "Neu erstellen",
+          "linkExistingTab": "Bestehende verknüpfen",
+          "linkExistingLoading": "Geplante Live Trainings werden geladen...",
+          "linkExistingEmpty": "Keine geplanten Live Trainings verfügbar.",
+          "linkedTitle": "Verknüpftes Live Training",
+          "linkedDescription": "Zeitplan, Trainer, Dateien und Sitzungseinstellungen werden auf der Live-Training-Seite verwaltet.",
+          "openLiveTraining": "Live Training öffnen",
+          "validation": {
+            "liveTrainingRequired": "Wähle ein geplantes Live Training zum Verknüpfen aus."
+          }
         },
         "field": {
           "title": "Titel",
@@ -1846,6 +1883,7 @@
           "aiMentor": "KI-Mentor",
           "embed": "Einbetten",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Richtig",
           "true": "WAHR",
           "false": "FALSCH",
@@ -1865,6 +1903,7 @@
           "quizLessonDescription": "Eine Reihe von Fragen zur Überprüfung des Wissens.",
           "aiMentorLessonDescription": "Interaktives Gespräch mit einem virtuellen KI-Mentor.",
           "scormLessonDescription": "Lektionsinhalt als SCORM-Paket.",
+          "liveTrainingLessonDescription": "Geplante Live-Sitzung, die mit diesem Kurs verbunden ist.",
           "fillInTheBlanksDescription": "Diese Frage enthält einen Satz; Die Schüler müssen das richtige Wort per Drag-and-Drop in die Lücke ziehen.",
           "gapFillDescription": "Diese Frage enthält Sätze mit fehlenden Wörtern, die die Schüler eingeben müssen.",
           "embedLessonDescription": "Externe Ressource (z. B. Google Form, Canva-Präsentation oder YouTube-Livestream).",
@@ -2828,7 +2867,7 @@
     "toast": {
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
-      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
+      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine unterstützte Datei hoch.",
       "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload"
     },
     "import": {
@@ -3733,7 +3772,18 @@
       "invalidSchedule": "Die Endzeit muss nach der Startzeit liegen.",
       "invalidTrainer": "Ein oder mehrere ausgewählte Trainer wurden nicht gefunden.",
       "invalidCourse": "Ein oder mehrere verknüpfte Kurse wurden nicht gefunden.",
-      "invalidResource": "Eine oder mehrere ausgewählte Ressourcen wurden nicht gefunden."
+      "invalidResource": "Eine oder mehrere ausgewählte Ressourcen wurden nicht gefunden.",
+      "resourceNotFound": "Datei wurde nicht gefunden.",
+      "invalidResourceRelationshipType": "Der ausgewählte Dateibereich ist ungültig.",
+      "hostAssignmentForbidden": "Du hast keine Berechtigung, Hosts zuzuweisen.",
+      "hostMustHaveTrainerRole": "Zugewiesene Hosts müssen die Trainer-Rolle haben.",
+      "trainerAssignmentForbidden": "Du hast keine Berechtigung, Trainer zuzuweisen.",
+      "linkNotCreated": "Die Live-Training-Verknüpfung konnte nicht erstellt werden.",
+      "lessonAlreadyLinked": "Diese Lektion ist bereits mit einem Live Training verknüpft.",
+      "invalidLessonLinkMode": "Wähle, ob du ein neues Live Training erstellen oder ein bestehendes verknüpfen möchtest.",
+      "onlyScheduledCanBeLinked": "Nur geplante Live Trainings können mit Lektionen verknüpft werden.",
+      "trainingAlreadyLinkedToLesson": "Dieses Live Training ist in diesem Kurs bereits mit einer Lektion verknüpft.",
+      "lessonOnlyTitleEditable": "Hier kann nur der Lektionstitel bearbeitet werden. Öffne Live Training, um Sitzungsdetails zu ändern."
     }
   }
 }

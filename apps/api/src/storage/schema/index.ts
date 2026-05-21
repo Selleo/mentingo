@@ -498,7 +498,7 @@ export const liveTrainingMembers = pgTable(
     role: text("role")
       .notNull()
       .$type<LiveTrainingMemberRole>()
-      .default(LIVE_TRAINING_MEMBER_ROLES.TRAINER),
+      .default(LIVE_TRAINING_MEMBER_ROLES.HOST),
     displayOrder: integer("display_order"),
     settings: jsonb("settings").default({}).notNull(),
     metadata: jsonb("metadata").default({}).notNull(),

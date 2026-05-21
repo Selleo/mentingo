@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS "live_training_members" (
 	"updated_at" timestamp(3) with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	"live_training_id" uuid NOT NULL,
 	"user_id" uuid NOT NULL,
-	"role" text DEFAULT 'trainer' NOT NULL,
+	"role" text DEFAULT 'host' NOT NULL,
 	"display_order" integer,
 	"settings" jsonb DEFAULT '{}'::jsonb NOT NULL,
 	"metadata" jsonb DEFAULT '{}'::jsonb NOT NULL,

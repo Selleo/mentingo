@@ -109,12 +109,14 @@ export class UserService {
   private readonly SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+    [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
   private readonly SYSTEM_ROLE_PRIORITY: Record<string, number> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: 0,
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: 1,
-    [SYSTEM_ROLE_SLUGS.STUDENT]: 2,
+    [SYSTEM_ROLE_SLUGS.TRAINER]: 2,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: 3,
   };
 
   constructor(
@@ -220,7 +222,8 @@ export class UserService {
           CASE
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.ADMIN} THEN 0
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
-            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 2
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.TRAINER} THEN 2
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 3
             ELSE 999
           END
         `,

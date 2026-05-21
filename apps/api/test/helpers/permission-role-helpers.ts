@@ -22,6 +22,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 const SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+  [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
   [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
 };
 
@@ -38,40 +39,33 @@ export async function ensureSystemRolesForTenantInTests(db: DatabasePg, tenantId
         slug: roleSlug,
         isSystem: true,
       })
-      .onConflictDoUpdate({
+      .onConflictDoNothing({
         target: [permissionRoles.tenantId, permissionRoles.slug],
-        set: {
-          name: SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
-          isSystem: true,
-          updatedAt: sql`NOW()`,
-        },
       })
       .returning({ id: permissionRoles.id });
+    const roleId = role?.id ?? (await findPermissionRoleIdInTests(db, tenantId, roleSlug));
 
     const [ruleSet] = await db
       .insert(permissionRuleSets)
       .values({
         tenantId,
-        name: `${SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
+        name: SYSTEM_ROLE_DISPLAY_NAME[roleSlug],
         slug: ruleSetSlug,
         isSystem: true,
       })
-      .onConflictDoUpdate({
+      .onConflictDoNothing({
         target: [permissionRuleSets.tenantId, permissionRuleSets.slug],
-        set: {
-          name: `${SYSTEM_ROLE_DISPLAY_NAME[roleSlug]} Default`,
-          isSystem: true,
-          updatedAt: sql`NOW()`,
-        },
       })
       .returning({ id: permissionRuleSets.id });
+    const ruleSetId =
+      ruleSet?.id ?? (await findPermissionRuleSetIdInTests(db, tenantId, ruleSetSlug));
 
     await db
       .insert(permissionRoleRuleSets)
       .values({
         tenantId,
-        roleId: role.id,
-        ruleSetId: ruleSet.id,
+        roleId,
+        ruleSetId,
       })
       .onConflictDoNothing({
         target: [permissionRoleRuleSets.roleId, permissionRoleRuleSets.ruleSetId],
@@ -81,7 +75,7 @@ export async function ensureSystemRolesForTenantInTests(db: DatabasePg, tenantId
       .delete(permissionRuleSetPermissions)
       .where(
         and(
-          eq(permissionRuleSetPermissions.ruleSetId, ruleSet.id),
+          eq(permissionRuleSetPermissions.ruleSetId, ruleSetId),
           eq(permissionRuleSetPermissions.tenantId, tenantId),
         ),
       );
@@ -92,7 +86,7 @@ export async function ensureSystemRolesForTenantInTests(db: DatabasePg, tenantId
         .values(
           permissions.map((permission) => ({
             tenantId,
-            ruleSetId: ruleSet.id,
+            ruleSetId,
             permission,
           })),
         )
@@ -128,6 +122,38 @@ export async function assignSystemRoleToUserInTests(
     roleId: role.id,
     tenantId,
   });
+}
+
+async function findPermissionRoleIdInTests(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  roleSlug: SystemRoleSlug,
+) {
+  const [role] = await db
+    .select({ id: permissionRoles.id })
+    .from(permissionRoles)
+    .where(and(eq(permissionRoles.tenantId, tenantId), eq(permissionRoles.slug, roleSlug)))
+    .limit(1);
+
+  if (!role) throw new Error(`System role ${roleSlug} was not inserted or found`);
+
+  return role.id;
+}
+
+async function findPermissionRuleSetIdInTests(
+  db: DatabasePg,
+  tenantId: UUIDType,
+  ruleSetSlug: string,
+) {
+  const [ruleSet] = await db
+    .select({ id: permissionRuleSets.id })
+    .from(permissionRuleSets)
+    .where(and(eq(permissionRuleSets.tenantId, tenantId), eq(permissionRuleSets.slug, ruleSetSlug)))
+    .limit(1);
+
+  if (!ruleSet) throw new Error(`System rule set ${ruleSetSlug} was not inserted or found`);
+
+  return ruleSet.id;
 }
 
 export function userLacksPermissionCondition(

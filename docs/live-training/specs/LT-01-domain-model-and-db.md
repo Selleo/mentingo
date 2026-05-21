@@ -38,8 +38,8 @@ Still open:
 Define the first implementable Live Training slice:
 
 - schedule Live Training through a calendar-compatible event,
-- link one Live Training to zero or one course lesson in V1, while keeping the bridge table ready
-  for future M:N linking,
+- link one Live Training to zero or many course lessons, while one lesson can point to at most one
+  Live Training,
 - assign trainers,
 - start and end a LiveKit-backed runtime session,
 - let eligible users join as observers,
@@ -66,8 +66,8 @@ Define the first implementable Live Training slice:
 - Do not put `lesson_id` directly on `live_trainings` or `live_training_links`.
 - Use `live_lessons` as the bridge from Live Training to concrete `lessons(type = live_training)`
   rows.
-- V1 enforces one lesson per Live Training. Future M:N reuse can relax the unique
-  `live_training_id` constraint.
+- V1 enforces one Live Training per lesson in backend service logic. A Live Training can be assigned
+  to multiple lessons.
 - Do not snapshot course learners when scheduling or linking the training.
 - Do not materialize course learners or all tenant users into `live_training_members`.
 - Use `live_training_members` only for assigned trainers.
@@ -393,8 +393,8 @@ Rules:
 
 ### Table: `live_lessons`
 
-Bridge from Live Training to concrete LMS lesson rows. V1 supports one linked lesson per Live
-Training while preserving a bridge-table shape for future M:N reuse.
+Bridge from Live Training to concrete LMS lesson rows. V1 supports multiple lesson rows for the same
+Live Training, but one lesson can point to only one Live Training.
 
 ```text
 id uuid pk
@@ -409,10 +409,8 @@ live_training_id uuid not null references live_trainings(id) on delete cascade
 Constraints and indexes:
 
 ```text
-unique(lesson_id)
-unique(live_training_id) -- V1 restriction; remove later if one Live Training can back many lessons
-
 tenant_id
+tenant_id, lesson_id
 tenant_id, live_training_id
 ```
 
@@ -423,7 +421,9 @@ Rules:
 - A lesson can create or link a Live Training, but Live Training edits happen on the Live Training
   page.
 - Course lesson views show lightweight Live Training metadata and redirect to `/live-training/:id`.
-- V1 rejects linking a Live Training that already has a `live_lessons` row.
+- V1 service logic rejects creating/linking a Live Training lesson when the lesson already has a
+  `live_lessons` row.
+- Do not enforce the V1 lesson-to-Live-Training rule with DB unique constraints.
 
 ### Table: `live_training_sessions`
 
@@ -633,7 +633,7 @@ create live_lessons bridge row
 
 V1 restriction:
 
-- One Live Training can be linked to at most one lesson.
+- One lesson can be linked to at most one Live Training.
 - Do not allow adding/removing course links after a session starts.
 
 ## Session Flow

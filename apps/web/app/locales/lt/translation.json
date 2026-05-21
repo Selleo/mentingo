@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Turinio kūrėjas",
+      "trainer": "Trainer",
       "student": "Studentas"
     },
     "languages": {
@@ -381,6 +382,9 @@
       "trainers": "{{count}} trainer",
       "trainers_plural": "{{count}} trainers",
       "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training"
@@ -408,6 +412,7 @@
       "role": {
         "admin": "Admin",
         "author": "Author",
+        "host": "Host",
         "trainer": "Trainer",
         "observer": "Observer"
       }
@@ -465,6 +470,9 @@
       "peak": "Peak",
       "people": "People",
       "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
       "trainer": "Trainer",
       "trainers": "Trainers",
       "noTrainers": "No trainers assigned.",
@@ -474,6 +482,9 @@
       "visibility": "Visibility",
       "courses": "Linked courses",
       "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
@@ -496,7 +507,15 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished."
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Pridėti failą",
+      "download": "Atsisiųsti",
+      "removeFile": "Pašalinti {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Failas pridėtas.",
+        "removed": "Failas pašalintas."
+      }
     },
     "attendance": {
       "title": "Attendance",
@@ -1760,6 +1779,8 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM paketas sėkmingai pridėtas",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
+          "liveTrainingLessonCreated": "Live Training pamoka sėkmingai sukurta",
+          "liveTrainingLessonUpdated": "Live Training pamoka sėkmingai atnaujinta",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor pamokų failai sėkmingai įkelti",
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
@@ -1772,6 +1793,22 @@
           "embedLessonUpdatedSuccessfully": "Įterpti pamoką sėkmingai atnaujinta",
           "embedLessonCreateError": "Nepavyko sukurti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą.",
           "embedLessonUpdateError": "Nepavyko atnaujinti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą."
+        },
+        "liveTraining": {
+          "createTitle": "Sukurti Live Training pamoką",
+          "editTitle": "Redaguoti Live Training pamoką",
+          "lessonTitle": "Pamokos pavadinimas",
+          "lessonTitlePlaceholder": "Kurse rodomas pamokos pavadinimas",
+          "createNewTab": "Sukurti naują",
+          "linkExistingTab": "Susieti esamą",
+          "linkExistingLoading": "Įkeliami suplanuoti Live Training...",
+          "linkExistingEmpty": "Nėra pasiekiamų suplanuotų Live Training.",
+          "linkedTitle": "Susietas Live Training",
+          "linkedDescription": "Tvarkaraštis, treneriai, failai ir sesijos nustatymai valdomi Live Training puslapyje.",
+          "openLiveTraining": "Atidaryti Live Training",
+          "validation": {
+            "liveTrainingRequired": "Pasirinkite suplanuotą Live Training susiejimui."
+          }
         },
         "field": {
           "title": "Pavadinimas",
@@ -1840,6 +1877,7 @@
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -1859,6 +1897,7 @@
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
           "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
           "scormLessonDescription": "Pamokos turinys SCORM pakete.",
+          "liveTrainingLessonDescription": "Su šiuo kursu susieta suplanuota tiesioginė sesija.",
           "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
           "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
@@ -2822,7 +2861,7 @@
     "toast": {
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite palaikomą failą.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui"
     },
     "import": {
@@ -3727,7 +3766,18 @@
       "invalidSchedule": "Pabaigos laikas turi būti vėlesnis už pradžios laiką.",
       "invalidTrainer": "Vienas ar keli pasirinkti treneriai nerasti.",
       "invalidCourse": "Vienas ar keli susieti kursai nerasti.",
-      "invalidResource": "Vienas ar keli pasirinkti ištekliai nerasti."
+      "invalidResource": "Vienas ar keli pasirinkti ištekliai nerasti.",
+      "resourceNotFound": "Failas nerastas.",
+      "invalidResourceRelationshipType": "Pasirinkta failų sekcija neteisinga.",
+      "hostAssignmentForbidden": "Neturite teisės priskirti hostų.",
+      "hostMustHaveTrainerRole": "Priskirti hostai turi turėti Trainer rolę.",
+      "trainerAssignmentForbidden": "Neturite teisės priskirti trenerių.",
+      "linkNotCreated": "Nepavyko sukurti Live Training susiejimo.",
+      "lessonAlreadyLinked": "Ši pamoka jau susieta su Live Training.",
+      "invalidLessonLinkMode": "Pasirinkite, ar kurti naują Live Training, ar susieti esamą.",
+      "onlyScheduledCanBeLinked": "Su pamokomis galima susieti tik suplanuotus Live Training.",
+      "trainingAlreadyLinkedToLesson": "Šis Live Training šiame kurse jau susietas su pamoka.",
+      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Live Training, kad pakeistumėte sesijos duomenis."
     }
   }
 }

@@ -1,6 +1,7 @@
-import { PackageOpen } from "lucide-react";
+import { PackageOpen, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { Icon } from "~/components/Icon";
 import { Badge } from "~/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
@@ -65,10 +66,24 @@ const lessonTypes: readonly LessonTypeConfig[] = [
     title: "adminCourseView.curriculum.lesson.other.scorm",
     description: "adminCourseView.curriculum.lesson.other.scormLessonDescription",
   },
+  {
+    contentType: ContentTypes.LIVE_TRAINING_LESSON_FORM,
+    handle: LESSON_TYPE_OPTION_HANDLES.LIVE_TRAINING,
+    lucideIcon: Video,
+    title: "adminCourseView.curriculum.lesson.other.liveTraining",
+    description: "adminCourseView.curriculum.lesson.other.liveTrainingLessonDescription",
+  },
 ];
 
 const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) => {
   const { t } = useTranslation();
+  const { data: globalSettings } = useGlobalSettings();
+  const availableLessonTypes = lessonTypes.filter(
+    (lessonType) =>
+      lessonType.contentType !== ContentTypes.LIVE_TRAINING_LESSON_FORM ||
+      globalSettings?.liveTrainingEnabled,
+  );
+
   return (
     <TooltipProvider>
       <div className="flex flex-col gap-y-6 bg-white p-8">
@@ -76,7 +91,7 @@ const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) =>
           {t("adminCourseView.curriculum.lesson.other.chooseType")}:
         </h3>
         <div className="grid grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-4">
-          {lessonTypes.map(
+          {availableLessonTypes.map(
             ({ contentType, handle, icon, lucideIcon: LucideIcon, title, description }) => {
               return (
                 <div

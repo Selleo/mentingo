@@ -16,7 +16,7 @@ export const liveTrainingDetailsSchema = Type.Intersect([
     settings: liveTrainingSettingsSchema,
     metadata: Type.Record(Type.String(), Type.Unknown()),
     author: liveTrainingUserSummarySchema,
-    trainers: Type.Array(liveTrainingUserSummarySchema),
+    hosts: Type.Array(liveTrainingUserSummarySchema),
     linkedCourses: Type.Array(liveTrainingCourseSummarySchema),
     materials: Type.Object({
       before: Type.Array(liveTrainingMaterialSchema),

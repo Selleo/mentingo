@@ -11,6 +11,7 @@ import {
   Req,
   Res,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -23,6 +24,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  FEATURES,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
@@ -32,8 +34,10 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { FeaturesGuard } from "src/common/guards/features.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
@@ -47,6 +51,9 @@ import {
   createAiMentorLessonSchema,
   CreateLessonBody,
   createLessonSchema,
+  CreateLiveTrainingLessonBody,
+  createLiveTrainingLessonResponseDataSchema,
+  createLiveTrainingLessonSchema,
   CreateQuizLessonBody,
   createQuizLessonSchema,
   lessonShowSchema,
@@ -66,7 +73,12 @@ import {
 import { AdminLessonService } from "./services/adminLesson.service";
 import { LessonService } from "./services/lesson.service";
 
-import type { EnrolledLesson, LessonsFilters, LessonShow } from "./lesson.schema";
+import type {
+  CreateLiveTrainingLessonResponseData,
+  EnrolledLesson,
+  LessonsFilters,
+  LessonShow,
+} from "./lesson.schema";
 
 @Controller("lesson")
 export class LessonController {
@@ -148,6 +160,35 @@ export class LessonController {
     const id = await this.adminLessonsService.createLessonForChapter(createLessonBody, currentUser);
 
     return new BaseResponse({ id, message: "Lesson created successfully" });
+  }
+
+  @Post("beta-create-lesson/live")
+  @UseGuards(FeaturesGuard)
+  @RequireFeature(FEATURES.LIVE_TRAINING)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      {
+        type: "body",
+        schema: createLiveTrainingLessonSchema,
+      },
+    ],
+    response: baseResponse(createLiveTrainingLessonResponseDataSchema),
+  })
+  async betaCreateLiveTrainingLesson(
+    @Body() createLiveTrainingLessonBody: CreateLiveTrainingLessonBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CreateLiveTrainingLessonResponseData>> {
+    const { lessonId, liveTrainingId } = await this.adminLessonsService.createLiveTrainingLesson(
+      createLiveTrainingLessonBody,
+      currentUser,
+    );
+
+    return new BaseResponse({
+      id: lessonId,
+      liveTrainingId,
+      message: "adminCourseView.curriculum.lesson.toast.liveTrainingLessonCreated",
+    });
   }
 
   @Post("initialize-lesson-context")

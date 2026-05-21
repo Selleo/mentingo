@@ -110,7 +110,6 @@ export default function LiveTrainingPage() {
         permissions: currentUser.permissions,
       })
     : null;
-  const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
 
   useEffect(() => {
     if (!liveTraining) return;
@@ -169,11 +168,7 @@ export default function LiveTrainingPage() {
             onEditFormStateCommit={commitEditFormState}
             onEditFormStateChange={updateEditFormState}
           />
-          <LiveTrainingWorkspace
-            liveTraining={liveTraining}
-            actions={actions}
-            canManageUsers={canManageUsers}
-          />
+          <LiveTrainingWorkspace liveTraining={liveTraining} actions={actions} />
           <LiveTrainingDeleteDialog
             open={isDeleteDialogOpen}
             isDeleting={isDeleting}

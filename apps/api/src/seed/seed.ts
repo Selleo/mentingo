@@ -45,7 +45,7 @@ import {
   seedTruncateAllTables,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
-import { admin, contentCreators, students } from "./users-seed";
+import { admin, contentCreators, students, trainers } from "./users-seed";
 
 import type { UsersSeed } from "./seed.types";
 import type { DatabasePg, UUIDType } from "../common";
@@ -381,6 +381,7 @@ async function seed() {
         "password",
         emailSuffix,
       );
+      const createdTrainers = await createUsers(trainers, tenantId, "password", emailSuffix);
       await createUsers(
         [
           {
@@ -404,6 +405,7 @@ async function seed() {
       console.log("Created or found admin user:", createdAdmin);
       console.log("Created or found students user:", createdStudents);
       console.log("Created or found content creators user:", createdContentCreators);
+      console.log("Created or found trainers user:", createdTrainers);
 
       const createdCourses = await createNiceCourses(creatorCourseIds, db, niceCourses, tenantId);
       console.log("✨✨✨Created nice courses✨✨✨");

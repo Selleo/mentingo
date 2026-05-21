@@ -32,6 +32,7 @@ import { CONTEXT_TTL, getContextKey } from "src/file/utils/resourceCacheKeys";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { LessonService } from "src/lesson/services/lesson.service";
+import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -48,6 +49,8 @@ import type {
   CreateAiMentorLessonBody,
   CreateEmbedLessonBody,
   CreateLessonBody,
+  CreateLiveTrainingLessonBody,
+  CreateLiveTrainingLessonResult,
   CreateQuizLessonBody,
   UpdateAiMentorLessonBody,
   UpdateEmbedLessonBody,
@@ -75,6 +78,7 @@ export class AdminLessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
+    private readonly liveTrainingService: LiveTrainingService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -139,6 +143,143 @@ export class AdminLessonService {
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, dbInstance);
 
     return { lessonId: lesson.id, language };
+  }
+
+  async createLiveTrainingLesson(
+    data: CreateLiveTrainingLessonBody,
+    currentUser: CurrentUserType,
+  ): Promise<CreateLiveTrainingLessonResult> {
+    const { lessonId, liveTrainingId, language } = await this.db.transaction(async (trx) => {
+      await this.masterCourseService.assertCourseContentEditableByChapterId(data.chapterId);
+      await this.courseFeaturePolicyService.assertCourseFeatureEnabledByChapterId(
+        data.chapterId,
+        COURSE_FEATURE.CURRICULUM_EDITING,
+      );
+      await this.validateAccess("chapter", currentUser, data.chapterId);
+
+      if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
+        throw new ForbiddenException({ message: "auth.error.missingPermission" });
+      }
+
+      this.assertLiveTrainingLessonMode(data);
+
+      const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
+
+      if (!course) {
+        throw new NotFoundException("Course not found");
+      }
+
+      const { language } = await this.localizationService.getBaseLanguage(
+        ENTITY_TYPE.CHAPTER,
+        data.chapterId,
+      );
+
+      if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+        throw new BadRequestException({
+          message: `adminCourseView.toast.maxTitleLengthExceeded`,
+          count: MAX_LESSON_TITLE_LENGTH,
+        });
+      }
+
+      const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(
+        data.chapterId,
+        trx,
+      );
+      const lesson = await this.adminLessonRepository.createLessonForChapter(
+        {
+          title: data.title,
+          description: data.description,
+          type: LESSON_TYPES.LIVE_TRAINING,
+          chapterId: data.chapterId,
+          displayOrder: data.displayOrder ?? maxDisplayOrder + 1,
+          contextId: data.contextId,
+        },
+        language,
+        trx,
+      );
+      const existingLiveLesson = await this.adminLessonRepository.getLiveLessonByLessonId(
+        lesson.id,
+        trx,
+      );
+
+      if (existingLiveLesson) {
+        throw new BadRequestException("liveTraining.errors.lessonAlreadyLinked");
+      }
+
+      const liveTraining = await this.createOrLinkLiveTrainingForLesson(
+        data,
+        course.id,
+        language,
+        currentUser,
+        trx,
+      );
+
+      const existingLinkedLiveLesson =
+        await this.adminLessonRepository.getLiveLessonByLiveTrainingLinkId(
+          liveTraining.liveTrainingLinkId,
+          trx,
+        );
+
+      if (existingLinkedLiveLesson) {
+        throw new BadRequestException("liveTraining.errors.trainingAlreadyLinkedToLesson");
+      }
+
+      await this.adminLessonRepository.createLiveLesson(
+        {
+          lessonId: lesson.id,
+          liveTrainingId: liveTraining.liveTrainingId,
+          liveTrainingLinkId: liveTraining.liveTrainingLinkId,
+        },
+        trx,
+      );
+
+      await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
+
+      return { lessonId: lesson.id, liveTrainingId: liveTraining.liveTrainingId, language };
+    });
+
+    await this.publishCreateLessonEvent(lessonId, language, currentUser);
+
+    return { lessonId, liveTrainingId };
+  }
+
+  private assertLiveTrainingLessonMode(data: CreateLiveTrainingLessonBody) {
+    const hasNewLiveTraining = Boolean(data.liveTraining);
+    const hasExistingLiveTraining = Boolean(data.liveTrainingId);
+
+    if (hasNewLiveTraining === hasExistingLiveTraining) {
+      throw new BadRequestException("liveTraining.errors.invalidLessonLinkMode");
+    }
+  }
+
+  private async createOrLinkLiveTrainingForLesson(
+    data: CreateLiveTrainingLessonBody,
+    courseId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+    dbInstance: DatabasePg,
+  ) {
+    if (data.liveTrainingId) {
+      return this.liveTrainingService.linkScheduledLiveTrainingToCourseInTransaction(
+        data.liveTrainingId,
+        courseId,
+        language,
+        currentUser,
+        dbInstance,
+      );
+    }
+
+    if (data.liveTraining) {
+      return this.liveTrainingService.createCourseLinkedLiveTrainingInTransaction(
+        data.liveTraining,
+        courseId,
+        language,
+        currentUser,
+        dbInstance,
+      );
+    }
+
+    throw new BadRequestException("liveTraining.errors.invalidLessonLinkMode");
   }
 
   async publishCreateLessonEvent(
@@ -416,6 +557,8 @@ export class AdminLessonService {
       throw new NotFoundException("Lesson not found");
     }
 
+    this.assertLiveTrainingLessonTitleOnlyUpdate(lesson.type, data);
+
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
     if (data.description !== undefined) {
@@ -436,6 +579,20 @@ export class AdminLessonService {
     );
 
     return updatedLesson.id;
+  }
+
+  private assertLiveTrainingLessonTitleOnlyUpdate(lessonType: string, data: UpdateLessonBody) {
+    if (lessonType !== LESSON_TYPES.LIVE_TRAINING) {
+      return;
+    }
+
+    const blockedFields = Object.keys(data).filter(
+      (field) => !["language", "title"].includes(field),
+    );
+
+    if (blockedFields.length) {
+      throw new BadRequestException("liveTraining.errors.lessonOnlyTitleEditable");
+    }
   }
 
   async removeLesson(lessonId: UUIDType, currentUser: CurrentUserType) {

@@ -1,19 +1,16 @@
 import { LIVE_TRAINING_PERSON_ROLES } from "~/modules/LiveTraining/liveTraining.types";
 import { getPersonDisplayName } from "~/modules/LiveTraining/utils/liveTrainingFormat";
 
-import type { GetUsersResponse } from "~/api/generated-api";
+import type { GetHostCandidatesResponse } from "~/api/generated-api";
 import type {
   LiveTrainingDetails,
   LiveTrainingPersonListItem,
 } from "~/modules/LiveTraining/liveTraining.types";
 
-export type LiveTrainingTrainerCandidate = GetUsersResponse["data"][number];
+export type LiveTrainingHostCandidate = GetHostCandidatesResponse["data"][number];
 
-export const getUserCandidateDisplayName = (user: LiveTrainingTrainerCandidate) => {
-  const fullName = [user.firstName, user.lastName].filter(Boolean).join(" ").trim();
-
-  return fullName || user.email;
-};
+export const getUserCandidateDisplayName = (user: LiveTrainingHostCandidate) =>
+  user.fullName || user.email;
 
 export const getLiveTrainingPeopleList = (
   liveTraining: LiveTrainingDetails,
@@ -29,29 +26,27 @@ export const getLiveTrainingPeopleList = (
     roles: [LIVE_TRAINING_PERSON_ROLES.AUTHOR],
   });
 
-  for (const trainer of liveTraining.trainers) {
-    const existingPerson = peopleById.get(trainer.id);
+  for (const host of liveTraining.hosts) {
+    const existingPerson = peopleById.get(host.id);
 
     if (existingPerson) {
-      if (!existingPerson.roles.includes(LIVE_TRAINING_PERSON_ROLES.TRAINER)) {
-        existingPerson.roles.push(LIVE_TRAINING_PERSON_ROLES.TRAINER);
+      if (!existingPerson.roles.includes(LIVE_TRAINING_PERSON_ROLES.HOST)) {
+        existingPerson.roles.push(LIVE_TRAINING_PERSON_ROLES.HOST);
       }
 
       continue;
     }
 
-    peopleById.set(trainer.id, {
-      id: trainer.id,
-      name: getPersonDisplayName(trainer, fallbackName),
-      profilePictureUrl: trainer.profilePictureUrl,
-      roles: [LIVE_TRAINING_PERSON_ROLES.TRAINER],
+    peopleById.set(host.id, {
+      id: host.id,
+      name: getPersonDisplayName(host, fallbackName),
+      profilePictureUrl: host.profilePictureUrl,
+      roles: [LIVE_TRAINING_PERSON_ROLES.HOST],
     });
   }
 
   return [...peopleById.values()];
 };
 
-export const getLiveTrainingEditableTrainerIds = (liveTraining: LiveTrainingDetails) =>
-  liveTraining.trainers
-    .map((trainer) => trainer.id)
-    .filter((trainerId) => trainerId !== liveTraining.author.id);
+export const getLiveTrainingEditableHostIds = (liveTraining: LiveTrainingDetails) =>
+  liveTraining.hosts.map((host) => host.id).filter((hostId) => hostId !== liveTraining.author.id);

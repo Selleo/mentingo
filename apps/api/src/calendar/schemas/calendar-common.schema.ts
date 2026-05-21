@@ -54,7 +54,7 @@ export const calendarEventAuthorSchema = Type.Object({
   email: Type.String(),
 });
 
-export const calendarEventTrainerSchema = Type.Object({
+export const calendarEventHostSchema = Type.Object({
   userId: UUIDSchema,
   fullName: Type.Union([Type.String(), Type.Null()]),
   email: Type.String(),
@@ -85,7 +85,7 @@ export const calendarEventLiveTrainingDetailsPayloadSchema = Type.Intersect([
   calendarEventLiveTrainingPayloadSchema,
   Type.Object({
     author: calendarEventAuthorSchema,
-    trainers: Type.Array(calendarEventTrainerSchema),
+    hosts: Type.Array(calendarEventHostSchema),
     materials: Type.Object({
       before: Type.Array(calendarEventMaterialSchema),
       after: Type.Array(calendarEventMaterialSchema),
@@ -118,7 +118,7 @@ export type CalendarEventLiveTrainingPayload = Static<
 export type CalendarEventPayload = Static<typeof calendarEventPayloadSchema>;
 export type CalendarEventListItem = Static<typeof calendarEventListItemSchema>;
 export type CalendarEventAuthor = Static<typeof calendarEventAuthorSchema>;
-export type CalendarEventTrainer = Static<typeof calendarEventTrainerSchema>;
+export type CalendarEventHost = Static<typeof calendarEventHostSchema>;
 export type CalendarEventMaterial = Static<typeof calendarEventMaterialSchema>;
 export type CalendarEventLatestSession = Static<typeof calendarEventLatestSessionSchema>;
 export type CalendarEventLiveTrainingDetailsPayload = Static<

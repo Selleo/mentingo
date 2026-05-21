@@ -148,6 +148,33 @@ describe("mapNavigationItems", () => {
     });
   });
 
+  it("should prefer explicit item access requirements over route requirements", () => {
+    const items: NavigationItem[] = [
+      {
+        label: "courses",
+        path: "courses",
+        iconName: "Course",
+        accessRequirement: {
+          anyOf: [PERMISSIONS.COURSE_READ],
+        },
+      },
+    ];
+
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
+    expect(mapped[0].accessRequirement).toEqual({
+      anyOf: [PERMISSIONS.COURSE_READ],
+    });
+  });
+
   it("should handle items without matching routes", () => {
     const items: NavigationItem[] = [
       {

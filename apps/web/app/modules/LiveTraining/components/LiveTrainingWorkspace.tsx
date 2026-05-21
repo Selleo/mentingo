@@ -15,7 +15,6 @@ import type {
 type LiveTrainingWorkspaceProps = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
-  canManageUsers: boolean;
 };
 
 type DeferredPanelProps = {
@@ -40,13 +39,8 @@ function DeferredPanel({ icon, title, description }: DeferredPanelProps) {
   );
 }
 
-export function LiveTrainingWorkspace({
-  liveTraining,
-  actions,
-  canManageUsers,
-}: LiveTrainingWorkspaceProps) {
+export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWorkspaceProps) {
   const { t } = useTranslation();
-  const canEditPeople = actions.canShowEdit && canManageUsers;
 
   return (
     <Tabs defaultValue={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW} className="grid gap-4">
@@ -65,13 +59,13 @@ export function LiveTrainingWorkspace({
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
         <LiveTrainingOverview
           liveTraining={liveTraining}
-          canEditPeople={canEditPeople}
+          canEditPeople={actions.canManagePeople}
           className="lg:grid-cols-[minmax(18rem,0.9fr)_minmax(20rem,1.1fr)]"
         />
       </TabsContent>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>
-        <LiveTrainingMaterials liveTraining={liveTraining} />
+        <LiveTrainingMaterials liveTraining={liveTraining} actions={actions} />
       </TabsContent>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.ATTENDANCE}>

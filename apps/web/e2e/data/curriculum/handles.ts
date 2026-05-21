@@ -6,6 +6,7 @@ export const LESSON_TYPE_OPTION_HANDLES = {
   AI_MENTOR: "ai_mentor",
   EMBED: "embed",
   SCORM: "scorm",
+  LIVE_TRAINING: "live_training",
 } as const;
 
 export const CURRICULUM_HANDLES = {
@@ -113,6 +114,13 @@ export const SCORM_LESSON_FORM_HANDLES = {
   DELETE_DIALOG: "curriculum-scorm-lesson-delete-dialog",
   DELETE_DIALOG_CONFIRM_BUTTON: "curriculum-scorm-lesson-delete-dialog-confirm-button",
   DELETE_DIALOG_CANCEL_BUTTON: "curriculum-scorm-lesson-delete-dialog-cancel-button",
+} as const;
+
+export const LIVE_TRAINING_LESSON_FORM_HANDLES = {
+  ROOT: "curriculum-live-training-lesson-form",
+  TITLE_INPUT: "curriculum-live-training-lesson-title-input",
+  SAVE_BUTTON: "curriculum-live-training-lesson-save-button",
+  CANCEL_BUTTON: "curriculum-live-training-lesson-cancel-button",
 } as const;
 
 export const AI_MENTOR_LESSON_FORM_HANDLES = {

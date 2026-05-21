@@ -87,7 +87,7 @@ export class CalendarRepository {
       );
   }
 
-  async getLiveTrainingTrainerRows(eventIds: UUIDType[]) {
+  async getLiveTrainingHostRows(eventIds: UUIDType[]) {
     return this.db
       .select({
         eventId: calendarEvents.id,

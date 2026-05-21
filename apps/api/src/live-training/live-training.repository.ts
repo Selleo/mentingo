@@ -5,8 +5,9 @@ import {
   ENTITY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_STATUSES,
+  SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
@@ -17,6 +18,8 @@ import {
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
+  permissionRoles,
+  permissionUserRoles,
   resourceEntity,
   resources,
   studentCourses,
@@ -26,9 +29,10 @@ import {
 import type {
   CalendarEventUpdateInput,
   CreateLiveTrainingRecordInput,
+  LiveTrainingHostCandidateQuery,
+  LiveTrainingHostInput,
   LiveTrainingLinkInput,
   LiveTrainingListConditions,
-  LiveTrainingTrainerInput,
   LiveTrainingUpdateInput,
 } from "./live-training.types";
 import type { LiveTrainingResourceRelationshipType, SupportedLanguages } from "@repo/shared";
@@ -41,29 +45,34 @@ export class LiveTrainingRepository {
   ) {}
 
   async createLiveTrainingRecord(input: CreateLiveTrainingRecordInput): Promise<UUIDType> {
-    return this.db.transaction(async (tx) => {
-      const [calendarEvent] = await tx
-        .insert(calendarEvents)
-        .values(input.calendarEvent)
-        .returning({ id: calendarEvents.id });
+    return this.db.transaction((tx) => this.createLiveTrainingRecordInTransaction(input, tx));
+  }
 
-      const [liveTraining] = await tx
-        .insert(liveTrainings)
-        .values({
-          ...input.liveTraining,
-          calendarEventId: calendarEvent.id,
-        })
-        .returning({ id: liveTrainings.id });
+  async createLiveTrainingRecordInTransaction(
+    input: CreateLiveTrainingRecordInput,
+    dbInstance: DatabasePg,
+  ): Promise<UUIDType> {
+    const [calendarEvent] = await dbInstance
+      .insert(calendarEvents)
+      .values(input.calendarEvent)
+      .returning({ id: calendarEvents.id });
 
-      await tx.insert(liveTrainingMembers).values(
-        input.trainers.map((trainer) => ({
-          liveTrainingId: liveTraining.id,
-          ...trainer,
-        })),
-      );
+    const [liveTraining] = await dbInstance
+      .insert(liveTrainings)
+      .values({
+        ...input.liveTraining,
+        calendarEventId: calendarEvent.id,
+      })
+      .returning({ id: liveTrainings.id });
 
-      return liveTraining.id;
-    });
+    await dbInstance.insert(liveTrainingMembers).values(
+      input.hosts.map((host) => ({
+        liveTrainingId: liveTraining.id,
+        ...host,
+      })),
+    );
+
+    return liveTraining.id;
   }
 
   async getExistingUserIds(userIds: UUIDType[]) {
@@ -71,6 +80,36 @@ export class LiveTrainingRepository {
       .select({ id: users.id })
       .from(users)
       .where(and(inArray(users.id, userIds), eq(users.archived, false), isNull(users.deletedAt)));
+  }
+
+  async getUserIdsWithTrainerRole(userIds: UUIDType[]) {
+    if (!userIds.length) return [];
+
+    return this.db
+      .select({ id: users.id })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(
+        and(
+          inArray(users.id, userIds),
+          eq(users.archived, false),
+          isNull(users.deletedAt),
+          eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.TRAINER),
+        ),
+      );
   }
 
   async getExistingCourseIds(courseIds: UUIDType[]) {
@@ -82,6 +121,78 @@ export class LiveTrainingRepository {
       .select({ id: resources.id })
       .from(resources)
       .where(and(inArray(resources.id, resourceIds), eq(resources.archived, false)));
+  }
+
+  async getHostCandidates({ keyword, page, perPage }: LiveTrainingHostCandidateQuery) {
+    const conditions = [
+      eq(users.archived, false),
+      isNull(users.deletedAt),
+      eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.TRAINER),
+    ];
+
+    if (keyword) {
+      const keywordCondition = or(
+        ilike(users.firstName, `%${keyword}%`),
+        ilike(users.lastName, `%${keyword}%`),
+        ilike(users.email, `%${keyword}%`),
+      );
+
+      if (keywordCondition) conditions.push(keywordCondition);
+    }
+
+    const data = await this.db
+      .select({
+        id: users.id,
+        fullName: sql<
+          string | null
+        >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        email: users.email,
+        avatarReference: users.avatarReference,
+      })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(and(...conditions))
+      .groupBy(users.id)
+      .orderBy(asc(users.firstName), asc(users.lastName), asc(users.email))
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(and(...conditions));
+
+    return {
+      data,
+      pagination: { totalItems, page, perPage },
+    };
   }
 
   async getLiveTrainingBaseRow(id: UUIDType, language?: SupportedLanguages) {
@@ -169,7 +280,7 @@ export class LiveTrainingRepository {
       .orderBy(asc(calendarEvents.startsAt));
   }
 
-  async getLiveTrainingTrainerRows(id: UUIDType) {
+  async getLiveTrainingHostRows(id: UUIDType) {
     return this.db
       .select({
         id: users.id,
@@ -218,7 +329,7 @@ export class LiveTrainingRepository {
           calendarEvents,
         ),
         contentType: resources.contentType,
-        fileUrl: resources.reference,
+        size: sql<number | null>`NULLIF(${resources.metadata}->>'size', '')::int`,
         relationshipType: resourceEntity.relationshipType,
       })
       .from(resourceEntity)
@@ -233,6 +344,45 @@ export class LiveTrainingRepository {
           eq(resources.archived, false),
         ),
       );
+  }
+
+  async getLiveTrainingMaterialRowByResourceId(
+    liveTrainingId: UUIDType,
+    resourceId: UUIDType,
+    language: SupportedLanguages,
+  ) {
+    const [row] = await this.db
+      .select({
+        resourceId: resources.id,
+        title: this.localizationService.getLocalizedSqlField(
+          resources.title,
+          language,
+          calendarEvents,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          resources.description,
+          language,
+          calendarEvents,
+        ),
+        contentType: resources.contentType,
+        reference: resources.reference,
+        size: sql<number | null>`NULLIF(${resources.metadata}->>'size', '')::int`,
+        relationshipType: resourceEntity.relationshipType,
+      })
+      .from(resourceEntity)
+      .innerJoin(liveTrainings, eq(liveTrainings.id, resourceEntity.entityId))
+      .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityId, liveTrainingId),
+          eq(resourceEntity.resourceId, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPES.LIVE_TRAINING),
+          eq(resources.archived, false),
+        ),
+      );
+
+    return row;
   }
 
   async getEnrolledCourseIds(userId: UUIDType, courseIds: UUIDType[]) {
@@ -256,17 +406,17 @@ export class LiveTrainingRepository {
     return this.db.update(liveTrainings).set(data).where(eq(liveTrainings.id, liveTrainingId));
   }
 
-  async deleteTrainers(liveTrainingId: UUIDType) {
+  async deleteHosts(liveTrainingId: UUIDType) {
     return this.db
       .delete(liveTrainingMembers)
       .where(eq(liveTrainingMembers.liveTrainingId, liveTrainingId));
   }
 
-  async insertTrainers(liveTrainingId: UUIDType, trainers: LiveTrainingTrainerInput) {
+  async insertHosts(liveTrainingId: UUIDType, hosts: LiveTrainingHostInput) {
     return this.db.insert(liveTrainingMembers).values(
-      trainers.map((trainer) => ({
+      hosts.map((host) => ({
         liveTrainingId,
-        ...trainer,
+        ...host,
       })),
     );
   }
@@ -277,13 +427,47 @@ export class LiveTrainingRepository {
       .where(eq(liveTrainingLinks.liveTrainingId, liveTrainingId));
   }
 
-  async insertLinks(liveTrainingId: UUIDType, links: LiveTrainingLinkInput) {
-    return this.db.insert(liveTrainingLinks).values(
-      links.map((link) => ({
-        liveTrainingId,
-        ...link,
-      })),
-    );
+  async insertLinks(
+    liveTrainingId: UUIDType,
+    links: LiveTrainingLinkInput,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
+      .insert(liveTrainingLinks)
+      .values(
+        links.map((link) => ({
+          liveTrainingId,
+          ...link,
+        })),
+      )
+      .returning({
+        id: liveTrainingLinks.id,
+        entityId: liveTrainingLinks.entityId,
+        entityType: liveTrainingLinks.entityType,
+      });
+  }
+
+  async getCourseLink(
+    liveTrainingId: UUIDType,
+    courseId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [link] = await dbInstance
+      .select({
+        id: liveTrainingLinks.id,
+        entityId: liveTrainingLinks.entityId,
+        entityType: liveTrainingLinks.entityType,
+      })
+      .from(liveTrainingLinks)
+      .where(
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveTrainingId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+          eq(liveTrainingLinks.entityId, courseId),
+        ),
+      );
+
+    return link ?? null;
   }
 
   async deleteResourceLinks(
@@ -301,12 +485,25 @@ export class LiveTrainingRepository {
       );
   }
 
+  async deleteResourceLink(liveTrainingId: UUIDType, resourceId: UUIDType) {
+    return this.db
+      .delete(resourceEntity)
+      .where(
+        and(
+          eq(resourceEntity.entityId, liveTrainingId),
+          eq(resourceEntity.resourceId, resourceId),
+          eq(resourceEntity.entityType, ENTITY_TYPES.LIVE_TRAINING),
+        ),
+      );
+  }
+
   async insertResourceLinks(
     liveTrainingId: UUIDType,
     resourceIds: UUIDType[],
     relationshipType: LiveTrainingResourceRelationshipType,
+    dbInstance: DatabasePg = this.db,
   ) {
-    return this.db.insert(resourceEntity).values(
+    return dbInstance.insert(resourceEntity).values(
       resourceIds.map((resourceId) => ({
         resourceId,
         entityId: liveTrainingId,

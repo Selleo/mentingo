@@ -25,6 +25,7 @@ export type NavigationItem = {
   label: string;
   path: string;
   iconName: IconName;
+  accessRequirement?: PermissionRequirement;
   testId?: string;
 };
 
@@ -58,6 +59,9 @@ export const getNavigationConfig = (
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",
+          accessRequirement: {
+            anyOf: [PERMISSIONS.COURSE_READ],
+          },
           testId: NAVIGATION_HANDLES.COURSES_LINK,
         },
         {
@@ -294,7 +298,7 @@ export const findMatchingRoute = (path: string) => {
 
 const mapMenuItemsWithRolesAndLink = (items: NavigationItem[]) => {
   return items.map((item) => {
-    const accessRequirement = findMatchingRoute(item.path);
+    const accessRequirement = item.accessRequirement ?? findMatchingRoute(item.path);
 
     return {
       ...item,

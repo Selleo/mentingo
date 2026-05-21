@@ -7,6 +7,7 @@ const SYSTEM_ROLE_TRANSLATION_KEYS = {
   [SYSTEM_ROLE_SLUGS.ADMIN]: "common.roles.admin",
   [SYSTEM_ROLE_SLUGS.STUDENT]: "common.roles.student",
   [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "common.roles.contentCreator",
+  [SYSTEM_ROLE_SLUGS.TRAINER]: "common.roles.trainer",
 } as const;
 
 export const getRoleLabel = (roleSlug: string, t: TFunction, roles?: RoleOption[]): string => {
