@@ -813,6 +813,13 @@
       "when": 1779374783888,
       "tag": "0115_add_live_training_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 116,
+      "version": "7",
+      "when": 1779378812600,
+      "tag": "0116_update_live_lessons_language_constraints",
+      "breakpoints": true
     }
   ]
 }

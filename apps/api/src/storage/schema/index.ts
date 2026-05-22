@@ -566,16 +566,20 @@ export const liveLessons = pgTable(
     lessonId: uuid("lesson_id")
       .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
+    language: text("language")
+      .$type<SupportedLanguages>()
+      .notNull()
+      .default(SUPPORTED_LANGUAGES.EN),
     tenantId,
   },
   withTenantIdIndex("live_lessons", (table) => ({
-    liveTrainingLinkUniqueIdx: uniqueIndex("live_lessons_training_link_unique_idx").on(
-      table.liveTrainingLinkId,
-    ),
-    lessonUniqueIdx: uniqueIndex("live_lessons_lesson_unique_idx").on(table.lessonId),
-    trainingLessonUniqueIdx: uniqueIndex("live_lessons_training_lesson_unique_idx").on(
-      table.liveTrainingId,
+    lessonLanguageUniqueIdx: uniqueIndex("live_lessons_lesson_language_unique_idx").on(
       table.lessonId,
+      table.language,
+    ),
+    liveTrainingLinkIdx: index("live_lessons_training_link_idx").on(
+      table.tenantId,
+      table.liveTrainingLinkId,
     ),
     liveTrainingIdx: index("live_lessons_training_idx").on(table.tenantId, table.liveTrainingId),
   })),

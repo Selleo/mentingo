@@ -15,6 +15,7 @@ import { DB } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   courses,
+  liveLessons,
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
@@ -538,5 +539,16 @@ export class LiveTrainingRepository {
         })
         .where(eq(calendarEvents.id, calendarEventId));
     });
+  }
+
+  async getLinkedLessonCount(liveTrainingId: UUIDType) {
+    const [row] = await this.db
+      .select({
+        count: sql<number>`count(DISTINCT ${liveLessons.lessonId})::int`,
+      })
+      .from(liveLessons)
+      .where(eq(liveLessons.liveTrainingId, liveTrainingId));
+
+    return row?.count ?? 0;
   }
 }

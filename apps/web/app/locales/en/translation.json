@@ -539,6 +539,8 @@
     "deleteDialog": {
       "title": "Delete Live Training?",
       "description": "This will cancel the Live Training and remove it from the calendar. This action cannot be undone.",
+      "assignedToLessonsDescription": "This Live Training is linked to {{count}} lesson. Delete the related lesson first before deleting the Live Training.",
+      "assignedToLessonsDescription_plural": "This Live Training is linked to {{count}} lessons. Delete the related lessons first before deleting the Live Training.",
       "toast": {
         "success": "Live Training deleted successfully."
       }
@@ -1306,6 +1308,7 @@
         "live_training_update": "Edit any live training.",
         "live_training_update_own": "Edit live trainings created by this user.",
         "live_training_delete": "Delete live trainings.",
+        "live_training_delete_own": "Delete live trainings created by this user.",
         "live_training_join": "Join live training sessions.",
         "live_training_start": "Start live training sessions.",
         "live_training_end": "End live training sessions.",
@@ -1754,6 +1757,7 @@
         "removeAiMentorLesson": "Are you sure you want to delete this AI Mentor lesson from chapter?",
         "removeEmbedLesson": "Are you sure you want to delete this embed lesson from chapter?",
         "removeScormLesson": "Are you sure you want to delete this SCORM lesson from chapter?",
+        "removeLiveTrainingLesson": "Are you sure you want to delete this Live Training lesson from chapter?",
         "removeChapter": "Are you sure you want to delete this chapter?",
         "removeQuestion": "Are you sure you want to delete question?",
         "removeContent": "Are you sure you want to delete content?"
@@ -1848,6 +1852,7 @@
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
           "liveTrainingLessonCreated": "Live Training lesson created successfully",
           "liveTrainingLessonUpdated": "Live Training lesson updated successfully",
+          "liveTrainingLessonAttached": "Live Training assignment attached successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
           "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
@@ -1873,6 +1878,9 @@
           "linkedTitle": "Linked Live Training",
           "linkedDescription": "Schedule, trainers, files, and session settings are managed on the Live Training page.",
           "openLiveTraining": "Open Live Training",
+          "openBaseLiveTraining": "Open base Live Training",
+          "languageMissingTitle": "No Live Training assigned for this language",
+          "languageMissingDescription": "This lesson falls back to the course base language. Create or link a scheduled Live Training to override it for the selected language.",
           "validation": {
             "liveTrainingRequired": "Select a scheduled Live Training to link."
           }
@@ -3846,7 +3854,11 @@
       "invalidLessonLinkMode": "Choose whether to create a new Live Training or link an existing one.",
       "onlyScheduledCanBeLinked": "Only scheduled Live Trainings can be linked to lessons.",
       "trainingAlreadyLinkedToLesson": "This Live Training is already linked to a lesson in this course.",
-      "lessonOnlyTitleEditable": "Only the lesson title can be edited here. Open Live Training to change session details."
+      "lessonOnlyTitleEditable": "Only the lesson title can be edited here. Open Live Training to change session details.",
+      "unsupportedLessonLanguage": "This course does not support the selected language.",
+      "baseLanguageAssignmentRequired": "Live Training lessons must be created in the course base language first.",
+      "invalidLessonType": "Only Live Training lessons can have Live Training assignments.",
+      "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training."
     }
   }
 }

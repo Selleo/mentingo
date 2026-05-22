@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { useAttachLiveTrainingLesson } from "~/api/mutations/admin/useAttachLiveTrainingLesson";
 import { useCreateLiveTrainingLesson } from "~/api/mutations/admin/useCreateLiveTrainingLesson";
 import { useUpdateLiveTrainingLessonTitle } from "~/api/mutations/admin/useUpdateLiveTrainingLessonTitle";
 import { useLiveTrainings } from "~/api/queries/live-training/useLiveTrainings";
@@ -48,6 +49,8 @@ export function useLiveTrainingLessonForm({
   const { setIsCurrectFormDirty } = useLeaveModal();
   const uiLanguage = useLanguageStore((state) => state.language);
   const { mutateAsync: createLiveTrainingLesson, isPending } = useCreateLiveTrainingLesson();
+  const { mutateAsync: attachLiveTrainingLesson, isPending: isAttachingLiveTraining } =
+    useAttachLiveTrainingLesson();
   const { mutateAsync: updateLiveTrainingLessonTitle, isPending: isUpdatingTitle } =
     useUpdateLiveTrainingLessonTitle();
   const [formMode, setFormMode] = useState<LiveTrainingLessonFormMode>(
@@ -71,22 +74,34 @@ export function useLiveTrainingLessonForm({
   const timezone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC", []);
   const { isDirty } = form.formState;
   const { reset } = form;
+  const currentLanguageHasLiveTraining =
+    !lessonToEdit || Boolean(lessonToEdit.liveTrainingLanguages?.includes(language));
+  const shouldShowAssignmentFields = !lessonToEdit || !currentLanguageHasLiveTraining;
   const { data: scheduledLiveTrainings, isLoading: isLoadingScheduledLiveTrainings } =
     useLiveTrainings({
       status: LIVE_TRAINING_STATUSES.SCHEDULED,
       language: uiLanguage,
-      enabled: formMode === LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING,
+      enabled:
+        shouldShowAssignmentFields && formMode === LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING,
       perPage: 50,
     });
 
   useEffect(() => {
-    setIsCurrectFormDirty(
-      isDirty ||
-        isLiveTrainingFormDirty ||
+    const hasAssignmentDraft =
+      shouldShowAssignmentFields &&
+      (isLiveTrainingFormDirty ||
         formMode !== LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW ||
-        Boolean(selectedLiveTrainingId),
-    );
-  }, [formMode, isDirty, isLiveTrainingFormDirty, selectedLiveTrainingId, setIsCurrectFormDirty]);
+        Boolean(selectedLiveTrainingId));
+
+    setIsCurrectFormDirty(isDirty || hasAssignmentDraft);
+  }, [
+    formMode,
+    isDirty,
+    isLiveTrainingFormDirty,
+    selectedLiveTrainingId,
+    setIsCurrectFormDirty,
+    shouldShowAssignmentFields,
+  ]);
 
   useEffect(() => {
     reset({ title: lessonToEdit?.title ?? "" });
@@ -116,9 +131,7 @@ export function useLiveTrainingLessonForm({
     return { startsAt, endsAt };
   };
 
-  const onSubmit = async (values: LiveTrainingLessonFormValues) => {
-    if (!chapterToEdit || lessonToEdit) return;
-
+  const validateLiveTrainingAssignment = () => {
     const isLinkExistingMode = formMode === LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING;
     const { startsAt, endsAt } = getLiveTrainingDates();
 
@@ -126,7 +139,7 @@ export function useLiveTrainingLessonForm({
       setLiveTrainingFormError(
         t("adminCourseView.curriculum.lesson.liveTraining.validation.liveTrainingRequired"),
       );
-      return;
+      return null;
     }
 
     if (!isLinkExistingMode) {
@@ -140,18 +153,27 @@ export function useLiveTrainingLessonForm({
         setLiveTrainingFormError(
           validationResult.error.issues[0]?.message ?? t("common.toast.somethingWentWrong"),
         );
-        return;
+        return null;
       }
     }
 
-    setLiveTrainingFormError(null);
+    return getLiveTrainingLessonPayload(startsAt, endsAt);
+  };
 
-    const liveTrainingPayload = getLiveTrainingLessonPayload(startsAt, endsAt);
+  const onSubmit = async (values: LiveTrainingLessonFormValues) => {
+    if (!chapterToEdit || lessonToEdit) return;
+
+    const liveTrainingPayload = validateLiveTrainingAssignment();
+
+    if (!liveTrainingPayload) return;
+
+    setLiveTrainingFormError(null);
 
     await createLiveTrainingLesson({
       data: {
         title: values.title.trim(),
         chapterId: chapterToEdit.id,
+        language,
         ...liveTrainingPayload,
       },
     });
@@ -162,6 +184,27 @@ export function useLiveTrainingLessonForm({
 
   const onSubmitEdit = async (values: LiveTrainingLessonFormValues) => {
     if (!lessonToEdit) return;
+
+    if (!currentLanguageHasLiveTraining) {
+      const liveTrainingPayload = validateLiveTrainingAssignment();
+
+      if (!liveTrainingPayload) return;
+
+      setLiveTrainingFormError(null);
+
+      await attachLiveTrainingLesson({
+        lessonId: lessonToEdit.id,
+        data: {
+          title: values.title.trim(),
+          language,
+          ...liveTrainingPayload,
+        },
+      });
+
+      setIsCurrectFormDirty(false);
+      setContentTypeToDisplay(ContentTypes.EMPTY);
+      return;
+    }
 
     await updateLiveTrainingLessonTitle({
       lessonId: lessonToEdit.id,
@@ -204,9 +247,10 @@ export function useLiveTrainingLessonForm({
   };
 
   return {
+    currentLanguageHasLiveTraining,
     form,
     formMode,
-    isPending: isPending || isUpdatingTitle,
+    isPending: isPending || isUpdatingTitle || isAttachingLiveTraining,
     isLoadingScheduledLiveTrainings,
     liveTrainingFormError,
     liveTrainingFormState,

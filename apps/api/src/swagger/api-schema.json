@@ -5414,6 +5414,43 @@
         }
       }
     },
+    "/api/lesson/{lessonId}/live-training": {
+      "patch": {
+        "operationId": "LessonController_attachLiveTrainingLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttachLiveTrainingLessonBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachLiveTrainingLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/lesson/initialize-lesson-context": {
       "post": {
         "operationId": "LessonController_initializeLessonContext",
@@ -12826,6 +12863,10 @@
                     },
                     {
                       "const": "live_training.delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "live_training.delete_own",
                       "type": "string"
                     },
                     {
@@ -24154,6 +24195,31 @@
             "format": "uuid",
             "type": "string"
           },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          },
           "displayOrder": {
             "type": "number"
           },
@@ -24275,10 +24341,190 @@
         },
         "required": [
           "title",
-          "chapterId"
+          "chapterId",
+          "language"
         ]
       },
       "BetaCreateLiveTrainingLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "liveTrainingId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "liveTrainingId",
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AttachLiveTrainingLessonBody": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          },
+          "liveTraining": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "minLength": 1,
+                "maxLength": 120,
+                "type": "string"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "maxLength": 500,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "startsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "endsAt": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "allDay": {
+                "type": "boolean"
+              },
+              "timezone": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "location": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "deliveryType": {
+                "anyOf": [
+                  {
+                    "const": "online",
+                    "type": "string"
+                  },
+                  {
+                    "const": "offline",
+                    "type": "string"
+                  }
+                ]
+              },
+              "maxParticipants": {
+                "minimum": 1,
+                "maximum": 100,
+                "type": "number"
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "viewerPermissions": {
+                    "type": "object",
+                    "properties": {
+                      "microphoneEnabled": {
+                        "type": "boolean"
+                      },
+                      "cameraEnabled": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              },
+              "hostUserIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "beforeResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "afterResourceIds": {
+                "type": "array",
+                "items": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "title",
+              "startsAt",
+              "endsAt",
+              "timezone",
+              "deliveryType"
+            ]
+          },
+          "liveTrainingId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "language"
+        ]
+      },
+      "AttachLiveTrainingLessonResponse": {
         "type": "object",
         "properties": {
           "data": {
@@ -27777,6 +28023,9 @@
                       ]
                     }
                   },
+                  "linkedLessonCount": {
+                    "type": "number"
+                  },
                   "materials": {
                     "type": "object",
                     "properties": {
@@ -27909,6 +28158,7 @@
                   "author",
                   "hosts",
                   "linkedCourses",
+                  "linkedLessonCount",
                   "materials"
                 ]
               }
@@ -28323,6 +28573,9 @@
                       ]
                     }
                   },
+                  "linkedLessonCount": {
+                    "type": "number"
+                  },
                   "materials": {
                     "type": "object",
                     "properties": {
@@ -28455,6 +28708,7 @@
                   "author",
                   "hosts",
                   "linkedCourses",
+                  "linkedLessonCount",
                   "materials"
                 ]
               }
@@ -28985,6 +29239,9 @@
                       ]
                     }
                   },
+                  "linkedLessonCount": {
+                    "type": "number"
+                  },
                   "materials": {
                     "type": "object",
                     "properties": {
@@ -29117,6 +29374,7 @@
                   "author",
                   "hosts",
                   "linkedCourses",
+                  "linkedLessonCount",
                   "materials"
                 ]
               }

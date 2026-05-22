@@ -532,6 +532,8 @@
     "deleteDialog": {
       "title": "Smazat Live Training?",
       "description": "Live Training bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
+      "assignedToLessonsDescription": "Tento Live Training je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Live Training.",
+      "assignedToLessonsDescription_plural": "Tento Live Training je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Live Training.",
       "toast": {
         "success": "Live Training byl smazán."
       }
@@ -1240,6 +1242,7 @@
         "live_training_update": "Může upravovat libovolné živé školení.",
         "live_training_update_own": "Může upravovat živá školení vytvořená tímto uživatelem.",
         "live_training_delete": "Může mazat živá školení.",
+        "live_training_delete_own": "Může mazat živá školení vytvořená tímto uživatelem.",
         "live_training_join": "Může se připojit k relacím živého školení.",
         "live_training_start": "Může spouštět relace živého školení.",
         "live_training_end": "Může ukončovat relace živého školení.",
@@ -1687,6 +1690,7 @@
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
         "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
+        "removeLiveTrainingLesson": "Opravdu chcete smazat tuto lekci Live Training z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -1781,6 +1785,7 @@
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
           "liveTrainingLessonCreated": "Lekce Live Training byla úspěšně vytvořena",
           "liveTrainingLessonUpdated": "Lekce Live Training byla úspěšně aktualizována",
+          "liveTrainingLessonAttached": "Přiřazení Live Training bylo úspěšně připojeno",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
           "aiMentorLessonFileAddedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně nahrány",
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
@@ -1806,6 +1811,9 @@
           "linkedTitle": "Propojený Live Training",
           "linkedDescription": "Plán, trenéři, soubory a nastavení relace se spravují na stránce Live Training.",
           "openLiveTraining": "Otevřít Live Training",
+          "openBaseLiveTraining": "Otevřít základní Live Training",
+          "languageMissingTitle": "Pro tento jazyk není přiřazen Live Training",
+          "languageMissingDescription": "Tato lekce používá Live Training ze základního jazyka kurzu. Vytvořte nebo propojte naplánovaný Live Training, pokud ho chcete pro vybraný jazyk změnit.",
           "validation": {
             "liveTrainingRequired": "Vyberte naplánovaný Live Training k propojení."
           }
@@ -3777,7 +3785,11 @@
       "invalidLessonLinkMode": "Vyberte, zda chcete vytvořit nový Live Training, nebo propojit existující.",
       "onlyScheduledCanBeLinked": "K lekcím lze propojit pouze naplánované Live Training.",
       "trainingAlreadyLinkedToLesson": "Tento Live Training je v tomto kurzu již propojen s lekcí.",
-      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Live Training."
+      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Live Training.",
+      "unsupportedLessonLanguage": "Tento kurz nepodporuje vybraný jazyk.",
+      "baseLanguageAssignmentRequired": "Lekce Live Training musí být nejprve vytvořena v základním jazyce kurzu.",
+      "invalidLessonType": "Přiřazení Live Training lze přidat pouze k lekcím Live Training.",
+      "deleteAssignedToLesson": "Tento Live Training je propojen s lekcí. Nejdříve smažte lekci a až potom Live Training."
     }
   }
 }

@@ -172,6 +172,7 @@ export default function LiveTrainingPage() {
           <LiveTrainingDeleteDialog
             open={isDeleteDialogOpen}
             isDeleting={isDeleting}
+            linkedLessonCount={liveTraining.linkedLessonCount}
             onOpenChange={setIsDeleteDialogOpen}
             onConfirm={handleDeleteLiveTraining}
           />

@@ -220,7 +220,17 @@ export class AdminChapterRepository {
             SELECT ${liveLessons.liveTrainingId}
             FROM ${liveLessons}
             WHERE ${liveLessons.lessonId} = ${lessons.id}
+              AND ${liveLessons.language} IN (${language}, ${courses.baseLanguage})
+            ORDER BY CASE WHEN ${liveLessons.language} = ${language} THEN 0 ELSE 1 END
             LIMIT 1
+          )
+        `,
+        liveTrainingLanguages: sql<SupportedLanguages[]>`
+          ARRAY(
+            SELECT ${liveLessons.language}
+            FROM ${liveLessons}
+            WHERE ${liveLessons.lessonId} = ${lessons.id}
+            ORDER BY ${liveLessons.language}
           )
         `,
       })

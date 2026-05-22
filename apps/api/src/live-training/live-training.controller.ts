@@ -240,7 +240,7 @@ export class LiveTrainingController {
   }
 
   @Delete(":id")
-  @RequirePermission(PERMISSIONS.LIVE_TRAINING_DELETE)
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_DELETE, PERMISSIONS.LIVE_TRAINING_DELETE_OWN)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(liveTrainingDeleteResponseSchema),

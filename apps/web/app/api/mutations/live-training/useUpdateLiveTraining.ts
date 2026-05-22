@@ -42,11 +42,7 @@ export function useUpdateLiveTraining() {
     onError: (error: AxiosError) => {
       toast({
         variant: "destructive",
-        description: getTranslatedApiErrorMessage(
-          error,
-          t,
-          t("common.toast.somethingWentWrong"),
-        ),
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });

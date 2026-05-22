@@ -538,6 +538,8 @@
     "deleteDialog": {
       "title": "Live Training löschen?",
       "description": "Das Live Training wird abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "assignedToLessonsDescription": "Dieses Live Training ist mit {{count}} Lektion verknüpft. Lösche zuerst die zugehörige Lektion, bevor du das Live Training löschst.",
+      "assignedToLessonsDescription_plural": "Dieses Live Training ist mit {{count}} Lektionen verknüpft. Lösche zuerst die zugehörigen Lektionen, bevor du das Live Training löschst.",
       "toast": {
         "success": "Live Training wurde gelöscht."
       }
@@ -1246,6 +1248,7 @@
         "live_training_update": "Beliebige Live Trainings bearbeiten.",
         "live_training_update_own": "Vom Benutzer erstellte Live Trainings bearbeiten.",
         "live_training_delete": "Live Trainings löschen.",
+        "live_training_delete_own": "Vom Benutzer erstellte Live Trainings löschen.",
         "live_training_join": "Live Training Sessions beitreten.",
         "live_training_start": "Live Training Sessions starten.",
         "live_training_end": "Live Training Sessions beenden.",
@@ -1693,6 +1696,7 @@
         "removeAiMentorLesson": "Sind Sie sicher, dass Sie diese AI Mentor-Lektion aus dem Kapitel löschen möchten?",
         "removeEmbedLesson": "Sind Sie sicher, dass Sie diese Einbettungslektion aus dem Kapitel löschen möchten?",
         "removeScormLesson": "Sind Sie sicher, dass Sie diese SCORM-Lektion aus dem Kapitel löschen möchten?",
+        "removeLiveTrainingLesson": "Sind Sie sicher, dass Sie diese Live Training-Lektion aus dem Kapitel löschen möchten?",
         "removeChapter": "Sind Sie sicher, dass Sie dieses Kapitel löschen möchten?",
         "removeQuestion": "Sind Sie sicher, dass Sie die Frage löschen möchten?",
         "removeContent": "Sind Sie sicher, dass Sie Inhalte löschen möchten?"
@@ -1787,6 +1791,7 @@
           "aiMentorLessonCreatedSuccessfully": "AI-Mentor-Lektion erfolgreich erstellt",
           "liveTrainingLessonCreated": "Live-Training-Lektion erfolgreich erstellt",
           "liveTrainingLessonUpdated": "Live-Training-Lektion erfolgreich aktualisiert",
+          "liveTrainingLessonAttached": "Live Training-Zuweisung erfolgreich verknüpft",
           "aiMentorLessonUpdatedSuccessfully": "AI-Mentor-Lektion erfolgreich aktualisiert",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor-Lektionsdateien wurden erfolgreich hochgeladen",
           "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
@@ -1812,6 +1817,9 @@
           "linkedTitle": "Verknüpftes Live Training",
           "linkedDescription": "Zeitplan, Trainer, Dateien und Sitzungseinstellungen werden auf der Live-Training-Seite verwaltet.",
           "openLiveTraining": "Live Training öffnen",
+          "openBaseLiveTraining": "Basis-Live-Training öffnen",
+          "languageMissingTitle": "Für diese Sprache ist kein Live Training zugewiesen",
+          "languageMissingDescription": "Diese Lektion verwendet das Live Training der Basissprache des Kurses. Erstelle oder verknüpfe ein geplantes Live Training, um es für die ausgewählte Sprache zu überschreiben.",
           "validation": {
             "liveTrainingRequired": "Wähle ein geplantes Live Training zum Verknüpfen aus."
           }
@@ -3783,7 +3791,11 @@
       "invalidLessonLinkMode": "Wähle, ob du ein neues Live Training erstellen oder ein bestehendes verknüpfen möchtest.",
       "onlyScheduledCanBeLinked": "Nur geplante Live Trainings können mit Lektionen verknüpft werden.",
       "trainingAlreadyLinkedToLesson": "Dieses Live Training ist in diesem Kurs bereits mit einer Lektion verknüpft.",
-      "lessonOnlyTitleEditable": "Hier kann nur der Lektionstitel bearbeitet werden. Öffne Live Training, um Sitzungsdetails zu ändern."
+      "lessonOnlyTitleEditable": "Hier kann nur der Lektionstitel bearbeitet werden. Öffne Live Training, um Sitzungsdetails zu ändern.",
+      "unsupportedLessonLanguage": "Dieser Kurs unterstützt die ausgewählte Sprache nicht.",
+      "baseLanguageAssignmentRequired": "Live Training-Lektionen müssen zuerst in der Basissprache des Kurses erstellt werden.",
+      "invalidLessonType": "Live Training-Zuweisungen können nur zu Live Training-Lektionen hinzugefügt werden.",
+      "deleteAssignedToLesson": "Dieses Live Training ist mit einer Lektion verknüpft. Lösche zuerst die Lektion, bevor du das Live Training löschst."
     }
   }
 }

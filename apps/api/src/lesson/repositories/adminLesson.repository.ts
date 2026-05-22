@@ -107,8 +107,8 @@ export class AdminLessonRepository {
     return lesson;
   }
 
-  async updateLesson(id: UUIDType, data: UpdateLessonBody) {
-    const [updatedLesson] = await this.db
+  async updateLesson(id: UUIDType, data: UpdateLessonBody, dbInstance: DatabasePg = this.db) {
+    const [updatedLesson] = await dbInstance
       .update(lessons)
       .set({
         ...data,
@@ -400,23 +400,40 @@ export class AdminLessonRepository {
     `);
   }
 
-  async getLiveLessonByLessonId(lessonId: UUIDType, dbInstance: DatabasePg = this.db) {
-    const [liveLesson] = await dbInstance
-      .select({ id: liveLessons.id })
-      .from(liveLessons)
-      .where(eq(liveLessons.lessonId, lessonId));
-
-    return liveLesson ?? null;
-  }
-
-  async getLiveLessonByLiveTrainingLinkId(
-    liveTrainingLinkId: UUIDType,
+  async getLiveLessonByLessonIdAndLanguage(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
   ) {
     const [liveLesson] = await dbInstance
       .select({ id: liveLessons.id })
       .from(liveLessons)
-      .where(eq(liveLessons.liveTrainingLinkId, liveTrainingLinkId));
+      .where(and(eq(liveLessons.lessonId, lessonId), eq(liveLessons.language, language)));
+
+    return liveLesson ?? null;
+  }
+
+  async getResolvedLiveLessonByLessonId(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [liveLesson] = await dbInstance
+      .select({
+        id: liveLessons.id,
+        liveTrainingId: liveLessons.liveTrainingId,
+        language: liveLessons.language,
+      })
+      .from(liveLessons)
+      .where(
+        and(
+          eq(liveLessons.lessonId, lessonId),
+          inArray(liveLessons.language, [language, baseLanguage]),
+        ),
+      )
+      .orderBy(sql`CASE WHEN ${liveLessons.language} = ${language} THEN 0 ELSE 1 END`)
+      .limit(1);
 
     return liveLesson ?? null;
   }
@@ -426,6 +443,7 @@ export class AdminLessonRepository {
       lessonId: UUIDType;
       liveTrainingId: UUIDType;
       liveTrainingLinkId: UUIDType;
+      language: SupportedLanguages;
     },
     dbInstance: DatabasePg = this.db,
   ) {

@@ -113,6 +113,7 @@ export const adminLessonSchema = Type.Object({
   aiMentor: Type.Union([aiMentorLessonSchema, Type.Null()]),
   scormPackageLanguages: Type.Optional(Type.Array(supportedLanguagesSchema)),
   liveTrainingId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+  liveTrainingLanguages: Type.Optional(Type.Array(supportedLanguagesSchema)),
 });
 
 export const lessonSchema = Type.Object({
@@ -169,8 +170,16 @@ export const createLiveTrainingLessonSchema = Type.Object({
   title: Type.String({ minLength: 1 }),
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   chapterId: UUIDSchema,
+  language: supportedLanguagesSchema,
   displayOrder: Type.Optional(Type.Number()),
   contextId: Type.Optional(Type.String()),
+  liveTraining: Type.Optional(createLiveTrainingLessonLiveTrainingSchema),
+  liveTrainingId: Type.Optional(UUIDSchema),
+});
+
+export const attachLiveTrainingLessonSchema = Type.Object({
+  title: Type.String({ minLength: 1 }),
+  language: supportedLanguagesSchema,
   liveTraining: Type.Optional(createLiveTrainingLessonLiveTrainingSchema),
   liveTrainingId: Type.Optional(UUIDSchema),
 });
@@ -370,6 +379,7 @@ export type AdminLessonWithContentSchema = Static<typeof adminLessonSchema>;
 export type LessonForChapterSchema = Static<typeof lessonForChapterSchema>;
 export type CreateLessonBody = Static<typeof createLessonSchema>;
 export type CreateLiveTrainingLessonBody = Static<typeof createLiveTrainingLessonSchema>;
+export type AttachLiveTrainingLessonBody = Static<typeof attachLiveTrainingLessonSchema>;
 export type CreateLiveTrainingLessonResponseData = Static<
   typeof createLiveTrainingLessonResponseDataSchema
 >;

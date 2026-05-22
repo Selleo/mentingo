@@ -532,6 +532,8 @@
     "deleteDialog": {
       "title": "Ištrinti Live Training?",
       "description": "Live Training bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
+      "assignedToLessonsDescription": "Šis Live Training susietas su {{count}} pamoka. Pirmiausia ištrinkite susijusią pamoką, tada Live Training.",
+      "assignedToLessonsDescription_plural": "Šis Live Training susietas su {{count}} pamokomis. Pirmiausia ištrinkite susijusias pamokas, tada Live Training.",
       "toast": {
         "success": "Live Training ištrintas."
       }
@@ -1240,6 +1242,7 @@
         "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
         "live_training_update_own": "Gali redaguoti šio naudotojo sukurtus gyvus mokymus.",
         "live_training_delete": "Gali trinti gyvus mokymus.",
+        "live_training_delete_own": "Gali trinti šio naudotojo sukurtus gyvus mokymus.",
         "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
         "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
         "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
@@ -1687,6 +1690,7 @@
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
         "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
+        "removeLiveTrainingLesson": "Ar tikrai norite ištrinti šią Live Training pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -1781,6 +1785,7 @@
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
           "liveTrainingLessonCreated": "Live Training pamoka sėkmingai sukurta",
           "liveTrainingLessonUpdated": "Live Training pamoka sėkmingai atnaujinta",
+          "liveTrainingLessonAttached": "Live Training priskyrimas sėkmingai pridėtas",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor pamokų failai sėkmingai įkelti",
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
@@ -1806,6 +1811,9 @@
           "linkedTitle": "Susietas Live Training",
           "linkedDescription": "Tvarkaraštis, treneriai, failai ir sesijos nustatymai valdomi Live Training puslapyje.",
           "openLiveTraining": "Atidaryti Live Training",
+          "openBaseLiveTraining": "Atidaryti bazinį Live Training",
+          "languageMissingTitle": "Šiai kalbai Live Training nepriskirtas",
+          "languageMissingDescription": "Ši pamoka naudoja kurso bazinės kalbos Live Training. Sukurkite arba susiekite suplanuotą Live Training, jei norite jį pakeisti pasirinktai kalbai.",
           "validation": {
             "liveTrainingRequired": "Pasirinkite suplanuotą Live Training susiejimui."
           }
@@ -3777,7 +3785,11 @@
       "invalidLessonLinkMode": "Pasirinkite, ar kurti naują Live Training, ar susieti esamą.",
       "onlyScheduledCanBeLinked": "Su pamokomis galima susieti tik suplanuotus Live Training.",
       "trainingAlreadyLinkedToLesson": "Šis Live Training šiame kurse jau susietas su pamoka.",
-      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Live Training, kad pakeistumėte sesijos duomenis."
+      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Live Training, kad pakeistumėte sesijos duomenis.",
+      "unsupportedLessonLanguage": "Šis kursas nepalaiko pasirinktos kalbos.",
+      "baseLanguageAssignmentRequired": "Live Training pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
+      "invalidLessonType": "Live Training priskyrimus galima pridėti tik prie Live Training pamokų.",
+      "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training."
     }
   }
 }

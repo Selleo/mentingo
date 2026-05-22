@@ -13,6 +13,7 @@ import {
 type LiveTrainingDeleteDialogProps = {
   open: boolean;
   isDeleting: boolean;
+  linkedLessonCount: number;
   onOpenChange: (open: boolean) => void;
   onConfirm: () => Promise<void> | void;
 };
@@ -20,10 +21,12 @@ type LiveTrainingDeleteDialogProps = {
 export function LiveTrainingDeleteDialog({
   open,
   isDeleting,
+  linkedLessonCount,
   onOpenChange,
   onConfirm,
 }: LiveTrainingDeleteDialogProps) {
   const { t } = useTranslation();
+  const hasLinkedLessons = linkedLessonCount > 0;
 
   const handleConfirm = async () => {
     await onConfirm();
@@ -37,7 +40,11 @@ export function LiveTrainingDeleteDialog({
             {t("liveTrainingView.deleteDialog.title")}
           </DialogTitle>
           <DialogDescription className="leading-6">
-            {t("liveTrainingView.deleteDialog.description")}
+            {hasLinkedLessons
+              ? t("liveTrainingView.deleteDialog.assignedToLessonsDescription", {
+                  count: linkedLessonCount,
+                })
+              : t("liveTrainingView.deleteDialog.description")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-2">
@@ -53,7 +60,7 @@ export function LiveTrainingDeleteDialog({
             type="button"
             variant="destructive"
             onClick={handleConfirm}
-            disabled={isDeleting}
+            disabled={isDeleting || hasLinkedLessons}
           >
             {t("common.button.delete")}
           </Button>

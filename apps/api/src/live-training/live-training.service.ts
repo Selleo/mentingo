@@ -457,11 +457,19 @@ export class LiveTrainingService {
     return this.getLiveTrainingDetailsOrThrow(id, language, currentUser);
   }
 
-  async deleteLiveTraining(id: UUIDType, _currentUser: CurrentUserType): Promise<void> {
+  async deleteLiveTraining(id: UUIDType, currentUser: CurrentUserType): Promise<void> {
     const row = await this.liveTrainingRepository.getLiveTrainingBaseRow(id);
 
     if (!row) {
       throw new NotFoundException("liveTraining.errors.notFound");
+    }
+
+    this.assertCanDeleteLiveTraining(row.authorId, currentUser);
+
+    const linkedLessonCount = await this.liveTrainingRepository.getLinkedLessonCount(row.id);
+
+    if (linkedLessonCount > 0) {
+      throw new BadRequestException("liveTraining.errors.deleteAssignedToLesson");
     }
 
     await this.liveTrainingRepository.softDeleteLiveTraining(
@@ -469,6 +477,17 @@ export class LiveTrainingService {
       row.calendarEventId,
       row.sequence + 1,
     );
+  }
+
+  private assertCanDeleteLiveTraining(authorId: UUIDType, currentUser: CurrentUserType) {
+    const canDeleteAny = hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_DELETE);
+    const canDeleteOwn =
+      hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_DELETE_OWN) &&
+      authorId === currentUser.userId;
+
+    if (!canDeleteAny && !canDeleteOwn) {
+      throw new ForbiddenException({ message: "auth.error.missingPermission" });
+    }
   }
 
   async uploadLiveTrainingResource(
@@ -561,7 +580,7 @@ export class LiveTrainingService {
       throw new NotFoundException("liveTraining.errors.notFound");
     }
 
-    const [hosts, linkedCourses, materials] = await Promise.all([
+    const [hosts, linkedCourses, materials, linkedLessonCount] = await Promise.all([
       this.liveTrainingRepository.getLiveTrainingHostRows(id),
       this.liveTrainingRepository.getLiveTrainingLinkedCourseRows(id, language),
       this.liveTrainingRepository.getLiveTrainingMaterialRows(
@@ -572,6 +591,7 @@ export class LiveTrainingService {
         ],
         language,
       ),
+      this.liveTrainingRepository.getLinkedLessonCount(id),
     ]);
 
     if (!(await this.canSeeLiveTraining(row, hosts, linkedCourses, currentUser))) {
@@ -611,6 +631,7 @@ export class LiveTrainingService {
       },
       hosts: hostsWithProfilePictures,
       linkedCourses,
+      linkedLessonCount,
       materials: visibleMaterials,
     };
   }
@@ -751,6 +772,7 @@ export class LiveTrainingService {
     return hasAnyPermission(currentUser.permissions, [
       PERMISSIONS.LIVE_TRAINING_UPDATE,
       PERMISSIONS.LIVE_TRAINING_DELETE,
+      PERMISSIONS.LIVE_TRAINING_DELETE_OWN,
       PERMISSIONS.LIVE_TRAINING_STATISTICS,
     ]);
   }

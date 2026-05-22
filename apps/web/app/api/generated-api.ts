@@ -139,6 +139,7 @@ export interface CurrentUserResponse {
       | "live_training.update"
       | "live_training.update_own"
       | "live_training.delete"
+      | "live_training.delete_own"
       | "live_training.join"
       | "live_training.start"
       | "live_training.end"
@@ -2494,6 +2495,8 @@ export interface BetaCreateLiveTrainingLessonBody {
   description?: string | null;
   /** @format uuid */
   chapterId: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
   displayOrder?: number;
   contextId?: string;
   liveTraining?: {
@@ -2532,6 +2535,56 @@ export interface BetaCreateLiveTrainingLessonBody {
 }
 
 export interface BetaCreateLiveTrainingLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    liveTrainingId: string;
+    message: string;
+  };
+}
+
+export interface AttachLiveTrainingLessonBody {
+  /** @minLength 1 */
+  title: string;
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+  liveTraining?: {
+    /**
+     * @minLength 1
+     * @maxLength 120
+     */
+    title: string;
+    description?: string | null;
+    /** @minLength 1 */
+    startsAt: string;
+    /** @minLength 1 */
+    endsAt: string;
+    allDay?: boolean;
+    /** @minLength 1 */
+    timezone: string;
+    location?: string | null;
+    deliveryType: "online" | "offline";
+    /**
+     * @min 1
+     * @max 100
+     */
+    maxParticipants?: number;
+    settings?: {
+      viewerPermissions?: {
+        microphoneEnabled?: boolean;
+        cameraEnabled?: boolean;
+      };
+    };
+    hostUserIds?: string[];
+    beforeResourceIds?: string[];
+    afterResourceIds?: string[];
+  };
+  /** @format uuid */
+  liveTrainingId?: string;
+}
+
+export interface AttachLiveTrainingLessonResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -3197,6 +3250,7 @@ export interface GetLiveTrainingResponse {
       id: string;
       title: string;
     }[];
+    linkedLessonCount: number;
     materials: {
       before: {
         /** @format uuid */
@@ -3301,6 +3355,7 @@ export interface CreateLiveTrainingResponse {
       id: string;
       title: string;
     }[];
+    linkedLessonCount: number;
     materials: {
       before: {
         /** @format uuid */
@@ -3424,6 +3479,7 @@ export interface UpdateLiveTrainingResponse {
       id: string;
       title: string;
     }[];
+    linkedLessonCount: number;
     materials: {
       before: {
         /** @format uuid */
@@ -8547,6 +8603,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<BetaCreateLiveTrainingLessonResponse, any>({
         path: `/api/lesson/beta-create-lesson/live`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonControllerAttachLiveTrainingLesson
+     * @request PATCH:/api/lesson/{lessonId}/live-training
+     */
+    lessonControllerAttachLiveTrainingLesson: (
+      lessonId: string,
+      data: AttachLiveTrainingLessonBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<AttachLiveTrainingLessonResponse, any>({
+        path: `/api/lesson/${lessonId}/live-training`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

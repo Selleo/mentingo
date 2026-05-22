@@ -60,6 +60,7 @@ export interface Lesson {
   aiMentor?: AiMentor;
   scormPackageLanguages?: SupportedLanguages[];
   liveTrainingId?: string | null;
+  liveTrainingLanguages?: SupportedLanguages[];
 }
 
 export interface Chapter {

@@ -46,6 +46,8 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
 import {
   AnswerQuestionBody,
+  AttachLiveTrainingLessonBody,
+  attachLiveTrainingLessonSchema,
   answerQuestionsForLessonBody,
   CreateAiMentorLessonBody,
   createAiMentorLessonSchema,
@@ -188,6 +190,42 @@ export class LessonController {
       id: lessonId,
       liveTrainingId,
       message: "adminCourseView.curriculum.lesson.toast.liveTrainingLessonCreated",
+    });
+  }
+
+  @Patch(":lessonId/live-training")
+  @UseGuards(FeaturesGuard)
+  @RequireFeature(FEATURES.LIVE_TRAINING)
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      {
+        type: "param",
+        name: "lessonId",
+        schema: UUIDSchema,
+      },
+      {
+        type: "body",
+        schema: attachLiveTrainingLessonSchema,
+      },
+    ],
+    response: baseResponse(createLiveTrainingLessonResponseDataSchema),
+  })
+  async attachLiveTrainingLesson(
+    @Param("lessonId") lessonId: UUIDType,
+    @Body() attachLiveTrainingLessonBody: AttachLiveTrainingLessonBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CreateLiveTrainingLessonResponseData>> {
+    const { liveTrainingId } = await this.adminLessonsService.attachLiveTrainingLesson(
+      lessonId,
+      attachLiveTrainingLessonBody,
+      currentUser,
+    );
+
+    return new BaseResponse({
+      id: lessonId,
+      liveTrainingId,
+      message: "adminCourseView.curriculum.lesson.toast.liveTrainingLessonAttached",
     });
   }
 

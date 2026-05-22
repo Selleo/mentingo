@@ -399,6 +399,7 @@ export class CalendarService {
     return hasAnyPermission(currentUser.permissions, [
       PERMISSIONS.LIVE_TRAINING_UPDATE,
       PERMISSIONS.LIVE_TRAINING_DELETE,
+      PERMISSIONS.LIVE_TRAINING_DELETE_OWN,
       PERMISSIONS.LIVE_TRAINING_STATISTICS,
     ]);
   }

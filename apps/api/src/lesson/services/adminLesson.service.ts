@@ -49,6 +49,7 @@ import type {
   CreateAiMentorLessonBody,
   CreateEmbedLessonBody,
   CreateLessonBody,
+  AttachLiveTrainingLessonBody,
   CreateLiveTrainingLessonBody,
   CreateLiveTrainingLessonResult,
   CreateQuizLessonBody,
@@ -62,6 +63,11 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+
+type LiveTrainingLessonAssignmentInput = Pick<
+  CreateLiveTrainingLessonBody,
+  "liveTraining" | "liveTrainingId"
+>;
 
 @Injectable()
 export class AdminLessonService {
@@ -169,10 +175,17 @@ export class AdminLessonService {
         throw new NotFoundException("Course not found");
       }
 
-      const { language } = await this.localizationService.getBaseLanguage(
-        ENTITY_TYPE.CHAPTER,
-        data.chapterId,
-      );
+      const language = data.language;
+      const courseLocales = course.availableLocales as SupportedLanguages[];
+      const courseBaseLanguage = course.baseLanguage as SupportedLanguages;
+
+      if (!courseLocales.includes(language)) {
+        throw new BadRequestException("liveTraining.errors.unsupportedLessonLanguage");
+      }
+
+      if (language !== courseBaseLanguage) {
+        throw new BadRequestException("liveTraining.errors.baseLanguageAssignmentRequired");
+      }
 
       if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
         throw new BadRequestException({
@@ -197,10 +210,12 @@ export class AdminLessonService {
         language,
         trx,
       );
-      const existingLiveLesson = await this.adminLessonRepository.getLiveLessonByLessonId(
-        lesson.id,
-        trx,
-      );
+      const existingLiveLesson =
+        await this.adminLessonRepository.getLiveLessonByLessonIdAndLanguage(
+          lesson.id,
+          language,
+          trx,
+        );
 
       if (existingLiveLesson) {
         throw new BadRequestException("liveTraining.errors.lessonAlreadyLinked");
@@ -214,21 +229,12 @@ export class AdminLessonService {
         trx,
       );
 
-      const existingLinkedLiveLesson =
-        await this.adminLessonRepository.getLiveLessonByLiveTrainingLinkId(
-          liveTraining.liveTrainingLinkId,
-          trx,
-        );
-
-      if (existingLinkedLiveLesson) {
-        throw new BadRequestException("liveTraining.errors.trainingAlreadyLinkedToLesson");
-      }
-
       await this.adminLessonRepository.createLiveLesson(
         {
           lessonId: lesson.id,
           liveTrainingId: liveTraining.liveTrainingId,
           liveTrainingLinkId: liveTraining.liveTrainingLinkId,
+          language,
         },
         trx,
       );
@@ -243,7 +249,122 @@ export class AdminLessonService {
     return { lessonId, liveTrainingId };
   }
 
-  private assertLiveTrainingLessonMode(data: CreateLiveTrainingLessonBody) {
+  async attachLiveTrainingLesson(
+    lessonId: UUIDType,
+    data: AttachLiveTrainingLessonBody,
+    currentUser: CurrentUserType,
+  ): Promise<CreateLiveTrainingLessonResult> {
+    await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    await this.validateAccess("lesson", currentUser, lessonId);
+
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
+      throw new ForbiddenException({ message: "auth.error.missingPermission" });
+    }
+
+    this.assertLiveTrainingLessonMode(data);
+
+    const [lesson] = await this.adminLessonRepository.getLesson(lessonId, data.language);
+
+    if (!lesson) {
+      throw new NotFoundException("Lesson not found");
+    }
+
+    if (lesson.type !== LESSON_TYPES.LIVE_TRAINING) {
+      throw new BadRequestException("liveTraining.errors.invalidLessonType");
+    }
+
+    const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
+
+    if (!course) {
+      throw new NotFoundException("Course not found");
+    }
+
+    const language = data.language;
+    const courseLocales = course.availableLocales as SupportedLanguages[];
+    const courseBaseLanguage = course.baseLanguage as SupportedLanguages;
+
+    if (!courseLocales.includes(language)) {
+      throw new BadRequestException("liveTraining.errors.unsupportedLessonLanguage");
+    }
+
+    const existingLanguageAssignment =
+      await this.adminLessonRepository.getLiveLessonByLessonIdAndLanguage(lessonId, language);
+
+    if (existingLanguageAssignment) {
+      throw new BadRequestException("liveTraining.errors.lessonAlreadyLinked");
+    }
+
+    const isBaseLanguageAssignment = language === courseBaseLanguage;
+    const baseLanguageAssignment = isBaseLanguageAssignment
+      ? null
+      : await this.adminLessonRepository.getLiveLessonByLessonIdAndLanguage(
+          lessonId,
+          courseBaseLanguage,
+        );
+
+    if (!isBaseLanguageAssignment && !baseLanguageAssignment) {
+      throw new BadRequestException("liveTraining.errors.baseLanguageAssignmentRequired");
+    }
+
+    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
+      throw new BadRequestException({
+        message: `adminCourseView.toast.maxTitleLengthExceeded`,
+        count: MAX_LESSON_TITLE_LENGTH,
+      });
+    }
+
+    const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, language);
+
+    const liveTraining = await this.db.transaction(async (trx) => {
+      await this.adminLessonRepository.updateLesson(
+        lessonId,
+        {
+          title: data.title,
+          language,
+        },
+        trx,
+      );
+
+      const assignedLiveTraining = await this.createOrLinkLiveTrainingForLesson(
+        data,
+        course.id,
+        language,
+        currentUser,
+        trx,
+      );
+
+      await this.adminLessonRepository.createLiveLesson(
+        {
+          lessonId,
+          liveTrainingId: assignedLiveTraining.liveTrainingId,
+          liveTrainingLinkId: assignedLiveTraining.liveTrainingLinkId,
+          language,
+        },
+        trx,
+      );
+
+      return assignedLiveTraining;
+    });
+
+    const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, language);
+
+    await this.outboxPublisher.publish(
+      new UpdateLessonEvent({
+        lessonId,
+        actor: currentUser,
+        previousLessonData: previousLessonSnapshot,
+        updatedLessonData: updatedLessonSnapshot,
+      }),
+    );
+
+    return { lessonId, liveTrainingId: liveTraining.liveTrainingId };
+  }
+
+  private assertLiveTrainingLessonMode(data: LiveTrainingLessonAssignmentInput) {
     const hasNewLiveTraining = Boolean(data.liveTraining);
     const hasExistingLiveTraining = Boolean(data.liveTrainingId);
 
@@ -253,7 +374,7 @@ export class AdminLessonService {
   }
 
   private async createOrLinkLiveTrainingForLesson(
-    data: CreateLiveTrainingLessonBody,
+    data: LiveTrainingLessonAssignmentInput,
     courseId: UUIDType,
     language: SupportedLanguages,
     currentUser: CurrentUserType,

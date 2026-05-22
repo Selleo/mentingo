@@ -542,6 +542,8 @@
     "deleteDialog": {
       "title": "Usunąć Live Training?",
       "description": "Live Training zostanie anulowany i usunięty z kalendarza. Tej akcji nie można cofnąć.",
+      "assignedToLessonsDescription": "Ten Live Training jest połączony z {{count}} lekcją. Najpierw usuń powiązaną lekcję, a dopiero potem Live Training.",
+      "assignedToLessonsDescription_plural": "Ten Live Training jest połączony z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem Live Training.",
       "toast": {
         "success": "Live Training został usunięty."
       }
@@ -1517,6 +1519,7 @@
         "live_training_update": "Może edytować dowolne szkolenie live.",
         "live_training_update_own": "Może edytować utworzone przez siebie szkolenia live.",
         "live_training_delete": "Może usuwać szkolenia live.",
+        "live_training_delete_own": "Może usuwać utworzone przez siebie szkolenia live.",
         "live_training_join": "Może dołączać do sesji szkolenia live.",
         "live_training_start": "Może rozpoczynać sesje szkolenia live.",
         "live_training_end": "Może kończyć sesje szkolenia live.",
@@ -1969,6 +1972,7 @@
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
         "removeScormLesson": "Czy na pewno chcesz usunąć tę lekcję SCORM z rozdziału?",
+        "removeLiveTrainingLesson": "Czy na pewno chcesz usunąć tę lekcję Live Training z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -2065,6 +2069,7 @@
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
           "liveTrainingLessonCreated": "Lekcja Live Training została pomyślnie utworzona",
           "liveTrainingLessonUpdated": "Lekcja Live Training została zaktualizowana pomyślnie",
+          "liveTrainingLessonAttached": "Przypisanie Live Training zostało dodane pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
           "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
@@ -2090,6 +2095,9 @@
           "linkedTitle": "Połączony Live Training",
           "linkedDescription": "Harmonogram, trenerzy, pliki i ustawienia sesji są zarządzane na stronie Live Training.",
           "openLiveTraining": "Otwórz Live Training",
+          "openBaseLiveTraining": "Otwórz bazowy Live Training",
+          "languageMissingTitle": "Brak przypisanego Live Training dla tego języka",
+          "languageMissingDescription": "Ta lekcja korzysta z Live Training w języku bazowym kursu. Utwórz albo połącz zaplanowany Live Training, aby nadpisać go dla wybranego języka.",
           "validation": {
             "liveTrainingRequired": "Wybierz zaplanowany Live Training do połączenia."
           }
@@ -3869,7 +3877,11 @@
       "invalidLessonLinkMode": "Wybierz, czy chcesz utworzyć nowy Live Training, czy połączyć istniejący.",
       "onlyScheduledCanBeLinked": "Do lekcji można połączyć tylko zaplanowane Live Training.",
       "trainingAlreadyLinkedToLesson": "Ten Live Training jest już połączony z lekcją w tym kursie.",
-      "lessonOnlyTitleEditable": "Tutaj można edytować tylko tytuł lekcji. Otwórz Live Training, aby zmienić szczegóły sesji."
+      "lessonOnlyTitleEditable": "Tutaj można edytować tylko tytuł lekcji. Otwórz Live Training, aby zmienić szczegóły sesji.",
+      "unsupportedLessonLanguage": "Ten kurs nie obsługuje wybranego języka.",
+      "baseLanguageAssignmentRequired": "Lekcję Live Training trzeba najpierw utworzyć w języku bazowym kursu.",
+      "invalidLessonType": "Przypisania Live Training można dodawać tylko do lekcji Live Training.",
+      "deleteAssignedToLesson": "Ten Live Training jest połączony z lekcją. Najpierw usuń lekcję, a dopiero potem Live Training."
     }
   }
 }

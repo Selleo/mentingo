@@ -2,8 +2,10 @@ import { Link } from "@remix-run/react";
 import { LIVE_TRAINING_STATUSES } from "@repo/shared";
 import { format } from "date-fns";
 import { CalendarClock, ExternalLink, Loader2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -12,10 +14,11 @@ import { Form } from "~/components/ui/form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { LiveTrainingFormFields } from "~/modules/LiveTraining/components/LiveTrainingFormFields";
 
 import { LIVE_TRAINING_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
-import { ContentTypes } from "../../../EditCourse.types";
+import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { LIVE_TRAINING_LESSON_FORM_MODES } from "./liveTrainingLessonForm.types";
@@ -129,7 +132,10 @@ export function LiveTrainingLessonForm({
   setSelectedLesson,
 }: LiveTrainingLessonFormProps) {
   const { t } = useTranslation();
+  const { mutateAsync: deleteLesson } = useDeleteLesson();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const {
+    currentLanguageHasLiveTraining,
     form,
     formMode,
     isPending,
@@ -151,6 +157,20 @@ export function LiveTrainingLessonForm({
   });
   const isEditMode = Boolean(lessonToEdit);
   const linkedLiveTrainingId = lessonToEdit?.liveTrainingId ?? null;
+  const shouldShowAssignmentTabs = !isEditMode || !currentLanguageHasLiveTraining;
+
+  const handleDelete = async () => {
+    if (!lessonToEdit || !chapterToEdit) return;
+
+    await deleteLesson({
+      chapterId: chapterToEdit.id,
+      lessonId: lessonToEdit.id,
+    });
+
+    setIsDeleteModalOpen(false);
+    setContentTypeToDisplay(ContentTypes.EMPTY);
+    setSelectedLesson(null);
+  };
 
   return (
     <Card data-testid={LIVE_TRAINING_LESSON_FORM_HANDLES.ROOT}>
@@ -186,7 +206,7 @@ export function LiveTrainingLessonForm({
                 required
               />
 
-              {isEditMode ? (
+              {isEditMode && currentLanguageHasLiveTraining && (
                 <section className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -207,7 +227,34 @@ export function LiveTrainingLessonForm({
                     ) : null}
                   </div>
                 </section>
-              ) : (
+              )}
+
+              {isEditMode && !currentLanguageHasLiveTraining && (
+                <section className="rounded-md border border-neutral-200 bg-neutral-50 p-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <h3 className="text-sm font-medium text-neutral-950">
+                        {t("adminCourseView.curriculum.lesson.liveTraining.languageMissingTitle")}
+                      </h3>
+                      <p className="mt-1 text-sm text-neutral-600">
+                        {t(
+                          "adminCourseView.curriculum.lesson.liveTraining.languageMissingDescription",
+                        )}
+                      </p>
+                    </div>
+                    {linkedLiveTrainingId ? (
+                      <Button asChild type="button" variant="outline" className="gap-2">
+                        <Link to={`/live-training/${linkedLiveTrainingId}`}>
+                          <ExternalLink className="size-4" />
+                          {t("adminCourseView.curriculum.lesson.liveTraining.openBaseLiveTraining")}
+                        </Link>
+                      </Button>
+                    ) : null}
+                  </div>
+                </section>
+              )}
+
+              {shouldShowAssignmentTabs && (
                 <Tabs
                   value={formMode}
                   onValueChange={(value) => updateFormMode(value as typeof formMode)}
@@ -244,9 +291,9 @@ export function LiveTrainingLessonForm({
                 </Tabs>
               )}
 
-              {liveTrainingFormError ? (
+              {liveTrainingFormError && (
                 <p className="text-sm font-medium text-error-600">{liveTrainingFormError}</p>
-              ) : null}
+              )}
 
               <div className="flex gap-x-3">
                 <Button
@@ -254,7 +301,7 @@ export function LiveTrainingLessonForm({
                   type="submit"
                   disabled={
                     isPending ||
-                    (!isEditMode &&
+                    (shouldShowAssignmentTabs &&
                       formMode === LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING &&
                       !selectedLiveTrainingId)
                   }
@@ -262,18 +309,42 @@ export function LiveTrainingLessonForm({
                   {t("common.button.save")}
                 </Button>
                 <Button
-                  data-testid={LIVE_TRAINING_LESSON_FORM_HANDLES.CANCEL_BUTTON}
+                  data-testid={
+                    isEditMode
+                      ? LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_BUTTON
+                      : LIVE_TRAINING_LESSON_FORM_HANDLES.CANCEL_BUTTON
+                  }
                   type="button"
                   variant="outline"
-                  onClick={() => setContentTypeToDisplay(ContentTypes.EMPTY)}
+                  onClick={
+                    isEditMode
+                      ? () => setIsDeleteModalOpen(true)
+                      : () => setContentTypeToDisplay(ContentTypes.EMPTY)
+                  }
+                  className={
+                    isEditMode
+                      ? "border border-red-500 bg-transparent text-red-500 hover:bg-red-100"
+                      : undefined
+                  }
                 >
-                  {t("common.button.cancel")}
+                  {isEditMode ? t("common.button.delete") : t("common.button.cancel")}
                 </Button>
               </div>
             </form>
           </Form>
         </TooltipProvider>
       </CardContent>
+      <DeleteConfirmationModal
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={handleDelete}
+        contentType={DeleteContentType.LIVE_TRAINING}
+        testIds={{
+          dialog: LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_DIALOG,
+          confirmButton: LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON,
+          cancelButton: LIVE_TRAINING_LESSON_FORM_HANDLES.DELETE_DIALOG_CANCEL_BUTTON,
+        }}
+      />
     </Card>
   );
 }

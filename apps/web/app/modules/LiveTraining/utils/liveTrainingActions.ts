@@ -16,6 +16,7 @@ const TERMINAL_LIVE_TRAINING_STATUSES = [
 const BROAD_LIVE_TRAINING_MANAGE_PERMISSIONS = [
   PERMISSIONS.LIVE_TRAINING_UPDATE,
   PERMISSIONS.LIVE_TRAINING_DELETE,
+  PERMISSIONS.LIVE_TRAINING_DELETE_OWN,
   PERMISSIONS.LIVE_TRAINING_STATISTICS,
 ] as const;
 
@@ -37,6 +38,8 @@ export const deriveLiveTrainingUiActions = ({
   );
   const canUpdateAny = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_UPDATE);
   const canUpdateOwn = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_UPDATE_OWN) && isAuthor;
+  const canDeleteAny = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE);
+  const canDeleteOwn = hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE_OWN) && isAuthor;
   const canEditDetails = canUpdateAny || canUpdateOwn;
   const canManageSession = hasHostRole || hasBroadManagePermission;
   const canViewAllMaterials = hasHostRole || hasBroadManagePermission;
@@ -49,7 +52,7 @@ export const deriveLiveTrainingUiActions = ({
 
   return {
     canShowEdit: canEditDetails,
-    canShowDelete: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_DELETE),
+    canShowDelete: canDeleteAny || canDeleteOwn,
     canShowStart:
       (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_START) || hasHostRole) &&
       canManageSession &&
