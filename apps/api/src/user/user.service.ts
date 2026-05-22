@@ -211,12 +211,20 @@ export class UserService {
   }
 
   public async getRoles(tenantId: UUIDType) {
+    const isLiveTrainingEnabled =
+      await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+    const conditions = [eq(permissionRoles.tenantId, tenantId)];
+
+    if (!isLiveTrainingEnabled) {
+      conditions.push(not(eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.TRAINER)));
+    }
+
     return this.db
       .select({
         ...getTableColumns(permissionRoles),
       })
       .from(permissionRoles)
-      .where(eq(permissionRoles.tenantId, tenantId))
+      .where(and(...conditions))
       .orderBy(
         sql<number>`
           CASE
@@ -1275,6 +1283,8 @@ export class UserService {
       throw new BadRequestException("adminUsersView.toast.userMustHaveAtLeastOneRole");
     }
 
+    await this.assertTrainerRoleAvailable(tenantId, uniqueRoleSlugs);
+
     const roles = await dbInstance
       .select({ id: permissionRoles.id, slug: permissionRoles.slug })
       .from(permissionRoles)
@@ -1295,6 +1305,17 @@ export class UserService {
         tenantId,
       })),
     );
+  }
+
+  private async assertTrainerRoleAvailable(tenantId: UUIDType, roleSlugs: string[]): Promise<void> {
+    if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.TRAINER)) return;
+
+    const isLiveTrainingEnabled =
+      await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+
+    if (isLiveTrainingEnabled) return;
+
+    throw new BadRequestException("adminUsersView.toast.trainerRoleRequiresLiveTraining");
   }
 
   private async ensureSystemRolesForTenant(

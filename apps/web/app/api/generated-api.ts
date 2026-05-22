@@ -329,6 +329,7 @@ export interface GetPublicGlobalSettingsResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -459,6 +460,7 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -503,6 +505,7 @@ export interface UpdateEnforceSSOResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -547,6 +550,7 @@ export interface UpdateModernCourseListEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -591,6 +595,7 @@ export interface UpdateCalendarEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -635,6 +640,7 @@ export interface UpdateLiveTrainingEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {
@@ -710,6 +716,7 @@ export interface UpdateColorSchemaResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
     companyInformation?: {

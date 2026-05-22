@@ -1166,7 +1166,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Der Administrator kann seine eigene Rolle nicht ändern",
       "noUserSelected": "Kein Benutzer ausgewählt",
-      "userMustHaveAtLeastOneRole": "Ein Benutzer muss mindestens eine Rolle haben."
+      "userMustHaveAtLeastOneRole": "Ein Benutzer muss mindestens eine Rolle haben.",
+      "trainerRoleRequiresLiveTraining": "Die Trainer-Rolle ist nur verfügbar, wenn Live Training aktiviert ist."
     },
     "import": {
       "toast": {
@@ -2629,7 +2630,9 @@
       "calendarDescription": "Benutzern erlauben, geplante Ereignisse im Kalender anzuzeigen",
       "liveTraining": "Live Training aktivieren",
       "liveTrainingDescription": "Trainern erlauben, Live-Schulungen zu erstellen und durchzuführen",
-      "liveTrainingTooltip": "Live Training hängt vom Kalender ab. Wenn Live Training aktiviert wird, wird der Kalender automatisch ebenfalls aktiviert.",
+      "liveTrainingTooltip": "Aktivieren Sie dies nur, wenn der Mandant trainergeführte Live-Sitzungen verwenden soll.",
+      "liveTrainingDisableBlockedTooltip_one": "Derzeit hat {{count}} Benutzer die Trainer-Rolle. Entziehen Sie sie, um diese Funktion zu deaktivieren.",
+      "liveTrainingDisableBlockedTooltip_other": "Derzeit haben {{count}} Benutzer die Trainer-Rolle. Entziehen Sie sie, um diese Funktion zu deaktivieren.",
       "finishedCourseNotification": "Benachrichtigungen über abgeschlossene Kurse",
       "finishedCourseNotificationDescription": "Erhalten Sie Benachrichtigungen, wenn ein Benutzer einen Kurs beendet",
       "studentsWithOverdueCourseNotification": "Studierende mit Benachrichtigungen über überfällige Kurse",

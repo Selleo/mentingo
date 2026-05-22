@@ -1167,7 +1167,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator cannot change their own role",
       "noUserSelected": "No user selected",
-      "userMustHaveAtLeastOneRole": "User must have at least one role."
+      "userMustHaveAtLeastOneRole": "User must have at least one role.",
+      "trainerRoleRequiresLiveTraining": "The Trainer role is available only when Live Training is enabled."
     },
     "import": {
       "toast": {
@@ -2690,7 +2691,9 @@
       "calendarDescription": "Allow users to view scheduled events in the calendar",
       "liveTraining": "Enable Live Training",
       "liveTrainingDescription": "Allow trainers to create and run live training sessions",
-      "liveTrainingTooltip": "Live Training depends on Calendar. Turning on Live Training automatically turns on Calendar too.",
+      "liveTrainingTooltip": "Enable this only when the tenant should use trainer-led live sessions.",
+      "liveTrainingDisableBlockedTooltip_one": "Currently you have {{count}} user with the Trainer role. Revoke it in order to disable this feature.",
+      "liveTrainingDisableBlockedTooltip_other": "Currently you have {{count}} users with the Trainer role. Revoke them in order to disable this feature.",
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",

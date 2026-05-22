@@ -127,36 +127,36 @@ Service-level checks remain mandatory:
 ## Feature Toggle Requirement
 
 Calendar is a toggleable tenant feature because all new product surfaces should be feature-gated.
-Live Training is also a separate toggleable tenant feature. Calendar routes require Calendar to be
-enabled. Live Training-specific enrichment/actions require Live Training to be enabled.
+Calendar is now always-on and is controlled by `PERMISSIONS.CALENDAR_READ`, not by a tenant feature
+toggle. Live Training remains a separate toggleable tenant feature. Live Training-specific
+enrichment/actions require Live Training to be enabled.
 
-- Calendar feature enabled for the current tenant on every Calendar route,
+- Calendar read permission on every Calendar route,
 - Live Training feature enabled before returning Live Training source details/actions.
 
 Implementation should be decided before coding LT-02, but the preferred NestJS shape is:
 
 ```text
-@RequireFeature(FEATURES.CALENDAR)
+@RequirePermission(PERMISSIONS.CALENDAR_READ)
 ```
 
-backed by a guard that checks the current tenant feature configuration. This keeps feature checks
-declarative at the controller level and avoids scattering toggle checks through every service
-method. Live Training-specific enrichment should be disabled or omitted when
+backed by the existing permissions guard. Live Training feature checks remain declarative through
+`@RequireFeature(FEATURES.LIVE_TRAINING)` on Live Training-owned routes. Live Training-specific
+Calendar enrichment should be disabled or omitted when
 `FEATURES.LIVE_TRAINING` is off.
 
 Rules:
 
-- Add or reuse shared feature constants for `calendar` and `live_training`.
-- Apply the Calendar feature gate to all Calendar routes.
+- Do not apply a Calendar feature gate to Calendar routes.
+- Keep or reuse shared feature constants for `live_training`.
 - Apply the Live Training feature gate to Live Training-backed event queries/responses.
 - Endpoints must be guarded; feature checks should not exist only as ad hoc service `if`
   statements.
 - Service methods may still assert the feature where they are called outside HTTP controllers.
-- Disabled feature behavior should be consistent across endpoints. Prefer `404` for specific event
-  details and an empty result for list/indicator endpoints, unless the existing feature-flag pattern
-  in the repo uses `403`.
-- Add API E2E coverage for disabled Calendar behavior and disabled Live Training calendar-data
-  behavior.
+- Disabled Live Training behavior should be consistent across endpoints. Prefer `404` for specific
+  event details and an empty result for list/indicator endpoints, unless the existing feature-flag
+  pattern in the repo uses `403`.
+- Add API E2E coverage for disabled Live Training calendar-data behavior.
 
 ## Endpoint: List Calendar Events
 

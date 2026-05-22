@@ -47,15 +47,12 @@ describe("findMatchingRoute", () => {
 describe("getNavigationConfig", () => {
   const translate = ((key: string) => key) as never;
 
-  it("should show calendar navigation item only when calendar is enabled", () => {
-    const disabledConfig = getNavigationConfig(translate, false, false, false, false, false);
-    const enabledConfig = getNavigationConfig(translate, false, false, false, true, false);
+  it("should always include the calendar navigation item", () => {
+    const config = getNavigationConfig(translate, false, false, false, false);
 
-    const disabledCourseItems = disabledConfig[0].items;
-    const enabledCourseItems = enabledConfig[0].items;
+    const courseItems = config[0].items;
 
-    expect(disabledCourseItems).not.toContainEqual(expect.objectContaining({ path: "calendar" }));
-    expect(enabledCourseItems).toContainEqual(
+    expect(courseItems).toContainEqual(
       expect.objectContaining({
         path: "calendar",
         iconName: "Calendar",

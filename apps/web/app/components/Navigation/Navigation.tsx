@@ -71,7 +71,6 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         globalSettings?.QAEnabled,
         globalSettings?.newsEnabled,
         globalSettings?.articlesEnabled,
-        globalSettings?.calendarEnabled,
         isStripeConfigured?.enabled,
       ),
     );

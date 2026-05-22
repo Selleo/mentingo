@@ -44,7 +44,6 @@ export const getNavigationConfig = (
   isQAEnabled = false,
   isNewsEnabled = false,
   isArticlesEnabled = false,
-  isCalendarEnabled = false,
   isStripeConfigured = false,
 ): NavigationGroups[] => {
   const isAnyContentFeatureEnabled = isQAEnabled || isNewsEnabled || isArticlesEnabled;
@@ -70,16 +69,12 @@ export const getNavigationConfig = (
           iconName: "Route",
           testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
         },
-        ...(isCalendarEnabled
-          ? ([
-              {
-                label: t("navigationSideBar.calendar"),
-                path: "calendar",
-                iconName: "Calendar",
-                testId: NAVIGATION_HANDLES.CALENDAR_LINK,
-              },
-            ] satisfies NavigationItem[])
-          : []),
+        {
+          label: t("navigationSideBar.calendar"),
+          path: "calendar",
+          iconName: "Calendar",
+          testId: NAVIGATION_HANDLES.CALENDAR_LINK,
+        },
         {
           label: t("navigationSideBar.analytics"),
           path: "admin/analytics",

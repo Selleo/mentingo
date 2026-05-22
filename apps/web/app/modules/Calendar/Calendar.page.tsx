@@ -9,7 +9,7 @@ import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
-import { globalSettingsQueryOptions, useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -42,22 +42,16 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 const getBrowserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
-  const [currentUserResponse, globalSettingsResponse] = await Promise.all([
-    queryClient.ensureQueryData(currentUserQueryOptions),
-    queryClient.ensureQueryData(globalSettingsQueryOptions),
-  ]);
+  const currentUserResponse = await queryClient.ensureQueryData(currentUserQueryOptions);
 
   const currentUser = currentUserResponse?.data;
-  const globalSettings = globalSettingsResponse?.data;
 
   if (!currentUser) {
     saveEntryToNavigationHistory(request);
     throw redirect("/auth/login");
   }
 
-  const canReadCalendar =
-    Boolean(globalSettings?.calendarEnabled) &&
-    hasPermission(currentUser.permissions, PERMISSIONS.CALENDAR_READ);
+  const canReadCalendar = hasPermission(currentUser.permissions, PERMISSIONS.CALENDAR_READ);
 
   if (!canReadCalendar) {
     throw redirect("/");

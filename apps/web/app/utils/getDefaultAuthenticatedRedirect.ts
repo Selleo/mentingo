@@ -17,7 +17,7 @@ const isAvailableRoute = (route: string, excludedRoutes: Set<string>) => !exclud
 
 export const getDefaultAuthenticatedRedirect = (
   currentUser: CurrentUser,
-  globalSettings?: GlobalSettings,
+  _globalSettings?: GlobalSettings,
   options: DefaultRedirectOptions = {},
 ) => {
   const excludedRoutes = new Set(options.exclude ?? []);
@@ -32,7 +32,6 @@ export const getDefaultAuthenticatedRedirect = (
 
   if (
     isAvailableRoute("/calendar", excludedRoutes) &&
-    Boolean(globalSettings?.calendarEnabled) &&
     hasPermission(permissions, PERMISSIONS.CALENDAR_READ)
   ) {
     return "/calendar";

@@ -1160,7 +1160,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
       "noUserSelected": "Nebyl vybrán žádný uživatel",
-      "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli."
+      "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli.",
+      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Live Training."
     },
     "import": {
       "toast": {
@@ -2623,7 +2624,9 @@
       "calendarDescription": "Umožnit uživatelům zobrazit naplánované události v kalendáři",
       "liveTraining": "Povolit Live Training",
       "liveTrainingDescription": "Umožnit školitelům vytvářet a vést živá školení",
-      "liveTrainingTooltip": "Live Training závisí na kalendáři. Zapnutím Live Training se automaticky zapne také kalendář.",
+      "liveTrainingTooltip": "Zapněte pouze tehdy, když má tenant používat živé relace vedené trenéry.",
+      "liveTrainingDisableBlockedTooltip_one": "Aktuálně máte {{count}} uživatele s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
+      "liveTrainingDisableBlockedTooltip_other": "Aktuálně máte {{count}} uživatelů s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",

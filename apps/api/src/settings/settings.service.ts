@@ -14,8 +14,9 @@ import {
   MAX_LOGIN_PAGE_DOCUMENTS,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, count, eq, getTableColumns, inArray, isNull, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 import sharp from "sharp";
 
@@ -34,12 +35,14 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   formFields,
   forms,
+  permissionUserRoles,
   permissionRoleRuleSets,
   permissionRoles,
   permissionRuleSetPermissions,
   resourceEntity,
   resources,
   settings,
+  users,
 } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -86,6 +89,7 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
+const GLOBAL_SETTINGS_NOT_FOUND_MESSAGE = "common.toast.globalSettingsNotFound";
 
 export const SETTINGS_IMAGE_ASSET = {
   PLATFORM_LOGO: "platform-logo",
@@ -131,10 +135,12 @@ export class SettingsService {
       .where(isNull(settings.userId));
 
     if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    const parsedSettings = await this.withTrainerRoleUserCount(
+      this.parseGlobalSettings(globalSettings.settings),
+    );
 
     const {
       certificateBackgroundImage,
@@ -180,7 +186,7 @@ export class SettingsService {
       .where(isNull(settings.userId));
 
     if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
@@ -201,10 +207,12 @@ export class SettingsService {
       .where(isNull(settings.userId));
 
     if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    const parsedSettings = await this.withTrainerRoleUserCount(
+      this.parseGlobalSettings(globalSettings.settings),
+    );
 
     const {
       certificateBackgroundImage,
@@ -248,10 +256,14 @@ export class SettingsService {
       .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
 
     if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
-    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    const parsedSettings = await this.withTrainerRoleUserCount(
+      this.parseGlobalSettings(globalSettings.settings),
+      this.dbAdmin,
+      tenantId,
+    );
 
     const {
       certificateBackgroundImage,
@@ -288,6 +300,19 @@ export class SettingsService {
       loginBackgroundImageS3Key: loginBackgroundSignedUrl,
       certificateBackgroundImage: certificateBackgroundSignedUrl,
     };
+  }
+
+  public async isLiveTrainingEnabledForTenant(tenantId: UUIDType): Promise<boolean> {
+    const [globalSettings] = await this.dbAdmin
+      .select({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    if (!globalSettings) {
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
+    }
+
+    return this.parseGlobalSettings(globalSettings.settings).liveTrainingEnabled;
   }
 
   public async getRegistrationForm(
@@ -723,25 +748,15 @@ export class SettingsService {
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
     const previousRecord = await this.getGlobalSettingsRecord();
-    const previousSettings = this.parseGlobalSettings(previousRecord.settings);
-    const nextCalendarEnabled = !previousSettings.calendarEnabled;
-    const nextLiveTrainingEnabled = nextCalendarEnabled
-      ? previousSettings.liveTrainingEnabled
-      : false;
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
         settings: sql`
           jsonb_set(
-            jsonb_set(
-              settings.settings,
-              '{calendarEnabled}',
-              to_jsonb(${nextCalendarEnabled}::boolean),
-              true
-            ),
-            '{liveTrainingEnabled}',
-            to_jsonb(${nextLiveTrainingEnabled}::boolean),
+            settings.settings,
+            '{calendarEnabled}',
+            to_jsonb(true),
             true
           )
         `,
@@ -757,7 +772,7 @@ export class SettingsService {
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
 
-    return this.parseGlobalSettings(updatedGlobalSettings);
+    return this.withTrainerRoleUserCount(this.parseGlobalSettings(updatedGlobalSettings));
   }
 
   public async updateGlobalLiveTrainingEnabled(
@@ -766,6 +781,16 @@ export class SettingsService {
     const previousRecord = await this.getGlobalSettingsRecord();
     const previousSettings = this.parseGlobalSettings(previousRecord.settings);
     const nextLiveTrainingEnabled = !previousSettings.liveTrainingEnabled;
+
+    if (!nextLiveTrainingEnabled) {
+      const trainerRoleUserCount = await this.getTrainerRoleUserCount();
+
+      if (trainerRoleUserCount > 0) {
+        throw new BadRequestException(
+          "adminPreferences.errors.liveTrainingDisableBlockedByTrainerRole",
+        );
+      }
+    }
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -779,7 +804,7 @@ export class SettingsService {
               true
             ),
             '{calendarEnabled}',
-            to_jsonb(${nextLiveTrainingEnabled || previousSettings.calendarEnabled}::boolean),
+            to_jsonb(true),
             true
           )
         `,
@@ -795,7 +820,7 @@ export class SettingsService {
       updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
     });
 
-    return this.parseGlobalSettings(updatedGlobalSettings);
+    return this.withTrainerRoleUserCount(this.parseGlobalSettings(updatedGlobalSettings));
   }
 
   public async uploadPlatformLogo(
@@ -1452,7 +1477,7 @@ export class SettingsService {
     }
 
     if (!globalSettings) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     const [{ settings: updatedGlobalSettings }] = await this.db
@@ -1485,7 +1510,7 @@ export class SettingsService {
     if (!globalSettings.newsEnabled && ALLOWED_NEWS_SETTINGS.NEWS_ENABLED !== setting)
       throw new BadRequestException("newsPreferences.toast.newsNotEnabled");
 
-    if (!globalSettings) throw new NotFoundException("Global settings not found");
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -1517,7 +1542,7 @@ export class SettingsService {
     if (!globalSettings.articlesEnabled && ALLOWED_ARTICLES_SETTINGS.ARTICLES_ENABLED !== setting)
       throw new BadRequestException("articlesPreferences.toast.articlesNotEnabled");
 
-    if (!globalSettings) throw new NotFoundException("Global settings not found");
+    if (!globalSettings) throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
 
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
@@ -1686,7 +1711,7 @@ export class SettingsService {
       .where(and(isNull(settings.userId)));
 
     if (!existingResources) {
-      throw new NotFoundException("Global settings not found");
+      throw new NotFoundException(GLOBAL_SETTINGS_NOT_FOUND_MESSAGE);
     }
 
     return existingResources;
@@ -1699,7 +1724,7 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
-      calendarEnabled: settings.calendarEnabled ?? DEFAULT_GLOBAL_SETTINGS.calendarEnabled,
+      calendarEnabled: true,
       liveTrainingEnabled:
         settings.liveTrainingEnabled ?? DEFAULT_GLOBAL_SETTINGS.liveTrainingEnabled,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
@@ -1710,6 +1735,53 @@ export class SettingsService {
         : JSON.parse(settings.loginPageFiles ?? "[]"),
       ageLimit: settings.ageLimit ?? null,
     };
+  }
+
+  private async withTrainerRoleUserCount(
+    settingsData: GlobalSettingsJSONContentSchema,
+    dbInstance: DatabasePg = this.db,
+    tenantId?: UUIDType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    return {
+      ...settingsData,
+      trainerRoleUserCount: await this.getTrainerRoleUserCount(dbInstance, tenantId),
+    };
+  }
+
+  private async getTrainerRoleUserCount(
+    dbInstance: DatabasePg = this.db,
+    tenantId?: UUIDType,
+  ): Promise<number> {
+    const conditions = [
+      eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.TRAINER),
+      isNull(users.deletedAt),
+      eq(users.archived, false),
+    ];
+
+    if (tenantId) {
+      conditions.push(eq(permissionUserRoles.tenantId, tenantId));
+    }
+
+    const [row] = await dbInstance
+      .select({ totalItems: count() })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .innerJoin(
+        users,
+        and(
+          eq(users.id, permissionUserRoles.userId),
+          eq(users.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(and(...conditions));
+
+    return row?.totalItems ?? 0;
   }
 
   private reorderEmailTriggers(emailTriggers: UserEmailTriggersSchema) {

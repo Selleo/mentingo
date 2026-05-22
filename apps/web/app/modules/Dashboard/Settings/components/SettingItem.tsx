@@ -83,14 +83,14 @@ export function SettingItem({
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger>
-              <Switch disabled data-testid={testId} />
+              <Switch disabled checked={checked} data-testid={testId} />
             </TooltipTrigger>
             <TooltipContent
               side="top"
               align="center"
               className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
             >
-              {t(tooltipTranslationKey)}
+              {tooltip ?? t(tooltipTranslationKey)}
               <TooltipArrow className="fill-black" />
             </TooltipContent>
           </Tooltip>

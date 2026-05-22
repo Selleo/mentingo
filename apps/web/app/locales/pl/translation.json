@@ -1380,7 +1380,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
       "noUserSelected": "Nie wybrano żadnego użytkownika",
-      "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę."
+      "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę.",
+      "trainerRoleRequiresLiveTraining": "Rola Trener jest dostępna tylko wtedy, gdy Live Training jest włączony."
     },
     "other": {
       "selected": "Wybrany"
@@ -2958,7 +2959,11 @@
       "calendarDescription": "Pozwól użytkownikom przeglądać zaplanowane wydarzenia w kalendarzu",
       "liveTraining": "Włącz Live Training",
       "liveTrainingDescription": "Pozwól trenerom tworzyć i prowadzić sesje szkoleniowe na żywo",
-      "liveTrainingTooltip": "Live Training zależy od kalendarza. Włączenie Live Training automatycznie włącza też kalendarz.",
+      "liveTrainingTooltip": "Włącz tylko wtedy, gdy tenant ma korzystać z sesji prowadzonych przez trenerów.",
+      "liveTrainingDisableBlockedTooltip_one": "Obecnie masz {{count}} użytkownika z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_few": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_many": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_other": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",

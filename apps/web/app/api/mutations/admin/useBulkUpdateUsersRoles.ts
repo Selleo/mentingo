@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -28,6 +29,7 @@ export function useBulkUpdateUsersRoles() {
       });
 
       await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateLearningPathEnrollmentData();
     },
 

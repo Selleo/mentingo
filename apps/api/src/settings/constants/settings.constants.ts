@@ -27,7 +27,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   articlesEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   modernCourseListEnabled: true,
-  calendarEnabled: false,
+  calendarEnabled: true,
   liveTrainingEnabled: false,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,

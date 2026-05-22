@@ -30,6 +30,7 @@ export const globalSettingsJSONSchema = Type.Object({
   modernCourseListEnabled: Type.Boolean(),
   calendarEnabled: Type.Boolean(),
   liveTrainingEnabled: Type.Boolean(),
+  trainerRoleUserCount: Type.Optional(Type.Number()),
   enforceSSO: Type.Boolean(),
   certificateBackgroundImage: Type.Union([Type.String(), Type.Null()]),
   companyInformation: Type.Optional(companyInformationJSONSchema),

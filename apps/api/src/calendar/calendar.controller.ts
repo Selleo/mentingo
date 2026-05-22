@@ -1,12 +1,10 @@
 import { Controller, Get, Param, Query, UseGuards } from "@nestjs/common";
-import { FEATURES, PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, UUIDSchema, type UUIDType } from "src/common";
-import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { FeaturesGuard } from "src/common/guards/features.guard";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -24,8 +22,7 @@ import {
   type GetCalendarEventsQuery,
 } from "./schemas/get-calendar-events-query.schema";
 
-@UseGuards(FeaturesGuard, PermissionsGuard)
-@RequireFeature(FEATURES.CALENDAR)
+@UseGuards(PermissionsGuard)
 @Controller("calendar")
 export class CalendarController {
   constructor(private readonly calendarService: CalendarService) {}

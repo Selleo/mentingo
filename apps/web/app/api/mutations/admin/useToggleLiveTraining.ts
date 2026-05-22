@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { rolesQueryOptions } from "~/api/queries/admin/useRoles";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
@@ -18,6 +19,7 @@ export function useToggleLiveTraining() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries(globalSettingsQueryOptions);
+      queryClient.invalidateQueries(rolesQueryOptions());
       toast({
         variant: "default",
         description: t("adminPreferences.toast.liveTrainingPreferenceChangeSuccess"),

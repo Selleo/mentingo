@@ -433,7 +433,7 @@ describe("SettingsController (e2e)", () => {
         await truncateTables(db, ["settings"]);
       });
 
-      it("should toggle the global calendar setting as admin", async () => {
+      it("should keep the global calendar setting enabled as admin", async () => {
         const response = await request(app.getHttpServer())
           .patch("/api/settings/admin/calendar")
           .set("Cookie", adminCookies)
@@ -447,7 +447,7 @@ describe("SettingsController (e2e)", () => {
           .set("Cookie", adminCookies)
           .expect(200);
 
-        expect(toggleResponse.body.data.calendarEnabled).toBe(false);
+        expect(toggleResponse.body.data.calendarEnabled).toBe(true);
         expect(toggleResponse.body.data.liveTrainingEnabled).toBe(false);
       });
 
@@ -490,7 +490,7 @@ describe("SettingsController (e2e)", () => {
         await truncateTables(db, ["settings"]);
       });
 
-      it("should toggle live training and enable calendar automatically", async () => {
+      it("should toggle live training while calendar stays enabled", async () => {
         const response = await request(app.getHttpServer())
           .patch("/api/settings/admin/live-training")
           .set("Cookie", adminCookies)
@@ -508,7 +508,7 @@ describe("SettingsController (e2e)", () => {
         expect(toggleResponse.body.data.calendarEnabled).toBe(true);
       });
 
-      it("should disable live training automatically when disabling calendar", async () => {
+      it("should not disable live training when calendar endpoint is called", async () => {
         await request(app.getHttpServer())
           .patch("/api/settings/admin/live-training")
           .set("Cookie", adminCookies)
@@ -519,8 +519,8 @@ describe("SettingsController (e2e)", () => {
           .set("Cookie", adminCookies)
           .expect(200);
 
-        expect(response.body.data.calendarEnabled).toBe(false);
-        expect(response.body.data.liveTrainingEnabled).toBe(false);
+        expect(response.body.data.calendarEnabled).toBe(true);
+        expect(response.body.data.liveTrainingEnabled).toBe(true);
       });
 
       it("should return 403 if user is not an admin", async () => {

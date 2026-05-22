@@ -24,6 +24,9 @@ Trainings.
 - Assigned hosts must have the global Trainer role.
 - Live Trainings are globally reusable by content creators for course assignment, but linking does
   not grant edit/session management rights.
+- Trainer role is available only while Live Training is enabled.
+- Live Training can be disabled only when no users currently have the global Trainer role.
+- Calendar is always-on and is not disabled with Live Training.
 
 ## Permission Model
 
@@ -94,6 +97,10 @@ Admin keeps full Live Training permissions.
 - People selector uses the Live Training host candidate endpoint, not the generic users endpoint.
 - UI can show host management for authors/admins only; backend remains the source of truth.
 - Permission matrix and role labels include the global Trainer role.
+- Permission matrix and all role selectors hide the global Trainer role while Live Training is
+  disabled.
+- Settings disables the Live Training switch while at least one active user has the global Trainer
+  role.
 - The general Courses sidebar item is hidden for Trainer because Trainer does not have course read
   access. Direct `/courses` access redirects to Calendar when enabled, otherwise Settings.
 - Trainer can load certificate-related profile/settings data through certificate read/share/render
@@ -112,6 +119,10 @@ Admin keeps full Live Training permissions.
 - [x] Add Trainer role labels/translations.
 - [x] Hide Courses navigation for Trainer and redirect direct `/courses` access to the best
       authenticated fallback.
+- [x] Hide Trainer role from role lists while Live Training is disabled.
+- [x] Block assigning Trainer role while Live Training is disabled.
+- [x] Block disabling Live Training while any active user has Trainer role.
+- [x] Remove Calendar from tenant feature gating and keep Calendar permission-gated only.
 - [x] Regenerate API client.
 - [x] Run API and web type/lint checks.
 

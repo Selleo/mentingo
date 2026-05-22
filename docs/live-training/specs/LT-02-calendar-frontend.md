@@ -9,7 +9,7 @@ shape so future event sources can be added without redesigning the page.
 This slice includes:
 
 - Calendar page using React FullCalendar.
-- Calendar sidebar entry behind feature and permission checks.
+- Calendar sidebar entry behind permission checks.
 - FE-only today indicator derived from visible fetched events.
 - Event details modal.
 - Calendar day/slot selection create flow for independent Live Training events.
@@ -24,7 +24,8 @@ This slice does not include:
 
 ## Implementation Progress
 
-- [x] Calendar sidebar entry is gated by `globalSettings.calendarEnabled`.
+- [x] Calendar sidebar entry is always available by `PERMISSIONS.CALENDAR_READ`; Calendar is no
+      longer feature flagged.
 - [x] Calendar sidebar route access requires `PERMISSIONS.CALENDAR_READ`.
 - [x] Calendar navigation test handle and translations are added.
 - [x] `/calendar` route exists under the authenticated dashboard/navigation layout.
@@ -49,9 +50,7 @@ This slice does not include:
 ## Routes And Navigation
 
 - Add `/calendar` under the authenticated dashboard/navigation layout.
-- Add Calendar to the sidebar only when:
-  - `globalSettings.calendarEnabled === true`
-  - current user has `PERMISSIONS.CALENDAR_READ`
+- Add Calendar to the sidebar when the current user has `PERMISSIONS.CALENDAR_READ`.
 - Add `calendar` route access config requiring `PERMISSIONS.CALENDAR_READ`.
 - Use the existing navigation/test handle pattern for the sidebar item.
 - Use an existing calendar icon if available in `apps/web/app/assets/svgs`; otherwise add a small

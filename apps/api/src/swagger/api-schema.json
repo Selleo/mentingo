@@ -13656,6 +13656,9 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -14420,6 +14423,9 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -14655,6 +14661,9 @@
               },
               "liveTrainingEnabled": {
                 "type": "boolean"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
               },
               "enforceSSO": {
                 "type": "boolean"
@@ -14892,6 +14901,9 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -15128,6 +15140,9 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
               "enforceSSO": {
                 "type": "boolean"
               },
@@ -15363,6 +15378,9 @@
               },
               "liveTrainingEnabled": {
                 "type": "boolean"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
               },
               "enforceSSO": {
                 "type": "boolean"
@@ -15754,6 +15772,9 @@
               },
               "liveTrainingEnabled": {
                 "type": "boolean"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
               },
               "enforceSSO": {
                 "type": "boolean"
