@@ -8,12 +8,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
-import { BaseEmailTemplate } from "@repo/email-templates";
+import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
   COURSE_TYPE,
   COURSE_ENROLLMENT,
-  SUPPORTED_LANGUAGES,
   ENTITY_TYPES,
   PERMISSIONS,
   type PermissionKey,
@@ -39,6 +38,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
@@ -47,6 +47,7 @@ import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
+import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -156,7 +157,6 @@ import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SQL } from "drizzle-orm";
-import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -168,6 +168,23 @@ import type {
 } from "src/lesson/lesson.schema";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 import type Stripe from "stripe";
+
+type OverdueCoursesEmailCourse = {
+  courseTitle: string;
+  groups: {
+    groupName: string;
+    dueDate: string;
+    students: {
+      name: string;
+      email: string;
+    }[];
+  }[];
+};
+
+type OverdueCoursesByLanguageRow = {
+  language: SupportedLanguages;
+  courses: OverdueCoursesEmailCourse[];
+};
 
 @Injectable()
 export class CourseService {
@@ -428,7 +445,7 @@ export class CourseService {
   }
 
   async getStudentsWithEnrollmentDate(query: EnrolledStudentsQuery) {
-    const { courseId, filters = {}, page = 1, perPage = DEFAULT_PAGE_SIZE } = query;
+    const { courseId, filters = {}, language, page = 1, perPage = DEFAULT_PAGE_SIZE } = query;
     const { keyword, sort = EnrolledStudentSortFields.enrolledAt } = filters;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -475,9 +492,13 @@ export class CourseService {
         >`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.enrolledAt} ELSE NULL END`,
         groups: sql<
           Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
-          "groups",
-        ),
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+          groups.id
+        }, 'name', ${this.localizationService.getLocalizedSqlField(
+          groups.name,
+          language,
+          groups,
+        )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
         isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
@@ -3422,7 +3443,7 @@ export class CourseService {
 
     const conditions = [
       eq(studentCourses.courseId, courseId),
-      this.getSearchQueryConditions(searchQuery),
+      this.getSearchQueryConditions(searchQuery, language),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
     ];
 
@@ -3506,7 +3527,7 @@ export class CourseService {
       eq(chapters.courseId, courseId),
       or(
         sql`${quizNameExpression} ILIKE ${`%${searchQuery}%`}`,
-        this.getSearchQueryConditions(searchQuery),
+        this.getSearchQueryConditions(searchQuery, language),
       ),
     ];
 
@@ -3601,7 +3622,7 @@ export class CourseService {
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(chapters.courseId, courseId),
       or(
-        this.getSearchQueryConditions(searchQuery),
+        this.getSearchQueryConditions(searchQuery, language),
         sql`${lessonNameExpression} ILIKE ${`%${searchQuery}%`}`,
       ),
     ];
@@ -3739,6 +3760,9 @@ export class CourseService {
     courseId: UUIDType,
     language: SupportedLanguages,
   ) {
+    const studentGroups = alias(groups, "g");
+    const studentGroupUsers = alias(groupUsers, "gu");
+
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -3761,10 +3785,22 @@ export class CourseService {
         ), 0)::float`;
 
     const groupNameExpression = sql<Array<{ id: string; name: string }>>`(
-          SELECT json_agg(json_build_object('id', g.id, 'name', g.name))
-          FROM ${groups} g
-          JOIN ${groupUsers} gu ON gu.group_id = g.id
-          WHERE gu.user_id = ${users.id}
+          SELECT json_agg(
+            json_build_object(
+              'id',
+              ${studentGroups.id},
+              'name',
+              ${this.localizationService.getLocalizedSqlField(
+                studentGroups.name,
+                language,
+                groups,
+                "g",
+              )}
+            )
+          )
+          FROM ${studentGroups}
+          JOIN ${studentGroupUsers} ON ${studentGroupUsers.groupId} = ${studentGroups.id}
+          WHERE ${studentGroupUsers.userId} = ${users.id}
         )`;
 
     const lastAttemptExpression = sql<string>`(
@@ -4044,123 +4080,38 @@ export class CourseService {
   }
 
   async sendOverdueCoursesEmails() {
-    const overdueStudents = await this.db
-      .select({
-        courseId: courses.id,
-        courseTitle: this.localizationService.getLocalizedSqlField(
-          courses.title,
-          SUPPORTED_LANGUAGES.EN,
-        ),
-        studentId: users.id,
-        studentName: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
-        studentEmail: users.email,
-        groupId: groups.id,
-        groupName: groups.name,
-        dueDate: sql<string>`TO_CHAR(${groupCourses.dueDate}, 'DD.MM.YYYY')`,
-      })
-      .from(groupCourses)
-      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
-      .innerJoin(groups, eq(groups.id, groupCourses.groupId))
-      .innerJoin(
-        studentCourses,
-        and(
-          eq(studentCourses.courseId, courses.id),
-          or(
-            eq(studentCourses.enrolledByGroupId, groups.id),
-            and(
-              eq(groupCourses.isMandatory, true),
-              sql`EXISTS (
-                SELECT 1
-                FROM ${groupUsers}
-                WHERE ${groupUsers.groupId} = ${groups.id}
-                  AND ${groupUsers.userId} = ${studentCourses.studentId}
-                  AND ${studentCourses.enrolledByGroupId} IS NULL
-              )`,
-            ),
-          ),
-        ),
-      )
-      .innerJoin(users, eq(users.id, studentCourses.studentId))
-      .where(
-        and(
-          isNotNull(groupCourses.dueDate),
-          sql`${groupCourses.dueDate} < NOW()`,
-          not(
-            userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
-              PERMISSIONS.COURSE_UPDATE,
-              PERMISSIONS.COURSE_UPDATE_OWN,
-            ]),
-          ),
-          isNull(users.deletedAt),
-          isNull(studentCourses.completedAt),
-        ),
-      );
-
-    if (overdueStudents.length === 0) return;
-
-    const groupedByCourse = overdueStudents.reduce(
-      (acc, row) => {
-        const courseTitle = row.courseTitle;
-        if (!acc[courseTitle as string]) acc[courseTitle as string] = [];
-        acc[courseTitle as string].push(row);
-        return acc;
-      },
-      {} as Record<string, typeof overdueStudents>,
-    );
-
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutOverdueCourse();
 
     if (adminsToNotify.length === 0) return;
 
-    const indent = "\u00A0\u00A0\u00A0\u00A0";
+    const requestedLanguages = Array.from(
+      new Set(adminsToNotify.map(({ defaultEmailSettings }) => defaultEmailSettings.language)),
+    );
 
-    await Promise.all(
-      adminsToNotify.map(async ({ id: adminId, email: adminEmail, tenantId }) => {
-        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-          tenantId,
-          adminId,
-        );
+    const overdueCoursesByLanguage = await this.getOverdueCoursesByLanguage(requestedLanguages);
 
-        const lines: string[] = [];
-        for (const [courseKey, rows] of Object.entries(groupedByCourse)) {
-          lines.push(`Course: ${courseKey}`);
-          lines.push("");
+    if (overdueCoursesByLanguage.length === 0) return;
 
-          rows.forEach((r) => {
-            lines.push(`${indent}- ${r.studentName} (${r.studentEmail})`);
-            lines.push("");
-          });
+    const overdueCoursesMap = new Map(
+      overdueCoursesByLanguage.map(({ language, courses }) => [language, courses]),
+    );
 
-          const uniqueDueDates = Array.from(new Set(rows.map((r) => r.dueDate).filter(Boolean)));
-          lines.push(
-            `${indent}Due date: ${uniqueDueDates.length ? uniqueDueDates.join(", ") : "-"}`,
-          );
-          lines.push("");
-        }
+    await Promise.allSettled(
+      adminsToNotify.map(async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
+        const coursesForLanguage = overdueCoursesMap.get(defaultEmailSettings.language);
 
-        const heading =
-          defaultEmailSettings.language === "pl"
-            ? "Zaległe kursy studentów"
-            : "Students with overdue courses";
-        const introParagraph =
-          defaultEmailSettings.language === "pl"
-            ? "Niektórzy studenci nie ukończyli kursów w wymaganym terminie:"
-            : "Some students did not finish their courses on time:";
-        const buttonText =
-          defaultEmailSettings.language === "pl" ? "PRZEJDŹ DO KURSÓW" : "VIEW COURSES";
+        if (!coursesForLanguage?.length) return;
 
-        const { text, html } = new BaseEmailTemplate({
-          heading,
-          paragraphs: [introParagraph, "", ...lines],
-          buttonText,
-          buttonLink: `${process.env.CORS_ORIGIN}/admin/courses`,
+        const { text, html } = new OverdueCoursesEmail({
+          courses: coursesForLanguage,
+          coursesLink: this.buildAdminCoursesUrl(tenantHost),
           ...defaultEmailSettings,
         });
 
         return this.emailService.sendEmailWithLogo(
           {
-            to: adminEmail,
-            subject: "Overdue courses notification",
+            to: email,
+            subject: getEmailSubject("adminOverdueCoursesEmail", defaultEmailSettings.language),
             text,
             html,
           },
@@ -4168,6 +4119,149 @@ export class CourseService {
         );
       }),
     );
+  }
+
+  private async getOverdueCoursesByLanguage(
+    languages: SupportedLanguages[],
+  ): Promise<OverdueCoursesByLanguageRow[]> {
+    if (languages.length === 0) return [];
+
+    const requestedLanguageValues = languages.map((language) => sql`${language}`);
+
+    const requestedLanguages = this.db.$with("requested_languages").as(
+      this.db
+        .select({
+          language: sql<SupportedLanguages>`unnest(ARRAY[${sql.join(
+            requestedLanguageValues,
+            sql`, `,
+          )}]::text[])`.as("language"),
+        })
+        .from(sql`(SELECT 1) AS language_seed`),
+    );
+
+    const requestedLanguage = sql<SupportedLanguages>`${requestedLanguages.language}`;
+
+    const overdueRows = this.db.$with("overdue_rows").as(
+      this.db
+        .selectDistinct({
+          language: requestedLanguages.language,
+          courseId: courses.id,
+          courseTitle: this.localizationService
+            .getLocalizedSqlField(courses.title, requestedLanguage)
+            .as("course_title"),
+          groupId: groups.id,
+          groupName: this.localizationService
+            .getLocalizedSqlField(groups.name, requestedLanguage, groups)
+            .as("group_name"),
+          dueDate: sql<string>`TO_CHAR(${groupCourses.dueDate}, 'DD.MM.YYYY')`.as("due_date"),
+          studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`.as(
+            "student_name",
+          ),
+          studentEmail: users.email,
+        })
+        .from(groupCourses)
+        .innerJoin(requestedLanguages, sql`true`)
+        .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+        .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+        .innerJoin(
+          studentCourses,
+          and(
+            eq(studentCourses.courseId, courses.id),
+            or(
+              eq(studentCourses.enrolledByGroupId, groups.id),
+              and(
+                eq(groupCourses.isMandatory, true),
+                sql`EXISTS (
+                  SELECT 1
+                  FROM ${groupUsers}
+                  WHERE ${groupUsers.groupId} = ${groups.id}
+                    AND ${groupUsers.userId} = ${studentCourses.studentId}
+                    AND ${studentCourses.enrolledByGroupId} IS NULL
+                )`,
+              ),
+            ),
+          ),
+        )
+        .innerJoin(users, eq(users.id, studentCourses.studentId))
+        .where(
+          and(
+            isNotNull(groupCourses.dueDate),
+            sql`${groupCourses.dueDate} < NOW()`,
+            not(
+              userHasAnyPermissionsCondition(this.db, users.id, users.tenantId, [
+                PERMISSIONS.COURSE_UPDATE,
+                PERMISSIONS.COURSE_UPDATE_OWN,
+              ]),
+            ),
+            isNull(users.deletedAt),
+            isNull(studentCourses.completedAt),
+          ),
+        ),
+    );
+
+    const groupSummaries = this.db.$with("group_summaries").as(
+      this.db
+        .select({
+          language: overdueRows.language,
+          courseId: overdueRows.courseId,
+          courseTitle: overdueRows.courseTitle,
+          groupName: overdueRows.groupName,
+          dueDate: overdueRows.dueDate,
+          students: sql<OverdueCoursesEmailCourse["groups"][number]["students"]>`jsonb_agg(
+            jsonb_build_object(
+              'name', ${overdueRows.studentName},
+              'email', ${overdueRows.studentEmail}
+            )
+            ORDER BY ${overdueRows.studentName}, ${overdueRows.studentEmail}
+          )`.as("students"),
+        })
+        .from(overdueRows)
+        .groupBy(
+          overdueRows.language,
+          overdueRows.courseId,
+          overdueRows.courseTitle,
+          overdueRows.groupId,
+          overdueRows.groupName,
+          overdueRows.dueDate,
+        ),
+    );
+
+    const courseSummaries = this.db.$with("course_summaries").as(
+      this.db
+        .select({
+          language: groupSummaries.language,
+          courseTitle: groupSummaries.courseTitle,
+          groups: sql<OverdueCoursesEmailCourse["groups"]>`jsonb_agg(
+            jsonb_build_object(
+              'groupName', ${groupSummaries.groupName},
+              'dueDate', ${groupSummaries.dueDate},
+              'students', ${groupSummaries.students}
+            )
+            ORDER BY ${groupSummaries.groupName}, ${groupSummaries.dueDate}
+          )`.as("groups"),
+        })
+        .from(groupSummaries)
+        .groupBy(groupSummaries.language, groupSummaries.courseId, groupSummaries.courseTitle),
+    );
+
+    return this.db
+      .with(requestedLanguages, overdueRows, groupSummaries, courseSummaries)
+      .select({
+        language: courseSummaries.language,
+        courses: sql<OverdueCoursesEmailCourse[]>`jsonb_agg(
+          jsonb_build_object(
+            'courseTitle', ${courseSummaries.courseTitle},
+            'groups', ${courseSummaries.groups}
+          )
+          ORDER BY ${courseSummaries.courseTitle}
+        )`.as("courses"),
+      })
+      .from(courseSummaries)
+      .groupBy(courseSummaries.language);
+  }
+
+  private buildAdminCoursesUrl(tenantHost: string) {
+    return `${tenantHost.replace(/\/$/, "")}/admin/courses`;
   }
 
   async generateMissingTranslations(
@@ -4792,11 +4886,15 @@ export class CourseService {
     return { flat, grouped, withContext };
   }
 
-  private getSearchQueryConditions(searchQuery: string) {
+  private getSearchQueryConditions(searchQuery: string, language?: SupportedLanguages) {
     return or(
       ilike(users.firstName, `%${searchQuery}%`),
       ilike(users.lastName, `%${searchQuery}%`),
-      ilike(groups.name, `%${searchQuery}%`),
+      this.localizationService.getLocalizedFieldSearchCondition(
+        groups.name,
+        `%${searchQuery}%`,
+        language,
+      ),
     );
   }
 

@@ -855,6 +855,20 @@
       "when": 1779196011885,
       "tag": "0121_backfill_certificate_issued_at",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1779700754913,
+      "tag": "0122_translate_group_entries",
+      "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1779700900506,
+      "tag": "0123_translate_groups_schema",
+      "breakpoints": true
     }
   ]
 }

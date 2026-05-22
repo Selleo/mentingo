@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, type SQL } from "drizzle-orm";
 import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
@@ -81,7 +81,7 @@ export class LocalizationService {
    */
   getLocalizedSqlField(
     fieldColumn: AnyPgColumn,
-    language?: SupportedLanguages,
+    language?: SupportedLanguages | SQL<unknown>,
     baseTable: BaseTable = courses,
     joinedAliasName?: string,
   ) {

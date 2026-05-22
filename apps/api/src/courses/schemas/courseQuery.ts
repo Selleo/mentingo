@@ -136,6 +136,7 @@ export type EnrolledStudentsQuery = {
   page?: number;
   perPage?: number;
   filters?: EnrolledStudentFilterSchema;
+  language?: SupportedLanguages;
 };
 
 // Course student progression query options

@@ -238,11 +238,18 @@ export class AiRepository {
     return lesson;
   }
 
-  async findGroupsByThreadId(threadId: UUIDType): Promise<AiMentorGroupsBody> {
+  async findGroupsByThreadId(
+    threadId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<AiMentorGroupsBody> {
     return this.db
       .select({
-        name: groups.name,
-        characteristic: groups.characteristic,
+        name: this.localizationService.getLocalizedSqlField(groups.name, language, groups),
+        characteristic: this.localizationService.getLocalizedSqlField(
+          groups.characteristic,
+          language,
+          groups,
+        ),
       })
       .from(groups)
       .innerJoin(groupUsers, eq(groups.id, groupUsers.groupId))

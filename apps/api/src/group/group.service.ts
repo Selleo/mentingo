@@ -6,22 +6,18 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
-import {
-  and,
-  countDistinct,
-  eq,
-  getTableColumns,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  sql,
-} from "drizzle-orm";
+import { COURSE_ENROLLMENT, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import { and, countDistinct, eq, getTableColumns, inArray, isNull, or, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
+import {
+  buildJsonbField,
+  deleteJsonbField,
+  setJsonbField,
+  type JsonbFieldUpdate,
+} from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
@@ -32,9 +28,11 @@ import {
   UpdateGroupEvent,
 } from "src/events";
 import { GroupSortFields } from "src/group/group.schema";
+import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { groupCourses, groups, groupUsers, studentCourses, users } from "src/storage/schema";
+import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
 
 import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
@@ -43,9 +41,11 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
-  UpsertGroupBody,
+  CreateGroupBody,
   GroupsQuery,
   GroupResponse,
+  GroupBaseLanguageUpdateBody,
+  UpdateGroupBody,
 } from "src/group/group.types";
 import type { UserResponse } from "src/user/schemas/user.schema";
 
@@ -56,6 +56,7 @@ export class GroupService {
     @Inject(forwardRef(() => CourseService)) private readonly courseService: CourseService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly permissionsService: PermissionsService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   public async getAllGroups(
@@ -66,15 +67,18 @@ export class GroupService {
       page = 1,
       perPage = DEFAULT_PAGE_SIZE,
       sort = GroupSortFields.createdAt,
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
-    const conditions = this.getFiltersConditions(filters);
+    const conditions = this.getFiltersConditions(filters, language);
 
     return this.db.transaction(async (trx) => {
       const queryDB = trx
         .select({
           ...getTableColumns(groups),
+          name: this.getLocalizedGroupName(language),
+          characteristic: this.getLocalizedGroupCharacteristic(language),
           users: sql<UserResponse[]>`
             COALESCE(
               (
@@ -101,7 +105,7 @@ export class GroupService {
         })
         .from(groups)
         .where(and(...conditions))
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField)));
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -123,14 +127,24 @@ export class GroupService {
     });
   }
 
-  public async getGroupById(groupId: UUIDType): Promise<{ data: GroupResponse }> {
+  public async getGroupById(
+    groupId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<GroupResponse> {
     const [group] = await this.db
-      .select()
+      .select({
+        ...getTableColumns(groups),
+        name: this.getLocalizedGroupName(language),
+        characteristic: this.getLocalizedGroupCharacteristic(language),
+      })
       .from(groups)
       .where(and(eq(groups.id, groupId)));
-    return {
-      data: group,
-    };
+
+    if (!group) {
+      throw new NotFoundException("adminGroupsView.updateGroup.groupNotFound");
+    }
+
+    return group;
   }
 
   async getUserGroups(
@@ -142,25 +156,27 @@ export class GroupService {
       page = 1,
       perPage = DEFAULT_PAGE_SIZE,
       sort = GroupSortFields.createdAt,
+      language,
     } = query;
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     return this.db.transaction(async (trx) => {
-      const conditions = [eq(groupUsers.userId, userId), ...this.getFiltersConditions(filters)];
+      const conditions = [
+        eq(groupUsers.userId, userId),
+        ...this.getFiltersConditions(filters, language),
+      ];
 
       const queryDB = trx
         .select({
-          id: groups.id,
-          name: groups.name,
-          characteristic: groups.characteristic,
-          createdAt: groups.createdAt,
-          updatedAt: groups.updatedAt,
+          ...getTableColumns(groups),
+          name: this.getLocalizedGroupName(language),
+          characteristic: this.getLocalizedGroupCharacteristic(language),
         })
         .from(groupUsers)
         .innerJoin(groups, eq(groups.id, groupUsers.groupId))
         .where(and(...conditions))
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField)));
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as GroupSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -183,8 +199,18 @@ export class GroupService {
     });
   }
 
-  public async createGroup(createGroupBody: UpsertGroupBody, currentUser?: CurrentUserType) {
-    const [createdGroup] = await this.db.insert(groups).values(createGroupBody).returning();
+  public async createGroup(createGroupBody: CreateGroupBody, currentUser?: CurrentUserType) {
+    const { language, name, characteristic } = createGroupBody;
+
+    const [createdGroup] = await this.db
+      .insert(groups)
+      .values({
+        name: buildJsonbField(language, name),
+        characteristic: buildJsonbField(language, characteristic, true),
+        baseLanguage: language,
+        availableLocales: [language],
+      })
+      .returning();
 
     if (!createdGroup) throw new ConflictException("Unable to create group");
 
@@ -193,54 +219,145 @@ export class GroupService {
         new CreateGroupEvent({
           groupId: createdGroup.id,
           actor: currentUser,
-          group: this.buildGroupSnapshot(createdGroup),
+          group: await this.buildGroupSnapshot(createdGroup.id, language),
         }),
       );
     }
 
-    return createdGroup;
+    return this.getGroupById(createdGroup.id, language);
   }
 
   public async updateGroup(
     groupId: UUIDType,
-    updateGroupBody: UpsertGroupBody,
+    updateGroupBody: UpdateGroupBody,
     currentUser?: CurrentUserType,
   ) {
-    const [existingGroup] = await this.db.select().from(groups).where(eq(groups.id, groupId));
+    const existingGroup = await this.getGroupById(groupId);
 
-    if (!existingGroup) {
-      throw new NotFoundException("Group not found");
+    const language = updateGroupBody.language ?? existingGroup.baseLanguage;
+
+    if (!existingGroup.availableLocales.includes(language)) {
+      throw new BadRequestException("adminGroupsView.toast.languageNotSupported");
     }
 
-    const previousSnapshot = this.buildGroupSnapshot(existingGroup);
+    const previousSnapshot = await this.buildGroupSnapshot(groupId, language);
 
-    const [updatedGroup] = await this.db
-      .update(groups)
-      .set(updateGroupBody)
-      .where(eq(groups.id, groupId))
-      .returning();
+    const updateData: {
+      name?: JsonbFieldUpdate;
+      characteristic?: JsonbFieldUpdate;
+    } = {};
 
-    const updatedSnapshot = this.buildGroupSnapshot(updatedGroup);
+    if (updateGroupBody.name !== undefined) {
+      updateData.name = setJsonbField(groups.name, language, updateGroupBody.name);
+    }
 
-    if (currentUser && !isEqual(previousSnapshot, updatedSnapshot)) {
-      await this.outboxPublisher.publish(
-        new UpdateGroupEvent({
-          groupId,
-          actor: currentUser,
-          previousGroupData: previousSnapshot,
-          updatedGroupData: updatedSnapshot,
-        }),
+    if (updateGroupBody.characteristic !== undefined) {
+      updateData.characteristic = setJsonbField(
+        groups.characteristic,
+        language,
+        updateGroupBody.characteristic,
+        true,
+        true,
       );
     }
 
-    return updatedGroup;
+    if (!hasDataToUpdate(updateData)) {
+      return this.getGroupById(groupId, language);
+    }
+
+    await this.db.update(groups).set(updateData).where(eq(groups.id, groupId)).returning();
+
+    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+
+    return this.getGroupById(groupId, language);
+  }
+
+  public async createLanguage(
+    groupId: UUIDType,
+    language: SupportedLanguages,
+    currentUser?: CurrentUserType,
+  ) {
+    const existingGroup = await this.getGroupById(groupId, language);
+
+    if (existingGroup.availableLocales.includes(language)) {
+      throw new BadRequestException("adminGroupsView.toast.languageAlreadyExists");
+    }
+
+    const previousSnapshot = await this.buildGroupSnapshot(groupId, language);
+
+    await this.db
+      .update(groups)
+      .set({ availableLocales: [...existingGroup.availableLocales, language] })
+      .where(eq(groups.id, groupId))
+      .returning();
+
+    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+
+    return this.getGroupById(groupId, language);
+  }
+
+  public async deleteLanguage(
+    groupId: UUIDType,
+    language: SupportedLanguages,
+    currentUser?: CurrentUserType,
+  ) {
+    const existingGroup = await this.getGroupById(groupId, language);
+
+    if (
+      !existingGroup.availableLocales.includes(language) ||
+      existingGroup.baseLanguage === language
+    ) {
+      throw new BadRequestException("adminGroupsView.toast.invalidLanguageToDelete");
+    }
+
+    const previousSnapshot = await this.buildGroupSnapshot(groupId, language);
+
+    await this.db
+      .update(groups)
+      .set({
+        name: deleteJsonbField(groups.name, language),
+        characteristic: deleteJsonbField(groups.characteristic, language),
+        availableLocales: sql`ARRAY_REMOVE(${groups.availableLocales}, ${language})`,
+      })
+      .where(eq(groups.id, groupId))
+      .returning();
+
+    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+
+    return this.getGroupById(groupId, existingGroup.baseLanguage);
+  }
+
+  public async updateBaseLanguage(
+    groupId: UUIDType,
+    { baseLanguage }: GroupBaseLanguageUpdateBody,
+    currentUser?: CurrentUserType,
+  ) {
+    const existingGroup = await this.getGroupById(groupId, baseLanguage);
+
+    if (!existingGroup.availableLocales.includes(baseLanguage)) {
+      throw new BadRequestException("adminGroupsView.toast.languageNotSupported");
+    }
+
+    if (!existingGroup.name) {
+      throw new BadRequestException("adminGroupsView.toast.baseLanguageNameRequired");
+    }
+
+    const previousSnapshot = await this.buildGroupSnapshot(groupId, existingGroup.baseLanguage);
+
+    await this.db.update(groups).set({ baseLanguage }).where(eq(groups.id, groupId)).returning();
+
+    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, baseLanguage);
+
+    return this.getGroupById(groupId, baseLanguage);
   }
 
   public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUserType) {
+    const existingGroup = currentUser ? await this.getGroupById(groupId) : null;
+
     const [deletedGroup] = await this.db.delete(groups).where(eq(groups.id, groupId)).returning();
 
     if (!deletedGroup) {
-      throw new NotFoundException("Group not found");
+      throw new NotFoundException("adminGroupsView.updateGroup.groupNotFound");
     }
 
     if (currentUser) {
@@ -248,7 +365,7 @@ export class GroupService {
         new DeleteGroupEvent({
           groupId: deletedGroup.id,
           actor: currentUser,
-          groupName: deletedGroup.name,
+          groupName: existingGroup?.name,
         }),
       );
     }
@@ -355,14 +472,20 @@ export class GroupService {
     }
   }
 
-  private getFiltersConditions(filters: GroupKeywordFilterBody) {
+  private getFiltersConditions(filters: GroupKeywordFilterBody, language?: SupportedLanguages) {
     const conditions = [];
 
     if (filters.keyword) {
+      const pattern = `%${filters.keyword.toLowerCase()}%`;
+
       conditions.push(
         or(
-          ilike(groups.name, `%${filters.keyword.toLowerCase()}%`),
-          ilike(groups.characteristic, `%${filters.keyword.toLowerCase()}%`),
+          this.localizationService.getLocalizedFieldSearchCondition(groups.name, pattern, language),
+          this.localizationService.getLocalizedFieldSearchCondition(
+            groups.characteristic,
+            pattern,
+            language,
+          ),
         ) as SQL,
       );
     }
@@ -370,21 +493,21 @@ export class GroupService {
     return conditions ?? [sql`1=1`];
   }
 
-  private getColumnToSortBy(sort: GroupSortField) {
+  private getColumnToSortBy(sort: GroupSortField, language?: SupportedLanguages) {
     switch (sort) {
+      case GroupSortFields.name:
+        return this.getLocalizedGroupName(language);
       default:
         return groups.createdAt;
     }
   }
 
-  async getGroupsByCourse(courseId: UUIDType) {
+  async getGroupsByCourse(courseId: UUIDType, language?: SupportedLanguages) {
     return this.db
       .select({
-        id: groups.id,
-        name: groups.name,
-        createdAt: groups.createdAt,
-        updatedAt: groups.updatedAt,
-        isMandatory: groupCourses.isMandatory,
+        ...getTableColumns(groups),
+        name: this.getLocalizedGroupName(language),
+        characteristic: this.getLocalizedGroupCharacteristic(language),
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
       })
       .from(groupCourses)
@@ -479,15 +602,58 @@ export class GroupService {
     if (idsToInsert) await this.enrollUserToGroupCourses(userId, groupId, idsToInsert, trx);
   }
 
-  private buildGroupSnapshot(group: {
-    id: UUIDType;
-    name?: string | null;
-    characteristic?: string | null;
-  }): GroupActivityLogSnapshot {
+  private async publishUpdateEvent(
+    groupId: UUIDType,
+    currentUser: CurrentUserType | undefined,
+    previousSnapshot: GroupActivityLogSnapshot,
+    language: SupportedLanguages,
+  ) {
+    if (!currentUser) return;
+
+    const updatedSnapshot = await this.buildGroupSnapshot(groupId, language);
+
+    if (isEqual(previousSnapshot, updatedSnapshot)) return;
+
+    await this.outboxPublisher.publish(
+      new UpdateGroupEvent({
+        groupId,
+        actor: currentUser,
+        previousGroupData: previousSnapshot,
+        updatedGroupData: updatedSnapshot,
+      }),
+    );
+  }
+
+  private async buildGroupSnapshot(
+    groupId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<GroupActivityLogSnapshot> {
+    const [group] = await this.db
+      .select({
+        id: groups.id,
+        name: this.getLocalizedGroupName(language),
+        characteristic: this.getLocalizedGroupCharacteristic(language),
+      })
+      .from(groups)
+      .where(eq(groups.id, groupId));
+
     return {
-      id: group.id,
+      id: groupId,
       name: group.name,
-      characteristic: group.characteristic,
+      characteristic: group.characteristic ?? null,
     };
+  }
+
+  private getLocalizedGroupName(language?: SupportedLanguages) {
+    return this.localizationService.getLocalizedSqlField(groups.name, language, groups);
+  }
+
+  private getLocalizedGroupCharacteristic(language?: SupportedLanguages) {
+    return sql<string | null>`
+      CASE
+        WHEN ${groups.characteristic} IS NULL THEN NULL
+        ELSE ${this.localizationService.getLocalizedSqlField(groups.characteristic, language, groups)}
+      END
+    `;
   }
 }

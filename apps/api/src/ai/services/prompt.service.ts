@@ -148,7 +148,7 @@ export class PromptService implements OnModuleInit {
 
     const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId, userLanguage);
 
-    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId);
+    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
 
     const mode = (lesson.type ?? "mentor").toLowerCase();
 

@@ -1,29 +1,52 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 import { baseUserResponseSchema } from "src/user/schemas/user.schema";
 
+export const groupLanguageSchema = Type.Enum(SUPPORTED_LANGUAGES);
+
 export const groupSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
   characteristic: Type.Union([Type.String(), Type.Null()]),
+  availableLocales: Type.Array(groupLanguageSchema),
+  baseLanguage: groupLanguageSchema,
   users: Type.Optional(Type.Array(baseUserResponseSchema)),
   createdAt: Type.Optional(Type.String()),
   updatedAt: Type.Optional(Type.String()),
 });
+
 export const allGroupsSchema = Type.Array(groupSchema);
+
 export const baseGroupSchema = Type.Object({
   id: UUIDSchema,
   name: Type.String(),
-  characteristic: Type.Optional(Type.String()),
+  characteristic: Type.Optional(Type.Union([Type.String(), Type.Null()])),
+  availableLocales: Type.Optional(Type.Array(groupLanguageSchema)),
+  baseLanguage: Type.Optional(groupLanguageSchema),
   createdAt: Type.String(),
   updatedAt: Type.String(),
   isMandatory: Type.Optional(Type.Boolean()),
   dueDate: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
-export const upsertGroupSchema = Type.Object({
+
+export const createGroupSchema = Type.Object({
   name: Type.String(),
   characteristic: Type.Optional(Type.String()),
+  language: groupLanguageSchema,
+});
+
+export const updateGroupSchema = Type.Partial(
+  Type.Object({
+    name: Type.String(),
+    characteristic: Type.String(),
+    language: groupLanguageSchema,
+  }),
+);
+
+export const groupBaseLanguageUpdateSchema = Type.Object({
+  baseLanguage: groupLanguageSchema,
 });
 export const bulkDeleteGroupsSchema = Type.Array(UUIDSchema);
 

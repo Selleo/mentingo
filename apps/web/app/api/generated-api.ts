@@ -1267,6 +1267,8 @@ export interface GetAllGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     users?: {
       id: string;
       createdAt: string;
@@ -1295,6 +1297,8 @@ export interface GetGroupByIdResponse {
     id: string;
     name: string;
     characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     users?: {
       id: string;
       createdAt: string;
@@ -1317,6 +1321,8 @@ export interface GetUserGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     users?: {
       id: string;
       createdAt: string;
@@ -1342,6 +1348,7 @@ export interface GetUserGroupsResponse {
 export interface CreateGroupBody {
   name: string;
   characteristic?: string;
+  language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateGroupResponse {
@@ -1353,8 +1360,9 @@ export interface CreateGroupResponse {
 }
 
 export interface UpdateGroupBody {
-  name: string;
+  name?: string;
   characteristic?: string;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface UpdateGroupResponse {
@@ -1362,11 +1370,90 @@ export interface UpdateGroupResponse {
     /** @format uuid */
     id: string;
     name: string;
-    characteristic?: string;
+    characteristic?: string | null;
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs";
     createdAt: string;
     updatedAt: string;
     isMandatory?: boolean;
     dueDate?: string | null;
+  };
+}
+
+export interface CreateLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    description: string;
+    thumbnailReference: string | null;
+    status: "draft" | "published" | "private";
+    includesCertificate: boolean;
+    settings: {
+      /** @default null */
+      certificateSignature: string | null;
+      /** @default null */
+      certificateFontColor: string | null;
+    };
+    sequenceEnabled: boolean;
+    /** @format uuid */
+    authorId: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeleteLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
+  };
+}
+
+export interface UpdateBaseLanguageBody {
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface UpdateBaseLanguageResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    users?: {
+      id: string;
+      createdAt: string;
+      updatedAt: string;
+      email: string;
+      firstName: string;
+      lastName: string;
+      archived: boolean;
+      deletedAt: string | null;
+      profilePictureUrl: string | null;
+    }[];
+    createdAt?: string;
+    updatedAt?: string;
   };
 }
 
@@ -1397,7 +1484,9 @@ export interface GetGroupsByCourseResponse {
     /** @format uuid */
     id: string;
     name: string;
-    characteristic?: string;
+    characteristic?: string | null;
+    availableLocales?: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage?: "en" | "pl" | "de" | "lt" | "cs";
     createdAt: string;
     updatedAt: string;
     isMandatory?: boolean;
@@ -4113,31 +4202,6 @@ export interface UpdateLearningPathResponse {
   };
 }
 
-export interface CreateLanguageResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    description: string;
-    thumbnailReference: string | null;
-    status: "draft" | "published" | "private";
-    includesCertificate: boolean;
-    settings: {
-      /** @default null */
-      certificateSignature: string | null;
-      /** @default null */
-      certificateFontColor: string | null;
-    };
-    sequenceEnabled: boolean;
-    /** @format uuid */
-    authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
 export interface DeleteLearningPathResponse {
   data: {
     message: string;
@@ -4535,6 +4599,8 @@ export interface GetGroupsResponse {
     id: string;
     name: string;
     characteristic: string | null;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     users?: {
       id: string;
       createdAt: string;
@@ -7087,6 +7153,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7104,10 +7171,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GroupControllerGetGroupById
      * @request GET:/api/group/{groupId}
      */
-    groupControllerGetGroupById: (groupId: string, params: RequestParams = {}) =>
+    groupControllerGetGroupById: (
+      groupId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetGroupByIdResponse, any>({
         path: `/api/group/${groupId}`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -7160,6 +7234,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -7206,6 +7281,68 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name GroupControllerCreateLanguage
+     * @request POST:/api/group/{groupId}/language
+     */
+    groupControllerCreateLanguage: (
+      groupId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateLanguageResponse, any>({
+        path: `/api/group/${groupId}/language`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerDeleteLanguage
+     * @request DELETE:/api/group/{groupId}/language
+     */
+    groupControllerDeleteLanguage: (
+      groupId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<DeleteLanguageResponse, any>({
+        path: `/api/group/${groupId}/language`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GroupControllerUpdateBaseLanguage
+     * @request PATCH:/api/group/{groupId}/base-language
+     */
+    groupControllerUpdateBaseLanguage: (
+      groupId: string,
+      data: UpdateBaseLanguageBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateBaseLanguageResponse, any>({
+        path: `/api/group/${groupId}/base-language`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name GroupControllerSetUserGroups
      * @request POST:/api/group/set
      */
@@ -7233,10 +7370,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name GroupControllerGetGroupsByCourse
      * @request GET:/api/group/by-course/{courseId}
      */
-    groupControllerGetGroupsByCourse: (courseId: string, params: RequestParams = {}) =>
+    groupControllerGetGroupsByCourse: (
+      courseId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetGroupsByCourseResponse, any>({
         path: `/api/group/by-course/${courseId}`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -7351,6 +7495,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "-email"
           | "-isEnrolledByGroup";
         groups?: string[];
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
         /** @min 1 */
         page?: number;
         perPage?: number;
@@ -7882,11 +8028,16 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     courseControllerGetCourseLearningStatisticsFilterOptions: (
       courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetCourseLearningStatisticsFilterOptionsResponse, any>({
         path: `/api/course/${courseId}/statistics/learning-time-filter-options`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -10720,6 +10871,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         perPage?: number;
         sort?: "name" | "createdAt";
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
