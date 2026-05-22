@@ -1895,6 +1895,22 @@ export interface UpdateCourseSettingsBody {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
   certificateFontColor?: string;
+  certificateValidity?:
+    | (
+        | {
+            type: "period";
+            /** @min 1 */
+            value: number;
+            unit: "days" | "months" | "years";
+          }
+        | {
+            type: "fixedDate";
+            /** @format date */
+            date: string;
+          }
+      )
+    | null;
+  applyValidityToExistingCertificates?: boolean;
   removeCertificateSignature?: boolean;
   /** @format binary */
   certificateSignature?: File;
@@ -1916,6 +1932,22 @@ export interface GetCourseSettingsResponse {
     certificateSignature: string | null;
     /** @default null */
     certificateFontColor: string | null;
+    /** @default null */
+    certificateValidity:
+      | (
+          | {
+              type: "period";
+              /** @min 1 */
+              value: number;
+              unit: "days" | "months" | "years";
+            }
+          | {
+              type: "fixedDate";
+              /** @format date */
+              date: string;
+            }
+        )
+      | null;
     certificateSignatureUrl: string | null;
   };
 }
@@ -2913,6 +2945,8 @@ export interface GetAllCertificatesResponse {
     fullName?: string | null;
     certificateSignatureUrl?: string | null;
     certificateFontColor?: string | null;
+    issuedAt: string;
+    expiresAt?: string | null;
     createdAt: string;
   }[];
   pagination: {
@@ -2953,6 +2987,67 @@ export interface CreateCertificateShareLinkBody {
 export interface CreateCertificateShareLinkResponse {
   shareUrl: string;
   linkedinShareUrl: string;
+}
+
+export interface GetCertificateValidityImpactBody {
+  certificateValidity:
+    | (
+        | {
+            type: "period";
+            /** @min 1 */
+            value: number;
+            unit: "days" | "months" | "years";
+          }
+        | {
+            type: "fixedDate";
+            /** @format date */
+            date: string;
+          }
+      )
+    | null;
+}
+
+export interface GetCertificateValidityImpactResponse {
+  activeCertificateCount: number;
+  immediatelyExpiringCertificateCount: number;
+}
+
+export interface GetCertificateResetOptionsResponse {
+  groups: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    activeCertificateCount: number;
+  }[];
+  activeCertificateUserCount: number;
+}
+
+export interface GetCertificateResetUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface ResetCourseCertificatesBody {
+  scope: "all" | "groups" | "users";
+  groupIds?: string[];
+  userIds?: string[];
+  sendEmail?: boolean;
+}
+
+export interface ResetCourseCertificatesResponse {
+  affectedCertificateCount: number;
+  affectedUserCount: number;
 }
 
 export interface GetThreadResponse {
@@ -4622,6 +4717,8 @@ export interface GetActivityLogsResponse {
       | "complete_lesson"
       | "complete_course"
       | "complete_chapter"
+      | "expire_certificate"
+      | "reset_certificate"
       | "view_announcement";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
@@ -8720,6 +8817,88 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<CreateCertificateShareLinkResponse, any>({
         path: `/api/certificates/share-link`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateValidityImpact
+     * @request POST:/api/certificates/course/{courseId}/validity-impact
+     */
+    certificatesControllerGetCertificateValidityImpact: (
+      courseId: string,
+      data: GetCertificateValidityImpactBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateValidityImpactResponse, any>({
+        path: `/api/certificates/course/${courseId}/validity-impact`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateResetOptions
+     * @request GET:/api/certificates/course/{courseId}/reset-options
+     */
+    certificatesControllerGetCertificateResetOptions: (
+      courseId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateResetOptionsResponse, any>({
+        path: `/api/certificates/course/${courseId}/reset-options`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerGetCertificateResetUsers
+     * @request GET:/api/certificates/course/{courseId}/reset-users
+     */
+    certificatesControllerGetCertificateResetUsers: (
+      courseId: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetCertificateResetUsersResponse, any>({
+        path: `/api/certificates/course/${courseId}/reset-users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CertificatesControllerResetCourseCertificates
+     * @request POST:/api/certificates/course/{courseId}/reset
+     */
+    certificatesControllerResetCourseCertificates: (
+      courseId: string,
+      data: ResetCourseCertificatesBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ResetCourseCertificatesResponse, any>({
+        path: `/api/certificates/course/${courseId}/reset`,
         method: "POST",
         body: data,
         type: ContentType.Json,

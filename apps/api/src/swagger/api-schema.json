@@ -6149,6 +6149,160 @@
         }
       }
     },
+    "/api/certificates/course/{courseId}/validity-impact": {
+      "post": {
+        "operationId": "CertificatesController_getCertificateValidityImpact",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetCertificateValidityImpactBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateValidityImpactResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset-options": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateResetOptions",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResetOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset-users": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateResetUsers",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResetUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset": {
+      "post": {
+        "operationId": "CertificatesController_resetCourseCertificates",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetCourseCertificatesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetCourseCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/certificates/share": {
       "get": {
         "operationId": "CertificatesController_getCertificateSharePage",
@@ -21125,6 +21279,73 @@
           "certificateFontColor": {
             "type": "string"
           },
+          "certificateValidity": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "period",
+                        "type": "string"
+                      },
+                      "value": {
+                        "minimum": 1,
+                        "type": "number"
+                      },
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "const": "days",
+                            "type": "string"
+                          },
+                          {
+                            "const": "months",
+                            "type": "string"
+                          },
+                          {
+                            "const": "years",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "value",
+                      "unit"
+                    ]
+                  },
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "fixedDate",
+                        "type": "string"
+                      },
+                      "date": {
+                        "format": "date",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "date"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "applyValidityToExistingCertificates": {
+            "type": "boolean"
+          },
           "removeCertificateSignature": {
             "type": "boolean"
           },
@@ -21189,6 +21410,71 @@
                   }
                 ]
               },
+              "certificateValidity": {
+                "default": null,
+                "anyOf": [
+                  {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "period",
+                            "type": "string"
+                          },
+                          "value": {
+                            "minimum": 1,
+                            "type": "number"
+                          },
+                          "unit": {
+                            "anyOf": [
+                              {
+                                "const": "days",
+                                "type": "string"
+                              },
+                              {
+                                "const": "months",
+                                "type": "string"
+                              },
+                              {
+                                "const": "years",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "value",
+                          "unit"
+                        ]
+                      },
+                      {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "fixedDate",
+                            "type": "string"
+                          },
+                          "date": {
+                            "format": "date",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "date"
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "certificateSignatureUrl": {
                 "anyOf": [
                   {
@@ -21205,6 +21491,7 @@
               "quizFeedbackEnabled",
               "certificateSignature",
               "certificateFontColor",
+              "certificateValidity",
               "certificateSignatureUrl"
             ]
           }
@@ -26158,6 +26445,19 @@
                     }
                   ]
                 },
+                "issuedAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
                 "createdAt": {
                   "type": "string"
                 }
@@ -26166,6 +26466,7 @@
                 "id",
                 "userId",
                 "courseId",
+                "issuedAt",
                 "createdAt"
               ]
             }
@@ -26349,6 +26650,245 @@
         "required": [
           "shareUrl",
           "linkedinShareUrl"
+        ]
+      },
+      "GetCertificateValidityImpactBody": {
+        "type": "object",
+        "properties": {
+          "certificateValidity": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "period",
+                        "type": "string"
+                      },
+                      "value": {
+                        "minimum": 1,
+                        "type": "number"
+                      },
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "const": "days",
+                            "type": "string"
+                          },
+                          {
+                            "const": "months",
+                            "type": "string"
+                          },
+                          {
+                            "const": "years",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "value",
+                      "unit"
+                    ]
+                  },
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "fixedDate",
+                        "type": "string"
+                      },
+                      "date": {
+                        "format": "date",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "date"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "certificateValidity"
+        ]
+      },
+      "GetCertificateValidityImpactResponse": {
+        "type": "object",
+        "properties": {
+          "activeCertificateCount": {
+            "type": "number"
+          },
+          "immediatelyExpiringCertificateCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "activeCertificateCount",
+          "immediatelyExpiringCertificateCount"
+        ]
+      },
+      "GetCertificateResetOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "activeCertificateCount": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "activeCertificateCount"
+              ]
+            }
+          },
+          "activeCertificateUserCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "groups",
+          "activeCertificateUserCount"
+        ]
+      },
+      "GetCertificateResetUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "firstName",
+                "lastName",
+                "email"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "ResetCourseCertificatesBody": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "anyOf": [
+              {
+                "const": "all",
+                "type": "string"
+              },
+              {
+                "const": "groups",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              }
+            ]
+          },
+          "groupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "sendEmail": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "ResetCourseCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "affectedCertificateCount": {
+            "type": "number"
+          },
+          "affectedUserCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "affectedCertificateCount",
+          "affectedUserCount"
         ]
       },
       "GetThreadResponse": {
@@ -34170,6 +34710,14 @@
                     },
                     {
                       "const": "complete_chapter",
+                      "type": "string"
+                    },
+                    {
+                      "const": "expire_certificate",
+                      "type": "string"
+                    },
+                    {
+                      "const": "reset_certificate",
                       "type": "string"
                     },
                     {

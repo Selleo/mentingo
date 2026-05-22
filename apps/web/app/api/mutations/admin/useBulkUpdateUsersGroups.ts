@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
+import { invalidateCertificateResetData } from "~/api/utils/invalidateCertificateResetData";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -37,6 +38,7 @@ export function useBulkUpdateUsersGroups() {
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY] });
+      await invalidateCertificateResetData();
       await invalidateLearningPathEnrollmentData();
       await invalidateCourseStatisticsQueries();
     },

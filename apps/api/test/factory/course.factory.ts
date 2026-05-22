@@ -101,6 +101,7 @@ export const createCourseFactory = (db: DatabasePg) => {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
         certificateFontColor: null,
+        certificateValidity: null,
       },
     };
   });

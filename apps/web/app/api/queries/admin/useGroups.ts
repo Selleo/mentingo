@@ -35,6 +35,6 @@ export function useGroupsQuerySuspense(searchParams?: GroupsSearchParams) {
   return useSuspenseQuery(groupsQueryOptions(searchParams));
 }
 
-export function useGroupsQuery(searchParams?: GroupsSearchParams) {
-  return useQuery(groupsQueryOptions(searchParams));
+export function useGroupsQuery(searchParams?: GroupsSearchParams, options?: QueryOptions) {
+  return useQuery(groupsQueryOptions(searchParams, options));
 }

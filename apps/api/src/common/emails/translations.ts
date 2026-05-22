@@ -71,6 +71,20 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Kursas baigtas - {{courseName}}",
     cs: "Kurz dokončen - {{courseName}}",
   },
+  certificateExpirationWarningEmail: {
+    en: "Certificate expires soon - {{courseName}}",
+    pl: "Certyfikat wkrótce wygaśnie - {{courseName}}",
+    de: "Zertifikat läuft bald ab - {{courseName}}",
+    lt: "Pažymėjimas netrukus baigs galioti - {{courseName}}",
+    cs: "Certifikát brzy vyprší - {{courseName}}",
+  },
+  certificateExpiredEmail: {
+    en: "Certificate reset - {{courseName}}",
+    pl: "Certyfikat zresetowany - {{courseName}}",
+    de: "Zertifikat zurückgesetzt - {{courseName}}",
+    lt: "Pažymėjimas nustatytas iš naujo - {{courseName}}",
+    cs: "Certifikát resetován - {{courseName}}",
+  },
   adminNewUserEmail: {
     en: "A new user has registered on your platform",
     pl: "Nowy użytkownik zarejestrował się na Twojej platformie",

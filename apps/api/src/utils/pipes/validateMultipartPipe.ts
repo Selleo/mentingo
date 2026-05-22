@@ -7,6 +7,12 @@ import type { TObject, Static, TSchema } from "@sinclair/typebox";
 type MultipartValue = string | Buffer | File | undefined;
 type ParsedValue = string | number | boolean | object | null;
 type MultipartData = Record<string, MultipartValue | MultipartValue[]>;
+type SchemaWithComposition = TSchema & {
+  allOf?: TSchema[];
+  anyOf?: TSchema[];
+  oneOf?: TSchema[];
+  type?: string;
+};
 
 @Injectable()
 export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
@@ -72,6 +78,8 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     }
 
     if (this.isStringSchema(schema)) return value;
+
+    if (this.shouldParseNull(schema, value)) return null;
 
     if (this.isJSONString(value)) {
       try {
@@ -175,5 +183,21 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
     const isBooleanString = value.toLowerCase() === "true" || value.toLowerCase() === "false";
 
     return (schemaType === "boolean" || schemaType === undefined) && isBooleanString;
+  }
+
+  private shouldParseNull(schema: TSchema | undefined, value: string) {
+    return value.trim() === "null" && this.schemaIncludesType(schema, "null");
+  }
+
+  private schemaIncludesType(schema: TSchema | undefined, type: string): boolean {
+    if (!schema) return false;
+
+    const schemaDefinition = schema as SchemaWithComposition;
+
+    if (schemaDefinition.type === type) return true;
+
+    return [schemaDefinition.anyOf, schemaDefinition.oneOf, schemaDefinition.allOf].some(
+      (schemas) => schemas?.some((nestedSchema) => this.schemaIncludesType(nestedSchema, type)),
+    );
   }
 }
