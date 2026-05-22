@@ -870,7 +870,7 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategorija sėkmingai ištrinta",
       "deleteCategoryFailed": "Nepavyko ištrinti kategorijos",
-      "deleteCategoryAssignedToCourses": "Kategorijos ištrinti negalima. Ji priskirta kursams ({{courseCount}}): {{courseTitles}}",
+      "deleteCategoryAssignedToCourses": "Kategorijos ištrinti negalima. Ji priskirta kursams ({{courseCount}}): {{courseTitles}}...",
       "noCategoriesFoundToDelete": "Nerasta kategorijų, kurias būtų galima ištrinti"
     },
     "breadcrumbs": {

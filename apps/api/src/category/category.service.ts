@@ -445,11 +445,13 @@ export class CategoryService {
   }
 
   private getCategoryAssignedToCoursesError(courseTitles: string[]) {
+    const displayedCourseTitles = courseTitles.slice(0, 2);
+
     return {
       message: "adminCategoriesView.toast.deleteCategoryAssignedToCourses",
       translationParams: {
         courseCount: courseTitles.length,
-        courseTitles: courseTitles.join(", "),
+        courseTitles: displayedCourseTitles.join(", "),
       },
     };
   }

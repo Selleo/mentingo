@@ -870,7 +870,7 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategorie byla úspěšně smazána",
       "deleteCategoryFailed": "Kategorii se nepodařilo smazat",
-      "deleteCategoryAssignedToCourses": "Kategorii nelze smazat. Je přiřazena ke kurzům ({{courseCount}}): {{courseTitles}}",
+      "deleteCategoryAssignedToCourses": "Kategorii nelze smazat. Je přiřazena ke kurzům ({{courseCount}}): {{courseTitles}}...",
       "noCategoriesFoundToDelete": "Nebyly nalezeny žádné kategorie ke smazání"
     },
     "breadcrumbs": {

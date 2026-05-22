@@ -1082,7 +1082,7 @@
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
       "deleteCategoryFailed": "Nie udało się usunąć kategorii",
-      "deleteCategoryAssignedToCourses": "Nie można usunąć kategorii. Jest przypisana do kursów ({{courseCount}}): {{courseTitles}}",
+      "deleteCategoryAssignedToCourses": "Nie można usunąć kategorii. Jest przypisana do kursów ({{courseCount}}): {{courseTitles}}...",
       "noCategoriesFoundToDelete": "Nie znaleziono kategorii do usunięcia"
     },
     "breadcrumbs": {

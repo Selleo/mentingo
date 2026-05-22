@@ -450,5 +450,57 @@ describe("CategoryController (e2e)", () => {
           });
         });
     });
+
+    it("limits assigned course names in category delete errors", async () => {
+      const user = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookie = await cookieFor(user, app);
+      const categoryTitle = `Assigned Category ${Date.now()}`;
+      const courseTitles = [
+        `Assigned Course A ${Date.now()}`,
+        `Assigned Course B ${Date.now()}`,
+        `Assigned Course C ${Date.now()}`,
+      ];
+
+      const createResponse = await request(app.getHttpServer())
+        .post("/api/category")
+        .set("Cookie", cookie)
+        .send({ title: categoryTitle, language: SUPPORTED_LANGUAGES.EN })
+        .expect(201);
+
+      const categoryId = createResponse.body.data.id;
+
+      await Promise.all(
+        courseTitles.map((courseTitle) =>
+          courseFactory.create({
+            title: courseTitle,
+            authorId: user.id,
+            categoryId,
+            status: "published",
+            thumbnailS3Key: null,
+          }),
+        ),
+      );
+
+      await request(app.getHttpServer())
+        .delete(`/api/category/deleteCategory/${categoryId}`)
+        .set("Cookie", cookie)
+        .expect(422)
+        .expect(({ body }) => {
+          expect(body.message).toBe("adminCategoriesView.toast.deleteCategoryAssignedToCourses");
+          expect(body.translationParams.courseCount).toBe(3);
+
+          const displayedCourseTitles = body.translationParams.courseTitles.split(", ") as string[];
+
+          expect(displayedCourseTitles).toHaveLength(2);
+          expect(
+            displayedCourseTitles.every((courseTitle: string) =>
+              courseTitles.includes(courseTitle),
+            ),
+          ).toBe(true);
+        });
+    });
   });
 });

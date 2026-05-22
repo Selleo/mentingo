@@ -55,10 +55,8 @@ export default function CreateNewCategoryPage() {
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
-                  <Label htmlFor="title" className="text-right">
-                    {t("adminCategoryView.field.title")}
-                  </Label>
+                <FormItem className="space-y-2">
+                  <Label htmlFor="title">{t("adminCategoryView.field.title")}</Label>
                   <FormControl>
                     <Input
                       id="title"

@@ -871,7 +871,7 @@
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
       "deleteCategoryFailed": "Failed to delete category",
-      "deleteCategoryAssignedToCourses": "Cannot delete category. It is assigned to {{courseCount}} course(s): {{courseTitles}}",
+      "deleteCategoryAssignedToCourses": "Cannot delete category. It is assigned to {{courseCount}} course(s): {{courseTitles}}...",
       "noCategoriesFoundToDelete": "No categories found to delete"
     },
     "breadcrumbs": {
