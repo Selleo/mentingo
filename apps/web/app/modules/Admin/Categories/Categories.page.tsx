@@ -1,6 +1,5 @@
 import { Link, useNavigate } from "@remix-run/react";
 import {
-  type ColumnDef,
   flexRender,
   getCoreRowModel,
   getSortedRowModel,
@@ -8,23 +7,17 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { format } from "date-fns";
 import { isEmpty } from "lodash-es";
 import { Plus, Trash } from "lucide-react";
-import React, { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteCategory } from "~/api/mutations/admin/useDeleteCategory";
 import { useDeleteManyCategories } from "~/api/mutations/admin/useDeleteManyCategories";
 import { useCategoriesSuspense, usersQueryOptions } from "~/api/queries";
-import { CATEGORIES_QUERY_KEY } from "~/api/queries/useCategories";
 import { queryClient } from "~/api/queryClient";
-import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { PageWrapper } from "~/components/PageWrapper";
-import SortButton from "~/components/TableSortButton/TableSortButton";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Checkbox } from "~/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -43,8 +36,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { useToast } from "~/components/ui/use-toast";
-import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { cn } from "~/lib/utils";
 import {
   type FilterConfig,
@@ -53,14 +44,12 @@ import {
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
-import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { CATEGORIES_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
 
-import type { MetaFunction } from "@remix-run/react";
-import type { GetAllCategoriesResponse } from "~/api/generated-api";
+import { getCategoriesColumns } from "./categories.columns";
 
-type TCategory = GetAllCategoriesResponse["data"][number];
+import type { MetaFunction } from "@remix-run/react";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.categories");
 
@@ -71,21 +60,25 @@ export const clientLoader = async () => {
 };
 
 const Categories = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [isPending, startTransition] = useTransition();
+
+  const appLanguage = useLanguageStore((state) => state.language);
+
   const [searchParams, setSearchParams] = useState<{
     title?: string;
     archived?: boolean;
   }>({ archived: false });
-  const { mutate: deleteManyCategories } = useDeleteManyCategories();
-  const { mutate: deleteCategory } = useDeleteCategory();
-  const [isPending, startTransition] = useTransition();
-  const appLanguage = useLanguageStore((state) => state.language);
+
   const { data } = useCategoriesSuspense({ ...searchParams, language: appLanguage });
-  const { t } = useTranslation();
-  const { toast } = useToast();
-  const [lastSelectedRowIndex, setLastSelectedRowIndex] = React.useState<number>(0);
+
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number>(0);
+
+  const { mutate: deleteCategory } = useDeleteCategory();
+  const { mutate: deleteManyCategories } = useDeleteManyCategories();
 
   const filterConfig: FilterConfig[] = [
     {
@@ -112,71 +105,15 @@ const Categories = () => {
     });
   };
 
-  const columns: ColumnDef<TCategory>[] = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          data-testid={CATEGORIES_PAGE_HANDLES.SELECT_ALL_CHECKBOX}
-          checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row, table }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          aria-label="Select row"
-          data-testid={CATEGORIES_PAGE_HANDLES.rowCheckbox(row.original.id)}
-          onClick={(event) => {
-            event.stopPropagation();
-            handleRowSelectionRange({
-              table,
-              event,
-              lastSelectedRowIndex,
-              setLastSelectedRowIndex,
-              id: row.id,
-              idx: row.index,
-              value: row.getIsSelected(),
-            });
-          }}
-        />
-      ),
-      enableSorting: false,
-    },
-    {
-      accessorKey: "title",
-      header: ({ column }) => (
-        <SortButton<TCategory> testId={CATEGORIES_PAGE_HANDLES.SORT_TITLE} column={column}>
-          {t("adminCategoriesView.field.title")}
-        </SortButton>
-      ),
-      cell: ({ row }) => (
-        <div className="max-w-md truncate">{formatHtmlString(row.original.title)}</div>
-      ),
-    },
-    {
-      accessorKey: "archived",
-      header: t("adminCategoriesView.field.status"),
-      cell: ({ row }) => {
-        const isArchived = row.original.archived;
-        return (
-          <Badge variant={isArchived ? "outline" : "secondary"} className="w-max">
-            {isArchived ? t("common.other.archived") : t("common.other.active")}
-          </Badge>
-        );
-      },
-    },
-    {
-      accessorKey: "createdAt",
-      header: ({ column }) => (
-        <SortButton<TCategory> testId={CATEGORIES_PAGE_HANDLES.SORT_CREATED_AT} column={column}>
-          {t("adminCategoriesView.field.createdAt")}
-        </SortButton>
-      ),
-      cell: ({ row }) => row.original.createdAt && format(new Date(row.original.createdAt), "PPpp"),
-    },
-  ];
+  const columns = useMemo(
+    () =>
+      getCategoriesColumns({
+        lastSelectedRowIndex,
+        setLastSelectedRowIndex,
+        t,
+      }),
+    [lastSelectedRowIndex, t],
+  );
 
   const table = useReactTable({
     getRowId: (row) => row.id,
@@ -193,53 +130,19 @@ const Categories = () => {
   });
 
   const selectedCategories = table.getSelectedRowModel().rows.map((row) => row.original.id);
+
   const handleDelete = () => {
-    try {
-      if (selectedCategories.length === 1) {
-        deleteCategory(selectedCategories[0], {
-          onSuccess: () => {
-            setRowSelection({});
-            queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-            toast({
-              title: t("adminCategoriesView.toast.deleteCategorySuccessfully"),
-            });
-          },
-          onError: (error) => {
-            console.error(error);
-            toast({
-              title: getTranslatedApiErrorMessage(
-                error,
-                t,
-                t("adminCategoriesView.toast.deleteCategoryFailed"),
-              ),
-            });
-          },
-        });
-      } else {
-        deleteManyCategories(selectedCategories, {
-          onSuccess: () => {
-            setRowSelection({});
-            queryClient.invalidateQueries({ queryKey: CATEGORIES_QUERY_KEY });
-            toast({
-              title: t("adminCategoriesView.toast.deleteCategorySuccessfully"),
-            });
-          },
-          onError: (error) => {
-            console.error(error);
-            toast({
-              title: getTranslatedApiErrorMessage(
-                error,
-                t,
-                t("adminCategoriesView.toast.deleteCategoryFailed"),
-              ),
-            });
-          },
-        });
-      }
-    } catch (error) {
-      console.error(error);
-      throw new Error("Failed to delete categories");
+    if (selectedCategories.length === 1) {
+      deleteCategory(selectedCategories[0], {
+        onSuccess: () => setRowSelection({}),
+      });
+
+      return;
     }
+
+    deleteManyCategories(selectedCategories, {
+      onSuccess: () => setRowSelection({}),
+    });
   };
 
   const getDeleteModalTitle = () => {

@@ -4,7 +4,7 @@ import { UUIDSchema } from "src/common";
 
 import { categoryLanguageSchema } from "./category.schema";
 
-import type { SupportedLanguages } from "@repo/shared";
+import type { Static } from "@sinclair/typebox";
 
 export const categoryUpdateSchema = Type.Partial(
   Type.Object({
@@ -15,16 +15,9 @@ export const categoryUpdateSchema = Type.Partial(
   }),
 );
 
-export type CategoryUpdateBody = {
-  archived?: boolean;
-  title?: string;
-  language?: SupportedLanguages;
-};
-
 export const categoryBaseLanguageUpdateSchema = Type.Object({
   baseLanguage: categoryLanguageSchema,
 });
 
-export type CategoryBaseLanguageUpdateBody = {
-  baseLanguage: SupportedLanguages;
-};
+export type CategoryUpdateBody = Static<typeof categoryUpdateSchema>;
+export type CategoryBaseLanguageUpdateBody = Static<typeof categoryBaseLanguageUpdateSchema>;

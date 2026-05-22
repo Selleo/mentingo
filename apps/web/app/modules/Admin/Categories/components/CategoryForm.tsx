@@ -3,10 +3,9 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useUpdateCategory } from "~/api/mutations/admin/useUpdateCategory";
-import { categoryByIdQueryOptions } from "~/api/queries/admin/useCategoryById";
-import { queryClient } from "~/api/queryClient";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
+import { cn } from "~/lib/utils";
 
 import { CATEGORY_PAGE_HANDLES } from "../../../../../e2e/data/categories/handles";
 import { CategoryDetails } from "../CategoryDetails";
@@ -34,14 +33,7 @@ export const CategoryForm = ({ category, categoryId, language }: CategoryFormPro
   } = useForm<UpdateCategoryBody>();
 
   const onSubmit = (data: UpdateCategoryBody) => {
-    updateCategory(
-      { data: { ...data, language }, categoryId },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries(categoryByIdQueryOptions(categoryId, language));
-        },
-      },
-    );
+    updateCategory({ data: { ...data, language }, categoryId });
   };
 
   return (
@@ -64,7 +56,7 @@ export const CategoryForm = ({ category, categoryId, language }: CategoryFormPro
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {displayedFields.map((field) => (
-          <div key={field} className={field === "title" ? "md:col-span-2" : ""}>
+          <div key={field} className={cn(field === "title" && "md:col-span-2")}>
             <Label className="mb-2 inline-block text-xs font-semibold uppercase tracking-wide text-neutral-500">
               {field === "archived"
                 ? t("adminCategoryView.field.status")
