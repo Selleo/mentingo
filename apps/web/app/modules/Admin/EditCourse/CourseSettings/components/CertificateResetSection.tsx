@@ -9,6 +9,7 @@ import { useCertificateResetUsersSuspense } from "~/api/queries/useCertificateRe
 import { Button } from "~/components/ui/button";
 import { useDebounce } from "~/hooks/useDebounce";
 import { usePaginationReducer } from "~/hooks/usePaginationReducer";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { CertificateResetDialog } from "./CertificateResetDialog";
 
@@ -23,6 +24,7 @@ const EMPTY_RESET_GROUPS: CertificateResetGroup[] = [];
 
 export function CertificateResetSection({ courseId, disabled }: CertificateResetSectionProps) {
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
 
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [resetScope, setResetScope] = useState<CertificateResetScope>(CERTIFICATE_RESET_SCOPES.ALL);
@@ -46,6 +48,7 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
 
   const { data: resetOptions } = useCertificateResetOptions(
     courseId,
+    language,
     isResetDialogOpen && !!courseId,
   );
 
@@ -60,6 +63,7 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
   } = useCertificateResetUsersSuspense(
     {
       courseId,
+      language,
       page: usersPage,
       perPage: usersPerPage,
       search: debouncedUsersSearch || undefined,

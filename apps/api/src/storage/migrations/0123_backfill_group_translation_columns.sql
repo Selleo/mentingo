@@ -1,5 +1,4 @@
--- Custom SQL migration file, put you code below! --
-
+-- Custom SQL migration file, put your code below! --
 DO $$
 DECLARE
   group_record RECORD;
@@ -13,9 +12,7 @@ BEGIN
     BEGIN
       parsed_name := group_record."name"::jsonb;
 
-      IF jsonb_typeof(parsed_name) = 'object' THEN
-        parsed_name := group_record."name"::jsonb;
-      ELSE
+      IF jsonb_typeof(parsed_name) <> 'object' THEN
         parsed_name := NULL;
       END IF;
     EXCEPTION
@@ -27,9 +24,7 @@ BEGIN
       BEGIN
         parsed_characteristic := group_record."characteristic"::jsonb;
 
-        IF jsonb_typeof(parsed_characteristic) = 'object' THEN
-          parsed_characteristic := group_record."characteristic"::jsonb;
-        ELSE
+        IF jsonb_typeof(parsed_characteristic) <> 'object' THEN
           parsed_characteristic := NULL;
         END IF;
       EXCEPTION
@@ -42,13 +37,16 @@ BEGIN
 
     UPDATE "groups"
     SET
-      "name" = COALESCE(parsed_name, jsonb_build_object('en', group_record."name"))::text,
-      "characteristic" = CASE
+      "name_translations" = COALESCE(
+        parsed_name,
+        jsonb_build_object('en', group_record."name")
+      ),
+      "characteristic_translations" = CASE
         WHEN group_record."characteristic" IS NULL THEN NULL
         ELSE COALESCE(
           parsed_characteristic,
           jsonb_build_object('en', group_record."characteristic")
-        )::text
+        )
       END
     WHERE "id" = group_record."id";
   END LOOP;

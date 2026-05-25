@@ -9003,11 +9003,16 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     certificatesControllerGetCertificateResetOptions: (
       courseId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
       params: RequestParams = {},
     ) =>
       this.request<GetCertificateResetOptionsResponse, any>({
         path: `/api/certificates/course/${courseId}/reset-options`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -9026,6 +9031,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         perPage?: number;
         search?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>

@@ -42,6 +42,7 @@ export type CertificatesQuery = {
 };
 
 export type CertificateResetUsersQuery = {
+  language?: SupportedLanguages;
   page?: number;
   perPage?: number;
   search?: string;
@@ -50,13 +51,14 @@ export type CertificateResetUsersQuery = {
 export type CertificateResetUsersResult = {
   data: CertificateResetUsersResponse;
   pagination: Pagination;
-  appliedFilters: { search?: string };
+  appliedFilters: { language?: SupportedLanguages; search?: string };
 };
 
 export type FindCertificateResetUsersParams = {
   courseId: UUIDType;
   page: number;
   perPage: number;
+  language?: SupportedLanguages;
   search?: string;
 };
 
