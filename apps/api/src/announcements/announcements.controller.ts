@@ -1,5 +1,15 @@
-import { Body, Controller, Get, Param, Post, UseGuards, Patch, Query } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+} from "@nestjs/common";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -12,6 +22,7 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
+  announcementLanguageSchema,
   announcementsForUserSchema,
   baseAnnouncementSchema,
   unreadAnnouncementsSchema,
@@ -30,21 +41,13 @@ export class AnnouncementsController {
   @Get()
   @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
+    request: [
+      { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
+    ],
     response: baseResponse(allAnnouncementsSchema),
   })
-  async getAllAnnouncements() {
-    const announcements = await this.announcementsService.getAllAnnouncements();
-
-    return new BaseResponse(announcements);
-  }
-
-  @Get("latest")
-  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
-  @Validate({
-    response: baseResponse(allAnnouncementsSchema),
-  })
-  async getLatestUnreadAnnouncements(@CurrentUser("userId") userId: UUIDType) {
-    const announcements = await this.announcementsService.getLatestUnreadAnnouncements(userId);
+  async getAllAnnouncements(@Query("language") language?: SupportedLanguages) {
+    const announcements = await this.announcementsService.getAllAnnouncements(language);
 
     return new BaseResponse(announcements);
   }
@@ -70,6 +73,7 @@ export class AnnouncementsController {
       { type: "query", name: "authorName", schema: Type.Optional(Type.String()) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
       { type: "query", name: "isRead", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
     ],
     response: baseResponse(announcementsForUserSchema),
   })
@@ -79,6 +83,7 @@ export class AnnouncementsController {
     @Query("authorName") authorName?: string,
     @Query("search") search?: string,
     @Query("isRead") isRead?: string,
+    @Query("language") language?: SupportedLanguages,
     @CurrentUser("userId") userId?: UUIDType,
   ) {
     const filters: AnnouncementFilters = {
@@ -88,7 +93,11 @@ export class AnnouncementsController {
       search,
       isRead: isRead ? isRead === "true" : undefined,
     };
-    const announcements = await this.announcementsService.getAnnouncementsForUser(userId!, filters);
+    const announcements = await this.announcementsService.getAnnouncementsForUser(
+      userId!,
+      filters,
+      language,
+    );
 
     return new BaseResponse(announcements);
   }
@@ -111,6 +120,17 @@ export class AnnouncementsController {
     return new BaseResponse(announcement);
   }
 
+  @Patch("read-all")
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
+  @Validate({
+    response: baseResponse(Type.Object({ updatedCount: Type.Number() })),
+  })
+  async markAllAnnouncementsAsRead(@CurrentUser() currentUser: CurrentUserType) {
+    const updatedCount = await this.announcementsService.markAllAnnouncementsAsRead(currentUser);
+
+    return new BaseResponse({ updatedCount });
+  }
+
   @Patch(":id/read")
   @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
@@ -126,5 +146,16 @@ export class AnnouncementsController {
     );
 
     return new BaseResponse(announcement);
+  }
+
+  @Delete(":id")
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_DELETE)
+  @Validate({
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteAnnouncement(@Param("id") announcementId: UUIDType) {
+    await this.announcementsService.deleteAnnouncement(announcementId);
+
+    return new BaseResponse({ message: "Announcement deleted successfully" });
   }
 }

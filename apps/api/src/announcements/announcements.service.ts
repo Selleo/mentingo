@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 
 import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -16,12 +17,8 @@ export class AnnouncementsService {
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async getAllAnnouncements() {
-    return await this.announcementsRepository.getAllAnnouncements();
-  }
-
-  async getLatestUnreadAnnouncements(userId: UUIDType) {
-    return await this.announcementsRepository.getLatestUnreadAnnouncements(userId);
+  async getAllAnnouncements(language?: SupportedLanguages) {
+    return await this.announcementsRepository.getAllAnnouncements(language);
   }
 
   async getUnreadAnnouncementsCount(userId: UUIDType) {
@@ -55,11 +52,21 @@ export class AnnouncementsService {
     return readAnnouncements;
   }
 
-  async getAnnouncementsForUser(userId: UUIDType, filters?: AnnouncementFilters) {
-    return await this.announcementsRepository.getAnnouncementsForUser(userId, filters);
+  async markAllAnnouncementsAsRead(currentUser: CurrentUserType) {
+    return await this.announcementsRepository.markAllAnnouncementsAsRead(currentUser.userId);
+  }
+
+  async getAnnouncementsForUser(
+    userId: UUIDType,
+    filters?: AnnouncementFilters,
+    language?: SupportedLanguages,
+  ) {
+    return await this.announcementsRepository.getAnnouncementsForUser(userId, filters, language);
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUserType) {
+    this.validateCreateAnnouncement(createAnnouncementData);
+
     const createdAnnouncement = await this.announcementsRepository.createAnnouncement(
       createAnnouncementData,
       author.userId,
@@ -76,5 +83,42 @@ export class AnnouncementsService {
     );
 
     return createdAnnouncement;
+  }
+
+  async deleteAnnouncement(announcementId: UUIDType) {
+    const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
+
+    if (!announcement) throw new BadRequestException("Announcement not found");
+
+    const [deletedAnnouncement] =
+      await this.announcementsRepository.deleteAnnouncement(announcementId);
+
+    if (!deletedAnnouncement) throw new BadRequestException("announcements.toast.deleteFailed");
+  }
+
+  private validateCreateAnnouncement(createAnnouncementData: CreateAnnouncement) {
+    const { baseLanguage, translations } = createAnnouncementData;
+
+    if (!Object.values(SUPPORTED_LANGUAGES).includes(baseLanguage)) {
+      throw new BadRequestException("announcements.toast.invalidBaseLanguage");
+    }
+
+    if (!translations.length) {
+      throw new BadRequestException("announcements.toast.translationsRequired");
+    }
+
+    const seenLanguages = new Set<SupportedLanguages>();
+
+    translations.forEach((translation) => {
+      if (seenLanguages.has(translation.language)) {
+        throw new BadRequestException("announcements.toast.duplicateLanguage");
+      }
+
+      seenLanguages.add(translation.language);
+    });
+
+    if (!seenLanguages.has(baseLanguage)) {
+      throw new BadRequestException("announcements.toast.baseLanguageRequired");
+    }
   }
 }

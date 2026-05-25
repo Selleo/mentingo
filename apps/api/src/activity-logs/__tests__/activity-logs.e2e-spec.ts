@@ -425,9 +425,15 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when announcement is created", async () => {
       const announcement = await announcementsService.createAnnouncement(
         {
-          title: "Initial Announcement",
-          content: "Announcement content",
           groupId: null,
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "Initial Announcement",
+              content: "Announcement content",
+            },
+          ],
         },
         currentAdminUser,
       );
@@ -452,9 +458,15 @@ describe("Activity Logs E2E", () => {
 
       const announcement = await announcementsService.createAnnouncement(
         {
-          title: "Initial Announcement",
-          content: "Announcement content",
           groupId: null,
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "Initial Announcement",
+              content: "Announcement content",
+            },
+          ],
         },
         currentAdminUser,
       );

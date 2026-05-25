@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { eq, and, not } from "drizzle-orm";
 import { Factory } from "fishery";
 
@@ -56,10 +57,13 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
 
     return {
       id: faker.string.uuid(),
-      title: faker.lorem.sentence(3),
-      content: faker.lorem.paragraph(),
+      title: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.sentence(3) },
+      content: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph() },
       authorId: faker.string.uuid(),
       isEveryone: true,
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN],
+      deletedAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
