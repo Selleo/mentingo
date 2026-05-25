@@ -237,7 +237,7 @@ export class UserService {
       );
   }
 
-  public async getUserById(id: UUIDType, db?: DatabasePg) {
+  public async getUserById(id: UUIDType, db?: DatabasePg, language?: SupportedLanguages) {
     const dbInstance = db ?? this.db;
 
     const [user] = await dbInstance
@@ -249,7 +249,7 @@ export class UserService {
           groups.id
         }, 'name', ${this.localizationService.getLocalizedSqlField(
           groups.name,
-          undefined,
+          language,
           groups,
         )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
       })
