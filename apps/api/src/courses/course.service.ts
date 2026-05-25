@@ -38,7 +38,6 @@ import {
   or,
   sql,
 } from "drizzle-orm";
-import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
@@ -157,6 +156,7 @@ import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SQL } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -3760,9 +3760,6 @@ export class CourseService {
     courseId: UUIDType,
     language: SupportedLanguages,
   ) {
-    const studentGroups = alias(groups, "g");
-    const studentGroupUsers = alias(groupUsers, "gu");
-
     const studentNameExpression = sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
 
     const lastActivityExpression = sql<string | null>`(
@@ -3788,19 +3785,24 @@ export class CourseService {
           SELECT json_agg(
             json_build_object(
               'id',
-              ${studentGroups.id},
+              g.id,
               'name',
-              ${this.localizationService.getLocalizedSqlField(
-                studentGroups.name,
-                language,
-                groups,
-                "g",
-              )}
+              COALESCE(
+                CASE
+                  WHEN g.available_locales @> ARRAY[${language}]::text[]
+                    THEN COALESCE(
+                      g.name::jsonb ->> ${language}::text,
+                      g.name::jsonb ->> g.base_language::text
+                    )
+                  ELSE g.name::jsonb ->> g.base_language::text
+                END,
+                ''
+              )
             )
           )
-          FROM ${studentGroups}
-          JOIN ${studentGroupUsers} ON ${studentGroupUsers.groupId} = ${studentGroups.id}
-          WHERE ${studentGroupUsers.userId} = ${users.id}
+          FROM ${groups} AS g
+          JOIN ${groupUsers} AS gu ON gu.group_id = g.id
+          WHERE gu.user_id = ${users.id}
         )`;
 
     const lastAttemptExpression = sql<string>`(
