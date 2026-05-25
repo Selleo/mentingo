@@ -3,32 +3,31 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
 import { queryClient } from "~/api/queryClient";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
-type GroupBody = {
-  name: string;
-  description?: string;
-};
+import type { UpdateGroupBody } from "~/api/generated-api";
 
 export function useUpdateGroup(groupId: string) {
   const { t } = useTranslation();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (input: GroupBody) => {
+    mutationFn: async (input: UpdateGroupBody) => {
       const { data } = await ApiClient.api.groupControllerUpdateGroup(groupId, input);
-
-      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
-      await queryClient.invalidateQueries({ queryKey: ["users"] });
-      await invalidateLearningPathEnrollmentData();
 
       return data;
     },
 
-    onSuccess: () => {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: [COURSE_STUDENTS_PROGRESS_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: ["users"] });
+      await invalidateLearningPathEnrollmentData();
+
       toast({
         variant: "default",
         description: t("adminGroupsView.updateGroup.groupUpdatedSuccessfully"),

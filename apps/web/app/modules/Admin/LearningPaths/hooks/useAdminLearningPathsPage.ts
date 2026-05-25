@@ -46,7 +46,7 @@ export function useAdminLearningPathsPage() {
     searchQuery,
   });
 
-  const { data: groups = [] } = useGroupsQuery();
+  const { data: groups = [] } = useGroupsQuery({ language: appLanguage });
 
   const { mutateAsync: createLearningPath, isPending: isCreatePending } = useCreateLearningPath();
   const { mutateAsync: updateLearningPath, isPending: isUpdatePending } = useUpdateLearningPath();

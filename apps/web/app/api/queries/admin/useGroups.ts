@@ -2,11 +2,13 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { GetAllGroupsResponse } from "~/api/generated-api";
 
 export type GroupsSearchParams = {
   name?: string;
   sort?: string;
+  language?: SupportedLanguages;
 };
 
 export const GROUPS_QUERY_KEY = "groups";
@@ -24,6 +26,7 @@ export const groupsQueryOptions = (
     const { data } = await ApiClient.api.groupControllerGetAllGroups({
       ...(searchParams?.name && { keyword: searchParams.name }),
       ...(searchParams?.sort && { sort: searchParams.sort }),
+      ...(searchParams?.language && { language: searchParams.language }),
     });
     return data;
   },

@@ -34,6 +34,7 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 import { useGroupTable } from "~/modules/Admin/Groups/hooks/useGroupTable";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { GROUPS_PAGE_HANDLES } from "../../../../e2e/data/groups/handles";
@@ -47,6 +48,9 @@ export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.
 const Groups = (): ReactElement => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const language = useLanguageStore((state) => state.language);
+
   const { columns } = useGroupTable();
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -54,8 +58,9 @@ const Groups = (): ReactElement => {
 
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
 
-  const { data } = useGroupsQuerySuspense();
+  const { data } = useGroupsQuerySuspense({ language });
   const { mutateAsync: deleteGroupsMutation } = useBulkDeleteGroups();
+
   const table = useReactTable({
     getRowId: (row) => row.id,
     data,

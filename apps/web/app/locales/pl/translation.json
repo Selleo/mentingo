@@ -1485,6 +1485,14 @@
       "groupUpdatedSuccessfully": "Grupa zaktualizowana pomyślnie",
       "groupNotFound": "Nie znaleziono grupy"
     },
+    "language": {
+      "languageCreated": "Język grupy został pomyślnie utworzony",
+      "languageDeleted": "Język grupy został pomyślnie usunięty",
+      "baseLanguageUpdated": "Domyślny język grupy został pomyślnie zaktualizowany",
+      "setBaseLanguage": "Ustaw domyślny",
+      "setBaseTitle": "Ustaw język domyślny",
+      "setBaseDescription": "Czy na pewno chcesz ustawić {{language}} jako język domyślny?"
+    },
     "deleteGroup": {
       "title": "Potwierdź usunięcie",
       "description": "Czy na pewno chcesz usunąć te grupy?",

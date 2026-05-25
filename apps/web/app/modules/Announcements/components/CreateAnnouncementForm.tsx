@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { CREATE_ANNOUNCEMENT_PAGE_HANDLES } from "../handles";
 
@@ -29,7 +30,9 @@ interface CreateAnnouncementFormProps {
 export default function CreateAnnouncementForm({ control, errors }: CreateAnnouncementFormProps) {
   const { t } = useTranslation();
 
-  const { data: groups } = useGroupsQuerySuspense();
+  const language = useLanguageStore((state) => state.language);
+
+  const { data: groups } = useGroupsQuerySuspense({ language });
 
   return (
     <Card className="w-full">

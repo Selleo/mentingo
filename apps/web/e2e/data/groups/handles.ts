@@ -20,8 +20,22 @@ export const GROUPS_PAGE_HANDLES = {
 export const GROUP_FORM_HANDLES = {
   NAME_INPUT: "group-form-name-input",
   CHARACTERISTIC_INPUT: "group-form-characteristic-input",
+  LANGUAGE_SELECT: "group-form-language-select",
   CANCEL_BUTTON: "group-form-cancel-button",
   SUBMIT_BUTTON: "group-form-submit-button",
+} as const;
+
+export const GROUP_LANGUAGE_SELECTOR_HANDLES = {
+  SELECT: "group-language-select",
+  DELETE_BUTTON: "group-language-delete-button",
+  SET_BASE_LANGUAGE_BUTTON: "group-language-set-base-button",
+  SET_BASE_LANGUAGE_DIALOG: "group-language-set-base-dialog",
+  SET_BASE_LANGUAGE_CONFIRM_BUTTON: "group-language-set-base-confirm-button",
+  CREATE_DIALOG: "group-language-create-dialog",
+  CREATE_CONFIRM_BUTTON: "group-language-create-confirm-button",
+  DELETE_DIALOG: "group-language-delete-dialog",
+  DELETE_CONFIRM_BUTTON: "group-language-delete-confirm-button",
+  option: (language: string) => `group-language-option-${language}`,
 } as const;
 
 export const CREATE_GROUP_PAGE_HANDLES = {

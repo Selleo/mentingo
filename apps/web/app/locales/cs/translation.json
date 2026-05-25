@@ -1210,6 +1210,14 @@
       "groupUpdatedSuccessfully": "Skupina byla úspěšně aktualizována",
       "groupNotFound": "Skupina nenalezena"
     },
+    "language": {
+      "languageCreated": "Jazyk skupiny byl úspěšně vytvořen",
+      "languageDeleted": "Jazyk skupiny byl úspěšně odstraněn",
+      "baseLanguageUpdated": "Výchozí jazyk skupiny byl úspěšně aktualizován",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Nastavit výchozí jazyk",
+      "setBaseDescription": "Opravdu chcete nastavit {{language}} jako výchozí jazyk?"
+    },
     "deleteGroup": {
       "title": "Potvrďte smazání",
       "description": "Opravdu chcete tyto skupiny smazat?",

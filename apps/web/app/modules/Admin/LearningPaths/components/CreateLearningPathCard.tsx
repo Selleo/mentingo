@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
@@ -43,6 +44,15 @@ export function CreateLearningPathCard({
 
   const title = form.watch("title") ?? "";
   const description = form.watch("description") ?? "";
+
+  const {
+    formKey,
+    selectorProps: { value, onChange },
+  } = getLocalizedResourceLanguage({
+    value: language,
+    onChange: onLanguageChange,
+    formKeyParts: ["learning-path", "create"],
+  });
 
   useEffect(() => {
     return () => {
@@ -146,8 +156,9 @@ export function CreateLearningPathCard({
             </div>
             <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
               <LearningPathLanguageSelector
-                language={language}
-                onChange={onLanguageChange}
+                formKey={formKey}
+                language={value}
+                onChange={onChange}
                 isCreateMode
               />
             </div>
