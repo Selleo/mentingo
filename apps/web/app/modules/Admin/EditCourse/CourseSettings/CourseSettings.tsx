@@ -88,7 +88,7 @@ const CourseSettings = ({
     courseId: courseId || "",
   });
 
-  const { data: categories } = useCategoriesSuspense();
+  const { data: categories } = useCategoriesSuspense({ language: courseLanguage });
   const { mutateAsync: uploadFile } = useUploadFile();
   const { mutateAsync: deleteTrailer } = useDeleteCourseTrailer();
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();

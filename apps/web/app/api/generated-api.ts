@@ -1410,23 +1410,11 @@ export interface DeleteLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
-    name: string;
-    characteristic: string | null;
+    title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
+    archived: boolean | null;
+    createdAt: string | null;
   };
 }
 
@@ -1438,23 +1426,11 @@ export interface UpdateBaseLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
-    name: string;
-    characteristic: string | null;
+    title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    users?: {
-      id: string;
-      createdAt: string;
-      updatedAt: string;
-      email: string;
-      firstName: string;
-      lastName: string;
-      archived: boolean;
-      deletedAt: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    createdAt?: string;
-    updatedAt?: string;
+    archived: boolean | null;
+    createdAt: string | null;
   };
 }
 
@@ -3737,59 +3713,6 @@ export interface UpdateCategoryBody {
 }
 
 export interface UpdateCategoryResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    archived: boolean | null;
-    createdAt: string | null;
-  };
-}
-
-export interface CreateLanguageResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    description: string;
-    thumbnailReference: string | null;
-    status: "draft" | "published" | "private";
-    includesCertificate: boolean;
-    settings: {
-      /** @default null */
-      certificateSignature: string | null;
-      /** @default null */
-      certificateFontColor: string | null;
-    };
-    sequenceEnabled: boolean;
-    /** @format uuid */
-    authorId: string;
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface DeleteLanguageResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
-    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-    archived: boolean | null;
-    createdAt: string | null;
-  };
-}
-
-export interface UpdateBaseLanguageBody {
-  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
-}
-
-export interface UpdateBaseLanguageResponse {
   data: {
     /** @format uuid */
     id: string;
