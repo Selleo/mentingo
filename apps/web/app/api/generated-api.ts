@@ -4453,8 +4453,6 @@ export interface GetAllAnnouncementsResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     deletedAt: string | null;
-    authorName: string;
-    authorProfilePictureUrl: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -4482,8 +4480,6 @@ export interface GetAnnouncementsForUserResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     deletedAt: string | null;
-    authorName: string;
-    authorProfilePictureUrl: string | null;
     isRead: boolean;
   }[];
   pagination: {
@@ -10702,7 +10698,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         content?: string;
-        authorName?: string;
         search?: string;
         isRead?: string;
         language?: "en" | "pl" | "de" | "lt" | "cs";

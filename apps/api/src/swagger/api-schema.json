@@ -9760,14 +9760,6 @@
             }
           },
           {
-            "name": "authorName",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "search",
             "required": false,
             "in": "query",
@@ -34658,19 +34650,6 @@
                       "type": "null"
                     }
                   ]
-                },
-                "authorName": {
-                  "type": "string"
-                },
-                "authorProfilePictureUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 }
               },
               "required": [
@@ -34683,9 +34662,7 @@
                 "content",
                 "baseLanguage",
                 "availableLocales",
-                "deletedAt",
-                "authorName",
-                "authorProfilePictureUrl"
+                "deletedAt"
               ]
             }
           },
@@ -34829,19 +34806,6 @@
                     }
                   ]
                 },
-                "authorName": {
-                  "type": "string"
-                },
-                "authorProfilePictureUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "isRead": {
                   "type": "boolean"
                 }
@@ -34857,8 +34821,6 @@
                 "baseLanguage",
                 "availableLocales",
                 "deletedAt",
-                "authorName",
-                "authorProfilePictureUrl",
                 "isRead"
               ]
             }

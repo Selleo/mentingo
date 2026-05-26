@@ -10,7 +10,6 @@ import {
   sql,
   not,
   desc,
-  ilike,
   or,
   isNull,
   inArray,
@@ -27,7 +26,6 @@ import {
   userAnnouncements,
   users,
 } from "src/storage/schema";
-import { UserService } from "src/user/user.service";
 
 import type {
   Announcement,
@@ -42,7 +40,6 @@ import type { UUIDType } from "src/common";
 export class AnnouncementsRepository {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private readonly userService: UserService,
     private readonly permissionsService: PermissionsService,
     private readonly localizationService: LocalizationService,
   ) {}
@@ -56,10 +53,8 @@ export class AnnouncementsRepository {
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
-          ...this.getAuthorFields(),
         })
         .from(announcements)
-        .leftJoin(users, eq(announcements.authorId, users.id))
         .where(isNull(announcements.deletedAt))
         .orderBy(desc(announcements.createdAt))
         .limit(pagination.perPage)
@@ -71,7 +66,7 @@ export class AnnouncementsRepository {
         .where(isNull(announcements.deletedAt));
 
       return {
-        data: await this.mapAnnouncementsWithProfilePictures(announcementsData),
+        data: announcementsData,
         pagination: { ...pagination, totalItems },
       };
     });
@@ -236,7 +231,6 @@ export class AnnouncementsRepository {
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
-          ...this.getAuthorFields(),
           isRead: userAnnouncements.isRead,
         })
         .from(announcements)
@@ -247,7 +241,6 @@ export class AnnouncementsRepository {
             eq(userAnnouncements.userId, userId),
           ),
         )
-        .leftJoin(users, eq(announcements.authorId, users.id))
         .where(conditions)
         .orderBy(desc(announcements.createdAt))
         .limit(pagination.perPage)
@@ -263,11 +256,10 @@ export class AnnouncementsRepository {
             eq(userAnnouncements.userId, userId),
           ),
         )
-        .leftJoin(users, eq(announcements.authorId, users.id))
         .where(conditions);
 
       return {
-        data: await this.mapAnnouncementsWithProfilePictures(announcementsData),
+        data: announcementsData,
         pagination: { ...pagination, totalItems },
       };
     });
@@ -297,14 +289,6 @@ export class AnnouncementsRepository {
       );
 
     if (filters.isRead !== undefined) conditions.push(eq(userAnnouncements.isRead, filters.isRead));
-
-    if (filters.authorName)
-      conditions.push(
-        or(
-          ilike(users.firstName, `%${filters.authorName.toLowerCase()}%`),
-          ilike(users.lastName, `%${filters.authorName.toLowerCase()}%`),
-        ),
-      );
 
     if (filters.search)
       conditions.push(
@@ -337,13 +321,6 @@ export class AnnouncementsRepository {
     await this.db.insert(userAnnouncements).values(userAnnouncementsToInsert);
   }
 
-  getAuthorFields() {
-    return {
-      authorName: sql<string>`concat(${users.firstName}, ' ', ${users.lastName})`,
-      authorProfilePictureUrl: users.avatarReference,
-    };
-  }
-
   private getLocalizedAnnouncementFields(language?: SupportedLanguages) {
     return {
       title: this.localizationService.getLocalizedSqlField(
@@ -367,29 +344,10 @@ export class AnnouncementsRepository {
       .select({
         ...getTableColumns(announcements),
         ...this.getLocalizedAnnouncementFields(language),
-        ...this.getAuthorFields(),
       })
       .from(announcements)
-      .leftJoin(users, eq(announcements.authorId, users.id))
       .where(eq(announcements.id, announcementId));
 
-    const [announcementWithProfilePicture] = await this.mapAnnouncementsWithProfilePictures([
-      announcement,
-    ]);
-
-    return announcementWithProfilePicture;
-  }
-
-  async mapAnnouncementsWithProfilePictures<T extends { authorProfilePictureUrl: string | null }>(
-    announcementsData: T[],
-  ) {
-    return Promise.all(
-      announcementsData.map(async (announcement) => ({
-        ...announcement,
-        authorProfilePictureUrl: await this.userService.getUsersProfilePictureUrl(
-          announcement.authorProfilePictureUrl,
-        ),
-      })),
-    );
+    return announcement;
   }
 }

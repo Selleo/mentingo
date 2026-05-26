@@ -36,7 +36,6 @@ export function useInfiniteAnnouncementsForUser(
       const { data } = await ApiClient.api.announcementsControllerGetAnnouncementsForUser({
         ...(searchParams?.title && { title: searchParams.title }),
         ...(searchParams?.content && { content: searchParams.content }),
-        ...(searchParams?.authorName && { authorName: searchParams.authorName }),
         ...(searchParams?.search && { search: searchParams.search }),
         ...(searchParams?.isRead && { isRead: searchParams.isRead }),
         ...(searchParams?.language && { language: searchParams.language }),

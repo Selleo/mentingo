@@ -89,7 +89,6 @@ export class AnnouncementsController {
     request: [
       { type: "query", name: "title", schema: Type.Optional(Type.String()) },
       { type: "query", name: "content", schema: Type.Optional(Type.String()) },
-      { type: "query", name: "authorName", schema: Type.Optional(Type.String()) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
       { type: "query", name: "isRead", schema: Type.Optional(Type.String()) },
       { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
@@ -101,7 +100,6 @@ export class AnnouncementsController {
   async getAnnouncementsForUser(
     @Query("title") title?: string,
     @Query("content") content?: string,
-    @Query("authorName") authorName?: string,
     @Query("search") search?: string,
     @Query("isRead") isRead?: string,
     @Query("language") language?: SupportedLanguages,
@@ -112,7 +110,6 @@ export class AnnouncementsController {
     const filters: AnnouncementFilters = {
       title,
       content,
-      authorName,
       search,
       isRead: isRead ? isRead === "true" : undefined,
     };

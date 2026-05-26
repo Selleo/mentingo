@@ -11,7 +11,6 @@ export const ANNOUNCEMENTS_PAGE_SIZE = 20;
 export type AnnouncementFilters = {
   title?: string;
   content?: string;
-  authorName?: string;
   search?: string;
   isRead?: string;
   language?: SupportedLanguages;
@@ -32,7 +31,6 @@ export const announcementsForUserOptions = (
     const response = await ApiClient.api.announcementsControllerGetAnnouncementsForUser({
       ...(searchParams?.title && { title: searchParams.title }),
       ...(searchParams?.content && { content: searchParams.content }),
-      ...(searchParams?.authorName && { authorName: searchParams.authorName }),
       ...(searchParams?.search && { search: searchParams.search }),
       ...(searchParams?.isRead && { isRead: searchParams.isRead }),
       ...(searchParams?.language && { language: searchParams.language }),

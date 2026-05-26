@@ -24,13 +24,7 @@ export const baseAnnouncementSchema = Type.Composite([
   }),
 ]);
 
-export const announcementSchema = Type.Composite([
-  baseAnnouncementSchema,
-  Type.Object({
-    authorName: Type.String(),
-    authorProfilePictureUrl: Type.Union([Type.String(), Type.Null()]),
-  }),
-]);
+export const announcementSchema = baseAnnouncementSchema;
 export const allAnnouncementsSchema = Type.Array(announcementSchema);
 
 export const userAnnouncementsSchema = omitTenantId(
@@ -42,5 +36,5 @@ export const userAnnouncementsSchema = omitTenantId(
 export const unreadAnnouncementsSchema = Type.Object({ unreadCount: Type.Number() });
 
 export const announcementsForUserSchema = Type.Array(
-  Type.Object({ ...announcementSchema.properties, isRead: Type.Boolean() }),
+  Type.Object({ ...baseAnnouncementSchema.properties, isRead: Type.Boolean() }),
 );
