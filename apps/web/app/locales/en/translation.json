@@ -2704,7 +2704,8 @@
       "markRead": "Mark as read",
       "markAllRead": "Mark all as read",
       "loadMore": "Load more",
-      "loadingMore": "Loading more..."
+      "loadingMore": "Loading more...",
+      "goToNotificationCenter": "Go to notification center"
     },
     "status": {
       "unread": "Unread"
@@ -3046,6 +3047,7 @@
     "createNewPassword": "Create New Password",
     "createAnnouncement": "Create Announcement",
     "announcements": "Announcements",
+    "notifications": "Notifications",
     "users": "Users",
     "userDetails": "User Details",
     "createNewUser": "Create New User",

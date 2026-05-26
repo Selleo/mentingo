@@ -27,11 +27,13 @@ import type { NotificationAnnouncement } from "../notifications.types";
 type NotificationAnnouncementItemProps = {
   announcement: NotificationAnnouncement;
   canDelete: boolean;
+  highlightUnread?: boolean;
 };
 
 export function NotificationAnnouncementItem({
   announcement,
   canDelete,
+  highlightUnread = true,
 }: NotificationAnnouncementItemProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
@@ -52,7 +54,7 @@ export function NotificationAnnouncementItem({
     <article
       className={cn(
         "group grid grid-cols-[40px_1fr_auto] gap-3 rounded-lg border border-neutral-200 bg-white p-4 shadow-sm transition-colors hover:border-primary-200 hover:bg-primary-50/40",
-        isUnread && "border-primary-300 bg-primary-50/60",
+        isUnread && highlightUnread && "border-primary-300 bg-primary-50/60",
       )}
       data-testid={NOTIFICATIONS_HANDLES.card(announcement.id)}
     >

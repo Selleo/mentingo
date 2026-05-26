@@ -88,6 +88,9 @@ export const routeAccessConfig = createRouteConfig({
   // Client part
   "": PUBLIC,
   progress: LEARNING_PROGRESS_ACCESS,
+  notifications: {
+    allOf: [PERMISSIONS.ANNOUNCEMENT_READ],
+  },
   settings: PUBLIC,
   "profile/:id": PUBLIC,
   "course/:courseId/lesson/:lessonId": PUBLIC,

@@ -1,5 +1,6 @@
+import { Link } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
-import { Plus, RefreshCw } from "lucide-react";
+import { CheckCheck, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,8 +8,10 @@ import { useMarkAllAnnouncementsAsRead } from "~/api/mutations/useMarkAllAnnounc
 import { useInfiniteAllAnnouncements } from "~/api/queries/admin/useInfiniteAllAnnouncements";
 import { useInfiniteAnnouncementsForUser } from "~/api/queries/useInfiniteAnnouncementsForUser";
 import { useUnreadAnnouncementsCount } from "~/api/queries/useUnreadAnnouncementsCount";
-import { Button } from "~/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { Button, buttonVariants } from "~/components/ui/button";
+import { PopoverClose } from "~/components/ui/popover";
+import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { TooltipProvider } from "~/components/ui/tooltip";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -20,8 +23,17 @@ import { NotificationAnnouncementItem } from "./NotificationAnnouncementItem";
 
 import type { NotificationsFeed } from "../notifications.types";
 
+export const NOTIFICATIONS_POPOVER_VARIANT = {
+  POPOVER: "popover",
+  PAGE: "page",
+} as const;
+
+type NotificationsPopoverVariant =
+  (typeof NOTIFICATIONS_POPOVER_VARIANT)[keyof typeof NOTIFICATIONS_POPOVER_VARIANT];
+
 type NotificationsPopoverProps = {
   className?: string;
+  variant?: NotificationsPopoverVariant;
 };
 
 const TAB_VALUE = {
@@ -29,9 +41,13 @@ const TAB_VALUE = {
   ADMIN: "admin-announcements",
 } as const;
 
-export function NotificationsPopover({ className }: NotificationsPopoverProps) {
+export function NotificationsPopover({
+  className,
+  variant = NOTIFICATIONS_POPOVER_VARIANT.POPOVER,
+}: NotificationsPopoverProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
+  const isPageVariant = variant === NOTIFICATIONS_POPOVER_VARIANT.PAGE;
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
@@ -52,7 +68,7 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
     hasNextPage: hasNextUserAnnouncementsPage,
     isFetchingNextPage: isFetchingNextUserAnnouncementsPage,
     refetch: refetchUserAnnouncements,
-  } = useInfiniteAnnouncementsForUser({ language });
+  } = useInfiniteAnnouncementsForUser({ language }, { enabled: !canManageAnnouncements });
 
   const {
     data: adminAnnouncementsData,
@@ -62,8 +78,9 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
     refetch: refetchAdminAnnouncements,
   } = useInfiniteAllAnnouncements({ language }, { enabled: canManageAnnouncements });
 
+  const shouldFetchUnreadCount = !isPageVariant || !canManageAnnouncements;
   const { data: unreadAnnouncementsCount, refetch: refetchUnreadAnnouncementsCount } =
-    useUnreadAnnouncementsCount();
+    useUnreadAnnouncementsCount({ enabled: shouldFetchUnreadCount });
 
   const unreadCount = unreadAnnouncementsCount?.unreadCount ?? 0;
 
@@ -85,10 +102,16 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
 
   const notificationsFeed = canManageAnnouncements ? adminFeed : userFeed;
 
+  const shouldShowMarkAllRead = !canManageAnnouncements;
+
   const handleRefresh = () => {
-    refetchUserAnnouncements();
-    refetchUnreadAnnouncementsCount();
-    if (canManageAnnouncements) refetchAdminAnnouncements();
+    if (shouldFetchUnreadCount) refetchUnreadAnnouncementsCount();
+
+    if (canManageAnnouncements) {
+      refetchAdminAnnouncements();
+    } else {
+      refetchUserAnnouncements();
+    }
   };
 
   const renderAnnouncements = ({
@@ -109,12 +132,18 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
     }
 
     return (
-      <div className="grid max-h-[430px] gap-2 overflow-y-auto pr-1">
+      <div
+        className={cn(
+          "grid gap-2 pr-1",
+          isPageVariant ? "overflow-visible" : "max-h-[430px] overflow-y-auto",
+        )}
+      >
         {announcements.map((announcement) => (
           <NotificationAnnouncementItem
             key={announcement.id}
             announcement={announcement}
             canDelete={canDeleteAnnouncements}
+            highlightUnread={!isPageVariant}
           />
         ))}
         {hasMore && (
@@ -136,79 +165,103 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
   };
 
   return (
-    <section className={cn("space-y-4", className)} data-testid={NOTIFICATIONS_HANDLES.POPOVER}>
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-semibold text-neutral-950">{t("notifications.title")}</h2>
-        <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="size-9 text-neutral-600"
-            onClick={handleRefresh}
-            data-testid={NOTIFICATIONS_HANDLES.REFRESH_BUTTON}
-          >
-            <RefreshCw className="size-5" aria-hidden />
-            <span className="sr-only">{t("notifications.actions.refresh")}</span>
-          </Button>
-          {canCreateAnnouncements && (
+    <TooltipProvider>
+      <section className={cn("space-y-4", className)} data-testid={NOTIFICATIONS_HANDLES.POPOVER}>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className={cn("font-semibold text-neutral-950", isPageVariant ? "h4" : "text-xl")}>
+            {t("notifications.title")}
+          </h2>
+          <div className="flex items-center gap-1">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               className="size-9 text-neutral-600"
-              onClick={() => setIsCreateDialogOpen(true)}
-              data-testid={NOTIFICATIONS_HANDLES.CREATE_BUTTON}
+              onClick={handleRefresh}
+              data-testid={NOTIFICATIONS_HANDLES.REFRESH_BUTTON}
             >
-              <Plus className="size-5" aria-hidden />
-              <span className="sr-only">{t("notifications.actions.create")}</span>
+              <RefreshCw className="size-5" aria-hidden />
+              <span className="sr-only">{t("notifications.actions.refresh")}</span>
             </Button>
-          )}
+            {isPageVariant && shouldShowMarkAllRead && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="h-9 flex items-center gap-2"
+                disabled={!unreadCount || isMarkingAllRead}
+                onClick={() => markAllAsRead()}
+                data-testid={NOTIFICATIONS_HANDLES.MARK_ALL_READ_BUTTON}
+              >
+                <CheckCheck className="size-4" aria-hidden />
+                {t("notifications.actions.markAllRead")}
+              </Button>
+            )}
+            {canCreateAnnouncements && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="size-9 text-neutral-600"
+                onClick={() => setIsCreateDialogOpen(true)}
+                data-testid={NOTIFICATIONS_HANDLES.CREATE_BUTTON}
+              >
+                <Plus className="size-5" aria-hidden />
+                <span className="sr-only">{t("notifications.actions.create")}</span>
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <Tabs defaultValue={TAB_VALUE.ADMIN} className="space-y-4">
-        <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg bg-neutral-100 p-1">
-          <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ALL}>
-            {t("notifications.tabs.all")}
-            <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-              {notificationsFeed.count}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ADMIN}>
-            {t("notifications.tabs.adminAnnouncements")}
-            <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-              {notificationsFeed.count}
-            </span>
-          </TabsTrigger>
-        </TabsList>
+        <Tabs defaultValue={TAB_VALUE.ADMIN} className="space-y-4">
+          <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg bg-neutral-100 p-1">
+            <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ALL}>
+              {t("notifications.tabs.all")}
+              <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
+                {notificationsFeed.count}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ADMIN}>
+              {t("notifications.tabs.adminAnnouncements")}
+              <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
+                {notificationsFeed.count}
+              </span>
+            </TabsTrigger>
+          </TabsList>
 
-        <TabsContent value={TAB_VALUE.ALL}>
-          {renderAnnouncements({
-            ...notificationsFeed,
-          })}
-        </TabsContent>
-        <TabsContent value={TAB_VALUE.ADMIN}>
-          {renderAnnouncements({
-            ...notificationsFeed,
-          })}
-        </TabsContent>
-      </Tabs>
+          {renderAnnouncements({ ...notificationsFeed })}
+        </Tabs>
 
-      <div className="flex items-center justify-between gap-3">
-        <Button
-          type="button"
-          variant="link"
-          className="h-auto p-0 text-neutral-950"
-          disabled={!unreadCount || isMarkingAllRead}
-          onClick={() => markAllAsRead()}
-          data-testid={NOTIFICATIONS_HANDLES.MARK_ALL_READ_BUTTON}
-        >
-          {t("notifications.actions.markAllRead")}
-        </Button>
-      </div>
+        {!isPageVariant && (
+          <div className="flex items-center justify-between gap-3">
+            {shouldShowMarkAllRead && (
+              <Button
+                type="button"
+                variant="link"
+                className="h-auto gap-1.5 p-0 text-neutral-950"
+                disabled={!unreadCount || isMarkingAllRead}
+                onClick={() => markAllAsRead()}
+                data-testid={NOTIFICATIONS_HANDLES.MARK_ALL_READ_BUTTON}
+              >
+                <CheckCheck className="size-4" aria-hidden />
+                {t("notifications.actions.markAllRead")}
+              </Button>
+            )}
+            <PopoverClose asChild>
+              <Link
+                to="/notifications"
+                prefetch="render"
+                className={buttonVariants({ variant: "outline", className: "h-10" })}
+                data-testid={NOTIFICATIONS_HANDLES.CENTER_LINK}
+              >
+                {t("notifications.actions.goToNotificationCenter")}
+              </Link>
+            </PopoverClose>
+          </div>
+        )}
 
-      <CreateAnnouncementDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
-    </section>
+        <CreateAnnouncementDialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen} />
+      </section>
+    </TooltipProvider>
   );
 }

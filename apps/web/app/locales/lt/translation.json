@@ -2643,7 +2643,8 @@
       "markRead": "Pažymėti kaip skaitytą",
       "markAllRead": "Pažymėti visus kaip skaitytus",
       "loadMore": "Įkelti daugiau",
-      "loadingMore": "Įkeliama..."
+      "loadingMore": "Įkeliama...",
+      "goToNotificationCenter": "Eiti į pranešimų centrą"
     },
     "status": {
       "unread": "Neskaityta"
@@ -2986,6 +2987,7 @@
     "createNewPassword": "Sukurti naują slaptažodį",
     "createAnnouncement": "Sukurti skelbimą",
     "announcements": "Skelbimai",
+    "notifications": "Pranešimai",
     "users": "Vartotojai",
     "userDetails": "Vartotojo informacija",
     "createNewUser": "Sukurti naują vartotoją",

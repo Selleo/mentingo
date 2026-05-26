@@ -2641,7 +2641,8 @@
       "markRead": "Als gelesen markieren",
       "markAllRead": "Alle als gelesen markieren",
       "loadMore": "Mehr laden",
-      "loadingMore": "Wird geladen..."
+      "loadingMore": "Wird geladen...",
+      "goToNotificationCenter": "Zur Benachrichtigungszentrale"
     },
     "status": {
       "unread": "Ungelesen"
@@ -2983,6 +2984,7 @@
     "createNewPassword": "Neues Passwort erstellen",
     "createAnnouncement": "Ankündigung erstellen",
     "announcements": "Ankündigungen",
+    "notifications": "Benachrichtigungen",
     "users": "Benutzer",
     "userDetails": "Benutzerdetails",
     "createNewUser": "Neuen Benutzer erstellen",

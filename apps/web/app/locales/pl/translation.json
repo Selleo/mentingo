@@ -2975,7 +2975,8 @@
       "markRead": "Oznacz jako przeczytane",
       "markAllRead": "Oznacz wszystkie jako przeczytane",
       "loadMore": "Załaduj więcej",
-      "loadingMore": "Ładowanie..."
+      "loadingMore": "Ładowanie...",
+      "goToNotificationCenter": "Przejdź do centrum powiadomień"
     },
     "status": {
       "unread": "Nieprzeczytane"
@@ -3301,6 +3302,7 @@
     "createNewPassword": "Utwórz nowe hasło",
     "createAnnouncement": "Utwórz ogłoszenie",
     "announcements": "Ogłoszenia",
+    "notifications": "Powiadomienia",
     "users": "Użytkownicy",
     "userDetails": "Informacje o użytkowniku",
     "createNewUser": "Utwórz nowego użytkownika",

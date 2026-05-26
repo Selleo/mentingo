@@ -11,12 +11,19 @@ import {
 import type { GetAnnouncementsForUserResponse } from "../generated-api";
 import type { InfiniteData } from "@tanstack/react-query";
 
+type QueryOptions = {
+  enabled?: boolean;
+};
+
 export const getInfiniteAnnouncementsForUserQueryKey = (
   searchParams?: AnnouncementFilters,
   perPage = ANNOUNCEMENTS_PAGE_SIZE,
 ) => [ANNOUNCEMENTS_FOR_USER_QUERY_KEY, "infinite", searchParams, perPage];
 
-export function useInfiniteAnnouncementsForUser(searchParams?: AnnouncementFilters) {
+export function useInfiniteAnnouncementsForUser(
+  searchParams?: AnnouncementFilters,
+  options: QueryOptions = { enabled: true },
+) {
   return useInfiniteQuery<
     GetAnnouncementsForUserResponse,
     Error,
@@ -46,5 +53,6 @@ export function useInfiniteAnnouncementsForUser(searchParams?: AnnouncementFilte
 
       return nextPage <= Math.ceil(totalItems / perPage) ? nextPage : undefined;
     },
+    ...options,
   });
 }

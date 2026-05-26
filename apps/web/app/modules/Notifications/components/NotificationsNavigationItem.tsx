@@ -1,3 +1,4 @@
+import { NavLink } from "@remix-run/react";
 import { Bell } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -15,6 +16,7 @@ type NotificationsNavigationItemProps = {
   showLabel: boolean;
   showTooltip: boolean;
   isSidebarCollapsed: boolean;
+  onMobileNavigate?: () => void;
 };
 
 export function NotificationsNavigationItem({
@@ -22,6 +24,7 @@ export function NotificationsNavigationItem({
   showLabel,
   showTooltip,
   isSidebarCollapsed,
+  onMobileNavigate,
 }: NotificationsNavigationItemProps) {
   const { t } = useTranslation();
 
@@ -29,39 +32,57 @@ export function NotificationsNavigationItem({
 
   const unreadCount = data?.unreadCount ?? 0;
 
+  const baseTriggerClassName = cn(
+    "relative flex w-full items-center gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
+    { "justify-center": !showLabel },
+  );
+
+  const renderTriggerContent = (isActive = false) => (
+    <>
+      <Bell className={cn("size-6", { "text-primary-700": isActive })} aria-hidden />
+      <span
+        className={cn("line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize", {
+          "sr-only": !showLabel,
+        })}
+      >
+        {t("navigationSideBar.notifications")}
+      </span>
+      {unreadCount > 0 && (
+        <span
+          className={cn(
+            "absolute top-1/2 grid aspect-square min-w-5 -translate-y-1/2 place-items-center rounded-full bg-error-500 text-center text-[10px] font-semibold leading-4 text-white",
+            isSidebarCollapsed ? "-right-px -translate-y-[90%]" : "right-2",
+          )}
+        >
+          <span>{Math.min(unreadCount, 99)}</span>
+        </span>
+      )}
+    </>
+  );
+
   return (
     <li className={className} id="notifications">
+      <NavLink
+        to="/notifications"
+        onClick={onMobileNavigate}
+        className={({ isActive }) =>
+          cn(baseTriggerClassName, "2xl:hidden", {
+            "border-primary-200 text-primary-800": isActive,
+          })
+        }
+        data-testid={NOTIFICATIONS_HANDLES.MOBILE_TRIGGER}
+      >
+        {({ isActive }) => renderTriggerContent(isActive)}
+      </NavLink>
+
       <Popover>
         <Tooltip>
           <TooltipTrigger asChild>
             <PopoverTrigger
-              className={cn(
-                "relative flex w-full items-center gap-x-3 rounded-lg border border-transparent bg-white px-4 py-3.5 text-neutral-900 hover:border-primary-200 2xl:p-2 2xl:hover:bg-primary-50 body-sm-md",
-                { "justify-center": !showLabel },
-              )}
+              className={cn(baseTriggerClassName, "hidden 2xl:flex")}
               data-testid={NOTIFICATIONS_HANDLES.TRIGGER}
             >
-              <Bell className="size-6" aria-hidden />
-              <span
-                className={cn(
-                  "line-clamp-1 overflow-hidden truncate whitespace-nowrap capitalize",
-                  {
-                    "sr-only": !showLabel,
-                  },
-                )}
-              >
-                {t("navigationSideBar.notifications")}
-              </span>
-              {unreadCount > 0 && (
-                <span
-                  className={cn(
-                    "absolute top-1/2 grid aspect-square min-w-5 -translate-y-1/2 place-items-center rounded-full bg-error-500 text-center text-[10px] font-semibold leading-4 text-white",
-                    isSidebarCollapsed ? "-right-px -translate-y-[90%]" : "right-2",
-                  )}
-                >
-                  <span>{Math.min(unreadCount, 99)}</span>
-                </span>
-              )}
+              {renderTriggerContent()}
             </PopoverTrigger>
           </TooltipTrigger>
           <TooltipContent

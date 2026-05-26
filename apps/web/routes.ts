@@ -40,6 +40,7 @@ export const routes: (
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
           route("progress", "modules/Statistics/Statistics.page.tsx");
+          route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
           route("articles/:articleId/edit", "modules/Articles/ArticleForm.page.tsx", {

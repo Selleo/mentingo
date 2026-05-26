@@ -57,6 +57,7 @@ export function NavigationFooter({
           showLabel={showNavigationLabels}
           showTooltip={shouldShowTooltips}
           isSidebarCollapsed={isSidebarCollapsed}
+          onMobileNavigate={() => setIsMobileNavOpen(false)}
         />
       )}
 

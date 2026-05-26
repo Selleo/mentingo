@@ -1,2 +1,2 @@
 export { NotificationsNavigationItem } from "./NotificationsNavigationItem";
-export { NotificationsPopover } from "./NotificationsPopover";
+export { NOTIFICATIONS_POPOVER_VARIANT, NotificationsPopover } from "./NotificationsPopover";
