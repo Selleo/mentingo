@@ -210,7 +210,7 @@ export class GroupService {
         baseLanguage: language,
         availableLocales: [language],
       })
-      .returning();
+      .returning(this.getLocalizedGroupReturningFields(language));
 
     if (!createdGroup) throw new ConflictException("Unable to create group");
 
@@ -219,12 +219,12 @@ export class GroupService {
         new CreateGroupEvent({
           groupId: createdGroup.id,
           actor: currentUser,
-          group: await this.buildGroupSnapshot(createdGroup.id, language),
+          group: this.buildGroupSnapshotFromGroup(createdGroup),
         }),
       );
     }
 
-    return this.getGroupById(createdGroup.id, language);
+    return createdGroup;
   }
 
   public async updateGroup(
@@ -265,11 +265,21 @@ export class GroupService {
       return this.getGroupById(groupId, language);
     }
 
-    await this.db.update(groups).set(updateData).where(eq(groups.id, groupId)).returning();
+    const [updatedGroup] = await this.db
+      .update(groups)
+      .set(updateData)
+      .where(eq(groups.id, groupId))
+      .returning(this.getLocalizedGroupReturningFields(language));
 
-    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+    await this.publishUpdateEvent(
+      groupId,
+      currentUser,
+      previousSnapshot,
+      language,
+      this.buildGroupSnapshotFromGroup(updatedGroup),
+    );
 
-    return this.getGroupById(groupId, language);
+    return updatedGroup;
   }
 
   public async createLanguage(
@@ -285,15 +295,21 @@ export class GroupService {
 
     const previousSnapshot = await this.buildGroupSnapshot(groupId, language);
 
-    await this.db
+    const [updatedGroup] = await this.db
       .update(groups)
       .set({ availableLocales: [...existingGroup.availableLocales, language] })
       .where(eq(groups.id, groupId))
-      .returning();
+      .returning(this.getLocalizedGroupReturningFields(language));
 
-    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+    await this.publishUpdateEvent(
+      groupId,
+      currentUser,
+      previousSnapshot,
+      language,
+      this.buildGroupSnapshotFromGroup(updatedGroup),
+    );
 
-    return this.getGroupById(groupId, language);
+    return updatedGroup;
   }
 
   public async deleteLanguage(
@@ -312,7 +328,7 @@ export class GroupService {
 
     const previousSnapshot = await this.buildGroupSnapshot(groupId, language);
 
-    await this.db
+    const [updatedGroup] = await this.db
       .update(groups)
       .set({
         name: deleteJsonbField(groups.name, language),
@@ -320,11 +336,17 @@ export class GroupService {
         availableLocales: sql`ARRAY_REMOVE(${groups.availableLocales}, ${language})`,
       })
       .where(eq(groups.id, groupId))
-      .returning();
+      .returning(this.getLocalizedGroupReturningFields(existingGroup.baseLanguage));
 
-    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, language);
+    await this.publishUpdateEvent(
+      groupId,
+      currentUser,
+      previousSnapshot,
+      language,
+      this.buildGroupSnapshotFromGroup(updatedGroup),
+    );
 
-    return this.getGroupById(groupId, existingGroup.baseLanguage);
+    return updatedGroup;
   }
 
   public async updateBaseLanguage(
@@ -344,11 +366,21 @@ export class GroupService {
 
     const previousSnapshot = await this.buildGroupSnapshot(groupId, existingGroup.baseLanguage);
 
-    await this.db.update(groups).set({ baseLanguage }).where(eq(groups.id, groupId)).returning();
+    const [updatedGroup] = await this.db
+      .update(groups)
+      .set({ baseLanguage })
+      .where(eq(groups.id, groupId))
+      .returning(this.getLocalizedGroupReturningFields(baseLanguage));
 
-    await this.publishUpdateEvent(groupId, currentUser, previousSnapshot, baseLanguage);
+    await this.publishUpdateEvent(
+      groupId,
+      currentUser,
+      previousSnapshot,
+      baseLanguage,
+      this.buildGroupSnapshotFromGroup(updatedGroup),
+    );
 
-    return this.getGroupById(groupId, baseLanguage);
+    return updatedGroup;
   }
 
   public async deleteGroup(groupId: UUIDType, currentUser?: CurrentUserType) {
@@ -607,10 +639,11 @@ export class GroupService {
     currentUser: CurrentUserType | undefined,
     previousSnapshot: GroupActivityLogSnapshot,
     language: SupportedLanguages,
+    updatedSnapshot?: GroupActivityLogSnapshot,
   ) {
     if (!currentUser) return;
 
-    const updatedSnapshot = await this.buildGroupSnapshot(groupId, language);
+    updatedSnapshot ??= await this.buildGroupSnapshot(groupId, language);
 
     if (isEqual(previousSnapshot, updatedSnapshot)) return;
 
@@ -644,6 +677,26 @@ export class GroupService {
     };
   }
 
+  private buildGroupSnapshotFromGroup(
+    group: Pick<GroupResponse, "id" | "name" | "characteristic">,
+  ) {
+    const { id, name } = group;
+
+    return {
+      id,
+      name,
+      characteristic: group.characteristic ?? null,
+    };
+  }
+
+  private getLocalizedGroupReturningFields(language?: SupportedLanguages) {
+    return {
+      ...getTableColumns(groups),
+      name: this.getLocalizedGroupName(language),
+      characteristic: this.getLocalizedGroupCharacteristic(language),
+    };
+  }
+
   private getLocalizedGroupName(language?: SupportedLanguages) {
     return this.localizationService.getLocalizedSqlField(groups.name, language, groups);
   }
@@ -652,7 +705,11 @@ export class GroupService {
     return sql<string | null>`
       CASE
         WHEN ${groups.characteristic} IS NULL THEN NULL
-        ELSE ${this.localizationService.getLocalizedSqlField(groups.characteristic, language, groups)}
+        ELSE ${this.localizationService.getLocalizedSqlField(
+          groups.characteristic,
+          language,
+          groups,
+        )}
       END
     `;
   }
