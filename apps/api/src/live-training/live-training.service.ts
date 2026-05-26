@@ -29,8 +29,15 @@ import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
+import {
+  CreateLiveTrainingEvent,
+  DeleteLiveTrainingEvent,
+  UpdateLiveTrainingEvent,
+  UpdateLiveTrainingMaterialsEvent,
+} from "src/events";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
 import { LiveTrainingRepository } from "./live-training.repository";
@@ -57,6 +64,7 @@ import type { LiveTrainingListQuery } from "./schemas/live-training-list-query.s
 import type { LiveTrainingListItem } from "./schemas/live-training-list.schema";
 import type { UpdateLiveTrainingBody } from "./schemas/update-live-training.schema";
 import type { SQL } from "drizzle-orm";
+import type { LiveTrainingActivityLogSnapshot } from "src/activity-logs/types";
 import type { DatabasePg, Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -66,6 +74,7 @@ export class LiveTrainingService {
     private readonly liveTrainingRepository: LiveTrainingRepository,
     private readonly fileService: FileService,
     private readonly envService: EnvService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async getLiveTrainings(
@@ -195,6 +204,18 @@ export class LiveTrainingService {
     currentUser: CurrentUserType,
   ): Promise<LiveTrainingDetails> {
     const liveTrainingId = await this.createLiveTrainingRecord(body, language, currentUser);
+    const liveTrainingSnapshot = await this.buildLiveTrainingActivitySnapshot(
+      liveTrainingId,
+      language,
+    );
+
+    await this.outboxPublisher.publish(
+      new CreateLiveTrainingEvent({
+        liveTrainingId,
+        actor: currentUser,
+        createdLiveTraining: liveTrainingSnapshot,
+      }),
+    );
 
     return this.getLiveTrainingDetailsOrThrow(liveTrainingId, language, currentUser);
   }
@@ -225,6 +246,21 @@ export class LiveTrainingService {
     if (!courseLink) {
       throw new BadRequestException("liveTraining.errors.linkNotCreated");
     }
+
+    const liveTrainingSnapshot = await this.buildLiveTrainingActivitySnapshot(
+      liveTrainingId,
+      language,
+      dbInstance,
+    );
+
+    await this.outboxPublisher.publish(
+      new CreateLiveTrainingEvent({
+        liveTrainingId,
+        actor: currentUser,
+        createdLiveTraining: liveTrainingSnapshot,
+      }),
+      dbInstance,
+    );
 
     return { liveTrainingId, liveTrainingLinkId: courseLink.id };
   }
@@ -373,6 +409,7 @@ export class LiveTrainingService {
     currentUser: CurrentUserType,
   ): Promise<LiveTrainingDetails> {
     const row = await this.getEditableLiveTrainingOrThrow(id, language, currentUser);
+    const previousSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
 
     this.assertValidUpdateSchedule(body, row.startsAt, row.endsAt);
     this.assertCanUpdateHostAssignments(row, body.hostUserIds, currentUser);
@@ -459,6 +496,17 @@ export class LiveTrainingService {
       }
     }
 
+    const updatedSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
+
+    await this.outboxPublisher.publish(
+      new UpdateLiveTrainingEvent({
+        liveTrainingId: id,
+        actor: currentUser,
+        previousLiveTrainingData: previousSnapshot,
+        updatedLiveTrainingData: updatedSnapshot,
+      }),
+    );
+
     return this.getLiveTrainingDetailsOrThrow(id, language, currentUser);
   }
 
@@ -470,6 +518,10 @@ export class LiveTrainingService {
     }
 
     this.assertCanDeleteLiveTraining(row.authorId, currentUser);
+    const deletedSnapshot = await this.buildLiveTrainingActivitySnapshot(
+      id,
+      row.baseLanguage as SupportedLanguages,
+    );
 
     const linkedLessonCount = await this.liveTrainingRepository.getLinkedLessonCount(row.id);
 
@@ -481,6 +533,14 @@ export class LiveTrainingService {
       row.id,
       row.calendarEventId,
       row.sequence + 1,
+    );
+
+    await this.outboxPublisher.publish(
+      new DeleteLiveTrainingEvent({
+        liveTrainingId: row.id,
+        actor: currentUser,
+        deletedLiveTrainingData: deletedSnapshot,
+      }),
     );
   }
 
@@ -504,6 +564,7 @@ export class LiveTrainingService {
   ): Promise<LiveTrainingMaterial> {
     this.assertResourceRelationshipType(relationshipType);
     await this.getEditableLiveTrainingOrThrow(id, language, currentUser);
+    const previousSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
 
     const { resourceId } = await this.fileService.uploadResource({
       file,
@@ -526,6 +587,23 @@ export class LiveTrainingService {
     if (!material || !this.hasRelationshipType(material.relationshipType, relationshipType)) {
       throw new BadRequestException("liveTraining.errors.invalidResource");
     }
+
+    const updatedSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
+
+    await this.outboxPublisher.publish(
+      new UpdateLiveTrainingMaterialsEvent({
+        liveTrainingId: id,
+        actor: currentUser,
+        previousLiveTrainingData: previousSnapshot,
+        updatedLiveTrainingData: updatedSnapshot,
+        context: {
+          materialAction: "added",
+          materialSection: relationshipType,
+          resourceId,
+          resourceTitle: material.title,
+        },
+      }),
+    );
 
     return {
       resourceId: material.resourceId,
@@ -560,6 +638,7 @@ export class LiveTrainingService {
     currentUser: CurrentUserType,
   ): Promise<void> {
     await this.getEditableLiveTrainingOrThrow(id, language, currentUser);
+    const previousSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
 
     const material = await this.liveTrainingRepository.getLiveTrainingMaterialRowByResourceId(
       id,
@@ -572,6 +651,22 @@ export class LiveTrainingService {
     }
 
     await this.liveTrainingRepository.deleteResourceLink(id, resourceId);
+    const updatedSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
+
+    await this.outboxPublisher.publish(
+      new UpdateLiveTrainingMaterialsEvent({
+        liveTrainingId: id,
+        actor: currentUser,
+        previousLiveTrainingData: previousSnapshot,
+        updatedLiveTrainingData: updatedSnapshot,
+        context: {
+          materialAction: "removed",
+          materialSection: this.getActivityMaterialSection(material.relationshipType),
+          resourceId,
+          resourceTitle: material.title,
+        },
+      }),
+    );
   }
 
   private async getLiveTrainingDetailsOrThrow(
@@ -642,6 +737,42 @@ export class LiveTrainingService {
       linkedLessonCount,
       currentSession,
       materials: visibleMaterials,
+    };
+  }
+
+  async buildLiveTrainingActivitySnapshot(
+    id: UUIDType,
+    language: SupportedLanguages,
+    dbInstance?: DatabasePg,
+  ): Promise<LiveTrainingActivityLogSnapshot> {
+    const row = await this.liveTrainingRepository.getLiveTrainingBaseRow(id, language, dbInstance);
+
+    if (!row) {
+      throw new NotFoundException("liveTraining.errors.notFound");
+    }
+
+    const [hosts, linkedCourses] = await Promise.all([
+      this.liveTrainingRepository.getLiveTrainingHostRows(id, dbInstance),
+      this.liveTrainingRepository.getLiveTrainingLinkedCourseRows(id, language, dbInstance),
+    ]);
+
+    return {
+      id: row.id,
+      title: row.title,
+      description: row.description || null,
+      status: row.status,
+      deliveryType: row.deliveryType,
+      visibilityScope: row.visibilityScope,
+      startsAt: row.startsAt,
+      endsAt: row.endsAt,
+      allDay: row.allDay,
+      timezone: row.timezone,
+      location: row.location,
+      maxParticipants: row.maxParticipants,
+      authorId: row.authorId,
+      hostIds: hosts.map((host) => host.id),
+      linkedCourseIds: linkedCourses.map((course) => course.id),
+      settings: row.settings as Record<string, unknown>,
     };
   }
 
@@ -794,6 +925,16 @@ export class LiveTrainingService {
         description: material.description || null,
         relationshipType,
       }));
+  }
+
+  private getActivityMaterialSection(relationshipType: string) {
+    if (
+      this.hasRelationshipType(relationshipType, LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER)
+    ) {
+      return LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER;
+    }
+
+    return LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE;
   }
 
   private async getHostsWithProfilePictureUrls(

@@ -4,6 +4,8 @@ import {
   COURSE_ENROLLMENT,
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
+  type LiveTrainingParticipantRole,
+  type PermissionKey,
 } from "@repo/shared";
 import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
@@ -19,6 +21,10 @@ import {
   chapters,
   lessons,
   liveTrainings,
+  permissionRoles,
+  permissionRoleRuleSets,
+  permissionRuleSetPermissions,
+  permissionUserRoles,
   studentCourses,
   users,
 } from "src/storage/schema";
@@ -33,8 +39,8 @@ import type {
   LiveTrainingSessionTenantRow,
   LiveTrainingUserDisplayRow,
 } from "./live-training-sessions.repository.types";
-import type { LiveTrainingParticipantRole } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 @Injectable()
 export class LiveTrainingSessionsRepository {
@@ -195,6 +201,65 @@ export class LiveTrainingSessionsRepository {
       .where(and(eq(users.id, userId), eq(users.archived, false), isNull(users.deletedAt)));
 
     return row ?? null;
+  }
+
+  async getActorUserRow(userId: UUIDType): Promise<ActorUserType | null> {
+    const [user] = await this.db
+      .select({
+        userId: users.id,
+        email: users.email,
+        tenantId: users.tenantId,
+      })
+      .from(users)
+      .where(and(eq(users.id, userId), eq(users.archived, false), isNull(users.deletedAt)));
+
+    if (!user) return null;
+
+    const accessRows = await this.db
+      .select({
+        roleSlug: permissionRoles.slug,
+        permission: permissionRuleSetPermissions.permission,
+      })
+      .from(permissionUserRoles)
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .leftJoin(
+        permissionRoleRuleSets,
+        and(
+          eq(permissionRoleRuleSets.roleId, permissionRoles.id),
+          eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
+        ),
+      )
+      .leftJoin(
+        permissionRuleSetPermissions,
+        and(
+          eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
+          eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
+        ),
+      )
+      .where(
+        and(
+          eq(permissionUserRoles.userId, userId),
+          eq(permissionUserRoles.tenantId, user.tenantId),
+        ),
+      );
+
+    return {
+      ...user,
+      roleSlugs: Array.from(new Set(accessRows.map(({ roleSlug }) => roleSlug))),
+      permissions: Array.from(
+        new Set(
+          accessRows
+            .map(({ permission }) => permission)
+            .filter((permission): permission is PermissionKey => Boolean(permission)),
+        ),
+      ),
+    };
   }
 
   async getSessionTenantByRoomName(roomName: string): Promise<LiveTrainingSessionTenantRow | null> {

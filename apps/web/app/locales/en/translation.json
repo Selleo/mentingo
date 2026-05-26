@@ -3913,6 +3913,7 @@
       "user": "User",
       "category": "Category",
       "announcement": "Announcement",
+      "live_training": "Live Training",
       "global_settings": "Settings"
     },
     "table": {

@@ -11,7 +11,12 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 
-import { LiveTrainingSessionEvent } from "src/events";
+import {
+  EndLiveTrainingSessionEvent,
+  FailLiveTrainingSessionEvent,
+  LiveTrainingSessionEvent,
+  StartLiveTrainingSessionEvent,
+} from "src/events";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
@@ -34,7 +39,9 @@ import type {
   LiveTrainingSessionSummary,
 } from "./live-training-sessions.types";
 import type { WebhookEvent } from "livekit-server-sdk";
+import type { LiveTrainingActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 const LIVEKIT_WEBHOOK_EVENTS = {
@@ -166,7 +173,12 @@ export class LiveTrainingSessionsService {
     }
 
     if (liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE) {
-      return this.startOfflineSession(liveTrainingId, currentUser, liveTraining.calendarEventId);
+      return this.startOfflineSession(
+        liveTrainingId,
+        language ?? SUPPORTED_LANGUAGES.EN,
+        currentUser,
+        liveTraining.calendarEventId,
+      );
     }
 
     await this.liveKitService.assertConfigured();
@@ -207,6 +219,15 @@ export class LiveTrainingSessionsService {
     if (!sessionRow) {
       throw new NotFoundException("liveTraining.errors.sessionNotFound");
     }
+
+    await this.publishSessionStartActivity({
+      liveTrainingId,
+      sessionId: session.id,
+      language: language ?? SUPPORTED_LANGUAGES.EN,
+      currentUser,
+      deliveryType: liveTraining.deliveryType,
+      startedAt: sessionRow.startedAt ?? new Date().toISOString(),
+    });
 
     return this.mapSessionSummary(sessionRow);
   }
@@ -319,6 +340,7 @@ export class LiveTrainingSessionsService {
 
   private async startOfflineSession(
     liveTrainingId: UUIDType,
+    language: SupportedLanguages,
     currentUser: CurrentUserType,
     calendarEventId: UUIDType,
   ) {
@@ -349,6 +371,15 @@ export class LiveTrainingSessionsService {
     if (!sessionRow) {
       throw new NotFoundException("liveTraining.errors.sessionNotFound");
     }
+
+    await this.publishSessionStartActivity({
+      liveTrainingId,
+      sessionId: session.id,
+      language,
+      currentUser,
+      deliveryType: LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
+      startedAt: sessionRow.startedAt ?? new Date().toISOString(),
+    });
 
     return this.mapSessionSummary(sessionRow);
   }
@@ -448,6 +479,15 @@ export class LiveTrainingSessionsService {
       id: sessionId,
       liveTrainingId,
       tenantId: currentUser.tenantId,
+    });
+    await this.publishSessionEndActivity({
+      liveTrainingId,
+      sessionId,
+      language: language ?? SUPPORTED_LANGUAGES.EN,
+      currentUser,
+      deliveryType: liveTraining.deliveryType,
+      endedAt,
+      endReason: LIVE_TRAINING_SESSION_STATUSES.ENDED,
     });
 
     const endedSession = await this.liveTrainingSessionsRepository.getSessionRow(
@@ -598,6 +638,126 @@ export class LiveTrainingSessionsService {
     );
     await this.liveTrainingSessionsRepository.updateSessionCounters(sessionTenant.id);
     await this.publishSessionEvent(event.event, sessionTenant);
+
+    const failedSession = await this.liveTrainingSessionsRepository.getSessionRow(
+      sessionTenant.liveTrainingId,
+      sessionTenant.id,
+    );
+
+    if (failedSession?.startedByUserId) {
+      const actor = await this.liveTrainingSessionsRepository.getActorUserRow(
+        failedSession.startedByUserId,
+      );
+
+      if (actor) {
+        await this.publishSessionFailActivity({
+          liveTrainingId: sessionTenant.liveTrainingId,
+          sessionId: sessionTenant.id,
+          actor,
+          endedAt,
+          endReason: UNEXPECTED_ROOM_FINISHED_REASON,
+        });
+      }
+    }
+  }
+
+  private async publishSessionStartActivity(input: {
+    liveTrainingId: UUIDType;
+    sessionId: UUIDType;
+    language: SupportedLanguages;
+    currentUser: CurrentUserType;
+    deliveryType: LiveTrainingDeliveryType;
+    startedAt: string;
+  }) {
+    const liveTraining = await this.liveTrainingService.buildLiveTrainingActivitySnapshot(
+      input.liveTrainingId,
+      input.language,
+    );
+
+    await this.outboxPublisher.publish(
+      new StartLiveTrainingSessionEvent({
+        liveTrainingId: input.liveTrainingId,
+        sessionId: input.sessionId,
+        actor: input.currentUser,
+        liveTraining,
+        context: {
+          sessionAction: "started",
+          deliveryType: input.deliveryType,
+          startedAt: input.startedAt,
+        },
+      }),
+    );
+  }
+
+  private async publishSessionEndActivity(input: {
+    liveTrainingId: UUIDType;
+    sessionId: UUIDType;
+    language: SupportedLanguages;
+    currentUser: CurrentUserType;
+    deliveryType: LiveTrainingDeliveryType;
+    endedAt: string;
+    endReason: string;
+  }) {
+    const liveTraining = await this.liveTrainingService.buildLiveTrainingActivitySnapshot(
+      input.liveTrainingId,
+      input.language,
+    );
+
+    await this.outboxPublisher.publish(
+      new EndLiveTrainingSessionEvent({
+        liveTrainingId: input.liveTrainingId,
+        sessionId: input.sessionId,
+        actor: input.currentUser,
+        liveTraining,
+        context: {
+          sessionAction: "ended",
+          deliveryType: input.deliveryType,
+          endedAt: input.endedAt,
+          endReason: input.endReason,
+        },
+      }),
+    );
+  }
+
+  private async publishSessionFailActivity(input: {
+    liveTrainingId: UUIDType;
+    sessionId: UUIDType;
+    actor: ActorUserType;
+    endedAt: string;
+    endReason: string;
+  }) {
+    const liveTraining = await this.getActivitySnapshotOrNull(
+      input.liveTrainingId,
+      SUPPORTED_LANGUAGES.EN,
+    );
+
+    await this.outboxPublisher.publish(
+      new FailLiveTrainingSessionEvent({
+        liveTrainingId: input.liveTrainingId,
+        sessionId: input.sessionId,
+        actor: input.actor,
+        liveTraining,
+        context: {
+          sessionAction: "failed",
+          endedAt: input.endedAt,
+          endReason: input.endReason,
+        },
+      }),
+    );
+  }
+
+  private async getActivitySnapshotOrNull(
+    liveTrainingId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<LiveTrainingActivityLogSnapshot | null> {
+    try {
+      return await this.liveTrainingService.buildLiveTrainingActivitySnapshot(
+        liveTrainingId,
+        language,
+      );
+    } catch {
+      return null;
+    }
   }
 
   private async publishSessionEvent(

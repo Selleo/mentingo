@@ -200,8 +200,12 @@ export class LiveTrainingRepository {
     };
   }
 
-  async getLiveTrainingBaseRow(id: UUIDType, language?: SupportedLanguages) {
-    const [row] = await this.db
+  async getLiveTrainingBaseRow(
+    id: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [row] = await dbInstance
       .select({
         id: liveTrainings.id,
         calendarEventId: liveTrainings.calendarEventId,
@@ -335,8 +339,8 @@ export class LiveTrainingRepository {
       .orderBy(asc(calendarEvents.startsAt));
   }
 
-  async getLiveTrainingHostRows(id: UUIDType) {
-    return this.db
+  async getLiveTrainingHostRows(id: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance
       .select({
         id: users.id,
         fullName: sql<
@@ -349,8 +353,12 @@ export class LiveTrainingRepository {
       .where(eq(liveTrainingMembers.liveTrainingId, id));
   }
 
-  async getLiveTrainingLinkedCourseRows(id: UUIDType, language: SupportedLanguages) {
-    return this.db
+  async getLiveTrainingLinkedCourseRows(
+    id: UUIDType,
+    language: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance
       .select({
         id: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),

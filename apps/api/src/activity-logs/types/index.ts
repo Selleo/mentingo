@@ -36,6 +36,7 @@ export const ACTIVITY_LOG_RESOURCE_TYPES = {
   NEWS: "news",
   ARTICLE: "article",
   ARTICLE_SECTION: "articleSection",
+  LIVE_TRAINING: "live_training",
 } as const;
 
 export type ActivityLogResourceType =
@@ -92,6 +93,25 @@ export type LessonActivityLogResource = {
   contentType?: string;
   allowFullscreen?: boolean;
   displayOrder?: number | null;
+};
+
+export type LiveTrainingActivityLogSnapshot = {
+  id: UUIDType;
+  title: string | null;
+  description?: string | null;
+  status: string;
+  deliveryType: string;
+  visibilityScope: string;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  timezone: string;
+  location?: string | null;
+  maxParticipants: number;
+  authorId: UUIDType;
+  hostIds?: UUIDType[];
+  linkedCourseIds?: UUIDType[];
+  settings?: Record<string, unknown>;
 };
 
 export type LessonActivityLogSnapshot = {
