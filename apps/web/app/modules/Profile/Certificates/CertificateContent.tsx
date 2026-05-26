@@ -29,7 +29,7 @@ const translations = {
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "ukończył/a kurs",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę edukacyjną",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę rozwoju",
     },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
@@ -40,7 +40,7 @@ const translations = {
     certifyThat: "THIS IS TO CERTIFY THAT",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "has successfully completed the course",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the learning path",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the development path",
     },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",

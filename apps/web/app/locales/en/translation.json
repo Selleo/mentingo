@@ -295,7 +295,7 @@
     "progress": "Progress",
     "findInApplication": "Find in application",
     "courses": "Courses",
-    "learningPaths": "Learning Paths",
+    "learningPaths": "Development Paths",
     "content": "Content",
     "categories": "Categories",
     "users": "Users",
@@ -389,7 +389,7 @@
       "noSearchResults": "No search results for:",
       "announcements": "Announcements",
       "lessons": "Lessons",
-      "learningPaths": "Learning Paths",
+      "learningPaths": "Development Paths",
       "news": "News",
       "articles": "Articles",
       "qa": "Q&A"
@@ -1006,7 +1006,7 @@
         "category": "categories",
         "group": "groups",
         "course": "courses",
-        "learning_path": "learning paths",
+        "learning_path": "development paths",
         "learning_mode": "learning mode",
         "learning_progress": "learning progress",
         "certificate": "certificates",
@@ -1038,15 +1038,15 @@
         "category_manage": "Create, edit, and delete course categories.",
         "group_read": "View user groups.",
         "group_manage": "Create, edit, and delete user groups.",
-        "learning_path_read": "View learning paths.",
-        "learning_path_create": "Create learning paths.",
-        "learning_path_update": "Edit any learning path.",
-        "learning_path_update_own": "Edit learning paths created by this user.",
-        "learning_path_delete": "Delete learning paths.",
-        "learning_path_course_update": "Add, remove, and reorder courses in any learning path.",
-        "learning_path_course_update_own": "Add, remove, and reorder courses in own learning paths.",
-        "learning_path_enrollment": "Manage learning path enrollments.",
-        "learning_path_export": "Export learning paths to tenants.",
+        "learning_path_read": "View development paths.",
+        "learning_path_create": "Create development paths.",
+        "learning_path_update": "Edit any development path.",
+        "learning_path_update_own": "Edit development paths created by this user.",
+        "learning_path_delete": "Delete development paths.",
+        "learning_path_course_update": "Add, remove, and reorder courses in any development path.",
+        "learning_path_course_update_own": "Add, remove, and reorder courses in own development paths.",
+        "learning_path_enrollment": "Manage development path enrollments.",
+        "learning_path_export": "Export development paths to tenants.",
         "course_read_assigned": "View courses assigned to this user.",
         "course_read_manageable": "View courses this user can manage.",
         "course_read": "View course content.",
@@ -2483,7 +2483,7 @@
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
       "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
-      "learningPathsUpdatedSuccessfully": "Learning Paths settings updated successfully"
+      "learningPathsUpdatedSuccessfully": "Development Paths settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -3094,16 +3094,16 @@
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
     "tenants": "Organizations",
-    "learningPaths": "Learning Paths",
-    "adminLearningPaths": "Learning Paths",
-    "adminLearningPathEditor": "Learning Path Editor"
+    "learningPaths": "Development Paths",
+    "adminLearningPaths": "Development Paths",
+    "adminLearningPathEditor": "Development Path Editor"
   },
   "learningPathsView": {
-    "title": "Learning Paths",
-    "description": "Browse assigned learning paths and continue through their ordered course sequences.",
-    "searchPlaceholder": "Search learning paths",
-    "summary": "{{count}} learning paths are available.",
-    "detailsTitle": "Learning Path",
+    "title": "Development Paths",
+    "description": "Browse assigned development paths and continue through their ordered course sequences.",
+    "searchPlaceholder": "Search development paths",
+    "summary": "{{count}} development paths are available.",
+    "detailsTitle": "Development Path",
     "detailsDescription": "Review the ordered course sequence, progress, locks, and certificate state.",
     "detailsSummary": "This path contains {{count}} courses. Current progress: {{progress}}.",
     "emptyDescription": "No description has been added yet.",
@@ -3122,10 +3122,10 @@
       "certificate": "Certificate"
     },
     "card": {
-      "openPath": "Open learning path"
+      "openPath": "Open development path"
     },
     "empty": {
-      "title": "No learning paths found",
+      "title": "No development paths found",
       "description": "Adjust your search or check back after paths are assigned."
     },
     "progress": {
@@ -3135,7 +3135,7 @@
     "certificate": {
       "available": "Certificate available",
       "ready": "Certificate ready",
-      "pathCompleted": "Learning path completed. Your certificate is ready."
+      "pathCompleted": "Development path completed. Your certificate is ready."
     },
     "courseState": {
       "completed": "Finished",
@@ -3150,12 +3150,12 @@
       "courses": "Courses in this path",
       "courseTitle": "Course {{number}}",
       "completedAt": "Completed {{date}}",
-      "emptyCourses": "This learning path does not include any courses yet."
+      "emptyCourses": "This development path does not include any courses yet."
     },
     "enrollment": {
       "manage": "Enroll",
       "title": "Enroll learners",
-      "description": "Manage student and group enrollment for this learning path.",
+      "description": "Manage student and group enrollment for this development path.",
       "students": "Students",
       "selectStudents": "Select students",
       "groups": "Groups",
@@ -3175,9 +3175,9 @@
       "groupsEnrolled": "Groups enrolled",
       "studentsUnenrolled": "Students unenrolled",
       "groupsUnenrolled": "Groups unenrolled",
-      "enrolledSuccessfully": "Learning path enrolled",
-      "enrollGroupsDescription": "Select groups to enroll in this learning path.",
-      "unenrollGroupsDescription": "Select groups to unenroll from this learning path.",
+      "enrolledSuccessfully": "Development path enrolled",
+      "enrollGroupsDescription": "Select groups to enroll in this development path.",
+      "unenrollGroupsDescription": "Select groups to unenroll from this development path.",
       "table": {
         "selectAll": "Select all learners",
         "select": "Select learner",
@@ -3193,16 +3193,16 @@
       },
       "confirmation": {
         "title": "Confirm enrollment",
-        "description": "Are you sure you want to enroll the selected students in this learning path? This action cannot be undone."
+        "description": "Are you sure you want to enroll the selected students in this development path? This action cannot be undone."
       },
       "unenrollConfirmation": {
         "title": "Unenroll confirmation",
-        "description": "Are you sure you want to unenroll the selected students from this learning path? This action cannot be undone."
+        "description": "Are you sure you want to unenroll the selected students from this development path? This action cannot be undone."
       },
       "noGroups": "No groups available"
     },
     "breadcrumbs": {
-      "learningPaths": "Learning Paths",
+      "learningPaths": "Development Paths",
       "details": "Details"
     },
     "buttons": {
@@ -3210,26 +3210,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Learning Paths",
+    "title": "Development Paths",
     "description": "Manage path metadata, sequence settings, ordered courses, enrollment, exports, and certificates.",
-    "summary": "{{count}} learning paths are available in this workspace.",
+    "summary": "{{count}} development paths are available in this workspace.",
     "breadcrumbs": {
-      "learningPaths": "Learning Paths",
+      "learningPaths": "Development Paths",
       "create": "Create",
       "edit": "Edit"
     },
     "buttons": {
-      "create": "Create learning path",
+      "create": "Create development path",
       "edit": "Edit",
       "save": "Save changes",
       "removeImage": "Remove image"
     },
     "editor": {
-      "createTitle": "Create Learning Path",
-      "editTitle": "Edit Learning Path",
-      "description": "Set up the learning path details, sequence settings, courses, and publishing state.",
-      "createSummary": "Start with the learning path details.",
-      "editSummary": "This learning path currently has {{coursesCount}} courses.",
+      "createTitle": "Create Development Path",
+      "editTitle": "Edit Development Path",
+      "description": "Set up the development path details, sequence settings, courses, and publishing state.",
+      "createSummary": "Start with the development path details.",
+      "editSummary": "This development path currently has {{coursesCount}} courses.",
       "details": "Details",
       "courses": "Courses",
       "image": "Image",
@@ -3242,19 +3242,19 @@
       "language": "Language",
       "createdAt": "Created",
       "actions": "Actions",
-      "untitled": "Untitled learning path",
+      "untitled": "Untitled development path",
       "emptyDescription": "No description",
       "sequential": "Sequential",
       "flexible": "Flexible",
       "certificate": "Certificate",
-      "empty": "No learning paths have been created yet."
+      "empty": "No development paths have been created yet."
     },
     "form": {
       "language": "Language",
       "status": "Status",
       "statusDescription": "Controls whether this path is visible, draft-only, or private.",
       "title": "Title",
-      "titlePlaceholder": "Name the learning path",
+      "titlePlaceholder": "Name the development path",
       "description": "Description",
       "descriptionPlaceholder": "Describe what students will complete in this path",
       "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
@@ -3263,14 +3263,14 @@
       "includesCertificate": "Certificate",
       "includesCertificateDescription": "Students can receive a certificate after completing the path.",
       "certificateSignature": "Certificate signature",
-      "certificateSignatureDescription": "Upload the signature shown on certificates for this learning path.",
+      "certificateSignatureDescription": "Upload the signature shown on certificates for this development path.",
       "certificateFontColor": "Certificate font color",
       "certificateFontColorDescription": "Use the preview color picker to update the certificate text and line color.",
       "certificatePreview": "Certificate preview",
       "certificatePreviewDescription": "Preview the certificate and adjust its font color."
     },
     "detailsContent": {
-      "title": "Learning path details",
+      "title": "Development path details",
       "description": "Define the localized name and student-facing description."
     },
     "detailsImage": {
@@ -3285,7 +3285,7 @@
       "baseLanguage": "Base language"
     },
     "languageSelector": {
-      "tooltip": "This learning path base language is {{baseLanguage}}."
+      "tooltip": "This development path base language is {{baseLanguage}}."
     },
     "courses": {
       "select": "Select a course",
@@ -3296,32 +3296,32 @@
       "course": "Course",
       "chapter_one": "{{count}} chapter",
       "chapter_other": "{{count}} chapters",
-      "empty": "No courses have been added to this learning path yet.",
-      "saveFirst": "Save the learning path before adding courses.",
+      "empty": "No courses have been added to this development path yet.",
+      "saveFirst": "Save the development path before adding courses.",
       "unknownCourse": "Course details unavailable"
     },
     "sharedLearningPath": {
       "badgeExported": "Shared",
       "exportButton": "Share",
-      "exportSuccess": "Learning path was exported",
-      "exportsDescription": "Share this learning path with selected organizations.",
+      "exportSuccess": "Development path was exported",
+      "exportsDescription": "Share this development path with selected organizations.",
       "exportsTitle": "Sharing",
       "exportingButton": "Sharing...",
       "selectTenants": "Select organizations",
       "selectedCount": "Selected:"
     },
     "deleteModal": {
-      "title": "Delete learning path",
-      "description": "This will delete the learning path and remove its path-based course access."
+      "title": "Delete development path",
+      "description": "This will delete the development path and remove its path-based course access."
     },
     "toast": {
-      "created": "Learning path created successfully",
-      "updated": "Learning path updated successfully",
-      "deleted": "Learning path deleted successfully",
-      "languageCreated": "Learning path language created successfully",
-      "coursesAdded": "Courses added to learning path successfully",
-      "courseRemoved": "Course removed from learning path successfully",
-      "coursesReordered": "Learning path courses reordered successfully"
+      "created": "Development path created successfully",
+      "updated": "Development path updated successfully",
+      "deleted": "Development path deleted successfully",
+      "languageCreated": "Development path language created successfully",
+      "coursesAdded": "Courses added to development path successfully",
+      "courseRemoved": "Course removed from development path successfully",
+      "coursesReordered": "Development path courses reordered successfully"
     }
   },
   "lessonPreview": {
@@ -3429,12 +3429,12 @@
     }
   },
   "learningPathsPreferences": {
-    "subHeader": "Configure Learning Paths settings",
-    "header": "Learning Paths Settings",
+    "subHeader": "Configure Development Paths settings",
+    "header": "Development Paths Settings",
     "settings": {
       "learningPathsEnabled": {
-        "label": "Enable Learning Paths",
-        "description": "Enable Learning Paths. When disabled, Learning Paths are hidden and blocked for all users."
+        "label": "Enable Development Paths",
+        "description": "Enable Development Paths. When disabled, Development Paths are hidden and blocked for all users."
       }
     }
   },
@@ -3715,19 +3715,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Select at least one target tenant",
-      "exportLinkMissing": "Learning path export link not found",
-      "noCourses": "Learning path must include at least one course before export",
-      "courseExportFailed": "Failed to export one of the learning path courses",
+      "exportLinkMissing": "Development path export link not found",
+      "noCourses": "Development path must include at least one course before export",
+      "courseExportFailed": "Failed to export one of the development path courses",
       "targetAuthorMissing": "Target tenant author not found",
-      "jobNotFound": "Learning path export job not found",
-      "invalidJobData": "Invalid learning path export job data",
-      "invalidExportId": "Invalid learning path export id",
-      "invalidExportLink": "Invalid learning path export link"
+      "jobNotFound": "Development path export job not found",
+      "invalidJobData": "Invalid development path export job data",
+      "invalidExportId": "Invalid development path export id",
+      "invalidExportLink": "Invalid development path export link"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Learning path certificates are disabled"
+      "disabled": "Development path certificates are disabled"
     }
   },
   "activityLogsView": {
