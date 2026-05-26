@@ -154,6 +154,7 @@ export function NotificationsPopover({
             className="mt-1 h-9 justify-center"
             disabled={isFetchingMore}
             onClick={() => onLoadMore()}
+            data-testid={NOTIFICATIONS_HANDLES.LOAD_MORE_BUTTON}
           >
             {isFetchingMore
               ? t("notifications.actions.loadingMore")

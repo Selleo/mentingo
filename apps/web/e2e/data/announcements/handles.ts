@@ -1,6 +1,1 @@
-export {
-  ANNOUNCEMENTS_PAGE_HANDLES,
-  ANNOUNCEMENT_CARD_HANDLES,
-  CREATE_ANNOUNCEMENT_PAGE_HANDLES,
-  LATEST_ANNOUNCEMENTS_POPUP_HANDLES,
-} from "../../../app/modules/Announcements/handles";
+export { NOTIFICATIONS_HANDLES } from "../../../app/modules/Notifications/handles";

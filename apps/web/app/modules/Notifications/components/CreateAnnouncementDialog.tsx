@@ -32,6 +32,7 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { EVERYONE_GROUP_VALUE } from "../constants";
+import { NOTIFICATIONS_HANDLES } from "../handles";
 import { createAnnouncementFormSchema } from "../schemas/createAnnouncement.schema";
 import { getDefaultAnnouncementFormValues } from "../utils";
 
@@ -137,7 +138,10 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+      <DialogContent
+        className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl"
+        data-testid={NOTIFICATIONS_HANDLES.CREATE_DIALOG}
+      >
         <DialogHeader>
           <DialogTitle>{t("announcements.createPage.header")}</DialogTitle>
         </DialogHeader>
@@ -151,12 +155,20 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                   value={selectedLanguage}
                   onValueChange={(value: SupportedLanguages) => handleLanguageChange(value)}
                 >
-                  <SelectTrigger className="min-w-[200px]">
+                  <SelectTrigger
+                    className="min-w-[200px]"
+                    data-testid={NOTIFICATIONS_HANDLES.CREATE_LANGUAGE_SELECT}
+                  >
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     {addedLanguageItems.map((item) => (
-                      <SelectItem key={item.key} value={item.key} className="w-full">
+                      <SelectItem
+                        key={item.key}
+                        value={item.key}
+                        className="w-full"
+                        data-testid={NOTIFICATIONS_HANDLES.languageOption(item.key)}
+                      >
                         <div className="flex w-full items-center gap-2">
                           <Icon name={item.iconName} className="size-4" />
                           <span className="font-semibold">{t(item.translationKey)}</span>
@@ -176,7 +188,11 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                           {t("adminCourseView.common.notAddedLanguages")}
                         </div>
                         {notAddedLanguageItems.map((item) => (
-                          <SelectItem key={item.key} value={item.key}>
+                          <SelectItem
+                            key={item.key}
+                            value={item.key}
+                            data-testid={NOTIFICATIONS_HANDLES.languageOption(item.key)}
+                          >
                             <div className="flex w-full items-center gap-2">
                               <Icon name={item.iconName} className="size-4" />
                               <span className="font-semibold">{t(item.translationKey)}</span>
@@ -252,6 +268,7 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                 id="announcement-title"
                 value={activeTranslation?.title ?? ""}
                 placeholder={t("announcements.createPage.placeholders.title")}
+                data-testid={NOTIFICATIONS_HANDLES.CREATE_TITLE_INPUT}
                 {...register(`translations.${selectedLanguage}.title`)}
               />
               {selectedLanguageErrors?.title && (
@@ -268,6 +285,7 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                 className="min-h-44"
                 value={activeTranslation?.content ?? ""}
                 placeholder={t("announcements.createPage.placeholders.content")}
+                data-testid={NOTIFICATIONS_HANDLES.CREATE_CONTENT_INPUT}
                 {...register(`translations.${selectedLanguage}.content`)}
               />
               {selectedLanguageErrors?.content && (
@@ -286,16 +304,23 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                 });
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger data-testid={NOTIFICATIONS_HANDLES.CREATE_GROUP_SELECT}>
                 <SelectValue placeholder={t("announcements.createPage.placeholders.group")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value={EVERYONE_GROUP_VALUE}>
+                  <SelectItem
+                    value={EVERYONE_GROUP_VALUE}
+                    data-testid={NOTIFICATIONS_HANDLES.groupOption(EVERYONE_GROUP_VALUE)}
+                  >
                     {t("announcements.createPage.fields.everyone")}
                   </SelectItem>
                   {groups.map((group) => (
-                    <SelectItem key={group.id} value={group.id}>
+                    <SelectItem
+                      key={group.id}
+                      value={group.id}
+                      data-testid={NOTIFICATIONS_HANDLES.groupOption(group.id)}
+                    >
                       {group.name}
                     </SelectItem>
                   ))}
@@ -309,7 +334,12 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t("common.button.cancel")}
           </Button>
-          <Button type="button" disabled={isPending} onClick={handleSubmit(onSubmit, onInvalid)}>
+          <Button
+            type="button"
+            disabled={isPending}
+            onClick={handleSubmit(onSubmit, onInvalid)}
+            data-testid={NOTIFICATIONS_HANDLES.CREATE_SUBMIT_BUTTON}
+          >
             {isPending ? t("common.button.saving") : t("common.button.create")}
           </Button>
         </DialogFooter>

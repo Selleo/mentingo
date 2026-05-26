@@ -125,6 +125,7 @@ export function NotificationAnnouncementItem({
                     disabled={isDeleting}
                     onClick={() => deleteAnnouncement({ id: announcement.id })}
                     className="bg-error-600 text-white hover:bg-error-700"
+                    data-testid={NOTIFICATIONS_HANDLES.DELETE_CONFIRM_BUTTON}
                   >
                     {t("common.button.delete")}
                   </Button>

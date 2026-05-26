@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 
-import { USER_ROLE } from "~/config/userRoles";
-import {
-  ANNOUNCEMENT_CARD_HANDLES,
-  ANNOUNCEMENTS_PAGE_HANDLES,
-} from "~/modules/Announcements/handles";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
+import { USER_ROLE } from "~/config/userRoles";
+
+import { NOTIFICATIONS_HANDLES } from "../../data/announcements/handles";
 import { expect, test } from "../../fixtures/test.fixture";
+
+import { createAnnouncement } from "./announcement-test-helpers";
 
 const ACCOUNT_PASSWORD = "Password123@";
 
@@ -37,27 +38,26 @@ test("group announcements stay hidden from users outside the group", async ({
     role: USER_ROLE.student,
   });
 
-  const createdAnnouncementResponse =
-    await workspace.apiClient.api.announcementsControllerCreateAnnouncement({
-      title: `visibility-announcement-${randomUUID().slice(0, 8)}`,
-      content: `visibility-content-${randomUUID().slice(0, 8)}`,
-      groupId: group.id,
-    });
-  const createdAnnouncement = createdAnnouncementResponse.data.data;
+  const createdAnnouncement = await createAnnouncement(workspace.apiClient, {
+    groupId: group.id,
+    translations: [
+      {
+        language: SUPPORTED_LANGUAGES.EN,
+        title: `visibility-announcement-${randomUUID().slice(0, 8)}`,
+        content: `visibility-content-${randomUUID().slice(0, 8)}`,
+      },
+    ],
+  });
 
-  await memberSession.page.goto(`${workspace.origin}/announcements`);
-  await memberSession.page
-    .getByTestId(ANNOUNCEMENTS_PAGE_HANDLES.PAGE)
-    .waitFor({ state: "visible" });
+  await memberSession.page.goto(`${workspace.origin}/notifications`);
+  await memberSession.page.getByTestId(NOTIFICATIONS_HANDLES.PAGE).waitFor({ state: "visible" });
   await expect(
-    memberSession.page.getByTestId(ANNOUNCEMENT_CARD_HANDLES.card(createdAnnouncement.id)),
+    memberSession.page.getByTestId(NOTIFICATIONS_HANDLES.card(createdAnnouncement.id)),
   ).toBeVisible();
 
-  await outsiderSession.page.goto(`${workspace.origin}/announcements`);
-  await outsiderSession.page
-    .getByTestId(ANNOUNCEMENTS_PAGE_HANDLES.PAGE)
-    .waitFor({ state: "visible" });
+  await outsiderSession.page.goto(`${workspace.origin}/notifications`);
+  await outsiderSession.page.getByTestId(NOTIFICATIONS_HANDLES.PAGE).waitFor({ state: "visible" });
   await expect(
-    outsiderSession.page.getByTestId(ANNOUNCEMENT_CARD_HANDLES.card(createdAnnouncement.id)),
+    outsiderSession.page.getByTestId(NOTIFICATIONS_HANDLES.card(createdAnnouncement.id)),
   ).toHaveCount(0);
 });
