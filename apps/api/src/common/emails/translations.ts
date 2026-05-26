@@ -99,6 +99,13 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Naudotojas baigė kursą tavo platformoje",
     cs: "Uživatel dokončil kurz na tvé platformě",
   },
+  adminOverdueCoursesEmail: {
+    en: "Overdue courses notification",
+    pl: "Powiadomienie o zaległych kursach",
+    de: "Benachrichtigung über überfällige Kurse",
+    lt: "Pranešimas apie vėluojančius kursus",
+    cs: "Upozornění na kurzy po termínu",
+  },
   magicLinkEmail: {
     en: "Login link",
     pl: "Link do logowania",

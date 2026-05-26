@@ -250,6 +250,7 @@ export class CourseController {
     @Query("keyword") keyword: string,
     @Query("sort") sort: SortEnrolledStudentsOptions,
     @Query("groups") groups: GroupsFilterSchema,
+    @Query("language") language: SupportedLanguages,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
   ): Promise<PaginatedResponse<EnrolledStudent[]>> {
@@ -258,7 +259,8 @@ export class CourseController {
       sort,
       groups,
     };
-    const query = { courseId, filters, page, perPage };
+
+    const query = { courseId, filters, language, page, perPage };
 
     const enrolledStudents = await this.courseService.getStudentsWithEnrollmentDate(query);
 
@@ -824,10 +826,16 @@ export class CourseController {
   @RequirePermission(PERMISSIONS.COURSE_STATISTICS)
   @Validate({
     response: baseResponse(learningTimeStatisticsFilterOptionsSchema),
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
   })
-  async getCourseLearningStatisticsFilterOptions(@Param("courseId") courseId: UUIDType) {
-    const data = await this.learningTimeService.getFilterOptions(courseId);
+  async getCourseLearningStatisticsFilterOptions(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+  ) {
+    const data = await this.learningTimeService.getFilterOptions(courseId, language);
 
     return new BaseResponse(data);
   }

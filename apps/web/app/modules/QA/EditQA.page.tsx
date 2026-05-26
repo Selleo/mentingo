@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import useUpdateQA from "~/api/mutations/admin/useUpdateQA";
 import useQA from "~/api/queries/useQA";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
@@ -77,6 +78,14 @@ export default function EditQAPage() {
     await updateQA({ qaId, ...values, language: qaLanguage }).then(() => navigate("/qa"));
   };
 
+  const { formKey, selectorProps } = getLocalizedResourceLanguage({
+    value: qaLanguage,
+    onChange: setQALanguage,
+    baseLanguage: qa?.baseLanguage,
+    availableLocales: qa?.availableLocales,
+    formKeyParts: [qaId ?? "", qa?.title ?? "", qa?.description ?? ""],
+  });
+
   return (
     <PageWrapper
       breadcrumbs={[
@@ -124,7 +133,12 @@ export default function EditQAPage() {
             <CardContent className="space-y-8">
               <div className="space-y-2">
                 <Label>{t("qaView.edit.language")}</Label>
-                <QALanguageSelector qaLanguage={qaLanguage} qa={qa} onChange={setQALanguage} />
+                <QALanguageSelector
+                  formKey={formKey}
+                  qaLanguage={selectorProps.value}
+                  qa={qa}
+                  onChange={selectorProps.onChange}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="title">

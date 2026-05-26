@@ -13,6 +13,8 @@ import MagicLinkEmailTemplate from "./templates/MagicLinkEmail";
 export const MagicLinkEmail = emailTemplateFactory(MagicLinkEmailTemplate);
 import NewUserEmailTemplate from "./templates/NewUserEmail";
 export const NewUserEmail = emailTemplateFactory(NewUserEmailTemplate);
+import OverdueCoursesEmailTemplate from "./templates/OverdueCoursesEmail";
+export const OverdueCoursesEmail = emailTemplateFactory(OverdueCoursesEmailTemplate);
 import PasswordRecoveryEmailTemplate from "./templates/PasswordRecoveryEmail";
 export const PasswordRecoveryEmail = emailTemplateFactory(PasswordRecoveryEmailTemplate);
 import UserAssignedToCourseEmailTemplate from "./templates/UserAssignedToCourseEmail";

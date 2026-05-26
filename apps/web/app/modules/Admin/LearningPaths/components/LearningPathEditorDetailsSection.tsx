@@ -1,8 +1,4 @@
-import {
-  ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES,
-  LEARNING_PATH_STATUSES,
-  type SupportedLanguages,
-} from "@repo/shared";
+import { ALLOWED_CERTIFICATE_SIGNATURE_FILE_TYPES, LEARNING_PATH_STATUSES } from "@repo/shared";
 import { useTranslation } from "react-i18next";
 
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
@@ -23,14 +19,14 @@ import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/Lear
 
 import type { LearningPathEditorFormValues } from "../types";
 import type { UseFormReturn } from "react-hook-form";
+import type { LocalizedResourceLanguageSelectorProps } from "~/components/LanguageSelector/types";
 
 type LearningPathEditorDetailsSectionProps = {
   form: UseFormReturn<LearningPathEditorFormValues>;
   isCreateMode: boolean;
   coursesCount: number;
-  editorLanguage: SupportedLanguages;
-  availableLocales?: SupportedLanguages[];
-  baseLanguage?: SupportedLanguages;
+  learningPathId?: string;
+  languageSelectorProps: LocalizedResourceLanguageSelectorProps;
   thumbnailUrl: string | null;
   fileInputRef: React.RefObject<HTMLInputElement>;
   onImageUpload: (file: File) => void;
@@ -39,7 +35,6 @@ type LearningPathEditorDetailsSectionProps = {
   certificateSignatureFileInputRef: React.RefObject<HTMLInputElement>;
   onCertificateSignatureUpload: (file: File) => void;
   onRemoveCertificateSignature: () => void;
-  onLanguageChange: (language: SupportedLanguages) => void;
   canEdit: boolean;
 };
 
@@ -77,9 +72,8 @@ export function LearningPathEditorDetailsSection({
   form,
   isCreateMode,
   coursesCount,
-  editorLanguage,
-  availableLocales,
-  baseLanguage,
+  learningPathId,
+  languageSelectorProps,
   thumbnailUrl,
   fileInputRef,
   onImageUpload,
@@ -88,7 +82,6 @@ export function LearningPathEditorDetailsSection({
   certificateSignatureFileInputRef,
   onCertificateSignatureUpload,
   onRemoveCertificateSignature,
-  onLanguageChange,
   canEdit,
 }: LearningPathEditorDetailsSectionProps) {
   const { t } = useTranslation();
@@ -110,11 +103,13 @@ export function LearningPathEditorDetailsSection({
           </p>
         </div>
         <LearningPathLanguageSelector
-          language={editorLanguage}
-          availableLocales={availableLocales}
-          baseLanguage={baseLanguage}
+          formKey={languageSelectorProps.formKey}
+          learningPathId={learningPathId}
+          language={languageSelectorProps.value}
+          availableLocales={languageSelectorProps.availableLocales}
+          baseLanguage={languageSelectorProps.baseLanguage ?? undefined}
           isCreateMode={isCreateMode}
-          onChange={onLanguageChange}
+          onChange={languageSelectorProps.onChange}
           canCreateLanguage={canEdit}
         />
       </div>

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -18,14 +18,23 @@ import {
   allGroupsSchema,
   baseGroupSchema,
   bulkDeleteGroupsSchema,
+  createGroupSchema,
+  groupBaseLanguageUpdateSchema,
+  groupLanguageSchema,
   groupSchema,
-  upsertGroupSchema,
+  updateGroupSchema,
 } from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
-import { UpsertGroupBody, GroupSortFieldsOptions } from "src/group/group.types";
+import {
+  CreateGroupBody,
+  GroupSortFieldsOptions,
+  GroupBaseLanguageUpdateBody,
+  UpdateGroupBody,
+} from "src/group/group.types";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse, GroupResponse } from "src/group/group.types";
+import type { GroupsByCourseResponse } from "src/group/types/groups-by-course-response.type";
 
 @Controller("group")
 export class GroupController {
@@ -39,6 +48,7 @@ export class GroupController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "language", schema: Type.Optional(groupLanguageSchema) },
     ],
     response: paginatedResponse(allGroupsSchema),
   })
@@ -47,11 +57,12 @@ export class GroupController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: GroupSortFieldsOptions,
+    @Query("language") language: SupportedLanguages | undefined,
   ): Promise<PaginatedResponse<AllGroupsResponse>> {
     const filters: GroupKeywordFilterBody = {
       keyword,
     };
-    const query = { filters, page, perPage, sort };
+    const query = { filters, language, page, perPage, sort };
 
     const groups = await this.groupService.getAllGroups(query);
 
@@ -61,11 +72,19 @@ export class GroupController {
   @Get(":groupId")
   @RequirePermission(PERMISSIONS.GROUP_READ)
   @Validate({
-    request: [{ type: "param", name: "groupId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: Type.Optional(groupLanguageSchema) },
+    ],
     response: baseResponse(groupSchema),
   })
-  async getGroupById(@Param("groupId") userId: UUIDType): Promise<{ data: GroupResponse }> {
-    return await this.groupService.getGroupById(userId);
+  async getGroupById(
+    @Param("groupId") groupId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+  ): Promise<BaseResponse<GroupResponse>> {
+    const group = await this.groupService.getGroupById(groupId, language);
+
+    return new BaseResponse(group);
   }
 
   @Get("/user/:userId")
@@ -77,6 +96,7 @@ export class GroupController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: Type.String() },
+      { type: "query", name: "language", schema: Type.Optional(groupLanguageSchema) },
     ],
     response: paginatedResponse(allGroupsSchema),
   })
@@ -86,11 +106,12 @@ export class GroupController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: GroupSortFieldsOptions,
+    @Query("language") language: SupportedLanguages | undefined,
   ): Promise<PaginatedResponse<AllGroupsResponse>> {
     const filters: GroupKeywordFilterBody = {
       keyword,
     };
-    const query = { filters, page, perPage, sort };
+    const query = { filters, language, page, perPage, sort };
 
     const groups = await this.groupService.getUserGroups(query, userId);
 
@@ -100,11 +121,11 @@ export class GroupController {
   @Post()
   @RequirePermission(PERMISSIONS.GROUP_MANAGE)
   @Validate({
-    request: [{ type: "body", schema: upsertGroupSchema }],
+    request: [{ type: "body", schema: createGroupSchema }],
     response: baseResponse(Type.Object({ id: UUIDSchema, message: Type.String() })),
   })
   async createGroup(
-    @Body() createGroupBody: UpsertGroupBody,
+    @Body() createGroupBody: CreateGroupBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
     const { id } = await this.groupService.createGroup(createGroupBody, currentUser);
@@ -117,18 +138,75 @@ export class GroupController {
   @Validate({
     request: [
       { type: "param", name: "groupId", schema: Type.String() },
-      { type: "body", schema: upsertGroupSchema },
+      { type: "body", schema: updateGroupSchema },
     ],
     response: baseResponse(baseGroupSchema),
   })
   async updateGroup(
     @Param("groupId") groupId: UUIDType,
-    @Body() updateGroupBody: UpsertGroupBody,
+    @Body() updateGroupBody: UpdateGroupBody,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GroupResponse>> {
     const updatedGroup = await this.groupService.updateGroup(groupId, updateGroupBody, currentUser);
 
     return new BaseResponse(updatedGroup);
+  }
+
+  @Post(":groupId/language")
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
+  @Validate({
+    response: baseResponse(groupSchema),
+    request: [
+      { type: "param", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: groupLanguageSchema },
+    ],
+  })
+  async createLanguage(
+    @Param("groupId") groupId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GroupResponse>> {
+    const group = await this.groupService.createLanguage(groupId, language, currentUser);
+
+    return new BaseResponse(group);
+  }
+
+  @Delete(":groupId/language")
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
+  @Validate({
+    response: baseResponse(groupSchema),
+    request: [
+      { type: "param", name: "groupId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: groupLanguageSchema },
+    ],
+  })
+  async deleteLanguage(
+    @Param("groupId") groupId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GroupResponse>> {
+    const group = await this.groupService.deleteLanguage(groupId, language, currentUser);
+
+    return new BaseResponse(group);
+  }
+
+  @Patch(":groupId/base-language")
+  @RequirePermission(PERMISSIONS.GROUP_MANAGE)
+  @Validate({
+    response: baseResponse(groupSchema),
+    request: [
+      { type: "param", name: "groupId", schema: UUIDSchema },
+      { type: "body", schema: groupBaseLanguageUpdateSchema },
+    ],
+  })
+  async updateBaseLanguage(
+    @Param("groupId") groupId: UUIDType,
+    @Body() body: GroupBaseLanguageUpdateBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GroupResponse>> {
+    const group = await this.groupService.updateBaseLanguage(groupId, body, currentUser);
+
+    return new BaseResponse(group);
   }
 
   @Delete(":groupId")
@@ -190,15 +268,15 @@ export class GroupController {
         name: "courseId",
         schema: UUIDSchema,
       },
+      { type: "query", name: "language", schema: Type.Optional(groupLanguageSchema) },
     ],
     response: baseResponse(Type.Array(baseGroupSchema)),
   })
   async getGroupsByCourse(
     @Param("courseId") courseId: UUIDType,
-  ): Promise<
-    BaseResponse<Array<{ id: string; name: string; createdAt: string; updatedAt: string }>>
-  > {
-    const groups = await this.groupService.getGroupsByCourse(courseId);
+    @Query("language") language: SupportedLanguages | undefined,
+  ): Promise<BaseResponse<GroupsByCourseResponse>> {
+    const groups = await this.groupService.getGroupsByCourse(courseId, language);
 
     return new BaseResponse(groups);
   }

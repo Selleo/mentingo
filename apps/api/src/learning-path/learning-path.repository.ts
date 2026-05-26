@@ -612,7 +612,11 @@ export class LearningPathRepository {
         enrolledAt: sql<string | null>`${studentLearningPaths.enrolledAt}`,
         groups: sql<Array<{ id: string; name: string }>>`
           COALESCE(
-            json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name}))
+            json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${this.localizationService.getLocalizedSqlField(
+              groups.name,
+              undefined,
+              groups,
+            )}))
             FILTER (WHERE ${groups.id} IS NOT NULL),
             '[]'
           )

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useDeleteCourseLanguage } from "~/api/mutations/admin/useDeleteCourseLanguage";
 import { Icon } from "~/components/Icon";
+import { languageOptions } from "~/components/LanguageSelector/languageOptions";
 import { Button } from "~/components/ui/button";
 import {
   Select,
@@ -26,39 +27,8 @@ import { CreateLanguageDialog } from "./CreateNewLanguageModal";
 import { DeleteLanguageDialog } from "./DeleteLanguageDialog";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { IconName } from "~/types/shared";
 
-export const courseLanguages: {
-  key: SupportedLanguages;
-  iconName: IconName;
-  translationKey: string;
-}[] = [
-  {
-    key: "pl",
-    iconName: "PL",
-    translationKey: "changeUserLanguageView.options.polish",
-  },
-  {
-    key: "en",
-    iconName: "GB",
-    translationKey: "changeUserLanguageView.options.english",
-  },
-  {
-    key: "de",
-    iconName: "DE",
-    translationKey: "changeUserLanguageView.options.german",
-  },
-  {
-    key: "cs",
-    iconName: "CS",
-    translationKey: "changeUserLanguageView.options.czech",
-  },
-  {
-    key: "lt",
-    iconName: "LT",
-    translationKey: "changeUserLanguageView.options.lithuanian",
-  },
-];
+export const courseLanguages = languageOptions;
 
 type LanguageSelectorProps = {
   courseLanguage: SupportedLanguages;

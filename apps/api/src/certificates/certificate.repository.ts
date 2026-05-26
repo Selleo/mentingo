@@ -400,11 +400,13 @@ export class CertificateRepository {
     return validityImpact;
   }
 
-  async findCertificateResetGroups(courseId: UUIDType) {
+  async findCertificateResetGroups(courseId: UUIDType, language?: SupportedLanguages) {
+    const groupName = this.localizationService.getLocalizedSqlField(groups.name, language, groups);
+
     return this.db
       .select({
         id: groups.id,
-        name: groups.name,
+        name: groupName,
         activeCertificateCount: countDistinct(certificates.id),
       })
       .from(groups)
@@ -421,7 +423,7 @@ export class CertificateRepository {
           eq(certificates.status, CERTIFICATE_STATUSES.ACTIVE),
         ),
       )
-      .groupBy(groups.id, groups.name);
+      .groupBy(groups.id);
   }
 
   async findCertificateResetUsers(courseId: UUIDType) {

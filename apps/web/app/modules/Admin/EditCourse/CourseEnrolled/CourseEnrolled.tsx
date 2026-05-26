@@ -1,5 +1,5 @@
 import { useParams } from "@remix-run/react";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, type SupportedLanguages } from "@repo/shared";
 import { useReactTable, flexRender, getCoreRowModel } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Minus, User, Users } from "lucide-react";
@@ -68,15 +68,19 @@ import type { FilterConfig, FilterValue } from "~/modules/common/SearchFilter/Se
 
 type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
 
-export const CourseEnrolled = (): ReactElement => {
+type CourseEnrolledProps = {
+  language?: SupportedLanguages;
+};
+
+export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement => {
   const { t } = useTranslation();
   const { id: courseId } = useParams();
   const { toast } = useToast();
   const { mutate: bulkEnroll } = useBulkCourseEnroll(courseId);
   const { mutateAsync: unenrollCourse } = useUnenrollCourse();
 
-  const { data: groupData } = useGroupsQuerySuspense();
-  const { data: enrolledGroups } = useGroupsByCourseQuery(courseId ?? "");
+  const { data: groupData } = useGroupsQuerySuspense({ language });
+  const { data: enrolledGroups } = useGroupsByCourseQuery(courseId ?? "", language);
 
   const [searchParams, setSearchParams] = useState<UsersEnrolledSearchParams>({
     page: 1,

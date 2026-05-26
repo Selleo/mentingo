@@ -305,11 +305,15 @@ export class CertificatesService implements OnModuleDestroy {
     };
   }
 
-  async getCertificateResetOptions(courseId: UUIDType, currentUser: CurrentUserType) {
+  async getCertificateResetOptions(
+    courseId: UUIDType,
+    language: SupportedLanguages | undefined,
+    currentUser: CurrentUserType,
+  ) {
     await this.assertCanManageCourseCertificates(courseId, currentUser);
 
     const [groups, activeCertificateUserCount] = await Promise.all([
-      this.certificateRepository.findCertificateResetGroups(courseId),
+      this.certificateRepository.findCertificateResetGroups(courseId, language),
       this.certificateRepository.countCertificateResetUsers(courseId),
     ]);
 
@@ -329,13 +333,14 @@ export class CertificatesService implements OnModuleDestroy {
         courseId,
         page,
         perPage,
+        language: query.language,
         search: query.search,
       });
 
     return {
       data: rows,
       pagination: { totalItems, page, perPage },
-      appliedFilters: { search: query.search },
+      appliedFilters: { language: query.language, search: query.search },
     };
   }
 

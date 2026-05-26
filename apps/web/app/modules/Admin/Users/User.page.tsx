@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { PermissionsMatrix } from "~/modules/Admin/Users/components/PermissionsMatrix";
 import { buildPermissionsUnionForRoleSlugs } from "~/modules/Admin/Users/utils/permissionsMatrix";
 import Loader from "~/modules/common/Loader/Loader";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { USER_PAGE_HANDLES } from "../../../../e2e/data/users/handles";
@@ -42,10 +43,11 @@ const displayedFields: Array<keyof UpdateUserBody> = [
 const User = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
 
   if (!id) throw new Error(t("adminUserView.error.userNotFound"));
 
-  const { data: user, isLoading } = useUserById(id);
+  const { data: user, isLoading } = useUserById(id, language);
   const { mutateAsync: updateUser } = useAdminUpdateUser();
 
   const {
@@ -91,7 +93,7 @@ const User = () => {
 
   const onSubmit = (data: UpdateUserBody) => {
     updateUser({ data, userId: id }).then(() => {
-      queryClient.invalidateQueries(userQueryOptions(id));
+      queryClient.invalidateQueries(userQueryOptions(id, language));
       queryClient.invalidateQueries({ queryKey: [ENROLLED_USERS_QUERY_KEY], exact: false });
     });
   };

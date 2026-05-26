@@ -586,6 +586,35 @@
             }
           },
           {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "X-Tenant-Id",
             "in": "header",
             "description": "Target tenant context for this request. Must be one of the tenant IDs returned by GET /integration/tenants.",
@@ -1734,6 +1763,57 @@
                     }
                   ]
                 },
+                "availableLocales": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "baseLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "users": {
                   "type": "array",
                   "items": {
@@ -1804,7 +1884,9 @@
               "required": [
                 "id",
                 "name",
-                "characteristic"
+                "characteristic",
+                "availableLocales",
+                "baseLanguage"
               ]
             }
           },

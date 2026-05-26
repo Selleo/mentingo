@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useLearningPath } from "~/api/queries/useLearningPaths";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Icon } from "~/components/Icon";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { Badge } from "~/components/ui/badge";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/LearningPathLanguageSelector";
@@ -106,6 +107,18 @@ export function InlineLearningPathCard({
           description: optimisticText.description,
         }
       : displayLearningPath;
+
+  const { formKey, selectorProps } = getLocalizedResourceLanguage({
+    value: selectedLanguage,
+    onChange: onLanguageChange,
+    baseLanguage: learningPath.baseLanguage,
+    availableLocales: learningPath.availableLocales,
+    formKeyParts: [
+      learningPath.id,
+      optimisticDisplayLearningPath.title,
+      optimisticDisplayLearningPath.description,
+    ],
+  });
 
   useEffect(() => {
     setOptimisticText({
@@ -246,11 +259,12 @@ export function InlineLearningPathCard({
           <div className="flex flex-col gap-2">
             {canEdit && (
               <LearningPathLanguageSelector
+                formKey={formKey}
                 learningPathId={learningPath.id}
-                language={selectedLanguage}
-                availableLocales={learningPath.availableLocales}
-                baseLanguage={learningPath.baseLanguage}
-                onChange={onLanguageChange}
+                language={selectorProps.value}
+                availableLocales={selectorProps.availableLocales}
+                baseLanguage={selectorProps.baseLanguage ?? undefined}
+                onChange={selectorProps.onChange}
                 onLanguageCreated={onLanguageCreated}
                 canCreateLanguage={canEdit}
               />

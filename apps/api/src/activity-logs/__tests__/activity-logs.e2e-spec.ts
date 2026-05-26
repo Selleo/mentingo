@@ -1,4 +1,4 @@
-import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq, and, isNull } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
@@ -33,7 +33,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateCourseBody } from "src/courses/schemas/createCourse.schema";
 import type { UpdateCourseBody } from "src/courses/schemas/updateCourse.schema";
-import type { UpsertGroupBody } from "src/group/group.types";
+import type { CreateGroupBody } from "src/group/group.types";
 import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schema";
 
 describe("Activity Logs E2E", () => {
@@ -474,9 +474,10 @@ describe("Activity Logs E2E", () => {
   });
 
   describe("Group activity logs", () => {
-    const createGroup = async (body?: Partial<UpsertGroupBody>) =>
+    const createGroup = async (body?: Partial<CreateGroupBody>) =>
       groupService.createGroup(
         {
+          language: SUPPORTED_LANGUAGES.EN,
           name: "Initial Group",
           characteristic: "Test",
           ...(body ?? {}),
@@ -528,7 +529,11 @@ describe("Activity Logs E2E", () => {
     it("should record GROUP_ASSIGNMENT activity log when user assigned to group", async () => {
       const student = await userFactory.create();
       const group = await groupService.createGroup(
-        { name: "Factory Group", characteristic: "Test" },
+        {
+          language: SUPPORTED_LANGUAGES.EN,
+          name: "Factory Group",
+          characteristic: "Test",
+        },
         currentAdminUser,
       );
 

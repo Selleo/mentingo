@@ -759,7 +759,7 @@ export class StudentLessonProgressService {
       .select({
         userName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
-        groupName: sql<string>`${groups.name}`,
+        groupName: this.localizationService.getLocalizedSqlField(groups.name, undefined, groups),
         completedAt: sql<string>`${studentCourses.completedAt}`,
       })
       .from(studentCourses)

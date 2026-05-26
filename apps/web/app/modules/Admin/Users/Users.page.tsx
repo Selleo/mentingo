@@ -47,6 +47,7 @@ import {
   type FilterValue,
   SearchFilter,
 } from "~/modules/common/SearchFilter/SearchFilter";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
@@ -75,6 +76,8 @@ export const clientLoader = async () => {
 const Users = () => {
   const navigate = useNavigate();
 
+  const language = useLanguageStore((state) => state.language);
+
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
@@ -94,7 +97,7 @@ const Users = () => {
   const [isPending, startTransition] = React.useTransition();
 
   const { data: userData } = useAllUsersSuspense(usersQueryParams);
-  const { data: groupData } = useGroupsQuerySuspense();
+  const { data: groupData } = useGroupsQuerySuspense({ language });
   const { data: roles = [] } = useRoles();
 
   const [selectedValue, setSelectedValue] = React.useState<string[]>([]);

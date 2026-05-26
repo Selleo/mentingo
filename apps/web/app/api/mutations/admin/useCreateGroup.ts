@@ -8,16 +8,13 @@ import { invalidateCertificateResetData } from "~/api/utils/invalidateCertificat
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
-type GroupBody = {
-  name: string;
-  description?: string;
-};
+import type { CreateGroupBody } from "~/api/generated-api";
 
 export function useCreateGroup() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (input: GroupBody) => {
+    mutationFn: async (input: CreateGroupBody) => {
       const { data } = await ApiClient.api.groupControllerCreateGroup(input);
 
       await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY] });

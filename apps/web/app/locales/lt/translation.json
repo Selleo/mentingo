@@ -1210,6 +1210,14 @@
       "groupUpdatedSuccessfully": "Grupė sėkmingai atnaujinta",
       "groupNotFound": "Grupė nerasta"
     },
+    "language": {
+      "languageCreated": "Grupės kalba sėkmingai sukurta",
+      "languageDeleted": "Grupės kalba sėkmingai ištrinta",
+      "baseLanguageUpdated": "Numatytoji grupės kalba sėkmingai atnaujinta",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Nustatyti numatytąją kalbą",
+      "setBaseDescription": "Ar tikrai norite nustatyti {{language}} kaip numatytąją kalbą?"
+    },
     "deleteGroup": {
       "title": "Patvirtinti ištrynimą",
       "description": "Ar tikrai norite ištrinti šias grupes?",

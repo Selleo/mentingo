@@ -949,8 +949,10 @@ export const groups = pgTable(
   {
     ...id,
     ...timestamps,
-    name: text("name").notNull(),
-    characteristic: text("characteristic"),
+    name: jsonb("name").$type<LocalizedText>().default({}).notNull(),
+    characteristic: jsonb("characteristic").$type<LocalizedText>(),
+    baseLanguage,
+    availableLocales,
     tenantId,
   },
   withTenantIdIndex("groups"),

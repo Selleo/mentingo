@@ -177,14 +177,18 @@ export class CertificatesController {
   @Get("course/:courseId/reset-options")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
-    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
     response: certificateResetOptionsResponseSchema,
   })
   async getCertificateResetOptions(
     @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<CertificateResetOptionsResponse> {
-    return this.certificatesService.getCertificateResetOptions(courseId, currentUser);
+    return this.certificatesService.getCertificateResetOptions(courseId, language, currentUser);
   }
 
   @Get("course/:courseId/reset-users")
@@ -195,6 +199,7 @@ export class CertificatesController {
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
     ],
     response: paginatedResponse(certificateResetUsersSchema),
   })
@@ -203,11 +208,12 @@ export class CertificatesController {
     @Query("page") page: number | undefined,
     @Query("perPage") perPage: number | undefined,
     @Query("search") search: string | undefined,
+    @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<CertificateResetUsersResponse>> {
     const data = await this.certificatesService.getCertificateResetUsers(
       courseId,
-      { page, perPage, search },
+      { language, page, perPage, search },
       currentUser,
     );
 

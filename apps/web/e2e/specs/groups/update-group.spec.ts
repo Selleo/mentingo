@@ -1,6 +1,10 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { GROUP_FORM_HANDLES, GROUPS_PAGE_HANDLES } from "../../data/groups/handles";
+import {
+  GROUP_FORM_HANDLES,
+  GROUP_PAGE_HANDLES,
+  GROUPS_PAGE_HANDLES,
+} from "../../data/groups/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { cancelGroupFormFlow } from "../../flows/groups/cancel-group-form.flow";
 import { fillGroupFormFlow } from "../../flows/groups/fill-group-form.flow";
@@ -25,8 +29,8 @@ test("admin can update a group", async ({ cleanup, factories, withWorkerPage }) 
     });
     await submitGroupFormFlow(page);
 
-    await expect(page).toHaveURL(/\/admin\/groups$/);
-    await expect(page.getByTestId(GROUPS_PAGE_HANDLES.row(group.id))).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`/admin/groups/${group.id}$`));
+    await expect(page.getByTestId(GROUP_PAGE_HANDLES.PAGE)).toBeVisible();
 
     await expect
       .poll(async () => {

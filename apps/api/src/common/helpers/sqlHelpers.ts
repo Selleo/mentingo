@@ -35,6 +35,8 @@ export function setJsonbField(
   `;
 }
 
+export type JsonbFieldUpdate = ReturnType<typeof setJsonbField>;
+
 export function buildJsonbField(
   key?: string | null,
   value?: string | null,

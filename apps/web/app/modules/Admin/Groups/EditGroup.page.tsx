@@ -1,44 +1,32 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "@remix-run/react";
-import { useForm } from "react-hook-form";
+import { useParams } from "@remix-run/react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useUpdateGroup } from "~/api/mutations/admin/useUpdateGroup";
-import { COURSE_STUDENTS_PROGRESS_QUERY_KEY } from "~/api/queries/admin/useCourseStudentsProgress";
-import { useGroupByIdQuerySuspense } from "~/api/queries/admin/useGroupById";
-import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
-import { queryClient } from "~/api/queryClient";
+import { useGroupById } from "~/api/queries/admin/useGroupById";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { PageWrapper } from "~/components/PageWrapper";
-import CreateGroupCard from "~/modules/Admin/Groups/components/CreateGroupCard";
-import { GroupHeader } from "~/modules/Admin/Groups/components/GroupHeader";
-import { groupFormSchema } from "~/modules/Admin/Groups/group.utils";
+import { EditGroupForm } from "~/modules/Admin/Groups/components/EditGroupForm";
+import { GroupLanguageSelector } from "~/modules/Admin/Groups/components/GroupLanguageSelector";
 import Loader from "~/modules/common/Loader/Loader";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { setPageTitle } from "~/utils/setPageTitle";
 
-import { GROUP_FORM_HANDLES, GROUP_PAGE_HANDLES } from "../../../../e2e/data/groups/handles";
+import { GROUP_PAGE_HANDLES } from "../../../../e2e/data/groups/handles";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { ReactElement } from "react";
-import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.editGroup");
 
 const EditGroup = (): ReactElement => {
   const { id: groupId } = useParams();
-  const navigate = useNavigate();
 
   const { t } = useTranslation();
 
-  const { data, isLoading } = useGroupByIdQuerySuspense(groupId ?? "");
-  const { mutateAsync: updateGroupMutation } = useUpdateGroup(groupId ?? "");
+  const appLanguage = useLanguageStore((state) => state.language);
+  const [selectedGroupLanguage, setSelectedGroupLanguage] = useState(appLanguage);
 
-  const form = useForm<GroupFormValues>({
-    resolver: zodResolver(groupFormSchema),
-    defaultValues: {
-      name: data.name,
-      characteristic: data.characteristic ?? "",
-    },
-  });
+  const { data, isLoading } = useGroupById(groupId ?? "", selectedGroupLanguage);
 
   if (isLoading)
     return (
@@ -49,16 +37,13 @@ const EditGroup = (): ReactElement => {
 
   if (!data) throw new Error(t("adminGroupsView.updateGroup.groupNotFound"));
 
-  const handleSubmit = async (group: GroupFormValues) => {
-    try {
-      await updateGroupMutation(group);
-      await queryClient.invalidateQueries({ queryKey: [GROUPS_QUERY_KEY, { groupId }] });
-      await queryClient.invalidateQueries({ queryKey: [COURSE_STUDENTS_PROGRESS_QUERY_KEY] });
-      navigate("/admin/groups");
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { effectiveLanguage, formKey, selectorProps } = getLocalizedResourceLanguage({
+    value: selectedGroupLanguage,
+    onChange: setSelectedGroupLanguage,
+    baseLanguage: data.baseLanguage,
+    availableLocales: data.availableLocales,
+    formKeyParts: [data.id, data.name, data.characteristic ?? ""],
+  });
 
   return (
     <PageWrapper
@@ -75,15 +60,14 @@ const EditGroup = (): ReactElement => {
       ]}
     >
       <div data-testid={GROUP_PAGE_HANDLES.PAGE} className="flex h-full flex-col">
-        <GroupHeader
-          title={t("adminGroupsView.updateGroup.header")}
-          handlePublish={() => form.handleSubmit(handleSubmit)()}
-          handleCancel={() => navigate("/admin/groups")}
-          headingTestId={GROUP_PAGE_HANDLES.HEADING}
-          cancelButtonTestId={GROUP_FORM_HANDLES.CANCEL_BUTTON}
-          submitButtonTestId={GROUP_FORM_HANDLES.SUBMIT_BUTTON}
+        <EditGroupForm
+          key={formKey}
+          formKey={formKey}
+          group={data}
+          groupId={groupId ?? ""}
+          language={effectiveLanguage}
+          languageSelector={<GroupLanguageSelector group={data} {...selectorProps} />}
         />
-        <CreateGroupCard form={form} handleSubmit={handleSubmit} />
       </div>
     </PageWrapper>
   );

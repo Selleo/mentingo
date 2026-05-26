@@ -855,6 +855,34 @@
       "when": 1779196011885,
       "tag": "0121_backfill_certificate_issued_at",
       "breakpoints": true
+    },
+    {
+      "idx": 122,
+      "version": "7",
+      "when": 1779701857890,
+      "tag": "0122_add_group_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 123,
+      "version": "7",
+      "when": 1779701863849,
+      "tag": "0123_backfill_group_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 124,
+      "version": "7",
+      "when": 1779701879910,
+      "tag": "0124_drop_group_text_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 125,
+      "version": "7",
+      "when": 1779701922574,
+      "tag": "0125_rename_group_translation_columns",
+      "breakpoints": true
     }
   ]
 }

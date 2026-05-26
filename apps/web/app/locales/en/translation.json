@@ -1273,6 +1273,14 @@
       "groupUpdatedSuccessfully": "Group updated successfully",
       "groupNotFound": "Group not found"
     },
+    "language": {
+      "languageCreated": "Group language created successfully",
+      "languageDeleted": "Group language deleted successfully",
+      "baseLanguageUpdated": "Group default language updated successfully",
+      "setBaseLanguage": "Set default",
+      "setBaseTitle": "Set default language",
+      "setBaseDescription": "Are you sure you want to set {{language}} as the default language?"
+    },
     "deleteGroup": {
       "title": "Confirm deletion",
       "description": "Are you sure you want to delete these groups?",

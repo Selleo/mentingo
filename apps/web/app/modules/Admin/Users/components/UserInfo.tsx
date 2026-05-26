@@ -9,6 +9,7 @@ import { Input } from "~/components/ui/input";
 import MultipleSelector from "~/components/ui/multiselect";
 import { useGroupsOptions } from "~/hooks/useGroupsOptions";
 import { getRoleLabel } from "~/modules/Admin/Users/utils/getRoleLabel";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { USER_PAGE_HANDLES } from "../../../../../e2e/data/users/handles";
 
@@ -23,7 +24,10 @@ interface UserInfoType {
 
 export const UserInfo = ({ name, control, isEditing, user }: UserInfoType) => {
   const { t } = useTranslation();
-  const { data: groups } = useGroupsQuerySuspense();
+
+  const language = useLanguageStore((state) => state.language);
+
+  const { data: groups } = useGroupsQuerySuspense({ language });
   const { data: roles = [] } = useRoles();
 
   const { selectedGroups, setSelectedGroups, filterGroups, options } = useGroupsOptions(groups);
