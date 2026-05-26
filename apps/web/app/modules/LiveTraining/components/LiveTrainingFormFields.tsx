@@ -4,7 +4,7 @@ import {
   LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
   LIVE_TRAINING_TITLE_MAX_LENGTH,
 } from "@repo/shared";
-import { Mic, Video } from "lucide-react";
+import { Mic, MicOff, Video, VideoOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "~/components/ui/input";
@@ -17,6 +17,8 @@ import {
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
+import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
 import { CalendarFormFieldLabel } from "~/modules/Calendar/components/CalendarFormFieldLabel";
 import { CalendarViewerPermissionToggle } from "~/modules/Calendar/components/CalendarViewerPermissionToggle";
@@ -37,6 +39,7 @@ type LiveTrainingFormFieldsProps = {
   onFormStateChange: LiveTrainingFormFieldUpdater;
   idPrefix?: string;
   portalledDatePicker?: boolean;
+  isOnlineDeliveryAvailable?: boolean;
 };
 
 function LiveTrainingFormSection({ title, children }: LiveTrainingFormSectionProps) {
@@ -53,6 +56,7 @@ export function LiveTrainingFormFields({
   onFormStateChange,
   idPrefix = "live-training",
   portalledDatePicker = false,
+  isOnlineDeliveryAvailable = true,
 }: LiveTrainingFormFieldsProps) {
   const { t } = useTranslation();
   const titleId = `${idPrefix}-title`;
@@ -62,6 +66,13 @@ export function LiveTrainingFormFields({
   const locationId = `${idPrefix}-location`;
   const microphoneId = `${idPrefix}-microphone-enabled`;
   const cameraId = `${idPrefix}-camera-enabled`;
+  const handleDeliveryTypeChange = (value: string) => {
+    if (value === LIVE_TRAINING_DELIVERY_TYPES.ONLINE && !isOnlineDeliveryAvailable) {
+      return;
+    }
+
+    onFormStateChange("deliveryType", value as LiveTrainingFormState["deliveryType"]);
+  };
 
   return (
     <div className="min-w-0">
@@ -155,18 +166,43 @@ export function LiveTrainingFormFields({
               label={t("calendarView.create.field.deliveryType")}
               tooltip={t("calendarView.create.tooltip.deliveryType")}
             />
-            <Select
-              value={formState.deliveryType}
-              onValueChange={(value) =>
-                onFormStateChange("deliveryType", value as LiveTrainingFormState["deliveryType"])
-              }
-            >
+            <Select value={formState.deliveryType} onValueChange={handleDeliveryTypeChange}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={LIVE_TRAINING_DELIVERY_TYPES.ONLINE}>
-                  {t("calendarView.create.deliveryType.online")}
+                <SelectItem
+                  value={LIVE_TRAINING_DELIVERY_TYPES.ONLINE}
+                  aria-disabled={!isOnlineDeliveryAvailable}
+                  className={cn({
+                    "cursor-not-allowed opacity-50 focus:bg-transparent focus:text-current":
+                      !isOnlineDeliveryAvailable,
+                  })}
+                  onSelect={(event) => {
+                    if (!isOnlineDeliveryAvailable) {
+                      event.preventDefault();
+                    }
+                  }}
+                >
+                  {!isOnlineDeliveryAvailable ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="block w-full">
+                          {t("calendarView.create.deliveryType.online")}
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="right"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("calendarView.create.liveKitRequired")}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    t("calendarView.create.deliveryType.online")
+                  )}
                 </SelectItem>
                 <SelectItem value={LIVE_TRAINING_DELIVERY_TYPES.OFFLINE}>
                   {t("calendarView.create.deliveryType.offline")}
@@ -229,7 +265,13 @@ export function LiveTrainingFormFields({
               checked={formState.microphoneEnabled}
               label={t("calendarView.create.field.microphoneEnabled")}
               tooltip={t("calendarView.create.tooltip.microphoneEnabled")}
-              icon={<Mic className="size-4" />}
+              icon={
+                formState.microphoneEnabled ? (
+                  <Mic className="size-4" />
+                ) : (
+                  <MicOff className="size-4" />
+                )
+              }
               onCheckedChange={(checked) => onFormStateChange("microphoneEnabled", checked)}
             />
             <CalendarViewerPermissionToggle
@@ -237,7 +279,13 @@ export function LiveTrainingFormFields({
               checked={formState.cameraEnabled}
               label={t("calendarView.create.field.cameraEnabled")}
               tooltip={t("calendarView.create.tooltip.cameraEnabled")}
-              icon={<Video className="size-4" />}
+              icon={
+                formState.cameraEnabled ? (
+                  <Video className="size-4" />
+                ) : (
+                  <VideoOff className="size-4" />
+                )
+              }
               onCheckedChange={(checked) => onFormStateChange("cameraEnabled", checked)}
             />
           </div>

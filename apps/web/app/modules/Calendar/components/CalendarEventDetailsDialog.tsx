@@ -98,7 +98,7 @@ export function CalendarEventDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]">
+      <DialogContent className="z-[90] max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]">
         <DialogHeader className="border-b border-neutral-200 px-6 py-5">
           <div className="flex items-start justify-between gap-4 pr-7">
             <div className="min-w-0">

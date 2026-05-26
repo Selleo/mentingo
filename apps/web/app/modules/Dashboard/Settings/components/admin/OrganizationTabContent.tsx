@@ -1,6 +1,7 @@
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { AgeLimitSelect } from "~/modules/Dashboard/Settings/components/admin/AgeLimitSelect";
 import { InviteOnlyRegistration } from "~/modules/Dashboard/Settings/components/admin/InviteOnlyRegistration";
+import { LiveTrainingMaxParallelSessionsSetting } from "~/modules/Dashboard/Settings/components/admin/LiveTrainingMaxParallelSessionsSetting";
 import { UploadFilesToLoginPage } from "~/modules/Dashboard/Settings/components/admin/UploadFilesToLoginPage";
 import UserEmailTriggers from "~/modules/Dashboard/Settings/components/admin/UserEmailTriggers";
 
@@ -29,6 +30,9 @@ export default function OrganizationTabContent({ globalSettings }: OrganizationT
       {canEditSSOEnforcement && <SSOEnforceSwitch enforceSSO={globalSettings.enforceSSO} />}
       <UserEmailTriggers userEmailTriggers={globalSettings.userEmailTriggers} />
       <InviteOnlyRegistration inviteOnlyRegistration={globalSettings.inviteOnlyRegistration} />
+      <LiveTrainingMaxParallelSessionsSetting
+        value={globalSettings.liveTrainingMaxParallelSessions}
+      />
       <RoleBasedMFAEnforcementSwitch MFAEnforcedRoles={globalSettings.MFAEnforcedRoles} />
       {stripeConfigured?.enabled && (
         <DefaultCourseCurrencySelect currentCurrency={globalSettings.defaultCourseCurrency} />

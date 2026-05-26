@@ -87,6 +87,15 @@ export class EnvController {
     return new BaseResponse(await this.envService.getLumaConfigured());
   }
 
+  @Public()
+  @Get("livekit")
+  @Validate({
+    response: baseResponse(isConfiguredResponseSchema),
+  })
+  async getLiveKitConfigured() {
+    return new BaseResponse(await this.envService.getLiveKitConfigured());
+  }
+
   @Get("config/setup")
   @RequirePermission(PERMISSIONS.ENV_MANAGE)
   @Validate({

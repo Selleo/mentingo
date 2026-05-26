@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBulkUpsertSecret } from "~/api/mutations/admin/useBulkUpsertSecret";
 import { useSecret } from "~/api/queries/admin/useSecret";
+import { liveKitConfiguredQueryOptions } from "~/api/queries/useLiveKitConfigured";
 import { ssoEnabledQueryOptions } from "~/api/queries/useSSOEnabled";
 import { stripePublishableKeyQueryOptions } from "~/api/queries/useStripePublishableKey";
 import { queryClient } from "~/api/queryClient";
@@ -95,6 +96,7 @@ const Envs = (): React.ReactElement => {
     await queryClient.invalidateQueries({ queryKey: ["secrets"] });
     await queryClient.invalidateQueries({ queryKey: ssoEnabledQueryOptions().queryKey });
     await queryClient.invalidateQueries(stripePublishableKeyQueryOptions());
+    await queryClient.invalidateQueries(liveKitConfiguredQueryOptions);
   };
 
   return (

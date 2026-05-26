@@ -12,11 +12,13 @@ import {
   DrawerTitle,
 } from "~/components/ui/drawer";
 
+import { LiveTrainingFullscreenTrackOverlay } from "./LiveTrainingFullscreenTrackOverlay";
 import { LiveTrainingMeetingMaterialsPanel } from "./LiveTrainingMeetingMaterialsPanel";
 import { LiveTrainingParticipantGrid } from "./LiveTrainingParticipantGrid";
 import { LiveTrainingRoomToolbar } from "./LiveTrainingRoomToolbar";
 
 import type { LiveTrainingRoomProps } from "./LiveTrainingMeeting.types";
+import type { TrackReferenceOrPlaceholder } from "@livekit/components-react";
 
 function LiveTrainingRoomContent({
   credentials,
@@ -25,6 +27,10 @@ function LiveTrainingRoomContent({
 }: Pick<LiveTrainingRoomProps, "credentials" | "liveTraining" | "canViewAllMaterials">) {
   const { t } = useTranslation();
   const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
+  const [fullscreenTrack, setFullscreenTrack] = useState<{
+    trackRef: TrackReferenceOrPlaceholder;
+    profilePictureUrl?: string | null;
+  } | null>(null);
 
   return (
     <div className="fixed inset-0 z-[61] grid h-screen w-screen min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden bg-primary-950 p-3 sm:p-4">
@@ -37,13 +43,18 @@ function LiveTrainingRoomContent({
             {liveTraining.title}
           </h2>
         </div>
-        <Badge className="shrink-0 rounded bg-primary-400/20 text-primary-50 hover:bg-primary-400/20">
+        <Badge className="shrink-0 rounded bg-white/10 text-white/80 hover:bg-white/10">
           {t("liveTrainingView.meeting.roomTitle")}
         </Badge>
       </div>
 
-      <div className="min-h-0">
-        <LiveTrainingParticipantGrid />
+      <div className="min-h-0 h-full">
+        <LiveTrainingParticipantGrid
+          liveTrainingId={liveTraining.id}
+          onTrackSelect={(trackRef, profilePictureUrl) =>
+            setFullscreenTrack({ trackRef, profilePictureUrl })
+          }
+        />
       </div>
 
       <RoomAudioRenderer />
@@ -78,6 +89,11 @@ function LiveTrainingRoomContent({
           </div>
         </DrawerContent>
       </Drawer>
+      <LiveTrainingFullscreenTrackOverlay
+        profilePictureUrl={fullscreenTrack?.profilePictureUrl}
+        trackRef={fullscreenTrack?.trackRef ?? null}
+        onClose={() => setFullscreenTrack(null)}
+      />
     </div>
   );
 }
@@ -100,7 +116,7 @@ export function LiveTrainingRoom({
       data-lk-theme="default"
     >
       <div className="fixed inset-0 z-[60] bg-primary-950" />
-      <div className="fixed inset-0 z-[60] bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.14),transparent_28%),linear-gradient(135deg,var(--primary-800),var(--primary-950)_48%,var(--primary-900))]" />
+      <div className="fixed inset-x-0 top-0 z-[60] h-px bg-primary-300/30" />
       <div className="fixed inset-0 z-[61]">
         <LiveTrainingRoomContent
           credentials={credentials}

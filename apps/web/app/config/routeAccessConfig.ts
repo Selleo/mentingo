@@ -107,6 +107,7 @@ export const routeAccessConfig = createRouteConfig({
   "learning-paths": LEARNING_PATH_READ_ACCESS,
   calendar: CALENDAR_READ_ACCESS,
   "live-training/:id": LIVE_TRAINING_READ_ACCESS,
+  "live-training/:id/room": LIVE_TRAINING_READ_ACCESS,
   qa: PUBLIC,
   "qa/:id": QA_EDIT_ACCESS,
   articles: PUBLIC,

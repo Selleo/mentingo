@@ -1,6 +1,6 @@
-import { DisconnectButton, TrackToggle } from "@livekit/components-react";
+import { DisconnectButton, useTrackToggle } from "@livekit/components-react";
 import { Track } from "livekit-client";
-import { Files, Mic, PhoneOff, ScreenShare, Video } from "lucide-react";
+import { Files, Mic, MicOff, PhoneOff, ScreenShare, Video, VideoOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -26,11 +26,26 @@ type ToolbarToggleProps = {
   children: ReactNode;
 };
 
-function toolbarButtonClassName() {
+type ToolbarButtonState = "default" | "active" | "muted";
+
+function toolbarButtonClassName(state: ToolbarButtonState = "default") {
   return cn(
-    "inline-flex size-10 items-center justify-center rounded-md border border-white/10 bg-white/10 text-white transition-colors hover:border-primary-300/50 hover:bg-primary-400/25",
-    "data-[lk-muted=true]:border-danger-300/30 data-[lk-muted=true]:bg-danger-500/80 data-[lk-muted=true]:hover:bg-danger-500",
+    "inline-flex size-10 items-center justify-center rounded-md border text-white transition-colors",
+    {
+      "border-white/10 bg-white/10 hover:bg-white/15": state === "default",
+      "border-primary-100/45 bg-primary-500/35 text-primary-50 hover:bg-primary-500/45":
+        state === "active",
+      "border-danger-300/50 bg-danger-500/25 text-danger-50 hover:bg-danger-500/35":
+        state === "muted",
+    },
   );
+}
+
+function getTrackToggleButtonState(isMuted: boolean, isActive: boolean): ToolbarButtonState {
+  if (isMuted) return "muted";
+  if (isActive) return "active";
+
+  return "default";
 }
 
 function ToolbarTooltip({ label, children }: ToolbarToggleProps) {
@@ -49,6 +64,39 @@ function ToolbarTooltip({ label, children }: ToolbarToggleProps) {
   );
 }
 
+type MeetingTrackToggleButtonProps = {
+  source: Track.Source.Microphone | Track.Source.Camera | Track.Source.ScreenShare;
+  label: string;
+  enabledIcon: ReactNode;
+  disabledIcon?: ReactNode;
+};
+
+function MeetingTrackToggleButton({
+  source,
+  label,
+  enabledIcon,
+  disabledIcon,
+}: MeetingTrackToggleButtonProps) {
+  const { buttonProps, enabled, pending } = useTrackToggle({ source });
+  const isMuted = Boolean(disabledIcon) && !enabled;
+  const isActive = enabled && !isMuted;
+  const buttonState = getTrackToggleButtonState(isMuted, isActive);
+
+  return (
+    <ToolbarTooltip label={label}>
+      <button
+        {...buttonProps}
+        type="button"
+        disabled={buttonProps.disabled || pending}
+        className={toolbarButtonClassName(buttonState)}
+        aria-label={label}
+      >
+        {isMuted ? (disabledIcon ?? enabledIcon) : enabledIcon}
+      </button>
+    </ToolbarTooltip>
+  );
+}
+
 export function LiveTrainingRoomToolbar({
   credentials,
   onOpenMaterials,
@@ -57,44 +105,31 @@ export function LiveTrainingRoomToolbar({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex flex-wrap items-center justify-center gap-2 rounded-md border border-white/10 bg-black/25 p-2 backdrop-blur">
+      <div className="flex flex-wrap items-center justify-center gap-2 rounded-md bg-black/35 p-2 backdrop-blur-md">
         {canPublishMicrophone(credentials) && (
-          <ToolbarTooltip label={t("liveTrainingView.meeting.microphone")}>
-            <TrackToggle
-              source={Track.Source.Microphone}
-              showIcon={false}
-              className={toolbarButtonClassName()}
-              aria-label={t("liveTrainingView.meeting.microphone")}
-            >
-              <Mic className="size-4" />
-            </TrackToggle>
-          </ToolbarTooltip>
+          <MeetingTrackToggleButton
+            source={Track.Source.Microphone}
+            label={t("liveTrainingView.meeting.microphone")}
+            enabledIcon={<Mic className="size-4" />}
+            disabledIcon={<MicOff className="size-4" />}
+          />
         )}
 
         {canPublishCamera(credentials) && (
-          <ToolbarTooltip label={t("liveTrainingView.meeting.camera")}>
-            <TrackToggle
-              source={Track.Source.Camera}
-              showIcon={false}
-              className={toolbarButtonClassName()}
-              aria-label={t("liveTrainingView.meeting.camera")}
-            >
-              <Video className="size-4" />
-            </TrackToggle>
-          </ToolbarTooltip>
+          <MeetingTrackToggleButton
+            source={Track.Source.Camera}
+            label={t("liveTrainingView.meeting.camera")}
+            enabledIcon={<Video className="size-4" />}
+            disabledIcon={<VideoOff className="size-4" />}
+          />
         )}
 
         {canPublishScreenShare(credentials) && (
-          <ToolbarTooltip label={t("liveTrainingView.meeting.screenShare")}>
-            <TrackToggle
-              source={Track.Source.ScreenShare}
-              showIcon={false}
-              className={toolbarButtonClassName()}
-              aria-label={t("liveTrainingView.meeting.screenShare")}
-            >
-              <ScreenShare className="size-4" />
-            </TrackToggle>
-          </ToolbarTooltip>
+          <MeetingTrackToggleButton
+            source={Track.Source.ScreenShare}
+            label={t("liveTrainingView.meeting.screenShare")}
+            enabledIcon={<ScreenShare className="size-4" />}
+          />
         )}
 
         <ToolbarTooltip label={t("liveTrainingView.meeting.materials")}>
@@ -110,7 +145,7 @@ export function LiveTrainingRoomToolbar({
 
         <ToolbarTooltip label={t("liveTrainingView.meeting.leave")}>
           <DisconnectButton
-            className="inline-flex size-10 items-center justify-center rounded-md border border-danger-300/25 bg-danger-500/90 text-white transition-colors hover:bg-danger-500"
+            className="inline-flex size-10 items-center justify-center rounded-md bg-danger-500/90 text-white transition-colors hover:bg-danger-500"
             aria-label={t("liveTrainingView.meeting.leave")}
           >
             <PhoneOff className="size-4" />

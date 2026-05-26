@@ -823,6 +823,46 @@ export class SettingsService {
     return this.withTrainerRoleUserCount(this.parseGlobalSettings(updatedGlobalSettings));
   }
 
+  public async updateLiveTrainingMaxParallelSessions(
+    maxParallelSessions: number,
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+    const normalizedMaxParallelSessions = Math.floor(maxParallelSessions);
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            settings.settings,
+            '{liveTrainingMaxParallelSessions}',
+            to_jsonb(${normalizedMaxParallelSessions}::integer),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.withTrainerRoleUserCount(this.parseGlobalSettings(updatedGlobalSettings));
+  }
+
+  public async getLiveTrainingMaxParallelSessions(): Promise<number> {
+    const globalSettingsRecord = await this.getGlobalSettingsRecord();
+    const globalSettings = this.parseGlobalSettings(globalSettingsRecord.settings);
+
+    return globalSettings.liveTrainingMaxParallelSessions;
+  }
+
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
     actor?: CurrentUserType,
@@ -1727,6 +1767,9 @@ export class SettingsService {
       calendarEnabled: true,
       liveTrainingEnabled:
         settings.liveTrainingEnabled ?? DEFAULT_GLOBAL_SETTINGS.liveTrainingEnabled,
+      liveTrainingMaxParallelSessions:
+        settings.liveTrainingMaxParallelSessions ??
+        DEFAULT_GLOBAL_SETTINGS.liveTrainingMaxParallelSessions,
       MFAEnforcedRoles: Array.isArray(settings.MFAEnforcedRoles)
         ? settings.MFAEnforcedRoles
         : JSON.parse(settings.MFAEnforcedRoles ?? "[]"),

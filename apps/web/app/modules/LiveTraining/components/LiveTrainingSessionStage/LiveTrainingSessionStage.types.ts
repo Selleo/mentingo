@@ -21,6 +21,7 @@ export type PreviewMetaItemProps = {
   value: ReactNode;
   tooltip: string;
   canEdit?: boolean;
+  variant?: "default" | "danger";
 };
 
 export type StageActionButtonProps = {
@@ -35,6 +36,7 @@ export type LiveTrainingSessionStageLogicParams = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
   editFormState: LiveTrainingEditFormState | null;
+  isOnlineDeliveryAvailable: boolean;
   onEditFormStateChange: UpdateLiveTrainingEditFormState;
   onEditFormStateCommit: (nextFormState: LiveTrainingEditFormState) => void;
 };

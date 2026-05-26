@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { EnvModule } from "src/env/env.module";
 import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { SettingsModule } from "src/settings/settings.module";
@@ -15,7 +16,7 @@ import { LiveKitWebhookController } from "./livekit/livekit-webhook.controller";
 import { LiveKitService } from "./livekit/livekit.service";
 
 @Module({
-  imports: [FileModule, LocalizationModule, SettingsModule, StudentLessonProgressModule],
+  imports: [EnvModule, FileModule, LocalizationModule, SettingsModule, StudentLessonProgressModule],
   controllers: [LiveTrainingController, LiveTrainingSessionsController, LiveKitWebhookController],
   providers: [
     LiveTrainingService,

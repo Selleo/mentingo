@@ -3,7 +3,7 @@ import {
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
 } from "@repo/shared";
-import { CalendarClock, CheckCircle2, Download, FileText, Play, Video } from "lucide-react";
+import { CalendarClock, CheckCircle2, Download, FileText, MapPin, Play, Video } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -39,6 +39,10 @@ type LiveTrainingStatusPreviewProps = {
   canJoin: boolean;
   isJoining: boolean;
   onJoin: () => void;
+};
+
+type LiveTrainingLocationNoticeProps = {
+  location: string;
 };
 
 function LiveTrainingMaterialList({
@@ -96,6 +100,24 @@ function LiveTrainingMaterialList({
   );
 }
 
+function LiveTrainingLocationNotice({ location }: LiveTrainingLocationNoticeProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="mt-3 flex min-w-0 items-center gap-2 border-t border-neutral-100 pt-3">
+      <span className="flex size-7 shrink-0 items-center justify-center rounded bg-neutral-50 text-primary-700">
+        <MapPin className="size-4" />
+      </span>
+      <span className="shrink-0 text-sm text-neutral-500">
+        {t("studentLessonView.liveTraining.locationNotice")}
+      </span>
+      <span className="min-w-0 truncate text-sm font-medium text-neutral-950" title={location}>
+        {location}
+      </span>
+    </div>
+  );
+}
+
 function LiveTrainingStatusPreview({
   liveTraining,
   scheduleLabel,
@@ -104,10 +126,13 @@ function LiveTrainingStatusPreview({
   onJoin,
 }: LiveTrainingStatusPreviewProps) {
   const { t } = useTranslation();
+  const isActive = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
   const isEnded = liveTraining.status === LIVE_TRAINING_STATUSES.ENDED;
   const isScheduled = liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED;
+  const isOffline = liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE;
+  const location = isOffline ? liveTraining.location : null;
 
-  if (canJoin) {
+  if (isActive) {
     return (
       <section className="overflow-hidden rounded-md border border-primary-100 bg-white shadow-sm">
         <div className="relative bg-primary-950 p-4 text-white">
@@ -128,17 +153,20 @@ function LiveTrainingStatusPreview({
               </div>
             </div>
 
-            <Button
-              type="button"
-              className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90"
-              disabled={isJoining}
-              onClick={onJoin}
-            >
-              <Play className="size-4" />
-              {t("liveTrainingView.actions.join")}
-            </Button>
+            {canJoin && (
+              <Button
+                type="button"
+                className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90"
+                disabled={isJoining}
+                onClick={onJoin}
+              >
+                <Play className="size-4" />
+                {t("liveTrainingView.actions.join")}
+              </Button>
+            )}
           </div>
         </div>
+        {location && <LiveTrainingLocationNotice location={location} />}
       </section>
     );
   }
@@ -160,6 +188,7 @@ function LiveTrainingStatusPreview({
             <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
           </div>
         </div>
+        {location && <LiveTrainingLocationNotice location={location} />}
       </section>
     );
   }
@@ -181,6 +210,7 @@ function LiveTrainingStatusPreview({
             <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
           </div>
         </div>
+        {location && <LiveTrainingLocationNotice location={location} />}
       </section>
     );
   }

@@ -6,6 +6,7 @@ import {
   LIVE_TRAINING_STATUSES,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
+  type LiveTrainingDeliveryType,
   type LiveTrainingParticipantRole,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -13,6 +14,7 @@ import {
 import { LiveTrainingSessionEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
@@ -21,7 +23,10 @@ import { LiveKitService } from "../livekit/livekit.service";
 
 import { LiveTrainingSessionsRepository } from "./live-training-sessions.repository";
 
-import type { LiveTrainingSessionRow } from "./live-training-sessions.repository.types";
+import type {
+  LiveTrainingLessonCompletionRow,
+  LiveTrainingSessionRow,
+} from "./live-training-sessions.repository.types";
 import type {
   HandleLiveKitWebhookInput,
   JoinLiveTrainingSessionResponse,
@@ -53,6 +58,7 @@ export class LiveTrainingSessionsService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async getSessions(
@@ -142,10 +148,6 @@ export class LiveTrainingSessionsService {
 
     this.assertCanManageSession(liveTraining, currentUser);
 
-    if (liveTraining.deliveryType !== LIVE_TRAINING_DELIVERY_TYPES.ONLINE) {
-      throw new BadRequestException("liveTraining.errors.onlineSessionRequired");
-    }
-
     const canStartNewSession =
       liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED ||
       liveTraining.status === LIVE_TRAINING_STATUSES.ENDED;
@@ -154,12 +156,20 @@ export class LiveTrainingSessionsService {
       throw new BadRequestException("liveTraining.errors.onlyScheduledCanBeStarted");
     }
 
+    await this.assertMaxParallelSessionsAvailable();
+
     const existingCurrentSession =
       await this.liveTrainingSessionsRepository.getCurrentSessionRow(liveTrainingId);
 
     if (existingCurrentSession) {
       throw new BadRequestException("liveTraining.errors.sessionAlreadyActive");
     }
+
+    if (liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE) {
+      return this.startOfflineSession(liveTrainingId, currentUser, liveTraining.calendarEventId);
+    }
+
+    await this.liveKitService.assertConfigured();
 
     const session = await this.liveTrainingSessionsRepository.createWaitingSession({
       liveTrainingId,
@@ -231,6 +241,8 @@ export class LiveTrainingSessionsService {
       throw new BadRequestException("liveTraining.errors.liveKitRoomNotAvailable");
     }
 
+    await this.assertRoomHasCapacity(session.livekitRoomName, liveTraining.maxParticipants);
+
     const user = await this.liveTrainingSessionsRepository.getUserDisplayRow(currentUser.userId);
 
     if (!user) {
@@ -250,6 +262,7 @@ export class LiveTrainingSessionsService {
         userId: user.id,
         role,
       },
+      attributes: { userId: user.id },
       canPublishAudio:
         canManageSession || liveTraining.settings.viewerPermissions.microphoneEnabled,
       canPublishVideo: canManageSession || liveTraining.settings.viewerPermissions.cameraEnabled,
@@ -272,6 +285,91 @@ export class LiveTrainingSessionsService {
       role,
       viewerPermissions: liveTraining.settings.viewerPermissions,
     };
+  }
+
+  async getParticipantProfilePictures(
+    liveTrainingId: UUIDType,
+    language: SupportedLanguages | undefined,
+    currentUser: CurrentUserType,
+  ) {
+    await this.liveTrainingService.getLiveTraining(
+      liveTrainingId,
+      language ?? SUPPORTED_LANGUAGES.EN,
+      currentUser,
+    );
+    const currentSession =
+      await this.liveTrainingSessionsRepository.getCurrentSessionRow(liveTrainingId);
+
+    if (!currentSession) {
+      return [];
+    }
+
+    const participants = await this.liveTrainingSessionsRepository.getParticipantRows(
+      liveTrainingId,
+      currentSession.id,
+    );
+
+    return Promise.all(
+      participants.map(async (participant) => ({
+        userId: participant.userId,
+        profilePictureUrl: await this.getProfilePictureUrl(participant.avatarReference),
+      })),
+    );
+  }
+
+  private async startOfflineSession(
+    liveTrainingId: UUIDType,
+    currentUser: CurrentUserType,
+    calendarEventId: UUIDType,
+  ) {
+    const session = await this.liveTrainingSessionsRepository.createWaitingSession({
+      liveTrainingId,
+      startedByUserId: currentUser.userId,
+    });
+
+    await this.liveTrainingSessionsRepository.activateLiveTrainingSession({
+      liveTrainingId,
+      sessionId: session.id,
+      calendarEventId,
+      roomName: null,
+      roomSid: null,
+    });
+    await this.liveTrainingSessionsRepository.markSessionActive(session.id);
+    await this.publishSessionEvent(LIVE_TRAINING_SESSION_STATUSES.ACTIVE, {
+      id: session.id,
+      liveTrainingId,
+      tenantId: currentUser.tenantId,
+    });
+
+    const sessionRow = await this.liveTrainingSessionsRepository.getSessionRow(
+      liveTrainingId,
+      session.id,
+    );
+
+    if (!sessionRow) {
+      throw new NotFoundException("liveTraining.errors.sessionNotFound");
+    }
+
+    return this.mapSessionSummary(sessionRow);
+  }
+
+  private async assertRoomHasCapacity(roomName: string, maxParticipants: number) {
+    const participantCount = await this.liveKitService.getParticipantCount(roomName);
+
+    if (participantCount >= maxParticipants) {
+      throw new BadRequestException("liveTraining.errors.maxParticipantsReached");
+    }
+  }
+
+  private async assertMaxParallelSessionsAvailable() {
+    const [maxParallelSessions, currentSessionCount] = await Promise.all([
+      this.settingsService.getLiveTrainingMaxParallelSessions(),
+      this.liveTrainingSessionsRepository.countCurrentSessions(),
+    ]);
+
+    if (currentSessionCount >= maxParallelSessions) {
+      throw new BadRequestException("liveTraining.errors.maxParallelSessionsReached");
+    }
   }
 
   async endSession(
@@ -341,7 +439,11 @@ export class LiveTrainingSessionsService {
       endedAt,
     });
     await this.liveTrainingSessionsRepository.updateSessionCounters(sessionId);
-    await this.markLinkedLiveLessonsCompleted(liveTrainingId, currentUser);
+    await this.markLinkedLiveLessonsCompleted({
+      liveTrainingId,
+      deliveryType: liveTraining.deliveryType,
+      currentUser,
+    });
     await this.publishSessionEvent(LIVE_TRAINING_SESSION_STATUSES.ENDED, {
       id: sessionId,
       liveTrainingId,
@@ -580,18 +682,28 @@ export class LiveTrainingSessionsService {
     return LIVE_TRAINING_PARTICIPANT_ROLES.OBSERVER;
   }
 
-  private async markLinkedLiveLessonsCompleted(
-    liveTrainingId: UUIDType,
-    currentUser: CurrentUserType,
-  ) {
-    const completionRows =
-      await this.liveTrainingSessionsRepository.getLiveLessonCompletionRows(liveTrainingId);
+  private async markLinkedLiveLessonsCompleted(input: {
+    liveTrainingId: UUIDType;
+    deliveryType: LiveTrainingDeliveryType;
+    currentUser: CurrentUserType;
+  }) {
+    let completionRows: LiveTrainingLessonCompletionRow[];
+
+    if (input.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE) {
+      completionRows = await this.liveTrainingSessionsRepository.getOfflineLiveLessonCompletionRows(
+        input.liveTrainingId,
+      );
+    } else {
+      completionRows = await this.liveTrainingSessionsRepository.getOnlineLiveLessonCompletionRows(
+        input.liveTrainingId,
+      );
+    }
 
     for (const row of completionRows) {
       await this.studentLessonProgressService.markLessonAsCompleted({
         id: row.lessonId,
         studentId: row.studentId,
-        actor: currentUser,
+        actor: input.currentUser,
         language: row.language,
       });
     }

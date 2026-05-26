@@ -43,9 +43,16 @@ export const updateAgeLimitSchema = Type.Object({
   ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
 });
 
+export const updateLiveTrainingMaxParallelSessionsSchema = Type.Object({
+  liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),
+});
+
 export type UpdateSettingsBody = Static<typeof updateSettingsBodySchema>;
 export type UpdateMFAEnforcedRolesRequest = Static<typeof updateMFAEnforcedRolesSchema>;
 export type UpdateDefaultCourseCurrencyBody = Static<typeof updateDefaultCourseCurrencySchema>;
 export type UpdateGlobalColorSchemaBody = Static<typeof updateGlobalColorSchema>;
 export type UpdateConfigWarningDismissedBody = Static<typeof updateConfigWarningDismissedSchema>;
 export type UpdateAgeLimitBody = Static<typeof updateAgeLimitSchema>;
+export type UpdateLiveTrainingMaxParallelSessionsBody = Static<
+  typeof updateLiveTrainingMaxParallelSessionsSchema
+>;

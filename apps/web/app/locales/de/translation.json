@@ -324,6 +324,7 @@
       "title": "Zum Kalender hinzufügen",
       "description": "Wählen Sie aus, was Sie für die ausgewählte Zeit hinzufügen möchten.",
       "noOptions": "Es sind keine Kalenderelemente zum Erstellen verfügbar.",
+      "liveKitRequired": "Konfigurieren Sie LiveKit in den Umgebungseinstellungen, um Online-Live-Trainings zu aktivieren. Offline-Trainings bleiben verfügbar.",
       "submit": "Live Training erstellen",
       "toast": {
         "success": "Live Training wurde erstellt."
@@ -534,6 +535,7 @@
       "microphone": "Mikrofon",
       "camera": "Kamera",
       "screenShare": "Bildschirm teilen",
+      "screen": "Bildschirm",
       "leave": "Verlassen",
       "empty": "Warten auf Teilnehmer.",
       "materials": "Materialien",
@@ -841,7 +843,7 @@
         "slack_authorization": "Erlauben Sie Benutzern, sich mit ihrem Slack-Konto anzumelden",
         "openAI": "Aktivieren Sie AI Mentor-Funktionen",
         "luma": "Aktivieren Sie die Funktionen zur KI-Kursgenerierung",
-        "livekit": "Live Training-Videositzungen aktivieren"
+        "livekit": "Konfigurieren Sie LiveKit, um Online-Video-Sitzungen für Live Training zu aktivieren. Ohne LiveKit sind nur Offline-Trainings verfügbar."
       }
     }
   },
@@ -2465,6 +2467,7 @@
       "endedTitle": "Live Training ist bereits beendet",
       "inactiveLabel": "Live Training",
       "inactiveTitle": "Keine Live-Training-Sitzung ist aktiv",
+      "locationNotice": "Ort",
       "notAvailable": "Live Training ist für diese Lektion nicht verfügbar."
     },
     "videoProcessing": {
@@ -2712,6 +2715,8 @@
       "calendarDescription": "Benutzern erlauben, geplante Ereignisse im Kalender anzuzeigen",
       "liveTraining": "Live Training aktivieren",
       "liveTrainingDescription": "Trainern erlauben, Live-Schulungen zu erstellen und durchzuführen",
+      "liveTrainingMaxParallelSessions": "Maximale parallele Live Training-Sitzungen",
+      "liveTrainingMaxParallelSessionsDescription": "Begrenzen Sie, wie viele Live Training-Sitzungen gleichzeitig aktiv sein können.",
       "liveTrainingTooltip": "Aktivieren Sie dies nur, wenn der Mandant trainergeführte Live-Sitzungen verwenden soll.",
       "liveTrainingDisableBlockedTooltip_one": "Derzeit hat {{count}} Benutzer die Trainer-Rolle. Entziehen Sie sie, um diese Funktion zu deaktivieren.",
       "liveTrainingDisableBlockedTooltip_other": "Derzeit haben {{count}} Benutzer die Trainer-Rolle. Entziehen Sie sie, um diese Funktion zu deaktivieren.",
@@ -2726,6 +2731,7 @@
       "modernCourseListPreferenceChangeSuccess": "Die Voreinstellung für die moderne Kursliste wurde erfolgreich aktualisiert",
       "calendarPreferenceChangeSuccess": "Die Kalendereinstellung wurde erfolgreich aktualisiert",
       "liveTrainingPreferenceChangeSuccess": "Die Live-Training-Einstellung wurde erfolgreich aktualisiert",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Das Live Training-Sitzungslimit wurde erfolgreich aktualisiert",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse wurden erfolgreich aktualisiert",
       "finishedCourseNotificationsPreferenceChangeError": "Die Benachrichtigungseinstellungen für abgeschlossene Kurse konnten nicht aktualisiert werden",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Die Benachrichtigungseinstellungen für überfällige Kurse wurden erfolgreich aktualisiert",
@@ -3881,7 +3887,9 @@
       "baseLanguageAssignmentRequired": "Live Training-Lektionen müssen zuerst in der Basissprache des Kurses erstellt werden.",
       "invalidLessonType": "Live Training-Zuweisungen können nur zu Live Training-Lektionen hinzugefügt werden.",
       "deleteAssignedToLesson": "Dieses Live Training ist mit einer Lektion verknüpft. Lösche zuerst die Lektion, bevor du das Live Training löschst.",
-      "liveKitNotConfigured": "LiveKit ist nicht konfiguriert."
+      "liveKitNotConfigured": "LiveKit ist nicht konfiguriert.",
+      "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
+      "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live Training-Sitzungen wurde erreicht."
     }
   }
 }

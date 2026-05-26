@@ -8,6 +8,7 @@ import { useAttachLiveTrainingLesson } from "~/api/mutations/admin/useAttachLive
 import { useCreateLiveTrainingLesson } from "~/api/mutations/admin/useCreateLiveTrainingLesson";
 import { useUpdateLiveTrainingLessonTitle } from "~/api/mutations/admin/useUpdateLiveTrainingLessonTitle";
 import { useLiveTrainings } from "~/api/queries/live-training/useLiveTrainings";
+import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { getCalendarCreateLiveTrainingSchema } from "~/modules/Calendar/components/calendarCreateLiveTraining.schema";
 import {
@@ -53,12 +54,14 @@ export function useLiveTrainingLessonForm({
     useAttachLiveTrainingLesson();
   const { mutateAsync: updateLiveTrainingLessonTitle, isPending: isUpdatingTitle } =
     useUpdateLiveTrainingLessonTitle();
+  const { data: liveKitConfigured } = useLiveKitConfigured();
+  const isOnlineDeliveryAvailable = Boolean(liveKitConfigured?.enabled);
   const [formMode, setFormMode] = useState<LiveTrainingLessonFormMode>(
     LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW,
   );
   const [selectedLiveTrainingId, setSelectedLiveTrainingId] = useState<string | null>(null);
   const [liveTrainingFormState, setLiveTrainingFormState] = useState<LiveTrainingFormState>(() =>
-    buildInitialCalendarCreateLiveTrainingFormState(null),
+    buildInitialCalendarCreateLiveTrainingFormState(null, LIVE_TRAINING_DELIVERY_TYPES.OFFLINE),
   );
   const [liveTrainingFormError, setLiveTrainingFormError] = useState<string | null>(null);
   const [isLiveTrainingFormDirty, setIsLiveTrainingFormDirty] = useState(false);
@@ -106,6 +109,24 @@ export function useLiveTrainingLessonForm({
   useEffect(() => {
     reset({ title: lessonToEdit?.title ?? "" });
   }, [lessonToEdit, reset]);
+
+  useEffect(() => {
+    if (isOnlineDeliveryAvailable && !isLiveTrainingFormDirty) {
+      setLiveTrainingFormState((current) => ({
+        ...current,
+        deliveryType: LIVE_TRAINING_DELIVERY_TYPES.ONLINE,
+      }));
+      return;
+    }
+
+    if (isOnlineDeliveryAvailable) return;
+
+    setLiveTrainingFormState((current) => {
+      if (current.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE) return current;
+
+      return { ...current, deliveryType: LIVE_TRAINING_DELIVERY_TYPES.OFFLINE };
+    });
+  }, [isLiveTrainingFormDirty, isOnlineDeliveryAvailable]);
 
   const updateFormMode = (mode: LiveTrainingLessonFormMode) => {
     setFormMode(mode);
@@ -252,6 +273,7 @@ export function useLiveTrainingLessonForm({
     formMode,
     isPending: isPending || isUpdatingTitle || isAttachingLiveTraining,
     isLoadingScheduledLiveTrainings,
+    isOnlineDeliveryAvailable,
     liveTrainingFormError,
     liveTrainingFormState,
     onSubmit,

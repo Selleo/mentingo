@@ -325,6 +325,7 @@
       "title": "Add to calendar",
       "description": "Choose what you want to add for the selected time.",
       "noOptions": "No calendar items are available to create.",
+      "liveKitRequired": "Configure LiveKit in environment settings to enable online Live Trainings. Offline trainings remain available.",
       "submit": "Create live training",
       "toast": {
         "success": "Live training has been created."
@@ -535,6 +536,7 @@
       "microphone": "Microphone",
       "camera": "Camera",
       "screenShare": "Share screen",
+      "screen": "Screen",
       "leave": "Leave",
       "empty": "Waiting for participants.",
       "materials": "Materials",
@@ -842,7 +844,7 @@
         "slack_authorization": "Allow users to sign in with their Slack account",
         "openAI": "Enable AI Mentor features",
         "luma": "Enable AI Course Generation features",
-        "livekit": "Enable Live Training video sessions"
+        "livekit": "Configure LiveKit to enable online Live Training video sessions. Without it, only offline Live Trainings are available."
       }
     }
   },
@@ -2526,6 +2528,7 @@
       "endedTitle": "Live Training has already ended",
       "inactiveLabel": "Live Training",
       "inactiveTitle": "No Live Training is active",
+      "locationNotice": "Location",
       "notAvailable": "Live Training is not available for this lesson."
     },
     "videoProcessing": {
@@ -2773,6 +2776,8 @@
       "calendarDescription": "Allow users to view scheduled events in the calendar",
       "liveTraining": "Enable Live Training",
       "liveTrainingDescription": "Allow trainers to create and run live training sessions",
+      "liveTrainingMaxParallelSessions": "Max parallel Live Training sessions",
+      "liveTrainingMaxParallelSessionsDescription": "Limit how many Live Training sessions can be active at the same time.",
       "liveTrainingTooltip": "Enable this only when the tenant should use trainer-led live sessions.",
       "liveTrainingDisableBlockedTooltip_one": "Currently you have {{count}} user with the Trainer role. Revoke it in order to disable this feature.",
       "liveTrainingDisableBlockedTooltip_other": "Currently you have {{count}} users with the Trainer role. Revoke them in order to disable this feature.",
@@ -2787,6 +2792,7 @@
       "modernCourseListPreferenceChangeSuccess": "Modern course list preference has been updated successfully",
       "calendarPreferenceChangeSuccess": "Calendar preference has been updated successfully",
       "liveTrainingPreferenceChangeSuccess": "Live Training preference has been updated successfully",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Live Training session limit has been updated successfully",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
@@ -3944,7 +3950,9 @@
       "baseLanguageAssignmentRequired": "Live Training lessons must be created in the course base language first.",
       "invalidLessonType": "Only Live Training lessons can have Live Training assignments.",
       "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training.",
-      "liveKitNotConfigured": "LiveKit is not configured."
+      "liveKitNotConfigured": "LiveKit is not configured.",
+      "maxParticipantsReached": "The maximum number of participants has been reached.",
+      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
   }
 }

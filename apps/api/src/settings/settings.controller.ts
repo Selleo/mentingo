@@ -77,6 +77,8 @@ import {
   UpdateConfigWarningDismissedBody,
   updateAgeLimitSchema,
   UpdateAgeLimitBody,
+  updateLiveTrainingMaxParallelSessionsSchema,
+  UpdateLiveTrainingMaxParallelSessionsBody,
 } from "./schemas/update-settings.schema";
 import { SETTINGS_IMAGE_ASSET, SettingsService } from "./settings.service";
 
@@ -203,6 +205,23 @@ export class SettingsController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     const result = await this.settingsService.updateGlobalLiveTrainingEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
+  @Patch("admin/live-training/max-parallel-sessions")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: updateLiveTrainingMaxParallelSessionsSchema }],
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateLiveTrainingMaxParallelSessions(
+    @Body() body: UpdateLiveTrainingMaxParallelSessionsBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateLiveTrainingMaxParallelSessions(
+      body.liveTrainingMaxParallelSessions,
+      currentUser,
+    );
     return new BaseResponse(result);
   }
 

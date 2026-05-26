@@ -18,8 +18,10 @@ import {
   liveTrainingSessionSummaryResponseSchema,
   joinLiveTrainingSessionBaseResponseSchema,
   type JoinLiveTrainingSessionResponse,
+  type LiveTrainingParticipantProfilePicture,
   type LiveTrainingSessionDetails,
   type LiveTrainingSessionSummary,
+  liveTrainingParticipantProfilePictureResponseSchema,
 } from "./live-training-sessions.types";
 
 const languageQuerySchema = Type.Optional(Type.Enum(SUPPORTED_LANGUAGES));
@@ -97,6 +99,29 @@ export class LiveTrainingSessionsController {
     );
 
     return new BaseResponse(session);
+  }
+
+  @Get("participants/profile-pictures")
+  @RequirePermission(PERMISSIONS.LIVE_TRAINING_READ)
+  @Validate({
+    request: [
+      { type: "param", name: "liveTrainingId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: languageQuerySchema },
+    ],
+    response: liveTrainingParticipantProfilePictureResponseSchema,
+  })
+  async getParticipantProfilePictures(
+    @Param("liveTrainingId") liveTrainingId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<LiveTrainingParticipantProfilePicture[]>> {
+    const profilePicture = await this.liveTrainingSessionsService.getParticipantProfilePictures(
+      liveTrainingId,
+      language,
+      currentUser,
+    );
+
+    return new BaseResponse(profilePicture);
   }
 
   @Get(":sessionId")

@@ -329,6 +329,8 @@ export interface GetPublicGlobalSettingsResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -460,6 +462,8 @@ export interface UpdateUnregisteredUserCoursesAccessibilityResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -505,6 +509,8 @@ export interface UpdateEnforceSSOResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -550,6 +556,8 @@ export interface UpdateModernCourseListEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -595,6 +603,8 @@ export interface UpdateCalendarEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -640,6 +650,60 @@ export interface UpdateLiveTrainingEnabledResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
+    trainerRoleUserCount?: number;
+    enforceSSO: boolean;
+    certificateBackgroundImage: string | null;
+    companyInformation?: {
+      companyName?: string;
+      /** @maxLength 10 */
+      companyShortName?: string;
+      registeredAddress?: string;
+      taxNumber?: string;
+      emailAddress?: string;
+      courtRegisterNumber?: string;
+    };
+    platformLogoS3Key: string | null;
+    loginBackgroundImageS3Key: string | null;
+    platformSimpleLogoS3Key: string | null;
+    MFAEnforcedRoles: string[];
+    defaultCourseCurrency: "pln" | "eur" | "gbp" | "usd";
+    inviteOnlyRegistration: boolean;
+    userEmailTriggers: {
+      userFirstLogin: boolean;
+      userCourseAssignment: boolean;
+      userShortInactivity: boolean;
+      userLongInactivity: boolean;
+      userChapterFinished: boolean;
+      userCourseFinished: boolean;
+    };
+    primaryColor: string | null;
+    contrastColor: string | null;
+    unregisteredUserQAAccessibility: boolean;
+    QAEnabled: boolean;
+    unregisteredUserNewsAccessibility: boolean;
+    newsEnabled: boolean;
+    unregisteredUserArticlesAccessibility: boolean;
+    articlesEnabled: boolean;
+    ageLimit: 13 | 16 | null;
+    loginPageFiles: string[];
+  };
+}
+
+export interface UpdateLiveTrainingMaxParallelSessionsBody {
+  /** @min 1 */
+  liveTrainingMaxParallelSessions: number;
+}
+
+export interface UpdateLiveTrainingMaxParallelSessionsResponse {
+  data: {
+    unregisteredUserCoursesAccessibility: boolean;
+    modernCourseListEnabled: boolean;
+    calendarEnabled: boolean;
+    liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -716,6 +780,8 @@ export interface UpdateColorSchemaResponse {
     modernCourseListEnabled: boolean;
     calendarEnabled: boolean;
     liveTrainingEnabled: boolean;
+    /** @min 1 */
+    liveTrainingMaxParallelSessions: number;
     trainerRoleUserCount?: number;
     enforceSSO: boolean;
     certificateBackgroundImage: string | null;
@@ -3780,6 +3846,14 @@ export interface JoinCurrentSessionResponse {
   };
 }
 
+export interface GetParticipantProfilePicturesResponse {
+  data: {
+    /** @format uuid */
+    userId: string;
+    profilePictureUrl: string | null;
+  }[];
+}
+
 export interface GetSessionResponse {
   data: {
     /** @format uuid */
@@ -3856,6 +3930,74 @@ export interface EndSessionResponse {
     uniqueParticipantCount: number;
     peakParticipantCount: number;
     endReason: string | null;
+  };
+}
+
+export type BulkUpsertEnvBody = {
+  name: string;
+  value: string;
+}[];
+
+export interface GetFrontendSSOEnabledResponse {
+  data: {
+    google?: string;
+    microsoft?: string;
+    slack?: string;
+  };
+}
+
+export interface GetStripePublishableKeyResponse {
+  data: {
+    publishableKey: string | null;
+  };
+}
+
+export interface GetStripeConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetAIConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetLumaConfiguredResponse {
+  data: {
+    enabled: boolean;
+    courseGenerationEnabled: boolean;
+    voiceMentorEnabled: boolean;
+  };
+}
+
+export interface GetLiveKitConfiguredResponse {
+  data: {
+    enabled: boolean;
+  };
+}
+
+export interface GetIsConfigSetupResponse {
+  data: {
+    fullyConfigured: string[];
+    partiallyConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    notConfigured: {
+      service: string;
+      missingKeys: string[];
+    }[];
+    hasIssues: boolean;
+    isWarningDismissed: boolean;
+  };
+}
+
+export interface GetEnvKeyResponse {
+  data: {
+    name: string;
+    value: string;
   };
 }
 
@@ -5039,68 +5181,6 @@ export interface RotateKeyResponse {
       updatedAt: string;
       lastUsedAt: string | null;
     };
-  };
-}
-
-export type BulkUpsertEnvBody = {
-  name: string;
-  value: string;
-}[];
-
-export interface GetFrontendSSOEnabledResponse {
-  data: {
-    google?: string;
-    microsoft?: string;
-    slack?: string;
-  };
-}
-
-export interface GetStripePublishableKeyResponse {
-  data: {
-    publishableKey: string | null;
-  };
-}
-
-export interface GetStripeConfiguredResponse {
-  data: {
-    enabled: boolean;
-  };
-}
-
-export interface GetAIConfiguredResponse {
-  data: {
-    enabled: boolean;
-  };
-}
-
-export interface GetLumaConfiguredResponse {
-  data: {
-    enabled: boolean;
-    courseGenerationEnabled: boolean;
-    voiceMentorEnabled: boolean;
-  };
-}
-
-export interface GetIsConfigSetupResponse {
-  data: {
-    fullyConfigured: string[];
-    partiallyConfigured: {
-      service: string;
-      missingKeys: string[];
-    }[];
-    notConfigured: {
-      service: string;
-      missingKeys: string[];
-    }[];
-    hasIssues: boolean;
-    isWarningDismissed: boolean;
-  };
-}
-
-export interface GetEnvKeyResponse {
-  data: {
-    name: string;
-    value: string;
   };
 }
 
@@ -6553,6 +6633,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateLiveTrainingEnabledResponse, any>({
         path: `/api/settings/admin/live-training`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerUpdateLiveTrainingMaxParallelSessions
+     * @request PATCH:/api/settings/admin/live-training/max-parallel-sessions
+     */
+    settingsControllerUpdateLiveTrainingMaxParallelSessions: (
+      data: UpdateLiveTrainingMaxParallelSessionsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateLiveTrainingMaxParallelSessionsResponse, any>({
+        path: `/api/settings/admin/live-training/max-parallel-sessions`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -9840,6 +9939,27 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name LiveTrainingSessionsControllerGetParticipantProfilePictures
+     * @request GET:/api/live-training/{liveTrainingId}/sessions/participants/profile-pictures
+     */
+    liveTrainingSessionsControllerGetParticipantProfilePictures: (
+      liveTrainingId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetParticipantProfilePicturesResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions/participants/profile-pictures`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LiveTrainingSessionsControllerGetSession
      * @request GET:/api/live-training/{liveTrainingId}/sessions/{sessionId}
      */
@@ -9891,6 +10011,133 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/live-training/livekit/webhook`,
         method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerBulkUpsertEnv
+     * @request POST:/api/env/bulk
+     */
+    envControllerBulkUpsertEnv: (data: BulkUpsertEnvBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/env/bulk`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetFrontendSsoEnabled
+     * @request GET:/api/env/frontend/sso
+     */
+    envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
+      this.request<GetFrontendSSOEnabledResponse, any>({
+        path: `/api/env/frontend/sso`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetStripePublishableKey
+     * @request GET:/api/env/stripe/publishable-key
+     */
+    envControllerGetStripePublishableKey: (params: RequestParams = {}) =>
+      this.request<GetStripePublishableKeyResponse, any>({
+        path: `/api/env/stripe/publishable-key`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetStripeConfigured
+     * @request GET:/api/env/frontend/stripe
+     */
+    envControllerGetStripeConfigured: (params: RequestParams = {}) =>
+      this.request<GetStripeConfiguredResponse, any>({
+        path: `/api/env/frontend/stripe`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetAiConfigured
+     * @request GET:/api/env/ai
+     */
+    envControllerGetAiConfigured: (params: RequestParams = {}) =>
+      this.request<GetAIConfiguredResponse, any>({
+        path: `/api/env/ai`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetLumaConfigured
+     * @request GET:/api/env/luma
+     */
+    envControllerGetLumaConfigured: (params: RequestParams = {}) =>
+      this.request<GetLumaConfiguredResponse, any>({
+        path: `/api/env/luma`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetLiveKitConfigured
+     * @request GET:/api/env/livekit
+     */
+    envControllerGetLiveKitConfigured: (params: RequestParams = {}) =>
+      this.request<GetLiveKitConfiguredResponse, any>({
+        path: `/api/env/livekit`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetIsConfigSetup
+     * @request GET:/api/env/config/setup
+     */
+    envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
+      this.request<GetIsConfigSetupResponse, any>({
+        path: `/api/env/config/setup`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name EnvControllerGetEnvKey
+     * @request GET:/api/env/{envName}
+     */
+    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
+      this.request<GetEnvKeyResponse, any>({
+        path: `/api/env/${envName}`,
+        method: "GET",
+        format: "json",
         ...params,
       }),
 
@@ -11446,119 +11693,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<RotateKeyResponse, void>({
         path: `/api/integration/key`,
         method: "POST",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerBulkUpsertEnv
-     * @request POST:/api/env/bulk
-     */
-    envControllerBulkUpsertEnv: (data: BulkUpsertEnvBody, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/env/bulk`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetFrontendSsoEnabled
-     * @request GET:/api/env/frontend/sso
-     */
-    envControllerGetFrontendSsoEnabled: (params: RequestParams = {}) =>
-      this.request<GetFrontendSSOEnabledResponse, any>({
-        path: `/api/env/frontend/sso`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetStripePublishableKey
-     * @request GET:/api/env/stripe/publishable-key
-     */
-    envControllerGetStripePublishableKey: (params: RequestParams = {}) =>
-      this.request<GetStripePublishableKeyResponse, any>({
-        path: `/api/env/stripe/publishable-key`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetStripeConfigured
-     * @request GET:/api/env/frontend/stripe
-     */
-    envControllerGetStripeConfigured: (params: RequestParams = {}) =>
-      this.request<GetStripeConfiguredResponse, any>({
-        path: `/api/env/frontend/stripe`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetAiConfigured
-     * @request GET:/api/env/ai
-     */
-    envControllerGetAiConfigured: (params: RequestParams = {}) =>
-      this.request<GetAIConfiguredResponse, any>({
-        path: `/api/env/ai`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetLumaConfigured
-     * @request GET:/api/env/luma
-     */
-    envControllerGetLumaConfigured: (params: RequestParams = {}) =>
-      this.request<GetLumaConfiguredResponse, any>({
-        path: `/api/env/luma`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetIsConfigSetup
-     * @request GET:/api/env/config/setup
-     */
-    envControllerGetIsConfigSetup: (params: RequestParams = {}) =>
-      this.request<GetIsConfigSetupResponse, any>({
-        path: `/api/env/config/setup`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EnvControllerGetEnvKey
-     * @request GET:/api/env/{envName}
-     */
-    envControllerGetEnvKey: (envName: string, params: RequestParams = {}) =>
-      this.request<GetEnvKeyResponse, any>({
-        path: `/api/env/${envName}`,
-        method: "GET",
         format: "json",
         ...params,
       }),

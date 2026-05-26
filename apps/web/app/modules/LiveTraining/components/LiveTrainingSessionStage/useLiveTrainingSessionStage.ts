@@ -26,6 +26,7 @@ export function useLiveTrainingSessionStage({
   liveTraining,
   actions,
   editFormState,
+  isOnlineDeliveryAvailable,
   onEditFormStateChange,
   onEditFormStateCommit,
 }: LiveTrainingSessionStageLogicParams) {
@@ -91,11 +92,13 @@ export function useLiveTrainingSessionStage({
   }, [commitCurrentFormState]);
 
   const toggleDeliveryType = useCallback(() => {
+    if (!isOnlineDeliveryAvailable) return;
+
     updateAndCommit(
       "deliveryType",
       isOffline ? LIVE_TRAINING_DELIVERY_TYPES.ONLINE : LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
     );
-  }, [isOffline, updateAndCommit]);
+  }, [isOffline, isOnlineDeliveryAvailable, updateAndCommit]);
 
   const handleMaxParticipantsChange = useCallback(
     (value: string) => {
@@ -161,6 +164,7 @@ export function useLiveTrainingSessionStage({
     isDescriptionAtLimit,
     isDescriptionFocused,
     isOffline,
+    isOnlineDeliveryAvailable,
     isTitleAtLimit,
     isTitleFocused,
     setIsDescriptionFocused,

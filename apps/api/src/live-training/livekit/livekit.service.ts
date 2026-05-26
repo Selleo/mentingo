@@ -123,6 +123,7 @@ export class LiveKitService {
       identity: input.identity,
       name: input.displayName ?? undefined,
       metadata: input.metadata ? this.stringifyMetadata(input.metadata) : undefined,
+      attributes: input.attributes,
       ttl: input.ttlSeconds ?? LIVEKIT_DEFAULT_TOKEN_TTL_SECONDS,
     });
 
@@ -133,6 +134,10 @@ export class LiveKitService {
       url: config.url,
       identity: input.identity,
     };
+  }
+
+  async assertConfigured(): Promise<void> {
+    await this.getConfig();
   }
 
   async receiveWebhook(body: string, authorizationHeader?: string): Promise<LiveKitWebhookResult> {

@@ -820,6 +820,13 @@
       "when": 1779378812600,
       "tag": "0116_update_live_lessons_language_constraints",
       "breakpoints": true
+    },
+    {
+      "idx": 117,
+      "version": "7",
+      "when": 1779805309081,
+      "tag": "0117_backfill_live_training_max_parallel_sessions",
+      "breakpoints": true
     }
   ]
 }

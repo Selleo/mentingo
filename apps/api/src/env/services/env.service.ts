@@ -254,7 +254,9 @@ export class EnvService {
       fullyConfigured,
       partiallyConfigured,
       notConfigured,
-      hasIssues: partiallyConfigured.length > 0,
+      hasIssues:
+        partiallyConfigured.length > 0 ||
+        notConfigured.some(({ service }) => service === "livekit"),
       isWarningDismissed: await this.envRepository.getIsEnvConfigWarningDismissed(userId),
     };
   }

@@ -140,6 +140,7 @@ export function LiveTrainingLessonForm({
     formMode,
     isPending,
     isLoadingScheduledLiveTrainings,
+    isOnlineDeliveryAvailable,
     liveTrainingFormError,
     liveTrainingFormState,
     onSubmit,
@@ -274,6 +275,7 @@ export function LiveTrainingLessonForm({
                       onFormStateChange={updateLiveTrainingFormState}
                       idPrefix="lesson-live-training"
                       portalledDatePicker
+                      isOnlineDeliveryAvailable={isOnlineDeliveryAvailable}
                     />
                   </TabsContent>
 

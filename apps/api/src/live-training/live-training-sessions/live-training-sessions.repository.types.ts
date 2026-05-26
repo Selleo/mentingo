@@ -64,6 +64,12 @@ export const liveTrainingCreatedSessionRowSchema = Type.Object({
   id: UUIDSchema,
 });
 
+export const liveTrainingUserDisplayRowSchema = Type.Object({
+  id: UUIDSchema,
+  fullName: nullableStringSchema,
+  avatarReference: nullableStringSchema,
+});
+
 export const liveTrainingLessonCompletionRowSchema = Type.Object({
   lessonId: UUIDSchema,
   studentId: UUIDSchema,
@@ -79,3 +85,4 @@ export type LiveTrainingSessionTenantRow = Static<typeof liveTrainingSessionTena
 export type LiveTrainingSessionRoomRow = Static<typeof liveTrainingSessionRoomRowSchema>;
 export type LiveTrainingLessonCompletionRow = Static<typeof liveTrainingLessonCompletionRowSchema>;
 export type LiveTrainingCreatedSessionRow = Static<typeof liveTrainingCreatedSessionRowSchema>;
+export type LiveTrainingUserDisplayRow = Static<typeof liveTrainingUserDisplayRowSchema>;

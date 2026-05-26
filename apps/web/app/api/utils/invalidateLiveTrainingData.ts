@@ -15,7 +15,7 @@ type InvalidateLiveTrainingDataOptions = {
 };
 
 const COURSE_AND_LESSON_QUERY_KEYS = [
-  COURSE_QUERY_KEY,
+  [COURSE_QUERY_KEY],
   ["course"],
   ["lesson"],
   ["lessonProgress"],

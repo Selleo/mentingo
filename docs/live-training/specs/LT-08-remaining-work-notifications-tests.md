@@ -200,6 +200,22 @@ Important rule:
 
 Goal: support offline trainings without LiveKit.
 
+Offline mode is also the safe fallback when LiveKit is not configured. This lets us test the
+business lifecycle without requiring a real LiveKit deployment.
+
+LiveKit configuration rule:
+
+- If LiveKit URL/API key/API secret are missing:
+  - online Live Training creation must be blocked,
+  - existing online trainings must not be startable,
+  - create/edit UI should allow only `offline` delivery type,
+  - settings should show a dismissible warning explaining that LiveKit must be configured before
+    online Live Trainings can be used.
+- If LiveKit is configured:
+  - online and offline delivery types are both available,
+  - online session start uses LiveKit,
+  - offline session start never touches LiveKit.
+
 Backend:
 
 - Start offline session:
@@ -222,6 +238,8 @@ Frontend:
 
 - Offline Live Training page should show a non-video session surface.
 - Lesson view should show scheduled/active/ended status and files.
+- Calendar create/edit flow should disable online delivery when LiveKit is missing and show clear
+  configuration guidance.
 
 ## Test Plan
 
@@ -229,6 +247,11 @@ Frontend:
 
 - Admin creates online Live Training and paired `calendar_events` row.
 - Admin creates offline Live Training and paired `calendar_events` row.
+- When LiveKit is not configured:
+  - online Live Training creation is rejected with translated configuration error.
+  - offline Live Training creation still works.
+  - online session start is rejected without creating a session row or LiveKit room.
+  - offline session start and finish work without LiveKit.
 - Content creator creates own Live Training and cannot assign another trainer.
 - Content creator can link own Live Training to own/manageable course only.
 - Trainer can read assigned trainings and see before/after files.
@@ -246,6 +269,7 @@ Frontend:
   - author/host/admin can start,
   - unrelated user cannot start,
   - offline start uses offline path,
+  - offline start works when LiveKit env is missing,
   - online start creates LiveKit room metadata.
 - Join session:
   - visible student can join,
@@ -274,6 +298,10 @@ Frontend:
 - Max parallel sessions:
   - starting session is rejected when limit is reached.
   - offline sessions do not count toward online limit.
+- Offline lifecycle:
+  - offline session start does not call LiveKit service.
+  - offline session finish changes Live Training/session/calendar status.
+  - offline linked lesson completion follows the final agreed participant rule.
 - Cleanup:
   - stale open attendance intervals are closed defensively.
   - expired scheduled trainings are marked expired according to configured window.
@@ -307,6 +335,7 @@ Frontend:
   - select date/slot.
   - create Live Training.
   - event appears on calendar.
+  - when LiveKit is missing, online delivery is unavailable and offline creation remains available.
 - Live Training page:
   - author starts session.
   - student joins session.
@@ -317,6 +346,13 @@ Frontend:
   - active card appears after session start.
   - join opens full-screen meeting overlay.
   - ended card appears after end.
+- Offline Live Training page:
+  - shows non-video session surface.
+  - start/finish works without LiveKit.
+  - no LiveKit room overlay is shown.
+- Settings:
+  - missing LiveKit configuration warning is visible and dismissible.
+  - warning copy explains that only offline Live Trainings are available until LiveKit is configured.
 - Quick-join popup:
   - appears for visible session start.
   - does not appear twice after dismissal.
@@ -335,5 +371,6 @@ Frontend:
 6. Max parallel online session env/config and enforcement.
 7. Cleanup/expiry poller.
 8. Offline lifecycle start/finish.
-9. API E2E coverage.
-10. Frontend unit/E2E coverage.
+9. LiveKit configuration gating for online vs offline delivery.
+10. API E2E coverage, starting with offline/no-LiveKit paths.
+11. Frontend unit/E2E coverage, starting with offline/no-LiveKit paths.

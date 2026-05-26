@@ -288,6 +288,9 @@ This slice should finish Live Training creation, calendar event creation, course
 
 - [ ] Support `offline` delivery type without LiveKit room/token.
 - [x] Show offline trainings in Calendar.
+- [ ] When LiveKit is not configured, allow only offline Live Trainings and show a dismissible
+      settings warning explaining that online Live Trainings require LiveKit configuration.
+- [ ] Block online Live Training creation/start when LiveKit env values are missing.
 - [ ] Allow offline trainings to have:
   - planned dates
   - description
@@ -324,6 +327,8 @@ This slice should finish Live Training creation, calendar event creation, course
 ## LT-13 Tests And Validation
 
 - [ ] API e2e: admin creates online and offline trainings.
+- [ ] API e2e: offline Live Training create/start/finish works when LiveKit is not configured.
+- [ ] API e2e: online create/start is rejected when LiveKit is not configured.
 - [ ] API e2e: content creator can create only own training and cannot assign another trainer.
 - [ ] API e2e: content creator can link own training to own/manageable course only.
 - [ ] API e2e: observer cannot read or join unassigned training.
@@ -338,6 +343,8 @@ This slice should finish Live Training creation, calendar event creation, course
 - [ ] Web E2E: today sidebar indicator.
 - [ ] Web E2E: quick-join popup appears once per user/session.
 - [ ] Web E2E: course-linked live training start/join/end with mocked LiveKit token.
+- [ ] Web E2E: missing LiveKit config disables online delivery and keeps offline creation available.
+- [ ] Web E2E: missing LiveKit config warning in settings is visible and dismissible.
 - [ ] Run narrow validation for touched slices:
   - `pnpm lint-tsc-api`
   - `pnpm lint-tsc-web`

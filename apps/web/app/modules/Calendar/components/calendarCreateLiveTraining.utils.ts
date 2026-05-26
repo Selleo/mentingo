@@ -8,6 +8,7 @@ import type {
   CalendarCreateLiveTrainingDialogProps,
   CalendarCreateLiveTrainingFormState,
 } from "./calendarCreateLiveTraining.types";
+import type { LiveTrainingDeliveryType } from "@repo/shared";
 
 const padDatePart = (value: number) => String(value).padStart(2, "0");
 
@@ -57,6 +58,7 @@ export const buildCalendarCreateAllDayEndDateTime = (date: string) => {
 
 export const buildInitialCalendarCreateLiveTrainingFormState = (
   selectedRange: CalendarCreateLiveTrainingDialogProps["selectedRange"],
+  deliveryType: LiveTrainingDeliveryType = LIVE_TRAINING_DELIVERY_TYPES.ONLINE,
 ): CalendarCreateLiveTrainingFormState => {
   const { startsAt, endsAt, isAllDay } = getDefaultDateRange(selectedRange);
 
@@ -68,7 +70,7 @@ export const buildInitialCalendarCreateLiveTrainingFormState = (
     startTime: toTimeInputValue(startsAt),
     endDate: toDateInputValue(endsAt),
     endTime: toTimeInputValue(endsAt),
-    deliveryType: LIVE_TRAINING_DELIVERY_TYPES.ONLINE,
+    deliveryType,
     location: "",
     maxParticipants: LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
     microphoneEnabled: DEFAULT_LIVE_TRAINING_SETTINGS.viewerPermissions.microphoneEnabled,

@@ -63,6 +63,7 @@ export const createLiveKitParticipantTokenInputSchema = Type.Object({
   identity: Type.String(),
   displayName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   metadata: Type.Optional(Type.Record(Type.String(), Type.Unknown())),
+  attributes: Type.Optional(Type.Record(Type.String(), Type.String())),
   ttlSeconds: Type.Optional(Type.Integer({ minimum: 1 })),
   canPublishAudio: Type.Boolean(),
   canPublishVideo: Type.Boolean(),

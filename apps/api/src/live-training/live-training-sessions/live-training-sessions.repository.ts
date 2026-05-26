@@ -5,7 +5,7 @@ import {
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
 } from "@repo/shared";
-import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
@@ -31,6 +31,7 @@ import type {
   LiveTrainingSessionRow,
   LiveTrainingSessionRoomRow,
   LiveTrainingSessionTenantRow,
+  LiveTrainingUserDisplayRow,
 } from "./live-training-sessions.repository.types";
 import type { LiveTrainingParticipantRole } from "@repo/shared";
 import type { UUIDType } from "src/common";
@@ -58,6 +59,20 @@ export class LiveTrainingSessionsRepository {
     );
 
     return row ?? null;
+  }
+
+  async countCurrentSessions() {
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(liveTrainingSessions)
+      .where(
+        inArray(liveTrainingSessions.status, [
+          LIVE_TRAINING_SESSION_STATUSES.WAITING,
+          LIVE_TRAINING_SESSION_STATUSES.ACTIVE,
+        ]),
+      );
+
+    return totalItems;
   }
 
   async getSessionRow(
@@ -167,13 +182,14 @@ export class LiveTrainingSessionsRepository {
       .orderBy(liveTrainingAttendance.joinedAt);
   }
 
-  async getUserDisplayRow(userId: UUIDType) {
+  async getUserDisplayRow(userId: UUIDType): Promise<LiveTrainingUserDisplayRow | null> {
     const [row] = await this.db
       .select({
         id: users.id,
         fullName: sql<
           string | null
         >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+        avatarReference: users.avatarReference,
       })
       .from(users)
       .where(and(eq(users.id, userId), eq(users.archived, false), isNull(users.deletedAt)));
@@ -456,7 +472,7 @@ export class LiveTrainingSessionsRepository {
     });
   }
 
-  async getLiveLessonCompletionRows(
+  async getOnlineLiveLessonCompletionRows(
     liveTrainingId: UUIDType,
   ): Promise<LiveTrainingLessonCompletionRow[]> {
     return this.db
@@ -486,6 +502,28 @@ export class LiveTrainingSessionsRepository {
           sql`${liveTrainingSessionParticipants.joinCount} > 0`,
         ),
       );
+  }
+
+  async getOfflineLiveLessonCompletionRows(
+    liveTrainingId: UUIDType,
+  ): Promise<LiveTrainingLessonCompletionRow[]> {
+    return this.db
+      .selectDistinct({
+        lessonId: liveLessons.lessonId,
+        studentId: studentCourses.studentId,
+        language: liveLessons.language,
+      })
+      .from(liveLessons)
+      .innerJoin(lessons, eq(lessons.id, liveLessons.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .where(eq(liveLessons.liveTrainingId, liveTrainingId));
   }
 
   async updateParticipantAfterJoin(participantId: UUIDType, joinedAt: string) {

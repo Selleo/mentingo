@@ -1,5 +1,15 @@
 import { LIVE_TRAINING_DESCRIPTION_MAX_LENGTH, LIVE_TRAINING_TITLE_MAX_LENGTH } from "@repo/shared";
-import { CalendarClock, Mic, Play, Square, Trash2, Users, Video } from "lucide-react";
+import {
+  CalendarClock,
+  Mic,
+  MicOff,
+  Play,
+  Square,
+  Trash2,
+  Users,
+  Video,
+  VideoOff,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "~/components/ui/input";
@@ -36,6 +46,7 @@ type LiveTrainingSessionStageProps = {
   isStartingSession: boolean;
   isJoiningSession: boolean;
   isFinishingSession: boolean;
+  isOnlineDeliveryAvailable: boolean;
   onDeleteClick: () => void;
   onStartSession: () => void;
   onJoinSession: () => void;
@@ -51,6 +62,7 @@ export function LiveTrainingSessionStage({
   isStartingSession,
   isJoiningSession,
   isFinishingSession,
+  isOnlineDeliveryAvailable,
   onDeleteClick,
   onStartSession,
   onJoinSession,
@@ -79,6 +91,7 @@ export function LiveTrainingSessionStage({
     isDescriptionAtLimit,
     isDescriptionFocused,
     isOffline,
+    isOnlineDeliveryAvailable: canUseOnlineDelivery,
     isTitleAtLimit,
     isTitleFocused,
     setIsDescriptionFocused,
@@ -92,9 +105,11 @@ export function LiveTrainingSessionStage({
     liveTraining,
     actions,
     editFormState,
+    isOnlineDeliveryAvailable,
     onEditFormStateChange,
     onEditFormStateCommit,
   });
+  const canToggleDeliveryType = canEdit && canUseOnlineDelivery;
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -216,14 +231,18 @@ export function LiveTrainingSessionStage({
 
                 <button
                   type="button"
-                  disabled={!canEdit}
+                  disabled={!canToggleDeliveryType}
                   onClick={toggleDeliveryType}
                   className="group rounded focus-visible:outline-none"
                 >
                   <PreviewMetaItem
-                    canEdit={canEdit}
+                    canEdit={canToggleDeliveryType}
                     value={t(`liveTrainingView.deliveryType.${displayedDeliveryType}`)}
-                    tooltip={t("calendarView.create.tooltip.deliveryType")}
+                    tooltip={
+                      canUseOnlineDelivery
+                        ? t("calendarView.create.tooltip.deliveryType")
+                        : t("calendarView.create.liveKitRequired")
+                    }
                   />
                 </button>
 
@@ -368,12 +387,19 @@ export function LiveTrainingSessionStage({
                     >
                       <PreviewMetaItem
                         canEdit={canEdit}
-                        icon={<Mic className="size-4" />}
+                        icon={
+                          editFormState.microphoneEnabled ? (
+                            <Mic className="size-4" />
+                          ) : (
+                            <MicOff className="size-4" />
+                          )
+                        }
                         value={
                           editFormState.microphoneEnabled
                             ? t("liveTrainingView.boolean.yes")
                             : t("liveTrainingView.boolean.no")
                         }
+                        variant={editFormState.microphoneEnabled ? "default" : "danger"}
                         tooltip={t("liveTrainingView.stage.viewerMic")}
                       />
                     </button>
@@ -385,12 +411,19 @@ export function LiveTrainingSessionStage({
                     >
                       <PreviewMetaItem
                         canEdit={canEdit}
-                        icon={<Video className="size-4" />}
+                        icon={
+                          editFormState.cameraEnabled ? (
+                            <Video className="size-4" />
+                          ) : (
+                            <VideoOff className="size-4" />
+                          )
+                        }
                         value={
                           editFormState.cameraEnabled
                             ? t("liveTrainingView.boolean.yes")
                             : t("liveTrainingView.boolean.no")
                         }
+                        variant={editFormState.cameraEnabled ? "default" : "danger"}
                         tooltip={t("liveTrainingView.stage.viewerCamera")}
                       />
                     </button>

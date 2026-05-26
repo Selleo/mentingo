@@ -14,6 +14,11 @@ export const liveTrainingSessionUserSchema = Type.Object({
   profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
 });
 
+export const liveTrainingParticipantProfilePictureSchema = Type.Object({
+  userId: UUIDSchema,
+  profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+});
+
 export const liveTrainingSessionSummarySchema = Type.Object({
   id: UUIDSchema,
   status: Type.Enum(LIVE_TRAINING_SESSION_STATUSES),
@@ -66,6 +71,10 @@ export const liveTrainingSessionDetailsResponseSchema = baseResponse(
   liveTrainingSessionDetailsSchema,
 );
 
+export const liveTrainingParticipantProfilePictureResponseSchema = baseResponse(
+  Type.Array(liveTrainingParticipantProfilePictureSchema),
+);
+
 export const joinLiveTrainingSessionResponseSchema = Type.Object({
   sessionId: UUIDSchema,
   livekitUrl: Type.String(),
@@ -84,6 +93,9 @@ export const joinLiveTrainingSessionBaseResponseSchema = baseResponse(
 
 export type HandleLiveKitWebhookInput = Static<typeof handleLiveKitWebhookInputSchema>;
 export type LiveTrainingSessionUser = Static<typeof liveTrainingSessionUserSchema>;
+export type LiveTrainingParticipantProfilePicture = Static<
+  typeof liveTrainingParticipantProfilePictureSchema
+>;
 export type LiveTrainingSessionSummary = Static<typeof liveTrainingSessionSummarySchema>;
 export type LiveTrainingAttendanceInterval = Static<typeof liveTrainingAttendanceIntervalSchema>;
 export type LiveTrainingSessionParticipant = Static<typeof liveTrainingSessionParticipantSchema>;

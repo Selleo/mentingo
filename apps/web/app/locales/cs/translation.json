@@ -324,6 +324,7 @@
       "title": "Přidat do kalendáře",
       "description": "Vyberte, co chcete přidat pro zvolený čas.",
       "noOptions": "Nejsou dostupné žádné položky k vytvoření.",
+      "liveKitRequired": "Nakonfigurujte LiveKit v nastavení prostředí, abyste povolili online Live Training. Offline školení zůstávají dostupná.",
       "submit": "Vytvořit live training",
       "toast": {
         "success": "Live training byl vytvořen."
@@ -530,6 +531,7 @@
       "microphone": "Mikrofon",
       "camera": "Kamera",
       "screenShare": "Sdílet obrazovku",
+      "screen": "Obrazovka",
       "leave": "Odejít",
       "empty": "Čeká se na účastníky.",
       "materials": "Materiály",
@@ -841,7 +843,7 @@
         "slack_authorization": "Umožněte uživatelům přihlásit se pomocí účtu Slack",
         "openAI": "Povolit funkce AI Mentor",
         "luma": "Povolit funkce generování kurzů AI",
-        "livekit": "Povolit video relace Live Training"
+        "livekit": "Nakonfigurujte LiveKit, abyste povolili online video relace Live Training. Bez něj jsou dostupná pouze offline školení."
       }
     }
   },
@@ -2465,6 +2467,7 @@
       "endedTitle": "Live Training již skončil",
       "inactiveLabel": "Live Training",
       "inactiveTitle": "Žádné Live Training sezení není aktivní",
+      "locationNotice": "Místo",
       "notAvailable": "Live Training není pro tuto lekci dostupný."
     },
     "videoProcessing": {
@@ -2712,6 +2715,8 @@
       "calendarDescription": "Umožnit uživatelům zobrazit naplánované události v kalendáři",
       "liveTraining": "Povolit Live Training",
       "liveTrainingDescription": "Umožnit školitelům vytvářet a vést živá školení",
+      "liveTrainingMaxParallelSessions": "Maximální počet souběžných relací Live Training",
+      "liveTrainingMaxParallelSessionsDescription": "Omezte počet relací Live Training, které mohou být aktivní současně.",
       "liveTrainingTooltip": "Zapněte pouze tehdy, když má tenant používat živé relace vedené trenéry.",
       "liveTrainingDisableBlockedTooltip_one": "Aktuálně máte {{count}} uživatele s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
       "liveTrainingDisableBlockedTooltip_other": "Aktuálně máte {{count}} uživatelů s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
@@ -2726,6 +2731,7 @@
       "modernCourseListPreferenceChangeSuccess": "Předvolba seznamu moderních kurzů byla úspěšně aktualizována",
       "calendarPreferenceChangeSuccess": "Předvolba kalendáře byla úspěšně aktualizována",
       "liveTrainingPreferenceChangeSuccess": "Předvolba Live Training byla úspěšně aktualizována",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit relací Live Training byl úspěšně aktualizován",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
@@ -3881,7 +3887,9 @@
       "baseLanguageAssignmentRequired": "Lekce Live Training musí být nejprve vytvořena v základním jazyce kurzu.",
       "invalidLessonType": "Přiřazení Live Training lze přidat pouze k lekcím Live Training.",
       "deleteAssignedToLesson": "Tento Live Training je propojen s lekcí. Nejdříve smažte lekci a až potom Live Training.",
-      "liveKitNotConfigured": "LiveKit není nakonfigurován."
+      "liveKitNotConfigured": "LiveKit není nakonfigurován.",
+      "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Live Training."
     }
   }
 }

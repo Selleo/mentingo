@@ -324,6 +324,7 @@
       "title": "Pridėti į kalendorių",
       "description": "Pasirinkite, ką norite pridėti pasirinktam laikui.",
       "noOptions": "Nėra kalendoriaus elementų, kuriuos galima sukurti.",
+      "liveKitRequired": "Sukonfigūruokite LiveKit aplinkos nustatymuose, kad įjungtumėte online Live Training. Offline mokymai lieka pasiekiami.",
       "submit": "Sukurti live training",
       "toast": {
         "success": "Live training sukurtas."
@@ -530,6 +531,7 @@
       "microphone": "Mikrofonas",
       "camera": "Kamera",
       "screenShare": "Bendrinti ekraną",
+      "screen": "Ekranas",
       "leave": "Išeiti",
       "empty": "Laukiama dalyvių.",
       "materials": "Medžiaga",
@@ -841,7 +843,7 @@
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
         "luma": "Įgalinti AI kursų generavimo funkcijas",
-        "livekit": "Įgalinti Live Training vaizdo sesijas"
+        "livekit": "Sukonfigūruokite LiveKit, kad įjungtumėte online Live Training vaizdo sesijas. Be jo pasiekiami tik offline mokymai."
       }
     }
   },
@@ -2465,6 +2467,7 @@
       "endedTitle": "Live Training jau baigėsi",
       "inactiveLabel": "Live Training",
       "inactiveTitle": "Nėra aktyvios Live Training sesijos",
+      "locationNotice": "Vieta",
       "notAvailable": "Live Training šiai pamokai nepasiekiamas."
     },
     "videoProcessing": {
@@ -2712,6 +2715,8 @@
       "calendarDescription": "Leiskite naudotojams peržiūrėti suplanuotus įvykius kalendoriuje",
       "liveTraining": "Įjungti Live Training",
       "liveTrainingDescription": "Leiskite treneriams kurti ir vesti tiesiogines mokymo sesijas",
+      "liveTrainingMaxParallelSessions": "Maksimalus lygiagrečių Live Training sesijų skaičius",
+      "liveTrainingMaxParallelSessionsDescription": "Apribokite, kiek Live Training sesijų gali būti aktyvios vienu metu.",
       "liveTrainingTooltip": "Įjunkite tik tada, kai klientas turi naudoti trenerių vedamas tiesiogines sesijas.",
       "liveTrainingDisableBlockedTooltip_one": "Šiuo metu turite {{count}} naudotoją su Trenerio vaidmeniu. Atšaukite jį, kad galėtumėte išjungti šią funkciją.",
       "liveTrainingDisableBlockedTooltip_other": "Šiuo metu turite {{count}} naudotojų su Trenerio vaidmeniu. Atšaukite juos, kad galėtumėte išjungti šią funkciją.",
@@ -2726,6 +2731,7 @@
       "modernCourseListPreferenceChangeSuccess": "Šiuolaikinės kursų sąrašo nuostatos sėkmingai atnaujintos",
       "calendarPreferenceChangeSuccess": "Kalendoriaus nuostata sėkmingai atnaujinta",
       "liveTrainingPreferenceChangeSuccess": "Live Training nuostata sėkmingai atnaujinta",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Live Training sesijų limitas sėkmingai atnaujintas",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
@@ -3881,7 +3887,9 @@
       "baseLanguageAssignmentRequired": "Live Training pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
       "invalidLessonType": "Live Training priskyrimus galima pridėti tik prie Live Training pamokų.",
       "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training.",
-      "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas."
+      "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
+      "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
+      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Live Training sesijų skaičius."
     }
   }
 }

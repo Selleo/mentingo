@@ -10,6 +10,7 @@ import {
   CALENDAR_EVENT_STATUSES,
   DEFAULT_LIVE_TRAINING_SETTINGS,
   ENTITY_TYPES,
+  LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
   LIVE_TRAINING_MEMBER_ROLES,
@@ -27,6 +28,7 @@ import { and, eq, gt, isNull, lt } from "drizzle-orm";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { EnvService } from "src/env/services/env.service";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
@@ -63,6 +65,7 @@ export class LiveTrainingService {
   constructor(
     private readonly liveTrainingRepository: LiveTrainingRepository,
     private readonly fileService: FileService,
+    private readonly envService: EnvService,
   ) {}
 
   async getLiveTrainings(
@@ -269,6 +272,7 @@ export class LiveTrainingService {
     dbInstance?: DatabasePg,
   ): Promise<UUIDType> {
     this.assertValidSchedule(body.startsAt, body.endsAt);
+    await this.assertOnlineDeliveryConfigured(body.deliveryType);
 
     const linkedCourseIds = this.getUniqueIds(body.linkedCourseIds);
     const hostUserIds = this.getCreateHostUserIds(currentUser.userId, body.hostUserIds);
@@ -372,6 +376,7 @@ export class LiveTrainingService {
 
     this.assertValidUpdateSchedule(body, row.startsAt, row.endsAt);
     this.assertCanUpdateHostAssignments(row, body.hostUserIds, currentUser);
+    await this.assertOnlineDeliveryConfigured(body.deliveryType);
 
     const hostUserIds = this.getUpdateHostUserIds(row.authorId, body.hostUserIds);
     const linkedCourseIds = this.getOptionalUniqueIds(body.linkedCourseIds);
@@ -1014,6 +1019,16 @@ export class LiveTrainingService {
     }
 
     return update;
+  }
+
+  private async assertOnlineDeliveryConfigured(deliveryType?: string) {
+    if (deliveryType !== LIVE_TRAINING_DELIVERY_TYPES.ONLINE) return;
+
+    const { enabled } = await this.envService.getLiveKitConfigured();
+
+    if (!enabled) {
+      throw new BadRequestException("liveTraining.errors.liveKitNotConfigured");
+    }
   }
 
   private getCreateHostUserIds(authorId: UUIDType, hostUserIds?: UUIDType[]) {

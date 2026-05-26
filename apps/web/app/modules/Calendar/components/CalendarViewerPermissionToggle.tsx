@@ -29,7 +29,7 @@ export function CalendarViewerPermissionToggle({
         "group flex cursor-pointer items-center justify-between gap-3 rounded-md border bg-white px-3 py-2.5 transition-colors",
         {
           "border-primary-300": checked,
-          "border-neutral-200 hover:border-neutral-300": !checked,
+          "border-danger-200 bg-danger-50/40 hover:border-danger-300": !checked,
         },
       )}
     >
@@ -39,7 +39,7 @@ export function CalendarViewerPermissionToggle({
             "flex size-9 shrink-0 items-center justify-center rounded-md border transition-colors",
             {
               "border-primary-200 bg-primary-50 text-primary-700": checked,
-              "border-neutral-200 bg-neutral-50 text-neutral-500 group-hover:text-neutral-700":
+              "border-danger-200 bg-danger-50 text-danger-700 group-hover:text-danger-800":
                 !checked,
             },
           )}

@@ -328,6 +328,7 @@
       "title": "Dodaj do kalendarza",
       "description": "Wybierz, co chcesz dodać dla wybranego terminu.",
       "noOptions": "Brak dostępnych elementów do utworzenia.",
+      "liveKitRequired": "Skonfiguruj LiveKit w ustawieniach środowiska, aby włączyć Live Training online. Szkolenia offline pozostają dostępne.",
       "submit": "Utwórz live training",
       "toast": {
         "success": "Live training został utworzony."
@@ -540,6 +541,7 @@
       "microphone": "Mikrofon",
       "camera": "Kamera",
       "screenShare": "Udostępnij ekran",
+      "screen": "Ekran",
       "leave": "Opuść",
       "empty": "Oczekiwanie na uczestników.",
       "materials": "Materiały",
@@ -1055,7 +1057,7 @@
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
         "luma": "Włącz funkcje generowania kursów AI",
-        "livekit": "Włącz sesje wideo Live Training"
+        "livekit": "Skonfiguruj LiveKit, aby włączyć sesje wideo Live Training online. Bez tego dostępne są tylko szkolenia offline."
       }
     }
   },
@@ -2764,6 +2766,7 @@
       "endedTitle": "Live Training już się zakończył",
       "inactiveLabel": "Live Training",
       "inactiveTitle": "Brak aktywnej sesji Live Training",
+      "locationNotice": "Lokalizacja",
       "notAvailable": "Live Training nie jest dostępny dla tej lekcji."
     },
     "videoProcessing": {
@@ -3049,6 +3052,8 @@
       "calendarDescription": "Pozwól użytkownikom przeglądać zaplanowane wydarzenia w kalendarzu",
       "liveTraining": "Włącz Live Training",
       "liveTrainingDescription": "Pozwól trenerom tworzyć i prowadzić sesje szkoleniowe na żywo",
+      "liveTrainingMaxParallelSessions": "Maksymalna liczba równoległych sesji Live Training",
+      "liveTrainingMaxParallelSessionsDescription": "Ogranicz liczbę sesji Live Training aktywnych w tym samym czasie.",
       "liveTrainingTooltip": "Włącz tylko wtedy, gdy tenant ma korzystać z sesji prowadzonych przez trenerów.",
       "liveTrainingDisableBlockedTooltip_one": "Obecnie masz {{count}} użytkownika z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
       "liveTrainingDisableBlockedTooltip_few": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
@@ -3065,6 +3070,7 @@
       "modernCourseListPreferenceChangeSuccess": "Preferencje nowoczesnej listy kursów zostały pomyślnie zaktualizowane",
       "calendarPreferenceChangeSuccess": "Preferencje kalendarza zostały pomyślnie zaktualizowane",
       "liveTrainingPreferenceChangeSuccess": "Preferencje Live Training zostały pomyślnie zaktualizowane",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit sesji Live Training został zaktualizowany",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
@@ -3977,7 +3983,9 @@
       "baseLanguageAssignmentRequired": "Lekcję Live Training trzeba najpierw utworzyć w języku bazowym kursu.",
       "invalidLessonType": "Przypisania Live Training można dodawać tylko do lekcji Live Training.",
       "deleteAssignedToLesson": "Ten Live Training jest połączony z lekcją. Najpierw usuń lekcję, a dopiero potem Live Training.",
-      "liveKitNotConfigured": "LiveKit nie jest skonfigurowany."
+      "liveKitNotConfigured": "LiveKit nie jest skonfigurowany.",
+      "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
+      "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji Live Training."
     }
   }
 }

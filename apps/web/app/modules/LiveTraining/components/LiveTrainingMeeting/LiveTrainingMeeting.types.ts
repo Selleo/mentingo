@@ -1,3 +1,4 @@
+import type { TrackReferenceOrPlaceholder } from "@livekit/components-react";
 import type { JoinCurrentSessionResponse } from "~/api/generated-api";
 import type {
   LiveTrainingDetails,
@@ -23,4 +24,15 @@ export type LiveTrainingRoomProps = {
 export type LiveTrainingRoomToolbarProps = {
   credentials: LiveTrainingMeetingCredentials;
   onOpenMaterials: () => void;
+};
+
+export type LiveTrainingParticipantGridProps = {
+  liveTrainingId: string;
+  onTrackSelect: (trackRef: TrackReferenceOrPlaceholder, profilePictureUrl?: string | null) => void;
+};
+
+export type LiveTrainingFullscreenTrackOverlayProps = {
+  profilePictureUrl?: string | null;
+  trackRef: TrackReferenceOrPlaceholder | null;
+  onClose: () => void;
 };

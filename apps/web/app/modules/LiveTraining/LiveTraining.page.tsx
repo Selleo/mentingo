@@ -1,7 +1,7 @@
-import { redirect, useNavigate, useParams } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { redirect, useLocation, useNavigate, useParams } from "@remix-run/react";
+import { LIVE_TRAINING_DELIVERY_TYPES, PERMISSIONS } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTraining } from "~/api/mutations/live-training/useDeleteLiveTraining";
@@ -16,6 +16,7 @@ import {
 } from "~/api/queries/live-training/useLiveTraining";
 import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
+import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -96,9 +97,11 @@ export const clientLoader = async ({ params, request }: ClientLoaderFunctionArgs
 export default function LiveTrainingPage() {
   const { t } = useTranslation();
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editFormState, setEditFormState] = useState<LiveTrainingEditFormState | null>(null);
+  const [hasAttemptedRoomJoin, setHasAttemptedRoomJoin] = useState(false);
   const [meetingCredentials, setMeetingCredentials] = useState<
     JoinCurrentSessionResponse["data"] | null
   >(null);
@@ -108,25 +111,51 @@ export default function LiveTrainingPage() {
     enabled: Boolean(id),
     retry: false,
   });
+  const { data: liveKitConfigured } = useLiveKitConfigured();
+  const isOnlineDeliveryAvailable = Boolean(liveKitConfigured?.enabled);
   const { mutateAsync: deleteLiveTraining, isPending: isDeleting } = useDeleteLiveTraining();
   const { mutateAsync: updateLiveTraining, isPending: isUpdating } = useUpdateLiveTraining();
   const { mutateAsync: startSession, isPending: isStartingSession } = useStartLiveTrainingSession();
   const { mutateAsync: joinSession, isPending: isJoiningSession } = useJoinLiveTrainingSession();
   const { mutateAsync: endSession, isPending: isFinishingSession } = useEndLiveTrainingSession();
+  const isRoomRoute = location.pathname.endsWith("/room");
 
-  const actions = liveTraining
-    ? deriveLiveTrainingUiActions({
-        liveTraining,
-        currentUserId: currentUser.id,
-        permissions: currentUser.permissions,
-      })
-    : null;
+  const actions = useMemo(
+    () =>
+      liveTraining
+        ? deriveLiveTrainingUiActions({
+            liveTraining,
+            currentUserId: currentUser.id,
+            permissions: currentUser.permissions,
+          })
+        : null,
+    [currentUser.id, currentUser.permissions, liveTraining],
+  );
+  const visibleActions = useMemo(
+    () =>
+      liveTraining && actions
+        ? {
+            ...actions,
+            canShowStart:
+              actions.canShowStart &&
+              (isOnlineDeliveryAvailable ||
+                liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE),
+            canShowJoin: actions.canShowJoin && isOnlineDeliveryAvailable,
+          }
+        : null,
+    [actions, isOnlineDeliveryAvailable, liveTraining],
+  );
 
   useEffect(() => {
     if (!liveTraining) return;
 
     setEditFormState(buildLiveTrainingEditFormState(liveTraining));
   }, [language, liveTraining]);
+
+  useEffect(() => {
+    setHasAttemptedRoomJoin(false);
+    setMeetingCredentials(null);
+  }, [id, isRoomRoute]);
 
   const updateEditFormState = <Key extends keyof LiveTrainingEditFormState>(
     key: Key,
@@ -169,9 +198,14 @@ export default function LiveTrainingPage() {
   const handleJoinSession = useCallback(async () => {
     if (!id) return;
 
+    if (!isRoomRoute) {
+      navigate(`/live-training/${id}/room`);
+      return;
+    }
+
     const credentials = await joinSession({ liveTrainingId: id, language });
     setMeetingCredentials(credentials);
-  }, [id, language, joinSession]);
+  }, [id, isRoomRoute, joinSession, language, navigate]);
 
   const handleFinishSession = useCallback(async () => {
     if (!id || !liveTraining?.currentSession?.id) return;
@@ -186,7 +220,35 @@ export default function LiveTrainingPage() {
 
   const handleLeaveSession = useCallback(() => {
     setMeetingCredentials(null);
-  }, []);
+    if (id && isRoomRoute) {
+      navigate(`/live-training/${id}`);
+    }
+  }, [id, isRoomRoute, navigate]);
+
+  useEffect(() => {
+    if (!isRoomRoute || hasAttemptedRoomJoin || meetingCredentials) return;
+    if (!id || !liveTraining || !visibleActions) return;
+
+    if (!visibleActions.canShowJoin) {
+      navigate(`/live-training/${id}`, { replace: true });
+      return;
+    }
+
+    setHasAttemptedRoomJoin(true);
+    void joinSession({ liveTrainingId: id, language })
+      .then(setMeetingCredentials)
+      .catch(() => navigate(`/live-training/${id}`, { replace: true }));
+  }, [
+    hasAttemptedRoomJoin,
+    id,
+    isRoomRoute,
+    joinSession,
+    language,
+    liveTraining,
+    meetingCredentials,
+    navigate,
+    visibleActions,
+  ]);
 
   return (
     <PageWrapper
@@ -197,15 +259,16 @@ export default function LiveTrainingPage() {
     >
       {isLoading && <LiveTrainingPageSkeleton />}
 
-      {!isLoading && liveTraining && actions && (
+      {!isLoading && liveTraining && visibleActions && (
         <div className="grid gap-5">
           <LiveTrainingSessionStage
             liveTraining={liveTraining}
-            actions={actions}
+            actions={visibleActions}
             editFormState={editFormState}
             isStartingSession={isStartingSession}
             isJoiningSession={isJoiningSession}
             isFinishingSession={isFinishingSession}
+            isOnlineDeliveryAvailable={isOnlineDeliveryAvailable}
             onDeleteClick={() => setIsDeleteDialogOpen(true)}
             onStartSession={handleStartSession}
             onJoinSession={handleJoinSession}
@@ -213,7 +276,7 @@ export default function LiveTrainingPage() {
             onEditFormStateCommit={commitEditFormState}
             onEditFormStateChange={updateEditFormState}
           />
-          <LiveTrainingWorkspace liveTraining={liveTraining} actions={actions} />
+          <LiveTrainingWorkspace liveTraining={liveTraining} actions={visibleActions} />
           <LiveTrainingDeleteDialog
             open={isDeleteDialogOpen}
             isDeleting={isDeleting}
@@ -223,11 +286,11 @@ export default function LiveTrainingPage() {
           />
         </div>
       )}
-      {meetingCredentials && liveTraining && actions && (
+      {meetingCredentials && liveTraining && visibleActions && (
         <LiveTrainingRoom
           credentials={meetingCredentials}
           liveTraining={liveTraining}
-          canViewAllMaterials={actions.canViewAllMaterials}
+          canViewAllMaterials={visibleActions.canViewAllMaterials}
           onLeave={handleLeaveSession}
         />
       )}

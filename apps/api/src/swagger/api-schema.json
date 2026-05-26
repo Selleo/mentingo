@@ -585,6 +585,33 @@
         }
       }
     },
+    "/api/settings/admin/live-training/max-parallel-sessions": {
+      "patch": {
+        "operationId": "SettingsController_updateLiveTrainingMaxParallelSessions",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLiveTrainingMaxParallelSessionsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateLiveTrainingMaxParallelSessionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/admin/finished-course-notification": {
       "patch": {
         "operationId": "SettingsController_updateAdminFinishedCourseNotification",
@@ -7198,6 +7225,62 @@
         }
       }
     },
+    "/api/live-training/{liveTrainingId}/sessions/participants/profile-pictures": {
+      "get": {
+        "operationId": "LiveTrainingSessionsController_getParticipantProfilePictures",
+        "parameters": [
+          {
+            "name": "liveTrainingId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetParticipantProfilePicturesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/live-training/{liveTrainingId}/sessions/{sessionId}": {
       "get": {
         "operationId": "LiveTrainingSessionsController_getSession",
@@ -7335,6 +7418,172 @@
         "responses": {
           "201": {
             "description": ""
+          }
+        }
+      }
+    },
+    "/api/env/bulk": {
+      "post": {
+        "operationId": "EnvController_bulkUpsertEnv",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulkUpsertEnvBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/env/frontend/sso": {
+      "get": {
+        "operationId": "EnvController_getFrontendSSOEnabled",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFrontendSSOEnabledResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/stripe/publishable-key": {
+      "get": {
+        "operationId": "EnvController_getStripePublishableKey",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripePublishableKeyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/frontend/stripe": {
+      "get": {
+        "operationId": "EnvController_getStripeConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStripeConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/ai": {
+      "get": {
+        "operationId": "EnvController_getAIConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAIConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/luma": {
+      "get": {
+        "operationId": "EnvController_getLumaConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLumaConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/livekit": {
+      "get": {
+        "operationId": "EnvController_getLiveKitConfigured",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLiveKitConfiguredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/config/setup": {
+      "get": {
+        "operationId": "EnvController_getIsConfigSetup",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIsConfigSetupResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/env/{envName}": {
+      "get": {
+        "operationId": "EnvController_getEnvKey",
+        "parameters": [
+          {
+            "name": "envName",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEnvKeyResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -10636,155 +10885,6 @@
         ]
       }
     },
-    "/api/env/bulk": {
-      "post": {
-        "operationId": "EnvController_bulkUpsertEnv",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/bulkUpsertEnvBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/env/frontend/sso": {
-      "get": {
-        "operationId": "EnvController_getFrontendSSOEnabled",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetFrontendSSOEnabledResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/stripe/publishable-key": {
-      "get": {
-        "operationId": "EnvController_getStripePublishableKey",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetStripePublishableKeyResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/frontend/stripe": {
-      "get": {
-        "operationId": "EnvController_getStripeConfigured",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetStripeConfiguredResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/ai": {
-      "get": {
-        "operationId": "EnvController_getAIConfigured",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAIConfiguredResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/luma": {
-      "get": {
-        "operationId": "EnvController_getLumaConfigured",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLumaConfiguredResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/config/setup": {
-      "get": {
-        "operationId": "EnvController_getIsConfigSetup",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetIsConfigSetupResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/env/{envName}": {
-      "get": {
-        "operationId": "EnvController_getEnvKey",
-        "parameters": [
-          {
-            "name": "envName",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEnvKeyResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/activity-logs": {
       "get": {
         "operationId": "ActivityLogsController_getActivityLogs",
@@ -13965,6 +14065,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -14160,6 +14264,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -14732,6 +14837,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -14927,6 +15036,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -14971,6 +15081,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -15166,6 +15280,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -15210,6 +15325,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -15405,6 +15524,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -15449,6 +15569,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -15644,6 +15768,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -15688,6 +15813,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -15883,6 +16012,263 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
+              "enforceSSO",
+              "certificateBackgroundImage",
+              "platformLogoS3Key",
+              "loginBackgroundImageS3Key",
+              "platformSimpleLogoS3Key",
+              "MFAEnforcedRoles",
+              "defaultCourseCurrency",
+              "inviteOnlyRegistration",
+              "userEmailTriggers",
+              "primaryColor",
+              "contrastColor",
+              "unregisteredUserQAAccessibility",
+              "QAEnabled",
+              "unregisteredUserNewsAccessibility",
+              "newsEnabled",
+              "unregisteredUserArticlesAccessibility",
+              "articlesEnabled",
+              "ageLimit",
+              "loginPageFiles"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateLiveTrainingMaxParallelSessionsBody": {
+        "type": "object",
+        "properties": {
+          "liveTrainingMaxParallelSessions": {
+            "minimum": 1,
+            "type": "number"
+          }
+        },
+        "required": [
+          "liveTrainingMaxParallelSessions"
+        ]
+      },
+      "UpdateLiveTrainingMaxParallelSessionsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "unregisteredUserCoursesAccessibility": {
+                "type": "boolean"
+              },
+              "modernCourseListEnabled": {
+                "type": "boolean"
+              },
+              "calendarEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingEnabled": {
+                "type": "boolean"
+              },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
+              "trainerRoleUserCount": {
+                "type": "number"
+              },
+              "enforceSSO": {
+                "type": "boolean"
+              },
+              "certificateBackgroundImage": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "companyInformation": {
+                "type": "object",
+                "properties": {
+                  "companyName": {
+                    "type": "string"
+                  },
+                  "companyShortName": {
+                    "maxLength": 10,
+                    "type": "string"
+                  },
+                  "registeredAddress": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "emailAddress": {
+                    "type": "string"
+                  },
+                  "courtRegisterNumber": {
+                    "type": "string"
+                  }
+                }
+              },
+              "platformLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginBackgroundImageS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "platformSimpleLogoS3Key": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "MFAEnforcedRoles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "defaultCourseCurrency": {
+                "anyOf": [
+                  {
+                    "const": "pln",
+                    "type": "string"
+                  },
+                  {
+                    "const": "eur",
+                    "type": "string"
+                  },
+                  {
+                    "const": "gbp",
+                    "type": "string"
+                  },
+                  {
+                    "const": "usd",
+                    "type": "string"
+                  }
+                ]
+              },
+              "inviteOnlyRegistration": {
+                "type": "boolean"
+              },
+              "userEmailTriggers": {
+                "type": "object",
+                "properties": {
+                  "userFirstLogin": {
+                    "type": "boolean"
+                  },
+                  "userCourseAssignment": {
+                    "type": "boolean"
+                  },
+                  "userShortInactivity": {
+                    "type": "boolean"
+                  },
+                  "userLongInactivity": {
+                    "type": "boolean"
+                  },
+                  "userChapterFinished": {
+                    "type": "boolean"
+                  },
+                  "userCourseFinished": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userFirstLogin",
+                  "userCourseAssignment",
+                  "userShortInactivity",
+                  "userLongInactivity",
+                  "userChapterFinished",
+                  "userCourseFinished"
+                ]
+              },
+              "primaryColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "contrastColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "unregisteredUserQAAccessibility": {
+                "type": "boolean"
+              },
+              "QAEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserNewsAccessibility": {
+                "type": "boolean"
+              },
+              "newsEnabled": {
+                "type": "boolean"
+              },
+              "unregisteredUserArticlesAccessibility": {
+                "type": "boolean"
+              },
+              "articlesEnabled": {
+                "type": "boolean"
+              },
+              "ageLimit": {
+                "anyOf": [
+                  {
+                    "const": 13,
+                    "type": "number"
+                  },
+                  {
+                    "const": 16,
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "loginPageFiles": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "unregisteredUserCoursesAccessibility",
+              "modernCourseListEnabled",
+              "calendarEnabled",
+              "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -16082,6 +16468,10 @@
               "liveTrainingEnabled": {
                 "type": "boolean"
               },
+              "liveTrainingMaxParallelSessions": {
+                "minimum": 1,
+                "type": "number"
+              },
               "trainerRoleUserCount": {
                 "type": "number"
               },
@@ -16277,6 +16667,7 @@
               "modernCourseListEnabled",
               "calendarEnabled",
               "liveTrainingEnabled",
+              "liveTrainingMaxParallelSessions",
               "enforceSSO",
               "certificateBackgroundImage",
               "platformLogoS3Key",
@@ -31483,6 +31874,40 @@
           "data"
         ]
       },
+      "GetParticipantProfilePicturesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "profilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "userId",
+                "profilePictureUrl"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "GetSessionResponse": {
         "type": "object",
         "properties": {
@@ -32024,6 +32449,253 @@
               "uniqueParticipantCount",
               "peakParticipantCount",
               "endReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "bulkUpsertEnvBody": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "name",
+            "value"
+          ]
+        }
+      },
+      "GetFrontendSSOEnabledResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "google": {
+                "type": "string"
+              },
+              "microsoft": {
+                "type": "string"
+              },
+              "slack": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripePublishableKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "publishableKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "publishableKey"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetStripeConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAIConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLumaConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "courseGenerationEnabled": {
+                "type": "boolean"
+              },
+              "voiceMentorEnabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled",
+              "courseGenerationEnabled",
+              "voiceMentorEnabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLiveKitConfiguredResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "enabled"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetIsConfigSetupResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "fullyConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "partiallyConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "missingKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "missingKeys"
+                  ]
+                }
+              },
+              "notConfigured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "missingKeys": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "missingKeys"
+                  ]
+                }
+              },
+              "hasIssues": {
+                "type": "boolean"
+              },
+              "isWarningDismissed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "fullyConfigured",
+              "partiallyConfigured",
+              "notConfigured",
+              "hasIssues",
+              "isWarningDismissed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetEnvKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "value"
             ]
           }
         },
@@ -37819,234 +38491,6 @@
             "required": [
               "key",
               "metadata"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "bulkUpsertEnvBody": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "value": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "name",
-            "value"
-          ]
-        }
-      },
-      "GetFrontendSSOEnabledResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "google": {
-                "type": "string"
-              },
-              "microsoft": {
-                "type": "string"
-              },
-              "slack": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetStripePublishableKeyResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "publishableKey": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "publishableKey"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetStripeConfiguredResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "enabled"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetAIConfiguredResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "enabled"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetLumaConfiguredResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "enabled": {
-                "type": "boolean"
-              },
-              "courseGenerationEnabled": {
-                "type": "boolean"
-              },
-              "voiceMentorEnabled": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "enabled",
-              "courseGenerationEnabled",
-              "voiceMentorEnabled"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetIsConfigSetupResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "fullyConfigured": {
-                "type": "array",
-                "items": {
-                  "type": "string"
-                }
-              },
-              "partiallyConfigured": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "service": {
-                      "type": "string"
-                    },
-                    "missingKeys": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "service",
-                    "missingKeys"
-                  ]
-                }
-              },
-              "notConfigured": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "service": {
-                      "type": "string"
-                    },
-                    "missingKeys": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "service",
-                    "missingKeys"
-                  ]
-                }
-              },
-              "hasIssues": {
-                "type": "boolean"
-              },
-              "isWarningDismissed": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "fullyConfigured",
-              "partiallyConfigured",
-              "notConfigured",
-              "hasIssues",
-              "isWarningDismissed"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetEnvKeyResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "value"
             ]
           }
         },

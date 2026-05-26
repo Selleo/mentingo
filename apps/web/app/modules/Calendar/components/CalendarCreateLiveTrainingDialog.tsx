@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCreateLiveTraining } from "~/api/mutations/live-training/useCreateLiveTraining";
+import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -44,10 +45,18 @@ export function CalendarCreateLiveTrainingDialog({
   const { t } = useTranslation();
   const appLanguage = useLanguageStore((state) => state.language);
   const { mutateAsync: createLiveTraining, isPending } = useCreateLiveTraining();
+  const { data: liveKitConfigured } = useLiveKitConfigured();
+  const isOnlineDeliveryAvailable = Boolean(liveKitConfigured?.enabled);
 
   const initialFormState = useMemo(
-    () => buildInitialCalendarCreateLiveTrainingFormState(selectedRange),
-    [selectedRange],
+    () =>
+      buildInitialCalendarCreateLiveTrainingFormState(
+        selectedRange,
+        isOnlineDeliveryAvailable
+          ? LIVE_TRAINING_DELIVERY_TYPES.ONLINE
+          : LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
+      ),
+    [isOnlineDeliveryAvailable, selectedRange],
   );
 
   const [mode, setMode] = useState<CalendarCreateMode>(CALENDAR_CREATE_MODES.MENU);
@@ -76,6 +85,15 @@ export function CalendarCreateLiveTrainingDialog({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (
+      formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE &&
+      !isOnlineDeliveryAvailable
+    ) {
+      updateFormState("deliveryType", LIVE_TRAINING_DELIVERY_TYPES.OFFLINE);
+      setFormError(t("calendarView.create.liveKitRequired"));
+      return;
+    }
 
     const startsAt = formState.allDay
       ? buildCalendarCreateAllDayStartDateTime(formState.startDate)
@@ -172,6 +190,7 @@ export function CalendarCreateLiveTrainingDialog({
                   onFormStateChange={updateFormState}
                   idPrefix="calendar-live-training"
                   portalledDatePicker={false}
+                  isOnlineDeliveryAvailable={isOnlineDeliveryAvailable}
                 />
 
                 {formError && (
