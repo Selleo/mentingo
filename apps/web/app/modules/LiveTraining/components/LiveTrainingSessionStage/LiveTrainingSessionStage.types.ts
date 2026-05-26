@@ -27,6 +27,7 @@ export type StageActionButtonProps = {
   icon: ReactNode;
   label: string;
   variant?: "primary" | "secondary";
+  disabled?: boolean;
   onClick?: () => void;
 };
 

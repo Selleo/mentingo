@@ -2,7 +2,6 @@ import { LIVE_TRAINING_DESCRIPTION_MAX_LENGTH, LIVE_TRAINING_TITLE_MAX_LENGTH } 
 import { CalendarClock, Mic, Play, Square, Trash2, Users, Video } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import { Switch } from "~/components/ui/switch";
@@ -15,6 +14,8 @@ import {
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { LiveTrainingMeetingPreview } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingMeetingPreview";
 import { InlineEditable } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/InlineEditable";
 import { PreviewMetaItem } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/PreviewMetaItem";
 import { StageActionButton } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/StageActionButton";
@@ -32,7 +33,13 @@ type LiveTrainingSessionStageProps = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
   editFormState: LiveTrainingEditFormState | null;
+  isStartingSession: boolean;
+  isJoiningSession: boolean;
+  isFinishingSession: boolean;
   onDeleteClick: () => void;
+  onStartSession: () => void;
+  onJoinSession: () => void;
+  onFinishSession: () => void;
   onEditFormStateChange: UpdateLiveTrainingEditFormState;
   onEditFormStateCommit: (nextFormState: LiveTrainingEditFormState) => void;
 };
@@ -41,11 +48,18 @@ export function LiveTrainingSessionStage({
   liveTraining,
   actions,
   editFormState,
+  isStartingSession,
+  isJoiningSession,
+  isFinishingSession,
   onDeleteClick,
+  onStartSession,
+  onJoinSession,
+  onFinishSession,
   onEditFormStateChange,
   onEditFormStateCommit,
 }: LiveTrainingSessionStageProps) {
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const {
     canEdit,
     commitCurrentFormState,
@@ -172,12 +186,16 @@ export function LiveTrainingSessionStage({
                     icon={<Play className="size-4" />}
                     label={t("liveTrainingView.actions.start")}
                     variant="primary"
+                    disabled={isStartingSession}
+                    onClick={onStartSession}
                   />
                 )}
                 {actions.canShowFinish && (
                   <StageActionButton
                     icon={<Square className="size-4" />}
                     label={t("liveTrainingView.actions.finish")}
+                    disabled={isFinishingSession}
+                    onClick={onFinishSession}
                   />
                 )}
               </div>
@@ -228,6 +246,7 @@ export function LiveTrainingSessionStage({
                             displayedStartsAt,
                             displayedEndsAt,
                             displayedAllDay,
+                            language,
                           )}
                           tooltip={t("liveTrainingView.stage.scheduleTooltip")}
                         />
@@ -378,14 +397,14 @@ export function LiveTrainingSessionStage({
                   </>
                 )}
               </div>
-
-              {actions.canShowJoin && (
-                <Button className="h-9 shrink-0 gap-2 bg-white text-primary-950 hover:bg-white/90 sm:h-10">
-                  <Video className="size-4" />
-                  {t("liveTrainingView.actions.join")}
-                </Button>
-              )}
             </div>
+
+            <LiveTrainingMeetingPreview
+              liveTraining={liveTraining}
+              actions={actions}
+              isJoining={isJoiningSession}
+              onJoin={onJoinSession}
+            />
           </div>
         </div>
       </section>

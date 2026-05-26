@@ -51,7 +51,7 @@ Default layout should be compact and operational.
       character counters.
 - [x] Keep Live Training page component code modular by extracting stage primitives, constants, and
       utility functions.
-- [ ] Add LiveKit room integration in a later runtime slice.
+- [x] Add LiveKit room integration in the runtime slice.
 - [ ] Add tests after the page behavior stabilizes.
 
 ## Backend Prerequisites
@@ -67,25 +67,29 @@ Already available:
 - Before/after resources modeled through `resource_entity.relationship_type`.
 - Shared permissions for read/create/update/delete/join/start/end/statistics.
 
-Still needed before full runtime behavior:
+Runtime behavior now available:
 
 - Start session endpoint.
 - Join session endpoint that returns a LiveKit token.
 - Finish/end session endpoint.
-- Active session detail endpoint or inclusion in `GET /live-training/:id`.
+- Active session detail inclusion in `GET /live-training/:id`.
 - Session lifecycle service rules:
   - only authorized trainer/admin/author can start,
   - only authorized trainer/admin/author can finish,
   - finish is always manual,
-  - dangerous metadata edits are blocked after session start.
+  - dangerous metadata edits are blocked after session start where required.
 - LiveKit room creation/token service.
-- Live Training socket gateway for session status and participant updates.
-- Attendance persistence from LiveKit/webhook/socket lifecycle.
-- Participant presence/active count source, probably DB plus Redis cache later.
+- Attendance persistence from LiveKit webhook lifecycle.
 - File visibility rules in API response:
   - before files visible before session end,
   - after files visible only after session end for students/viewers,
   - trainers/admin/author can see both.
+
+Still needed:
+
+- Live Training socket gateway for app-shell popup/status notifications.
+- Fallback cleanup/expiry job for stale sessions and open attendance intervals.
+- Max parallel active online session limit enforcement.
 
 Access model:
 
@@ -358,7 +362,9 @@ Rules:
 - Successful updates invalidate:
   - Live Training detail query,
   - Calendar event queries,
-  - Calendar event details query if open/stale.
+  - Calendar event details query if open/stale,
+  - linked course and lesson queries, because Live Training details are embedded in course lesson
+    views.
 
 V1 editable fields:
 

@@ -2,9 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
-import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -30,8 +29,7 @@ export function useUpdateLiveTrainingLessonTitle() {
       return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
-      await queryClient.invalidateQueries({ queryKey: ["course"] });
+      await invalidateLiveTrainingData({ includeCoursesAndLessons: true });
 
       toast({
         description: t("adminCourseView.curriculum.lesson.toast.liveTrainingLessonUpdated"),

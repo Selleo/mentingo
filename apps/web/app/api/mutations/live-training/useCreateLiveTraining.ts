@@ -3,8 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { CALENDAR_EVENTS_QUERY_KEY } from "~/api/queries/calendar/useCalendarEvents";
-import { queryClient } from "~/api/queryClient";
+import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { CreateLiveTrainingBody } from "~/api/generated-api";
@@ -19,7 +18,7 @@ export function useCreateLiveTraining() {
       return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY });
+      await invalidateLiveTrainingData({ includeCalendar: true });
       toast({
         variant: "default",
         description: t("calendarView.create.toast.success"),

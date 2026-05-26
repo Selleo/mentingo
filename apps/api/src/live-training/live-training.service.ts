@@ -580,19 +580,21 @@ export class LiveTrainingService {
       throw new NotFoundException("liveTraining.errors.notFound");
     }
 
-    const [hosts, linkedCourses, materials, linkedLessonCount] = await Promise.all([
-      this.liveTrainingRepository.getLiveTrainingHostRows(id),
-      this.liveTrainingRepository.getLiveTrainingLinkedCourseRows(id, language),
-      this.liveTrainingRepository.getLiveTrainingMaterialRows(
-        id,
-        [
-          LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
-          LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
-        ],
-        language,
-      ),
-      this.liveTrainingRepository.getLinkedLessonCount(id),
-    ]);
+    const [hosts, linkedCourses, materials, linkedLessonCount, currentSessionRow] =
+      await Promise.all([
+        this.liveTrainingRepository.getLiveTrainingHostRows(id),
+        this.liveTrainingRepository.getLiveTrainingLinkedCourseRows(id, language),
+        this.liveTrainingRepository.getLiveTrainingMaterialRows(
+          id,
+          [
+            LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
+            LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
+          ],
+          language,
+        ),
+        this.liveTrainingRepository.getLinkedLessonCount(id),
+        this.liveTrainingRepository.getCurrentSessionRow(id),
+      ]);
 
     if (!(await this.canSeeLiveTraining(row, hosts, linkedCourses, currentUser))) {
       throw new NotFoundException("liveTraining.errors.notFound");
@@ -600,9 +602,10 @@ export class LiveTrainingService {
 
     const isPrivilegedViewer = this.canViewAllMaterials(row, hosts, currentUser);
     const visibleMaterials = this.getVisibleMaterials(materials, row.status, isPrivilegedViewer);
-    const [authorProfilePictureUrl, hostsWithProfilePictures] = await Promise.all([
+    const [authorProfilePictureUrl, hostsWithProfilePictures, currentSession] = await Promise.all([
       this.getProfilePictureUrl(row.authorAvatarReference),
       this.getHostsWithProfilePictureUrls(hosts),
+      currentSessionRow ? this.mapSessionSummary(currentSessionRow) : Promise.resolve(null),
     ]);
 
     return {
@@ -632,7 +635,44 @@ export class LiveTrainingService {
       hosts: hostsWithProfilePictures,
       linkedCourses,
       linkedLessonCount,
+      currentSession,
       materials: visibleMaterials,
+    };
+  }
+
+  private async mapSessionSummary(
+    row: NonNullable<Awaited<ReturnType<LiveTrainingRepository["getCurrentSessionRow"]>>>,
+  ) {
+    const [startedByProfilePictureUrl, endedByProfilePictureUrl] = await Promise.all([
+      this.getProfilePictureUrl(row.startedByAvatarReference),
+      this.getProfilePictureUrl(row.endedByAvatarReference),
+    ]);
+
+    return {
+      id: row.id,
+      status: row.status,
+      startedAt: row.startedAt,
+      endedAt: row.endedAt,
+      startedByUserId: row.startedByUserId,
+      endedByUserId: row.endedByUserId,
+      startedBy: row.startedByUserId
+        ? {
+            id: row.startedByUserId,
+            fullName: row.startedByFullName,
+            profilePictureUrl: startedByProfilePictureUrl,
+          }
+        : null,
+      endedBy: row.endedByUserId
+        ? {
+            id: row.endedByUserId,
+            fullName: row.endedByFullName,
+            profilePictureUrl: endedByProfilePictureUrl,
+          }
+        : null,
+      activeParticipantCount: row.activeParticipantCount,
+      uniqueParticipantCount: row.uniqueParticipantCount,
+      peakParticipantCount: row.peakParticipantCount,
+      endReason: row.endReason,
     };
   }
 

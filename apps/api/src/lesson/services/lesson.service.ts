@@ -25,6 +25,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -71,6 +72,7 @@ export class LessonService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
     private readonly permissionsService: PermissionsService,
+    private readonly liveTrainingService: LiveTrainingService,
   ) {}
 
   async getLessonById(
@@ -208,6 +210,18 @@ export class LessonService {
       });
 
       return { ...lesson, lessonResources: mappedResources };
+    }
+
+    if (lesson.type === LESSON_TYPES.LIVE_TRAINING) {
+      const liveTraining = lesson.liveTrainingId
+        ? await this.liveTrainingService.getLiveTraining(
+            lesson.liveTrainingId,
+            actualLanguage,
+            currentUser,
+          )
+        : null;
+
+      return { ...lesson, liveTraining };
     }
 
     const questionList = await this.questionRepository.getQuestionsForLesson(

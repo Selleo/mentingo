@@ -2418,6 +2418,100 @@ export interface GetLessonByIdResponse {
       name: string;
       avatarReferenceUrl?: string;
     } | null;
+    liveTraining?:
+      | ({
+          /** @format uuid */
+          id: string;
+          /** @format uuid */
+          calendarEventId: string;
+          title: string;
+          description: string | null;
+          startsAt: string;
+          endsAt: string;
+          allDay: boolean;
+          timezone: string;
+          location: string | null;
+          deliveryType: "online" | "offline";
+          visibilityScope: "all" | "linked_courses";
+          status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+          maxParticipants: number;
+          /** @format uuid */
+          authorId: string;
+          hostIds: string[];
+          linkedCourseIds: string[];
+        } & {
+          settings: {
+            viewerPermissions: {
+              microphoneEnabled: boolean;
+              cameraEnabled: boolean;
+            };
+          };
+          metadata: object;
+          author: {
+            /** @format uuid */
+            id: string;
+            fullName: string | null;
+            profilePictureUrl: string | null;
+          };
+          hosts: {
+            /** @format uuid */
+            id: string;
+            fullName: string | null;
+            profilePictureUrl: string | null;
+          }[];
+          linkedCourses: {
+            /** @format uuid */
+            id: string;
+            title: string;
+          }[];
+          linkedLessonCount: number;
+          currentSession: {
+            /** @format uuid */
+            id: string;
+            status: "waiting" | "active" | "ended" | "failed";
+            startedAt: string | null;
+            endedAt: string | null;
+            startedByUserId: string | null;
+            endedByUserId: string | null;
+            startedBy: {
+              /** @format uuid */
+              id: string;
+              fullName: string | null;
+              profilePictureUrl: string | null;
+            } | null;
+            endedBy: {
+              /** @format uuid */
+              id: string;
+              fullName: string | null;
+              profilePictureUrl: string | null;
+            } | null;
+            activeParticipantCount: number;
+            uniqueParticipantCount: number;
+            peakParticipantCount: number;
+            endReason: string | null;
+          } | null;
+          materials: {
+            before: {
+              /** @format uuid */
+              resourceId: string;
+              title: string;
+              description: string | null;
+              contentType: string;
+              size: number | null;
+              relationshipType: "live_training_before" | "live_training_after";
+            }[];
+            after: {
+              /** @format uuid */
+              resourceId: string;
+              title: string;
+              description: string | null;
+              contentType: string;
+              size: number | null;
+              relationshipType: "live_training_before" | "live_training_after";
+            }[];
+          };
+        })
+      | null;
   };
 }
 
@@ -3258,6 +3352,31 @@ export interface GetLiveTrainingResponse {
       title: string;
     }[];
     linkedLessonCount: number;
+    currentSession: {
+      /** @format uuid */
+      id: string;
+      status: "waiting" | "active" | "ended" | "failed";
+      startedAt: string | null;
+      endedAt: string | null;
+      startedByUserId: string | null;
+      endedByUserId: string | null;
+      startedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      endedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      activeParticipantCount: number;
+      uniqueParticipantCount: number;
+      peakParticipantCount: number;
+      endReason: string | null;
+    } | null;
     materials: {
       before: {
         /** @format uuid */
@@ -3363,6 +3482,31 @@ export interface CreateLiveTrainingResponse {
       title: string;
     }[];
     linkedLessonCount: number;
+    currentSession: {
+      /** @format uuid */
+      id: string;
+      status: "waiting" | "active" | "ended" | "failed";
+      startedAt: string | null;
+      endedAt: string | null;
+      startedByUserId: string | null;
+      endedByUserId: string | null;
+      startedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      endedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      activeParticipantCount: number;
+      uniqueParticipantCount: number;
+      peakParticipantCount: number;
+      endReason: string | null;
+    } | null;
     materials: {
       before: {
         /** @format uuid */
@@ -3487,6 +3631,31 @@ export interface UpdateLiveTrainingResponse {
       title: string;
     }[];
     linkedLessonCount: number;
+    currentSession: {
+      /** @format uuid */
+      id: string;
+      status: "waiting" | "active" | "ended" | "failed";
+      startedAt: string | null;
+      endedAt: string | null;
+      startedByUserId: string | null;
+      endedByUserId: string | null;
+      startedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      endedBy: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      } | null;
+      activeParticipantCount: number;
+      uniqueParticipantCount: number;
+      peakParticipantCount: number;
+      endReason: string | null;
+    } | null;
     materials: {
       before: {
         /** @format uuid */
@@ -3537,6 +3706,156 @@ export interface GetLiveTrainingResourceDownloadUrlResponse {
 export interface DeleteLiveTrainingResourceResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetSessionsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    status: "waiting" | "active" | "ended" | "failed";
+    startedAt: string | null;
+    endedAt: string | null;
+    startedByUserId: string | null;
+    endedByUserId: string | null;
+    startedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    endedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    activeParticipantCount: number;
+    uniqueParticipantCount: number;
+    peakParticipantCount: number;
+    endReason: string | null;
+  }[];
+}
+
+export interface StartSessionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    status: "waiting" | "active" | "ended" | "failed";
+    startedAt: string | null;
+    endedAt: string | null;
+    startedByUserId: string | null;
+    endedByUserId: string | null;
+    startedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    endedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    activeParticipantCount: number;
+    uniqueParticipantCount: number;
+    peakParticipantCount: number;
+    endReason: string | null;
+  };
+}
+
+export interface JoinCurrentSessionResponse {
+  data: {
+    /** @format uuid */
+    sessionId: string;
+    livekitUrl: string;
+    token: string;
+    identity: string;
+    role: "host" | "co_trainer" | "moderator" | "observer" | "admin";
+    viewerPermissions: {
+      microphoneEnabled: boolean;
+      cameraEnabled: boolean;
+    };
+  };
+}
+
+export interface GetSessionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    status: "waiting" | "active" | "ended" | "failed";
+    startedAt: string | null;
+    endedAt: string | null;
+    startedByUserId: string | null;
+    endedByUserId: string | null;
+    startedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    endedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    activeParticipantCount: number;
+    uniqueParticipantCount: number;
+    peakParticipantCount: number;
+    endReason: string | null;
+  } & {
+    participants: {
+      /** @format uuid */
+      id: string;
+      user: {
+        /** @format uuid */
+        id: string;
+        fullName: string | null;
+        profilePictureUrl: string | null;
+      };
+      role: "host" | "co_trainer" | "moderator" | "observer" | "admin";
+      firstJoinedAt: string | null;
+      lastLeftAt: string | null;
+      totalSeconds: number;
+      joinCount: number;
+      intervals: {
+        /** @format uuid */
+        id: string;
+        joinedAt: string;
+        leftAt: string | null;
+        disconnectReason: string | null;
+      }[];
+    }[];
+  };
+}
+
+export interface EndSessionResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    status: "waiting" | "active" | "ended" | "failed";
+    startedAt: string | null;
+    endedAt: string | null;
+    startedByUserId: string | null;
+    endedByUserId: string | null;
+    startedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    endedBy: {
+      /** @format uuid */
+      id: string;
+      fullName: string | null;
+      profilePictureUrl: string | null;
+    } | null;
+    activeParticipantCount: number;
+    uniqueParticipantCount: number;
+    peakParticipantCount: number;
+    endReason: string | null;
   };
 }
 
@@ -9452,6 +9771,126 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "DELETE",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingSessionsControllerGetSessions
+     * @request GET:/api/live-training/{liveTrainingId}/sessions
+     */
+    liveTrainingSessionsControllerGetSessions: (
+      liveTrainingId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetSessionsResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingSessionsControllerStartSession
+     * @request POST:/api/live-training/{liveTrainingId}/sessions/start
+     */
+    liveTrainingSessionsControllerStartSession: (
+      liveTrainingId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<StartSessionResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions/start`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingSessionsControllerJoinCurrentSession
+     * @request POST:/api/live-training/{liveTrainingId}/sessions/current/join
+     */
+    liveTrainingSessionsControllerJoinCurrentSession: (
+      liveTrainingId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<JoinCurrentSessionResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions/current/join`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingSessionsControllerGetSession
+     * @request GET:/api/live-training/{liveTrainingId}/sessions/{sessionId}
+     */
+    liveTrainingSessionsControllerGetSession: (
+      liveTrainingId: string,
+      sessionId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetSessionResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions/${sessionId}`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveTrainingSessionsControllerEndSession
+     * @request POST:/api/live-training/{liveTrainingId}/sessions/{sessionId}/end
+     */
+    liveTrainingSessionsControllerEndSession: (
+      liveTrainingId: string,
+      sessionId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<EndSessionResponse, any>({
+        path: `/api/live-training/${liveTrainingId}/sessions/${sessionId}/end`,
+        method: "POST",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LiveKitWebhookControllerHandleWebhook
+     * @request POST:/api/live-training/livekit/webhook
+     */
+    liveKitWebhookControllerHandleWebhook: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/live-training/livekit/webhook`,
+        method: "POST",
         ...params,
       }),
 

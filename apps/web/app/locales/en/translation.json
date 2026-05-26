@@ -503,7 +503,7 @@
     "tabs": {
       "overview": "Overview",
       "files": "Files",
-      "attendance": "Attendance",
+      "sessions": "Sessions",
       "settings": "Settings"
     },
     "files": {
@@ -522,6 +522,66 @@
       "toast": {
         "uploaded": "File has been added.",
         "removed": "File has been removed."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live session",
+      "waitingTitle": "Session is ready to join",
+      "activeTitle": "Session is active",
+      "inSession": "In session",
+      "roomTitle": "Live room",
+      "participants_one": "{{count}} participant",
+      "participants_other": "{{count}} participants",
+      "microphone": "Microphone",
+      "camera": "Camera",
+      "screenShare": "Share screen",
+      "leave": "Leave",
+      "empty": "Waiting for participants.",
+      "materials": "Materials",
+      "beforeMaterials": "Before",
+      "afterMaterials": "After",
+      "noMaterials": "No files"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Session has been started.",
+        "ended": "Session has been finished."
       }
     },
     "attendance": {
@@ -771,7 +831,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Process course payments and manage subscriptions",
@@ -780,7 +841,8 @@
         "microsoft_authorization": "Allow users to sign in with their Microsoft account",
         "slack_authorization": "Allow users to sign in with their Slack account",
         "openAI": "Enable AI Mentor features",
-        "luma": "Enable AI Course Generation features"
+        "luma": "Enable AI Course Generation features",
+        "livekit": "Enable Live Training video sessions"
       }
     }
   },
@@ -1485,6 +1547,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Save"
     },
@@ -2445,6 +2516,17 @@
       "nextSco": "Next section",
       "tryAgain": "Try again",
       "lessonFinished": "SCORM lesson finished."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Session is active",
+      "scheduledLabel": "Scheduled",
+      "scheduledTitle": "Live Training is scheduled",
+      "endedLabel": "Ended",
+      "endedTitle": "Live Training has already ended",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "No Live Training is active",
+      "notAvailable": "Live Training is not available for this lesson."
     },
     "videoProcessing": {
       "title": "Video is being processed",
@@ -3861,7 +3943,8 @@
       "unsupportedLessonLanguage": "This course does not support the selected language.",
       "baseLanguageAssignmentRequired": "Live Training lessons must be created in the course base language first.",
       "invalidLessonType": "Only Live Training lessons can have Live Training assignments.",
-      "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training."
+      "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training.",
+      "liveKitNotConfigured": "LiveKit is not configured."
     }
   }
 }

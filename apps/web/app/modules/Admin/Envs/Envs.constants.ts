@@ -87,4 +87,16 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.LUMA_API_KEY.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  LIVEKIT_URL: {
+    labelKey: "adminEnvsView.form.LIVEKIT_URL.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  LIVEKIT_API_KEY: {
+    labelKey: "adminEnvsView.form.LIVEKIT_API_KEY.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  LIVEKIT_API_SECRET: {
+    labelKey: "adminEnvsView.form.LIVEKIT_API_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
 };

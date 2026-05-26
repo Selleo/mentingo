@@ -377,7 +377,7 @@ Calendar reads remain generic:
 - [x] Block Live Training deletion when it is still linked to lessons.
 - [x] Keep Live Training intact when deleting a Live Training lesson.
 - [x] Add Live Training lesson delete button and confirmation in the course lesson edit form.
-- [ ] Render lightweight Live Training lesson view with redirect to `/live-training/:id`.
+- [x] Render lightweight Live Training lesson view with status, files, and join overlay.
 - [ ] Add targeted API and frontend tests after the flow stabilizes.
 
 ## Regression Tests To Add

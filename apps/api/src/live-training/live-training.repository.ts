@@ -4,10 +4,12 @@ import {
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
+  LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, asc, count, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
@@ -16,8 +18,10 @@ import {
   calendarEvents,
   courses,
   liveLessons,
+  liveTrainingAttendance,
   liveTrainingLinks,
   liveTrainingMembers,
+  liveTrainingSessions,
   liveTrainings,
   permissionRoles,
   permissionUserRoles,
@@ -241,6 +245,56 @@ export class LiveTrainingRepository {
           isNull(calendarEvents.deletedAt),
         ),
       );
+
+    return row ?? null;
+  }
+
+  async getCurrentSessionRow(liveTrainingId: UUIDType) {
+    const startedBy = alias(users, "started_by_user");
+    const endedBy = alias(users, "ended_by_user");
+
+    const [row] = await this.db
+      .select({
+        id: liveTrainingSessions.id,
+        status: liveTrainingSessions.status,
+        startedAt: liveTrainingSessions.startedAt,
+        endedAt: liveTrainingSessions.endedAt,
+        startedByUserId: liveTrainingSessions.startedByUserId,
+        endedByUserId: liveTrainingSessions.endedByUserId,
+        startedByFullName: sql<
+          string | null
+        >`nullif(concat_ws(' ', ${startedBy.firstName}, ${startedBy.lastName}), '')`,
+        startedByAvatarReference: startedBy.avatarReference,
+        endedByFullName: sql<
+          string | null
+        >`nullif(concat_ws(' ', ${endedBy.firstName}, ${endedBy.lastName}), '')`,
+        endedByAvatarReference: endedBy.avatarReference,
+        peakParticipantCount: liveTrainingSessions.peakParticipantCount,
+        uniqueParticipantCount: liveTrainingSessions.uniqueParticipantCount,
+        activeParticipantCount: sql<number>`count(${liveTrainingAttendance.id})::int`,
+        endReason: liveTrainingSessions.endReason,
+      })
+      .from(liveTrainingSessions)
+      .leftJoin(startedBy, eq(startedBy.id, liveTrainingSessions.startedByUserId))
+      .leftJoin(endedBy, eq(endedBy.id, liveTrainingSessions.endedByUserId))
+      .leftJoin(
+        liveTrainingAttendance,
+        and(
+          eq(liveTrainingAttendance.liveTrainingSessionId, liveTrainingSessions.id),
+          isNull(liveTrainingAttendance.leftAt),
+        ),
+      )
+      .where(
+        and(
+          eq(liveTrainingSessions.liveTrainingId, liveTrainingId),
+          inArray(liveTrainingSessions.status, [
+            LIVE_TRAINING_SESSION_STATUSES.WAITING,
+            LIVE_TRAINING_SESSION_STATUSES.ACTIVE,
+          ]),
+        ),
+      )
+      .groupBy(liveTrainingSessions.id, startedBy.id, endedBy.id)
+      .orderBy(desc(liveTrainingSessions.createdAt));
 
     return row ?? null;
   }

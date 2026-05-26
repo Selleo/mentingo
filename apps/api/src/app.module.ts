@@ -34,6 +34,7 @@ import callbackUrlConfig from "./common/configuration/callbackUrl";
 import database from "./common/configuration/database";
 import emailConfig from "./common/configuration/email";
 import jwtConfig from "./common/configuration/jwt";
+import livekitConfig from "./common/configuration/livekit";
 import { getOptionalConfigs } from "./common/configuration/optional-config-loader";
 import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
@@ -89,6 +90,7 @@ import type { RedisClient } from "src/redis";
         redisConfig,
         callbackUrlConfig,
         bunnyConfig,
+        livekitConfig,
         ...getOptionalConfigs(),
       ],
       isGlobal: true,

@@ -506,7 +506,7 @@
     "tabs": {
       "overview": "Przegląd",
       "files": "Pliki",
-      "attendance": "Obecność",
+      "sessions": "Sesje",
       "settings": "Ustawienia"
     },
     "files": {
@@ -527,6 +527,72 @@
         "removed": "Plik został usunięty."
       }
     },
+    "meeting": {
+      "previewLabel": "Sesja live",
+      "waitingTitle": "Sesja jest gotowa do dołączenia",
+      "activeTitle": "Sesja jest aktywna",
+      "inSession": "W sesji",
+      "roomTitle": "Pokój live",
+      "participants_one": "{{count}} uczestnik",
+      "participants_few": "{{count}} uczestników",
+      "participants_many": "{{count}} uczestników",
+      "participants_other": "{{count}} uczestników",
+      "microphone": "Mikrofon",
+      "camera": "Kamera",
+      "screenShare": "Udostępnij ekran",
+      "leave": "Opuść",
+      "empty": "Oczekiwanie na uczestników.",
+      "materials": "Materiały",
+      "beforeMaterials": "Przed",
+      "afterMaterials": "Po",
+      "noMaterials": "Brak plików"
+    },
+    "sessions": {
+      "title": "Sesje",
+      "description": "Każda rozpoczęta sesja jest zapisywana osobno wraz z obecnością.",
+      "empty": "Nie rozpoczęto jeszcze żadnej sesji.",
+      "activeParticipants_one": "{{count}} aktywny uczestnik",
+      "activeParticipants_few": "{{count}} aktywnych uczestników",
+      "activeParticipants_many": "{{count}} aktywnych uczestników",
+      "activeParticipants_other": "{{count}} aktywnych uczestników",
+      "uniqueParticipants_one": "{{count}} unikalny uczestnik",
+      "uniqueParticipants_few": "{{count}} unikalnych uczestników",
+      "uniqueParticipants_many": "{{count}} unikalnych uczestników",
+      "uniqueParticipants_other": "{{count}} unikalnych uczestników",
+      "peakParticipants": "Szczyt {{count}}",
+      "startedBy": "Rozpoczął",
+      "endedBy": "Zakończył",
+      "notEnded": "Nie zakończono",
+      "notAvailable": "Brak danych",
+      "endReason": "Powód zakończenia",
+      "noEndReason": "Brak powodu zakończenia",
+      "status": {
+        "waiting": "Oczekuje",
+        "active": "Aktywna",
+        "ended": "Zakończona",
+        "failed": "Nieudana"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Współtrener",
+        "moderator": "Moderator",
+        "observer": "Obserwator",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "Dla tej sesji nie zapisano jeszcze obecności.",
+        "user": "Użytkownik",
+        "role": "Rola",
+        "totalTime": "Czas obecności",
+        "firstJoinedAt": "Pierwsze dołączenie",
+        "lastLeftAt": "Ostatnie wyjście",
+        "joinCount": "Dołączenia"
+      },
+      "toast": {
+        "started": "Sesja została rozpoczęta.",
+        "ended": "Sesja została zakończona."
+      }
+    },
     "attendance": {
       "title": "Obecność",
       "description": "Obecność i przedziały uczestników zostaną wdrożone w etapie runtime."
@@ -542,8 +608,10 @@
     "deleteDialog": {
       "title": "Usunąć Live Training?",
       "description": "Live Training zostanie anulowany i usunięty z kalendarza. Tej akcji nie można cofnąć.",
-      "assignedToLessonsDescription": "Ten Live Training jest połączony z {{count}} lekcją. Najpierw usuń powiązaną lekcję, a dopiero potem Live Training.",
-      "assignedToLessonsDescription_plural": "Ten Live Training jest połączony z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem Live Training.",
+      "assignedToLessonsDescription_one": "Ten Live Training jest połączony z {{count}} lekcją. Najpierw usuń powiązaną lekcję, a dopiero potem Live Training.",
+      "assignedToLessonsDescription_few": "Ten Live Training jest połączony z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem Live Training.",
+      "assignedToLessonsDescription_many": "Ten Live Training jest połączony z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem Live Training.",
+      "assignedToLessonsDescription_other": "Ten Live Training jest połączony z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem Live Training.",
       "toast": {
         "success": "Live Training został usunięty."
       }
@@ -976,7 +1044,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
@@ -985,7 +1054,8 @@
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
-        "luma": "Włącz funkcje generowania kursów AI"
+        "luma": "Włącz funkcje generowania kursów AI",
+        "livekit": "Włącz sesje wideo Live Training"
       }
     }
   },
@@ -1697,6 +1767,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Zapisz"
     },
@@ -2675,6 +2754,17 @@
       "nextSco": "Następna sekcja",
       "tryAgain": "Spróbuj ponownie",
       "lessonFinished": "Lekcja SCORM została zakończona."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Sesja jest aktywna",
+      "scheduledLabel": "Zaplanowano",
+      "scheduledTitle": "Live Training jest zaplanowany",
+      "endedLabel": "Zakończono",
+      "endedTitle": "Live Training już się zakończył",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "Brak aktywnej sesji Live Training",
+      "notAvailable": "Live Training nie jest dostępny dla tej lekcji."
     },
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",
@@ -3886,7 +3976,8 @@
       "unsupportedLessonLanguage": "Ten kurs nie obsługuje wybranego języka.",
       "baseLanguageAssignmentRequired": "Lekcję Live Training trzeba najpierw utworzyć w języku bazowym kursu.",
       "invalidLessonType": "Przypisania Live Training można dodawać tylko do lekcji Live Training.",
-      "deleteAssignedToLesson": "Ten Live Training jest połączony z lekcją. Najpierw usuń lekcję, a dopiero potem Live Training."
+      "deleteAssignedToLesson": "Ten Live Training jest połączony z lekcją. Najpierw usuń lekcję, a dopiero potem Live Training.",
+      "liveKitNotConfigured": "LiveKit nie jest skonfigurowany."
     }
   }
 }

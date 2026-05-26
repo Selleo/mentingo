@@ -10,6 +10,7 @@ import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema, type UUIDType } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { createLiveTrainingSchema } from "src/live-training/schemas/create-live-training.schema";
+import { liveTrainingDetailsSchema } from "src/live-training/schemas/live-training-details.schema";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
@@ -254,6 +255,7 @@ export const lessonShowSchema = Type.Object({
       Type.Null(),
     ]),
   ),
+  liveTraining: Type.Optional(Type.Union([liveTrainingDetailsSchema, Type.Null()])),
 });
 
 export const updateLessonSchema = Type.Intersect([

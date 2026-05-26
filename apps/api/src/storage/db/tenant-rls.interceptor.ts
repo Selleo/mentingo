@@ -13,6 +13,7 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/integration/tenants",
     "/api/certificates/share",
     "/api/certificates/share-image",
+    "/api/live-training/livekit/webhook",
   ]);
 
   constructor(

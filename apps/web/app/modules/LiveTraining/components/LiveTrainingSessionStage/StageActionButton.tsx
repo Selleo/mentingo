@@ -8,6 +8,7 @@ export function StageActionButton({
   icon,
   label,
   variant = "secondary",
+  disabled,
   onClick,
 }: StageActionButtonProps) {
   return (
@@ -16,6 +17,7 @@ export function StageActionButton({
         <Button
           variant={variant === "primary" ? "default" : "outline"}
           aria-label={label}
+          disabled={disabled}
           onClick={onClick}
           className={cn("h-8 w-8 gap-2 px-0 sm:h-9 sm:w-auto sm:px-3", {
             "bg-white text-neutral-950 hover:bg-white/90": variant === "primary",

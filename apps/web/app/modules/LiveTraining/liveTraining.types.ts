@@ -14,6 +14,7 @@ export type LiveTrainingUiActions = {
   canManagePeople: boolean;
   canManageSession: boolean;
   canViewAllMaterials: boolean;
+  canViewSessionData: boolean;
 };
 
 export type LiveTrainingActionContext = {
@@ -54,7 +55,7 @@ export type LiveTrainingFileTab =
 export const LIVE_TRAINING_WORKSPACE_TABS = {
   OVERVIEW: "overview",
   FILES: "files",
-  ATTENDANCE: "attendance",
+  SESSIONS: "sessions",
 } as const;
 
 export type LiveTrainingWorkspaceTab =

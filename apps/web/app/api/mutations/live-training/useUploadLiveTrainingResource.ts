@@ -2,9 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { LIVE_TRAINING_QUERY_KEY } from "~/api/queries/live-training/useLiveTraining";
-import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { LiveTrainingResourceRelationshipType, SupportedLanguages } from "@repo/shared";
@@ -40,7 +39,7 @@ export function useUploadLiveTrainingResource() {
       return response.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: LIVE_TRAINING_QUERY_KEY });
+      await invalidateLiveTrainingData({ includeCoursesAndLessons: true });
 
       toast({
         variant: "default",

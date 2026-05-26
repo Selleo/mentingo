@@ -502,7 +502,7 @@
     "tabs": {
       "overview": "Overview",
       "files": "Files",
-      "attendance": "Attendance",
+      "sessions": "Sessions",
       "settings": "Settings"
     },
     "files": {
@@ -521,6 +521,66 @@
       "toast": {
         "uploaded": "Datei wurde hinzugefügt.",
         "removed": "Datei wurde entfernt."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live-Sitzung",
+      "waitingTitle": "Die Sitzung ist bereit zum Beitreten",
+      "activeTitle": "Die Sitzung ist aktiv",
+      "inSession": "In der Sitzung",
+      "roomTitle": "Live-Raum",
+      "participants_one": "{{count}} Teilnehmer",
+      "participants_other": "{{count}} Teilnehmer",
+      "microphone": "Mikrofon",
+      "camera": "Kamera",
+      "screenShare": "Bildschirm teilen",
+      "leave": "Verlassen",
+      "empty": "Warten auf Teilnehmer.",
+      "materials": "Materialien",
+      "beforeMaterials": "Vorher",
+      "afterMaterials": "Nachher",
+      "noMaterials": "Keine Dateien"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Sitzung wurde gestartet.",
+        "ended": "Sitzung wurde beendet."
       }
     },
     "attendance": {
@@ -770,7 +830,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Verarbeiten Sie Kurszahlungen und verwalten Sie Abonnements",
@@ -779,7 +840,8 @@
         "microsoft_authorization": "Erlauben Sie Benutzern, sich mit ihrem Microsoft-Konto anzumelden",
         "slack_authorization": "Erlauben Sie Benutzern, sich mit ihrem Slack-Konto anzumelden",
         "openAI": "Aktivieren Sie AI Mentor-Funktionen",
-        "luma": "Aktivieren Sie die Funktionen zur KI-Kursgenerierung"
+        "luma": "Aktivieren Sie die Funktionen zur KI-Kursgenerierung",
+        "livekit": "Live Training-Videositzungen aktivieren"
       }
     }
   },
@@ -1424,6 +1486,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma-API-Schlüssel"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Speichern"
     },
@@ -2384,6 +2455,17 @@
       "nextSco": "Nächster Abschnitt",
       "tryAgain": "Erneut versuchen",
       "lessonFinished": "SCORM-Lektion abgeschlossen."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Sitzung ist aktiv",
+      "scheduledLabel": "Geplant",
+      "scheduledTitle": "Live Training ist geplant",
+      "endedLabel": "Beendet",
+      "endedTitle": "Live Training ist bereits beendet",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "Keine Live-Training-Sitzung ist aktiv",
+      "notAvailable": "Live Training ist für diese Lektion nicht verfügbar."
     },
     "videoProcessing": {
       "title": "Video wird verarbeitet",
@@ -3798,7 +3880,8 @@
       "unsupportedLessonLanguage": "Dieser Kurs unterstützt die ausgewählte Sprache nicht.",
       "baseLanguageAssignmentRequired": "Live Training-Lektionen müssen zuerst in der Basissprache des Kurses erstellt werden.",
       "invalidLessonType": "Live Training-Zuweisungen können nur zu Live Training-Lektionen hinzugefügt werden.",
-      "deleteAssignedToLesson": "Dieses Live Training ist mit einer Lektion verknüpft. Lösche zuerst die Lektion, bevor du das Live Training löschst."
+      "deleteAssignedToLesson": "Dieses Live Training ist mit einer Lektion verknüpft. Lösche zuerst die Lektion, bevor du das Live Training löschst.",
+      "liveKitNotConfigured": "LiveKit ist nicht konfiguriert."
     }
   }
 }

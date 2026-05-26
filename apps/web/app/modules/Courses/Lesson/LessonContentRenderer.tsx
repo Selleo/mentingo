@@ -5,6 +5,7 @@ import Viewer from "~/components/RichText/Viever";
 
 import AiMentorLesson from "./AiMentorLesson/AiMentorLesson";
 import { EmbedLesson } from "./EmbedLesson/EmbedLesson";
+import { LiveTrainingLesson } from "./LiveTrainingLesson/LiveTrainingLesson";
 import { Quiz } from "./Quiz";
 import { ScormLesson } from "./ScormLesson/ScormLesson";
 
@@ -34,6 +35,7 @@ export const LessonContentRenderer = memo(
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
       ))
       .with("scorm", () => <ScormLesson lessonId={lesson.id} />)
+      .with("live_training", () => <LiveTrainingLesson lesson={lesson} />)
       .otherwise(() => null);
   },
 );

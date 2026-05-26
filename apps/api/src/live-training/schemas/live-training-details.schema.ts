@@ -2,6 +2,8 @@ import { Type, type Static } from "@sinclair/typebox";
 
 import { baseResponse } from "src/common";
 
+import { liveTrainingSessionSummarySchema } from "../live-training-sessions/live-training-sessions.types";
+
 import {
   liveTrainingBaseSchema,
   liveTrainingCourseSummarySchema,
@@ -19,6 +21,7 @@ export const liveTrainingDetailsSchema = Type.Intersect([
     hosts: Type.Array(liveTrainingUserSummarySchema),
     linkedCourses: Type.Array(liveTrainingCourseSummarySchema),
     linkedLessonCount: Type.Number(),
+    currentSession: Type.Union([liveTrainingSessionSummarySchema, Type.Null()]),
     materials: Type.Object({
       before: Type.Array(liveTrainingMaterialSchema),
       after: Type.Array(liveTrainingMaterialSchema),

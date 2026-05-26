@@ -6,8 +6,8 @@ This document turns `docs/implementation_schema_live_training.md` into a spec-dr
 
 - Meeting provider: LiveKit.
 - Calendar UI library: React FullCalendar.
-- New product surfaces are tenant-toggleable features. Calendar must be gated by a Calendar feature
-  toggle, and Live Training calendar data must also require the Live Training feature toggle.
+- Live Training is tenant-toggleable. Calendar is always available, but Live Training calendar data
+  and Live Training lesson flows require the Live Training feature toggle.
 - Default active online session limit: `5` globally.
 - PPTX support for the first implementation means upload/download as training material and presentation through LiveKit screen share.
 - Native PPTX rendering, synced slide control, recording, chat, and whiteboard are out of the first implementation unless explicitly reprioritized.
@@ -15,11 +15,11 @@ This document turns `docs/implementation_schema_live_training.md` into a spec-dr
 
 ## Progress Checklist
 
-- [ ] LT-01 Domain Model And Constants
+- [x] LT-01 Domain Model And Constants
 - [ ] LT-02 Calendar API, FullCalendar UI, And E2E
 - [ ] LT-03 Backend API And Access Policy
-- [ ] LT-04 Course Lesson And Event Integration
-- [ ] LT-05 Materials
+- [x] LT-04 Course Lesson And Event Integration
+- [x] LT-05 Materials
 - [ ] LT-06 LiveKit Meeting Integration
 - [ ] LT-07 Attendance And Session Lifecycle
 - [ ] LT-08 Active Session Popup
@@ -92,17 +92,17 @@ This is the next implementation slice after LT-01. Finish the calendar path end-
   - course-linked trainings are visible to users enrolled in any linked course and to assigned trainers/admins
   - unlinked course-scoped trainings should not leak to unrelated users
 - [x] Regenerate Swagger/API schema and web API client after the calendar API contract is added.
-- [ ] Add web query hooks using `ApiClient.api...` only.
-- [ ] Add a dedicated Calendar route from the left sidebar.
-- [ ] Build the calendar screen with React FullCalendar.
-- [ ] Configure React FullCalendar for:
+- [x] Add web query hooks using `ApiClient.api...` only.
+- [x] Add a dedicated Calendar route from the left sidebar.
+- [x] Build the calendar screen with React FullCalendar.
+- [x] Configure React FullCalendar for:
   - date-range fetching
   - today highlighting
   - one-day and multi-day events
   - online/offline labels
   - active/ended/cancelled/expired visual states
   - event click opening a role-aware details panel/modal
-- [ ] Event details should support the non-LiveKit information already available at this stage:
+- [x] Event details should support the non-LiveKit information already available at this stage:
   - view details and materials
   - show waiting/disabled state for start/join until LiveKit meeting work lands
 - [ ] Add sidebar indicator for visible trainings today.
@@ -143,92 +143,97 @@ Spec: `docs/live-training/specs/LT-03-live-training-crud-endpoints.md`
 
 This slice should finish Live Training creation, calendar event creation, course linking, and lesson rendering before LiveKit room/token behavior is completed.
 
-- [ ] Add `live_training` to backend lesson creation/update/read flows.
-- [ ] Add `live_training` to frontend lesson type selector, lesson cards, lesson icons, lesson labels, sidebar, previews, and lesson renderer.
-- [ ] Creating a Live Training should create its `calendar_events` row in the same transactional flow.
-- [ ] Linking a Live Training to a course should create/update the course lesson representation without duplicating the Live Training.
-- [ ] Support M:N links through `live_training_links`, including course/lesson link records where required by the schema.
-- [ ] Course-linked live training should behave as a normal lesson with:
+- [x] Add `live_training` to backend lesson creation/update/read flows.
+- [x] Add `live_training` to frontend lesson type selector, lesson cards, lesson icons, lesson labels, sidebar, previews, and lesson renderer.
+- [x] Creating a Live Training should create its `calendar_events` row in the same transactional flow.
+- [x] Linking a Live Training to a course should create/update the course lesson representation without duplicating the Live Training.
+- [x] Support M:N links through `live_training_links`, including course/lesson link records where required by the schema.
+- [x] Course-linked live training should behave as a normal lesson with:
   - title
   - description
   - status
   - materials
   - join/start/end actions based on role
   - progress state
-- [ ] Ending a linked training should automatically complete the lesson for all assigned participants, regardless of actual attendance.
-- [ ] Update progress/statistics queries so live training lessons count correctly and do not break existing content, quiz, AI Mentor, embed, or SCORM behavior.
-- [ ] Keep independent calendar trainings outside course progress.
+- [x] Ending a linked training should automatically complete the lesson for enrolled participants who
+      joined at least once in any session of that Live Training.
+- [x] Update progress/statistics queries so live training lessons count correctly and do not break existing content, quiz, AI Mentor, embed, or SCORM behavior.
+- [x] Keep independent calendar trainings outside course progress.
 
 ## LT-05 Materials
 
-- [ ] Reuse central resources/file upload where possible.
-- [ ] Support PDF, PPTX, and supporting documents.
-- [ ] Store Live Training material phase through resource entity relationship type:
+- [x] Reuse central resources/file upload where possible.
+- [x] Support PDF, PPTX, and supporting documents.
+- [x] Store Live Training material phase through resource entity relationship type:
   - `live_training_before`
   - `live_training_after`
-- [ ] Allow authorized admins/content creators/trainers to attach/update materials before session start.
-- [ ] Show materials before, during, and after the event to authorized users.
-- [ ] Allow observers to view/download materials when allowed by training configuration.
-- [ ] Treat PPTX as a stored material for v1; trainer presents it using screen share.
-- [ ] Do not implement native PPTX renderer or slide sync in this slice.
+- [x] Allow authorized admins/content creators/trainers to attach/update materials before session start.
+- [x] Show materials before, during, and after the event to authorized users.
+- [x] Allow observers to view/download materials when allowed by training configuration.
+- [x] Treat PPTX as a stored material for v1; trainer presents it using screen share.
+- [x] Do not implement native PPTX renderer or slide sync in this slice.
 
 ## LT-06 LiveKit Meeting Integration
 
-- [ ] Add backend LiveKit configuration:
+- [x] Add backend LiveKit configuration:
   - server URL
   - API key
   - API secret
   - default active session limit `5`
-- [ ] Add a LiveKit service responsible for:
+- [ ] Add `.env`/env-manager support for overriding the max parallel active Live Training sessions
+      limit.
+  - LiveKit URL/API key/API secret env-manager support is done.
+  - Max parallel session env and enforcement are still deferred.
+- [x] Add a LiveKit service responsible for:
   - creating/activating rooms
   - generating participant tokens
   - closing rooms or disconnecting participants
   - validating webhook signatures/events if supported by the chosen LiveKit SDK
-- [ ] Generate role-based tokens:
+- [x] Generate role-based tokens:
   - Trainer/admin moderator: publish audio/video/screen share/data and subscribe.
   - Observer with microphone OFF: subscribe only.
   - Observer with microphone ON: publish microphone only and subscribe.
-- [ ] Enforce no observer camera or screen-share grant.
-- [ ] Add start-session flow:
+- [x] Enforce no observer camera or screen-share grant.
+- [x] Add start-session flow:
   - verify trainer/admin permission
-  - enforce active online session limit
+  - enforce active online session limit: deferred
   - create/activate LiveKit room
   - persist actual start and room ID
   - set status to `active`
-  - emit realtime/in-app event
-- [ ] Add join-session flow:
+  - emit outbox event
+- [x] Add join-session flow:
   - verify visibility/assignment
   - return LiveKit URL, token, role, status, and UI capabilities
-- [ ] Add end-session flow:
+- [x] Add end-session flow:
   - verify trainer/admin permission
   - close/disconnect LiveKit room
   - persist actual end
   - set status to `ended`
   - finalize attendance
-  - complete linked course lesson for assigned participants
+  - complete linked course lesson for participants who joined at least once
 
 ## LT-07 Attendance And Session Lifecycle
 
-- [ ] Persist session fields:
+- [x] Persist session fields:
   - planned start/end
   - actual start/end
   - current status
   - LiveKit room ID
   - peak participants
   - unique participant count
-- [ ] Add LiveKit webhook endpoint for participant join/leave/disconnect events.
-- [ ] Track attendance intervals with:
+- [x] Add LiveKit webhook endpoint for participant join/leave/disconnect events.
+- [x] Track attendance intervals with:
   - user ID
   - role
   - join time
   - leave time
   - reconnect-safe total attended time
-- [ ] Make webhook handling idempotent.
+- [x] Make webhook handling idempotent.
 - [ ] Add fallback cleanup/expiry job:
   - mark not-started trainings as `expired` after allowed window
   - close stale active sessions if needed
   - finalize open attendance intervals defensively
-- [ ] Keep attendance reporting-only for course completion.
+- [x] Use attendance as the gate for course-linked Live Training lesson completion.
 
 ## LT-08 Active Session Popup
 
@@ -245,25 +250,25 @@ This slice should finish Live Training creation, calendar event creation, course
 
 ## LT-09 Live Session UI
 
-- [ ] Add frontend LiveKit dependencies.
-- [ ] Build live training lesson/session screen using `@livekit/components-react`.
-- [ ] Connect through server-provided LiveKit URL and token only.
-- [ ] Render trainer controls:
+- [x] Add frontend LiveKit dependencies.
+- [x] Build live training full-page session screen using `@livekit/components-react`.
+- [x] Connect through server-provided LiveKit URL and token only.
+- [x] Render trainer controls:
   - microphone
   - camera
   - screen share
   - leave
   - end session
-- [ ] Render observer controls:
+- [x] Render observer controls:
   - microphone hidden/disabled when observer mic is OFF
   - microphone available when observer mic is ON
   - no camera control
   - no screen-share control
   - leave
-- [ ] Show waiting state before trainer starts:
+- [x] Show waiting state before trainer starts:
   - `Szkolenie rozpocznie się, gdy Trener uruchomi sesję.`
-- [ ] Show session ended/canceled/expired states.
-- [ ] Keep UI consistent with existing course/lesson surfaces.
+- [x] Show session ended/canceled/expired states.
+- [x] Keep UI consistent with existing course/lesson surfaces.
 
 ## LT-10 Notifications
 
@@ -282,7 +287,7 @@ This slice should finish Live Training creation, calendar event creation, course
 ## LT-11 Offline Trainings
 
 - [ ] Support `offline` delivery type without LiveKit room/token.
-- [ ] Show offline trainings in Calendar.
+- [x] Show offline trainings in Calendar.
 - [ ] Allow offline trainings to have:
   - planned dates
   - description
@@ -296,23 +301,25 @@ This slice should finish Live Training creation, calendar event creation, course
 
 ## LT-12 Generated Client And Web Wiring
 
-- [ ] Regenerate Swagger/API schema through existing scripts after backend contract changes.
-- [ ] Regenerate web API client with `pnpm generate:client`.
-- [ ] Use `ApiClient.api...` only in web code.
-- [ ] Treat calendar API/client wiring as part of LT-02 when implementing the calendar slice.
-- [ ] Add web query hooks for read-only Calendar data:
+- [x] Regenerate Swagger/API schema through existing scripts after backend contract changes.
+- [x] Regenerate web API client with `pnpm generate:client`.
+- [x] Use `ApiClient.api...` only in web code.
+- [x] Treat calendar API/client wiring as part of LT-02 when implementing the calendar slice.
+- [x] Add web query hooks for read-only Calendar data:
   - calendar list
   - details
   - indicator
-- [ ] Add Live Training mutation hooks for scheduling and lifecycle actions:
+- [x] Add Live Training mutation hooks for scheduling and lifecycle actions:
   - create/update/delete/cancel/complete training
   - link to course
   - start/join/end/cancel/complete
   - materials
-  - popup summary
   - attendance report
+- [x] Centralize Live Training query invalidation so training, calendar, session, material,
+      course, and linked lesson views refresh after related mutations.
+- [ ] Add Live Training app-shell/popup summary hooks.
 - [ ] Add shared `data-testid` handles for E2E instead of relying on visible copy.
-- [ ] Add translations for all supported UI languages.
+- [x] Add translations for all supported UI languages.
 
 ## LT-13 Tests And Validation
 

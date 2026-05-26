@@ -496,7 +496,7 @@
     "tabs": {
       "overview": "Overview",
       "files": "Files",
-      "attendance": "Attendance",
+      "sessions": "Sessions",
       "settings": "Settings"
     },
     "files": {
@@ -515,6 +515,72 @@
       "toast": {
         "uploaded": "Failas pridėtas.",
         "removed": "Failas pašalintas."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live sesija",
+      "waitingTitle": "Sesija paruošta prisijungti",
+      "activeTitle": "Sesija aktyvi",
+      "inSession": "Sesijoje",
+      "roomTitle": "Live kambarys",
+      "participants_one": "{{count}} dalyvis",
+      "participants_few": "{{count}} dalyviai",
+      "participants_many": "{{count}} dalyvių",
+      "participants_other": "{{count}} dalyvių",
+      "microphone": "Mikrofonas",
+      "camera": "Kamera",
+      "screenShare": "Bendrinti ekraną",
+      "leave": "Išeiti",
+      "empty": "Laukiama dalyvių.",
+      "materials": "Medžiaga",
+      "beforeMaterials": "Prieš",
+      "afterMaterials": "Po",
+      "noMaterials": "Failų nėra"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_few": "{{count}} active participants",
+      "activeParticipants_many": "{{count}} active participants",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_few": "{{count}} unique participants",
+      "uniqueParticipants_many": "{{count}} unique participants",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Sesija pradėta.",
+        "ended": "Sesija baigta."
       }
     },
     "attendance": {
@@ -764,7 +830,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Apdorokite kursų mokėjimus ir tvarkykite prenumeratas",
@@ -773,7 +840,8 @@
         "microsoft_authorization": "Leiskite vartotojams prisijungti naudojant „Microsoft“ paskyrą",
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
-        "luma": "Įgalinti AI kursų generavimo funkcijas"
+        "luma": "Įgalinti AI kursų generavimo funkcijas",
+        "livekit": "Įgalinti Live Training vaizdo sesijas"
       }
     }
   },
@@ -1418,6 +1486,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Išsaugoti"
     },
@@ -2378,6 +2455,17 @@
       "nextSco": "Kita dalis",
       "tryAgain": "Bandykite dar kartą",
       "lessonFinished": "SCORM pamoka baigta."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Sesija aktyvi",
+      "scheduledLabel": "Suplanuota",
+      "scheduledTitle": "Live Training suplanuotas",
+      "endedLabel": "Baigta",
+      "endedTitle": "Live Training jau baigėsi",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "Nėra aktyvios Live Training sesijos",
+      "notAvailable": "Live Training šiai pamokai nepasiekiamas."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -3792,7 +3880,8 @@
       "unsupportedLessonLanguage": "Šis kursas nepalaiko pasirinktos kalbos.",
       "baseLanguageAssignmentRequired": "Live Training pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
       "invalidLessonType": "Live Training priskyrimus galima pridėti tik prie Live Training pamokų.",
-      "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training."
+      "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training.",
+      "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas."
     }
   }
 }

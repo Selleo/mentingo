@@ -1,4 +1,9 @@
-import { LIVE_TRAINING_DELIVERY_TYPES, LIVE_TRAINING_STATUSES, PERMISSIONS } from "@repo/shared";
+import {
+  LIVE_TRAINING_DELIVERY_TYPES,
+  LIVE_TRAINING_SESSION_STATUSES,
+  LIVE_TRAINING_STATUSES,
+  PERMISSIONS,
+} from "@repo/shared";
 
 import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 
@@ -43,11 +48,19 @@ export const deriveLiveTrainingUiActions = ({
   const canEditDetails = canUpdateAny || canUpdateOwn;
   const canManageSession = hasHostRole || hasBroadManagePermission;
   const canViewAllMaterials = hasHostRole || hasBroadManagePermission;
+  const canViewSessionData =
+    canManageSession || hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_STATISTICS);
   const isActiveSession = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
-  const isScheduled = liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED;
+  const canStartFromStatus =
+    liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED ||
+    liveTraining.status === LIVE_TRAINING_STATUSES.ENDED;
+  const currentSession = liveTraining.currentSession;
+  const hasOpenSession =
+    currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.WAITING ||
+    currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.ACTIVE;
   const isJoinable =
     liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE &&
-    liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE &&
+    hasOpenSession &&
     !isTerminalLiveTrainingStatus(liveTraining.status);
 
   return {
@@ -56,16 +69,18 @@ export const deriveLiveTrainingUiActions = ({
     canShowStart:
       (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_START) || hasHostRole) &&
       canManageSession &&
-      isScheduled,
+      canStartFromStatus &&
+      !hasOpenSession,
     canShowJoin: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_JOIN) && isJoinable,
     canShowFinish:
       (hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_END) || hasHostRole) &&
       canManageSession &&
-      isActiveSession,
+      (isActiveSession || hasOpenSession),
     canShowStatistics: hasPermission(permissions, PERMISSIONS.LIVE_TRAINING_STATISTICS),
     canEditMaterials: canEditDetails,
     canManagePeople: canEditDetails && hasPermission(permissions, PERMISSIONS.USER_MANAGE),
     canManageSession,
     canViewAllMaterials,
+    canViewSessionData,
   };
 };

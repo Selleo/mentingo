@@ -1,6 +1,33 @@
-import { format } from "date-fns";
+import type { SupportedLanguages } from "@repo/shared";
 
-export const formatLiveTrainingDateRange = (startsAt: string, endsAt: string, allDay = false) => {
+const formatDate = (date: Date, language: SupportedLanguages) =>
+  new Intl.DateTimeFormat(language, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+
+const formatDateTime = (date: Date, language: SupportedLanguages) =>
+  new Intl.DateTimeFormat(language, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+
+const formatTime = (date: Date, language: SupportedLanguages) =>
+  new Intl.DateTimeFormat(language, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+
+export const formatLiveTrainingDateRange = (
+  startsAt: string,
+  endsAt: string,
+  allDay = false,
+  language: SupportedLanguages,
+) => {
   const start = new Date(startsAt);
   const end = new Date(endsAt);
 
@@ -9,19 +36,19 @@ export const formatLiveTrainingDateRange = (startsAt: string, endsAt: string, al
     inclusiveEnd.setDate(inclusiveEnd.getDate() - 1);
 
     if (start.toDateString() === inclusiveEnd.toDateString()) {
-      return format(start, "d MMM yyyy");
+      return formatDate(start, language);
     }
 
-    return `${format(start, "d MMM yyyy")} - ${format(inclusiveEnd, "d MMM yyyy")}`;
+    return `${formatDate(start, language)} - ${formatDate(inclusiveEnd, language)}`;
   }
 
   const isSameDay = start.toDateString() === end.toDateString();
 
   if (isSameDay) {
-    return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "HH:mm")}`;
+    return `${formatDateTime(start, language)} - ${formatTime(end, language)}`;
   }
 
-  return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "d MMM yyyy, HH:mm")}`;
+  return `${formatDateTime(start, language)} - ${formatDateTime(end, language)}`;
 };
 
 export const getPersonDisplayName = (person: { fullName: string | null }, fallback: string) =>

@@ -1,12 +1,11 @@
-import { Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { LiveTrainingMaterials } from "~/modules/LiveTraining/components/LiveTrainingMaterials";
 import { LiveTrainingOverview } from "~/modules/LiveTraining/components/LiveTrainingOverview";
+import { LiveTrainingSessionsPanel } from "~/modules/LiveTraining/components/LiveTrainingSessionsPanel";
 import { LIVE_TRAINING_WORKSPACE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 
-import type { ReactNode } from "react";
 import type {
   LiveTrainingDetails,
   LiveTrainingUiActions,
@@ -16,28 +15,6 @@ type LiveTrainingWorkspaceProps = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
 };
-
-type DeferredPanelProps = {
-  icon: ReactNode;
-  title: string;
-  description: string;
-};
-
-function DeferredPanel({ icon, title, description }: DeferredPanelProps) {
-  return (
-    <section className="rounded-md border border-neutral-200 bg-white p-5 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded bg-neutral-50 text-neutral-500">
-          {icon}
-        </div>
-        <div>
-          <h2 className="text-sm font-semibold text-neutral-950">{title}</h2>
-          <p className="mt-1 text-sm leading-6 text-neutral-600">{description}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWorkspaceProps) {
   const { t } = useTranslation();
@@ -51,9 +28,11 @@ export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWor
         <TabsTrigger value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>
           {t("liveTrainingView.tabs.files")}
         </TabsTrigger>
-        <TabsTrigger value={LIVE_TRAINING_WORKSPACE_TABS.ATTENDANCE}>
-          {t("liveTrainingView.tabs.attendance")}
-        </TabsTrigger>
+        {actions.canViewSessionData && (
+          <TabsTrigger value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}>
+            {t("liveTrainingView.tabs.sessions")}
+          </TabsTrigger>
+        )}
       </TabsList>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.OVERVIEW}>
@@ -68,13 +47,11 @@ export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWor
         <LiveTrainingMaterials liveTraining={liveTraining} actions={actions} />
       </TabsContent>
 
-      <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.ATTENDANCE}>
-        <DeferredPanel
-          icon={<Users className="size-4" />}
-          title={t("liveTrainingView.attendance.title")}
-          description={t("liveTrainingView.attendance.description")}
-        />
-      </TabsContent>
+      {actions.canViewSessionData && (
+        <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.SESSIONS}>
+          <LiveTrainingSessionsPanel liveTrainingId={liveTraining.id} />
+        </TabsContent>
+      )}
     </Tabs>
   );
 }
