@@ -2627,7 +2627,8 @@
       "createdSuccessfully": "Oznámení bylo úspěšně vytvořeno",
       "createFailed": "Oznámení se nepodařilo vytvořit",
       "deletedSuccessfully": "Oznámení bylo úspěšně odstraněno",
-      "deleteFailed": "Oznámení se nepodařilo odstranit"
+      "deleteFailed": "Oznámení se nepodařilo odstranit",
+      "notFound": "Oznámení nebylo nalezeno"
     }
   },
   "notifications": {

@@ -2627,7 +2627,8 @@
       "createdSuccessfully": "Skelbimas sėkmingai sukurtas",
       "createFailed": "Nepavyko sukurti pranešimo",
       "deletedSuccessfully": "Pranešimas sėkmingai ištrintas",
-      "deleteFailed": "Nepavyko ištrinti pranešimo"
+      "deleteFailed": "Nepavyko ištrinti pranešimo",
+      "notFound": "Pranešimas nerastas"
     }
   },
   "notifications": {

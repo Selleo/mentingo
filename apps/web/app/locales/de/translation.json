@@ -2625,7 +2625,8 @@
       "createdSuccessfully": "Ankündigung erfolgreich erstellt",
       "createFailed": "Ankündigung konnte nicht erstellt werden",
       "deletedSuccessfully": "Ankündigung erfolgreich gelöscht",
-      "deleteFailed": "Ankündigung konnte nicht gelöscht werden"
+      "deleteFailed": "Ankündigung konnte nicht gelöscht werden",
+      "notFound": "Ankündigung nicht gefunden"
     }
   },
   "notifications": {

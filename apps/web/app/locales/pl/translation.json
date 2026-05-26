@@ -2959,7 +2959,8 @@
       "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
       "createFailed": "Nie udało się utworzyć ogłoszenia",
       "deletedSuccessfully": "Ogłoszenie zostało usunięte",
-      "deleteFailed": "Nie udało się usunąć ogłoszenia"
+      "deleteFailed": "Nie udało się usunąć ogłoszenia",
+      "notFound": "Nie znaleziono ogłoszenia"
     }
   },
   "notifications": {

@@ -3,6 +3,15 @@ import { z } from "zod";
 
 import type { TFunction } from "i18next";
 
+const translationSchema = z.object({ title: z.string(), content: z.string() });
+
+const createTranslationsSchema = () =>
+  z.object(
+    Object.fromEntries(
+      Object.values(SUPPORTED_LANGUAGES).map((language) => [language, translationSchema]),
+    ) as Record<SupportedLanguages, typeof translationSchema>,
+  );
+
 export const createAnnouncementFormSchema = (
   enabledLanguages: SupportedLanguages[],
   t: TFunction,
@@ -10,13 +19,7 @@ export const createAnnouncementFormSchema = (
   z
     .object({
       groupId: z.string().uuid().nullable(),
-      translations: z.object({
-        [SUPPORTED_LANGUAGES.EN]: z.object({ title: z.string(), content: z.string() }),
-        [SUPPORTED_LANGUAGES.PL]: z.object({ title: z.string(), content: z.string() }),
-        [SUPPORTED_LANGUAGES.DE]: z.object({ title: z.string(), content: z.string() }),
-        [SUPPORTED_LANGUAGES.LT]: z.object({ title: z.string(), content: z.string() }),
-        [SUPPORTED_LANGUAGES.CS]: z.object({ title: z.string(), content: z.string() }),
-      }),
+      translations: createTranslationsSchema(),
     })
     .superRefine(({ translations }, context) => {
       enabledLanguages.forEach((language) => {

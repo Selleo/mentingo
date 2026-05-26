@@ -177,6 +177,6 @@ export class AnnouncementsController {
   async deleteAnnouncement(@Param("id") announcementId: UUIDType) {
     await this.announcementsService.deleteAnnouncement(announcementId);
 
-    return new BaseResponse({ message: "Announcement deleted successfully" });
+    return new BaseResponse({ message: "announcements.toast.deletedSuccessfully" });
   }
 }

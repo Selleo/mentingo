@@ -43,7 +43,7 @@ export class AnnouncementsService {
   async markAnnouncementAsRead(announcementId: UUIDType, currentUser: CurrentUserType) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
 
-    if (!announcement) throw new BadRequestException("Announcement not found");
+    if (!announcement) throw new BadRequestException("announcements.toast.notFound");
 
     const [readAnnouncements] = await this.announcementsRepository.markAnnouncementAsRead(
       announcementId,
@@ -109,7 +109,7 @@ export class AnnouncementsService {
   async deleteAnnouncement(announcementId: UUIDType) {
     const [announcement] = await this.announcementsRepository.getAnnouncementById(announcementId);
 
-    if (!announcement) throw new BadRequestException("Announcement not found");
+    if (!announcement) throw new BadRequestException("announcements.toast.notFound");
 
     const [deletedAnnouncement] =
       await this.announcementsRepository.deleteAnnouncement(announcementId);

@@ -2688,7 +2688,8 @@
       "createdSuccessfully": "Announcement created successfully",
       "createFailed": "Failed to create announcement",
       "deletedSuccessfully": "Announcement deleted successfully",
-      "deleteFailed": "Failed to delete announcement"
+      "deleteFailed": "Failed to delete announcement",
+      "notFound": "Announcement not found"
     }
   },
   "notifications": {

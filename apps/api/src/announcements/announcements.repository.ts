@@ -13,10 +13,12 @@ import {
   or,
   isNull,
   inArray,
+  type SQL,
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { addPagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import {
@@ -49,7 +51,7 @@ export class AnnouncementsRepository {
     pagination: AnnouncementPagination,
   ) {
     return this.db.transaction(async (trx) => {
-      const announcementsData = await trx
+      const announcementsQuery = trx
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
@@ -57,8 +59,13 @@ export class AnnouncementsRepository {
         .from(announcements)
         .where(isNull(announcements.deletedAt))
         .orderBy(desc(announcements.createdAt))
-        .limit(pagination.perPage)
-        .offset((pagination.page - 1) * pagination.perPage);
+        .$dynamic();
+
+      const announcementsData = await addPagination(
+        announcementsQuery,
+        pagination.page,
+        pagination.perPage,
+      );
 
       const [{ totalItems }] = await trx
         .select({ totalItems: count() })
@@ -223,11 +230,11 @@ export class AnnouncementsRepository {
     const conditions = and(
       isNotNull(userAnnouncements.userId),
       isNull(announcements.deletedAt),
-      ...(filterConditions as any),
+      ...filterConditions,
     );
 
     return this.db.transaction(async (trx) => {
-      const announcementsData = await trx
+      const announcementsQuery = trx
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
@@ -243,8 +250,13 @@ export class AnnouncementsRepository {
         )
         .where(conditions)
         .orderBy(desc(announcements.createdAt))
-        .limit(pagination.perPage)
-        .offset((pagination.page - 1) * pagination.perPage);
+        .$dynamic();
+
+      const announcementsData = await addPagination(
+        announcementsQuery,
+        pagination.page,
+        pagination.perPage,
+      );
 
       const [{ totalItems }] = await trx
         .select({ totalItems: countDistinct(announcements.id) })
@@ -266,7 +278,7 @@ export class AnnouncementsRepository {
   }
 
   private getFiltersConditions(filters?: AnnouncementFilters, language?: SupportedLanguages) {
-    const conditions = [] as unknown[];
+    const conditions: SQL<unknown>[] = [];
 
     if (!filters) return [sql`1=1`];
 
@@ -290,21 +302,22 @@ export class AnnouncementsRepository {
 
     if (filters.isRead !== undefined) conditions.push(eq(userAnnouncements.isRead, filters.isRead));
 
-    if (filters.search)
-      conditions.push(
-        or(
-          this.localizationService.getLocalizedFieldSearchCondition(
-            announcements.title,
-            `%${filters.search.toLowerCase()}%`,
-            language,
-          ),
-          this.localizationService.getLocalizedFieldSearchCondition(
-            announcements.content,
-            `%${filters.search.toLowerCase()}%`,
-            language,
-          ),
+    if (filters.search) {
+      const searchCondition = or(
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.title,
+          `%${filters.search.toLowerCase()}%`,
+          language,
+        ),
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.content,
+          `%${filters.search.toLowerCase()}%`,
+          language,
         ),
       );
+
+      if (searchCondition) conditions.push(searchCondition);
+    }
 
     return conditions.length ? conditions : [sql`1=1`];
   }
