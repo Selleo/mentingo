@@ -312,16 +312,16 @@
     "articles": "Baza wiedzy",
     "tenants": "Organizacje",
     "activityLogs": "Dziennik zdarzeń",
-    "learningPaths": "Ścieżki edukacyjne",
-    "adminLearningPaths": "Ścieżki edukacyjne",
-    "adminLearningPathEditor": "Edytor ścieżki edukacyjnej"
+    "learningPaths": "Ścieżki Rozwoju",
+    "adminLearningPaths": "Ścieżki Rozwoju",
+    "adminLearningPathEditor": "Edytor ścieżki rozwoju"
   },
   "learningPathsView": {
-    "title": "Ścieżki edukacyjne",
-    "description": "Przeglądaj przypisane ścieżki edukacyjne i kontynuuj uporządkowane sekwencje kursów.",
-    "searchPlaceholder": "Szukaj ścieżek edukacyjnych",
-    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych.",
-    "detailsTitle": "Ścieżka edukacyjna",
+    "title": "Ścieżki Rozwoju",
+    "description": "Przeglądaj przypisane ścieżki rozwoju i kontynuuj uporządkowane sekwencje kursów.",
+    "searchPlaceholder": "Szukaj ścieżek rozwoju",
+    "summary": "{{count}} ścieżek rozwoju jest dostępnych.",
+    "detailsTitle": "Ścieżka Rozwoju",
     "detailsDescription": "Sprawdź kolejność kursów, postęp, blokady i status certyfikatu.",
     "detailsSummary": "Ta ścieżka zawiera {{count}} kursów. Aktualny postęp: {{progress}}.",
     "emptyDescription": "Nie dodano jeszcze opisu.",
@@ -353,7 +353,7 @@
     "certificate": {
       "available": "Certyfikat dostępny",
       "ready": "Certyfikat gotowy",
-      "pathCompleted": "Ścieżka edukacyjna ukończona. Twój certyfikat jest gotowy."
+      "pathCompleted": "Ścieżka Rozwoju ukończona. Twój certyfikat jest gotowy."
     },
     "courseState": {
       "completed": "Ukończony",
@@ -368,7 +368,7 @@
       "courses": "Kursy w tej ścieżce",
       "courseTitle": "Kurs {{number}}",
       "completedAt": "Ukończono {{date}}",
-      "emptyCourses": "Ta ścieżka edukacyjna nie zawiera jeszcze kursów."
+      "emptyCourses": "Ta ścieżka rozwoju nie zawiera jeszcze kursów."
     },
     "enrollment": {
       "manage": "Zapisz",
@@ -394,8 +394,8 @@
       "studentsUnenrolled": "Usunięto uczniów z zapisów",
       "groupsUnenrolled": "Usunięto grupy z zapisów",
       "enrolledSuccessfully": "Zapisano do ścieżki",
-      "enrollGroupsDescription": "Wybierz grupy do zapisania do tej ścieżki edukacyjnej.",
-      "unenrollGroupsDescription": "Wybierz grupy do usunięcia z tej ścieżki edukacyjnej.",
+      "enrollGroupsDescription": "Wybierz grupy do zapisania do tej ścieżki rozwoju.",
+      "unenrollGroupsDescription": "Wybierz grupy do usunięcia z tej ścieżki rozwoju.",
       "table": {
         "selectAll": "Zaznacz wszystkich uczestników",
         "select": "Zaznacz uczestnika",
@@ -411,16 +411,16 @@
       },
       "confirmation": {
         "title": "Potwierdź zapis",
-        "description": "Czy na pewno chcesz zapisać wybranych studentów do tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz zapisać wybranych studentów do tej ścieżki rozwoju? Tej operacji nie można cofnąć."
       },
       "unenrollConfirmation": {
         "title": "Potwierdź wypisanie",
-        "description": "Czy na pewno chcesz wypisać wybranych studentów z tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tej ścieżki rozwoju? Tej operacji nie można cofnąć."
       },
       "noGroups": "Brak dostępnych grup"
     },
     "breadcrumbs": {
-      "learningPaths": "Ścieżki edukacyjne",
+      "learningPaths": "Ścieżki Rozwoju",
       "details": "Szczegóły"
     },
     "buttons": {
@@ -428,11 +428,11 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Ścieżki edukacyjne",
+    "title": "Ścieżki Rozwoju",
     "description": "Zarządzaj metadanymi, ustawieniami sekwencji, kursami, zapisami, eksportem i certyfikatami.",
-    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych w tej organizacji.",
+    "summary": "{{count}} ścieżek rozwoju jest dostępnych w tej organizacji.",
     "breadcrumbs": {
-      "learningPaths": "Ścieżki edukacyjne",
+      "learningPaths": "Ścieżki Rozwoju",
       "create": "Utwórz",
       "edit": "Edytuj"
     },
@@ -443,11 +443,11 @@
       "removeImage": "Usuń obraz"
     },
     "editor": {
-      "createTitle": "Utwórz ścieżkę edukacyjną",
-      "editTitle": "Edytuj ścieżkę edukacyjną",
+      "createTitle": "Utwórz ścieżkę rozwoju",
+      "editTitle": "Edytuj ścieżkę rozwoju",
       "description": "Skonfiguruj szczegóły ścieżki, ustawienia sekwencji, kursy i status publikacji.",
-      "createSummary": "Zacznij od szczegółów ścieżki edukacyjnej.",
-      "editSummary": "Ta ścieżka edukacyjna ma obecnie {{coursesCount}} kursów.",
+      "createSummary": "Zacznij od szczegółów ścieżki rozwoju.",
+      "editSummary": "Ta ścieżka rozwoju ma obecnie {{coursesCount}} kursów.",
       "details": "Szczegóły",
       "courses": "Kursy",
       "image": "Obraz",
@@ -465,14 +465,14 @@
       "sequential": "Sekwencyjna",
       "flexible": "Dowolna kolejność",
       "certificate": "Certyfikat",
-      "empty": "Nie utworzono jeszcze żadnych ścieżek edukacyjnych."
+      "empty": "Nie utworzono jeszcze żadnych ścieżek rozwoju."
     },
     "form": {
       "language": "Język",
       "status": "Status",
       "statusDescription": "Określa, czy ścieżka jest widoczna, robocza czy prywatna.",
       "title": "Tytuł",
-      "titlePlaceholder": "Nazwij ścieżkę edukacyjną",
+      "titlePlaceholder": "Nazwij ścieżkę rozwoju",
       "description": "Opis",
       "descriptionPlaceholder": "Opisz, co uczestnicy ukończą w tej ścieżce",
       "imageHint": "PNG, JPG lub JPEG (maks. 20 MB, zalecane 1200x1200 lub większe)",
@@ -481,7 +481,7 @@
       "includesCertificate": "Certyfikat",
       "includesCertificateDescription": "Uczestnicy mogą otrzymać certyfikat po ukończeniu ścieżki.",
       "certificateSignature": "Podpis na certyfikacie",
-      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki edukacyjnej.",
+      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki rozwoju.",
       "certificateFontColor": "Kolor tekstu certyfikatu",
       "certificateFontColorDescription": "Użyj próbnika kolorów w podglądzie, aby zmienić kolor tekstu i linii certyfikatu.",
       "certificatePreview": "Podgląd certyfikatu",
@@ -529,17 +529,17 @@
       "selectedCount": "Wybrano:"
     },
     "deleteModal": {
-      "title": "Usuń ścieżkę edukacyjną",
+      "title": "Usuń ścieżkę rozwoju",
       "description": "Spowoduje to usunięcie ścieżki i dostępu do kursów przyznanego przez tę ścieżkę."
     },
     "toast": {
-      "created": "Ścieżka edukacyjna została utworzona",
-      "updated": "Ścieżka edukacyjna została zaktualizowana",
-      "deleted": "Ścieżka edukacyjna została usunięta",
-      "languageCreated": "Język ścieżki edukacyjnej został utworzony",
-      "coursesAdded": "Kursy zostały dodane do ścieżki edukacyjnej",
-      "courseRemoved": "Kurs został usunięty ze ścieżki edukacyjnej",
-      "coursesReordered": "Kolejność kursów w ścieżce edukacyjnej została zaktualizowana"
+      "created": "Ścieżka Rozwoju została utworzona",
+      "updated": "Ścieżka Rozwoju została zaktualizowana",
+      "deleted": "Ścieżka Rozwoju została usunięta",
+      "languageCreated": "Język ścieżki rozwoju został utworzony",
+      "coursesAdded": "Kursy zostały dodane do ścieżki rozwoju",
+      "courseRemoved": "Kurs został usunięty ze ścieżki rozwoju",
+      "coursesReordered": "Kolejność kursów w ścieżce rozwoju została zaktualizowana"
     }
   },
   "newsView": {
@@ -619,7 +619,7 @@
       "noSearchResults": "Brak wyników wyszukiwania dla:",
       "announcements": "Powiadomienia",
       "lessons": "Lekcje",
-      "learningPaths": "Ścieżki edukacyjne",
+      "learningPaths": "Ścieżki Rozwoju",
       "news": "Aktualności",
       "articles": "Artykuły",
       "qa": "Pytania i odpowiedzi"
@@ -1194,7 +1194,7 @@
         "category": "kategorie",
         "group": "grupy",
         "course": "kursy",
-        "learning_path": "ścieżki nauki",
+        "learning_path": "ścieżki rozwoju",
         "learning_mode": "tryb nauki",
         "learning_progress": "postęp nauki",
         "certificate": "certyfikaty",
@@ -1226,15 +1226,15 @@
         "category_manage": "Może tworzyć, edytować i usuwać kategorie kursów.",
         "group_read": "Może przeglądać grupy użytkowników.",
         "group_manage": "Może tworzyć, edytować i usuwać grupy użytkowników.",
-        "learning_path_read": "Może przeglądać ścieżki nauki.",
-        "learning_path_create": "Może tworzyć ścieżki nauki.",
-        "learning_path_update": "Może edytować dowolną ścieżkę nauki.",
-        "learning_path_update_own": "Może edytować utworzone przez siebie ścieżki nauki.",
-        "learning_path_delete": "Może usuwać ścieżki nauki.",
-        "learning_path_course_update": "Może dodawać, usuwać i zmieniać kolejność kursów w dowolnej ścieżce nauki.",
-        "learning_path_course_update_own": "Może dodawać, usuwać i zmieniać kolejność kursów we własnych ścieżkach nauki.",
-        "learning_path_enrollment": "Może zarządzać zapisami na ścieżki nauki.",
-        "learning_path_export": "Może eksportować ścieżki nauki do tenantów.",
+        "learning_path_read": "Może przeglądać ścieżki rozwoju.",
+        "learning_path_create": "Może tworzyć ścieżki rozwoju.",
+        "learning_path_update": "Może edytować dowolną ścieżkę rozwoju.",
+        "learning_path_update_own": "Może edytować utworzone przez siebie ścieżki rozwoju.",
+        "learning_path_delete": "Może usuwać ścieżki rozwoju.",
+        "learning_path_course_update": "Może dodawać, usuwać i zmieniać kolejność kursów w dowolnej ścieżce rozwoju.",
+        "learning_path_course_update_own": "Może dodawać, usuwać i zmieniać kolejność kursów we własnych ścieżkach rozwoju.",
+        "learning_path_enrollment": "Może zarządzać zapisami na ścieżki rozwoju.",
+        "learning_path_export": "Może eksportować ścieżki rozwoju do tenantów.",
         "course_read_assigned": "Może przeglądać kursy przypisane do tego użytkownika.",
         "course_read_manageable": "Może przeglądać kursy, którymi ten użytkownik może zarządzać.",
         "course_read": "Może przeglądać treści kursów.",
@@ -2681,7 +2681,7 @@
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
       "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane",
-      "learningPathsUpdatedSuccessfully": "Ustawienia ścieżek edukacyjnych zostały pomyślnie zaktualizowane"
+      "learningPathsUpdatedSuccessfully": "Ustawienia ścieżek rozwoju zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -3390,12 +3390,12 @@
     }
   },
   "learningPathsPreferences": {
-    "subHeader": "Skonfiguruj ustawienia ścieżek edukacyjnych",
-    "header": "Ustawienia ścieżek edukacyjnych",
+    "subHeader": "Skonfiguruj ustawienia ścieżek rozwoju",
+    "header": "Ustawienia ścieżek rozwoju",
     "settings": {
       "learningPathsEnabled": {
-        "label": "Włącz ścieżki edukacyjne",
-        "description": "Włącz ścieżki edukacyjne. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
+        "label": "Włącz ścieżki rozwoju",
+        "description": "Włącz ścieżki rozwoju. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
       }
     }
   },
@@ -3676,19 +3676,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
-      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki edukacyjnej",
-      "noCourses": "Ścieżka edukacyjna musi zawierać co najmniej jeden kurs przed eksportem",
-      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki edukacyjnej",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki rozwoju",
+      "noCourses": "Ścieżka Rozwoju musi zawierać co najmniej jeden kurs przed eksportem",
+      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki rozwoju",
       "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
-      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki edukacyjnej",
-      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki edukacyjnej",
-      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki edukacyjnej",
-      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki edukacyjnej"
+      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki rozwoju",
+      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki rozwoju",
+      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki rozwoju",
+      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki rozwoju"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Certyfikaty ścieżek edukacyjnych są wyłączone"
+      "disabled": "Certyfikaty ścieżek rozwoju są wyłączone"
     }
   },
   "activityLogsView": {

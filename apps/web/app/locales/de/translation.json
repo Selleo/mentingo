@@ -295,7 +295,7 @@
     "progress": "Fortschritt",
     "findInApplication": "Finden Sie in der Anwendung",
     "courses": "Kurse",
-    "learningPaths": "Lernpfade",
+    "learningPaths": "Entwicklungspfade",
     "content": "Inhalt",
     "categories": "Kategorien",
     "users": "Benutzer",
@@ -387,7 +387,7 @@
       "noSearchResults": "Keine Suchergebnisse für:",
       "announcements": "Ankündigungen",
       "lessons": "Unterricht",
-      "learningPaths": "Lernpfade",
+      "learningPaths": "Entwicklungspfade",
       "news": "Nachricht",
       "articles": "Artikel",
       "qa": "Fragen und Antworten"
@@ -982,7 +982,7 @@
         "category": "Kategorien",
         "group": "Gruppen",
         "course": "Kurse",
-        "learning_path": "Lernpfade",
+        "learning_path": "Entwicklungspfade",
         "learning_mode": "Lernmodus",
         "learning_progress": "Lernfortschritt",
         "certificate": "Zertifikate",
@@ -2389,7 +2389,7 @@
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
       "newsSettingUpdatedSuccessfully": "Nachrichteneinstellungen erfolgreich aktualisiert",
       "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert",
-      "learningPathsUpdatedSuccessfully": "Die Lernpfad-Einstellungen wurden erfolgreich aktualisiert"
+      "learningPathsUpdatedSuccessfully": "Die Entwicklungspfad-Einstellungen wurden erfolgreich aktualisiert"
     }
   },
   "certificateBackgroundUpload": {
@@ -2966,9 +2966,9 @@
     "createTenant": "Organisation erstellen",
     "tenants": "Organisationen",
     "activityLogs": "Aktivitätsprotokoll",
-    "learningPaths": "Lernpfade",
-    "adminLearningPaths": "Lernpfade",
-    "adminLearningPathEditor": "Lernpfad Editor"
+    "learningPaths": "Entwicklungspfade",
+    "adminLearningPaths": "Entwicklungspfade",
+    "adminLearningPathEditor": "Entwicklungspfad Editor"
   },
   "masterCourse": {
     "error": {
@@ -2985,19 +2985,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
-      "exportLinkMissing": "Lernpfad-Exportverknuepfung nicht gefunden",
-      "noCourses": "Der Lernpfad muss vor dem Export mindestens einen Kurs enthalten",
-      "courseExportFailed": "Einer der Lernpfadkurse konnte nicht exportiert werden",
+      "exportLinkMissing": "Entwicklungspfad-Exportverknuepfung nicht gefunden",
+      "noCourses": "Der Entwicklungspfad muss vor dem Export mindestens einen Kurs enthalten",
+      "courseExportFailed": "Einer der Entwicklungspfadkurse konnte nicht exportiert werden",
       "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
-      "jobNotFound": "Lernpfad-Exportauftrag nicht gefunden",
-      "invalidJobData": "Ungueltige Daten fuer den Lernpfad-Exportauftrag",
-      "invalidExportId": "Ungueltige Lernpfad-Export-ID",
-      "invalidExportLink": "Ungueltige Lernpfad-Exportverknuepfung"
+      "jobNotFound": "Entwicklungspfad-Exportauftrag nicht gefunden",
+      "invalidJobData": "Ungueltige Daten fuer den Entwicklungspfad-Exportauftrag",
+      "invalidExportId": "Ungueltige Entwicklungspfad-Export-ID",
+      "invalidExportLink": "Ungueltige Entwicklungspfad-Exportverknuepfung"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Lernpfad-Zertifikate sind deaktiviert"
+      "disabled": "Entwicklungspfad-Zertifikate sind deaktiviert"
     }
   },
   "activityLogsView": {
@@ -3073,11 +3073,11 @@
     }
   },
   "learningPathsView": {
-    "title": "Lernpfade",
-    "description": "Durchsuchen Sie zugewiesene Lernpfade und setzen Sie geordnete Kurssequenzen fort.",
-    "searchPlaceholder": "Lernpfade suchen",
-    "summary": "{{count}} Lernpfade sind verfügbar.",
-    "detailsTitle": "Lernpfad",
+    "title": "Entwicklungspfade",
+    "description": "Durchsuchen Sie zugewiesene Entwicklungspfade und setzen Sie geordnete Kurssequenzen fort.",
+    "searchPlaceholder": "Entwicklungspfade suchen",
+    "summary": "{{count}} Entwicklungspfade sind verfügbar.",
+    "detailsTitle": "Entwicklungspfad",
     "detailsDescription": "Prüfen Sie Kursreihenfolge, Fortschritt, Sperren und Zertifikatsstatus.",
     "detailsSummary": "Dieser Pfad enthält {{count}} Kurse. Aktueller Fortschritt: {{progress}}.",
     "emptyDescription": "Es wurde noch keine Beschreibung hinzugefügt.",
@@ -3096,10 +3096,10 @@
       "certificate": "Zertifikat"
     },
     "card": {
-      "openPath": "Lernpfad öffnen"
+      "openPath": "Entwicklungspfad öffnen"
     },
     "empty": {
-      "title": "Keine Lernpfade gefunden",
+      "title": "Keine Entwicklungspfade gefunden",
       "description": "Passen Sie die Suche an oder prüfen Sie später erneut."
     },
     "progress": {
@@ -3109,7 +3109,7 @@
     "certificate": {
       "available": "Zertifikat verfügbar",
       "ready": "Zertifikat bereit",
-      "pathCompleted": "Lernpfad abgeschlossen. Ihr Zertifikat ist bereit."
+      "pathCompleted": "Entwicklungspfad abgeschlossen. Ihr Zertifikat ist bereit."
     },
     "courseState": {
       "completed": "Abgeschlossen",
@@ -3124,12 +3124,12 @@
       "courses": "Kurse in diesem Pfad",
       "courseTitle": "Kurs {{number}}",
       "completedAt": "Abgeschlossen am {{date}}",
-      "emptyCourses": "Dieser Lernpfad enthält noch keine Kurse."
+      "emptyCourses": "Dieser Entwicklungspfad enthält noch keine Kurse."
     },
     "enrollment": {
       "manage": "Einschreiben",
       "title": "Lernende einschreiben",
-      "description": "Verwalten Sie Einschreibungen von Studierenden und Gruppen für diesen Lernpfad.",
+      "description": "Verwalten Sie Einschreibungen von Studierenden und Gruppen für diesen Entwicklungspfad.",
       "students": "Studierende",
       "selectStudents": "Studierende auswählen",
       "groups": "Gruppen",
@@ -3149,9 +3149,9 @@
       "groupsEnrolled": "Gruppen eingeschrieben",
       "studentsUnenrolled": "Studierende abgemeldet",
       "groupsUnenrolled": "Gruppen abgemeldet",
-      "enrolledSuccessfully": "Lernpfad eingeschrieben",
-      "enrollGroupsDescription": "Wählen Sie Gruppen aus, die in diesen Lernpfad eingeschrieben werden sollen.",
-      "unenrollGroupsDescription": "Wählen Sie Gruppen aus, die aus diesem Lernpfad abgemeldet werden sollen.",
+      "enrolledSuccessfully": "Entwicklungspfad eingeschrieben",
+      "enrollGroupsDescription": "Wählen Sie Gruppen aus, die in diesen Entwicklungspfad eingeschrieben werden sollen.",
+      "unenrollGroupsDescription": "Wählen Sie Gruppen aus, die aus diesem Entwicklungspfad abgemeldet werden sollen.",
       "table": {
         "selectAll": "Alle Lernenden auswählen",
         "select": "Lernenden auswählen",
@@ -3167,16 +3167,16 @@
       },
       "confirmation": {
         "title": "Einschreibung bestätigen",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden in diesen Lernpfad einschreiben möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden in diesen Entwicklungspfad einschreiben möchten? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "unenrollConfirmation": {
         "title": "Abmeldung bestätigen",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden aus diesem Lernpfad abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden aus diesem Entwicklungspfad abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "noGroups": "Keine Gruppen verfügbar"
     },
     "breadcrumbs": {
-      "learningPaths": "Lernpfade",
+      "learningPaths": "Entwicklungspfade",
       "details": "Details"
     },
     "buttons": {
@@ -3184,26 +3184,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Lernpfade",
+    "title": "Entwicklungspfade",
     "description": "Verwalten Sie Metadaten, Sequenzeinstellungen, Kurse, Einschreibungen, Exporte und Zertifikate.",
-    "summary": "{{count}} Lernpfade sind in diesem Arbeitsbereich verfügbar.",
+    "summary": "{{count}} Entwicklungspfade sind in diesem Arbeitsbereich verfügbar.",
     "breadcrumbs": {
-      "learningPaths": "Lernpfade",
+      "learningPaths": "Entwicklungspfade",
       "create": "Erstellen",
       "edit": "Bearbeiten"
     },
     "buttons": {
-      "create": "Lernpfad erstellen",
+      "create": "Entwicklungspfad erstellen",
       "edit": "Bearbeiten",
       "save": "Änderungen speichern",
       "removeImage": "Bild entfernen"
     },
     "editor": {
-      "createTitle": "Lernpfad erstellen",
-      "editTitle": "Lernpfad bearbeiten",
-      "description": "Richten Sie Details, Sequenzeinstellungen, Kurse und Veröffentlichungsstatus des Lernpfads ein.",
-      "createSummary": "Beginnen Sie mit den Lernpfaddetails.",
-      "editSummary": "Dieser Lernpfad hat derzeit {{coursesCount}} Kurse.",
+      "createTitle": "Entwicklungspfad erstellen",
+      "editTitle": "Entwicklungspfad bearbeiten",
+      "description": "Richten Sie Details, Sequenzeinstellungen, Kurse und Veröffentlichungsstatus des Entwicklungspfads ein.",
+      "createSummary": "Beginnen Sie mit den Entwicklungspfaddetails.",
+      "editSummary": "Dieser Entwicklungspfad hat derzeit {{coursesCount}} Kurse.",
       "details": "Details",
       "courses": "Kurse",
       "image": "Bild",
@@ -3216,40 +3216,40 @@
       "language": "Sprache",
       "createdAt": "Erstellt",
       "actions": "Aktionen",
-      "untitled": "Lernpfad ohne Titel",
+      "untitled": "Entwicklungspfad ohne Titel",
       "emptyDescription": "Keine Beschreibung",
       "sequential": "Sequenziell",
       "flexible": "Flexible Reihenfolge",
       "certificate": "Zertifikat",
-      "empty": "Es wurden noch keine Lernpfade erstellt."
+      "empty": "Es wurden noch keine Entwicklungspfade erstellt."
     },
     "form": {
       "language": "Sprache",
       "status": "Status",
-      "statusDescription": "Legt fest, ob dieser Lernpfad sichtbar, ein Entwurf oder privat ist.",
+      "statusDescription": "Legt fest, ob dieser Entwicklungspfad sichtbar, ein Entwurf oder privat ist.",
       "title": "Titel",
-      "titlePlaceholder": "Lernpfad benennen",
+      "titlePlaceholder": "Entwicklungspfad benennen",
       "description": "Beschreibung",
-      "descriptionPlaceholder": "Beschreiben Sie, was Teilnehmer in diesem Lernpfad abschließen",
+      "descriptionPlaceholder": "Beschreiben Sie, was Teilnehmer in diesem Entwicklungspfad abschließen",
       "imageHint": "PNG, JPG oder JPEG (max. 20 MB, empfohlen 1200x1200 oder höher)",
       "sequenceEnabled": "Sequenzielles Lernen",
       "sequenceEnabledDescription": "Teilnehmer müssen Kurse in der angezeigten Reihenfolge abschließen.",
       "includesCertificate": "Zertifikat",
-      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Lernpfads ein Zertifikat erhalten.",
+      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Entwicklungspfads ein Zertifikat erhalten.",
       "certificateSignature": "Zertifikatssignatur",
-      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Lernpfad angezeigt wird.",
+      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Entwicklungspfad angezeigt wird.",
       "certificateFontColor": "Schriftfarbe des Zertifikats",
       "certificateFontColorDescription": "Verwenden Sie den Farbwähler in der Vorschau, um die Text- und Linienfarbe des Zertifikats zu ändern.",
       "certificatePreview": "Zertifikatsvorschau",
       "certificatePreviewDescription": "Zeigen Sie das Zertifikat in der Vorschau an und passen Sie die Schriftfarbe an."
     },
     "detailsContent": {
-      "title": "Lernpfaddetails",
+      "title": "Entwicklungspfaddetails",
       "description": "Definieren Sie den lokalisierten Namen und die Beschreibung für Teilnehmer."
     },
     "detailsImage": {
       "title": "Titelbild",
-      "description": "Verwenden Sie ein Bild, das diesen Lernpfad leichter erkennbar macht."
+      "description": "Verwenden Sie ein Bild, das diesen Entwicklungspfad leichter erkennbar macht."
     },
     "detailsSettings": {
       "title": "Veröffentlichung und Verhalten",
@@ -3259,7 +3259,7 @@
       "baseLanguage": "Basissprache"
     },
     "languageSelector": {
-      "tooltip": "Basissprache dieses Lernpfads ist {{baseLanguage}}."
+      "tooltip": "Basissprache dieses Entwicklungspfads ist {{baseLanguage}}."
     },
     "courses": {
       "select": "Kurs auswählen",
@@ -3268,32 +3268,32 @@
       "delete": "Kurs löschen",
       "order": "Reihenfolge",
       "course": "Kurs",
-      "empty": "Diesem Lernpfad wurden noch keine Kurse hinzugefügt.",
-      "saveFirst": "Speichern Sie den Lernpfad, bevor Sie Kurse hinzufügen.",
+      "empty": "Diesem Entwicklungspfad wurden noch keine Kurse hinzugefügt.",
+      "saveFirst": "Speichern Sie den Entwicklungspfad, bevor Sie Kurse hinzufügen.",
       "unknownCourse": "Kursdetails nicht verfügbar"
     },
     "sharedLearningPath": {
       "badgeExported": "Geteilt",
       "exportButton": "Teilen",
-      "exportSuccess": "Lernpfad wurde geteilt",
-      "exportsDescription": "Teilen Sie diesen Lernpfad mit ausgewählten Organisationen.",
+      "exportSuccess": "Entwicklungspfad wurde geteilt",
+      "exportsDescription": "Teilen Sie diesen Entwicklungspfad mit ausgewählten Organisationen.",
       "exportsTitle": "Teilen",
       "exportingButton": "Teilen...",
       "selectTenants": "Organisationen auswählen",
       "selectedCount": "Ausgewählt:"
     },
     "deleteModal": {
-      "title": "Lernpfad löschen",
-      "description": "Dadurch wird der Lernpfad gelöscht und der pfadbasierte Kurszugriff entfernt."
+      "title": "Entwicklungspfad löschen",
+      "description": "Dadurch wird der Entwicklungspfad gelöscht und der pfadbasierte Kurszugriff entfernt."
     },
     "toast": {
-      "created": "Lernpfad erfolgreich erstellt",
-      "updated": "Lernpfad erfolgreich aktualisiert",
-      "deleted": "Lernpfad erfolgreich gelöscht",
-      "languageCreated": "Lernpfadsprache erfolgreich erstellt",
-      "coursesAdded": "Kurse erfolgreich zum Lernpfad hinzugefügt",
-      "courseRemoved": "Kurs erfolgreich aus dem Lernpfad entfernt",
-      "coursesReordered": "Lernpfadkurse erfolgreich neu sortiert"
+      "created": "Entwicklungspfad erfolgreich erstellt",
+      "updated": "Entwicklungspfad erfolgreich aktualisiert",
+      "deleted": "Entwicklungspfad erfolgreich gelöscht",
+      "languageCreated": "Entwicklungspfadsprache erfolgreich erstellt",
+      "coursesAdded": "Kurse erfolgreich zum Entwicklungspfad hinzugefügt",
+      "courseRemoved": "Kurs erfolgreich aus dem Entwicklungspfad entfernt",
+      "coursesReordered": "Entwicklungspfadkurse erfolgreich neu sortiert"
     }
   },
   "lessonPreview": {
@@ -3401,12 +3401,12 @@
     }
   },
   "learningPathsPreferences": {
-    "subHeader": "Konfigurieren Sie die Lernpfad-Einstellungen",
-    "header": "Lernpfad-Einstellungen",
+    "subHeader": "Konfigurieren Sie die Entwicklungspfad-Einstellungen",
+    "header": "Entwicklungspfad-Einstellungen",
     "settings": {
       "learningPathsEnabled": {
-        "label": "Lernpfade aktivieren",
-        "description": "Aktivieren Sie Lernpfade. Wenn deaktiviert, werden Lernpfade fuer alle Benutzer ausgeblendet und blockiert."
+        "label": "Entwicklungspfade aktivieren",
+        "description": "Aktivieren Sie Entwicklungspfade. Wenn deaktiviert, werden Entwicklungspfade fuer alle Benutzer ausgeblendet und blockiert."
       }
     }
   },

@@ -51,7 +51,7 @@ const certificateTranslations = {
     certifyThat: "NINIEJSZYM ZAŚWIADCZA SIĘ, ŻE",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "ukończył/a kurs",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę edukacyjną",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ukończył/a ścieżkę rozwoju",
     },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
@@ -63,7 +63,7 @@ const certificateTranslations = {
     certifyThat: "THIS IS TO CERTIFY THAT",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "has successfully completed the course",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the learning path",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "has successfully completed the development path",
     },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",
@@ -75,7 +75,7 @@ const certificateTranslations = {
     certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "hat den Kurs erfolgreich abgeschlossen",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "hat den Lernpfad erfolgreich abgeschlossen",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "hat den Entwicklungspfad erfolgreich abgeschlossen",
     },
     confirmation: "und bestätigt damit die Teilnahme am gesamten Schulungsprogramm.",
     date: "Datum",
@@ -87,7 +87,7 @@ const certificateTranslations = {
     certifyThat: "ŠIUO PATVIRTINAMA, KAD",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "sėkmingai baigė kursą",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "sėkmingai baigė mokymosi kelią",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "sėkmingai baigė tobulėjimo kelią",
     },
     confirmation: "taip patvirtindamas dalyvavimą visoje mokymo programoje.",
     date: "Data",
@@ -99,7 +99,7 @@ const certificateTranslations = {
     certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
     successfulCompletion: {
       [CERTIFICATE_KIND.COURSE]: "úspěšně absolvoval/a kurz",
-      [CERTIFICATE_KIND.LEARNING_PATH]: "úspěšně dokončil/a vzdělávací cestu",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "úspěšně dokončil/a rozvojovou cestu",
     },
     confirmation: "čímž potvrzuje účast na celém školicím programu.",
     date: "Datum",
