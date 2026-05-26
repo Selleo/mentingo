@@ -2641,7 +2641,9 @@
       "create": "Vytvořit oznámení",
       "delete": "Odstranit oznámení",
       "markRead": "Označit jako přečtené",
-      "markAllRead": "Označit vše jako přečtené"
+      "markAllRead": "Označit vše jako přečtené",
+      "loadMore": "Načíst další",
+      "loadingMore": "Načítání..."
     },
     "status": {
       "unread": "Nepřečtené"

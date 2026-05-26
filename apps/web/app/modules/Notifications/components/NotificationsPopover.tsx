@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useMarkAllAnnouncementsAsRead } from "~/api/mutations/useMarkAllAnnouncementsAsRead";
-import { useAllAnnouncements } from "~/api/queries/admin/useAllAnnouncements";
-import { useAnnouncementsForUser } from "~/api/queries/useAnnouncementsForUser";
+import { useInfiniteAllAnnouncements } from "~/api/queries/admin/useInfiniteAllAnnouncements";
+import { useInfiniteAnnouncementsForUser } from "~/api/queries/useInfiniteAnnouncementsForUser";
 import { useUnreadAnnouncementsCount } from "~/api/queries/useUnreadAnnouncementsCount";
 import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -17,6 +17,8 @@ import { NOTIFICATIONS_HANDLES } from "../handles";
 
 import { CreateAnnouncementDialog } from "./CreateAnnouncementDialog";
 import { NotificationAnnouncementItem } from "./NotificationAnnouncementItem";
+
+import type { NotificationsFeed } from "../notifications.types";
 
 type NotificationsPopoverProps = {
   className?: string;
@@ -44,21 +46,44 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
 
   const { mutate: markAllAsRead, isPending: isMarkingAllRead } = useMarkAllAnnouncementsAsRead();
 
-  const { data: userAnnouncements = [], refetch: refetchUserAnnouncements } =
-    useAnnouncementsForUser({ language });
-  const { data: adminAnnouncements = [], refetch: refetchAdminAnnouncements } = useAllAnnouncements(
-    { language },
-    { enabled: canManageAnnouncements },
-  );
+  const {
+    data: userAnnouncementsData,
+    fetchNextPage: fetchNextUserAnnouncementsPage,
+    hasNextPage: hasNextUserAnnouncementsPage,
+    isFetchingNextPage: isFetchingNextUserAnnouncementsPage,
+    refetch: refetchUserAnnouncements,
+  } = useInfiniteAnnouncementsForUser({ language });
+
+  const {
+    data: adminAnnouncementsData,
+    fetchNextPage: fetchNextAdminAnnouncementsPage,
+    hasNextPage: hasNextAdminAnnouncementsPage,
+    isFetchingNextPage: isFetchingNextAdminAnnouncementsPage,
+    refetch: refetchAdminAnnouncements,
+  } = useInfiniteAllAnnouncements({ language }, { enabled: canManageAnnouncements });
+
   const { data: unreadAnnouncementsCount, refetch: refetchUnreadAnnouncementsCount } =
     useUnreadAnnouncementsCount();
 
-  const allAnnouncements = canManageAnnouncements ? adminAnnouncements : userAnnouncements;
   const unreadCount = unreadAnnouncementsCount?.unreadCount ?? 0;
 
-  const adminTabCount = canManageAnnouncements
-    ? adminAnnouncements.length
-    : userAnnouncements.length;
+  const userFeed = {
+    announcements: userAnnouncementsData?.pages.flatMap((page) => page.data) ?? [],
+    count: userAnnouncementsData?.pages[0]?.pagination.totalItems ?? 0,
+    hasMore: hasNextUserAnnouncementsPage,
+    isFetchingMore: isFetchingNextUserAnnouncementsPage,
+    onLoadMore: fetchNextUserAnnouncementsPage,
+  };
+
+  const adminFeed = {
+    announcements: adminAnnouncementsData?.pages.flatMap((page) => page.data) ?? [],
+    count: adminAnnouncementsData?.pages[0]?.pagination.totalItems ?? 0,
+    hasMore: hasNextAdminAnnouncementsPage,
+    isFetchingMore: isFetchingNextAdminAnnouncementsPage,
+    onLoadMore: fetchNextAdminAnnouncementsPage,
+  };
+
+  const notificationsFeed = canManageAnnouncements ? adminFeed : userFeed;
 
   const handleRefresh = () => {
     refetchUserAnnouncements();
@@ -66,7 +91,12 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
     if (canManageAnnouncements) refetchAdminAnnouncements();
   };
 
-  const renderAnnouncements = (announcements: typeof allAnnouncements) => {
+  const renderAnnouncements = ({
+    announcements,
+    hasMore,
+    isFetchingMore,
+    onLoadMore,
+  }: NotificationsFeed) => {
     if (!announcements.length) {
       return (
         <div
@@ -87,6 +117,20 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
             canDelete={canDeleteAnnouncements}
           />
         ))}
+        {hasMore && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-1 h-9 justify-center"
+            disabled={isFetchingMore}
+            onClick={() => onLoadMore()}
+          >
+            {isFetchingMore
+              ? t("notifications.actions.loadingMore")
+              : t("notifications.actions.loadMore")}
+          </Button>
+        )}
       </div>
     );
   };
@@ -123,25 +167,31 @@ export function NotificationsPopover({ className }: NotificationsPopoverProps) {
         </div>
       </div>
 
-      <Tabs defaultValue={TAB_VALUE.ALL} className="space-y-4">
+      <Tabs defaultValue={TAB_VALUE.ADMIN} className="space-y-4">
         <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg bg-neutral-100 p-1">
           <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ALL}>
             {t("notifications.tabs.all")}
             <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-              {allAnnouncements.length}
+              {notificationsFeed.count}
             </span>
           </TabsTrigger>
           <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ADMIN}>
             {t("notifications.tabs.adminAnnouncements")}
             <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-              {adminTabCount}
+              {notificationsFeed.count}
             </span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={TAB_VALUE.ALL}>{renderAnnouncements(allAnnouncements)}</TabsContent>
+        <TabsContent value={TAB_VALUE.ALL}>
+          {renderAnnouncements({
+            ...notificationsFeed,
+          })}
+        </TabsContent>
         <TabsContent value={TAB_VALUE.ADMIN}>
-          {renderAnnouncements(canManageAnnouncements ? adminAnnouncements : userAnnouncements)}
+          {renderAnnouncements({
+            ...notificationsFeed,
+          })}
         </TabsContent>
       </Tabs>
 

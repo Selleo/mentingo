@@ -7,8 +7,10 @@ import type { SupportedLanguages } from "@repo/shared";
 
 export const ALL_ANNOUNCEMENTS_QUERY_KEY = "announcements";
 
-type AllAnnouncementsParams = {
+export type AllAnnouncementsParams = {
   language?: SupportedLanguages;
+  page?: number;
+  perPage?: number;
 };
 
 type QueryOptions = {
@@ -23,6 +25,8 @@ export const allAnnouncementsOptions = (
   queryFn: async () => {
     const { data } = await ApiClient.api.announcementsControllerGetAllAnnouncements({
       ...(searchParams?.language && { language: searchParams.language }),
+      ...(searchParams?.page && { page: searchParams.page }),
+      ...(searchParams?.perPage && { perPage: searchParams.perPage }),
     });
 
     return data;

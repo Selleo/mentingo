@@ -4,6 +4,7 @@ import {
   eq,
   and,
   getTableColumns,
+  count,
   countDistinct,
   isNotNull,
   sql,
@@ -33,6 +34,7 @@ import type {
   CreateAnnouncement,
   AnnouncementFilters,
 } from "./types/announcement.types";
+import type { AnnouncementPagination } from "./types/announcementPagination.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
@@ -45,19 +47,34 @@ export class AnnouncementsRepository {
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async getAllAnnouncements(language?: SupportedLanguages) {
-    const announcementsData = await this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getLocalizedAnnouncementFields(language),
-        ...this.getAuthorFields(),
-      })
-      .from(announcements)
-      .leftJoin(users, eq(announcements.authorId, users.id))
-      .where(isNull(announcements.deletedAt))
-      .orderBy(desc(announcements.createdAt));
+  async getAllAnnouncements(
+    language: SupportedLanguages | undefined,
+    pagination: AnnouncementPagination,
+  ) {
+    return this.db.transaction(async (trx) => {
+      const announcementsData = await trx
+        .select({
+          ...getTableColumns(announcements),
+          ...this.getLocalizedAnnouncementFields(language),
+          ...this.getAuthorFields(),
+        })
+        .from(announcements)
+        .leftJoin(users, eq(announcements.authorId, users.id))
+        .where(isNull(announcements.deletedAt))
+        .orderBy(desc(announcements.createdAt))
+        .limit(pagination.perPage)
+        .offset((pagination.page - 1) * pagination.perPage);
 
-    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+      const [{ totalItems }] = await trx
+        .select({ totalItems: count() })
+        .from(announcements)
+        .where(isNull(announcements.deletedAt));
+
+      return {
+        data: await this.mapAnnouncementsWithProfilePictures(announcementsData),
+        pagination: { ...pagination, totalItems },
+      };
+    });
   }
 
   async getUnreadAnnouncementsCount(userId: UUIDType) {
@@ -202,39 +219,58 @@ export class AnnouncementsRepository {
 
   async getAnnouncementsForUser(
     userId: UUIDType,
-    filters?: AnnouncementFilters,
-    language?: SupportedLanguages,
+    filters: AnnouncementFilters | undefined,
+    language: SupportedLanguages | undefined,
+    pagination: AnnouncementPagination,
   ) {
-    const baseQuery = this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getLocalizedAnnouncementFields(language),
-        ...this.getAuthorFields(),
-        isRead: userAnnouncements.isRead,
-      })
-      .from(announcements)
-      .leftJoin(
-        userAnnouncements,
-        and(
-          eq(announcements.id, userAnnouncements.announcementId),
-          eq(userAnnouncements.userId, userId),
-        ),
-      )
-      .leftJoin(users, eq(announcements.authorId, users.id));
-
     const filterConditions = this.getFiltersConditions(filters, language);
 
-    const announcementsData = await baseQuery
-      .where(
-        and(
-          isNotNull(userAnnouncements.userId),
-          isNull(announcements.deletedAt),
-          ...(filterConditions as any),
-        ),
-      )
-      .orderBy(desc(announcements.createdAt));
+    const conditions = and(
+      isNotNull(userAnnouncements.userId),
+      isNull(announcements.deletedAt),
+      ...(filterConditions as any),
+    );
 
-    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+    return this.db.transaction(async (trx) => {
+      const announcementsData = await trx
+        .select({
+          ...getTableColumns(announcements),
+          ...this.getLocalizedAnnouncementFields(language),
+          ...this.getAuthorFields(),
+          isRead: userAnnouncements.isRead,
+        })
+        .from(announcements)
+        .innerJoin(
+          userAnnouncements,
+          and(
+            eq(announcements.id, userAnnouncements.announcementId),
+            eq(userAnnouncements.userId, userId),
+          ),
+        )
+        .leftJoin(users, eq(announcements.authorId, users.id))
+        .where(conditions)
+        .orderBy(desc(announcements.createdAt))
+        .limit(pagination.perPage)
+        .offset((pagination.page - 1) * pagination.perPage);
+
+      const [{ totalItems }] = await trx
+        .select({ totalItems: countDistinct(announcements.id) })
+        .from(announcements)
+        .innerJoin(
+          userAnnouncements,
+          and(
+            eq(announcements.id, userAnnouncements.announcementId),
+            eq(userAnnouncements.userId, userId),
+          ),
+        )
+        .leftJoin(users, eq(announcements.authorId, users.id))
+        .where(conditions);
+
+      return {
+        data: await this.mapAnnouncementsWithProfilePictures(announcementsData),
+        pagination: { ...pagination, totalItems },
+      };
+    });
   }
 
   private getFiltersConditions(filters?: AnnouncementFilters, language?: SupportedLanguages) {
@@ -344,7 +380,9 @@ export class AnnouncementsRepository {
     return announcementWithProfilePicture;
   }
 
-  async mapAnnouncementsWithProfilePictures(announcementsData: Announcement[]) {
+  async mapAnnouncementsWithProfilePictures<T extends { authorProfilePictureUrl: string | null }>(
+    announcementsData: T[],
+  ) {
     return Promise.all(
       announcementsData.map(async (announcement) => ({
         ...announcement,

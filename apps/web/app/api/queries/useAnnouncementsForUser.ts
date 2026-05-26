@@ -6,6 +6,7 @@ import type { GetAnnouncementsForUserResponse } from "../generated-api";
 import type { SupportedLanguages } from "@repo/shared";
 
 export const ANNOUNCEMENTS_FOR_USER_QUERY_KEY = "announcements-for-user";
+export const ANNOUNCEMENTS_PAGE_SIZE = 20;
 
 export type AnnouncementFilters = {
   title?: string;
@@ -14,6 +15,8 @@ export type AnnouncementFilters = {
   search?: string;
   isRead?: string;
   language?: SupportedLanguages;
+  page?: number;
+  perPage?: number;
 };
 
 type QueryOptions = {
@@ -33,6 +36,8 @@ export const announcementsForUserOptions = (
       ...(searchParams?.search && { search: searchParams.search }),
       ...(searchParams?.isRead && { isRead: searchParams.isRead }),
       ...(searchParams?.language && { language: searchParams.language }),
+      ...(searchParams?.page && { page: searchParams.page }),
+      ...(searchParams?.perPage && { perPage: searchParams.perPage }),
     });
     return response.data;
   },

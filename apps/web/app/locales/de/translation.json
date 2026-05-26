@@ -2639,7 +2639,9 @@
       "create": "Ankündigung erstellen",
       "delete": "Ankündigung löschen",
       "markRead": "Als gelesen markieren",
-      "markAllRead": "Alle als gelesen markieren"
+      "markAllRead": "Alle als gelesen markieren",
+      "loadMore": "Mehr laden",
+      "loadingMore": "Wird geladen..."
     },
     "status": {
       "unread": "Ungelesen"

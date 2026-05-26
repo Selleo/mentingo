@@ -2702,7 +2702,9 @@
       "create": "Create announcement",
       "delete": "Delete announcement",
       "markRead": "Mark as read",
-      "markAllRead": "Mark all as read"
+      "markAllRead": "Mark all as read",
+      "loadMore": "Load more",
+      "loadingMore": "Loading more..."
     },
     "status": {
       "unread": "Unread"

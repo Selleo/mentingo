@@ -1,0 +1,1 @@
+export const ANNOUNCEMENTS_PAGE_SIZE = 20;

@@ -2641,7 +2641,9 @@
       "create": "Sukurti skelbimą",
       "delete": "Ištrinti skelbimą",
       "markRead": "Pažymėti kaip skaitytą",
-      "markAllRead": "Pažymėti visus kaip skaitytus"
+      "markAllRead": "Pažymėti visus kaip skaitytus",
+      "loadMore": "Įkelti daugiau",
+      "loadingMore": "Įkeliama..."
     },
     "status": {
       "unread": "Neskaityta"

@@ -1,12 +1,15 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 
+import { parsePagination } from "src/common/pagination";
 import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
 import { AnnouncementsRepository } from "./announcements.repository";
+import { ANNOUNCEMENTS_PAGE_SIZE } from "./constants/announcementPagination.constants";
 
 import type { CreateAnnouncement, AnnouncementFilters } from "./types/announcement.types";
+import type { AnnouncementPaginationQuery } from "./types/announcementPagination.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -17,8 +20,18 @@ export class AnnouncementsService {
     private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
-  async getAllAnnouncements(language?: SupportedLanguages) {
-    return await this.announcementsRepository.getAllAnnouncements(language);
+  async getAllAnnouncements(
+    language?: SupportedLanguages,
+    paginationQuery: AnnouncementPaginationQuery = {},
+  ) {
+    const { page, perPage } = parsePagination(paginationQuery.page, paginationQuery.perPage, {
+      perPage: ANNOUNCEMENTS_PAGE_SIZE,
+    });
+
+    return await this.announcementsRepository.getAllAnnouncements(language, {
+      page,
+      perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
+    });
   }
 
   async getUnreadAnnouncementsCount(userId: UUIDType) {
@@ -60,8 +73,16 @@ export class AnnouncementsService {
     userId: UUIDType,
     filters?: AnnouncementFilters,
     language?: SupportedLanguages,
+    paginationQuery: AnnouncementPaginationQuery = {},
   ) {
-    return await this.announcementsRepository.getAnnouncementsForUser(userId, filters, language);
+    const { page, perPage } = parsePagination(paginationQuery.page, paginationQuery.perPage, {
+      perPage: ANNOUNCEMENTS_PAGE_SIZE,
+    });
+
+    return await this.announcementsRepository.getAnnouncementsForUser(userId, filters, language, {
+      page,
+      perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
+    });
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUserType) {

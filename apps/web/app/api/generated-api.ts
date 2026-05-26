@@ -4456,6 +4456,12 @@ export interface GetAllAnnouncementsResponse {
     authorName: string;
     authorProfilePictureUrl: string | null;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetUnreadAnnouncementsCountResponse {
@@ -4480,6 +4486,12 @@ export interface GetAnnouncementsForUserResponse {
     authorProfilePictureUrl: string | null;
     isRead: boolean;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface CreateAnnouncementBody {
@@ -10632,6 +10644,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     announcementsControllerGetAllAnnouncements: (
       query?: {
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>
@@ -10690,6 +10706,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         search?: string;
         isRead?: string;
         language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>

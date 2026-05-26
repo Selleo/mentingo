@@ -9664,6 +9664,24 @@
                 }
               ]
             }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -9792,6 +9810,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -34652,10 +34688,36 @@
                 "authorProfilePictureUrl"
               ]
             }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetUnreadAnnouncementsCountResponse": {
@@ -34800,10 +34862,36 @@
                 "isRead"
               ]
             }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "CreateAnnouncementBody": {

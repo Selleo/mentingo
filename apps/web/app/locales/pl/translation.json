@@ -2973,7 +2973,9 @@
       "create": "Utwórz ogłoszenie",
       "delete": "Usuń ogłoszenie",
       "markRead": "Oznacz jako przeczytane",
-      "markAllRead": "Oznacz wszystkie jako przeczytane"
+      "markAllRead": "Oznacz wszystkie jako przeczytane",
+      "loadMore": "Załaduj więcej",
+      "loadingMore": "Ładowanie..."
     },
     "status": {
       "unread": "Nieprzeczytane"
