@@ -304,6 +304,7 @@
     "news": "Zprávy",
     "providerInformation": "Informace",
     "announcements": "Oznámení",
+    "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
     "ariaLabels": {
@@ -2584,14 +2585,19 @@
       "subheader": "Zadejte podrobnosti pro nastavení nového oznámení.",
       "buttons": {
         "confirm": "Potvrdit",
-        "cancel": "Zrušit"
+        "cancel": "Zrušit",
+        "addLanguage": "Přidat jazyk",
+        "removeLanguage": "Odebrat jazyk",
+        "setDefaultLanguage": "Nastavit jako výchozí jazyk"
       },
       "fields": {
         "title": "Titul",
         "content": "Obsah",
         "group": "Skupina",
+        "language": "Jazyk",
         "everyone": "Každý"
       },
+      "addedLanguages": "Přidané jazyky",
       "placeholders": {
         "title": "Zadejte název",
         "content": "Sem napište své oznámení...",
@@ -2619,7 +2625,31 @@
       "markedAsRead": "Oznámení byla označena jako úspěšně přečtená",
       "markAsReadFailed": "Oznámení se nepodařilo označit jako přečtené",
       "createdSuccessfully": "Oznámení bylo úspěšně vytvořeno",
-      "createFailed": "Oznámení se nepodařilo vytvořit"
+      "createFailed": "Oznámení se nepodařilo vytvořit",
+      "deletedSuccessfully": "Oznámení bylo úspěšně odstraněno",
+      "deleteFailed": "Oznámení se nepodařilo odstranit"
+    }
+  },
+  "notifications": {
+    "title": "Notifikace",
+    "tabs": {
+      "all": "Vše",
+      "adminAnnouncements": "Oznámení adminů"
+    },
+    "actions": {
+      "refresh": "Obnovit",
+      "create": "Vytvořit oznámení",
+      "delete": "Odstranit oznámení",
+      "markRead": "Označit jako přečtené",
+      "markAllRead": "Označit vše jako přečtené"
+    },
+    "status": {
+      "unread": "Nepřečtené"
+    },
+    "empty": "Žádné notifikace",
+    "deleteDialog": {
+      "title": "Odstranit oznámení",
+      "description": "Toto oznámení bude odebráno všem."
     }
   },
   "platformLogo": {

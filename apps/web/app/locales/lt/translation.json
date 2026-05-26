@@ -304,6 +304,7 @@
     "news": "Naujienos",
     "providerInformation": "Informacija",
     "announcements": "Skelbimai",
+    "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
     "ariaLabels": {
@@ -2584,14 +2585,19 @@
       "subheader": "Pateikite išsamią informaciją, kad nustatytumėte naują pranešimą.",
       "buttons": {
         "confirm": "Patvirtinti",
-        "cancel": "Atšaukti"
+        "cancel": "Atšaukti",
+        "addLanguage": "Pridėti kalbą",
+        "removeLanguage": "Pašalinti kalbą",
+        "setDefaultLanguage": "Nustatyti kaip numatytąją kalbą"
       },
       "fields": {
         "title": "Pavadinimas",
         "content": "Turinys",
         "group": "Grupė",
+        "language": "Kalba",
         "everyone": "Visi"
       },
+      "addedLanguages": "Pridėtos kalbos",
       "placeholders": {
         "title": "Įveskite pavadinimą",
         "content": "Rašykite savo skelbimą čia...",
@@ -2619,7 +2625,31 @@
       "markedAsRead": "Pranešimai sėkmingai pažymėti kaip perskaityti",
       "markAsReadFailed": "Nepavyko pažymėti pranešimų kaip skaitytų",
       "createdSuccessfully": "Skelbimas sėkmingai sukurtas",
-      "createFailed": "Nepavyko sukurti pranešimo"
+      "createFailed": "Nepavyko sukurti pranešimo",
+      "deletedSuccessfully": "Pranešimas sėkmingai ištrintas",
+      "deleteFailed": "Nepavyko ištrinti pranešimo"
+    }
+  },
+  "notifications": {
+    "title": "Pranešimai",
+    "tabs": {
+      "all": "Visi",
+      "adminAnnouncements": "Administratoriaus skelbimai"
+    },
+    "actions": {
+      "refresh": "Atnaujinti",
+      "create": "Sukurti skelbimą",
+      "delete": "Ištrinti skelbimą",
+      "markRead": "Pažymėti kaip skaitytą",
+      "markAllRead": "Pažymėti visus kaip skaitytus"
+    },
+    "status": {
+      "unread": "Neskaityta"
+    },
+    "empty": "Pranešimų nėra",
+    "deleteDialog": {
+      "title": "Ištrinti skelbimą",
+      "description": "Šis skelbimas bus pašalintas visiems."
     }
   },
   "platformLogo": {

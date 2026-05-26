@@ -2,7 +2,6 @@ import { Link, NavLink, Outlet, useLocation } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
 import { PlatformLogo } from "~/components/PlatformLogo";
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
@@ -12,9 +11,7 @@ import { cn } from "~/lib/utils";
 import AllArticlesTOC from "~/modules/Articles/AllArticlesTOC";
 import { setPageTitle } from "~/utils/setPageTitle";
 
-import Loader from "../common/Loader/Loader";
-
-import { LatestAnnouncementsPopup, MobileNavigationDropdown } from "./components";
+import { MobileNavigationDropdown } from "./components";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { TFunction } from "i18next";
@@ -91,17 +88,6 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
   const is2xl = useMediaQuery({ minWidth: 1440 });
 
   const { data: globalSettings } = useGlobalSettings();
-
-  const { data: latestUnreadAnnouncements, isLoading } =
-    useLatestUnreadAnnouncements(isAuthenticated);
-
-  if (isLoading) {
-    return (
-      <div className="flex h-full w-full">
-        <Loader />
-      </div>
-    );
-  }
 
   const enabledForPublic = (featureEnabled?: boolean, publicAccessible?: boolean) =>
     Boolean(featureEnabled && publicAccessible);
@@ -180,7 +166,6 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
         </div>
         {!is2xl && <AllArticlesTOC isMobile={true} />}
         <main className="relative flex-1 overflow-y-auto bg-primary-50">
-          <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
           <RouteGuard>
             <Outlet />
           </RouteGuard>
@@ -191,7 +176,6 @@ export const Dashboard = ({ isAuthenticated }: DashboardProps) => {
 
   return (
     <main className="relative flex-1 overflow-y-auto bg-primary-50">
-      <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
       <RouteGuard>
         <Outlet />
       </RouteGuard>

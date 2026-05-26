@@ -9,35 +9,31 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { CreateAnnouncementBody } from "~/api/generated-api";
-
-type CreateAnnouncementOptions = {
-  data: CreateAnnouncementBody;
+type DeleteAnnouncementOptions = {
+  id: string;
 };
 
-export function useCreateAnnouncement() {
-  const { toast } = useToast();
+export function useDeleteAnnouncement() {
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (options: CreateAnnouncementOptions) => {
-      const response = await ApiClient.api.announcementsControllerCreateAnnouncement(options.data);
-      return response.data;
+    mutationFn: async ({ id }: DeleteAnnouncementOptions) => {
+      const { data } = await ApiClient.api.announcementsControllerDeleteAnnouncement(id);
+
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [ALL_ANNOUNCEMENTS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
 
-      toast({
-        variant: "default",
-        description: t("announcements.toast.createdSuccessfully"),
-      });
+      toast({ description: t("announcements.toast.deletedSuccessfully") });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        description: getTranslatedApiErrorMessage(error, t, t("announcements.toast.createFailed")),
+        description: getTranslatedApiErrorMessage(error, t, t("announcements.toast.deleteFailed")),
       });
     },
   });

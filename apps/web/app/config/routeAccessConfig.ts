@@ -91,7 +91,6 @@ export const routeAccessConfig = createRouteConfig({
   settings: PUBLIC,
   "profile/:id": PUBLIC,
   "course/:courseId/lesson/:lessonId": PUBLIC,
-  announcements: PUBLIC,
   "articles/:articleId/edit": ARTICLE_EDIT_ACCESS,
   "news/add": NEWS_EDIT_ACCESS,
   "news/:newsId/edit": NEWS_EDIT_ACCESS,
@@ -138,9 +137,6 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/lessons/*": COURSE_EDIT_ACCESS,
   "admin/lesson-items/*": COURSE_EDIT_ACCESS,
-  "admin/announcements/new": {
-    allOf: [PERMISSIONS.ANNOUNCEMENT_CREATE],
-  },
   "provider-information": PUBLIC,
   "admin/promotion-codes": {
     allOf: [PERMISSIONS.BILLING_MANAGE],

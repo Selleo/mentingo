@@ -304,6 +304,7 @@
     "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
+    "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
     "ariaLabels": {
@@ -2645,14 +2646,19 @@
       "subheader": "Provide the details to set up an new announcement.",
       "buttons": {
         "confirm": "Confirm",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "addLanguage": "Add language",
+        "removeLanguage": "Remove language",
+        "setDefaultLanguage": "Set as default language"
       },
       "fields": {
         "title": "Title",
         "content": "Content",
         "group": "Group",
+        "language": "Language",
         "everyone": "Everyone"
       },
+      "addedLanguages": "Added languages",
       "placeholders": {
         "title": "Enter title",
         "content": "Write your announcement here...",
@@ -2680,7 +2686,31 @@
       "markedAsRead": "Announcements have been marked as read successfully",
       "markAsReadFailed": "Failed to mark announcements as read",
       "createdSuccessfully": "Announcement created successfully",
-      "createFailed": "Failed to create announcement"
+      "createFailed": "Failed to create announcement",
+      "deletedSuccessfully": "Announcement deleted successfully",
+      "deleteFailed": "Failed to delete announcement"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "tabs": {
+      "all": "All",
+      "adminAnnouncements": "Admin announcements"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "create": "Create announcement",
+      "delete": "Delete announcement",
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read"
+    },
+    "status": {
+      "unread": "Unread"
+    },
+    "empty": "No notifications yet",
+    "deleteDialog": {
+      "title": "Delete announcement",
+      "description": "This announcement will be removed for everyone."
     }
   },
   "platformLogo": {

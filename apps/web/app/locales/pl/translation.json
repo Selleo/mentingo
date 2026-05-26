@@ -303,6 +303,7 @@
     "news": "Aktualności",
     "providerInformation": "Informacje",
     "announcements": "Ogłoszenia",
+    "notifications": "Powiadomienia",
     "promotionCodes": "Kody promocyjne",
     "manage": "Zarządzaj",
     "ariaLabels": {
@@ -2916,14 +2917,19 @@
       "subheader": "Podaj szczegóły, aby utworzyć nowe ogłoszenie.",
       "buttons": {
         "confirm": "Potwierdź",
-        "cancel": "Anuluj"
+        "cancel": "Anuluj",
+        "addLanguage": "Dodaj język",
+        "removeLanguage": "Usuń język",
+        "setDefaultLanguage": "Ustaw jako język domyślny"
       },
       "fields": {
         "title": "Tytuł",
         "content": "Treść",
         "group": "Grupa",
+        "language": "Język",
         "everyone": "Wszyscy"
       },
+      "addedLanguages": "Dodane języki",
       "placeholders": {
         "title": "Wprowadź tytuł",
         "content": "Napisz swoje ogłoszenie tutaj...",
@@ -2951,7 +2957,31 @@
       "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",
       "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
-      "createFailed": "Nie udało się utworzyć ogłoszenia"
+      "createFailed": "Nie udało się utworzyć ogłoszenia",
+      "deletedSuccessfully": "Ogłoszenie zostało usunięte",
+      "deleteFailed": "Nie udało się usunąć ogłoszenia"
+    }
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "tabs": {
+      "all": "Wszystkie",
+      "adminAnnouncements": "Ogłoszenia adminów"
+    },
+    "actions": {
+      "refresh": "Odśwież",
+      "create": "Utwórz ogłoszenie",
+      "delete": "Usuń ogłoszenie",
+      "markRead": "Oznacz jako przeczytane",
+      "markAllRead": "Oznacz wszystkie jako przeczytane"
+    },
+    "status": {
+      "unread": "Nieprzeczytane"
+    },
+    "empty": "Brak powiadomień",
+    "deleteDialog": {
+      "title": "Usuń ogłoszenie",
+      "description": "To ogłoszenie zostanie usunięte dla wszystkich."
     }
   },
   "platformLogo": {

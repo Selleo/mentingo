@@ -9,26 +9,21 @@ import { UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY } from "../queries/useUnreadAnnoun
 import { queryClient } from "../queryClient";
 import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
-type MarkAnnouncementAsReadOptions = {
-  id: string;
-};
-
-export function useMarkAnnouncementAsRead() {
+export function useMarkAllAnnouncementsAsRead() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async (options: MarkAnnouncementAsReadOptions) => {
-      const response = await ApiClient.api.announcementsControllerMarkAnnouncementAsRead(
-        options.id,
-      );
+    mutationFn: async () => {
+      const { data } = await ApiClient.api.announcementsControllerMarkAllAnnouncementsAsRead();
 
-      return response.data;
+      return data;
     },
     onSuccess: () => {
-      toast({ description: t("announcements.toast.markedAsRead") });
       queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
+
+      toast({ description: t("announcements.toast.markedAsRead") });
     },
     onError: (error) => {
       toast({

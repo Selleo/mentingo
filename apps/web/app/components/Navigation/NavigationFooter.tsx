@@ -9,6 +9,7 @@ import { Icon } from "~/components/Icon";
 import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
+import { NotificationsNavigationItem } from "~/modules/Notifications/components";
 
 import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import {
@@ -20,7 +21,6 @@ import {
 import { UserAvatar } from "../UserProfile/UserAvatar";
 
 import { MobileNavigationFooterItems } from "./MobileNavigationFooterItems";
-import { NavigationMenuItem } from "./NavigationMenuItem";
 import { NavigationMenuItemLink } from "./NavigationMenuItemLink";
 
 type NavigationFooterProps = {
@@ -52,16 +52,11 @@ export function NavigationFooter({
   return (
     <menu className="grid w-full grid-cols-4 gap-3 md:grid-cols-8 2xl:flex 2xl:flex-col 2xl:gap-2 2xl:self-end">
       {canViewAnnouncements && (
-        <NavigationMenuItem
+        <NotificationsNavigationItem
           className="col-span-4 md:col-span-8 2xl:block"
-          item={{
-            iconName: "Bell",
-            label: t("navigationSideBar.announcements"),
-            link: "/announcements",
-          }}
-          setIsMobileNavOpen={setIsMobileNavOpen}
           showLabel={showNavigationLabels}
           showTooltip={shouldShowTooltips}
+          isSidebarCollapsed={isSidebarCollapsed}
         />
       )}
 
@@ -108,10 +103,10 @@ export function NavigationFooter({
             )}
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            align="start"
-            className={cn("w-80 p-1", {
-              "absolute bottom-0 left-16": isSidebarCollapsed,
-            })}
+            align="end"
+            side="right"
+            sideOffset={isSidebarCollapsed ? 12 : 24}
+            className="w-80 rounded-2xl border-neutral-200 bg-white p-1 shadow-xl"
           >
             <menu className="flex flex-col gap-2 p-1">
               <DropdownMenuItem onClick={() => setIsDropdownOpen(false)}>
