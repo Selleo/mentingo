@@ -869,7 +869,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorie byla úspěšně smazána",
-      "deleteCategoryFailed": "Kategorii se nepodařilo smazat"
+      "deleteCategoryFailed": "Kategorii se nepodařilo smazat",
+      "deleteCategoryAssignedToCourses": "Kategorii nelze smazat. Je přiřazena ke kurzům ({{courseCount}}): {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "Nebyly nalezeny žádné kategorie ke smazání"
     },
     "breadcrumbs": {
       "categories": "Kategorie",
@@ -892,9 +894,29 @@
     "button": {
       "createCategory": "Vytvořit kategorii"
     },
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Změnit výchozí jazyk",
+      "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto kategorii?",
+      "createTitle": "Vytvořit překlad",
+      "createDescription": "Vytvořit překlad této kategorie do jazyka {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad do jazyka {{language}}? Jeho obsah bude odstraněn."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorie byla úspěšně vytvořena",
-      "categoryUpdatedSuccessfully": "Kategorie byla úspěšně aktualizována"
+      "categoryUpdatedSuccessfully": "Kategorie byla úspěšně aktualizována",
+      "baseLanguageUpdatedSuccessfully": "Výchozí jazyk byl úspěšně aktualizován",
+      "baseLanguageUpdateFailed": "Výchozí jazyk se nepodařilo aktualizovat",
+      "languageNotSupported": "Tato kategorie tento jazyk nepodporuje.",
+      "alreadyExists": "Kategorie již existuje.",
+      "categoryNotCreated": "Kategorii se nepodařilo vytvořit.",
+      "languageAlreadyExists": "Tento jazyk kategorie již existuje.",
+      "invalidLanguageToDelete": "Tento jazyk kategorie nelze smazat.",
+      "baseLanguageTitleRequired": "Vybraný výchozí jazyk musí mít název."
     },
     "error": {
       "categoryNotFound": "Kategorie nenalezena",

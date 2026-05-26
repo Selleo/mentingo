@@ -565,7 +565,10 @@ describe("Activity Logs E2E", () => {
 
   describe("Category activity logs", () => {
     const createCategory = async () =>
-      categoryService.createCategory({ title: "Initial Category" }, currentAdminUser);
+      categoryService.createCategory(
+        { title: "Initial Category", language: SUPPORTED_LANGUAGES.EN },
+        currentAdminUser,
+      );
 
     it("should record CREATE activity log when category is created", async () => {
       const category = await createCategory();

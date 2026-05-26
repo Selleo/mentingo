@@ -2,14 +2,22 @@ import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
 
-import type { CategoryInsert } from "./createCategorySchema";
+import { categoryLanguageSchema } from "./category.schema";
+
+import type { Static } from "@sinclair/typebox";
 
 export const categoryUpdateSchema = Type.Partial(
   Type.Object({
     id: UUIDSchema,
     title: Type.String(),
     archived: Type.Boolean(),
+    language: categoryLanguageSchema,
   }),
 );
 
-export type CategoryUpdateBody = Partial<Pick<CategoryInsert, "title" | "archived">>;
+export const categoryBaseLanguageUpdateSchema = Type.Object({
+  baseLanguage: categoryLanguageSchema,
+});
+
+export type CategoryUpdateBody = Static<typeof categoryUpdateSchema>;
+export type CategoryBaseLanguageUpdateBody = Static<typeof categoryBaseLanguageUpdateSchema>;

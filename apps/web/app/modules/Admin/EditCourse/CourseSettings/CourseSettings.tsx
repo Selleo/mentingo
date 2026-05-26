@@ -79,7 +79,7 @@ const CourseSettings = ({
 }: CourseSettingsProps) => {
   const { t } = useTranslation();
 
-  const { form, onSubmit } = useCourseSettingsForm({
+  const { form, onSubmit, saveCategory } = useCourseSettingsForm({
     title,
     description,
     categoryId,
@@ -88,7 +88,7 @@ const CourseSettings = ({
     courseId: courseId || "",
   });
 
-  const { data: categories } = useCategoriesSuspense();
+  const { data: categories } = useCategoriesSuspense({ language: courseLanguage });
   const { mutateAsync: uploadFile } = useUploadFile();
   const { mutateAsync: deleteTrailer } = useDeleteCourseTrailer();
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
@@ -115,7 +115,7 @@ const CourseSettings = ({
 
   const watchedTitle = form.watch("title");
   const watchedDescription = form.watch("description");
-  const watchedCategoryId = form.getValues("categoryId");
+  const watchedCategoryId = form.watch("categoryId");
 
   const strippedDescriptionTextLength = stripHtmlTags(watchedDescription).length;
   const descriptionFieldCharactersLeft =
@@ -267,8 +267,14 @@ const CourseSettings = ({
                               </SelectItem>
                             ))}
                             <InlineCategoryCreationForm
-                              onCategoryCreated={(categoryId) => {
-                                form.setValue("categoryId", categoryId, { shouldValidate: true });
+                              onCategoryCreated={async (categoryId) => {
+                                form.setValue("categoryId", categoryId, {
+                                  shouldDirty: true,
+                                  shouldTouch: true,
+                                  shouldValidate: true,
+                                });
+                                await saveCategory(categoryId);
+                                form.resetField("categoryId", { defaultValue: categoryId });
                               }}
                             />
                           </SelectContent>

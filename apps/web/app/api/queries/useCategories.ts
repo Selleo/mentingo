@@ -3,10 +3,12 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "../api-client";
 
 import type { GetAllCategoriesResponse } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 
 type CategorySearchParams = {
   title?: string;
   archived?: boolean;
+  language?: SupportedLanguages;
 };
 
 export const CATEGORIES_QUERY_KEY = ["categories"];
@@ -28,6 +30,7 @@ export const categoriesQueryOptions = (
       ...(searchParams?.archived !== undefined && {
         archived: String(searchParams.archived),
       }),
+      ...(searchParams?.language && { language: searchParams.language }),
     });
     return response.data;
   },

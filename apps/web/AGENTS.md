@@ -45,12 +45,14 @@ Frontend-specific instructions for `apps/web`. Preserve generated API usage, rou
 - Put server-state reads/writes in `app/api/queries` and `app/api/mutations`; keep components focused on UI and orchestration.
 - Keep each TanStack Query hook in its own file: one query per file in `app/api/queries` and one mutation per file in `app/api/mutations`.
 - Invalidate existing query keys/options after mutations; search for the domain query hook before creating a new key.
+- For query invalidation, import and use the shared `queryClient` from `app/api/queryClient.ts`; do not create local `useQueryClient()` instances for invalidation.
 - Put mutation-owned query invalidation and success toasts in the mutation hook `onSuccess`, not inline page/component callbacks. Keep UI-only effects such as closing dialogs and navigation close to the UI flow.
 - In components, destructure mutation results at the hook call site, e.g. `const { mutateAsync: updateItem, isPending } = useUpdateItem();`; do not call `mutation.mutateAsync(...)`.
 - In mutation error toasts, use `getTranslatedApiErrorMessage(error, t, fallback)` from `app/api/utils/getTranslatedApiErrorMessage.ts` instead of custom `AxiosError` branches.
 - Add routes in `routes.ts` and update `app/config/routeAccessConfig.ts` for protected pages.
 - Use `PERMISSIONS` and permission helpers from `@repo/shared`; do not hardcode role-name UI gates unless the existing feature already does.
 - Reuse `app/components/ui`, `PageWrapper`, form components, and module components before adding new primitives.
+- Use `cn` from `app/lib/utils.ts` for conditional `className` values instead of ternaries, template literals, string concatenation, or array joins.
 - Add visible strings to all locale files, not only English or Polish.
 - Keep component prop types in the component file they belong to. Use separate `*.types.ts` files for shared/reused domain, API, hook, reducer, or cross-component types, not for a single component's props.
 - For Zustand stores, subscribe with selectors in components, e.g. `useLanguageStore((state) => state.language)`. Avoid `useLanguageStore.getState()` during render because it is not reactive and can miss or over-broaden updates; reserve `getState()` for loaders, event handlers, or non-render code.

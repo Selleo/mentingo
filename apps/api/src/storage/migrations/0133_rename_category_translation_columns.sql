@@ -1,0 +1,2 @@
+ALTER TABLE "categories" RENAME COLUMN "title_translations" TO "title";--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "categories_tenant_id_base_title_unique" ON "categories" USING btree ("tenant_id",("title"->>"base_language"));

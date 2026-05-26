@@ -140,7 +140,11 @@ export class CourseScormSnapshotService {
         id: courses.id,
         title: this.localizationService.getLocalizedSqlField(courses.title, language),
         description: this.localizationService.getLocalizedSqlField(courses.description, language),
-        category: categories.title,
+        category: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        ),
         authorId: courses.authorId,
         settings: sql<CoursesSettings>`${courses.settings}`,
         thumbnailReference: courses.thumbnailS3Key,

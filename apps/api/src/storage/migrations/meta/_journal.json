@@ -911,6 +911,34 @@
       "when": 1779716265564,
       "tag": "0129_rename_announcement_translation_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 130,
+      "version": "7",
+      "when": 1779827843545,
+      "tag": "0130_add_category_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 131,
+      "version": "7",
+      "when": 1779827854243,
+      "tag": "0131_backfill_category_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 132,
+      "version": "7",
+      "when": 1779827884056,
+      "tag": "0132_drop_category_text_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 133,
+      "version": "7",
+      "when": 1779827903915,
+      "tag": "0133_rename_category_translation_columns",
+      "breakpoints": true
     }
   ]
 }

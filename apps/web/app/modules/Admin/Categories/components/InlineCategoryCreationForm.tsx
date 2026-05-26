@@ -11,7 +11,7 @@ import { Separator } from "~/components/ui/separator";
 import { useCreateCategoryForm } from "../hooks/useCreateCategoryForm";
 
 type InlineCategoryCreationFormProps = {
-  onCategoryCreated?: (categoryId: string) => void;
+  onCategoryCreated?: (categoryId: string) => Promise<void> | void;
 };
 
 export const InlineCategoryCreationForm = ({
@@ -23,7 +23,7 @@ export const InlineCategoryCreationForm = ({
     async ({ data }) => {
       if (data.id) {
         await queryClient.invalidateQueries({ queryKey: categoriesQueryOptions().queryKey });
-        onCategoryCreated?.(data.id);
+        await onCategoryCreated?.(data.id);
         createCategoryForm.reset();
       }
     },
