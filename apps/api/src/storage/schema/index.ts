@@ -1114,12 +1114,15 @@ export const announcements = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull(),
-    content: text("content").notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+    content: jsonb("content").$type<LocalizedText>().default({}).notNull(),
     authorId: uuid("author_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     isEveryone: boolean("is_everyone").notNull().default(false),
+    baseLanguage,
+    availableLocales,
+    deletedAt: timestampWithTimezone({ name: "deleted_at" }),
     tenantId,
   },
   withTenantIdIndex("announcements"),
@@ -1137,7 +1140,7 @@ export const userAnnouncements = pgTable(
       .references(() => announcements.id, { onDelete: "cascade" })
       .notNull(),
     isRead: boolean("is_read").notNull().default(false),
-    readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
+    readAt: timestamp("read_at", { mode: "string", withTimezone: true, precision: 3 }),
     tenantId,
   },
   withTenantIdIndex("user_announcements", (table) => ({

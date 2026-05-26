@@ -10,7 +10,6 @@ import type {
   GetAllCoursesResponse,
   GetAllGroupsResponse,
   GetAllQAResponse,
-  GetAnnouncementsForUserResponse,
   GetArticlesResponse,
   GetAvailableCoursesResponse,
   GetLessonsResponse,
@@ -74,14 +73,6 @@ export type GlobalSearchItem =
       resultData: GetAllGroupsResponse["data"];
       Component: (props: {
         item: GetAllGroupsResponse["data"][number];
-        onSelect: () => void;
-      }) => JSX.Element;
-    }
-  | {
-      resultType: "announcements";
-      resultData: GetAnnouncementsForUserResponse["data"];
-      Component: (props: {
-        item: GetAnnouncementsForUserResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }

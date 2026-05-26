@@ -1,9 +1,25 @@
-import { Body, Controller, Get, Param, Post, UseGuards, Patch, Query } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  Query,
+} from "@nestjs/common";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { baseResponse, BaseResponse, UUIDType } from "src/common";
+import {
+  baseResponse,
+  BaseResponse,
+  paginatedResponse,
+  PaginatedResponse,
+  UUIDType,
+} from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
@@ -12,6 +28,7 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
+  announcementLanguageSchema,
   announcementsForUserSchema,
   baseAnnouncementSchema,
   unreadAnnouncementsSchema,
@@ -20,7 +37,11 @@ import {
 import { createAnnouncementSchema } from "./schemas/createAnnouncement.schema";
 import { CreateAnnouncement } from "./types/announcement.types";
 
-import type { AnnouncementFilters } from "./types/announcement.types";
+import type {
+  AllAnnouncements,
+  AnnouncementFilters,
+  UserAnnouncements,
+} from "./types/announcement.types";
 
 @UseGuards(PermissionsGuard)
 @Controller("announcements")
@@ -30,23 +51,24 @@ export class AnnouncementsController {
   @Get()
   @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
-    response: baseResponse(allAnnouncementsSchema),
+    request: [
+      { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+    ],
+    response: paginatedResponse(allAnnouncementsSchema),
   })
-  async getAllAnnouncements() {
-    const announcements = await this.announcementsService.getAllAnnouncements();
+  async getAllAnnouncements(
+    @Query("language") language?: SupportedLanguages,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
+  ): Promise<PaginatedResponse<AllAnnouncements>> {
+    const announcements = await this.announcementsService.getAllAnnouncements(language, {
+      page,
+      perPage,
+    });
 
-    return new BaseResponse(announcements);
-  }
-
-  @Get("latest")
-  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
-  @Validate({
-    response: baseResponse(allAnnouncementsSchema),
-  })
-  async getLatestUnreadAnnouncements(@CurrentUser("userId") userId: UUIDType) {
-    const announcements = await this.announcementsService.getLatestUnreadAnnouncements(userId);
-
-    return new BaseResponse(announcements);
+    return new PaginatedResponse(announcements);
   }
 
   @Get("unread")
@@ -67,30 +89,38 @@ export class AnnouncementsController {
     request: [
       { type: "query", name: "title", schema: Type.Optional(Type.String()) },
       { type: "query", name: "content", schema: Type.Optional(Type.String()) },
-      { type: "query", name: "authorName", schema: Type.Optional(Type.String()) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
       { type: "query", name: "isRead", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
     ],
-    response: baseResponse(announcementsForUserSchema),
+    response: paginatedResponse(announcementsForUserSchema),
   })
   async getAnnouncementsForUser(
     @Query("title") title?: string,
     @Query("content") content?: string,
-    @Query("authorName") authorName?: string,
     @Query("search") search?: string,
     @Query("isRead") isRead?: string,
+    @Query("language") language?: SupportedLanguages,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
     @CurrentUser("userId") userId?: UUIDType,
-  ) {
+  ): Promise<PaginatedResponse<UserAnnouncements>> {
     const filters: AnnouncementFilters = {
       title,
       content,
-      authorName,
       search,
       isRead: isRead ? isRead === "true" : undefined,
     };
-    const announcements = await this.announcementsService.getAnnouncementsForUser(userId!, filters);
+    const announcements = await this.announcementsService.getAnnouncementsForUser(
+      userId!,
+      filters,
+      language,
+      { page, perPage },
+    );
 
-    return new BaseResponse(announcements);
+    return new PaginatedResponse(announcements);
   }
 
   @Post()
@@ -111,6 +141,17 @@ export class AnnouncementsController {
     return new BaseResponse(announcement);
   }
 
+  @Patch("read-all")
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
+  @Validate({
+    response: baseResponse(Type.Object({ updatedCount: Type.Number() })),
+  })
+  async markAllAnnouncementsAsRead(@CurrentUser() currentUser: CurrentUserType) {
+    const updatedCount = await this.announcementsService.markAllAnnouncementsAsRead(currentUser);
+
+    return new BaseResponse({ updatedCount });
+  }
+
   @Patch(":id/read")
   @RequirePermission(PERMISSIONS.ANNOUNCEMENT_READ)
   @Validate({
@@ -126,5 +167,16 @@ export class AnnouncementsController {
     );
 
     return new BaseResponse(announcement);
+  }
+
+  @Delete(":id")
+  @RequirePermission(PERMISSIONS.ANNOUNCEMENT_DELETE)
+  @Validate({
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async deleteAnnouncement(@Param("id") announcementId: UUIDType) {
+    await this.announcementsService.deleteAnnouncement(announcementId);
+
+    return new BaseResponse({ message: "announcements.toast.deletedSuccessfully" });
   }
 }

@@ -40,9 +40,9 @@ export const routes: (
         route("", "modules/Dashboard/UserDashboard.layout.tsx", () => {
           route("", "modules/Dashboard/IndexRedirect.page.tsx", { index: true });
           route("progress", "modules/Statistics/Statistics.page.tsx");
+          route("notifications", "modules/Notifications/Notifications.page.tsx");
           route("settings", "modules/Dashboard/Settings/Settings.page.tsx");
           route("provider-information", "modules/ProviderInformation/ProviderInformation.page.tsx");
-          route("announcements", "modules/Announcements/Announcements.page.tsx");
           route("articles/:articleId/edit", "modules/Articles/ArticleForm.page.tsx", {
             id: "edit-article",
           });
@@ -70,7 +70,6 @@ export const routes: (
           route("groups", "modules/Admin/Groups/Groups.page.tsx");
           route("groups/new", "modules/Admin/Groups/CreateGroup.page.tsx");
           route("groups/:id", "modules/Admin/Groups/EditGroup.page.tsx");
-          route("announcements/new", "modules/Announcements/CreateAnnouncement.page.tsx");
           route("promotion-codes", "modules/Admin/PromotionCodes/PromotionCodes.page.tsx");
           route("promotion-codes/new", "modules/Admin/PromotionCodes/CreatePromotionCode.page.tsx");
           route(

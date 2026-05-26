@@ -11,7 +11,6 @@ import {
 } from "~/api/queries";
 import { groupsQueryOptions } from "~/api/queries/admin/useGroups";
 import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
-import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
 import { contentCreatorCoursesOptions } from "~/api/queries/useContentCreatorCourses";
@@ -23,7 +22,6 @@ import { hasAnyPermission, hasPermission } from "~/common/permissions/permission
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { AnnouncementEntry } from "./AnnouncementEntry";
 import { ArticleEntry } from "./ArticleEntry";
 import { CategoryEntry } from "./CategoryEntry";
 import { CourseEntry } from "./CourseEntry";
@@ -63,7 +61,6 @@ export const GlobalSearchResults = ({
     canSearchOwnCourses,
     canSearchStudentCourses,
     canSearchAvailableCourses,
-    canSearchAnnouncements,
     canSearchLessons,
     canSearchNews,
     canSearchArticles,
@@ -84,7 +81,6 @@ export const GlobalSearchResults = ({
       canSearchOwnCourses: hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN),
       canSearchStudentCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ_ASSIGNED]),
       canSearchAvailableCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
-      canSearchAnnouncements: hasPermission(permissions, PERMISSIONS.ANNOUNCEMENT_READ),
       canSearchLessons: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
       canSearchNews: hasAnyPermission(permissions, [
         PERMISSIONS.NEWS_READ_PUBLIC,
@@ -136,10 +132,6 @@ export const GlobalSearchResults = ({
         { searchQuery: debouncedSearch, language },
         { enabled: isSearchReady && canSearchAvailableCourses },
       ),
-      announcementsForUserOptions(
-        { search: debouncedSearch },
-        { enabled: isSearchReady && canSearchAnnouncements },
-      ),
       lessonsQueryOptions(
         { searchQuery: debouncedSearch, language },
         { enabled: isSearchReady && canSearchLessons },
@@ -170,7 +162,6 @@ export const GlobalSearchResults = ({
         contentCreatorCourses,
         studentCourses,
         availableCourses,
-        announcements,
         lessons,
         learningPaths,
         newsResults,
@@ -224,11 +215,6 @@ export const GlobalSearchResults = ({
           resultType: "groups",
           resultData: groups?.data ?? [],
           Component: GroupEntry,
-        },
-        {
-          resultType: "announcements",
-          resultData: announcements?.data ?? [],
-          Component: AnnouncementEntry,
         },
         {
           resultType: "news",

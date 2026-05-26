@@ -53,6 +53,7 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Read actor scope from `@CurrentUser()`; do not trust body/query user IDs for authorization.
 - Use `OutboxPublisher.publish(...)` for durable domain events instead of direct side effects when existing flow uses outbox/events.
 - Generate migrations only through Drizzle Kit. Use normal generated migrations for schema changes and `--custom` mainly for data migrations or other custom SQL changes.
+- Do not put database schema modifications in custom migrations. Schema changes must be produced by Drizzle's normal generated migration flow; custom migrations are for data manipulation/backfills or non-generatable custom SQL only.
 - Always pass a meaningful `--name=<meaningful_name>` when generating migrations.
 - Do not create migration files by hand and do not modify generated migration files by hand.
 

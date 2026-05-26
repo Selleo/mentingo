@@ -158,6 +158,7 @@ export interface CurrentUserResponse {
       | "ai.use"
       | "announcement.read"
       | "announcement.create"
+      | "announcement.delete"
       | "news.read_public"
       | "news.manage"
       | "news.manage_own"
@@ -4445,27 +4446,20 @@ export interface GetAllAnnouncementsResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    title: string;
-    content: string;
     authorId: string;
     isEveryone: boolean;
-    authorName: string;
-    authorProfilePictureUrl: string | null;
-  }[];
-}
-
-export interface GetLatestUnreadAnnouncementsResponse {
-  data: {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
     title: string;
     content: string;
-    authorId: string;
-    isEveryone: boolean;
-    authorName: string;
-    authorProfilePictureUrl: string | null;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    deletedAt: string | null;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface GetUnreadAnnouncementsCountResponse {
@@ -4479,26 +4473,38 @@ export interface GetAnnouncementsForUserResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    title: string;
-    content: string;
     authorId: string;
     isEveryone: boolean;
-    authorName: string;
-    authorProfilePictureUrl: string | null;
+    title: string;
+    content: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    deletedAt: string | null;
     isRead: boolean;
   }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
 }
 
 export interface CreateAnnouncementBody {
-  /**
-   * @minLength 1
-   * @maxLength 120
-   */
-  title: string;
-  /** @minLength 1 */
-  content: string;
   /** @default null */
   groupId: string | null;
+  baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+  /** @minItems 1 */
+  translations: {
+    language: "en" | "pl" | "de" | "lt" | "cs";
+    /**
+     * @minLength 1
+     * @maxLength 120
+     */
+    title: string;
+    /** @minLength 1 */
+    content: string;
+  }[];
 }
 
 export interface CreateAnnouncementResponse {
@@ -4506,10 +4512,19 @@ export interface CreateAnnouncementResponse {
     id: string;
     createdAt: string;
     updatedAt: string;
-    title: string;
-    content: string;
     authorId: string;
     isEveryone: boolean;
+    title: string;
+    content: string;
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    deletedAt: string | null;
+  };
+}
+
+export interface MarkAllAnnouncementsAsReadResponse {
+  data: {
+    updatedCount: number;
   };
 }
 
@@ -4522,6 +4537,12 @@ export interface MarkAnnouncementAsReadResponse {
     announcementId: string;
     isRead: boolean;
     readAt: string | null;
+  };
+}
+
+export interface DeleteAnnouncementResponse {
+  data: {
+    message: string;
   };
 }
 
@@ -6863,6 +6884,8 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query: {
         /** @format uuid */
         id: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
       },
       params: RequestParams = {},
     ) =>
@@ -10614,10 +10637,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name AnnouncementsControllerGetAllAnnouncements
      * @request GET:/api/announcements
      */
-    announcementsControllerGetAllAnnouncements: (params: RequestParams = {}) =>
+    announcementsControllerGetAllAnnouncements: (
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<GetAllAnnouncementsResponse, any>({
         path: `/api/announcements`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
@@ -10637,20 +10670,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name AnnouncementsControllerGetLatestUnreadAnnouncements
-     * @request GET:/api/announcements/latest
-     */
-    announcementsControllerGetLatestUnreadAnnouncements: (params: RequestParams = {}) =>
-      this.request<GetLatestUnreadAnnouncementsResponse, any>({
-        path: `/api/announcements/latest`,
-        method: "GET",
         format: "json",
         ...params,
       }),
@@ -10679,9 +10698,13 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         content?: string;
-        authorName?: string;
         search?: string;
         isRead?: string;
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
       },
       params: RequestParams = {},
     ) =>
@@ -10696,6 +10719,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AnnouncementsControllerMarkAllAnnouncementsAsRead
+     * @request PATCH:/api/announcements/read-all
+     */
+    announcementsControllerMarkAllAnnouncementsAsRead: (params: RequestParams = {}) =>
+      this.request<MarkAllAnnouncementsAsReadResponse, any>({
+        path: `/api/announcements/read-all`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AnnouncementsControllerMarkAnnouncementAsRead
      * @request PATCH:/api/announcements/{id}/read
      */
@@ -10703,6 +10740,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<MarkAnnouncementAsReadResponse, any>({
         path: `/api/announcements/${id}/read`,
         method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AnnouncementsControllerDeleteAnnouncement
+     * @request DELETE:/api/announcements/{id}
+     */
+    announcementsControllerDeleteAnnouncement: (id: string, params: RequestParams = {}) =>
+      this.request<DeleteAnnouncementResponse, any>({
+        path: `/api/announcements/${id}`,
+        method: "DELETE",
         format: "json",
         ...params,
       }),

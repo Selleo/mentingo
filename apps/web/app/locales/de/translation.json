@@ -304,6 +304,7 @@
     "news": "Nachricht",
     "providerInformation": "Information",
     "announcements": "Ankündigungen",
+    "notifications": "Benachrichtigungen",
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
     "ariaLabels": {
@@ -2582,14 +2583,19 @@
       "subheader": "Geben Sie die Details an, um eine neue Ankündigung einzurichten.",
       "buttons": {
         "confirm": "Bestätigen",
-        "cancel": "Stornieren"
+        "cancel": "Stornieren",
+        "addLanguage": "Sprache hinzufügen",
+        "removeLanguage": "Sprache entfernen",
+        "setDefaultLanguage": "Als Standardsprache festlegen"
       },
       "fields": {
         "title": "Titel",
         "content": "Inhalt",
         "group": "Gruppe",
+        "language": "Sprache",
         "everyone": "Alle"
       },
+      "addedLanguages": "Hinzugefügte Sprachen",
       "placeholders": {
         "title": "Titel eingeben",
         "content": "Schreiben Sie hier Ihre Ankündigung...",
@@ -2617,7 +2623,35 @@
       "markedAsRead": "Ankündigungen wurden als erfolgreich gelesen markiert",
       "markAsReadFailed": "Ankündigungen konnten nicht als gelesen markiert werden",
       "createdSuccessfully": "Ankündigung erfolgreich erstellt",
-      "createFailed": "Ankündigung konnte nicht erstellt werden"
+      "createFailed": "Ankündigung konnte nicht erstellt werden",
+      "deletedSuccessfully": "Ankündigung erfolgreich gelöscht",
+      "deleteFailed": "Ankündigung konnte nicht gelöscht werden",
+      "notFound": "Ankündigung nicht gefunden"
+    }
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "tabs": {
+      "all": "Alle",
+      "adminAnnouncements": "Admin-Ankündigungen"
+    },
+    "actions": {
+      "refresh": "Aktualisieren",
+      "create": "Ankündigung erstellen",
+      "delete": "Ankündigung löschen",
+      "markRead": "Als gelesen markieren",
+      "markAllRead": "Alle als gelesen markieren",
+      "loadMore": "Mehr laden",
+      "loadingMore": "Wird geladen...",
+      "goToNotificationCenter": "Zur Benachrichtigungszentrale"
+    },
+    "status": {
+      "unread": "Ungelesen"
+    },
+    "empty": "Noch keine Benachrichtigungen",
+    "deleteDialog": {
+      "title": "Ankündigung löschen",
+      "description": "Diese Ankündigung wird für alle entfernt."
     }
   },
   "platformLogo": {
@@ -2951,6 +2985,7 @@
     "createNewPassword": "Neues Passwort erstellen",
     "createAnnouncement": "Ankündigung erstellen",
     "announcements": "Ankündigungen",
+    "notifications": "Benachrichtigungen",
     "users": "Benutzer",
     "userDetails": "Benutzerdetails",
     "createNewUser": "Neuen Benutzer erstellen",

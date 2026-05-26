@@ -9635,7 +9635,55 @@
     "/api/announcements": {
       "get": {
         "operationId": "AnnouncementsController_getAllAnnouncements",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -9667,23 +9715,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateAnnouncementResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/announcements/latest": {
-      "get": {
-        "operationId": "AnnouncementsController_getLatestUnreadAnnouncements",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLatestUnreadAnnouncementsResponse"
                 }
               }
             }
@@ -9729,14 +9760,6 @@
             }
           },
           {
-            "name": "authorName",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "search",
             "required": false,
             "in": "query",
@@ -9751,6 +9774,53 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
           }
         ],
         "responses": {
@@ -9759,6 +9829,23 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/GetAnnouncementsForUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/read-all": {
+      "patch": {
+        "operationId": "AnnouncementsController_markAllAnnouncementsAsRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkAllAnnouncementsAsReadResponse"
                 }
               }
             }
@@ -9785,6 +9872,32 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MarkAnnouncementAsReadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/announcements/{id}": {
+      "delete": {
+        "operationId": "AnnouncementsController_deleteAnnouncement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteAnnouncementResponse"
                 }
               }
             }
@@ -13295,6 +13408,10 @@
                     },
                     {
                       "const": "announcement.create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "announcement.delete",
                       "type": "string"
                     },
                     {
@@ -34461,22 +34578,70 @@
                 "updatedAt": {
                   "type": "string"
                 },
-                "title": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
                 "authorId": {
                   "type": "string"
                 },
                 "isEveryone": {
                   "type": "boolean"
                 },
-                "authorName": {
+                "title": {
                   "type": "string"
                 },
-                "authorProfilePictureUrl": {
+                "content": {
+                  "type": "string"
+                },
+                "baseLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "availableLocales": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "deletedAt": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -34491,79 +34656,45 @@
                 "id",
                 "createdAt",
                 "updatedAt",
-                "title",
-                "content",
                 "authorId",
                 "isEveryone",
-                "authorName",
-                "authorProfilePictureUrl"
+                "title",
+                "content",
+                "baseLanguage",
+                "availableLocales",
+                "deletedAt"
               ]
             }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetLatestUnreadAnnouncementsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "createdAt": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
-                "authorId": {
-                  "type": "string"
-                },
-                "isEveryone": {
-                  "type": "boolean"
-                },
-                "authorName": {
-                  "type": "string"
-                },
-                "authorProfilePictureUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
               },
-              "required": [
-                "id",
-                "createdAt",
-                "updatedAt",
-                "title",
-                "content",
-                "authorId",
-                "isEveryone",
-                "authorName",
-                "authorProfilePictureUrl"
-              ]
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
             }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "GetUnreadAnnouncementsCountResponse": {
@@ -34602,22 +34733,70 @@
                 "updatedAt": {
                   "type": "string"
                 },
-                "title": {
-                  "type": "string"
-                },
-                "content": {
-                  "type": "string"
-                },
                 "authorId": {
                   "type": "string"
                 },
                 "isEveryone": {
                   "type": "boolean"
                 },
-                "authorName": {
+                "title": {
                   "type": "string"
                 },
-                "authorProfilePictureUrl": {
+                "content": {
+                  "type": "string"
+                },
+                "baseLanguage": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "availableLocales": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "deletedAt": {
                   "anyOf": [
                     {
                       "type": "string"
@@ -34635,49 +34814,139 @@
                 "id",
                 "createdAt",
                 "updatedAt",
-                "title",
-                "content",
                 "authorId",
                 "isEveryone",
-                "authorName",
-                "authorProfilePictureUrl",
+                "title",
+                "content",
+                "baseLanguage",
+                "availableLocales",
+                "deletedAt",
                 "isRead"
               ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
             }
           }
         },
         "required": [
-          "data"
+          "data",
+          "pagination"
         ]
       },
       "CreateAnnouncementBody": {
         "type": "object",
         "properties": {
-          "title": {
-            "minLength": 1,
-            "maxLength": 120,
-            "type": "string"
-          },
-          "content": {
-            "minLength": 1,
-            "type": "string"
-          },
           "groupId": {
             "default": null,
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ]
+          },
+          "baseLanguage": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          },
+          "translations": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "title": {
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "type": "string"
+                },
+                "content": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "language",
+                "title",
+                "content"
+              ]
+            }
           }
         },
         "required": [
-          "title",
-          "content",
-          "groupId"
+          "groupId",
+          "baseLanguage",
+          "translations"
         ]
       },
       "CreateAnnouncementResponse": {
@@ -34695,27 +34964,110 @@
               "updatedAt": {
                 "type": "string"
               },
+              "authorId": {
+                "type": "string"
+              },
+              "isEveryone": {
+                "type": "boolean"
+              },
               "title": {
                 "type": "string"
               },
               "content": {
                 "type": "string"
               },
-              "authorId": {
-                "type": "string"
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
               },
-              "isEveryone": {
-                "type": "boolean"
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "deletedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
               "id",
               "createdAt",
               "updatedAt",
+              "authorId",
+              "isEveryone",
               "title",
               "content",
-              "authorId",
-              "isEveryone"
+              "baseLanguage",
+              "availableLocales",
+              "deletedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MarkAllAnnouncementsAsReadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "updatedCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "updatedCount"
             ]
           }
         },
@@ -34766,6 +35118,25 @@
               "announcementId",
               "isRead",
               "readAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DeleteAnnouncementResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
             ]
           }
         },
