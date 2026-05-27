@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import type { FixtureFactories } from "../../factories";
@@ -325,6 +327,7 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
   input: Omit<
     CreatePublishedLearningCourseInput<{
       dndBlankAnswer: string;
+      dndBlankAnswerId: string;
       quizLesson: CurriculumCourseLessonRecord;
       textBlankAnswer: string;
     }>,
@@ -337,6 +340,7 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
     buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
       const textBlankAnswer = `${prefix}-text-answer`;
       const dndBlankAnswer = `${prefix}-dnd-answer`;
+      const dndBlankAnswerId = randomUUID();
       const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
         chapterId,
         title: `${prefix}-quiz-lesson`,
@@ -402,15 +406,22 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
           {
             type: "fill_in_the_blanks_dnd",
             title: `${prefix}-fill-dnd`,
-            description: "Drag the [word] answer.",
+            description: `Drag the <blank-answer-${dndBlankAnswerId}> answer.`,
             displayOrder: 7,
-            options: [{ optionText: dndBlankAnswer, displayOrder: 1, isCorrect: true }],
+            options: [
+              {
+                id: dndBlankAnswerId,
+                optionText: dndBlankAnswer,
+                displayOrder: 1,
+                isCorrect: true,
+              },
+            ],
           },
           { type: "brief_response", title: `${prefix}-brief-response`, displayOrder: 8 },
           { type: "detailed_response", title: `${prefix}-detailed-response`, displayOrder: 9 },
         ],
       });
 
-      return { quizLesson, textBlankAnswer, dndBlankAnswer };
+      return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId };
     },
   });

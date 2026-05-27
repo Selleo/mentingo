@@ -50,6 +50,7 @@ export const globalSettingsJSONSchema = Type.Object({
   newsEnabled: Type.Boolean(),
   unregisteredUserArticlesAccessibility: Type.Boolean(),
   articlesEnabled: Type.Boolean(),
+  learningPathsEnabled: Type.Boolean(),
   ageLimit: Type.Union(ALLOWED_AGE_LIMITS.map((age) => (!age ? Type.Null() : Type.Literal(age)))),
   loginPageFiles: Type.Array(Type.String()),
 });

@@ -4,12 +4,16 @@ import {
   ENTITY_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   PERMISSIONS,
+  SUPPORTED_LANGUAGES,
   type MasterCourseEntityType,
+  type SupportedLanguages,
 } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
+import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -46,6 +50,7 @@ export class MasterCourseRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async getCourseById(courseId: UUIDType) {
@@ -73,6 +78,16 @@ export class MasterCourseRepository {
       .limit(1);
 
     return tenant;
+  }
+
+  async getTenantHost(tenantId: UUIDType) {
+    const [tenant] = await this.dbAdmin
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host;
   }
 
   async findExportLinkByPair(
@@ -291,7 +306,14 @@ export class MasterCourseRepository {
     if (!sourceCourse) throw new NotFoundException("Course not found");
 
     const [sourceCategory] = await this.db
-      .select({ id: categories.id, title: categories.title })
+      .select({
+        id: categories.id,
+        title: this.localizationService.getLocalizedSqlField(
+          categories.title,
+          sourceCourse.baseLanguage as SupportedLanguages,
+          categories,
+        ),
+      })
       .from(categories)
       .where(eq(categories.id, sourceCourse.categoryId))
       .limit(1);
@@ -401,7 +423,13 @@ export class MasterCourseRepository {
     const [existingCategory] = await this.db
       .select({ id: categories.id })
       .from(categories)
-      .where(eq(categories.title, title))
+      .where(
+        sql`${this.localizationService.getLocalizedSqlField(
+          categories.title,
+          undefined,
+          categories,
+        )} = ${title}`,
+      )
       .limit(1);
 
     return existingCategory;
@@ -410,7 +438,9 @@ export class MasterCourseRepository {
   async createCategory(title: string) {
     const [createdCategory] = await this.db
       .insert(categories)
-      .values({ title })
+      .values({
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, title),
+      })
       .returning({ id: categories.id });
 
     return createdCategory;

@@ -1,8 +1,10 @@
-import { redirect } from "@remix-run/react";
+import { redirect, useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
+import { useLayoutEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions } from "~/api/queries";
+import { globalSettingsQueryOptions, useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { learningPathsQueryOptions } from "~/api/queries/useLearningPaths";
 import { queryClient } from "~/api/queryClient";
 import { hasAnyPermission } from "~/common/permissions/permission.utils";
@@ -14,6 +16,7 @@ import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHisto
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { LEARNING_PATHS_PAGE_HANDLES } from "../../../e2e/data/learning-paths/handles";
+import { LOGIN_REDIRECT_URL } from "../Auth/constants";
 
 import { LearningPathsEmptyState } from "./components/LearningPathsEmptyState";
 import { LearningPathsPageHeader } from "./components/LearningPathsPageHeader";
@@ -25,6 +28,9 @@ import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.learningPaths");
 
 export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const searchQuery = url.searchParams.get("searchQuery") ?? "";
+
   try {
     const user = await queryClient.ensureQueryData(currentUserQueryOptions);
 
@@ -37,21 +43,21 @@ export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
     throw redirect("/auth/login");
   }
 
+  const globalSettings = await queryClient.ensureQueryData(globalSettingsQueryOptions);
+
+  if (globalSettings?.data.learningPathsEnabled === false) {
+    throw redirect(LOGIN_REDIRECT_URL);
+  }
+
   const { language } = useLanguageStore.getState();
 
-  return queryClient.fetchQuery(learningPathsQueryOptions({ language }));
+  return queryClient.fetchQuery(learningPathsQueryOptions({ language, searchQuery }));
 };
 
 function StudentLearningPathsPage() {
   const { t } = useTranslation();
-  const {
-    language,
-    learningPaths,
-    searchValue,
-    setSearchValue,
-    enrollLearningPath,
-    isEnrollPending,
-  } = useStudentLearningPathsPage();
+  const { language, learningPaths, enrollLearningPath, isEnrollPending } =
+    useStudentLearningPathsPage();
 
   return (
     <PageWrapper
@@ -66,7 +72,7 @@ function StudentLearningPathsPage() {
         className="flex flex-col gap-6 md:gap-8"
         data-testid={LEARNING_PATHS_PAGE_HANDLES.PAGE}
       >
-        <LearningPathsPageHeader searchValue={searchValue} onSearchChange={setSearchValue} />
+        <LearningPathsPageHeader />
 
         <div className="flex flex-col gap-4">
           {learningPaths.data.map((learningPath) => (
@@ -87,7 +93,10 @@ function StudentLearningPathsPage() {
 }
 
 export default function LearningPathsPage() {
+  const navigate = useNavigate();
+
   const { permissions } = usePermissions();
+  const { data: globalSettings } = useGlobalSettings();
 
   const canAccessLearningPathAdmin = hasAnyPermission(permissions, [
     PERMISSIONS.LEARNING_PATH_CREATE,
@@ -99,6 +108,14 @@ export default function LearningPathsPage() {
     PERMISSIONS.LEARNING_PATH_ENROLLMENT,
     PERMISSIONS.LEARNING_PATH_EXPORT,
   ]);
+
+  useLayoutEffect(() => {
+    if (globalSettings?.learningPathsEnabled === false) {
+      navigate("/courses");
+    }
+  }, [globalSettings?.learningPathsEnabled, navigate]);
+
+  if (globalSettings?.learningPathsEnabled === false) return null;
 
   return canAccessLearningPathAdmin ? <AdminLearningPathsPage /> : <StudentLearningPathsPage />;
 }

@@ -48,10 +48,12 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Keep request handlers thin; put domain logic in services and query details in repositories where that pattern exists.
 - Validate controller inputs/outputs with `@Validate(...)` and TypeBox schemas.
 - Return `new BaseResponse(...)` or `new PaginatedResponse(...)` from controllers.
+- Create named exported response types in schema files instead of inline controller return shapes such as `Promise<BaseResponse<{ id: UUIDType }>>`.
 - Protect endpoints with `@RequirePermission(PERMISSIONS.X)` from `@repo/shared`.
 - Read actor scope from `@CurrentUser()`; do not trust body/query user IDs for authorization.
 - Use `OutboxPublisher.publish(...)` for durable domain events instead of direct side effects when existing flow uses outbox/events.
 - Generate migrations only through Drizzle Kit. Use normal generated migrations for schema changes and `--custom` mainly for data migrations or other custom SQL changes.
+- Do not put database schema modifications in custom migrations. Schema changes must be produced by Drizzle's normal generated migration flow; custom migrations are for data manipulation/backfills or non-generatable custom SQL only.
 - Always pass a meaningful `--name=<meaningful_name>` when generating migrations.
 - Do not create migration files by hand and do not modify generated migration files by hand.
 
@@ -77,6 +79,8 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - API usage examples: `src/courses/course.controller.ts`, `src/stripe/schemas/checkoutSession.schema.ts`, `src/user/user.service.ts`.
 - Agent rule: use `SUPPORTED_LANGUAGES`/`SupportedLanguages`; do not hardcode language arrays in schemas or services.
 - Agent rule: resolve localized JSONB fields in repository/database queries, usually with `LocalizationService.getLocalizedSqlField`; public API response schemas should return localized strings instead of language maps unless the endpoint explicitly manages translations.
+- Agent rule: search localized JSONB values through `LocalizationService`; do not cast the whole localizable JSON object to text for language-aware checks.
+- Agent rule: update individual localized JSONB values with `setJsonbField`; do not replace the whole localizable object when changing one language.
 
 ### Course/Lesson Flow
 

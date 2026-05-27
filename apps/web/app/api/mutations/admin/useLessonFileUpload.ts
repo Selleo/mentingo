@@ -2,6 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "~/api/queries/useResourceLibraryAssets";
+import { queryClient } from "~/api/queryClient";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -45,6 +47,9 @@ export function useLessonFileUpload() {
         },
       });
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: RESOURCE_LIBRARY_ASSETS_QUERY_KEY });
     },
     onError: (error: AxiosError) => {
       const apiResponseData = error.response?.data as ApiErrorResponse;

@@ -125,6 +125,16 @@
       "success": "Plik został pomyślnie usunięty"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Zasób został pomyślnie usunięty"
+    },
+    "error": {
+      "fileRequired": "Plik jest wymagany",
+      "assetNotFound": "Zasób nie został znaleziony",
+      "entityNotFound": "Nie znaleziono encji"
+    }
+  },
   "adminScorm": {
     "header": "Prześlij SCORM",
     "subHeader": "Prześlij swój plik SCORM w formacie .zip.",
@@ -262,7 +272,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Utwórz kurs z pakietu SCORM 1.2.",
-      "badge": "Placeholder",
       "features": {
         "import": "Tworzony z pakietu SCORM 1.2 .zip",
         "tracking": "Obsługa śledzenia ukończenia SCO i stanu uruchomieniowego",
@@ -297,6 +306,7 @@
     "news": "Aktualności",
     "providerInformation": "Informacje",
     "announcements": "Ogłoszenia",
+    "notifications": "Powiadomienia",
     "promotionCodes": "Kody promocyjne",
     "manage": "Zarządzaj",
     "ariaLabels": {
@@ -306,9 +316,9 @@
     "articles": "Baza wiedzy",
     "tenants": "Organizacje",
     "activityLogs": "Dziennik zdarzeń",
-    "learningPaths": "Ścieżki edukacyjne",
-    "adminLearningPaths": "Ścieżki edukacyjne",
-    "adminLearningPathEditor": "Edytor ścieżki edukacyjnej"
+    "learningPaths": "Ścieżki Rozwoju",
+    "adminLearningPaths": "Ścieżki Rozwoju",
+    "adminLearningPathEditor": "Edytor ścieżki rozwoju"
   },
   "calendarView": {
     "title": "Kalendarz",
@@ -626,11 +636,11 @@
     }
   },
   "learningPathsView": {
-    "title": "Ścieżki edukacyjne",
-    "description": "Przeglądaj przypisane ścieżki edukacyjne i kontynuuj uporządkowane sekwencje kursów.",
-    "searchPlaceholder": "Szukaj ścieżek edukacyjnych",
-    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych.",
-    "detailsTitle": "Ścieżka edukacyjna",
+    "title": "Ścieżki Rozwoju",
+    "description": "Przeglądaj przypisane ścieżki rozwoju i kontynuuj uporządkowane sekwencje kursów.",
+    "searchPlaceholder": "Szukaj ścieżek rozwoju",
+    "summary": "{{count}} ścieżek rozwoju jest dostępnych.",
+    "detailsTitle": "Ścieżka Rozwoju",
     "detailsDescription": "Sprawdź kolejność kursów, postęp, blokady i status certyfikatu.",
     "detailsSummary": "Ta ścieżka zawiera {{count}} kursów. Aktualny postęp: {{progress}}.",
     "emptyDescription": "Nie dodano jeszcze opisu.",
@@ -662,7 +672,7 @@
     "certificate": {
       "available": "Certyfikat dostępny",
       "ready": "Certyfikat gotowy",
-      "pathCompleted": "Ścieżka edukacyjna ukończona. Twój certyfikat jest gotowy."
+      "pathCompleted": "Ścieżka Rozwoju ukończona. Twój certyfikat jest gotowy."
     },
     "courseState": {
       "completed": "Ukończony",
@@ -677,7 +687,7 @@
       "courses": "Kursy w tej ścieżce",
       "courseTitle": "Kurs {{number}}",
       "completedAt": "Ukończono {{date}}",
-      "emptyCourses": "Ta ścieżka edukacyjna nie zawiera jeszcze kursów."
+      "emptyCourses": "Ta ścieżka rozwoju nie zawiera jeszcze kursów."
     },
     "enrollment": {
       "manage": "Zapisz",
@@ -703,8 +713,8 @@
       "studentsUnenrolled": "Usunięto uczniów z zapisów",
       "groupsUnenrolled": "Usunięto grupy z zapisów",
       "enrolledSuccessfully": "Zapisano do ścieżki",
-      "enrollGroupsDescription": "Wybierz grupy do zapisania do tej ścieżki edukacyjnej.",
-      "unenrollGroupsDescription": "Wybierz grupy do usunięcia z tej ścieżki edukacyjnej.",
+      "enrollGroupsDescription": "Wybierz grupy do zapisania do tej ścieżki rozwoju.",
+      "unenrollGroupsDescription": "Wybierz grupy do usunięcia z tej ścieżki rozwoju.",
       "table": {
         "selectAll": "Zaznacz wszystkich uczestników",
         "select": "Zaznacz uczestnika",
@@ -720,16 +730,16 @@
       },
       "confirmation": {
         "title": "Potwierdź zapis",
-        "description": "Czy na pewno chcesz zapisać wybranych studentów do tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz zapisać wybranych studentów do tej ścieżki rozwoju? Tej operacji nie można cofnąć."
       },
       "unenrollConfirmation": {
         "title": "Potwierdź wypisanie",
-        "description": "Czy na pewno chcesz wypisać wybranych studentów z tej ścieżki edukacyjnej? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tej ścieżki rozwoju? Tej operacji nie można cofnąć."
       },
       "noGroups": "Brak dostępnych grup"
     },
     "breadcrumbs": {
-      "learningPaths": "Ścieżki edukacyjne",
+      "learningPaths": "Ścieżki Rozwoju",
       "details": "Szczegóły"
     },
     "buttons": {
@@ -737,11 +747,11 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Ścieżki edukacyjne",
+    "title": "Ścieżki Rozwoju",
     "description": "Zarządzaj metadanymi, ustawieniami sekwencji, kursami, zapisami, eksportem i certyfikatami.",
-    "summary": "{{count}} ścieżek edukacyjnych jest dostępnych w tej organizacji.",
+    "summary": "{{count}} ścieżek rozwoju jest dostępnych w tej organizacji.",
     "breadcrumbs": {
-      "learningPaths": "Ścieżki edukacyjne",
+      "learningPaths": "Ścieżki Rozwoju",
       "create": "Utwórz",
       "edit": "Edytuj"
     },
@@ -752,11 +762,11 @@
       "removeImage": "Usuń obraz"
     },
     "editor": {
-      "createTitle": "Utwórz ścieżkę edukacyjną",
-      "editTitle": "Edytuj ścieżkę edukacyjną",
+      "createTitle": "Utwórz ścieżkę rozwoju",
+      "editTitle": "Edytuj ścieżkę rozwoju",
       "description": "Skonfiguruj szczegóły ścieżki, ustawienia sekwencji, kursy i status publikacji.",
-      "createSummary": "Zacznij od szczegółów ścieżki edukacyjnej.",
-      "editSummary": "Ta ścieżka edukacyjna ma obecnie {{coursesCount}} kursów.",
+      "createSummary": "Zacznij od szczegółów ścieżki rozwoju.",
+      "editSummary": "Ta ścieżka rozwoju ma obecnie {{coursesCount}} kursów.",
       "details": "Szczegóły",
       "courses": "Kursy",
       "image": "Obraz",
@@ -774,14 +784,14 @@
       "sequential": "Sekwencyjna",
       "flexible": "Dowolna kolejność",
       "certificate": "Certyfikat",
-      "empty": "Nie utworzono jeszcze żadnych ścieżek edukacyjnych."
+      "empty": "Nie utworzono jeszcze żadnych ścieżek rozwoju."
     },
     "form": {
       "language": "Język",
       "status": "Status",
       "statusDescription": "Określa, czy ścieżka jest widoczna, robocza czy prywatna.",
       "title": "Tytuł",
-      "titlePlaceholder": "Nazwij ścieżkę edukacyjną",
+      "titlePlaceholder": "Nazwij ścieżkę rozwoju",
       "description": "Opis",
       "descriptionPlaceholder": "Opisz, co uczestnicy ukończą w tej ścieżce",
       "imageHint": "PNG, JPG lub JPEG (maks. 20 MB, zalecane 1200x1200 lub większe)",
@@ -790,7 +800,7 @@
       "includesCertificate": "Certyfikat",
       "includesCertificateDescription": "Uczestnicy mogą otrzymać certyfikat po ukończeniu ścieżki.",
       "certificateSignature": "Podpis na certyfikacie",
-      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki edukacyjnej.",
+      "certificateSignatureDescription": "Prześlij podpis widoczny na certyfikatach tej ścieżki rozwoju.",
       "certificateFontColor": "Kolor tekstu certyfikatu",
       "certificateFontColorDescription": "Użyj próbnika kolorów w podglądzie, aby zmienić kolor tekstu i linii certyfikatu.",
       "certificatePreview": "Podgląd certyfikatu",
@@ -838,17 +848,17 @@
       "selectedCount": "Wybrano:"
     },
     "deleteModal": {
-      "title": "Usuń ścieżkę edukacyjną",
+      "title": "Usuń ścieżkę rozwoju",
       "description": "Spowoduje to usunięcie ścieżki i dostępu do kursów przyznanego przez tę ścieżkę."
     },
     "toast": {
-      "created": "Ścieżka edukacyjna została utworzona",
-      "updated": "Ścieżka edukacyjna została zaktualizowana",
-      "deleted": "Ścieżka edukacyjna została usunięta",
-      "languageCreated": "Język ścieżki edukacyjnej został utworzony",
-      "coursesAdded": "Kursy zostały dodane do ścieżki edukacyjnej",
-      "courseRemoved": "Kurs został usunięty ze ścieżki edukacyjnej",
-      "coursesReordered": "Kolejność kursów w ścieżce edukacyjnej została zaktualizowana"
+      "created": "Ścieżka Rozwoju została utworzona",
+      "updated": "Ścieżka Rozwoju została zaktualizowana",
+      "deleted": "Ścieżka Rozwoju została usunięta",
+      "languageCreated": "Język ścieżki rozwoju został utworzony",
+      "coursesAdded": "Kursy zostały dodane do ścieżki rozwoju",
+      "courseRemoved": "Kurs został usunięty ze ścieżki rozwoju",
+      "coursesReordered": "Kolejność kursów w ścieżce rozwoju została zaktualizowana"
     }
   },
   "newsView": {
@@ -928,6 +938,7 @@
       "noSearchResults": "Brak wyników wyszukiwania dla:",
       "announcements": "Powiadomienia",
       "lessons": "Lekcje",
+      "learningPaths": "Ścieżki Rozwoju",
       "news": "Aktualności",
       "articles": "Artykuły",
       "qa": "Pytania i odpowiedzi"
@@ -1378,9 +1389,9 @@
       "createdAt": "Utworzono"
     },
     "button": {
-      "createNew": "Utwórz nowy",
-      "clearAll": "Wyczyść wszystko",
-      "deleteSelected": "Usuń wybrane"
+      "createNew": "Utwórz nową",
+      "clearAll": "Wyczyść wszystkie filtry",
+      "deleteSelected": "Usuń wybrane kategorie"
     },
     "deleteModal": {
       "titleSingle": "Usuń kategorię",
@@ -1390,7 +1401,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategoria została usunięta pomyślnie",
-      "deleteCategoryFailed": "Nie udało się usunąć kategorii"
+      "deleteCategoryFailed": "Nie udało się usunąć kategorii",
+      "deleteCategoryAssignedToCourses": "Nie można usunąć kategorii. Jest przypisana do kursów ({{courseCount}}): {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "Nie znaleziono kategorii do usunięcia"
     },
     "breadcrumbs": {
       "categories": "Kategorie",
@@ -1413,9 +1426,29 @@
     "button": {
       "createCategory": "Utwórz kategorię"
     },
+    "language": {
+      "label": "Język",
+      "baseLanguage": "Domyślny",
+      "notAddedLanguages": "Języki do dodania",
+      "setBaseLanguage": "Ustaw jako domyślny",
+      "setBaseTitle": "Zmień język domyślny",
+      "setBaseDescription": "Użyć języka {{language}} jako domyślnego dla tej kategorii?",
+      "createTitle": "Utwórz tłumaczenie",
+      "createDescription": "Utworzyć tłumaczenie tej kategorii w języku {{language}}?",
+      "deleteTitle": "Usuń tłumaczenie",
+      "deleteDescription": "Usunąć tłumaczenie w języku {{language}}? Jego treść zostanie usunięta."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategoria została utworzona pomyślnie",
-      "categoryUpdatedSuccessfully": "Kategoria została zaktualizowana pomyślnie"
+      "categoryUpdatedSuccessfully": "Kategoria została zaktualizowana pomyślnie",
+      "baseLanguageUpdatedSuccessfully": "Język domyślny został zaktualizowany pomyślnie",
+      "baseLanguageUpdateFailed": "Nie udało się zaktualizować języka domyślnego",
+      "languageNotSupported": "Ta kategoria nie obsługuje tego języka.",
+      "alreadyExists": "Kategoria już istnieje.",
+      "categoryNotCreated": "Nie udało się utworzyć kategorii.",
+      "languageAlreadyExists": "Ten język kategorii już istnieje.",
+      "invalidLanguageToDelete": "Nie można usunąć tego języka kategorii.",
+      "baseLanguageTitleRequired": "Wybrany język domyślny musi mieć tytuł."
     },
     "error": {
       "categoryNotFound": "Kategoria nie została znaleziona",
@@ -1505,7 +1538,7 @@
         "category": "kategorie",
         "group": "grupy",
         "course": "kursy",
-        "learning_path": "ścieżki nauki",
+        "learning_path": "ścieżki rozwoju",
         "learning_mode": "tryb nauki",
         "learning_progress": "postęp nauki",
         "certificate": "certyfikaty",
@@ -1540,15 +1573,15 @@
         "category_manage": "Może tworzyć, edytować i usuwać kategorie kursów.",
         "group_read": "Może przeglądać grupy użytkowników.",
         "group_manage": "Może tworzyć, edytować i usuwać grupy użytkowników.",
-        "learning_path_read": "Może przeglądać ścieżki nauki.",
-        "learning_path_create": "Może tworzyć ścieżki nauki.",
-        "learning_path_update": "Może edytować dowolną ścieżkę nauki.",
-        "learning_path_update_own": "Może edytować utworzone przez siebie ścieżki nauki.",
-        "learning_path_delete": "Może usuwać ścieżki nauki.",
-        "learning_path_course_update": "Może dodawać, usuwać i zmieniać kolejność kursów w dowolnej ścieżce nauki.",
-        "learning_path_course_update_own": "Może dodawać, usuwać i zmieniać kolejność kursów we własnych ścieżkach nauki.",
-        "learning_path_enrollment": "Może zarządzać zapisami na ścieżki nauki.",
-        "learning_path_export": "Może eksportować ścieżki nauki do tenantów.",
+        "learning_path_read": "Może przeglądać ścieżki rozwoju.",
+        "learning_path_create": "Może tworzyć ścieżki rozwoju.",
+        "learning_path_update": "Może edytować dowolną ścieżkę rozwoju.",
+        "learning_path_update_own": "Może edytować utworzone przez siebie ścieżki rozwoju.",
+        "learning_path_delete": "Może usuwać ścieżki rozwoju.",
+        "learning_path_course_update": "Może dodawać, usuwać i zmieniać kolejność kursów w dowolnej ścieżce rozwoju.",
+        "learning_path_course_update_own": "Może dodawać, usuwać i zmieniać kolejność kursów we własnych ścieżkach rozwoju.",
+        "learning_path_enrollment": "Może zarządzać zapisami na ścieżki rozwoju.",
+        "learning_path_export": "Może eksportować ścieżki rozwoju do tenantów.",
         "course_read_assigned": "Może przeglądać kursy przypisane do tego użytkownika.",
         "course_read_manageable": "Może przeglądać kursy, którymi ten użytkownik może zarządzać.",
         "course_read": "Może przeglądać treści kursów.",
@@ -1820,6 +1853,14 @@
       "groupUpdatedSuccessfully": "Grupa zaktualizowana pomyślnie",
       "groupNotFound": "Nie znaleziono grupy"
     },
+    "language": {
+      "languageCreated": "Język grupy został pomyślnie utworzony",
+      "languageDeleted": "Język grupy został pomyślnie usunięty",
+      "baseLanguageUpdated": "Domyślny język grupy został pomyślnie zaktualizowany",
+      "setBaseLanguage": "Ustaw domyślny",
+      "setBaseTitle": "Ustaw język domyślny",
+      "setBaseDescription": "Czy na pewno chcesz ustawić {{language}} jako język domyślny?"
+    },
     "deleteGroup": {
       "title": "Potwierdź usunięcie",
       "description": "Czy na pewno chcesz usunąć te grupy?",
@@ -1878,6 +1919,8 @@
       "courseTrailerRemovedSuccessfully": "Zwiastun kursu został usunięty",
       "certificateUpdatedSuccessfully": "Certyfikat zaktualizowany pomyślnie",
       "certificateUpdateError": "Wystąpił błąd podczas aktualizacji certyfikatu",
+      "certificatesResetSuccessfully": "Zresetowano certyfikaty dla {{count}} użytkowników",
+      "certificatesResetError": "Wystąpił błąd podczas resetowania certyfikatów",
       "maxTitleLengthExceeded_one": "Tytuł nie może mieć więcej niż {{count}} znak",
       "maxTitleLengthExceeded_few": "Tytuł nie może mieć więcej niż {{count}} znaki",
       "maxTitleLengthExceeded_many": "Tytuł nie może mieć więcej niż {{count}} znaków",
@@ -1960,7 +2003,11 @@
         "removeTrailer": "Usuń zwiastun",
         "removeCertificateSignature": "Usuń podpis",
         "includesCertificate": "Zawiera certyfikat",
-        "doesNotIncludeCertificate": "Nie zawiera certyfikatu"
+        "doesNotIncludeCertificate": "Nie zawiera certyfikatu",
+        "saveValidity": "Zapisz ważność",
+        "resetCertificates": "Resetuj certyfikaty",
+        "futureOnly": "Zastosuj tylko dla nowych",
+        "applyToExisting": "Zastosuj do wszystkich (wstecznie)"
       },
       "selectButton": {
         "uploadFile": "Plik",
@@ -1984,7 +2031,11 @@
         "description": "Opis",
         "thumbnail": "Miniatura",
         "trailer": "Zwiastun kursu",
-        "baseLanguage": "Język podstawowy"
+        "baseLanguage": "Język podstawowy",
+        "validityType": "Typ ważności",
+        "validityValue": "Wartość",
+        "validityUnit": "Jednostka",
+        "validUntil": "Ważny do"
       },
       "placeholder": {
         "title": "Wprowadź tytuł",
@@ -1997,6 +2048,38 @@
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
         "enableCertificate": "Włącz certyfikat",
         "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
+        "certificateValidity": "Ważność certyfikatu",
+        "certificateValidityDescription": "Ustaw, kiedy wystawione certyfikaty wygasną i zresetują postęp kursu.",
+        "enableCertificateValidityConfirmationTitle": "Włączyć ważność certyfikatu?",
+        "enableCertificateValidityConfirmationDescription": "To ustawienie wpływa tylko na statystyki tego kursu. Po zakończeniu ważności certyfikatu objęci użytkownicy utracą postęp w tym kursie.",
+        "enableCertificateValidityConfirmationConfirm": "Włącz ważność",
+        "confirmValidityChangesTitle": "Potwierdź zmiany ważności certyfikatu",
+        "noActiveCertificatesValidityDescription": "Nie ma teraz aktywnych certyfikatów do zaktualizowania. Przyszłe certyfikaty będą korzystać z tego ustawienia ważności.",
+        "activeCertificatesStat": "Aktywne certyfikaty",
+        "immediatelyExpiringStat": "Wygasną od razu",
+        "validityPeriod": "Okres",
+        "validityFixedDate": "Konkretna data",
+        "days": "Dni",
+        "months": "Miesiące",
+        "years": "Lata",
+        "applyValidityTitle": "Zastosować ważność do istniejących certyfikatów?",
+        "applyValidityDescription": "Istnieje {{activeCount}} aktywnych certyfikatów. {{expiringCount}} wygaśnie natychmiast po zastosowaniu tej zmiany do istniejących certyfikatów.",
+        "resetCertificates": "Ręczny reset certyfikatu",
+        "resetCertificatesDescription": "Zarchiwizuj wybrane certyfikaty i zresetuj postęp kursu.",
+        "resetCertificatesDialogDescription": "Ta akcja archiwizuje aktywne certyfikaty, resetuje postęp kursu i może powiadomić użytkowników. Dotyczy tylko tego kursu.",
+        "sendResetEmail": "Wyślij e-mail do objętych użytkowników",
+        "activeCertificateCount": "{{count}} aktywne",
+        "noActiveCertificate": "Brak aktywnego certyfikatu",
+        "resetUsersSearchPlaceholder": "Szukaj uczestników po imieniu, nazwisku lub e-mailu",
+        "resetUsersStudent": "Uczestnik",
+        "resetUsersEmail": "E-mail",
+        "resetUsersLoading": "Ładowanie uczestników...",
+        "noResetUsers": "Nie znaleziono uczestników z aktywnymi certyfikatami",
+        "resetScope": {
+          "all": "Wszyscy użytkownicy",
+          "groups": "Grupy",
+          "users": "Użytkownicy"
+        },
         "certificateSignatureRequirements": "PNG lub SVG (zalecane przezroczyste tło)",
         "certificatePreviewTitle": "Podgląd certyfikatu",
         "certificatePreviewDescription": "Otwórz podgląd, aby dostosować język i kolor.",
@@ -2015,7 +2098,11 @@
         "titleMinLength": "Tytuł musi mieć co najmniej 2 znaki.",
         "titleMaxLength": "Tytuł może mieć maksymalnie 250 znaków.",
         "descriptionMinLength": "Opis musi mieć co najmniej 2 znaki.",
-        "categoryRequired": "Kategoria jest wymagana"
+        "categoryRequired": "Kategoria jest wymagana",
+        "certificateManageDenied": "Nie możesz zarządzać certyfikatami tego kursu.",
+        "validityDateRequired": "Wybierz datę ważności certyfikatu.",
+        "groupIdsRequired": "Wybierz co najmniej jedną grupę.",
+        "userIdsRequired": "Wybierz co najmniej jednego użytkownika."
       },
       "header": "Utwórz nowy kurs",
       "subHeader": "Podaj szczegóły, aby utworzyć nowy kurs. Będziesz miał więcej opcji dostosowania później.",
@@ -2157,6 +2244,8 @@
           "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
           "aiMentorLessonFileDeletedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie usunięte",
           "lessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
+          "lessonDeletedSuccessfully": "Lekcja usunięta pomyślnie",
+          "lessonDeleteError": "Nie udało się usunąć lekcji",
           "contentLessonUpdatedSuccessfully": "Lekcja zaktualizowana pomyślnie",
           "fileLessonUpdatedSuccessfully": "Plik zaktualizowany pomyślnie",
           "questionOptionsUpdatedSuccessfully": "Opcje pytania zostały pomyślnie zaktualizowane",
@@ -2817,7 +2906,8 @@
       "invalidFormatForMultiAnswer": "Nieprawidłowy format dla pytania wielokrotnego wyboru.",
       "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
-      "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!"
+      "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!",
+      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}"
     }
   },
   "studentCourseView": {
@@ -2936,8 +3026,38 @@
     },
     "tabs": {
       "chapters": "Rozdziały",
+      "chat": "Dyskusja",
       "moreFromAuthor": "Więcej od autora",
       "statistics": "Statystyki"
+    },
+    "courseChat": {
+      "title": "Dyskusja kursu",
+      "newThreadPlaceholder": "Rozpocznij nową dyskusję...",
+      "startThread": "Rozpocznij wątek",
+      "messagesTitle": "Wiadomości",
+      "noThreadSelected": "Wybierz wątek",
+      "emptyThreads": "Nie ma jeszcze dyskusji. Rozpocznij pierwszą.",
+      "emptyMessages": "Nie ma jeszcze wiadomości.",
+      "replyPlaceholder": "Napisz odpowiedź...",
+      "reply": "Odpowiedz",
+      "reactWith": "Zareaguj {{reaction}}",
+      "deleteMessage": "Usuń wiadomość",
+      "deleteMessageConfirmationTitle": "Usunąć wiadomość?",
+      "deleteMessageConfirmationDescription": "Wiadomość zostanie usunięta z dyskusji. Odpowiedzi mogą zachować zastępczy wpis, żeby rozmowa pozostała czytelna.",
+      "deletedMessage": "Ta wiadomość została usunięta.",
+      "repliesCount_one": "{{countLabel}} odpowiedź",
+      "repliesCount_few": "{{countLabel}} odpowiedzi",
+      "repliesCount_many": "{{countLabel}} odpowiedzi",
+      "repliesCount_other": "{{countLabel}} odpowiedzi",
+      "loadMoreReplies": "Załaduj więcej odpowiedzi",
+      "send": "Wyślij",
+      "selectThread": "Wybierz wątek, aby przeczytać wiadomości.",
+      "users": "Użytkownicy",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Brak zapisanych użytkowników.",
+      "mentionedToast": "Ktoś oznaczył Cię w dyskusji kursu."
     }
   },
   "studentChapterView": {
@@ -2973,7 +3093,8 @@
       "qaSettingUpdatedSuccessfully": "Ustawienia QA zostały pomyślnie zaktualizowane",
       "ageLimitUpdatedSuccessfully": "Limit wieku został pomyślnie zaktualizowany",
       "newsSettingUpdatedSuccessfully": "Ustawienia aktualności zostały pomyślnie zaktualizowane",
-      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane"
+      "articlesSettingUpdatedSuccessfully": "Ustawienia bazy wiedzy zostały pomyślnie zaktualizowane",
+      "learningPathsUpdatedSuccessfully": "Ustawienia ścieżek rozwoju zostały pomyślnie zaktualizowane"
     }
   },
   "platformSimpleLogo": {
@@ -3214,14 +3335,19 @@
       "subheader": "Podaj szczegóły, aby utworzyć nowe ogłoszenie.",
       "buttons": {
         "confirm": "Potwierdź",
-        "cancel": "Anuluj"
+        "cancel": "Anuluj",
+        "addLanguage": "Dodaj język",
+        "removeLanguage": "Usuń język",
+        "setDefaultLanguage": "Ustaw jako język domyślny"
       },
       "fields": {
         "title": "Tytuł",
         "content": "Treść",
         "group": "Grupa",
+        "language": "Język",
         "everyone": "Wszyscy"
       },
+      "addedLanguages": "Dodane języki",
       "placeholders": {
         "title": "Wprowadź tytuł",
         "content": "Napisz swoje ogłoszenie tutaj...",
@@ -3249,7 +3375,35 @@
       "markedAsRead": "Ogłoszenia oznaczone jako przeczytane",
       "markAsReadFailed": "Nie udało się oznaczyć ogłoszeń jako przeczytane",
       "createdSuccessfully": "Ogłoszenie zostało pomyślnie utworzone",
-      "createFailed": "Nie udało się utworzyć ogłoszenia"
+      "createFailed": "Nie udało się utworzyć ogłoszenia",
+      "deletedSuccessfully": "Ogłoszenie zostało usunięte",
+      "deleteFailed": "Nie udało się usunąć ogłoszenia",
+      "notFound": "Nie znaleziono ogłoszenia"
+    }
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "tabs": {
+      "all": "Wszystkie",
+      "adminAnnouncements": "Ogłoszenia adminów"
+    },
+    "actions": {
+      "refresh": "Odśwież",
+      "create": "Utwórz ogłoszenie",
+      "delete": "Usuń ogłoszenie",
+      "markRead": "Oznacz jako przeczytane",
+      "markAllRead": "Oznacz wszystkie jako przeczytane",
+      "loadMore": "Załaduj więcej",
+      "loadingMore": "Ładowanie...",
+      "goToNotificationCenter": "Przejdź do centrum powiadomień"
+    },
+    "status": {
+      "unread": "Nieprzeczytane"
+    },
+    "empty": "Brak powiadomień",
+    "deleteDialog": {
+      "title": "Usuń ogłoszenie",
+      "description": "To ogłoszenie zostanie usunięte dla wszystkich."
     }
   },
   "platformLogo": {
@@ -3385,6 +3539,65 @@
         "h3": "Nagłówek 3",
         "h4": "Nagłówek 4"
       },
+      "bold": {
+        "tooltip": "Pogrubienie: pogrubia zaznaczony tekst"
+      },
+      "italic": {
+        "tooltip": "Kursywa: pochyla zaznaczony tekst"
+      },
+      "strikethrough": {
+        "tooltip": "Przekreślenie: przekreśla zaznaczony tekst"
+      },
+      "bulletList": {
+        "tooltip": "Lista punktowana: rozpoczyna listę punktowaną"
+      },
+      "orderedList": {
+        "tooltip": "Lista numerowana: rozpoczyna listę numerowaną"
+      },
+      "taskList": {
+        "tooltip": "Lista zadań: dodaje checklistę"
+      },
+      "blockquote": {
+        "tooltip": "Cytat: formatuje tekst jako cytat blokowy"
+      },
+      "codeBlock": {
+        "tooltip": "Blok kodu: formatuje tekst jako kod"
+      },
+      "horizontalRule": {
+        "tooltip": "Linia pozioma: wstawia linię oddzielającą"
+      },
+      "table": {
+        "tooltip": "Tabela: wstaw lub edytuj tabelę",
+        "groups": {
+          "columns": "Kolumny",
+          "rows": "Wiersze",
+          "cells": "Komórki",
+          "headers": "Nagłówki"
+        },
+        "actions": {
+          "insert": "Wstaw tabelę",
+          "addColumnBefore": "Dodaj kolumnę przed",
+          "addColumnAfter": "Dodaj kolumnę po",
+          "deleteColumn": "Usuń kolumnę",
+          "addRowBefore": "Dodaj wiersz przed",
+          "addRowAfter": "Dodaj wiersz po",
+          "deleteRow": "Usuń wiersz",
+          "mergeCells": "Scal komórki",
+          "splitCell": "Podziel komórkę",
+          "mergeOrSplit": "Scal lub podziel",
+          "toggleHeaderRow": "Przełącz wiersz nagłówka",
+          "toggleHeaderColumn": "Przełącz kolumnę nagłówka",
+          "toggleHeaderCell": "Przełącz komórkę nagłówka",
+          "fixTables": "Napraw strukturę tabeli",
+          "deleteTable": "Usuń tabelę"
+        }
+      },
+      "undo": {
+        "tooltip": "Cofnij: cofa ostatnią zmianę"
+      },
+      "redo": {
+        "tooltip": "Ponów: przywraca ostatnio cofniętą zmianę"
+      },
       "link": {
         "tooltip": "Link: Wstaw lub edytuj link",
         "dialog": {
@@ -3400,6 +3613,9 @@
       "upload": {
         "uploadFailed": "Nie udało się przesłać pliku",
         "tooltip": "Prześlij: Pozwala przesłać plik"
+      },
+      "assetLibrary": {
+        "tooltip": "Biblioteka zasobów: wstaw wcześniej przesłany plik"
       }
     }
   },
@@ -3452,6 +3668,42 @@
     },
     "loadingAiAsset": {
       "processing": "Zasób jest obecnie przetwarzany"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3469,6 +3721,7 @@
     "createNewPassword": "Utwórz nowe hasło",
     "createAnnouncement": "Utwórz ogłoszenie",
     "announcements": "Ogłoszenia",
+    "notifications": "Powiadomienia",
     "users": "Użytkownicy",
     "userDetails": "Informacje o użytkowniku",
     "createNewUser": "Utwórz nowego użytkownika",
@@ -3595,6 +3848,16 @@
     },
     "tooltip": {
       "disabled": "Aby przełączyć to pole, najpierw włącz sekcję bazy wiedzy."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Skonfiguruj ustawienia ścieżek rozwoju",
+    "header": "Ustawienia ścieżek rozwoju",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Włącz ścieżki rozwoju",
+        "description": "Włącz ścieżki rozwoju. Po wyłączeniu są ukryte i zablokowane dla wszystkich użytkowników."
+      }
     }
   },
   "qaView": {
@@ -3874,19 +4137,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
-      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki edukacyjnej",
-      "noCourses": "Ścieżka edukacyjna musi zawierać co najmniej jeden kurs przed eksportem",
-      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki edukacyjnej",
+      "exportLinkMissing": "Nie znaleziono powiązania eksportu ścieżki rozwoju",
+      "noCourses": "Ścieżka Rozwoju musi zawierać co najmniej jeden kurs przed eksportem",
+      "courseExportFailed": "Nie udało się wyeksportować jednego z kursów ścieżki rozwoju",
       "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
-      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki edukacyjnej",
-      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki edukacyjnej",
-      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki edukacyjnej",
-      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki edukacyjnej"
+      "jobNotFound": "Nie znaleziono zadania eksportu ścieżki rozwoju",
+      "invalidJobData": "Nieprawidłowe dane zadania eksportu ścieżki rozwoju",
+      "invalidExportId": "Nieprawidłowy identyfikator eksportu ścieżki rozwoju",
+      "invalidExportLink": "Nieprawidłowe powiązanie eksportu ścieżki rozwoju"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Certyfikaty ścieżek edukacyjnych są wyłączone"
+      "disabled": "Certyfikaty ścieżek rozwoju są wyłączone"
     }
   },
   "activityLogsView": {
@@ -3934,6 +4197,8 @@
       "complete_lesson": "Ukończono",
       "complete_course": "Ukończono",
       "complete_chapter": "Ukończono",
+      "expire_certificate": "Certyfikat wygasł",
+      "reset_certificate": "Certyfikat zresetowany",
       "view_announcement": "Wyświetlono"
     },
     "entity": {

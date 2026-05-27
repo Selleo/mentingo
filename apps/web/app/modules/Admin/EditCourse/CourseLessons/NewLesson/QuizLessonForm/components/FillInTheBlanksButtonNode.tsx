@@ -8,6 +8,7 @@ import type { NodeViewProps } from "@tiptap/react";
 
 const FillInTheBlanksButton = ({ node, getPos, editor }: NodeViewProps) => {
   const word = node.attrs.word;
+  const optionId = node.attrs.optionId;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -27,6 +28,7 @@ const FillInTheBlanksButton = ({ node, getPos, editor }: NodeViewProps) => {
       type="button"
       className={FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}
       data-word={word}
+      data-option-id={optionId}
       onClick={handleClick}
     >
       <span>{word}</span>
@@ -44,6 +46,7 @@ export const FillInTheBlanksButtonNode = Node.create({
   addAttributes() {
     return {
       word: { default: "" },
+      optionId: { default: "" },
     };
   },
 
@@ -56,6 +59,7 @@ export const FillInTheBlanksButtonNode = Node.create({
           if (element.classList.contains("bg-primary-100") && element.dataset.word) {
             return {
               word: element.dataset.word,
+              optionId: element.dataset.optionId ?? "",
             };
           }
           return false;
@@ -65,7 +69,7 @@ export const FillInTheBlanksButtonNode = Node.create({
   },
 
   renderHTML({ node }) {
-    const { word } = node.attrs;
+    const { word, optionId } = node.attrs;
 
     return [
       "button",
@@ -73,6 +77,7 @@ export const FillInTheBlanksButtonNode = Node.create({
         type: "button",
         class: FILL_IN_THE_BLANKS_BUTTON_CLASSNAME,
         "data-word": word,
+        "data-option-id": optionId,
       }),
       `<span>${word}</span><span>${StringifiedIcons.X}</span>`,
     ];

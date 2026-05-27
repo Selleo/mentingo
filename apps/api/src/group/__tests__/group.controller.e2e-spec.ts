@@ -1,4 +1,4 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { groupUsers, lessons, studentCourses } from "src/storage/schema";
+import { groupCourses, groupUsers, lessons, studentCourses } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -144,8 +144,8 @@ describe("groupController (e2e)", () => {
           .expect(200);
 
         expect(response.body.data).toHaveLength(2);
-        expect(response.body.data[1].id).toBe(group2.id);
-        expect(response.body.data[0].id).toBe(group1.id);
+        expect(response.body.data[0].id).toBe(group2.id);
+        expect(response.body.data[1].id).toBe(group1.id);
       });
 
       it("returns all groups with sorting by created at", async () => {
@@ -416,8 +416,35 @@ describe("groupController (e2e)", () => {
         await request(app.getHttpServer())
           .post("/api/group")
           .set("Cookie", cookies)
-          .send({ name, characteristic })
+          .send({ name, characteristic, language: SUPPORTED_LANGUAGES.EN })
           .expect(201);
+      });
+
+      it("creates a group with language metadata", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+        const cookies = await cookieFor(admin, app);
+        const name = "Programiści";
+        const characteristic = "Osoby, które lubią programowanie";
+
+        const createResponse = await request(app.getHttpServer())
+          .post("/api/group")
+          .set("Cookie", cookies)
+          .send({ name, characteristic, language: SUPPORTED_LANGUAGES.PL })
+          .expect(201);
+
+        const detailResponse = await request(app.getHttpServer())
+          .get(`/api/group/${createResponse.body.data.id}`)
+          .set("Cookie", cookies)
+          .query({ language: SUPPORTED_LANGUAGES.PL })
+          .expect(200);
+
+        expect(detailResponse.body.data.name).toBe(name);
+        expect(detailResponse.body.data.characteristic).toBe(characteristic);
+        expect(detailResponse.body.data.baseLanguage).toBe(SUPPORTED_LANGUAGES.PL);
+        expect(detailResponse.body.data.availableLocales).toEqual([SUPPORTED_LANGUAGES.PL]);
       });
     });
   });
@@ -492,6 +519,53 @@ describe("groupController (e2e)", () => {
         expect(response.body.data.id).toBe(group.id);
         expect(response.body.data.name).toBe(name);
         expect(response.body.data.characteristic).toBe(characteristic);
+      });
+
+      it("updates only the selected language and falls back to base language", async () => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+        const cookies = await cookieFor(admin, app);
+        const group = await groupFactory.create({
+          name: "Developers",
+          characteristic: "People who write code",
+        });
+
+        const fallbackResponse = await request(app.getHttpServer())
+          .post(`/api/group/${group.id}/language`)
+          .set("Cookie", cookies)
+          .query({ language: SUPPORTED_LANGUAGES.PL })
+          .expect(201);
+
+        expect(fallbackResponse.body.data.name).toBe("Developers");
+        expect(fallbackResponse.body.data.characteristic).toBe("People who write code");
+        expect(fallbackResponse.body.data.availableLocales).toEqual([
+          SUPPORTED_LANGUAGES.EN,
+          SUPPORTED_LANGUAGES.PL,
+        ]);
+
+        const updateResponse = await request(app.getHttpServer())
+          .patch(`/api/group/${group.id}`)
+          .set("Cookie", cookies)
+          .send({
+            name: "Programiści",
+            characteristic: "Osoby, które piszą kod",
+            language: SUPPORTED_LANGUAGES.PL,
+          })
+          .expect(200);
+
+        expect(updateResponse.body.data.name).toBe("Programiści");
+        expect(updateResponse.body.data.characteristic).toBe("Osoby, które piszą kod");
+
+        const englishResponse = await request(app.getHttpServer())
+          .get(`/api/group/${group.id}`)
+          .set("Cookie", cookies)
+          .query({ language: SUPPORTED_LANGUAGES.EN })
+          .expect(200);
+
+        expect(englishResponse.body.data.name).toBe("Developers");
+        expect(englishResponse.body.data.characteristic).toBe("People who write code");
       });
 
       it("returns 404 if group does not exist", async () => {
@@ -578,6 +652,128 @@ describe("groupController (e2e)", () => {
           .set("Cookie", cookies)
           .expect(404);
       });
+    });
+  });
+
+  describe("group translation API", () => {
+    it("returns localized responses for list, detail, user groups, and groups by course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+      const user = await userFactory.create();
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+      });
+      const group = await groupFactory.create({
+        name: "Developers",
+        characteristic: "People who write code",
+      });
+
+      await request(app.getHttpServer())
+        .post(`/api/group/${group.id}/language`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/api/group/${group.id}`)
+        .set("Cookie", cookies)
+        .send({
+          name: "Programiści",
+          characteristic: "Osoby, które piszą kod",
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      await db.insert(groupUsers).values({ userId: user.id, groupId: group.id });
+      await db.insert(groupCourses).values({ groupId: group.id, courseId: course.id });
+
+      const listResponse = await request(app.getHttpServer())
+        .get("/api/group/all")
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+      expect(listResponse.body.data[0].name).toBe("Programiści");
+      expect(listResponse.body.data[0].characteristic).toBe("Osoby, które piszą kod");
+
+      const detailResponse = await request(app.getHttpServer())
+        .get(`/api/group/${group.id}`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+      expect(detailResponse.body.data.name).toBe("Programiści");
+
+      const userGroupsResponse = await request(app.getHttpServer())
+        .get(`/api/group/user/${user.id}`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+      expect(userGroupsResponse.body.data[0].name).toBe("Programiści");
+
+      const groupsByCourseResponse = await request(app.getHttpServer())
+        .get(`/api/group/by-course/${course.id}`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+      expect(groupsByCourseResponse.body.data[0].name).toBe("Programiści");
+    });
+
+    it("adds a language, updates base language, and deletes a non-base language", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+      const group = await groupFactory.create({ name: "Developers" });
+
+      await request(app.getHttpServer())
+        .post(`/api/group/${group.id}/language`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/api/group/${group.id}`)
+        .set("Cookie", cookies)
+        .send({ name: "Programiści", language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+
+      const baseLanguageResponse = await request(app.getHttpServer())
+        .patch(`/api/group/${group.id}/base-language`)
+        .set("Cookie", cookies)
+        .send({ baseLanguage: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+
+      expect(baseLanguageResponse.body.data.baseLanguage).toBe(SUPPORTED_LANGUAGES.PL);
+
+      const deleteLanguageResponse = await request(app.getHttpServer())
+        .delete(`/api/group/${group.id}/language`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(200);
+
+      expect(deleteLanguageResponse.body.data.availableLocales).toEqual([SUPPORTED_LANGUAGES.PL]);
+      expect(deleteLanguageResponse.body.data.name).toBe("Programiści");
+    });
+
+    it("rejects deleting the base language", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+      const group = await groupFactory.create();
+
+      await request(app.getHttpServer())
+        .delete(`/api/group/${group.id}/language`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(400);
     });
   });
 

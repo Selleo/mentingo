@@ -3,12 +3,11 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useAddArticleSectionLanguage } from "~/api/mutations/admin/useAddArticleSectionLanguage";
 import { useDeleteArticleSection } from "~/api/mutations/admin/useDeleteArticleSection";
-import { useDeleteArticleSectionLanguage } from "~/api/mutations/admin/useDeleteArticleSectionLanguage";
 import { useUpdateArticleSection } from "~/api/mutations/admin/useUpdateArticleSection";
 import { useArticleSection } from "~/api/queries/useArticleSection";
 import { Icon } from "~/components/Icon";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -24,7 +23,7 @@ import {
   articleSectionFormSchema,
   type ArticleSectionFormValues,
 } from "~/modules/Articles/articleSection.types";
-import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
+import { ArticleSectionLanguageSelector } from "~/modules/Articles/LanguageSelector";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -52,9 +51,6 @@ export function EditArticleSectionSheet({
 
   const { mutateAsync: updateSection, isPending: isUpdating } = useUpdateArticleSection();
   const { mutateAsync: deleteSection, isPending: isDeleting } = useDeleteArticleSection();
-
-  const { mutateAsync: addLanguage } = useAddArticleSectionLanguage();
-  const { mutateAsync: deleteLanguage } = useDeleteArticleSectionLanguage();
 
   const { handleSubmit, register, reset, formState } = useForm<ArticleSectionFormValues>({
     resolver: zodResolver(articleSectionFormSchema),
@@ -92,6 +88,14 @@ export function EditArticleSectionSheet({
 
   const canDeleteSection = (section?.assignedArticlesCount ?? 0) === 0;
 
+  const { selectorProps } = getLocalizedResourceLanguage({
+    value: sectionLanguage,
+    onChange: setSectionLanguage,
+    baseLanguage: section?.baseLanguage,
+    availableLocales: section?.availableLocales,
+    formKeyParts: [sectionId, section?.title ?? ""],
+  });
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-[28rem] max-w-[92vw] sm:max-w-[32rem] p-0">
@@ -113,21 +117,12 @@ export function EditArticleSectionSheet({
                 <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
                     <Label>{t("adminArticleView.section.languageLabel")}</Label>
-                    <LanguageSelector
+                    <ArticleSectionLanguageSelector
                       id={sectionId}
-                      value={sectionLanguage}
-                      baseLanguage={section?.baseLanguage}
-                      availableLocales={section?.availableLocales}
-                      onChange={setSectionLanguage}
+                      {...selectorProps}
                       onCreated={(lang) => setSectionLanguage(lang)}
                       onDeleted={() => {
                         setSectionLanguage(section?.baseLanguage ?? language);
-                      }}
-                      onCreate={async ({ id, language }) => {
-                        await addLanguage({ id, language });
-                      }}
-                      onDelete={async ({ id, language }) => {
-                        await deleteLanguage({ id, language });
                       }}
                     />
                     <div className="text-xs text-neutral-500">

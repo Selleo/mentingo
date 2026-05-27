@@ -1,6 +1,6 @@
 {
-  "id": "6d41100d-2048-4c26-8984-68a136afd2fb",
-  "prevId": "85e2df97-ccb0-4333-ba10-bf0d6a4a5c55",
+  "id": "ced0874c-5eeb-4dd9-9534-5ce7d937a400",
+  "prevId": "a6b3e099-a8db-46b0-bca0-a1c6ec600092",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1100,237 +1100,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.calendar_events": {
-      "name": "calendar_events",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "uid": {
-          "name": "uid",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "sequence": {
-          "name": "sequence",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'scheduled'"
-        },
-        "base_language": {
-          "name": "base_language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        },
-        "available_locales": {
-          "name": "available_locales",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "ARRAY['en']::text[]"
-        },
-        "title": {
-          "name": "title",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "description": {
-          "name": "description",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "starts_at": {
-          "name": "starts_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ends_at": {
-          "name": "ends_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "all_day": {
-          "name": "all_day",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "timezone": {
-          "name": "timezone",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "location": {
-          "name": "location",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "organizer_user_id": {
-          "name": "organizer_user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "rrule": {
-          "name": "rrule",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "exdates": {
-          "name": "exdates",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "calendar_events_tenant_id_idx": {
-          "name": "calendar_events_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "calendar_events_tenant_starts_ends_idx": {
-          "name": "calendar_events_tenant_starts_ends_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "starts_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "ends_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "calendar_events_tenant_uid_idx": {
-          "name": "calendar_events_tenant_uid_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "uid",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "calendar_events_organizer_user_id_users_id_fk": {
-          "name": "calendar_events_organizer_user_id_users_id_fk",
-          "tableFrom": "calendar_events",
-          "columnsFrom": [
-            "organizer_user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "set null"
-        },
-        "calendar_events_tenant_id_tenants_id_fk": {
-          "name": "calendar_events_tenant_id_tenants_id_fk",
-          "tableFrom": "calendar_events",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.categories": {
       "name": "categories",
       "schema": "",
@@ -1667,6 +1436,559 @@
         "chapters_tenant_id_tenants_id_fk": {
           "name": "chapters_tenant_id_tenants_id_fk",
           "tableFrom": "chapters",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.course_chat_message_reactions": {
+      "name": "course_chat_message_reactions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "message_id": {
+          "name": "message_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reaction": {
+          "name": "reaction",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "course_chat_message_reactions_tenant_id_idx": {
+          "name": "course_chat_message_reactions_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_message_reactions_message_id_reaction_idx": {
+          "name": "course_chat_message_reactions_message_id_reaction_idx",
+          "columns": [
+            {
+              "expression": "message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "reaction",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_message_reactions_user_message_reaction_unique_idx": {
+          "name": "course_chat_message_reactions_user_message_reaction_unique_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "reaction",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "course_chat_message_reactions_message_id_course_chat_messages_id_fk": {
+          "name": "course_chat_message_reactions_message_id_course_chat_messages_id_fk",
+          "tableFrom": "course_chat_message_reactions",
+          "columnsFrom": [
+            "message_id"
+          ],
+          "tableTo": "course_chat_messages",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_message_reactions_course_id_courses_id_fk": {
+          "name": "course_chat_message_reactions_course_id_courses_id_fk",
+          "tableFrom": "course_chat_message_reactions",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "tableTo": "courses",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_message_reactions_user_id_users_id_fk": {
+          "name": "course_chat_message_reactions_user_id_users_id_fk",
+          "tableFrom": "course_chat_message_reactions",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "users",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_message_reactions_tenant_id_tenants_id_fk": {
+          "name": "course_chat_message_reactions_tenant_id_tenants_id_fk",
+          "tableFrom": "course_chat_message_reactions",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.course_chat_messages": {
+      "name": "course_chat_messages",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "thread_id": {
+          "name": "thread_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parent_message_id": {
+          "name": "parent_message_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "course_chat_messages_tenant_id_idx": {
+          "name": "course_chat_messages_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_messages_course_id_created_at_idx": {
+          "name": "course_chat_messages_course_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_messages_thread_id_created_at_idx": {
+          "name": "course_chat_messages_thread_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "thread_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_messages_parent_message_id_created_at_idx": {
+          "name": "course_chat_messages_parent_message_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "parent_message_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "course_chat_messages_thread_id_course_chat_threads_id_fk": {
+          "name": "course_chat_messages_thread_id_course_chat_threads_id_fk",
+          "tableFrom": "course_chat_messages",
+          "columnsFrom": [
+            "thread_id"
+          ],
+          "tableTo": "course_chat_threads",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_messages_course_id_courses_id_fk": {
+          "name": "course_chat_messages_course_id_courses_id_fk",
+          "tableFrom": "course_chat_messages",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "tableTo": "courses",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_messages_user_id_users_id_fk": {
+          "name": "course_chat_messages_user_id_users_id_fk",
+          "tableFrom": "course_chat_messages",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "users",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_messages_parent_message_id_course_chat_messages_id_fk": {
+          "name": "course_chat_messages_parent_message_id_course_chat_messages_id_fk",
+          "tableFrom": "course_chat_messages",
+          "columnsFrom": [
+            "parent_message_id"
+          ],
+          "tableTo": "course_chat_messages",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "set null"
+        },
+        "course_chat_messages_tenant_id_tenants_id_fk": {
+          "name": "course_chat_messages_tenant_id_tenants_id_fk",
+          "tableFrom": "course_chat_messages",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.course_chat_threads": {
+      "name": "course_chat_threads",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "course_id": {
+          "name": "course_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_by_user_id": {
+          "name": "created_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "archived": {
+          "name": "archived",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "course_chat_threads_tenant_id_idx": {
+          "name": "course_chat_threads_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_threads_course_id_created_at_idx": {
+          "name": "course_chat_threads_course_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "course_chat_threads_course_id_updated_at_idx": {
+          "name": "course_chat_threads_course_id_updated_at_idx",
+          "columns": [
+            {
+              "expression": "course_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "updated_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "course_chat_threads_course_id_courses_id_fk": {
+          "name": "course_chat_threads_course_id_courses_id_fk",
+          "tableFrom": "course_chat_threads",
+          "columnsFrom": [
+            "course_id"
+          ],
+          "tableTo": "courses",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_threads_created_by_user_id_users_id_fk": {
+          "name": "course_chat_threads_created_by_user_id_users_id_fk",
+          "tableFrom": "course_chat_threads",
+          "columnsFrom": [
+            "created_by_user_id"
+          ],
+          "tableTo": "users",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "course_chat_threads_tenant_id_tenants_id_fk": {
+          "name": "course_chat_threads_tenant_id_tenants_id_fk",
+          "tableFrom": "course_chat_threads",
           "columnsFrom": [
             "tenant_id"
           ],
@@ -5240,1568 +5562,6 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
-    },
-    "public.live_lessons": {
-      "name": "live_lessons",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "live_training_link_id": {
-          "name": "live_training_link_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "lesson_id": {
-          "name": "lesson_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "language": {
-          "name": "language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_lessons_tenant_id_idx": {
-          "name": "live_lessons_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_lessons_lesson_language_unique_idx": {
-          "name": "live_lessons_lesson_language_unique_idx",
-          "columns": [
-            {
-              "expression": "lesson_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "language",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_lessons_training_link_idx": {
-          "name": "live_lessons_training_link_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_link_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_lessons_training_idx": {
-          "name": "live_lessons_training_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_lessons_live_training_id_live_trainings_id_fk": {
-          "name": "live_lessons_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_lessons",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_lessons_live_training_link_id_live_training_links_id_fk": {
-          "name": "live_lessons_live_training_link_id_live_training_links_id_fk",
-          "tableFrom": "live_lessons",
-          "columnsFrom": [
-            "live_training_link_id"
-          ],
-          "tableTo": "live_training_links",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_lessons_lesson_id_lessons_id_fk": {
-          "name": "live_lessons_lesson_id_lessons_id_fk",
-          "tableFrom": "live_lessons",
-          "columnsFrom": [
-            "lesson_id"
-          ],
-          "tableTo": "lessons",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_lessons_tenant_id_tenants_id_fk": {
-          "name": "live_lessons_tenant_id_tenants_id_fk",
-          "tableFrom": "live_lessons",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_training_attendance": {
-      "name": "live_training_attendance",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_session_participant_id": {
-          "name": "live_training_session_participant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "live_training_session_id": {
-          "name": "live_training_session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "joined_at": {
-          "name": "joined_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "left_at": {
-          "name": "left_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "livekit_participant_sid": {
-          "name": "livekit_participant_sid",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "disconnect_reason": {
-          "name": "disconnect_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_training_attendance_tenant_id_idx": {
-          "name": "live_training_attendance_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_attendance_session_user_idx": {
-          "name": "live_training_attendance_session_user_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_session_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_attendance_training_user_idx": {
-          "name": "live_training_attendance_training_user_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_attendance_joined_at_idx": {
-          "name": "live_training_attendance_joined_at_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "joined_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_training_attendance_live_training_session_participant_id_live_training_session_participants_id_fk": {
-          "name": "live_training_attendance_live_training_session_participant_id_live_training_session_participants_id_fk",
-          "tableFrom": "live_training_attendance",
-          "columnsFrom": [
-            "live_training_session_participant_id"
-          ],
-          "tableTo": "live_training_session_participants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_attendance_live_training_session_id_live_training_sessions_id_fk": {
-          "name": "live_training_attendance_live_training_session_id_live_training_sessions_id_fk",
-          "tableFrom": "live_training_attendance",
-          "columnsFrom": [
-            "live_training_session_id"
-          ],
-          "tableTo": "live_training_sessions",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_attendance_live_training_id_live_trainings_id_fk": {
-          "name": "live_training_attendance_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_training_attendance",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_attendance_user_id_users_id_fk": {
-          "name": "live_training_attendance_user_id_users_id_fk",
-          "tableFrom": "live_training_attendance",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_training_attendance_tenant_id_tenants_id_fk": {
-          "name": "live_training_attendance_tenant_id_tenants_id_fk",
-          "tableFrom": "live_training_attendance",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_training_links": {
-      "name": "live_training_links",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "entity_type": {
-          "name": "entity_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'course'"
-        },
-        "entity_id": {
-          "name": "entity_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_training_links_tenant_id_idx": {
-          "name": "live_training_links_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_links_training_entity_unique_idx": {
-          "name": "live_training_links_training_entity_unique_idx",
-          "columns": [
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_links_training_idx": {
-          "name": "live_training_links_training_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_links_entity_idx": {
-          "name": "live_training_links_entity_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_type",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "entity_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_training_links_live_training_id_live_trainings_id_fk": {
-          "name": "live_training_links_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_training_links",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_links_tenant_id_tenants_id_fk": {
-          "name": "live_training_links_tenant_id_tenants_id_fk",
-          "tableFrom": "live_training_links",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_training_members": {
-      "name": "live_training_members",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'host'"
-        },
-        "display_order": {
-          "name": "display_order",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "settings": {
-          "name": "settings",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_training_members_tenant_id_idx": {
-          "name": "live_training_members_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_members_training_user_unique_idx": {
-          "name": "live_training_members_training_user_unique_idx",
-          "columns": [
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_members_training_idx": {
-          "name": "live_training_members_training_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_members_user_idx": {
-          "name": "live_training_members_user_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_members_role_idx": {
-          "name": "live_training_members_role_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "role",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_training_members_live_training_id_live_trainings_id_fk": {
-          "name": "live_training_members_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_training_members",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_members_user_id_users_id_fk": {
-          "name": "live_training_members_user_id_users_id_fk",
-          "tableFrom": "live_training_members",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_training_members_tenant_id_tenants_id_fk": {
-          "name": "live_training_members_tenant_id_tenants_id_fk",
-          "tableFrom": "live_training_members",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_training_session_participants": {
-      "name": "live_training_session_participants",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_session_id": {
-          "name": "live_training_session_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "first_joined_at": {
-          "name": "first_joined_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_left_at": {
-          "name": "last_left_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "total_seconds": {
-          "name": "total_seconds",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "join_count": {
-          "name": "join_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "livekit_identity": {
-          "name": "livekit_identity",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_training_session_participants_tenant_id_idx": {
-          "name": "live_training_session_participants_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_session_participants_session_user_unique_idx": {
-          "name": "live_training_session_participants_session_user_unique_idx",
-          "columns": [
-            {
-              "expression": "live_training_session_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_session_participants_session_idx": {
-          "name": "live_training_session_participants_session_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_session_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_session_participants_training_user_idx": {
-          "name": "live_training_session_participants_training_user_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_session_participants_user_idx": {
-          "name": "live_training_session_participants_user_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_training_session_participants_live_training_session_id_live_training_sessions_id_fk": {
-          "name": "live_training_session_participants_live_training_session_id_live_training_sessions_id_fk",
-          "tableFrom": "live_training_session_participants",
-          "columnsFrom": [
-            "live_training_session_id"
-          ],
-          "tableTo": "live_training_sessions",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_session_participants_live_training_id_live_trainings_id_fk": {
-          "name": "live_training_session_participants_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_training_session_participants",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_session_participants_user_id_users_id_fk": {
-          "name": "live_training_session_participants_user_id_users_id_fk",
-          "tableFrom": "live_training_session_participants",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_training_session_participants_tenant_id_tenants_id_fk": {
-          "name": "live_training_session_participants_tenant_id_tenants_id_fk",
-          "tableFrom": "live_training_session_participants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_training_sessions": {
-      "name": "live_training_sessions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "live_training_id": {
-          "name": "live_training_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'waiting'"
-        },
-        "started_at": {
-          "name": "started_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ended_at": {
-          "name": "ended_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "started_by_user_id": {
-          "name": "started_by_user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "ended_by_user_id": {
-          "name": "ended_by_user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "end_reason": {
-          "name": "end_reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "livekit_room_name": {
-          "name": "livekit_room_name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "livekit_room_sid": {
-          "name": "livekit_room_sid",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "peak_participant_count": {
-          "name": "peak_participant_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "unique_participant_count": {
-          "name": "unique_participant_count",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_training_sessions_tenant_id_idx": {
-          "name": "live_training_sessions_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_sessions_training_idx": {
-          "name": "live_training_sessions_training_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "live_training_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_sessions_status_idx": {
-          "name": "live_training_sessions_status_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_training_sessions_livekit_room_name_idx": {
-          "name": "live_training_sessions_livekit_room_name_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "livekit_room_name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_training_sessions_live_training_id_live_trainings_id_fk": {
-          "name": "live_training_sessions_live_training_id_live_trainings_id_fk",
-          "tableFrom": "live_training_sessions",
-          "columnsFrom": [
-            "live_training_id"
-          ],
-          "tableTo": "live_trainings",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_training_sessions_started_by_user_id_users_id_fk": {
-          "name": "live_training_sessions_started_by_user_id_users_id_fk",
-          "tableFrom": "live_training_sessions",
-          "columnsFrom": [
-            "started_by_user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_training_sessions_ended_by_user_id_users_id_fk": {
-          "name": "live_training_sessions_ended_by_user_id_users_id_fk",
-          "tableFrom": "live_training_sessions",
-          "columnsFrom": [
-            "ended_by_user_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_training_sessions_tenant_id_tenants_id_fk": {
-          "name": "live_training_sessions_tenant_id_tenants_id_fk",
-          "tableFrom": "live_training_sessions",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.live_trainings": {
-      "name": "live_trainings",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "calendar_event_id": {
-          "name": "calendar_event_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "author_id": {
-          "name": "author_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "base_language": {
-          "name": "base_language",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'en'"
-        },
-        "available_locales": {
-          "name": "available_locales",
-          "type": "text[]",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "ARRAY['en']::text[]"
-        },
-        "delivery_type": {
-          "name": "delivery_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'online'"
-        },
-        "visibility_scope": {
-          "name": "visibility_scope",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'linked_courses'"
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'scheduled'"
-        },
-        "max_participants": {
-          "name": "max_participants",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 100
-        },
-        "settings": {
-          "name": "settings",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{\"viewerPermissions\":{\"microphoneEnabled\":false,\"cameraEnabled\":false}}'::jsonb"
-        },
-        "metadata": {
-          "name": "metadata",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
-        },
-        "deleted_at": {
-          "name": "deleted_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        }
-      },
-      "indexes": {
-        "live_trainings_tenant_id_idx": {
-          "name": "live_trainings_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_trainings_tenant_status_idx": {
-          "name": "live_trainings_tenant_status_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        },
-        "live_trainings_author_idx": {
-          "name": "live_trainings_author_idx",
-          "columns": [
-            {
-              "expression": "author_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "with": {},
-          "method": "btree",
-          "concurrently": false
-        }
-      },
-      "foreignKeys": {
-        "live_trainings_calendar_event_id_calendar_events_id_fk": {
-          "name": "live_trainings_calendar_event_id_calendar_events_id_fk",
-          "tableFrom": "live_trainings",
-          "columnsFrom": [
-            "calendar_event_id"
-          ],
-          "tableTo": "calendar_events",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        },
-        "live_trainings_author_id_users_id_fk": {
-          "name": "live_trainings_author_id_users_id_fk",
-          "tableFrom": "live_trainings",
-          "columnsFrom": [
-            "author_id"
-          ],
-          "tableTo": "users",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "no action"
-        },
-        "live_trainings_tenant_id_tenants_id_fk": {
-          "name": "live_trainings_tenant_id_tenants_id_fk",
-          "tableFrom": "live_trainings",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "tableTo": "tenants",
-          "columnsTo": [
-            "id"
-          ],
-          "onUpdate": "no action",
-          "onDelete": "cascade"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "live_trainings_calendar_event_id_unique": {
-          "name": "live_trainings_calendar_event_id_unique",
-          "columns": [
-            "calendar_event_id"
-          ],
-          "nullsNotDistinct": false
-        }
-      }
     },
     "public.magic_link_tokens": {
       "name": "magic_link_tokens",

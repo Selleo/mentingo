@@ -9,6 +9,7 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   lessons,
+  quizAttempts,
   questions,
   questionAnswerOptions,
   studentCourses,
@@ -76,6 +77,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   afterEach(async () => {
     await truncateTables(baseDb, [
+      "quiz_attempts",
       "courses",
       "chapters",
       "lessons",
@@ -238,6 +240,65 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         ),
       );
   };
+
+  describe("DELETE /api/lesson - quiz lesson deletion", () => {
+    it("should delete a quiz lesson with linked quiz attempts", async () => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        settings: {
+          lessonSequenceEnabled: false,
+          quizFeedbackEnabled: true,
+        },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+      const { lesson } = await createQuizLesson(course.id, chapter.id, admin.id);
+
+      await db.insert(quizAttempts).values({
+        id: crypto.randomUUID(),
+        userId: student.id,
+        courseId: course.id,
+        lessonId: lesson.id,
+        correctAnswers: 1,
+        wrongAnswers: 0,
+        score: 100,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      const response = await request(app.getHttpServer())
+        .delete("/api/lesson")
+        .query({ lessonId: lesson.id })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(response.body.data.message).toBe(
+        "adminCourseView.curriculum.lesson.toast.lessonDeletedSuccessfully",
+      );
+
+      const deletedLessons = await db
+        .select({ id: lessons.id })
+        .from(lessons)
+        .where(eq(lessons.id, lesson.id));
+      const remainingQuizAttempts = await db
+        .select({ id: quizAttempts.id })
+        .from(quizAttempts)
+        .where(eq(quizAttempts.lessonId, lesson.id));
+
+      expect(deletedLessons).toHaveLength(0);
+      expect(remainingQuizAttempts).toHaveLength(0);
+    });
+  });
 
   describe("GET /api/lesson/:id - quiz feedback redaction", () => {
     it("should redact quiz feedback for student when quizFeedbackEnabled is false", async () => {

@@ -8,15 +8,17 @@ import { RequiredTick } from "~/modules/Admin/Groups/components/RequiredTick";
 
 import { GROUP_FORM_HANDLES } from "../../../../../e2e/data/groups/handles";
 
+import type { ReactNode } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { GroupFormValues } from "~/modules/Admin/Groups/group.utils";
 
 interface CreateGroupProps {
   form: UseFormReturn<GroupFormValues>;
   handleSubmit: (group: GroupFormValues) => Promise<void>;
+  languageSelector?: ReactNode;
 }
 
-const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
+const CreateGroupCard = ({ form, handleSubmit, languageSelector }: CreateGroupProps) => {
   const { t } = useTranslation();
   return (
     <section className="mt-4 flex w-full grow flex-col gap-y-6 rounded-lg bg-white p-6 drop-shadow">
@@ -26,6 +28,7 @@ const CreateGroupCard = ({ form, handleSubmit }: CreateGroupProps) => {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="flex grow flex-col space-y-4">
+          {languageSelector}
           <FormField
             control={form.control}
             name="name"

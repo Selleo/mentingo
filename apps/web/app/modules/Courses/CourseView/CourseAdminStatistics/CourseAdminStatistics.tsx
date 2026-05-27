@@ -25,6 +25,7 @@ import {
   type FilterConfig,
 } from "~/modules/common/SearchFilter/SearchFilter";
 import { CourseStudentsLearningTimeTable } from "~/modules/Courses/CourseView/CourseAdminStatistics/components/CourseStudentsLearningTimeTable";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
 
@@ -73,6 +74,7 @@ export const formatLearningTime = (totalSeconds: number) => {
 
 export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
   const courseId = course?.id || "";
 
   const { hasAccess: canManageCourses } = usePermissions({
@@ -127,6 +129,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { data: learningTimeFilterOptions } = useCourseStatisticsFilter({
     id: courseId,
     enabled: canManageCourses,
+    language,
   });
 
   const { data: courseStatistics } = useCourseStatistics({

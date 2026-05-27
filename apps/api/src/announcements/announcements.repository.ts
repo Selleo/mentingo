@@ -4,17 +4,22 @@ import {
   eq,
   and,
   getTableColumns,
+  count,
   countDistinct,
   isNotNull,
   sql,
   not,
   desc,
-  ilike,
   or,
   isNull,
+  inArray,
+  type SQL,
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { addPagination } from "src/common/pagination";
+import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsService } from "src/permissions/permissions.service";
 import {
   announcements,
@@ -23,58 +28,55 @@ import {
   userAnnouncements,
   users,
 } from "src/storage/schema";
-import { UserService } from "src/user/user.service";
-
-import { LATEST_ANNOUNCEMENTS_LIMIT } from "./consts";
 
 import type {
   Announcement,
   CreateAnnouncement,
   AnnouncementFilters,
 } from "./types/announcement.types";
+import type { AnnouncementPagination } from "./types/announcementPagination.types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AnnouncementsRepository {
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
-    private readonly userService: UserService,
     private readonly permissionsService: PermissionsService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
-  async getAllAnnouncements() {
-    const announcementsData = await this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getAuthorFields(),
-      })
-      .from(announcements)
-      .leftJoin(users, eq(announcements.authorId, users.id))
-      .orderBy(desc(announcements.createdAt));
+  async getAllAnnouncements(
+    language: SupportedLanguages | undefined,
+    pagination: AnnouncementPagination,
+  ) {
+    return this.db.transaction(async (trx) => {
+      const announcementsQuery = trx
+        .select({
+          ...getTableColumns(announcements),
+          ...this.getLocalizedAnnouncementFields(language),
+        })
+        .from(announcements)
+        .where(isNull(announcements.deletedAt))
+        .orderBy(desc(announcements.createdAt))
+        .$dynamic();
 
-    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
-  }
+      const announcementsData = await addPagination(
+        announcementsQuery,
+        pagination.page,
+        pagination.perPage,
+      );
 
-  async getLatestUnreadAnnouncements(userId: UUIDType) {
-    const announcementsData = await this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getAuthorFields(),
-      })
-      .from(announcements)
-      .leftJoin(
-        userAnnouncements,
-        and(
-          eq(announcements.id, userAnnouncements.announcementId),
-          eq(userAnnouncements.userId, userId),
-        ),
-      )
-      .leftJoin(users, eq(announcements.authorId, users.id))
-      .where(eq(userAnnouncements.isRead, false))
-      .orderBy(desc(announcements.createdAt))
-      .limit(LATEST_ANNOUNCEMENTS_LIMIT);
+      const [{ totalItems }] = await trx
+        .select({ totalItems: count() })
+        .from(announcements)
+        .where(isNull(announcements.deletedAt));
 
-    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+      return {
+        data: announcementsData,
+        pagination: { ...pagination, totalItems },
+      };
+    });
   }
 
   async getUnreadAnnouncementsCount(userId: UUIDType) {
@@ -83,15 +85,39 @@ export class AnnouncementsRepository {
         unreadCount: countDistinct(announcements.id),
       })
       .from(userAnnouncements)
-      .where(and(eq(userAnnouncements.userId, userId), eq(userAnnouncements.isRead, false)));
+      .innerJoin(announcements, eq(announcements.id, userAnnouncements.announcementId))
+      .where(
+        and(
+          eq(userAnnouncements.userId, userId),
+          eq(userAnnouncements.isRead, false),
+          isNull(announcements.deletedAt),
+        ),
+      );
   }
 
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, authorId: UUIDType) {
-    const { groupId, ...announcementData } = createAnnouncementData;
+    const { groupId, baseLanguage, translations } = createAnnouncementData;
+
+    const titleTranslations = Object.fromEntries(
+      translations.map((translation) => [translation.language, translation.title]),
+    );
+
+    const contentTranslations = Object.fromEntries(
+      translations.map((translation) => [translation.language, translation.content]),
+    );
+
+    const availableLocales = translations.map((translation) => translation.language);
 
     const [announcement] = await this.db
       .insert(announcements)
-      .values({ ...announcementData, authorId, isEveryone: groupId === null })
+      .values({
+        title: buildJsonbFieldWithMultipleEntries(titleTranslations),
+        content: buildJsonbFieldWithMultipleEntries(contentTranslations),
+        baseLanguage,
+        availableLocales,
+        authorId,
+        isEveryone: groupId === null,
+      })
       .returning();
 
     if (groupId) {
@@ -117,7 +143,7 @@ export class AnnouncementsRepository {
         announcement.id,
       );
 
-      return announcement;
+      return this.getAnnouncementSnapshot(announcement.id, baseLanguage);
     }
 
     const allUserIds = await this.db
@@ -129,7 +155,7 @@ export class AnnouncementsRepository {
       announcement.id,
     );
 
-    return announcement;
+    return this.getAnnouncementSnapshot(announcement.id, baseLanguage);
   }
 
   async getAnnouncementById(announcementId: UUIDType) {
@@ -140,13 +166,13 @@ export class AnnouncementsRepository {
       })
       .from(announcements)
       .leftJoin(groupAnnouncements, eq(groupAnnouncements.announcementId, announcements.id))
-      .where(eq(announcements.id, announcementId));
+      .where(and(eq(announcements.id, announcementId), isNull(announcements.deletedAt)));
   }
 
   async markAnnouncementAsRead(announcementId: string, userId: UUIDType) {
     return await this.db
       .update(userAnnouncements)
-      .set({ isRead: true })
+      .set({ isRead: true, readAt: sql`CURRENT_TIMESTAMP` })
       .where(
         and(
           eq(userAnnouncements.announcementId, announcementId),
@@ -156,56 +182,142 @@ export class AnnouncementsRepository {
       .returning();
   }
 
-  async getAnnouncementsForUser(userId: UUIDType, filters?: AnnouncementFilters) {
-    const baseQuery = this.db
-      .select({
-        ...getTableColumns(announcements),
-        ...this.getAuthorFields(),
-        isRead: userAnnouncements.isRead,
-      })
-      .from(announcements)
-      .leftJoin(
-        userAnnouncements,
+  async markAllAnnouncementsAsRead(userId: UUIDType) {
+    const activeAnnouncementIds = this.db
+      .$with("active_announcement_ids")
+      .as(
+        this.db
+          .select({ id: announcements.id })
+          .from(announcements)
+          .where(isNull(announcements.deletedAt)),
+      );
+
+    const updatedAnnouncements = await this.db
+      .with(activeAnnouncementIds)
+      .update(userAnnouncements)
+      .set({ isRead: true, readAt: sql`CURRENT_TIMESTAMP` })
+      .where(
         and(
-          eq(announcements.id, userAnnouncements.announcementId),
           eq(userAnnouncements.userId, userId),
+          eq(userAnnouncements.isRead, false),
+          inArray(
+            userAnnouncements.announcementId,
+            this.db.select({ id: activeAnnouncementIds.id }).from(activeAnnouncementIds),
+          ),
         ),
       )
-      .leftJoin(users, eq(announcements.authorId, users.id));
+      .returning({ id: userAnnouncements.id });
 
-    const filterConditions = this.getFiltersConditions(filters);
-
-    const announcementsData = await baseQuery
-      .where(and(isNotNull(userAnnouncements.userId), ...(filterConditions as any)))
-      .orderBy(desc(announcements.createdAt));
-
-    return await this.mapAnnouncementsWithProfilePictures(announcementsData);
+    return updatedAnnouncements.length;
   }
 
-  private getFiltersConditions(filters?: AnnouncementFilters) {
-    const conditions = [] as unknown[];
+  async deleteAnnouncement(announcementId: UUIDType) {
+    return await this.db
+      .update(announcements)
+      .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
+      .where(and(eq(announcements.id, announcementId), isNull(announcements.deletedAt)))
+      .returning();
+  }
+
+  async getAnnouncementsForUser(
+    userId: UUIDType,
+    filters: AnnouncementFilters | undefined,
+    language: SupportedLanguages | undefined,
+    pagination: AnnouncementPagination,
+  ) {
+    const filterConditions = this.getFiltersConditions(filters, language);
+
+    const conditions = and(
+      isNotNull(userAnnouncements.userId),
+      isNull(announcements.deletedAt),
+      ...filterConditions,
+    );
+
+    return this.db.transaction(async (trx) => {
+      const announcementsQuery = trx
+        .select({
+          ...getTableColumns(announcements),
+          ...this.getLocalizedAnnouncementFields(language),
+          isRead: userAnnouncements.isRead,
+        })
+        .from(announcements)
+        .innerJoin(
+          userAnnouncements,
+          and(
+            eq(announcements.id, userAnnouncements.announcementId),
+            eq(userAnnouncements.userId, userId),
+          ),
+        )
+        .where(conditions)
+        .orderBy(desc(announcements.createdAt))
+        .$dynamic();
+
+      const announcementsData = await addPagination(
+        announcementsQuery,
+        pagination.page,
+        pagination.perPage,
+      );
+
+      const [{ totalItems }] = await trx
+        .select({ totalItems: countDistinct(announcements.id) })
+        .from(announcements)
+        .innerJoin(
+          userAnnouncements,
+          and(
+            eq(announcements.id, userAnnouncements.announcementId),
+            eq(userAnnouncements.userId, userId),
+          ),
+        )
+        .where(conditions);
+
+      return {
+        data: announcementsData,
+        pagination: { ...pagination, totalItems },
+      };
+    });
+  }
+
+  private getFiltersConditions(filters?: AnnouncementFilters, language?: SupportedLanguages) {
+    const conditions: SQL<unknown>[] = [];
 
     if (!filters) return [sql`1=1`];
 
     if (filters.title)
-      conditions.push(ilike(announcements.title, `%${filters.title.toLowerCase()}%`));
+      conditions.push(
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.title,
+          `%${filters.title.toLowerCase()}%`,
+          language,
+        ),
+      );
+
     if (filters.content)
-      conditions.push(ilike(announcements.content, `%${filters.content.toLowerCase()}%`));
+      conditions.push(
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.content,
+          `%${filters.content.toLowerCase()}%`,
+          language,
+        ),
+      );
+
     if (filters.isRead !== undefined) conditions.push(eq(userAnnouncements.isRead, filters.isRead));
-    if (filters.authorName)
-      conditions.push(
-        or(
-          ilike(users.firstName, `%${filters.authorName.toLowerCase()}%`),
-          ilike(users.lastName, `%${filters.authorName.toLowerCase()}%`),
+
+    if (filters.search) {
+      const searchCondition = or(
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.title,
+          `%${filters.search.toLowerCase()}%`,
+          language,
+        ),
+        this.localizationService.getLocalizedFieldSearchCondition(
+          announcements.content,
+          `%${filters.search.toLowerCase()}%`,
+          language,
         ),
       );
-    if (filters.search)
-      conditions.push(
-        or(
-          ilike(announcements.title, `%${filters.search.toLowerCase()}%`),
-          ilike(announcements.content, `%${filters.search.toLowerCase()}%`),
-        ),
-      );
+
+      if (searchCondition) conditions.push(searchCondition);
+    }
 
     return conditions.length ? conditions : [sql`1=1`];
   }
@@ -222,21 +334,33 @@ export class AnnouncementsRepository {
     await this.db.insert(userAnnouncements).values(userAnnouncementsToInsert);
   }
 
-  getAuthorFields() {
+  private getLocalizedAnnouncementFields(language?: SupportedLanguages) {
     return {
-      authorName: sql<string>`concat(${users.firstName}, ' ', ${users.lastName})`,
-      authorProfilePictureUrl: users.avatarReference,
+      title: this.localizationService.getLocalizedSqlField(
+        announcements.title,
+        language,
+        announcements,
+      ),
+      content: this.localizationService.getLocalizedSqlField(
+        announcements.content,
+        language,
+        announcements,
+      ),
     };
   }
 
-  async mapAnnouncementsWithProfilePictures(announcementsData: Announcement[]) {
-    return Promise.all(
-      announcementsData.map(async (announcement) => ({
-        ...announcement,
-        authorProfilePictureUrl: await this.userService.getUsersProfilePictureUrl(
-          announcement.authorProfilePictureUrl,
-        ),
-      })),
-    );
+  private async getAnnouncementSnapshot(
+    announcementId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<Announcement> {
+    const [announcement] = await this.db
+      .select({
+        ...getTableColumns(announcements),
+        ...this.getLocalizedAnnouncementFields(language),
+      })
+      .from(announcements)
+      .where(eq(announcements.id, announcementId));
+
+    return announcement;
   }
 }

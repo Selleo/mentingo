@@ -4,13 +4,16 @@ import {
   SYSTEM_ROLE_PERMISSIONS,
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
+  SUPPORTED_LANGUAGES,
   type SystemRoleSlug,
 } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
   aiMentorLessons,
   categories,
@@ -31,6 +34,52 @@ import { StripeService } from "src/stripe/stripe.service";
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
 
+const BLANK_ANSWER_MARKER_PREFIX = "<blank-answer-";
+const LEGACY_BLANK_MARKER = "[word]";
+
+type SeedQuestionData = NonNullable<
+  NonNullable<NiceCourseData["chapters"][number]["lessons"][number]["questions"]>[number]
+>;
+
+type SeedQuestionOption = NonNullable<SeedQuestionData["options"]>[number];
+
+const isFillInTheBlanksQuestion = (questionType: SeedQuestionData["type"]) =>
+  questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND ||
+  questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
+
+const replaceLegacyBlankMarkers = (description: string | undefined, answerIds: UUIDType[]) => {
+  if (!description || description.includes(BLANK_ANSWER_MARKER_PREFIX)) return description;
+
+  let answerIndex = 0;
+  return description.replaceAll(LEGACY_BLANK_MARKER, () => {
+    const answerId = answerIds[answerIndex];
+    answerIndex += 1;
+
+    return answerId ? `<blank-answer-${answerId}>` : LEGACY_BLANK_MARKER;
+  });
+};
+
+const normalizeOptionalString = (value: string | null | undefined) => value ?? undefined;
+
+const buildQuestionAnswerOptionList = (
+  questionOptions: SeedQuestionOption[],
+  questionId: UUIDType,
+  createdAt: string,
+  tenantId: UUIDType,
+) =>
+  questionOptions.map((questionAnswerOption, index) => ({
+    id: crypto.randomUUID(),
+    createdAt: createdAt,
+    updatedAt: createdAt,
+    questionId,
+    optionText: sql`json_build_object('en', ${questionAnswerOption.optionText}::text)`,
+    isCorrect: questionAnswerOption.isCorrect || false,
+    displayOrder: index + 1,
+    matchedWord: sql`json_build_object('en', ${questionAnswerOption.matchedWord || null}::text)`,
+    scaleAnswer: questionAnswerOption.scaleAnswer || null,
+    tenantId,
+  }));
+
 export async function createNiceCourses(
   creatorUserIds: UUIDType[],
   db: DatabasePg,
@@ -44,24 +93,27 @@ export async function createNiceCourses(
     const creatorIndex = i % creatorUserIds.length;
     const creatorUserId = creatorUserIds[creatorIndex];
 
-    await db
-      .insert(categories)
-      .values({
-        id: crypto.randomUUID(),
-        title: courseData.category,
-        archived: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        tenantId,
-      })
-      .onConflictDoNothing({
-        target: [categories.tenantId, categories.title],
-      });
-
-    const [category] = await db
+    const [existingCategory] = await db
       .select()
       .from(categories)
-      .where(and(eq(categories.title, courseData.category), eq(categories.tenantId, tenantId)));
+      .where(
+        and(
+          sql`${categories.title}->>${categories.baseLanguage} = ${courseData.category}`,
+          eq(categories.tenantId, tenantId),
+        ),
+      );
+
+    const [category] = existingCategory
+      ? [existingCategory]
+      : await db
+          .insert(categories)
+          .values({
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, courseData.category),
+            baseLanguage: SUPPORTED_LANGUAGES.EN,
+            availableLocales: [SUPPORTED_LANGUAGES.EN],
+            tenantId,
+          })
+          .returning();
 
     const createdAt = faker.date.past({ years: 1, refDate: new Date() }).toISOString();
 
@@ -176,6 +228,18 @@ export async function createNiceCourses(
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
           for (const [index, questionData] of lessonData.questions.entries()) {
             const questionId = crypto.randomUUID();
+            const questionAnswerOptionList = questionData.options
+              ? buildQuestionAnswerOptionList(questionData.options, questionId, createdAt, tenantId)
+              : [];
+            const correctFillBlankAnswerIds = questionAnswerOptionList
+              .filter(({ isCorrect }) => isCorrect)
+              .map(({ id }) => id);
+            const description = isFillInTheBlanksQuestion(questionData.type)
+              ? replaceLegacyBlankMarkers(
+                  normalizeOptionalString(questionData.description),
+                  correctFillBlankAnswerIds,
+                )
+              : questionData.description;
 
             await db
               .insert(questions)
@@ -183,9 +247,7 @@ export async function createNiceCourses(
                 id: questionId,
                 type: questionData.type,
                 title: sql`json_build_object('en', ${questionData.title}::text)`,
-                description: sql`json_build_object('en', ${
-                  questionData.description ?? null
-                }::text)`,
+                description: sql`json_build_object('en', ${description ?? null}::text)`,
                 lessonId: lesson.id,
                 authorId: creatorUserId,
                 createdAt: createdAt,
@@ -199,24 +261,7 @@ export async function createNiceCourses(
               })
               .returning();
 
-            if (questionData.options) {
-              const questionAnswerOptionList = questionData.options.map(
-                (questionAnswerOption, index) => ({
-                  id: crypto.randomUUID(),
-                  createdAt: createdAt,
-                  updatedAt: createdAt,
-                  questionId,
-                  optionText: sql`json_build_object('en', ${questionAnswerOption.optionText}::text)`,
-                  isCorrect: questionAnswerOption.isCorrect || false,
-                  displayOrder: index + 1,
-                  matchedWord: sql`json_build_object('en', ${
-                    questionAnswerOption.matchedWord || null
-                  }::text)`,
-                  scaleAnswer: questionAnswerOption.scaleAnswer || null,
-                  tenantId,
-                }),
-              );
-
+            if (questionAnswerOptionList.length > 0) {
               await db.insert(questionAnswerOptions).values(questionAnswerOptionList);
             }
           }

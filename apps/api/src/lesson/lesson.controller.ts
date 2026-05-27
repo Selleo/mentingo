@@ -372,8 +372,9 @@ export class LessonController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ message: string }>> {
     await this.adminLessonsService.removeLesson(lessonId, currentUser);
+
     return new BaseResponse({
-      message: "Lesson removed from course successfully",
+      message: "adminCourseView.curriculum.lesson.toast.lessonDeletedSuccessfully",
     });
   }
 

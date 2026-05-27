@@ -23,7 +23,9 @@ export const formatMsAsScorm12Time = (valueMs: number) => {
   const seconds = Math.floor((safeValueMs % 60_000) / 1_000);
   const hundredths = Math.floor((safeValueMs % 1_000) / 10);
 
-  return `${String(hours).padStart(4, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(hundredths).padStart(2, "0")}`;
+  return `${String(hours).padStart(4, "0")}:${String(minutes).padStart(2, "0")}:${String(
+    seconds,
+  ).padStart(2, "0")}.${String(hundredths).padStart(2, "0")}`;
 };
 
 export const addScorm12Times = (left?: string | null, right?: string | null) =>

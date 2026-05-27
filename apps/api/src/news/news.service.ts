@@ -17,6 +17,7 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
 
@@ -46,6 +47,7 @@ export class NewsService {
     private readonly fileService: FileService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
+    private readonly resourceLibraryRepository: ResourceLibraryRepository,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
@@ -127,6 +129,10 @@ export class NewsService {
       .where(eq(news.id, newsId));
 
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.updateError");
+
+    if ("content" in updateNewsData && updateNewsData.content !== undefined) {
+      await this.resourceLibraryRepository.syncNewsAssetRelations(newsId);
+    }
 
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
@@ -439,16 +445,27 @@ export class NewsService {
         entityType: resourceEntity.entityType,
       })
       .from(resources)
-      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
-      .where(
+      .leftJoin(
+        resourceEntity,
         and(
-          eq(resources.id, resourceId),
+          eq(resourceEntity.resourceId, resources.id),
           eq(resourceEntity.entityType, ENTITY_TYPES.NEWS),
-          ne(resources.archived, true),
         ),
-      );
+      )
+      .where(and(eq(resources.id, resourceId), ne(resources.archived, true)));
 
-    if (!resource || resource.entityType !== ENTITY_TYPES.NEWS) {
+    if (!resource) {
+      throw new NotFoundException("News resource not found");
+    }
+
+    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
+
+    if (!resource.entityId || resource.entityType !== ENTITY_TYPES.NEWS) {
+      if (isAdminLike) return this.streamNewsResource(req, res, resource.reference);
+
       throw new NotFoundException("News resource not found");
     }
 
@@ -462,10 +479,6 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("News not found");
 
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.NEWS_MANAGE,
-      PERMISSIONS.NEWS_MANAGE_OWN,
-    ]);
     const isAuthor = Boolean(
       currentUser?.userId &&
         hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN) &&
@@ -477,8 +490,12 @@ export class NewsService {
       throw new NotFoundException("News resource not found");
     }
 
+    return this.streamNewsResource(req, res, resource.reference);
+  }
+
+  private async streamNewsResource(req: Request, res: Response, reference: string) {
     const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(resource.reference, rangeHeader);
+    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);
@@ -597,9 +614,6 @@ export class NewsService {
       file,
       folder: filePath,
       resource: RESOURCE_CATEGORIES.NEWS,
-      entityId: newsId,
-      entityType: ENTITY_TYPES.NEWS,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
       currentUser,

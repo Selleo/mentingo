@@ -124,6 +124,16 @@
       "success": "Failas sėkmingai ištrintas"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Išteklius sėkmingai ištrintas"
+    },
+    "error": {
+      "fileRequired": "Failas yra būtinas",
+      "assetNotFound": "Išteklius nerastas",
+      "entityNotFound": "Subjektas nerastas"
+    }
+  },
   "adminScorm": {
     "header": "Įkelti SCORM",
     "subHeader": "Įkelkite SCORM .zip failą.",
@@ -261,7 +271,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Sukurkite kursą iš SCORM 1.2 paketo.",
-      "badge": "Placeholder",
       "features": {
         "import": "Kuriama iš SCORM 1.2 .zip paketo",
         "tracking": "Palaikomas SCO užbaigimo ir vykdymo būsenos sekimas",
@@ -288,7 +297,7 @@
     "progress": "Pažanga",
     "findInApplication": "Rasti programoje",
     "courses": "Kursai",
-    "learningPaths": "Mokymosi keliai",
+    "learningPaths": "Tobulėjimo keliai",
     "calendar": "Kalendorius",
     "content": "Turinys",
     "categories": "Kategorijos",
@@ -298,6 +307,7 @@
     "news": "Naujienos",
     "providerInformation": "Informacija",
     "announcements": "Skelbimai",
+    "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
     "manage": "Tvarkyti",
     "ariaLabels": {
@@ -688,6 +698,7 @@
       "noSearchResults": "Nėra paieškos rezultatų:",
       "announcements": "Skelbimai",
       "lessons": "Pamokos",
+      "learningPaths": "Tobulėjimo keliai",
       "news": "Naujienos",
       "articles": "Straipsniai",
       "qa": "Klausimai ir atsakymai"
@@ -1170,7 +1181,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorija sėkmingai ištrinta",
-      "deleteCategoryFailed": "Nepavyko ištrinti kategorijos"
+      "deleteCategoryFailed": "Nepavyko ištrinti kategorijos",
+      "deleteCategoryAssignedToCourses": "Kategorijos ištrinti negalima. Ji priskirta kursams ({{courseCount}}): {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "Nerasta kategorijų, kurias būtų galima ištrinti"
     },
     "breadcrumbs": {
       "categories": "Kategorijos",
@@ -1193,9 +1206,29 @@
     "button": {
       "createCategory": "Sukurti kategoriją"
     },
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Kalbos, kurias galima pridėti",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Pakeisti numatytąją kalbą",
+      "setBaseDescription": "Naudoti {{language}} kaip numatytąją šios kategorijos kalbą?",
+      "createTitle": "Sukurti vertimą",
+      "createDescription": "Sukurti šios kategorijos vertimą {{language}} kalba?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti {{language}} vertimą? Jo turinys bus pašalintas."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorija sėkmingai sukurta",
-      "categoryUpdatedSuccessfully": "Kategorija sėkmingai atnaujinta"
+      "categoryUpdatedSuccessfully": "Kategorija sėkmingai atnaujinta",
+      "baseLanguageUpdatedSuccessfully": "Numatytoji kalba sėkmingai atnaujinta",
+      "baseLanguageUpdateFailed": "Nepavyko atnaujinti numatytosios kalbos",
+      "languageNotSupported": "Ši kategorija nepalaiko šios kalbos.",
+      "alreadyExists": "Kategorija jau egzistuoja.",
+      "categoryNotCreated": "Kategorijos sukurti nepavyko.",
+      "languageAlreadyExists": "Ši kategorijos kalba jau egzistuoja.",
+      "invalidLanguageToDelete": "Šios kategorijos kalbos ištrinti negalima.",
+      "baseLanguageTitleRequired": "Pasirinktai numatytajai kalbai reikia pavadinimo."
     },
     "error": {
       "categoryNotFound": "Kategorija nerasta",
@@ -1285,7 +1318,7 @@
         "category": "kategorijas",
         "group": "grupes",
         "course": "kursus",
-        "learning_path": "mokymosi kelius",
+        "learning_path": "tobulėjimo kelius",
         "learning_mode": "mokymosi režimą",
         "learning_progress": "mokymosi pažangą",
         "certificate": "sertifikatus",
@@ -1539,6 +1572,14 @@
       "groupUpdatedSuccessfully": "Grupė sėkmingai atnaujinta",
       "groupNotFound": "Grupė nerasta"
     },
+    "language": {
+      "languageCreated": "Grupės kalba sėkmingai sukurta",
+      "languageDeleted": "Grupės kalba sėkmingai ištrinta",
+      "baseLanguageUpdated": "Numatytoji grupės kalba sėkmingai atnaujinta",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Nustatyti numatytąją kalbą",
+      "setBaseDescription": "Ar tikrai norite nustatyti {{language}} kaip numatytąją kalbą?"
+    },
     "deleteGroup": {
       "title": "Patvirtinti ištrynimą",
       "description": "Ar tikrai norite ištrinti šias grupes?",
@@ -1597,6 +1638,8 @@
       "courseTrailerRemovedSuccessfully": "Kurso anonsas sėkmingai pašalintas",
       "certificateUpdatedSuccessfully": "Sertifikatas sėkmingai atnaujintas",
       "certificateUpdateError": "Klaida atnaujinant sertifikatą",
+      "certificatesResetSuccessfully": "Sertifikatai nustatyti iš naujo {{count}} naudotojams",
+      "certificatesResetError": "Klaida nustatant sertifikatus iš naujo",
       "maxTitleLengthExceeded_one": "Pavadinimas negali būti ilgesnis nei {{count}} simbolio",
       "maxTitleLengthExceeded_other": "Pavadinimas negali būti ilgesnis nei {{count}} simbolių",
       "aiMentorAvatarIncorrectType": "Neteisingas failo tipas. Įkelkite JPG, JPEG, PNG arba SVG vaizdą.",
@@ -1677,7 +1720,11 @@
         "removeTrailer": "Pašalinti priekabą",
         "removeCertificateSignature": "Pašalinti parašą",
         "includesCertificate": "Apima sertifikatą",
-        "doesNotIncludeCertificate": "Nėra sertifikato"
+        "doesNotIncludeCertificate": "Nėra sertifikato",
+        "saveValidity": "Išsaugoti galiojimą",
+        "resetCertificates": "Nustatyti sertifikatus iš naujo",
+        "futureOnly": "Taikyti tik naujiems",
+        "applyToExisting": "Taikyti visiems (įskaitant ankstesnius)"
       },
       "selectButton": {
         "uploadFile": "Įkelti failą",
@@ -1700,7 +1747,11 @@
         "description": "Aprašymas",
         "thumbnail": "Miniatiūra",
         "trailer": "Kursų anonsas",
-        "baseLanguage": "Bazinė kalba"
+        "baseLanguage": "Bazinė kalba",
+        "validityType": "Galiojimo tipas",
+        "validityValue": "Reikšmė",
+        "validityUnit": "Vienetas",
+        "validUntil": "Galioja iki"
       },
       "placeholder": {
         "title": "Įveskite pavadinimą",
@@ -1713,6 +1764,38 @@
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
+        "certificateValidity": "Sertifikato galiojimas",
+        "certificateValidityDescription": "Nustatykite, kada išduoti sertifikatai baigs galioti ir atstatys kurso pažangą.",
+        "enableCertificateValidityConfirmationTitle": "Įjungti sertifikato galiojimą?",
+        "enableCertificateValidityConfirmationDescription": "Šis nustatymas turi įtakos tik šio kurso statistikai. Kai sertifikato galiojimas baigsis, paveikti naudotojai praras šio kurso pažangą.",
+        "enableCertificateValidityConfirmationConfirm": "Įjungti galiojimą",
+        "confirmValidityChangesTitle": "Patvirtinkite sertifikato galiojimo pakeitimus",
+        "noActiveCertificatesValidityDescription": "Šiuo metu nėra aktyvių sertifikatų, kuriuos reikėtų atnaujinti. Būsimi sertifikatai naudos šį galiojimo nustatymą.",
+        "activeCertificatesStat": "Aktyvūs sertifikatai",
+        "immediatelyExpiringStat": "Baigsis iš karto",
+        "validityPeriod": "Laikotarpis",
+        "validityFixedDate": "Konkreti data",
+        "days": "Dienos",
+        "months": "Mėnesiai",
+        "years": "Metai",
+        "applyValidityTitle": "Taikyti galiojimą esamiems sertifikatams?",
+        "applyValidityDescription": "Yra {{activeCount}} aktyvių sertifikatų. {{expiringCount}} baigtų galioti iš karto, jei šis nustatymas būtų pritaikytas esamiems sertifikatams.",
+        "resetCertificates": "Rankinis sertifikato nustatymas iš naujo",
+        "resetCertificatesDescription": "Archyvuoti pasirinktus sertifikatus ir atstatyti kurso pažangą.",
+        "resetCertificatesDialogDescription": "Šis veiksmas archyvuoja aktyvius sertifikatus, atstato kurso pažangą ir gali pranešti naudotojams. Jis taikomas tik šiam kursui.",
+        "sendResetEmail": "Siųsti el. laišką paveiktiems naudotojams",
+        "activeCertificateCount": "{{count}} aktyvūs",
+        "noActiveCertificate": "Nėra aktyvaus sertifikato",
+        "resetUsersSearchPlaceholder": "Ieškoti dalyvių pagal vardą arba el. paštą",
+        "resetUsersStudent": "Dalyvis",
+        "resetUsersEmail": "El. paštas",
+        "resetUsersLoading": "Dalyviai įkeliami...",
+        "noResetUsers": "Nerasta dalyvių su aktyviais sertifikatais",
+        "resetScope": {
+          "all": "Visi naudotojai",
+          "groups": "Grupės",
+          "users": "Naudotojai"
+        },
         "certificateSignatureRequirements": "PNG arba SVG (rekomenduojamas skaidrus fonas)",
         "certificatePreviewTitle": "Sertifikato peržiūra",
         "certificatePreviewDescription": "Atidarykite peržiūrą, kad sureguliuotumėte kalbą ir spalvą.",
@@ -1731,7 +1814,11 @@
         "titleMinLength": "Pavadinimą turi sudaryti bent 2 simboliai.",
         "titleMaxLength": "Pavadinimas turi būti ne ilgesnis kaip 250 simbolių.",
         "descriptionMinLength": "Aprašą turi sudaryti bent 2 simboliai.",
-        "categoryRequired": "Kategorija būtina"
+        "categoryRequired": "Kategorija būtina",
+        "certificateManageDenied": "Negalite tvarkyti šio kurso pažymėjimų.",
+        "validityDateRequired": "Pasirinkite sertifikato galiojimo datą.",
+        "groupIdsRequired": "Pasirinkite bent vieną grupę.",
+        "userIdsRequired": "Pasirinkite bent vieną naudotoją."
       },
       "header": "Sukurti naują kursą",
       "subHeader": "Pateikite išsamią informaciją, kad nustatytumėte naują kursą. Vėliau turėsite daugiau parinkčių tinkinti.",
@@ -1871,6 +1958,8 @@
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor pamokų failai sėkmingai ištrinti",
           "lessonUpdatedSuccessfully": "Pamoka sėkmingai atnaujinta",
+          "lessonDeletedSuccessfully": "Pamoka sėkmingai ištrinta",
+          "lessonDeleteError": "Nepavyko ištrinti pamokos",
           "contentLessonUpdatedSuccessfully": "Turinio pamoka sėkmingai atnaujinta",
           "fileLessonUpdatedSuccessfully": "Failo elementas sėkmingai atnaujintas",
           "questionOptionsUpdatedSuccessfully": "Klausimo parinktys sėkmingai atnaujintos",
@@ -2518,7 +2607,8 @@
       "invalidFormatForMultiAnswer": "Netinkamas kelių atsakymų klausimų formatas.",
       "trueOrFalseRequired": "Reikalingas teisingas arba klaidingas atsakymas.",
       "photoQuestionMustHaveAnswer": "Atsakymas reikalingas į šį klausimą su nuotrauka.",
-      "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!"
+      "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!",
+      "unansweredQuestionsWithNames": "Atsakykite į trūkstamus klausimus: {{questionNames}}"
     }
   },
   "studentCourseView": {
@@ -2637,8 +2727,38 @@
     },
     "tabs": {
       "chapters": "Skyriai",
+      "chat": "Diskusija",
       "moreFromAuthor": "Daugiau iš autoriaus",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Kurso diskusija",
+      "newThreadPlaceholder": "Pradėkite naują diskusiją...",
+      "startThread": "Pradėti temą",
+      "messagesTitle": "Žinutės",
+      "noThreadSelected": "Pasirinkite temą",
+      "emptyThreads": "Diskusijų dar nėra. Pradėkite pirmąją.",
+      "emptyMessages": "Žinučių dar nėra.",
+      "replyPlaceholder": "Parašykite atsakymą...",
+      "reply": "Atsakyti",
+      "reactWith": "Reaguoti {{reaction}}",
+      "deleteMessage": "Ištrinti žinutę",
+      "deleteMessageConfirmationTitle": "Ištrinti žinutę?",
+      "deleteMessageConfirmationDescription": "Žinutė bus pašalinta iš diskusijos. Atsakymai gali palikti ištrintos žinutės vietaženklį, kad pokalbis išliktų aiškus.",
+      "deletedMessage": "Ši žinutė buvo ištrinta.",
+      "repliesCount_one": "{{countLabel}} atsakymas",
+      "repliesCount_few": "{{countLabel}} atsakymai",
+      "repliesCount_many": "{{countLabel}} atsakymų",
+      "repliesCount_other": "{{countLabel}} atsakymo",
+      "loadMoreReplies": "Įkelti daugiau atsakymų",
+      "send": "Siųsti",
+      "selectThread": "Pasirinkite temą, kad skaitytumėte žinutes.",
+      "users": "Vartotojai",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Dar nėra užsiregistravusių vartotojų.",
+      "mentionedToast": "Kažkas paminėjo jus kurso diskusijoje."
     }
   },
   "studentChapterView": {
@@ -2677,7 +2797,8 @@
       "qaSettingUpdatedSuccessfully": "QA nustatymai sėkmingai atnaujinti",
       "ageLimitUpdatedSuccessfully": "Amžiaus riba sėkmingai atnaujinta",
       "newsSettingUpdatedSuccessfully": "Naujienų nustatymai sėkmingai atnaujinti",
-      "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti"
+      "articlesSettingUpdatedSuccessfully": "Žinių bazės nustatymai sėkmingai atnaujinti",
+      "learningPathsUpdatedSuccessfully": "Tobulėjimo kelių nustatymai sėkmingai atnaujinti"
     }
   },
   "certificateBackgroundUpload": {
@@ -2874,14 +2995,19 @@
       "subheader": "Pateikite išsamią informaciją, kad nustatytumėte naują pranešimą.",
       "buttons": {
         "confirm": "Patvirtinti",
-        "cancel": "Atšaukti"
+        "cancel": "Atšaukti",
+        "addLanguage": "Pridėti kalbą",
+        "removeLanguage": "Pašalinti kalbą",
+        "setDefaultLanguage": "Nustatyti kaip numatytąją kalbą"
       },
       "fields": {
         "title": "Pavadinimas",
         "content": "Turinys",
         "group": "Grupė",
+        "language": "Kalba",
         "everyone": "Visi"
       },
+      "addedLanguages": "Pridėtos kalbos",
       "placeholders": {
         "title": "Įveskite pavadinimą",
         "content": "Rašykite savo skelbimą čia...",
@@ -2909,7 +3035,35 @@
       "markedAsRead": "Pranešimai sėkmingai pažymėti kaip perskaityti",
       "markAsReadFailed": "Nepavyko pažymėti pranešimų kaip skaitytų",
       "createdSuccessfully": "Skelbimas sėkmingai sukurtas",
-      "createFailed": "Nepavyko sukurti pranešimo"
+      "createFailed": "Nepavyko sukurti pranešimo",
+      "deletedSuccessfully": "Pranešimas sėkmingai ištrintas",
+      "deleteFailed": "Nepavyko ištrinti pranešimo",
+      "notFound": "Pranešimas nerastas"
+    }
+  },
+  "notifications": {
+    "title": "Pranešimai",
+    "tabs": {
+      "all": "Visi",
+      "adminAnnouncements": "Administratoriaus skelbimai"
+    },
+    "actions": {
+      "refresh": "Atnaujinti",
+      "create": "Sukurti skelbimą",
+      "delete": "Ištrinti skelbimą",
+      "markRead": "Pažymėti kaip skaitytą",
+      "markAllRead": "Pažymėti visus kaip skaitytus",
+      "loadMore": "Įkelti daugiau",
+      "loadingMore": "Įkeliama...",
+      "goToNotificationCenter": "Eiti į pranešimų centrą"
+    },
+    "status": {
+      "unread": "Neskaityta"
+    },
+    "empty": "Pranešimų nėra",
+    "deleteDialog": {
+      "title": "Ištrinti skelbimą",
+      "description": "Šis skelbimas bus pašalintas visiems."
     }
   },
   "platformLogo": {
@@ -3061,6 +3215,65 @@
         "h3": "3 antraštė",
         "h4": "4 antraštė"
       },
+      "bold": {
+        "tooltip": "Paryškinimas: paryškina pasirinktą tekstą"
+      },
+      "italic": {
+        "tooltip": "Kursyvas: pakreipia pasirinktą tekstą"
+      },
+      "strikethrough": {
+        "tooltip": "Perbraukimas: perbraukia pasirinktą tekstą"
+      },
+      "bulletList": {
+        "tooltip": "Sąrašas su ženkleliais: pradeda sąrašą su ženkleliais"
+      },
+      "orderedList": {
+        "tooltip": "Numeruotas sąrašas: pradeda numeruotą sąrašą"
+      },
+      "taskList": {
+        "tooltip": "Užduočių sąrašas: prideda kontrolinį sąrašą"
+      },
+      "blockquote": {
+        "tooltip": "Citata: formatuoja tekstą kaip blokinę citatą"
+      },
+      "codeBlock": {
+        "tooltip": "Kodo blokas: formatuoja tekstą kaip kodą"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontali linija: įterpia skiriamąją liniją"
+      },
+      "table": {
+        "tooltip": "Lentelė: įterpti arba redaguoti lentelę",
+        "groups": {
+          "columns": "Stulpeliai",
+          "rows": "Eilutės",
+          "cells": "Langeliai",
+          "headers": "Antraštės"
+        },
+        "actions": {
+          "insert": "Įterpti lentelę",
+          "addColumnBefore": "Pridėti stulpelį prieš",
+          "addColumnAfter": "Pridėti stulpelį po",
+          "deleteColumn": "Ištrinti stulpelį",
+          "addRowBefore": "Pridėti eilutę prieš",
+          "addRowAfter": "Pridėti eilutę po",
+          "deleteRow": "Ištrinti eilutę",
+          "mergeCells": "Sujungti langelius",
+          "splitCell": "Padalyti langelį",
+          "mergeOrSplit": "Sujungti arba padalyti",
+          "toggleHeaderRow": "Perjungti antraštės eilutę",
+          "toggleHeaderColumn": "Perjungti antraštės stulpelį",
+          "toggleHeaderCell": "Perjungti antraštės langelį",
+          "fixTables": "Taisyti lentelės struktūrą",
+          "deleteTable": "Ištrinti lentelę"
+        }
+      },
+      "undo": {
+        "tooltip": "Anuliuoti: atšaukia paskutinį pakeitimą"
+      },
+      "redo": {
+        "tooltip": "Grąžinti: pakartoja paskutinį atšauktą pakeitimą"
+      },
       "link": {
         "tooltip": "Nuoroda: paverčia pasirinktą tekstą hipersaitu",
         "dialog": {
@@ -3076,6 +3289,9 @@
       "upload": {
         "uploadFailed": "Failo įkėlimas nepavyko",
         "tooltip": "Įkelti: leidžia įkelti failą"
+      },
+      "assetLibrary": {
+        "tooltip": "Failų biblioteka: įterpti anksčiau įkeltą failą"
       }
     }
   },
@@ -3128,6 +3344,43 @@
     },
     "loadingAiAsset": {
       "processing": "Išteklius šiuo metu apdorojamas"
+    },
+    "assetLibrary": {
+      "title": "Failų biblioteka",
+      "description": "Raskite, įkelkite, įterpkite arba ištrinkite raiškiojo teksto turinyje naudojamus failus.",
+      "searchPlaceholder": "Ieškoti pagal failo pavadinimą arba antraštę...",
+      "upload": "Įkelti failą",
+      "insert": "Įterpti",
+      "delete": "Ištrinti",
+      "loading": "Įkeliami failai...",
+      "loadingUsages": "Įkeliami panaudojimai...",
+      "disabledUntilSaved": "Išsaugokite turinį prieš įterpdami arba trindami esamus failus. Naują failą vis dar galite įkelti.",
+      "empty": {
+        "title": "Failų nerasta",
+        "description": "Įkelkite failą arba pakeiskite paiešką, kad rastumėte esamus failus."
+      },
+      "types": {
+        "image": "Paveikslėlis",
+        "video": "Vaizdo įrašas",
+        "pdf": "PDF",
+        "presentation": "Prezentacija",
+        "document": "Dokumentas",
+        "other": "Kita"
+      },
+      "entities": {
+        "lesson": "Pamoka",
+        "articles": "Straipsnis",
+        "news": "Naujiena"
+      },
+      "deleteConfirmation": {
+        "title": "Ištrinti {{name}}?",
+        "description": "Tai pašalins atitinkamus įterpinius ir nuorodas iš viso nurodyto turinio ir archyvuos failą.",
+        "usages": "Žinomi panaudojimai",
+        "noUsages": "Panaudojimų nerasta."
+      },
+      "usageCount_one": "{{count}} panaudojimas",
+      "usageCount_few": "{{count}} panaudojimai",
+      "usageCount_other": "{{count}} panaudojimų"
     }
   },
   "pages": {
@@ -3145,6 +3398,7 @@
     "createNewPassword": "Sukurti naują slaptažodį",
     "createAnnouncement": "Sukurti skelbimą",
     "announcements": "Skelbimai",
+    "notifications": "Pranešimai",
     "users": "Vartotojai",
     "userDetails": "Vartotojo informacija",
     "createNewUser": "Sukurti naują vartotoją",
@@ -3169,9 +3423,9 @@
     "createTenant": "Sukurti organizaciją",
     "tenants": "Organizacijos",
     "activityLogs": "Veiklos žurnalas",
-    "learningPaths": "Mokymosi keliai",
-    "adminLearningPaths": "Mokymosi keliai",
-    "adminLearningPathEditor": "Mokymosi kelio redaktorius"
+    "learningPaths": "Tobulėjimo keliai",
+    "adminLearningPaths": "Tobulėjimo keliai",
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
   },
   "masterCourse": {
     "error": {
@@ -3188,19 +3442,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
-      "exportLinkMissing": "Mokymosi kelio eksporto rysys nerastas",
-      "noCourses": "Pries eksportuojant mokymosi kelyje turi buti bent vienas kursas",
-      "courseExportFailed": "Nepavyko eksportuoti vieno is mokymosi kelio kursu",
+      "exportLinkMissing": "Tobulėjimo kelio eksporto rysys nerastas",
+      "noCourses": "Pries eksportuojant tobulėjimo kelyje turi buti bent vienas kursas",
+      "courseExportFailed": "Nepavyko eksportuoti vieno is tobulėjimo kelio kursu",
       "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
-      "jobNotFound": "Mokymosi kelio eksporto uzduotis nerasta",
-      "invalidJobData": "Neteisingi mokymosi kelio eksporto uzduoties duomenys",
-      "invalidExportId": "Neteisingas mokymosi kelio eksporto ID",
-      "invalidExportLink": "Neteisingas mokymosi kelio eksporto rysys"
+      "jobNotFound": "Tobulėjimo kelio eksporto uzduotis nerasta",
+      "invalidJobData": "Neteisingi tobulėjimo kelio eksporto uzduoties duomenys",
+      "invalidExportId": "Neteisingas tobulėjimo kelio eksporto ID",
+      "invalidExportLink": "Neteisingas tobulėjimo kelio eksporto rysys"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Mokymosi kelio sertifikatai isjungti"
+      "disabled": "Tobulėjimo kelio sertifikatai isjungti"
     }
   },
   "activityLogsView": {
@@ -3248,6 +3502,8 @@
       "complete_lesson": "Užbaigta",
       "complete_course": "Užbaigta",
       "complete_chapter": "Užbaigta",
+      "expire_certificate": "Sertifikatas nebegalioja",
+      "reset_certificate": "Sertifikatas nustatytas iš naujo",
       "view_announcement": "Peržiūrėta"
     },
     "entity": {
@@ -3275,11 +3531,11 @@
     }
   },
   "learningPathsView": {
-    "title": "Mokymosi keliai",
-    "description": "Naršykite priskirtus mokymosi kelius ir tęskite sutvarkytas kursų sekas.",
-    "searchPlaceholder": "Ieškoti mokymosi kelių",
-    "summary": "{{count}} mokymosi keliai yra pasiekiami.",
-    "detailsTitle": "Mokymosi kelias",
+    "title": "Tobulėjimo keliai",
+    "description": "Naršykite priskirtus tobulėjimo kelius ir tęskite sutvarkytas kursų sekas.",
+    "searchPlaceholder": "Ieškoti tobulėjimo kelių",
+    "summary": "{{count}} tobulėjimo keliai yra pasiekiami.",
+    "detailsTitle": "Tobulėjimo kelias",
     "detailsDescription": "Peržiūrėkite kursų seką, pažangą, užraktus ir sertifikato būseną.",
     "detailsSummary": "Šiame kelyje yra {{count}} kursų. Dabartinė pažanga: {{progress}}.",
     "emptyDescription": "Aprašymas dar nepridėtas.",
@@ -3298,10 +3554,10 @@
       "certificate": "Sertifikatas"
     },
     "card": {
-      "openPath": "Atidaryti mokymosi kelią"
+      "openPath": "Atidaryti tobulėjimo kelią"
     },
     "empty": {
-      "title": "Mokymosi kelių nerasta",
+      "title": "Tobulėjimo kelių nerasta",
       "description": "Pakeiskite paiešką arba grįžkite, kai keliai bus priskirti."
     },
     "progress": {
@@ -3311,7 +3567,7 @@
     "certificate": {
       "available": "Sertifikatas pasiekiamas",
       "ready": "Sertifikatas paruoštas",
-      "pathCompleted": "Mokymosi kelias baigtas. Jūsų sertifikatas paruoštas."
+      "pathCompleted": "Tobulėjimo kelias baigtas. Jūsų sertifikatas paruoštas."
     },
     "courseState": {
       "completed": "Baigta",
@@ -3326,12 +3582,12 @@
       "courses": "Šio kelio kursai",
       "courseTitle": "Kursas {{number}}",
       "completedAt": "Baigta {{date}}",
-      "emptyCourses": "Šiame mokymosi kelyje dar nėra kursų."
+      "emptyCourses": "Šiame tobulėjimo kelyje dar nėra kursų."
     },
     "enrollment": {
       "manage": "Registruoti",
       "title": "Registruoti besimokančiuosius",
-      "description": "Tvarkykite studentų ir grupių registraciją į šį mokymosi kelią.",
+      "description": "Tvarkykite studentų ir grupių registraciją į šį tobulėjimo kelią.",
       "students": "Studentai",
       "selectStudents": "Pasirinkti studentus",
       "groups": "Grupės",
@@ -3351,9 +3607,9 @@
       "groupsEnrolled": "Grupės užregistruotos",
       "studentsUnenrolled": "Studentai išregistruoti",
       "groupsUnenrolled": "Grupės išregistruotos",
-      "enrolledSuccessfully": "Užregistruota į mokymosi kelią",
-      "enrollGroupsDescription": "Pasirinkite grupes, kurias norite registruoti į šį mokymosi kelią.",
-      "unenrollGroupsDescription": "Pasirinkite grupes, kurias norite išregistruoti iš šio mokymosi kelio.",
+      "enrolledSuccessfully": "Užregistruota į tobulėjimo kelią",
+      "enrollGroupsDescription": "Pasirinkite grupes, kurias norite registruoti į šį tobulėjimo kelią.",
+      "unenrollGroupsDescription": "Pasirinkite grupes, kurias norite išregistruoti iš šio tobulėjimo kelio.",
       "table": {
         "selectAll": "Pasirinkti visus besimokančiuosius",
         "select": "Pasirinkti besimokantįjį",
@@ -3369,16 +3625,16 @@
       },
       "confirmation": {
         "title": "Patvirtinti registraciją",
-        "description": "Ar tikrai norite užregistruoti pasirinktus studentus į šį mokymosi kelią? Šio veiksmo negalima atšaukti."
+        "description": "Ar tikrai norite užregistruoti pasirinktus studentus į šį tobulėjimo kelią? Šio veiksmo negalima atšaukti."
       },
       "unenrollConfirmation": {
         "title": "Patvirtinti išregistravimą",
-        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio mokymosi kelio? Šio veiksmo negalima atšaukti."
+        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio tobulėjimo kelio? Šio veiksmo negalima atšaukti."
       },
       "noGroups": "Nėra pasiekiamų grupių"
     },
     "breadcrumbs": {
-      "learningPaths": "Mokymosi keliai",
+      "learningPaths": "Tobulėjimo keliai",
       "details": "Informacija"
     },
     "buttons": {
@@ -3386,26 +3642,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Mokymosi keliai",
+    "title": "Tobulėjimo keliai",
     "description": "Tvarkykite metaduomenis, sekos nustatymus, kursus, registracijas, eksportą ir sertifikatus.",
-    "summary": "{{count}} mokymosi keliai yra pasiekiami šioje darbo srityje.",
+    "summary": "{{count}} tobulėjimo keliai yra pasiekiami šioje darbo srityje.",
     "breadcrumbs": {
-      "learningPaths": "Mokymosi keliai",
+      "learningPaths": "Tobulėjimo keliai",
       "create": "Sukurti",
       "edit": "Redaguoti"
     },
     "buttons": {
-      "create": "Sukurti mokymosi kelią",
+      "create": "Sukurti tobulėjimo kelią",
       "edit": "Redaguoti",
       "save": "Išsaugoti pakeitimus",
       "removeImage": "Pašalinti paveikslėlį"
     },
     "editor": {
-      "createTitle": "Sukurti mokymosi kelią",
-      "editTitle": "Redaguoti mokymosi kelią",
-      "description": "Nustatykite mokymosi kelio informaciją, seką, kursus ir publikavimo būseną.",
-      "createSummary": "Pradėkite nuo mokymosi kelio informacijos.",
-      "editSummary": "Šiame mokymosi kelyje šiuo metu yra {{coursesCount}} kursų.",
+      "createTitle": "Sukurti tobulėjimo kelią",
+      "editTitle": "Redaguoti tobulėjimo kelią",
+      "description": "Nustatykite tobulėjimo kelio informaciją, seką, kursus ir publikavimo būseną.",
+      "createSummary": "Pradėkite nuo tobulėjimo kelio informacijos.",
+      "editSummary": "Šiame tobulėjimo kelyje šiuo metu yra {{coursesCount}} kursų.",
       "details": "Informacija",
       "courses": "Kursai",
       "image": "Paveikslėlis",
@@ -3418,35 +3674,35 @@
       "language": "Kalba",
       "createdAt": "Sukurta",
       "actions": "Veiksmai",
-      "untitled": "Mokymosi kelias be pavadinimo",
+      "untitled": "Tobulėjimo kelias be pavadinimo",
       "emptyDescription": "Nėra aprašymo",
       "sequential": "Nuoseklus",
       "flexible": "Laisva tvarka",
       "certificate": "Sertifikatas",
-      "empty": "Dar nėra sukurtų mokymosi kelių."
+      "empty": "Dar nėra sukurtų tobulėjimo kelių."
     },
     "form": {
       "language": "Kalba",
       "status": "Būsena",
       "statusDescription": "Nustato, ar kelias matomas, juodraštis, ar privatus.",
       "title": "Pavadinimas",
-      "titlePlaceholder": "Pavadinkite mokymosi kelią",
+      "titlePlaceholder": "Pavadinkite tobulėjimo kelią",
       "description": "Aprašymas",
-      "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame mokymosi kelyje",
+      "descriptionPlaceholder": "Aprašykite, ką dalyviai atliks šiame tobulėjimo kelyje",
       "imageHint": "PNG, JPG arba JPEG (maks. 20 MB, rekomenduojama 1200x1200 ar didesnė)",
       "sequenceEnabled": "Nuoseklus mokymasis",
       "sequenceEnabledDescription": "Dalyviai turi baigti kursus rodoma tvarka.",
       "includesCertificate": "Sertifikatas",
-      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę mokymosi kelią.",
+      "includesCertificateDescription": "Dalyviai gali gauti sertifikatą baigę tobulėjimo kelią.",
       "certificateSignature": "Sertifikato parašas",
-      "certificateSignatureDescription": "Įkelkite parašą, rodomą šio mokymosi kelio sertifikatuose.",
+      "certificateSignatureDescription": "Įkelkite parašą, rodomą šio tobulėjimo kelio sertifikatuose.",
       "certificateFontColor": "Sertifikato šrifto spalva",
       "certificateFontColorDescription": "Naudokite peržiūros spalvų parinkiklį, kad pakeistumėte sertifikato teksto ir linijų spalvą.",
       "certificatePreview": "Sertifikato peržiūra",
       "certificatePreviewDescription": "Peržiūrėkite sertifikatą ir pakoreguokite šrifto spalvą."
     },
     "detailsContent": {
-      "title": "Mokymosi kelio informacija",
+      "title": "Tobulėjimo kelio informacija",
       "description": "Nustatykite lokalizuotą pavadinimą ir dalyviams matomą aprašymą."
     },
     "detailsImage": {
@@ -3461,7 +3717,7 @@
       "baseLanguage": "Pagrindinė kalba"
     },
     "languageSelector": {
-      "tooltip": "Šio mokymosi kelio pagrindinė kalba yra {{baseLanguage}}."
+      "tooltip": "Šio tobulėjimo kelio pagrindinė kalba yra {{baseLanguage}}."
     },
     "courses": {
       "select": "Pasirinkite kursą",
@@ -3470,32 +3726,32 @@
       "delete": "Ištrinti kursą",
       "order": "Eilė",
       "course": "Kursas",
-      "empty": "Į šį mokymosi kelią dar nepridėta kursų.",
-      "saveFirst": "Išsaugokite mokymosi kelią prieš pridėdami kursus.",
+      "empty": "Į šį tobulėjimo kelią dar nepridėta kursų.",
+      "saveFirst": "Išsaugokite tobulėjimo kelią prieš pridėdami kursus.",
       "unknownCourse": "Kurso informacija nepasiekiama"
     },
     "sharedLearningPath": {
       "badgeExported": "Dalinamas",
       "exportButton": "Dalintis",
-      "exportSuccess": "Mokymosi kelias buvo bendrinamas",
-      "exportsDescription": "Dalinkitės šiuo mokymosi keliu su pasirinktomis organizacijomis.",
+      "exportSuccess": "Tobulėjimo kelias buvo bendrinamas",
+      "exportsDescription": "Dalinkitės šiuo tobulėjimo keliu su pasirinktomis organizacijomis.",
       "exportsTitle": "Dalijimasis",
       "exportingButton": "Bendrinama...",
       "selectTenants": "Pasirinkite organizacijas",
       "selectedCount": "Pasirinkta:"
     },
     "deleteModal": {
-      "title": "Ištrinti mokymosi kelią",
-      "description": "Tai ištrins mokymosi kelią ir pašalins per jį suteiktą prieigą prie kursų."
+      "title": "Ištrinti tobulėjimo kelią",
+      "description": "Tai ištrins tobulėjimo kelią ir pašalins per jį suteiktą prieigą prie kursų."
     },
     "toast": {
-      "created": "Mokymosi kelias sukurtas",
-      "updated": "Mokymosi kelias atnaujintas",
-      "deleted": "Mokymosi kelias ištrintas",
-      "languageCreated": "Mokymosi kelio kalba sukurta",
-      "coursesAdded": "Kursai pridėti prie mokymosi kelio",
-      "courseRemoved": "Kursas pašalintas iš mokymosi kelio",
-      "coursesReordered": "Mokymosi kelio kursų tvarka atnaujinta"
+      "created": "Tobulėjimo kelias sukurtas",
+      "updated": "Tobulėjimo kelias atnaujintas",
+      "deleted": "Tobulėjimo kelias ištrintas",
+      "languageCreated": "Tobulėjimo kelio kalba sukurta",
+      "coursesAdded": "Kursai pridėti prie tobulėjimo kelio",
+      "courseRemoved": "Kursas pašalintas iš tobulėjimo kelio",
+      "coursesReordered": "Tobulėjimo kelio kursų tvarka atnaujinta"
     }
   },
   "lessonPreview": {
@@ -3600,6 +3856,16 @@
     },
     "tooltip": {
       "disabled": "Norėdami perjungti šį lauką, pirmiausia įgalinkite žinių bazės skyrių."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigūruokite tobulėjimo kelių nustatymus",
+    "header": "Tobulėjimo kelių nustatymai",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Įjungti tobulėjimo kelius",
+        "description": "Įjunkite tobulėjimo kelius. Išjungus jie paslepiami ir užblokuojami visiems naudotojams."
+      }
     }
   },
   "qaView": {

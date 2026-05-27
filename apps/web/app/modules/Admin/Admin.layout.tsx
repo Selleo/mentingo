@@ -4,7 +4,6 @@ import { Suspense, useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
 import { currentUserQueryOptions } from "~/api/queries";
-import { useLatestUnreadAnnouncements } from "~/api/queries/useLatestUnreadNotifications";
 import { queryClient } from "~/api/queryClient";
 import { RouteGuard } from "~/Guards/RouteGuard";
 import { usePermissions } from "~/hooks/usePermissions";
@@ -13,7 +12,6 @@ import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHisto
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import Loader from "../common/Loader/Loader";
-import { LatestAnnouncementsPopup } from "../Dashboard/components";
 
 import type { PropsWithChildren } from "react";
 
@@ -56,8 +54,6 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 
   const isAllowed = canManageUsers || canManageOwnCourses || canAccessLearningPathAdmin;
 
-  const { data: latestUnreadAnnouncements } = useLatestUnreadAnnouncements(canManageOwnCourses);
-
   useLayoutEffect(() => {
     if (!isAllowed) {
       navigate("/");
@@ -66,12 +62,7 @@ const AdminGuard = ({ children }: PropsWithChildren) => {
 
   if (!isAllowed) return null;
 
-  return (
-    <>
-      <LatestAnnouncementsPopup latestUnreadAnnouncements={latestUnreadAnnouncements || []} />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 export const shouldHideTopbarAndSidebar = (pathname: string) =>

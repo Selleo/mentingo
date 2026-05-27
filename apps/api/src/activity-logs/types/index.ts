@@ -16,6 +16,8 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   COMPLETE_LESSON: "complete_lesson",
   COMPLETE_COURSE: "complete_course",
   COMPLETE_CHAPTER: "complete_chapter",
+  EXPIRE_CERTIFICATE: "expire_certificate",
+  RESET_CERTIFICATE: "reset_certificate",
   VIEW_ANNOUNCEMENT: "view_announcement",
 } as const;
 

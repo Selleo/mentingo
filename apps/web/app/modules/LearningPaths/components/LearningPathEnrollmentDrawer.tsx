@@ -178,7 +178,7 @@ export function LearningPathEnrollmentDrawer({
   );
 
   return (
-    <Drawer direction="right">
+    <Drawer direction="right" handleOnly>
       <DrawerTrigger asChild>
         <Button
           type="button"

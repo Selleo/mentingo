@@ -10,10 +10,10 @@ import type {
   GetAllCoursesResponse,
   GetAllGroupsResponse,
   GetAllQAResponse,
-  GetAnnouncementsForUserResponse,
   GetArticlesResponse,
   GetAvailableCoursesResponse,
   GetLessonsResponse,
+  GetLearningPathsResponse,
   GetNewsListResponse,
   GetStudentCoursesResponse,
   GetUsersResponse,
@@ -45,6 +45,14 @@ export type GlobalSearchItem =
       }) => JSX.Element;
     }
   | {
+      resultType: "learningPaths";
+      resultData: GetLearningPathsResponse["data"];
+      Component: (props: {
+        item: GetLearningPathsResponse["data"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
+    }
+  | {
       resultType: "users";
       resultData: GetUsersResponse["data"];
       Component: (props: {
@@ -65,14 +73,6 @@ export type GlobalSearchItem =
       resultData: GetAllGroupsResponse["data"];
       Component: (props: {
         item: GetAllGroupsResponse["data"][number];
-        onSelect: () => void;
-      }) => JSX.Element;
-    }
-  | {
-      resultType: "announcements";
-      resultData: GetAnnouncementsForUserResponse["data"];
-      Component: (props: {
-        item: GetAnnouncementsForUserResponse["data"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }

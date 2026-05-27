@@ -119,6 +119,40 @@ describe("ValidateMultipartPipe", () => {
     expect(result.name).toBe("123123");
   });
 
+  it("should parse null strings for nullable schema fields", () => {
+    const SettingsSchema = Type.Object({
+      certificateValidity: Type.Optional(
+        Type.Union([
+          Type.Object({
+            value: Type.Number(),
+          }),
+          Type.Null(),
+        ]),
+      ),
+    });
+    const settingsPipe = new ValidateMultipartPipe(SettingsSchema);
+
+    const result = settingsPipe.transform({
+      certificateValidity: "null",
+    });
+
+    expect(result).toEqual({
+      certificateValidity: null,
+    });
+  });
+
+  it("should keep null strings for string schema fields", () => {
+    const multipartData = {
+      name: "null",
+      age: "42",
+      isActive: "true",
+    };
+
+    const result = pipe.transform(multipartData);
+
+    expect(result.name).toBe("null");
+  });
+
   it("should parse boolean strings correctly", () => {
     const multipartData = {
       name: "Eve",

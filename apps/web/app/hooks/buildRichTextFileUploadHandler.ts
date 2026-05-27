@@ -80,6 +80,7 @@ const handleVideoUpload = async ({
   onVideoUploadError,
   fallbackUploadErrorMessage,
   uploadQueue,
+  insertOnUpload,
 }: {
   editor?: TiptapEditor | null;
   file: File;
@@ -89,6 +90,7 @@ const handleVideoUpload = async ({
   onVideoUploadError: (error: unknown) => void;
   fallbackUploadErrorMessage: string;
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
+  insertOnUpload: boolean;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "video" });
   const uploadId = queueId ?? crypto.randomUUID();
@@ -97,11 +99,13 @@ const handleVideoUpload = async ({
     uploadQueue?.setStatus(queueId, UPLOAD_STATUS.QUEUED);
   }
 
-  await insertPendingVideoNode({
-    editor,
-    file,
-    uploadId,
-  });
+  if (insertOnUpload) {
+    await insertPendingVideoNode({
+      editor,
+      file,
+      uploadId,
+    });
+  }
 
   const processVideoUpload = async () => {
     try {
@@ -110,7 +114,7 @@ const handleVideoUpload = async ({
         uploadQueue?.attachUploadId(queueId, session.uploadId);
       }
 
-      if (session.resourceId) {
+      if (insertOnUpload && session.resourceId) {
         updateVideoUploadNodeById(editor, uploadId, {
           src: buildEntityResourceUrl(session.resourceId, entityType),
           sourceType: session.provider === "s3" ? "external" : "internal",
@@ -139,11 +143,13 @@ const handleVideoUpload = async ({
               errorMessage: error.message,
             });
           }
-          updateVideoUploadNodeById(editor, uploadId, {
-            hasError: true,
-            uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
-            uploadErrorMessage: error.message,
-          });
+          if (insertOnUpload) {
+            updateVideoUploadNodeById(editor, uploadId, {
+              hasError: true,
+              uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
+              uploadErrorMessage: error.message,
+            });
+          }
         },
       });
     } catch (error) {
@@ -152,10 +158,12 @@ const handleVideoUpload = async ({
           errorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
         });
       }
-      updateVideoUploadNodeById(editor, uploadId, {
-        uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
-        uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
-      });
+      if (insertOnUpload) {
+        updateVideoUploadNodeById(editor, uploadId, {
+          uploadStatus: VIDEO_UPLOAD_NODE_STATUS.FAILED,
+          uploadErrorMessage: error instanceof Error ? error.message : fallbackUploadErrorMessage,
+        });
+      }
       onVideoUploadError(error);
     }
   };
@@ -173,6 +181,7 @@ const handleResourceUpload = async ({
   uploadResourceFile,
   fallbackUploadErrorMessage,
   uploadQueue,
+  insertOnUpload,
 }: {
   editor?: TiptapEditor | null;
   file: File;
@@ -183,6 +192,7 @@ const handleResourceUpload = async ({
   uploadResourceFile: (file: File) => Promise<string>;
   fallbackUploadErrorMessage: string;
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
+  insertOnUpload: boolean;
 }) => {
   const queueId = uploadQueue?.enqueue({ fileName: file.name, kind: "resource" });
 
@@ -192,7 +202,7 @@ const handleResourceUpload = async ({
 
   let displayMode: DisplayMode = DISPLAY_MODE.PREVIEW;
 
-  if (displayModePrompt) {
+  if (insertOnUpload && displayModePrompt) {
     const selectedMode = await askForDisplayModeSequentially(askForDisplayMode, file.name);
     if (!selectedMode) {
       if (queueId) uploadQueue?.remove?.(queueId);
@@ -218,14 +228,16 @@ const handleResourceUpload = async ({
     throw error;
   }
 
-  await insertResourceNode({
-    editor,
-    resourceId,
-    entityType,
-    file,
-    resourceType,
-    displayMode,
-  });
+  if (insertOnUpload) {
+    await insertResourceNode({
+      editor,
+      resourceId,
+      entityType,
+      file,
+      resourceType,
+      displayMode,
+    });
+  }
 };
 
 type VideoUploadArgs = {
@@ -245,6 +257,7 @@ type BuildRichTextFileUploadHandlerArgs = {
   askForDisplayMode: (filename: string) => Promise<DisplayMode | null>;
   onVideoUploadError: (error: unknown) => void;
   fallbackUploadErrorMessage: string;
+  insertOnUpload?: boolean;
   uploadQueue?: {
     enqueue: (args: { fileName: string; kind: RichTextUploadKind }) => string;
     setStatus: (
@@ -283,10 +296,12 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     isPdf,
     isDocument,
     resourceType: match({
+      isVideo,
       isPresentation,
       isPdf,
       isDocument,
     })
+      .with({ isVideo: true }, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
       .with({ isPresentation: true }, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
       .with({ isPdf: true }, () => RICH_TEXT_RESOURCE_TYPE.PDF)
       .with({ isDocument: true }, () => RICH_TEXT_RESOURCE_TYPE.DOCUMENT)
@@ -311,6 +326,7 @@ export const buildRichTextFileUploadHandler = ({
   askForDisplayMode,
   onVideoUploadError,
   fallbackUploadErrorMessage,
+  insertOnUpload = true,
   uploadQueue,
 }: BuildRichTextFileUploadHandlerArgs) => {
   return async (file?: File, editor?: TiptapEditor | null) => {
@@ -328,6 +344,7 @@ export const buildRichTextFileUploadHandler = ({
         onVideoUploadError,
         fallbackUploadErrorMessage,
         uploadQueue,
+        insertOnUpload,
       });
       return;
     }
@@ -342,6 +359,7 @@ export const buildRichTextFileUploadHandler = ({
       uploadResourceFile,
       fallbackUploadErrorMessage,
       uploadQueue,
+      insertOnUpload,
     });
   };
 };

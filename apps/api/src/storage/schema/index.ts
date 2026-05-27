@@ -18,6 +18,7 @@ import {
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
+  CERTIFICATE_STATUSES,
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
@@ -36,6 +37,7 @@ import {
   timestamp,
   unique,
   uniqueIndex,
+  type AnyPgColumn,
   uuid,
   varchar,
   vector,
@@ -56,6 +58,7 @@ import {
   id,
   tenantId,
   timestamps,
+  timestampWithTimezone,
   withTenantIdIndex,
 } from "./utils";
 
@@ -81,6 +84,8 @@ import type {
   LearningPathEnrollmentType,
   LearningPathProgressStatus,
   LearningPathStatus,
+  CertificateArchiveReason,
+  CertificateStatus,
   CalendarEventStatus,
   LiveTrainingDeliveryType,
   LiveTrainingLinkEntityType,
@@ -164,7 +169,7 @@ export const quizAttempts = pgTable(
       .references(() => courses.id)
       .notNull(),
     lessonId: uuid("lesson_id")
-      .references(() => lessons.id)
+      .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
     correctAnswers: integer("correct_answers").notNull(),
     wrongAnswers: integer("wrong_answers").notNull(),
@@ -193,15 +198,17 @@ export const categories = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+    baseLanguage,
+    availableLocales,
     archived,
     tenantId,
   },
   (table) => ({
     ...withTenantIdIndex("categories")(table),
-    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_title_unique").on(
+    tenantTitleUniqueIdx: uniqueIndex("categories_tenant_id_base_title_unique").on(
       table.tenantId,
-      table.title,
+      sql`(${table.title}->>${table.baseLanguage})`,
     ),
   }),
 );
@@ -781,6 +788,102 @@ export const aiMentorThreadMessages = pgTable(
   withTenantIdIndex("ai_mentor_thread_messages"),
 );
 
+export const courseChatThreads = pgTable(
+  "course_chat_threads",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    createdByUserId: uuid("created_by_user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    archived,
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_threads", (table) => ({
+    courseCreatedAtIdx: index("course_chat_threads_course_id_created_at_idx").on(
+      table.courseId,
+      table.createdAt,
+    ),
+    courseUpdatedAtIdx: index("course_chat_threads_course_id_updated_at_idx").on(
+      table.courseId,
+      table.updatedAt,
+    ),
+  })),
+);
+
+export const courseChatMessages = pgTable(
+  "course_chat_messages",
+  {
+    ...id,
+    ...timestamps,
+    threadId: uuid("thread_id")
+      .references(() => courseChatThreads.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    content: text("content").notNull(),
+    parentMessageId: uuid("parent_message_id").references(
+      (): AnyPgColumn => courseChatMessages.id,
+      { onDelete: "set null" },
+    ),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_messages", (table) => ({
+    courseCreatedAtIdx: index("course_chat_messages_course_id_created_at_idx").on(
+      table.courseId,
+      table.createdAt,
+    ),
+    threadCreatedAtIdx: index("course_chat_messages_thread_id_created_at_idx").on(
+      table.threadId,
+      table.createdAt,
+    ),
+    parentCreatedAtIdx: index("course_chat_messages_parent_message_id_created_at_idx").on(
+      table.parentMessageId,
+      table.createdAt,
+    ),
+  })),
+);
+
+export const courseChatMessageReactions = pgTable(
+  "course_chat_message_reactions",
+  {
+    ...id,
+    ...timestamps,
+    messageId: uuid("message_id")
+      .references(() => courseChatMessages.id, { onDelete: "cascade" })
+      .notNull(),
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    reaction: text("reaction").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("course_chat_message_reactions", (table) => ({
+    messageReactionIdx: index("course_chat_message_reactions_message_id_reaction_idx").on(
+      table.messageId,
+      table.reaction,
+    ),
+    userMessageReactionUniqueIdx: uniqueIndex(
+      "course_chat_message_reactions_user_message_reaction_unique_idx",
+    ).on(table.userId, table.messageId, table.reaction),
+  })),
+);
+
 export const questions = pgTable(
   "questions",
   {
@@ -1205,8 +1308,10 @@ export const groups = pgTable(
   {
     ...id,
     ...timestamps,
-    name: text("name").notNull(),
-    characteristic: text("characteristic"),
+    name: jsonb("name").$type<LocalizedText>().default({}).notNull(),
+    characteristic: jsonb("characteristic").$type<LocalizedText>(),
+    baseLanguage,
+    availableLocales,
     tenantId,
   },
   withTenantIdIndex("groups"),
@@ -1344,10 +1449,22 @@ export const certificates = pgTable(
     courseId: uuid("course_id")
       .references(() => courses.id, { onDelete: "cascade" })
       .notNull(),
+    status: text("status")
+      .$type<CertificateStatus>()
+      .notNull()
+      .default(CERTIFICATE_STATUSES.ACTIVE),
+    issuedAt: timestampWithTimezone({ name: "issued_at" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+    expiresAt: timestampWithTimezone({ name: "expires_at" }),
+    archivedAt: timestampWithTimezone({ name: "archived_at" }),
+    archiveReason: text("archive_reason").$type<CertificateArchiveReason>(),
+    expirationWarningSentAt: timestampWithTimezone({ name: "expiration_warning_sent_at" }),
     tenantId,
   },
   withTenantIdIndex("certificates", (table) => ({
-    unq: unique().on(table.userId, table.courseId),
+    activeExpiryIdx: index("certificates_active_expiry_idx").on(table.status, table.expiresAt),
+    userCourseIdx: index("certificates_user_course_idx").on(table.userId, table.courseId),
   })),
 );
 
@@ -1356,12 +1473,15 @@ export const announcements = pgTable(
   {
     ...id,
     ...timestamps,
-    title: text("title").notNull(),
-    content: text("content").notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
+    content: jsonb("content").$type<LocalizedText>().default({}).notNull(),
     authorId: uuid("author_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     isEveryone: boolean("is_everyone").notNull().default(false),
+    baseLanguage,
+    availableLocales,
+    deletedAt: timestampWithTimezone({ name: "deleted_at" }),
     tenantId,
   },
   withTenantIdIndex("announcements"),
@@ -1379,7 +1499,7 @@ export const userAnnouncements = pgTable(
       .references(() => announcements.id, { onDelete: "cascade" })
       .notNull(),
     isRead: boolean("is_read").notNull().default(false),
-    readAt: timestamp("read_at", { withTimezone: true, precision: 3 }),
+    readAt: timestamp("read_at", { mode: "string", withTimezone: true, precision: 3 }),
     tenantId,
   },
   withTenantIdIndex("user_announcements", (table) => ({

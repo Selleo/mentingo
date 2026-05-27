@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, type SupportedLanguages } from "@repo/shared";
 import { and, countDistinct, eq, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
   courses,
@@ -20,7 +21,10 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class LearningTimeRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(
+    @Inject("DB") private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async addLearningTime(userId: UUIDType, lessonId: UUIDType, courseId: UUIDType, seconds: number) {
     await this.db
@@ -197,11 +201,11 @@ export class LearningTimeRepository {
       );
   }
 
-  async getGroupsInCourse(courseId: UUIDType) {
+  async getGroupsInCourse(courseId: UUIDType, language?: SupportedLanguages) {
     return this.db
       .select({
         id: groups.id,
-        name: groups.name,
+        name: this.localizationService.getLocalizedSqlField(groups.name, language, groups),
       })
       .from(studentCourses)
       .innerJoin(users, eq(studentCourses.studentId, users.id))

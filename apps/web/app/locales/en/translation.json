@@ -124,6 +124,16 @@
       "success": "File deleted successfully"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Asset deleted successfully"
+    },
+    "error": {
+      "fileRequired": "File is required",
+      "assetNotFound": "Asset not found",
+      "entityNotFound": "Entity not found"
+    }
+  },
   "adminScorm": {
     "header": "Upload SCORM",
     "subHeader": "Upload your SCORM .zip file.",
@@ -261,7 +271,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Create a course from a SCORM 1.2 package.",
-      "badge": "Placeholder",
       "features": {
         "import": "Built from a SCORM 1.2 .zip package",
         "tracking": "SCO completion and runtime tracking supported",
@@ -288,7 +297,7 @@
     "progress": "Progress",
     "findInApplication": "Find in application",
     "courses": "Courses",
-    "learningPaths": "Learning Paths",
+    "learningPaths": "Development Paths",
     "calendar": "Calendar",
     "content": "Content",
     "categories": "Categories",
@@ -298,6 +307,7 @@
     "news": "News",
     "providerInformation": "Information",
     "announcements": "Announcements",
+    "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
     "manage": "Manage",
     "ariaLabels": {
@@ -689,6 +699,7 @@
       "noSearchResults": "No search results for:",
       "announcements": "Announcements",
       "lessons": "Lessons",
+      "learningPaths": "Development Paths",
       "news": "News",
       "articles": "Articles",
       "qa": "Q&A"
@@ -1171,7 +1182,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Category deleted successfully",
-      "deleteCategoryFailed": "Failed to delete category"
+      "deleteCategoryFailed": "Failed to delete category",
+      "deleteCategoryAssignedToCourses": "Cannot delete category. It is assigned to {{courseCount}} course(s): {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "No categories found to delete"
     },
     "breadcrumbs": {
       "categories": "Categories",
@@ -1194,9 +1207,29 @@
     "button": {
       "createCategory": "Create category"
     },
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Default",
+      "notAddedLanguages": "Languages to add",
+      "setBaseLanguage": "Set as default",
+      "setBaseTitle": "Change default language",
+      "setBaseDescription": "Use {{language}} as the default language for this category?",
+      "createTitle": "Create translation",
+      "createDescription": "Create a translation for this category in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Category created successfully",
-      "categoryUpdatedSuccessfully": "Category updated successfully"
+      "categoryUpdatedSuccessfully": "Category updated successfully",
+      "baseLanguageUpdatedSuccessfully": "Default language updated successfully",
+      "baseLanguageUpdateFailed": "Failed to update default language",
+      "languageNotSupported": "This category does not support this language.",
+      "alreadyExists": "Category already exists.",
+      "categoryNotCreated": "Category could not be created.",
+      "languageAlreadyExists": "This category language already exists.",
+      "invalidLanguageToDelete": "This category language cannot be deleted.",
+      "baseLanguageTitleRequired": "The selected default language needs a title."
     },
     "error": {
       "categoryNotFound": "Category not found",
@@ -1286,7 +1319,7 @@
         "category": "categories",
         "group": "groups",
         "course": "courses",
-        "learning_path": "learning paths",
+        "learning_path": "development paths",
         "learning_mode": "learning mode",
         "learning_progress": "learning progress",
         "certificate": "certificates",
@@ -1321,15 +1354,15 @@
         "category_manage": "Create, edit, and delete course categories.",
         "group_read": "View user groups.",
         "group_manage": "Create, edit, and delete user groups.",
-        "learning_path_read": "View learning paths.",
-        "learning_path_create": "Create learning paths.",
-        "learning_path_update": "Edit any learning path.",
-        "learning_path_update_own": "Edit learning paths created by this user.",
-        "learning_path_delete": "Delete learning paths.",
-        "learning_path_course_update": "Add, remove, and reorder courses in any learning path.",
-        "learning_path_course_update_own": "Add, remove, and reorder courses in own learning paths.",
-        "learning_path_enrollment": "Manage learning path enrollments.",
-        "learning_path_export": "Export learning paths to tenants.",
+        "learning_path_read": "View development paths.",
+        "learning_path_create": "Create development paths.",
+        "learning_path_update": "Edit any development path.",
+        "learning_path_update_own": "Edit development paths created by this user.",
+        "learning_path_delete": "Delete development paths.",
+        "learning_path_course_update": "Add, remove, and reorder courses in any development path.",
+        "learning_path_course_update_own": "Add, remove, and reorder courses in own development paths.",
+        "learning_path_enrollment": "Manage development path enrollments.",
+        "learning_path_export": "Export development paths to tenants.",
         "course_read_assigned": "View courses assigned to this user.",
         "course_read_manageable": "View courses this user can manage.",
         "course_read": "View course content.",
@@ -1600,6 +1633,14 @@
       "groupUpdatedSuccessfully": "Group updated successfully",
       "groupNotFound": "Group not found"
     },
+    "language": {
+      "languageCreated": "Group language created successfully",
+      "languageDeleted": "Group language deleted successfully",
+      "baseLanguageUpdated": "Group default language updated successfully",
+      "setBaseLanguage": "Set default",
+      "setBaseTitle": "Set default language",
+      "setBaseDescription": "Are you sure you want to set {{language}} as the default language?"
+    },
     "deleteGroup": {
       "title": "Confirm deletion",
       "description": "Are you sure you want to delete these groups?",
@@ -1658,6 +1699,8 @@
       "courseTrailerRemovedSuccessfully": "Course trailer removed successfully",
       "certificateUpdatedSuccessfully": "Certificate updated successfully",
       "certificateUpdateError": "Error updating certificate",
+      "certificatesResetSuccessfully": "Certificates reset for {{count}} users",
+      "certificatesResetError": "Error resetting certificates",
       "maxTitleLengthExceeded_one": "Title cannot be longer than {{count}} character",
       "maxTitleLengthExceeded_other": "Title cannot be longer than {{count}} characters",
       "aiMentorAvatarIncorrectType": "Invalid file type. Please upload a JPG, JPEG, PNG, or SVG image.",
@@ -1738,7 +1781,11 @@
         "removeTrailer": "Remove Trailer",
         "removeCertificateSignature": "Remove signature",
         "includesCertificate": "Includes certificate",
-        "doesNotIncludeCertificate": "Does not include certificate"
+        "doesNotIncludeCertificate": "Does not include certificate",
+        "saveValidity": "Save validity",
+        "resetCertificates": "Reset certificates",
+        "futureOnly": "Apply to new only",
+        "applyToExisting": "Apply to all (including past)"
       },
       "selectButton": {
         "uploadFile": "Upload file",
@@ -1761,7 +1808,11 @@
         "description": "Description",
         "thumbnail": "Thumbnail",
         "trailer": "Course trailer",
-        "baseLanguage": "Base language"
+        "baseLanguage": "Base language",
+        "validityType": "Validity type",
+        "validityValue": "Value",
+        "validityUnit": "Unit",
+        "validUntil": "Valid until"
       },
       "placeholder": {
         "title": "Enter title",
@@ -1774,6 +1825,38 @@
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
+        "certificateValidity": "Certificate validity",
+        "certificateValidityDescription": "Set when issued certificates expire and trigger course progress reset.",
+        "enableCertificateValidityConfirmationTitle": "Enable certificate validity?",
+        "enableCertificateValidityConfirmationDescription": "This setting affects course statistics for this course only. When a certificate reaches the end of its validity, affected users will lose their progress in this course.",
+        "enableCertificateValidityConfirmationConfirm": "Enable validity",
+        "confirmValidityChangesTitle": "Confirm certificate validity changes",
+        "noActiveCertificatesValidityDescription": "There are no active certificates to update right now. Future certificates will use this validity setting.",
+        "activeCertificatesStat": "Active certificates",
+        "immediatelyExpiringStat": "Expiring immediately",
+        "validityPeriod": "Period",
+        "validityFixedDate": "Fixed date",
+        "days": "Days",
+        "months": "Months",
+        "years": "Years",
+        "applyValidityTitle": "Apply validity to existing certificates?",
+        "applyValidityDescription": "{{activeCount}} active certificates exist. {{expiringCount}} would expire immediately if this setting is applied to existing certificates.",
+        "resetCertificates": "Manual certificate reset",
+        "resetCertificatesDescription": "Archive selected certificates and reset course progress.",
+        "resetCertificatesDialogDescription": "This archives active certificates, resets course progress, and can notify affected users. This action affects this course only.",
+        "sendResetEmail": "Send reset email to affected users",
+        "activeCertificateCount": "{{count}} active",
+        "noActiveCertificate": "No active certificate",
+        "resetUsersSearchPlaceholder": "Search students by name or email",
+        "resetUsersStudent": "Student",
+        "resetUsersEmail": "Email",
+        "resetUsersLoading": "Loading students...",
+        "noResetUsers": "No students with active certificates found",
+        "resetScope": {
+          "all": "All users",
+          "groups": "Groups",
+          "users": "Users"
+        },
         "certificateSignatureRequirements": "PNG or SVG (recommended transparent background)",
         "certificatePreviewTitle": "Certificate preview",
         "certificatePreviewDescription": "Open preview to adjust language and color.",
@@ -1792,7 +1875,11 @@
         "titleMinLength": "Title must be at least 2 characters.",
         "titleMaxLength": "Title must be at most 250 characters.",
         "descriptionMinLength": "Description must be at least 2 characters.",
-        "categoryRequired": "Category is required"
+        "categoryRequired": "Category is required",
+        "certificateManageDenied": "You cannot manage certificates for this course.",
+        "validityDateRequired": "Select a certificate validity date.",
+        "groupIdsRequired": "Select at least one group.",
+        "userIdsRequired": "Select at least one user."
       },
       "header": "Create a new course",
       "subHeader": "Provide the details to set up a new course. You’ll have more options to customize it later.",
@@ -1932,6 +2019,8 @@
           "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor lesson files deleted successfully",
           "lessonUpdatedSuccessfully": "Lesson updated successfully",
+          "lessonDeletedSuccessfully": "Lesson deleted successfully",
+          "lessonDeleteError": "Failed to delete lesson",
           "contentLessonUpdatedSuccessfully": "Content lesson updated successfully",
           "fileLessonUpdatedSuccessfully": "File item updated successfully",
           "questionOptionsUpdatedSuccessfully": "Question options updated successfully",
@@ -2579,7 +2668,8 @@
       "invalidFormatForMultiAnswer": "Invalid format for multi-answer questions.",
       "trueOrFalseRequired": "A true or false response is required.",
       "photoQuestionMustHaveAnswer": "An answer is required for this photo question.",
-      "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!"
+      "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!",
+      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}"
     }
   },
   "studentCourseView": {
@@ -2698,8 +2788,36 @@
     },
     "tabs": {
       "chapters": "Chapters",
+      "chat": "Discussion",
       "moreFromAuthor": "More from author",
       "statistics": "Statistics"
+    },
+    "courseChat": {
+      "title": "Course discussion",
+      "newThreadPlaceholder": "Start a new discussion...",
+      "startThread": "Start thread",
+      "messagesTitle": "Messages",
+      "noThreadSelected": "Select a thread",
+      "emptyThreads": "No discussions yet. Start the first one.",
+      "emptyMessages": "No messages yet.",
+      "replyPlaceholder": "Write a reply...",
+      "reply": "Reply",
+      "reactWith": "React with {{reaction}}",
+      "deleteMessage": "Delete message",
+      "deleteMessageConfirmationTitle": "Delete message?",
+      "deleteMessageConfirmationDescription": "This message will be removed from the discussion. Replies may keep a deleted placeholder so the conversation stays readable.",
+      "deletedMessage": "This message was deleted.",
+      "repliesCount_one": "{{countLabel}} reply",
+      "repliesCount_other": "{{countLabel}} replies",
+      "loadMoreReplies": "Load more replies",
+      "send": "Send",
+      "selectThread": "Select a thread to read messages.",
+      "users": "Users",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "No enrolled users yet.",
+      "mentionedToast": "Someone mentioned you in the course discussion."
     }
   },
   "studentChapterView": {
@@ -2738,7 +2856,8 @@
       "qaSettingUpdatedSuccessfully": "QA settings updated successfully",
       "ageLimitUpdatedSuccessfully": "Age limit updated successfully",
       "newsSettingUpdatedSuccessfully": "News settings updated successfully",
-      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully"
+      "articlesSettingUpdatedSuccessfully": "Knowledge base settings updated successfully",
+      "learningPathsUpdatedSuccessfully": "Development Paths settings updated successfully"
     }
   },
   "certificateBackgroundUpload": {
@@ -2935,14 +3054,19 @@
       "subheader": "Provide the details to set up an new announcement.",
       "buttons": {
         "confirm": "Confirm",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "addLanguage": "Add language",
+        "removeLanguage": "Remove language",
+        "setDefaultLanguage": "Set as default language"
       },
       "fields": {
         "title": "Title",
         "content": "Content",
         "group": "Group",
+        "language": "Language",
         "everyone": "Everyone"
       },
+      "addedLanguages": "Added languages",
       "placeholders": {
         "title": "Enter title",
         "content": "Write your announcement here...",
@@ -2970,7 +3094,35 @@
       "markedAsRead": "Announcements have been marked as read successfully",
       "markAsReadFailed": "Failed to mark announcements as read",
       "createdSuccessfully": "Announcement created successfully",
-      "createFailed": "Failed to create announcement"
+      "createFailed": "Failed to create announcement",
+      "deletedSuccessfully": "Announcement deleted successfully",
+      "deleteFailed": "Failed to delete announcement",
+      "notFound": "Announcement not found"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "tabs": {
+      "all": "All",
+      "adminAnnouncements": "Admin announcements"
+    },
+    "actions": {
+      "refresh": "Refresh",
+      "create": "Create announcement",
+      "delete": "Delete announcement",
+      "markRead": "Mark as read",
+      "markAllRead": "Mark all as read",
+      "loadMore": "Load more",
+      "loadingMore": "Loading more...",
+      "goToNotificationCenter": "Go to notification center"
+    },
+    "status": {
+      "unread": "Unread"
+    },
+    "empty": "No notifications yet",
+    "deleteDialog": {
+      "title": "Delete announcement",
+      "description": "This announcement will be removed for everyone."
     }
   },
   "platformLogo": {
@@ -3122,6 +3274,65 @@
         "h3": "Heading 3",
         "h4": "Heading 4"
       },
+      "bold": {
+        "tooltip": "Bold: makes selected text bold"
+      },
+      "italic": {
+        "tooltip": "Italic: italicizes selected text"
+      },
+      "strikethrough": {
+        "tooltip": "Strikethrough: adds a line through selected text"
+      },
+      "bulletList": {
+        "tooltip": "Bullet list: starts a bulleted list"
+      },
+      "orderedList": {
+        "tooltip": "Numbered list: starts a numbered list"
+      },
+      "taskList": {
+        "tooltip": "Checklist: adds a checklist"
+      },
+      "blockquote": {
+        "tooltip": "Quote: formats text as a blockquote"
+      },
+      "codeBlock": {
+        "tooltip": "Code block: formats text as code"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontal rule: inserts a divider line"
+      },
+      "table": {
+        "tooltip": "Table: insert or edit a table",
+        "groups": {
+          "columns": "Columns",
+          "rows": "Rows",
+          "cells": "Cells",
+          "headers": "Headers"
+        },
+        "actions": {
+          "insert": "Insert table",
+          "addColumnBefore": "Add column before",
+          "addColumnAfter": "Add column after",
+          "deleteColumn": "Delete column",
+          "addRowBefore": "Add row before",
+          "addRowAfter": "Add row after",
+          "deleteRow": "Delete row",
+          "mergeCells": "Merge cells",
+          "splitCell": "Split cell",
+          "mergeOrSplit": "Merge or split",
+          "toggleHeaderRow": "Toggle header row",
+          "toggleHeaderColumn": "Toggle header column",
+          "toggleHeaderCell": "Toggle header cell",
+          "fixTables": "Fix table structure",
+          "deleteTable": "Delete table"
+        }
+      },
+      "undo": {
+        "tooltip": "Undo: reverts the last change"
+      },
+      "redo": {
+        "tooltip": "Redo: reapplies the last undone change"
+      },
       "link": {
         "tooltip": "Link: Makes selected text a hyperlink",
         "dialog": {
@@ -3137,6 +3348,9 @@
       "upload": {
         "uploadFailed": "File upload failed",
         "tooltip": "Upload: Allows you to upload file"
+      },
+      "assetLibrary": {
+        "tooltip": "Assets library: insert a previously uploaded file"
       }
     }
   },
@@ -3189,6 +3403,42 @@
     },
     "loadingAiAsset": {
       "processing": "Resource is currently processing"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3206,6 +3456,7 @@
     "createNewPassword": "Create New Password",
     "createAnnouncement": "Create Announcement",
     "announcements": "Announcements",
+    "notifications": "Notifications",
     "users": "Users",
     "userDetails": "User Details",
     "createNewUser": "Create New User",
@@ -3230,16 +3481,16 @@
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
     "tenants": "Organizations",
-    "learningPaths": "Learning Paths",
-    "adminLearningPaths": "Learning Paths",
-    "adminLearningPathEditor": "Learning Path Editor"
+    "learningPaths": "Development Paths",
+    "adminLearningPaths": "Development Paths",
+    "adminLearningPathEditor": "Development Path Editor"
   },
   "learningPathsView": {
-    "title": "Learning Paths",
-    "description": "Browse assigned learning paths and continue through their ordered course sequences.",
-    "searchPlaceholder": "Search learning paths",
-    "summary": "{{count}} learning paths are available.",
-    "detailsTitle": "Learning Path",
+    "title": "Development Paths",
+    "description": "Browse assigned development paths and continue through their ordered course sequences.",
+    "searchPlaceholder": "Search development paths",
+    "summary": "{{count}} development paths are available.",
+    "detailsTitle": "Development Path",
     "detailsDescription": "Review the ordered course sequence, progress, locks, and certificate state.",
     "detailsSummary": "This path contains {{count}} courses. Current progress: {{progress}}.",
     "emptyDescription": "No description has been added yet.",
@@ -3258,10 +3509,10 @@
       "certificate": "Certificate"
     },
     "card": {
-      "openPath": "Open learning path"
+      "openPath": "Open development path"
     },
     "empty": {
-      "title": "No learning paths found",
+      "title": "No development paths found",
       "description": "Adjust your search or check back after paths are assigned."
     },
     "progress": {
@@ -3271,7 +3522,7 @@
     "certificate": {
       "available": "Certificate available",
       "ready": "Certificate ready",
-      "pathCompleted": "Learning path completed. Your certificate is ready."
+      "pathCompleted": "Development path completed. Your certificate is ready."
     },
     "courseState": {
       "completed": "Finished",
@@ -3286,12 +3537,12 @@
       "courses": "Courses in this path",
       "courseTitle": "Course {{number}}",
       "completedAt": "Completed {{date}}",
-      "emptyCourses": "This learning path does not include any courses yet."
+      "emptyCourses": "This development path does not include any courses yet."
     },
     "enrollment": {
       "manage": "Enroll",
       "title": "Enroll learners",
-      "description": "Manage student and group enrollment for this learning path.",
+      "description": "Manage student and group enrollment for this development path.",
       "students": "Students",
       "selectStudents": "Select students",
       "groups": "Groups",
@@ -3311,9 +3562,9 @@
       "groupsEnrolled": "Groups enrolled",
       "studentsUnenrolled": "Students unenrolled",
       "groupsUnenrolled": "Groups unenrolled",
-      "enrolledSuccessfully": "Learning path enrolled",
-      "enrollGroupsDescription": "Select groups to enroll in this learning path.",
-      "unenrollGroupsDescription": "Select groups to unenroll from this learning path.",
+      "enrolledSuccessfully": "Development path enrolled",
+      "enrollGroupsDescription": "Select groups to enroll in this development path.",
+      "unenrollGroupsDescription": "Select groups to unenroll from this development path.",
       "table": {
         "selectAll": "Select all learners",
         "select": "Select learner",
@@ -3329,16 +3580,16 @@
       },
       "confirmation": {
         "title": "Confirm enrollment",
-        "description": "Are you sure you want to enroll the selected students in this learning path? This action cannot be undone."
+        "description": "Are you sure you want to enroll the selected students in this development path? This action cannot be undone."
       },
       "unenrollConfirmation": {
         "title": "Unenroll confirmation",
-        "description": "Are you sure you want to unenroll the selected students from this learning path? This action cannot be undone."
+        "description": "Are you sure you want to unenroll the selected students from this development path? This action cannot be undone."
       },
       "noGroups": "No groups available"
     },
     "breadcrumbs": {
-      "learningPaths": "Learning Paths",
+      "learningPaths": "Development Paths",
       "details": "Details"
     },
     "buttons": {
@@ -3346,26 +3597,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Learning Paths",
+    "title": "Development Paths",
     "description": "Manage path metadata, sequence settings, ordered courses, enrollment, exports, and certificates.",
-    "summary": "{{count}} learning paths are available in this workspace.",
+    "summary": "{{count}} development paths are available in this workspace.",
     "breadcrumbs": {
-      "learningPaths": "Learning Paths",
+      "learningPaths": "Development Paths",
       "create": "Create",
       "edit": "Edit"
     },
     "buttons": {
-      "create": "Create learning path",
+      "create": "Create development path",
       "edit": "Edit",
       "save": "Save changes",
       "removeImage": "Remove image"
     },
     "editor": {
-      "createTitle": "Create Learning Path",
-      "editTitle": "Edit Learning Path",
-      "description": "Set up the learning path details, sequence settings, courses, and publishing state.",
-      "createSummary": "Start with the learning path details.",
-      "editSummary": "This learning path currently has {{coursesCount}} courses.",
+      "createTitle": "Create Development Path",
+      "editTitle": "Edit Development Path",
+      "description": "Set up the development path details, sequence settings, courses, and publishing state.",
+      "createSummary": "Start with the development path details.",
+      "editSummary": "This development path currently has {{coursesCount}} courses.",
       "details": "Details",
       "courses": "Courses",
       "image": "Image",
@@ -3378,19 +3629,19 @@
       "language": "Language",
       "createdAt": "Created",
       "actions": "Actions",
-      "untitled": "Untitled learning path",
+      "untitled": "Untitled development path",
       "emptyDescription": "No description",
       "sequential": "Sequential",
       "flexible": "Flexible",
       "certificate": "Certificate",
-      "empty": "No learning paths have been created yet."
+      "empty": "No development paths have been created yet."
     },
     "form": {
       "language": "Language",
       "status": "Status",
       "statusDescription": "Controls whether this path is visible, draft-only, or private.",
       "title": "Title",
-      "titlePlaceholder": "Name the learning path",
+      "titlePlaceholder": "Name the development path",
       "description": "Description",
       "descriptionPlaceholder": "Describe what students will complete in this path",
       "imageHint": "PNG, JPG or JPEG (max. 20 MB, recommended 1200x1200 or higher)",
@@ -3399,14 +3650,14 @@
       "includesCertificate": "Certificate",
       "includesCertificateDescription": "Students can receive a certificate after completing the path.",
       "certificateSignature": "Certificate signature",
-      "certificateSignatureDescription": "Upload the signature shown on certificates for this learning path.",
+      "certificateSignatureDescription": "Upload the signature shown on certificates for this development path.",
       "certificateFontColor": "Certificate font color",
       "certificateFontColorDescription": "Use the preview color picker to update the certificate text and line color.",
       "certificatePreview": "Certificate preview",
       "certificatePreviewDescription": "Preview the certificate and adjust its font color."
     },
     "detailsContent": {
-      "title": "Learning path details",
+      "title": "Development path details",
       "description": "Define the localized name and student-facing description."
     },
     "detailsImage": {
@@ -3421,7 +3672,7 @@
       "baseLanguage": "Base language"
     },
     "languageSelector": {
-      "tooltip": "This learning path base language is {{baseLanguage}}."
+      "tooltip": "This development path base language is {{baseLanguage}}."
     },
     "courses": {
       "select": "Select a course",
@@ -3432,32 +3683,32 @@
       "course": "Course",
       "chapter_one": "{{count}} chapter",
       "chapter_other": "{{count}} chapters",
-      "empty": "No courses have been added to this learning path yet.",
-      "saveFirst": "Save the learning path before adding courses.",
+      "empty": "No courses have been added to this development path yet.",
+      "saveFirst": "Save the development path before adding courses.",
       "unknownCourse": "Course details unavailable"
     },
     "sharedLearningPath": {
       "badgeExported": "Shared",
       "exportButton": "Share",
-      "exportSuccess": "Learning path was exported",
-      "exportsDescription": "Share this learning path with selected organizations.",
+      "exportSuccess": "Development path was exported",
+      "exportsDescription": "Share this development path with selected organizations.",
       "exportsTitle": "Sharing",
       "exportingButton": "Sharing...",
       "selectTenants": "Select organizations",
       "selectedCount": "Selected:"
     },
     "deleteModal": {
-      "title": "Delete learning path",
-      "description": "This will delete the learning path and remove its path-based course access."
+      "title": "Delete development path",
+      "description": "This will delete the development path and remove its path-based course access."
     },
     "toast": {
-      "created": "Learning path created successfully",
-      "updated": "Learning path updated successfully",
-      "deleted": "Learning path deleted successfully",
-      "languageCreated": "Learning path language created successfully",
-      "coursesAdded": "Courses added to learning path successfully",
-      "courseRemoved": "Course removed from learning path successfully",
-      "coursesReordered": "Learning path courses reordered successfully"
+      "created": "Development path created successfully",
+      "updated": "Development path updated successfully",
+      "deleted": "Development path deleted successfully",
+      "languageCreated": "Development path language created successfully",
+      "coursesAdded": "Courses added to development path successfully",
+      "courseRemoved": "Course removed from development path successfully",
+      "coursesReordered": "Development path courses reordered successfully"
     }
   },
   "lessonPreview": {
@@ -3562,6 +3813,16 @@
     },
     "tooltip": {
       "disabled": "To toggle this field, please enable the knowledge base section first."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Configure Development Paths settings",
+    "header": "Development Paths Settings",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Enable Development Paths",
+        "description": "Enable Development Paths. When disabled, Development Paths are hidden and blocked for all users."
+      }
     }
   },
   "qaView": {
@@ -3841,19 +4102,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Select at least one target tenant",
-      "exportLinkMissing": "Learning path export link not found",
-      "noCourses": "Learning path must include at least one course before export",
-      "courseExportFailed": "Failed to export one of the learning path courses",
+      "exportLinkMissing": "Development path export link not found",
+      "noCourses": "Development path must include at least one course before export",
+      "courseExportFailed": "Failed to export one of the development path courses",
       "targetAuthorMissing": "Target tenant author not found",
-      "jobNotFound": "Learning path export job not found",
-      "invalidJobData": "Invalid learning path export job data",
-      "invalidExportId": "Invalid learning path export id",
-      "invalidExportLink": "Invalid learning path export link"
+      "jobNotFound": "Development path export job not found",
+      "invalidJobData": "Invalid development path export job data",
+      "invalidExportId": "Invalid development path export id",
+      "invalidExportLink": "Invalid development path export link"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Learning path certificates are disabled"
+      "disabled": "Development path certificates are disabled"
     }
   },
   "activityLogsView": {
@@ -3901,6 +4162,8 @@
       "complete_lesson": "Completed",
       "complete_course": "Completed",
       "complete_chapter": "Completed",
+      "expire_certificate": "Certificate expired",
+      "reset_certificate": "Certificate reset",
       "view_announcement": "Viewed"
     },
     "entity": {

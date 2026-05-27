@@ -69,6 +69,7 @@ export { default as News } from "./news.svg?react";
 export { default as Calendar } from "./calendar.svg?react";
 export { default as Group } from "./group.svg?react";
 export { default as Library } from "./library.svg?react";
+export { default as Linkedin } from "./linkedin.svg?react";
 export { default as ChartNoAxes } from "./chart-no-axes.svg?react";
 export { default as Target } from "./target.svg?react";
 export { default as PanelLeftClose } from "./panel-left-close.svg?react";

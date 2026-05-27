@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
+import { removeResourceNode, type RichTextResourceNodeOptions } from "./utils/resourceNode";
+
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
 
@@ -39,18 +41,16 @@ const getDownloadableFileDataAttributes = (attrs: DownloadableFileAttrs) => ({
 
 const DownloadableFileEditorView = ({ node, editor, getPos }: NodeViewProps) => {
   const { t } = useTranslation();
+
   const attrs = normalizeDownloadableFileAttrs(node.attrs);
   if (!attrs.src) return null;
 
-  const handleRemove = () => {
-    const pos = getPos();
-
-    editor
-      .chain()
-      .focus()
-      .deleteRange({ from: pos, to: pos + node.nodeSize })
-      .run();
-  };
+  const handleRemove = () =>
+    void removeResourceNode({
+      editor,
+      getPos,
+      nodeSize: node.nodeSize,
+    });
 
   return (
     <NodeViewWrapper className="downloadable-file-node">
@@ -172,8 +172,11 @@ const baseDownloadableFileNodeConfig: NodeConfig = {
   },
 };
 
-export const DownloadableFileEmbedEditor = Node.create({
+export const DownloadableFileEmbedEditor = Node.create<RichTextResourceNodeOptions>({
   ...baseDownloadableFileNodeConfig,
+  addOptions() {
+    return {};
+  },
   addNodeView() {
     return ReactNodeViewRenderer(DownloadableFileEditorView);
   },

@@ -738,14 +738,14 @@ function renderFillText(
   savedAnswer: QuestionAnswer | undefined,
   submitted: boolean,
 ) {
-  const parts = (question.description ?? "").split("[word]");
+  const parts = splitBlankAnswerMarkers(question.description ?? "");
   const answers = Array.isArray(savedAnswer) ? savedAnswer : [];
   const sentence = element("div", "fill-sentence");
   parts.forEach((part, index) => {
-    sentence.append(document.createTextNode(stripHtml(part)));
-    if (index < parts.length - 1) {
+    sentence.append(document.createTextNode(stripHtml(part.text)));
+    if (part.answerId) {
       const input = element("input", "blank-input") as HTMLInputElement;
-      input.name = `${question.id}:${index + 1}`;
+      input.name = `${question.id}:${part.answerId}`;
       input.value = answers[index] ?? "";
       input.disabled = submitted;
       sentence.append(input);
@@ -760,13 +760,13 @@ function renderFillDnd(
   savedAnswer: QuestionAnswer | undefined,
   submitted: boolean,
 ) {
-  const parts = stripHtml(question.description ?? "").split("[word]");
+  const parts = splitBlankAnswerMarkers(question.description ?? "");
   const answers = Array.isArray(savedAnswer) ? savedAnswer : [];
   const sentence = element("div", "fill-sentence dnd-sentence");
 
   parts.forEach((part, index) => {
-    sentence.append(document.createTextNode(part));
-    if (index < parts.length - 1) {
+    sentence.append(document.createTextNode(stripHtml(part.text)));
+    if (part.answerId) {
       const blank = element("button", "dnd-blank", answers[index] ?? "") as HTMLButtonElement;
       blank.type = "button";
       blank.dataset.blankIndex = String(index);
@@ -775,7 +775,7 @@ function renderFillDnd(
       blank.disabled = submitted;
       const input = element("input") as HTMLInputElement;
       input.type = "hidden";
-      input.name = `${question.id}:${index + 1}`;
+      input.name = `${question.id}:${part.answerId}`;
       input.value = answers[index] ?? "";
       sentence.append(blank, input);
     }
@@ -1105,6 +1105,14 @@ function isBlankQuestionCorrect(question: QuizQuestion, answerValues: string[]) 
   if (!answerValues.length || !correctOptions.length) return false;
 
   const blankCount = getBlankCount(question);
+  const markerAnswerIds = getBlankAnswerIds(question);
+  if (markerAnswerIds.length) {
+    return markerAnswerIds.every((answerId, index) => {
+      const option = question.options.find((item) => item.id === answerId);
+      return Boolean(option && isSameAnswer(answerValues[index], option.title));
+    });
+  }
+
   if (blankCount === 1) {
     return correctOptions.some((option) => isSameAnswer(answerValues[0], option.title));
   }
@@ -1127,7 +1135,35 @@ function getCorrectOptions(question: QuizQuestion) {
 }
 
 function getBlankCount(question: QuizQuestion) {
-  return Math.max(stripHtml(question.description ?? "").split("[word]").length - 1, 0);
+  return splitBlankAnswerMarkers(question.description ?? "").filter((part) => part.answerId).length;
+}
+
+function getBlankAnswerIds(question: QuizQuestion) {
+  return splitBlankAnswerMarkers(question.description ?? "")
+    .map((part) => part.answerId)
+    .filter((answerId): answerId is string => Boolean(answerId));
+}
+
+function splitBlankAnswerMarkers(content: string) {
+  const markerRegex = /<blank-answer-([^>]+)>/g;
+  const parts: Array<{ text: string; answerId?: string }> = [];
+  let lastIndex = 0;
+
+  for (const match of content.matchAll(markerRegex)) {
+    const matchIndex = match.index ?? 0;
+    parts.push({ text: content.slice(lastIndex, matchIndex), answerId: match[1] });
+    lastIndex = matchIndex + match[0].length;
+  }
+
+  if (!parts.length) {
+    return content.split("[word]").map((text, index, legacyParts) => ({
+      text,
+      answerId: index < legacyParts.length - 1 ? `${index + 1}` : undefined,
+    }));
+  }
+
+  parts.push({ text: content.slice(lastIndex) });
+  return parts;
 }
 
 function isSameAnswer(answer: string | undefined, expected: string) {

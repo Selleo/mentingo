@@ -71,6 +71,20 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Kursas baigtas - {{courseName}}",
     cs: "Kurz dokončen - {{courseName}}",
   },
+  certificateExpirationWarningEmail: {
+    en: "Certificate expires soon - {{courseName}}",
+    pl: "Certyfikat wkrótce wygaśnie - {{courseName}}",
+    de: "Zertifikat läuft bald ab - {{courseName}}",
+    lt: "Pažymėjimas netrukus baigs galioti - {{courseName}}",
+    cs: "Certifikát brzy vyprší - {{courseName}}",
+  },
+  certificateExpiredEmail: {
+    en: "Certificate reset - {{courseName}}",
+    pl: "Certyfikat zresetowany - {{courseName}}",
+    de: "Zertifikat zurückgesetzt - {{courseName}}",
+    lt: "Pažymėjimas nustatytas iš naujo - {{courseName}}",
+    cs: "Certifikát resetován - {{courseName}}",
+  },
   adminNewUserEmail: {
     en: "A new user has registered on your platform",
     pl: "Nowy użytkownik zarejestrował się na Twojej platformie",
@@ -85,12 +99,26 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Naudotojas baigė kursą tavo platformoje",
     cs: "Uživatel dokončil kurz na tvé platformě",
   },
+  adminOverdueCoursesEmail: {
+    en: "Overdue courses notification",
+    pl: "Powiadomienie o zaległych kursach",
+    de: "Benachrichtigung über überfällige Kurse",
+    lt: "Pranešimas apie vėluojančius kursus",
+    cs: "Upozornění na kurzy po termínu",
+  },
   magicLinkEmail: {
     en: "Login link",
     pl: "Link do logowania",
     de: "Anmeldelink",
     lt: "Prisijungimo nuoroda",
     cs: "Přihlašovací odkaz",
+  },
+  courseChatMentionEmail: {
+    en: "You were mentioned in {{courseName}}",
+    pl: "Oznaczono Cię w kursie {{courseName}}",
+    de: "Du wurdest in {{courseName}} erwähnt",
+    lt: "Buvote paminėti kurse {{courseName}}",
+    cs: "Byl(a) jste zmíněn(a) v kurzu {{courseName}}",
   },
 } as const;
 

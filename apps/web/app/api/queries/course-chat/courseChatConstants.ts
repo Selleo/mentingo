@@ -1,0 +1,3 @@
+import { COURSE_CHAT_ALLOWED_REACTIONS } from "@repo/shared";
+
+export const COURSE_CHAT_REACTIONS = COURSE_CHAT_ALLOWED_REACTIONS;

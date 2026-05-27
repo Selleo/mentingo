@@ -1,13 +1,22 @@
 import { useNavigate } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
+import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { DialogFooter } from "~/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { CreatePageHeader } from "~/modules/Admin/components";
+import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import { CREATE_CATEGORY_PAGE_HANDLES } from "../../../../e2e/data/categories/handles";
@@ -46,10 +55,8 @@ export default function CreateNewCategoryPage() {
               control={form.control}
               name="title"
               render={({ field }) => (
-                <FormItem>
-                  <Label htmlFor="title" className="text-right">
-                    {t("adminCategoryView.field.title")}
-                  </Label>
+                <FormItem className="space-y-2">
+                  <Label htmlFor="title">{t("adminCategoryView.field.title")}</Label>
                   <FormControl>
                     <Input
                       id="title"
@@ -57,6 +64,43 @@ export default function CreateNewCategoryPage() {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="language"
+              render={({ field }) => (
+                <FormItem>
+                  <Label htmlFor="language">
+                    {t("adminCourseView.settings.field.baseLanguage")}
+                  </Label>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger
+                        id="language"
+                        data-testid={CREATE_CATEGORY_PAGE_HANDLES.LANGUAGE_SELECT}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {courseLanguages.map((item) => (
+                        <SelectItem
+                          data-testid={CREATE_CATEGORY_PAGE_HANDLES.languageOption(item.key)}
+                          value={item.key}
+                          key={item.key}
+                          className="w-full"
+                        >
+                          <div className="flex w-full items-center gap-2">
+                            <Icon name={item.iconName} className="size-4" />
+                            <span className="font-semibold">{t(item.translationKey)}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

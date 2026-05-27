@@ -15,6 +15,32 @@ import {
 
 import { createSingleChoiceQuizLessonCourse } from "./learning-test-helpers";
 
+type LearningApiClient = Parameters<typeof getUserQuizAttemptCountFlow>[0];
+
+const waitForCourseCertificate = async (
+  apiClient: LearningApiClient,
+  input: { courseId: string; studentId: string },
+): Promise<string> => {
+  const getCertificateId = async () => {
+    const response = await apiClient.api.certificatesControllerGetCertificate({
+      courseId: input.courseId,
+      language: "en",
+      userId: input.studentId,
+    });
+
+    return response.data?.id ?? null;
+  };
+
+  await expect.poll(getCertificateId, { timeout: 15_000 }).not.toBeNull();
+
+  const certificateId = await getCertificateId();
+  if (!certificateId) {
+    throw new Error(`Certificate was not created for course ${input.courseId}`);
+  }
+
+  return certificateId;
+};
+
 test("student can submit and retake a quiz lesson", async ({
   apiClient,
   cleanup,
@@ -118,6 +144,105 @@ test("student can submit and retake a quiz lesson", async ({
       });
 
       await waitForUserQuizAttemptCountFlow(apiClient, secondExpectedQuizAttemptCount);
+    },
+    { root: true },
+  );
+});
+
+test("student can retake the final quiz when the completed course already has a certificate", async ({
+  apiClient,
+  cleanup,
+  factories,
+  withWorkerPage,
+}) => {
+  const enrollmentFactory = factories.createEnrollmentFactory();
+  const courseFactory = factories.createCourseFactory();
+
+  let quizWasSubmitted = false;
+
+  const { courseId, lessons } = await createSingleChoiceQuizLessonCourse({
+    cleanup,
+    factories,
+    prefix: `learning-quiz-retake-certificate-${Date.now()}`,
+    shouldKeepCourseAfterTest: () => quizWasSubmitted,
+    withWorkerPage,
+  });
+  const { quizLesson } = lessons;
+
+  await withWorkerPage(
+    USER_ROLE.student,
+    async ({ context, origin, page }) => {
+      await enrollmentFactory.selfEnroll(courseId);
+      const studentId = await enrollmentFactory.getCurrentUserId();
+
+      await openCourseOverviewFlow(page, courseId);
+      await startLearningFlow(page);
+
+      const initialQuizAttemptCount = await getUserQuizAttemptCountFlow(apiClient);
+
+      await selectFirstSingleChoiceAnswerFlow(page);
+      await submitQuizFlow(page);
+      quizWasSubmitted = true;
+
+      await assertQuizLessonProgressFlow(apiClient, {
+        courseId,
+        lessonId: quizLesson.id,
+        studentId,
+        expected: {
+          completedLessonCount: 1,
+          courseLessonStatus: "completed",
+          lessonCompleted: true,
+          attempts: 1,
+        },
+      });
+      await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 1);
+
+      let certificateId = "";
+      await withWorkerPage(
+        USER_ROLE.admin,
+        async () => {
+          await courseFactory.updateHasCertificate(courseId, true);
+          certificateId = await waitForCourseCertificate(apiClient, { courseId, studentId });
+        },
+        { root: true },
+      );
+      await apiClient.syncFromContext(context, origin ?? new URL(page.url()).origin);
+
+      await retakeQuizFlow(page);
+
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeEnabled();
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeDisabled();
+
+      await selectFirstSingleChoiceAnswerFlow(page);
+      await submitQuizFlow(page);
+
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_SUBMIT_BUTTON)).toBeDisabled();
+      await expect(page.getByTestId(LEARNING_HANDLES.QUIZ_RETAKE_BUTTON)).toBeEnabled();
+
+      await assertQuizLessonProgressFlow(apiClient, {
+        courseId,
+        lessonId: quizLesson.id,
+        studentId,
+        expected: {
+          completedLessonCount: 1,
+          courseLessonStatus: "completed",
+          lessonCompleted: true,
+          attempts: 2,
+        },
+      });
+      await waitForUserQuizAttemptCountFlow(apiClient, initialQuizAttemptCount + 2);
+
+      await expect
+        .poll(async () => {
+          const response = await apiClient.api.certificatesControllerGetCertificate({
+            courseId,
+            language: "en",
+            userId: studentId,
+          });
+
+          return response.data?.id ?? null;
+        })
+        .toBe(certificateId);
     },
     { root: true },
   );

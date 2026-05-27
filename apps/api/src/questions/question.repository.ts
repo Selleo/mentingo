@@ -85,12 +85,15 @@ export class QuestionRepository {
                       WHEN ${isCompleted} THEN ${questionAnswerOptions.displayOrder}
                       ELSE NULL
                     END,
-                    'isStudentAnswer',
+                  'isStudentAnswer',
                     CASE
                       WHEN ${studentQuestionAnswers.id} IS NULL THEN NULL
-                      WHEN ${studentQuestionAnswers.answer}->>CAST(${
-                        questionAnswerOptions.displayOrder
-                      } AS text) = ${this.localizationService.getLocalizedSqlField(
+                      WHEN COALESCE(
+                        ${studentQuestionAnswers.answer}->>${questionAnswerOptions.id}::text,
+                        ${studentQuestionAnswers.answer}->>CAST(${
+                          questionAnswerOptions.displayOrder
+                        } AS text)
+                      ) = ${this.localizationService.getLocalizedSqlField(
                         questionAnswerOptions.optionText,
                         language,
                       )} AND
@@ -121,6 +124,14 @@ export class QuestionRepository {
                   'studentAnswer',  
                     CASE
                       WHEN ${studentQuestionAnswers.id} IS NULL THEN NULL
+                      WHEN ${questions.type} IN (${QUESTION_TYPE.FILL_IN_THE_BLANKS_DND}, ${
+                        QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT
+                      }) THEN COALESCE(
+                        ${studentQuestionAnswers.answer}->>${questionAnswerOptions.id}::text,
+                        ${studentQuestionAnswers.answer}->>CAST(${
+                          questionAnswerOptions.displayOrder
+                        } AS text)
+                      )
                       ELSE ${studentQuestionAnswers.answer}->>CAST(${
                         questionAnswerOptions.displayOrder
                       } AS text)
@@ -169,6 +180,7 @@ export class QuestionRepository {
     return this.db
       .select({
         id: questions.id,
+        title: this.localizationService.getLocalizedSqlField(questions.title, language),
         type: sql<QuestionType>`${questions.type}`,
         correctAnswers: sql<{ answerId: UUIDType; displayOrder: number; value: string }[]>`
           (

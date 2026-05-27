@@ -43,7 +43,7 @@ export const TextBlank = ({
   const isCorrectAnswer = studentAnswer?.isCorrect && studentAnswer.isStudentAnswer;
 
   const textBlankClasses = cn(
-    "bg-transparent border-dashed border-b mx-1.5 w-20 focus:ring-0 focus:outline-none text-accent-foreground border-b-accent-foreground",
+    "mx-1.5 w-20 align-middle bg-transparent border-b border-dashed border-b-accent-foreground text-accent-foreground focus:outline-none focus:ring-0",
     {
       "border-b-neutral-400 text-neutral-600": isQuizFeedbackRedacted && isQuizSubmitted,
       "border-b-success-500 text-success-500":

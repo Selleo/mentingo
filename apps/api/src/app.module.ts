@@ -44,6 +44,7 @@ import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
+import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
@@ -62,6 +63,7 @@ import { QuestionsModule } from "./questions/question.module";
 import { AppThrottlerGuard } from "./rate-limit/app-throttler.guard";
 import { RedisThrottlerStorage } from "./rate-limit/redis-throttler.storage";
 import { ReportModule } from "./report/report.module";
+import { ResourceLibraryModule } from "./resource-library/resource-library.module";
 import { S3Module } from "./s3/s3.module";
 import { ScormModule } from "./scorm/scorm.module";
 import { SentryInterceptor } from "./sentry/sentry.interceptor";
@@ -137,6 +139,7 @@ import type { RedisClient } from "src/redis";
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
+    CourseChatModule,
     LearningPathModule,
     GroupModule,
     LessonModule,
@@ -149,6 +152,7 @@ import type { RedisClient } from "src/redis";
     EventsModule,
     StatisticsModule,
     ReportModule,
+    ResourceLibraryModule,
     CacheModule,
     RedisClientsModule,
     QueueModule,

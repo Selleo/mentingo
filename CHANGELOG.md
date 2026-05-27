@@ -1,3 +1,95 @@
+<a name="v4.9.0"></a>
+
+## [v4.9.0] - 16.05.2026
+
+### Features:
+
+- allow creators add tables to rich text content ([#1508](https://github.com/Selleo/mentingo/issues/1508))
+
+- add an asset library to organize and reuse course materials easily ([#1503](https://github.com/Selleo/mentingo/issues/1503))
+
+- introduce course chat discussions for real-time learner interactions ([#1495](https://github.com/Selleo/mentingo/issues/1495))
+
+- introduce learning paths to group related courses together ([#1491](https://github.com/Selleo/mentingo/issues/1491))
+
+- enable SCORM export for sharing courses across learning platforms ([#1480](https://github.com/Selleo/mentingo/issues/1480))
+
+- add activity logs view to help users track recent actions and updates ([#1460](https://github.com/Selleo/mentingo/issues/1460))
+
+- add support for importing SCORM course packages into the platform ([#1476](https://github.com/Selleo/mentingo/issues/1476))
+
+- add integration endpoint for retrieving student progress ([#1474](https://github.com/Selleo/mentingo/issues/1474))
+
+- add new controls for managing voice mentor interactions ([#1437](https://github.com/Selleo/mentingo/issues/1437))
+
+### Bug Fixes:
+
+- improve multiple file uploads for smoother course creation ([#1499](https://github.com/Selleo/mentingo/issues/1499))
+
+- one command application setup ([#1461](https://github.com/Selleo/mentingo/issues/1461))
+
+- resolve issue preventing users from completing lessons with videos ([#1438](https://github.com/Selleo/mentingo/issues/1438))
+
+### Chores:
+
+- improve fill-in-the-blank exercises with support for repeated words ([#1506](https://github.com/Selleo/mentingo/issues/1506))
+
+- improve file storage reliability with better error handling and timeouts ([#1516](https://github.com/Selleo/mentingo/issues/1516))
+
+- add AGENTS.md to document AI agent guidelines ([#1490](https://github.com/Selleo/mentingo/issues/1490))
+
+- make background event processing more reliable with Postgres listener ([#1482](https://github.com/Selleo/mentingo/issues/1482))
+
+- add scroll to navigation on smaller devices ([#1443](https://github.com/Selleo/mentingo/issues/1443))
+
+- improve testing workflows with flexible browser selection and add nightly Firefox test runs ([#1444](https://github.com/Selleo/mentingo/issues/1444))
+
+- make MFA issuer use company name specified by provider ([#1442](https://github.com/Selleo/mentingo/issues/1442))
+
+- enhance account recovery security by preventing email exposure ([#1441](https://github.com/Selleo/mentingo/issues/1441))
+
+- clean up deployment workflows for unused environments ([#1440](https://github.com/Selleo/mentingo/issues/1440))
+
+- bump AWS credentials action to v4 across deployment workflows ([#1439](https://github.com/Selleo/mentingo/issues/1439))
+
+- update storage paths to make file management simpler and more organized ([#1428](https://github.com/Selleo/mentingo/issues/1428))
+
+### Code Refactoring:
+
+- improve test setup to run checks fully in parallel ([#1430](https://github.com/Selleo/mentingo/issues/1430))
+
+### Tests:
+
+- extend coverage with settings ([#1472](https://github.com/Selleo/mentingo/issues/1472))
+
+- extend statistics test coverage ([#1459](https://github.com/Selleo/mentingo/issues/1459))
+
+- extend coverage with ai tests ([#1458](https://github.com/Selleo/mentingo/issues/1458))
+
+- extend coverage with learning-based activities ([#1457](https://github.com/Selleo/mentingo/issues/1457))
+
+- extend coverage with support mode functionality ([#1456](https://github.com/Selleo/mentingo/issues/1456))
+
+- add environment variables test coverage to ensure stable configuration handling ([#1455](https://github.com/Selleo/mentingo/issues/1455))
+
+- add Q&A test coverage to improve platform reliability ([#1454](https://github.com/Selleo/mentingo/issues/1454))
+
+- add coverage for course enrollment flows ([#1451](https://github.com/Selleo/mentingo/issues/1451))
+
+- add coverage for internationalization and improve test cases ([#1453](https://github.com/Selleo/mentingo/issues/1453))
+
+- add coverage for announcements and multi-tenant access handling ([#1452](https://github.com/Selleo/mentingo/issues/1452))
+
+- add coverage for curriculum activities ([#1450](https://github.com/Selleo/mentingo/issues/1450))
+
+- add coverage for news and articles flows ([#1449](https://github.com/Selleo/mentingo/issues/1449))
+
+- add coverage for tenant and course workflows ([#1448](https://github.com/Selleo/mentingo/issues/1448))
+
+- implement end-to-end flows for authentication processes and navigation ([#1445](https://github.com/Selleo/mentingo/issues/1445))
+
+- add test coverage for users, groups, and categories to improve platform reliability ([#1435](https://github.com/Selleo/mentingo/issues/1435))
+
 <a name="v4.8.0"></a>
 
 ## [v4.8.0] - 09.04.2026
@@ -49,6 +141,10 @@
 - automatically play welcome message on voice ai mentor conversation start ([#1408](https://github.com/Selleo/mentingo/issues/1408))
 
 - improve voice mentor quality ([#1405](https://github.com/Selleo/mentingo/issues/1405))
+
+### Documentation:
+
+- update changelog for version v4.8.0
 
 <a name="v4.7.0"></a>
 
@@ -2634,7 +2730,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.8.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.9.0...HEAD
+[v4.9.0]: https://github.com/Selleo/mentingo/compare/v4.8.0...v4.9.0
 [v4.8.0]: https://github.com/Selleo/mentingo/compare/v4.7.0...v4.8.0
 [v4.7.0]: https://github.com/Selleo/mentingo/compare/v4.6.1...v4.7.0
 [v4.6.1]: https://github.com/Selleo/mentingo/compare/v4.6.0...v4.6.1

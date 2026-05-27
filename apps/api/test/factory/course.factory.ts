@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_TYPE } from "@repo/shared";
+import { COURSE_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { getTableColumns, sql } from "drizzle-orm";
 import { Factory } from "fishery";
 
@@ -20,7 +20,12 @@ const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UU
     .insert(categories)
     .values({
       id: faker.string.uuid(),
-      title: `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
+      title: buildJsonbField(
+        SUPPORTED_LANGUAGES.EN,
+        `${faker.commerce.department()}-${faker.string.nanoid(8)}`,
+      ),
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+      availableLocales: [SUPPORTED_LANGUAGES.EN],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     })
@@ -101,6 +106,7 @@ export const createCourseFactory = (db: DatabasePg) => {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
         certificateFontColor: null,
+        certificateValidity: null,
       },
     };
   });

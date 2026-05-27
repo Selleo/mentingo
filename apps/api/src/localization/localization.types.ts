@@ -4,9 +4,12 @@ import type {
   news,
   articles,
   articleSections,
+  categories,
   formFields,
+  groups,
   learningPaths,
   calendarEvents,
+  announcements,
 } from "src/storage/schema";
 
 export const ENTITY_TYPE = {
@@ -32,8 +35,12 @@ export type BaseTable =
   | typeof courses
   | typeof questionsAndAnswers
   | typeof articles
+  | typeof categories
   | typeof news
   | typeof articleSections
   | typeof formFields
+  | typeof groups
+  | typeof learningPaths
+  | typeof announcements
   | typeof learningPaths
   | typeof calendarEvents;

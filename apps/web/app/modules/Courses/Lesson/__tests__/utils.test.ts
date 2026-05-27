@@ -1,6 +1,10 @@
 import { expect, describe, it } from "vitest";
 
 import {
+  getAnswers as getFillInTheBlanksDndAnswers,
+  getCompletedAnswers as getCompletedFillInTheBlanksDndAnswers,
+} from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
+import {
   findFirstInProgressLessonId,
   findFirstNotStartedLessonId,
   getEmptyQuizAnswers,
@@ -401,5 +405,136 @@ describe("fill in the blanks text mapping", () => {
     expect(userAnswers.fillInTheBlanksText["question-text"]).toEqual({
       "1": "go",
     });
+  });
+
+  it("uses blank answer ids from rendered placeholders", () => {
+    const questions = [
+      {
+        id: "question-text",
+        type: "fill_in_the_blanks_text",
+        description: "I <blank-answer-o2> to the <blank-answer-o1> every day.",
+        options: [
+          { id: "o1", studentAnswer: "park" },
+          { id: "o2", studentAnswer: "go" },
+        ],
+      },
+    ] as unknown as NonNullable<
+      import("~/api/generated-api").GetLessonByIdResponse["data"]["quizDetails"]
+    >["questions"];
+
+    expect(getEmptyQuizAnswers(questions).fillInTheBlanksText["question-text"]).toEqual({
+      o2: null,
+      o1: null,
+    });
+    expect(getUserAnswers(questions).fillInTheBlanksText["question-text"]).toEqual({
+      o2: "go",
+      o1: "park",
+    });
+  });
+
+  it("submits fill in the blanks values with answer ids when present", () => {
+    const formData: QuizForm = {
+      briefResponses: {},
+      detailedResponses: {},
+      singleAnswerQuestions: {},
+      multiAnswerQuestions: {},
+      photoQuestionSingleChoice: {},
+      photoQuestionMultipleChoice: {},
+      trueOrFalseQuestions: {},
+      fillInTheBlanksText: {
+        "question-text": {
+          o2: "go",
+          o1: "park",
+        },
+      },
+      fillInTheBlanksDnd: {},
+    };
+
+    const parsed = parseQuizFormData(formData);
+
+    expect(parsed).toEqual([
+      {
+        questionId: "question-text",
+        answers: [
+          { answerId: "o2", value: "go" },
+          { answerId: "o1", value: "park" },
+        ],
+      },
+    ]);
+  });
+});
+
+describe("fill in the blanks drag-and-drop mapping", () => {
+  it("keeps duplicate word options as separate draggable answers", () => {
+    const answers = getFillInTheBlanksDndAnswers([
+      {
+        id: "o1",
+        optionText: "same",
+        displayOrder: 1,
+        isCorrect: null,
+        isStudentAnswer: null,
+        studentAnswer: null,
+      },
+      {
+        id: "o2",
+        optionText: "same",
+        displayOrder: 2,
+        isCorrect: null,
+        isStudentAnswer: null,
+        studentAnswer: null,
+      },
+    ]);
+
+    expect(answers).toHaveLength(2);
+    expect(answers.map(({ id, value }) => ({ id, value }))).toEqual([
+      { id: "o1", value: "same" },
+      { id: "o2", value: "same" },
+    ]);
+  });
+
+  it("renders completed blanks from submitted values and keeps distractors in the word bank", () => {
+    const answers = getCompletedFillInTheBlanksDndAnswers(
+      [
+        {
+          id: "o1",
+          optionText: "went",
+          displayOrder: 1,
+          isCorrect: true,
+          isStudentAnswer: true,
+          studentAnswer: "went",
+        },
+        {
+          id: "o2",
+          optionText: "went",
+          displayOrder: 2,
+          isCorrect: true,
+          isStudentAnswer: false,
+          studentAnswer: "go",
+        },
+        {
+          id: "o3",
+          optionText: "go",
+          displayOrder: 3,
+          isCorrect: false,
+          isStudentAnswer: false,
+          studentAnswer: null,
+        },
+      ],
+      ["o1", "o2"],
+      2,
+    );
+
+    expect(
+      answers.map(({ blankId, value, isCorrect, isStudentAnswer }) => ({
+        blankId,
+        value,
+        isCorrect,
+        isStudentAnswer,
+      })),
+    ).toEqual([
+      { blankId: "blank:o1", value: "went", isCorrect: true, isStudentAnswer: true },
+      { blankId: "blank:o2", value: "go", isCorrect: true, isStudentAnswer: false },
+      { blankId: "blank_preset", value: "go", isCorrect: false, isStudentAnswer: false },
+    ]);
   });
 });

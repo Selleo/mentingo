@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { ApiForbiddenResponse, ApiHeader, ApiUnauthorizedResponse, ApiTags } from "@nestjs/swagger";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -34,6 +34,7 @@ import { enrolledCourseGroupsPayload } from "src/courses/schemas/course.schema";
 import { createCoursesEnrollmentSchema } from "src/courses/schemas/createCoursesEnrollment";
 import {
   allGroupsSchema,
+  groupLanguageSchema,
   groupSortFieldsOptions,
   groupsFilterSchema,
 } from "src/group/group.schema";
@@ -302,6 +303,7 @@ export class IntegrationController {
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: groupSortFieldsOptions },
+      { type: "query", name: "language", schema: Type.Optional(groupLanguageSchema) },
     ],
     response: paginatedResponse(allGroupsSchema),
   })
@@ -310,12 +312,13 @@ export class IntegrationController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: GroupSortFieldsOptions,
+    @Query("language") language: SupportedLanguages | undefined,
   ): Promise<PaginatedResponse<AllGroupsResponse>> {
     const filters: GroupKeywordFilterBody = {
       keyword,
     };
 
-    const query = { filters, page, perPage, sort };
+    const query = { filters, language, page, perPage, sort };
     const groups = await this.groupService.getAllGroups(query);
 
     return new PaginatedResponse(groups);

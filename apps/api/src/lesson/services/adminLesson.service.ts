@@ -36,6 +36,7 @@ import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -84,6 +85,7 @@ export class AdminLessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
+    private readonly resourceLibraryRepository: ResourceLibraryRepository,
     private readonly liveTrainingService: LiveTrainingService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
@@ -674,9 +676,7 @@ export class AdminLessonService {
       });
     }
 
-    if (!lesson) {
-      throw new NotFoundException("Lesson not found");
-    }
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     this.assertLiveTrainingLessonTitleOnlyUpdate(lesson.type, data);
 
@@ -687,6 +687,10 @@ export class AdminLessonService {
     }
 
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
+
+    if (data.description !== undefined) {
+      await this.resourceLibraryRepository.syncLessonAssetRelations(id);
+    }
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -727,9 +731,7 @@ export class AdminLessonService {
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
-    if (!lesson) {
-      throw new NotFoundException("Lesson not found");
-    }
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     await this.db.transaction(async (trx) => {
       await this.documentService.deleteAllDocumentsIfLast(lessonId, trx);
@@ -944,6 +946,7 @@ export class AdminLessonService {
       const optionsToInsert = insertedQuestions.flatMap(
         (question, index) =>
           data.questions?.[index].options?.map((option) => ({
+            id: option.id,
             questionId: question.id,
             optionText: buildJsonbField(language, option.optionText),
             isCorrect: option.isCorrect,
@@ -1112,6 +1115,7 @@ export class AdminLessonService {
               }
 
               const optionData = {
+                id: option.id,
                 optionText: option.optionText,
                 isCorrect: option.isCorrect,
                 displayOrder: option.displayOrder,
@@ -1120,7 +1124,7 @@ export class AdminLessonService {
                 language: data.language,
               };
 
-              if (option.id) {
+              if (option.id && existingOptionIds.includes(option.id)) {
                 const result = await this.adminLessonRepository.updateOption(
                   option.id,
                   optionData,
@@ -1349,9 +1353,6 @@ export class AdminLessonService {
       file,
       folder: "lesson-content",
       resource: RESOURCE_CATEGORIES.LESSON,
-      entityId: lessonId,
-      entityType: ENTITY_TYPES.LESSON,
-      relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       title: fileTitle,
       description: fileDescription,
       currentUser,

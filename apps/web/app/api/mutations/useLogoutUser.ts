@@ -6,7 +6,6 @@ import { useToast } from "~/components/ui/use-toast";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
 import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
-import { useAnnouncementsPopupStore } from "~/modules/Dashboard/store/useAnnouncementsPopupStore";
 
 import { ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
@@ -15,7 +14,6 @@ export function useLogoutUser() {
   const { toast } = useToast();
   const { setLoggedIn } = useAuthStore();
   const setCurrentUser = useCurrentUserStore((state) => state.setCurrentUser);
-  const setIsVisible = useAnnouncementsPopupStore((state) => state.setIsVisible);
   const clearHistory = useNavigationHistoryStore((state) => state.clearHistory);
 
   const navigate = useNavigate();
@@ -26,7 +24,6 @@ export function useLogoutUser() {
 
       setCurrentUser(undefined);
       setLoggedIn(false);
-      setIsVisible(true);
 
       return response.data;
     },

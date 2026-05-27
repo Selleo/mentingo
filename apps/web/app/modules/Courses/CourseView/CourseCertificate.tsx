@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +10,7 @@ import { Card } from "~/components/ui/card";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 const CourseCertificate = ({ courseId }: { courseId: string }) => {
   const { t } = useTranslation();
@@ -41,7 +41,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
     const studentName = certificate?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
     const courseName = certificate?.courseTitle || course.title;
     const completionDate = certificate ? certificate.completionDate : null;
-    const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
+    const formattedDate = formatCertificateDate(completionDate);
 
     return { studentName, courseName, formattedDate };
   }, [certificate, currentUser, course, isEffectiveStudentExperience]);

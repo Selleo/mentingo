@@ -28,10 +28,11 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
       <div className="h6 text-neutral-950">{t("studentLessonView.other.fillInTheBlanks")}</div>
       <FillInTheTextBlanks
         content={question.description}
-        replacement={(index) => {
+        replacement={(index, answerId) => {
           const blankDisplayOrder = index + 1;
 
           const studentAnswerForBlank =
+            question.options?.find((option) => option.id === answerId) ??
             question.options?.find((option) => option.displayOrder === blankDisplayOrder) ??
             question.options?.[index];
 

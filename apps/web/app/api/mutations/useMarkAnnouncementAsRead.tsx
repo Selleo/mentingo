@@ -4,8 +4,10 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { announcementsForUserOptions } from "../queries/useAnnouncementsForUser";
+import { ANNOUNCEMENTS_FOR_USER_QUERY_KEY } from "../queries/useAnnouncementsForUser";
+import { UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY } from "../queries/useUnreadAnnouncementsCount";
 import { queryClient } from "../queryClient";
+import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
 type MarkAnnouncementAsReadOptions = {
   id: string;
@@ -25,12 +27,17 @@ export function useMarkAnnouncementAsRead() {
     },
     onSuccess: () => {
       toast({ description: t("announcements.toast.markedAsRead") });
-      queryClient.invalidateQueries(announcementsForUserOptions());
+      queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
     },
     onError: (error) => {
       toast({
         variant: "destructive",
-        description: t(error.message),
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("announcements.toast.markAsReadFailed"),
+        ),
       });
     },
   });

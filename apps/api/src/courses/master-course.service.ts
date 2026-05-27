@@ -21,6 +21,10 @@ import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/cons
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import {
+  buildTenantResourceUrl,
+  replaceResourceReferencesInRichText,
+} from "src/resource-library/resource-library.utils";
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
@@ -305,6 +309,12 @@ export class MasterCourseService {
     exportLink: MasterCourseExportRecord,
     sourceSnapshot: SourceSnapshot,
   ): Promise<UUIDType> {
+    const targetTenantHost = await this.masterCourseRepository.getTenantHost(
+      exportLink.targetTenantId,
+    );
+
+    if (!targetTenantHost) throw new NotFoundException("masterCourse.error.targetTenantMissing");
+
     return this.tenantRunner.runWithTenant(exportLink.targetTenantId, async () => {
       const sourceLanguage = sourceSnapshot.course.baseLanguage;
       const courseSettings = this.normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
@@ -312,6 +322,7 @@ export class MasterCourseService {
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
         certificateFontColor: null,
+        certificateValidity: null,
       });
 
       const targetAuthor = await this.masterCourseRepository.findTargetAuthor();
@@ -390,13 +401,22 @@ export class MasterCourseService {
 
       await this.syncAiMentors(sourceSnapshot, lessonMap);
 
-      await this.syncResources({
+      const lessonResourceMap = await this.syncResources({
         sourceLanguage,
         sourceSnapshot,
         lessonMap,
         targetCourseId: resolvedTargetCourseId,
         targetAuthorId: targetAuthor.id,
       });
+
+      await this.syncLessonResourceReferences({
+        sourceLanguage,
+        sourceSnapshot,
+        lessonMap,
+        lessonResourceMap,
+        targetTenantHost,
+      });
+
       await this.cleanupMissingMirroredEntities(exportLink.id, sourceSnapshot);
 
       await this.masterCourseRepository.updateTargetCourseChapterCount(
@@ -790,6 +810,7 @@ export class MasterCourseService {
     targetAuthorId: UUIDType;
   }) {
     const targetLessonIds = Array.from(params.lessonMap.values());
+    const lessonResourceMap = new Map<UUIDType, Map<UUIDType, UUIDType>>();
 
     await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
     await this.masterCourseRepository.removeCourseResourceRelations(params.targetCourseId);
@@ -819,9 +840,18 @@ export class MasterCourseService {
     for (const { resource: sourceResource, relation: sourceRelation } of params.sourceSnapshot
       .lessonResources) {
       const mappedLessonId = params.lessonMap.get(sourceRelation.entityId);
+
       if (!mappedLessonId) continue;
 
       const targetResourceId = await insertResourceFromSource(sourceResource);
+
+      this.setNestedMapValue(
+        lessonResourceMap,
+        sourceRelation.entityId,
+        sourceResource.id,
+        targetResourceId,
+      );
+
       await this.masterCourseRepository.createResourceRelation({
         resourceId: targetResourceId,
         entityId: mappedLessonId,
@@ -839,6 +869,45 @@ export class MasterCourseService {
         entityId: params.targetCourseId,
         entityType: ENTITY_TYPES.COURSE,
         relationshipType: sourceRelation.relationshipType || RESOURCE_RELATIONSHIP_TYPES.TRAILER,
+      });
+    }
+
+    return lessonResourceMap;
+  }
+
+  private async syncLessonResourceReferences(params: {
+    sourceLanguage: string;
+    sourceSnapshot: SourceSnapshot;
+    lessonMap: Map<UUIDType, UUIDType>;
+    lessonResourceMap: Map<UUIDType, Map<UUIDType, UUIDType>>;
+    targetTenantHost: string;
+  }) {
+    for (const sourceLesson of params.sourceSnapshot.lessons) {
+      const mappedLessonId = params.lessonMap.get(sourceLesson.id);
+      const resourceReplacements = params.lessonResourceMap.get(sourceLesson.id);
+
+      if (!mappedLessonId || !resourceReplacements?.size) continue;
+
+      const sourceDescription = this.getLocalizedText(
+        sourceLesson.description,
+        params.sourceLanguage,
+      );
+
+      const rewrittenDescription = sourceDescription
+        ? replaceResourceReferencesInRichText(sourceDescription, resourceReplacements, {
+            buildResourceUrl: (resourceId, route) =>
+              buildTenantResourceUrl(params.targetTenantHost, resourceId, route),
+          })
+        : sourceDescription;
+
+      await this.masterCourseRepository.updateTargetLesson(mappedLessonId, {
+        description: setJsonbField(
+          lessons.description,
+          params.sourceLanguage,
+          rewrittenDescription,
+          true,
+          true,
+        ),
       });
     }
   }
@@ -993,6 +1062,18 @@ export class MasterCourseService {
     }
 
     return String(normalizedValue);
+  }
+
+  private setNestedMapValue<TKey, TNestedKey, TValue>(
+    map: Map<TKey, Map<TNestedKey, TValue>>,
+    key: TKey,
+    nestedKey: TNestedKey,
+    value: TValue,
+  ) {
+    const nestedMap = map.get(key) ?? new Map<TNestedKey, TValue>();
+
+    nestedMap.set(nestedKey, value);
+    map.set(key, nestedMap);
   }
 
   private tryParseJsonString(value: string): unknown | undefined {

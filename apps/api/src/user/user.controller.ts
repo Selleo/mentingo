@@ -15,7 +15,12 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express/multer/interceptors/file.interceptor";
 import { ApiBody } from "@nestjs/swagger";
 import { ApiConsumes } from "@nestjs/swagger/dist/decorators/api-consumes.decorator";
-import { ALLOWED_AVATAR_IMAGE_TYPES, OnboardingPages, PERMISSIONS } from "@repo/shared";
+import {
+  ALLOWED_AVATAR_IMAGE_TYPES,
+  OnboardingPages,
+  PERMISSIONS,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { memoryStorage } from "multer";
 import { Validate } from "nestjs-typebox";
@@ -33,6 +38,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { ALLOWED_EXCEL_MIME_TYPES, MAX_FILE_SIZE } from "src/file/file.constants";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
@@ -145,11 +151,17 @@ export class UserController {
   @Get()
   @RequirePermission(PERMISSIONS.USER_MANAGE)
   @Validate({
-    request: [{ type: "query", name: "id", schema: UUIDSchema, required: true }],
+    request: [
+      { type: "query", name: "id", schema: UUIDSchema, required: true },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
     response: baseResponse(userSchema),
   })
-  async getUserById(@Query("id") id: UUIDType): Promise<BaseResponse<UserResponse>> {
-    const user = await this.usersService.getUserById(id);
+  async getUserById(
+    @Query("id") id: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+  ): Promise<BaseResponse<UserResponse>> {
+    const user = await this.usersService.getUserById(id, undefined, language);
 
     return new BaseResponse(user);
   }

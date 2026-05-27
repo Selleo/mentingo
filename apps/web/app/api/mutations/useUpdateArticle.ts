@@ -8,6 +8,7 @@ import { useToast } from "~/components/ui/use-toast";
 import { ApiClient } from "../api-client";
 import { ARTICLE_QUERY_KEY } from "../queries/useArticle";
 import { ARTICLES_TOC_QUERY_KEY } from "../queries/useArticlesToc";
+import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
 
 import type { UpdateArticleBody } from "../generated-api";
 import type { AxiosError } from "axios";
@@ -30,6 +31,7 @@ export function useUpdateArticle() {
       await queryClient.invalidateQueries({ queryKey: [ARTICLES_TOC_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [ARTICLE_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: [ARTICLE_SECTION_QUERY_KEY] });
+      await queryClient.invalidateQueries({ queryKey: RESOURCE_LIBRARY_ASSETS_QUERY_KEY });
     },
     onError: (error: AxiosError) => {
       const { message } = (error.response?.data ?? {}) as { message?: string };

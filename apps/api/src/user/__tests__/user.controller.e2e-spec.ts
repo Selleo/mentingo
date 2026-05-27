@@ -1,4 +1,4 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { omit } from "lodash";
 import request from "supertest";
 
@@ -102,7 +102,10 @@ describe("UsersController (e2e)", () => {
 
   describe("PATCH ?id=:id", () => {
     it("should update group for user", async () => {
-      const updateData = await groupService.createGroup({ name: "Test group" });
+      const updateData = await groupService.createGroup({
+        language: SUPPORTED_LANGUAGES.EN,
+        name: "Test group",
+      });
 
       const response = await request(app.getHttpServer())
         .patch(`/api/user?id=${testUser.id}`)
@@ -295,6 +298,7 @@ describe("UsersController (e2e)", () => {
       };
 
       const updateData = await groupService.createGroup({
+        language: SUPPORTED_LANGUAGES.EN,
         name: "Test group",
       });
 
@@ -331,7 +335,10 @@ describe("UsersController (e2e)", () => {
         avatarReference: null,
       };
 
-      const updateData = await groupService.createGroup({ name: "Test group" });
+      const updateData = await groupService.createGroup({
+        language: SUPPORTED_LANGUAGES.EN,
+        name: "Test group",
+      });
 
       const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")

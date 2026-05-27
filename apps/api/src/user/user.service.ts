@@ -34,6 +34,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { isEqual } from "lodash";
 import { nanoid } from "nanoid";
 
@@ -54,6 +55,7 @@ import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
+import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SessionRevocationService } from "src/redis";
 import { S3Service } from "src/s3/s3.service";
@@ -76,6 +78,7 @@ import {
   userDetails,
   users,
   settings,
+  tenants,
   userOnboarding,
   studentCourses,
   coursesSummaryStats,
@@ -102,6 +105,7 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
+import type { AdminOverdueCourseNotificationRecipient } from "src/user/types/admin-overdue-course-notification-recipient.type";
 import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
 
 @Injectable()
@@ -128,6 +132,7 @@ export class UserService {
     private createPasswordService: CreatePasswordService,
     private settingsService: SettingsService,
     private readonly groupService: GroupService,
+    private readonly localizationService: LocalizationService,
     private statisticsService: StatisticsService,
     private readonly sessionRevocationService: SessionRevocationService,
     private readonly wsGateway: WsGateway,
@@ -155,9 +160,13 @@ export class UserService {
         ),
         groups: sql<
           Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
-          "groups",
-        ),
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+          groups.id
+        }, 'name', ${this.localizationService.getLocalizedSqlField(
+          groups.name,
+          undefined,
+          groups,
+        )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
       })
       .from(users)
       .leftJoin(
@@ -239,7 +248,7 @@ export class UserService {
       );
   }
 
-  public async getUserById(id: UUIDType, db?: DatabasePg) {
+  public async getUserById(id: UUIDType, db?: DatabasePg, language?: SupportedLanguages) {
     const dbInstance = db ?? this.db;
 
     const [user] = await dbInstance
@@ -247,9 +256,13 @@ export class UserService {
         ...getTableColumns(users),
         groups: sql<
           Array<{ id: string; name: string }>
-        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${groups.id}, 'name', ${groups.name})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as(
-          "groups",
-        ),
+        >`COALESCE(json_agg(DISTINCT jsonb_build_object('id', ${
+          groups.id
+        }, 'name', ${this.localizationService.getLocalizedSqlField(
+          groups.name,
+          language,
+          groups,
+        )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
       })
       .from(users)
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
@@ -954,7 +967,16 @@ export class UserService {
         const existingGroups = await trx
           .select()
           .from(groups)
-          .where(inArray(groups.name, groupNames));
+          .where(
+            inArray(
+              this.localizationService.getLocalizedSqlField(
+                groups.name,
+                SUPPORTED_LANGUAGES.EN,
+                groups,
+              ),
+              groupNames,
+            ),
+          );
 
         if (!existingGroups.length) return;
 
@@ -1022,12 +1044,12 @@ export class UserService {
     const userGroups = await dbInstance
       .select({
         id: groups.id,
-        name: groups.name,
+        name: this.localizationService.getLocalizedSqlField(groups.name, undefined, groups),
       })
       .from(groupUsers)
       .innerJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(eq(groupUsers.userId, userId))
-      .orderBy(asc(groups.name));
+      .orderBy(asc(this.localizationService.getLocalizedSqlField(groups.name, undefined, groups)));
 
     return userGroups.map(({ id, name }) => ({ id, name }));
   }
@@ -1110,23 +1132,38 @@ export class UserService {
   }
 
   public async getAdminsToNotifyAboutOverdueCourse(): Promise<
-    { email: string; id: string; tenantId: string }[]
+    AdminOverdueCourseNotificationRecipient[]
   > {
+    const globalSettings = alias(settings, "global_settings");
+
     return this.db
       .select({
         id: users.id,
         email: users.email,
         tenantId: users.tenantId,
+        tenantHost: tenants.host,
+        defaultEmailSettings: sql<
+          AdminOverdueCourseNotificationRecipient["defaultEmailSettings"]
+        >`json_build_object(
+          'language',
+          ${settings.settings}->>'language',
+          'primaryColor',
+          COALESCE(NULLIF(${globalSettings.settings}->>'primaryColor', ''), '#4796FD'),
+          'companyName',
+          COALESCE(NULLIF(${globalSettings.settings} #>> '{companyInformation,companyName}', ''), 'Mentingo.com')
+        )`,
       })
       .from(users)
       .innerJoin(settings, eq(users.id, settings.userId))
+      .innerJoin(tenants, eq(users.tenantId, tenants.id))
+      .leftJoin(globalSettings, isNull(globalSettings.userId))
       .where(
         and(
           buildUserHasPermissionCondition(
             this.db,
             users.id,
             users.tenantId,
-            PERMISSIONS.TENANT_MANAGE,
+            PERMISSIONS.COURSE_ENROLLMENT,
           ),
           sql`${settings.settings}->>'adminOverdueCourseNotification' = 'true'`,
           isNull(users.deletedAt),

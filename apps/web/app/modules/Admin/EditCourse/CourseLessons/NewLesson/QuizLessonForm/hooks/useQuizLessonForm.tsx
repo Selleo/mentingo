@@ -14,6 +14,11 @@ import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
 import { useLeaveModal } from "~/context/LeaveModalContext";
 import { ContentTypes, LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
+import {
+  BLANK_ANSWER_MARKER_REGEX,
+  createBlankAnswerMarker,
+  normalizeBlankAnswerLineBreaks,
+} from "~/utils/blankAnswerMarkers";
 import { StringifiedIcons } from "~/utils/stringifiedIcons";
 
 import { FILL_IN_THE_BLANKS_BUTTON_CLASSNAME } from "../components/constants";
@@ -25,6 +30,11 @@ import type { Question, QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
+
+const FILL_BLANK_BUTTON_REGEX = /<button\b[^>]*>[\s\S]*?<\/button>/g;
+
+const getHtmlAttribute = (html: string, attribute: string) =>
+  new RegExp(`${attribute}="([^"]*)"`).exec(html)?.[1] ?? "";
 
 type QuizLessonFormProps = {
   chapterToEdit: Chapter | null;
@@ -48,8 +58,10 @@ export const useQuizLessonForm = ({
   const { id: courseId } = useParams();
   const { t } = useTranslation();
 
-  const createButtonHtml = (word: string) => {
-    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"><span>${word}</span><span>${StringifiedIcons.X}</span></button>`;
+  const createButtonHtml = (word: string, optionId?: string) => {
+    const optionIdAttribute = optionId ? ` data-option-id="${optionId}"` : "";
+
+    return `<button type="button" class="${FILL_IN_THE_BLANKS_BUTTON_CLASSNAME}" data-word="${word}"${optionIdAttribute}><span>${word}</span><span>${StringifiedIcons.X}</span></button>`;
   };
 
   const form = useForm<QuizLessonFormValues>({
@@ -76,17 +88,32 @@ export const useQuizLessonForm = ({
           lessonToEdit.questions?.map((question: Question) => {
             let processedDescription = question.description || "";
 
-            const wordMatches = [...processedDescription.matchAll(/\[word\]/g)];
+            const blankAnswerMatches = [
+              ...processedDescription.matchAll(BLANK_ANSWER_MARKER_REGEX),
+            ];
 
-            wordMatches.forEach((match, index) => {
-              const displayOrder = index + 1;
-              const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
+            if (blankAnswerMatches.length > 0) {
+              blankAnswerMatches.forEach((match) => {
+                const option = question.options?.find((opt) => opt.id === match[1]);
 
-              if (option) {
-                const buttonHtml = createButtonHtml(option.optionText);
-                processedDescription = processedDescription.replace(match[0], buttonHtml);
-              }
-            });
+                if (option) {
+                  const buttonHtml = createButtonHtml(option.optionText, option.id);
+                  processedDescription = processedDescription.replace(match[0], buttonHtml);
+                }
+              });
+            } else {
+              const wordMatches = [...processedDescription.matchAll(/\[word\]/g)];
+
+              wordMatches.forEach((match, index) => {
+                const displayOrder = index + 1;
+                const option = question.options?.find((opt) => opt.displayOrder === displayOrder);
+
+                if (option) {
+                  const buttonHtml = createButtonHtml(option.optionText, option.id);
+                  processedDescription = processedDescription.replace(match[0], buttonHtml);
+                }
+              });
+            }
 
             return {
               id: question.id,
@@ -137,16 +164,22 @@ export const useQuizLessonForm = ({
 
     const updatedQuestions = values.questions.map((question) => {
       let updatedSolutionExplanation = question?.description;
-      const buttons = updatedSolutionExplanation?.match(/<button\b[^>]*>[\s\S]*?<\/button>/g);
+      const buttons = updatedSolutionExplanation?.match(FILL_BLANK_BUTTON_REGEX);
       if (buttons && question.options) {
-        question.options.sort((a, b) => a.displayOrder - b.displayOrder);
+        const orderedOptions = [...question.options].sort(
+          (a, b) => a.displayOrder - b.displayOrder,
+        );
 
         buttons.forEach((button, index) => {
-          if (question?.options?.[index]) {
-            const optionText = question?.options[index].optionText;
+          const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+          const option =
+            question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
+            orderedOptions[index];
+
+          if (option) {
             updatedSolutionExplanation = updatedSolutionExplanation?.replace(
               button,
-              `<strong>${optionText}</strong>`,
+              `<strong>${option.optionText}</strong>`,
             );
           }
         });
@@ -173,9 +206,27 @@ export const useQuizLessonForm = ({
           question.type === QuestionType.FILL_IN_THE_BLANKS_TEXT) &&
         question.description
       ) {
+        const orderedFillOptions = [...(question.options ?? [])].sort(
+          (a, b) => a.displayOrder - b.displayOrder,
+        );
+
         return {
           ...question,
-          description: question.description.replace(/<button\b[^>]*>[\s\S]*?<\/button>/g, "[word]"),
+          options: question.options?.map((option) => ({
+            ...option,
+            id: option.id ?? option.sortableId,
+          })),
+          description: normalizeBlankAnswerLineBreaks(question.description).replace(
+            FILL_BLANK_BUTTON_REGEX,
+            (button) => {
+              const buttonOptionId = getHtmlAttribute(button, "data-option-id");
+              const option =
+                question.options?.find((item) => (item.id ?? item.sortableId) === buttonOptionId) ??
+                orderedFillOptions.shift();
+
+              return option ? createBlankAnswerMarker(option.id ?? option.sortableId) : "";
+            },
+          ),
           solutionExplanation: updatedSolutionExplanation,
         };
       }

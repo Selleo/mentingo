@@ -3,6 +3,10 @@ import { Heading } from "@tiptap/extension-heading";
 import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableRow } from "@tiptap/extension-table-row";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { StarterKit } from "@tiptap/starter-kit";
@@ -26,6 +30,8 @@ import {
   PresentationEmbedViewer,
 } from "~/components/RichText/extensions/presentation";
 import { VideoEmbedEditor, VideoEmbedViewer } from "~/components/RichText/extensions/video";
+
+import type { RichTextResourceNodeOptions } from "./extensions/utils/resourceNode";
 
 const HeadingWithId = Heading.extend({
   name: "heading",
@@ -94,23 +100,41 @@ const basePlugins = [
 
 export const baseEditorPlugins = [...basePlugins];
 
-export const contentEditorPlugins = [
+const tablePlugins = [
+  Table.configure({
+    resizable: true,
+    HTMLAttributes: {
+      class: "rich-text-table",
+    },
+  }),
+  TableRow,
+  TableHeader,
+  TableCell,
+];
+
+export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) => [
   ...basePlugins,
+  ...tablePlugins,
   Placeholder.configure({
     includeChildren: true,
     showOnlyCurrent: true,
     placeholder: ({ node }) =>
       node.type.name === "paragraph" ? i18n.t("richTextEditor.placeholder.lineHint") : "",
   }),
-  DownloadableFileEmbedEditor,
+  DownloadableFileEmbedEditor.configure(options),
   LoadingAiAssetEditor,
-  PdfPreviewEmbedEditor,
-  PresentationEmbedEditor,
-  VideoEmbedEditor,
+  PdfPreviewEmbedEditor.configure(options),
+  PresentationEmbedEditor.configure(options),
+  VideoEmbedEditor.configure(options),
 ];
 
-export const viewerPlugins = [
+export const contentEditorPlugins = getContentEditorPlugins();
+
+export const baseViewerPlugins = [...basePlugins];
+
+export const contentViewerPlugins = [
   ...basePlugins,
+  ...tablePlugins,
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
   PdfPreviewEmbedViewer,

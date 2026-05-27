@@ -124,6 +124,16 @@
       "success": "Datei erfolgreich gelöscht"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Ressource erfolgreich gelöscht"
+    },
+    "error": {
+      "fileRequired": "Datei ist erforderlich",
+      "assetNotFound": "Ressource nicht gefunden",
+      "entityNotFound": "Entität nicht gefunden"
+    }
+  },
   "adminScorm": {
     "header": "Laden Sie SCORM hoch",
     "subHeader": "Laden Sie Ihre SCORM-ZIP-Datei hoch.",
@@ -261,7 +271,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Erstellen Sie einen Kurs aus einem SCORM-1.2-Paket.",
-      "badge": "Platzhalter",
       "features": {
         "import": "Aus einem SCORM-1.2-ZIP-Paket erstellt",
         "tracking": "SCO-Abschluss und Laufzeitstatus unterstützt",
@@ -288,7 +297,7 @@
     "progress": "Fortschritt",
     "findInApplication": "Finden Sie in der Anwendung",
     "courses": "Kurse",
-    "learningPaths": "Lernpfade",
+    "learningPaths": "Entwicklungspfade",
     "calendar": "Kalender",
     "content": "Inhalt",
     "categories": "Kategorien",
@@ -298,6 +307,7 @@
     "news": "Nachricht",
     "providerInformation": "Information",
     "announcements": "Ankündigungen",
+    "notifications": "Benachrichtigungen",
     "promotionCodes": "Aktionscodes",
     "manage": "Verwalten",
     "ariaLabels": {
@@ -688,6 +698,7 @@
       "noSearchResults": "Keine Suchergebnisse für:",
       "announcements": "Ankündigungen",
       "lessons": "Unterricht",
+      "learningPaths": "Entwicklungspfade",
       "news": "Nachricht",
       "articles": "Artikel",
       "qa": "Fragen und Antworten"
@@ -1170,7 +1181,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorie erfolgreich gelöscht",
-      "deleteCategoryFailed": "Kategorie konnte nicht gelöscht werden"
+      "deleteCategoryFailed": "Kategorie konnte nicht gelöscht werden",
+      "deleteCategoryAssignedToCourses": "Kategorie kann nicht gelöscht werden. Sie ist {{courseCount}} Kurs(en) zugewiesen: {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "Keine Kategorien zum Löschen gefunden"
     },
     "breadcrumbs": {
       "categories": "Kategorien",
@@ -1193,9 +1206,29 @@
     "button": {
       "createCategory": "Kategorie erstellen"
     },
+    "language": {
+      "label": "Sprache",
+      "baseLanguage": "Standard",
+      "notAddedLanguages": "Sprachen zum Hinzufügen",
+      "setBaseLanguage": "Als Standard festlegen",
+      "setBaseTitle": "Standardsprache ändern",
+      "setBaseDescription": "{{language}} als Standardsprache für diese Kategorie verwenden?",
+      "createTitle": "Übersetzung erstellen",
+      "createDescription": "Eine Übersetzung für diese Kategorie auf {{language}} erstellen?",
+      "deleteTitle": "Übersetzung löschen",
+      "deleteDescription": "Die Übersetzung auf {{language}} löschen? Ihr Inhalt wird entfernt."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorie erfolgreich erstellt",
-      "categoryUpdatedSuccessfully": "Kategorie erfolgreich aktualisiert"
+      "categoryUpdatedSuccessfully": "Kategorie erfolgreich aktualisiert",
+      "baseLanguageUpdatedSuccessfully": "Standardsprache erfolgreich aktualisiert",
+      "baseLanguageUpdateFailed": "Standardsprache konnte nicht aktualisiert werden",
+      "languageNotSupported": "Diese Kategorie unterstützt diese Sprache nicht.",
+      "alreadyExists": "Kategorie existiert bereits.",
+      "categoryNotCreated": "Kategorie konnte nicht erstellt werden.",
+      "languageAlreadyExists": "Diese Kategoriesprache existiert bereits.",
+      "invalidLanguageToDelete": "Diese Kategoriesprache kann nicht gelöscht werden.",
+      "baseLanguageTitleRequired": "Die ausgewählte Standardsprache benötigt einen Titel."
     },
     "error": {
       "categoryNotFound": "Kategorie nicht gefunden",
@@ -1285,7 +1318,7 @@
         "category": "Kategorien",
         "group": "Gruppen",
         "course": "Kurse",
-        "learning_path": "Lernpfade",
+        "learning_path": "Entwicklungspfade",
         "learning_mode": "Lernmodus",
         "learning_progress": "Lernfortschritt",
         "certificate": "Zertifikate",
@@ -1539,6 +1572,14 @@
       "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert",
       "groupNotFound": "Gruppe nicht gefunden"
     },
+    "language": {
+      "languageCreated": "Gruppensprache erfolgreich erstellt",
+      "languageDeleted": "Gruppensprache erfolgreich gelöscht",
+      "baseLanguageUpdated": "Standardsprache der Gruppe erfolgreich aktualisiert",
+      "setBaseLanguage": "Als Standard festlegen",
+      "setBaseTitle": "Standardsprache festlegen",
+      "setBaseDescription": "Möchten Sie {{language}} wirklich als Standardsprache festlegen?"
+    },
     "deleteGroup": {
       "title": "Bestätigen Sie den Löschvorgang",
       "description": "Sind Sie sicher, dass Sie diese Gruppen löschen möchten?",
@@ -1597,6 +1638,8 @@
       "courseTrailerRemovedSuccessfully": "Kurstrailer erfolgreich entfernt",
       "certificateUpdatedSuccessfully": "Zertifikat erfolgreich aktualisiert",
       "certificateUpdateError": "Fehler beim Aktualisieren des Zertifikats",
+      "certificatesResetSuccessfully": "Zertifikate für {{count}} Benutzer zurückgesetzt",
+      "certificatesResetError": "Fehler beim Zurücksetzen der Zertifikate",
       "maxTitleLengthExceeded_one": "Der Titel darf nicht länger als {{count}} Zeichen sein",
       "maxTitleLengthExceeded_other": "Der Titel darf nicht länger als {{count}} Zeichen sein",
       "aiMentorAvatarIncorrectType": "Ungültiger Dateityp. Bitte laden Sie ein JPG-, JPEG-, PNG- oder SVG-Bild hoch.",
@@ -1677,7 +1720,11 @@
         "removeTrailer": "Trailer entfernen",
         "removeCertificateSignature": "Signatur entfernen",
         "includesCertificate": "Inklusive Zertifikat",
-        "doesNotIncludeCertificate": "Zertifikat ist nicht im Lieferumfang enthalten"
+        "doesNotIncludeCertificate": "Zertifikat ist nicht im Lieferumfang enthalten",
+        "saveValidity": "Gültigkeit speichern",
+        "resetCertificates": "Zertifikate zurücksetzen",
+        "futureOnly": "Nur auf neue anwenden",
+        "applyToExisting": "Auf alle anwenden (einschließlich vergangener)"
       },
       "selectButton": {
         "uploadFile": "Datei hochladen",
@@ -1700,7 +1747,11 @@
         "description": "Beschreibung",
         "thumbnail": "Miniaturansicht",
         "trailer": "Kurstrailer",
-        "baseLanguage": "Basissprache"
+        "baseLanguage": "Basissprache",
+        "validityType": "Gültigkeitstyp",
+        "validityValue": "Wert",
+        "validityUnit": "Einheit",
+        "validUntil": "Gültig bis"
       },
       "placeholder": {
         "title": "Titel eingeben",
@@ -1713,6 +1764,38 @@
         "reachedCharactersLimitHtml": "Zu viel Formatierung. Bitte reduzieren Sie die Formatierung, damit sie innerhalb des Limits liegt.",
         "enableCertificate": "Zertifikat aktivieren",
         "enableCertificateDescription": "Aktivieren Sie diese Option, um Zertifikate für diesen Kurs auszustellen und konfigurieren Sie unten deren Signatur und Vorschau.",
+        "certificateValidity": "Zertifikatsgültigkeit",
+        "certificateValidityDescription": "Legen Sie fest, wann ausgestellte Zertifikate ablaufen und den Kursfortschritt zurücksetzen.",
+        "enableCertificateValidityConfirmationTitle": "Zertifikatsgültigkeit aktivieren?",
+        "enableCertificateValidityConfirmationDescription": "Diese Einstellung wirkt sich nur auf die Statistiken dieses Kurses aus. Wenn ein Zertifikat das Ende seiner Gültigkeit erreicht, verlieren betroffene Benutzer ihren Fortschritt in diesem Kurs.",
+        "enableCertificateValidityConfirmationConfirm": "Gültigkeit aktivieren",
+        "confirmValidityChangesTitle": "Änderungen der Zertifikatsgültigkeit bestätigen",
+        "noActiveCertificatesValidityDescription": "Derzeit gibt es keine aktiven Zertifikate, die aktualisiert werden müssen. Zukünftige Zertifikate verwenden diese Gültigkeitseinstellung.",
+        "activeCertificatesStat": "Aktive Zertifikate",
+        "immediatelyExpiringStat": "Laufen sofort ab",
+        "validityPeriod": "Zeitraum",
+        "validityFixedDate": "Festes Datum",
+        "days": "Tage",
+        "months": "Monate",
+        "years": "Jahre",
+        "applyValidityTitle": "Gültigkeit auf bestehende Zertifikate anwenden?",
+        "applyValidityDescription": "{{activeCount}} aktive Zertifikate existieren. {{expiringCount}} würden sofort ablaufen, wenn diese Einstellung auf bestehende Zertifikate angewendet wird.",
+        "resetCertificates": "Manuelles Zurücksetzen des Zertifikats",
+        "resetCertificatesDescription": "Ausgewählte Zertifikate archivieren und Kursfortschritt zurücksetzen.",
+        "resetCertificatesDialogDescription": "Diese Aktion archiviert aktive Zertifikate, setzt den Kursfortschritt zurück und kann betroffene Benutzer benachrichtigen. Sie betrifft nur diesen Kurs.",
+        "sendResetEmail": "Reset-E-Mail an betroffene Benutzer senden",
+        "activeCertificateCount": "{{count}} aktiv",
+        "noActiveCertificate": "Kein aktives Zertifikat",
+        "resetUsersSearchPlaceholder": "Teilnehmer nach Name oder E-Mail suchen",
+        "resetUsersStudent": "Teilnehmer",
+        "resetUsersEmail": "E-Mail",
+        "resetUsersLoading": "Teilnehmer werden geladen...",
+        "noResetUsers": "Keine Teilnehmer mit aktiven Zertifikaten gefunden",
+        "resetScope": {
+          "all": "Alle Benutzer",
+          "groups": "Gruppen",
+          "users": "Benutzer"
+        },
         "certificateSignatureRequirements": "PNG oder SVG (empfohlener transparenter Hintergrund)",
         "certificatePreviewTitle": "Zertifikatsvorschau",
         "certificatePreviewDescription": "Öffnen Sie die Vorschau, um Sprache und Farbe anzupassen.",
@@ -1731,7 +1814,11 @@
         "titleMinLength": "Der Titel muss mindestens 2 Zeichen lang sein.",
         "titleMaxLength": "Der Titel darf höchstens 250 Zeichen lang sein.",
         "descriptionMinLength": "Die Beschreibung muss mindestens 2 Zeichen lang sein.",
-        "categoryRequired": "Kategorie ist erforderlich"
+        "categoryRequired": "Kategorie ist erforderlich",
+        "certificateManageDenied": "Sie können Zertifikate für diesen Kurs nicht verwalten.",
+        "validityDateRequired": "Wählen Sie ein Gültigkeitsdatum für das Zertifikat aus.",
+        "groupIdsRequired": "Wählen Sie mindestens eine Gruppe aus.",
+        "userIdsRequired": "Wählen Sie mindestens einen Benutzer aus."
       },
       "header": "Erstellen Sie einen neuen Kurs",
       "subHeader": "Geben Sie die Details an, um einen neuen Kurs einzurichten. Später haben Sie weitere Möglichkeiten, es anzupassen.",
@@ -1871,6 +1958,8 @@
           "courseGenerationFileAddedToUploadQueue": "Datei zur Upload-Warteschlange hinzugefügt",
           "aiMentorLessonFileDeletedSuccessfully": "AI Mentor-Lektionsdateien erfolgreich gelöscht",
           "lessonUpdatedSuccessfully": "Lektion erfolgreich aktualisiert",
+          "lessonDeletedSuccessfully": "Lektion erfolgreich gelöscht",
+          "lessonDeleteError": "Lektion konnte nicht gelöscht werden",
           "contentLessonUpdatedSuccessfully": "Inhalt der Lektion erfolgreich aktualisiert",
           "fileLessonUpdatedSuccessfully": "Dateielement erfolgreich aktualisiert",
           "questionOptionsUpdatedSuccessfully": "Die Frageoptionen wurden erfolgreich aktualisiert",
@@ -2518,7 +2607,8 @@
       "invalidFormatForMultiAnswer": "Ungültiges Format für Fragen mit mehreren Antworten.",
       "trueOrFalseRequired": "Es ist eine wahre oder falsche Antwort erforderlich.",
       "photoQuestionMustHaveAnswer": "Für diese Fotofrage ist eine Antwort erforderlich.",
-      "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!"
+      "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!",
+      "unansweredQuestionsWithNames": "Bitte beantworten Sie die fehlenden Fragen: {{questionNames}}"
     }
   },
   "studentCourseView": {
@@ -2637,8 +2727,36 @@
     },
     "tabs": {
       "chapters": "Kapitel",
+      "chat": "Diskussion",
       "moreFromAuthor": "Mehr vom Autor",
       "statistics": "Statistiken"
+    },
+    "courseChat": {
+      "title": "Kursdiskussion",
+      "newThreadPlaceholder": "Neue Diskussion starten...",
+      "startThread": "Thread starten",
+      "messagesTitle": "Nachrichten",
+      "noThreadSelected": "Thread auswählen",
+      "emptyThreads": "Noch keine Diskussionen. Starten Sie die erste.",
+      "emptyMessages": "Noch keine Nachrichten.",
+      "replyPlaceholder": "Antwort schreiben...",
+      "reply": "Antworten",
+      "reactWith": "Mit {{reaction}} reagieren",
+      "deleteMessage": "Nachricht löschen",
+      "deleteMessageConfirmationTitle": "Nachricht löschen?",
+      "deleteMessageConfirmationDescription": "Diese Nachricht wird aus der Diskussion entfernt. Antworten können einen gelöschten Platzhalter behalten, damit die Unterhaltung lesbar bleibt.",
+      "deletedMessage": "Diese Nachricht wurde gelöscht.",
+      "repliesCount_one": "{{countLabel}} Antwort",
+      "repliesCount_other": "{{countLabel}} Antworten",
+      "loadMoreReplies": "Weitere Antworten laden",
+      "send": "Senden",
+      "selectThread": "Wählen Sie einen Thread, um Nachrichten zu lesen.",
+      "users": "Benutzer",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Noch keine eingeschriebenen Benutzer.",
+      "mentionedToast": "Jemand hat Sie in der Kursdiskussion erwähnt."
     }
   },
   "studentChapterView": {
@@ -2677,7 +2795,8 @@
       "qaSettingUpdatedSuccessfully": "Die QA-Einstellungen wurden erfolgreich aktualisiert",
       "ageLimitUpdatedSuccessfully": "Altersgrenze erfolgreich aktualisiert",
       "newsSettingUpdatedSuccessfully": "Nachrichteneinstellungen erfolgreich aktualisiert",
-      "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert"
+      "articlesSettingUpdatedSuccessfully": "Die Einstellungen der Wissensdatenbank wurden erfolgreich aktualisiert",
+      "learningPathsUpdatedSuccessfully": "Die Entwicklungspfad-Einstellungen wurden erfolgreich aktualisiert"
     }
   },
   "certificateBackgroundUpload": {
@@ -2874,14 +2993,19 @@
       "subheader": "Geben Sie die Details an, um eine neue Ankündigung einzurichten.",
       "buttons": {
         "confirm": "Bestätigen",
-        "cancel": "Stornieren"
+        "cancel": "Stornieren",
+        "addLanguage": "Sprache hinzufügen",
+        "removeLanguage": "Sprache entfernen",
+        "setDefaultLanguage": "Als Standardsprache festlegen"
       },
       "fields": {
         "title": "Titel",
         "content": "Inhalt",
         "group": "Gruppe",
+        "language": "Sprache",
         "everyone": "Alle"
       },
+      "addedLanguages": "Hinzugefügte Sprachen",
       "placeholders": {
         "title": "Titel eingeben",
         "content": "Schreiben Sie hier Ihre Ankündigung...",
@@ -2909,7 +3033,35 @@
       "markedAsRead": "Ankündigungen wurden als erfolgreich gelesen markiert",
       "markAsReadFailed": "Ankündigungen konnten nicht als gelesen markiert werden",
       "createdSuccessfully": "Ankündigung erfolgreich erstellt",
-      "createFailed": "Ankündigung konnte nicht erstellt werden"
+      "createFailed": "Ankündigung konnte nicht erstellt werden",
+      "deletedSuccessfully": "Ankündigung erfolgreich gelöscht",
+      "deleteFailed": "Ankündigung konnte nicht gelöscht werden",
+      "notFound": "Ankündigung nicht gefunden"
+    }
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "tabs": {
+      "all": "Alle",
+      "adminAnnouncements": "Admin-Ankündigungen"
+    },
+    "actions": {
+      "refresh": "Aktualisieren",
+      "create": "Ankündigung erstellen",
+      "delete": "Ankündigung löschen",
+      "markRead": "Als gelesen markieren",
+      "markAllRead": "Alle als gelesen markieren",
+      "loadMore": "Mehr laden",
+      "loadingMore": "Wird geladen...",
+      "goToNotificationCenter": "Zur Benachrichtigungszentrale"
+    },
+    "status": {
+      "unread": "Ungelesen"
+    },
+    "empty": "Noch keine Benachrichtigungen",
+    "deleteDialog": {
+      "title": "Ankündigung löschen",
+      "description": "Diese Ankündigung wird für alle entfernt."
     }
   },
   "platformLogo": {
@@ -3061,6 +3213,65 @@
         "h3": "Überschrift 3",
         "h4": "Überschrift 4"
       },
+      "bold": {
+        "tooltip": "Fett: macht den ausgewählten Text fett"
+      },
+      "italic": {
+        "tooltip": "Kursiv: setzt den ausgewählten Text kursiv"
+      },
+      "strikethrough": {
+        "tooltip": "Durchgestrichen: streicht den ausgewählten Text durch"
+      },
+      "bulletList": {
+        "tooltip": "Aufzählung: startet eine Aufzählungsliste"
+      },
+      "orderedList": {
+        "tooltip": "Nummerierte Liste: startet eine nummerierte Liste"
+      },
+      "taskList": {
+        "tooltip": "Checkliste: fügt eine Checkliste hinzu"
+      },
+      "blockquote": {
+        "tooltip": "Zitat: formatiert Text als Blockzitat"
+      },
+      "codeBlock": {
+        "tooltip": "Codeblock: formatiert Text als Code"
+      },
+      "horizontalRule": {
+        "tooltip": "Horizontale Linie: fügt eine Trennlinie ein"
+      },
+      "table": {
+        "tooltip": "Tabelle: Tabelle einfügen oder bearbeiten",
+        "groups": {
+          "columns": "Spalten",
+          "rows": "Zeilen",
+          "cells": "Zellen",
+          "headers": "Kopfzeilen"
+        },
+        "actions": {
+          "insert": "Tabelle einfügen",
+          "addColumnBefore": "Spalte davor hinzufügen",
+          "addColumnAfter": "Spalte danach hinzufügen",
+          "deleteColumn": "Spalte löschen",
+          "addRowBefore": "Zeile davor hinzufügen",
+          "addRowAfter": "Zeile danach hinzufügen",
+          "deleteRow": "Zeile löschen",
+          "mergeCells": "Zellen verbinden",
+          "splitCell": "Zelle teilen",
+          "mergeOrSplit": "Verbinden oder teilen",
+          "toggleHeaderRow": "Kopfzeile umschalten",
+          "toggleHeaderColumn": "Kopfspalte umschalten",
+          "toggleHeaderCell": "Kopfzelle umschalten",
+          "fixTables": "Tabellenstruktur reparieren",
+          "deleteTable": "Tabelle löschen"
+        }
+      },
+      "undo": {
+        "tooltip": "Rückgängig: macht die letzte Änderung rückgängig"
+      },
+      "redo": {
+        "tooltip": "Wiederholen: stellt die zuletzt rückgängig gemachte Änderung wieder her"
+      },
       "link": {
         "tooltip": "Link: Macht den ausgewählten Text zu einem Hyperlink",
         "dialog": {
@@ -3076,6 +3287,9 @@
       "upload": {
         "uploadFailed": "Das Hochladen der Datei ist fehlgeschlagen",
         "tooltip": "Hochladen: Ermöglicht das Hochladen einer Datei"
+      },
+      "assetLibrary": {
+        "tooltip": "Asset-Bibliothek: fügt eine zuvor hochgeladene Datei ein"
       }
     }
   },
@@ -3128,6 +3342,42 @@
     },
     "loadingAiAsset": {
       "processing": "Die Ressource wird derzeit verarbeitet"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3145,6 +3395,7 @@
     "createNewPassword": "Neues Passwort erstellen",
     "createAnnouncement": "Ankündigung erstellen",
     "announcements": "Ankündigungen",
+    "notifications": "Benachrichtigungen",
     "users": "Benutzer",
     "userDetails": "Benutzerdetails",
     "createNewUser": "Neuen Benutzer erstellen",
@@ -3169,9 +3420,9 @@
     "createTenant": "Organisation erstellen",
     "tenants": "Organisationen",
     "activityLogs": "Aktivitätsprotokoll",
-    "learningPaths": "Lernpfade",
-    "adminLearningPaths": "Lernpfade",
-    "adminLearningPathEditor": "Lernpfad Editor"
+    "learningPaths": "Entwicklungspfade",
+    "adminLearningPaths": "Entwicklungspfade",
+    "adminLearningPathEditor": "Entwicklungspfad Editor"
   },
   "masterCourse": {
     "error": {
@@ -3188,19 +3439,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
-      "exportLinkMissing": "Lernpfad-Exportverknuepfung nicht gefunden",
-      "noCourses": "Der Lernpfad muss vor dem Export mindestens einen Kurs enthalten",
-      "courseExportFailed": "Einer der Lernpfadkurse konnte nicht exportiert werden",
+      "exportLinkMissing": "Entwicklungspfad-Exportverknuepfung nicht gefunden",
+      "noCourses": "Der Entwicklungspfad muss vor dem Export mindestens einen Kurs enthalten",
+      "courseExportFailed": "Einer der Entwicklungspfadkurse konnte nicht exportiert werden",
       "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
-      "jobNotFound": "Lernpfad-Exportauftrag nicht gefunden",
-      "invalidJobData": "Ungueltige Daten fuer den Lernpfad-Exportauftrag",
-      "invalidExportId": "Ungueltige Lernpfad-Export-ID",
-      "invalidExportLink": "Ungueltige Lernpfad-Exportverknuepfung"
+      "jobNotFound": "Entwicklungspfad-Exportauftrag nicht gefunden",
+      "invalidJobData": "Ungueltige Daten fuer den Entwicklungspfad-Exportauftrag",
+      "invalidExportId": "Ungueltige Entwicklungspfad-Export-ID",
+      "invalidExportLink": "Ungueltige Entwicklungspfad-Exportverknuepfung"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Lernpfad-Zertifikate sind deaktiviert"
+      "disabled": "Entwicklungspfad-Zertifikate sind deaktiviert"
     }
   },
   "activityLogsView": {
@@ -3248,6 +3499,8 @@
       "complete_lesson": "Abgeschlossen",
       "complete_course": "Abgeschlossen",
       "complete_chapter": "Abgeschlossen",
+      "expire_certificate": "Zertifikat abgelaufen",
+      "reset_certificate": "Zertifikat zurückgesetzt",
       "view_announcement": "Angezeigt"
     },
     "entity": {
@@ -3275,11 +3528,11 @@
     }
   },
   "learningPathsView": {
-    "title": "Lernpfade",
-    "description": "Durchsuchen Sie zugewiesene Lernpfade und setzen Sie geordnete Kurssequenzen fort.",
-    "searchPlaceholder": "Lernpfade suchen",
-    "summary": "{{count}} Lernpfade sind verfügbar.",
-    "detailsTitle": "Lernpfad",
+    "title": "Entwicklungspfade",
+    "description": "Durchsuchen Sie zugewiesene Entwicklungspfade und setzen Sie geordnete Kurssequenzen fort.",
+    "searchPlaceholder": "Entwicklungspfade suchen",
+    "summary": "{{count}} Entwicklungspfade sind verfügbar.",
+    "detailsTitle": "Entwicklungspfad",
     "detailsDescription": "Prüfen Sie Kursreihenfolge, Fortschritt, Sperren und Zertifikatsstatus.",
     "detailsSummary": "Dieser Pfad enthält {{count}} Kurse. Aktueller Fortschritt: {{progress}}.",
     "emptyDescription": "Es wurde noch keine Beschreibung hinzugefügt.",
@@ -3298,10 +3551,10 @@
       "certificate": "Zertifikat"
     },
     "card": {
-      "openPath": "Lernpfad öffnen"
+      "openPath": "Entwicklungspfad öffnen"
     },
     "empty": {
-      "title": "Keine Lernpfade gefunden",
+      "title": "Keine Entwicklungspfade gefunden",
       "description": "Passen Sie die Suche an oder prüfen Sie später erneut."
     },
     "progress": {
@@ -3311,7 +3564,7 @@
     "certificate": {
       "available": "Zertifikat verfügbar",
       "ready": "Zertifikat bereit",
-      "pathCompleted": "Lernpfad abgeschlossen. Ihr Zertifikat ist bereit."
+      "pathCompleted": "Entwicklungspfad abgeschlossen. Ihr Zertifikat ist bereit."
     },
     "courseState": {
       "completed": "Abgeschlossen",
@@ -3326,12 +3579,12 @@
       "courses": "Kurse in diesem Pfad",
       "courseTitle": "Kurs {{number}}",
       "completedAt": "Abgeschlossen am {{date}}",
-      "emptyCourses": "Dieser Lernpfad enthält noch keine Kurse."
+      "emptyCourses": "Dieser Entwicklungspfad enthält noch keine Kurse."
     },
     "enrollment": {
       "manage": "Einschreiben",
       "title": "Lernende einschreiben",
-      "description": "Verwalten Sie Einschreibungen von Studierenden und Gruppen für diesen Lernpfad.",
+      "description": "Verwalten Sie Einschreibungen von Studierenden und Gruppen für diesen Entwicklungspfad.",
       "students": "Studierende",
       "selectStudents": "Studierende auswählen",
       "groups": "Gruppen",
@@ -3351,9 +3604,9 @@
       "groupsEnrolled": "Gruppen eingeschrieben",
       "studentsUnenrolled": "Studierende abgemeldet",
       "groupsUnenrolled": "Gruppen abgemeldet",
-      "enrolledSuccessfully": "Lernpfad eingeschrieben",
-      "enrollGroupsDescription": "Wählen Sie Gruppen aus, die in diesen Lernpfad eingeschrieben werden sollen.",
-      "unenrollGroupsDescription": "Wählen Sie Gruppen aus, die aus diesem Lernpfad abgemeldet werden sollen.",
+      "enrolledSuccessfully": "Entwicklungspfad eingeschrieben",
+      "enrollGroupsDescription": "Wählen Sie Gruppen aus, die in diesen Entwicklungspfad eingeschrieben werden sollen.",
+      "unenrollGroupsDescription": "Wählen Sie Gruppen aus, die aus diesem Entwicklungspfad abgemeldet werden sollen.",
       "table": {
         "selectAll": "Alle Lernenden auswählen",
         "select": "Lernenden auswählen",
@@ -3369,16 +3622,16 @@
       },
       "confirmation": {
         "title": "Einschreibung bestätigen",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden in diesen Lernpfad einschreiben möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden in diesen Entwicklungspfad einschreiben möchten? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "unenrollConfirmation": {
         "title": "Abmeldung bestätigen",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden aus diesem Lernpfad abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studierenden aus diesem Entwicklungspfad abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "noGroups": "Keine Gruppen verfügbar"
     },
     "breadcrumbs": {
-      "learningPaths": "Lernpfade",
+      "learningPaths": "Entwicklungspfade",
       "details": "Details"
     },
     "buttons": {
@@ -3386,26 +3639,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Lernpfade",
+    "title": "Entwicklungspfade",
     "description": "Verwalten Sie Metadaten, Sequenzeinstellungen, Kurse, Einschreibungen, Exporte und Zertifikate.",
-    "summary": "{{count}} Lernpfade sind in diesem Arbeitsbereich verfügbar.",
+    "summary": "{{count}} Entwicklungspfade sind in diesem Arbeitsbereich verfügbar.",
     "breadcrumbs": {
-      "learningPaths": "Lernpfade",
+      "learningPaths": "Entwicklungspfade",
       "create": "Erstellen",
       "edit": "Bearbeiten"
     },
     "buttons": {
-      "create": "Lernpfad erstellen",
+      "create": "Entwicklungspfad erstellen",
       "edit": "Bearbeiten",
       "save": "Änderungen speichern",
       "removeImage": "Bild entfernen"
     },
     "editor": {
-      "createTitle": "Lernpfad erstellen",
-      "editTitle": "Lernpfad bearbeiten",
-      "description": "Richten Sie Details, Sequenzeinstellungen, Kurse und Veröffentlichungsstatus des Lernpfads ein.",
-      "createSummary": "Beginnen Sie mit den Lernpfaddetails.",
-      "editSummary": "Dieser Lernpfad hat derzeit {{coursesCount}} Kurse.",
+      "createTitle": "Entwicklungspfad erstellen",
+      "editTitle": "Entwicklungspfad bearbeiten",
+      "description": "Richten Sie Details, Sequenzeinstellungen, Kurse und Veröffentlichungsstatus des Entwicklungspfads ein.",
+      "createSummary": "Beginnen Sie mit den Entwicklungspfaddetails.",
+      "editSummary": "Dieser Entwicklungspfad hat derzeit {{coursesCount}} Kurse.",
       "details": "Details",
       "courses": "Kurse",
       "image": "Bild",
@@ -3418,40 +3671,40 @@
       "language": "Sprache",
       "createdAt": "Erstellt",
       "actions": "Aktionen",
-      "untitled": "Lernpfad ohne Titel",
+      "untitled": "Entwicklungspfad ohne Titel",
       "emptyDescription": "Keine Beschreibung",
       "sequential": "Sequenziell",
       "flexible": "Flexible Reihenfolge",
       "certificate": "Zertifikat",
-      "empty": "Es wurden noch keine Lernpfade erstellt."
+      "empty": "Es wurden noch keine Entwicklungspfade erstellt."
     },
     "form": {
       "language": "Sprache",
       "status": "Status",
-      "statusDescription": "Legt fest, ob dieser Lernpfad sichtbar, ein Entwurf oder privat ist.",
+      "statusDescription": "Legt fest, ob dieser Entwicklungspfad sichtbar, ein Entwurf oder privat ist.",
       "title": "Titel",
-      "titlePlaceholder": "Lernpfad benennen",
+      "titlePlaceholder": "Entwicklungspfad benennen",
       "description": "Beschreibung",
-      "descriptionPlaceholder": "Beschreiben Sie, was Teilnehmer in diesem Lernpfad abschließen",
+      "descriptionPlaceholder": "Beschreiben Sie, was Teilnehmer in diesem Entwicklungspfad abschließen",
       "imageHint": "PNG, JPG oder JPEG (max. 20 MB, empfohlen 1200x1200 oder höher)",
       "sequenceEnabled": "Sequenzielles Lernen",
       "sequenceEnabledDescription": "Teilnehmer müssen Kurse in der angezeigten Reihenfolge abschließen.",
       "includesCertificate": "Zertifikat",
-      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Lernpfads ein Zertifikat erhalten.",
+      "includesCertificateDescription": "Teilnehmer können nach Abschluss des Entwicklungspfads ein Zertifikat erhalten.",
       "certificateSignature": "Zertifikatssignatur",
-      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Lernpfad angezeigt wird.",
+      "certificateSignatureDescription": "Laden Sie die Signatur hoch, die auf Zertifikaten für diesen Entwicklungspfad angezeigt wird.",
       "certificateFontColor": "Schriftfarbe des Zertifikats",
       "certificateFontColorDescription": "Verwenden Sie den Farbwähler in der Vorschau, um die Text- und Linienfarbe des Zertifikats zu ändern.",
       "certificatePreview": "Zertifikatsvorschau",
       "certificatePreviewDescription": "Zeigen Sie das Zertifikat in der Vorschau an und passen Sie die Schriftfarbe an."
     },
     "detailsContent": {
-      "title": "Lernpfaddetails",
+      "title": "Entwicklungspfaddetails",
       "description": "Definieren Sie den lokalisierten Namen und die Beschreibung für Teilnehmer."
     },
     "detailsImage": {
       "title": "Titelbild",
-      "description": "Verwenden Sie ein Bild, das diesen Lernpfad leichter erkennbar macht."
+      "description": "Verwenden Sie ein Bild, das diesen Entwicklungspfad leichter erkennbar macht."
     },
     "detailsSettings": {
       "title": "Veröffentlichung und Verhalten",
@@ -3461,7 +3714,7 @@
       "baseLanguage": "Basissprache"
     },
     "languageSelector": {
-      "tooltip": "Basissprache dieses Lernpfads ist {{baseLanguage}}."
+      "tooltip": "Basissprache dieses Entwicklungspfads ist {{baseLanguage}}."
     },
     "courses": {
       "select": "Kurs auswählen",
@@ -3470,32 +3723,32 @@
       "delete": "Kurs löschen",
       "order": "Reihenfolge",
       "course": "Kurs",
-      "empty": "Diesem Lernpfad wurden noch keine Kurse hinzugefügt.",
-      "saveFirst": "Speichern Sie den Lernpfad, bevor Sie Kurse hinzufügen.",
+      "empty": "Diesem Entwicklungspfad wurden noch keine Kurse hinzugefügt.",
+      "saveFirst": "Speichern Sie den Entwicklungspfad, bevor Sie Kurse hinzufügen.",
       "unknownCourse": "Kursdetails nicht verfügbar"
     },
     "sharedLearningPath": {
       "badgeExported": "Geteilt",
       "exportButton": "Teilen",
-      "exportSuccess": "Lernpfad wurde geteilt",
-      "exportsDescription": "Teilen Sie diesen Lernpfad mit ausgewählten Organisationen.",
+      "exportSuccess": "Entwicklungspfad wurde geteilt",
+      "exportsDescription": "Teilen Sie diesen Entwicklungspfad mit ausgewählten Organisationen.",
       "exportsTitle": "Teilen",
       "exportingButton": "Teilen...",
       "selectTenants": "Organisationen auswählen",
       "selectedCount": "Ausgewählt:"
     },
     "deleteModal": {
-      "title": "Lernpfad löschen",
-      "description": "Dadurch wird der Lernpfad gelöscht und der pfadbasierte Kurszugriff entfernt."
+      "title": "Entwicklungspfad löschen",
+      "description": "Dadurch wird der Entwicklungspfad gelöscht und der pfadbasierte Kurszugriff entfernt."
     },
     "toast": {
-      "created": "Lernpfad erfolgreich erstellt",
-      "updated": "Lernpfad erfolgreich aktualisiert",
-      "deleted": "Lernpfad erfolgreich gelöscht",
-      "languageCreated": "Lernpfadsprache erfolgreich erstellt",
-      "coursesAdded": "Kurse erfolgreich zum Lernpfad hinzugefügt",
-      "courseRemoved": "Kurs erfolgreich aus dem Lernpfad entfernt",
-      "coursesReordered": "Lernpfadkurse erfolgreich neu sortiert"
+      "created": "Entwicklungspfad erfolgreich erstellt",
+      "updated": "Entwicklungspfad erfolgreich aktualisiert",
+      "deleted": "Entwicklungspfad erfolgreich gelöscht",
+      "languageCreated": "Entwicklungspfadsprache erfolgreich erstellt",
+      "coursesAdded": "Kurse erfolgreich zum Entwicklungspfad hinzugefügt",
+      "courseRemoved": "Kurs erfolgreich aus dem Entwicklungspfad entfernt",
+      "coursesReordered": "Entwicklungspfadkurse erfolgreich neu sortiert"
     }
   },
   "lessonPreview": {
@@ -3600,6 +3853,16 @@
     },
     "tooltip": {
       "disabled": "Um dieses Feld umzuschalten, aktivieren Sie bitte zuerst den Abschnitt „Wissensdatenbank“."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigurieren Sie die Entwicklungspfad-Einstellungen",
+    "header": "Entwicklungspfad-Einstellungen",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Entwicklungspfade aktivieren",
+        "description": "Aktivieren Sie Entwicklungspfade. Wenn deaktiviert, werden Entwicklungspfade fuer alle Benutzer ausgeblendet und blockiert."
+      }
     }
   },
   "qaView": {

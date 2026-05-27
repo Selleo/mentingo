@@ -8,12 +8,12 @@ import { useLocation } from "react-use";
 import { z } from "zod";
 
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { useToast } from "~/components/ui/use-toast";
 import {
   buildRichTextFileUploadHandler,
   RICH_TEXT_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
@@ -47,7 +47,6 @@ import { useLanguageStore } from "../Dashboard/Settings/Language/LanguageStore";
 
 import { NewsLanguageSelector } from "./components/NewsLanguageSelector";
 
-import type { SupportedLanguages } from "@repo/shared";
 import type { Editor as TipTapEditor } from "@tiptap/react";
 
 type NewsFormValues = {
@@ -91,8 +90,6 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     { language },
     { enabled: isEdit },
   );
-
-  useClearVideoOnTabChange(tabValue, "editor");
 
   const { mutateAsync: updateNews } = useUpdateNews();
   const { uploadResource } = useEntityResourceUpload();
@@ -195,6 +192,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
             resource: ENTITY_TYPES.NEWS,
             entityId: id,
             entityType: ENTITY_TYPES.NEWS,
+            linkToEntity: false,
           }),
       }),
     uploadVideo,
@@ -272,6 +270,19 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
     );
   }
 
+  const { selectorProps } = getLocalizedResourceLanguage({
+    value: language,
+    onChange: setLanguage,
+    baseLanguage: existingNews?.baseLanguage,
+    availableLocales: existingNews?.availableLocales,
+    formKeyParts: [
+      id ?? "new",
+      existingNews?.title ?? "",
+      existingNews?.summary ?? "",
+      existingNews?.plainContent ?? "",
+    ],
+  });
+
   return (
     <PageWrapper
       breadcrumbs={breadcrumbs}
@@ -290,15 +301,7 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                   {pageTitle}
                 </h1>
               </div>
-              {id && (
-                <NewsLanguageSelector
-                  newsId={id}
-                  value={language}
-                  baseLanguage={existingNews?.baseLanguage as SupportedLanguages}
-                  availableLocales={existingNews?.availableLocales as SupportedLanguages[]}
-                  onChange={(lang) => setLanguage(lang)}
-                />
-              )}
+              {id && <NewsLanguageSelector newsId={id} {...selectorProps} />}
             </div>
           </header>
 
@@ -461,6 +464,11 @@ function NewsFormPage({ defaultValues }: NewsFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
+                              assetLibrary={{
+                                entityType: ENTITY_TYPES.NEWS,
+                                entityId: id,
+                                language,
+                              }}
                               {...field}
                             />
                             <RichTextUploadQueue

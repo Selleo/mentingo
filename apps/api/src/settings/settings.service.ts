@@ -22,7 +22,7 @@ import sharp from "sharp";
 
 import { CORS_ORIGIN } from "src/auth/consts";
 import { DatabasePg } from "src/common";
-import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -863,6 +863,33 @@ export class SettingsService {
     return globalSettings.liveTrainingMaxParallelSessions;
   }
 
+  public async updateGlobalLearningPathsEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current =
+      previousRecord.settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "learningPathsEnabled", !current),
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async uploadPlatformLogo(
     file: Express.Multer.File | null | undefined,
     actor?: CurrentUserType,
@@ -1063,6 +1090,19 @@ export class SettingsService {
     }
 
     return settingsRecord.companyInformation;
+  }
+
+  public async getCompanyInformationByTenantId(
+    tenantId: UUIDType,
+  ): Promise<CompanyInformaitonJSONSchema> {
+    const [settingsRecord] = await this.dbAdmin
+      .select({
+        companyInformation: sql<CompanyInformaitonJSONSchema>`${settings.settings}->'companyInformation'`,
+      })
+      .from(settings)
+      .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+    return settingsRecord?.companyInformation ?? DEFAULT_GLOBAL_SETTINGS.companyInformation;
   }
 
   public async updateCompanyInformation(
@@ -1764,6 +1804,8 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
+      learningPathsEnabled:
+        settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       calendarEnabled: true,
       liveTrainingEnabled:
         settings.liveTrainingEnabled ?? DEFAULT_GLOBAL_SETTINGS.liveTrainingEnabled,

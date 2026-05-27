@@ -10,14 +10,13 @@ import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
-import { useAddArticleLanguage } from "~/api/mutations/admin/useAddArticleLanguage";
-import { useDeleteArticleLanguage } from "~/api/mutations/admin/useDeleteArticleLanguage";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { usePreviewArticle } from "~/api/mutations/usePreviewArticle";
 import { useUpdateArticle } from "~/api/mutations/useUpdateArticle";
 import { useArticle } from "~/api/queries";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "~/components/Form/FormTextField";
+import { getLocalizedResourceLanguage } from "~/components/LanguageSelector/utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentEditor } from "~/components/RichText/Editor";
 import { RichTextUploadQueue } from "~/components/RichText/RichTextUploadQueue";
@@ -31,13 +30,12 @@ import {
   buildRichTextFileUploadHandler,
   RICH_TEXT_ACCEPTED_FILE_TYPES,
 } from "~/hooks/buildRichTextFileUploadHandler";
-import { useClearVideoOnTabChange } from "~/hooks/useClearVideoOnTabChange";
 import { useEntityResourceUpload } from "~/hooks/useEntityResourceUpload";
 import { useHandleImageUpload } from "~/hooks/useHandleImageUpload";
 import { useRichTextUploadQueue } from "~/hooks/useRichTextUploadQueue";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
-import { LanguageSelector } from "~/modules/Articles/LanguageSelector";
+import { ArticleLanguageSelector } from "~/modules/Articles/LanguageSelector";
 import { filterChangedData } from "~/utils/filterChangedData";
 
 import { ARTICLE_FORM_PAGE_HANDLES } from "../../../e2e/data/articles/handles";
@@ -87,9 +85,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
   const { mutateAsync: initVideoUpload } = useInitVideoUpload();
   const { toast } = useToast();
 
-  const { mutateAsync: addLanguage } = useAddArticleLanguage();
-  const { mutateAsync: deleteLanguage } = useDeleteArticleLanguage();
-
   const { mutateAsync: previewArticle, isPending: isPreviewLoading } = usePreviewArticle();
   const [previewContent, setPreviewContent] = useState("");
   const { getSessionForFile, uploadVideo } = useTusVideoUpload();
@@ -137,8 +132,6 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     initialImageUrl:
       existingArticle?.resources?.coverImage?.fileUrl ?? defaultValues?.imageUrl ?? null,
   });
-
-  useClearVideoOnTabChange(tabValue, "editor");
 
   useEffect(() => {
     if (!existingArticle || isFetchingArticle) return;
@@ -204,6 +197,7 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
             resource: ENTITY_TYPES.ARTICLES,
             entityId: articleId,
             entityType: ENTITY_TYPES.ARTICLES,
+            linkToEntity: false,
           }),
       }),
     uploadVideo,
@@ -263,6 +257,19 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
     );
   }
 
+  const { selectorProps } = getLocalizedResourceLanguage({
+    value: articleLanguage,
+    onChange: setArticleLanguage,
+    baseLanguage: existingArticle?.baseLanguage,
+    availableLocales: existingArticle?.availableLocales,
+    formKeyParts: [
+      articleId,
+      existingArticle?.title ?? "",
+      existingArticle?.summary ?? "",
+      existingArticle?.plainContent ?? "",
+    ],
+  });
+
   return (
     <PageWrapper
       breadcrumbs={breadcrumbs}
@@ -282,19 +289,10 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                     {pageTitle}
                   </h1>
                 </div>
-                <LanguageSelector
+                <ArticleLanguageSelector
                   id={articleId}
-                  value={articleLanguage}
-                  baseLanguage={existingArticle?.baseLanguage}
-                  availableLocales={existingArticle?.availableLocales}
-                  onChange={setArticleLanguage}
+                  {...selectorProps}
                   onCreated={(lang) => setArticleLanguage(lang)}
-                  onCreate={async ({ id, language }) => {
-                    await addLanguage({ id, language });
-                  }}
-                  onDelete={async ({ id, language }) => {
-                    await deleteLanguage({ id, language });
-                  }}
                 />
               </div>
             </div>
@@ -398,6 +396,11 @@ function ArticleFormPage({ defaultValues }: ArticleFormPageProps) {
                               allowFiles
                               acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                               onUpload={handleFileUpload}
+                              assetLibrary={{
+                                entityType: ENTITY_TYPES.ARTICLES,
+                                entityId: articleId,
+                                language: articleLanguage,
+                              }}
                               onChange={field.onChange}
                             />
                             <RichTextUploadQueue

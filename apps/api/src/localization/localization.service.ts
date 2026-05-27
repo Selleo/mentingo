@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, type SQL } from "drizzle-orm";
 import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
@@ -81,7 +81,7 @@ export class LocalizationService {
    */
   getLocalizedSqlField(
     fieldColumn: AnyPgColumn,
-    language?: SupportedLanguages,
+    language?: SupportedLanguages | SQL<unknown>,
     baseTable: BaseTable = courses,
     joinedAliasName?: string,
   ) {
@@ -110,6 +110,22 @@ export class LocalizationService {
             ${fieldColumn}->>${language}::text,
             ''
         )
+    `;
+  }
+
+  getLocalizedFieldSearchCondition(
+    fieldColumn: AnyPgColumn,
+    pattern: string,
+    language?: SupportedLanguages,
+  ) {
+    if (language) return sql`${this.getFieldByLanguage(fieldColumn, language)} ilike ${pattern}`;
+
+    return sql`
+      EXISTS (
+        SELECT 1
+        FROM jsonb_each_text(COALESCE(${fieldColumn}, '{}'::jsonb)) AS localized_field(key, value)
+        WHERE localized_field.value ilike ${pattern}
+      )
     `;
   }
 

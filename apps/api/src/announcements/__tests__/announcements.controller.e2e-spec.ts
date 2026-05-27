@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -21,6 +22,15 @@ describe("AnnouncementsController (e2e)", () => {
   let announcementsFactory: ReturnType<typeof createAnnouncementFactory>;
 
   const password = "Password123@";
+  const createAnnouncementBody = (
+    title = "Admin announcement",
+    content = "Hello",
+    groupId: string | null = null,
+  ) => ({
+    baseLanguage: SUPPORTED_LANGUAGES.EN,
+    groupId,
+    translations: [{ language: SUPPORTED_LANGUAGES.EN, title, content }],
+  });
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -80,58 +90,45 @@ describe("AnnouncementsController (e2e)", () => {
     it("unauthenticated request returns 401", async () => {
       await request(app.getHttpServer()).get("/api/announcements").expect(401);
     });
-  });
 
-  describe("GET /api/announcements/latest", () => {
-    it("returns latest unread announcements for user", async () => {
-      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
-      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
-
-      await announcementsFactory.withEveryone().create({ authorId: admin.id });
-
-      const studentCookies = await cookieFor(student, app);
-
-      const response = await request(app.getHttpServer())
-        .get("/api/announcements/latest")
-        .set("Cookie", studentCookies)
-        .expect(200);
-
-      expect(Array.isArray(response.body.data)).toBe(true);
-    });
-
-    it("returns empty array if no unread announcements", async () => {
-      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
-
-      const studentCookies = await cookieFor(student, app);
-
-      const response = await request(app.getHttpServer())
-        .get("/api/announcements/latest")
-        .set("Cookie", studentCookies)
-        .expect(200);
-
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(0);
-    });
-
-    it("returns empty array for admin user", async () => {
+    it("returns announcement in requested language", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
 
       const adminCookies = await cookieFor(admin, app);
 
-      await announcementsFactory.withEveryone().create({ authorId: admin.id });
-      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send({
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          groupId: null,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "English title",
+              content: "English content",
+            },
+            {
+              language: SUPPORTED_LANGUAGES.PL,
+              title: "Polski tytul",
+              content: "Polska tresc",
+            },
+          ],
+        })
+        .expect(201);
 
       const response = await request(app.getHttpServer())
-        .get("/api/announcements/latest")
+        .get("/api/announcements")
+        .query({ language: SUPPORTED_LANGUAGES.PL })
         .set("Cookie", adminCookies)
         .expect(200);
 
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBe(0);
-    });
-
-    it("unauthenticated request returns 401", async () => {
-      await request(app.getHttpServer()).get("/api/announcements/latest").expect(401);
+      expect(response.body.data[0].title).toBe("Polski tytul");
+      expect(response.body.data[0].content).toBe("Polska tresc");
+      expect(response.body.data[0].baseLanguage).toBe(SUPPORTED_LANGUAGES.EN);
+      expect(response.body.data[0].availableLocales).toEqual(
+        expect.arrayContaining([SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL]),
+      );
     });
   });
 
@@ -241,7 +238,7 @@ describe("AnnouncementsController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/api/announcements")
         .set("Cookie", adminCookies)
-        .send({ title: "Admin announcement", content: "Hello", groupId: null })
+        .send(createAnnouncementBody())
         .expect(201);
     });
 
@@ -256,7 +253,7 @@ describe("AnnouncementsController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/api/announcements")
         .set("Cookie", creatorCookies)
-        .send({ title: "Content creator announcement", content: "Hello", groupId: null })
+        .send(createAnnouncementBody("Content creator announcement"))
         .expect(201);
     });
 
@@ -270,8 +267,73 @@ describe("AnnouncementsController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/api/announcements")
         .set("Cookie", adminCookies)
-        .send({ title: "Group announcement", content: "Hello group", groupId: group.id })
+        .send(createAnnouncementBody("Group announcement", "Hello group", group.id))
         .expect(201);
+    });
+
+    it("rejects announcement without base language translation", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+
+      const adminCookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send({
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          groupId: null,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.PL,
+              title: "Polski tytul",
+              content: "Polska tresc",
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    it("rejects announcement with duplicate translation languages", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+
+      const adminCookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send({
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          groupId: null,
+          translations: [
+            { language: SUPPORTED_LANGUAGES.EN, title: "Title", content: "Content" },
+            { language: SUPPORTED_LANGUAGES.EN, title: "Other title", content: "Other content" },
+          ],
+        })
+        .expect(400);
+    });
+
+    it("rejects empty title and content", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+
+      const adminCookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send(createAnnouncementBody("", ""))
+        .expect(400);
+    });
+
+    it("rejects title longer than 120 characters", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+
+      const adminCookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send(createAnnouncementBody("a".repeat(121), "Content"))
+        .expect(400);
     });
 
     it("student cannot create announcement (403)", async () => {
@@ -282,8 +344,34 @@ describe("AnnouncementsController (e2e)", () => {
       await request(app.getHttpServer())
         .post("/api/announcements")
         .set("Cookie", studentCookies)
-        .send({ title: "Bad", content: "nope", groupId: null })
+        .send(createAnnouncementBody("Bad", "nope"))
         .expect(403);
+    });
+  });
+
+  describe("PATCH /api/announcements/read-all", () => {
+    it("user can mark all announcements as read", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+
+      const studentCookies = await cookieFor(student, app);
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/announcements/read-all")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(response.body.data.updatedCount).toBe(2);
+
+      const unreadResponse = await request(app.getHttpServer())
+        .get("/api/announcements/unread")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(unreadResponse.body.data.unreadCount).toBe(0);
     });
   });
 
@@ -316,6 +404,50 @@ describe("AnnouncementsController (e2e)", () => {
         .patch(`/api/announcements/${randomId}/read`)
         .set("Cookie", studentCookies)
         .expect(400);
+    });
+  });
+
+  describe("DELETE /api/announcements/:id", () => {
+    it("admin can soft delete an announcement", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+
+      const announcement = await announcementsFactory.withEveryone().create({ authorId: admin.id });
+
+      const adminCookies = await cookieFor(admin, app);
+      const studentCookies = await cookieFor(student, app);
+
+      await request(app.getHttpServer())
+        .delete(`/api/announcements/${announcement.id}`)
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      const userAnnouncementsResponse = await request(app.getHttpServer())
+        .get("/api/announcements/user/me")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(userAnnouncementsResponse.body.data).toHaveLength(0);
+
+      const unreadResponse = await request(app.getHttpServer())
+        .get("/api/announcements/unread")
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(unreadResponse.body.data.unreadCount).toBe(0);
+    });
+
+    it("student cannot delete announcement", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const announcement = await announcementsFactory.withEveryone().create({ authorId: admin.id });
+
+      const studentCookies = await cookieFor(student, app);
+
+      await request(app.getHttpServer())
+        .delete(`/api/announcements/${announcement.id}`)
+        .set("Cookie", studentCookies)
+        .expect(403);
     });
   });
 });

@@ -19,7 +19,7 @@ export const getUserFinishedCourseEmailTranslations = (
       heading: "Kurs ukończony",
       paragraphs: [
         "Gratulacje! 🏁",
-        `Ukończyłeś(-aś) ${courseName}. ${hasCertificate ? "Certyfikat jest gotowy do pobrania; sprawdź też proponowane ścieżki dalszej nauki." : ""}`,
+        `Ukończyłeś(-aś) ${courseName}. ${hasCertificate ? "Certyfikat jest gotowy do pobrania; sprawdź też proponowane ścieżki rozwoju." : ""}`,
       ],
       buttonText: hasCertificate ? "POBIERZ CERTYFIKAT" : "KONTYNUUJ SWOJĄ NAUKĘ",
     },

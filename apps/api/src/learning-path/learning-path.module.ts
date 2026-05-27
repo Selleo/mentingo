@@ -11,6 +11,7 @@ import { LearningPathCourseController } from "./controllers/learning-path-course
 import { LearningPathEnrollmentController } from "./controllers/learning-path-enrollment.controller";
 import { LearningPathExportController } from "./controllers/learning-path-export.controller";
 import { LearningPathController } from "./controllers/learning-path.controller";
+import { LearningPathsEnabledGuard } from "./guards/learning-paths-enabled.guard";
 import { LearningPathCourseSyncHandler } from "./handlers/learning-path-course-sync.handler";
 import { LearningPathQueueService } from "./learning-path.queue.service";
 import { LearningPathRepository } from "./learning-path.repository";
@@ -44,6 +45,7 @@ import { LearningPathService } from "./services/learning-path.service";
     LearningPathQueueService,
     LearningPathCertificateService,
     LearningPathWorker,
+    LearningPathsEnabledGuard,
   ],
   exports: [LearningPathService, LearningPathRepository],
 })

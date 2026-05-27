@@ -11,22 +11,23 @@ import {
 } from "~/api/queries";
 import { groupsQueryOptions } from "~/api/queries/admin/useGroups";
 import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
-import { announcementsForUserOptions } from "~/api/queries/useAnnouncementsForUser";
 import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
 import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
 import { contentCreatorCoursesOptions } from "~/api/queries/useContentCreatorCourses";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { learningPathsQueryOptions } from "~/api/queries/useLearningPaths";
 import { newsSearchQueryOptions } from "~/api/queries/useNewsList";
 import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
-import { AnnouncementEntry } from "./AnnouncementEntry";
 import { ArticleEntry } from "./ArticleEntry";
 import { CategoryEntry } from "./CategoryEntry";
 import { CourseEntry } from "./CourseEntry";
 import { GlobalSearchContent } from "./GlobalSearchContent";
 import { GroupEntry } from "./GroupEntry";
+import { LearningPathEntry } from "./LearningPathEntry";
 import { LessonEntry } from "./LessonEntry";
 import { MyCourseEntry } from "./MyCourseEntry";
 import { NewsEntry } from "./NewsEntry";
@@ -47,8 +48,10 @@ export const GlobalSearchResults = ({
   setTotalItems: (count: number) => void;
 }) => {
   const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
   const { permissions } = usePermissions();
   const { language } = useLanguageStore();
+  const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
 
   const {
     canSearchAllCourses,
@@ -58,11 +61,11 @@ export const GlobalSearchResults = ({
     canSearchOwnCourses,
     canSearchStudentCourses,
     canSearchAvailableCourses,
-    canSearchAnnouncements,
     canSearchLessons,
     canSearchNews,
     canSearchArticles,
     canSearchQA,
+    canSearchLearningPaths,
   } = useMemo(() => {
     return {
       canSearchAllCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_UPDATE]),
@@ -78,7 +81,6 @@ export const GlobalSearchResults = ({
       canSearchOwnCourses: hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN),
       canSearchStudentCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ_ASSIGNED]),
       canSearchAvailableCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
-      canSearchAnnouncements: hasPermission(permissions, PERMISSIONS.ANNOUNCEMENT_READ),
       canSearchLessons: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
       canSearchNews: hasAnyPermission(permissions, [
         PERMISSIONS.NEWS_READ_PUBLIC,
@@ -95,6 +97,7 @@ export const GlobalSearchResults = ({
         PERMISSIONS.QA_MANAGE,
         PERMISSIONS.QA_MANAGE_OWN,
       ]),
+      canSearchLearningPaths: hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ),
     };
   }, [permissions]);
 
@@ -129,13 +132,13 @@ export const GlobalSearchResults = ({
         { searchQuery: debouncedSearch, language },
         { enabled: isSearchReady && canSearchAvailableCourses },
       ),
-      announcementsForUserOptions(
-        { search: debouncedSearch },
-        { enabled: isSearchReady && canSearchAnnouncements },
-      ),
       lessonsQueryOptions(
         { searchQuery: debouncedSearch, language },
         { enabled: isSearchReady && canSearchLessons },
+      ),
+      learningPathsQueryOptions(
+        { searchQuery: debouncedSearch, language },
+        { enabled: isSearchReady && canSearchLearningPaths && isLearningPathsEnabled },
       ),
       newsSearchQueryOptions(
         { searchQuery: debouncedSearch, language },
@@ -159,8 +162,8 @@ export const GlobalSearchResults = ({
         contentCreatorCourses,
         studentCourses,
         availableCourses,
-        announcements,
         lessons,
+        learningPaths,
         newsResults,
         articlesResults,
         qaResults,
@@ -189,6 +192,11 @@ export const GlobalSearchResults = ({
           Component: CourseEntry,
         },
         {
+          resultType: "learningPaths",
+          resultData: learningPaths?.data?.data ?? [],
+          Component: LearningPathEntry,
+        },
+        {
           resultType: "lessons",
           resultData: lessons?.data ?? [],
           Component: LessonEntry,
@@ -207,11 +215,6 @@ export const GlobalSearchResults = ({
           resultType: "groups",
           resultData: groups?.data ?? [],
           Component: GroupEntry,
-        },
-        {
-          resultType: "announcements",
-          resultData: announcements?.data ?? [],
-          Component: AnnouncementEntry,
         },
         {
           resultType: "news",

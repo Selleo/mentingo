@@ -1,16 +1,22 @@
 import { faker } from "@faker-js/faker";
-import { COURSE_ENROLLMENT, ENTITY_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  ENTITY_TYPES,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import AdmZip from "adm-zip";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  categories,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -438,6 +444,65 @@ describe("CourseController (e2e)", () => {
                 (course.description as string)?.includes("Python"),
             ),
           ).toBe(true);
+        });
+
+        it("localizes and filters course category names by requested language", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+          const cookies = await cookieFor(admin, app);
+          const suffix = Date.now();
+          const englishCategoryTitle = `Course Category English ${suffix}`;
+          const polishCategoryTitle = `Kategoria Kursu Polska ${suffix}`;
+          const [category] = await db
+            .insert(categories)
+            .values({
+              title: buildJsonbFieldWithMultipleEntries({
+                [SUPPORTED_LANGUAGES.EN]: englishCategoryTitle,
+                [SUPPORTED_LANGUAGES.PL]: polishCategoryTitle,
+              }),
+              baseLanguage: SUPPORTED_LANGUAGES.EN,
+              availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+            })
+            .returning();
+
+          await courseFactory.create({
+            title: "Localized category course",
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+            thumbnailS3Key: null,
+          });
+
+          await request(app.getHttpServer())
+            .get("/api/course/all")
+            .query({ language: SUPPORTED_LANGUAGES.PL })
+            .set("Cookie", cookies)
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body.data).toHaveLength(1);
+              expect(body.data[0].category).toBe(polishCategoryTitle);
+            });
+
+          await request(app.getHttpServer())
+            .get("/api/course/all")
+            .query({ category: polishCategoryTitle, language: SUPPORTED_LANGUAGES.PL })
+            .set("Cookie", cookies)
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body.data).toHaveLength(1);
+              expect(body.data[0].category).toBe(polishCategoryTitle);
+            });
+
+          await request(app.getHttpServer())
+            .get("/api/course/all")
+            .query({ category: polishCategoryTitle, language: SUPPORTED_LANGUAGES.EN })
+            .set("Cookie", cookies)
+            .expect(200)
+            .expect(({ body }) => {
+              expect(body.data).toHaveLength(0);
+            });
         });
 
         it("filters by date range", async () => {
@@ -1308,6 +1373,41 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data).toBeDefined();
         expect(response.body.data.length).toBe(1);
         expect(response.body.data[0].id).toBe(availableCourse.id);
+      });
+
+      it("returns published courses with inactive learning path enrollment rows", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
+
+        const lockedLearningPathCourse = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(studentCourses).values({
+          studentId: student.id,
+          courseId: lockedLearningPathCourse.id,
+          finishedChapterCount: 0,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/available-courses")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data).toEqual(
+          expect.arrayContaining([expect.objectContaining({ id: lockedLearningPathCourse.id })]),
+        );
       });
 
       it("filters by title", async () => {
@@ -3495,5 +3595,51 @@ describe("CourseController (e2e)", () => {
           .expect(200);
       },
     );
+
+    it("returns localized category name in course details with base-language fallback", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const suffix = Date.now();
+      const englishCategoryTitle = `Details Category English ${suffix}`;
+      const lithuanianCategoryTitle = `Detali Kategorija Lietuviu ${suffix}`;
+      const [category] = await db
+        .insert(categories)
+        .values({
+          title: buildJsonbFieldWithMultipleEntries({
+            [SUPPORTED_LANGUAGES.EN]: englishCategoryTitle,
+            [SUPPORTED_LANGUAGES.LT]: lithuanianCategoryTitle,
+          }),
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.LT],
+        })
+        .returning();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        title: "Course details localized category",
+      });
+      const cookie = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.LT })
+        .set("Cookie", cookie)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.category).toBe(lithuanianCategoryTitle);
+        });
+
+      await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.DE })
+        .set("Cookie", cookie)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.category).toBe(englishCategoryTitle);
+        });
+    });
   });
 });

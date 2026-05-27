@@ -122,6 +122,7 @@ export const studentsWithEnrolmentValidation = {
       name: "groups",
       schema: groupsFilterSchema,
     },
+    { type: "query" as const, name: "language", schema: supportedLanguagesSchema },
     { type: "query" as const, name: "page", schema: Type.Number({ minimum: 1 }) },
     { type: "query" as const, name: "perPage", schema: Type.Number() },
   ],

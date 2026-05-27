@@ -1,4 +1,4 @@
-import { PERMISSIONS, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq, and, isNull } from "drizzle-orm";
 
 import { AnnouncementsService } from "src/announcements/announcements.service";
@@ -33,7 +33,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CreateCourseBody } from "src/courses/schemas/createCourse.schema";
 import type { UpdateCourseBody } from "src/courses/schemas/updateCourse.schema";
-import type { UpsertGroupBody } from "src/group/group.types";
+import type { CreateGroupBody } from "src/group/group.types";
 import type { CreateLessonBody, UpdateLessonBody } from "src/lesson/lesson.schema";
 
 describe("Activity Logs E2E", () => {
@@ -425,9 +425,15 @@ describe("Activity Logs E2E", () => {
     it("should record CREATE activity log when announcement is created", async () => {
       const announcement = await announcementsService.createAnnouncement(
         {
-          title: "Initial Announcement",
-          content: "Announcement content",
           groupId: null,
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "Initial Announcement",
+              content: "Announcement content",
+            },
+          ],
         },
         currentAdminUser,
       );
@@ -452,9 +458,15 @@ describe("Activity Logs E2E", () => {
 
       const announcement = await announcementsService.createAnnouncement(
         {
-          title: "Initial Announcement",
-          content: "Announcement content",
           groupId: null,
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+          translations: [
+            {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "Initial Announcement",
+              content: "Announcement content",
+            },
+          ],
         },
         currentAdminUser,
       );
@@ -474,9 +486,10 @@ describe("Activity Logs E2E", () => {
   });
 
   describe("Group activity logs", () => {
-    const createGroup = async (body?: Partial<UpsertGroupBody>) =>
+    const createGroup = async (body?: Partial<CreateGroupBody>) =>
       groupService.createGroup(
         {
+          language: SUPPORTED_LANGUAGES.EN,
           name: "Initial Group",
           characteristic: "Test",
           ...(body ?? {}),
@@ -528,7 +541,11 @@ describe("Activity Logs E2E", () => {
     it("should record GROUP_ASSIGNMENT activity log when user assigned to group", async () => {
       const student = await userFactory.create();
       const group = await groupService.createGroup(
-        { name: "Factory Group", characteristic: "Test" },
+        {
+          language: SUPPORTED_LANGUAGES.EN,
+          name: "Factory Group",
+          characteristic: "Test",
+        },
         currentAdminUser,
       );
 
@@ -548,7 +565,10 @@ describe("Activity Logs E2E", () => {
 
   describe("Category activity logs", () => {
     const createCategory = async () =>
-      categoryService.createCategory({ title: "Initial Category" }, currentAdminUser);
+      categoryService.createCategory(
+        { title: "Initial Category", language: SUPPORTED_LANGUAGES.EN },
+        currentAdminUser,
+      );
 
     it("should record CREATE activity log when category is created", async () => {
       const category = await createCategory();

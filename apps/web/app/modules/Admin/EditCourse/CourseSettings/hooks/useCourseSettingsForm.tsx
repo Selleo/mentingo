@@ -42,15 +42,31 @@ export const useCourseSettingsForm = ({
     },
   });
 
+  const invalidateCourseQueries = async () => {
+    await queryClient.invalidateQueries(betaCourseQueryOptions(courseId));
+    await queryClient.invalidateQueries(courseQueryOptions(courseId, courseLanguage));
+  };
+
   const onSubmit: SubmitHandler<CourseSettingsFormValues> = async (data) => {
     await updateCourse({
       data,
       courseId,
     });
 
-    await queryClient.invalidateQueries(betaCourseQueryOptions(courseId));
-    await queryClient.invalidateQueries(courseQueryOptions(courseId, courseLanguage));
+    await invalidateCourseQueries();
   };
 
-  return { form, onSubmit, reset: form.reset };
+  const saveCategory = async (newCategoryId: string) => {
+    await updateCourse({
+      data: {
+        categoryId: newCategoryId,
+        language: courseLanguage,
+      },
+      courseId,
+    });
+
+    await invalidateCourseQueries();
+  };
+
+  return { form, onSubmit, reset: form.reset, saveCategory };
 };

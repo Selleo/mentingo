@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "~/api/queries";
 import { useConfigurationState } from "~/api/queries/admin/useConfigurationState";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { useLearningPaths } from "~/api/queries/useLearningPaths";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { matchesRequirement } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
@@ -15,6 +16,7 @@ import { getNavigationConfig, mapNavigationItems } from "~/config/navigationConf
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import { shouldHideTopbarAndSidebar } from "~/modules/Admin/Admin.layout";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { Button } from "../ui/button";
 
@@ -31,15 +33,34 @@ type DashboardNavigationProps = { menuItems?: NavigationGroups[] };
 
 export function Navigation({ menuItems }: DashboardNavigationProps) {
   const { isMobileNavOpen, setIsMobileNavOpen } = useMobileNavigation();
+
   const { hasAccess: canManageEnvs, permissions } = usePermissions({
     required: [PERMISSIONS.ENV_MANAGE],
   });
+  const { hasAccess: canAccessLearningPathAdmin } = usePermissions({
+    required: [
+      PERMISSIONS.LEARNING_PATH_CREATE,
+      PERMISSIONS.LEARNING_PATH_UPDATE,
+      PERMISSIONS.LEARNING_PATH_UPDATE_OWN,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE,
+      PERMISSIONS.LEARNING_PATH_COURSE_UPDATE_OWN,
+      PERMISSIONS.LEARNING_PATH_DELETE,
+      PERMISSIONS.LEARNING_PATH_ENROLLMENT,
+      PERMISSIONS.LEARNING_PATH_EXPORT,
+    ],
+  });
+  const { hasAccess: canReadLearningPaths } = usePermissions({
+    required: [PERMISSIONS.LEARNING_PATH_READ],
+  });
+
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const [is2xlBreakpoint, setIs2xlBreakpoint] = useState(false);
   const { data: isStripeConfigured } = useStripeConfigured();
 
   const { data: globalSettings } = useGlobalSettings();
+
+  const language = useLanguageStore((state) => state.language);
 
   const { data: user } = useCurrentUser();
 
@@ -51,6 +72,19 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
     canManageEnvs && configurationState?.hasIssues && !configurationState?.isWarningDismissed;
 
   const { isSidebarCollapsed, toggleSidebarCollapsed } = useNavigationStore();
+
+  const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
+
+  const { data: studentLearningPaths } = useLearningPaths(
+    { page: 1, perPage: 1, language },
+    {
+      enabled:
+        isLearningPathsEnabled && canReadLearningPaths && !canAccessLearningPathAdmin && !!user?.id,
+    },
+  );
+
+  const shouldShowLearningPaths =
+    canAccessLearningPathAdmin || Boolean(studentLearningPaths?.pagination.totalItems);
 
   useEffect(() => {
     const updateBreakpoint = () => {
@@ -72,6 +106,8 @@ export function Navigation({ menuItems }: DashboardNavigationProps) {
         globalSettings?.newsEnabled,
         globalSettings?.articlesEnabled,
         isStripeConfigured?.enabled,
+        isLearningPathsEnabled,
+        shouldShowLearningPaths,
       ),
     );
   }

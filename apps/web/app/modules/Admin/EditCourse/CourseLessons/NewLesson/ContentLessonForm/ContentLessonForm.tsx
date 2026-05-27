@@ -96,6 +96,7 @@ const ContentLessonForm = ({
             contextId,
             entityId: lessonToEdit?.id,
             entityType: ENTITY_TYPES.LESSON,
+            linkToEntity: false,
           }),
       }),
     uploadVideo,
@@ -226,6 +227,12 @@ const ContentLessonForm = ({
                       allowFiles={!!lessonToEdit?.id || !!contextId}
                       acceptedFileTypes={RICH_TEXT_ACCEPTED_FILE_TYPES}
                       onUpload={handleFileUpload}
+                      assetLibrary={{
+                        entityType: ENTITY_TYPES.LESSON,
+                        entityId: lessonToEdit?.id,
+                        contextId,
+                        language,
+                      }}
                       onCtrlSave={() => form.handleSubmit(onSubmit)()}
                       {...field}
                     />

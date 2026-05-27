@@ -4,6 +4,7 @@ import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
+import type { TFunction } from "i18next";
 
 describe("findMatchingRoute", () => {
   it("should find exact matches", () => {
@@ -192,5 +193,38 @@ describe("mapNavigationItems", () => {
     const mapped = mappedGroups[0].items;
 
     expect(mapped[0].accessRequirement).toBeUndefined();
+  });
+});
+
+describe("getNavigationConfig", () => {
+  const t = ((key: string) => key) as TFunction;
+
+  const getCourseItems = (isLearningPathsEnabled: boolean, shouldShowLearningPaths: boolean) =>
+    getNavigationConfig(
+      t,
+      false,
+      false,
+      false,
+      false,
+      isLearningPathsEnabled,
+      shouldShowLearningPaths,
+    )[0].items;
+
+  it("should hide learning paths when the feature is disabled", () => {
+    const items = getCourseItems(false, true);
+
+    expect(items.some((item) => item.path === "learning-paths")).toBe(false);
+  });
+
+  it("should hide learning paths when students have no available paths", () => {
+    const items = getCourseItems(true, false);
+
+    expect(items.some((item) => item.path === "learning-paths")).toBe(false);
+  });
+
+  it("should show learning paths when enabled and available", () => {
+    const items = getCourseItems(true, true);
+
+    expect(items.some((item) => item.path === "learning-paths")).toBe(true);
   });
 });

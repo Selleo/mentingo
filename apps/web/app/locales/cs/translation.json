@@ -124,6 +124,16 @@
       "success": "Soubor byl úspěšně smazán"
     }
   },
+  "resourceLibrary": {
+    "toast": {
+      "assetDeletedSuccessfully": "Zdroj byl úspěšně smazán"
+    },
+    "error": {
+      "fileRequired": "Soubor je povinný",
+      "assetNotFound": "Zdroj nebyl nalezen",
+      "entityNotFound": "Prostředek nebyl nalezen"
+    }
+  },
   "adminScorm": {
     "header": "Nahrajte SCORM",
     "subHeader": "Nahrajte svůj soubor .zip SCORM.",
@@ -261,7 +271,6 @@
     "scorm": {
       "title": "SCORM",
       "description": "Vytvořte kurz z balíčku SCORM 1.2.",
-      "badge": "Placeholder",
       "features": {
         "import": "Vytvořeno z balíčku SCORM 1.2 .zip",
         "tracking": "Podpora dokončení SCO a runtime stavu",
@@ -288,7 +297,7 @@
     "progress": "Pokrok",
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
-    "learningPaths": "Vzdělávací cesty",
+    "learningPaths": "Rozvojové cesty",
     "calendar": "Kalendář",
     "content": "Obsah",
     "categories": "Kategorie",
@@ -298,6 +307,7 @@
     "news": "Zprávy",
     "providerInformation": "Informace",
     "announcements": "Oznámení",
+    "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
     "manage": "Spravovat",
     "ariaLabels": {
@@ -688,6 +698,7 @@
       "noSearchResults": "Žádné výsledky vyhledávání pro:",
       "announcements": "Oznámení",
       "lessons": "Lekce",
+      "learningPaths": "Rozvojové cesty",
       "news": "Zprávy",
       "articles": "články",
       "qa": "Otázky a odpovědi"
@@ -1170,7 +1181,9 @@
     },
     "toast": {
       "deleteCategorySuccessfully": "Kategorie byla úspěšně smazána",
-      "deleteCategoryFailed": "Kategorii se nepodařilo smazat"
+      "deleteCategoryFailed": "Kategorii se nepodařilo smazat",
+      "deleteCategoryAssignedToCourses": "Kategorii nelze smazat. Je přiřazena ke kurzům ({{courseCount}}): {{courseTitles}}...",
+      "noCategoriesFoundToDelete": "Nebyly nalezeny žádné kategorie ke smazání"
     },
     "breadcrumbs": {
       "categories": "Kategorie",
@@ -1193,9 +1206,29 @@
     "button": {
       "createCategory": "Vytvořit kategorii"
     },
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Změnit výchozí jazyk",
+      "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto kategorii?",
+      "createTitle": "Vytvořit překlad",
+      "createDescription": "Vytvořit překlad této kategorie do jazyka {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad do jazyka {{language}}? Jeho obsah bude odstraněn."
+    },
     "toast": {
       "categoryCreatedSuccessfully": "Kategorie byla úspěšně vytvořena",
-      "categoryUpdatedSuccessfully": "Kategorie byla úspěšně aktualizována"
+      "categoryUpdatedSuccessfully": "Kategorie byla úspěšně aktualizována",
+      "baseLanguageUpdatedSuccessfully": "Výchozí jazyk byl úspěšně aktualizován",
+      "baseLanguageUpdateFailed": "Výchozí jazyk se nepodařilo aktualizovat",
+      "languageNotSupported": "Tato kategorie tento jazyk nepodporuje.",
+      "alreadyExists": "Kategorie již existuje.",
+      "categoryNotCreated": "Kategorii se nepodařilo vytvořit.",
+      "languageAlreadyExists": "Tento jazyk kategorie již existuje.",
+      "invalidLanguageToDelete": "Tento jazyk kategorie nelze smazat.",
+      "baseLanguageTitleRequired": "Vybraný výchozí jazyk musí mít název."
     },
     "error": {
       "categoryNotFound": "Kategorie nenalezena",
@@ -1285,7 +1318,7 @@
         "category": "kategorie",
         "group": "skupiny",
         "course": "kurzy",
-        "learning_path": "vzdělávací cesty",
+        "learning_path": "rozvojové cesty",
         "learning_mode": "režim učení",
         "learning_progress": "studijní postup",
         "certificate": "certifikáty",
@@ -1539,6 +1572,14 @@
       "groupUpdatedSuccessfully": "Skupina byla úspěšně aktualizována",
       "groupNotFound": "Skupina nenalezena"
     },
+    "language": {
+      "languageCreated": "Jazyk skupiny byl úspěšně vytvořen",
+      "languageDeleted": "Jazyk skupiny byl úspěšně odstraněn",
+      "baseLanguageUpdated": "Výchozí jazyk skupiny byl úspěšně aktualizován",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Nastavit výchozí jazyk",
+      "setBaseDescription": "Opravdu chcete nastavit {{language}} jako výchozí jazyk?"
+    },
     "deleteGroup": {
       "title": "Potvrďte smazání",
       "description": "Opravdu chcete tyto skupiny smazat?",
@@ -1597,6 +1638,8 @@
       "courseTrailerRemovedSuccessfully": "Upoutávka kurzu byla úspěšně odstraněna",
       "certificateUpdatedSuccessfully": "Certifikát byl úspěšně aktualizován",
       "certificateUpdateError": "Chyba při aktualizaci certifikátu",
+      "certificatesResetSuccessfully": "Certifikáty resetovány pro {{count}} uživatelů",
+      "certificatesResetError": "Chyba při resetování certifikátů",
       "maxTitleLengthExceeded_one": "Název nesmí být delší než {{count}} znaků",
       "maxTitleLengthExceeded_other": "Název nesmí být delší než {{count}} znaků",
       "aiMentorAvatarIncorrectType": "Neplatný typ souboru. Nahrajte prosím obrázek JPG, JPEG, PNG nebo SVG.",
@@ -1677,7 +1720,11 @@
         "removeTrailer": "Odebrat přívěs",
         "removeCertificateSignature": "Odebrat podpis",
         "includesCertificate": "Obsahuje certifikát",
-        "doesNotIncludeCertificate": "Neobsahuje certifikát"
+        "doesNotIncludeCertificate": "Neobsahuje certifikát",
+        "saveValidity": "Uložit platnost",
+        "resetCertificates": "Resetovat certifikáty",
+        "futureOnly": "Použít pouze pro nové",
+        "applyToExisting": "Použít pro všechny (včetně minulých)"
       },
       "selectButton": {
         "uploadFile": "Nahrajte soubor",
@@ -1700,7 +1747,11 @@
         "description": "Popis",
         "thumbnail": "Náhled",
         "trailer": "Trailer kurzu",
-        "baseLanguage": "Základní jazyk"
+        "baseLanguage": "Základní jazyk",
+        "validityType": "Typ platnosti",
+        "validityValue": "Hodnota",
+        "validityUnit": "Jednotka",
+        "validUntil": "Platné do"
       },
       "placeholder": {
         "title": "Zadejte název",
@@ -1713,6 +1764,38 @@
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
+        "certificateValidity": "Platnost certifikátu",
+        "certificateValidityDescription": "Nastavte, kdy vydané certifikáty vyprší a resetují průběh kurzu.",
+        "enableCertificateValidityConfirmationTitle": "Povolit platnost certifikátu?",
+        "enableCertificateValidityConfirmationDescription": "Toto nastavení ovlivňuje pouze statistiky tohoto kurzu. Po skončení platnosti certifikátu dotčení uživatelé ztratí svůj postup v tomto kurzu.",
+        "enableCertificateValidityConfirmationConfirm": "Povolit platnost",
+        "confirmValidityChangesTitle": "Potvrďte změny platnosti certifikátu",
+        "noActiveCertificatesValidityDescription": "Nyní nejsou žádné aktivní certifikáty k aktualizaci. Budoucí certifikáty budou používat toto nastavení platnosti.",
+        "activeCertificatesStat": "Aktivní certifikáty",
+        "immediatelyExpiringStat": "Vyprší okamžitě",
+        "validityPeriod": "Období",
+        "validityFixedDate": "Konkrétní datum",
+        "days": "Dny",
+        "months": "Měsíce",
+        "years": "Roky",
+        "applyValidityTitle": "Použít platnost na stávající certifikáty?",
+        "applyValidityDescription": "Existuje {{activeCount}} aktivních certifikátů. {{expiringCount}} by vypršelo okamžitě, pokud by se toto nastavení použilo na stávající certifikáty.",
+        "resetCertificates": "Ruční reset certifikátu",
+        "resetCertificatesDescription": "Archivovat vybrané certifikáty a resetovat průběh kurzu.",
+        "resetCertificatesDialogDescription": "Tato akce archivuje aktivní certifikáty, resetuje průběh kurzu a může upozornit dotčené uživatele. Týká se pouze tohoto kurzu.",
+        "sendResetEmail": "Odeslat e-mail dotčeným uživatelům",
+        "activeCertificateCount": "{{count}} aktivních",
+        "noActiveCertificate": "Žádný aktivní certifikát",
+        "resetUsersSearchPlaceholder": "Hledat účastníky podle jména nebo e-mailu",
+        "resetUsersStudent": "Účastník",
+        "resetUsersEmail": "E-mail",
+        "resetUsersLoading": "Načítání účastníků...",
+        "noResetUsers": "Nebyli nalezeni účastníci s aktivními certifikáty",
+        "resetScope": {
+          "all": "Všichni uživatelé",
+          "groups": "Skupiny",
+          "users": "Uživatelé"
+        },
         "certificateSignatureRequirements": "PNG nebo SVG (doporučené průhledné pozadí)",
         "certificatePreviewTitle": "Náhled certifikátu",
         "certificatePreviewDescription": "Otevřete náhled a upravte jazyk a barvu.",
@@ -1731,7 +1814,11 @@
         "titleMinLength": "Název musí mít alespoň 2 znaky.",
         "titleMaxLength": "Název musí mít maximálně 250 znaků.",
         "descriptionMinLength": "Popis musí mít alespoň 2 znaky.",
-        "categoryRequired": "Kategorie je povinná"
+        "categoryRequired": "Kategorie je povinná",
+        "certificateManageDenied": "Nemůžete spravovat certifikáty pro tento kurz.",
+        "validityDateRequired": "Vyberte datum platnosti certifikátu.",
+        "groupIdsRequired": "Vyberte alespoň jednu skupinu.",
+        "userIdsRequired": "Vyberte alespoň jednoho uživatele."
       },
       "header": "Vytvořte nový kurz",
       "subHeader": "Zadejte podrobnosti pro vytvoření nového kurzu. Později budete mít více možností, jak si jej přizpůsobit.",
@@ -1871,6 +1958,8 @@
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
           "aiMentorLessonFileDeletedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně odstraněny",
           "lessonUpdatedSuccessfully": "Lekce byla úspěšně aktualizována",
+          "lessonDeletedSuccessfully": "Lekce byla úspěšně odstraněna",
+          "lessonDeleteError": "Lekci se nepodařilo odstranit",
           "contentLessonUpdatedSuccessfully": "Obsah lekce byl úspěšně aktualizován",
           "fileLessonUpdatedSuccessfully": "Položka souboru byla úspěšně aktualizována",
           "questionOptionsUpdatedSuccessfully": "Možnosti otázky byly úspěšně aktualizovány",
@@ -2518,7 +2607,8 @@
       "invalidFormatForMultiAnswer": "Neplatný formát pro otázky s více odpověďmi.",
       "trueOrFalseRequired": "Vyžaduje se pravdivá nebo nepravdivá odpověď.",
       "photoQuestionMustHaveAnswer": "Na tuto fotografickou otázku je vyžadována odpověď.",
-      "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!"
+      "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!",
+      "unansweredQuestionsWithNames": "Odpovězte na chybějící otázky: {{questionNames}}"
     }
   },
   "studentCourseView": {
@@ -2637,8 +2727,38 @@
     },
     "tabs": {
       "chapters": "Kapitoly",
+      "chat": "Diskuze",
       "moreFromAuthor": "Více od autora",
       "statistics": "Statistika"
+    },
+    "courseChat": {
+      "title": "Diskuze kurzu",
+      "newThreadPlaceholder": "Zahajte novou diskuzi...",
+      "startThread": "Zahájit vlákno",
+      "messagesTitle": "Zprávy",
+      "noThreadSelected": "Vyberte vlákno",
+      "emptyThreads": "Zatím zde nejsou žádné diskuze. Zahajte první.",
+      "emptyMessages": "Zatím zde nejsou žádné zprávy.",
+      "replyPlaceholder": "Napište odpověď...",
+      "reply": "Odpovědět",
+      "reactWith": "Reagovat {{reaction}}",
+      "deleteMessage": "Smazat zprávu",
+      "deleteMessageConfirmationTitle": "Smazat zprávu?",
+      "deleteMessageConfirmationDescription": "Zpráva bude z diskuze odstraněna. Odpovědi mohou ponechat zástupný záznam, aby konverzace zůstala čitelná.",
+      "deletedMessage": "Tato zpráva byla smazána.",
+      "repliesCount_one": "{{countLabel}} odpověď",
+      "repliesCount_few": "{{countLabel}} odpovědi",
+      "repliesCount_many": "{{countLabel}} odpovědí",
+      "repliesCount_other": "{{countLabel}} odpovědí",
+      "loadMoreReplies": "Načíst další odpovědi",
+      "send": "Odeslat",
+      "selectThread": "Vyberte vlákno pro čtení zpráv.",
+      "users": "Uživatelé",
+      "onlineCount": "{{online}}/{{total}} online",
+      "online": "Online",
+      "offline": "Offline",
+      "emptyUsers": "Zatím nejsou zapsáni žádní uživatelé.",
+      "mentionedToast": "Někdo vás zmínil v diskuzi kurzu."
     }
   },
   "studentChapterView": {
@@ -2677,7 +2797,8 @@
       "qaSettingUpdatedSuccessfully": "Nastavení QA bylo úspěšně aktualizováno",
       "ageLimitUpdatedSuccessfully": "Věkový limit byl úspěšně aktualizován",
       "newsSettingUpdatedSuccessfully": "Nastavení zpráv byla úspěšně aktualizována",
-      "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována"
+      "articlesSettingUpdatedSuccessfully": "Nastavení znalostní báze byla úspěšně aktualizována",
+      "learningPathsUpdatedSuccessfully": "Nastavení rozvojových cest byla úspěšně aktualizována"
     }
   },
   "certificateBackgroundUpload": {
@@ -2874,14 +2995,19 @@
       "subheader": "Zadejte podrobnosti pro nastavení nového oznámení.",
       "buttons": {
         "confirm": "Potvrdit",
-        "cancel": "Zrušit"
+        "cancel": "Zrušit",
+        "addLanguage": "Přidat jazyk",
+        "removeLanguage": "Odebrat jazyk",
+        "setDefaultLanguage": "Nastavit jako výchozí jazyk"
       },
       "fields": {
         "title": "Titul",
         "content": "Obsah",
         "group": "Skupina",
+        "language": "Jazyk",
         "everyone": "Každý"
       },
+      "addedLanguages": "Přidané jazyky",
       "placeholders": {
         "title": "Zadejte název",
         "content": "Sem napište své oznámení...",
@@ -2909,7 +3035,35 @@
       "markedAsRead": "Oznámení byla označena jako úspěšně přečtená",
       "markAsReadFailed": "Oznámení se nepodařilo označit jako přečtené",
       "createdSuccessfully": "Oznámení bylo úspěšně vytvořeno",
-      "createFailed": "Oznámení se nepodařilo vytvořit"
+      "createFailed": "Oznámení se nepodařilo vytvořit",
+      "deletedSuccessfully": "Oznámení bylo úspěšně odstraněno",
+      "deleteFailed": "Oznámení se nepodařilo odstranit",
+      "notFound": "Oznámení nebylo nalezeno"
+    }
+  },
+  "notifications": {
+    "title": "Notifikace",
+    "tabs": {
+      "all": "Vše",
+      "adminAnnouncements": "Oznámení adminů"
+    },
+    "actions": {
+      "refresh": "Obnovit",
+      "create": "Vytvořit oznámení",
+      "delete": "Odstranit oznámení",
+      "markRead": "Označit jako přečtené",
+      "markAllRead": "Označit vše jako přečtené",
+      "loadMore": "Načíst další",
+      "loadingMore": "Načítání...",
+      "goToNotificationCenter": "Přejít do centra notifikací"
+    },
+    "status": {
+      "unread": "Nepřečtené"
+    },
+    "empty": "Žádné notifikace",
+    "deleteDialog": {
+      "title": "Odstranit oznámení",
+      "description": "Toto oznámení bude odebráno všem."
     }
   },
   "platformLogo": {
@@ -3061,6 +3215,65 @@
         "h3": "Nadpis 3",
         "h4": "Nadpis 4"
       },
+      "bold": {
+        "tooltip": "Tučné: zvýrazní vybraný text tučně"
+      },
+      "italic": {
+        "tooltip": "Kurzíva: nastaví vybraný text kurzívou"
+      },
+      "strikethrough": {
+        "tooltip": "Přeškrtnutí: přeškrtne vybraný text"
+      },
+      "bulletList": {
+        "tooltip": "Seznam s odrážkami: spustí seznam s odrážkami"
+      },
+      "orderedList": {
+        "tooltip": "Číslovaný seznam: spustí číslovaný seznam"
+      },
+      "taskList": {
+        "tooltip": "Kontrolní seznam: přidá kontrolní seznam"
+      },
+      "blockquote": {
+        "tooltip": "Citace: formátuje text jako blokovou citaci"
+      },
+      "codeBlock": {
+        "tooltip": "Blok kódu: formátuje text jako kód"
+      },
+      "horizontalRule": {
+        "tooltip": "Vodorovná čára: vloží oddělovací čáru"
+      },
+      "table": {
+        "tooltip": "Tabulka: vložit nebo upravit tabulku",
+        "groups": {
+          "columns": "Sloupce",
+          "rows": "Řádky",
+          "cells": "Buňky",
+          "headers": "Záhlaví"
+        },
+        "actions": {
+          "insert": "Vložit tabulku",
+          "addColumnBefore": "Přidat sloupec před",
+          "addColumnAfter": "Přidat sloupec za",
+          "deleteColumn": "Odstranit sloupec",
+          "addRowBefore": "Přidat řádek před",
+          "addRowAfter": "Přidat řádek za",
+          "deleteRow": "Odstranit řádek",
+          "mergeCells": "Sloučit buňky",
+          "splitCell": "Rozdělit buňku",
+          "mergeOrSplit": "Sloučit nebo rozdělit",
+          "toggleHeaderRow": "Přepnout řádek záhlaví",
+          "toggleHeaderColumn": "Přepnout sloupec záhlaví",
+          "toggleHeaderCell": "Přepnout buňku záhlaví",
+          "fixTables": "Opravit strukturu tabulky",
+          "deleteTable": "Odstranit tabulku"
+        }
+      },
+      "undo": {
+        "tooltip": "Zpět: vrátí poslední změnu"
+      },
+      "redo": {
+        "tooltip": "Znovu: znovu provede poslední vrácenou změnu"
+      },
       "link": {
         "tooltip": "Odkaz: Z vybraného textu udělá hypertextový odkaz",
         "dialog": {
@@ -3075,7 +3288,10 @@
       },
       "upload": {
         "uploadFailed": "Nahrání souboru se nezdařilo",
-        "tooltip": "Upload: Umožňuje nahrát soubor"
+        "tooltip": "Nahrát: umožňuje nahrát soubor"
+      },
+      "assetLibrary": {
+        "tooltip": "Knihovna souborů: vloží dříve nahraný soubor"
       }
     }
   },
@@ -3128,6 +3344,42 @@
     },
     "loadingAiAsset": {
       "processing": "Zdroj se právě zpracovává"
+    },
+    "assetLibrary": {
+      "title": "Assets library",
+      "description": "Find, upload, insert, or delete files used in rich text content.",
+      "searchPlaceholder": "Search by filename or title...",
+      "upload": "Upload asset",
+      "insert": "Insert",
+      "delete": "Delete",
+      "loading": "Loading assets...",
+      "loadingUsages": "Loading usages...",
+      "disabledUntilSaved": "Save this content before inserting or deleting existing assets. Uploading a new asset is still available.",
+      "empty": {
+        "title": "No assets found",
+        "description": "Upload a file or adjust the search to find existing assets."
+      },
+      "types": {
+        "image": "Image",
+        "video": "Video",
+        "pdf": "PDF",
+        "presentation": "Presentation",
+        "document": "Document",
+        "other": "Other"
+      },
+      "entities": {
+        "lesson": "Lesson",
+        "articles": "Article",
+        "news": "News"
+      },
+      "deleteConfirmation": {
+        "title": "Delete {{name}}?",
+        "description": "This removes matching embeds and links from every listed content item and archives the asset.",
+        "usages": "Known usages",
+        "noUsages": "No usages were found."
+      },
+      "usageCount_one": "{{count}} usage",
+      "usageCount_other": "{{count}} usages"
     }
   },
   "pages": {
@@ -3145,6 +3397,7 @@
     "createNewPassword": "Vytvořit nové heslo",
     "createAnnouncement": "Vytvořit oznámení",
     "announcements": "Oznámení",
+    "notifications": "Notifikace",
     "users": "Uživatelé",
     "userDetails": "Podrobnosti o uživateli",
     "createNewUser": "Vytvořit nového uživatele",
@@ -3169,9 +3422,9 @@
     "createTenant": "Vytvořit organizaci",
     "tenants": "Organizace",
     "activityLogs": "Log aktivit",
-    "learningPaths": "Vzdělávací cesty",
-    "adminLearningPaths": "Vzdělávací cesty",
-    "adminLearningPathEditor": "Editor vzdělávací cesty"
+    "learningPaths": "Rozvojové cesty",
+    "adminLearningPaths": "Rozvojové cesty",
+    "adminLearningPathEditor": "Editor rozvojové cesty"
   },
   "masterCourse": {
     "error": {
@@ -3188,19 +3441,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
-      "exportLinkMissing": "Vazba exportu vzdelavaci cesty nebyla nalezena",
-      "noCourses": "Vzdelavaci cesta musi pred exportem obsahovat alespon jeden kurz",
-      "courseExportFailed": "Nepodarilo se exportovat jeden z kurzu vzdelavaci cesty",
+      "exportLinkMissing": "Vazba exportu rozvojove cesty nebyla nalezena",
+      "noCourses": "Rozvojova cesta musi pred exportem obsahovat alespon jeden kurz",
+      "courseExportFailed": "Nepodarilo se exportovat jeden z kurzu rozvojove cesty",
       "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
-      "jobNotFound": "Uloha exportu vzdelavaci cesty nebyla nalezena",
-      "invalidJobData": "Neplatna data ulohy exportu vzdelavaci cesty",
-      "invalidExportId": "Neplatne ID exportu vzdelavaci cesty",
-      "invalidExportLink": "Neplatna vazba exportu vzdelavaci cesty"
+      "jobNotFound": "Uloha exportu rozvojove cesty nebyla nalezena",
+      "invalidJobData": "Neplatna data ulohy exportu rozvojove cesty",
+      "invalidExportId": "Neplatne ID exportu rozvojove cesty",
+      "invalidExportLink": "Neplatna vazba exportu rozvojove cesty"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Certifikaty vzdelavacich cest jsou vypnute"
+      "disabled": "Certifikaty rozvojovych cest jsou vypnute"
     }
   },
   "activityLogsView": {
@@ -3248,6 +3501,8 @@
       "complete_lesson": "Dokončeno",
       "complete_course": "Dokončeno",
       "complete_chapter": "Dokončeno",
+      "expire_certificate": "Certifikát vypršel",
+      "reset_certificate": "Certifikát resetován",
       "view_announcement": "Zobrazeno"
     },
     "entity": {
@@ -3275,11 +3530,11 @@
     }
   },
   "learningPathsView": {
-    "title": "Vzdělávací cesty",
-    "description": "Procházejte přiřazené vzdělávací cesty a pokračujte v uspořádaných sekvencích kurzů.",
-    "searchPlaceholder": "Hledat vzdělávací cesty",
-    "summary": "{{count}} vzdělávacích cest je dostupných.",
-    "detailsTitle": "Vzdělávací cesta",
+    "title": "Rozvojové cesty",
+    "description": "Procházejte přiřazené rozvojové cesty a pokračujte v uspořádaných sekvencích kurzů.",
+    "searchPlaceholder": "Hledat rozvojové cesty",
+    "summary": "{{count}} rozvojových cest je dostupných.",
+    "detailsTitle": "Rozvojová cesta",
     "detailsDescription": "Zkontrolujte pořadí kurzů, pokrok, uzamčení a stav certifikátu.",
     "detailsSummary": "Tato cesta obsahuje {{count}} kurzů. Aktuální pokrok: {{progress}}.",
     "emptyDescription": "Popis zatím nebyl přidán.",
@@ -3298,7 +3553,7 @@
       "certificate": "Certifikát"
     },
     "card": {
-      "openPath": "Otevřít vzdělávací cestu"
+      "openPath": "Otevřít rozvojovou cestu"
     },
     "empty": {
       "title": "Nebyly nalezeny žádné cesty",
@@ -3311,7 +3566,7 @@
     "certificate": {
       "available": "Certifikát dostupný",
       "ready": "Certifikát připraven",
-      "pathCompleted": "Vzdělávací cesta dokončena. Váš certifikát je připraven."
+      "pathCompleted": "Rozvojová cesta dokončena. Váš certifikát je připraven."
     },
     "courseState": {
       "completed": "Dokončeno",
@@ -3326,12 +3581,12 @@
       "courses": "Kurzy v této cestě",
       "courseTitle": "Kurz {{number}}",
       "completedAt": "Dokončeno {{date}}",
-      "emptyCourses": "Tato vzdělávací cesta zatím neobsahuje žádné kurzy."
+      "emptyCourses": "Tato rozvojová cesta zatím neobsahuje žádné kurzy."
     },
     "enrollment": {
       "manage": "Zapsat",
       "title": "Zapsat účastníky",
-      "description": "Spravujte zápisy studentů a skupin do této vzdělávací cesty.",
+      "description": "Spravujte zápisy studentů a skupin do této rozvojové cesty.",
       "students": "Studenti",
       "selectStudents": "Vyberte studenty",
       "groups": "Skupiny",
@@ -3351,9 +3606,9 @@
       "groupsEnrolled": "Skupiny zapsány",
       "studentsUnenrolled": "Studenti odebráni ze zápisu",
       "groupsUnenrolled": "Skupiny odebrány ze zápisu",
-      "enrolledSuccessfully": "Zapsáno do vzdělávací cesty",
-      "enrollGroupsDescription": "Vyberte skupiny, které chcete zapsat do této vzdělávací cesty.",
-      "unenrollGroupsDescription": "Vyberte skupiny, které chcete odebrat ze zápisu do této vzdělávací cesty.",
+      "enrolledSuccessfully": "Zapsáno do rozvojové cesty",
+      "enrollGroupsDescription": "Vyberte skupiny, které chcete zapsat do této rozvojové cesty.",
+      "unenrollGroupsDescription": "Vyberte skupiny, které chcete odebrat ze zápisu do této rozvojové cesty.",
       "table": {
         "selectAll": "Vybrat všechny účastníky",
         "select": "Vybrat účastníka",
@@ -3369,16 +3624,16 @@
       },
       "confirmation": {
         "title": "Potvrdit zápis",
-        "description": "Opravdu chcete zapsat vybrané studenty do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+        "description": "Opravdu chcete zapsat vybrané studenty do této rozvojové cesty? Tuto akci nelze vrátit zpět."
       },
       "unenrollConfirmation": {
         "title": "Potvrdit odebrání ze zápisu",
-        "description": "Opravdu chcete odebrat vybrané studenty ze zápisu do této vzdělávací cesty? Tuto akci nelze vrátit zpět."
+        "description": "Opravdu chcete odebrat vybrané studenty ze zápisu do této rozvojové cesty? Tuto akci nelze vrátit zpět."
       },
       "noGroups": "Nejsou dostupné žádné skupiny"
     },
     "breadcrumbs": {
-      "learningPaths": "Vzdělávací cesty",
+      "learningPaths": "Rozvojové cesty",
       "details": "Detail"
     },
     "buttons": {
@@ -3386,26 +3641,26 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Vzdělávací cesty",
+    "title": "Rozvojové cesty",
     "description": "Spravujte metadata, nastavení sekvence, kurzy, zápisy, exporty a certifikáty.",
-    "summary": "{{count}} vzdělávacích cest je dostupných v tomto prostoru.",
+    "summary": "{{count}} rozvojových cest je dostupných v tomto prostoru.",
     "breadcrumbs": {
-      "learningPaths": "Vzdělávací cesty",
+      "learningPaths": "Rozvojové cesty",
       "create": "Vytvořit",
       "edit": "Upravit"
     },
     "buttons": {
-      "create": "Vytvořit vzdělávací cestu",
+      "create": "Vytvořit rozvojovou cestu",
       "edit": "Upravit",
       "save": "Uložit změny",
       "removeImage": "Odebrat obrázek"
     },
     "editor": {
-      "createTitle": "Vytvořit vzdělávací cestu",
-      "editTitle": "Upravit vzdělávací cestu",
+      "createTitle": "Vytvořit rozvojovou cestu",
+      "editTitle": "Upravit rozvojovou cestu",
       "description": "Nastavte podrobnosti cesty, sekvenci, kurzy a stav publikování.",
-      "createSummary": "Začněte podrobnostmi vzdělávací cesty.",
-      "editSummary": "Tato vzdělávací cesta má aktuálně {{coursesCount}} kurzů.",
+      "createSummary": "Začněte podrobnostmi rozvojové cesty.",
+      "editSummary": "Tato rozvojová cesta má aktuálně {{coursesCount}} kurzů.",
       "details": "Podrobnosti",
       "courses": "Kurzy",
       "image": "Obrázek",
@@ -3418,19 +3673,19 @@
       "language": "Jazyk",
       "createdAt": "Vytvořeno",
       "actions": "Akce",
-      "untitled": "Vzdělávací cesta bez názvu",
+      "untitled": "Rozvojová cesta bez názvu",
       "emptyDescription": "Bez popisu",
       "sequential": "Sekvenční",
       "flexible": "Volné pořadí",
       "certificate": "Certifikát",
-      "empty": "Zatím nebyly vytvořeny žádné vzdělávací cesty."
+      "empty": "Zatím nebyly vytvořeny žádné rozvojové cesty."
     },
     "form": {
       "language": "Jazyk",
       "status": "Stav",
       "statusDescription": "Určuje, zda je cesta viditelná, jako koncept nebo soukromá.",
       "title": "Název",
-      "titlePlaceholder": "Pojmenujte vzdělávací cestu",
+      "titlePlaceholder": "Pojmenujte rozvojovou cestu",
       "description": "Popis",
       "descriptionPlaceholder": "Popište, co studenti v této cestě dokončí",
       "imageHint": "PNG, JPG nebo JPEG (max. 20 MB, doporučeno 1200x1200 nebo vyšší)",
@@ -3439,7 +3694,7 @@
       "includesCertificate": "Certifikát",
       "includesCertificateDescription": "Studenti mohou po dokončení cesty získat certifikát.",
       "certificateSignature": "Podpis na certifikátu",
-      "certificateSignatureDescription": "Nahrajte podpis zobrazený na certifikátech pro tuto vzdělávací cestu.",
+      "certificateSignatureDescription": "Nahrajte podpis zobrazený na certifikátech pro tuto rozvojovou cestu.",
       "certificateFontColor": "Barva písma certifikátu",
       "certificateFontColorDescription": "Pomocí výběru barvy v náhledu změňte barvu textu a linek certifikátu.",
       "certificatePreview": "Náhled certifikátu",
@@ -3470,32 +3725,32 @@
       "delete": "Smazat kurz",
       "order": "Pořadí",
       "course": "Kurz",
-      "empty": "Do této vzdělávací cesty zatím nebyly přidány žádné kurzy.",
-      "saveFirst": "Před přidáním kurzů vzdělávací cestu uložte.",
+      "empty": "Do této rozvojové cesty zatím nebyly přidány žádné kurzy.",
+      "saveFirst": "Před přidáním kurzů rozvojovou cestu uložte.",
       "unknownCourse": "Podrobnosti kurzu nejsou dostupné"
     },
     "sharedLearningPath": {
       "badgeExported": "Sdíleno",
       "exportButton": "Sdílet",
-      "exportSuccess": "Vzdělávací cesta byla sdílena",
-      "exportsDescription": "Sdílejte tuto vzdělávací cestu s vybranými organizacemi.",
+      "exportSuccess": "Rozvojová cesta byla sdílena",
+      "exportsDescription": "Sdílejte tuto rozvojovou cestu s vybranými organizacemi.",
       "exportsTitle": "Sdílení",
       "exportingButton": "Sdílení...",
       "selectTenants": "Vyberte organizace",
       "selectedCount": "Vybráno:"
     },
     "deleteModal": {
-      "title": "Smazat vzdělávací cestu",
-      "description": "Tím se smaže vzdělávací cesta a odebere přístup ke kurzům udělený touto cestou."
+      "title": "Smazat rozvojovou cestu",
+      "description": "Tím se smaže rozvojová cesta a odebere přístup ke kurzům udělený touto cestou."
     },
     "toast": {
-      "created": "Vzdělávací cesta byla vytvořena",
-      "updated": "Vzdělávací cesta byla aktualizována",
-      "deleted": "Vzdělávací cesta byla smazána",
-      "languageCreated": "Jazyk vzdělávací cesty byl vytvořen",
-      "coursesAdded": "Kurzy byly přidány do vzdělávací cesty",
-      "courseRemoved": "Kurz byl odebrán ze vzdělávací cesty",
-      "coursesReordered": "Pořadí kurzů ve vzdělávací cestě bylo aktualizováno"
+      "created": "Rozvojová cesta byla vytvořena",
+      "updated": "Rozvojová cesta byla aktualizována",
+      "deleted": "Rozvojová cesta byla smazána",
+      "languageCreated": "Jazyk rozvojové cesty byl vytvořen",
+      "coursesAdded": "Kurzy byly přidány do rozvojové cesty",
+      "courseRemoved": "Kurz byl odebrán z rozvojové cesty",
+      "coursesReordered": "Pořadí kurzů v rozvojové cestě bylo aktualizováno"
     }
   },
   "lessonPreview": {
@@ -3600,6 +3855,16 @@
     },
     "tooltip": {
       "disabled": "Chcete-li toto pole přepnout, nejprve povolte sekci znalostní báze."
+    }
+  },
+  "learningPathsPreferences": {
+    "subHeader": "Konfigurace nastavení rozvojových cest",
+    "header": "Nastavení rozvojových cest",
+    "settings": {
+      "learningPathsEnabled": {
+        "label": "Povolit rozvojové cesty",
+        "description": "Povolte rozvojové cesty. Po vypnutí jsou skryté a zablokované pro všechny uživatele."
+      }
     }
   },
   "qaView": {

@@ -12,10 +12,13 @@ import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 export const meta: MetaFunction = ({ matches }) =>
   setPageTitle(matches, "pages.adminLearningPaths");
 
-export const clientLoader = async (_: ClientLoaderFunctionArgs) => {
+export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
+  const url = new URL(request.url);
+  const searchQuery = url.searchParams.get("searchQuery") ?? "";
+
   const { language } = useLanguageStore.getState();
 
-  return queryClient.fetchQuery(learningPathsQueryOptions({ language }));
+  return queryClient.fetchQuery(learningPathsQueryOptions({ language, searchQuery }));
 };
 
 export default function AdminLearningPathsPage() {

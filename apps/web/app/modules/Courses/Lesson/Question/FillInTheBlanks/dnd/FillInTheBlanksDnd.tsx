@@ -16,9 +16,11 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { type FC, useEffect, useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import Viewer from "~/components/RichText/Viever";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
+import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 
 import { DndBlank } from "./DndBlank";
 import { DraggableWord } from "./DraggableWord";
@@ -34,28 +36,99 @@ type FillInTheBlanksDndProps = {
   isCompleted?: boolean;
 };
 
-const getAnswers = (options: QuizQuestionOption[] | undefined) => {
+const WORD_BANK_BLANK_ID = "blank_preset";
+const DND_BLANK_ID_PREFIX = "blank:";
+
+const createDndBlankId = (answerId: string) => `${DND_BLANK_ID_PREFIX}${answerId}`;
+
+const getAnswerIdFromDndBlankId = (blankId: string) =>
+  blankId.startsWith(DND_BLANK_ID_PREFIX) ? blankId.slice(DND_BLANK_ID_PREFIX.length) : blankId;
+
+export const getAnswers = (
+  options: QuizQuestionOption[] | undefined,
+  blankAnswerIds: string[] = [],
+  isCompleted?: boolean,
+) => {
   if (!options?.length) return [];
 
-  const items: DndWord[] = options.map(
-    ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }) => ({
-      id,
-      index: displayOrder ?? null,
-      value: optionText,
-      blankId: typeof displayOrder === "number" ? `${displayOrder}` : "blank_preset",
-      isCorrect: isCorrect,
-      isStudentAnswer,
-      studentAnswerText: studentAnswer,
-    }),
+  return options.map(
+    ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }) => {
+      const blankId = match({
+        displayOrder,
+        hasAnswerMarker: Boolean(id && blankAnswerIds.includes(id)),
+        hasAnswerMarkers: blankAnswerIds.length > 0,
+        isCompleted,
+      })
+        .with({ isCompleted: true, hasAnswerMarker: true }, () => createDndBlankId(id))
+        .with({ isCompleted: true, hasAnswerMarkers: true }, () => WORD_BANK_BLANK_ID)
+        .when(
+          ({ displayOrder, isCompleted }) =>
+            isCompleted && typeof displayOrder === "number" && displayOrder > 0,
+          ({ displayOrder }) => `${displayOrder}`,
+        )
+        .otherwise(() => WORD_BANK_BLANK_ID);
+
+      return {
+        id,
+        index: displayOrder ?? null,
+        value: optionText,
+        blankId,
+        isCorrect: isCorrect,
+        isStudentAnswer,
+        studentAnswerText: studentAnswer,
+      };
+    },
+  );
+};
+
+export const getCompletedAnswers = (
+  options: QuizQuestionOption[] | undefined,
+  blankAnswerIds: string[] = [],
+  maxAnswersAmount = 0,
+) => {
+  if (!options?.length) return [];
+
+  const blankOptions =
+    blankAnswerIds.length > 0
+      ? blankAnswerIds
+          .map((answerId) => options.find((option) => option.id === answerId))
+          .filter((option): option is QuizQuestionOption => Boolean(option))
+      : options
+          .filter((option) => Boolean(option.isCorrect))
+          .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+          .slice(0, maxAnswersAmount);
+
+  const blankOptionIds = new Set(blankOptions.map(({ id }) => id));
+
+  const blankWords = blankOptions.map(
+    ({ id, optionText, displayOrder, isStudentAnswer, isCorrect, studentAnswer }, index) => {
+      const blankId = id ? createDndBlankId(id) : `${index + 1}`;
+
+      return {
+        id: `${id ?? index + 1}:submitted`,
+        index: displayOrder ?? index + 1,
+        value: studentAnswer ?? optionText,
+        blankId,
+        isCorrect,
+        isStudentAnswer,
+        studentAnswerText: null,
+      };
+    },
   );
 
-  return items.reduce<DndWord[]>((acc, item) => {
-    if (!acc.some(({ value }) => value === item.value)) {
-      acc.push(item);
-    }
+  const wordBankWords = options
+    .filter((option) => !blankOptionIds.has(option.id))
+    .map(({ id, optionText, displayOrder, isStudentAnswer, isCorrect }) => ({
+      id: id ?? `word-bank-${displayOrder ?? optionText}`,
+      index: displayOrder ?? null,
+      value: optionText,
+      blankId: WORD_BANK_BLANK_ID,
+      isCorrect,
+      isStudentAnswer,
+      studentAnswerText: null,
+    }));
 
-    return acc;
-  }, []);
+  return [...blankWords, ...wordBankWords];
 };
 
 const getLongestAnswerLength = (options: QuizQuestionOption[] | undefined) => {
@@ -72,8 +145,14 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
 
   const { isQuizFeedbackRedacted } = useQuizContext();
   const { setValue } = useFormContext<QuizForm>();
+  const blankAnswerIds = useMemo(
+    () => getBlankAnswerIds(question.description),
+    [question.description],
+  );
 
-  const [words, setWords] = useState<DndWord[]>(getAnswers(question.options));
+  const [words, setWords] = useState<DndWord[]>(
+    getAnswers(question.options, blankAnswerIds, isCompleted),
+  );
   const [currentlyDraggedWord, setCurrentlyDraggedWord] = useState<DndWord | null>(null);
   const [previewBlankId, setPreviewBlankId] = useState<string | null>(null);
   const wordsBeforeDragRef = useRef<DndWord[] | null>(null);
@@ -103,15 +182,26 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   );
 
   useEffect(() => {
-    setWords(getAnswers(question.options));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isCompleted]);
+    setWords(getAnswers(question.options, blankAnswerIds, isCompleted));
+  }, [blankAnswerIds, isCompleted, question.options]);
 
   if (!question.description) return null;
 
-  const maxAnswersAmount = question.description?.match(/\[word]/g)?.length ?? 0;
+  const maxAnswersAmount = getBlankCount(question.description);
+  const getBlankIndex = (blankId: string) => {
+    const answerId = getAnswerIdFromDndBlankId(blankId);
+    const answerIdIndex = blankAnswerIds.indexOf(answerId);
+
+    if (answerIdIndex !== -1) return answerIdIndex + 1;
+
+    return parseInt(answerId.match(/\d+$/)?.[0] ?? "0", 10);
+  };
+
   const isValidBlankId = (id: string) => {
-    if (id === "blank_preset") return true;
+    if (id === WORD_BANK_BLANK_ID) return true;
+    if (id.startsWith(DND_BLANK_ID_PREFIX)) {
+      return blankAnswerIds.includes(getAnswerIdFromDndBlankId(id));
+    }
     if (!/^\d+$/.test(id)) return false;
 
     const value = Number(id);
@@ -121,8 +211,9 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   const resolveOverBlankId = (over: DragEndEvent["over"] | DragOverEvent["over"]) => {
     if (!over) return null;
 
+    const droppableBlankId = over.data.current?.blankId;
     const sortableContainerId = over?.data?.current?.sortable?.containerId;
-    const candidateId = sortableContainerId ?? over.id;
+    const candidateId = droppableBlankId ?? sortableContainerId ?? over.id;
     const id = String(candidateId);
 
     return isValidBlankId(id) ? id : null;
@@ -161,7 +252,7 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     const occupiedTargetWord = previewWords.find(
       (word) => word.blankId === previewBlankId && word.id !== currentlyDraggedWord.id,
     );
-    if (occupiedTargetWord && previewBlankId !== "blank_preset") {
+    if (occupiedTargetWord && previewBlankId !== WORD_BANK_BLANK_ID) {
       occupiedTargetWord.blankId = previewActiveWord.blankId;
     }
 
@@ -238,14 +329,14 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         const occupiedTargetWord = updatedWords.find(
           ({ blankId, id }) => blankId === overBlankId && id !== activeId,
         );
-        if (occupiedTargetWord && overBlankId !== "blank_preset") {
+        if (occupiedTargetWord && overBlankId !== WORD_BANK_BLANK_ID) {
           occupiedTargetWord.blankId = activeBlankId;
         }
 
         updatedActiveWord.blankId = overBlankId;
       }
 
-      if (activeBlankId === overBlankId && overBlankId === "blank_preset") {
+      if (activeBlankId === overBlankId && overBlankId === WORD_BANK_BLANK_ID) {
         const overId = String(over.id);
         const activeWords = updatedWords.filter(({ blankId }) => blankId === activeBlankId);
         const overWord = activeWords.find(({ id }) => id === overId);
@@ -265,12 +356,11 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
       }
 
       const filteredWords = updatedWords
-        .filter(({ blankId }) => blankId !== "blank_preset")
+        .filter(({ blankId }) => blankId !== WORD_BANK_BLANK_ID)
         .map((item) => {
-          const newIndex = parseInt(item.blankId.match(/\d+$/)?.[0] ?? "0", 10);
           return {
             ...item,
-            index: newIndex,
+            index: getBlankIndex(item.blankId),
           };
         });
 
@@ -281,9 +371,19 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         }
       }
 
+      const blankIds =
+        blankAnswerIds.length > 0
+          ? blankAnswerIds
+          : Array.from({ length: maxAnswersAmount }, (_item, index) => `${index + 1}`);
+
+      for (const blankId of blankIds) {
+        setValue(`fillInTheBlanksDnd.${question.id}.${blankId}`, null);
+      }
+
       for (const word of updatedWords) {
-        if (word.blankId !== "blank_preset") {
-          setValue(`fillInTheBlanksDnd.${question.id}.${word.blankId}`, word.value);
+        if (word.blankId !== WORD_BANK_BLANK_ID) {
+          const answerId = getAnswerIdFromDndBlankId(word.blankId);
+          setValue(`fillInTheBlanksDnd.${question.id}.${answerId}`, word.value);
         }
       }
 
@@ -293,17 +393,14 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
     resetDragState();
   }
 
-  const renderedWords = buildPreviewWords(words);
-  const renderedWordBankWords = renderedWords.filter(({ studentAnswerText, blankId, value }) => {
-    const isBlankPreset = blankId === "blank_preset";
-    const isSubmitted = isCompleted;
-    const isValuesEqualStudentAnswer = studentAnswerText === value;
+  const wordsForRender = isCompleted
+    ? getCompletedAnswers(question.options, blankAnswerIds, maxAnswersAmount)
+    : words;
+  const renderedWords = buildPreviewWords(wordsForRender);
 
-    if (isBlankPreset && !isSubmitted) return true;
-    if (isValuesEqualStudentAnswer) return false;
-
-    if (isSubmitted) return true;
-  });
+  const renderedWordBankWords = renderedWords.filter(
+    ({ blankId }) => blankId === WORD_BANK_BLANK_ID,
+  );
 
   return (
     <div className="rounded-lg border bg-card p-8 text-card-foreground shadow-sm select-none touch-none">
@@ -324,8 +421,8 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         </DragOverlay>
         <SentenceBuilder
           content={question.description}
-          replacement={(index) => {
-            const blankId = `${index + 1}`;
+          replacement={(index, answerId) => {
+            const blankId = answerId ? createDndBlankId(answerId) : `${index + 1}`;
             const wordsInBlank = renderedWords.filter((word) => word.blankId === blankId);
 
             return (

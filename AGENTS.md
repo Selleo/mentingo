@@ -4,6 +4,19 @@
 
 Instructions for AI coding agents working in this Mentingo monorepo. Keep changes repo-native, scoped, and consistent with the existing API/web contracts.
 
+## Instruction Lookup
+
+Start with this file, then read the more specific `AGENTS.md` files for the area you are changing. Follow the most specific applicable file when instructions overlap.
+
+- Backend/API changes under `apps/api`, database schema/migrations, Nest modules, permissions, tenants, jobs, outbox, realtime, file upload, or Swagger contracts: read `apps/api/AGENTS.md`.
+- Frontend/web changes under `apps/web`, Remix routes, UI modules, generated API usage, TanStack Query hooks, route access, i18n, uploads, sockets, Vitest, or Playwright: read `apps/web/AGENTS.md`.
+- Cross-app API contract changes: read both `apps/api/AGENTS.md` and `apps/web/AGENTS.md`; update API schemas/controllers first, regenerate generated artifacts through existing scripts, then update web callers.
+- Shared package changes under `packages/shared`, especially permissions, languages, file constants, tenant/session/access helpers, or exported types: read both app-level files and verify every consuming side keeps its contract.
+- Prompt/template changes under `packages/prompts`: keep prompt source files authoritative and regenerate generated prompt exports through the existing script; do not hand-edit generated exports.
+- Email template changes under `packages/email-templates`: check API usage in `apps/api` before changing exported props or template names.
+- Infrastructure, Docker, Turbo, workspace, or root command changes: check root scripts/configs first, then read the app-level file for any app whose command/runtime behavior is affected.
+- Documentation-only changes: read the app-level file only when the docs describe app-specific behavior, commands, contracts, security, tenant behavior, language behavior, or tests.
+
 ## Tech Stack
 
 - Package manager: `pnpm` with Turbo (`package.json`, `turbo.json`).
@@ -47,6 +60,7 @@ Instructions for AI coding agents working in this Mentingo monorepo. Keep change
 - Keep tenant, permission, and language behavior explicit in both API and web changes.
 - Do not commit secrets from `.env` files or log tokens/passwords/API keys.
 - Keep edits scoped. Do not reformat unrelated files.
+- Do not use nested ternaries; prefer `match` from `ts-pattern` for multi-branch expressions.
 
 ## Shared Conventions
 

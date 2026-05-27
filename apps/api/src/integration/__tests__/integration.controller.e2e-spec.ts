@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
@@ -180,6 +180,49 @@ describe("IntegrationController (e2e)", () => {
         ]),
       );
       expect(response.body.pagination.totalItems).toBeGreaterThanOrEqual(1);
+    });
+
+    it("returns localized groups for valid key", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+      const group = await groupFactory.create({ name: "Developers" });
+
+      await request(app.getHttpServer())
+        .post(`/api/group/${group.id}/language`)
+        .set("Cookie", cookies)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .patch(`/api/group/${group.id}`)
+        .set("Cookie", cookies)
+        .send({ name: "Programiści", language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+      const apiKey = rotateResponse.body.data.key as string;
+
+      const response = await request(app.getHttpServer())
+        .get("/api/integration/groups")
+        .set("X-API-Key", apiKey)
+        .set("X-Tenant-Id", admin.tenantId)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            id: group.id,
+            name: "Programiści",
+          }),
+        ]),
+      );
     });
 
     it("returns 401 when X-Tenant-Id header is missing for non-tenant-list endpoint", async () => {
@@ -386,7 +429,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 
@@ -403,6 +448,7 @@ describe("IntegrationController (e2e)", () => {
           quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
           certificateSignature: null,
           certificateFontColor: null,
+          certificateValidity: null,
         },
         tenantId: admin.tenantId,
       });
@@ -799,7 +845,9 @@ describe("IntegrationController (e2e)", () => {
 
       await db.insert(categories).values({
         id: categoryId,
-        title: categoryTitle,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, categoryTitle),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN],
         tenantId: admin.tenantId,
       });
 
@@ -816,6 +864,7 @@ describe("IntegrationController (e2e)", () => {
           quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
           certificateSignature: null,
           certificateFontColor: null,
+          certificateValidity: null,
         },
         tenantId: admin.tenantId,
       });

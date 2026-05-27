@@ -5,11 +5,11 @@ import { match } from "ts-pattern";
 import {
   DEFAULT_ADMIN_SETTINGS,
   DEFAULT_STUDENT_SETTINGS,
-  DEFAULT_GLOBAL_SETTINGS,
 } from "src/settings/constants/settings.constants";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { settings } from "../../src/storage/schema";
+import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../helpers/e2e-settings";
 
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -22,7 +22,7 @@ export const createSettingsFactory = (
   isAdmin: boolean = false,
 ) => {
   const defaultSettings = match({ isAdmin, userId })
-    .with({ isAdmin: false, userId: null }, () => DEFAULT_GLOBAL_SETTINGS)
+    .with({ isAdmin: false, userId: null }, () => DEFAULT_E2E_GLOBAL_SETTINGS)
     .with({ isAdmin: true }, () => DEFAULT_ADMIN_SETTINGS)
     .with({ isAdmin: false }, () => DEFAULT_STUDENT_SETTINGS)
     .exhaustive();

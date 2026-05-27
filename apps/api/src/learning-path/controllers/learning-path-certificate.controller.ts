@@ -12,6 +12,7 @@ import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
+import { LearningPathsEnabledGuard } from "../guards/learning-paths-enabled.guard";
 import {
   learningPathCertificateCreateShareLinkSchema,
   learningPathCertificateDownloadSchema,
@@ -25,7 +26,7 @@ import {
 import { LearningPathCertificateService } from "../services/learning-path-certificate.service";
 
 @Controller("learning-path/certificates")
-@UseGuards(PermissionsGuard)
+@UseGuards(PermissionsGuard, LearningPathsEnabledGuard)
 export class LearningPathCertificateController {
   constructor(private readonly learningPathCertificateService: LearningPathCertificateService) {}
 

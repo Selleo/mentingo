@@ -1,4 +1,3 @@
-import { format } from "date-fns";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -11,6 +10,7 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { CERTIFICATE_KIND } from "~/modules/Profile/Certificates/certificateKind";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 type LearningPathCertificateProps = {
   learningPathId: string;
@@ -48,7 +48,7 @@ export function LearningPathCertificate({
     const studentName = certificate?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
     const pathName = certificate?.courseTitle || title;
     const completionDate = certificate ? certificate.completionDate : null;
-    const formattedDate = completionDate ? format(new Date(completionDate), "dd.MM.yyyy") : "";
+    const formattedDate = formatCertificateDate(completionDate);
 
     return { studentName, pathName, formattedDate };
   }, [certificate, currentUser, title]);

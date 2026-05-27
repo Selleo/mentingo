@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards, Post, Body, Res, Req } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards, Post, Body, Res, Req, Param } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -15,17 +15,32 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import {
   allCertificatesSchema,
+  certificateResetOptionsResponseSchema,
+  certificateResetUsersSchema,
+  certificateValidityImpactResponseSchema,
+  certificateValidityImpactSchema,
   certificateShareLinkResponseSchema,
   createCertificateShareLinkSchema,
   downloadCertificateSchema,
+  resetCourseCertificatesResponseSchema,
+  resetCourseCertificatesSchema,
   singleCertificateSchema,
 } from "./certificates.schema";
 import { CertificatesService } from "./certificates.service";
-import { CreateCertificateShareLinkBody, DownloadCertificateBody } from "./certificates.types";
+import {
+  CertificateValidityImpactBody,
+  CreateCertificateShareLinkBody,
+  DownloadCertificateBody,
+  ResetCourseCertificatesBody,
+} from "./certificates.types";
 
 import type {
   AllCertificatesResponse,
+  CertificateResetOptionsResponse,
+  CertificateResetUsersResponse,
+  CertificateValidityImpactResponse,
   CertificateShareLinkResponse,
+  ResetCourseCertificatesResponse,
   SingleCertificateResponse,
 } from "./certificates.types";
 
@@ -136,6 +151,90 @@ export class CertificatesController {
       body.certificateId,
       body.language,
     );
+  }
+
+  @Post("course/:courseId/validity-impact")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: certificateValidityImpactSchema },
+    ],
+    response: certificateValidityImpactResponseSchema,
+  })
+  async getCertificateValidityImpact(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: CertificateValidityImpactBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<CertificateValidityImpactResponse> {
+    return this.certificatesService.getCertificateValidityImpact(
+      courseId,
+      body.certificateValidity,
+      currentUser,
+    );
+  }
+
+  @Get("course/:courseId/reset-options")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+    response: certificateResetOptionsResponseSchema,
+  })
+  async getCertificateResetOptions(
+    @Param("courseId") courseId: UUIDType,
+    @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<CertificateResetOptionsResponse> {
+    return this.certificatesService.getCertificateResetOptions(courseId, language, currentUser);
+  }
+
+  @Get("course/:courseId/reset-users")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "language", schema: Type.Optional(supportedLanguagesSchema) },
+    ],
+    response: paginatedResponse(certificateResetUsersSchema),
+  })
+  async getCertificateResetUsers(
+    @Param("courseId") courseId: UUIDType,
+    @Query("page") page: number | undefined,
+    @Query("perPage") perPage: number | undefined,
+    @Query("search") search: string | undefined,
+    @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<PaginatedResponse<CertificateResetUsersResponse>> {
+    const data = await this.certificatesService.getCertificateResetUsers(
+      courseId,
+      { language, page, perPage, search },
+      currentUser,
+    );
+
+    return new PaginatedResponse(data);
+  }
+
+  @Post("course/:courseId/reset")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "courseId", schema: UUIDSchema },
+      { type: "body", schema: resetCourseCertificatesSchema },
+    ],
+    response: resetCourseCertificatesResponseSchema,
+  })
+  async resetCourseCertificates(
+    @Param("courseId") courseId: UUIDType,
+    @Body() body: ResetCourseCertificatesBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<ResetCourseCertificatesResponse> {
+    return this.certificatesService.resetCourseCertificates(courseId, body, currentUser);
   }
 
   @Public()
