@@ -6,6 +6,7 @@ import { ANNOUNCEMENT_EMAIL_TEMPLATES } from "@repo/shared";
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent } from "src/events";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 
@@ -37,61 +38,54 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
       announcement.id,
     );
 
-    for (let index = 0; index < recipients.length; index += EMAIL_BATCH_SIZE) {
-      const batch = recipients.slice(index, index + EMAIL_BATCH_SIZE);
-      const results = await Promise.allSettled(
-        batch.map(async (recipient) => {
-          const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-            announcement.tenantId,
-            recipient.id,
-          );
-          const title = this.getLocalizedValue(
-            announcement.title,
-            defaultEmailSettings.language,
-            announcement.baseLanguage,
-          );
-          const content = this.getLocalizedValue(
-            announcement.content,
-            defaultEmailSettings.language,
-            announcement.baseLanguage,
-          );
-          const tenantOrigin = await resolveTenantOrigin(this.dbAdmin, announcement.tenantId);
-          const { text, html } = new BaseEmailTemplate({
-            heading: title,
-            paragraphs: [content],
-            buttonText: this.getButtonText(
-              announcement.emailTemplate,
-              defaultEmailSettings.language,
-            ),
-            buttonLink: this.getButtonLink(
-              tenantOrigin,
-              announcement.emailTemplate,
-              announcement.sourceId,
-            ),
-            ...defaultEmailSettings,
-          });
+    await processInBatches(
+      recipients,
+      async (recipient) => {
+        const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
+          announcement.tenantId,
+          recipient.id,
+        );
+        const title = this.getLocalizedValue(
+          announcement.title,
+          defaultEmailSettings.language,
+          announcement.baseLanguage,
+        );
+        const content = this.getLocalizedValue(
+          announcement.content,
+          defaultEmailSettings.language,
+          announcement.baseLanguage,
+        );
+        const tenantOrigin = await resolveTenantOrigin(this.dbAdmin, announcement.tenantId);
+        const { text, html } = new BaseEmailTemplate({
+          heading: title,
+          paragraphs: [content],
+          buttonText: this.getButtonText(announcement.emailTemplate, defaultEmailSettings.language),
+          buttonLink: this.getButtonLink(
+            tenantOrigin,
+            announcement.emailTemplate,
+            announcement.sourceId,
+          ),
+          ...defaultEmailSettings,
+        });
 
-          await this.emailService.sendEmailWithLogo(
-            {
-              to: recipient.email,
-              subject: title,
-              text,
-              html,
-            },
-            { tenantId: announcement.tenantId },
-          );
-        }),
-      );
-
-      results.forEach((result, resultIndex) => {
-        if (result.status === "rejected") {
-          this.logger.error(
-            `Announcement email failed for recipient ${batch[resultIndex]?.id}`,
-            result.reason,
-          );
-        }
-      });
-    }
+        await this.emailService.sendEmailWithLogo(
+          {
+            to: recipient.email,
+            subject: title,
+            text,
+            html,
+          },
+          { tenantId: announcement.tenantId },
+        );
+      },
+      {
+        batchSize: EMAIL_BATCH_SIZE,
+        throwOnError: false,
+        onItemError: (error, recipient) => {
+          this.logger.error(`Announcement email failed for recipient ${recipient.id}`, error);
+        },
+      },
+    );
   }
 
   private getLocalizedValue(

@@ -9,6 +9,7 @@ export function StageActionButton({
   label,
   variant = "secondary",
   disabled,
+  testId,
   onClick,
 }: StageActionButtonProps) {
   return (
@@ -17,6 +18,7 @@ export function StageActionButton({
         <Button
           variant={variant === "primary" ? "default" : "outline"}
           aria-label={label}
+          data-testid={testId}
           disabled={disabled}
           onClick={onClick}
           className={cn("h-8 w-8 gap-2 px-0 sm:h-9 sm:w-auto sm:px-3", {

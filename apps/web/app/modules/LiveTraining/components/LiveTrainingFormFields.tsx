@@ -23,6 +23,8 @@ import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDat
 import { CalendarFormFieldLabel } from "~/modules/Calendar/components/CalendarFormFieldLabel";
 import { CalendarViewerPermissionToggle } from "~/modules/Calendar/components/CalendarViewerPermissionToggle";
 
+import { LIVE_TRAINING_FORM_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import type {
   LiveTrainingFormFieldUpdater,
   LiveTrainingFormState,
@@ -85,6 +87,7 @@ export function LiveTrainingFormFields({
           />
           <Input
             id={titleId}
+            data-testid={LIVE_TRAINING_FORM_HANDLES.titleInput(idPrefix)}
             value={formState.title}
             maxLength={LIVE_TRAINING_TITLE_MAX_LENGTH}
             onChange={(event) =>
@@ -105,6 +108,7 @@ export function LiveTrainingFormFields({
           />
           <Textarea
             id={descriptionId}
+            data-testid={LIVE_TRAINING_FORM_HANDLES.descriptionInput(idPrefix)}
             value={formState.description}
             maxLength={LIVE_TRAINING_DESCRIPTION_MAX_LENGTH}
             onChange={(event) =>
@@ -129,6 +133,7 @@ export function LiveTrainingFormFields({
           />
           <Switch
             id={allDayId}
+            data-testid={LIVE_TRAINING_FORM_HANDLES.allDaySwitch(idPrefix)}
             checked={formState.allDay}
             onCheckedChange={(checked) => onFormStateChange("allDay", checked)}
           />
@@ -142,6 +147,8 @@ export function LiveTrainingFormFields({
             time={formState.startTime}
             portalledDatePicker={portalledDatePicker}
             hideTime={formState.allDay}
+            dateButtonTestId={LIVE_TRAINING_FORM_HANDLES.startDateButton(idPrefix)}
+            timeSelectTestId={LIVE_TRAINING_FORM_HANDLES.startTimeSelect(idPrefix)}
             onDateChange={(date) => onFormStateChange("startDate", date)}
             onTimeChange={(time) => onFormStateChange("startTime", time)}
           />
@@ -153,6 +160,8 @@ export function LiveTrainingFormFields({
             time={formState.endTime}
             portalledDatePicker={portalledDatePicker}
             hideTime={formState.allDay}
+            dateButtonTestId={LIVE_TRAINING_FORM_HANDLES.endDateButton(idPrefix)}
+            timeSelectTestId={LIVE_TRAINING_FORM_HANDLES.endTimeSelect(idPrefix)}
             onDateChange={(date) => onFormStateChange("endDate", date)}
             onTimeChange={(time) => onFormStateChange("endTime", time)}
           />
@@ -167,12 +176,15 @@ export function LiveTrainingFormFields({
               tooltip={t("calendarView.create.tooltip.deliveryType")}
             />
             <Select value={formState.deliveryType} onValueChange={handleDeliveryTypeChange}>
-              <SelectTrigger>
+              <SelectTrigger data-testid={LIVE_TRAINING_FORM_HANDLES.deliveryTypeSelect(idPrefix)}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem
                   value={LIVE_TRAINING_DELIVERY_TYPES.ONLINE}
+                  data-testid={LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(
+                    LIVE_TRAINING_DELIVERY_TYPES.ONLINE,
+                  )}
                   aria-disabled={!isOnlineDeliveryAvailable}
                   className={cn({
                     "cursor-not-allowed opacity-50 focus:bg-transparent focus:text-current":
@@ -204,7 +216,12 @@ export function LiveTrainingFormFields({
                     t("calendarView.create.deliveryType.online")
                   )}
                 </SelectItem>
-                <SelectItem value={LIVE_TRAINING_DELIVERY_TYPES.OFFLINE}>
+                <SelectItem
+                  value={LIVE_TRAINING_DELIVERY_TYPES.OFFLINE}
+                  data-testid={LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(
+                    LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
+                  )}
+                >
                   {t("calendarView.create.deliveryType.offline")}
                 </SelectItem>
               </SelectContent>
@@ -219,6 +236,7 @@ export function LiveTrainingFormFields({
             />
             <Input
               id={maxParticipantsId}
+              data-testid={LIVE_TRAINING_FORM_HANDLES.maxParticipantsInput(idPrefix)}
               type="number"
               min={1}
               max={LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT}
@@ -245,6 +263,7 @@ export function LiveTrainingFormFields({
             />
             <Input
               id={locationId}
+              data-testid={LIVE_TRAINING_FORM_HANDLES.locationInput(idPrefix)}
               value={formState.location}
               onChange={(event) => onFormStateChange("location", event.target.value)}
               placeholder={t("calendarView.create.placeholder.location")}

@@ -57,3 +57,7 @@ export type AnnouncementSourceLookup = {
   sourceType: AnnouncementSourceType;
   sourceId: UUIDType;
 };
+
+export type TenantWithDueScheduledAnnouncements = {
+  tenantId: UUIDType;
+};

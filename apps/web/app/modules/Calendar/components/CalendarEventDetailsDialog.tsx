@@ -17,6 +17,8 @@ import {
 import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 
+import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import type { SupportedLanguages } from "@repo/shared";
 import type { ReactNode } from "react";
 
@@ -98,7 +100,10 @@ export function CalendarEventDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="z-[90] max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]">
+      <DialogContent
+        data-testid={CALENDAR_HANDLES.EVENT_DETAILS_DIALOG}
+        className="z-[90] max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]"
+      >
         <DialogHeader className="border-b border-neutral-200 px-6 py-5">
           <div className="flex items-start justify-between gap-4 pr-7">
             <div className="min-w-0">
@@ -218,7 +223,11 @@ export function CalendarEventDetailsDialog({
               </div>
 
               <div className="border-t border-neutral-200 pt-4">
-                <Button asChild className="w-full gap-2">
+                <Button
+                  asChild
+                  className="w-full gap-2"
+                  data-testid={CALENDAR_HANDLES.EVENT_DETAILS_GO_TO_LIVE_TRAINING}
+                >
                   <Link to={`/live-training/${eventDetails.sourceId}`}>
                     {t("calendarView.details.action.goToLiveTraining")}
                     <ExternalLink className="size-4" />

@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 type LiveTrainingDeleteDialogProps = {
   open: boolean;
   isDeleting: boolean;
@@ -34,7 +36,10 @@ export function LiveTrainingDeleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md rounded-md">
+      <DialogContent
+        data-testid={LIVE_TRAINING_HANDLES.DELETE_DIALOG}
+        className="max-w-md rounded-md"
+      >
         <DialogHeader className="text-left">
           <DialogTitle className="text-base font-semibold text-neutral-950">
             {t("liveTrainingView.deleteDialog.title")}
@@ -51,6 +56,7 @@ export function LiveTrainingDeleteDialog({
           <Button
             type="button"
             variant="outline"
+            data-testid={LIVE_TRAINING_HANDLES.DELETE_DIALOG_CANCEL_BUTTON}
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
           >
@@ -59,6 +65,7 @@ export function LiveTrainingDeleteDialog({
           <Button
             type="button"
             variant="destructive"
+            data-testid={LIVE_TRAINING_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON}
             onClick={handleConfirm}
             disabled={isDeleting || hasLinkedLessons}
           >

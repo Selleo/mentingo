@@ -18,6 +18,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { CALENDAR_HANDLES } from "../../../e2e/data/live-training/handles";
+
 import calendarStyles from "./calendar.css?url";
 import {
   CALENDAR_ACTION_TYPES,
@@ -30,7 +32,14 @@ import {
 import { CalendarCreateLiveTrainingDialog } from "./components/CalendarCreateLiveTrainingDialog";
 import { CalendarEventDetailsDialog } from "./components/CalendarEventDetailsDialog";
 
-import type { DatesSetArg, DateSelectArg, EventClickArg, EventInput } from "@fullcalendar/core";
+import type {
+  DayCellMountArg,
+  DatesSetArg,
+  DateSelectArg,
+  EventClickArg,
+  EventInput,
+  EventMountArg,
+} from "@fullcalendar/core";
 import type { DateClickArg } from "@fullcalendar/interaction";
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
@@ -130,10 +139,19 @@ export default function CalendarPage() {
     });
   };
 
+  const handleDayCellDidMount = (dayCellInfo: DayCellMountArg) => {
+    dayCellInfo.el.dataset.testid = CALENDAR_HANDLES.dayCell(dayCellInfo.dateStr);
+  };
+
+  const handleEventDidMount = (eventInfo: EventMountArg) => {
+    eventInfo.el.dataset.testid = CALENDAR_HANDLES.event(eventInfo.event.id);
+  };
+
   return (
     <PageWrapper
       isBarebones
       className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-neutral-50/50 p-4 md:p-6 2xl:h-dvh 3xl:p-8"
+      data-testid={CALENDAR_HANDLES.PAGE}
     >
       <section className="flex min-h-0 flex-1 flex-col">
         <div className="calendar-shell min-h-0 flex-1">
@@ -145,6 +163,8 @@ export default function CalendarPage() {
             dateClick={handleDateClick}
             select={handleSelect}
             eventClick={handleEventClick}
+            dayCellDidMount={handleDayCellDidMount}
+            eventDidMount={handleEventDidMount}
             selectable
             selectMirror
             unselectAuto

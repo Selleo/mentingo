@@ -13,6 +13,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import type { LiveTrainingResourceRelationshipType } from "@repo/shared";
 import type {
   LiveTrainingDetails,
@@ -30,6 +32,7 @@ type MaterialCardProps = {
   material: LiveTrainingMaterial;
   isRemoving: boolean;
   canEditMaterials: boolean;
+  testId: string;
   onOpen: () => void;
   onRemove: () => void;
 };
@@ -38,6 +41,8 @@ type MaterialsSectionProps = {
   title: string;
   materials: LiveTrainingMaterial[];
   relationshipType: LiveTrainingResourceRelationshipType;
+  fileInputTestId: string;
+  materialCardTestId: (resourceId: string) => string;
   canEditMaterials: boolean;
   isUploading: boolean;
   isRemoving: boolean;
@@ -53,6 +58,7 @@ function MaterialCard({
   material,
   isRemoving,
   canEditMaterials,
+  testId,
   onOpen,
   onRemove,
 }: MaterialCardProps) {
@@ -64,7 +70,10 @@ function MaterialCard({
     : null;
 
   return (
-    <div className="group/material relative flex min-h-28 min-w-0 flex-col justify-between rounded-md border border-neutral-200 bg-white p-3 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/40">
+    <div
+      data-testid={testId}
+      className="group/material relative flex min-h-28 min-w-0 flex-col justify-between rounded-md border border-neutral-200 bg-white p-3 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/40"
+    >
       <div className="min-w-0">
         <div className="mb-3 flex items-center gap-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
@@ -120,10 +129,12 @@ function MaterialCard({
 function AddMaterialTile({
   title,
   isUploading,
+  inputTestId,
   onFilesSelected,
 }: {
   title: string;
   isUploading: boolean;
+  inputTestId: string;
   onFilesSelected: (files: FileList | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -132,6 +143,7 @@ function AddMaterialTile({
     <>
       <input
         ref={inputRef}
+        data-testid={inputTestId}
         type="file"
         multiple
         className="sr-only"
@@ -157,6 +169,8 @@ function MaterialsSection({
   title,
   materials,
   relationshipType,
+  fileInputTestId,
+  materialCardTestId,
   canEditMaterials,
   isUploading,
   isRemoving,
@@ -183,6 +197,7 @@ function MaterialsSection({
             <MaterialCard
               key={material.resourceId}
               material={material}
+              testId={materialCardTestId(material.resourceId)}
               isRemoving={isRemoving}
               canEditMaterials={canEditMaterials}
               onOpen={() => onOpen(material)}
@@ -193,6 +208,7 @@ function MaterialsSection({
             <AddMaterialTile
               title={t("liveTrainingView.files.addFile")}
               isUploading={isUploading}
+              inputTestId={fileInputTestId}
               onFilesSelected={(files) => onUpload(files, relationshipType)}
             />
           )}
@@ -243,19 +259,31 @@ export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMat
   return (
     <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE} className="grid gap-4">
       <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-        <TabsTrigger value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+        <TabsTrigger
+          value={LIVE_TRAINING_FILE_TABS.BEFORE}
+          data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_TAB}
+        >
           {t("liveTrainingView.files.beforeHeading")}
         </TabsTrigger>
-        <TabsTrigger value={LIVE_TRAINING_FILE_TABS.AFTER} disabled={isAfterTabLocked}>
+        <TabsTrigger
+          value={LIVE_TRAINING_FILE_TABS.AFTER}
+          disabled={isAfterTabLocked}
+          data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_TAB}
+        >
           {t("liveTrainingView.files.afterHeading")}
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+      <TabsContent
+        value={LIVE_TRAINING_FILE_TABS.BEFORE}
+        data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_PANEL}
+      >
         <MaterialsSection
           title={t("liveTrainingView.files.beforeHeading")}
           materials={liveTraining.materials.before}
           relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
+          fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
+          materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
           canEditMaterials={actions.canEditMaterials}
           isUploading={isUploading}
           isRemoving={isRemoving}
@@ -265,11 +293,16 @@ export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMat
         />
       </TabsContent>
 
-      <TabsContent value={LIVE_TRAINING_FILE_TABS.AFTER}>
+      <TabsContent
+        value={LIVE_TRAINING_FILE_TABS.AFTER}
+        data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_PANEL}
+      >
         <MaterialsSection
           title={t("liveTrainingView.files.afterHeading")}
           materials={liveTraining.materials.after}
           relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
+          fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
+          materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
           canEditMaterials={actions.canEditMaterials}
           isUploading={isUploading}
           isRemoving={isRemoving}

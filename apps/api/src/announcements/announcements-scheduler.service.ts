@@ -7,6 +7,8 @@ import {
   type LocalizedText,
 } from "@repo/shared";
 
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+
 import { AnnouncementsDeliveryService } from "./announcements-delivery.service";
 import { AnnouncementsRepository } from "./announcements.repository";
 import {
@@ -28,6 +30,7 @@ export class AnnouncementsSchedulerService {
   constructor(
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly announcementsDeliveryService: AnnouncementsDeliveryService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async createManualAnnouncement(
@@ -97,15 +100,29 @@ export class AnnouncementsSchedulerService {
   }
 
   async publishDueScheduledAnnouncements() {
-    const dueAnnouncements = await this.announcementsRepository.claimDueScheduledAnnouncements(
-      SCHEDULED_ANNOUNCEMENT_PUBLISH_BATCH_SIZE,
-    );
+    const tenantsWithDueAnnouncements =
+      await this.announcementsRepository.findTenantsWithDueScheduledAnnouncements(
+        SCHEDULED_ANNOUNCEMENT_PUBLISH_BATCH_SIZE,
+      );
+    let publishedCount = 0;
 
-    await this.announcementsDeliveryService.deliverPublishedAnnouncements(
-      dueAnnouncements.map((announcement) => announcement.id),
-    );
+    for (const { tenantId } of tenantsWithDueAnnouncements) {
+      const publishedAnnouncements = await this.tenantRunner.runWithTenant(tenantId, async () => {
+        const published = await this.announcementsRepository.claimDueScheduledAnnouncements(
+          SCHEDULED_ANNOUNCEMENT_PUBLISH_BATCH_SIZE,
+        );
 
-    return dueAnnouncements.length;
+        await this.announcementsDeliveryService.deliverPublishedAnnouncements(
+          published.map((announcement) => announcement.id),
+        );
+
+        return published;
+      });
+
+      publishedCount += publishedAnnouncements.length;
+    }
+
+    return publishedCount;
   }
 
   async publishAnnouncementNow(announcementId: UUIDType) {

@@ -58,7 +58,7 @@ CRUD slice progress:
   - [x] `POST /live-training`
   - [x] `PATCH /live-training/:id`
   - [x] `DELETE /live-training/:id`
-- [ ] Add API E2E coverage for the CRUD slice.
+- [x] Add API E2E coverage for the CRUD slice.
 - [x] Regenerate Swagger/API schema and web API client after API contract stabilizes.
 
 ## Purpose
@@ -525,22 +525,27 @@ Do not add a new Live Training resources table in this slice.
 
 API E2E:
 
-- Admin creates online Live Training and receives details response.
-- Create inserts exactly one `calendar_events` row.
-- Create links trainers, linked courses, before resources, and after resources.
-- Create rejects `visibilityScope = all` with linked courses.
-- Create rejects `visibilityScope = linked_courses` without linked courses.
-- Update changes schedule and increments `calendar_events.sequence`.
-- Update replaces provided relation arrays and preserves omitted relation arrays.
-- Delete cancels both `live_trainings` and `calendar_events`.
-- Delete does not hard-delete resources or resource links.
-- Student detail hides after resources before training is ended.
-- Student detail shows after resources when training status is `ended`.
-- Admin/author/trainer detail shows before and after resources regardless of status.
-- Inaccessible detail returns `404`.
+- [ ] Admin creates online Live Training and receives details response.
+- [x] Admin creates offline Live Training and receives details response.
+- [x] Create inserts exactly one `calendar_events` row.
+- [x] Create links linked courses, before resources, and after resources.
+- [ ] Create links trainers.
+- [ ] Create rejects `visibilityScope = all` with linked courses.
+- [ ] Create rejects `visibilityScope = linked_courses` without linked courses.
+- [x] Update changes schedule and increments `calendar_events.sequence`.
+- [ ] Update replaces provided relation arrays and preserves omitted relation arrays.
+- [x] Delete cancels both `live_trainings` and `calendar_events`.
+- [ ] Delete does not hard-delete resources or resource links.
+- [x] Student detail hides after resources before training is ended.
+- [x] Student detail shows after resources when training status is `ended`.
+- [ ] Admin/author/trainer detail shows before and after resources regardless of status.
+- [ ] Inaccessible detail returns `404`.
+- [x] Linked-course calendar event is visible to enrolled students.
+- [x] Linked-course calendar event is hidden from unrelated students.
+- [x] Offline linked Live Training lesson completion marks enrolled students completed.
 
 Validation:
 
-- Run API typecheck.
-- Run targeted Live Training controller E2E.
-- Regenerate Swagger/API schema and web API client after implementation.
+- [x] Run API typecheck.
+- [x] Run targeted Live Training controller E2E.
+- [x] Regenerate Swagger/API schema and web API client after implementation.

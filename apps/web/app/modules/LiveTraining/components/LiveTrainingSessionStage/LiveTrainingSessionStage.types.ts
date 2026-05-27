@@ -29,6 +29,7 @@ export type StageActionButtonProps = {
   label: string;
   variant?: "primary" | "secondary";
   disabled?: boolean;
+  testId?: string;
   onClick?: () => void;
 };
 

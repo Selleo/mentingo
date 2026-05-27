@@ -18,6 +18,8 @@ import { TooltipProvider } from "~/components/ui/tooltip";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LiveTrainingFormFields } from "~/modules/LiveTraining/components/LiveTrainingFormFields";
 
+import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import { CALENDAR_CREATE_MODES } from "./calendarCreateLiveTraining.constants";
 import { getCalendarCreateLiveTrainingSchema } from "./calendarCreateLiveTraining.schema";
 import {
@@ -145,7 +147,10 @@ export function CalendarCreateLiveTrainingDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="flex max-h-[92dvh] flex-col overflow-hidden p-0 sm:max-w-[720px]">
+      <DialogContent
+        data-testid={CALENDAR_HANDLES.CREATE_DIALOG}
+        className="flex max-h-[92dvh] flex-col overflow-hidden p-0 sm:max-w-[720px]"
+      >
         <DialogHeader>
           <div className="px-6 pt-6">
             <DialogTitle>{t("calendarView.create.title")}</DialogTitle>
@@ -158,6 +163,7 @@ export function CalendarCreateLiveTrainingDialog({
             {canCreateLiveTraining ? (
               <button
                 type="button"
+                data-testid={CALENDAR_HANDLES.CREATE_LIVE_TRAINING_OPTION}
                 className="flex w-full items-center gap-3 rounded-lg border border-neutral-200 bg-white p-4 text-left transition-colors hover:border-primary-300 hover:bg-primary-50"
                 onClick={() => setMode(CALENDAR_CREATE_MODES.LIVE_TRAINING)}
               >
@@ -202,11 +208,16 @@ export function CalendarCreateLiveTrainingDialog({
                 <Button
                   type="button"
                   variant="outline"
+                  data-testid={CALENDAR_HANDLES.CREATE_BACK_BUTTON}
                   onClick={() => setMode(CALENDAR_CREATE_MODES.MENU)}
                 >
                   {t("common.button.back")}
                 </Button>
-                <Button type="submit" disabled={isPending}>
+                <Button
+                  type="submit"
+                  disabled={isPending}
+                  data-testid={CALENDAR_HANDLES.CREATE_SUBMIT_BUTTON}
+                >
                   {isPending ? t("common.button.saving") : t("calendarView.create.submit")}
                 </Button>
               </DialogFooter>

@@ -23,6 +23,7 @@ import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelper
 import { addPagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsService } from "src/permissions/permissions.service";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   announcements,
   groupAnnouncements,
@@ -34,6 +35,7 @@ import {
 import type {
   AnnouncementSourceLookup,
   CreateAnnouncementRecordInput,
+  TenantWithDueScheduledAnnouncements,
 } from "./types/announcement-source.types";
 import type { Announcement, AnnouncementFilters } from "./types/announcement.types";
 import type { AnnouncementPagination } from "./types/announcementPagination.types";
@@ -43,7 +45,8 @@ import type { UUIDType } from "src/common";
 @Injectable()
 export class AnnouncementsRepository {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     private readonly permissionsService: PermissionsService,
     private readonly localizationService: LocalizationService,
   ) {}
@@ -350,6 +353,24 @@ export class AnnouncementsRepository {
     );
   }
 
+  async findTenantsWithDueScheduledAnnouncements(
+    limit: number,
+  ): Promise<TenantWithDueScheduledAnnouncements[]> {
+    return this.dbAdmin
+      .selectDistinct({
+        tenantId: announcements.tenantId,
+      })
+      .from(announcements)
+      .where(
+        and(
+          eq(announcements.status, ANNOUNCEMENT_STATUSES.SCHEDULED),
+          lte(announcements.scheduledAt, sql`now()`),
+          isNull(announcements.deletedAt),
+        ),
+      )
+      .limit(limit);
+  }
+
   async claimDueScheduledAnnouncements(limit: number) {
     const dueAnnouncementIds = await this.db
       .select({ id: announcements.id })
@@ -366,7 +387,7 @@ export class AnnouncementsRepository {
 
     if (!dueAnnouncementIds.length) return [];
 
-    const dueAnnouncements = await this.db
+    return this.db
       .update(announcements)
       .set({
         status: ANNOUNCEMENT_STATUSES.PUBLISHED,
@@ -383,8 +404,6 @@ export class AnnouncementsRepository {
         ),
       )
       .returning({ id: announcements.id });
-
-    return dueAnnouncements;
   }
 
   async publishAnnouncementNow(announcementId: UUIDType) {

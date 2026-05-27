@@ -35,6 +35,8 @@ import {
 } from "~/modules/LiveTraining/utils/liveTrainingEditForm";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 
+import { LIVE_TRAINING_HANDLES } from "../../../e2e/data/live-training/handles";
+
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { JoinCurrentSessionResponse } from "~/api/generated-api";
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
@@ -256,6 +258,7 @@ export default function LiveTrainingPage() {
         { title: t("calendarView.title"), href: "/calendar" },
         { title: t("liveTrainingView.title"), href: `/live-training/${id ?? ""}` },
       ]}
+      data-testid={LIVE_TRAINING_HANDLES.PAGE}
     >
       {isLoading && <LiveTrainingPageSkeleton />}
 

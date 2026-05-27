@@ -1,8 +1,11 @@
 import { faker } from "@faker-js/faker";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { eq } from "drizzle-orm";
 import request from "supertest";
 
+import { AnnouncementsSchedulerService } from "src/announcements/announcements-scheduler.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { announcements, userAnnouncements } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createAnnouncementFactory } from "../../../test/factory/announcement.factory";
@@ -11,7 +14,7 @@ import { createUserFactory } from "../../../test/factory/user.factory";
 import { truncateTables, truncateAllTables, cookieFor } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
-import type { DatabasePg } from "src/common";
+import type { DatabasePg, UUIDType } from "src/common";
 
 describe("AnnouncementsController (e2e)", () => {
   let app: INestApplication;
@@ -20,6 +23,8 @@ describe("AnnouncementsController (e2e)", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
   let groupFactory: ReturnType<typeof createGroupFactory>;
   let announcementsFactory: ReturnType<typeof createAnnouncementFactory>;
+  let announcementsSchedulerService: AnnouncementsSchedulerService;
+  let defaultTenantId: UUIDType;
 
   const password = "Password123@";
   const createAnnouncementBody = (
@@ -31,13 +36,24 @@ describe("AnnouncementsController (e2e)", () => {
     groupId,
     translations: [{ language: SUPPORTED_LANGUAGES.EN, title, content }],
   });
+  const getFutureDateOnScheduleStep = (minutesFromNow: number) => {
+    const date = new Date();
+    const currentMinutes = date.getMinutes();
+    const minutesToNextStep = (5 - (currentMinutes % 5)) % 5;
+
+    date.setMinutes(currentMinutes + minutesToNextStep + minutesFromNow, 0, 0);
+
+    return date.toISOString();
+  };
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const testContext = await createE2ETest();
 
-    app = testApp;
+    app = testContext.app;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    defaultTenantId = testContext.defaultTenantId;
+    announcementsSchedulerService = app.get(AnnouncementsSchedulerService);
 
     userFactory = createUserFactory(db);
     groupFactory = createGroupFactory(db);
@@ -346,6 +362,52 @@ describe("AnnouncementsController (e2e)", () => {
         .set("Cookie", studentCookies)
         .send(createAnnouncementBody("Bad", "nope"))
         .expect(403);
+    });
+
+    it("publishes due scheduled announcement and creates user notifications", async () => {
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create({
+        tenantId: defaultTenantId,
+      });
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create({
+        tenantId: defaultTenantId,
+      });
+      const adminCookies = await cookieFor(admin, app);
+
+      const response = await request(app.getHttpServer())
+        .post("/api/announcements")
+        .set("Cookie", adminCookies)
+        .send({
+          ...createAnnouncementBody("Scheduled announcement", "Scheduled content"),
+          scheduledAt: getFutureDateOnScheduleStep(10),
+        })
+        .expect(201);
+      const announcementId = response.body.data.id;
+
+      await db
+        .update(announcements)
+        .set({ scheduledAt: new Date(Date.now() - 60 * 1000).toISOString() })
+        .where(eq(announcements.id, announcementId));
+
+      await expect(announcementsSchedulerService.publishDueScheduledAnnouncements()).resolves.toBe(
+        1,
+      );
+
+      const [publishedAnnouncement] = await db
+        .select()
+        .from(announcements)
+        .where(eq(announcements.id, announcementId));
+      const [studentNotification] = await db
+        .select()
+        .from(userAnnouncements)
+        .where(eq(userAnnouncements.userId, student.id));
+
+      expect(publishedAnnouncement.status).toBe(ANNOUNCEMENT_STATUSES.PUBLISHED);
+      expect(publishedAnnouncement.publishedAt).not.toBeNull();
+      expect(studentNotification).toMatchObject({
+        announcementId,
+        userId: student.id,
+        isRead: false,
+      });
     });
   });
 

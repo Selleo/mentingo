@@ -25,7 +25,8 @@ Use announcements as the simple, durable notification payload for scheduled manu
 - [ ] Regenerate API schema/client.
 - [ ] Add scheduled announcement controls to the web create dialog.
 - [ ] Show scheduled status in admin notification feed.
-- [ ] Add API tests for scheduled visibility, cron publish, and Live Training reminder rules.
+- [ ] Add API tests for scheduled visibility and Live Training reminder rules.
+- [x] Add API test for cron publishing due scheduled announcements under tenant RLS.
 - [ ] Add focused web tests for scheduling controls.
 
 ## Live Training Rules

@@ -8,6 +8,7 @@ import type {
   BetaCreateAiMentorLessonBody,
   BetaCreateChapterBody,
   BetaCreateLessonBody,
+  BetaCreateLiveTrainingLessonBody,
   BetaCreateQuizLessonBody,
   BetaUpdateLessonBody,
   BetaUpdateQuizLessonBody,
@@ -39,6 +40,11 @@ type CreateQuizLessonInput = Partial<BetaCreateQuizLessonBody> & {
 
 type CreateAiMentorLessonInput = Partial<BetaCreateAiMentorLessonBody> & {
   chapterId: string;
+};
+
+type CreateLiveTrainingLessonInput = Partial<BetaCreateLiveTrainingLessonBody> & {
+  chapterId: string;
+  liveTrainingId: string;
 };
 
 const createTitle = (prefix: string) => `${prefix}-${randomUUID().slice(0, 8)}`;
@@ -177,6 +183,24 @@ export class CurriculumFactory {
       ttsPreset: input.ttsPreset ?? "female",
       customTtsReference: input.customTtsReference ?? null,
       displayOrder: input.displayOrder,
+    });
+
+    return this.findLessonInCourse(courseId, input.chapterId, response.data.data.id);
+  }
+
+  async createLiveTrainingLesson(
+    courseId: string,
+    input: CreateLiveTrainingLessonInput,
+  ): Promise<CurriculumCourseLessonRecord> {
+    const title = input.title ?? createTitle("live-training-lesson");
+    const response = await this.apiClient.api.lessonControllerBetaCreateLiveTrainingLesson({
+      title,
+      chapterId: input.chapterId,
+      language: input.language ?? "en",
+      liveTrainingId: input.liveTrainingId,
+      description: input.description,
+      displayOrder: input.displayOrder,
+      contextId: input.contextId,
     });
 
     return this.findLessonInCourse(courseId, input.chapterId, response.data.data.id);

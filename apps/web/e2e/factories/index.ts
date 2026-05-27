@@ -4,6 +4,7 @@ import { CourseFactory } from "./course.factory";
 import { CurriculumFactory } from "./curriculum.factory";
 import { EnrollmentFactory } from "./enrollment.factory";
 import { GroupFactory } from "./group.factory";
+import { LiveTrainingFactory } from "./live-training.factory";
 import { NewsFactory } from "./news.factory";
 import { QAFactory } from "./qa.factory";
 import { TenantFactory } from "./tenant.factory";
@@ -18,6 +19,7 @@ export type FixtureFactories = {
   createCurriculumFactory: () => CurriculumFactory;
   createEnrollmentFactory: () => EnrollmentFactory;
   createGroupFactory: () => GroupFactory;
+  createLiveTrainingFactory: () => LiveTrainingFactory;
   createNewsFactory: () => NewsFactory;
   createQAFactory: () => QAFactory;
   createTenantFactory: () => TenantFactory;
@@ -31,6 +33,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
   let curriculumFactory: CurriculumFactory | undefined;
   let enrollmentFactory: EnrollmentFactory | undefined;
   let groupFactory: GroupFactory | undefined;
+  let liveTrainingFactory: LiveTrainingFactory | undefined;
   let newsFactory: NewsFactory | undefined;
   let qaFactory: QAFactory | undefined;
   let tenantFactory: TenantFactory | undefined;
@@ -60,6 +63,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
     createGroupFactory: () => {
       groupFactory ??= new GroupFactory(apiClient);
       return groupFactory;
+    },
+    createLiveTrainingFactory: () => {
+      liveTrainingFactory ??= new LiveTrainingFactory(apiClient);
+      return liveTrainingFactory;
     },
     createNewsFactory: () => {
       newsFactory ??= new NewsFactory(apiClient);

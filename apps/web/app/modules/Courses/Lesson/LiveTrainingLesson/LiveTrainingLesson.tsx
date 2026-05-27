@@ -18,6 +18,8 @@ import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.typ
 import { formatLiveTrainingDateRange } from "~/modules/LiveTraining/utils/liveTrainingFormat";
 import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
+import { LIVE_TRAINING_LESSON_HANDLES } from "../../../../../e2e/data/live-training/handles";
+
 import type { GetLessonByIdResponse, JoinCurrentSessionResponse } from "~/api/generated-api";
 
 type LiveTrainingLessonProps = {
@@ -30,6 +32,7 @@ type LiveTrainingMaterial = LiveTrainingDetails["materials"]["before"][number];
 type LiveTrainingMaterialListProps = {
   materials: LiveTrainingMaterial[];
   emptyMessage: string;
+  materialCardTestId: (resourceId: string) => string;
   onOpen: (material: LiveTrainingMaterial) => void;
 };
 
@@ -48,6 +51,7 @@ type LiveTrainingLocationNoticeProps = {
 function LiveTrainingMaterialList({
   materials,
   emptyMessage,
+  materialCardTestId,
   onOpen,
 }: LiveTrainingMaterialListProps) {
   const { t } = useTranslation();
@@ -65,6 +69,7 @@ function LiveTrainingMaterialList({
       {materials.map((material) => (
         <div
           key={material.resourceId}
+          data-testid={materialCardTestId(material.resourceId)}
           className="flex min-w-0 flex-col justify-between rounded-md border border-neutral-200 bg-white p-3 shadow-sm"
         >
           <div className="min-w-0">
@@ -104,7 +109,10 @@ function LiveTrainingLocationNotice({ location }: LiveTrainingLocationNoticeProp
   const { t } = useTranslation();
 
   return (
-    <div className="mt-3 flex min-w-0 items-center gap-2 border-t border-neutral-100 pt-3">
+    <div
+      data-testid={LIVE_TRAINING_LESSON_HANDLES.LOCATION_NOTICE}
+      className="mt-3 flex min-w-0 items-center gap-2 border-t border-neutral-100 pt-3"
+    >
       <span className="flex size-7 shrink-0 items-center justify-center rounded bg-neutral-50 text-primary-700">
         <MapPin className="size-4" />
       </span>
@@ -134,7 +142,10 @@ function LiveTrainingStatusPreview({
 
   if (isActive) {
     return (
-      <section className="overflow-hidden rounded-md border border-primary-100 bg-white shadow-sm">
+      <section
+        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
+        className="overflow-hidden rounded-md border border-primary-100 bg-white shadow-sm"
+      >
         <div className="relative bg-primary-950 p-4 text-white">
           <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--primary-800),var(--primary-950)_55%,var(--primary-900))]" />
           <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -156,6 +167,7 @@ function LiveTrainingStatusPreview({
             {canJoin && (
               <Button
                 type="button"
+                data-testid={LIVE_TRAINING_LESSON_HANDLES.JOIN_BUTTON}
                 className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90"
                 disabled={isJoining}
                 onClick={onJoin}
@@ -173,7 +185,10 @@ function LiveTrainingStatusPreview({
 
   if (isEnded) {
     return (
-      <section className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+      <section
+        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
+        className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm"
+      >
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-success-50 text-success-700">
             <CheckCircle2 className="size-5" />
@@ -195,7 +210,10 @@ function LiveTrainingStatusPreview({
 
   if (isScheduled) {
     return (
-      <section className="rounded-md border border-primary-100 bg-white p-4 shadow-sm">
+      <section
+        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
+        className="rounded-md border border-primary-100 bg-white p-4 shadow-sm"
+      >
         <div className="flex min-w-0 items-start gap-3">
           <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary-50 text-primary-700">
             <CalendarClock className="size-5" />
@@ -216,7 +234,10 @@ function LiveTrainingStatusPreview({
   }
 
   return (
-    <section className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-4">
+    <section
+      data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
+      className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-4"
+    >
       <div className="flex min-w-0 items-start gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-white text-neutral-500">
           <Video className="size-5" />
@@ -288,7 +309,7 @@ export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
   };
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-4" data-testid={LIVE_TRAINING_LESSON_HANDLES.ROOT}>
       <LiveTrainingStatusPreview
         liveTraining={liveTraining}
         scheduleLabel={scheduleLabel}
@@ -299,26 +320,41 @@ export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
 
       <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE} className="grid gap-4">
         <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-          <TabsTrigger value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+          <TabsTrigger
+            value={LIVE_TRAINING_FILE_TABS.BEFORE}
+            data-testid={LIVE_TRAINING_LESSON_HANDLES.BEFORE_FILES_TAB}
+          >
             {t("liveTrainingView.files.beforeHeading")}
           </TabsTrigger>
-          <TabsTrigger value={LIVE_TRAINING_FILE_TABS.AFTER} disabled={isAfterTabLocked}>
+          <TabsTrigger
+            value={LIVE_TRAINING_FILE_TABS.AFTER}
+            disabled={isAfterTabLocked}
+            data-testid={LIVE_TRAINING_LESSON_HANDLES.AFTER_FILES_TAB}
+          >
             {t("liveTrainingView.files.afterHeading")}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value={LIVE_TRAINING_FILE_TABS.BEFORE}>
+        <TabsContent
+          value={LIVE_TRAINING_FILE_TABS.BEFORE}
+          data-testid={LIVE_TRAINING_LESSON_HANDLES.BEFORE_FILES_PANEL}
+        >
           <LiveTrainingMaterialList
             materials={liveTraining.materials.before}
             emptyMessage={t("liveTrainingView.meeting.noMaterials")}
+            materialCardTestId={LIVE_TRAINING_LESSON_HANDLES.beforeFileCard}
             onOpen={handleOpenMaterial}
           />
         </TabsContent>
 
-        <TabsContent value={LIVE_TRAINING_FILE_TABS.AFTER}>
+        <TabsContent
+          value={LIVE_TRAINING_FILE_TABS.AFTER}
+          data-testid={LIVE_TRAINING_LESSON_HANDLES.AFTER_FILES_PANEL}
+        >
           <LiveTrainingMaterialList
             materials={liveTraining.materials.after}
             emptyMessage={afterFilesEmptyMessage}
+            materialCardTestId={LIVE_TRAINING_LESSON_HANDLES.afterFileCard}
             onOpen={handleOpenMaterial}
           />
         </TabsContent>

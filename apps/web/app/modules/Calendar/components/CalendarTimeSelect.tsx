@@ -11,6 +11,7 @@ import {
 type CalendarTimeSelectProps = {
   value: string;
   stepMinutes?: number;
+  testId?: string;
   onChange: (time: string) => void;
 };
 
@@ -37,13 +38,14 @@ const buildTimeOptions = (stepMinutes: number) => {
 export function CalendarTimeSelect({
   value,
   stepMinutes = DEFAULT_TIME_STEP_MINUTES,
+  testId,
   onChange,
 }: CalendarTimeSelectProps) {
   const options = useMemo(() => buildTimeOptions(stepMinutes), [stepMinutes]);
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger data-testid={testId}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent className="max-h-72">

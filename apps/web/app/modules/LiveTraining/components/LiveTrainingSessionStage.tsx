@@ -32,6 +32,8 @@ import { StageActionButton } from "~/modules/LiveTraining/components/LiveTrainin
 import { useLiveTrainingSessionStage } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/useLiveTrainingSessionStage";
 import { formatLiveTrainingDateRange } from "~/modules/LiveTraining/utils/liveTrainingFormat";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import type { UpdateLiveTrainingEditFormState } from "~/modules/LiveTraining/components/LiveTrainingSessionStage/LiveTrainingSessionStage.types";
 import type {
   LiveTrainingDetails,
@@ -113,7 +115,10 @@ export function LiveTrainingSessionStage({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <section className="overflow-hidden rounded-md border border-neutral-200 bg-white shadow-sm">
+      <section
+        data-testid={LIVE_TRAINING_HANDLES.STAGE}
+        className="overflow-hidden rounded-md border border-neutral-200 bg-white shadow-sm"
+      >
         <div className="relative bg-primary-950 p-3 text-white sm:min-h-[240px] sm:p-5">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.16),transparent_28%),linear-gradient(135deg,var(--primary-800),var(--primary-950)_48%,var(--primary-900))]" />
           <div className="absolute inset-x-0 bottom-0 h-px bg-white/15" />
@@ -131,6 +136,7 @@ export function LiveTrainingSessionStage({
                 >
                   <textarea
                     ref={titleRef}
+                    data-testid={LIVE_TRAINING_HANDLES.TITLE_INPUT}
                     readOnly={!canEdit}
                     value={titleValue}
                     maxLength={LIVE_TRAINING_TITLE_MAX_LENGTH}
@@ -161,6 +167,7 @@ export function LiveTrainingSessionStage({
                     <span className="block w-full">
                       <textarea
                         ref={descriptionRef}
+                        data-testid={LIVE_TRAINING_HANDLES.DESCRIPTION_INPUT}
                         readOnly={!canEdit}
                         value={displayedDescription}
                         onChange={(event) => handleDescriptionChange(event.target.value)}
@@ -193,6 +200,7 @@ export function LiveTrainingSessionStage({
                   <StageActionButton
                     icon={<Trash2 className="size-4" />}
                     label={t("liveTrainingView.actions.delete")}
+                    testId={LIVE_TRAINING_HANDLES.DELETE_BUTTON}
                     onClick={onDeleteClick}
                   />
                 )}
@@ -202,6 +210,7 @@ export function LiveTrainingSessionStage({
                     label={t("liveTrainingView.actions.start")}
                     variant="primary"
                     disabled={isStartingSession}
+                    testId={LIVE_TRAINING_HANDLES.START_SESSION_BUTTON}
                     onClick={onStartSession}
                   />
                 )}
@@ -210,6 +219,7 @@ export function LiveTrainingSessionStage({
                     icon={<Square className="size-4" />}
                     label={t("liveTrainingView.actions.finish")}
                     disabled={isFinishingSession}
+                    testId={LIVE_TRAINING_HANDLES.FINISH_SESSION_BUTTON}
                     onClick={onFinishSession}
                   />
                 )}
@@ -219,6 +229,7 @@ export function LiveTrainingSessionStage({
             <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
               <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0">
                 <span
+                  data-testid={LIVE_TRAINING_HANDLES.STATUS_BADGE}
                   className={cn(
                     "inline-flex h-8 shrink-0 items-center rounded border border-white/15 bg-white/10 px-2.5 text-xs font-medium text-white/85 sm:h-9 sm:px-3 sm:text-sm",
                     {
@@ -321,6 +332,7 @@ export function LiveTrainingSessionStage({
                       >
                         <Users className="size-4 shrink-0 text-white/65" />
                         <Input
+                          data-testid={LIVE_TRAINING_HANDLES.MAX_PARTICIPANTS_INPUT}
                           readOnly={!canEdit}
                           value={editFormState.maxParticipants}
                           onChange={(event) => handleMaxParticipantsChange(event.target.value)}
@@ -353,6 +365,7 @@ export function LiveTrainingSessionStage({
                         )}
                       >
                         <Input
+                          data-testid={LIVE_TRAINING_HANDLES.LOCATION_INPUT}
                           readOnly={!canEdit}
                           value={editFormState.location}
                           onChange={(event) =>

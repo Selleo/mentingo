@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../../e2e/data/live-training/handles";
+
 import type { LiveTrainingMeetingPreviewProps } from "./LiveTrainingMeeting.types";
 
 export function LiveTrainingMeetingPreview({
@@ -43,6 +45,7 @@ export function LiveTrainingMeetingPreview({
         {actions.canShowJoin && (
           <Button
             type="button"
+            data-testid={LIVE_TRAINING_HANDLES.JOIN_SESSION_BUTTON}
             onClick={onJoin}
             disabled={isJoining}
             className="h-9 gap-2 bg-white text-primary-950 hover:bg-white/90"

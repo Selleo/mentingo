@@ -30,6 +30,8 @@ import {
   getUserCandidateDisplayName,
 } from "~/modules/LiveTraining/utils/liveTrainingPeople";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 type LiveTrainingPeopleSectionProps = {
   liveTraining: LiveTrainingDetails;
   canEditPeople: boolean;
@@ -207,6 +209,7 @@ export function LiveTrainingPeopleSection({
           <PopoverTrigger asChild>
             <button
               type="button"
+              data-testid={LIVE_TRAINING_HANDLES.ADD_HOST_BUTTON}
               className={cn(
                 "mt-3 flex shrink-0 items-center justify-center gap-2 rounded border border-dashed border-neutral-300 px-3 py-2 text-sm text-neutral-500 transition",
                 "hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700",

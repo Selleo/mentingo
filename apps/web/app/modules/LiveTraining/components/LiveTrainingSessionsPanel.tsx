@@ -26,6 +26,8 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { formatLiveTrainingDateRange } from "~/modules/LiveTraining/utils/liveTrainingFormat";
 
+import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
+
 import type { ColumnDef } from "@tanstack/react-table";
 import type { GetSessionResponse, GetSessionsResponse } from "~/api/generated-api";
 
@@ -225,6 +227,7 @@ function LiveTrainingSessionCard({
   return (
     <AccordionItem
       value={session.id}
+      data-testid={LIVE_TRAINING_HANDLES.sessionCard(session.id)}
       className="max-w-full overflow-hidden rounded-md border border-neutral-200 bg-white shadow-sm"
     >
       <AccordionTrigger className="gap-4 px-4 py-3 text-left hover:no-underline">
@@ -279,7 +282,10 @@ export function LiveTrainingSessionsPanel({ liveTrainingId }: LiveTrainingSessio
   if (isLoading) return <LiveTrainingSessionsSkeleton />;
 
   return (
-    <section className="max-w-full overflow-hidden rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
+    <section
+      data-testid={LIVE_TRAINING_HANDLES.SESSIONS_PANEL}
+      className="max-w-full overflow-hidden rounded-md border border-neutral-200 bg-white p-4 shadow-sm"
+    >
       <div className="mb-4">
         <h2 className="text-sm font-semibold text-neutral-950">
           {t("liveTrainingView.sessions.title")}

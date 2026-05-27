@@ -20,6 +20,8 @@ type CalendarDateTimeFieldProps = {
   portalledDatePicker?: boolean;
   hideTime?: boolean;
   timeStepMinutes?: number;
+  dateButtonTestId?: string;
+  timeSelectTestId?: string;
   onDateChange: (date: string) => void;
   onTimeChange: (time: string) => void;
 };
@@ -39,6 +41,8 @@ export function CalendarDateTimeField({
   portalledDatePicker = true,
   hideTime = false,
   timeStepMinutes,
+  dateButtonTestId,
+  timeSelectTestId,
   onDateChange,
   onTimeChange,
 }: CalendarDateTimeFieldProps) {
@@ -60,6 +64,7 @@ export function CalendarDateTimeField({
             <Button
               type="button"
               variant="outline"
+              data-testid={dateButtonTestId}
               className={cn(
                 "w-full justify-start gap-2 border-neutral-300 bg-white font-normal shadow-none",
                 {
@@ -95,7 +100,12 @@ export function CalendarDateTimeField({
           </PopoverContent>
         </Popover>
         {!hideTime && (
-          <CalendarTimeSelect value={time} stepMinutes={timeStepMinutes} onChange={onTimeChange} />
+          <CalendarTimeSelect
+            value={time}
+            stepMinutes={timeStepMinutes}
+            testId={timeSelectTestId}
+            onChange={onTimeChange}
+          />
         )}
       </div>
     </div>
