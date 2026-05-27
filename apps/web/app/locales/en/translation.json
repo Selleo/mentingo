@@ -2274,9 +2274,9 @@
       "exportingButton": "Exporting...",
       "success": "SCORM package download started.",
       "warning": {
-        "title": "AI Mentor lessons will be skipped",
-        "description": "This course contains {{count}} AI Mentor lesson. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
-        "description_other": "This course contains {{count}} AI Mentor lessons. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "title": "Unsupported lessons will be skipped",
+        "description": "This course contains {{count}} lesson that is not supported in SCORM packages. AI Mentor and Live Training lessons are skipped during export. Do you want to continue?",
+        "description_other": "This course contains {{count}} lessons that are not supported in SCORM packages. AI Mentor and Live Training lessons are skipped during export. Do you want to continue?",
         "confirm": "Export anyway"
       },
       "error": {

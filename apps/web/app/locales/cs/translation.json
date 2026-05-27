@@ -2213,9 +2213,9 @@
       "exportingButton": "Exportování...",
       "success": "Stahování balíčku SCORM bylo zahájeno.",
       "warning": {
-        "title": "Lekce AI Mentor budou přeskočeny",
-        "description": "Tento kurz obsahuje {{count}} lekci AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
-        "description_other": "Tento kurz obsahuje {{count}} lekce AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "title": "Nepodporované lekce budou přeskočeny",
+        "description": "Tento kurz obsahuje {{count}} lekci, která není v balíčcích SCORM podporována. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
+        "description_other": "Tento kurz obsahuje {{count}} lekcí, které nejsou v balíčcích SCORM podporovány. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
         "confirm": "Přesto exportovat"
       },
       "error": {

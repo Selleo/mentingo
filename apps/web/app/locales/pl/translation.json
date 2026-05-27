@@ -2509,9 +2509,9 @@
       "exportingButton": "Eksportowanie...",
       "success": "Rozpoczęto pobieranie pakietu SCORM.",
       "warning": {
-        "title": "Lekcje AI Mentora zostaną pominięte",
-        "description": "Ten kurs zawiera {{count}} lekcję AI Mentora. Lekcje AI Mentora nie są obsługiwane w pakietach SCORM. Czy chcesz kontynuować?",
-        "description_other": "Ten kurs zawiera {{count}} lekcje AI Mentora. Lekcje AI Mentora nie są obsługiwane w pakietach SCORM. Czy chcesz kontynuować?",
+        "title": "Nieobsługiwane lekcje zostaną pominięte",
+        "description": "Ten kurs zawiera {{count}} lekcję nieobsługiwaną w pakietach SCORM. Lekcje AI Mentora i Live Training są pomijane podczas eksportu. Czy chcesz kontynuować?",
+        "description_other": "Ten kurs zawiera {{count}} lekcji nieobsługiwanych w pakietach SCORM. Lekcje AI Mentora i Live Training są pomijane podczas eksportu. Czy chcesz kontynuować?",
         "confirm": "Eksportuj mimo to"
       },
       "error": {

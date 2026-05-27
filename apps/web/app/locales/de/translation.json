@@ -2213,9 +2213,9 @@
       "exportingButton": "Exportieren...",
       "success": "Der Download des SCORM-Pakets wurde gestartet.",
       "warning": {
-        "title": "AI Mentor-Lektionen werden übersprungen",
-        "description": "Dieser Kurs enthält {{count}} AI Mentor-Lektion. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
-        "description_other": "Dieser Kurs enthält {{count}} AI Mentor-Lektionen. AI Mentor-Lektionen werden in SCORM-Paketen nicht unterstützt. Möchten Sie fortfahren?",
+        "title": "Nicht unterstützte Lektionen werden übersprungen",
+        "description": "Dieser Kurs enthält {{count}} Lektion, die in SCORM-Paketen nicht unterstützt wird. AI Mentor- und Live Training-Lektionen werden beim Export übersprungen. Möchten Sie fortfahren?",
+        "description_other": "Dieser Kurs enthält {{count}} Lektionen, die in SCORM-Paketen nicht unterstützt werden. AI Mentor- und Live Training-Lektionen werden beim Export übersprungen. Möchten Sie fortfahren?",
         "confirm": "Trotzdem exportieren"
       },
       "error": {

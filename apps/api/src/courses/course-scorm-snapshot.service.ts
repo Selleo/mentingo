@@ -24,6 +24,8 @@ import {
   scormScos,
 } from "src/storage/schema";
 
+import { SCORM_EXPORTABLE_LESSON_TYPES } from "./course-scorm-export.constants";
+
 import type {
   CourseScormBuildLessonsByIdOptions,
   CourseScormLessonAssetRow,
@@ -520,12 +522,7 @@ export class CourseScormSnapshotService {
   }
 
   private isExportableLessonType(type: string) {
-    return (
-      type === LESSON_TYPES.CONTENT ||
-      type === LESSON_TYPES.QUIZ ||
-      type === LESSON_TYPES.EMBED ||
-      type === LESSON_TYPES.SCORM
-    );
+    return SCORM_EXPORTABLE_LESSON_TYPES.has(type);
   }
 
   private getResourceMetadata(metadata: unknown): { allowFullscreen?: boolean } | null {

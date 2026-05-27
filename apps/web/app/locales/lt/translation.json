@@ -2213,9 +2213,9 @@
       "exportingButton": "Eksportuojama...",
       "success": "SCORM paketo atsisiuntimas pradėtas.",
       "warning": {
-        "title": "AI Mentor pamokos bus praleistos",
-        "description": "Šiame kurse yra {{count}} AI Mentor pamoka. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
-        "description_other": "Šiame kurse yra {{count}} AI Mentor pamokos. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "title": "Nepalaikomos pamokos bus praleistos",
+        "description": "Šiame kurse yra {{count}} pamoka, kuri nepalaikoma SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
+        "description_other": "Šiame kurse yra {{count}} pamokų, kurios nepalaikomos SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
         "confirm": "Vis tiek eksportuoti"
       },
       "error": {
