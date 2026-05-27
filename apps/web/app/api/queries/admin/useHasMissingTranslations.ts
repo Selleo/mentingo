@@ -1,4 +1,4 @@
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
@@ -9,6 +9,7 @@ export const COURSE_TRANSLATIONS_QUERY_KEY = ["missing-translations"];
 export const missingTranslationsQueryOptions = (
   courseId: string,
   language: SupportedLanguages,
+  enabled = true,
 ) => ({
   queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId, language }],
   queryFn: async () => {
@@ -19,8 +20,13 @@ export const missingTranslationsQueryOptions = (
 
     return data;
   },
+  enabled,
 });
 
-export function useMissingTranslations(courseId: string, language: SupportedLanguages) {
-  return useSuspenseQuery(missingTranslationsQueryOptions(courseId, language));
+export function useMissingTranslations(
+  courseId: string,
+  language: SupportedLanguages,
+  enabled = true,
+) {
+  return useQuery(missingTranslationsQueryOptions(courseId, language, enabled));
 }

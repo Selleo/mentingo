@@ -173,8 +173,15 @@
       "creatingCourse": "Creating Course...",
       "createCourse": "Create Course"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM package uploaded successfully"
+    "importFailure": {
+      "courseDescription": "The course was removed because the SCORM package could not be imported.",
+      "lessonDescription": "The SCORM lesson or package was removed because the package could not be imported."
+    },
+    "importProcessing": {
+      "description": "The package is still being imported. You can keep working while it finishes."
+    },
+    "importSuccess": {
+      "description": "The SCORM package is ready."
     },
     "errors": {
       "packageRequired": "SCORM package is required.",
@@ -191,6 +198,9 @@
       "packageAlreadyAttached": "This SCORM lesson already has a package for the selected language.",
       "invalidPackagePath": "SCORM package contains an invalid file path.",
       "externalPackagePath": "SCORM package contains an external file path.",
+      "importFailed": "SCORM package import failed.",
+      "unknownImportJob": "SCORM import job is not recognized.",
+      "unsupportedImportAction": "SCORM import action is not supported.",
       "runtime": {
         "launchNotFound": "SCORM launch content was not found.",
         "unsupportedStandard": "This SCORM standard is not supported.",

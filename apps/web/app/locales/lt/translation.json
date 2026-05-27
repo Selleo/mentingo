@@ -173,8 +173,15 @@
       "creatingCourse": "Kuriamas kursas...",
       "createCourse": "Sukurti kursą"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    "importFailure": {
+      "courseDescription": "Kursas pašalintas, nes SCORM paketo nepavyko importuoti.",
+      "lessonDescription": "SCORM pamoka arba paketas pašalinti, nes paketo nepavyko importuoti."
+    },
+    "importProcessing": {
+      "description": "Paketas vis dar importuojamas. Galite tęsti darbą, kol importas baigsis."
+    },
+    "importSuccess": {
+      "description": "SCORM paketas paruoštas."
     },
     "errors": {
       "packageRequired": "SCORM paketas yra privalomas.",
@@ -191,6 +198,9 @@
       "packageAlreadyAttached": "Ši SCORM pamoka jau turi paketą pasirinktai kalbai.",
       "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
       "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
+      "importFailed": "SCORM paketo importuoti nepavyko.",
+      "unknownImportJob": "SCORM importavimo užduotis neatpažinta.",
+      "unsupportedImportAction": "SCORM importavimo veiksmas nepalaikomas.",
       "runtime": {
         "launchNotFound": "SCORM paleidimo turinys nerastas.",
         "unsupportedStandard": "Šis SCORM standartas nepalaikomas.",

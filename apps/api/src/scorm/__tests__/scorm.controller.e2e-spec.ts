@@ -4,6 +4,7 @@ import {
   COURSE_ENROLLMENT,
   SCORM_COMPLETION_STATUS,
   SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_PACKAGE_STATUS,
   SCORM_SUCCESS_STATUS,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
@@ -71,6 +72,19 @@ class InMemoryS3Service {
 
   async deleteFile(key: string) {
     this.files.delete(key);
+  }
+
+  async getFileBuffer(key: string) {
+    const file = this.files.get(key);
+
+    if (!file) {
+      const error = new Error("No such key") as Error & { name: string; Code: string };
+      error.name = "NoSuchKey";
+      error.Code = "NoSuchKey";
+      throw error;
+    }
+
+    return file.buffer;
   }
 
   async getFileStream(key: string): Promise<FileStreamPayload> {
@@ -228,6 +242,23 @@ describe("ScormController (e2e)", () => {
       contentType: "application/zip",
     });
 
+  const waitForScormPackageReady = async (packageId: string) => {
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      const [scormPackage] = await db
+        .select()
+        .from(scormPackages)
+        .where(eq(scormPackages.id, packageId));
+
+      if (scormPackage?.status === SCORM_PACKAGE_STATUS.READY) {
+        return scormPackage;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    throw new Error(`SCORM package did not become ready: ${packageId}`);
+  };
+
   const importScormCourse = async (admin: UserWithCredentials) => {
     const category = await categoryFactory.create();
     const response = await attachScormPackage(
@@ -255,6 +286,7 @@ describe("ScormController (e2e)", () => {
           eq(scormPackages.language, "en"),
         ),
       );
+    await waitForScormPackageReady(scormPackage.id);
     const [sco] = await db.select().from(scormScos).where(eq(scormScos.packageId, scormPackage.id));
 
     return {
@@ -389,11 +421,12 @@ describe("ScormController (e2e)", () => {
         .select()
         .from(scormScos)
         .where(eq(scormScos.packageId, scormPackage.id));
+      const readyScormPackage = await waitForScormPackageReady(scormPackage.id);
 
       expect(lesson.chapterId).toBe(chapter.id);
       expect(lesson.type).toBe("scorm");
       expect(scormPackage.language).toBe("en");
-      expect(scormPackage.status).toBe("ready");
+      expect(readyScormPackage.status).toBe("ready");
       expect(sco.lessonId).toBe(lessonId);
       expect(sco.resourceIdentifier).toBe("RES-1");
       expect(sco.resourceMetadataJson).toEqual(
@@ -446,9 +479,13 @@ describe("ScormController (e2e)", () => {
           ),
         );
 
+      const readyPackages = await Promise.all(
+        packages.map((scormPackage) => waitForScormPackageReady(scormPackage.id)),
+      );
+
       expect(packages).toHaveLength(2);
       expect(packages.map((scormPackage) => scormPackage.language).sort()).toEqual(["en", "pl"]);
-      expect(packages.every((scormPackage) => scormPackage.status === "ready")).toBe(true);
+      expect(readyPackages.every((scormPackage) => scormPackage.status === "ready")).toBe(true);
 
       const courseResponse = await request(app.getHttpServer())
         .get(`/api/course/beta-course-by-id?id=${course.id}&language=en`)
@@ -604,6 +641,7 @@ describe("ScormController (e2e)", () => {
             eq(scormPackages.entityId, lessonId),
           ),
         );
+      await waitForScormPackageReady(scormPackage.id);
       const scos = (
         await db.select().from(scormScos).where(eq(scormScos.packageId, scormPackage.id))
       ).sort((firstSco, secondSco) => firstSco.displayOrder - secondSco.displayOrder);

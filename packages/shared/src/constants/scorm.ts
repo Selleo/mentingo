@@ -21,6 +21,26 @@ export const SCORM_PACKAGE_STATUS = {
 
 export type ScormPackageStatus = (typeof SCORM_PACKAGE_STATUS)[keyof typeof SCORM_PACKAGE_STATUS];
 
+export const SCORM_IMPORT_ACTION = {
+  CREATE_COURSE: "create-course",
+  CREATE_LESSON: "create-lesson",
+  ATTACH_LESSON_PACKAGE: "attach-lesson-package",
+} as const;
+
+export type ScormImportAction = (typeof SCORM_IMPORT_ACTION)[keyof typeof SCORM_IMPORT_ACTION];
+
+export const SCORM_IMPORT_SOCKET = {
+  EVENTS: {
+    STATUS_CHANGED: "scorm-import-status-change",
+  },
+  MESSAGE_KEYS: {
+    PROCESSING: "adminScorm.importProcessing.description",
+    READY: "adminScorm.importSuccess.description",
+    FAILED_COURSE: "adminScorm.importFailure.courseDescription",
+    FAILED_LESSON: "adminScorm.importFailure.lessonDescription",
+  },
+} as const;
+
 export const SCORM_COMPLETION_STATUS = {
   COMPLETED: "completed",
   INCOMPLETE: "incomplete",

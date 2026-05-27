@@ -173,8 +173,15 @@
       "creatingCourse": "Vytváření kurzu...",
       "createCourse": "Vytvořit kurz"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
+    "importFailure": {
+      "courseDescription": "Kurz byl odstraněn, protože balíček SCORM se nepodařilo importovat.",
+      "lessonDescription": "Lekce SCORM nebo balíček byly odstraněny, protože balíček se nepodařilo importovat."
+    },
+    "importProcessing": {
+      "description": "Balíček se stále importuje. Během dokončování importu můžete pokračovat v práci."
+    },
+    "importSuccess": {
+      "description": "Balíček SCORM je připraven."
     },
     "errors": {
       "packageRequired": "Balíček SCORM je povinný.",
@@ -191,6 +198,9 @@
       "packageAlreadyAttached": "Tato lekce SCORM již má balíček pro vybraný jazyk.",
       "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
       "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
+      "importFailed": "Import balíčku SCORM se nezdařil.",
+      "unknownImportJob": "Úloha importu SCORM nebyla rozpoznána.",
+      "unsupportedImportAction": "Akce importu SCORM není podporována.",
       "runtime": {
         "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
         "unsupportedStandard": "Tento standard SCORM není podporován.",

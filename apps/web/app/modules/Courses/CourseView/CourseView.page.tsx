@@ -1,5 +1,6 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { isAxiosError } from "axios";
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -64,10 +65,18 @@ export const clientLoader = async ({
   const url = new URL(request.url);
   const language = resolvePreferredLanguage(url);
 
-  const lookupResponse = await ApiClient.api.courseControllerLookupCourse({
-    id: idOrSlug,
-    language,
-  });
+  const lookupResponse = await ApiClient.api
+    .courseControllerLookupCourse({
+      id: idOrSlug,
+      language,
+    })
+    .catch((error: unknown) => {
+      if (isAxiosError(error) && error.response?.status === 404) {
+        throw redirect("/courses", 302);
+      }
+
+      throw error;
+    });
 
   const { status, slug } = lookupResponse.data.data;
 
@@ -90,7 +99,13 @@ export default function CourseViewPage() {
   const language =
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
-  const { data: course } = useCourse(id, language);
+  const { data: course, error } = useCourse(id, language);
+
+  useEffect(() => {
+    if (isAxiosError(error) && error.response?.status === 404) {
+      navigate("/courses", { replace: true });
+    }
+  }, [error, navigate]);
 
   useEffect(() => {
     const shouldCorrectUrl = course?.slug && course.slug !== id;
