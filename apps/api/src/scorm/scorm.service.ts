@@ -12,6 +12,8 @@ import {
 import {
   PERMISSIONS,
   SCORM_COMPLETION_STATUS,
+  SCORM_IMPORT_ACTION,
+  SCORM_IMPORT_SOCKET,
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
@@ -26,6 +28,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { S3Service } from "src/s3/s3.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { WsGateway } from "src/websocket";
 
 import { PROMISE_SETTLED_STATUS } from "./promise-settled-status";
 import { ScormRepository } from "./repositories/scorm.repository";
@@ -34,6 +37,7 @@ import {
   MAX_SCORM_EXTRACTED_FILE_COUNT,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
+import { ScormQueueService } from "./scorm-queue.service";
 import {
   SCORM_1_2_CMI_KEYS,
   SCORM_1_2_ALLOWED_RUNTIME_KEY_PATTERNS,
@@ -46,11 +50,13 @@ import {
   getScormExtractedFilesReference,
   getScormManifestReference,
   getScormOriginalFileReference,
+  getScormStagedUploadReference,
   joinScormRelativePath,
   normalizeScormRelativePath,
 } from "./scorm-storage-paths";
 import { addScorm12Times, SCORM_ZERO_TIME } from "./scorm-time";
 
+import type { ScormPackageStatus } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -59,6 +65,9 @@ import type {
   CreateScormLessonImportParams,
   ParsedScormManifest,
   PreparedPackageArtifacts,
+  QueuedScormPackageFile,
+  ScormImportJobData,
+  ScormImportResult,
   ScormItemManifest,
   ScormRuntimeCommitParams,
   ScormRuntimeFinishParams,
@@ -76,6 +85,8 @@ export class ScormService {
     private readonly courseService: CourseService,
     private readonly adminLessonService: AdminLessonService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
+    private readonly wsGateway: WsGateway,
+    private readonly scormQueueService: ScormQueueService,
   ) {}
 
   async createCourseImport({
@@ -83,127 +94,172 @@ export class ScormService {
     metadata,
     currentUser,
     isPlaywrightTest,
-  }: CreateScormCourseImportParams) {
-    if (!scormPackage?.buffer?.length) {
-      throw new BadRequestException("adminScorm.errors.packageRequired");
-    }
-
-    const artifacts = this.preparePackageArtifacts(scormPackage, currentUser);
-    let packageIds: UUIDType[] = [];
-    const course = await this.db.transaction(async (trx) => {
-      const createdCourse = await this.courseService.createCourseInTransaction(
-        {
-          ...metadata,
-          status: metadata.status ?? "draft",
-          isScorm: true,
-        },
-        currentUser,
-        isPlaywrightTest,
-        trx,
-      );
-
-      packageIds = await this.scormRepository.persistCoursePackage(
-        {
-          courseId: createdCourse.id,
-          packageId: artifacts.packageId,
-          metadata,
-          manifest: artifacts.manifest,
-          originalFileReference: artifacts.originalFileReference,
-          extractedFilesReference: artifacts.extractedFilesReference,
-          manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
-          manifestReference: artifacts.manifestReference,
-          currentUser,
-        },
-        trx,
-      );
-
-      return createdCourse;
-    });
-
-    let uploadedReferences: string[] = [];
-
-    try {
-      uploadedReferences = await this.uploadPackageFiles(artifacts, currentUser.tenantId);
-      await this.scormRepository.markPackagesReady(packageIds);
-    } catch (error) {
-      await this.deleteUploadedPackageFiles(uploadedReferences);
-      await this.scormRepository.deleteImportedCourse(course.id);
-      throw error;
-    }
-
-    await this.courseService.publishCreateCourseEvent(course.id, metadata.language, currentUser);
-
-    return {
-      id: course.id,
-      packageId: packageIds[0] ?? artifacts.packageId,
-      fileName: scormPackage.originalname,
-      fileSize: scormPackage.size,
-      mimeType: scormPackage.mimetype,
-      scoCount: artifacts.manifest.scos.length,
-    };
-  }
-
-  async createLessonImport({ scormPackage, metadata, currentUser }: CreateScormLessonImportParams) {
-    if (!scormPackage?.buffer?.length) {
-      throw new BadRequestException("adminScorm.errors.packageRequired");
-    }
-
-    const artifacts = this.preparePackageArtifacts(scormPackage, currentUser);
-    const createdLesson = await this.db.transaction(async (trx) => {
-      const lesson = await this.adminLessonService.createLessonForChapterInTransaction(
-        {
-          chapterId: metadata.chapterId,
-          title: metadata.title,
-          description: "",
-          type: LESSON_TYPES.SCORM,
-        },
-        currentUser,
-        trx,
-      );
-
-      await this.scormRepository.persistLessonPackage(
-        {
-          lessonId: lesson.lessonId,
-          packageId: artifacts.packageId,
-          manifest: artifacts.manifest,
-          originalFileReference: artifacts.originalFileReference,
-          extractedFilesReference: artifacts.extractedFilesReference,
-          manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
-          manifestReference: artifacts.manifestReference,
-          language: metadata.language,
-          currentUser,
-        },
-        trx,
-      );
-
-      return lesson;
-    });
-
-    let uploadedReferences: string[] = [];
-
-    try {
-      uploadedReferences = await this.uploadPackageFiles(artifacts, currentUser.tenantId);
-      await this.scormRepository.markPackageReady(artifacts.packageId);
-    } catch (error) {
-      await this.deleteUploadedPackageFiles(uploadedReferences);
-      await this.scormRepository.deleteImportedLesson(createdLesson.lessonId);
-      throw error;
-    }
-
-    await this.adminLessonService.publishCreateLessonEvent(
-      createdLesson.lessonId,
-      createdLesson.language,
-      currentUser,
+  }: CreateScormCourseImportParams): Promise<ScormImportResult> {
+    const { packageId, queuedPackage } = await this.stagePackageForImport(
+      scormPackage,
+      currentUser.tenantId,
     );
 
-    return {
-      id: createdLesson.lessonId,
-      packageId: artifacts.packageId,
-      fileName: scormPackage.originalname,
-      fileSize: scormPackage.size,
-      mimeType: scormPackage.mimetype,
-      scoCount: artifacts.manifest.scos.length,
-    };
+    let courseId: UUIDType | undefined;
+    let processingJobData: ScormImportJobData | undefined;
+
+    try {
+      const artifacts = this.preparePackageArtifacts(scormPackage, currentUser, packageId);
+
+      let packageIds: UUIDType[] = [];
+
+      const course = await this.db.transaction(async (trx) => {
+        const createdCourse = await this.courseService.createCourseInTransaction(
+          {
+            ...metadata,
+            status: metadata.status ?? "draft",
+            isScorm: true,
+          },
+          currentUser,
+          isPlaywrightTest,
+          trx,
+        );
+
+        packageIds = await this.scormRepository.persistCoursePackage(
+          {
+            courseId: createdCourse.id,
+            packageId: artifacts.packageId,
+            metadata,
+            manifest: artifacts.manifest,
+            originalFileReference: artifacts.originalFileReference,
+            extractedFilesReference: artifacts.extractedFilesReference,
+            manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+            manifestReference: artifacts.manifestReference,
+            currentUser,
+          },
+          trx,
+        );
+
+        return createdCourse;
+      });
+
+      courseId = course.id;
+
+      const result = this.buildImportResult({
+        id: course.id,
+        packageId: packageIds[0] ?? artifacts.packageId,
+        scormPackage,
+        scoCount: artifacts.manifest.scos.length,
+      });
+
+      const jobData = {
+        action: SCORM_IMPORT_ACTION.CREATE_COURSE,
+        packageId,
+        scormPackage: queuedPackage,
+        result,
+        metadata,
+        currentUser,
+        isPlaywrightTest,
+      };
+
+      await this.courseService.publishCreateCourseEvent(course.id, metadata.language, currentUser);
+
+      processingJobData = jobData;
+
+      await this.enqueueScormImportJob(jobData);
+
+      return result;
+    } catch (error) {
+      await this.cleanupSynchronousCourseImportFailure({
+        stagedFileReference: queuedPackage.stagedFileReference,
+        courseId,
+        jobData: processingJobData,
+      });
+
+      throw error;
+    }
+  }
+
+  async createLessonImport({
+    scormPackage,
+    metadata,
+    currentUser,
+  }: CreateScormLessonImportParams): Promise<ScormImportResult> {
+    const { packageId, queuedPackage } = await this.stagePackageForImport(
+      scormPackage,
+      currentUser.tenantId,
+    );
+
+    let lessonId: UUIDType | undefined;
+    let processingJobData: ScormImportJobData | undefined;
+
+    try {
+      const artifacts = this.preparePackageArtifacts(scormPackage, currentUser, packageId);
+
+      const createdLesson = await this.db.transaction(async (trx) => {
+        const lesson = await this.adminLessonService.createLessonForChapterInTransaction(
+          {
+            chapterId: metadata.chapterId,
+            title: metadata.title,
+            description: "",
+            type: LESSON_TYPES.SCORM,
+          },
+          currentUser,
+          trx,
+        );
+
+        await this.scormRepository.persistLessonPackage(
+          {
+            lessonId: lesson.lessonId,
+            packageId: artifacts.packageId,
+            manifest: artifacts.manifest,
+            originalFileReference: artifacts.originalFileReference,
+            extractedFilesReference: artifacts.extractedFilesReference,
+            manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+            manifestReference: artifacts.manifestReference,
+            language: metadata.language,
+            currentUser,
+          },
+          trx,
+        );
+
+        return lesson;
+      });
+
+      lessonId = createdLesson.lessonId;
+
+      const result = this.buildImportResult({
+        id: createdLesson.lessonId,
+        packageId: artifacts.packageId,
+        scormPackage,
+        scoCount: artifacts.manifest.scos.length,
+      });
+
+      const jobData = {
+        action: SCORM_IMPORT_ACTION.CREATE_LESSON,
+        packageId,
+        scormPackage: queuedPackage,
+        result,
+        metadata,
+        currentUser,
+      };
+
+      await this.adminLessonService.publishCreateLessonEvent(
+        createdLesson.lessonId,
+        createdLesson.language,
+        currentUser,
+      );
+
+      processingJobData = jobData;
+
+      await this.enqueueScormImportJob(jobData);
+
+      return result;
+    } catch (error) {
+      await this.cleanupSynchronousLessonImportFailure({
+        stagedFileReference: queuedPackage.stagedFileReference,
+        lessonId,
+        jobData: processingJobData,
+        currentUser,
+      });
+
+      throw error;
+    }
   }
 
   async attachLessonPackage({
@@ -211,72 +267,232 @@ export class ScormService {
     scormPackage,
     metadata,
     currentUser,
-  }: AttachScormLessonPackageParams) {
-    if (!scormPackage?.buffer?.length) {
-      throw new BadRequestException("adminScorm.errors.packageRequired");
-    }
-
-    const existingPackage = await this.scormRepository.findLessonPackage({
-      lessonId,
-      language: metadata.language,
-    });
-
-    if (existingPackage) {
-      throw new BadRequestException("adminScorm.errors.packageAlreadyAttached");
-    }
-
-    const artifacts = this.preparePackageArtifacts(scormPackage, currentUser);
-
-    await this.adminLessonService.updateLesson(
-      lessonId,
-      {
-        title: metadata.title,
-        description: "",
-        type: LESSON_TYPES.SCORM,
-        language: metadata.language,
-      },
-      currentUser,
+  }: AttachScormLessonPackageParams): Promise<ScormImportResult> {
+    const { packageId, queuedPackage } = await this.stagePackageForImport(
+      scormPackage,
+      currentUser.tenantId,
     );
 
-    await this.db.transaction((trx) =>
-      this.scormRepository.persistLessonPackage(
-        {
-          lessonId,
-          packageId: artifacts.packageId,
-          manifest: artifacts.manifest,
-          originalFileReference: artifacts.originalFileReference,
-          extractedFilesReference: artifacts.extractedFilesReference,
-          manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
-          manifestReference: artifacts.manifestReference,
-          language: metadata.language,
-          currentUser,
-        },
-        trx,
-      ),
-    );
-
-    let uploadedReferences: string[] = [];
+    let packagePersisted = false;
+    let processingJobData: ScormImportJobData | undefined;
 
     try {
-      uploadedReferences = await this.uploadPackageFiles(artifacts, currentUser.tenantId);
-      await this.scormRepository.markPackageReady(artifacts.packageId);
-    } catch (error) {
-      await this.deleteUploadedPackageFiles(uploadedReferences);
-      await this.scormRepository.deleteImportedLessonPackage({
+      const existingPackage = await this.scormRepository.findLessonPackage({
         lessonId,
         language: metadata.language,
       });
+
+      if (existingPackage) {
+        throw new BadRequestException("adminScorm.errors.packageAlreadyAttached");
+      }
+
+      const artifacts = this.preparePackageArtifacts(scormPackage, currentUser, packageId);
+
+      await this.adminLessonService.updateLesson(
+        lessonId,
+        {
+          title: metadata.title,
+          description: "",
+          type: LESSON_TYPES.SCORM,
+          language: metadata.language,
+        },
+        currentUser,
+      );
+
+      await this.db.transaction((trx) =>
+        this.scormRepository.persistLessonPackage(
+          {
+            lessonId,
+            packageId: artifacts.packageId,
+            manifest: artifacts.manifest,
+            originalFileReference: artifacts.originalFileReference,
+            extractedFilesReference: artifacts.extractedFilesReference,
+            manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+            manifestReference: artifacts.manifestReference,
+            language: metadata.language,
+            currentUser,
+          },
+          trx,
+        ),
+      );
+
+      packagePersisted = true;
+
+      const result = this.buildImportResult({
+        id: lessonId,
+        packageId: artifacts.packageId,
+        scormPackage,
+        scoCount: artifacts.manifest.scos.length,
+      });
+
+      const jobData = {
+        action: SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE,
+        packageId,
+        scormPackage: queuedPackage,
+        result,
+        lessonId,
+        metadata,
+        currentUser,
+      };
+
+      processingJobData = jobData;
+      await this.enqueueScormImportJob(jobData);
+
+      return result;
+    } catch (error) {
+      await this.cleanupSynchronousLessonImportFailure({
+        stagedFileReference: queuedPackage.stagedFileReference,
+        lessonId: packagePersisted ? lessonId : undefined,
+        jobData: processingJobData,
+        currentUser,
+      });
+
       throw error;
     }
+  }
 
+  async processQueuedImportJob(jobData: ScormImportJobData): Promise<ScormImportResult> {
+    let uploadedReferences: string[] = [];
+
+    try {
+      const buffer = await this.s3Service.getFileBuffer(jobData.scormPackage.stagedFileReference);
+
+      const scormPackage = this.buildQueuedScormPackage(jobData.scormPackage, buffer);
+
+      const artifacts = this.preparePackageArtifacts(
+        scormPackage,
+        jobData.currentUser,
+        jobData.packageId,
+      );
+
+      uploadedReferences = await this.uploadPackageFiles(artifacts, jobData.currentUser.tenantId);
+
+      await this.scormRepository.markPackageReady(jobData.packageId);
+
+      this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.READY);
+
+      return jobData.result;
+    } catch (error) {
+      await this.deleteUploadedPackageFiles(uploadedReferences);
+
+      throw error;
+    } finally {
+      await this.deleteUploadedPackageFiles([jobData.scormPackage.stagedFileReference]);
+    }
+  }
+
+  async handleQueuedImportFailure(jobData: ScormImportJobData) {
+    try {
+      await this.deleteFailedQueuedImport(jobData);
+    } finally {
+      this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.FAILED);
+    }
+  }
+
+  private buildImportResult(params: {
+    id: UUIDType;
+    packageId: UUIDType;
+    scormPackage: Express.Multer.File;
+    scoCount: number;
+  }): ScormImportResult {
     return {
-      id: lessonId,
-      packageId: artifacts.packageId,
-      fileName: scormPackage.originalname,
-      fileSize: scormPackage.size,
-      mimeType: scormPackage.mimetype,
-      scoCount: artifacts.manifest.scos.length,
+      id: params.id,
+      packageId: params.packageId,
+      fileName: params.scormPackage.originalname,
+      fileSize: params.scormPackage.size,
+      mimeType: params.scormPackage.mimetype,
+      scoCount: params.scoCount,
     };
+  }
+
+  private async enqueueScormImportJob(jobData: ScormImportJobData) {
+    this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.PROCESSING);
+    await this.scormQueueService.enqueueImportJob(jobData);
+  }
+
+  private async cleanupSynchronousCourseImportFailure(params: {
+    stagedFileReference: string;
+    courseId?: UUIDType;
+    jobData?: ScormImportJobData;
+  }) {
+    await this.deleteUploadedPackageFiles([params.stagedFileReference]);
+
+    if (params.courseId) await this.scormRepository.deleteImportedCourse(params.courseId);
+
+    if (params.jobData) this.publishScormImportStatus(params.jobData, SCORM_PACKAGE_STATUS.FAILED);
+  }
+
+  private async cleanupSynchronousLessonImportFailure(params: {
+    stagedFileReference: string;
+    lessonId?: UUIDType;
+    jobData?: ScormImportJobData;
+    currentUser: CurrentUserType;
+  }) {
+    await this.deleteUploadedPackageFiles([params.stagedFileReference]);
+
+    if (params.lessonId) await this.removeImportedLesson(params.lessonId, params.currentUser);
+
+    if (params.jobData) this.publishScormImportStatus(params.jobData, SCORM_PACKAGE_STATUS.FAILED);
+  }
+
+  private publishScormImportStatus(jobData: ScormImportJobData, status: ScormPackageStatus) {
+    this.wsGateway.emitToUser(
+      jobData.currentUser.userId,
+      SCORM_IMPORT_SOCKET.EVENTS.STATUS_CHANGED,
+      {
+        action: jobData.action,
+        status,
+        courseId:
+          jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE ? jobData.result.id : undefined,
+        lessonId:
+          jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE ? undefined : jobData.result.id,
+        packageId: jobData.packageId,
+        language: jobData.metadata.language,
+        messageKey: this.getScormImportMessageKey(jobData, status),
+      },
+    );
+  }
+
+  private getScormImportMessageKey(jobData: ScormImportJobData, status: ScormPackageStatus) {
+    if (status === SCORM_PACKAGE_STATUS.PROCESSING) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.PROCESSING;
+    }
+
+    if (status === SCORM_PACKAGE_STATUS.READY) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.READY;
+    }
+
+    if (jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.FAILED_COURSE;
+    }
+
+    return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.FAILED_LESSON;
+  }
+
+  private async deleteFailedQueuedImport(jobData: ScormImportJobData) {
+    switch (jobData.action) {
+      case SCORM_IMPORT_ACTION.CREATE_COURSE:
+        await this.scormRepository.deleteImportedCourse(jobData.result.id);
+        return;
+      case SCORM_IMPORT_ACTION.CREATE_LESSON:
+        await this.removeImportedLesson(jobData.result.id, jobData.currentUser);
+        return;
+      case SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE:
+        await this.removeImportedLesson(jobData.lessonId, jobData.currentUser);
+        return;
+      default:
+        throw new InternalServerErrorException("adminScorm.errors.unsupportedImportAction");
+    }
+  }
+
+  private async removeImportedLesson(lessonId: UUIDType, currentUser: CurrentUserType) {
+    try {
+      await this.adminLessonService.removeLesson(lessonId, currentUser);
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) throw error;
+    }
+
+    await this.scormRepository.deleteLessonPackages(lessonId);
   }
 
   async launchRuntime({ lessonId, scoId, language, currentUser }: ScormRuntimeLaunchParams) {
@@ -443,11 +659,60 @@ export class ScormService {
     }
   }
 
+  private async stagePackageForImport(
+    scormPackage: Express.Multer.File,
+    tenantId: UUIDType,
+  ): Promise<{ packageId: UUIDType; queuedPackage: QueuedScormPackageFile }> {
+    this.assertScormPackage(scormPackage);
+
+    const packageId = randomUUID();
+
+    const stagedFileReference = getScormStagedUploadReference(
+      tenantId,
+      packageId,
+      scormPackage.originalname,
+    );
+
+    await this.s3Service.uploadFile(
+      scormPackage.buffer,
+      stagedFileReference,
+      scormPackage.mimetype || "application/zip",
+    );
+
+    return {
+      packageId,
+      queuedPackage: {
+        stagedFileReference,
+        originalname: scormPackage.originalname,
+        mimetype: scormPackage.mimetype,
+        size: scormPackage.size,
+      },
+    };
+  }
+
+  private buildQueuedScormPackage(
+    file: QueuedScormPackageFile,
+    buffer: Buffer,
+  ): Express.Multer.File {
+    return {
+      buffer,
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+    } as Express.Multer.File;
+  }
+
+  private assertScormPackage(scormPackage: Express.Multer.File) {
+    if (!scormPackage?.buffer?.length) {
+      throw new BadRequestException("adminScorm.errors.packageRequired");
+    }
+  }
+
   private preparePackageArtifacts(
     scormPackage: Express.Multer.File,
     currentUser: CurrentUserType,
+    packageId: UUIDType = randomUUID(),
   ): PreparedPackageArtifacts {
-    const packageId = randomUUID();
     const zip = new AdmZip(scormPackage.buffer);
     const entries = this.getValidatedZipEntries(zip);
     const manifestEntry = this.getManifestEntry(entries);
@@ -831,6 +1096,8 @@ export class ScormService {
   }
 
   private async deleteUploadedPackageFiles(references: string[]) {
+    if (!references.length) return;
+
     await Promise.allSettled(references.map((reference) => this.s3Service.deleteFile(reference)));
   }
 
@@ -980,6 +1247,7 @@ export class ScormService {
     switch (lessonStatus) {
       case SCORM_1_2_LESSON_STATUS.COMPLETED:
       case SCORM_1_2_LESSON_STATUS.PASSED:
+      case SCORM_1_2_LESSON_STATUS.FAILED:
         return SCORM_COMPLETION_STATUS.COMPLETED;
       case SCORM_1_2_LESSON_STATUS.INCOMPLETE:
         return SCORM_COMPLETION_STATUS.INCOMPLETE;

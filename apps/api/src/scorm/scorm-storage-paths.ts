@@ -53,6 +53,13 @@ export const getScormOriginalFileReference = (
     originalFilename,
   )}`;
 
+export const getScormStagedUploadReference = (
+  tenantId: UUIDType,
+  packageId: UUIDType,
+  originalFilename: string,
+) =>
+  `${getScormPackagePrefix(tenantId, packageId)}/staged/${sanitizeScormFilename(originalFilename)}`;
+
 export const getScormExtractedFilesReference = (tenantId: UUIDType, packageId: UUIDType) =>
   `${getScormPackagePrefix(tenantId, packageId)}/extracted`;
 

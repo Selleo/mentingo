@@ -4,6 +4,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
+import { useGlobalScormImportNotifications } from "~/hooks/useGlobalScormImportNotifications";
 import { useGlobalVideoUploadNotifications } from "~/hooks/useGlobalVideoUploadNotifications";
 import { useSessionRevocationNotifications } from "~/hooks/useSessionRevocationNotifications";
 import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
@@ -53,6 +54,7 @@ function TourKeyboardHandler({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useGlobalVideoUploadNotifications();
+  useGlobalScormImportNotifications();
   useSessionRevocationNotifications();
   const { pruneExpiredUploads } = useVideoUploadResumeStore();
 

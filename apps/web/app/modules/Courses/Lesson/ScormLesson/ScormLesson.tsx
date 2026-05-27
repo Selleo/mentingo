@@ -26,10 +26,17 @@ type ScormNavigationProps = {
   title: string;
   previousScoId: string | null;
   nextScoId: string | null;
+  isSaving: boolean;
   onSelectSco: (scoId: string | null) => void;
 };
 
-function ScormNavigation({ title, previousScoId, nextScoId, onSelectSco }: ScormNavigationProps) {
+function ScormNavigation({
+  title,
+  previousScoId,
+  nextScoId,
+  isSaving,
+  onSelectSco,
+}: ScormNavigationProps) {
   const { t } = useTranslation();
 
   return (
@@ -41,7 +48,7 @@ function ScormNavigation({ title, previousScoId, nextScoId, onSelectSco }: Scorm
         data-testid={LEARNING_HANDLES.SCORM_PREVIOUS_SECTION_BUTTON}
         variant="outline"
         className="justify-self-start"
-        disabled={!previousScoId}
+        disabled={isSaving || !previousScoId}
         onClick={() => onSelectSco(previousScoId)}
       >
         <ChevronLeft className="size-4" />
@@ -52,7 +59,7 @@ function ScormNavigation({ title, previousScoId, nextScoId, onSelectSco }: Scorm
         data-testid={LEARNING_HANDLES.SCORM_NEXT_SECTION_BUTTON}
         variant="outline"
         className="justify-self-end"
-        disabled={!nextScoId}
+        disabled={isSaving || !nextScoId}
         onClick={() => onSelectSco(nextScoId)}
       >
         {t("studentLessonView.scorm.nextSco")}
@@ -66,6 +73,7 @@ export function ScormLesson({ lessonId }: ScormLessonProps) {
   const { t } = useTranslation();
   const { language } = useLanguageStore();
   const [selectedScoId, setSelectedScoId] = useState<string | null>(null);
+  const [isRuntimeSaving, setIsRuntimeSaving] = useState(false);
   const {
     data: launch,
     isLoading,
@@ -118,10 +126,11 @@ export function ScormLesson({ lessonId }: ScormLessonProps) {
           title={launch.scoTitle}
           previousScoId={launch.navigation.previousScoId}
           nextScoId={launch.navigation.nextScoId}
+          isSaving={isRuntimeSaving}
           onSelectSco={setSelectedScoId}
         />
       )}
-      <ScormPlayer launch={launch} language={language} />
+      <ScormPlayer launch={launch} language={language} onSavingChange={setIsRuntimeSaving} />
     </div>
   );
 }

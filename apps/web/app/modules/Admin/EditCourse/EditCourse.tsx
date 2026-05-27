@@ -7,6 +7,7 @@ import {
   isCourseFeatureEnabledForCourseType,
   type SupportedLanguages,
 } from "@repo/shared";
+import { isAxiosError } from "axios";
 import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -134,7 +135,11 @@ const EditCourse = () => {
   const [isCourseGeneratedOverride, setIsCourseGeneratedOverride] = useState(false);
   const isCourseGenerated = Boolean(draft?.isCourseGenerated) || isCourseGeneratedOverride;
 
-  const { data: hasMissingTranslations } = useMissingTranslations(id, courseLanguage);
+  const { data: hasMissingTranslations } = useMissingTranslations(
+    id,
+    courseLanguage,
+    Boolean(course),
+  );
   const { data: exportCandidates } = useMasterCourseExportCandidates(id, canShowTenantSharing);
   const { previousDataUpdatedAt, currentDataUpdatedAt } = useTrackDataUpdatedAt(dataUpdatedAt);
 
@@ -265,7 +270,7 @@ const EditCourse = () => {
 
   useEffect(() => {
     if (error) {
-      navigate("/");
+      navigate(isAxiosError(error) && error.response?.status === 404 ? "/courses" : "/");
     }
   }, [error, navigate]);
 
@@ -328,14 +333,16 @@ const EditCourse = () => {
                   {t("common.other.private")}
                 </Badge>
               )}
-              <Badge
-                data-testid={EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE}
-                variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
-                fontWeight="bold"
-                className="ml-2"
-              >
-                {getCourseTypeLabel(courseType, t)}
-              </Badge>
+              {courseType === COURSE_TYPE.SCORM && (
+                <Badge
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE}
+                  variant="success"
+                  fontWeight="bold"
+                  className="ml-2"
+                >
+                  {getCourseTypeLabel(courseType, t)}
+                </Badge>
+              )}
               {isMasterCourse && (
                 <Badge variant="secondaryWithOutline" fontWeight="bold" className="ml-2">
                   <Building className="size-3.5" />

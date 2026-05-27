@@ -117,6 +117,7 @@ type RuntimeLabels = {
   yourAnswer: string;
   correctAnswer: string;
   expectedAnswer: string;
+  retakeQuiz: string;
 };
 
 const DEFAULT_PRIMARY_COLOR = "#4596FD";
@@ -135,6 +136,7 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     yourAnswer: "Your answer",
     correctAnswer: "Correct answer",
     expectedAnswer: "Expected answer",
+    retakeQuiz: "Retake quiz",
   },
   pl: {
     passed: "Zaliczono",
@@ -148,6 +150,7 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     yourAnswer: "Twoja odpowiedz",
     correctAnswer: "Poprawna odpowiedz",
     expectedAnswer: "Oczekiwana odpowiedz",
+    retakeQuiz: "Podejdz ponownie",
   },
   de: {
     passed: "Bestanden",
@@ -161,6 +164,7 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     yourAnswer: "Deine Antwort",
     correctAnswer: "Richtige Antwort",
     expectedAnswer: "Erwartete Antwort",
+    retakeQuiz: "Quiz wiederholen",
   },
   cs: {
     passed: "Splneno",
@@ -174,6 +178,7 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     yourAnswer: "Vase odpoved",
     correctAnswer: "Spravna odpoved",
     expectedAnswer: "Ocekavana odpoved",
+    retakeQuiz: "Opakovat kviz",
   },
   lt: {
     passed: "Islaikyta",
@@ -187,6 +192,7 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     yourAnswer: "Jusu atsakymas",
     correctAnswer: "Teisingas atsakymas",
     expectedAnswer: "Tiketinas atsakymas",
+    retakeQuiz: "Kartoti testa",
   },
 };
 const QUESTION_TYPE = {
@@ -309,6 +315,19 @@ function createRuntimeState(api: ScormApi | null, lesson: Lesson) {
       api?.LMSSetValue("cmi.core.score.min", "0");
       api?.LMSSetValue("cmi.core.score.max", "100");
       api?.LMSSetValue("cmi.core.lesson_status", passed ? "passed" : "failed");
+      persist();
+    },
+    resetQuiz() {
+      const state = suspendData.lessons![lesson.id];
+      delete state.completed;
+      delete state.submitted;
+      delete state.correct;
+      delete state.scorePercent;
+      delete state.answers;
+      api?.LMSSetValue("cmi.core.score.raw", "0");
+      api?.LMSSetValue("cmi.core.score.min", "0");
+      api?.LMSSetValue("cmi.core.score.max", "100");
+      api?.LMSSetValue("cmi.core.lesson_status", "incomplete");
       persist();
     },
   };
@@ -537,11 +556,14 @@ function renderQuizLesson(
   const form = element("form", "quiz-form") as HTMLFormElement;
   const feedback = element("div", "quiz-feedback");
   const actions = element("div", "quiz-actions");
+  const retake = element("button", "secondary-button", labels.retakeQuiz) as HTMLButtonElement;
   const submit = element(
     "button",
     "primary-button",
     submitted ? labels.submitted : labels.submitQuiz,
   ) as HTMLButtonElement;
+  retake.type = "button";
+  retake.hidden = !submitted;
   submit.type = "submit";
   submit.disabled = submitted;
 
@@ -557,7 +579,7 @@ function renderQuizLesson(
       ),
     );
   });
-  actions.append(submit);
+  actions.append(retake, submit);
   form.append(feedback, actions);
 
   form.addEventListener("submit", (event) => {
@@ -569,6 +591,7 @@ function renderQuizLesson(
     feedback.replaceChildren(renderScore(result, lesson, labels));
     submit.textContent = labels.submitted;
     submit.disabled = true;
+    retake.hidden = false;
     form
       .querySelectorAll<
         HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -584,6 +607,12 @@ function renderQuizLesson(
         if (card) updateQuestionFeedback(card, question, answers[question.id], labels, true);
       });
     }
+  });
+
+  retake.addEventListener("click", () => {
+    runtime.resetQuiz();
+    container.replaceChildren();
+    renderQuizLesson(container, lesson, courseJson, runtime);
   });
 
   container.append(form);

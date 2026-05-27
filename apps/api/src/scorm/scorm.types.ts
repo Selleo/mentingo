@@ -1,4 +1,9 @@
-import type { ScormCompletionStatus, ScormSuccessStatus, SupportedLanguages } from "@repo/shared";
+import type {
+  ScormCompletionStatus,
+  SCORM_IMPORT_ACTION,
+  ScormSuccessStatus,
+  SupportedLanguages,
+} from "@repo/shared";
 import type AdmZip from "adm-zip";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -28,6 +33,65 @@ export type AttachScormLessonPackageParams = {
   metadata: Omit<CreateScormLessonBody, "chapterId">;
   currentUser: CurrentUserType;
 };
+
+export type ScormImportResult = {
+  id: UUIDType;
+  packageId: UUIDType;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  scoCount: number;
+};
+
+export type QueuedScormPackageFile = {
+  stagedFileReference: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
+};
+
+type ScormImportJobDataBase = {
+  packageId: UUIDType;
+  scormPackage: QueuedScormPackageFile;
+  currentUser: CurrentUserType;
+  result: ScormImportResult;
+};
+
+export type CreateScormCourseImportJobData = ScormImportJobDataBase & {
+  action: typeof SCORM_IMPORT_ACTION.CREATE_COURSE;
+  metadata: CreateScormCourseBody;
+  isPlaywrightTest: boolean;
+};
+
+export type CreateScormLessonImportJobData = ScormImportJobDataBase & {
+  action: typeof SCORM_IMPORT_ACTION.CREATE_LESSON;
+  metadata: CreateScormLessonBody;
+};
+
+export type AttachScormLessonPackageJobData = ScormImportJobDataBase & {
+  action: typeof SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE;
+  lessonId: UUIDType;
+  metadata: Omit<CreateScormLessonBody, "chapterId">;
+};
+
+export type ScormImportJobData =
+  | CreateScormCourseImportJobData
+  | CreateScormLessonImportJobData
+  | AttachScormLessonPackageJobData;
+
+export type ScormImportJobSuccess = {
+  success: true;
+  data: ScormImportResult;
+};
+
+export type ScormImportJobFailure = {
+  success: false;
+  statusCode: number;
+  message: string;
+  response?: unknown;
+};
+
+export type ScormImportJobResult = ScormImportJobSuccess | ScormImportJobFailure;
 
 export type ScormResourceManifest = {
   identifier: string;

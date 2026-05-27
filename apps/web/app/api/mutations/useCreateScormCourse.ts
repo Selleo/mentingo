@@ -27,10 +27,9 @@ export function useCreateScormCourse() {
 
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries(currentUserQueryOptions);
       queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
-      toast({ description: t(data.data.message) });
     },
     onError: (error: AxiosError) => {
       toast({

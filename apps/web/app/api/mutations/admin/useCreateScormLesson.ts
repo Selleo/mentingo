@@ -24,11 +24,9 @@ export function useCreateScormLesson() {
 
       return response.data;
     },
-    onSuccess: async (data) => {
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
       await queryClient.invalidateQueries({ queryKey: ["course"] });
-
-      toast({ description: t(data.data.message) });
     },
     onError: (error: AxiosError) => {
       toast({

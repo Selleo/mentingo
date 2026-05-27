@@ -173,8 +173,15 @@
       "creatingCourse": "Kurs erstellen...",
       "createCourse": "Kurs erstellen"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM-Paket erfolgreich hochgeladen"
+    "importFailure": {
+      "courseDescription": "Der Kurs wurde entfernt, weil das SCORM-Paket nicht importiert werden konnte.",
+      "lessonDescription": "Die SCORM-Lektion oder das Paket wurde entfernt, weil das Paket nicht importiert werden konnte."
+    },
+    "importProcessing": {
+      "description": "Das Paket wird noch importiert. Sie können weiterarbeiten, während der Import abgeschlossen wird."
+    },
+    "importSuccess": {
+      "description": "Das SCORM-Paket ist bereit."
     },
     "errors": {
       "packageRequired": "SCORM-Paket ist erforderlich.",
@@ -191,6 +198,9 @@
       "packageAlreadyAttached": "Diese SCORM-Lektion hat bereits ein Paket für die ausgewählte Sprache.",
       "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
       "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
+      "importFailed": "SCORM-Paketimport fehlgeschlagen.",
+      "unknownImportJob": "SCORM-Importauftrag wurde nicht erkannt.",
+      "unsupportedImportAction": "SCORM-Importaktion wird nicht unterstützt.",
       "runtime": {
         "launchNotFound": "SCORM-Startinhalt wurde nicht gefunden.",
         "unsupportedStandard": "Dieser SCORM-Standard wird nicht unterstützt.",
@@ -809,6 +819,7 @@
       "category": "Kategorie",
       "price": "Preis",
       "type": "Typ",
+      "scorm": "SCORM",
       "state": "Zustand",
       "status": "Status",
       "sharedCourse": "Geteilt",
