@@ -14,4 +14,6 @@ export const createAnnouncementSchema = Type.Object({
   groupId: Type.Union([UUIDSchema, Type.Null()], { default: null }),
   baseLanguage: announcementLanguageSchema,
   translations: Type.Array(createAnnouncementTranslationSchema, { minItems: 1 }),
+  scheduledAt: Type.Optional(Type.Union([Type.String({ format: "date-time" }), Type.Null()])),
+  sendEmail: Type.Optional(Type.Boolean({ default: false })),
 });

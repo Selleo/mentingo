@@ -3,6 +3,7 @@ export * from "./constants/aiMentorAvatar";
 export * from "./constants/aiMentorTypes";
 export * from "./constants/aiMentorVoice";
 export * from "./constants/allowedAge";
+export * from "./constants/announcements";
 export * from "./constants/articlesSettings";
 export * from "./constants/articlesTypes";
 export * from "./constants/calendar";

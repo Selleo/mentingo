@@ -303,6 +303,28 @@ export class LiveTrainingRepository {
     return row ?? null;
   }
 
+  async getLiveTrainingNotificationRow(liveTrainingId: UUIDType) {
+    const [row] = await this.db
+      .select({
+        id: liveTrainings.id,
+        title: calendarEvents.title,
+        startsAt: calendarEvents.startsAt,
+        baseLanguage: calendarEvents.baseLanguage,
+        availableLocales: calendarEvents.availableLocales,
+      })
+      .from(liveTrainings)
+      .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))
+      .where(
+        and(
+          eq(liveTrainings.id, liveTrainingId),
+          isNull(liveTrainings.deletedAt),
+          isNull(calendarEvents.deletedAt),
+        ),
+      );
+
+    return row ?? null;
+  }
+
   async getLiveTrainingListRows(
     conditions: LiveTrainingListConditions,
     language: SupportedLanguages,

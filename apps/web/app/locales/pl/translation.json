@@ -3345,7 +3345,17 @@
         "content": "Treść",
         "group": "Grupa",
         "language": "Język",
-        "everyone": "Wszyscy"
+        "everyone": "Wszyscy",
+        "schedule": "Zaplanuj ogłoszenie",
+        "scheduledAt": "Opublikuj o",
+        "sendEmail": "Wyślij e-mail"
+      },
+      "descriptions": {
+        "schedule": "Opublikuj to ogłoszenie automatycznie o wybranej godzinie.",
+        "sendEmail": "Wyślij treść ogłoszenia e-mailem po publikacji."
+      },
+      "tooltips": {
+        "scheduledAt": "Wybierz, kiedy ogłoszenie ma stać się widoczne."
       },
       "addedLanguages": "Dodane języki",
       "placeholders": {
@@ -3361,6 +3371,10 @@
         },
         "content": {
           "required": "Treść jest wymagana"
+        },
+        "schedule": {
+          "invalid": "Wybierz poprawną godzinę w odstępach co 5 minut",
+          "past": "Czas publikacji musi być w przyszłości"
         }
       }
     },
@@ -3378,7 +3392,10 @@
       "createFailed": "Nie udało się utworzyć ogłoszenia",
       "deletedSuccessfully": "Ogłoszenie zostało usunięte",
       "deleteFailed": "Nie udało się usunąć ogłoszenia",
-      "notFound": "Nie znaleziono ogłoszenia"
+      "notFound": "Nie znaleziono ogłoszenia",
+      "invalidSchedule": "Nieprawidłowy czas publikacji ogłoszenia",
+      "invalidScheduleStep": "Czas publikacji ogłoszenia musi używać odstępów co 5 minut",
+      "scheduleInPast": "Czas publikacji ogłoszenia musi być w przyszłości"
     }
   },
   "notifications": {
@@ -3398,7 +3415,9 @@
       "goToNotificationCenter": "Przejdź do centrum powiadomień"
     },
     "status": {
-      "unread": "Nieprzeczytane"
+      "unread": "Nieprzeczytane",
+      "scheduled": "Zaplanowane",
+      "published": "Opublikowane"
     },
     "empty": "Brak powiadomień",
     "deleteDialog": {

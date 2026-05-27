@@ -1,10 +1,15 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
+import {
+  SUPPORTED_LANGUAGES,
+  type AnnouncementStatus,
+  type SupportedLanguages,
+} from "@repo/shared";
 
 import { parsePagination } from "src/common/pagination";
 import { CreateAnnouncementEvent, ViewAnnouncementEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 
+import { AnnouncementsSchedulerService } from "./announcements-scheduler.service";
 import { AnnouncementsRepository } from "./announcements.repository";
 import { ANNOUNCEMENTS_PAGE_SIZE } from "./constants/announcementPagination.constants";
 
@@ -18,20 +23,26 @@ export class AnnouncementsService {
   constructor(
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly announcementsSchedulerService: AnnouncementsSchedulerService,
   ) {}
 
   async getAllAnnouncements(
     language?: SupportedLanguages,
     paginationQuery: AnnouncementPaginationQuery = {},
+    status?: AnnouncementStatus,
   ) {
     const { page, perPage } = parsePagination(paginationQuery.page, paginationQuery.perPage, {
       perPage: ANNOUNCEMENTS_PAGE_SIZE,
     });
 
-    return await this.announcementsRepository.getAllAnnouncements(language, {
-      page,
-      perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
-    });
+    return await this.announcementsRepository.getAllAnnouncements(
+      language,
+      {
+        page,
+        perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
+      },
+      status,
+    );
   }
 
   async getUnreadAnnouncementsCount(userId: UUIDType) {
@@ -88,9 +99,9 @@ export class AnnouncementsService {
   async createAnnouncement(createAnnouncementData: CreateAnnouncement, author: CurrentUserType) {
     this.validateCreateAnnouncement(createAnnouncementData);
 
-    const createdAnnouncement = await this.announcementsRepository.createAnnouncement(
+    const createdAnnouncement = await this.announcementsSchedulerService.createManualAnnouncement(
       createAnnouncementData,
-      author.userId,
+      author,
     );
 
     if (!createdAnnouncement) throw new BadRequestException("announcements.toast.createFailed");

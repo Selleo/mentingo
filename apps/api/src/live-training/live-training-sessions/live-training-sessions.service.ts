@@ -23,6 +23,7 @@ import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
+import { LiveTrainingAnnouncementsService } from "../live-training-announcements.service";
 import { LiveTrainingService } from "../live-training.service";
 import { LiveKitService } from "../livekit/livekit.service";
 
@@ -66,6 +67,7 @@ export class LiveTrainingSessionsService {
     private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly settingsService: SettingsService,
+    private readonly liveTrainingAnnouncementsService: LiveTrainingAnnouncementsService,
   ) {}
 
   async getSessions(
@@ -228,6 +230,10 @@ export class LiveTrainingSessionsService {
       deliveryType: liveTraining.deliveryType,
       startedAt: sessionRow.startedAt ?? new Date().toISOString(),
     });
+    await this.liveTrainingAnnouncementsService.publishStartedNotification(
+      liveTrainingId,
+      currentUser,
+    );
 
     return this.mapSessionSummary(sessionRow);
   }
@@ -380,6 +386,10 @@ export class LiveTrainingSessionsService {
       deliveryType: LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
       startedAt: sessionRow.startedAt ?? new Date().toISOString(),
     });
+    await this.liveTrainingAnnouncementsService.publishStartedNotification(
+      liveTrainingId,
+      currentUser,
+    );
 
     return this.mapSessionSummary(sessionRow);
   }
@@ -489,6 +499,10 @@ export class LiveTrainingSessionsService {
       endedAt,
       endReason: LIVE_TRAINING_SESSION_STATUSES.ENDED,
     });
+    await this.liveTrainingAnnouncementsService.publishEndedNotification(
+      liveTrainingId,
+      currentUser,
+    );
 
     const endedSession = await this.liveTrainingSessionsRepository.getSessionRow(
       liveTrainingId,

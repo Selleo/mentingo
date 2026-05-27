@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useCreateAnnouncement } from "~/api/mutations/admin/useCreateAnnouncement";
@@ -27,14 +27,16 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
+import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
+import { CalendarDateTimeField } from "~/modules/Calendar/components/CalendarDateTimeField";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { EVERYONE_GROUP_VALUE } from "../constants";
 import { NOTIFICATIONS_HANDLES } from "../handles";
 import { createAnnouncementFormSchema } from "../schemas/createAnnouncement.schema";
-import { getDefaultAnnouncementFormValues } from "../utils";
+import { buildAnnouncementScheduledAt, getDefaultAnnouncementFormValues } from "../utils";
 
 import type { CreateAnnouncementDialogProps, TranslationFormValues } from "../types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -64,8 +66,8 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
     register,
     reset,
     setValue,
-    watch,
     clearErrors,
+    control,
   } = useForm<TranslationFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: getDefaultAnnouncementFormValues(),
@@ -74,8 +76,12 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
 
   const baseLanguage = enabledLanguages[0] ?? selectedLanguage;
   const isSelectedEnabled = enabledLanguages.includes(selectedLanguage);
-  const groupId = watch("groupId");
-  const activeTranslation = watch(`translations.${selectedLanguage}`);
+  const groupId = useWatch({ control, name: "groupId" });
+  const activeTranslation = useWatch({ control, name: `translations.${selectedLanguage}` });
+  const scheduled = useWatch({ control, name: "scheduled" });
+  const scheduledDate = useWatch({ control, name: "scheduledDate" });
+  const scheduledTime = useWatch({ control, name: "scheduledTime" });
+  const sendEmail = useWatch({ control, name: "sendEmail" });
   const selectedLanguageErrors = errors.translations?.[selectedLanguage];
   const addedLanguageItems = languageOptions.filter((item) => enabledLanguages.includes(item.key));
   const notAddedLanguageItems = languageOptions.filter(
@@ -123,6 +129,10 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
         title: values.translations[language].title.trim(),
         content: values.translations[language].content.trim(),
       })),
+      scheduledAt: values.scheduled
+        ? buildAnnouncementScheduledAt(values.scheduledDate, values.scheduledTime)
+        : null,
+      sendEmail: values.sendEmail,
     };
 
     await createAnnouncement({ data });
@@ -327,6 +337,60 @@ export function CreateAnnouncementDialog({ open, onOpenChange }: CreateAnnouncem
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div>
+
+          <Separator />
+
+          <div className="grid gap-4">
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 p-3">
+              <div className="space-y-1">
+                <Label>{t("announcements.createPage.fields.schedule")}</Label>
+                <p className="text-sm text-neutral-600">
+                  {t("announcements.createPage.descriptions.schedule")}
+                </p>
+              </div>
+              <Switch
+                checked={scheduled}
+                onCheckedChange={(checked) => setValue("scheduled", checked, { shouldDirty: true })}
+              />
+            </div>
+
+            {scheduled && (
+              <div className="grid gap-2">
+                <CalendarDateTimeField
+                  label={t("announcements.createPage.fields.scheduledAt")}
+                  tooltip={t("announcements.createPage.tooltips.scheduledAt")}
+                  date={scheduledDate}
+                  time={scheduledTime}
+                  timeStepMinutes={5}
+                  portalledDatePicker={false}
+                  onDateChange={(date) =>
+                    setValue("scheduledDate", date, { shouldDirty: true, shouldValidate: true })
+                  }
+                  onTimeChange={(time) =>
+                    setValue("scheduledTime", time, { shouldDirty: true, shouldValidate: true })
+                  }
+                />
+                {(errors.scheduledDate || errors.scheduledTime) && (
+                  <p className="text-sm text-error-600">
+                    {errors.scheduledDate?.message ?? errors.scheduledTime?.message}
+                  </p>
+                )}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-neutral-200 p-3">
+              <div className="space-y-1">
+                <Label>{t("announcements.createPage.fields.sendEmail")}</Label>
+                <p className="text-sm text-neutral-600">
+                  {t("announcements.createPage.descriptions.sendEmail")}
+                </p>
+              </div>
+              <Switch
+                checked={sendEmail}
+                onCheckedChange={(checked) => setValue("sendEmail", checked, { shouldDirty: true })}
+              />
+            </div>
           </div>
         </div>
 

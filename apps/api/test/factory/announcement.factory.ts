@@ -1,5 +1,10 @@
 import { faker } from "@faker-js/faker";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  ANNOUNCEMENT_EMAIL_TEMPLATES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { eq, and, not } from "drizzle-orm";
 import { Factory } from "fishery";
 
@@ -61,6 +66,13 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
       content: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph() },
       authorId: faker.string.uuid(),
       isEveryone: true,
+      status: ANNOUNCEMENT_STATUSES.PUBLISHED,
+      scheduledAt: null,
+      publishedAt: new Date().toISOString(),
+      sendEmail: false,
+      emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
+      sourceType: ANNOUNCEMENT_SOURCE_TYPES.MANUAL,
+      sourceId: null,
       baseLanguage: SUPPORTED_LANGUAGES.EN,
       availableLocales: [SUPPORTED_LANGUAGES.EN],
       deletedAt: null,

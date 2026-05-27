@@ -40,6 +40,7 @@ import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
+import { LiveTrainingAnnouncementsService } from "./live-training-announcements.service";
 import { LiveTrainingRepository } from "./live-training.repository";
 
 import type {
@@ -75,6 +76,7 @@ export class LiveTrainingService {
     private readonly fileService: FileService,
     private readonly envService: EnvService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly liveTrainingAnnouncementsService: LiveTrainingAnnouncementsService,
   ) {}
 
   async getLiveTrainings(
@@ -216,6 +218,7 @@ export class LiveTrainingService {
         createdLiveTraining: liveTrainingSnapshot,
       }),
     );
+    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(liveTrainingId, currentUser);
 
     return this.getLiveTrainingDetailsOrThrow(liveTrainingId, language, currentUser);
   }
@@ -261,6 +264,7 @@ export class LiveTrainingService {
       }),
       dbInstance,
     );
+    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(liveTrainingId, currentUser);
 
     return { liveTrainingId, liveTrainingLinkId: courseLink.id };
   }
@@ -506,6 +510,7 @@ export class LiveTrainingService {
         updatedLiveTrainingData: updatedSnapshot,
       }),
     );
+    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(id, currentUser);
 
     return this.getLiveTrainingDetailsOrThrow(id, language, currentUser);
   }
@@ -534,6 +539,7 @@ export class LiveTrainingService {
       row.calendarEventId,
       row.sequence + 1,
     );
+    await this.liveTrainingAnnouncementsService.cancelStartsSoonReminder(row.id);
 
     await this.outboxPublisher.publish(
       new DeleteLiveTrainingEvent({

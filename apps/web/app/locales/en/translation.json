@@ -3064,7 +3064,17 @@
         "content": "Content",
         "group": "Group",
         "language": "Language",
-        "everyone": "Everyone"
+        "everyone": "Everyone",
+        "schedule": "Schedule announcement",
+        "scheduledAt": "Publish at",
+        "sendEmail": "Send email"
+      },
+      "descriptions": {
+        "schedule": "Publish this announcement automatically at a selected time.",
+        "sendEmail": "Send the announcement content by email when it is published."
+      },
+      "tooltips": {
+        "scheduledAt": "Choose when this announcement should become visible."
       },
       "addedLanguages": "Added languages",
       "placeholders": {
@@ -3080,6 +3090,10 @@
         },
         "content": {
           "required": "Content is required"
+        },
+        "schedule": {
+          "invalid": "Select a valid time in 5 minute intervals",
+          "past": "Scheduled time must be in the future"
         }
       }
     },
@@ -3097,7 +3111,10 @@
       "createFailed": "Failed to create announcement",
       "deletedSuccessfully": "Announcement deleted successfully",
       "deleteFailed": "Failed to delete announcement",
-      "notFound": "Announcement not found"
+      "notFound": "Announcement not found",
+      "invalidSchedule": "Invalid announcement schedule",
+      "invalidScheduleStep": "Announcement schedule must use 5 minute intervals",
+      "scheduleInPast": "Announcement schedule must be in the future"
     }
   },
   "notifications": {
@@ -3117,7 +3134,9 @@
       "goToNotificationCenter": "Go to notification center"
     },
     "status": {
-      "unread": "Unread"
+      "unread": "Unread",
+      "scheduled": "Scheduled",
+      "published": "Published"
     },
     "empty": "No notifications yet",
     "deleteDialog": {

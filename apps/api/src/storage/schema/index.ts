@@ -22,6 +22,9 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
+  ANNOUNCEMENT_EMAIL_TEMPLATES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -87,6 +90,9 @@ import type {
   CertificateArchiveReason,
   CertificateStatus,
   CalendarEventStatus,
+  AnnouncementEmailTemplate,
+  AnnouncementSourceType,
+  AnnouncementStatus,
   LiveTrainingDeliveryType,
   LiveTrainingLinkEntityType,
   LiveTrainingMemberRole,
@@ -1479,6 +1485,22 @@ export const announcements = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     isEveryone: boolean("is_everyone").notNull().default(false),
+    status: text("status")
+      .$type<AnnouncementStatus>()
+      .notNull()
+      .default(ANNOUNCEMENT_STATUSES.PUBLISHED),
+    scheduledAt: timestampWithTimezone({ name: "scheduled_at" }),
+    publishedAt: timestampWithTimezone({ name: "published_at" }),
+    sendEmail: boolean("send_email").notNull().default(false),
+    emailTemplate: text("email_template")
+      .$type<AnnouncementEmailTemplate>()
+      .notNull()
+      .default(ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT),
+    sourceType: text("source_type")
+      .$type<AnnouncementSourceType>()
+      .notNull()
+      .default(ANNOUNCEMENT_SOURCE_TYPES.MANUAL),
+    sourceId: uuid("source_id"),
     baseLanguage,
     availableLocales,
     deletedAt: timestampWithTimezone({ name: "deleted_at" }),

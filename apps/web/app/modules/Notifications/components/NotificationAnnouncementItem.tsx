@@ -1,3 +1,4 @@
+import { ANNOUNCEMENT_STATUSES } from "@repo/shared";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCheck, Megaphone, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -69,6 +70,11 @@ export function NotificationAnnouncementItem({
           {isUnread && (
             <span className="rounded-full bg-primary-100 px-2 py-0.5 font-medium text-primary-800">
               {t("notifications.status.unread")}
+            </span>
+          )}
+          {announcement.status === ANNOUNCEMENT_STATUSES.SCHEDULED && (
+            <span className="rounded-full bg-warning-100 px-2 py-0.5 font-medium text-warning-800">
+              {t("notifications.status.scheduled")}
             </span>
           )}
           <span>{distance}</span>

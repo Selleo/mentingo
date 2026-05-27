@@ -953,6 +953,13 @@
       "when": 1779892885630,
       "tag": "0135_backfill_live_training_max_parallel_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 136,
+      "version": "7",
+      "when": 1779896998213,
+      "tag": "0136_add_scheduled_announcements",
+      "breakpoints": true
     }
   ]
 }

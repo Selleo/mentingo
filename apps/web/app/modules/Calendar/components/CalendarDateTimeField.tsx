@@ -19,6 +19,7 @@ type CalendarDateTimeFieldProps = {
   time: string;
   portalledDatePicker?: boolean;
   hideTime?: boolean;
+  timeStepMinutes?: number;
   onDateChange: (date: string) => void;
   onTimeChange: (time: string) => void;
 };
@@ -37,6 +38,7 @@ export function CalendarDateTimeField({
   time,
   portalledDatePicker = true,
   hideTime = false,
+  timeStepMinutes,
   onDateChange,
   onTimeChange,
 }: CalendarDateTimeFieldProps) {
@@ -92,7 +94,9 @@ export function CalendarDateTimeField({
             />
           </PopoverContent>
         </Popover>
-        {!hideTime && <CalendarTimeSelect value={time} onChange={onTimeChange} />}
+        {!hideTime && (
+          <CalendarTimeSelect value={time} stepMinutes={timeStepMinutes} onChange={onTimeChange} />
+        )}
       </div>
     </div>
   );

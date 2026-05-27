@@ -7,6 +7,10 @@ export type TranslationDraft = {
 
 export type TranslationFormValues = {
   groupId: string | null;
+  scheduled: boolean;
+  scheduledDate: string;
+  scheduledTime: string;
+  sendEmail: boolean;
   translations: Record<SupportedLanguages, TranslationDraft>;
 };
 
