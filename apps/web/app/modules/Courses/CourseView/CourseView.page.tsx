@@ -4,8 +4,8 @@ import { isAxiosError } from "axios";
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ApiClient } from "~/api/api-client";
-import { useCourse, useCurrentUser } from "~/api/queries";
+import { courseLookupQueryOptions, useCourse, useCurrentUser } from "~/api/queries";
+import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -65,11 +65,8 @@ export const clientLoader = async ({
   const url = new URL(request.url);
   const language = resolvePreferredLanguage(url);
 
-  const lookupResponse = await ApiClient.api
-    .courseControllerLookupCourse({
-      id: idOrSlug,
-      language,
-    })
+  const lookupCourse = await queryClient
+    .fetchQuery(courseLookupQueryOptions(idOrSlug, language))
     .catch((error: unknown) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         throw redirect("/courses", 302);
@@ -78,7 +75,7 @@ export const clientLoader = async ({
       throw error;
     });
 
-  const { status, slug } = lookupResponse.data.data;
+  const { status, slug } = lookupCourse;
 
   if (status === "redirect" && slug) {
     const redirectUrl = new URL(`/course/${slug}`, request.url);

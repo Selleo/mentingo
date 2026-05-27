@@ -40,7 +40,7 @@ export class ScormImportWorker implements OnModuleDestroy {
 
   private async handleScormImport(job: Job<ScormImportJobData>): Promise<ScormImportJobResult> {
     if (job.name !== SCORM_IMPORT_JOB_NAME) {
-      throw new InternalServerErrorException("adminScorm.errors.unknownImportJob");
+      throw new InternalServerErrorException(`Unexpected SCORM import job name: ${job.name}`);
     }
 
     try {

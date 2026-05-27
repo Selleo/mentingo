@@ -4,6 +4,7 @@ export {
   useAvailableCoursesSuspense,
 } from "./useAvailableCourses";
 export { categoriesQueryOptions, useCategories, useCategoriesSuspense } from "./useCategories";
+export { courseLookupQueryOptions, getCourseLookupQueryKey } from "./useCourseLookup";
 export { courseQueryOptions, useCourse, useCourseSuspense } from "./useCourse";
 export { allCoursesQueryOptions, useCourses, useCoursesSuspense } from "./useCourses";
 export { currentUserQueryOptions, useCurrentUser, useCurrentUserSuspense } from "./useCurrentUser";
