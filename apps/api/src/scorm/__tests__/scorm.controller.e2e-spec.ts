@@ -1,6 +1,12 @@
 import { Readable } from "node:stream";
 
-import { COURSE_ENROLLMENT, SCORM_PACKAGE_ENTITY_TYPE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  SCORM_COMPLETION_STATUS,
+  SCORM_PACKAGE_ENTITY_TYPE,
+  SCORM_SUCCESS_STATUS,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import AdmZip from "adm-zip";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
@@ -129,6 +135,58 @@ const buildMinimalScormPackage = () => {
     ),
   );
   zip.addFile("scripts/runtime.js", Buffer.from("window.__SCORM_FIXTURE__ = true;"));
+
+  return zip.toBuffer();
+};
+
+const buildMultiScoScormPackage = () => {
+  const zip = new AdmZip();
+
+  zip.addFile(
+    "imsmanifest.xml",
+    Buffer.from(
+      `<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="mentingo-multi-scorm" version="1.2"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="ORG-1">
+    <organization identifier="ORG-1">
+      <title>Multi SCO SCORM Lesson</title>
+      <item identifier="ITEM-1" identifierref="RES-1">
+        <title>Quiz SCO</title>
+      </item>
+      <item identifier="ITEM-2" identifierref="RES-2">
+        <title>Summary SCO</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="RES-1" type="webcontent" adlcp:scormtype="sco" href="quiz.html">
+      <file href="quiz.html" />
+    </resource>
+    <resource identifier="RES-2" type="webcontent" adlcp:scormtype="sco" href="summary.html">
+      <file href="summary.html" />
+    </resource>
+  </resources>
+</manifest>`,
+    ),
+  );
+  zip.addFile(
+    "quiz.html",
+    Buffer.from(
+      "<!doctype html><html><head><title>Quiz SCO</title></head><body>Quiz</body></html>",
+    ),
+  );
+  zip.addFile(
+    "summary.html",
+    Buffer.from(
+      "<!doctype html><html><head><title>Summary SCO</title></head><body>Summary</body></html>",
+    ),
+  );
 
   return zip.toBuffer();
 };
@@ -513,6 +571,155 @@ describe("ScormController (e2e)", () => {
       expect(attempt.completedAt).toBeTruthy();
       expect(finishedState.completionStatus).toBe("completed");
       expect(finishedState.totalTime).toBe("0000:01:05.00");
+      expect(progress.completedAt).toBeTruthy();
+    });
+
+    it("completes a multi-SCO lesson after every SCO reaches terminal SCORM status", async () => {
+      const admin = await createAdmin();
+      const student = await createStudent();
+      const course = await courseFactory.create({ authorId: admin.id });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        lessonCount: 0,
+      });
+
+      const importResponse = await attachScormPackage(
+        request(app.getHttpServer())
+          .post("/api/scorm/lesson")
+          .set("Cookie", await cookieFor(admin, app))
+          .field("chapterId", chapter.id)
+          .field("title", "Imported multi-SCO SCORM Lesson")
+          .field("language", "en"),
+        buildMultiScoScormPackage(),
+      ).expect(201);
+
+      const lessonId = importResponse.body.data.id as string;
+      const [scormPackage] = await db
+        .select()
+        .from(scormPackages)
+        .where(
+          and(
+            eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+            eq(scormPackages.entityId, lessonId),
+          ),
+        );
+      const scos = (
+        await db.select().from(scormScos).where(eq(scormScos.packageId, scormPackage.id))
+      ).sort((firstSco, secondSco) => firstSco.displayOrder - secondSco.displayOrder);
+      const [firstSco, secondSco] = scos;
+
+      expect(scos).toHaveLength(2);
+
+      await enrollStudent(student.id, course.id);
+
+      const studentCookies = await cookieFor(student, app);
+      const firstLaunchResponse = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${lessonId}&language=en`)
+        .set("Cookie", studentCookies)
+        .expect(200);
+      const firstLaunch = firstLaunchResponse.body.data;
+
+      expect(firstLaunch.scoId).toBe(firstSco.id);
+      expect(firstLaunch.navigation).toEqual({
+        previousScoId: null,
+        nextScoId: secondSco.id,
+      });
+
+      const firstFinishResponse = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/finish")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: firstLaunch.attemptId,
+          packageId: firstLaunch.packageId,
+          scoId: firstLaunch.scoId,
+          lessonId: firstLaunch.lessonId,
+          courseId: firstLaunch.courseId,
+          values: {
+            "cmi.core.lesson_status": "failed",
+            "cmi.core.lesson_location": "quiz-finished",
+            "cmi.suspend_data": "selected-answer-token",
+          },
+          language: "en",
+        })
+        .expect(201);
+
+      expect(firstFinishResponse.body.data).toEqual(
+        expect.objectContaining({
+          finished: true,
+          lessonCompleted: false,
+          scormStatus: "failed",
+        }),
+      );
+
+      const [firstRuntimeState] = await db
+        .select()
+        .from(scormRuntimeState)
+        .where(eq(scormRuntimeState.attemptId, firstLaunch.attemptId));
+
+      expect(firstRuntimeState.completionStatus).toBe(SCORM_COMPLETION_STATUS.COMPLETED);
+      expect(firstRuntimeState.successStatus).toBe(SCORM_SUCCESS_STATUS.FAILED);
+      expect(firstRuntimeState.suspendData).toBe("selected-answer-token");
+
+      const secondLaunchResponse = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${lessonId}&scoId=${secondSco.id}&language=en`)
+        .set("Cookie", studentCookies)
+        .expect(200);
+      const secondLaunch = secondLaunchResponse.body.data;
+
+      expect(secondLaunch.scoId).toBe(secondSco.id);
+      expect(secondLaunch.navigation).toEqual({
+        previousScoId: firstSco.id,
+        nextScoId: null,
+      });
+
+      const secondFinishResponse = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/finish")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: secondLaunch.attemptId,
+          packageId: secondLaunch.packageId,
+          scoId: secondLaunch.scoId,
+          lessonId: secondLaunch.lessonId,
+          courseId: secondLaunch.courseId,
+          values: {
+            "cmi.core.lesson_status": "completed",
+          },
+          language: "en",
+        })
+        .expect(201);
+
+      expect(secondFinishResponse.body.data).toEqual(
+        expect.objectContaining({
+          finished: true,
+          lessonCompleted: true,
+          scormStatus: "completed",
+        }),
+      );
+
+      const resumedFirstScoResponse = await request(app.getHttpServer())
+        .get(`/api/scorm/runtime/launch?lessonId=${lessonId}&scoId=${firstSco.id}&language=en`)
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(resumedFirstScoResponse.body.data.runtime["cmi.core.entry"]).toBe("resume");
+      expect(resumedFirstScoResponse.body.data.runtime["cmi.core.lesson_location"]).toBe(
+        "quiz-finished",
+      );
+      expect(resumedFirstScoResponse.body.data.runtime["cmi.suspend_data"]).toBe(
+        "selected-answer-token",
+      );
+
+      const [progress] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lessonId),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+
       expect(progress.completedAt).toBeTruthy();
     });
   });

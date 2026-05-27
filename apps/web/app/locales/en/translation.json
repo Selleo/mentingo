@@ -810,6 +810,7 @@
       "category": "Category",
       "price": "Price",
       "type": "Type",
+      "scorm": "SCORM",
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",

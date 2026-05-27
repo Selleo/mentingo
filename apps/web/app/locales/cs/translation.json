@@ -809,6 +809,7 @@
       "category": "Kategorie",
       "price": "Cena",
       "type": "Typ",
+      "scorm": "SCORM",
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",

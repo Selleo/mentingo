@@ -809,6 +809,7 @@
       "category": "Kategorija",
       "price": "Kaina",
       "type": "Tipas",
+      "scorm": "SCORM",
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",

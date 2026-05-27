@@ -21,13 +21,15 @@ import {
 import type { ScormLaunchData, ScormRuntimeValues } from "./ScormLesson.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type { Scorm12API } from "scorm-again";
+import type { LaunchScormAttemptResponse } from "~/api/generated-api";
 
 type UseScormRuntimeParams = {
   launch: ScormLaunchData;
   language: SupportedLanguages;
+  onSavingChange?: (isSaving: boolean) => void;
 };
 
-export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
+export function useScormRuntime({ launch, language, onSavingChange }: UseScormRuntimeParams) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { mutateAsync: commitRuntime } = useCommitScormRuntime();
@@ -36,6 +38,7 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
   const finishRuntimeRef = useRef(finishRuntime);
   const dirtyValuesRef = useRef<ScormRuntimeValues>({});
   const apiRef = useRef<Scorm12API | null>(null);
+  const pendingSavesRef = useRef(0);
 
   useEffect(() => {
     commitRuntimeRef.current = commitRuntime;
@@ -56,6 +59,19 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
       language,
     });
 
+    const beginRuntimeSave = () => {
+      pendingSavesRef.current += 1;
+      onSavingChange?.(true);
+    };
+
+    const endRuntimeSave = () => {
+      pendingSavesRef.current = Math.max(0, pendingSavesRef.current - 1);
+
+      if (pendingSavesRef.current === 0) {
+        onSavingChange?.(false);
+      }
+    };
+
     const handleProgressUpdate = async (lessonCompleted: boolean) => {
       if (!lessonCompleted) {
         return;
@@ -65,6 +81,28 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
         queryClient.invalidateQueries({ queryKey: ["lesson"] }),
         queryClient.invalidateQueries({ queryKey: ["course"] }),
       ]);
+    };
+
+    const updateLaunchRuntimeCache = (values: ScormRuntimeValues) => {
+      queryClient.setQueriesData<LaunchScormAttemptResponse>(
+        { queryKey: ["scorm", "launch", launch.lessonId] },
+        (cachedLaunch) => {
+          if (!cachedLaunch || cachedLaunch.data.attemptId !== launch.attemptId) {
+            return cachedLaunch;
+          }
+
+          return {
+            ...cachedLaunch,
+            data: {
+              ...cachedLaunch.data,
+              runtime: {
+                ...asRuntimeValues(cachedLaunch.data.runtime),
+                ...values,
+              },
+            },
+          };
+        },
+      );
     };
 
     const commitDirtyValues = async () => {
@@ -77,11 +115,15 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
 
       dirtyValuesRef.current = {};
 
+      beginRuntimeSave();
       try {
         const result = await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
+        updateLaunchRuntimeCache(values);
         await handleProgressUpdate(result.lessonCompleted);
       } catch {
         dirtyValuesRef.current = { ...values, ...dirtyValuesRef.current };
+      } finally {
+        endRuntimeSave();
       }
     };
 
@@ -98,14 +140,18 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
 
       dirtyValuesRef.current = {};
 
+      beginRuntimeSave();
       try {
         const result = await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
+        updateLaunchRuntimeCache(values);
         await handleProgressUpdate(result.lessonCompleted);
         if (showToast) {
           toast({ description: t("studentLessonView.scorm.lessonFinished") });
         }
       } catch {
         dirtyValuesRef.current = { ...values, ...dirtyValuesRef.current };
+      } finally {
+        endRuntimeSave();
       }
     };
 
@@ -137,6 +183,7 @@ export function useScormRuntime({ launch, language }: UseScormRuntimeParams) {
     launch.packageId,
     launch.runtime,
     launch.scoId,
+    onSavingChange,
     queryClient,
     t,
   ]);

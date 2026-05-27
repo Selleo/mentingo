@@ -14,14 +14,15 @@ import type { SupportedLanguages } from "@repo/shared";
 type ScormPlayerProps = {
   launch: ScormLaunchData;
   language: SupportedLanguages;
+  onSavingChange?: (isSaving: boolean) => void;
 };
 
-export function ScormPlayer({ launch, language }: ScormPlayerProps) {
+export function ScormPlayer({ launch, language, onSavingChange }: ScormPlayerProps) {
   const { t } = useTranslation();
   const fullscreenRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  useScormRuntime({ launch, language });
+  useScormRuntime({ launch, language, onSavingChange });
 
   const toggleFullscreen = () => {
     if (document.fullscreenElement) {

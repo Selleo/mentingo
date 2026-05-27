@@ -328,14 +328,16 @@ const EditCourse = () => {
                   {t("common.other.private")}
                 </Badge>
               )}
-              <Badge
-                data-testid={EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE}
-                variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
-                fontWeight="bold"
-                className="ml-2"
-              >
-                {getCourseTypeLabel(courseType, t)}
-              </Badge>
+              {courseType === COURSE_TYPE.SCORM && (
+                <Badge
+                  data-testid={EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE}
+                  variant="success"
+                  fontWeight="bold"
+                  className="ml-2"
+                >
+                  {getCourseTypeLabel(courseType, t)}
+                </Badge>
+              )}
               {isMasterCourse && (
                 <Badge variant="secondaryWithOutline" fontWeight="bold" className="ml-2">
                   <Building className="size-3.5" />

@@ -980,6 +980,7 @@ export class ScormService {
     switch (lessonStatus) {
       case SCORM_1_2_LESSON_STATUS.COMPLETED:
       case SCORM_1_2_LESSON_STATUS.PASSED:
+      case SCORM_1_2_LESSON_STATUS.FAILED:
         return SCORM_COMPLETION_STATUS.COMPLETED;
       case SCORM_1_2_LESSON_STATUS.INCOMPLETE:
         return SCORM_COMPLETION_STATUS.INCOMPLETE;

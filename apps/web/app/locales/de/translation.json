@@ -809,6 +809,7 @@
       "category": "Kategorie",
       "price": "Preis",
       "type": "Typ",
+      "scorm": "SCORM",
       "state": "Zustand",
       "status": "Status",
       "sharedCourse": "Geteilt",
