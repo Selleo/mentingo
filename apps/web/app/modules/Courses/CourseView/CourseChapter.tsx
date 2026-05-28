@@ -32,6 +32,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const { id: courseSlug } = useParams();
   const {
     course: { enrolled },
+    isCourseStudentModeActive,
     isPreviewMode,
   } = useCourseAccessProvider();
   const lessonText = formatWithPlural(
@@ -129,8 +130,11 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                 {lessons?.map((lesson: Lesson) => {
                   if (!lesson) return null;
 
+                  const hasCourseLearningAccess =
+                    chapter.isFreemium || enrolled || isCourseStudentModeActive;
+
                   const canOpenLesson =
-                    isPreviewMode || ((chapter.isFreemium || enrolled) && lesson.hasAccess);
+                    isPreviewMode || (hasCourseLearningAccess && lesson.hasAccess);
 
                   return canOpenLesson ? (
                     <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
