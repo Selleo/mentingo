@@ -40,6 +40,7 @@ const CourseCertificateSetting = ({
   const { toast } = useToast();
   const [isCertificateEnabled, setIsCertificateEnabled] = useState(hasCertificate);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isCertificateColorPickerOpen, setIsCertificateColorPickerOpen] = useState(false);
   const colorSaveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedColorRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -275,8 +276,11 @@ const CourseCertificateSetting = ({
       </div>
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent
-          className="w-[95vw] max-w-[1120px] border-none bg-transparent p-0 shadow-none"
+          className="w-auto max-w-[calc(100vw-2rem)] overflow-visible p-0"
           noCloseButton
+          onInteractOutside={(event) => {
+            if (isCertificateColorPickerOpen) event.preventDefault();
+          }}
         >
           <CertificatePreview
             studentName={t("adminCourseView.settings.other.certificatePreviewStudentName")}
@@ -291,6 +295,7 @@ const CourseCertificateSetting = ({
             showDownloadButton={false}
             initialColor={settings?.certificateFontColor}
             onColorChange={handleCertificateColorChange}
+            onColorPickerOpenChange={setIsCertificateColorPickerOpen}
           />
         </DialogContent>
       </Dialog>

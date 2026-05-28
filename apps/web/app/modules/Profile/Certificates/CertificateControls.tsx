@@ -1,12 +1,15 @@
+import * as PopoverPrimitive from "@radix-ui/react-popover";
 import { HEX_COLOR_REGEX } from "@repo/shared";
 import { Download, Loader2, Palette, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 
 import { Linkedin } from "~/assets/svgs";
 import RectangularSwitch from "~/components/RectangularSwitch";
+import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
+import { cn } from "~/lib/utils";
 
 import { applyUniformCertificateColor } from "./certificateTheme";
 
@@ -23,6 +26,7 @@ interface CertificateControlsProps {
   colorTheme: CertificateColorTheme;
   setColorTheme: React.Dispatch<React.SetStateAction<CertificateColorTheme>>;
   onColorChange?: (color: string) => void;
+  onColorPickerOpenChange?: (isOpen: boolean) => void;
   showColorPicker?: boolean;
   showDownloadButton?: boolean;
   showShareButton?: boolean;
@@ -42,6 +46,7 @@ const CertificateControls = ({
   colorTheme,
   setColorTheme,
   onColorChange,
+  onColorPickerOpenChange,
   showColorPicker = false,
   showDownloadButton = true,
   showShareButton = false,
@@ -49,13 +54,30 @@ const CertificateControls = ({
   const { t } = useTranslation();
   const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
 
+  useEffect(() => {
+    return () => onColorPickerOpenChange?.(false);
+  }, [onColorPickerOpenChange]);
+
   const handleDownload = () => {
     void downloadCertificatePdf();
+  };
+
+  const handleColorPickerOpenChange = (isOpen: boolean) => {
+    setIsColorPickerOpen(isOpen);
+    onColorPickerOpenChange?.(isOpen);
   };
 
   const updateAllColors = (value: string) => {
     setColorTheme((previous) => applyUniformCertificateColor(value, previous));
     onColorChange?.(value);
+  };
+
+  const handleHexColorInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.startsWith("#")
+      ? event.target.value
+      : `#${event.target.value}`;
+
+    if (HEX_COLOR_REGEX.test(value)) updateAllColors(value);
   };
 
   return (
@@ -69,49 +91,44 @@ const CertificateControls = ({
       />
 
       {showColorPicker && (
-        <div className="relative">
-          <button
-            type="button"
-            data-certificate-font-color-picker="true"
-            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
-            onClick={() => setIsColorPickerOpen((previous) => !previous)}
-          >
-            <Palette className="size-4" />
-            <span>{t("studentCertificateView.controls.fontColor")}</span>
-            <span
-              className="size-4 rounded border border-gray-300"
-              style={{ backgroundColor: colorTheme.titleColor }}
-            />
-            <span className="font-mono uppercase">{colorTheme.titleColor}</span>
-          </button>
-          {isColorPickerOpen && (
-            <div
-              data-certificate-font-color-picker="true"
-              className="absolute right-0 top-[calc(100%+8px)] z-20 w-[260px] rounded-lg border bg-white p-3 shadow-md"
+        <PopoverPrimitive.Root open={isColorPickerOpen} onOpenChange={handleColorPickerOpenChange}>
+          <PopoverPrimitive.Trigger asChild>
+            <Button
+              size="sm"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
             >
-              <div className="flex flex-col items-center gap-3">
-                <HexColorPicker color={colorTheme.titleColor} onChange={updateAllColors} />
-                <div className="flex items-center justify-center space-x-1">
-                  <span className="text-sm text-gray-500">#</span>
-                  <Input
-                    type="text"
-                    value={colorTheme.titleColor.replace(/^#/, "").toLowerCase()}
-                    onChange={(event) => {
-                      const value = event.target.value.startsWith("#")
-                        ? event.target.value
-                        : `#${event.target.value}`;
-
-                      if (HEX_COLOR_REGEX.test(value)) {
-                        updateAllColors(value);
-                      }
-                    }}
-                    className="w-24"
-                  />
-                </div>
+              <Palette className="size-4" />
+              <span className="block mr-3">{t("studentCertificateView.controls.fontColor")}</span>
+              <span
+                className="size-4 rounded border border-gray-300"
+                style={{ backgroundColor: colorTheme.titleColor }}
+              />
+              <span className="font-mono uppercase">{colorTheme.titleColor}</span>
+            </Button>
+          </PopoverPrimitive.Trigger>
+          <PopoverPrimitive.Content
+            align="end"
+            sideOffset={8}
+            className={cn(
+              "z-[60] w-[260px] rounded-lg border bg-white p-3 text-popover-foreground shadow-md outline-none",
+              "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
+              "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+            )}
+          >
+            <div className="flex flex-col items-center gap-3">
+              <HexColorPicker color={colorTheme.titleColor} onChange={updateAllColors} />
+              <div className="flex items-center justify-center space-x-1">
+                <span className="text-sm text-gray-500">#</span>
+                <Input
+                  type="text"
+                  value={colorTheme.titleColor.replace(/^#/, "").toLowerCase()}
+                  onChange={handleHexColorInputChange}
+                  className="w-24"
+                />
               </div>
             </div>
-          )}
-        </div>
+          </PopoverPrimitive.Content>
+        </PopoverPrimitive.Root>
       )}
 
       {showDownloadButton && (
