@@ -37,14 +37,14 @@ export class TusUploadService {
       throw new BadRequestException("Missing upload length");
     }
 
-    if (uploadLength > MAX_VIDEO_SIZE) {
-      throw new BadRequestException("Video file exceeds maximum allowed size");
-    }
-
     const state = await this.videoProcessingStateService.getState(uploadId);
 
     if (!state || state.provider !== VIDEO_PROVIDERS.S3 || !state.fileKey) {
       throw new BadRequestException("S3 video upload not initialized");
+    }
+
+    if (uploadLength > (state.maxUploadSize ?? MAX_VIDEO_SIZE)) {
+      throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
 
     if (state.userId && currentUserId && state.userId !== currentUserId) {

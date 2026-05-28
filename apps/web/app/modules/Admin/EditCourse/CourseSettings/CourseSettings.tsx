@@ -1,4 +1,4 @@
-import { ALLOWED_VIDEO_FILE_TYPES, COURSE_TYPE, ENTITY_TYPES } from "@repo/shared";
+import { COURSE_TYPE, ENTITY_TYPES } from "@repo/shared";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -18,7 +18,6 @@ import { Icon } from "~/components/Icon";
 import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -41,6 +40,7 @@ import CourseCardPreview from "../components/CourseCardPreview";
 
 import CourseCertificateSetting from "./components/CourseCertificateSetting";
 import { CourseSettingsSwitches } from "./components/CourseSettingsSwitches";
+import { CourseTrailerUploadField } from "./components/CourseTrailerUploadField";
 import { useCourseSettingsForm } from "./hooks/useCourseSettingsForm";
 
 import type { CourseType, SupportedLanguages } from "@repo/shared";
@@ -353,45 +353,19 @@ const CourseSettings = ({
                   <Label htmlFor="course-trailer">
                     {t("adminCourseView.settings.field.trailer")}
                   </Label>
-                  <Input
-                    id="course-trailer"
-                    type="file"
-                    accept={ALLOWED_VIDEO_FILE_TYPES.join(",")}
-                    ref={trailerInputRef}
-                    disabled={isTrailerUploading}
-                    onChange={(event) => {
-                      const file = event.target.files?.[0];
-                      if (!file) return;
+                  <CourseTrailerUploadField
+                    inputId="course-trailer"
+                    trailerUrl={displayTrailerUrl}
+                    trailerEmbedUrl={trailerEmbedUrl}
+                    isUploading={isTrailerUploading}
+                    inputRef={trailerInputRef}
+                    onFileSelect={(file) => {
                       void handleTrailerUpload(file);
                     }}
+                    onDelete={() => {
+                      void removeTrailer();
+                    }}
                   />
-                  {isTrailerUploading && <p>{t("common.other.uploadingImage")}</p>}
-                  {displayTrailerUrl && (
-                    <div className="flex flex-col gap-3">
-                      <div className="overflow-hidden rounded-lg border border-neutral-200">
-                        {trailerEmbedUrl ? (
-                          <iframe
-                            src={trailerEmbedUrl}
-                            title={t("adminCourseView.settings.trailerPreview", {
-                              defaultValue: "Trailer preview",
-                            })}
-                            allow="autoplay; encrypted-media"
-                            allowFullScreen
-                            loading="lazy"
-                            className="aspect-video h-auto w-full border-none"
-                          />
-                        ) : (
-                          <video src={displayTrailerUrl} controls className="h-auto w-full">
-                            <track kind="captions" className="sr-only" />
-                          </video>
-                        )}
-                      </div>
-                      <Button type="button" onClick={removeTrailer} variant="destructive">
-                        <Icon name="TrashIcon" className="mr-2" />
-                        {t("adminCourseView.settings.button.removeTrailer")}
-                      </Button>
-                    </div>
-                  )}
                 </div>
                 <div className="flex space-x-5">
                   <Button

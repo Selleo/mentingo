@@ -100,6 +100,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Plik został pomyślnie przesłany",
       "videoFailed": "Nie udało się przesłać wideo",
+      "videoTooLarge": "Plik wideo przekracza maksymalny dozwolony rozmiar",
       "videoReady": "Wideo jest gotowe do użycia",
       "videoUploading": "Przesyłamy Twoje wideo. Proszę nie zamykaj karty.",
       "videoUploadedProcessing": "Przesyłanie zakończone. Twoje wideo jest teraz przetwarzane. Możesz zamknąć kartę."
@@ -1712,6 +1713,7 @@
         "charactersLeft": "Pozostało znaków",
         "reachedCharactersLimit": "Osiągnięto limit znaków.",
         "reachedCharactersLimitHtml": "Zbyt dużo formatowania. Zmniejsz ilość formatowania, aby zmieścić się w limicie.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 lub Hevc (maksymalnie 200 MB)",
         "enableCertificate": "Włącz certyfikat",
         "enableCertificateDescription": "Włącz tę opcję, aby wystawiać certyfikaty dla tego kursu i móc skonfigurować podpis.",
         "certificateValidity": "Ważność certyfikatu",

@@ -99,6 +99,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Failas sėkmingai įkeltas",
       "videoFailed": "Vaizdo įrašo įkėlimas nepavyko",
+      "videoTooLarge": "Vaizdo failas viršija didžiausią leistiną dydį",
       "videoReady": "Vaizdo įrašas paruoštas naudoti",
       "videoUploading": "Įkeliame jūsų vaizdo įrašą. Neuždarykite skirtuko.",
       "videoUploadedProcessing": "Jūsų įkėlimas baigtas. Dabar jūsų vaizdo įrašas apdorojamas. Nedvejodami uždarykite skirtuką."
@@ -1434,6 +1435,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 arba Hevc (maks. 200 MB)",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",
