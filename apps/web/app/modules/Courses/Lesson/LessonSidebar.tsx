@@ -141,23 +141,23 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                       </AccordionTrigger>
                       <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
                         {lessons?.map(({ id, title, status, type, hasAccess }) => {
-                          const shouldIgnoreBlockedStatus =
+                          const shouldIgnoreEnrollmentBlockedStatus =
                             isCourseStudentModeActive &&
                             hasAccess &&
                             status === LESSON_PROGRESS_STATUSES.BLOCKED;
 
-                          const effectiveStatus = shouldIgnoreBlockedStatus
+                          const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
                             ? LESSON_PROGRESS_STATUSES.NOT_STARTED
                             : status;
 
                           const isBlocked = match({
                             isPreviewMode,
-                            shouldIgnoreBlockedStatus,
+                            shouldIgnoreEnrollmentBlockedStatus,
                             hasAccess,
                             status,
                           })
                             .with({ isPreviewMode: true }, () => false)
-                            .with({ shouldIgnoreBlockedStatus: true }, () => false)
+                            .with({ shouldIgnoreEnrollmentBlockedStatus: true }, () => false)
                             .with({ status: LESSON_PROGRESS_STATUSES.BLOCKED }, () => true)
                             .with({ hasAccess: false }, () => true)
                             .otherwise(() => false);

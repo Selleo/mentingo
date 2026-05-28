@@ -29,14 +29,15 @@ type CourseChapterLessonProps = {
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
   const { isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
+
   const hasAccess = isPreviewMode || lesson.hasAccess;
 
-  const shouldIgnoreBlockedStatus =
+  const shouldIgnoreEnrollmentBlockedStatus =
     isCourseStudentModeActive &&
     lesson.hasAccess &&
     lesson.status === LESSON_PROGRESS_STATUSES.BLOCKED;
 
-  const effectiveStatus = shouldIgnoreBlockedStatus
+  const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
     ? LESSON_PROGRESS_STATUSES.NOT_STARTED
     : lesson.status;
 
