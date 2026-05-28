@@ -241,29 +241,27 @@ export const LessonContent = ({
                 {lesson.title}
               </p>
             </div>
-            {!isPreviewMode && (
-              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-                <div className="flex flex-row gap-x-4">
-                  <Button
-                    variant="outline"
-                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                    disabled={isPreviousDisabled || isFirstLesson}
-                    onClick={handlePrevious}
-                  >
-                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                  </Button>
-                  <Button
-                    data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
-                    variant="outline"
-                    disabled={isNextDisabled}
-                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                    onClick={handleNext}
-                  >
-                    <Icon name="ArrowRight" className="h-auto w-4" />
-                  </Button>
-                </div>
+            <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
+              <div className="flex flex-row gap-x-4">
+                <Button
+                  variant="outline"
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  disabled={isPreviousDisabled || isFirstLesson}
+                  onClick={handlePrevious}
+                >
+                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                </Button>
+                <Button
+                  data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
+                  variant="outline"
+                  disabled={isNextDisabled}
+                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                  onClick={handleNext}
+                >
+                  <Icon name="ArrowRight" className="h-auto w-4" />
+                </Button>
               </div>
-            )}
+            </div>
           </div>
 
           <LessonContentRenderer
