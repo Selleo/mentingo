@@ -39,7 +39,7 @@ export const CourseTrailerUploadField = ({
           isUploading && "opacity-70",
         )}
       >
-        {trailerUrl ? (
+        {trailerUrl && (
           <div className="absolute inset-0 bg-neutral-950">
             {trailerEmbedUrl ? (
               <iframe
@@ -58,7 +58,7 @@ export const CourseTrailerUploadField = ({
               </video>
             )}
           </div>
-        ) : null}
+        )}
         <div
           className={cn(
             "absolute inset-0 flex flex-col items-center justify-center gap-2 px-4 text-center",
