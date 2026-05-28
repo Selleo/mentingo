@@ -21,6 +21,7 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
 import { navigateToNextLesson } from "../../utils/navigateToNextLesson";
 
+import { HeroTrailerVideo } from "./HeroTrailerVideo";
 import { formatDuration } from "./utils";
 
 type HeroBannerProps = {
@@ -116,14 +117,7 @@ const HeroBanner = ({
 
       {trailerUrl && (
         <div className="absolute inset-0 z-10 hidden md:block">
-          <video
-            src={trailerUrl}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover"
-          />
+          <HeroTrailerVideo src={trailerUrl} />
           <div className="absolute inset-0 bg-gradient-to-r from-primary-50/95 via-primary-50/70 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-primary-50/80 via-primary-50/30 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-50/60 to-transparent" />
