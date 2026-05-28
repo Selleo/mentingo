@@ -5,12 +5,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT } from "@repo/shared";
 import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { canTrackLessonProgress } from "src/common/utils/lessonLearningAccess";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -89,6 +90,7 @@ export class StudentLessonProgressService {
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
       isLearningModeActive,
     });
 
@@ -275,6 +277,7 @@ export class StudentLessonProgressService {
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
       hasEnrollment: !!accessCourseLessonWithDetails.isAssigned,
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
       isLearningModeActive,
     });
 
@@ -396,19 +399,14 @@ export class StudentLessonProgressService {
     userPermissions: PermissionKey[],
     dbInstance: DatabasePg = this.db,
   ) {
-    if (!userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE)) return false;
-
     return this.isLessonStudentModeEnabled(lessonId, userId, dbInstance);
   }
 
   private canUseLearnerProgressByPermissions(
     userPermissions: PermissionKey[],
-    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
+    access: { hasEnrollment: boolean; isCourseAuthor: boolean; isLearningModeActive: boolean },
   ) {
-    const canUseLearningMode = userPermissions.includes(PERMISSIONS.LEARNING_MODE_USE);
-    if (canUseLearningMode) return access.isLearningModeActive;
-
-    return true;
+    return canTrackLessonProgress(userPermissions, access);
   }
 
   private async isLessonStudentModeEnabled(
@@ -736,6 +734,7 @@ export class StudentLessonProgressService {
         lessonType: lessons.type,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
+        isCourseAuthor: sql<boolean>`${courses.authorId} = ${userId}`,
       })
       .from(lessons)
       .leftJoin(users, eq(users.id, userId))
@@ -747,6 +746,7 @@ export class StudentLessonProgressService {
         ),
       )
       .leftJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .leftJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.courseId, chapters.courseId), eq(studentCourses.studentId, userId)),
