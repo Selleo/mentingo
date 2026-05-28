@@ -2945,6 +2945,7 @@
       }
     },
     "presentation": {
+      "title": "Prezentace",
       "ariaLabel": {
         "drag": "Přetáhněte prezentaci vložit",
         "remove": "Odebrat vložení prezentace"

@@ -2943,6 +2943,7 @@
       }
     },
     "presentation": {
+      "title": "Präsentation",
       "ariaLabel": {
         "drag": "Präsentation per Drag & Drop einbetten",
         "remove": "Präsentationseinbettung entfernen"

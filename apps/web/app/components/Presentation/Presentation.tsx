@@ -1,5 +1,6 @@
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
-import "@cyntler/react-doc-viewer/dist/index.css";
+import { useTranslation } from "react-i18next";
+
+import { PdfPreviewViewer } from "~/components/RichText/extensions/pdfPreview/PdfPreviewViewer";
 
 type PresentationProvider = "self" | "google" | "canva" | "unknown";
 
@@ -24,33 +25,43 @@ const buildCanvaEmbedUrl = (rawUrl: string): string => {
   }
 };
 
+export const buildPresentationPdfPreviewUrl = (rawUrl: string): string => {
+  try {
+    const baseUrl = typeof window === "undefined" ? "http://localhost" : window.location.origin;
+    const url = new URL(rawUrl, baseUrl);
+    url.searchParams.set("preview", "pdf");
+
+    if (/^https?:\/\//i.test(rawUrl)) return url.toString();
+
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return `${rawUrl}${rawUrl.includes("?") ? "&" : "?"}preview=pdf`;
+  }
+};
+
 export default function Presentation({
   url,
   isExternalUrl,
   provider = "unknown",
 }: PresentationProps) {
-  const docs = [
-    {
-      uri: url,
-      fileType: "pptx",
-      fileName: "Presentation",
-    },
-  ];
+  const { t } = useTranslation();
 
   if (isExternalUrl) {
     const iframeSrc = provider === "canva" ? buildCanvaEmbedUrl(url) : `${url}/embed`;
-    return <iframe title="Presentation" src={iframeSrc} className="aspect-video" allowFullScreen />;
+    return (
+      <iframe
+        title={t("richText.presentation.title")}
+        src={iframeSrc}
+        className="aspect-video w-full rounded-lg border border-neutral-200 bg-white"
+        allowFullScreen
+      />
+    );
   }
 
   return (
-    <DocViewer
-      documents={docs}
-      pluginRenderers={DocViewerRenderers}
-      config={{
-        header: {
-          disableFileName: false,
-        },
-      }}
+    <PdfPreviewViewer
+      src={buildPresentationPdfPreviewUrl(url)}
+      name={t("richText.presentation.title")}
     />
   );
 }

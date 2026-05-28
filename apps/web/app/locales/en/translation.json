@@ -3006,6 +3006,7 @@
       }
     },
     "presentation": {
+      "title": "Presentation",
       "ariaLabel": {
         "drag": "Drag presentation embed",
         "remove": "Remove presentation embed"

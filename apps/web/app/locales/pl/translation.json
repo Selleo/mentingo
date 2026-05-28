@@ -3261,6 +3261,7 @@
       }
     },
     "presentation": {
+      "title": "Prezentacja",
       "ariaLabel": {
         "drag": "Przeciągnij osadzoną prezentację",
         "remove": "Usuń osadzoną prezentację"
