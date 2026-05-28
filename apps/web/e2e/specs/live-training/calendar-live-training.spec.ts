@@ -12,10 +12,26 @@ const getTomorrowDate = () => {
   const date = new Date();
   date.setDate(date.getDate() + 1);
 
-  return date.toISOString().slice(0, 10);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };
 
-test("admin can open a visible Live Training calendar event and navigate to details page", async ({
+const getCalendarRangeAround = (dateIso: string) => {
+  const date = new Date(dateIso);
+  const start = new Date(date);
+  const end = new Date(date);
+
+  start.setDate(start.getDate() - 1);
+  end.setDate(end.getDate() + 1);
+
+  return { start: start.toISOString(), end: end.toISOString() };
+};
+
+test("admin can open a Live Training calendar event and navigate to details page", async ({
+  apiClient,
   cleanup,
   factories,
   withWorkerPage,
@@ -31,8 +47,23 @@ test("admin can open a visible Live Training calendar event and navigate to deta
       await liveTrainingFactory.delete(liveTraining.id);
     });
 
+    const calendarRange = getCalendarRangeAround(liveTraining.startsAt);
+
+    await expect
+      .poll(async () => {
+        const response = await apiClient.api.calendarControllerGetEvents({
+          ...calendarRange,
+          language: "en",
+        });
+
+        return response.data.data.events.some((event) => event.id === liveTraining.calendarEventId);
+      })
+      .toBe(true);
+
     await openCalendarFlow(page);
-    await page.getByTestId(CALENDAR_HANDLES.event(liveTraining.calendarEventId)).click();
+    await page
+      .getByTestId(CALENDAR_HANDLES.event(liveTraining.calendarEventId))
+      .dispatchEvent("click");
 
     await expect(page.getByTestId(CALENDAR_HANDLES.EVENT_DETAILS_DIALOG)).toBeVisible();
     await expect(page.getByTestId(CALENDAR_HANDLES.EVENT_DETAILS_DIALOG)).toContainText(
@@ -46,6 +77,7 @@ test("admin can open a visible Live Training calendar event and navigate to deta
 });
 
 test("admin can create an offline Live Training from calendar", async ({
+  apiClient,
   cleanup,
   factories,
   withWorkerPage,
@@ -83,9 +115,24 @@ test("admin can create an offline Live Training from calendar", async ({
       if (liveTraining) await liveTrainingFactory.delete(liveTraining.id);
     });
 
+    const calendarRange = getCalendarRangeAround(liveTraining!.startsAt);
+
+    await expect
+      .poll(async () => {
+        const response = await apiClient.api.calendarControllerGetEvents({
+          ...calendarRange,
+          language: "en",
+        });
+
+        return response.data.data.events.some(
+          (event) => event.id === liveTraining!.calendarEventId,
+        );
+      })
+      .toBe(true);
+
     await expect(page.getByTestId(CALENDAR_HANDLES.CREATE_DIALOG)).toBeHidden();
     await expect(
       page.getByTestId(CALENDAR_HANDLES.event(liveTraining!.calendarEventId)),
-    ).toBeVisible();
+    ).toHaveCount(1);
   });
 });

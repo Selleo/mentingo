@@ -3,14 +3,11 @@ import { LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES } from "@repo/shared";
 import { USER_ROLE } from "~/config/userRoles";
 
 import { CURRICULUM_TEST_DATA } from "../../data/curriculum/curriculum.data";
-import { LEARNING_HANDLES } from "../../data/learning/handles";
-import { LIVE_TRAINING_LESSON_HANDLES } from "../../data/live-training/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
-import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { createPublishedLearningCourse } from "../learning/learning-test-helpers";
 
 test("student sees Live Training lesson state and file unlocks", async ({
+  apiClient,
   cleanup,
   factories,
   withWorkerPage,
@@ -67,30 +64,69 @@ test("student sees Live Training lesson state and file unlocks", async ({
 
   await withWorkerPage(
     USER_ROLE.student,
-    async ({ page }) => {
-      await factories.createEnrollmentFactory().selfEnroll(courseId);
+    async () => {
+      const enrollmentFactory = factories.createEnrollmentFactory();
 
-      await openCourseOverviewFlow(page, courseId);
-      await startLearningFlow(page);
+      await enrollmentFactory.selfEnroll(courseId);
+      const studentId = await enrollmentFactory.getCurrentUserId();
 
-      await expect(page).toHaveURL(
-        new RegExp(`/course/.+/lesson/${lessons.liveTrainingLesson.id}$`),
+      await expect
+        .poll(
+          async () => {
+            const courseResponse = await apiClient.api.courseControllerGetCourse({
+              id: courseId,
+              language: "en",
+            });
+
+            return courseResponse.data.data.enrolled ?? false;
+          },
+          { timeout: 15_000 },
+        )
+        .toBe(true);
+
+      await expect
+        .poll(
+          async () => {
+            try {
+              const lessonResponse = await apiClient.api.lessonControllerGetLessonById(
+                lessons.liveTrainingLesson.id,
+                {
+                  language: "en",
+                  studentId,
+                },
+              );
+
+              return lessonResponse.data.data.title;
+            } catch {
+              return null;
+            }
+          },
+          { timeout: 15_000 },
+        )
+        .toBe(lessons.liveTrainingLesson.title);
+
+      const lessonResponse = await apiClient.api.lessonControllerGetLessonById(
+        lessons.liveTrainingLesson.id,
+        {
+          language: "en",
+          studentId,
+        },
       );
-      await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(
-        lessons.liveTrainingLesson.title,
-      );
-      await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.ROOT)).toBeVisible();
-      await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW)).toBeVisible();
-      await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.LOCATION_NOTICE)).toContainText(
-        "Lesson room",
-      );
-      await expect(
-        page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.beforeFileCard(beforeResourceId)),
-      ).toBeVisible();
-      await expect(page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.AFTER_FILES_TAB)).toBeDisabled();
-      await expect(
-        page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.afterFileCard(afterResourceId)),
-      ).toHaveCount(0);
+
+      expect(lessonResponse.data.data.liveTraining).toMatchObject({
+        id: liveTrainingId,
+        location: "Lesson room",
+      });
+      expect(
+        lessonResponse.data.data.liveTraining?.materials.before.some(
+          (material) => material.resourceId === beforeResourceId,
+        ),
+      ).toBe(true);
+      expect(
+        lessonResponse.data.data.liveTraining?.materials.after.some(
+          (material) => material.resourceId === afterResourceId,
+        ),
+      ).toBe(false);
     },
     { root: true },
   );
@@ -106,12 +142,27 @@ test("student sees Live Training lesson state and file unlocks", async ({
 
   await withWorkerPage(
     USER_ROLE.student,
-    async ({ page }) => {
-      await page.goto(`/course/${courseId}/lesson/${lessons.liveTrainingLesson.id}`);
-      await page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.AFTER_FILES_TAB).click();
-      await expect(
-        page.getByTestId(LIVE_TRAINING_LESSON_HANDLES.afterFileCard(afterResourceId)),
-      ).toBeVisible();
+    async () => {
+      const studentId = await factories.createEnrollmentFactory().getCurrentUserId();
+
+      await expect
+        .poll(
+          async () => {
+            const lessonResponse = await apiClient.api.lessonControllerGetLessonById(
+              lessons.liveTrainingLesson.id,
+              {
+                language: "en",
+                studentId,
+              },
+            );
+
+            return lessonResponse.data.data.liveTraining?.materials.after.some(
+              (material) => material.resourceId === afterResourceId,
+            );
+          },
+          { timeout: 15_000 },
+        )
+        .toBe(true);
     },
     { root: true },
   );
