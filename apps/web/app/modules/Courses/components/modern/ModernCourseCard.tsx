@@ -220,6 +220,9 @@ const ModernCourseCard = ({
       <Link
         to={`/course/${id}`}
         data-testid="modern-course-card-link"
+        discover="none"
+        prefetch="none"
+        reloadDocument
         className="absolute inset-0 transition-transform"
         style={{
           transform:
