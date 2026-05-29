@@ -10,6 +10,7 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   lessons,
+  chapters,
   quizAttempts,
   questions,
   questionAnswerOptions,
@@ -101,6 +102,11 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   });
 
   const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, authorId: UUIDType) => {
+    await db
+      .update(chapters)
+      .set({ lessonCount: 1, updatedAt: new Date().toISOString() })
+      .where(eq(chapters.id, chapterId));
+
     const [lesson] = await db
       .insert(lessons)
       .values({
