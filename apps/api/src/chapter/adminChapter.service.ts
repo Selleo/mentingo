@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { COURSE_FEATURE } from "@repo/shared";
+import { COURSE_FEATURE, ENTITY_TYPES } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
@@ -42,7 +42,7 @@ export class AdminChapterService {
     );
 
     const chapter = await this.db.transaction(async (trx) => {
-      await this.adminLessonService.validateAccess("course", currentUser, body.courseId);
+      await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, body.courseId);
 
       const [maxDisplayOrder] = await trx
         .select({ displayOrder: sql<number>`COALESCE(MAX(${chapters.displayOrder}), 0)` })
@@ -74,7 +74,7 @@ export class AdminChapterService {
           title: sql<string>`${chapters.title}->>${language}::text`,
         });
 
-      if (!chapter) throw new NotFoundException("Chapter not found");
+      if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
       await this.adminChapterRepository.updateChapterCountForCourse(chapter.courseId, trx);
 
@@ -107,7 +107,7 @@ export class AdminChapterService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, chapterId);
 
     return await this.adminChapterRepository.updateFreemiumStatus(chapterId, isFreemium);
   }
@@ -142,7 +142,7 @@ export class AdminChapterService {
     const oldDisplayOrder = chapterToUpdate.displayOrder;
 
     if (!chapterToUpdate || oldDisplayOrder === null) {
-      throw new NotFoundException("Chapter not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.chapter");
     }
 
     const newDisplayOrder = chapterObject.displayOrder;
@@ -184,7 +184,7 @@ export class AdminChapterService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.adminLessonService.validateAccess("chapter", currentUser, id);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, id);
 
     if (body.title && body.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -204,7 +204,7 @@ export class AdminChapterService {
 
     const [chapter] = await this.adminChapterRepository.updateChapter(id, body);
 
-    if (!chapter) throw new NotFoundException("Chapter not found");
+    if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
     const updatedSnapshot = await this.buildChapterActivitySnapshot(id, resolvedLanguage);
 
@@ -227,11 +227,11 @@ export class AdminChapterService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.adminLessonService.validateAccess("chapter", currentUser, chapterId);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, chapterId);
 
     const [chapter] = await this.adminChapterRepository.getChapterById(chapterId);
 
-    if (!chapter) throw new NotFoundException("Chapter not found");
+    if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
     await this.db.transaction(async (trx) => {
       await this.adminChapterRepository.removeChapter(chapterId, trx);
@@ -260,7 +260,7 @@ export class AdminChapterService {
 
     const [chapter] = await this.adminChapterRepository.getChapterById(chapterId, resolvedLanguage);
 
-    if (!chapter) throw new NotFoundException("Chapter not found");
+    if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 
     return {
       id: chapter.id,

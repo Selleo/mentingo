@@ -63,6 +63,7 @@ import type { EmbedLessonResourceType, LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { LessonActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
+import type { CourseContentEntityType } from "src/common/types/course-content-entity.type";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 type LiveTrainingLessonAssignmentInput = Pick<
@@ -110,7 +111,7 @@ export class AdminLessonService {
       data.chapterId,
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
-    await this.validateAccess("chapter", currentUser, data.chapterId);
+    await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -163,7 +164,7 @@ export class AdminLessonService {
         data.chapterId,
         COURSE_FEATURE.CURRICULUM_EDITING,
       );
-      await this.validateAccess("chapter", currentUser, data.chapterId);
+      await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
       if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
         throw new ForbiddenException({ message: "auth.error.missingPermission" });
@@ -174,7 +175,7 @@ export class AdminLessonService {
       const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
 
       if (!course) {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
 
       const language = data.language;
@@ -261,7 +262,7 @@ export class AdminLessonService {
       lessonId,
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
-    await this.validateAccess("lesson", currentUser, lessonId);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
       throw new ForbiddenException({ message: "auth.error.missingPermission" });
@@ -272,7 +273,7 @@ export class AdminLessonService {
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId, data.language);
 
     if (!lesson) {
-      throw new NotFoundException("Lesson not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.lesson");
     }
 
     if (lesson.type !== LESSON_TYPES.LIVE_TRAINING) {
@@ -282,7 +283,7 @@ export class AdminLessonService {
     const [course] = await this.adminLessonRepository.getCourseByLesson(lessonId);
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const language = data.language;
@@ -436,7 +437,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("chapter", currentUser, data.chapterId);
+    await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -496,7 +497,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("chapter", currentUser, data.chapterId);
+    await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
     const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
 
@@ -548,7 +549,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, id);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -568,7 +569,7 @@ export class AdminLessonService {
       });
     }
 
-    if (!lesson) throw new NotFoundException("Lesson not found");
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
       throw new BadRequestException("Instructions and conditions required");
@@ -602,7 +603,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, id);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, id);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -622,7 +623,7 @@ export class AdminLessonService {
 
     const lesson = await this.lessonRepository.getLesson(id, data.language);
 
-    if (!lesson) throw new NotFoundException("Lesson not found");
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     if (!data.questions?.length) throw new BadRequestException("Questions are required");
 
@@ -657,7 +658,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, id);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, id);
 
     const { availableLocales } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -727,7 +728,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, lessonId);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId);
 
@@ -767,13 +768,13 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", lessonObject.currentUser, lessonObject.lessonId);
+    await this.validateAccess(ENTITY_TYPES.LESSON, lessonObject.currentUser, lessonObject.lessonId);
 
     const [lessonToUpdate] = await this.adminLessonRepository.getLesson(lessonObject.lessonId);
 
     const oldDisplayOrder = lessonToUpdate.displayOrder;
     if (!lessonToUpdate || oldDisplayOrder === null) {
-      throw new NotFoundException("Lesson not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.lesson");
     }
 
     const { language } = await this.localizationService.getBaseLanguage(
@@ -1161,7 +1162,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("chapter", currentUser, data.chapterId);
+    await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
     if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -1227,7 +1228,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, lessonId);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
     if (data.title && data.title.length > MAX_LESSON_TITLE_LENGTH) {
       throw new BadRequestException({
@@ -1247,7 +1248,7 @@ export class AdminLessonService {
 
     const lesson = await this.lessonRepository.getLesson(lessonId, data.language);
 
-    if (!lesson) throw new NotFoundException("Lesson not found");
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
@@ -1339,7 +1340,7 @@ export class AdminLessonService {
         lessonId,
         COURSE_FEATURE.CURRICULUM_EDITING,
       );
-      await this.validateAccess("lesson", currentUser, lessonId);
+      await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
     }
     const fileTitle = {
       [language]: title,
@@ -1458,7 +1459,7 @@ export class AdminLessonService {
       COURSE_FEATURE.CURRICULUM_EDITING,
     );
 
-    await this.validateAccess("lesson", currentUser, lessonId);
+    await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
     if (!file) {
       await this.adminLessonRepository.updateAiMentorAvatar(lessonId, null);
@@ -1480,7 +1481,7 @@ export class AdminLessonService {
   ): Promise<LessonActivityLogSnapshot> {
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId, language);
 
-    if (!lesson) throw new NotFoundException("Lesson not found");
+    if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     const lessonResources = await this.fileService.getResourcesForEntity(
       lessonId,
@@ -1559,7 +1560,7 @@ export class AdminLessonService {
   }
 
   async validateAccess(
-    entity: "chapter" | "lesson" | "course",
+    entity: CourseContentEntityType,
     currentUser: CurrentUserType,
     id: UUIDType,
     throwOnNoAccess: boolean = true,
@@ -1567,18 +1568,18 @@ export class AdminLessonService {
     let course;
 
     switch (entity) {
-      case "lesson":
+      case ENTITY_TYPES.LESSON:
         [course] = await this.adminLessonRepository.getCourseByLesson(id);
         break;
-      case "chapter":
+      case ENTITY_TYPES.CHAPTER:
         [course] = await this.adminLessonRepository.getCourseByChapter(id);
         break;
 
-      case "course":
+      case ENTITY_TYPES.COURSE:
         [course] = await this.adminLessonRepository.getCourse(id);
     }
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const canManageCourseContent = hasPermission(
       currentUser.permissions,

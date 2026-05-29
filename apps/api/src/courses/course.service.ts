@@ -4003,7 +4003,7 @@ export class CourseService {
   ) {
     await this.masterCourseService.assertCourseContentEditable(courseId);
 
-    await this.adminLessonService.validateAccess("course", currentUser, courseId);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
 
     const [{ availableLocales }] = await this.db
       .select()

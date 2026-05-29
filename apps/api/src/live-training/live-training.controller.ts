@@ -251,7 +251,7 @@ export class LiveTrainingController {
   ): Promise<BaseResponse<LiveTrainingDeleteResponse>> {
     await this.liveTrainingService.deleteLiveTraining(id, currentUser);
 
-    return new BaseResponse({ message: "Live Training deleted successfully" });
+    return new BaseResponse({ message: "liveTrainingView.deleteDialog.toast.success" });
   }
 
   @Post(":id/resources")
@@ -363,6 +363,6 @@ export class LiveTrainingController {
       currentUser,
     );
 
-    return new BaseResponse({ message: "Live Training resource deleted successfully" });
+    return new BaseResponse({ message: "liveTrainingView.files.toast.removed" });
   }
 }
