@@ -1163,6 +1163,92 @@ describe("CourseController (e2e)", () => {
           });
         });
 
+        it("should include course managers and exclude the course author", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create({
+              email: "course-author@example.com",
+              firstName: "Course",
+              lastName: "Author",
+            });
+          const cookies = await cookieFor(admin, app);
+
+          const adminCandidate = await userFactory.withAdminRole().create({
+            email: "admin-candidate@example.com",
+            firstName: "Admin",
+            lastName: "Candidate",
+          });
+          const contentCreatorCandidate = await userFactory.create({
+            email: "content-creator-candidate@example.com",
+            firstName: "Content",
+            lastName: "Creator",
+            role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+          });
+          const studentCandidate = await userFactory.create({
+            email: "student-candidate@example.com",
+            firstName: "Student",
+            lastName: "Candidate",
+            role: SYSTEM_ROLE_SLUGS.STUDENT,
+          });
+
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            status: "published",
+          });
+
+          const [adminEnrollment] = await db
+            .insert(studentCourses)
+            .values({
+              studentId: adminCandidate.id,
+              courseId: course.id,
+              finishedChapterCount: 0,
+            })
+            .returning();
+
+          const response = await request(app.getHttpServer())
+            .get(`/api/course/${course.id}/students?sort=email`)
+            .set("Cookie", cookies);
+
+          expect(response.status).toBe(200);
+          expect(response.body.data).toEqual([
+            {
+              firstName: adminCandidate.firstName,
+              lastName: adminCandidate.lastName,
+              email: adminCandidate.email,
+              id: adminCandidate.id,
+              enrolledAt: adminEnrollment.enrolledAt,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+            {
+              firstName: contentCreatorCandidate.firstName,
+              lastName: contentCreatorCandidate.lastName,
+              email: contentCreatorCandidate.email,
+              id: contentCreatorCandidate.id,
+              enrolledAt: null,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+            {
+              firstName: studentCandidate.firstName,
+              lastName: studentCandidate.lastName,
+              email: studentCandidate.email,
+              id: studentCandidate.id,
+              enrolledAt: null,
+              groups: [],
+              isEnrolledByGroup: false,
+            },
+          ]);
+          expect(response.body.data.map(({ id }: { id: string }) => id)).not.toContain(admin.id);
+          expect(response.body.pagination).toEqual({
+            totalItems: 3,
+            page: 1,
+            perPage: DEFAULT_PAGE_SIZE,
+          });
+        });
+
         it("should return list filtered by firstName", async () => {
           const admin = await userFactory
             .withCredentials({ password })

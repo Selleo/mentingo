@@ -460,17 +460,10 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const hasCourseUpdatePermissions = userHasAnyPermissionsCondition(
-      this.db,
-      users.id,
-      users.tenantId,
-      [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-    );
-
     const conditions = [
       eq(users.archived, false),
       isNull(users.deletedAt),
-      not(hasCourseUpdatePermissions),
+      ne(users.id, courses.authorId),
     ];
 
     if (keyword) {
@@ -512,6 +505,7 @@ export class CourseService {
         isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
+      .innerJoin(courses, eq(courses.id, courseId))
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
@@ -534,6 +528,7 @@ export class CourseService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: countDistinct(users.id) })
       .from(users)
+      .innerJoin(courses, eq(courses.id, courseId))
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
