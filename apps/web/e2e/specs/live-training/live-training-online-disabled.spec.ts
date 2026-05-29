@@ -34,11 +34,11 @@ test("online delivery cannot be selected when LiveKit is not configured", async 
 
     await expect(deliverySelect).toContainText(/offline/i);
     await deliverySelect.click();
-    await page
-      .getByTestId(
+    await expect(
+      page.getByTestId(
         LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(LIVE_TRAINING_DELIVERY_TYPES.ONLINE),
-      )
-      .click();
+      ),
+    ).toHaveAttribute("aria-disabled", "true");
     await expect(deliverySelect).toContainText(/offline/i);
   });
 });
