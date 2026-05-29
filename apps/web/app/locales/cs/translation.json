@@ -2746,7 +2746,8 @@
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
       "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
-      "missingTenantContext": "Chybí kontext organizace pro nahrání souboru"
+      "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
+      "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",

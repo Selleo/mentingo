@@ -45,6 +45,9 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   ALLOWED_EXCEL_MIME_TYPES_MAP,
+  MAX_PRESENTATION_FILE_SIZE,
+  MAX_PRESENTATION_FILE_SIZE_UNIT,
+  MAX_PRESENTATION_FILE_SIZE_VALUE,
   PRESENTATION_PDF_PREVIEW_CONTENT_TYPE,
   MAX_COURSE_TRAILER_VIDEO_SIZE,
   RESOURCE_RELATIONSHIP_TYPES,
@@ -165,6 +168,19 @@ export class FileService {
 
     if (isVideo) {
       throw new BadRequestException("Video uploads must use the TUS endpoints");
+    }
+
+    if (
+      ALLOWED_PRESENTATION_FILE_TYPES.includes(file.mimetype) &&
+      file.size > MAX_PRESENTATION_FILE_SIZE
+    ) {
+      throw new BadRequestException({
+        message: "files.toast.presentationFileTooLarge",
+        translationParams: {
+          size: MAX_PRESENTATION_FILE_SIZE_VALUE,
+          unit: MAX_PRESENTATION_FILE_SIZE_UNIT,
+        },
+      });
     }
 
     const fileExtension = path.extname(file.originalname);
