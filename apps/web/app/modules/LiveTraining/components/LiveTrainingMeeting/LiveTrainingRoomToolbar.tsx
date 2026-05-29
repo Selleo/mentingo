@@ -33,8 +33,7 @@ function toolbarButtonClassName(state: ToolbarButtonState = "default") {
     "inline-flex size-10 items-center justify-center rounded-md border text-white transition-colors",
     {
       "border-white/10 bg-white/10 hover:bg-white/15": state === "default",
-      "border-primary-100/45 bg-primary-500/35 text-primary-50 hover:bg-primary-500/45":
-        state === "active",
+      "border-white bg-white text-primary-800 shadow-sm hover:bg-white/90": state === "active",
       "border-danger-300/50 bg-danger-500/25 text-danger-50 hover:bg-danger-500/35":
         state === "muted",
     },
