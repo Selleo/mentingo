@@ -27,6 +27,7 @@ import { and, eq, gt, isNull, lt } from "drizzle-orm";
 
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
 import {
@@ -340,7 +341,7 @@ export class LiveTrainingService {
 
     await this.assertUsersExist(hostUserIds);
     await this.assertOptionalUsersHaveTrainerRole(hostUserIds, currentUser.userId);
-    await this.assertCoursesExist(linkedCourseIds);
+    await this.assertCanLinkCourses(linkedCourseIds, currentUser);
     await this.assertResourcesExist(allResourceIds);
 
     const liveTrainingRecordInput = {
@@ -426,7 +427,7 @@ export class LiveTrainingService {
 
     await this.assertOptionalUsersExist(hostUserIds);
     await this.assertOptionalUsersHaveTrainerRole(hostUserIds, row.authorId);
-    await this.assertOptionalCoursesExist(linkedCourseIds);
+    await this.assertCanLinkOptionalCourses(linkedCourseIds, currentUser);
     await this.assertOptionalResourcesExist(beforeResourceIds, afterResourceIds);
 
     const availableLocales = [...row.availableLocales];
@@ -848,7 +849,7 @@ export class LiveTrainingService {
     linkedCourses: LiveTrainingVisibilityLinkedCourse[],
     currentUser: CurrentUserType,
   ) {
-    if (this.canManage(currentUser)) return true;
+    if (this.canManageAny(currentUser)) return true;
     if (row.authorId === currentUser.userId) return true;
     if (trainers.some((trainer) => trainer.id === currentUser.userId)) return true;
     if (row.visibilityScope === LIVE_TRAINING_VISIBILITY_SCOPES.ALL) return true;
@@ -960,12 +961,10 @@ export class LiveTrainingService {
     return this.fileService.getFileUrl(avatarReference);
   }
 
-  private canManage(currentUser: CurrentUserType) {
+  private canManageAny(currentUser: CurrentUserType) {
     return hasAnyPermission(currentUser.permissions, [
       PERMISSIONS.LIVE_TRAINING_UPDATE,
       PERMISSIONS.LIVE_TRAINING_DELETE,
-      PERMISSIONS.LIVE_TRAINING_DELETE_OWN,
-      PERMISSIONS.LIVE_TRAINING_STATISTICS,
     ]);
   }
 
@@ -975,7 +974,7 @@ export class LiveTrainingService {
     currentUser: CurrentUserType,
   ) {
     return (
-      this.canManage(currentUser) ||
+      this.canManageAny(currentUser) ||
       row.authorId === currentUser.userId ||
       trainers.some((trainer) => trainer.id === currentUser.userId)
     );
@@ -1334,23 +1333,34 @@ export class LiveTrainingService {
     await this.assertUsersExist(userIds);
   }
 
-  private async assertCoursesExist(courseIds: UUIDType[]) {
+  private async assertCanLinkCourses(courseIds: UUIDType[], currentUser: CurrentUserType) {
     if (!courseIds.length) return;
 
-    const existing = await this.liveTrainingRepository.getExistingCourseIds(courseIds);
+    const existing = await this.liveTrainingRepository.getExistingCourses(courseIds);
     this.assertAllIdsExist(
       courseIds,
       existing.map((course) => course.id),
       "liveTraining.errors.invalidCourse",
     );
+
+    const hasUnauthorizedCourse = existing.some(
+      (course) => !canUpdateCourseByAuthor(currentUser, course.authorId),
+    );
+
+    if (hasUnauthorizedCourse) {
+      throw new ForbiddenException("liveTraining.errors.courseLinkForbidden");
+    }
   }
 
-  private async assertOptionalCoursesExist(courseIds?: UUIDType[]) {
+  private async assertCanLinkOptionalCourses(
+    courseIds: UUIDType[] | undefined,
+    currentUser: CurrentUserType,
+  ) {
     if (courseIds === undefined) {
       return;
     }
 
-    await this.assertCoursesExist(courseIds);
+    await this.assertCanLinkCourses(courseIds, currentUser);
   }
 
   private async assertResourcesExist(resourceIds: UUIDType[]) {

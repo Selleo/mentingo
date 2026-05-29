@@ -17,7 +17,7 @@ const isAvailableRoute = (route: string, excludedRoutes: Set<string>) => !exclud
 
 export const getDefaultAuthenticatedRedirect = (
   currentUser: CurrentUser,
-  _globalSettings?: GlobalSettings,
+  globalSettings?: GlobalSettings,
   options: DefaultRedirectOptions = {},
 ) => {
   const excludedRoutes = new Set(options.exclude ?? []);
@@ -46,6 +46,7 @@ export const getDefaultAuthenticatedRedirect = (
 
   if (
     isAvailableRoute("/learning-paths", excludedRoutes) &&
+    globalSettings?.learningPathsEnabled !== false &&
     hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ)
   ) {
     return "/learning-paths";

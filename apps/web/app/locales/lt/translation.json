@@ -343,6 +343,12 @@
         "title": "Live Training",
         "description": "Suplanuokite internetinius arba gyvus mokymus."
       },
+      "section": {
+        "basics": "Pagrindai",
+        "schedule": "Tvarkaraštis",
+        "delivery": "Vykdymas",
+        "permissions": "Leidimai"
+      },
       "field": {
         "title": "Pavadinimas",
         "description": "Aprašymas",

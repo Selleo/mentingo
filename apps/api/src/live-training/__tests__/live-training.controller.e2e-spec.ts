@@ -8,6 +8,7 @@ import {
   LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
+  SYSTEM_ROLE_SLUGS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
@@ -32,6 +33,7 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
+import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../test/helpers/e2e-settings";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
@@ -113,6 +115,18 @@ describe("LiveTrainingController (e2e)", () => {
         email: `student-${crypto.randomUUID()}@example.com`,
         tenantId: defaultTenantId,
       });
+  };
+
+  const createTrainer = async () => {
+    const trainer = await userFactory.withCredentials({ password }).create({
+      email: `trainer-${crypto.randomUUID()}@example.com`,
+      tenantId: defaultTenantId,
+      roleSlug: SYSTEM_ROLE_SLUGS.TRAINER,
+    });
+
+    await createSettingsFactory(db, trainer.id, false).create();
+
+    return trainer;
   };
 
   const createTestCourse = async (authorId: UUIDType) => {
@@ -278,6 +292,67 @@ describe("LiveTrainingController (e2e)", () => {
     expect(new Date(calendarEvent.endsAt).toISOString()).toBe(nextEndsAt);
     expect(calendarEvent.location).toBe("Room 15");
     expect(calendarEvent.title).toMatchObject({ [language]: "Updated offline training" });
+  });
+
+  it("rejects course links from trainers without course management access", async () => {
+    const admin = await createAdmin();
+    const trainer = await createTrainer();
+    const course = await createTestCourse(admin.id);
+    const startsAt = getFutureDateOnScheduleStep(60);
+    const endsAt = getFutureDateOnScheduleStep(120);
+
+    await request(app.getHttpServer())
+      .post("/api/live-training")
+      .set("Cookie", await cookieFor(trainer, app))
+      .send({
+        language,
+        title: "Unauthorized course link",
+        startsAt,
+        endsAt,
+        timezone,
+        deliveryType: LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
+        linkedCourseIds: [course.id],
+      })
+      .expect(403);
+
+    const liveTraining = await createOfflineLiveTraining(trainer);
+
+    await request(app.getHttpServer())
+      .patch(`/api/live-training/${liveTraining.id}`)
+      .set("Cookie", await cookieFor(trainer, app))
+      .send({
+        language,
+        linkedCourseIds: [course.id],
+      })
+      .expect(403);
+  });
+
+  it("does not expose course-linked live trainings to unrelated trainers", async () => {
+    const admin = await createAdmin();
+    const unrelatedTrainer = await createTrainer();
+    const course = await createTestCourse(admin.id);
+    const liveTraining = await createOfflineLiveTraining(admin, course.id);
+
+    await request(app.getHttpServer())
+      .get(`/api/live-training/${liveTraining.id}`)
+      .query({ language })
+      .set("Cookie", await cookieFor(unrelatedTrainer, app))
+      .expect(404);
+
+    const response = await request(app.getHttpServer())
+      .get("/api/calendar/events")
+      .query({
+        start: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() + 24 * 60 * 60 * 1000 * 7).toISOString(),
+        language,
+        timezone,
+      })
+      .set("Cookie", await cookieFor(unrelatedTrainer, app))
+      .expect(200);
+
+    expect(response.body.data.events).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ id: liveTraining.calendarEventId })]),
+    );
   });
 
   it("soft deletes live training and cancels paired calendar event", async () => {

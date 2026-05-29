@@ -343,6 +343,12 @@
         "title": "Live Training",
         "description": "Naplánujte online nebo offline školení."
       },
+      "section": {
+        "basics": "Základy",
+        "schedule": "Plán",
+        "delivery": "Realizace",
+        "permissions": "Oprávnění"
+      },
       "field": {
         "title": "Název",
         "description": "Popis",

@@ -117,8 +117,11 @@ export class LiveTrainingRepository {
       );
   }
 
-  async getExistingCourseIds(courseIds: UUIDType[]) {
-    return this.db.select({ id: courses.id }).from(courses).where(inArray(courses.id, courseIds));
+  async getExistingCourses(courseIds: UUIDType[]) {
+    return this.db
+      .select({ id: courses.id, authorId: courses.authorId })
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
   }
 
   async getExistingResourceIds(resourceIds: UUIDType[]) {

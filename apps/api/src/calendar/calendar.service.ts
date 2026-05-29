@@ -283,7 +283,7 @@ export class CalendarService {
   }
 
   private getLiveTrainingVisibilityCondition(currentUser: CurrentUserType): SQL {
-    if (this.canManageLiveTraining(currentUser)) {
+    if (this.canManageAnyLiveTraining(currentUser)) {
       return sql`TRUE`;
     }
 
@@ -337,7 +337,7 @@ export class CalendarService {
     hosts: CalendarEventHostRow[],
     currentUser: CurrentUserType,
   ): CalendarEventSourceRole {
-    if (this.canManageLiveTraining(currentUser)) {
+    if (this.canManageAnyLiveTraining(currentUser)) {
       return CALENDAR_EVENT_SOURCE_ROLES.ADMIN;
     }
 
@@ -389,18 +389,16 @@ export class CalendarService {
     hosts: CalendarEventHostRow[],
     currentUser: CurrentUserType,
   ) {
-    if (this.canManageLiveTraining(currentUser)) return true;
+    if (this.canManageAnyLiveTraining(currentUser)) return true;
     if (row.authorId === currentUser.userId) return true;
 
     return hosts.some((host) => host.userId === currentUser.userId);
   }
 
-  private canManageLiveTraining(currentUser: CurrentUserType) {
+  private canManageAnyLiveTraining(currentUser: CurrentUserType) {
     return hasAnyPermission(currentUser.permissions, [
       PERMISSIONS.LIVE_TRAINING_UPDATE,
       PERMISSIONS.LIVE_TRAINING_DELETE,
-      PERMISSIONS.LIVE_TRAINING_DELETE_OWN,
-      PERMISSIONS.LIVE_TRAINING_STATISTICS,
     ]);
   }
 
