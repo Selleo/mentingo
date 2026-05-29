@@ -691,6 +691,66 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data[0].id).toBe(enrolledCourse.id);
       });
 
+      it("returns trailer url for enrolled courses", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
+
+        const enrolledCourse = await courseFactory.create({
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        const [trailerResource] = await db
+          .insert(resources)
+          .values({
+            reference: "course-trailers/trailer.mp4",
+            contentType: "video/mp4",
+            uploadedBy: contentCreator.id,
+          })
+          .returning();
+
+        await db.insert(resourceEntity).values({
+          resourceId: trailerResource.id,
+          entityId: enrolledCourse.id,
+          entityType: ENTITY_TYPES.COURSE,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.TRAILER,
+        });
+
+        await db.insert(studentCourses).values({
+          studentId: student.id,
+          courseId: enrolledCourse.id,
+          finishedChapterCount: 0,
+        });
+
+        mockFileService.getFileUrl.mockImplementation(async (reference: string) => {
+          if (reference === "course-trailers/trailer.mp4") {
+            return "http://example.com/signed-trailer.mp4";
+          }
+
+          return "http://example.com/file";
+        });
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/get-student-courses")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data).toHaveLength(1);
+        expect(response.body.data[0]).toMatchObject({
+          id: enrolledCourse.id,
+          trailerUrl: "http://example.com/signed-trailer.mp4",
+        });
+      });
+
       it("filters by title", async () => {
         const student = await userFactory
           .withCredentials({ password })

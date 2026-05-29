@@ -99,6 +99,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Soubor byl úspěšně nahrán",
       "videoFailed": "Nahrání videa se nezdařilo",
+      "videoTooLarge": "Video soubor překračuje maximální povolenou velikost",
       "videoReady": "Video je připraveno k použití",
       "videoUploading": "Nahráváme vaše video. Záložku prosím nezavírejte.",
       "videoUploadedProcessing": "Vaše nahrávání bylo dokončeno. Nyní se vaše video zpracovává. Neváhejte a zavřete kartu."
@@ -1434,6 +1435,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 nebo Hevc (max. 200 MB)",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",

@@ -409,30 +409,33 @@ export class CourseService {
         .leftJoin(users, eq(courses.authorId, users.id))
         .where(and(...conditions));
 
+      const courseIds = data.map((item) => item.id);
+      const trailerUrls = await this.getCourseTrailerUrls(courseIds);
+
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
-          if (!item.thumbnailUrl) {
-            return item;
-          }
-
+          const trailerUrl = trailerUrls[item.id] ?? null;
           try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const signedUrl = item.thumbnailUrl
+              ? await this.fileService.getFileUrl(item.thumbnailUrl)
+              : item.thumbnailUrl;
+
             const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
               item.authorAvatarUrl,
             );
             return {
               ...item,
               thumbnailUrl: signedUrl,
+              trailerUrl,
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-            return item;
+            return { ...item, trailerUrl };
           }
         }),
       );
 
-      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
 
       const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({

@@ -21,6 +21,7 @@ export type VideoUploadState = {
   fileType?: string;
   error?: string;
   userId?: string;
+  maxUploadSize?: number;
 };
 
 @Injectable()
@@ -71,6 +72,7 @@ export class VideoProcessingStateService {
       fileKey?: string;
       multipartUploadId?: string;
       partSize?: number;
+      maxUploadSize?: number;
     },
   ) {
     const state: VideoUploadState = {
@@ -83,6 +85,7 @@ export class VideoProcessingStateService {
       fileKey: options?.fileKey,
       multipartUploadId: options?.multipartUploadId,
       partSize: options?.partSize,
+      maxUploadSize: options?.maxUploadSize,
     };
 
     await this.retryOperation(

@@ -38,6 +38,7 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 
 import {
   ALLOWED_EXCEL_MIME_TYPES_MAP,
+  MAX_COURSE_TRAILER_VIDEO_SIZE,
   RESOURCE_RELATIONSHIP_TYPES,
   MAX_VIDEO_SIZE,
 } from "./file.constants";
@@ -202,12 +203,14 @@ export class FileService {
     placeholderKey: string,
     fileType: string | undefined,
     currentUserId?: UUIDType,
+    maxUploadSize?: number,
   ) {
     await this.videoProcessingStateService.initializeState(
       uploadId,
       placeholderKey,
       fileType,
       currentUserId,
+      { maxUploadSize },
     );
   }
 
@@ -312,8 +315,14 @@ export class FileService {
       throw new BadRequestException("Invalid video mime type");
     }
 
-    if (sizeBytes > MAX_VIDEO_SIZE) {
-      throw new BadRequestException("Video file exceeds maximum allowed size");
+    const isCourseTrailer =
+      entityType === ENTITY_TYPES.COURSE &&
+      relationshipType === RESOURCE_RELATIONSHIP_TYPES.TRAILER;
+
+    const maxUploadSize = isCourseTrailer ? MAX_COURSE_TRAILER_VIDEO_SIZE : MAX_VIDEO_SIZE;
+
+    if (sizeBytes > maxUploadSize) {
+      throw new BadRequestException("uploadFile.toast.videoTooLarge");
     }
 
     const { uploadId, placeholderKey, fileType } = this.buildVideoUploadContext(resource, filename);
@@ -337,7 +346,13 @@ export class FileService {
       }
     }
 
-    await this.initializeVideoUploadState(uploadId, placeholderKey, fileType, currentUser?.userId);
+    await this.initializeVideoUploadState(
+      uploadId,
+      placeholderKey,
+      fileType,
+      currentUser?.userId,
+      maxUploadSize,
+    );
 
     const provider = await this.resolveVideoProvider();
     const providerResponse = await this.initProviderUpload(

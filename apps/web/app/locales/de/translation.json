@@ -99,6 +99,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Datei erfolgreich hochgeladen",
       "videoFailed": "Das Hochladen des Videos ist fehlgeschlagen",
+      "videoTooLarge": "Die Videodatei überschreitet die maximal zulässige Größe",
       "videoReady": "Das Video ist einsatzbereit",
       "videoUploading": "Wir laden Ihr Video hoch. Bitte schließen Sie den Tab nicht.",
       "videoUploadedProcessing": "Ihr Upload ist abgeschlossen. Jetzt wird Ihr Video verarbeitet. Schließen Sie den Tab gerne."
@@ -1434,6 +1435,7 @@
         "charactersLeft": "Charaktere übrig",
         "reachedCharactersLimit": "Sie haben die Zeichenbeschränkung erreicht.",
         "reachedCharactersLimitHtml": "Zu viel Formatierung. Bitte reduzieren Sie die Formatierung, damit sie innerhalb des Limits liegt.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 oder Hevc (max. 200 MB)",
         "enableCertificate": "Zertifikat aktivieren",
         "enableCertificateDescription": "Aktivieren Sie diese Option, um Zertifikate für diesen Kurs auszustellen und konfigurieren Sie unten deren Signatur und Vorschau.",
         "certificateValidity": "Zertifikatsgültigkeit",
