@@ -1,5 +1,5 @@
 import { ForbiddenException, Injectable, NotImplementedException } from "@nestjs/common";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
@@ -45,7 +45,7 @@ export class TestConfigService {
       id: lessonId,
       language,
       studentId,
-      userPermissions: [],
+      userPermissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE],
     });
   }
 
