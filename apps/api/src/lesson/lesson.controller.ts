@@ -37,6 +37,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 import { MAX_VIDEO_SIZE } from "src/file/file.constants";
+import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
@@ -469,29 +470,37 @@ export class LessonController {
   @Get("lesson-image/:resourceId")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
-    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+    request: [
+      { type: "param", schema: UUIDSchema, name: "resourceId" },
+      { type: "query", name: "preview", schema: filePreviewQuerySchema },
+    ],
   })
   async getLessonImage(
     @Param("resourceId") resourceId: UUIDType,
+    @Query("preview") preview: FilePreviewQuery,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, currentUser, resourceId);
+    return this.lessonService.getLessonResource(req, res, currentUser, resourceId, preview);
   }
 
   @Get("lesson-resource/:resourceId")
   @RequirePermission(PERMISSIONS.COURSE_READ)
   @Validate({
-    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+    request: [
+      { type: "param", schema: UUIDSchema, name: "resourceId" },
+      { type: "query", name: "preview", schema: filePreviewQuerySchema },
+    ],
   })
   async getLessonResource(
     @Param("resourceId") resourceId: UUIDType,
+    @Query("preview") preview: FilePreviewQuery,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    return this.lessonService.getLessonResource(req, res, currentUser, resourceId);
+    return this.lessonService.getLessonResource(req, res, currentUser, resourceId, preview);
   }
 
   @Post("ai-mentor/avatar")

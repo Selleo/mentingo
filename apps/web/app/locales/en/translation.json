@@ -2807,7 +2807,8 @@
       "invalidData": "File upload failed - invalid file data",
       "contentTypeMismatch": "File content type does not match the provided content type",
       "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
-      "missingTenantContext": "Missing tenant context for file upload"
+      "missingTenantContext": "Missing tenant context for file upload",
+      "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -3006,6 +3007,7 @@
       }
     },
     "presentation": {
+      "title": "Presentation",
       "ariaLabel": {
         "drag": "Drag presentation embed",
         "remove": "Remove presentation embed"

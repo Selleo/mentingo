@@ -63,6 +63,7 @@ import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
 
 @Injectable()
 export class LessonService {
@@ -546,6 +547,7 @@ export class LessonService {
     res: Response,
     currentUser: CurrentUserType,
     resourceId: UUIDType,
+    preview?: FilePreviewFormat,
   ) {
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
@@ -562,7 +564,10 @@ export class LessonService {
           PERMISSIONS.COURSE_UPDATE_OWN,
         ])
       ) {
-        return this.streamResource(req, res, lessonResource.reference);
+        return this.streamResource(req, res, lessonResource.reference, {
+          contentType: lessonResource.contentType,
+          preview,
+        });
       }
 
       throw new NotFoundException("common.toast.notFound");
@@ -577,12 +582,22 @@ export class LessonService {
       throw new ForbiddenException("You are not allowed to access this lesson!");
     }
 
-    return this.streamResource(req, res, lessonResource.reference);
+    return this.streamResource(req, res, lessonResource.reference, {
+      contentType: lessonResource.contentType,
+      preview,
+    });
   }
 
-  private async streamResource(req: Request, res: Response, reference: string) {
-    const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
+  private async streamResource(
+    req: Request,
+    res: Response,
+    reference: string,
+    options?: FilePreviewOptions,
+  ) {
+    const file = await this.fileService.getFileDeliveryWithPreview(reference, {
+      ...options,
+      range: req.headers.range,
+    });
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);

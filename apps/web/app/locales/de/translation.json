@@ -2744,7 +2744,8 @@
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
       "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
-      "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload"
+      "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",
+      "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch."
     },
     "import": {
       "noFileUploaded": "Keine Datei hochgeladen",
@@ -2943,6 +2944,7 @@
       }
     },
     "presentation": {
+      "title": "Präsentation",
       "ariaLabel": {
         "drag": "Präsentation per Drag & Drop einbetten",
         "remove": "Präsentationseinbettung entfernen"

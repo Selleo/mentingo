@@ -2746,7 +2746,8 @@
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
       "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
-      "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui"
+      "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
+      "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -2945,6 +2946,7 @@
       }
     },
     "presentation": {
+      "title": "Pristatymas",
       "ariaLabel": {
         "drag": "Vilkite pristatymo įdėjimą",
         "remove": "Pašalinti pristatymo įterpimą"

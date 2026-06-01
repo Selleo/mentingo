@@ -3062,7 +3062,8 @@
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
       "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG.",
-      "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku"
+      "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
+      "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "Nie przesłano pliku",
@@ -3261,6 +3262,7 @@
       }
     },
     "presentation": {
+      "title": "Prezentacja",
       "ariaLabel": {
         "drag": "Przeciągnij osadzoną prezentację",
         "remove": "Usuń osadzoną prezentację"

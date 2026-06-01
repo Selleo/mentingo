@@ -31,6 +31,7 @@ import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
@@ -435,6 +436,7 @@ export class NewsService {
     res: Response,
     resourceId: UUIDType,
     currentUser?: CurrentUserType,
+    preview?: FilePreviewFormat,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -464,7 +466,12 @@ export class NewsService {
     ]);
 
     if (!resource.entityId || resource.entityType !== ENTITY_TYPES.NEWS) {
-      if (isAdminLike) return this.streamNewsResource(req, res, resource.reference);
+      if (isAdminLike) {
+        return this.streamNewsResource(req, res, resource.reference, {
+          contentType: resource.contentType,
+          preview,
+        });
+      }
 
       throw new NotFoundException("News resource not found");
     }
@@ -490,12 +497,22 @@ export class NewsService {
       throw new NotFoundException("News resource not found");
     }
 
-    return this.streamNewsResource(req, res, resource.reference);
+    return this.streamNewsResource(req, res, resource.reference, {
+      contentType: resource.contentType,
+      preview,
+    });
   }
 
-  private async streamNewsResource(req: Request, res: Response, reference: string) {
-    const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
+  private async streamNewsResource(
+    req: Request,
+    res: Response,
+    reference: string,
+    options?: FilePreviewOptions,
+  ) {
+    const file = await this.fileService.getFileDeliveryWithPreview(reference, {
+      ...options,
+      range: req.headers.range,
+    });
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);
