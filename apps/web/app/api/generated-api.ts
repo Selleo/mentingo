@@ -5517,6 +5517,87 @@ export interface GetLearningPathJobStatusResponse {
   };
 }
 
+export type InitScormImportBody =
+  | {
+      action: "create-course";
+      /** @minLength 1 */
+      filename: string;
+      /** @min 1 */
+      sizeBytes: number;
+      /** @minLength 1 */
+      mimeType: string;
+      metadata: {
+        title: string;
+        description: string;
+        /** @format uuid */
+        categoryId: string;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs";
+        status?: "draft" | "published" | "private";
+        thumbnailS3Key?: string;
+        priceInCents?: number;
+        currency?: string;
+        hasCertificate?: boolean;
+      };
+    }
+  | {
+      action: "create-lesson";
+      /** @minLength 1 */
+      filename: string;
+      /** @min 1 */
+      sizeBytes: number;
+      /** @minLength 1 */
+      mimeType: string;
+      metadata: {
+        /** @format uuid */
+        chapterId: string;
+        title: string;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs";
+      };
+    }
+  | {
+      action: "attach-lesson-package";
+      /** @format uuid */
+      lessonId: string;
+      /** @minLength 1 */
+      filename: string;
+      /** @min 1 */
+      sizeBytes: number;
+      /** @minLength 1 */
+      mimeType: string;
+      metadata: {
+        title: string;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs";
+      };
+    };
+
+export interface InitScormImportResponse {
+  /** @format uuid */
+  packageId: string;
+  /** @format uuid */
+  uploadId: string;
+  tusEndpoint: string;
+  tusHeaders: object;
+  expiresAt: string;
+  /** @min 1 */
+  partSize: number;
+}
+
+export interface CompleteScormImportResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    packageId: string;
+    fileName: string;
+    fileSize: number;
+    mimeType: string;
+    scoCount: number;
+  };
+}
+
 export interface CreateScormCourseResponse {
   data: {
     /** @format uuid */
@@ -12342,6 +12423,101 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/report/summary`,
         method: "GET",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerInitScormImport
+     * @request POST:/api/scorm/import/init
+     */
+    scormControllerInitScormImport: (data: InitScormImportBody, params: RequestParams = {}) =>
+      this.request<InitScormImportResponse, any>({
+        path: `/api/scorm/import/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerTusOptionsBase
+     * @request OPTIONS:/api/scorm/import/tus
+     */
+    scormControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/import/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerCreateTusUpload
+     * @request POST:/api/scorm/import/tus
+     */
+    scormControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/import/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerTusOptionsUpload
+     * @request OPTIONS:/api/scorm/import/tus/{packageId}
+     */
+    scormControllerTusOptionsUpload: (packageId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/import/tus/${packageId}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerGetTusUpload
+     * @request HEAD:/api/scorm/import/tus/{packageId}
+     */
+    scormControllerGetTusUpload: (packageId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/import/tus/${packageId}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerPatchTusUpload
+     * @request PATCH:/api/scorm/import/tus/{packageId}
+     */
+    scormControllerPatchTusUpload: (packageId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/scorm/import/tus/${packageId}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ScormControllerCompleteScormImport
+     * @request POST:/api/scorm/import/{packageId}/complete
+     */
+    scormControllerCompleteScormImport: (packageId: string, params: RequestParams = {}) =>
+      this.request<CompleteScormImportResponse, any>({
+        path: `/api/scorm/import/${packageId}/complete`,
+        method: "POST",
+        format: "json",
         ...params,
       }),
 

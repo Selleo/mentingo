@@ -72,11 +72,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
       }
     };
 
-    const handleProgressUpdate = async (lessonCompleted: boolean) => {
-      if (!lessonCompleted) {
-        return;
-      }
-
+    const invalidateRuntimeProgressQueries = async () => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["lesson"] }),
         queryClient.invalidateQueries({ queryKey: ["course"] }),
@@ -117,9 +113,9 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        const result = await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
+        await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
         updateLaunchRuntimeCache(values);
-        await handleProgressUpdate(result.lessonCompleted);
+        await invalidateRuntimeProgressQueries();
       } catch {
         dirtyValuesRef.current = { ...values, ...dirtyValuesRef.current };
       } finally {
@@ -142,9 +138,9 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        const result = await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
+        await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
         updateLaunchRuntimeCache(values);
-        await handleProgressUpdate(result.lessonCompleted);
+        await invalidateRuntimeProgressQueries();
         if (showToast) {
           toast({ description: t("studentLessonView.scorm.lessonFinished") });
         }

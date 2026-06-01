@@ -176,6 +176,10 @@
       "creatingCourse": "Vytváření kurzu...",
       "createCourse": "Vytvořit kurz"
     },
+    "upload": {
+      "uploading": "Nahrává se balíček SCORM...",
+      "uploadedProcessing": "Nahrávání balíčku SCORM bylo dokončeno. Zpracování importu bylo spuštěno."
+    },
     "importFailure": {
       "courseDescription": "Kurz byl odstraněn, protože balíček SCORM se nepodařilo importovat.",
       "lessonDescription": "Lekce SCORM nebo balíček byly odstraněny, protože balíček se nepodařilo importovat."
@@ -198,6 +202,16 @@
       "resourceIdentifierMissing": "Chybí identifikátor zdroje SCORM.",
       "itemIdentifierMissing": "Chybí identifikátor položky SCORM.",
       "launchFileMissing": "Chybí spouštěcí soubor SCORM.",
+      "uploadIdMissing": "Chybí identifikátor relace nahrávání SCORM.",
+      "uploadOffsetMissing": "Chybí pozice nahrávání SCORM.",
+      "unsupportedTusVersion": "Tato verze protokolu nahrávání SCORM není podporována.",
+      "uploadAlreadyCompleted": "Nahrávání SCORM je již dokončeno.",
+      "emptyUploadChunk": "Část nahrávání SCORM je prázdná.",
+      "uploadExceedsDeclaredLength": "Nahrávání SCORM překračuje deklarovanou velikost souboru.",
+      "uploadChunkTooSmall": "Část nahrávání SCORM je příliš malá.",
+      "uploadIncomplete": "Nahrávání SCORM není dokončeno.",
+      "uploadSessionNotFound": "Relace nahrávání SCORM nebyla nalezena.",
+      "uploadForbidden": "Toto nahrávání SCORM nepatří aktuálnímu uživateli.",
       "packageAlreadyAttached": "Tato lekce SCORM již má balíček pro vybraný jazyk.",
       "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
       "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
@@ -1922,6 +1936,7 @@
           "saveLesson": "Uložit",
           "addResource": "Přidat zdroj",
           "removeResource": "Odebrat zdroj",
+          "uploadFiles": "Nahrát soubory",
           "addLessonDisabledTooltip": "Chcete-li vytvořit lekci, musíte být v základním jazyce."
         },
         "breadcrumbs": {

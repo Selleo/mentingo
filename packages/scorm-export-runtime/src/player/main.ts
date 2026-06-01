@@ -110,8 +110,8 @@ type RuntimeLabels = {
   notPassed: string;
   score: string;
   correct: string;
+  passingThreshold: string;
   submitQuiz: string;
-  submitted: string;
   true: string;
   false: string;
   yourAnswer: string;
@@ -129,70 +129,74 @@ const RUNTIME_LABELS: Record<string, RuntimeLabels> = {
     notPassed: "Not passed",
     score: "Score",
     correct: "Correct",
-    submitQuiz: "Submit quiz",
-    submitted: "Submitted",
+    passingThreshold:
+      "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
+    submitQuiz: "Submit",
     true: "True",
     false: "False",
     yourAnswer: "Your answer",
     correctAnswer: "Correct answer",
     expectedAnswer: "Expected answer",
-    retakeQuiz: "Retake quiz",
+    retakeQuiz: "Retake",
   },
   pl: {
     passed: "Zaliczono",
     notPassed: "Nie zaliczono",
     score: "Wynik",
     correct: "Poprawne",
-    submitQuiz: "Zatwierdz quiz",
-    submitted: "Zatwierdzono",
+    passingThreshold: "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
+    submitQuiz: "Prześlij",
     true: "Prawda",
     false: "Falsz",
     yourAnswer: "Twoja odpowiedz",
     correctAnswer: "Poprawna odpowiedz",
     expectedAnswer: "Oczekiwana odpowiedz",
-    retakeQuiz: "Podejdz ponownie",
+    retakeQuiz: "Powtórz",
   },
   de: {
     passed: "Bestanden",
     notPassed: "Nicht bestanden",
     score: "Ergebnis",
     correct: "Richtig",
-    submitQuiz: "Quiz absenden",
-    submitted: "Abgesendet",
+    passingThreshold:
+      "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
+    submitQuiz: "Einreichen",
     true: "Richtig",
     false: "Falsch",
     yourAnswer: "Deine Antwort",
     correctAnswer: "Richtige Antwort",
     expectedAnswer: "Erwartete Antwort",
-    retakeQuiz: "Quiz wiederholen",
+    retakeQuiz: "Wiederholung",
   },
   cs: {
     passed: "Splneno",
     notPassed: "Nesplneno",
     score: "Skore",
     correct: "Spravne",
-    submitQuiz: "Odeslat kviz",
-    submitted: "Odeslano",
+    passingThreshold:
+      "Hranice pro splnění: {{threshold}}% ({{correct}} z {{questionsNumber}} otázek)",
+    submitQuiz: "Předložit",
     true: "Pravda",
     false: "Nepravda",
     yourAnswer: "Vase odpoved",
     correctAnswer: "Spravna odpoved",
     expectedAnswer: "Ocekavana odpoved",
-    retakeQuiz: "Opakovat kviz",
+    retakeQuiz: "Znovudobytí",
   },
   lt: {
     passed: "Islaikyta",
     notPassed: "Neislaikyta",
     score: "Rezultatas",
     correct: "Teisingai",
-    submitQuiz: "Pateikti testa",
-    submitted: "Pateikta",
+    passingThreshold:
+      "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
+    submitQuiz: "Pateikti",
     true: "Tiesa",
     false: "Netiesa",
     yourAnswer: "Jusu atsakymas",
     correctAnswer: "Teisingas atsakymas",
     expectedAnswer: "Tiketinas atsakymas",
-    retakeQuiz: "Kartoti testa",
+    retakeQuiz: "Perimti",
   },
 };
 const QUESTION_TYPE = {
@@ -324,10 +328,10 @@ function createRuntimeState(api: ScormApi | null, lesson: Lesson) {
       delete state.correct;
       delete state.scorePercent;
       delete state.answers;
-      api?.LMSSetValue("cmi.core.score.raw", "0");
-      api?.LMSSetValue("cmi.core.score.min", "0");
-      api?.LMSSetValue("cmi.core.score.max", "100");
-      api?.LMSSetValue("cmi.core.lesson_status", "incomplete");
+      api?.LMSSetValue("cmi.core.score.raw", "");
+      api?.LMSSetValue("cmi.core.score.min", "");
+      api?.LMSSetValue("cmi.core.score.max", "");
+      api?.LMSSetValue("cmi.core.lesson_status", "not attempted");
       persist();
     },
   };
@@ -557,17 +561,13 @@ function renderQuizLesson(
   const feedback = element("div", "quiz-feedback");
   const actions = element("div", "quiz-actions");
   const retake = element("button", "secondary-button", labels.retakeQuiz) as HTMLButtonElement;
-  const submit = element(
-    "button",
-    "primary-button",
-    submitted ? labels.submitted : labels.submitQuiz,
-  ) as HTMLButtonElement;
+  const submit = element("button", "primary-button", labels.submitQuiz) as HTMLButtonElement;
   retake.type = "button";
   retake.hidden = !submitted;
   submit.type = "submit";
   submit.disabled = submitted;
 
-  form.append(renderTitle(lesson.title));
+  form.append(renderTitle(lesson.title), renderPassingThreshold(lesson, labels));
   lesson.questions.forEach((question) => {
     form.append(
       renderQuestion(
@@ -589,7 +589,6 @@ function renderQuizLesson(
     submitted = true;
     runtime.submitQuiz(result.scorePercent, result.correct, result.passed, answers);
     feedback.replaceChildren(renderScore(result, lesson, labels));
-    submit.textContent = labels.submitted;
     submit.disabled = true;
     retake.hidden = false;
     form
@@ -770,14 +769,17 @@ function renderFillText(
   const parts = splitBlankAnswerMarkers(question.description ?? "");
   const answers = Array.isArray(savedAnswer) ? savedAnswer : [];
   const sentence = element("div", "fill-sentence");
+  let blankIndex = 0;
+
   parts.forEach((part, index) => {
     sentence.append(document.createTextNode(stripHtml(part.text)));
     if (part.answerId) {
       const input = element("input", "blank-input") as HTMLInputElement;
       input.name = `${question.id}:${part.answerId}`;
-      input.value = answers[index] ?? "";
+      input.value = answers[blankIndex] ?? "";
       input.disabled = submitted;
       sentence.append(input);
+      blankIndex += 1;
     }
   });
   container.append(sentence);
@@ -792,21 +794,24 @@ function renderFillDnd(
   const parts = splitBlankAnswerMarkers(question.description ?? "");
   const answers = Array.isArray(savedAnswer) ? savedAnswer : [];
   const sentence = element("div", "fill-sentence dnd-sentence");
+  let blankIndex = 0;
 
-  parts.forEach((part, index) => {
+  parts.forEach((part) => {
     sentence.append(document.createTextNode(stripHtml(part.text)));
     if (part.answerId) {
-      const blank = element("button", "dnd-blank", answers[index] ?? "") as HTMLButtonElement;
+      const blank = element("button", "dnd-blank", answers[blankIndex] ?? "") as HTMLButtonElement;
       blank.type = "button";
-      blank.dataset.blankIndex = String(index);
-      blank.dataset.word = answers[index] ?? "";
+      blank.dataset.blankIndex = String(blankIndex);
+      blank.dataset.answerId = part.answerId;
+      blank.dataset.word = answers[blankIndex] ?? "";
       blank.setAttribute("aria-label", "Drop word");
       blank.disabled = submitted;
       const input = element("input") as HTMLInputElement;
       input.type = "hidden";
       input.name = `${question.id}:${part.answerId}`;
-      input.value = answers[index] ?? "";
+      input.value = answers[blankIndex] ?? "";
       sentence.append(blank, input);
+      blankIndex += 1;
     }
   });
 
@@ -880,6 +885,12 @@ function isSavedChoiceChecked(
   if (Array.isArray(savedAnswer))
     return savedAnswer.includes(optionId) || savedAnswer.includes(value);
   return savedAnswer === optionId || savedAnswer === value;
+}
+
+function getSelectedAnswerSet(answer: QuestionAnswer | undefined) {
+  if (Array.isArray(answer)) return new Set(answer);
+  if (answer) return new Set([answer]);
+  return new Set<string>();
 }
 
 function resolveRuntimeReference(reference: string) {
@@ -978,7 +989,7 @@ function isQuestionCorrect(question: QuizQuestion, answer: QuestionAnswer | unde
     const values = Array.isArray(answer) ? answer : [];
     return question.options.every((option, index) => values[index] === String(option.isCorrect));
   }
-  const selected = new Set(Array.isArray(answer) ? answer : answer ? [answer] : []);
+  const selected = getSelectedAnswerSet(answer);
   return question.options.every((option) => selected.has(option.id) === option.isCorrect);
 }
 
@@ -1004,6 +1015,27 @@ function renderScore(
   return node;
 }
 
+function renderPassingThreshold(lesson: QuizLesson, labels: RuntimeLabels) {
+  const threshold = lesson.passingScorePercent ?? 0;
+  const requiredCorrect = Math.ceil((threshold * lesson.questions.length) / 100);
+  return element(
+    "div",
+    "quiz-summary",
+    formatRuntimeLabel(labels.passingThreshold, {
+      threshold: Math.round(threshold),
+      correct: requiredCorrect,
+      questionsNumber: lesson.questions.length,
+    }),
+  );
+}
+
+function formatRuntimeLabel(template: string, values: Record<string, string | number>) {
+  return Object.entries(values).reduce(
+    (result, [key, value]) => result.replaceAll(`{{${key}}}`, String(value)),
+    template,
+  );
+}
+
 function updateQuestionFeedback(
   card: HTMLElement,
   question: QuizQuestion,
@@ -1011,6 +1043,8 @@ function updateQuestionFeedback(
   labels: RuntimeLabels,
   showFeedback: boolean,
 ) {
+  const questionCorrect = isQuestionCorrect(question, answer);
+
   decorateSubmittedAnswers(card, question, answer, labels, showFeedback);
 
   const feedback = card.querySelector<HTMLElement>(".question-feedback");
@@ -1019,9 +1053,9 @@ function updateQuestionFeedback(
   feedback.hidden = !showFeedback;
   if (!showFeedback) return;
 
-  const correctAnswer = renderCorrectAnswer(question, labels);
+  const correctAnswer = questionCorrect ? null : renderCorrectAnswer(question, labels);
   if (correctAnswer) feedback.append(correctAnswer);
-  if (question.solutionExplanation)
+  if (!questionCorrect && !isFillInTheBlanksQuestion(question) && question.solutionExplanation)
     feedback.append(renderHtmlContent(question.solutionExplanation));
   if (!feedback.childElementCount) feedback.hidden = true;
 }
@@ -1059,7 +1093,7 @@ function decorateSubmittedAnswers(
   }
 
   if (isChoiceQuestion(question)) {
-    const selected = new Set(Array.isArray(answer) ? answer : answer ? [answer] : []);
+    const selected = getSelectedAnswerSet(answer);
     question.options.forEach((option) => {
       const input = card.querySelector<HTMLInputElement>(`input[value="${option.id}"]`);
       const row = input?.closest<HTMLElement>(".choice-row");
@@ -1137,7 +1171,7 @@ function isBlankQuestionCorrect(question: QuizQuestion, answerValues: string[]) 
   const markerAnswerIds = getBlankAnswerIds(question);
   if (markerAnswerIds.length) {
     return markerAnswerIds.every((answerId, index) => {
-      const option = question.options.find((item) => item.id === answerId);
+      const option = findBlankOption(question, answerId, index);
       return Boolean(option && isSameAnswer(answerValues[index], option.title));
     });
   }
@@ -1161,6 +1195,19 @@ function getCorrectOptions(question: QuizQuestion) {
     (option) => option.isCorrect || correctOptionIds.has(option.id),
   );
   return correctOptions.length ? correctOptions : question.options;
+}
+
+function findBlankOption(question: QuizQuestion, answerId: string, index: number) {
+  const directMatch = question.options.find((item) => item.id === answerId);
+  if (directMatch) return directMatch;
+
+  const displayOrder = Number(answerId);
+  if (Number.isInteger(displayOrder)) {
+    const displayOrderMatch = question.options.find((item) => item.displayOrder === displayOrder);
+    if (displayOrderMatch) return displayOrderMatch;
+  }
+
+  return getCorrectOptions(question)[index];
 }
 
 function getBlankCount(question: QuizQuestion) {

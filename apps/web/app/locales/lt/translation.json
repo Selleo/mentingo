@@ -176,6 +176,10 @@
       "creatingCourse": "Kuriamas kursas...",
       "createCourse": "Sukurti kursą"
     },
+    "upload": {
+      "uploading": "Įkeliamas SCORM paketas...",
+      "uploadedProcessing": "SCORM paketo įkėlimas baigtas. Importo apdorojimas pradėtas."
+    },
     "importFailure": {
       "courseDescription": "Kursas pašalintas, nes SCORM paketo nepavyko importuoti.",
       "lessonDescription": "SCORM pamoka arba paketas pašalinti, nes paketo nepavyko importuoti."
@@ -198,6 +202,16 @@
       "resourceIdentifierMissing": "Trūksta SCORM ištekliaus identifikatoriaus.",
       "itemIdentifierMissing": "Trūksta SCORM elemento identifikatoriaus.",
       "launchFileMissing": "Trūksta SCORM paleidimo failo.",
+      "uploadIdMissing": "Trūksta SCORM įkėlimo seanso ID.",
+      "uploadOffsetMissing": "Trūksta SCORM įkėlimo poslinkio.",
+      "unsupportedTusVersion": "Ši SCORM įkėlimo protokolo versija nepalaikoma.",
+      "uploadAlreadyCompleted": "SCORM įkėlimas jau baigtas.",
+      "emptyUploadChunk": "SCORM įkėlimo dalis yra tuščia.",
+      "uploadExceedsDeclaredLength": "SCORM įkėlimas viršija nurodytą failo dydį.",
+      "uploadChunkTooSmall": "SCORM įkėlimo dalis per maža.",
+      "uploadIncomplete": "SCORM įkėlimas nebaigtas.",
+      "uploadSessionNotFound": "SCORM įkėlimo seansas nerastas.",
+      "uploadForbidden": "Šis SCORM įkėlimas nepriklauso dabartiniam naudotojui.",
       "packageAlreadyAttached": "Ši SCORM pamoka jau turi paketą pasirinktai kalbai.",
       "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
       "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
@@ -1922,6 +1936,7 @@
           "saveLesson": "Išsaugoti",
           "addResource": "Pridėti išteklių",
           "removeResource": "Pašalinti išteklius",
+          "uploadFiles": "Įkelti failus",
           "addLessonDisabledTooltip": "Norėdami sukurti pamoką, turite kalbėti pagrindine kalba."
         },
         "breadcrumbs": {

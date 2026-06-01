@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { COURSE_ENROLLMENT } from "@repo/shared";
-import { and, eq, isNotNull, isNull, sql } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 
 import { CertificatesService } from "src/certificates/certificates.service";
 import { DatabasePg } from "src/common";
@@ -261,6 +261,100 @@ export class StudentLessonProgressService {
         actualLanguage,
       );
     }
+  }
+
+  async markLessonAsIncomplete({
+    id,
+    studentId,
+    userPermissions = [],
+    actor,
+    dbInstance = this.db,
+    resetStarted = false,
+  }: {
+    id: UUIDType;
+    studentId: UUIDType;
+    userPermissions?: PermissionKey[];
+    actor?: CurrentUserType;
+    dbInstance?: DatabasePg;
+    resetStarted?: boolean;
+  }) {
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
+
+    const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
+      id,
+      studentId,
+      userPermissions,
+      dbInstance,
+    );
+
+    const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
+      hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+    });
+
+    if (!canTrackProgress) return;
+
+    if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
+      await this.ensureStudentCourseEnrollment(
+        accessCourseLessonWithDetails.courseId,
+        studentId,
+        dbInstance,
+      );
+
+      accessCourseLessonWithDetails.isAssigned = true;
+    }
+
+    if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
+      throw new UnauthorizedException("You don't have assignment to this lesson");
+
+    const [lesson] = await dbInstance
+      .select({
+        id: lessons.id,
+        chapterId: chapters.id,
+        chapterLessonCount: chapters.lessonCount,
+        courseId: chapters.courseId,
+      })
+      .from(lessons)
+      .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(eq(lessons.id, id));
+
+    if (!lesson || !lesson.chapterId || !lesson.courseId || !lesson.chapterLessonCount) {
+      throw new NotFoundException(`Lesson with id ${id} not found`);
+    }
+
+    const updated = await dbInstance
+      .update(studentLessonProgress)
+      .set({ completedAt: null, ...(resetStarted ? { isStarted: false } : {}) })
+      .where(
+        and(
+          eq(studentLessonProgress.lessonId, lesson.id),
+          eq(studentLessonProgress.studentId, studentId),
+          resetStarted
+            ? or(
+                isNotNull(studentLessonProgress.completedAt),
+                eq(studentLessonProgress.isStarted, true),
+              )
+            : isNotNull(studentLessonProgress.completedAt),
+        ),
+      )
+      .returning();
+
+    if (updated.length === 0) return;
+
+    const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
+
+    await this.updateChapterProgress(
+      lesson.courseId,
+      lesson.chapterId,
+      studentId,
+      lesson.chapterLessonCount,
+      false,
+      resolvedActor,
+      dbInstance,
+    );
+
+    await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
   }
 
   async markLessonAsStarted(
@@ -567,6 +661,7 @@ export class StudentLessonProgressService {
         ],
         set: {
           completedLessonCount: completedLessonCount.count,
+          completedAt: null,
         },
       });
   }
@@ -719,7 +814,7 @@ export class StudentLessonProgressService {
 
     return dbInstance
       .update(studentCourses)
-      .set({ progress, finishedChapterCount })
+      .set({ progress, finishedChapterCount, completedAt: null })
       .where(and(eq(studentCourses.studentId, studentId), eq(studentCourses.courseId, courseId)));
   }
 

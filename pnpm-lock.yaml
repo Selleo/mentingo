@@ -344,6 +344,9 @@ importers:
       ts-pattern:
         specifier: 5.2.0
         version: 5.2.0
+      unzipper:
+        specifier: 0.12.3
+        version: 0.12.3
       uuid:
         specifier: 10.0.0
         version: 10.0.0
@@ -420,6 +423,9 @@ importers:
       '@types/supertest':
         specifier: 6.0.2
         version: 6.0.2
+      '@types/unzipper':
+        specifier: ^0.10.11
+        version: 0.10.11
       '@types/uuid':
         specifier: 10.0.0
         version: 10.0.0
@@ -8669,6 +8675,9 @@ packages:
 
   '@types/unist@3.0.3':
     resolution: {integrity: sha512-ko/gIFJRv177XgZsZcBwnqJN5x/Gien8qNOn0D5bQU/zAzVf9Zt3BlcUiLqhV9y4ARk0GbT3tnUiPNgnTXzc/Q==}
+
+  '@types/unzipper@0.10.11':
+    resolution: {integrity: sha512-D25im2zjyMCcgL9ag6N46+wbtJBnXIr7SI4zHf9eJD2Dw2tEB5e+p5MYkrxKIVRscs5QV0EhtU9rgXSPx90oJg==}
 
   '@types/use-sync-external-store@0.0.6':
     resolution: {integrity: sha512-zFDAD+tlpf2r4asuHEj0XH6pY6i0g5NeAHPn+15wk3BV6JA69eERFXC1gyGThDkVa1zCyKr5jox1+2LbV/AMLg==}
@@ -26134,6 +26143,10 @@ snapshots:
   '@types/unist@2.0.11': {}
 
   '@types/unist@3.0.3': {}
+
+  '@types/unzipper@0.10.11':
+    dependencies:
+      '@types/node': 20.17.6
 
   '@types/use-sync-external-store@0.0.6': {}
 

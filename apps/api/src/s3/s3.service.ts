@@ -6,6 +6,7 @@ import {
   CreateMultipartUploadCommand,
   UploadPartCommand,
   CompleteMultipartUploadCommand,
+  CopyObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
@@ -178,21 +179,38 @@ export class S3Service {
   }
 
   async uploadFile(
-    fileBuffer: Buffer | PassThrough,
+    fileBuffer: Buffer | PassThrough | Readable,
     key: string,
     contentType: string,
-  ): Promise<void> {
+    contentLength?: number,
+  ) {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
       Body: fileBuffer,
       ContentType: contentType,
+      ...(typeof contentLength === "number" ? { ContentLength: contentLength } : {}),
     });
 
     await this.sendWithTimeout(
       "uploadFile",
       (abortSignal) => this.s3Client.send(command, { abortSignal }),
       { key },
+    );
+  }
+
+  async copyFile(sourceKey: string, destinationKey: string, contentType?: string) {
+    const command = new CopyObjectCommand({
+      Bucket: this.bucketName,
+      CopySource: `${this.bucketName}/${encodeURIComponent(sourceKey).replace(/%2F/g, "/")}`,
+      Key: destinationKey,
+      ...(contentType ? { ContentType: contentType, MetadataDirective: "REPLACE" } : {}),
+    });
+
+    await this.sendWithTimeout(
+      "copyFile",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key: destinationKey },
     );
   }
 
@@ -356,6 +374,17 @@ export class S3Service {
       if (err?.$metadata.httpStatusCode === 404) return false;
       throw err;
     }
+  }
+
+  async getFileSize(key: string): Promise<number> {
+    const command = new HeadObjectCommand({ Bucket: this.bucketName, Key: key });
+    const response = await this.sendWithTimeout(
+      "getFileSize",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+
+    return response.ContentLength ?? 0;
   }
 
   async getFileContentType(key: string): Promise<string | null> {

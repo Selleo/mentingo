@@ -22,6 +22,7 @@ import {
   scormPackages,
   scormRuntimeState,
   scormScos,
+  studentChapterProgress,
   studentCourses,
   studentLessonProgress,
 } from "src/storage/schema";
@@ -611,7 +612,7 @@ describe("ScormController (e2e)", () => {
       expect(progress.completedAt).toBeTruthy();
     });
 
-    it("completes a multi-SCO lesson after every SCO reaches terminal SCORM status", async () => {
+    it("requires every SCO to be completed without a failed success status", async () => {
       const admin = await createAdmin();
       const student = await createStudent();
       const course = await courseFactory.create({ authorId: admin.id });
@@ -730,7 +731,7 @@ describe("ScormController (e2e)", () => {
       expect(secondFinishResponse.body.data).toEqual(
         expect.objectContaining({
           finished: true,
-          lessonCompleted: true,
+          lessonCompleted: false,
           scormStatus: "completed",
         }),
       );
@@ -748,7 +749,7 @@ describe("ScormController (e2e)", () => {
         "selected-answer-token",
       );
 
-      const [progress] = await db
+      const [progressAfterFailedSco] = await db
         .select()
         .from(studentLessonProgress)
         .where(
@@ -758,7 +759,100 @@ describe("ScormController (e2e)", () => {
           ),
         );
 
-      expect(progress.completedAt).toBeTruthy();
+      expect(progressAfterFailedSco.completedAt).toBeNull();
+
+      const firstPassedResponse = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/finish")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: resumedFirstScoResponse.body.data.attemptId,
+          packageId: resumedFirstScoResponse.body.data.packageId,
+          scoId: resumedFirstScoResponse.body.data.scoId,
+          lessonId: resumedFirstScoResponse.body.data.lessonId,
+          courseId: resumedFirstScoResponse.body.data.courseId,
+          values: {
+            "cmi.core.lesson_status": "passed",
+          },
+          language: "en",
+        })
+        .expect(201);
+
+      expect(firstPassedResponse.body.data).toEqual(
+        expect.objectContaining({
+          finished: true,
+          lessonCompleted: true,
+          scormStatus: "passed",
+        }),
+      );
+
+      const [progressAfterPassedRetake] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lessonId),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+
+      expect(progressAfterPassedRetake.completedAt).toBeTruthy();
+
+      const firstRetakeResponse = await request(app.getHttpServer())
+        .post("/api/scorm/runtime/commit")
+        .set("Cookie", studentCookies)
+        .send({
+          attemptId: resumedFirstScoResponse.body.data.attemptId,
+          packageId: resumedFirstScoResponse.body.data.packageId,
+          scoId: resumedFirstScoResponse.body.data.scoId,
+          lessonId: resumedFirstScoResponse.body.data.lessonId,
+          courseId: resumedFirstScoResponse.body.data.courseId,
+          values: {
+            "cmi.core.lesson_status": "not attempted",
+            "cmi.core.score.raw": "",
+            "cmi.core.score.min": "",
+            "cmi.core.score.max": "",
+          },
+          language: "en",
+        })
+        .expect(201);
+
+      expect(firstRetakeResponse.body.data).toEqual(
+        expect.objectContaining({
+          committed: true,
+          lessonCompleted: false,
+          scormStatus: "not attempted",
+        }),
+      );
+
+      const [progressAfterRetake] = await db
+        .select()
+        .from(studentLessonProgress)
+        .where(
+          and(
+            eq(studentLessonProgress.lessonId, lessonId),
+            eq(studentLessonProgress.studentId, student.id),
+          ),
+        );
+      const [chapterProgressAfterRetake] = await db
+        .select()
+        .from(studentChapterProgress)
+        .where(
+          and(
+            eq(studentChapterProgress.chapterId, chapter.id),
+            eq(studentChapterProgress.studentId, student.id),
+          ),
+        );
+      const [courseProgressAfterRetake] = await db
+        .select()
+        .from(studentCourses)
+        .where(
+          and(eq(studentCourses.courseId, course.id), eq(studentCourses.studentId, student.id)),
+        );
+
+      expect(progressAfterRetake.completedAt).toBeNull();
+      expect(progressAfterRetake.isStarted).toBe(false);
+      expect(chapterProgressAfterRetake.completedAt).toBeNull();
+      expect(courseProgressAfterRetake.completedAt).toBeNull();
     });
   });
 

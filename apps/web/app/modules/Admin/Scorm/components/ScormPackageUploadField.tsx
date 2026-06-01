@@ -57,11 +57,11 @@ export const ScormPackageUploadField = ({
   });
 
   return (
-    <div>
+    <div className="min-w-0">
       <div
         {...getRootProps({ "data-testid": testIds?.root })}
         className={cn(
-          "group cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
+          "group w-full min-w-0 cursor-pointer rounded-lg border-2 border-dashed bg-white p-6 transition-colors",
           file ? "border-primary-200" : "border-neutral-300 hover:border-primary-400",
           isDragActive && "border-primary-600 bg-primary-50",
           error && "border-red-400 bg-red-50/40",
@@ -71,7 +71,7 @@ export const ScormPackageUploadField = ({
       >
         <input {...getInputProps()} data-testid={testIds?.input} />
         {disabled ? (
-          <div data-testid={testIds?.readonly} className="flex items-start gap-4">
+          <div data-testid={testIds?.readonly} className="flex w-full min-w-0 items-start gap-4">
             <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-neutral-100 text-neutral-600">
               <FileArchive className="size-6" aria-hidden="true" />
             </div>
@@ -85,8 +85,8 @@ export const ScormPackageUploadField = ({
             </div>
           </div>
         ) : file ? (
-          <div data-testid={testIds?.selectedFile} className="flex flex-col gap-5">
-            <div className="flex items-start gap-4">
+          <div data-testid={testIds?.selectedFile} className="flex w-full min-w-0 flex-col gap-5">
+            <div className="flex w-full min-w-0 items-start gap-4">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-800">
                 <FileArchive className="size-6" aria-hidden="true" />
               </div>

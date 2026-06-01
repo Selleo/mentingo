@@ -84,7 +84,7 @@ async function bootstrap() {
   registerSwaggerDocsAccessControl({ app, jwtService, jwtSecret, isDevelopment });
 
   app.use(
-    "/api/file/videos/tus",
+    ["/api/file/videos/tus", "/api/scorm/import/tus"],
     bodyParser.raw({
       type: "application/offset+octet-stream",
       limit: DEFAULT_TUS_CHUNK_SIZE,

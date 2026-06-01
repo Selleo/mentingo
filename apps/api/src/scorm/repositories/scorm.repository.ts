@@ -5,7 +5,18 @@ import {
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
 } from "@repo/shared";
-import { and, asc, desc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  isNull,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
@@ -21,7 +32,7 @@ import {
   studentCourses,
 } from "src/storage/schema";
 
-import type { ScormCompletionStatus, SupportedLanguages } from "@repo/shared";
+import type { ScormCompletionStatus, ScormSuccessStatus, SupportedLanguages } from "@repo/shared";
 import type {
   PersistCoursePackageParams,
   PersistLessonPackageParams,
@@ -375,13 +386,21 @@ export class ScormRepository {
     packageId: string;
     lessonId: string;
     completedStatuses: ScormCompletionStatus[];
+    excludedSuccessStatuses?: ScormSuccessStatus[];
   }) {
+    const successStatusCondition = params.excludedSuccessStatuses?.length
+      ? or(
+          isNull(scormRuntimeState.successStatus),
+          notInArray(scormRuntimeState.successStatus, params.excludedSuccessStatuses),
+        )
+      : sql`true`;
+
     const [completion] = await this.db
       .select({
         totalCount: sql<number>`COUNT(DISTINCT ${scormScos.id})::int`,
-        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${inArray(
-          scormRuntimeState.completionStatus,
-          params.completedStatuses,
+        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${and(
+          inArray(scormRuntimeState.completionStatus, params.completedStatuses),
+          successStatusCondition,
         )} THEN ${scormScos.id} END)::int`,
       })
       .from(scormScos)

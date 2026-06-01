@@ -11015,6 +11015,127 @@
         }
       }
     },
+    "/api/scorm/import/init": {
+      "post": {
+        "operationId": "ScormController_initScormImport",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitScormImportBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitScormImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/scorm/import/tus": {
+      "options": {
+        "operationId": "ScormController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "ScormController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/scorm/import/tus/{packageId}": {
+      "options": {
+        "operationId": "ScormController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "ScormController_getTusUpload",
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "ScormController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/scorm/import/{packageId}/complete": {
+      "post": {
+        "operationId": "ScormController_completeScormImport",
+        "parameters": [
+          {
+            "name": "packageId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteScormImportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/scorm/course": {
       "post": {
         "operationId": "ScormController_createScormCourse",
@@ -42326,6 +42447,332 @@
               "state",
               "attemptsMade",
               "failedReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "InitScormImportBody": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "create-course",
+                "type": "string"
+              },
+              "filename": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "sizeBytes": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "categoryId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "draft",
+                        "type": "string"
+                      },
+                      {
+                        "const": "published",
+                        "type": "string"
+                      },
+                      {
+                        "const": "private",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "thumbnailS3Key": {
+                    "type": "string"
+                  },
+                  "priceInCents": {
+                    "type": "integer"
+                  },
+                  "currency": {
+                    "type": "string"
+                  },
+                  "hasCertificate": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "title",
+                  "description",
+                  "categoryId",
+                  "language"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "filename",
+              "sizeBytes",
+              "mimeType",
+              "metadata"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "create-lesson",
+                "type": "string"
+              },
+              "filename": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "sizeBytes": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "chapterId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "chapterId",
+                  "title",
+                  "language"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "filename",
+              "sizeBytes",
+              "mimeType",
+              "metadata"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "action": {
+                "const": "attach-lesson-package",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "filename": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "sizeBytes": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "mimeType": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "metadata": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "title",
+                  "language"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "lessonId",
+              "filename",
+              "sizeBytes",
+              "mimeType",
+              "metadata"
+            ]
+          }
+        ]
+      },
+      "InitScormImportResponse": {
+        "type": "object",
+        "properties": {
+          "packageId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "tusEndpoint": {
+            "type": "string"
+          },
+          "tusHeaders": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "string"
+              }
+            }
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "packageId",
+          "uploadId",
+          "tusEndpoint",
+          "tusHeaders",
+          "expiresAt",
+          "partSize"
+        ]
+      },
+      "CompleteScormImportResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "packageId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "fileName": {
+                "type": "string"
+              },
+              "fileSize": {
+                "type": "number"
+              },
+              "mimeType": {
+                "type": "string"
+              },
+              "scoCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "id",
+              "packageId",
+              "fileName",
+              "fileSize",
+              "mimeType",
+              "scoCount"
             ]
           }
         },

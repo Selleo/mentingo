@@ -10,6 +10,7 @@ import { WebSocketModule } from "src/websocket";
 import { ScormRepository } from "./repositories/scorm.repository";
 import { ScormImportWorker } from "./scorm-import.worker";
 import { ScormQueueService } from "./scorm-queue.service";
+import { ScormTusUploadService } from "./scorm-tus-upload.service";
 import { ScormController } from "./scorm.controller";
 import { ScormService } from "./scorm.service";
 
@@ -23,7 +24,13 @@ import { ScormService } from "./scorm.service";
     WebSocketModule,
   ],
   controllers: [ScormController],
-  providers: [ScormService, ScormQueueService, ScormImportWorker, ScormRepository],
+  providers: [
+    ScormService,
+    ScormQueueService,
+    ScormTusUploadService,
+    ScormImportWorker,
+    ScormRepository,
+  ],
   exports: [ScormService, ScormRepository],
 })
 export class ScormModule {}

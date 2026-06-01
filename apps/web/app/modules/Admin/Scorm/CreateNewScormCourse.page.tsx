@@ -4,12 +4,15 @@ import { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useCreateScormCourse } from "~/api/mutations/useCreateScormCourse";
+import { useCompleteScormImport } from "~/api/mutations/admin/useCompleteScormImport";
+import { useInitScormImport } from "~/api/mutations/admin/useInitScormImport";
+import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
 import { useCategoriesSuspense } from "~/api/queries/useCategories";
 import SplashScreenImage from "~/assets/svgs/splash-screen-image.svg";
 import { Button } from "~/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "~/components/ui/form";
 import { Label } from "~/components/ui/label";
+import { useTusScormUpload } from "~/hooks/useTusScormUpload";
 import { CourseDescriptionLimitMessage } from "~/modules/Admin/AddCourse/components/CourseDescriptionLimitMessage";
 import { CourseMetadataFields } from "~/modules/Admin/AddCourse/components/CourseMetadataFields";
 import { CourseThumbnailUploadField } from "~/modules/Admin/AddCourse/components/CourseThumbnailUploadField";
@@ -33,9 +36,13 @@ const CreateNewScormCourse = () => {
   const { data: categories } = useCategoriesSuspense();
   const { language } = useLanguageStore();
   const { t } = useTranslation();
-  const { mutateAsync: createScormCourse, isPending: isCreatingScormCourse } =
-    useCreateScormCourse();
   const navigate = useNavigate();
+  const { mutateAsync: uploadFile, isPending: isUploadingThumbnail } = useUploadFile();
+  const { mutateAsync: initScormImport, isPending: isInitializingScormImport } =
+    useInitScormImport();
+  const { mutateAsync: completeScormImport, isPending: isCompletingScormImport } =
+    useCompleteScormImport();
+  const { uploadScormPackage, isUploading: isUploadingScormPackage } = useTusScormUpload();
   const thumbnailInputRef = useRef<HTMLInputElement | null>(null);
 
   const form = useForm<ScormCourseFormValues>({
@@ -64,20 +71,35 @@ const CreateNewScormCourse = () => {
   const onSubmit = async (values: ScormCourseFormValues) => {
     if (!isBrowserFile(values.scormFile)) return;
 
-    const response = await createScormCourse({
-      data: {
+    const thumbnailS3Key = isBrowserFile(values.thumbnailFile)
+      ? (await uploadFile({ file: values.thumbnailFile, resource: "course" })).fileKey
+      : undefined;
+
+    const session = await initScormImport({
+      action: "create-course",
+      filename: values.scormFile.name,
+      sizeBytes: values.scormFile.size,
+      mimeType: values.scormFile.type || "application/zip",
+      metadata: {
         title: values.title,
         description: values.description,
         categoryId: values.categoryId,
         language: values.language,
-        scormPackage: values.scormFile,
-        thumbnail: isBrowserFile(values.thumbnailFile) ? values.thumbnailFile : undefined,
         status: "draft",
+        thumbnailS3Key,
       },
     });
 
-    navigate(`/admin/beta-courses/${response.data.id}`);
+    await uploadScormPackage({ file: values.scormFile, session });
+    await completeScormImport(session.packageId);
+    navigate("/admin/courses");
   };
+
+  const isCreatingScormCourse =
+    isUploadingThumbnail ||
+    isInitializingScormImport ||
+    isUploadingScormPackage ||
+    isCompletingScormImport;
 
   return (
     <div

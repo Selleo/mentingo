@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { useAttachScormLessonPackage } from "~/api/mutations/admin/useAttachScormLessonPackage";
-import { useCreateScormLesson } from "~/api/mutations/admin/useCreateScormLesson";
+import { useCompleteScormImport } from "~/api/mutations/admin/useCompleteScormImport";
 import { useDeleteLesson } from "~/api/mutations/admin/useDeleteLesson";
+import { useInitScormImport } from "~/api/mutations/admin/useInitScormImport";
 import { useUpdateContentLesson } from "~/api/mutations/admin/useUpdateContentLesson";
 import { FormTextField } from "~/components/Form/FormTextField";
 import { Icon } from "~/components/Icon";
@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useLeaveModal } from "~/context/LeaveModalContext";
+import { useTusScormUpload } from "~/hooks/useTusScormUpload";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { ScormPackageUploadField } from "~/modules/Admin/Scorm/components/ScormPackageUploadField";
 import { isBrowserFile } from "~/utils/isBrowserFile";
@@ -50,10 +51,11 @@ export const ScormLessonForm = ({
   language,
 }: ScormLessonFormProps) => {
   const { t } = useTranslation();
-  const { mutateAsync: createScormLesson, isPending: isCreatingScormLesson } =
-    useCreateScormLesson();
-  const { mutateAsync: attachScormLessonPackage, isPending: isAttachingScormLessonPackage } =
-    useAttachScormLessonPackage();
+  const { mutateAsync: initScormImport, isPending: isInitializingScormImport } =
+    useInitScormImport();
+  const { mutateAsync: completeScormImport, isPending: isCompletingScormImport } =
+    useCompleteScormImport();
+  const { uploadScormPackage, isUploading: isUploadingScormPackage } = useTusScormUpload();
   const { mutateAsync: updateScormLesson, isPending: isUpdatingScormLesson } =
     useUpdateContentLesson();
   const { mutateAsync: deleteLesson } = useDeleteLesson();
@@ -92,14 +94,20 @@ export const ScormLessonForm = ({
       });
 
       if (isBrowserFile(values.scormFile)) {
-        await attachScormLessonPackage({
+        const session = await initScormImport({
+          action: "attach-lesson-package",
           lessonId: lessonToEdit.id,
-          data: {
+          filename: values.scormFile.name,
+          sizeBytes: values.scormFile.size,
+          mimeType: values.scormFile.type || "application/zip",
+          metadata: {
             title: values.title,
             language,
-            scormPackage: values.scormFile,
           },
         });
+
+        await uploadScormPackage({ file: values.scormFile, session });
+        await completeScormImport(session.packageId);
       }
 
       setIsCurrectFormDirty(false);
@@ -109,18 +117,30 @@ export const ScormLessonForm = ({
 
     if (!chapterToEdit || !isBrowserFile(values.scormFile)) return;
 
-    await createScormLesson({
-      data: {
+    const session = await initScormImport({
+      action: "create-lesson",
+      filename: values.scormFile.name,
+      sizeBytes: values.scormFile.size,
+      mimeType: values.scormFile.type || "application/zip",
+      metadata: {
         chapterId: chapterToEdit.id,
         title: values.title,
         language,
-        scormPackage: values.scormFile,
       },
     });
+
+    await uploadScormPackage({ file: values.scormFile, session });
+    await completeScormImport(session.packageId);
 
     setIsCurrectFormDirty(false);
     setContentTypeToDisplay(ContentTypes.EMPTY);
   };
+
+  const isSavingScormLesson =
+    isInitializingScormImport ||
+    isCompletingScormImport ||
+    isUploadingScormPackage ||
+    isUpdatingScormLesson;
 
   const handleClear = () => {
     setSelectedFile(undefined);
@@ -239,12 +259,7 @@ export const ScormLessonForm = ({
             <Button
               type="submit"
               data-testid={SCORM_LESSON_FORM_HANDLES.SAVE_BUTTON}
-              disabled={
-                !form.formState.isValid ||
-                isCreatingScormLesson ||
-                isUpdatingScormLesson ||
-                isAttachingScormLessonPackage
-              }
+              disabled={!form.formState.isValid || isSavingScormLesson}
             >
               {t("common.button.save")}
             </Button>

@@ -176,6 +176,10 @@
       "creatingCourse": "Creating Course...",
       "createCourse": "Create Course"
     },
+    "upload": {
+      "uploading": "Uploading SCORM package...",
+      "uploadedProcessing": "SCORM package upload finished. Import processing has started."
+    },
     "importFailure": {
       "courseDescription": "The course was removed because the SCORM package could not be imported.",
       "lessonDescription": "The SCORM lesson or package was removed because the package could not be imported."
@@ -198,6 +202,16 @@
       "resourceIdentifierMissing": "SCORM resource identifier is missing.",
       "itemIdentifierMissing": "SCORM item identifier is missing.",
       "launchFileMissing": "SCORM launch file is missing.",
+      "uploadIdMissing": "SCORM upload session id is missing.",
+      "uploadOffsetMissing": "SCORM upload offset is missing.",
+      "unsupportedTusVersion": "This SCORM upload protocol version is not supported.",
+      "uploadAlreadyCompleted": "SCORM upload is already completed.",
+      "emptyUploadChunk": "SCORM upload chunk is empty.",
+      "uploadExceedsDeclaredLength": "SCORM upload exceeds the declared file size.",
+      "uploadChunkTooSmall": "SCORM upload chunk is too small.",
+      "uploadIncomplete": "SCORM upload is incomplete.",
+      "uploadSessionNotFound": "SCORM upload session was not found.",
+      "uploadForbidden": "This SCORM upload does not belong to the current user.",
       "packageAlreadyAttached": "This SCORM lesson already has a package for the selected language.",
       "invalidPackagePath": "SCORM package contains an invalid file path.",
       "externalPackagePath": "SCORM package contains an external file path.",
@@ -1977,6 +1991,7 @@
           "saveLesson": "Save",
           "addResource": "Add resource",
           "removeResource": "Remove resource",
+          "uploadFiles": "Upload files",
           "addLessonDisabledTooltip": "To create a lesson, you must be in the base language."
         },
         "breadcrumbs": {
