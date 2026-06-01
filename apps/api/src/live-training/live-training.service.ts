@@ -279,7 +279,17 @@ export class LiveTrainingService {
     currentUser: CurrentUserType,
     dbInstance: DatabasePg,
   ): Promise<CreateCourseLinkedLiveTrainingResult> {
-    const row = await this.getEditableLiveTrainingOrThrow(liveTrainingId, language, currentUser);
+    await this.assertCanLinkCourses([courseId], currentUser);
+
+    const row = await this.liveTrainingRepository.getLiveTrainingBaseRow(
+      liveTrainingId,
+      language,
+      dbInstance,
+    );
+
+    if (!row) {
+      throw new NotFoundException("liveTraining.errors.notFound");
+    }
 
     if (row.status !== LIVE_TRAINING_STATUSES.SCHEDULED) {
       throw new BadRequestException("liveTraining.errors.onlyScheduledCanBeLinked");
@@ -423,7 +433,7 @@ export class LiveTrainingService {
     const previousSnapshot = await this.buildLiveTrainingActivitySnapshot(id, language);
 
     this.assertValidUpdateSchedule(body, row.startsAt, row.endsAt);
-    this.assertCanUpdateHostAssignments(row, body.hostUserIds, currentUser);
+    await this.assertCanUpdateHostAssignments(row, body.hostUserIds, currentUser);
     await this.assertOnlineDeliveryConfigured(body.deliveryType);
 
     const hostUserIds = this.getUpdateHostUserIds(row.authorId, body.hostUserIds);
@@ -840,8 +850,11 @@ export class LiveTrainingService {
       throw new NotFoundException("liveTraining.errors.notFound");
     }
 
+    const hosts = await this.liveTrainingRepository.getLiveTrainingHostRows(id);
+
     if (
       !hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_UPDATE) &&
+      !hosts.some((host) => host.id === currentUser.userId) &&
       !(
         hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_UPDATE_OWN) &&
         row.authorId === currentUser.userId
@@ -1197,8 +1210,8 @@ export class LiveTrainingService {
     return this.uniqueIds(userIds);
   }
 
-  private assertCanUpdateHostAssignments(
-    row: { authorId: UUIDType },
+  private async assertCanUpdateHostAssignments(
+    row: { id: UUIDType; authorId: UUIDType },
     hostUserIds: UUIDType[] | undefined,
     currentUser: CurrentUserType,
   ) {
@@ -1210,11 +1223,17 @@ export class LiveTrainingService {
       return;
     }
 
-    this.assertCanAssignHostsByPermission(currentUser);
+    return this.assertCanAssignHosts(row.id, currentUser);
   }
 
-  private assertCanAssignHostsByPermission(currentUser: CurrentUserType) {
+  private async assertCanAssignHosts(liveTrainingId: UUIDType, currentUser: CurrentUserType) {
     if (hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_UPDATE)) {
+      return;
+    }
+
+    const hosts = await this.liveTrainingRepository.getLiveTrainingHostRows(liveTrainingId);
+
+    if (hosts.some((host) => host.id === currentUser.userId)) {
       return;
     }
 

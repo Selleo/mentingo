@@ -7,6 +7,7 @@ import {
   type LocalizedText,
   type SupportedLanguages,
 } from "@repo/shared";
+import { escape } from "lodash";
 
 import { AnnouncementsSchedulerService } from "src/announcements/announcements-scheduler.service";
 
@@ -133,33 +134,36 @@ export class LiveTrainingAnnouncementsService {
     emailTemplate: AnnouncementEmailTemplate,
     language: SupportedLanguages,
   ) {
-    const title = this.getLocalizedValue(liveTraining.title, language, liveTraining.baseLanguage);
+    const title = escape(
+      this.getLocalizedValue(liveTraining.title, language, liveTraining.baseLanguage),
+    );
+    const linkedTitle = `<a href="/live-training/${liveTraining.id}">${title}</a>`;
     const formattedStart = new Date(liveTraining.startsAt).toLocaleString(language);
 
     switch (emailTemplate) {
       case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_REMINDER:
         return this.translate(language, {
-          en: `Training "${title}" starts at ${formattedStart}.`,
-          pl: `Szkolenie "${title}" rozpocznie się ${formattedStart}.`,
-          de: `Das Training "${title}" beginnt am ${formattedStart}.`,
-          lt: `Mokymai "${title}" prasidės ${formattedStart}.`,
-          cs: `Školení "${title}" začne ${formattedStart}.`,
+          en: `Training ${linkedTitle} starts at ${formattedStart}.`,
+          pl: `Szkolenie ${linkedTitle} rozpocznie się ${formattedStart}.`,
+          de: `Das Training ${linkedTitle} beginnt am ${formattedStart}.`,
+          lt: `Mokymai ${linkedTitle} prasidės ${formattedStart}.`,
+          cs: `Školení ${linkedTitle} začne ${formattedStart}.`,
         });
       case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED:
         return this.translate(language, {
-          en: `Training "${title}" is active now.`,
-          pl: `Szkolenie "${title}" jest teraz aktywne.`,
-          de: `Das Training "${title}" ist jetzt aktiv.`,
-          lt: `Mokymai "${title}" dabar vyksta.`,
-          cs: `Školení "${title}" nyní probíhá.`,
+          en: `Training ${linkedTitle} is active now.`,
+          pl: `Szkolenie ${linkedTitle} jest teraz aktywne.`,
+          de: `Das Training ${linkedTitle} ist jetzt aktiv.`,
+          lt: `Mokymai ${linkedTitle} dabar vyksta.`,
+          cs: `Školení ${linkedTitle} nyní probíhá.`,
         });
       default:
         return this.translate(language, {
-          en: `Training "${title}" has ended.`,
-          pl: `Szkolenie "${title}" zostało zakończone.`,
-          de: `Das Training "${title}" wurde beendet.`,
-          lt: `Mokymai "${title}" baigėsi.`,
-          cs: `Školení "${title}" skončilo.`,
+          en: `Training ${linkedTitle} has ended.`,
+          pl: `Szkolenie ${linkedTitle} zostało zakończone.`,
+          de: `Das Training ${linkedTitle} wurde beendet.`,
+          lt: `Mokymai ${linkedTitle} baigėsi.`,
+          cs: `Školení ${linkedTitle} skončilo.`,
         });
     }
   }

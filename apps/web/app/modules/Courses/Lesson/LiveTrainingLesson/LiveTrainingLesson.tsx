@@ -1,5 +1,6 @@
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
+  LIVE_TRAINING_PARTICIPANT_ROLES,
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
 } from "@repo/shared";
@@ -9,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { useJoinLiveTrainingSession } from "~/api/mutations/live-training/useJoinLiveTrainingSession";
 import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOpenLiveTrainingResource";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { useToast } from "~/components/ui/use-toast";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LiveTrainingRoom } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingRoom";
 import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
@@ -28,6 +30,7 @@ type LiveTrainingLessonProps = {
 
 export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const language = useLanguageStore((state) => state.language);
   const liveTraining = lesson.liveTraining;
   const [meetingCredentials, setMeetingCredentials] = useState<
@@ -76,6 +79,22 @@ export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
       language,
       filename: material.title,
     });
+  };
+
+  const handleLeaveSession = ({ userInitiated }: { userInitiated: boolean }) => {
+    const shouldShowEndedToast =
+      !userInitiated && meetingCredentials?.role === LIVE_TRAINING_PARTICIPANT_ROLES.OBSERVER;
+
+    if (shouldShowEndedToast) {
+      toast({
+        description: t("liveTrainingView.meeting.sessionEndedToast", {
+          trainingName: liveTraining.title,
+        }),
+        duration: Number.MAX_SAFE_INTEGER,
+      });
+    }
+
+    setMeetingCredentials(null);
   };
 
   return (
@@ -135,7 +154,9 @@ export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
           credentials={meetingCredentials}
           liveTraining={liveTraining}
           canViewAllMaterials={false}
-          onLeave={() => setMeetingCredentials(null)}
+          isFinishingSession={false}
+          onFinishSession={async () => undefined}
+          onLeave={handleLeaveSession}
         />
       )}
     </div>

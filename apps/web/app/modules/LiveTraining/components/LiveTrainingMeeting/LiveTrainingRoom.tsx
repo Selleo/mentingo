@@ -1,6 +1,6 @@
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
@@ -24,7 +24,15 @@ function LiveTrainingRoomContent({
   credentials,
   liveTraining,
   canViewAllMaterials,
-}: Pick<LiveTrainingRoomProps, "credentials" | "liveTraining" | "canViewAllMaterials">) {
+  isFinishingSession,
+  onFinishSession,
+  onUserLeave,
+}: Pick<
+  LiveTrainingRoomProps,
+  "credentials" | "liveTraining" | "canViewAllMaterials" | "isFinishingSession" | "onFinishSession"
+> & {
+  onUserLeave: () => void;
+}) {
   const { t } = useTranslation();
   const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
   const [fullscreenTrack, setFullscreenTrack] = useState<{
@@ -60,7 +68,10 @@ function LiveTrainingRoomContent({
       <RoomAudioRenderer />
       <LiveTrainingRoomToolbar
         credentials={credentials}
+        isFinishingSession={isFinishingSession}
         onOpenMaterials={() => setIsMaterialsOpen(true)}
+        onFinishSession={onFinishSession}
+        onUserLeave={onUserLeave}
       />
 
       <Drawer
@@ -102,8 +113,12 @@ export function LiveTrainingRoom({
   credentials,
   liveTraining,
   canViewAllMaterials,
+  isFinishingSession,
+  onFinishSession,
   onLeave,
 }: LiveTrainingRoomProps) {
+  const userInitiatedLeaveRef = useRef(false);
+
   return (
     <LiveKitRoom
       token={credentials.token}
@@ -111,7 +126,7 @@ export function LiveTrainingRoom({
       connect
       audio={false}
       video={false}
-      onDisconnected={onLeave}
+      onDisconnected={() => onLeave({ userInitiated: userInitiatedLeaveRef.current })}
       className="fixed inset-0 z-[60] bg-primary-950 text-white"
       data-lk-theme="default"
     >
@@ -122,6 +137,11 @@ export function LiveTrainingRoom({
           credentials={credentials}
           liveTraining={liveTraining}
           canViewAllMaterials={canViewAllMaterials}
+          isFinishingSession={isFinishingSession}
+          onFinishSession={onFinishSession}
+          onUserLeave={() => {
+            userInitiatedLeaveRef.current = true;
+          }}
         />
       </div>
     </LiveKitRoom>

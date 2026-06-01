@@ -26,19 +26,21 @@ import { CalendarViewerPermissionToggle } from "~/modules/Calendar/components/Ca
 import { LIVE_TRAINING_FORM_HANDLES } from "../../../../e2e/data/live-training/handles";
 
 import type {
+  LiveTrainingFormFieldErrors,
   LiveTrainingFormFieldUpdater,
   LiveTrainingFormState,
 } from "../liveTrainingForm.types";
 import type { ReactNode } from "react";
 
 type LiveTrainingFormSectionProps = {
-  title: string;
+  title?: string;
   children: ReactNode;
 };
 
 type LiveTrainingFormFieldsProps = {
   formState: LiveTrainingFormState;
   onFormStateChange: LiveTrainingFormFieldUpdater;
+  errors?: LiveTrainingFormFieldErrors;
   idPrefix?: string;
   portalledDatePicker?: boolean;
   isOnlineDeliveryAvailable?: boolean;
@@ -47,7 +49,7 @@ type LiveTrainingFormFieldsProps = {
 function LiveTrainingFormSection({ title, children }: LiveTrainingFormSectionProps) {
   return (
     <section className="grid gap-4 border-t border-neutral-200 py-5 first:border-t-0 first:pt-0 last:pb-0">
-      <h3 className="text-xs font-semibold uppercase text-neutral-500">{title}</h3>
+      {title && <h3 className="text-xs font-semibold uppercase text-neutral-500">{title}</h3>}
       {children}
     </section>
   );
@@ -56,6 +58,7 @@ function LiveTrainingFormSection({ title, children }: LiveTrainingFormSectionPro
 export function LiveTrainingFormFields({
   formState,
   onFormStateChange,
+  errors,
   idPrefix = "live-training",
   portalledDatePicker = false,
   isOnlineDeliveryAvailable = true,
@@ -78,7 +81,7 @@ export function LiveTrainingFormFields({
 
   return (
     <div className="min-w-0">
-      <LiveTrainingFormSection title={t("calendarView.create.section.basics")}>
+      <LiveTrainingFormSection>
         <div className="grid gap-2">
           <CalendarFormFieldLabel
             htmlFor={titleId}
@@ -98,6 +101,7 @@ export function LiveTrainingFormFields({
             }
             placeholder={t("calendarView.create.placeholder.title")}
           />
+          {errors?.title && <p className="text-sm font-medium text-error-600">{errors.title}</p>}
         </div>
 
         <div className="grid gap-2">
@@ -153,18 +157,23 @@ export function LiveTrainingFormFields({
             onTimeChange={(time) => onFormStateChange("startTime", time)}
           />
 
-          <CalendarDateTimeField
-            label={t("calendarView.create.field.endsAt")}
-            tooltip={t("calendarView.create.tooltip.endsAt")}
-            date={formState.endDate}
-            time={formState.endTime}
-            portalledDatePicker={portalledDatePicker}
-            hideTime={formState.allDay}
-            dateButtonTestId={LIVE_TRAINING_FORM_HANDLES.endDateButton(idPrefix)}
-            timeSelectTestId={LIVE_TRAINING_FORM_HANDLES.endTimeSelect(idPrefix)}
-            onDateChange={(date) => onFormStateChange("endDate", date)}
-            onTimeChange={(time) => onFormStateChange("endTime", time)}
-          />
+          <div className="grid gap-2">
+            <CalendarDateTimeField
+              label={t("calendarView.create.field.endsAt")}
+              tooltip={t("calendarView.create.tooltip.endsAt")}
+              date={formState.endDate}
+              time={formState.endTime}
+              portalledDatePicker={portalledDatePicker}
+              hideTime={formState.allDay}
+              dateButtonTestId={LIVE_TRAINING_FORM_HANDLES.endDateButton(idPrefix)}
+              timeSelectTestId={LIVE_TRAINING_FORM_HANDLES.endTimeSelect(idPrefix)}
+              onDateChange={(date) => onFormStateChange("endDate", date)}
+              onTimeChange={(time) => onFormStateChange("endTime", time)}
+            />
+            {errors?.endsAt && (
+              <p className="text-sm font-medium text-error-600">{errors.endsAt}</p>
+            )}
+          </div>
         </div>
       </LiveTrainingFormSection>
 
@@ -273,7 +282,7 @@ export function LiveTrainingFormFields({
       </LiveTrainingFormSection>
 
       {formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE && (
-        <LiveTrainingFormSection title={t("calendarView.create.section.permissions")}>
+        <LiveTrainingFormSection>
           <CalendarFormFieldLabel
             label={t("calendarView.create.field.viewerPermissions")}
             tooltip={t("calendarView.create.tooltip.viewerPermissions")}

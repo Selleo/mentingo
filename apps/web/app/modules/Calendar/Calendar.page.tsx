@@ -119,6 +119,8 @@ export default function CalendarPage() {
   };
 
   const handleDateClick = (dateInfo: DateClickArg) => {
+    if (!canCreateLiveTraining) return;
+
     dispatchCalendarAction({
       type: CALENDAR_ACTION_TYPES.CREATE_RANGE_SELECTED,
       selectedRange: getSelectedRangeFromDateClick(dateInfo),
@@ -126,6 +128,8 @@ export default function CalendarPage() {
   };
 
   const handleSelect = (dateInfo: DateSelectArg) => {
+    if (!canCreateLiveTraining) return;
+
     dispatchCalendarAction({
       type: CALENDAR_ACTION_TYPES.CREATE_RANGE_SELECTED,
       selectedRange: getSelectedRangeFromSelection(dateInfo),
@@ -165,7 +169,7 @@ export default function CalendarPage() {
             eventClick={handleEventClick}
             dayCellDidMount={handleDayCellDidMount}
             eventDidMount={handleEventDidMount}
-            selectable
+            selectable={canCreateLiveTraining}
             selectMirror
             unselectAuto
             height="100%"

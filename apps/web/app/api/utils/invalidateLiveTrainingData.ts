@@ -32,11 +32,16 @@ export async function invalidateLiveTrainingData({
   includeSessions = false,
 }: InvalidateLiveTrainingDataOptions = {}) {
   const invalidations = [queryClient.invalidateQueries({ queryKey: LIVE_TRAINING_QUERY_KEY })];
+  const refetches = [queryClient.refetchQueries({ queryKey: LIVE_TRAINING_QUERY_KEY })];
 
   if (includeCalendar) {
     invalidations.push(
       queryClient.invalidateQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: CALENDAR_EVENT_DETAILS_QUERY_KEY }),
+    );
+    refetches.push(
+      queryClient.refetchQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY }),
+      queryClient.refetchQueries({ queryKey: CALENDAR_EVENT_DETAILS_QUERY_KEY }),
     );
   }
 
@@ -44,6 +49,10 @@ export async function invalidateLiveTrainingData({
     invalidations.push(
       queryClient.invalidateQueries({ queryKey: LIVE_TRAINING_SESSIONS_QUERY_KEY }),
       queryClient.invalidateQueries({ queryKey: LIVE_TRAINING_SESSION_QUERY_KEY }),
+    );
+    refetches.push(
+      queryClient.refetchQueries({ queryKey: LIVE_TRAINING_SESSIONS_QUERY_KEY }),
+      queryClient.refetchQueries({ queryKey: LIVE_TRAINING_SESSION_QUERY_KEY }),
     );
   }
 
@@ -60,4 +69,5 @@ export async function invalidateLiveTrainingData({
   }
 
   await Promise.all(invalidations);
+  await Promise.all(refetches);
 }

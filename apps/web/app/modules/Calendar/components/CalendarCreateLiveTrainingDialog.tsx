@@ -36,6 +36,7 @@ import type {
 } from "./calendarCreateLiveTraining.types";
 import type { FormEvent } from "react";
 import type { CreateLiveTrainingBody } from "~/api/generated-api";
+import type { LiveTrainingFormFieldErrors } from "~/modules/LiveTraining/liveTrainingForm.types";
 
 export function CalendarCreateLiveTrainingDialog({
   open,
@@ -64,6 +65,7 @@ export function CalendarCreateLiveTrainingDialog({
   const [mode, setMode] = useState<CalendarCreateMode>(CALENDAR_CREATE_MODES.MENU);
   const [formState, setFormState] = useState<CalendarCreateLiveTrainingFormState>(initialFormState);
   const [formError, setFormError] = useState<string | null>(null);
+  const [formFieldErrors, setFormFieldErrors] = useState<LiveTrainingFormFieldErrors>({});
 
   useEffect(() => {
     if (!open) return;
@@ -71,6 +73,7 @@ export function CalendarCreateLiveTrainingDialog({
     setMode(CALENDAR_CREATE_MODES.MENU);
     setFormState(initialFormState);
     setFormError(null);
+    setFormFieldErrors({});
   }, [initialFormState, open]);
 
   const handleClose = (isOpen: boolean) => {
@@ -83,6 +86,18 @@ export function CalendarCreateLiveTrainingDialog({
     value: CalendarCreateLiveTrainingFormState[Key],
   ) => {
     setFormState((current) => ({ ...current, [key]: value }));
+    setFormFieldErrors((current) => {
+      if (key === "title" && current.title) return { ...current, title: undefined };
+
+      if (
+        (key === "startDate" || key === "startTime" || key === "endDate" || key === "endTime") &&
+        current.endsAt
+      ) {
+        return { ...current, endsAt: undefined };
+      }
+
+      return current;
+    });
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -111,13 +126,27 @@ export function CalendarCreateLiveTrainingDialog({
     });
 
     if (!validationResult.success) {
+      const nextFieldErrors = validationResult.error.issues.reduce<LiveTrainingFormFieldErrors>(
+        (errors, issue) => {
+          const field = issue.path[0];
+
+          if (field === "title") return { ...errors, title: issue.message };
+          if (field === "endsAt") return { ...errors, endsAt: issue.message };
+
+          return errors;
+        },
+        {},
+      );
+
+      setFormFieldErrors(nextFieldErrors);
       setFormError(
-        validationResult.error.issues[0]?.message ?? t("common.toast.somethingWentWrong"),
+        Object.keys(nextFieldErrors).length ? null : t("common.toast.somethingWentWrong"),
       );
       return;
     }
 
     setFormError(null);
+    setFormFieldErrors({});
 
     const payload: CreateLiveTrainingBody = {
       title: formState.title.trim(),
@@ -192,6 +221,7 @@ export function CalendarCreateLiveTrainingDialog({
             <form className="flex min-h-0 flex-1 flex-col" onSubmit={handleSubmit}>
               <div className="min-h-0 overflow-y-auto overflow-x-hidden px-6 pb-4">
                 <LiveTrainingFormFields
+                  errors={formFieldErrors}
                   formState={formState}
                   onFormStateChange={updateFormState}
                   idPrefix="calendar-live-training"

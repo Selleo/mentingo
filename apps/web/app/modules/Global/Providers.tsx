@@ -5,6 +5,7 @@ import { useCallback, useEffect } from "react";
 import { I18nextProvider } from "react-i18next";
 
 import { useGlobalVideoUploadNotifications } from "~/hooks/useGlobalVideoUploadNotifications";
+import { useLiveTrainingInvalidationSocket } from "~/hooks/useLiveTrainingInvalidationSocket";
 import { useSessionRevocationNotifications } from "~/hooks/useSessionRevocationNotifications";
 import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
 
@@ -53,6 +54,7 @@ function TourKeyboardHandler({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useGlobalVideoUploadNotifications();
+  useLiveTrainingInvalidationSocket();
   useSessionRevocationNotifications();
   const { pruneExpiredUploads } = useVideoUploadResumeStore();
 

@@ -18,12 +18,17 @@ export type LiveTrainingRoomProps = {
   credentials: LiveTrainingMeetingCredentials;
   liveTraining: LiveTrainingDetails;
   canViewAllMaterials: boolean;
-  onLeave: () => void;
+  isFinishingSession: boolean;
+  onFinishSession: () => Promise<void>;
+  onLeave: (input: { userInitiated: boolean }) => void;
 };
 
 export type LiveTrainingRoomToolbarProps = {
   credentials: LiveTrainingMeetingCredentials;
+  isFinishingSession: boolean;
   onOpenMaterials: () => void;
+  onFinishSession: () => Promise<void>;
+  onUserLeave: () => void;
 };
 
 export type LiveTrainingParticipantGridProps = {

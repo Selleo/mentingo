@@ -370,7 +370,7 @@
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "tooltip": {
         "title": "Tento název se zobrazí v kalendáři a v detailech Live Training.",
@@ -411,14 +411,14 @@
       },
       "field": {
         "time": "Time",
-        "training": "Training",
+        "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
         "people": "People"
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "status": {
         "scheduled": "Scheduled",
@@ -450,7 +450,7 @@
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "Offline"
+      "offline": "In-person"
     },
     "visibility": {
       "all": "All users",
@@ -505,9 +505,9 @@
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people...",
-      "noUserResults": "No users found.",
-      "loadingUsers": "Loading users...",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
       "loadMoreUsers": "Load more"
     },
     "tabs": {
@@ -549,6 +549,16 @@
       "screenShare": "Sdílet obrazovku",
       "screen": "Obrazovka",
       "leave": "Odejít",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
       "empty": "Čeká se na účastníky.",
       "materials": "Materiály",
       "beforeMaterials": "Před",
@@ -4139,6 +4149,7 @@
     "errors": {
       "invalidLocalizedField": "Zadejte platný text pro vybraný jazyk.",
       "notFound": "Live Training nebyl nalezen.",
+      "sessionNotFound": "Relace Live Training nebyla nalezena.",
       "invalidDateRange": "Zadejte datum začátku i konce, nebo nechte obě pole prázdná.",
       "invalidSchedule": "Čas konce musí být po čase začátku.",
       "invalidTrainer": "Jeden nebo více vybraných trenérů nebylo nalezeno.",

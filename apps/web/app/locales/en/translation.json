@@ -335,14 +335,14 @@
       "title": "Add to calendar",
       "description": "Choose what you want to add for the selected time.",
       "noOptions": "No calendar items are available to create.",
-      "liveKitRequired": "Configure LiveKit in environment settings to enable online Live Trainings. Offline trainings remain available.",
+      "liveKitRequired": "Configure LiveKit in environment settings to enable online Live Trainings. In-person trainings remain available.",
       "submit": "Create live training",
       "toast": {
         "success": "Live training has been created."
       },
       "liveTrainingOption": {
         "title": "Live Training",
-        "description": "Schedule an online or offline training session."
+        "description": "Schedule an online or in-person training session."
       },
       "section": {
         "basics": "Basics",
@@ -371,18 +371,18 @@
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "tooltip": {
         "title": "This name is shown in the calendar and in the Live Training details.",
         "description": "Optional context for participants before they join the training.",
         "language": "The base language used for this Live Training title and description.",
         "allDay": "Use whole-day calendar dates and disable start/end time selection.",
-        "deliveryType": "Online sessions are remote. Offline sessions require a physical location.",
+        "deliveryType": "Online sessions are remote. In-person sessions require a physical location.",
         "startsAt": "The planned start time shown in the calendar.",
         "endsAt": "The planned end time shown in the calendar.",
         "maxParticipants": "The participant limit for this Live Training. The current maximum is 100.",
-        "location": "Optional place for offline trainings.",
+        "location": "Optional place for in-person trainings.",
         "viewerPermissions": "Controls what students can use when they join as viewers.",
         "microphoneEnabled": "Allow viewers to use their microphone during the session.",
         "cameraEnabled": "Allow viewers to use their camera during the session."
@@ -412,14 +412,14 @@
       },
       "field": {
         "time": "Time",
-        "training": "Training",
+        "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
         "people": "People"
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "status": {
         "scheduled": "Scheduled",
@@ -451,7 +451,7 @@
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "Offline"
+      "offline": "In-person"
     },
     "visibility": {
       "all": "All users",
@@ -478,8 +478,8 @@
       "timezoneTooltip": "Training timezone",
       "maxParticipantsTooltip": "Maximum participants",
       "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "offlineTitle": "In-person training",
+      "locationMissing": "Location has not been set"
     },
     "sidebar": {
       "lifecycle": "Session lifecycle",
@@ -490,10 +490,10 @@
       "author": "Author",
       "host": "Host",
       "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
+      "noHosts": "No hosts assigned",
       "trainer": "Trainer",
       "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
+      "noTrainers": "No trainers assigned",
       "unknownUser": "Unknown user",
       "details": "Training details",
       "maxParticipants": "Max participants",
@@ -506,9 +506,9 @@
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people...",
-      "noUserResults": "No users found.",
-      "loadingUsers": "Loading users...",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
       "loadMoreUsers": "Load more"
     },
     "tabs": {
@@ -548,7 +548,17 @@
       "screenShare": "Share screen",
       "screen": "Screen",
       "leave": "Leave",
-      "empty": "Waiting for participants.",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
+      "empty": "Waiting for participants",
       "materials": "Materials",
       "beforeMaterials": "Before",
       "afterMaterials": "After",
@@ -4213,6 +4223,7 @@
     "errors": {
       "invalidLocalizedField": "Provide valid text for the selected language.",
       "notFound": "Live Training was not found.",
+      "sessionNotFound": "Live Training session was not found.",
       "invalidDateRange": "Provide both start and end dates, or leave both empty.",
       "invalidSchedule": "End time must be after start time.",
       "invalidTrainer": "One or more selected trainers could not be found.",

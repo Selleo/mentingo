@@ -44,6 +44,8 @@ export function LiveTrainingParticipantTile({
   const isMicrophoneEnabled = trackRef.participant.isMicrophoneEnabled;
   const isCameraEnabled = trackRef.participant.isCameraEnabled;
   const isScreenShareEnabled = trackRef.participant.isScreenShareEnabled;
+  const shouldShowVideoTrack =
+    hasVideoTrack && (isScreenShare ? isScreenShareEnabled : isCameraEnabled);
 
   return (
     <button
@@ -60,7 +62,7 @@ export function LiveTrainingParticipantTile({
         },
       )}
     >
-      {hasVideoTrack ? (
+      {shouldShowVideoTrack ? (
         <VideoTrack
           trackRef={trackRef}
           className={cn("relative z-10 size-full object-cover", {

@@ -370,7 +370,7 @@
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "tooltip": {
         "title": "Šis pavadinimas rodomas kalendoriuje ir Live Training informacijoje.",
@@ -411,14 +411,14 @@
       },
       "field": {
         "time": "Time",
-        "training": "Training",
+        "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
         "people": "People"
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "status": {
         "scheduled": "Scheduled",
@@ -450,7 +450,7 @@
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "Offline"
+      "offline": "In-person"
     },
     "visibility": {
       "all": "All users",
@@ -505,9 +505,9 @@
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people...",
-      "noUserResults": "No users found.",
-      "loadingUsers": "Loading users...",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
       "loadMoreUsers": "Load more"
     },
     "tabs": {
@@ -549,6 +549,16 @@
       "screenShare": "Bendrinti ekraną",
       "screen": "Ekranas",
       "leave": "Išeiti",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
       "empty": "Laukiama dalyvių.",
       "materials": "Medžiaga",
       "beforeMaterials": "Prieš",
@@ -4140,6 +4150,7 @@
     "errors": {
       "invalidLocalizedField": "Įveskite tinkamą tekstą pasirinktai kalbai.",
       "notFound": "Live Training nerastas.",
+      "sessionNotFound": "Live Training sesija nerasta.",
       "invalidDateRange": "Nurodykite ir pradžios, ir pabaigos datą arba palikite abi tuščias.",
       "invalidSchedule": "Pabaigos laikas turi būti vėlesnis už pradžios laiką.",
       "invalidTrainer": "Vienas ar keli pasirinkti treneriai nerasti.",

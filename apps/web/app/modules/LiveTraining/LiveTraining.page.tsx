@@ -1,5 +1,10 @@
 import { redirect, useLocation, useNavigate, useParams } from "@remix-run/react";
-import { LIVE_TRAINING_DELIVERY_TYPES, PERMISSIONS } from "@repo/shared";
+import {
+  LIVE_TRAINING_DELIVERY_TYPES,
+  LIVE_TRAINING_PARTICIPANT_ROLES,
+  LIVE_TRAINING_SESSION_STATUSES,
+  PERMISSIONS,
+} from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -18,9 +23,12 @@ import { useCurrentUserSuspense } from "~/api/queries/useCurrentUser";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { useLiveKitConfigured } from "~/api/queries/useLiveKitConfigured";
 import { queryClient } from "~/api/queryClient";
+import { acquireSocket, releaseSocket } from "~/api/socket";
+import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Skeleton } from "~/components/ui/skeleton";
+import { useToast } from "~/components/ui/use-toast";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LiveTrainingDeleteDialog } from "~/modules/LiveTraining/components/LiveTrainingDeleteDialog";
 import { LiveTrainingRoom } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingRoom";
@@ -40,6 +48,21 @@ import { LIVE_TRAINING_HANDLES } from "../../../e2e/data/live-training/handles";
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import type { JoinCurrentSessionResponse } from "~/api/generated-api";
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
+
+const LIVE_TRAINING_SESSION_SOCKET_EVENT = "live-training:session";
+const SESSION_ENDED_TOAST_DURATION_MS = 15000;
+const REFRESHING_SESSION_STATUSES = new Set<string>([
+  LIVE_TRAINING_SESSION_STATUSES.WAITING,
+  LIVE_TRAINING_SESSION_STATUSES.ACTIVE,
+  LIVE_TRAINING_SESSION_STATUSES.ENDED,
+  LIVE_TRAINING_SESSION_STATUSES.FAILED,
+]);
+
+type LiveTrainingSessionSocketPayload = {
+  liveTrainingId: string;
+  sessionId: string;
+  eventName: string;
+};
 
 function LiveTrainingPageSkeleton() {
   return (
@@ -98,6 +121,7 @@ export const clientLoader = async ({ params, request }: ClientLoaderFunctionArgs
 
 export default function LiveTrainingPage() {
   const { t } = useTranslation();
+  const { toast } = useToast();
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -109,7 +133,11 @@ export default function LiveTrainingPage() {
   >(null);
   const language = useLanguageStore((state) => state.language);
   const { data: currentUser } = useCurrentUserSuspense();
-  const { data: liveTraining, isLoading } = useLiveTraining(id, language, {
+  const {
+    data: liveTraining,
+    isLoading,
+    refetch: refetchLiveTraining,
+  } = useLiveTraining(id, language, {
     enabled: Boolean(id),
     retry: false,
   });
@@ -195,7 +223,8 @@ export default function LiveTrainingPage() {
     if (!id) return;
 
     await startSession({ liveTrainingId: id, language });
-  }, [id, language, startSession]);
+    await refetchLiveTraining();
+  }, [id, language, refetchLiveTraining, startSession]);
 
   const handleJoinSession = useCallback(async () => {
     if (!id) return;
@@ -218,14 +247,108 @@ export default function LiveTrainingPage() {
       language,
     });
     setMeetingCredentials(null);
-  }, [endSession, id, language, liveTraining?.currentSession?.id]);
+    if (isRoomRoute) {
+      navigate(`/live-training/${id}`);
+    }
+  }, [endSession, id, isRoomRoute, language, liveTraining?.currentSession?.id, navigate]);
 
-  const handleLeaveSession = useCallback(() => {
+  const handleLeaveSession = useCallback(
+    ({ userInitiated }: { userInitiated: boolean }) => {
+      if (!userInitiated) {
+        void invalidateLiveTrainingData({
+          includeCalendar: true,
+          includeCoursesAndLessons: true,
+          includeSessions: true,
+        });
+      }
+
+      const shouldShowEndedToast =
+        !userInitiated && meetingCredentials?.role === LIVE_TRAINING_PARTICIPANT_ROLES.OBSERVER;
+
+      if (shouldShowEndedToast && liveTraining) {
+        toast({
+          description: t("liveTrainingView.meeting.sessionEndedToast", {
+            trainingName: liveTraining.title,
+          }),
+          duration: SESSION_ENDED_TOAST_DURATION_MS,
+        });
+      }
+
+      setMeetingCredentials(null);
+      if (id && isRoomRoute) {
+        navigate(`/live-training/${id}`);
+      }
+    },
+    [id, isRoomRoute, liveTraining, meetingCredentials?.role, navigate, t, toast],
+  );
+
+  const handleRemoteSessionEnded = useCallback(async () => {
+    await invalidateLiveTrainingData({
+      includeCalendar: true,
+      includeCoursesAndLessons: true,
+      includeSessions: true,
+    });
+
+    if (meetingCredentials?.role === LIVE_TRAINING_PARTICIPANT_ROLES.OBSERVER && liveTraining) {
+      toast({
+        description: t("liveTrainingView.meeting.sessionEndedToast", {
+          trainingName: liveTraining.title,
+        }),
+        duration: SESSION_ENDED_TOAST_DURATION_MS,
+      });
+    }
+
     setMeetingCredentials(null);
+
     if (id && isRoomRoute) {
       navigate(`/live-training/${id}`);
     }
-  }, [id, isRoomRoute, navigate]);
+  }, [id, isRoomRoute, liveTraining, meetingCredentials?.role, navigate, t, toast]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const socket = acquireSocket();
+
+    const joinRoom = () => {
+      socket.emit("join:live-training", { liveTrainingId: id });
+    };
+
+    const handleSessionEvent = (payload: LiveTrainingSessionSocketPayload) => {
+      if (payload.liveTrainingId !== id) return;
+
+      if (REFRESHING_SESSION_STATUSES.has(payload.eventName)) {
+        void invalidateLiveTrainingData({
+          includeCalendar: true,
+          includeCoursesAndLessons: true,
+          includeSessions: true,
+        });
+      }
+
+      if (payload.eventName === LIVE_TRAINING_SESSION_STATUSES.ENDED) {
+        void handleRemoteSessionEnded();
+      }
+    };
+
+    socket.on("connect", joinRoom);
+    socket.on(LIVE_TRAINING_SESSION_SOCKET_EVENT, handleSessionEvent);
+    socket.connect();
+
+    if (socket.connected) {
+      joinRoom();
+    }
+
+    return () => {
+      socket.off("connect", joinRoom);
+      socket.off(LIVE_TRAINING_SESSION_SOCKET_EVENT, handleSessionEvent);
+
+      if (socket.connected) {
+        socket.emit("leave:live-training", { liveTrainingId: id });
+      }
+
+      releaseSocket();
+    };
+  }, [handleRemoteSessionEnded, id]);
 
   useEffect(() => {
     if (!isRoomRoute || hasAttemptedRoomJoin || meetingCredentials) return;
@@ -294,6 +417,8 @@ export default function LiveTrainingPage() {
           credentials={meetingCredentials}
           liveTraining={liveTraining}
           canViewAllMaterials={visibleActions.canViewAllMaterials}
+          isFinishingSession={isFinishingSession}
+          onFinishSession={handleFinishSession}
           onLeave={handleLeaveSession}
         />
       )}

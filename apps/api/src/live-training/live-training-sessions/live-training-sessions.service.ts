@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
@@ -14,7 +14,6 @@ import {
 import {
   EndLiveTrainingSessionEvent,
   FailLiveTrainingSessionEvent,
-  LiveTrainingSessionEvent,
   StartLiveTrainingSessionEvent,
 } from "src/events";
 import { FileService } from "src/file/file.service";
@@ -22,8 +21,14 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
+import { REALTIME_PUBLISHER, type RealtimePublisher } from "src/websocket/realtime.publisher";
+import { getLiveTrainingRoomName } from "src/websocket/websocket.gateway";
 
 import { LiveTrainingAnnouncementsService } from "../live-training-announcements.service";
+import {
+  LIVE_TRAINING_INVALIDATE_SOCKET_EVENT,
+  LIVE_TRAINING_SESSION_SOCKET_EVENT,
+} from "../live-training-session-realtime.constants";
 import { LiveTrainingService } from "../live-training.service";
 import { LiveKitService } from "../livekit/livekit.service";
 
@@ -55,6 +60,12 @@ const LIVEKIT_WEBHOOK_EVENTS = {
 const LIVEKIT_IDENTITY_SEPARATOR = ":";
 const UNEXPECTED_ROOM_FINISHED_REASON = "livekit_room_finished_unexpectedly";
 const LIVE_TRAINING_PARTICIPANT_ROLE_VALUES = Object.values(LIVE_TRAINING_PARTICIPANT_ROLES);
+const INVALIDATING_SESSION_STATUSES = new Set<string>([
+  LIVE_TRAINING_SESSION_STATUSES.WAITING,
+  LIVE_TRAINING_SESSION_STATUSES.ACTIVE,
+  LIVE_TRAINING_SESSION_STATUSES.ENDED,
+  LIVE_TRAINING_SESSION_STATUSES.FAILED,
+]);
 
 @Injectable()
 export class LiveTrainingSessionsService {
@@ -68,6 +79,7 @@ export class LiveTrainingSessionsService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly settingsService: SettingsService,
     private readonly liveTrainingAnnouncementsService: LiveTrainingAnnouncementsService,
+    @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: RealtimePublisher,
   ) {}
 
   async getSessions(
@@ -426,6 +438,27 @@ export class LiveTrainingSessionsService {
     );
 
     this.assertCanManageSession(liveTraining, currentUser);
+
+    return this.finishSession({
+      liveTrainingId,
+      sessionId,
+      language: language ?? SUPPORTED_LANGUAGES.EN,
+      currentUser,
+      liveTraining,
+    });
+  }
+
+  private async finishSession(input: {
+    liveTrainingId: UUIDType;
+    sessionId: UUIDType;
+    language: SupportedLanguages;
+    currentUser: CurrentUserType;
+    liveTraining: {
+      calendarEventId: UUIDType;
+      deliveryType: LiveTrainingDeliveryType;
+    };
+  }): Promise<LiveTrainingSessionSummary> {
+    const { currentUser, language, liveTraining, liveTrainingId, sessionId } = input;
     const session = await this.liveTrainingSessionsRepository.getSessionRoomRow(
       liveTrainingId,
       sessionId,
@@ -493,7 +526,7 @@ export class LiveTrainingSessionsService {
     await this.publishSessionEndActivity({
       liveTrainingId,
       sessionId,
-      language: language ?? SUPPORTED_LANGUAGES.EN,
+      language,
       currentUser,
       deliveryType: liveTraining.deliveryType,
       endedAt,
@@ -623,13 +656,65 @@ export class LiveTrainingSessionsService {
     }
 
     await this.liveTrainingSessionsRepository.updateSessionCounters(sessionTenant.id);
+    const participantRole = await this.liveTrainingSessionsRepository.getParticipantRole(
+      sessionTenant.id,
+      userId,
+    );
+    const openHostCount =
+      participantRole === LIVE_TRAINING_PARTICIPANT_ROLES.HOST ||
+      participantRole === LIVE_TRAINING_PARTICIPANT_ROLES.ADMIN
+        ? await this.liveTrainingSessionsRepository.countOpenHostAttendanceIntervals(
+            sessionTenant.id,
+          )
+        : 1;
+
     await this.publishSessionEvent(event.event, sessionTenant, userId);
+
+    if (
+      (participantRole === LIVE_TRAINING_PARTICIPANT_ROLES.HOST ||
+        participantRole === LIVE_TRAINING_PARTICIPANT_ROLES.ADMIN) &&
+      openHostCount === 0
+    ) {
+      await this.finishSessionAfterLastHostLeft(sessionTenant, userId);
+    }
+  }
+
+  private async finishSessionAfterLastHostLeft(
+    sessionTenant: { id: UUIDType; liveTrainingId: UUIDType; tenantId: UUIDType },
+    userId: UUIDType,
+  ) {
+    const actor = await this.liveTrainingSessionsRepository.getActorUserRow(userId);
+
+    if (!actor) return;
+
+    const liveTraining = await this.liveTrainingService.getLiveTraining(
+      sessionTenant.liveTrainingId,
+      SUPPORTED_LANGUAGES.EN,
+      actor,
+    );
+
+    await this.finishSession({
+      liveTrainingId: sessionTenant.liveTrainingId,
+      sessionId: sessionTenant.id,
+      language: SUPPORTED_LANGUAGES.EN,
+      currentUser: actor,
+      liveTraining,
+    });
   }
 
   private async handleRoomFinished(
     event: WebhookEvent,
     sessionTenant: { id: UUIDType; liveTrainingId: UUIDType; tenantId: UUIDType },
   ) {
+    const currentSession = await this.liveTrainingSessionsRepository.getSessionRow(
+      sessionTenant.liveTrainingId,
+      sessionTenant.id,
+    );
+
+    if (currentSession?.status === LIVE_TRAINING_SESSION_STATUSES.ENDED) {
+      return;
+    }
+
     const endedAt = this.getWebhookTimestamp(event);
     const closedIntervals =
       await this.liveTrainingSessionsRepository.closeAllOpenAttendanceIntervals(
@@ -774,20 +859,28 @@ export class LiveTrainingSessionsService {
     }
   }
 
-  private async publishSessionEvent(
+  private publishSessionEvent(
     eventName: string,
     sessionTenant: { id: UUIDType; liveTrainingId: UUIDType; tenantId: UUIDType },
     userId?: UUIDType,
-  ) {
-    await this.outboxPublisher.publish(
-      new LiveTrainingSessionEvent({
-        liveTrainingId: sessionTenant.liveTrainingId,
-        sessionId: sessionTenant.id,
-        tenantId: sessionTenant.tenantId,
-        eventName,
-        userId,
-      }),
+  ): void {
+    const payload = {
+      liveTrainingId: sessionTenant.liveTrainingId,
+      sessionId: sessionTenant.id,
+      tenantId: sessionTenant.tenantId,
+      eventName,
+      userId,
+    };
+
+    this.realtimePublisher.emitToRoom(
+      LIVE_TRAINING_SESSION_SOCKET_EVENT,
+      getLiveTrainingRoomName(sessionTenant.liveTrainingId),
+      payload,
     );
+
+    if (INVALIDATING_SESSION_STATUSES.has(eventName)) {
+      this.realtimePublisher.emitToAll(LIVE_TRAINING_INVALIDATE_SOCKET_EVENT, payload);
+    }
   }
 
   private assertCanManageSession(

@@ -30,7 +30,11 @@ export function CalendarTimeSelect({
       <SelectTrigger data-testid={testId}>
         <SelectValue />
       </SelectTrigger>
-      <SelectContent className="max-h-72">
+      <SelectContent
+        className="max-h-72"
+        showScrollButtons={false}
+        viewportClassName="h-auto max-h-72 overflow-y-auto"
+      >
         {options.map((option) => (
           <SelectItem key={option} value={option}>
             {option}

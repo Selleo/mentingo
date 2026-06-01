@@ -209,6 +209,10 @@
   color: inherit;
 }
 
+.calendar-shell .fc .fc-daygrid-event-dot {
+  display: none;
+}
+
 .calendar-shell .fc .fc-event-title,
 .calendar-shell .fc .fc-event-title-container,
 .calendar-shell .fc .fc-daygrid-event-dot + .fc-event-title {
@@ -244,13 +248,6 @@
   border-left-color: var(--neutral-500);
   background: var(--neutral-100);
   color: var(--neutral-700);
-}
-
-.calendar-shell .fc .calendar-event--ended {
-  border-color: var(--success-200);
-  border-left-color: var(--success-600);
-  background: var(--success-50);
-  color: var(--success-900);
 }
 
 .calendar-shell .fc .fc-popover {

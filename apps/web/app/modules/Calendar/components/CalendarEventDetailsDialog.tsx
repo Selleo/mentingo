@@ -1,6 +1,6 @@
 import { Link } from "@remix-run/react";
 import { LIVE_TRAINING_DELIVERY_TYPES } from "@repo/shared";
-import { CalendarClock, ExternalLink, MapPin, Radio, Users } from "lucide-react";
+import { BookOpen, CalendarClock, MapPin, Radio, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useCalendarEventDetails } from "~/api/queries/calendar/useCalendarEventDetails";
@@ -55,7 +55,16 @@ export function CalendarEventDetailsDialog({
           <div className="flex items-start justify-between gap-4 pr-7">
             <div className="min-w-0">
               <DialogTitle className="truncate text-xl">
-                {eventDetails?.title ?? t("calendarView.details.title")}
+                {eventDetails?.sourceId && liveTraining ? (
+                  <Link
+                    to={`/live-training/${eventDetails.sourceId}`}
+                    className="underline-offset-4 hover:underline"
+                  >
+                    {eventDetails.title}
+                  </Link>
+                ) : (
+                  (eventDetails?.title ?? t("calendarView.details.title"))
+                )}
               </DialogTitle>
               <DialogDescription className="mt-1">
                 {t("calendarView.details.sourceType.liveTraining")}
@@ -70,9 +79,6 @@ export function CalendarEventDetailsDialog({
           {!isLoading && eventDetails && liveTraining && (
             <>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="default" fontWeight="normal">
-                  {t(`calendarView.details.status.${eventDetails.status}`)}
-                </Badge>
                 <Badge variant="default" fontWeight="normal">
                   {t(`calendarView.details.deliveryType.${liveTraining.deliveryType}`)}
                 </Badge>
@@ -116,7 +122,7 @@ export function CalendarEventDetailsDialog({
 
                 {linkedCourses.length > 0 && (
                   <CalendarEventMetaRow
-                    icon={<MapPin className="size-4" />}
+                    icon={<BookOpen className="size-4" />}
                     label={t("calendarView.details.field.linkedCourses")}
                     value={
                       <div className="flex flex-wrap gap-1.5">
@@ -177,7 +183,6 @@ export function CalendarEventDetailsDialog({
                 >
                   <Link to={`/live-training/${eventDetails.sourceId}`}>
                     {t("calendarView.details.action.goToLiveTraining")}
-                    <ExternalLink className="size-4" />
                   </Link>
                 </Button>
               </div>

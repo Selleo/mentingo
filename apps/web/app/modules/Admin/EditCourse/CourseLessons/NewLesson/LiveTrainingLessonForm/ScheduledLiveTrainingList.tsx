@@ -1,8 +1,6 @@
-import { LIVE_TRAINING_STATUSES } from "@repo/shared";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
 
 import { formatScheduledLiveTrainingDateRange } from "./liveTrainingLessonForm.utils";
@@ -12,6 +10,7 @@ import type { GetLiveTrainingsResponse } from "~/api/generated-api";
 type ScheduledLiveTraining = GetLiveTrainingsResponse["data"][number];
 
 type ScheduledLiveTrainingListProps = {
+  error?: string | null;
   isLoading: boolean;
   liveTrainings: ScheduledLiveTraining[];
   selectedLiveTrainingId: string | null;
@@ -19,6 +18,7 @@ type ScheduledLiveTrainingListProps = {
 };
 
 export function ScheduledLiveTrainingList({
+  error,
   isLoading,
   liveTrainings,
   selectedLiveTrainingId,
@@ -44,24 +44,24 @@ export function ScheduledLiveTrainingList({
   }
 
   return (
-    <div className="grid max-h-96 gap-2 overflow-y-auto pr-1">
-      {liveTrainings.map((liveTraining) => {
-        const isSelected = liveTraining.id === selectedLiveTrainingId;
+    <div className="grid gap-2">
+      <div className="grid max-h-96 gap-2 overflow-y-auto pr-1">
+        {liveTrainings.map((liveTraining) => {
+          const isSelected = liveTraining.id === selectedLiveTrainingId;
 
-        return (
-          <button
-            key={liveTraining.id}
-            type="button"
-            className={cn(
-              "grid gap-2 rounded-md border bg-white p-3 text-left transition hover:border-primary-400 hover:bg-primary-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
-              {
-                "border-primary-500 bg-primary-50": isSelected,
-                "border-neutral-200": !isSelected,
-              },
-            )}
-            onClick={() => onSelect(liveTraining.id)}
-          >
-            <div className="flex items-start justify-between gap-3">
+          return (
+            <button
+              key={liveTraining.id}
+              type="button"
+              className={cn(
+                "grid gap-2 rounded-md border bg-white p-3 text-left transition hover:border-primary-400 hover:bg-primary-50/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500",
+                {
+                  "border-primary-500 bg-primary-50": isSelected,
+                  "border-neutral-200": !isSelected,
+                },
+              )}
+              onClick={() => onSelect(liveTraining.id)}
+            >
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium text-neutral-950">
                   {liveTraining.title}
@@ -71,13 +71,11 @@ export function ScheduledLiveTrainingList({
                   {formatScheduledLiveTrainingDateRange(liveTraining)}
                 </p>
               </div>
-              <Badge variant="outline" fontWeight="normal" className="shrink-0 rounded">
-                {t(`liveTrainingView.status.${LIVE_TRAINING_STATUSES.SCHEDULED}`)}
-              </Badge>
-            </div>
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
+      {error && <p className="text-sm font-medium text-error-600">{error}</p>}
     </div>
   );
 }

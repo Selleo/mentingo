@@ -54,11 +54,12 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
           recipient.language,
           announcement.baseLanguage,
         );
-        const content = this.getLocalizedValue(
+        const localizedContent = this.getLocalizedValue(
           announcement.content,
           recipient.language,
           announcement.baseLanguage,
         );
+        const content = htmlToPlainText(localizedContent);
         const { text, html } = this.buildEmail({
           title,
           content,
@@ -148,4 +149,18 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
 
     return `${tenantOrigin}/notifications`;
   }
+}
+
+function htmlToPlainText(value: string) {
+  return decodeHtmlEntities(value.replace(/<br\s*\/?>/giu, "\n").replace(/<[^>]*>/gu, ""));
+}
+
+function decodeHtmlEntities(value: string) {
+  return value
+    .replace(/&amp;/gu, "&")
+    .replace(/&lt;/gu, "<")
+    .replace(/&gt;/gu, ">")
+    .replace(/&quot;/gu, '"')
+    .replace(/&#39;/gu, "'")
+    .replace(/&apos;/gu, "'");
 }

@@ -3,6 +3,7 @@ import {
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
+  LIVE_TRAINING_PARTICIPANT_ROLES,
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
   type LiveTrainingParticipantRole,
@@ -480,6 +481,45 @@ export class LiveTrainingSessionsRepository {
       });
 
     return row ?? null;
+  }
+
+  async getParticipantRole(sessionId: UUIDType, userId: UUIDType) {
+    const [row] = await this.db
+      .select({ role: liveTrainingSessionParticipants.role })
+      .from(liveTrainingSessionParticipants)
+      .where(
+        and(
+          eq(liveTrainingSessionParticipants.liveTrainingSessionId, sessionId),
+          eq(liveTrainingSessionParticipants.userId, userId),
+        ),
+      );
+
+    return row?.role ?? null;
+  }
+
+  async countOpenHostAttendanceIntervals(sessionId: UUIDType) {
+    const [{ totalItems }] = await this.db
+      .select({ totalItems: count() })
+      .from(liveTrainingAttendance)
+      .innerJoin(
+        liveTrainingSessionParticipants,
+        eq(
+          liveTrainingSessionParticipants.id,
+          liveTrainingAttendance.liveTrainingSessionParticipantId,
+        ),
+      )
+      .where(
+        and(
+          eq(liveTrainingAttendance.liveTrainingSessionId, sessionId),
+          isNull(liveTrainingAttendance.leftAt),
+          inArray(liveTrainingSessionParticipants.role, [
+            LIVE_TRAINING_PARTICIPANT_ROLES.HOST,
+            LIVE_TRAINING_PARTICIPANT_ROLES.ADMIN,
+          ]),
+        ),
+      );
+
+    return totalItems;
   }
 
   async closeAllOpenAttendanceIntervals(sessionId: UUIDType, leftAt: string, reason: string) {

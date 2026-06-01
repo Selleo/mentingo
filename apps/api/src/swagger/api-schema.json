@@ -28112,6 +28112,7 @@
         "properties": {
           "title": {
             "minLength": 1,
+            "maxLength": 250,
             "type": "string"
           },
           "description": {
@@ -28312,6 +28313,7 @@
         "properties": {
           "title": {
             "minLength": 1,
+            "maxLength": 250,
             "type": "string"
           },
           "language": {

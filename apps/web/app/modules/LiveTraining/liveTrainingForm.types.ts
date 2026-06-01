@@ -18,6 +18,11 @@ export const liveTrainingFormStateSchema = z.object({
 
 export type LiveTrainingFormState = z.infer<typeof liveTrainingFormStateSchema>;
 
+export type LiveTrainingFormFieldErrors = {
+  title?: string;
+  endsAt?: string;
+};
+
 export type LiveTrainingFormFieldUpdater = <Key extends keyof LiveTrainingFormState>(
   key: Key,
   value: LiveTrainingFormState[Key],

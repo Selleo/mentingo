@@ -1,5 +1,4 @@
 import { Link } from "@remix-run/react";
-import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -43,12 +42,14 @@ export function LiveTrainingLessonForm({
   const { mutateAsync: deleteLesson } = useDeleteLesson();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const {
+    canCreateLiveTraining,
     currentLanguageHasLiveTraining,
     form,
     formMode,
     isPending,
     isLoadingScheduledLiveTrainings,
     isOnlineDeliveryAvailable,
+    liveTrainingFormFieldErrors,
     liveTrainingFormError,
     liveTrainingFormState,
     onSubmit,
@@ -129,7 +130,6 @@ export function LiveTrainingLessonForm({
                     {linkedLiveTrainingId ? (
                       <Button asChild type="button" variant="outline" className="gap-2">
                         <Link to={`/live-training/${linkedLiveTrainingId}`}>
-                          <ExternalLink className="size-4" />
                           {t("adminCourseView.curriculum.lesson.liveTraining.openLiveTraining")}
                         </Link>
                       </Button>
@@ -154,7 +154,6 @@ export function LiveTrainingLessonForm({
                     {linkedLiveTrainingId ? (
                       <Button asChild type="button" variant="outline" className="gap-2">
                         <Link to={`/live-training/${linkedLiveTrainingId}`}>
-                          <ExternalLink className="size-4" />
                           {t("adminCourseView.curriculum.lesson.liveTraining.openBaseLiveTraining")}
                         </Link>
                       </Button>
@@ -164,45 +163,70 @@ export function LiveTrainingLessonForm({
               )}
 
               {shouldShowAssignmentTabs && (
-                <Tabs
-                  value={formMode}
-                  onValueChange={(value) => updateFormMode(value as typeof formMode)}
-                >
-                  <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-                    <TabsTrigger value={LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW}>
-                      {t("adminCourseView.curriculum.lesson.liveTraining.createNewTab")}
-                    </TabsTrigger>
-                    <TabsTrigger value={LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING}>
-                      {t("adminCourseView.curriculum.lesson.liveTraining.linkExistingTab")}
-                    </TabsTrigger>
-                  </TabsList>
+                <>
+                  {canCreateLiveTraining ? (
+                    <Tabs
+                      value={formMode}
+                      onValueChange={(value) => updateFormMode(value as typeof formMode)}
+                    >
+                      <TabsList className="h-auto w-fit bg-neutral-100 p-1">
+                        <TabsTrigger value={LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW}>
+                          {t("adminCourseView.curriculum.lesson.liveTraining.createNewTab")}
+                        </TabsTrigger>
+                        <TabsTrigger value={LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING}>
+                          {t("adminCourseView.curriculum.lesson.liveTraining.linkExistingTab")}
+                        </TabsTrigger>
+                      </TabsList>
 
-                  <TabsContent value={LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW} className="mt-5">
-                    <LiveTrainingFormFields
-                      formState={liveTrainingFormState}
-                      onFormStateChange={updateLiveTrainingFormState}
-                      idPrefix="lesson-live-training"
-                      portalledDatePicker
-                      isOnlineDeliveryAvailable={isOnlineDeliveryAvailable}
-                    />
-                  </TabsContent>
+                      <TabsContent
+                        value={LIVE_TRAINING_LESSON_FORM_MODES.CREATE_NEW}
+                        className="mt-5"
+                      >
+                        <div className="grid gap-2">
+                          <LiveTrainingFormFields
+                            errors={liveTrainingFormFieldErrors}
+                            formState={liveTrainingFormState}
+                            onFormStateChange={updateLiveTrainingFormState}
+                            idPrefix="lesson-live-training"
+                            portalledDatePicker
+                            isOnlineDeliveryAvailable={isOnlineDeliveryAvailable}
+                          />
+                          {liveTrainingFormError && (
+                            <p className="text-sm font-medium text-error-600">
+                              {liveTrainingFormError}
+                            </p>
+                          )}
+                        </div>
+                      </TabsContent>
 
-                  <TabsContent
-                    value={LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING}
-                    className="mt-5"
-                  >
-                    <ScheduledLiveTrainingList
-                      isLoading={isLoadingScheduledLiveTrainings}
-                      liveTrainings={scheduledLiveTrainings}
-                      selectedLiveTrainingId={selectedLiveTrainingId}
-                      onSelect={setSelectedLiveTrainingId}
-                    />
-                  </TabsContent>
-                </Tabs>
-              )}
-
-              {liveTrainingFormError && (
-                <p className="text-sm font-medium text-error-600">{liveTrainingFormError}</p>
+                      <TabsContent
+                        value={LIVE_TRAINING_LESSON_FORM_MODES.LINK_EXISTING}
+                        className="mt-5"
+                      >
+                        <ScheduledLiveTrainingList
+                          error={liveTrainingFormError}
+                          isLoading={isLoadingScheduledLiveTrainings}
+                          liveTrainings={scheduledLiveTrainings}
+                          selectedLiveTrainingId={selectedLiveTrainingId}
+                          onSelect={setSelectedLiveTrainingId}
+                        />
+                      </TabsContent>
+                    </Tabs>
+                  ) : (
+                    <div className="mt-1 grid gap-3">
+                      <h3 className="text-sm font-medium text-neutral-950">
+                        {t("adminCourseView.curriculum.lesson.liveTraining.linkExistingTab")}
+                      </h3>
+                      <ScheduledLiveTrainingList
+                        error={liveTrainingFormError}
+                        isLoading={isLoadingScheduledLiveTrainings}
+                        liveTrainings={scheduledLiveTrainings}
+                        selectedLiveTrainingId={selectedLiveTrainingId}
+                        onSelect={setSelectedLiveTrainingId}
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="flex gap-x-3">

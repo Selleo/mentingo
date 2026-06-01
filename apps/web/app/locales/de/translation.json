@@ -370,7 +370,7 @@
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "tooltip": {
         "title": "Dieser Name wird im Kalender und in den Live-Training-Details angezeigt.",
@@ -411,14 +411,14 @@
       },
       "field": {
         "time": "Time",
-        "training": "Training",
+        "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
         "people": "People"
       },
       "deliveryType": {
         "online": "Online",
-        "offline": "Offline"
+        "offline": "In-person"
       },
       "status": {
         "scheduled": "Scheduled",
@@ -450,7 +450,7 @@
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "Offline"
+      "offline": "In-person"
     },
     "visibility": {
       "all": "All users",
@@ -505,9 +505,9 @@
       "addTrainer": "Add",
       "addTrainerHint": "Add trainer",
       "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people...",
-      "noUserResults": "No users found.",
-      "loadingUsers": "Loading users...",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
       "loadMoreUsers": "Load more"
     },
     "tabs": {
@@ -547,6 +547,16 @@
       "screenShare": "Bildschirm teilen",
       "screen": "Bildschirm",
       "leave": "Verlassen",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
       "empty": "Warten auf Teilnehmer.",
       "materials": "Materialien",
       "beforeMaterials": "Vorher",
@@ -4131,6 +4141,7 @@
     "errors": {
       "invalidLocalizedField": "Gib gültigen Text für die ausgewählte Sprache ein.",
       "notFound": "Live Training wurde nicht gefunden.",
+      "sessionNotFound": "Live Training-Sitzung wurde nicht gefunden.",
       "invalidDateRange": "Gib Start- und Enddatum gemeinsam an oder lasse beide leer.",
       "invalidSchedule": "Die Endzeit muss nach der Startzeit liegen.",
       "invalidTrainer": "Ein oder mehrere ausgewählte Trainer wurden nicht gefunden.",

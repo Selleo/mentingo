@@ -39,7 +39,7 @@ type LiveTrainingSessionSummary = GetSessionsResponse["data"][number];
 type LiveTrainingAttendanceRow = GetSessionResponse["data"]["participants"][number];
 
 const getSessionBadgeVariant = (status: LiveTrainingSessionSummary["status"]) => {
-  if (status === LIVE_TRAINING_SESSION_STATUSES.ENDED) return "success";
+  if (status === LIVE_TRAINING_SESSION_STATUSES.ENDED) return "notStarted";
   if (status === LIVE_TRAINING_SESSION_STATUSES.FAILED) return "destructive";
   if (status === LIVE_TRAINING_SESSION_STATUSES.ACTIVE) return "inProgress";
 

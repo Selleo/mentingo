@@ -166,11 +166,8 @@ export class AdminLessonService {
       );
       await this.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, data.chapterId);
 
-      if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
-        throw new ForbiddenException({ message: "auth.error.missingPermission" });
-      }
-
       this.assertLiveTrainingLessonMode(data);
+      this.assertCanCreateLiveTrainingForLessonMode(data, currentUser);
 
       const [course] = await this.adminLessonRepository.getCourseByChapter(data.chapterId);
 
@@ -257,11 +254,8 @@ export class AdminLessonService {
     );
     await this.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
-    if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
-      throw new ForbiddenException({ message: "auth.error.missingPermission" });
-    }
-
     this.assertLiveTrainingLessonMode(data);
+    this.assertCanCreateLiveTrainingForLessonMode(data, currentUser);
 
     const [lesson] = await this.adminLessonRepository.getLesson(lessonId, data.language);
 
@@ -359,6 +353,19 @@ export class AdminLessonService {
 
     if (hasNewLiveTraining === hasExistingLiveTraining) {
       throw new BadRequestException("liveTraining.errors.invalidLessonLinkMode");
+    }
+  }
+
+  private assertCanCreateLiveTrainingForLessonMode(
+    data: LiveTrainingLessonAssignmentInput,
+    currentUser: CurrentUserType,
+  ) {
+    if (!data.liveTraining) {
+      return;
+    }
+
+    if (!hasPermission(currentUser.permissions, PERMISSIONS.LIVE_TRAINING_CREATE)) {
+      throw new ForbiddenException({ message: "auth.error.missingPermission" });
     }
   }
 

@@ -52,7 +52,7 @@ export function SettingItem({
             <Label htmlFor={id} className="body-base-md">
               {label}
             </Label>
-            {tooltip ? (
+            {tooltip && !disabled ? (
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>

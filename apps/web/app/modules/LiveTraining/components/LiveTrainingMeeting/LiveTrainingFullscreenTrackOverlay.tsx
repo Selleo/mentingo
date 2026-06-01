@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -13,6 +14,20 @@ export function LiveTrainingFullscreenTrackOverlay({
   onClose,
 }: LiveTrainingFullscreenTrackOverlayProps) {
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!trackRef) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, trackRef]);
 
   if (!trackRef) return null;
 

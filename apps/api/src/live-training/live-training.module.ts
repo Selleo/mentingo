@@ -6,6 +6,7 @@ import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
+import { WebSocketModule } from "src/websocket";
 
 import { LiveTrainingAnnouncementsService } from "./live-training-announcements.service";
 import { LiveTrainingSessionsController } from "./live-training-sessions/live-training-sessions.controller";
@@ -25,6 +26,7 @@ import { LiveKitService } from "./livekit/livekit.service";
     LocalizationModule,
     SettingsModule,
     StudentLessonProgressModule,
+    WebSocketModule,
   ],
   controllers: [LiveTrainingController, LiveTrainingSessionsController, LiveKitWebhookController],
   providers: [
