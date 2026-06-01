@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import {
   CALENDAR_EVENT_STATUSES,
   COURSE_ENROLLMENT,
+  LIVE_TRAINING_LINK_ENTITY_TYPES,
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
   type LiveTrainingParticipantRole,
@@ -17,9 +18,8 @@ import {
   liveTrainingSessionParticipants,
   liveTrainingSessions,
   liveLessons,
+  liveTrainingLinks,
   calendarEvents,
-  chapters,
-  lessons,
   liveTrainings,
   permissionRoles,
   permissionRoleRuleSets,
@@ -548,15 +548,21 @@ export class LiveTrainingSessionsRepository {
       })
       .from(liveLessons)
       .innerJoin(
+        liveTrainingLinks,
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveLessons.liveTrainingId),
+          eq(liveTrainingLinks.id, liveLessons.liveTrainingLinkId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+        ),
+      )
+      .innerJoin(
         liveTrainingSessionParticipants,
         eq(liveTrainingSessionParticipants.liveTrainingId, liveLessons.liveTrainingId),
       )
-      .innerJoin(lessons, eq(lessons.id, liveLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(
         studentCourses,
         and(
-          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.courseId, liveTrainingLinks.entityId),
           eq(studentCourses.studentId, liveTrainingSessionParticipants.userId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
@@ -579,12 +585,18 @@ export class LiveTrainingSessionsRepository {
         language: liveLessons.language,
       })
       .from(liveLessons)
-      .innerJoin(lessons, eq(lessons.id, liveLessons.lessonId))
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(
+        liveTrainingLinks,
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveLessons.liveTrainingId),
+          eq(liveTrainingLinks.id, liveLessons.liveTrainingLinkId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+        ),
+      )
       .innerJoin(
         studentCourses,
         and(
-          eq(studentCourses.courseId, chapters.courseId),
+          eq(studentCourses.courseId, liveTrainingLinks.entityId),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
         ),
       )

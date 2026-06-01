@@ -560,6 +560,16 @@ describe("LiveTrainingController (e2e)", () => {
       .where(
         and(eq(liveLessons.liveTrainingId, liveTrainingId), eq(liveLessons.lessonId, lessonId)),
       );
+    const [courseLink] = await db
+      .select()
+      .from(liveTrainingLinks)
+      .where(
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveTrainingId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+          eq(liveTrainingLinks.entityId, course.id),
+        ),
+      );
     const [lessonProgress] = await db
       .select()
       .from(studentLessonProgress)
@@ -573,6 +583,8 @@ describe("LiveTrainingController (e2e)", () => {
     expect(session.status).toBe(LIVE_TRAINING_SESSION_STATUSES.ENDED);
     expect(liveTraining.status).toBe(LIVE_TRAINING_STATUSES.ENDED);
     expect(liveLesson).toBeDefined();
+    expect(courseLink).toBeDefined();
+    expect(liveLesson.liveTrainingLinkId).toBe(courseLink.id);
     expect(lessonProgress.completedAt).not.toBeNull();
     expect(lessonProgress.languageAnswered).toBe(language);
   });

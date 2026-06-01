@@ -154,6 +154,7 @@ export class StudentLessonProgressService {
               lessonId: lesson.id,
               chapterId: lesson.chapterId,
               completedQuestionCount,
+              languageAnswered: actualLanguage,
             })
             .onConflictDoUpdate({
               target: [
@@ -163,6 +164,7 @@ export class StudentLessonProgressService {
               ],
               set: {
                 completedQuestionCount,
+                languageAnswered: actualLanguage,
               },
             })
             .returning()
@@ -184,6 +186,7 @@ export class StudentLessonProgressService {
           completedAt: sql`now
           ()`,
           completedQuestionCount,
+          languageAnswered: actualLanguage,
         })
         .where(
           and(
