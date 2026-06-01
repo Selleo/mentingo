@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -25,8 +26,9 @@ import {
 } from "@repo/shared";
 import { and, eq, gt, isNull, lt } from "drizzle-orm";
 
+import { DatabasePg, type Pagination, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { parsePagination } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { EnvService } from "src/env/services/env.service";
@@ -39,6 +41,7 @@ import {
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { DB } from "src/storage/db/db.providers";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
 import { LiveTrainingAnnouncementsService } from "./live-training-announcements.service";
@@ -67,12 +70,12 @@ import type { LiveTrainingListItem } from "./schemas/live-training-list.schema";
 import type { UpdateLiveTrainingBody } from "./schemas/update-live-training.schema";
 import type { SQL } from "drizzle-orm";
 import type { LiveTrainingActivityLogSnapshot } from "src/activity-logs/types";
-import type { DatabasePg, Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class LiveTrainingService {
   constructor(
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly liveTrainingRepository: LiveTrainingRepository,
     private readonly fileService: FileService,
     private readonly envService: EnvService,
@@ -97,6 +100,7 @@ export class LiveTrainingService {
 
     const uniqueRows = [...new Map(rows.map((row) => [row.id, row])).values()];
     const visibleItems: LiveTrainingListItem[] = [];
+    const { page, perPage } = parsePagination(query.page, query.perPage);
 
     for (const row of uniqueRows) {
       const [trainers, linkedCourses] = await Promise.all([
@@ -126,8 +130,6 @@ export class LiveTrainingService {
       });
     }
 
-    const page = query.page ?? 1;
-    const perPage = query.perPage ?? DEFAULT_PAGE_SIZE;
     const offset = (page - 1) * perPage;
 
     return {
@@ -155,8 +157,7 @@ export class LiveTrainingService {
   ) {
     await this.getHostAssignableLiveTrainingOrThrow(id, currentUser);
 
-    const page = query.page ?? 1;
-    const perPage = query.perPage ?? DEFAULT_PAGE_SIZE;
+    const { page, perPage } = parsePagination(query.page, query.perPage);
     const candidates = await this.liveTrainingRepository.getHostCandidates({
       keyword: query.keyword,
       page,
@@ -241,9 +242,10 @@ export class LiveTrainingService {
       currentUser,
       dbInstance,
     );
-    const [courseLink] = await this.liveTrainingRepository.insertLinks(
+
+    const courseLink = await this.liveTrainingRepository.getCourseLink(
       liveTrainingId,
-      this.getCourseLinkRows([courseId]),
+      courseId,
       dbInstance,
     );
 
@@ -372,39 +374,43 @@ export class LiveTrainingService {
       hosts: this.getHostRows(hostUserIds),
     };
 
-    const liveTrainingId = dbInstance
-      ? await this.liveTrainingRepository.createLiveTrainingRecordInTransaction(
+    const persistLiveTraining = async (transactionInstance: DatabasePg) => {
+      const liveTrainingId =
+        await this.liveTrainingRepository.createLiveTrainingRecordInTransaction(
           liveTrainingRecordInput,
-          dbInstance,
-        )
-      : await this.liveTrainingRepository.createLiveTrainingRecord(liveTrainingRecordInput);
+          transactionInstance,
+        );
 
-    if (linkedCourseIds.length && !dbInstance) {
-      await this.liveTrainingRepository.insertLinks(
-        liveTrainingId,
-        this.getCourseLinkRows(linkedCourseIds),
-      );
-    }
+      if (linkedCourseIds.length) {
+        await this.liveTrainingRepository.insertLinks(
+          liveTrainingId,
+          this.getCourseLinkRows(linkedCourseIds),
+          transactionInstance,
+        );
+      }
 
-    if (beforeResourceIds.length) {
-      await this.liveTrainingRepository.insertResourceLinks(
-        liveTrainingId,
-        beforeResourceIds,
-        LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
-        dbInstance,
-      );
-    }
+      if (beforeResourceIds.length) {
+        await this.liveTrainingRepository.insertResourceLinks(
+          liveTrainingId,
+          beforeResourceIds,
+          LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
+          transactionInstance,
+        );
+      }
 
-    if (afterResourceIds.length) {
-      await this.liveTrainingRepository.insertResourceLinks(
-        liveTrainingId,
-        afterResourceIds,
-        LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
-        dbInstance,
-      );
-    }
+      if (afterResourceIds.length) {
+        await this.liveTrainingRepository.insertResourceLinks(
+          liveTrainingId,
+          afterResourceIds,
+          LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
+          transactionInstance,
+        );
+      }
 
-    return liveTrainingId;
+      return liveTrainingId;
+    };
+
+    return dbInstance ? persistLiveTraining(dbInstance) : this.db.transaction(persistLiveTraining);
   }
 
   async updateLiveTraining(
@@ -430,18 +436,22 @@ export class LiveTrainingService {
     await this.assertCanLinkOptionalCourses(linkedCourseIds, currentUser);
     await this.assertOptionalResourcesExist(beforeResourceIds, afterResourceIds);
 
-    const availableLocales = [...row.availableLocales];
+    const hasLocalizedFieldChanges = this.hasLocalizedFieldChanges(body);
+    const nextAvailableLocales =
+      hasLocalizedFieldChanges && !row.availableLocales.includes(language)
+        ? [...row.availableLocales, language]
+        : row.availableLocales;
 
-    if (this.hasLocalizedFieldChanges(body) && !availableLocales.includes(language)) {
-      availableLocales.push(language);
-    }
-
-    const calendarEventUpdate = this.getCalendarEventUpdate(body, row.sequence, availableLocales);
+    const calendarEventUpdate = this.getCalendarEventUpdate(
+      body,
+      row.sequence,
+      nextAvailableLocales,
+    );
     const liveTrainingUpdate = this.getLiveTrainingUpdate(
       body,
       linkedCourseIds,
       row.settings,
-      availableLocales,
+      nextAvailableLocales,
     );
 
     if (this.hasUpdateValues(calendarEventUpdate)) {

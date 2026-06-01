@@ -179,8 +179,8 @@ export class AdminLessonService {
       }
 
       const language = data.language;
-      const courseLocales = course.availableLocales as SupportedLanguages[];
-      const courseBaseLanguage = course.baseLanguage as SupportedLanguages;
+      const courseLocales = course.availableLocales;
+      const courseBaseLanguage = course.baseLanguage;
 
       if (!courseLocales.includes(language)) {
         throw new BadRequestException("liveTraining.errors.unsupportedLessonLanguage");
@@ -188,13 +188,6 @@ export class AdminLessonService {
 
       if (language !== courseBaseLanguage) {
         throw new BadRequestException("liveTraining.errors.baseLanguageAssignmentRequired");
-      }
-
-      if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-        throw new BadRequestException({
-          message: `adminCourseView.toast.maxTitleLengthExceeded`,
-          count: MAX_LESSON_TITLE_LENGTH,
-        });
       }
 
       const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(
@@ -287,8 +280,8 @@ export class AdminLessonService {
     }
 
     const language = data.language;
-    const courseLocales = course.availableLocales as SupportedLanguages[];
-    const courseBaseLanguage = course.baseLanguage as SupportedLanguages;
+    const courseLocales = course.availableLocales;
+    const courseBaseLanguage = course.baseLanguage;
 
     if (!courseLocales.includes(language)) {
       throw new BadRequestException("liveTraining.errors.unsupportedLessonLanguage");
@@ -311,13 +304,6 @@ export class AdminLessonService {
 
     if (!isBaseLanguageAssignment && !baseLanguageAssignment) {
       throw new BadRequestException("liveTraining.errors.baseLanguageAssignmentRequired");
-    }
-
-    if (data.title.length > MAX_LESSON_TITLE_LENGTH) {
-      throw new BadRequestException({
-        message: `adminCourseView.toast.maxTitleLengthExceeded`,
-        count: MAX_LESSON_TITLE_LENGTH,
-      });
     }
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, language);

@@ -8,7 +8,19 @@ import {
   LIVE_TRAINING_STATUSES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
-import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { DatabasePg, type UUIDType } from "src/common";
@@ -148,59 +160,61 @@ export class LiveTrainingRepository {
       if (keywordCondition) conditions.push(keywordCondition);
     }
 
-    const data = await this.db
-      .select({
-        id: users.id,
-        fullName: sql<
-          string | null
-        >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
-        email: users.email,
-        avatarReference: users.avatarReference,
-      })
-      .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
-      .where(and(...conditions))
-      .groupBy(users.id)
-      .orderBy(asc(users.firstName), asc(users.lastName), asc(users.email))
-      .limit(perPage)
-      .offset((page - 1) * perPage);
+    return this.db.transaction(async (tx) => {
+      const data = await tx
+        .select({
+          id: users.id,
+          fullName: sql<
+            string | null
+          >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
+          email: users.email,
+          avatarReference: users.avatarReference,
+        })
+        .from(users)
+        .innerJoin(
+          permissionUserRoles,
+          and(
+            eq(permissionUserRoles.userId, users.id),
+            eq(permissionUserRoles.tenantId, users.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRoles,
+          and(
+            eq(permissionRoles.id, permissionUserRoles.roleId),
+            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+          ),
+        )
+        .where(and(...conditions))
+        .groupBy(users.id)
+        .orderBy(asc(users.firstName), asc(users.lastName), asc(users.email))
+        .limit(perPage)
+        .offset((page - 1) * perPage);
 
-    const [{ totalItems }] = await this.db
-      .select({ totalItems: count() })
-      .from(users)
-      .innerJoin(
-        permissionUserRoles,
-        and(
-          eq(permissionUserRoles.userId, users.id),
-          eq(permissionUserRoles.tenantId, users.tenantId),
-        ),
-      )
-      .innerJoin(
-        permissionRoles,
-        and(
-          eq(permissionRoles.id, permissionUserRoles.roleId),
-          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-        ),
-      )
-      .where(and(...conditions));
+      const [{ totalItems }] = await tx
+        .select({ totalItems: count() })
+        .from(users)
+        .innerJoin(
+          permissionUserRoles,
+          and(
+            eq(permissionUserRoles.userId, users.id),
+            eq(permissionUserRoles.tenantId, users.tenantId),
+          ),
+        )
+        .innerJoin(
+          permissionRoles,
+          and(
+            eq(permissionRoles.id, permissionUserRoles.roleId),
+            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+          ),
+        )
+        .where(and(...conditions));
 
-    return {
-      data,
-      pagination: { totalItems, page, perPage },
-    };
+      return {
+        data,
+        pagination: { totalItems, page, perPage },
+      };
+    });
   }
 
   async getLiveTrainingBaseRow(
@@ -210,8 +224,7 @@ export class LiveTrainingRepository {
   ) {
     const [row] = await dbInstance
       .select({
-        id: liveTrainings.id,
-        calendarEventId: liveTrainings.calendarEventId,
+        ...getTableColumns(liveTrainings),
         title: this.localizationService.getLocalizedSqlField(
           calendarEvents.title,
           language,
@@ -229,14 +242,7 @@ export class LiveTrainingRepository {
         allDay: calendarEvents.allDay,
         timezone: calendarEvents.timezone,
         location: calendarEvents.location,
-        deliveryType: liveTrainings.deliveryType,
-        visibilityScope: liveTrainings.visibilityScope,
-        status: liveTrainings.status,
-        maxParticipants: liveTrainings.maxParticipants,
-        authorId: liveTrainings.authorId,
         sequence: calendarEvents.sequence,
-        settings: liveTrainings.settings,
-        metadata: liveTrainings.metadata,
         authorName: sql<
           string | null
         >`nullif(concat_ws(' ', ${users.firstName}, ${users.lastName}), '')`,
@@ -309,7 +315,7 @@ export class LiveTrainingRepository {
   async getLiveTrainingNotificationRow(liveTrainingId: UUIDType) {
     const [row] = await this.db
       .select({
-        id: liveTrainings.id,
+        ...getTableColumns(liveTrainings),
         title: calendarEvents.title,
         startsAt: calendarEvents.startsAt,
         baseLanguage: calendarEvents.baseLanguage,
@@ -334,8 +340,7 @@ export class LiveTrainingRepository {
   ) {
     return this.db
       .select({
-        id: liveTrainings.id,
-        calendarEventId: liveTrainings.calendarEventId,
+        ...getTableColumns(liveTrainings),
         title: this.localizationService.getLocalizedSqlField(
           calendarEvents.title,
           language,
@@ -351,11 +356,6 @@ export class LiveTrainingRepository {
         allDay: calendarEvents.allDay,
         timezone: calendarEvents.timezone,
         location: calendarEvents.location,
-        deliveryType: liveTrainings.deliveryType,
-        visibilityScope: liveTrainings.visibilityScope,
-        status: liveTrainings.status,
-        maxParticipants: liveTrainings.maxParticipants,
-        authorId: liveTrainings.authorId,
       })
       .from(liveTrainings)
       .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))

@@ -254,7 +254,7 @@ export function LiveTrainingFormFields({
           </div>
         </div>
 
-        {formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE ? (
+        {formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE && (
           <div className="grid gap-2">
             <CalendarFormFieldLabel
               htmlFor={locationId}
@@ -269,10 +269,10 @@ export function LiveTrainingFormFields({
               placeholder={t("calendarView.create.placeholder.location")}
             />
           </div>
-        ) : null}
+        )}
       </LiveTrainingFormSection>
 
-      {formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE ? (
+      {formState.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.ONLINE && (
         <LiveTrainingFormSection title={t("calendarView.create.section.permissions")}>
           <CalendarFormFieldLabel
             label={t("calendarView.create.field.viewerPermissions")}
@@ -309,7 +309,7 @@ export function LiveTrainingFormFields({
             />
           </div>
         </LiveTrainingFormSection>
-      ) : null}
+      )}
     </div>
   );
 }

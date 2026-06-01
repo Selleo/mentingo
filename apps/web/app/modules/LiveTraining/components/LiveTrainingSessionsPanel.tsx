@@ -80,11 +80,7 @@ function LiveTrainingSessionAttendanceTable({
   liveTrainingId,
   sessionId,
   isOpen,
-}: {
-  liveTrainingId: string;
-  sessionId: string;
-  isOpen: boolean;
-}) {
+}: LiveTrainingSessionAttendanceTableProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const { data: session, isLoading } = useLiveTrainingSession(liveTrainingId, sessionId, language, {
@@ -207,15 +203,17 @@ function LiveTrainingSessionAttendanceTable({
   );
 }
 
+type LiveTrainingSessionAttendanceTableProps = {
+  liveTrainingId: string;
+  sessionId: string;
+  isOpen: boolean;
+};
+
 function LiveTrainingSessionCard({
   liveTrainingId,
   session,
   openedSessionId,
-}: {
-  liveTrainingId: string;
-  session: LiveTrainingSessionSummary;
-  openedSessionId: string | undefined;
-}) {
+}: LiveTrainingSessionCardProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const startedAt = session.startedAt;
@@ -270,6 +268,12 @@ function LiveTrainingSessionCard({
     </AccordionItem>
   );
 }
+
+type LiveTrainingSessionCardProps = {
+  liveTrainingId: string;
+  session: LiveTrainingSessionSummary;
+  openedSessionId: string | undefined;
+};
 
 export function LiveTrainingSessionsPanel({ liveTrainingId }: LiveTrainingSessionsPanelProps) {
   const { t } = useTranslation();

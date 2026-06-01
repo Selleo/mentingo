@@ -3,11 +3,12 @@ import { Track } from "livekit-client";
 import { Mic, MicOff, MonitorUp, Video, VideoOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { cn } from "~/lib/utils";
 
+import { ParticipantAvatar } from "./ParticipantAvatar";
+import { ParticipantStateIndicator } from "./ParticipantStateIndicator";
+
 import type { TrackReferenceOrPlaceholder } from "@livekit/components-react";
-import type { ReactNode } from "react";
 
 type LiveTrainingParticipantTileProps = {
   profilePictureUrl?: string | null;
@@ -26,77 +27,6 @@ const getParticipantInitials = (name: string) => {
 
   return `${firstInitial}${secondInitial}`.toUpperCase();
 };
-
-type ParticipantStateIndicatorProps = {
-  enabled: boolean;
-  enabledIcon: ReactNode;
-  disabledIcon: ReactNode;
-  label: string;
-};
-
-function ParticipantStateIndicator({
-  enabled,
-  enabledIcon,
-  disabledIcon,
-  label,
-}: ParticipantStateIndicatorProps) {
-  return (
-    <span
-      className={cn(
-        "inline-flex size-7 items-center justify-center rounded-md text-white shadow-sm",
-        {
-          "bg-primary-500/90": enabled,
-          "bg-danger-500/90": !enabled,
-        },
-      )}
-      aria-label={label}
-      title={label}
-    >
-      {enabled && enabledIcon}
-      {!enabled && disabledIcon}
-    </span>
-  );
-}
-
-type ParticipantAvatarProps = {
-  participantName: string;
-  participantInitials: string;
-  profilePictureUrl?: string | null;
-  size: "sm" | "lg" | "fullscreen";
-};
-
-function ParticipantAvatar({
-  participantName,
-  participantInitials,
-  profilePictureUrl,
-  size,
-}: ParticipantAvatarProps) {
-  return (
-    <Avatar
-      className={cn("shrink-0 bg-primary-800 ring-1 ring-primary-200/20", {
-        "size-7": size === "sm",
-        "size-20": size === "lg",
-        "size-32": size === "fullscreen",
-      })}
-    >
-      {profilePictureUrl && (
-        <AvatarImage
-          src={profilePictureUrl}
-          alt={`${participantName} profile`}
-          className="size-full object-cover"
-        />
-      )}
-      <AvatarFallback
-        className={cn("bg-primary-800 font-semibold text-primary-50", {
-          "text-xs": size === "sm",
-          "text-2xl": size !== "sm",
-        })}
-      >
-        {participantInitials}
-      </AvatarFallback>
-    </Avatar>
-  );
-}
 
 export function LiveTrainingParticipantTile({
   profilePictureUrl,

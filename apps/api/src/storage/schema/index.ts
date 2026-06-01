@@ -480,7 +480,7 @@ export const liveTrainings = pgTable(
           microphoneEnabled: false,
           cameraEnabled: false,
         },
-      } satisfies LiveTrainingSettings)
+      })
       .notNull()
       .$type<LiveTrainingSettings>(),
     metadata: jsonb("metadata").default({}).notNull(),

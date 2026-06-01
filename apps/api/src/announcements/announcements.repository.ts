@@ -23,11 +23,13 @@ import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelper
 import { addPagination } from "src/common/pagination";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsService } from "src/permissions/permissions.service";
+import { DEFAULT_STUDENT_SETTINGS } from "src/settings/constants/settings.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   announcements,
   groupAnnouncements,
   groupUsers,
+  settings as settingsTable,
   userAnnouncements,
   users,
 } from "src/storage/schema";
@@ -465,9 +467,11 @@ export class AnnouncementsRepository {
       .select({
         id: users.id,
         email: users.email,
+        language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
       })
       .from(userAnnouncements)
       .innerJoin(users, eq(users.id, userAnnouncements.userId))
+      .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
       .where(and(eq(userAnnouncements.announcementId, announcementId), isNull(users.deletedAt)));
   }
 

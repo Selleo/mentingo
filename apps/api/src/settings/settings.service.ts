@@ -792,22 +792,14 @@ export class SettingsService {
       }
     }
 
+    const liveTrainingEnabledUpdate =
+      setJsonbField(settings.settings, "liveTrainingEnabled", nextLiveTrainingEnabled) ??
+      settings.settings;
+
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
-        settings: sql`
-          jsonb_set(
-            jsonb_set(
-              settings.settings,
-              '{liveTrainingEnabled}',
-              to_jsonb(${nextLiveTrainingEnabled}::boolean),
-              true
-            ),
-            '{calendarEnabled}',
-            to_jsonb(true),
-            true
-          )
-        `,
+        settings: setJsonbField(liveTrainingEnabledUpdate, "calendarEnabled", true),
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
@@ -833,14 +825,11 @@ export class SettingsService {
     const [{ settings: updatedGlobalSettings }] = await this.db
       .update(settings)
       .set({
-        settings: sql`
-          jsonb_set(
-            settings.settings,
-            '{liveTrainingMaxParallelSessions}',
-            to_jsonb(${normalizedMaxParallelSessions}::integer),
-            true
-          )
-        `,
+        settings: setJsonbField(
+          settings.settings,
+          "liveTrainingMaxParallelSessions",
+          normalizedMaxParallelSessions,
+        ),
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });

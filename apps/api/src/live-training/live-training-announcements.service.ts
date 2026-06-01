@@ -10,16 +10,18 @@ import {
 
 import { AnnouncementsSchedulerService } from "src/announcements/announcements-scheduler.service";
 
+import {
+  LIVE_TRAINING_ANNOUNCEMENT_TITLES,
+  LIVE_TRAINING_REMINDER_OFFSET_MINUTES,
+} from "./live-training-announcements.constants";
 import { LiveTrainingRepository } from "./live-training.repository";
 
+import type {
+  BuildLiveTrainingAnnouncementInput,
+  LiveTrainingNotificationRow,
+} from "./live-training-announcements.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-
-const LIVE_TRAINING_REMINDER_OFFSET_MINUTES = 15;
-
-type LiveTrainingNotificationRow = NonNullable<
-  Awaited<ReturnType<LiveTrainingRepository["getLiveTrainingNotificationRow"]>>
->;
 
 @Injectable()
 export class LiveTrainingAnnouncementsService {
@@ -93,11 +95,7 @@ export class LiveTrainingAnnouncementsService {
     });
   }
 
-  private buildAnnouncementInput(input: {
-    liveTraining: LiveTrainingNotificationRow;
-    actor: CurrentUserType;
-    emailTemplate: AnnouncementEmailTemplate;
-  }) {
+  private buildAnnouncementInput(input: BuildLiveTrainingAnnouncementInput) {
     return {
       translations: this.buildTranslations(input.liveTraining, input.emailTemplate),
       baseLanguage: input.liveTraining.baseLanguage as SupportedLanguages,
@@ -124,38 +122,10 @@ export class LiveTrainingAnnouncementsService {
     emailTemplate: AnnouncementEmailTemplate,
     language: SupportedLanguages,
   ) {
-    const titles = {
-      [ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_REMINDER]: {
-        en: "Live Training starts soon",
-        pl: "Live Training rozpocznie się wkrótce",
-        de: "Live Training beginnt bald",
-        lt: "Live Training netrukus prasidės",
-        cs: "Live Training brzy začne",
-      },
-      [ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED]: {
-        en: "Live Training has started",
-        pl: "Live Training rozpoczął się",
-        de: "Live Training hat begonnen",
-        lt: "Live Training prasidėjo",
-        cs: "Live Training začal",
-      },
-      [ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_ENDED]: {
-        en: "Live Training has ended",
-        pl: "Live Training zakończył się",
-        de: "Live Training wurde beendet",
-        lt: "Live Training baigėsi",
-        cs: "Live Training skončil",
-      },
-      [ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT]: {
-        en: "Announcement",
-        pl: "Ogłoszenie",
-        de: "Ankündigung",
-        lt: "Pranešimas",
-        cs: "Oznámení",
-      },
-    } satisfies Record<AnnouncementEmailTemplate, Record<SupportedLanguages, string>>;
-
-    return titles[emailTemplate][language] ?? titles[emailTemplate][SUPPORTED_LANGUAGES.EN];
+    return (
+      LIVE_TRAINING_ANNOUNCEMENT_TITLES[emailTemplate][language] ??
+      LIVE_TRAINING_ANNOUNCEMENT_TITLES[emailTemplate][SUPPORTED_LANGUAGES.EN]
+    );
   }
 
   private getContentForTemplate(

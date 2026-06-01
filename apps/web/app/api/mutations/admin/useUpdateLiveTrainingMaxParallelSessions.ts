@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { AxiosError } from "axios";
 import type { UpdateLiveTrainingMaxParallelSessionsBody } from "~/api/generated-api";
 
 export function useUpdateLiveTrainingMaxParallelSessions() {
@@ -27,12 +27,10 @@ export function useUpdateLiveTrainingMaxParallelSessions() {
 
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
     },
-    onError: (error: AxiosError) => {
-      const message = (error.response?.data as { message?: string } | undefined)?.message;
-
+    onError: (error) => {
       toast({
         variant: "destructive",
-        description: message ? t(message) : t("common.toast.somethingWentWrong"),
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });

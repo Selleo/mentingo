@@ -1,6 +1,5 @@
 import { Link } from "@remix-run/react";
 import { LIVE_TRAINING_DELIVERY_TYPES } from "@repo/shared";
-import { format } from "date-fns";
 import { CalendarClock, ExternalLink, MapPin, Radio, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -14,13 +13,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 
 import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
 
+import { formatEventDateRange } from "./calendarEventDetailsDialog.utils";
+import { CalendarEventDetailsSkeleton } from "./CalendarEventDetailsSkeleton";
+import { CalendarEventMetaRow } from "./CalendarEventMetaRow";
+
 import type { SupportedLanguages } from "@repo/shared";
-import type { ReactNode } from "react";
 
 type CalendarEventDetailsDialogProps = {
   open: boolean;
@@ -28,60 +29,6 @@ type CalendarEventDetailsDialogProps = {
   language: SupportedLanguages;
   onOpenChange: (open: boolean) => void;
 };
-
-type CalendarEventMetaRowProps = {
-  icon: ReactNode;
-  label: string;
-  value: ReactNode;
-};
-
-const formatEventDateRange = (startsAt: string, endsAt: string, allDay: boolean) => {
-  const start = new Date(startsAt);
-  const end = new Date(endsAt);
-
-  if (allDay) {
-    const inclusiveEnd = new Date(end);
-    inclusiveEnd.setDate(inclusiveEnd.getDate() - 1);
-
-    if (start.toDateString() === inclusiveEnd.toDateString()) {
-      return format(start, "d MMM yyyy");
-    }
-
-    return `${format(start, "d MMM yyyy")} - ${format(inclusiveEnd, "d MMM yyyy")}`;
-  }
-
-  const isSameDay = start.toDateString() === end.toDateString();
-
-  if (isSameDay) {
-    return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "HH:mm")}`;
-  }
-
-  return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "d MMM yyyy, HH:mm")}`;
-};
-
-function CalendarEventMetaRow({ icon, label, value }: CalendarEventMetaRowProps) {
-  return (
-    <div className="flex items-start gap-3 rounded-md border border-neutral-200 bg-white px-3 py-2.5">
-      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-50 text-neutral-600">
-        {icon}
-      </span>
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase text-neutral-500">{label}</p>
-        <div className="mt-0.5 text-sm text-neutral-900">{value}</div>
-      </div>
-    </div>
-  );
-}
-
-function CalendarEventDetailsSkeleton() {
-  return (
-    <div className="grid gap-3">
-      <Skeleton className="h-16" />
-      <Skeleton className="h-16" />
-      <Skeleton className="h-16" />
-    </div>
-  );
-}
 
 export function CalendarEventDetailsDialog({
   open,

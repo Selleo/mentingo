@@ -48,22 +48,7 @@ export class CalendarRepository {
 
     return this.db
       .with(liveTrainingEvents)
-      .select({
-        id: liveTrainingEvents.id,
-        uid: liveTrainingEvents.uid,
-        sourceType: liveTrainingEvents.sourceType,
-        sourceId: liveTrainingEvents.sourceId,
-        title: liveTrainingEvents.title,
-        description: liveTrainingEvents.description,
-        startsAt: liveTrainingEvents.startsAt,
-        endsAt: liveTrainingEvents.endsAt,
-        allDay: liveTrainingEvents.allDay,
-        timezone: liveTrainingEvents.timezone,
-        location: liveTrainingEvents.location,
-        status: liveTrainingEvents.status,
-        payload: liveTrainingEvents.payload,
-        authorId: liveTrainingEvents.authorId,
-      })
+      .select()
       .from(liveTrainingEvents)
       .orderBy(liveTrainingEvents.startsAt);
   }

@@ -9,6 +9,7 @@ import { Type } from "@sinclair/typebox";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema, type UUIDType } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { createLiveTrainingSchema } from "src/live-training/schemas/create-live-training.schema";
 import { liveTrainingDetailsSchema } from "src/live-training/schemas/live-training-details.schema";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
@@ -168,7 +169,7 @@ const createLiveTrainingLessonLiveTrainingSchema = Type.Omit(createLiveTrainingS
 ]);
 
 export const createLiveTrainingLessonSchema = Type.Object({
-  title: Type.String({ minLength: 1 }),
+  title: Type.String({ minLength: 1, maxLength: MAX_LESSON_TITLE_LENGTH }),
   description: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   chapterId: UUIDSchema,
   language: supportedLanguagesSchema,
@@ -179,7 +180,7 @@ export const createLiveTrainingLessonSchema = Type.Object({
 });
 
 export const attachLiveTrainingLessonSchema = Type.Object({
-  title: Type.String({ minLength: 1 }),
+  title: Type.String({ minLength: 1, maxLength: MAX_LESSON_TITLE_LENGTH }),
   language: supportedLanguagesSchema,
   liveTraining: Type.Optional(createLiveTrainingLessonLiveTrainingSchema),
   liveTrainingId: Type.Optional(UUIDSchema),

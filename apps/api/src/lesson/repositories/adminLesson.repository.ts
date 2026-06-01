@@ -29,6 +29,7 @@ import type {
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
+import type { CreateLiveLessonInput } from "../lesson.type";
 import type {
   AiMentorType,
   AiMentorTTSPreset,
@@ -438,15 +439,7 @@ export class AdminLessonRepository {
     return liveLesson ?? null;
   }
 
-  async createLiveLesson(
-    data: {
-      lessonId: UUIDType;
-      liveTrainingId: UUIDType;
-      liveTrainingLinkId: UUIDType;
-      language: SupportedLanguages;
-    },
-    dbInstance: DatabasePg = this.db,
-  ) {
+  async createLiveLesson(data: CreateLiveLessonInput, dbInstance: DatabasePg = this.db) {
     const [liveLesson] = await dbInstance
       .insert(liveLessons)
       .values(data)
@@ -737,7 +730,11 @@ export class AdminLessonRepository {
 
   async getCourseByLesson(lessonId: UUIDType) {
     return this.db
-      .select({ ...getTableColumns(courses) })
+      .select({
+        ...getTableColumns(courses),
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(chapters.courseId, courses.id))
@@ -746,7 +743,11 @@ export class AdminLessonRepository {
 
   async getCourseByChapter(chapterId: UUIDType) {
     return this.db
-      .select({ ...getTableColumns(courses) })
+      .select({
+        ...getTableColumns(courses),
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
       .from(chapters)
       .innerJoin(courses, eq(chapters.courseId, courses.id))
       .where(eq(chapters.id, chapterId));

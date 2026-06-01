@@ -3,258 +3,28 @@ import {
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
 } from "@repo/shared";
-import { CalendarClock, CheckCircle2, Download, FileText, MapPin, Play, Video } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useJoinLiveTrainingSession } from "~/api/mutations/live-training/useJoinLiveTrainingSession";
 import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOpenLiveTrainingResource";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { LiveTrainingRoom } from "~/modules/LiveTraining/components/LiveTrainingMeeting/LiveTrainingRoom";
 import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 import { formatLiveTrainingDateRange } from "~/modules/LiveTraining/utils/liveTrainingFormat";
-import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
 import { LIVE_TRAINING_LESSON_HANDLES } from "../../../../../e2e/data/live-training/handles";
 
+import { LiveTrainingMaterialList } from "./LiveTrainingMaterialList";
+import { LiveTrainingStatusPreview } from "./LiveTrainingStatusPreview";
+
+import type { LiveTrainingMaterial } from "./LiveTrainingLesson.types";
 import type { GetLessonByIdResponse, JoinCurrentSessionResponse } from "~/api/generated-api";
 
 type LiveTrainingLessonProps = {
   lesson: GetLessonByIdResponse["data"];
 };
-
-type LiveTrainingDetails = NonNullable<GetLessonByIdResponse["data"]["liveTraining"]>;
-type LiveTrainingMaterial = LiveTrainingDetails["materials"]["before"][number];
-
-type LiveTrainingMaterialListProps = {
-  materials: LiveTrainingMaterial[];
-  emptyMessage: string;
-  materialCardTestId: (resourceId: string) => string;
-  onOpen: (material: LiveTrainingMaterial) => void;
-};
-
-type LiveTrainingStatusPreviewProps = {
-  liveTraining: LiveTrainingDetails;
-  scheduleLabel: string;
-  canJoin: boolean;
-  isJoining: boolean;
-  onJoin: () => void;
-};
-
-type LiveTrainingLocationNoticeProps = {
-  location: string;
-};
-
-function LiveTrainingMaterialList({
-  materials,
-  emptyMessage,
-  materialCardTestId,
-  onOpen,
-}: LiveTrainingMaterialListProps) {
-  const { t } = useTranslation();
-
-  if (materials.length === 0) {
-    return (
-      <div className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-5 text-sm text-neutral-600">
-        {emptyMessage}
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-3">
-      {materials.map((material) => (
-        <div
-          key={material.resourceId}
-          data-testid={materialCardTestId(material.resourceId)}
-          className="flex min-w-0 flex-col justify-between rounded-md border border-neutral-200 bg-white p-3 shadow-sm"
-        >
-          <div className="min-w-0">
-            <div className="mb-3 flex items-center gap-2">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-                <FileText className="size-4" />
-              </span>
-              <Badge variant="outline" fontWeight="normal" className="rounded px-2 py-0.5 text-xs">
-                {getReadableFileTypeLabel(material.contentType)}
-              </Badge>
-            </div>
-            <p className="truncate text-sm font-medium text-neutral-950" title={material.title}>
-              {material.title}
-            </p>
-          </div>
-
-          <div className="mt-3 flex justify-end">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="h-8 gap-1.5 rounded px-2 text-xs text-neutral-600 hover:text-primary-700"
-              aria-label={t("liveTrainingView.files.download")}
-              onClick={() => onOpen(material)}
-            >
-              <Download className="size-3.5" />
-              {t("liveTrainingView.files.download")}
-            </Button>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function LiveTrainingLocationNotice({ location }: LiveTrainingLocationNoticeProps) {
-  const { t } = useTranslation();
-
-  return (
-    <div
-      data-testid={LIVE_TRAINING_LESSON_HANDLES.LOCATION_NOTICE}
-      className="mt-3 flex min-w-0 items-center gap-2 border-t border-neutral-100 pt-3"
-    >
-      <span className="flex size-7 shrink-0 items-center justify-center rounded bg-neutral-50 text-primary-700">
-        <MapPin className="size-4" />
-      </span>
-      <span className="shrink-0 text-sm text-neutral-500">
-        {t("studentLessonView.liveTraining.locationNotice")}
-      </span>
-      <span className="min-w-0 truncate text-sm font-medium text-neutral-950" title={location}>
-        {location}
-      </span>
-    </div>
-  );
-}
-
-function LiveTrainingStatusPreview({
-  liveTraining,
-  scheduleLabel,
-  canJoin,
-  isJoining,
-  onJoin,
-}: LiveTrainingStatusPreviewProps) {
-  const { t } = useTranslation();
-  const isActive = liveTraining.status === LIVE_TRAINING_STATUSES.ACTIVE;
-  const isEnded = liveTraining.status === LIVE_TRAINING_STATUSES.ENDED;
-  const isScheduled = liveTraining.status === LIVE_TRAINING_STATUSES.SCHEDULED;
-  const isOffline = liveTraining.deliveryType === LIVE_TRAINING_DELIVERY_TYPES.OFFLINE;
-  const location = isOffline ? liveTraining.location : null;
-
-  if (isActive) {
-    return (
-      <section
-        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
-        className="overflow-hidden rounded-md border border-primary-100 bg-white shadow-sm"
-      >
-        <div className="relative bg-primary-950 p-4 text-white">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,var(--primary-800),var(--primary-950)_55%,var(--primary-900))]" />
-          <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-3">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-white/10">
-                <Video className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-white/50">
-                  {t("studentLessonView.liveTraining.activeLabel")}
-                </p>
-                <h2 className="text-base font-semibold text-white">
-                  {t("studentLessonView.liveTraining.activeTitle")}
-                </h2>
-                <p className="mt-1 truncate text-sm text-white/65">{scheduleLabel}</p>
-              </div>
-            </div>
-
-            {canJoin && (
-              <Button
-                type="button"
-                data-testid={LIVE_TRAINING_LESSON_HANDLES.JOIN_BUTTON}
-                className="h-9 gap-2 rounded bg-white text-primary-950 hover:bg-white/90"
-                disabled={isJoining}
-                onClick={onJoin}
-              >
-                <Play className="size-4" />
-                {t("liveTrainingView.actions.join")}
-              </Button>
-            )}
-          </div>
-        </div>
-        {location && <LiveTrainingLocationNotice location={location} />}
-      </section>
-    );
-  }
-
-  if (isEnded) {
-    return (
-      <section
-        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
-        className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm"
-      >
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-success-50 text-success-700">
-            <CheckCircle2 className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              {t("studentLessonView.liveTraining.endedLabel")}
-            </p>
-            <h2 className="text-base font-semibold text-neutral-950">
-              {t("studentLessonView.liveTraining.endedTitle")}
-            </h2>
-            <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
-          </div>
-        </div>
-        {location && <LiveTrainingLocationNotice location={location} />}
-      </section>
-    );
-  }
-
-  if (isScheduled) {
-    return (
-      <section
-        data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
-        className="rounded-md border border-primary-100 bg-white p-4 shadow-sm"
-      >
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-primary-50 text-primary-700">
-            <CalendarClock className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              {t("studentLessonView.liveTraining.scheduledLabel")}
-            </p>
-            <h2 className="text-base font-semibold text-neutral-950">
-              {t("studentLessonView.liveTraining.scheduledTitle")}
-            </h2>
-            <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
-          </div>
-        </div>
-        {location && <LiveTrainingLocationNotice location={location} />}
-      </section>
-    );
-  }
-
-  return (
-    <section
-      data-testid={LIVE_TRAINING_LESSON_HANDLES.STATUS_PREVIEW}
-      className="rounded-md border border-dashed border-neutral-200 bg-neutral-50 p-4"
-    >
-      <div className="flex min-w-0 items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-md bg-white text-neutral-500">
-          <Video className="size-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-            {t("studentLessonView.liveTraining.inactiveLabel")}
-          </p>
-          <h2 className="text-base font-semibold text-neutral-950">
-            {t("studentLessonView.liveTraining.inactiveTitle")}
-          </h2>
-          <p className="mt-1 text-sm text-neutral-600">{scheduleLabel}</p>
-        </div>
-      </div>
-    </section>
-  );
-}
 
 export function LiveTrainingLesson({ lesson }: LiveTrainingLessonProps) {
   const { t } = useTranslation();

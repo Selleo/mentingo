@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { invalidateLiveTrainingData } from "~/api/utils/invalidateLiveTrainingData";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -25,16 +25,9 @@ export function useCreateLiveTraining() {
       });
     },
     onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
-
       toast({
         variant: "destructive",
-        description: error.message,
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });

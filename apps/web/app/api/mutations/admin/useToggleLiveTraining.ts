@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { rolesQueryOptions } from "~/api/queries/admin/useRoles";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 export function useToggleLiveTraining() {
@@ -26,16 +26,9 @@ export function useToggleLiveTraining() {
       });
     },
     onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
-
       toast({
         variant: "destructive",
-        description: error.message,
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });
