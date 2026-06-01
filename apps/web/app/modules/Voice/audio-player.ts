@@ -1,5 +1,9 @@
 export type StreamingAudioChunk = ArrayBuffer | Uint8Array;
 
+type StreamingAudioChunkOptions = {
+  sampleRate?: number | null;
+};
+
 type StreamingAudioPlayerOptions = {
   sampleRate?: number;
   channels?: number;
@@ -14,16 +18,16 @@ export class RealtimePCMPlayer {
   private readonly gain: number;
 
   private audioCtx: AudioContext | null = null;
+  private workletNode: AudioWorkletNode | null = null;
   private gainNode: GainNode | null = null;
-  private nextStartTime = 0;
-  private activeSources = new Set<AudioBufferSourceNode>();
   private onIdle: (() => void) | null = null;
+  private isPlayerIdle = true;
 
   constructor({
     sampleRate = 44100,
     channels = 1,
     gain = 1,
-    leadTimeSeconds = 0.02,
+    leadTimeSeconds = 0.15,
   }: StreamingAudioPlayerOptions = {}) {
     this.sampleRate = sampleRate;
     this.channels = channels;
@@ -34,68 +38,72 @@ export class RealtimePCMPlayer {
   async start() {
     if (!this.audioCtx) {
       this.audioCtx = new AudioContext({ sampleRate: this.sampleRate });
+      await this.audioCtx.audioWorklet.addModule("/pcm-worklet-processor.js");
+
+      this.workletNode = new AudioWorkletNode(this.audioCtx, "pcm-stream-player", {
+        numberOfInputs: 0,
+        numberOfOutputs: 1,
+        outputChannelCount: [this.channels],
+        processorOptions: {
+          channels: this.channels,
+          initialBufferSamples: Math.round(
+            this.audioCtx.sampleRate * this.leadTimeSeconds * this.channels,
+          ),
+          capacitySamples: Math.round(this.audioCtx.sampleRate * 10 * this.channels),
+        },
+      });
+      this.workletNode.port.onmessage = (event: MessageEvent) => {
+        if (event.data?.type !== "idle-state") {
+          return;
+        }
+
+        this.isPlayerIdle = Boolean(event.data.isIdle);
+        if (this.isPlayerIdle) {
+          this.onIdle?.();
+        }
+      };
+
       this.gainNode = this.audioCtx.createGain();
       this.gainNode.gain.value = this.gain;
+      this.workletNode.connect(this.gainNode);
       this.gainNode.connect(this.audioCtx.destination);
     }
 
     if (this.audioCtx.state === "suspended") {
       await this.audioCtx.resume();
     }
-
-    this.nextStartTime = Math.max(
-      this.nextStartTime,
-      this.audioCtx.currentTime + this.leadTimeSeconds,
-    );
   }
 
-  async enqueue(chunk: StreamingAudioChunk) {
-    if (!this.audioCtx || !this.gainNode) {
+  async enqueue(chunk: StreamingAudioChunk, options: StreamingAudioChunkOptions = {}) {
+    if (!this.audioCtx || !this.workletNode) {
       await this.start();
     }
 
-    if (!this.audioCtx || !this.gainNode) {
+    if (!this.audioCtx || !this.workletNode) {
       return;
     }
 
-    const samples = this.pcm16leToFloat32(chunk);
+    const inputSampleRate = options.sampleRate ?? this.sampleRate;
+    const samples = this.resampleIfNeeded(
+      this.pcm16leToFloat32(chunk),
+      inputSampleRate,
+      this.audioCtx.sampleRate,
+    );
     if (samples.length === 0) {
       return;
     }
 
-    const frameCount = Math.floor(samples.length / this.channels);
-    if (frameCount <= 0) {
+    this.isPlayerIdle = false;
+    if (samples.buffer instanceof ArrayBuffer) {
+      this.workletNode.port.postMessage({ type: "samples", samples }, [samples.buffer]);
       return;
     }
 
-    const audioBuffer = this.audioCtx.createBuffer(this.channels, frameCount, this.sampleRate);
-
-    for (let channelIndex = 0; channelIndex < this.channels; channelIndex += 1) {
-      const channelData = audioBuffer.getChannelData(channelIndex);
-      for (let frame = 0; frame < frameCount; frame += 1) {
-        channelData[frame] = samples[frame * this.channels + channelIndex] ?? 0;
-      }
-    }
-
-    const source = this.audioCtx.createBufferSource();
-    source.buffer = audioBuffer;
-    source.connect(this.gainNode);
-
-    const startAt = Math.max(this.nextStartTime, this.audioCtx.currentTime + 0.005);
-    source.start(startAt);
-    this.nextStartTime = startAt + audioBuffer.duration;
-
-    this.activeSources.add(source);
-    source.onended = () => {
-      this.activeSources.delete(source);
-      if (this.activeSources.size === 0) {
-        this.onIdle?.();
-      }
-    };
+    this.workletNode.port.postMessage({ type: "samples", samples });
   }
 
   isIdle() {
-    return this.activeSources.size === 0;
+    return this.isPlayerIdle;
   }
 
   setOnIdle(callback: (() => void) | null) {
@@ -103,31 +111,25 @@ export class RealtimePCMPlayer {
   }
 
   reset() {
-    if (!this.audioCtx) return;
-
-    for (const source of this.activeSources) {
-      try {
-        source.stop();
-      } catch {
-        // Source may already be stopped.
-      }
-    }
-
-    this.activeSources.clear();
-    this.nextStartTime = this.audioCtx.currentTime + this.leadTimeSeconds;
+    this.workletNode?.port.postMessage({ type: "reset" });
+    this.isPlayerIdle = true;
   }
 
   async destroy() {
     this.reset();
+
+    this.workletNode?.disconnect();
+    this.gainNode?.disconnect();
 
     if (this.audioCtx && this.audioCtx.state !== "closed") {
       await this.audioCtx.close();
     }
 
     this.audioCtx = null;
+    this.workletNode = null;
     this.gainNode = null;
-    this.nextStartTime = 0;
     this.onIdle = null;
+    this.isPlayerIdle = true;
   }
 
   private pcm16leToFloat32(chunk: StreamingAudioChunk): Float32Array {
@@ -147,5 +149,41 @@ export class RealtimePCMPlayer {
     }
 
     return out;
+  }
+
+  private resampleIfNeeded(
+    samples: Float32Array,
+    inputSampleRate: number,
+    outputSampleRate: number,
+  ): Float32Array {
+    if (!Number.isFinite(inputSampleRate) || inputSampleRate <= 0) {
+      return samples;
+    }
+
+    if (inputSampleRate === outputSampleRate) {
+      return samples;
+    }
+
+    const inputFrameCount = Math.floor(samples.length / this.channels);
+    const outputFrameCount = Math.floor((inputFrameCount * outputSampleRate) / inputSampleRate);
+    const output = new Float32Array(outputFrameCount * this.channels);
+    const ratio = inputSampleRate / outputSampleRate;
+
+    for (let outputFrame = 0; outputFrame < outputFrameCount; outputFrame += 1) {
+      const inputFramePosition = outputFrame * ratio;
+      const inputFrame = Math.floor(inputFramePosition);
+      const nextInputFrame = Math.min(inputFrame + 1, inputFrameCount - 1);
+      const fraction = inputFramePosition - inputFrame;
+
+      for (let channel = 0; channel < this.channels; channel += 1) {
+        const currentSample = samples[inputFrame * this.channels + channel] ?? 0;
+        const nextSample = samples[nextInputFrame * this.channels + channel] ?? currentSample;
+
+        output[outputFrame * this.channels + channel] =
+          currentSample * (1 - fraction) + nextSample * fraction;
+      }
+    }
+
+    return output;
   }
 }
