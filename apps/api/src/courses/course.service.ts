@@ -4196,11 +4196,11 @@ export class CourseService {
       this.db
         .selectDistinct({
           language: requestedLanguages.language,
-          courseId: courses.id,
+          courseId: sql<UUIDType>`${courses.id}`.as("course_id"),
           courseTitle: this.localizationService
             .getLocalizedSqlField(courses.title, requestedLanguage)
             .as("course_title"),
-          groupId: groups.id,
+          groupId: sql<UUIDType>`${groups.id}`.as("group_id"),
           groupName: this.localizationService
             .getLocalizedSqlField(groups.name, requestedLanguage, groups)
             .as("group_name"),
