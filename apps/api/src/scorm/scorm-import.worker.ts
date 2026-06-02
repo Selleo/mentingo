@@ -13,7 +13,7 @@ import { SCORM_IMPORT_JOB_NAME } from "./scorm-queue.service";
 import { ScormService } from "./scorm.service";
 
 import type {
-  ScormImportJobData,
+  AnyScormImportJobData,
   ScormImportJobFailure,
   ScormImportJobResult,
 } from "./scorm.types";
@@ -21,14 +21,14 @@ import type { Job } from "bullmq";
 
 @Injectable()
 export class ScormImportWorker implements OnModuleDestroy {
-  private readonly worker: Worker<ScormImportJobData, ScormImportJobResult>;
+  private readonly worker: Worker<AnyScormImportJobData, ScormImportJobResult>;
 
   constructor(
     private readonly queueService: QueueService,
     private readonly scormService: ScormService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {
-    this.worker = new Worker<ScormImportJobData, ScormImportJobResult>(
+    this.worker = new Worker<AnyScormImportJobData, ScormImportJobResult>(
       QUEUE_NAMES.SCORM_IMPORT,
       (job) => this.handleScormImport(job),
       {
@@ -38,7 +38,7 @@ export class ScormImportWorker implements OnModuleDestroy {
     );
   }
 
-  private async handleScormImport(job: Job<ScormImportJobData>): Promise<ScormImportJobResult> {
+  private async handleScormImport(job: Job<AnyScormImportJobData>): Promise<ScormImportJobResult> {
     if (job.name !== SCORM_IMPORT_JOB_NAME) {
       throw new InternalServerErrorException(`Unexpected SCORM import job name: ${job.name}`);
     }

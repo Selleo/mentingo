@@ -392,10 +392,16 @@ input[type="checkbox"] {
 
 .primary-button,
 .secondary-button {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
   border: 0;
   border-radius: 8px;
-  padding: 12px 18px;
+  padding: 0 16px;
+  appearance: none;
   font: inherit;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -1022,9 +1028,7 @@ input[type="checkbox"]:checked {
 }
 
 .primary-button {
-  min-height: 40px;
   border-radius: var(--radius);
-  padding: 0 16px;
   background: var(--primary);
   color: var(--contrast);
   font-size: 14px;
@@ -1032,8 +1036,12 @@ input[type="checkbox"]:checked {
   transition: opacity 120ms ease;
 }
 
-.primary-button:hover {
+.primary-button:not(:disabled):hover {
   opacity: 0.9;
+}
+
+.primary-button:disabled:hover {
+  opacity: 0.55;
 }
 
 .question-feedback,

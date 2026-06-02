@@ -177,6 +177,10 @@
       "creatingCourse": "Tworzenie kursu...",
       "createCourse": "Utwórz kurs"
     },
+    "upload": {
+      "uploading": "Przesyłanie pakietu SCORM...",
+      "uploadedProcessing": "Przesyłanie pakietu SCORM zakończone. Rozpoczęto przetwarzanie importu."
+    },
     "importFailure": {
       "courseDescription": "Kurs został usunięty, ponieważ nie udało się zaimportować pakietu SCORM.",
       "lessonDescription": "Lekcja SCORM lub pakiet zostały usunięte, ponieważ nie udało się zaimportować pakietu."
@@ -199,6 +203,16 @@
       "resourceIdentifierMissing": "Brakuje identyfikatora zasobu SCORM.",
       "itemIdentifierMissing": "Brakuje identyfikatora elementu SCORM.",
       "launchFileMissing": "Brakuje pliku uruchomieniowego SCORM.",
+      "uploadIdMissing": "Brakuje identyfikatora sesji przesyłania SCORM.",
+      "uploadOffsetMissing": "Brakuje pozycji przesyłania SCORM.",
+      "unsupportedTusVersion": "Ta wersja protokołu przesyłania SCORM nie jest obsługiwana.",
+      "uploadAlreadyCompleted": "Przesyłanie SCORM zostało już zakończone.",
+      "emptyUploadChunk": "Fragment przesyłania SCORM jest pusty.",
+      "uploadExceedsDeclaredLength": "Przesyłanie SCORM przekracza zadeklarowany rozmiar pliku.",
+      "uploadChunkTooSmall": "Fragment przesyłania SCORM jest zbyt mały.",
+      "uploadIncomplete": "Przesyłanie SCORM jest niekompletne.",
+      "uploadSessionNotFound": "Nie znaleziono sesji przesyłania SCORM.",
+      "uploadForbidden": "To przesyłanie SCORM nie należy do bieżącego użytkownika.",
       "packageAlreadyAttached": "Ta lekcja SCORM ma już pakiet dla wybranego języka.",
       "invalidPackagePath": "Pakiet SCORM zawiera nieprawidłową ścieżkę pliku.",
       "externalPackagePath": "Pakiet SCORM zawiera zewnętrzną ścieżkę pliku.",
@@ -2200,6 +2214,7 @@
           "saveLesson": "Zapisz lekcje",
           "addResource": "Dodaj zasób",
           "removeResource": "Usuń zasób",
+          "uploadFiles": "Prześlij pliki",
           "addLessonDisabledTooltip": "Aby utworzyć lekcję, musisz być w języku domyślnym."
         },
         "breadcrumbs": {
@@ -2867,7 +2882,9 @@
       "previousSco": "Poprzednia sekcja",
       "nextSco": "Następna sekcja",
       "tryAgain": "Spróbuj ponownie",
-      "lessonFinished": "Lekcja SCORM została zakończona."
+      "lessonFinished": "Lekcja SCORM została zakończona.",
+      "progressReset": "Postęp SCORM został zresetowany.",
+      "progressUpdated": "Postęp SCORM został zaktualizowany."
     },
     "liveTraining": {
       "activeLabel": "Szkolenie na żywo",

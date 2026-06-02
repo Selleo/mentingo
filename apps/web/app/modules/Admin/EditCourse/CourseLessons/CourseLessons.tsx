@@ -244,10 +244,10 @@ const CourseLessons = ({
   return (
     <div
       data-testid={CURRICULUM_HANDLES.ROOT}
-      className="flex basis-full gap-x-8 rounded-lg md:items-start"
+      className="flex basis-full flex-col gap-8 rounded-lg md:flex-row md:items-start"
     >
       <CourseGenerationExitGuard enabled={isExitGuardEnabled} />
-      <div className="flex w-full overflow-y-auto flex-col justify-between md:max-w-[480px]">
+      <div className="flex w-full flex-col justify-between overflow-y-auto md:w-[480px] md:shrink-0 md:basis-[480px]">
         <CourseGenerationProgressStrip
           visible={shouldShowProgressStrip}
           currentMessageKey={currentGenerationMessageKey}
@@ -335,7 +335,7 @@ const CourseLessons = ({
         }}
         onProcessingStateChange={handleGenerationProcessingStateChange}
       />
-      <div className="size-full md:sticky md:top-8 self-start">{renderContent}</div>
+      <div className="min-w-0 flex-1 self-start md:sticky md:top-8">{renderContent}</div>
     </div>
   );
 };

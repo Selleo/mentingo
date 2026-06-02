@@ -3,6 +3,8 @@ import { Global, Inject, Module, type OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createCache } from "cache-manager";
 
+import { CACHE_MANAGER_TOKEN, type Cache } from "./cache.types";
+
 const REDIS_STORE = "REDIS_STORE";
 
 @Global()
@@ -19,14 +21,19 @@ const REDIS_STORE = "REDIS_STORE";
     },
     {
       inject: [REDIS_STORE],
-      provide: "CACHE_MANAGER",
+      provide: CACHE_MANAGER_TOKEN,
       useFactory: (redisStore: KeyvRedis) =>
         createCache({
           stores: [new Keyv({ store: redisStore })],
         }),
     },
+    {
+      inject: [CACHE_MANAGER_TOKEN],
+      provide: "CACHE_MANAGER",
+      useFactory: (cacheManager: Cache) => cacheManager,
+    },
   ],
-  exports: ["CACHE_MANAGER"],
+  exports: ["CACHE_MANAGER", CACHE_MANAGER_TOKEN],
 })
 export class CacheModule implements OnModuleDestroy {
   constructor(@Inject(REDIS_STORE) private readonly redisStore: KeyvRedis) {}

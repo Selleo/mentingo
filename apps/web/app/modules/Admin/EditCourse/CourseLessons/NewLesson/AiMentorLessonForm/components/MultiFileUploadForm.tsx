@@ -181,7 +181,7 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
               variant="outline"
               onClick={() => inputRef.current?.click()}
             >
-              Upload files
+              {t("adminCourseView.curriculum.lesson.button.uploadFiles")}
             </Button>
           )}
 

@@ -1,14 +1,14 @@
-import { DEFAULT_TUS_CHUNK_SIZE, type VideoProviderType } from "@repo/shared";
-import { useCallback, useState } from "react";
-import { useTranslation } from "react-i18next";
-import * as tus from "tus-js-client";
+import { useCallback } from "react";
 
-import { useToast } from "~/components/ui/use-toast";
 import { useVideoUploadResumeStore } from "~/modules/common/store/useVideoUploadResumeStore";
 
+import { normalizeTusHeaders, useTusUpload } from "./useTusUpload";
+
+import type { TusUploadSession as BaseTusUploadSession } from "./useTusUpload.types";
+import type { VideoProviderType } from "@repo/shared";
 import type { InitVideoUploadResponse } from "~/api/generated-api";
 
-type TusUploadSession = InitVideoUploadResponse;
+type TusUploadSession = InitVideoUploadResponse & BaseTusUploadSession;
 
 type GetSessionArgs = {
   file: File;
@@ -25,18 +25,9 @@ type UploadArgs = {
   onError?: (error: Error) => void;
 };
 
-const normalizeTusHeaders = (headers: object): Record<string, string> =>
-  Object.fromEntries(Object.entries(headers).map(([key, value]) => [key, String(value)]));
-
-const buildFileFingerprint = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
-
 export const useTusVideoUpload = () => {
-  const { t } = useTranslation();
-  const { toast } = useToast();
+  const tusUpload = useTusUpload();
   const { getUploadForFile, saveUpload, clearUpload } = useVideoUploadResumeStore();
-
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
 
   const getSessionForFile = useCallback(
     async ({ file, init, defaultProvider = "bunny" }: GetSessionArgs) => {
@@ -55,98 +46,51 @@ export const useTusVideoUpload = () => {
 
   const uploadVideo = useCallback(
     async ({ file, session, onUploadingStart, onProgress, onUploaded, onError }: UploadArgs) => {
-      if (!session.tusEndpoint || !session.tusHeaders || !session.expiresAt) {
-        throw new Error("Missing upload configuration");
-      }
-
-      const existingUpload = getUploadForFile(file);
-      const tusHeaders = normalizeTusHeaders(session.tusHeaders ?? {});
-      const tusFingerprint = `${session.provider}-tus:${session.uploadId}:${buildFileFingerprint(
+      await tusUpload.uploadFile({
         file,
-      )}`;
-
-      if (!existingUpload) {
-        saveUpload({
-          uploadId: session.uploadId,
-          bunnyGuid: session.bunnyGuid,
-          fileKey: session.fileKey,
-          provider: session.provider,
-          tusEndpoint: session.tusEndpoint,
-          tusHeaders,
-          expiresAt: session.expiresAt,
-          filename: file.name,
-          sizeBytes: file.size,
-          lastModified: file.lastModified,
-          resourceId: session.resourceId,
-        });
-      }
-
-      setIsUploading(true);
-      setUploadProgress(0);
-
-      try {
-        await new Promise<void>((resolve, reject) => {
-          toast({
-            description: t("uploadFile.toast.videoUploading"),
-            duration: Number.POSITIVE_INFINITY,
-            variant: "loading",
-          });
-          onUploadingStart?.();
-
-          const upload = new tus.Upload(file, {
-            endpoint: session.tusEndpoint,
-            headers: tusHeaders,
-            chunkSize: session.partSize ?? DEFAULT_TUS_CHUNK_SIZE,
-            metadata: {
-              filename: file.name,
-              filetype: file.type,
+        session,
+        fingerprintNamespace: `${session.provider}-tus`,
+        resumeAdapter: {
+          getUploadForFile: (uploadFile) => {
+            const upload = getUploadForFile(uploadFile);
+            return upload
+              ? ({
+                  ...upload,
+                  tusHeaders: normalizeTusHeaders(upload.tusHeaders),
+                } as typeof upload & TusUploadSession)
+              : null;
+          },
+          saveUpload: (upload) =>
+            saveUpload({
               uploadId: session.uploadId,
-            },
-            retryDelays: [0, 1000, 3000, 5000, 10000],
-            fingerprint: async () => tusFingerprint,
-            removeFingerprintOnSuccess: true,
-            onProgress: (bytesUploaded, bytesTotal) => {
-              if (bytesTotal === 0) return;
-              const progress = Math.round((bytesUploaded / bytesTotal) * 100);
-              setUploadProgress(progress);
-              onProgress?.(progress);
-            },
-            onError: (error) => {
-              clearUpload(session.uploadId);
-              onError?.(error);
-              reject(error);
-            },
-            onSuccess: () => {
-              clearUpload(session.uploadId);
-              toast({
-                description: t("uploadFile.toast.videoUploadedProcessing"),
-                duration: Number.POSITIVE_INFINITY,
-                variant: "success",
-              });
-              onUploaded?.();
-              resolve();
-            },
-          });
-
-          upload.findPreviousUploads().then((previousUploads) => {
-            if (previousUploads.length > 0) {
-              upload.resumeFromPreviousUpload(previousUploads[0]);
-            }
-            upload.start();
-          });
-        });
-      } finally {
-        setIsUploading(false);
-        setUploadProgress(null);
-      }
+              bunnyGuid: session.bunnyGuid,
+              fileKey: session.fileKey,
+              provider: session.provider,
+              tusEndpoint: session.tusEndpoint!,
+              tusHeaders: normalizeTusHeaders(session.tusHeaders ?? {}),
+              expiresAt: session.expiresAt!,
+              filename: upload.filename,
+              sizeBytes: upload.sizeBytes,
+              lastModified: upload.lastModified,
+              resourceId: session.resourceId,
+            }),
+          clearUpload,
+        },
+        uploadingToastKey: "uploadFile.toast.videoUploading",
+        uploadedToastKey: "uploadFile.toast.videoUploadedProcessing",
+        onUploadingStart,
+        onProgress,
+        onUploaded,
+        onError,
+      });
     },
-    [clearUpload, getUploadForFile, saveUpload, t, toast],
+    [clearUpload, getUploadForFile, saveUpload, tusUpload],
   );
 
   return {
     getSessionForFile,
     uploadVideo,
-    isUploading,
-    uploadProgress,
+    isUploading: tusUpload.isUploading,
+    uploadProgress: tusUpload.uploadProgress,
   };
 };

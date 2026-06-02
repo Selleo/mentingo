@@ -1,3 +1,5 @@
+import type { InitScormImportBody } from "./schemas/scormImport.schema";
+import type { ScormTusUploadState } from "./scorm-tus-upload.types";
 import type {
   ScormCompletionStatus,
   SCORM_IMPORT_ACTION,
@@ -34,6 +36,23 @@ export type AttachScormLessonPackageParams = {
   currentUser: CurrentUserType;
 };
 
+export type InitTusImportParams = {
+  importRequest: InitScormImportBody;
+  currentUser: CurrentUserType;
+};
+
+export type InitTusImportResult = {
+  packageId: UUIDType;
+  uploadId: UUIDType;
+  stagedFileReference: string;
+  multipartUploadId: string;
+};
+
+export type CompleteTusImportParams = {
+  session: ScormTusUploadState;
+  currentUser: CurrentUserType;
+};
+
 export type ScormImportResult = {
   id: UUIDType;
   packageId: UUIDType;
@@ -42,6 +61,8 @@ export type ScormImportResult = {
   mimeType: string;
   scoCount: number;
 };
+
+export type CompleteTusImportResult = ScormImportResult;
 
 export type QueuedScormPackageFile = {
   stagedFileReference: string;
@@ -54,7 +75,7 @@ type ScormImportJobDataBase = {
   packageId: UUIDType;
   scormPackage: QueuedScormPackageFile;
   currentUser: CurrentUserType;
-  result: ScormImportResult;
+  result?: ScormImportResult;
 };
 
 export type CreateScormCourseImportJobData = ScormImportJobDataBase & {
@@ -78,6 +99,16 @@ export type ScormImportJobData =
   | CreateScormCourseImportJobData
   | CreateScormLessonImportJobData
   | AttachScormLessonPackageJobData;
+
+export type StreamedScormImportJobData = {
+  packageId: UUIDType;
+  scormPackage: QueuedScormPackageFile;
+  currentUser: CurrentUserType;
+  importRequest: InitScormImportBody;
+  result?: ScormImportResult;
+};
+
+export type AnyScormImportJobData = ScormImportJobData | StreamedScormImportJobData;
 
 export type ScormImportJobSuccess = {
   success: true;
@@ -142,6 +173,23 @@ export type PreparedPackageArtifacts = {
   extractedFilesReference: string;
   manifestReference: string;
   originalFile: Express.Multer.File;
+};
+
+export type PreparedStreamedPackageArtifacts = {
+  packageId: UUIDType;
+  manifest: ParsedScormManifest;
+  originalFileReference: string;
+  extractedFilesReference: string;
+  manifestReference: string;
+  originalFile: QueuedScormPackageFile;
+  filePaths: Set<string>;
+};
+
+export type StreamedPackageUploadArtifacts = {
+  packageId: UUIDType;
+  originalFileReference: string;
+  extractedFilesReference: string;
+  originalFile: QueuedScormPackageFile;
 };
 
 type PersistPackageParamsBase = {

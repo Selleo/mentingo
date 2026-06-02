@@ -176,6 +176,10 @@
       "creatingCourse": "Kurs erstellen...",
       "createCourse": "Kurs erstellen"
     },
+    "upload": {
+      "uploading": "SCORM-Paket wird hochgeladen...",
+      "uploadedProcessing": "Der Upload des SCORM-Pakets ist abgeschlossen. Die Importverarbeitung wurde gestartet."
+    },
     "importFailure": {
       "courseDescription": "Der Kurs wurde entfernt, weil das SCORM-Paket nicht importiert werden konnte.",
       "lessonDescription": "Die SCORM-Lektion oder das Paket wurde entfernt, weil das Paket nicht importiert werden konnte."
@@ -198,6 +202,16 @@
       "resourceIdentifierMissing": "SCORM-Ressourcenkennung fehlt.",
       "itemIdentifierMissing": "SCORM-Elementkennung fehlt.",
       "launchFileMissing": "SCORM-Startdatei fehlt.",
+      "uploadIdMissing": "SCORM-Upload-Sitzungs-ID fehlt.",
+      "uploadOffsetMissing": "SCORM-Upload-Offset fehlt.",
+      "unsupportedTusVersion": "Diese Version des SCORM-Upload-Protokolls wird nicht unterstützt.",
+      "uploadAlreadyCompleted": "Der SCORM-Upload ist bereits abgeschlossen.",
+      "emptyUploadChunk": "Der SCORM-Upload-Block ist leer.",
+      "uploadExceedsDeclaredLength": "Der SCORM-Upload überschreitet die angegebene Dateigröße.",
+      "uploadChunkTooSmall": "Der SCORM-Upload-Block ist zu klein.",
+      "uploadIncomplete": "Der SCORM-Upload ist unvollständig.",
+      "uploadSessionNotFound": "Die SCORM-Upload-Sitzung wurde nicht gefunden.",
+      "uploadForbidden": "Dieser SCORM-Upload gehört nicht zum aktuellen Benutzer.",
       "packageAlreadyAttached": "Diese SCORM-Lektion hat bereits ein Paket für die ausgewählte Sprache.",
       "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
       "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
@@ -1916,6 +1930,7 @@
           "saveLesson": "Speichern",
           "addResource": "Ressource hinzufügen",
           "removeResource": "Ressource entfernen",
+          "uploadFiles": "Dateien hochladen",
           "addLessonDisabledTooltip": "Um eine Lektion zu erstellen, müssen Sie sich in der Basissprache befinden."
         },
         "breadcrumbs": {
@@ -2568,7 +2583,9 @@
       "previousSco": "Vorheriger Abschnitt",
       "nextSco": "Nächster Abschnitt",
       "tryAgain": "Erneut versuchen",
-      "lessonFinished": "SCORM-Lektion abgeschlossen."
+      "lessonFinished": "SCORM-Lektion abgeschlossen.",
+      "progressReset": "SCORM-Fortschritt wurde zurückgesetzt.",
+      "progressUpdated": "SCORM-Fortschritt wurde aktualisiert."
     },
     "liveTraining": {
       "activeLabel": "Live Training",

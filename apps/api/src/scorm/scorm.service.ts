@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
+import { PassThrough, type Readable } from "node:stream";
 
 import {
   BadRequestException,
@@ -21,9 +22,12 @@ import {
 } from "@repo/shared";
 import AdmZip from "adm-zip";
 import { load as loadHtml } from "cheerio";
+import * as unzipper from "unzipper";
 
 import { DatabasePg } from "src/common";
+import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
+import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { S3Service } from "src/s3/s3.service";
@@ -32,9 +36,10 @@ import { WsGateway } from "src/websocket";
 
 import { PROMISE_SETTLED_STATUS } from "./promise-settled-status";
 import { ScormRepository } from "./repositories/scorm.repository";
-import { resolveScormContentType } from "./scorm-content-type";
+import { resolveScormContentType, resolveScormContentTypeFromFilename } from "./scorm-content-type";
 import {
   MAX_SCORM_EXTRACTED_FILE_COUNT,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
 import { ScormQueueService } from "./scorm-queue.service";
@@ -55,17 +60,33 @@ import {
   normalizeScormRelativePath,
 } from "./scorm-storage-paths";
 import { addScorm12Times, SCORM_ZERO_TIME } from "./scorm-time";
+import {
+  SCORM_STREAMED_EXTRACTION_UPLOAD_CONCURRENCY,
+  SCORM_TUS_EXPOSED_HEADERS,
+  SCORM_TUS_VERSION,
+} from "./scorm-tus-upload.constants";
 
+import type { InitScormImportBody } from "./schemas/scormImport.schema";
+import type { ScormTusUploadState } from "./scorm-tus-upload.types";
 import type { ScormPackageStatus } from "@repo/shared";
+import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   AttachScormLessonPackageParams,
+  CompleteTusImportParams,
+  CompleteTusImportResult,
   CreateScormCourseImportParams,
   CreateScormLessonImportParams,
+  InitTusImportParams,
+  InitTusImportResult,
   ParsedScormManifest,
   PreparedPackageArtifacts,
+  PreparedStreamedPackageArtifacts,
   QueuedScormPackageFile,
+  AnyScormImportJobData,
+  StreamedScormImportJobData,
+  StreamedPackageUploadArtifacts,
   ScormImportJobData,
   ScormImportResult,
   ScormItemManifest,
@@ -75,6 +96,7 @@ import type {
   ScormResourceManifest,
   ScormScoManifest,
 } from "src/scorm/scorm.types";
+import type { File as UnzipperFile } from "unzipper";
 
 @Injectable()
 export class ScormService {
@@ -84,10 +106,118 @@ export class ScormService {
     private readonly s3Service: S3Service,
     private readonly courseService: CourseService,
     private readonly adminLessonService: AdminLessonService,
+    private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly wsGateway: WsGateway,
     private readonly scormQueueService: ScormQueueService,
   ) {}
+
+  ensureTusVersion(req: Request) {
+    if (req.headers["tus-resumable"] !== SCORM_TUS_VERSION) {
+      throw new BadRequestException("adminScorm.errors.unsupportedTusVersion");
+    }
+  }
+
+  parseTusMetadata(header?: string) {
+    if (!header) return {};
+
+    return Object.fromEntries(
+      header.split(",").map((part) => {
+        const [key, encodedValue] = part.trim().split(" ");
+        if (!encodedValue) return [key, ""];
+
+        return [key, Buffer.from(encodedValue, "base64").toString("utf8")];
+      }),
+    );
+  }
+
+  setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {
+    res.set({
+      "Tus-Resumable": SCORM_TUS_VERSION,
+      "Tus-Version": SCORM_TUS_VERSION,
+      "Tus-Extension": "creation",
+      "Tus-Max-Size": String(MAX_SCORM_PACKAGE_SIZE_BYTES),
+      "Access-Control-Expose-Headers": SCORM_TUS_EXPOSED_HEADERS,
+      ...extraHeaders,
+    });
+  }
+
+  async resolveThumbnailS3Key(
+    existingThumbnailS3Key: string | undefined,
+    thumbnail: Express.Multer.File | undefined,
+    currentUser: CurrentUserType,
+  ) {
+    if (existingThumbnailS3Key) return existingThumbnailS3Key;
+    if (!thumbnail) return undefined;
+
+    const uploadedFile = await this.fileService.uploadFile(
+      thumbnail,
+      "course",
+      currentUser.tenantId,
+    );
+    return uploadedFile.fileKey;
+  }
+
+  async initTusImport(params: InitTusImportParams): Promise<InitTusImportResult> {
+    this.assertTusImportPermission(params.importRequest, params.currentUser);
+
+    const packageId = randomUUID() as UUIDType;
+    const uploadId = packageId;
+    const stagedFileReference = getScormStagedUploadReference(
+      params.currentUser.tenantId,
+      packageId,
+      params.importRequest.filename,
+    );
+    const { uploadId: multipartUploadId } = await this.s3Service.createMultipartUpload(
+      stagedFileReference,
+      params.importRequest.mimeType || "application/zip",
+    );
+
+    return {
+      packageId,
+      uploadId,
+      stagedFileReference,
+      multipartUploadId,
+    };
+  }
+
+  private assertTusImportPermission(
+    importRequest: InitScormImportBody,
+    currentUser: CurrentUserType,
+  ) {
+    const requiredPermissions = this.getTusImportRequiredPermissions(importRequest.action);
+
+    if (!hasAnyPermission(currentUser.permissions, requiredPermissions)) {
+      throw new ForbiddenException("auth.error.missingPermission");
+    }
+  }
+
+  private getTusImportRequiredPermissions(action: InitScormImportBody["action"]) {
+    switch (action) {
+      case SCORM_IMPORT_ACTION.CREATE_COURSE:
+        return [PERMISSIONS.COURSE_CREATE];
+      case SCORM_IMPORT_ACTION.CREATE_LESSON:
+      case SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE:
+        return [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN];
+    }
+  }
+
+  async completeTusImport(params: CompleteTusImportParams): Promise<CompleteTusImportResult> {
+    const jobData = this.buildStreamedImportJobData(params.session, params.currentUser);
+
+    const artifacts = await this.prepareStreamedPackageArtifacts(jobData);
+
+    const result = await this.persistStreamedImport(jobData, artifacts);
+
+    try {
+      await this.enqueueScormImportJob({ ...jobData, result });
+    } catch (error) {
+      await this.deleteFailedQueuedImport(this.toLegacyNotificationJobData(jobData, result));
+      throw error;
+    }
+
+    return result;
+  }
 
   async createCourseImport({
     scormPackage,
@@ -351,7 +481,13 @@ export class ScormService {
     }
   }
 
-  async processQueuedImportJob(jobData: ScormImportJobData): Promise<ScormImportResult> {
+  async processQueuedImportJob(
+    jobData: ScormImportJobData | StreamedScormImportJobData,
+  ): Promise<ScormImportResult> {
+    if ("importRequest" in jobData) {
+      return this.processStreamedQueuedImportJob(jobData);
+    }
+
     let uploadedReferences: string[] = [];
 
     try {
@@ -371,7 +507,7 @@ export class ScormService {
 
       this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.READY);
 
-      return jobData.result;
+      return jobData.result!;
     } catch (error) {
       await this.deleteUploadedPackageFiles(uploadedReferences);
 
@@ -381,18 +517,69 @@ export class ScormService {
     }
   }
 
-  async handleQueuedImportFailure(jobData: ScormImportJobData) {
+  private async processStreamedQueuedImportJob(
+    jobData: StreamedScormImportJobData,
+  ): Promise<ScormImportResult> {
+    let uploadedReferences: string[] = [];
+    let createdResult: ScormImportResult | undefined;
+
     try {
-      await this.deleteFailedQueuedImport(jobData);
+      const result =
+        jobData.result ??
+        (await this.persistStreamedImport(
+          jobData,
+          await this.prepareStreamedPackageArtifacts(jobData),
+        ));
+      createdResult = result;
+      const uploadArtifacts = this.buildStreamedPackageUploadArtifacts(jobData, result.packageId);
+
+      uploadedReferences = await this.uploadStreamedPackageFiles(
+        uploadArtifacts,
+        jobData.currentUser.tenantId,
+      );
+
+      await this.scormRepository.markPackageReady(jobData.packageId);
+
+      this.publishScormImportStatus(
+        {
+          ...this.toLegacyNotificationJobData(jobData, result),
+          result,
+        },
+        SCORM_PACKAGE_STATUS.READY,
+      );
+
+      return result;
+    } catch (error) {
+      await this.deleteUploadedPackageFiles(uploadedReferences);
+
+      if (createdResult) {
+        await this.deleteFailedQueuedImport(
+          this.toLegacyNotificationJobData(jobData, createdResult),
+        );
+      }
+
+      throw error;
     } finally {
-      this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.FAILED);
+      await this.deleteUploadedPackageFiles([jobData.scormPackage.stagedFileReference]);
+    }
+  }
+
+  async handleQueuedImportFailure(jobData: AnyScormImportJobData) {
+    try {
+      if (!("importRequest" in jobData)) await this.deleteFailedQueuedImport(jobData);
+    } finally {
+      if ("importRequest" in jobData) {
+        this.publishStreamedScormImportStatus(jobData, SCORM_PACKAGE_STATUS.FAILED);
+      } else {
+        this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.FAILED);
+      }
     }
   }
 
   private buildImportResult(params: {
     id: UUIDType;
     packageId: UUIDType;
-    scormPackage: Express.Multer.File;
+    scormPackage: Express.Multer.File | QueuedScormPackageFile;
     scoCount: number;
   }): ScormImportResult {
     return {
@@ -405,8 +592,30 @@ export class ScormService {
     };
   }
 
-  private async enqueueScormImportJob(jobData: ScormImportJobData) {
-    this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.PROCESSING);
+  private buildStreamedImportJobData(
+    session: ScormTusUploadState,
+    currentUser: CurrentUserType,
+  ): StreamedScormImportJobData {
+    return {
+      packageId: session.packageId,
+      scormPackage: {
+        stagedFileReference: session.stagedFileReference,
+        originalname: session.filename,
+        mimetype: session.mimeType,
+        size: session.uploadLength,
+      },
+      currentUser,
+      importRequest: session.importRequest,
+    };
+  }
+
+  private async enqueueScormImportJob(jobData: AnyScormImportJobData) {
+    if ("importRequest" in jobData) {
+      this.publishStreamedScormImportStatus(jobData, SCORM_PACKAGE_STATUS.PROCESSING);
+    } else {
+      this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.PROCESSING);
+    }
+
     await this.scormQueueService.enqueueImportJob(jobData);
   }
 
@@ -436,21 +645,113 @@ export class ScormService {
   }
 
   private publishScormImportStatus(jobData: ScormImportJobData, status: ScormPackageStatus) {
+    const resultIds = this.getScormImportResultIds(jobData.action, jobData.result);
+
     this.wsGateway.emitToUser(
       jobData.currentUser.userId,
       SCORM_IMPORT_SOCKET.EVENTS.STATUS_CHANGED,
       {
         action: jobData.action,
         status,
-        courseId:
-          jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE ? jobData.result.id : undefined,
-        lessonId:
-          jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE ? undefined : jobData.result.id,
+        ...resultIds,
         packageId: jobData.packageId,
         language: jobData.metadata.language,
         messageKey: this.getScormImportMessageKey(jobData, status),
       },
     );
+  }
+
+  private publishStreamedScormImportStatus(
+    jobData: StreamedScormImportJobData,
+    status: ScormPackageStatus,
+    result?: ScormImportResult,
+  ) {
+    const action = jobData.importRequest.action;
+    const messageKey = this.getStreamedScormImportMessageKey(action, status);
+    const resultIds = this.getScormImportResultIds(action, result);
+
+    this.wsGateway.emitToUser(
+      jobData.currentUser.userId,
+      SCORM_IMPORT_SOCKET.EVENTS.STATUS_CHANGED,
+      {
+        action,
+        status,
+        ...resultIds,
+        packageId: jobData.packageId,
+        language: jobData.importRequest.metadata.language,
+        messageKey,
+      },
+    );
+  }
+
+  private getScormImportResultIds(
+    action: InitScormImportBody["action"],
+    result?: ScormImportResult,
+  ) {
+    switch (action) {
+      case SCORM_IMPORT_ACTION.CREATE_COURSE:
+        return { courseId: result?.id, lessonId: undefined };
+      case SCORM_IMPORT_ACTION.CREATE_LESSON:
+      case SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE:
+        return { courseId: undefined, lessonId: result?.id };
+    }
+  }
+
+  private getStreamedScormImportMessageKey(
+    action: StreamedScormImportJobData["importRequest"]["action"],
+    status: ScormPackageStatus,
+  ) {
+    if (status === SCORM_PACKAGE_STATUS.PROCESSING) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.PROCESSING;
+    }
+
+    if (status === SCORM_PACKAGE_STATUS.READY) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.READY;
+    }
+
+    if (action === SCORM_IMPORT_ACTION.CREATE_COURSE) {
+      return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.FAILED_COURSE;
+    }
+
+    return SCORM_IMPORT_SOCKET.MESSAGE_KEYS.FAILED_LESSON;
+  }
+
+  private toLegacyNotificationJobData(
+    jobData: StreamedScormImportJobData,
+    result: ScormImportResult,
+  ): ScormImportJobData {
+    if (jobData.importRequest.action === SCORM_IMPORT_ACTION.CREATE_COURSE) {
+      return {
+        action: SCORM_IMPORT_ACTION.CREATE_COURSE,
+        packageId: jobData.packageId,
+        scormPackage: jobData.scormPackage,
+        result,
+        metadata: jobData.importRequest.metadata,
+        currentUser: jobData.currentUser,
+        isPlaywrightTest: false,
+      };
+    }
+
+    if (jobData.importRequest.action === SCORM_IMPORT_ACTION.CREATE_LESSON) {
+      return {
+        action: SCORM_IMPORT_ACTION.CREATE_LESSON,
+        packageId: jobData.packageId,
+        scormPackage: jobData.scormPackage,
+        result,
+        metadata: jobData.importRequest.metadata,
+        currentUser: jobData.currentUser,
+      };
+    }
+
+    return {
+      action: SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE,
+      packageId: jobData.packageId,
+      scormPackage: jobData.scormPackage,
+      result,
+      lessonId: jobData.importRequest.lessonId,
+      metadata: jobData.importRequest.metadata,
+      currentUser: jobData.currentUser,
+    };
   }
 
   private getScormImportMessageKey(jobData: ScormImportJobData, status: ScormPackageStatus) {
@@ -470,6 +771,8 @@ export class ScormService {
   }
 
   private async deleteFailedQueuedImport(jobData: ScormImportJobData) {
+    if (!jobData.result) return;
+
     switch (jobData.action) {
       case SCORM_IMPORT_ACTION.CREATE_COURSE:
         await this.scormRepository.deleteImportedCourse(jobData.result.id);
@@ -478,7 +781,7 @@ export class ScormService {
         await this.removeImportedLesson(jobData.result.id, jobData.currentUser);
         return;
       case SCORM_IMPORT_ACTION.ATTACH_LESSON_PACKAGE:
-        await this.removeImportedLesson(jobData.lessonId, jobData.currentUser);
+        await this.scormRepository.deleteLessonPackages(jobData.lessonId);
         return;
       default:
         throw new InternalServerErrorException("adminScorm.errors.unsupportedImportAction");
@@ -595,26 +898,30 @@ export class ScormService {
       await this.scormRepository.markAttemptCompleted(body.attemptId);
     }
 
-    let lessonCompleted = false;
+    const lessonCompleted = await this.scormRepository.areAllLessonScosCompleted({
+      studentId: currentUser.userId,
+      packageId: body.packageId,
+      lessonId: body.lessonId,
+      completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
+      excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
+    });
 
-    if (scoCompleted) {
-      lessonCompleted = await this.scormRepository.areAllLessonScosCompleted({
-        studentId: currentUser.userId,
-        packageId: body.packageId,
-        lessonId: body.lessonId,
-        completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
-      });
-
-      if (lessonCompleted) {
-        await this.studentLessonProgressService.markLessonAsCompleted({
+    const progressResult = lessonCompleted
+      ? await this.studentLessonProgressService.markLessonAsCompleted({
           id: body.lessonId,
           studentId: currentUser.userId,
           userPermissions: currentUser.permissions,
           actor: currentUser,
           language: body.language ?? SUPPORTED_LANGUAGES.EN,
+        })
+      : await this.studentLessonProgressService.markLessonAsIncomplete({
+          id: body.lessonId,
+          studentId: currentUser.userId,
+          userPermissions: currentUser.permissions,
+          actor: currentUser,
+          resetStarted:
+            normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.NOT_ATTEMPTED,
         });
-      }
-    }
 
     const navigation = await this.scormRepository.findScoNavigation({
       packageId: body.packageId,
@@ -624,6 +931,7 @@ export class ScormService {
 
     return {
       lessonCompleted,
+      messageKey: progressResult.messageKey,
       scormStatus: mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] ?? null,
       nextScoId: navigation.nextScoId,
     };
@@ -745,6 +1053,125 @@ export class ScormService {
       manifestReference,
       originalFile: scormPackage,
     };
+  }
+
+  private async prepareStreamedPackageArtifacts(
+    jobData: StreamedScormImportJobData,
+  ): Promise<PreparedStreamedPackageArtifacts> {
+    const scan = await this.scanStreamedPackage(jobData.scormPackage.stagedFileReference);
+    const parsedManifest = this.parseManifest(scan.manifestXml);
+    const manifest = this.buildManifestModel(parsedManifest, scan.manifestEntryName);
+
+    this.assertLaunchFilePathsExist(manifest, scan.filePaths);
+
+    const originalFileReference = getScormOriginalFileReference(
+      jobData.currentUser.tenantId,
+      jobData.packageId,
+      jobData.scormPackage.originalname,
+    );
+    const extractedFilesReference = getScormExtractedFilesReference(
+      jobData.currentUser.tenantId,
+      jobData.packageId,
+    );
+    const manifestReference = getScormManifestReference(
+      jobData.currentUser.tenantId,
+      jobData.packageId,
+      manifest.manifestPath,
+    );
+
+    return {
+      packageId: jobData.packageId,
+      manifest,
+      originalFileReference,
+      extractedFilesReference,
+      manifestReference,
+      originalFile: jobData.scormPackage,
+      filePaths: scan.filePaths,
+    };
+  }
+
+  private buildStreamedPackageUploadArtifacts(
+    jobData: StreamedScormImportJobData,
+    packageId: UUIDType,
+  ): StreamedPackageUploadArtifacts {
+    return {
+      packageId,
+      originalFileReference: getScormOriginalFileReference(
+        jobData.currentUser.tenantId,
+        packageId,
+        jobData.scormPackage.originalname,
+      ),
+      extractedFilesReference: getScormExtractedFilesReference(
+        jobData.currentUser.tenantId,
+        packageId,
+      ),
+      originalFile: jobData.scormPackage,
+    };
+  }
+
+  private async scanStreamedPackage(stagedFileReference: string) {
+    const filePaths = new Set<string>();
+    let fileCount = 0;
+    let totalUncompressedSize = 0;
+    let manifestXml: string | undefined;
+    let manifestEntryName: string | undefined;
+
+    const directory = await this.openStreamedZipDirectory(stagedFileReference);
+
+    for (const entry of directory.files) {
+      if (entry.type === "Directory") continue;
+
+      const normalizedPath = normalizeScormRelativePath(entry.path);
+      filePaths.add(normalizedPath);
+      fileCount += 1;
+      totalUncompressedSize += entry.uncompressedSize ?? 0;
+
+      if (fileCount > MAX_SCORM_EXTRACTED_FILE_COUNT) {
+        throw new BadRequestException("adminScorm.errors.tooManyFiles");
+      }
+
+      if (totalUncompressedSize > MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES) {
+        throw new BadRequestException("adminScorm.errors.packageTooLarge");
+      }
+
+      if (!manifestXml && path.posix.basename(normalizedPath.toLowerCase()) === "imsmanifest.xml") {
+        manifestEntryName = normalizedPath;
+        manifestXml = (await entry.buffer()).toString("utf-8");
+      }
+    }
+
+    if (!fileCount) {
+      throw new BadRequestException("adminScorm.errors.emptyPackage");
+    }
+
+    if (!manifestXml || !manifestEntryName) {
+      throw new BadRequestException("adminScorm.errors.manifestMissing");
+    }
+
+    return { filePaths, manifestXml, manifestEntryName };
+  }
+
+  private getZipRangeStream(stagedFileReference: string, offset: number, length?: number) {
+    const output = new PassThrough();
+    const end = typeof length === "number" ? offset + length : "";
+    const range = `bytes=${offset}-${end}`;
+
+    this.s3Service
+      .getFileStream(stagedFileReference, range)
+      .then(({ stream }) => {
+        stream.on("error", (error) => output.destroy(error));
+        stream.pipe(output);
+      })
+      .catch((error) => output.destroy(error));
+
+    return output;
+  }
+
+  private openStreamedZipDirectory(stagedFileReference: string) {
+    return unzipper.Open.custom({
+      size: () => this.s3Service.getFileSize(stagedFileReference),
+      stream: (offset, length) => this.getZipRangeStream(stagedFileReference, offset, length),
+    });
   }
 
   private getValidatedZipEntries(zip: AdmZip) {
@@ -1040,6 +1467,226 @@ export class ScormService {
         throw new BadRequestException("adminScorm.errors.launchFileMissing");
       }
     }
+  }
+
+  private assertLaunchFilePathsExist(manifest: ParsedScormManifest, fileEntryPaths: Set<string>) {
+    for (const sco of manifest.scos) {
+      const launchPath = sco.href.split(/[?#]/)[0];
+      if (!fileEntryPaths.has(launchPath)) {
+        throw new BadRequestException("adminScorm.errors.launchFileMissing");
+      }
+    }
+  }
+
+  private async getZipEntryStream(stagedFileReference: string) {
+    const { stream } = await this.s3Service.getFileStream(stagedFileReference);
+    return stream.pipe(unzipper.Parse());
+  }
+
+  private async persistStreamedImport(
+    jobData: StreamedScormImportJobData,
+    artifacts: PreparedStreamedPackageArtifacts,
+  ): Promise<ScormImportResult> {
+    const { importRequest, currentUser } = jobData;
+
+    if (importRequest.action === SCORM_IMPORT_ACTION.CREATE_COURSE) {
+      let packageIds: UUIDType[] = [];
+      const course = await this.db.transaction(async (trx) => {
+        const createdCourse = await this.courseService.createCourseInTransaction(
+          {
+            ...importRequest.metadata,
+            status: importRequest.metadata.status ?? "draft",
+            isScorm: true,
+          },
+          currentUser,
+          false,
+          trx,
+        );
+
+        packageIds = await this.scormRepository.persistCoursePackage(
+          {
+            courseId: createdCourse.id,
+            packageId: artifacts.packageId,
+            metadata: importRequest.metadata,
+            manifest: artifacts.manifest,
+            originalFileReference: artifacts.originalFileReference,
+            extractedFilesReference: artifacts.extractedFilesReference,
+            manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+            manifestReference: artifacts.manifestReference,
+            currentUser,
+          },
+          trx,
+        );
+
+        return createdCourse;
+      });
+
+      await this.courseService.publishCreateCourseEvent(
+        course.id,
+        importRequest.metadata.language,
+        currentUser,
+      );
+
+      return this.buildImportResult({
+        id: course.id,
+        packageId: packageIds[0] ?? artifacts.packageId,
+        scormPackage: jobData.scormPackage,
+        scoCount: artifacts.manifest.scos.length,
+      });
+    }
+
+    if (importRequest.action === SCORM_IMPORT_ACTION.CREATE_LESSON) {
+      const createdLesson = await this.db.transaction(async (trx) => {
+        const lesson = await this.adminLessonService.createLessonForChapterInTransaction(
+          {
+            chapterId: importRequest.metadata.chapterId,
+            title: importRequest.metadata.title,
+            description: "",
+            type: LESSON_TYPES.SCORM,
+          },
+          currentUser,
+          trx,
+        );
+
+        await this.scormRepository.persistLessonPackage(
+          {
+            lessonId: lesson.lessonId,
+            packageId: artifacts.packageId,
+            manifest: artifacts.manifest,
+            originalFileReference: artifacts.originalFileReference,
+            extractedFilesReference: artifacts.extractedFilesReference,
+            manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+            manifestReference: artifacts.manifestReference,
+            language: importRequest.metadata.language,
+            currentUser,
+          },
+          trx,
+        );
+
+        return lesson;
+      });
+
+      await this.adminLessonService.publishCreateLessonEvent(
+        createdLesson.lessonId,
+        createdLesson.language,
+        currentUser,
+      );
+
+      return this.buildImportResult({
+        id: createdLesson.lessonId,
+        packageId: artifacts.packageId,
+        scormPackage: jobData.scormPackage,
+        scoCount: artifacts.manifest.scos.length,
+      });
+    }
+
+    const existingPackage = await this.scormRepository.findLessonPackage({
+      lessonId: importRequest.lessonId,
+      language: importRequest.metadata.language,
+    });
+
+    if (existingPackage) {
+      throw new BadRequestException("adminScorm.errors.packageAlreadyAttached");
+    }
+
+    await this.adminLessonService.updateLesson(
+      importRequest.lessonId,
+      {
+        title: importRequest.metadata.title,
+        description: "",
+        type: LESSON_TYPES.SCORM,
+        language: importRequest.metadata.language,
+      },
+      currentUser,
+    );
+
+    await this.db.transaction((trx) =>
+      this.scormRepository.persistLessonPackage(
+        {
+          lessonId: importRequest.lessonId,
+          packageId: artifacts.packageId,
+          manifest: artifacts.manifest,
+          originalFileReference: artifacts.originalFileReference,
+          extractedFilesReference: artifacts.extractedFilesReference,
+          manifestEntryPoint: artifacts.manifest.scos[0].launchPath,
+          manifestReference: artifacts.manifestReference,
+          language: importRequest.metadata.language,
+          currentUser,
+        },
+        trx,
+      ),
+    );
+
+    return this.buildImportResult({
+      id: importRequest.lessonId,
+      packageId: artifacts.packageId,
+      scormPackage: jobData.scormPackage,
+      scoCount: artifacts.manifest.scos.length,
+    });
+  }
+
+  private async uploadStreamedPackageFiles(
+    artifacts: StreamedPackageUploadArtifacts,
+    tenantId: UUIDType,
+  ) {
+    const uploadedReferences: string[] = [];
+
+    await this.s3Service.copyFile(
+      artifacts.originalFile.stagedFileReference,
+      artifacts.originalFileReference,
+      artifacts.originalFile.mimetype || "application/zip",
+    );
+    uploadedReferences.push(artifacts.originalFileReference);
+
+    const directory = await this.openStreamedZipDirectory(
+      artifacts.originalFile.stagedFileReference,
+    );
+    const fileEntries = directory.files.filter((entry) => entry.type === "File");
+
+    await this.uploadStreamedZipEntries({
+      entries: fileEntries,
+      uploadedReferences,
+      tenantId,
+      packageId: artifacts.packageId,
+    });
+
+    return uploadedReferences;
+  }
+
+  private async uploadStreamedZipEntries(params: {
+    entries: UnzipperFile[];
+    uploadedReferences: string[];
+    tenantId: UUIDType;
+    packageId: UUIDType;
+  }) {
+    let nextEntryIndex = 0;
+    const workerCount = Math.min(
+      SCORM_STREAMED_EXTRACTION_UPLOAD_CONCURRENCY,
+      params.entries.length,
+    );
+
+    const uploadNextEntry = async () => {
+      while (nextEntryIndex < params.entries.length) {
+        const entry = params.entries[nextEntryIndex];
+        nextEntryIndex += 1;
+
+        const reference = getScormExtractedFileReference(
+          params.tenantId,
+          params.packageId,
+          entry.path,
+        );
+
+        await this.s3Service.uploadFile(
+          entry.stream() as Readable,
+          reference,
+          resolveScormContentTypeFromFilename(entry.path),
+          entry.uncompressedSize,
+        );
+        params.uploadedReferences.push(reference);
+      }
+    };
+
+    await Promise.all(Array.from({ length: workerCount }, () => uploadNextEntry()));
   }
 
   private async uploadPackageFiles(

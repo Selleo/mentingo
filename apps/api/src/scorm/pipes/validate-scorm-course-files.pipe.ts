@@ -4,12 +4,13 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
+import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "../scorm-package-limits";
+
 import type { PipeTransform } from "@nestjs/common";
 
 export const SCORM_PACKAGE_FIELD = "scormPackage";
 export const SCORM_THUMBNAIL_FIELD = "thumbnail";
 
-const MAX_SCORM_PACKAGE_SIZE = 500 * 1024 * 1024;
 const MAX_THUMBNAIL_SIZE = 20 * 1024 * 1024;
 const ALLOWED_SCORM_PACKAGE_MIME_TYPES = ["application/zip", "application/x-zip-compressed"];
 
@@ -22,7 +23,7 @@ export type CreateScormCourseFiles = {
 export class ValidateScormCourseFilesPipe implements PipeTransform {
   private readonly scormPackagePipe = getBaseFileTypePipe(
     buildFileTypeRegex(ALLOWED_SCORM_PACKAGE_MIME_TYPES),
-    MAX_SCORM_PACKAGE_SIZE,
+    MAX_SCORM_PACKAGE_SIZE_BYTES,
     true,
   ).build({
     fileIsRequired: true,
