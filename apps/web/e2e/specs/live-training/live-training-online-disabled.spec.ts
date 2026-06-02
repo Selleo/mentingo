@@ -32,13 +32,13 @@ test("online delivery cannot be selected when LiveKit is not configured", async 
       LIVE_TRAINING_FORM_HANDLES.deliveryTypeSelect("calendar-live-training"),
     );
 
-    await expect(deliverySelect).toContainText(/offline/i);
+    await expect(deliverySelect).toContainText(/in-person/i);
     await deliverySelect.click();
     await expect(
       page.getByTestId(
         LIVE_TRAINING_FORM_HANDLES.deliveryTypeOption(LIVE_TRAINING_DELIVERY_TYPES.ONLINE),
       ),
     ).toHaveAttribute("aria-disabled", "true");
-    await expect(deliverySelect).toContainText(/offline/i);
+    await expect(deliverySelect).toContainText(/in-person/i);
   });
 });
