@@ -9,15 +9,8 @@ import {
   Logger,
   NotFoundException,
 } from "@nestjs/common";
+import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
-  CourseDueDateReminderEmail,
-  OverdueCoursesEmail,
-  getCourseDueDateReminderEmailTranslations,
-} from "@repo/email-templates";
-import {
-  ANNOUNCEMENT_EMAIL_TEMPLATES,
-  ANNOUNCEMENT_SOURCE_TYPES,
-  ANNOUNCEMENT_STATUSES,
   COURSE_FEATURE,
   COURSE_TYPE,
   COURSE_ENROLLMENT,
@@ -28,7 +21,7 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
-import { addDays, endOfDay, format, startOfDay } from "date-fns";
+import { addDays, endOfDay, startOfDay } from "date-fns";
 import {
   and,
   between,
@@ -52,7 +45,6 @@ import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
 import { AiService } from "src/ai/services/ai.service";
-import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
@@ -66,12 +58,11 @@ import { userHasAnyPermissionsCondition } from "src/common/permissions/permissio
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
-import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import {
-  AnnouncementPublishedEvent,
+  CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
@@ -125,10 +116,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
-import {
-  COURSE_DUE_DATE_REMINDER_DAYS,
-  COURSE_DUE_DATE_REMINDER_EMAIL_BATCH_SIZE,
-} from "./constants/course-due-date-reminders.constants";
+import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-reminders.constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
@@ -239,7 +227,6 @@ export class CourseService {
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly lumaService: LumaService,
     private readonly certificatesService: CertificatesService,
-    private readonly announcementsRepository: AnnouncementsRepository,
     private readonly groupCourseDueDateCalendarService: GroupCourseDueDateCalendarService,
   ) {}
 
@@ -4268,88 +4255,9 @@ export class CourseService {
   async sendCourseDueDateReminders() {
     const recipients = await this.getCourseDueDateReminderRecipients();
 
-    await processInBatches(recipients, (recipient) => this.sendCourseDueDateReminder(recipient), {
-      batchSize: COURSE_DUE_DATE_REMINDER_EMAIL_BATCH_SIZE,
-      throwOnError: false,
-      onItemError: (error, recipient) => {
-        const reason = error instanceof Error ? error.stack : String(error);
+    if (!recipients.length) return;
 
-        this.logger.error(
-          `Course due date reminder failed for student ${recipient.studentId} and course ${recipient.courseId}`,
-          reason,
-        );
-      },
-    });
-  }
-
-  private async sendCourseDueDateReminder(recipient: CourseDueDateReminderRecipient) {
-    await this.sendCourseDueDateReminderEmail(recipient);
-    await this.createCourseDueDateReminderAnnouncement(recipient);
-  }
-
-  private async sendCourseDueDateReminderEmail(recipient: CourseDueDateReminderRecipient) {
-    const formattedDueDate = format(new Date(recipient.dueDate), "dd.MM.yyyy");
-
-    const { text, html } = new CourseDueDateReminderEmail({
-      courseName: recipient.courseName,
-      courseLink: `${recipient.tenantHost.replace(/\/$/, "")}/course/${recipient.courseId}`,
-      dueDate: formattedDueDate,
-      daysBeforeDueDate: recipient.daysBeforeDueDate,
-      ...recipient.defaultEmailSettings,
-    });
-
-    await this.emailService.sendEmailWithLogo(
-      {
-        to: recipient.studentEmail,
-        subject: getEmailSubject(
-          "courseDueDateReminderEmail",
-          recipient.defaultEmailSettings.language,
-          { courseName: recipient.courseName },
-        ),
-        text,
-        html,
-      },
-      { tenantId: recipient.tenantId },
-    );
-  }
-
-  private async createCourseDueDateReminderAnnouncement(recipient: CourseDueDateReminderRecipient) {
-    const language = recipient.defaultEmailSettings.language;
-
-    const { heading, paragraphs } = getCourseDueDateReminderEmailTranslations(
-      language,
-      recipient.courseName,
-      "",
-      recipient.daysBeforeDueDate,
-    );
-
-    const translations = { [language]: heading };
-    const contents = { [language]: paragraphs.join("\n") };
-
-    const announcement = await this.announcementsRepository.createAnnouncement({
-      groupId: null,
-      title: translations,
-      content: contents,
-      baseLanguage: language,
-      availableLocales: [language],
-      authorId: recipient.courseAuthorId,
-      status: ANNOUNCEMENT_STATUSES.PUBLISHED,
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      sendEmail: false,
-      emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
-      sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
-      sourceId: recipient.courseId,
-    });
-
-    await this.announcementsRepository.createUserAnnouncementRecords(
-      [recipient.studentId],
-      announcement.id,
-    );
-
-    await this.outboxPublisher.publish(
-      new AnnouncementPublishedEvent({ announcementId: announcement.id }),
-    );
+    await this.outboxPublisher.publish(new CourseDueDateReminderEmailEvent({ recipients }));
   }
 
   private async getCourseDueDateReminderRecipients(): Promise<CourseDueDateReminderRecipient[]> {

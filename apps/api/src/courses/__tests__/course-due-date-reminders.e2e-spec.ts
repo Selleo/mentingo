@@ -3,7 +3,10 @@ import { addDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
+import { CourseDueDateReminderEmailHandler } from "src/courses/handlers/course-due-date-reminder-email.handler";
+import { CourseDueDateReminderEmailEvent } from "src/events";
 import { FileService } from "src/file/file.service";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { announcements, groupCourses, studentCourses, userAnnouncements } from "src/storage/schema";
 
@@ -67,6 +70,8 @@ describe("Course due date reminders (e2e)", () => {
   });
 
   afterEach(async () => {
+    jest.restoreAllMocks();
+
     await truncateTables(baseDb, [
       "user_announcements",
       "announcements",
@@ -120,7 +125,22 @@ describe("Course due date reminders (e2e)", () => {
       isMandatory: true,
     });
 
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish").mockResolvedValue(undefined);
+
     await courseService.sendCourseDueDateReminders();
+
+    const reminderEvent = publishSpy.mock.calls
+      .map(([event]) => event)
+      .find(
+        (event): event is CourseDueDateReminderEmailEvent =>
+          event instanceof CourseDueDateReminderEmailEvent,
+      );
+
+    expect(reminderEvent?.courseDueDateReminderEmailData.recipients).toHaveLength(2);
+
+    if (!reminderEvent) throw new Error("Expected course due date reminder email event");
+
+    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
 
     const sentEmails = emailAdapter.getAllEmails();
     expect(sentEmails).toHaveLength(2);

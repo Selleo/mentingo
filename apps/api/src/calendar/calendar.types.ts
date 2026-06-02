@@ -1,4 +1,5 @@
 import type {
+  CalendarEventSourceRole,
   CalendarEventSourceType,
   CalendarEventStatus,
   LiveTrainingDeliveryType,
@@ -28,6 +29,12 @@ export type LiveTrainingCalendarEventPayload = {
     status: LiveTrainingStatus;
     visibilityScope: LiveTrainingVisibilityScope;
     linkedCourses: CalendarEventLinkedCourse[];
+  };
+};
+
+export type LiveTrainingListItemPayload = {
+  liveTraining: LiveTrainingCalendarEventPayload["liveTraining"] & {
+    sourceRole: CalendarEventSourceRole;
   };
 };
 

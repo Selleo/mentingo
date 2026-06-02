@@ -34,6 +34,7 @@ import type {
   CalendarEventNormalizedRow,
   CalendarEventHostRow,
   LiveTrainingCalendarEventPayload,
+  LiveTrainingListItemPayload,
 } from "./calendar.types";
 import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
 import type {
@@ -163,50 +164,42 @@ export class CalendarService {
       return null;
     }
 
-    const rows = await this.calendarRepository.getLiveTrainingCalendarEventRows(
+    const [liveTraining] = await this.calendarRepository.getLiveTrainingCalendarEventRows(
       this.getLiveTrainingDetailConditions(eventId, currentUser),
       language,
     );
-    const row = rows[0];
 
-    if (!row) {
-      return null;
-    }
+    if (!liveTraining) return null;
 
     const [hosts, linkedCoursesByEventId, author, materials, latestSession] = await Promise.all([
-      this.calendarRepository.getLiveTrainingHostRows([row.id]),
-      this.getLinkedCoursesByEventId([row.id], language),
-      this.calendarRepository.getLiveTrainingAuthorRow(row.id),
+      this.calendarRepository.getLiveTrainingHostRows([liveTraining.id]),
+      this.getLinkedCoursesByEventId([liveTraining.id], language),
+      this.calendarRepository.getLiveTrainingAuthorRow(liveTraining.id),
       this.calendarRepository.getLiveTrainingMaterialRows(
-        row.id,
+        liveTraining.id,
         [
           LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
           LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
         ],
         language,
       ),
-      this.calendarRepository.getLatestLiveTrainingSessionRow(row.sourceId),
+      this.calendarRepository.getLatestLiveTrainingSessionRow(liveTraining.sourceId),
     ]);
-    const linkedCourses = linkedCoursesByEventId.get(row.id);
+    const linkedCourses = linkedCoursesByEventId.get(liveTraining.id);
 
-    const listItem = this.mapLiveTrainingListItem(row, hosts, linkedCourses, currentUser);
-    const isPrivilegedViewer = this.isPrivilegedViewer(row, hosts, currentUser);
-    const liveTrainingPayload = row.payload as LiveTrainingCalendarEventPayload;
-    const liveTrainingListPayload = (
-      listItem.payload as {
-        liveTraining: LiveTrainingCalendarEventPayload["liveTraining"] & {
-          sourceRole: CalendarEventSourceRole;
-        };
-      }
-    ).liveTraining;
+    const listItem = this.mapLiveTrainingListItem(liveTraining, hosts, linkedCourses, currentUser);
+    const isPrivilegedViewer = this.isPrivilegedViewer(liveTraining, hosts, currentUser);
+
+    const liveTrainingPayload = liveTraining.payload as LiveTrainingCalendarEventPayload;
+    const liveTrainingData = (listItem.payload as LiveTrainingListItemPayload).liveTraining;
 
     return {
       ...listItem,
       payload: {
         liveTraining: {
-          ...liveTrainingListPayload,
+          ...liveTrainingData,
           author: author ?? {
-            id: row.authorId ?? row.sourceId,
+            id: liveTraining.authorId ?? liveTraining.sourceId,
             fullName: null,
             email: "",
           },

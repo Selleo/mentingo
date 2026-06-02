@@ -67,6 +67,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     CourseSlugService,
     GroupCourseDueDateCalendarService,
     CourseHandler,
+    CourseDueDateReminderEmailHandler,
     LocalizationService,
     CourseCron,
     MasterCourseService,
