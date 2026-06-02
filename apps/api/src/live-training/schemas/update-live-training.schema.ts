@@ -1,0 +1,49 @@
+import {
+  LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
+  LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
+  LIVE_TRAINING_TITLE_MAX_LENGTH,
+} from "@repo/shared";
+import { Type, type Static } from "@sinclair/typebox";
+
+import { UUIDSchema, baseResponse } from "src/common";
+import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+
+import {
+  liveTrainingDeliveryTypeSchema,
+  liveTrainingStatusSchema,
+  updateLiveTrainingSettingsSchema,
+} from "./live-training-common.schema";
+import { liveTrainingDetailsSchema } from "./live-training-details.schema";
+
+export const updateLiveTrainingSchema = Type.Intersect([
+  Type.Object({
+    language: supportedLanguagesSchema,
+  }),
+  Type.Partial(
+    Type.Object({
+      title: Type.String({ minLength: 1, maxLength: LIVE_TRAINING_TITLE_MAX_LENGTH }),
+      description: Type.Union([
+        Type.String({ minLength: 1, maxLength: LIVE_TRAINING_DESCRIPTION_MAX_LENGTH }),
+        Type.Null(),
+      ]),
+      startsAt: Type.String({ minLength: 1 }),
+      endsAt: Type.String({ minLength: 1 }),
+      allDay: Type.Boolean(),
+      timezone: Type.String({ minLength: 1 }),
+      location: Type.Union([Type.String(), Type.Null()]),
+      deliveryType: liveTrainingDeliveryTypeSchema,
+      status: liveTrainingStatusSchema,
+      maxParticipants: Type.Number({ minimum: 1, maximum: LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT }),
+      settings: updateLiveTrainingSettingsSchema,
+      hostUserIds: Type.Array(UUIDSchema),
+      linkedCourseIds: Type.Array(UUIDSchema),
+      beforeResourceIds: Type.Array(UUIDSchema),
+      afterResourceIds: Type.Array(UUIDSchema),
+    }),
+  ),
+]);
+
+export const updateLiveTrainingResponseSchema = baseResponse(liveTrainingDetailsSchema);
+
+export type UpdateLiveTrainingBody = Static<typeof updateLiveTrainingSchema>;
+export type UpdateLiveTrainingResponse = Static<typeof updateLiveTrainingResponseSchema>;

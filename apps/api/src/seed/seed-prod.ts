@@ -157,6 +157,24 @@ export async function seedProduction() {
     );
     console.log("Inserted content creator user settings:", contentCreatorSettings);
 
+    const trainerUser = await createOrFindUser(
+      "trainer@example.com",
+      "password",
+      {
+        id: faker.string.uuid(),
+        email: "trainer@example.com",
+        firstName: faker.person.firstName(),
+        lastName: "Trainer",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        tenantId,
+      },
+      SYSTEM_ROLE_SLUGS.TRAINER,
+    );
+    console.log("Created or found trainer user:", trainerUser);
+    const trainerSettings = await insertUserSettings(db, trainerUser.id, tenantId, false);
+    console.log("Inserted trainer user settings:", trainerSettings);
+
     const globalSettings = await insertGlobalSettings(db, tenantId);
     console.log("Inserted global settings:", globalSettings);
 

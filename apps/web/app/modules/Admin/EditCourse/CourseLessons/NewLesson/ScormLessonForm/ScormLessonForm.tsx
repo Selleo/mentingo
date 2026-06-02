@@ -25,7 +25,7 @@ import { ScormPackageUploadField } from "~/modules/Admin/Scorm/components/ScormP
 import { isBrowserFile } from "~/utils/isBrowserFile";
 
 import { SCORM_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/curriculum/handles";
-import { ContentTypes, DeleteContentType } from "../../../EditCourse.types";
+import { ContentTypes, DeleteContentType, LessonType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import { scormLessonFormSchema } from "./validators/scormLessonFormSchema";
@@ -86,7 +86,7 @@ export const ScormLessonForm = ({
         data: {
           title: values.title,
           description: lessonToEdit.description ?? "",
-          type: lessonToEdit.type,
+          type: LessonType.SCORM,
           language,
         },
       });

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
 
@@ -20,6 +21,10 @@ export default function CoursesAccessibilityPreferences({
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
+  const { mutate: toggleLiveTraining } = useToggleLiveTraining();
+  const trainerRoleUserCount = globalSettings.trainerRoleUserCount ?? 0;
+  const isLiveTrainingDisableBlocked =
+    globalSettings.liveTrainingEnabled && trainerRoleUserCount > 0;
 
   const handleCoursesAccessibilityChange = () => {
     changeUnregisteredUserCoursesAccessibility();
@@ -42,6 +47,22 @@ export default function CoursesAccessibilityPreferences({
         checked={globalSettings.modernCourseListEnabled}
         onCheckedChange={toggleModernCourseList}
         testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
+      />
+      <SettingItem
+        id="liveTraining"
+        label={t("adminPreferences.field.liveTraining")}
+        description={t("adminPreferences.field.liveTrainingDescription")}
+        checked={globalSettings.liveTrainingEnabled}
+        onCheckedChange={toggleLiveTraining}
+        disabled={isLiveTrainingDisableBlocked}
+        tooltip={
+          isLiveTrainingDisableBlocked
+            ? t("adminPreferences.field.liveTrainingDisableBlockedTooltip", {
+                count: trainerRoleUserCount,
+              })
+            : t("adminPreferences.field.liveTrainingTooltip")
+        }
+        testId={SETTINGS_PAGE_HANDLES.LIVE_TRAINING_SWITCH}
       />
     </div>
   );

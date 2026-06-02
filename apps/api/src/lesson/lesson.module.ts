@@ -4,11 +4,13 @@ import { AiModule } from "src/ai/ai.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
+import { LiveTrainingModule } from "src/live-training/live-training.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { PermissionsModule } from "src/permissions/permissions.module";
 import { QuestionsModule } from "src/questions/question.module";
 import { ResourceLibraryModule } from "src/resource-library/resource-library.module";
+import { SettingsModule } from "src/settings/settings.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
 import { LessonController } from "./lesson.controller";
@@ -27,6 +29,8 @@ import { LessonService } from "./services/lesson.service";
     LocalizationModule,
     PermissionsModule,
     ResourceLibraryModule,
+    LiveTrainingModule,
+    SettingsModule,
     forwardRef(() => CourseModule),
   ],
   controllers: [LessonController],

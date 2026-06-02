@@ -1,12 +1,14 @@
-export const LESSON_TYPES = {
-  CONTENT: "content",
-  QUIZ: "quiz",
-  AI_MENTOR: "ai_mentor",
-  EMBED: "embed",
-  SCORM: "scorm",
-} as const;
+export { LESSON_TYPES, type LessonTypes } from "@repo/shared";
 
-export type LessonTypes = (typeof LESSON_TYPES)[keyof typeof LESSON_TYPES];
+import type { SupportedLanguages } from "@repo/shared";
+import type { UUIDType } from "src/common";
+
+export type CreateLiveLessonInput = {
+  lessonId: UUIDType;
+  liveTrainingId: UUIDType;
+  liveTrainingLinkId: UUIDType;
+  language: SupportedLanguages;
+};
 
 export type EmbedLessonResourceType = {
   id: string;

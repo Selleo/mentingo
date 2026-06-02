@@ -48,6 +48,8 @@ export const RESOURCE_RELATIONSHIP_TYPES = {
   BANNER: "banner",
   TRAILER: "trailer",
   MEDIA: "media",
+  LIVE_TRAINING_BEFORE: "live_training_before",
+  LIVE_TRAINING_AFTER: "live_training_after",
 } as const;
 
 export type ResourceRelationshipType =
@@ -59,6 +61,7 @@ export const RESOURCE_CATEGORIES = {
   LESSON: "lesson",
   COURSE: "course",
   GLOBAL_SETTINGS: "global_settings",
+  LIVE_TRAINING: "live_training",
 } as const;
 
 export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[keyof typeof RESOURCE_CATEGORIES];

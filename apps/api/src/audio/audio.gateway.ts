@@ -38,6 +38,10 @@ export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, Realtim
     await this.audioService.handleDisconnect(client.id);
   }
 
+  emitToAll(event: string, payload: unknown) {
+    this.server.emit(event, payload);
+  }
+
   emitToRoom(event: string, roomId: string, payload: unknown) {
     this.server.to(roomId).emit(event, payload);
   }

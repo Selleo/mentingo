@@ -13,11 +13,18 @@ import {
 } from "src/storage/schema";
 
 import type { OnApplicationBootstrap } from "@nestjs/common";
+import type { SystemRoleSlug } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class PermissionsBackfillService implements OnApplicationBootstrap {
   private readonly logger = new Logger(PermissionsBackfillService.name);
+  private readonly systemRoleDisplayName: Record<SystemRoleSlug, string> = {
+    [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
+    [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+    [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
+    [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
+  };
 
   constructor(
     private readonly tenantDbRunner: TenantDbRunnerService,
@@ -55,42 +62,12 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
     let insertedCount = 0;
 
     for (const roleSlug of Object.values(SYSTEM_ROLE_SLUGS)) {
-      const ruleSetSlug = SYSTEM_RULE_SET_SLUGS[roleSlug];
       const expectedPermissions = SYSTEM_ROLE_PERMISSIONS[roleSlug];
 
-      const [ruleSet] = await this.db
-        .select({ id: permissionRuleSets.id })
-        .from(permissionRoles)
-        .innerJoin(
-          permissionRoleRuleSets,
-          and(
-            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
-            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRuleSets,
-          and(
-            eq(permissionRuleSets.id, permissionRoleRuleSets.ruleSetId),
-            eq(permissionRuleSets.tenantId, permissionRoleRuleSets.tenantId),
-          ),
-        )
-        .where(
-          and(
-            eq(permissionRoles.tenantId, tenantId),
-            eq(permissionRoles.slug, roleSlug),
-            eq(permissionRuleSets.slug, ruleSetSlug),
-          ),
-        )
-        .limit(1);
+      const { ruleSetId, insertedCount: systemRowsInsertedCount } =
+        await this.ensureSystemRoleAndRuleSet(tenantId, roleSlug);
 
-      if (!ruleSet) {
-        this.logger.warn(
-          `Skipping permission backfill for tenant ${tenantId} because system rule set ${ruleSetSlug} is missing`,
-        );
-
-        continue;
-      }
+      insertedCount += systemRowsInsertedCount;
 
       const existingPermissions = await this.db
         .selectDistinct({
@@ -100,7 +77,7 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
         .where(
           and(
             eq(permissionRuleSetPermissions.tenantId, tenantId),
-            eq(permissionRuleSetPermissions.ruleSetId, ruleSet.id),
+            eq(permissionRuleSetPermissions.ruleSetId, ruleSetId),
           ),
         );
 
@@ -117,7 +94,7 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
         .values(
           missingPermissions.map((permission) => ({
             tenantId,
-            ruleSetId: ruleSet.id,
+            ruleSetId,
             permission,
           })),
         )
@@ -129,5 +106,110 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
     }
 
     return insertedCount;
+  }
+
+  private async ensureSystemRoleAndRuleSet(tenantId: UUIDType, roleSlug: SystemRoleSlug) {
+    const roleDisplayName = this.systemRoleDisplayName[roleSlug];
+    const ruleSetSlug = SYSTEM_RULE_SET_SLUGS[roleSlug];
+    let insertedCount = 0;
+
+    const existingRole = await this.findRole(tenantId, roleSlug);
+    const [role] = await this.db
+      .insert(permissionRoles)
+      .values({
+        tenantId,
+        name: roleDisplayName,
+        slug: roleSlug,
+        isSystem: true,
+      })
+      .onConflictDoNothing({
+        target: [permissionRoles.tenantId, permissionRoles.slug],
+      })
+      .returning({ id: permissionRoles.id });
+
+    if (!existingRole) insertedCount += 1;
+    const roleId = role?.id ?? existingRole?.id;
+
+    if (!roleId) {
+      throw new Error(`System role ${roleSlug} was not inserted or found for tenant ${tenantId}`);
+    }
+
+    const existingRuleSet = await this.findRuleSet(tenantId, ruleSetSlug);
+    const [ruleSet] = await this.db
+      .insert(permissionRuleSets)
+      .values({
+        tenantId,
+        name: roleDisplayName,
+        slug: ruleSetSlug,
+        isSystem: true,
+      })
+      .onConflictDoNothing({
+        target: [permissionRuleSets.tenantId, permissionRuleSets.slug],
+      })
+      .returning({ id: permissionRuleSets.id });
+
+    if (!existingRuleSet) insertedCount += 1;
+    const ruleSetId = ruleSet?.id ?? existingRuleSet?.id;
+
+    if (!ruleSetId) {
+      throw new Error(
+        `System rule set ${ruleSetSlug} was not inserted or found for tenant ${tenantId}`,
+      );
+    }
+
+    const existingRoleRuleSet = await this.findRoleRuleSet(tenantId, roleId, ruleSetId);
+
+    await this.db
+      .insert(permissionRoleRuleSets)
+      .values({
+        tenantId,
+        roleId,
+        ruleSetId,
+      })
+      .onConflictDoNothing({
+        target: [permissionRoleRuleSets.roleId, permissionRoleRuleSets.ruleSetId],
+      });
+
+    if (!existingRoleRuleSet) insertedCount += 1;
+
+    return { ruleSetId, insertedCount };
+  }
+
+  private async findRole(tenantId: UUIDType, roleSlug: SystemRoleSlug) {
+    const [role] = await this.db
+      .select({ id: permissionRoles.id })
+      .from(permissionRoles)
+      .where(and(eq(permissionRoles.tenantId, tenantId), eq(permissionRoles.slug, roleSlug)))
+      .limit(1);
+
+    return role;
+  }
+
+  private async findRuleSet(tenantId: UUIDType, ruleSetSlug: string) {
+    const [ruleSet] = await this.db
+      .select({ id: permissionRuleSets.id })
+      .from(permissionRuleSets)
+      .where(
+        and(eq(permissionRuleSets.tenantId, tenantId), eq(permissionRuleSets.slug, ruleSetSlug)),
+      )
+      .limit(1);
+
+    return ruleSet;
+  }
+
+  private async findRoleRuleSet(tenantId: UUIDType, roleId: UUIDType, ruleSetId: UUIDType) {
+    const [roleRuleSet] = await this.db
+      .select({ roleId: permissionRoleRuleSets.roleId })
+      .from(permissionRoleRuleSets)
+      .where(
+        and(
+          eq(permissionRoleRuleSets.tenantId, tenantId),
+          eq(permissionRoleRuleSets.roleId, roleId),
+          eq(permissionRoleRuleSets.ruleSetId, ruleSetId),
+        ),
+      )
+      .limit(1);
+
+    return roleRuleSet;
   }
 }

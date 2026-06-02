@@ -15,6 +15,7 @@ import { CourseActivityHandler } from "./handlers/course-activity.handler";
 import { EnvActivityHandler } from "./handlers/env-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
+import { LiveTrainingActivityHandler } from "./handlers/live-training-activity.handler";
 import { NewsActivityHandler } from "./handlers/news-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 import { UserActivityHandler } from "./handlers/user-activity.handler";
@@ -36,6 +37,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     UserActivityHandler,
     EnvActivityHandler,
     AuthActivityHandler,
+    LiveTrainingActivityHandler,
     NewsActivityHandler,
     ArticlesActivityHandler,
     ActivityLogsQueueService,

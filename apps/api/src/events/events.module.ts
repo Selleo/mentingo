@@ -1,6 +1,8 @@
 import { Global, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
+import { AnnouncementsModule } from "src/announcements/announcements.module";
+import { AnnouncementEmailHandler } from "src/announcements/handlers/announcement-email.handler";
 import { AuthModule } from "src/auth/auth.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -23,6 +25,7 @@ import { UserModule } from "src/user/user.module";
 @Module({
   imports: [
     CqrsModule,
+    AnnouncementsModule,
     UserModule,
     EmailModule,
     FileModule,
@@ -39,6 +42,7 @@ import { UserModule } from "src/user/user.module";
   providers: [
     NotifyAdminsHandler,
     NotifyUsersHandler,
+    AnnouncementEmailHandler,
     CourseChatMentionEmailHandler,
     S3Service,
     BunnyStreamService,

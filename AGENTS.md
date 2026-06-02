@@ -70,6 +70,12 @@ Start with this file, then read the more specific `AGENTS.md` files for the area
 - Frontend API calls: use `ApiClient.api...` from `apps/web/app/api/api-client.ts`; do not add ad hoc Axios/fetch calls for app endpoints.
 - Tests: prefer existing factories/fixtures/flows over custom setup code, especially in `apps/web/e2e`.
 
+## API Architecture
+
+- When backend changes introduce side effects, cross-module reactions, notifications, analytics updates, background work, or workflow state transitions, explicitly consider an event-driven design and suggest it when it fits better than direct service coupling.
+- Keep event-driven work repo-native: use existing outbox, queue, websocket, or domain-event patterns where available instead of inventing a parallel mechanism.
+- Do not force events for simple synchronous reads/writes; use them when they reduce coupling, improve reliability, or make side effects auditable/retryable.
+
 ## Definition Of Done
 
 - Run the narrowest relevant validation command for touched code.

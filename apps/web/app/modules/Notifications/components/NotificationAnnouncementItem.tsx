@@ -1,3 +1,4 @@
+import { ANNOUNCEMENT_STATUSES } from "@repo/shared";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCheck, Megaphone, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -21,6 +22,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { getDateLocale } from "~/utils/getDateLocale";
 
 import { NOTIFICATIONS_HANDLES } from "../handles";
+
+import { SafeAnnouncementContent } from "./SafeAnnouncementContent";
 
 import type { NotificationAnnouncement } from "../notifications.types";
 
@@ -64,11 +67,16 @@ export function NotificationAnnouncementItem({
 
       <div className="min-w-0 space-y-1">
         <p className="text-sm font-semibold leading-5 text-neutral-950">{announcement.title}</p>
-        <p className="line-clamp-2 text-sm leading-5 text-neutral-700">{announcement.content}</p>
+        <SafeAnnouncementContent html={announcement.content} />
         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-neutral-600">
           {isUnread && (
             <span className="rounded-full bg-primary-100 px-2 py-0.5 font-medium text-primary-800">
               {t("notifications.status.unread")}
+            </span>
+          )}
+          {announcement.status === ANNOUNCEMENT_STATUSES.SCHEDULED && (
+            <span className="rounded-full bg-warning-100 px-2 py-0.5 font-medium text-warning-800">
+              {t("notifications.status.scheduled")}
             </span>
           )}
           <span>{distance}</span>

@@ -41,3 +41,18 @@ export const contentCreators: UsersSeed = [
     lastName: "Content Creator 2",
   },
 ];
+
+export const trainers: UsersSeed = [
+  {
+    roleSlug: SYSTEM_ROLE_SLUGS.TRAINER,
+    email: "trainer@example.com",
+    firstName: faker.person.firstName(),
+    lastName: "Trainer",
+  },
+  {
+    roleSlug: SYSTEM_ROLE_SLUGS.TRAINER,
+    email: "trainer2@example.com",
+    firstName: faker.person.firstName(),
+    lastName: "Trainer 2",
+  },
+];

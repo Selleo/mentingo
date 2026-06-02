@@ -9,7 +9,7 @@ import {
   UseGuards,
   Query,
 } from "@nestjs/common";
-import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, type AnnouncementStatus, type SupportedLanguages } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -29,6 +29,7 @@ import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
   announcementLanguageSchema,
+  announcementStatusSchema,
   announcementsForUserSchema,
   baseAnnouncementSchema,
   unreadAnnouncementsSchema,
@@ -53,6 +54,7 @@ export class AnnouncementsController {
   @Validate({
     request: [
       { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
+      { type: "query", name: "status", schema: Type.Optional(announcementStatusSchema) },
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
     ],
@@ -60,13 +62,18 @@ export class AnnouncementsController {
   })
   async getAllAnnouncements(
     @Query("language") language?: SupportedLanguages,
+    @Query("status") status?: AnnouncementStatus,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
   ): Promise<PaginatedResponse<AllAnnouncements>> {
-    const announcements = await this.announcementsService.getAllAnnouncements(language, {
-      page,
-      perPage,
-    });
+    const announcements = await this.announcementsService.getAllAnnouncements(
+      language,
+      {
+        page,
+        perPage,
+      },
+      status,
+    );
 
     return new PaginatedResponse(announcements);
   }

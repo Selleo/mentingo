@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Content creator",
+      "trainer": "Trainer",
       "student": "Student"
     },
     "languages": {
@@ -47,7 +48,8 @@
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
       "embed": "Embed",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Oops! Something went wrong."
@@ -307,6 +309,7 @@
     "findInApplication": "Find in application",
     "courses": "Courses",
     "learningPaths": "Development Paths",
+    "calendar": "Calendar",
     "content": "Content",
     "categories": "Categories",
     "users": "Users",
@@ -324,6 +327,323 @@
     "qa": "Q&A",
     "tenants": "Organizations",
     "activityLogs": "Activity Logs"
+  },
+  "calendarView": {
+    "title": "Calendar",
+    "description": "View scheduled learning events.",
+    "loading": "Loading events",
+    "empty": "No events to display",
+    "today": "Today",
+    "view": {
+      "month": "Month",
+      "week": "Week",
+      "day": "Day",
+      "monthShort": "M",
+      "weekShort": "W",
+      "dayShort": "D"
+    },
+    "create": {
+      "title": "Add to calendar",
+      "description": "Choose what you want to add for the selected time.",
+      "noOptions": "No calendar items are available to create.",
+      "liveKitRequired": "Configure LiveKit in environment settings to enable online Live Trainings. In-person trainings remain available.",
+      "submit": "Create live training",
+      "toast": {
+        "success": "Live training has been created."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Schedule an online or in-person training session."
+      },
+      "section": {
+        "basics": "Basics",
+        "schedule": "Schedule",
+        "delivery": "Delivery",
+        "permissions": "Permissions"
+      },
+      "field": {
+        "title": "Title",
+        "description": "Description",
+        "language": "Language",
+        "allDay": "All day",
+        "deliveryType": "Delivery type",
+        "startsAt": "Starts at",
+        "endsAt": "Ends at",
+        "maxParticipants": "Max participants",
+        "location": "Location",
+        "viewerPermissions": "Viewer permissions",
+        "microphoneEnabled": "Microphone",
+        "cameraEnabled": "Camera"
+      },
+      "placeholder": {
+        "title": "Training title",
+        "description": "Optional session description",
+        "location": "Room, address, or meeting place"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "tooltip": {
+        "title": "This name is shown in the calendar and in the Live Training details.",
+        "description": "Optional context for participants before they join the training.",
+        "language": "The base language used for this Live Training title and description.",
+        "allDay": "Use whole-day calendar dates and disable start/end time selection.",
+        "deliveryType": "Online sessions are remote. In-person sessions require a physical location.",
+        "startsAt": "The planned start time shown in the calendar.",
+        "endsAt": "The planned end time shown in the calendar.",
+        "maxParticipants": "The participant limit for this Live Training. The current maximum is 100.",
+        "location": "Optional place for in-person trainings.",
+        "viewerPermissions": "Controls what students can use when they join as viewers.",
+        "microphoneEnabled": "Allow viewers to use their microphone during the session.",
+        "cameraEnabled": "Allow viewers to use their camera during the session."
+      },
+      "validation": {
+        "titleRequired": "Title is required.",
+        "invalidDateRange": "End time must be after start time."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training format",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "host": "Host",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "In-person"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "In-person training",
+      "locationMissing": "Location has not been set"
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
+      "loadMoreUsers": "Load more"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "sessions": "Sessions",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Add file",
+      "download": "Download",
+      "removeFile": "Remove {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "File has been added.",
+        "removed": "File has been removed."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live session",
+      "waitingTitle": "Session is ready to join",
+      "activeTitle": "Session is active",
+      "inSession": "In session",
+      "roomTitle": "Live room",
+      "participants_one": "{{count}} participant",
+      "participants_other": "{{count}} participants",
+      "microphone": "Microphone",
+      "camera": "Camera",
+      "screenShare": "Share screen",
+      "screen": "Screen",
+      "leave": "Leave",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
+      "empty": "Waiting for participants",
+      "materials": "Materials",
+      "beforeMaterials": "Before",
+      "afterMaterials": "After",
+      "noMaterials": "No files"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Session has been started.",
+        "ended": "Session has been finished."
+      }
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Delete Live Training?",
+      "description": "This will cancel the Live Training and remove it from the calendar. This action cannot be undone.",
+      "assignedToLessonsDescription": "This Live Training is linked to {{count}} lesson. Delete the related lesson first before deleting the Live Training.",
+      "assignedToLessonsDescription_plural": "This Live Training is linked to {{count}} lessons. Delete the related lessons first before deleting the Live Training.",
+      "toast": {
+        "success": "Live Training deleted successfully."
+      }
+    },
+    "edit": {
+      "saveChanges": "Save changes",
+      "toast": {
+        "success": "Live Training updated successfully."
+      }
+    }
   },
   "newsView": {
     "header": "News",
@@ -545,7 +865,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Process course payments and manage subscriptions",
@@ -554,7 +875,8 @@
         "microsoft_authorization": "Allow users to sign in with their Microsoft account",
         "slack_authorization": "Allow users to sign in with their Slack account",
         "openAI": "Enable AI Mentor features",
-        "luma": "Enable AI Course Generation features"
+        "luma": "Enable AI Course Generation features",
+        "livekit": "Configure LiveKit to enable online Live Training video sessions. Without it, only offline Live Trainings are available."
       }
     }
   },
@@ -964,7 +1286,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator cannot change their own role",
       "noUserSelected": "No user selected",
-      "userMustHaveAtLeastOneRole": "User must have at least one role."
+      "userMustHaveAtLeastOneRole": "User must have at least one role.",
+      "trainerRoleRequiresLiveTraining": "The Trainer role is available only when Live Training is enabled."
     },
     "import": {
       "toast": {
@@ -1034,6 +1357,9 @@
         "integration_key": "integration keys",
         "integration_api": "integration API",
         "tenant": "organization configuration",
+        "calendar": "calendar",
+        "live_training": "live trainings",
+        "activity_log": "activity log",
         "other": "platform capabilities"
       },
       "descriptions": {
@@ -1096,6 +1422,18 @@
         "integration_key_manage": "Manage integration API keys.",
         "integration_api_use": "Use integration API endpoints.",
         "tenant_manage": "Manage organization-level configuration.",
+        "calendar_read": "View calendar events.",
+        "live_training_read": "View live trainings.",
+        "live_training_create": "Create live trainings.",
+        "live_training_update": "Edit any live training.",
+        "live_training_update_own": "Edit live trainings created by this user.",
+        "live_training_delete": "Delete live trainings.",
+        "live_training_delete_own": "Delete live trainings created by this user.",
+        "live_training_join": "Join live training sessions.",
+        "live_training_start": "Start live training sessions.",
+        "live_training_end": "End live training sessions.",
+        "live_training_statistics": "View live training attendance and statistics.",
+        "activity_log_read": "View activity logs.",
         "course_ai_generation": "Generate course structure and content with AI tools."
       }
     },
@@ -1266,6 +1604,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Save"
     },
@@ -1594,6 +1941,7 @@
         "removeAiMentorLesson": "Are you sure you want to delete this AI Mentor lesson from chapter?",
         "removeEmbedLesson": "Are you sure you want to delete this embed lesson from chapter?",
         "removeScormLesson": "Are you sure you want to delete this SCORM lesson from chapter?",
+        "removeLiveTrainingLesson": "Are you sure you want to delete this Live Training lesson from chapter?",
         "removeChapter": "Are you sure you want to delete this chapter?",
         "removeQuestion": "Are you sure you want to delete question?",
         "removeContent": "Are you sure you want to delete content?"
@@ -1686,6 +2034,9 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM package attached successfully",
           "quizLessonCreatedSuccessfully": "Quiz created successfully",
           "aiMentorLessonCreatedSuccessfully": "AI Mentor lesson created successfully",
+          "liveTrainingLessonCreated": "Live Training lesson created successfully",
+          "liveTrainingLessonUpdated": "Live Training lesson updated successfully",
+          "liveTrainingLessonAttached": "Live Training assignment attached successfully",
           "aiMentorLessonUpdatedSuccessfully": "AI Mentor lesson updated successfully",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor lesson files uploaded successfully",
           "courseGenerationFileAddedToUploadQueue": "File added to the upload queue",
@@ -1700,6 +2051,25 @@
           "embedLessonUpdatedSuccessfully": "Embed lesson updated successfully",
           "embedLessonCreateError": "Failed to create embed lesson. Please check all the fields and try again.",
           "embedLessonUpdateError": "Failed to update embed lesson. Please check all the fields and try again."
+        },
+        "liveTraining": {
+          "createTitle": "Create Live Training lesson",
+          "editTitle": "Edit Live Training lesson",
+          "lessonTitle": "Lesson title",
+          "lessonTitlePlaceholder": "Lesson title shown in the course",
+          "createNewTab": "Create new",
+          "linkExistingTab": "Link existing",
+          "linkExistingLoading": "Loading scheduled Live Trainings...",
+          "linkExistingEmpty": "No scheduled Live Trainings available.",
+          "linkedTitle": "Linked Live Training",
+          "linkedDescription": "Schedule, trainers, files, and session settings are managed on the Live Training page.",
+          "openLiveTraining": "Open Live Training",
+          "openBaseLiveTraining": "Open base Live Training",
+          "languageMissingTitle": "No Live Training assigned for this language",
+          "languageMissingDescription": "This lesson falls back to the course base language. Create or link a scheduled Live Training to override it for the selected language.",
+          "validation": {
+            "liveTrainingRequired": "Select a scheduled Live Training to link."
+          }
         },
         "field": {
           "title": "Title",
@@ -1768,6 +2138,7 @@
           "aiMentor": "AI Mentor",
           "embed": "Embed",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Correct",
           "true": "True",
           "false": "False",
@@ -1787,6 +2158,7 @@
           "quizLessonDescription": "A set of questions to check knowledge.",
           "aiMentorLessonDescription": "Interactive conversation with a virtual AI mentor.",
           "scormLessonDescription": "SCORM package lesson content.",
+          "liveTrainingLessonDescription": "Scheduled live session connected to this course.",
           "fillInTheBlanksDescription": "This question contains a sentence; students must drag and drop the correct word into the blank.",
           "gapFillDescription": "This question will have sentence with missing words that students need to type in.",
           "embedLessonDescription": "External resource (e.g. Google Form, Canva presentation, or YouTube live stream).",
@@ -2014,9 +2386,9 @@
       "exportingButton": "Exporting...",
       "success": "SCORM package download started.",
       "warning": {
-        "title": "AI Mentor lessons will be skipped",
-        "description": "This course contains {{count}} AI Mentor lesson. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
-        "description_other": "This course contains {{count}} AI Mentor lessons. AI Mentor lessons are not supported in SCORM packages. Do you want to continue?",
+        "title": "Unsupported lessons will be skipped",
+        "description": "This course contains {{count}} lesson that is not supported in SCORM packages. AI Mentor and Live Training lessons are skipped during export. Do you want to continue?",
+        "description_other": "This course contains {{count}} lessons that are not supported in SCORM packages. AI Mentor and Live Training lessons are skipped during export. Do you want to continue?",
         "confirm": "Export anyway"
       },
       "error": {
@@ -2258,6 +2630,18 @@
       "nextSco": "Next section",
       "tryAgain": "Try again",
       "lessonFinished": "SCORM lesson finished."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Session is active",
+      "scheduledLabel": "Scheduled",
+      "scheduledTitle": "Live Training is scheduled",
+      "endedLabel": "Ended",
+      "endedTitle": "Live Training has already ended",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "No Live Training is active",
+      "locationNotice": "Location",
+      "notAvailable": "Live Training is not available for this lesson."
     },
     "videoProcessing": {
       "title": "Video is being processed",
@@ -2530,6 +2914,15 @@
       "coursesVisibilityDescription": "Allow visitors to view course list and access free lessons without logging in",
       "modernCourseList": "Use modern course list view",
       "modernCourseListDescription": "Enable the new course list design with hero and top courses sections",
+      "calendar": "Enable calendar",
+      "calendarDescription": "Allow users to view scheduled events in the calendar",
+      "liveTraining": "Enable Live Training",
+      "liveTrainingDescription": "Allow trainers to create and run live training sessions",
+      "liveTrainingMaxParallelSessions": "Max parallel Live Training sessions",
+      "liveTrainingMaxParallelSessionsDescription": "Limit how many Live Training sessions can be active at the same time.",
+      "liveTrainingTooltip": "Enable this only when the tenant should use trainer-led live sessions.",
+      "liveTrainingDisableBlockedTooltip_one": "Currently you have {{count}} user with the Trainer role. Revoke it in order to disable this feature.",
+      "liveTrainingDisableBlockedTooltip_other": "Currently you have {{count}} users with the Trainer role. Revoke them in order to disable this feature.",
       "finishedCourseNotification": "Finished Course Notifications",
       "finishedCourseNotificationDescription": "Receive notifications when a user finishes a course",
       "studentsWithOverdueCourseNotification": "Students with overdue courses notifications",
@@ -2539,6 +2932,9 @@
       "newUserNotificationsPreferenceChangeSuccess": "New user notification preferences have been successfully updated",
       "coursesVisibilityPreferenceChangeSuccess": "Course visibility preferences for unauthenticated users have been updated successfully",
       "modernCourseListPreferenceChangeSuccess": "Modern course list preference has been updated successfully",
+      "calendarPreferenceChangeSuccess": "Calendar preference has been updated successfully",
+      "liveTrainingPreferenceChangeSuccess": "Live Training preference has been updated successfully",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Live Training session limit has been updated successfully",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Finished course notification preferences have been successfully updated",
       "finishedCourseNotificationsPreferenceChangeError": "Failed to update finished course notification preferences",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Overdue course notification preferences have been successfully updated",
@@ -2691,7 +3087,17 @@
         "content": "Content",
         "group": "Group",
         "language": "Language",
-        "everyone": "Everyone"
+        "everyone": "Everyone",
+        "schedule": "Schedule announcement",
+        "scheduledAt": "Publish at",
+        "sendEmail": "Send email"
+      },
+      "descriptions": {
+        "schedule": "Publish this announcement automatically at a selected time.",
+        "sendEmail": "Send the announcement content by email when it is published."
+      },
+      "tooltips": {
+        "scheduledAt": "Choose when this announcement should become visible."
       },
       "addedLanguages": "Added languages",
       "placeholders": {
@@ -2707,6 +3113,10 @@
         },
         "content": {
           "required": "Content is required"
+        },
+        "schedule": {
+          "invalid": "Select a valid time in 5 minute intervals",
+          "past": "Scheduled time must be in the future"
         }
       }
     },
@@ -2724,7 +3134,10 @@
       "createFailed": "Failed to create announcement",
       "deletedSuccessfully": "Announcement deleted successfully",
       "deleteFailed": "Failed to delete announcement",
-      "notFound": "Announcement not found"
+      "notFound": "Announcement not found",
+      "invalidSchedule": "Invalid announcement schedule",
+      "invalidScheduleStep": "Announcement schedule must use 5 minute intervals",
+      "scheduleInPast": "Announcement schedule must be in the future"
     }
   },
   "notifications": {
@@ -2744,7 +3157,9 @@
       "goToNotificationCenter": "Go to notification center"
     },
     "status": {
-      "unread": "Unread"
+      "unread": "Unread",
+      "scheduled": "Scheduled",
+      "published": "Published"
     },
     "empty": "No notifications yet",
     "deleteDialog": {
@@ -3105,6 +3520,7 @@
     "createQA": "Create new Q&A",
     "analytics": "Analytics",
     "progress": "Progress",
+    "calendar": "Calendar",
     "activityLogs": "Activity Logs",
     "tenant": "Organization Details",
     "createTenant": "Create Organization",
@@ -3804,6 +4220,7 @@
       "user": "User",
       "category": "Category",
       "announcement": "Announcement",
+      "live_training": "Live Training",
       "global_settings": "Settings"
     },
     "table": {
@@ -3815,6 +4232,36 @@
       "showDetails": "Show details",
       "loading": "Loading activity logs...",
       "empty": "No activity logs found."
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Provide valid text for the selected language.",
+      "notFound": "Live Training was not found.",
+      "sessionNotFound": "Live Training session was not found.",
+      "invalidDateRange": "Provide both start and end dates, or leave both empty.",
+      "invalidSchedule": "End time must be after start time.",
+      "invalidTrainer": "One or more selected trainers could not be found.",
+      "invalidCourse": "One or more linked courses could not be found.",
+      "invalidResource": "One or more selected resources could not be found.",
+      "resourceNotFound": "File was not found.",
+      "invalidResourceRelationshipType": "Selected file section is invalid.",
+      "hostAssignmentForbidden": "You do not have permission to assign hosts.",
+      "hostMustHaveTrainerRole": "Assigned hosts must have the Trainer role.",
+      "trainerAssignmentForbidden": "You do not have permission to assign trainers.",
+      "linkNotCreated": "Live Training link could not be created.",
+      "lessonAlreadyLinked": "This lesson already has a Live Training linked.",
+      "invalidLessonLinkMode": "Choose whether to create a new Live Training or link an existing one.",
+      "onlyScheduledCanBeLinked": "Only scheduled Live Trainings can be linked to lessons.",
+      "trainingAlreadyLinkedToLesson": "This Live Training is already linked to a lesson in this course.",
+      "lessonOnlyTitleEditable": "Only the lesson title can be edited here. Open Live Training to change session details.",
+      "unsupportedLessonLanguage": "This course does not support the selected language.",
+      "baseLanguageAssignmentRequired": "Live Training lessons must be created in the course base language first.",
+      "invalidLessonType": "Only Live Training lessons can have Live Training assignments.",
+      "deleteAssignedToLesson": "This Live Training is linked to a lesson. Delete the lesson first before deleting the Live Training.",
+      "liveKitNotConfigured": "LiveKit is not configured.",
+      "maxParticipantsReached": "The maximum number of participants has been reached.",
+      "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
   }
 }

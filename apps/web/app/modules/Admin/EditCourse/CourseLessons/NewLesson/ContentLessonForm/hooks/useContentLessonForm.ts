@@ -47,7 +47,7 @@ export const useContentLessonForm = ({
     defaultValues: {
       title: lessonToEdit?.title || "",
       description: lessonToEdit?.description || "",
-      type: lessonToEdit?.type || LessonType.CONTENT,
+      type: LessonType.CONTENT,
     },
   });
 

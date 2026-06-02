@@ -190,6 +190,34 @@ export class EnvService {
     };
   }
 
+  async getLiveKitConfig() {
+    const [url, apiKey, apiSecret] = await Promise.all([
+      this.getEnv("LIVEKIT_URL")
+        .then(({ value }) => value)
+        .catch(() => this.configService.get("livekit.LIVEKIT_URL")),
+
+      this.getEnv("LIVEKIT_API_KEY")
+        .then(({ value }) => value)
+        .catch(() => this.configService.get("livekit.LIVEKIT_API_KEY")),
+
+      this.getEnv("LIVEKIT_API_SECRET")
+        .then(({ value }) => value)
+        .catch(() => this.configService.get("livekit.LIVEKIT_API_SECRET")),
+    ]);
+
+    return {
+      url,
+      apiKey,
+      apiSecret,
+    };
+  }
+
+  async getLiveKitConfigured() {
+    const { url, apiKey, apiSecret } = await this.getLiveKitConfig();
+
+    return { enabled: !!(url && apiKey && apiSecret) };
+  }
+
   async getEnvSetup(userId: string) {
     const allKeys = Object.values(SERVICE_GROUPS).flat();
 
@@ -226,7 +254,9 @@ export class EnvService {
       fullyConfigured,
       partiallyConfigured,
       notConfigured,
-      hasIssues: partiallyConfigured.length > 0,
+      hasIssues:
+        partiallyConfigured.length > 0 ||
+        notConfigured.some(({ service }) => service === "livekit"),
       isWarningDismissed: await this.envRepository.getIsEnvConfigWarningDismissed(userId),
     };
   }

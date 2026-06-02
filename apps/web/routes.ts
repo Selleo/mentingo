@@ -19,6 +19,13 @@ export const routes: (
           route("courses", "modules/Courses/Courses.page.tsx");
           route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
           route("learning-paths", "modules/LearningPaths/LearningPaths.page.tsx");
+          route("calendar", "modules/Calendar/Calendar.page.tsx");
+          route("live-training/:id/room", "modules/LiveTraining/LiveTraining.page.tsx", {
+            id: "live-training-room",
+          });
+          route("live-training/:id", "modules/LiveTraining/LiveTraining.page.tsx", {
+            id: "live-training-details",
+          });
           route("qa", "modules/QA/QA.page.tsx");
           route("qa/new", "modules/QA/CreateQA.page.tsx");
           route("qa/:id", "modules/QA/EditQA.page.tsx");

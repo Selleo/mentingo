@@ -17,6 +17,14 @@ export interface LeaveLessonPayload {
   lessonId: string;
 }
 
+export interface JoinLiveTrainingPayload {
+  liveTrainingId: string;
+}
+
+export interface LeaveLiveTrainingPayload {
+  liveTrainingId: string;
+}
+
 export interface WsUser {
   userId: string;
   email: string;

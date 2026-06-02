@@ -29,6 +29,7 @@ import AiMentorLessonForm from "./NewLesson/AiMentorLessonForm/AiMentorLessonFor
 import SelectLessonType from "./NewLesson/components/SelectLessonType";
 import ContentLessonForm from "./NewLesson/ContentLessonForm/ContentLessonForm";
 import { EmbedLessonForm } from "./NewLesson/EmbedLessonForm/EmbedLessonForm";
+import { LiveTrainingLessonForm } from "./NewLesson/LiveTrainingLessonForm/LiveTrainingLessonForm";
 import QuizLessonForm from "./NewLesson/QuizLessonForm/QuizLessonForm";
 import { ScormLessonForm } from "./NewLesson/ScormLessonForm/ScormLessonForm";
 
@@ -60,7 +61,7 @@ const CourseLessons = ({
   isCourseGenerated,
   onCourseGenerationFinished,
 }: CourseLessonsProps) => {
-  const [contentTypeToDisplay, setContentTypeToDisplay] = useState(ContentTypes.EMPTY);
+  const [contentTypeToDisplay, setContentTypeToDisplay] = useState<string>(ContentTypes.EMPTY);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
   const { setIsLeavingContent, isCurrentFormDirty, openLeaveModal } = useLeaveModal();
@@ -196,6 +197,15 @@ const CourseLessons = ({
       ),
       [ContentTypes.SCORM_LESSON_FORM]: (
         <ScormLessonForm
+          lessonToEdit={selectedLesson}
+          chapterToEdit={selectedChapter}
+          setContentTypeToDisplay={setContentTypeToDisplay}
+          setSelectedLesson={setSelectedLesson}
+          language={language}
+        />
+      ),
+      [ContentTypes.LIVE_TRAINING_LESSON_FORM]: (
+        <LiveTrainingLessonForm
           lessonToEdit={selectedLesson}
           chapterToEdit={selectedChapter}
           setContentTypeToDisplay={setContentTypeToDisplay}

@@ -66,6 +66,13 @@ async function bootstrap() {
     }),
   );
   app.use(cookieParser());
+  app.use(
+    "/api/live-training/livekit/webhook",
+    bodyParser.raw({
+      type: "*/*",
+      limit: "1mb",
+    }),
+  );
   app.setGlobalPrefix("api");
 
   const jwtService = app.get(JwtService);

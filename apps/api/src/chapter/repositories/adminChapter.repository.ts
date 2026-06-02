@@ -10,6 +10,7 @@ import {
   aiMentorLessons,
   chapters,
   courses,
+  liveLessons,
   lessons,
   questionAnswerOptions,
   questions,
@@ -212,6 +213,24 @@ export class AdminChapterRepository {
               )
               AND ${scormPackages.status} = ${SCORM_PACKAGE_STATUS.READY}
             ORDER BY ${scormPackages.language}
+          )
+        `,
+        liveTrainingId: sql<UUIDType | null>`
+          (
+            SELECT ${liveLessons.liveTrainingId}
+            FROM ${liveLessons}
+            WHERE ${liveLessons.lessonId} = ${lessons.id}
+              AND ${liveLessons.language} IN (${language}, ${courses.baseLanguage})
+            ORDER BY CASE WHEN ${liveLessons.language} = ${language} THEN 0 ELSE 1 END
+            LIMIT 1
+          )
+        `,
+        liveTrainingLanguages: sql<SupportedLanguages[]>`
+          ARRAY(
+            SELECT ${liveLessons.language}
+            FROM ${liveLessons}
+            WHERE ${liveLessons.lessonId} = ${lessons.id}
+            ORDER BY ${liveLessons.language}
           )
         `,
       })

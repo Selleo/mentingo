@@ -113,12 +113,14 @@ export class UserService {
   private readonly SYSTEM_ROLE_DISPLAY_NAME: Record<SystemRoleSlug, string> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
+    [SYSTEM_ROLE_SLUGS.TRAINER]: "Trainer",
     [SYSTEM_ROLE_SLUGS.STUDENT]: "Student",
   };
   private readonly SYSTEM_ROLE_PRIORITY: Record<string, number> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: 0,
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: 1,
-    [SYSTEM_ROLE_SLUGS.STUDENT]: 2,
+    [SYSTEM_ROLE_SLUGS.TRAINER]: 2,
+    [SYSTEM_ROLE_SLUGS.STUDENT]: 3,
   };
 
   constructor(
@@ -218,18 +220,27 @@ export class UserService {
   }
 
   public async getRoles(tenantId: UUIDType) {
+    const isLiveTrainingEnabled =
+      await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+    const conditions = [eq(permissionRoles.tenantId, tenantId)];
+
+    if (!isLiveTrainingEnabled) {
+      conditions.push(not(eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.TRAINER)));
+    }
+
     return this.db
       .select({
         ...getTableColumns(permissionRoles),
       })
       .from(permissionRoles)
-      .where(eq(permissionRoles.tenantId, tenantId))
+      .where(and(...conditions))
       .orderBy(
         sql<number>`
           CASE
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.ADMIN} THEN 0
             WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.CONTENT_CREATOR} THEN 1
-            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 2
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.TRAINER} THEN 2
+            WHEN ${permissionRoles.slug} = ${SYSTEM_ROLE_SLUGS.STUDENT} THEN 3
             ELSE 999
           END
         `,
@@ -1309,6 +1320,8 @@ export class UserService {
       throw new BadRequestException("adminUsersView.toast.userMustHaveAtLeastOneRole");
     }
 
+    await this.assertTrainerRoleAvailable(tenantId, uniqueRoleSlugs);
+
     const roles = await dbInstance
       .select({ id: permissionRoles.id, slug: permissionRoles.slug })
       .from(permissionRoles)
@@ -1329,6 +1342,17 @@ export class UserService {
         tenantId,
       })),
     );
+  }
+
+  private async assertTrainerRoleAvailable(tenantId: UUIDType, roleSlugs: string[]): Promise<void> {
+    if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.TRAINER)) return;
+
+    const isLiveTrainingEnabled =
+      await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+
+    if (isLiveTrainingEnabled) return;
+
+    throw new BadRequestException("adminUsersView.toast.trainerRoleRequiresLiveTraining");
   }
 
   private async ensureSystemRolesForTenant(

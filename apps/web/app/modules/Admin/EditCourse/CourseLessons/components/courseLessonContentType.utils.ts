@@ -14,6 +14,8 @@ export const getContentTypeByLessonType = (lessonType: Lesson["type"]) => {
       return ContentTypes.EMBED_FORM;
     case LessonType.SCORM:
       return ContentTypes.SCORM_LESSON_FORM;
+    case LessonType.LIVE_TRAINING:
+      return ContentTypes.LIVE_TRAINING_LESSON_FORM;
     default:
       return ContentTypes.EMPTY;
   }

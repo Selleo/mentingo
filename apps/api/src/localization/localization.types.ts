@@ -8,6 +8,7 @@ import type {
   formFields,
   groups,
   learningPaths,
+  calendarEvents,
   announcements,
 } from "src/storage/schema";
 
@@ -40,4 +41,6 @@ export type BaseTable =
   | typeof formFields
   | typeof groups
   | typeof learningPaths
-  | typeof announcements;
+  | typeof announcements
+  | typeof learningPaths
+  | typeof calendarEvents;

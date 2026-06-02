@@ -473,6 +473,135 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
+    describe("PATCH /api/settings/admin/calendar", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should keep the global calendar setting enabled as admin", async () => {
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/calendar")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.calendarEnabled).toBe(true);
+        expect(response.body.data.liveTrainingEnabled).toBe(false);
+
+        const toggleResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/calendar")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(toggleResponse.body.data.calendarEnabled).toBe(true);
+        expect(toggleResponse.body.data.liveTrainingEnabled).toBe(false);
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/calendar")
+          .set("Cookie", nonAdminCookies)
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer()).patch("/api/settings/admin/calendar").expect(401);
+      });
+    });
+
+    describe("PATCH /api/settings/admin/live-training", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should toggle live training while calendar stays enabled", async () => {
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/live-training")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.liveTrainingEnabled).toBe(true);
+        expect(response.body.data.calendarEnabled).toBe(true);
+
+        const toggleResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/live-training")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(toggleResponse.body.data.liveTrainingEnabled).toBe(false);
+        expect(toggleResponse.body.data.calendarEnabled).toBe(true);
+      });
+
+      it("should not disable live training when calendar endpoint is called", async () => {
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/live-training")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/calendar")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.calendarEnabled).toBe(true);
+        expect(response.body.data.liveTrainingEnabled).toBe(true);
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/live-training")
+          .set("Cookie", nonAdminCookies)
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer()).patch("/api/settings/admin/live-training").expect(401);
+      });
+    });
+
     describe("PATCH /api/settings/admin/color-schema", () => {
       let adminUser: UserWithCredentials;
       let adminCookies: string;

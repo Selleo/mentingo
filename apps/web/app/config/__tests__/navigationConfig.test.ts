@@ -1,5 +1,6 @@
 import { PERMISSIONS } from "@repo/shared";
 
+import { NAVIGATION_HANDLES } from "../../../e2e/data/navigation/handles";
 import { findMatchingRoute, getNavigationConfig, mapNavigationItems } from "../navigationConfig";
 
 import type { NavigationItem, NavigationGroups } from "../navigationConfig";
@@ -31,10 +32,34 @@ describe("findMatchingRoute", () => {
     });
   });
 
+  it("should find calendar routes", () => {
+    expect(findMatchingRoute("calendar")).toEqual({
+      anyOf: [PERMISSIONS.CALENDAR_READ],
+    });
+  });
+
   it("should find admin learning path routes", () => {
     expect(findMatchingRoute("admin/learning-paths/new")).toEqual({
       allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
     });
+  });
+});
+
+describe("getNavigationConfig", () => {
+  const translate = ((key: string) => key) as never;
+
+  it("should always include the calendar navigation item", () => {
+    const config = getNavigationConfig(translate, false, false, false, false);
+
+    const courseItems = config[0].items;
+
+    expect(courseItems).toContainEqual(
+      expect.objectContaining({
+        path: "calendar",
+        iconName: "Calendar",
+        testId: NAVIGATION_HANDLES.CALENDAR_LINK,
+      }),
+    );
   });
 });
 
@@ -118,6 +143,33 @@ describe("mapNavigationItems", () => {
       iconName: "Dashboard",
       link: "/",
       accessRequirement: expect.any(Object),
+    });
+  });
+
+  it("should prefer explicit item access requirements over route requirements", () => {
+    const items: NavigationItem[] = [
+      {
+        label: "courses",
+        path: "courses",
+        iconName: "Course",
+        accessRequirement: {
+          anyOf: [PERMISSIONS.COURSE_READ],
+        },
+      },
+    ];
+
+    const groups: NavigationGroups[] = [
+      {
+        title: "test",
+        items,
+      },
+    ];
+
+    const mappedGroups = mapNavigationItems(groups);
+    const mapped = mappedGroups[0].items;
+
+    expect(mapped[0].accessRequirement).toEqual({
+      anyOf: [PERMISSIONS.COURSE_READ],
     });
   });
 

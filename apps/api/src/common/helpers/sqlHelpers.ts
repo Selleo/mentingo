@@ -5,7 +5,7 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 export function setJsonbField(
   field: any,
   key?: string | null,
-  value?: string | boolean | null,
+  value?: string | boolean | number | null,
   createMissing: boolean = true,
   allowEmpty: boolean = false,
 ) {
@@ -20,16 +20,21 @@ export function setJsonbField(
       ELSE '{}'::jsonb
     END
   `;
+  let jsonValue = sql`to_jsonb(${value}::text)`;
+
+  if (typeof value === "boolean") {
+    jsonValue = sql`to_jsonb(${value}::boolean)`;
+  }
+
+  if (typeof value === "number") {
+    jsonValue = sql`to_jsonb(${value}::numeric)`;
+  }
 
   return sql`
     jsonb_set(
       ${objectField},
       ARRAY[${key}]::text[],
-      ${
-        typeof value === "boolean"
-          ? sql`to_jsonb(${value}::boolean)`
-          : sql`to_jsonb(${value}::text)`
-      },
+      ${jsonValue},
       ${createMissing}
     )
   `;

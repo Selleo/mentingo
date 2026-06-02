@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Turinio kūrėjas",
+      "trainer": "Trainer",
       "student": "Studentas"
     },
     "languages": {
@@ -47,7 +48,8 @@
       "quiz": "Viktorina",
       "ai_mentor": "AI mentorius",
       "embed": "Įterpti",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."
@@ -307,6 +309,7 @@
     "findInApplication": "Rasti programoje",
     "courses": "Kursai",
     "learningPaths": "Tobulėjimo keliai",
+    "calendar": "Kalendorius",
     "content": "Turinys",
     "categories": "Kategorijos",
     "users": "Vartotojai",
@@ -323,6 +326,329 @@
     },
     "qa": "Klausimai ir atsakymai",
     "tenants": "Organizacijos"
+  },
+  "calendarView": {
+    "title": "Kalendorius",
+    "description": "Peržiūrėkite suplanuotus mokymosi įvykius.",
+    "loading": "Įvykiai įkeliami",
+    "empty": "Nėra įvykių",
+    "today": "Šiandien",
+    "view": {
+      "month": "Mėnuo",
+      "week": "Savaitė",
+      "day": "Diena",
+      "monthShort": "M",
+      "weekShort": "S",
+      "dayShort": "D"
+    },
+    "create": {
+      "title": "Pridėti į kalendorių",
+      "description": "Pasirinkite, ką norite pridėti pasirinktam laikui.",
+      "noOptions": "Nėra kalendoriaus elementų, kuriuos galima sukurti.",
+      "liveKitRequired": "Sukonfigūruokite LiveKit aplinkos nustatymuose, kad įjungtumėte online Live Training. Offline mokymai lieka pasiekiami.",
+      "submit": "Sukurti live training",
+      "toast": {
+        "success": "Live training sukurtas."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Suplanuokite internetinius arba gyvus mokymus."
+      },
+      "section": {
+        "basics": "Pagrindai",
+        "schedule": "Tvarkaraštis",
+        "delivery": "Vykdymas",
+        "permissions": "Leidimai"
+      },
+      "field": {
+        "title": "Pavadinimas",
+        "description": "Aprašymas",
+        "language": "Kalba",
+        "allDay": "Visa diena",
+        "deliveryType": "Vykdymo tipas",
+        "startsAt": "Pradžia",
+        "endsAt": "Pabaiga",
+        "maxParticipants": "Maks. dalyvių",
+        "location": "Vieta",
+        "viewerPermissions": "Stebėtojų leidimai",
+        "microphoneEnabled": "Mikrofonas",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Mokymų pavadinimas",
+        "description": "Neprivalomas sesijos aprašymas",
+        "location": "Kambarys, adresas arba susitikimo vieta"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "tooltip": {
+        "title": "Šis pavadinimas rodomas kalendoriuje ir Live Training informacijoje.",
+        "description": "Neprivalomas kontekstas dalyviams prieš prisijungiant prie mokymų.",
+        "language": "Pagrindinė šio Live Training pavadinimo ir aprašymo kalba.",
+        "allDay": "Naudoja visos dienos kalendoriaus datas ir išjungia pradžios bei pabaigos laiko pasirinkimą.",
+        "deliveryType": "Online sesijos vyksta nuotoliniu būdu. Offline sesijoms reikia vietos.",
+        "startsAt": "Planuojamas pradžios laikas, rodomas kalendoriuje.",
+        "endsAt": "Planuojamas pabaigos laikas, rodomas kalendoriuje.",
+        "maxParticipants": "Šio Live Training dalyvių limitas. Dabartinis maksimumas yra 100.",
+        "location": "Neprivaloma offline mokymų vieta.",
+        "viewerPermissions": "Nustato, ką studentai gali naudoti prisijungę kaip stebėtojai.",
+        "microphoneEnabled": "Leisti stebėtojams naudoti mikrofoną sesijos metu.",
+        "cameraEnabled": "Leisti stebėtojams naudoti kamerą sesijos metu."
+      },
+      "validation": {
+        "titleRequired": "Pavadinimas privalomas.",
+        "invalidDateRange": "Pabaigos laikas turi būti po pradžios."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training format",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "host": "Host",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "In-person"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
+      "loadMoreUsers": "Load more"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "sessions": "Sessions",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Pridėti failą",
+      "download": "Atsisiųsti",
+      "removeFile": "Pašalinti {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Failas pridėtas.",
+        "removed": "Failas pašalintas."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live sesija",
+      "waitingTitle": "Sesija paruošta prisijungti",
+      "activeTitle": "Sesija aktyvi",
+      "inSession": "Sesijoje",
+      "roomTitle": "Live kambarys",
+      "participants_one": "{{count}} dalyvis",
+      "participants_few": "{{count}} dalyviai",
+      "participants_many": "{{count}} dalyvių",
+      "participants_other": "{{count}} dalyvių",
+      "microphone": "Mikrofonas",
+      "camera": "Kamera",
+      "screenShare": "Bendrinti ekraną",
+      "screen": "Ekranas",
+      "leave": "Išeiti",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
+      "empty": "Laukiama dalyvių.",
+      "materials": "Medžiaga",
+      "beforeMaterials": "Prieš",
+      "afterMaterials": "Po",
+      "noMaterials": "Failų nėra"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_few": "{{count}} active participants",
+      "activeParticipants_many": "{{count}} active participants",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_few": "{{count}} unique participants",
+      "uniqueParticipants_many": "{{count}} unique participants",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Sesija pradėta.",
+        "ended": "Sesija baigta."
+      }
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Ištrinti Live Training?",
+      "description": "Live Training bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
+      "assignedToLessonsDescription": "Šis Live Training susietas su {{count}} pamoka. Pirmiausia ištrinkite susijusią pamoką, tada Live Training.",
+      "assignedToLessonsDescription_plural": "Šis Live Training susietas su {{count}} pamokomis. Pirmiausia ištrinkite susijusias pamokas, tada Live Training.",
+      "toast": {
+        "success": "Live Training ištrintas."
+      }
+    },
+    "edit": {
+      "saveChanges": "Išsaugoti pakeitimus",
+      "toast": {
+        "success": "Live Training atnaujintas."
+      }
+    }
   },
   "newsView": {
     "header": "Naujienos",
@@ -544,7 +870,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Apdorokite kursų mokėjimus ir tvarkykite prenumeratas",
@@ -553,7 +880,8 @@
         "microsoft_authorization": "Leiskite vartotojams prisijungti naudojant „Microsoft“ paskyrą",
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
-        "luma": "Įgalinti AI kursų generavimo funkcijas"
+        "luma": "Įgalinti AI kursų generavimo funkcijas",
+        "livekit": "Sukonfigūruokite LiveKit, kad įjungtumėte online Live Training vaizdo sesijas. Be jo pasiekiami tik offline mokymai."
       }
     }
   },
@@ -963,7 +1291,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Administratorius negali pakeisti savo vaidmens",
       "noUserSelected": "Nepasirinktas joks vartotojas",
-      "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį."
+      "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį.",
+      "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Live Training."
     },
     "import": {
       "toast": {
@@ -1033,7 +1362,24 @@
         "integration_key": "integracijos raktus",
         "integration_api": "integracijos API",
         "tenant": "organizacijos konfigūraciją",
+        "calendar": "kalendorių",
+        "live_training": "gyvus mokymus",
+        "activity_log": "veiklos žurnalą",
         "other": "platformos funkcijas"
+      },
+      "descriptions": {
+        "calendar_read": "Gali peržiūrėti kalendoriaus įvykius.",
+        "live_training_read": "Gali peržiūrėti gyvus mokymus.",
+        "live_training_create": "Gali kurti gyvus mokymus.",
+        "live_training_update": "Gali redaguoti bet kuriuos gyvus mokymus.",
+        "live_training_update_own": "Gali redaguoti šio naudotojo sukurtus gyvus mokymus.",
+        "live_training_delete": "Gali trinti gyvus mokymus.",
+        "live_training_delete_own": "Gali trinti šio naudotojo sukurtus gyvus mokymus.",
+        "live_training_join": "Gali prisijungti prie gyvų mokymų sesijų.",
+        "live_training_start": "Gali pradėti gyvų mokymų sesijas.",
+        "live_training_end": "Gali užbaigti gyvų mokymų sesijas.",
+        "live_training_statistics": "Gali peržiūrėti gyvų mokymų lankomumą ir statistiką.",
+        "activity_log_read": "Gali peržiūrėti veiklos žurnalus."
       }
     },
     "dropdown": {
@@ -1203,6 +1549,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API raktas"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Išsaugoti"
     },
@@ -1531,6 +1886,7 @@
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
         "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
+        "removeLiveTrainingLesson": "Ar tikrai norite ištrinti šią Live Training pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -1623,6 +1979,9 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM paketas sėkmingai pridėtas",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
+          "liveTrainingLessonCreated": "Live Training pamoka sėkmingai sukurta",
+          "liveTrainingLessonUpdated": "Live Training pamoka sėkmingai atnaujinta",
+          "liveTrainingLessonAttached": "Live Training priskyrimas sėkmingai pridėtas",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor pamokų failai sėkmingai įkelti",
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
@@ -1637,6 +1996,25 @@
           "embedLessonUpdatedSuccessfully": "Įterpti pamoką sėkmingai atnaujinta",
           "embedLessonCreateError": "Nepavyko sukurti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą.",
           "embedLessonUpdateError": "Nepavyko atnaujinti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą."
+        },
+        "liveTraining": {
+          "createTitle": "Sukurti Live Training pamoką",
+          "editTitle": "Redaguoti Live Training pamoką",
+          "lessonTitle": "Pamokos pavadinimas",
+          "lessonTitlePlaceholder": "Kurse rodomas pamokos pavadinimas",
+          "createNewTab": "Sukurti naują",
+          "linkExistingTab": "Susieti esamą",
+          "linkExistingLoading": "Įkeliami suplanuoti Live Training...",
+          "linkExistingEmpty": "Nėra pasiekiamų suplanuotų Live Training.",
+          "linkedTitle": "Susietas Live Training",
+          "linkedDescription": "Tvarkaraštis, treneriai, failai ir sesijos nustatymai valdomi Live Training puslapyje.",
+          "openLiveTraining": "Atidaryti Live Training",
+          "openBaseLiveTraining": "Atidaryti bazinį Live Training",
+          "languageMissingTitle": "Šiai kalbai Live Training nepriskirtas",
+          "languageMissingDescription": "Ši pamoka naudoja kurso bazinės kalbos Live Training. Sukurkite arba susiekite suplanuotą Live Training, jei norite jį pakeisti pasirinktai kalbai.",
+          "validation": {
+            "liveTrainingRequired": "Pasirinkite suplanuotą Live Training susiejimui."
+          }
         },
         "field": {
           "title": "Pavadinimas",
@@ -1705,6 +2083,7 @@
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -1724,6 +2103,7 @@
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
           "aiMentorLessonDescription": "Interaktyvus pokalbis su virtualiu AI mentoriumi.",
           "scormLessonDescription": "Pamokos turinys SCORM pakete.",
+          "liveTrainingLessonDescription": "Su šiuo kursu susieta suplanuota tiesioginė sesija.",
           "fillInTheBlanksDescription": "Šiame klausime yra sakinys; mokiniai turi nuvilkti teisingą žodį į tuščią vietą.",
           "gapFillDescription": "Šiame klausime bus sakinys, kuriame trūksta žodžių, kuriuos mokiniai turi įvesti.",
           "embedLessonDescription": "Išorinis šaltinis (pvz., „Google“ forma, „Canva“ pristatymas arba „YouTube“ tiesioginis srautas).",
@@ -1951,9 +2331,9 @@
       "exportingButton": "Eksportuojama...",
       "success": "SCORM paketo atsisiuntimas pradėtas.",
       "warning": {
-        "title": "AI Mentor pamokos bus praleistos",
-        "description": "Šiame kurse yra {{count}} AI Mentor pamoka. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
-        "description_other": "Šiame kurse yra {{count}} AI Mentor pamokos. AI Mentor pamokos nėra palaikomos SCORM paketuose. Ar norite tęsti?",
+        "title": "Nepalaikomos pamokos bus praleistos",
+        "description": "Šiame kurse yra {{count}} pamoka, kuri nepalaikoma SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
+        "description_other": "Šiame kurse yra {{count}} pamokų, kurios nepalaikomos SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
         "confirm": "Vis tiek eksportuoti"
       },
       "error": {
@@ -2195,6 +2575,18 @@
       "nextSco": "Kita dalis",
       "tryAgain": "Bandykite dar kartą",
       "lessonFinished": "SCORM pamoka baigta."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Sesija aktyvi",
+      "scheduledLabel": "Suplanuota",
+      "scheduledTitle": "Live Training suplanuotas",
+      "endedLabel": "Baigta",
+      "endedTitle": "Live Training jau baigėsi",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "Nėra aktyvios Live Training sesijos",
+      "locationNotice": "Vieta",
+      "notAvailable": "Live Training šiai pamokai nepasiekiamas."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -2469,6 +2861,15 @@
       "coursesVisibilityDescription": "Leiskite lankytojams peržiūrėti kursų sąrašą ir gauti nemokamas pamokas neprisijungus",
       "modernCourseList": "Naudokite šiuolaikinį kursų sąrašo rodinį",
       "modernCourseListDescription": "Įgalinkite naują kursų sąrašo dizainą su herojų ir geriausių kursų skiltimis",
+      "calendar": "Įjungti kalendorių",
+      "calendarDescription": "Leiskite naudotojams peržiūrėti suplanuotus įvykius kalendoriuje",
+      "liveTraining": "Įjungti Live Training",
+      "liveTrainingDescription": "Leiskite treneriams kurti ir vesti tiesiogines mokymo sesijas",
+      "liveTrainingMaxParallelSessions": "Maksimalus lygiagrečių Live Training sesijų skaičius",
+      "liveTrainingMaxParallelSessionsDescription": "Apribokite, kiek Live Training sesijų gali būti aktyvios vienu metu.",
+      "liveTrainingTooltip": "Įjunkite tik tada, kai klientas turi naudoti trenerių vedamas tiesiogines sesijas.",
+      "liveTrainingDisableBlockedTooltip_one": "Šiuo metu turite {{count}} naudotoją su Trenerio vaidmeniu. Atšaukite jį, kad galėtumėte išjungti šią funkciją.",
+      "liveTrainingDisableBlockedTooltip_other": "Šiuo metu turite {{count}} naudotojų su Trenerio vaidmeniu. Atšaukite juos, kad galėtumėte išjungti šią funkciją.",
       "finishedCourseNotification": "Pranešimai apie baigtą kursą",
       "finishedCourseNotificationDescription": "Gaukite pranešimus, kai vartotojas baigia kursą",
       "studentsWithOverdueCourseNotification": "Studentai su pranešimais apie vėluojančius kursus",
@@ -2478,6 +2879,9 @@
       "newUserNotificationsPreferenceChangeSuccess": "Naujos vartotojo pranešimų nuostatos sėkmingai atnaujintos",
       "coursesVisibilityPreferenceChangeSuccess": "Kurso matomumo nuostatos neautentifikuotiems naudotojams sėkmingai atnaujintos",
       "modernCourseListPreferenceChangeSuccess": "Šiuolaikinės kursų sąrašo nuostatos sėkmingai atnaujintos",
+      "calendarPreferenceChangeSuccess": "Kalendoriaus nuostata sėkmingai atnaujinta",
+      "liveTrainingPreferenceChangeSuccess": "Live Training nuostata sėkmingai atnaujinta",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Live Training sesijų limitas sėkmingai atnaujintas",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
@@ -3045,6 +3449,7 @@
     "createQA": "Sukurti naujus klausimus ir atsakymus",
     "analytics": "Analizė",
     "progress": "Pažanga",
+    "calendar": "Kalendorius",
     "tenant": "Organizacijos informacija",
     "createTenant": "Sukurti organizaciją",
     "tenants": "Organizacijos",
@@ -3142,6 +3547,7 @@
       "user": "Vartotojas",
       "category": "Kategorija",
       "announcement": "Pranešimas",
+      "live_training": "Live Training",
       "global_settings": "Nustatymai"
     },
     "table": {
@@ -3753,6 +4159,36 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Įveskite tinkamą tekstą pasirinktai kalbai.",
+      "notFound": "Live Training nerastas.",
+      "sessionNotFound": "Live Training sesija nerasta.",
+      "invalidDateRange": "Nurodykite ir pradžios, ir pabaigos datą arba palikite abi tuščias.",
+      "invalidSchedule": "Pabaigos laikas turi būti vėlesnis už pradžios laiką.",
+      "invalidTrainer": "Vienas ar keli pasirinkti treneriai nerasti.",
+      "invalidCourse": "Vienas ar keli susieti kursai nerasti.",
+      "invalidResource": "Vienas ar keli pasirinkti ištekliai nerasti.",
+      "resourceNotFound": "Failas nerastas.",
+      "invalidResourceRelationshipType": "Pasirinkta failų sekcija neteisinga.",
+      "hostAssignmentForbidden": "Neturite teisės priskirti hostų.",
+      "hostMustHaveTrainerRole": "Priskirti hostai turi turėti Trainer rolę.",
+      "trainerAssignmentForbidden": "Neturite teisės priskirti trenerių.",
+      "linkNotCreated": "Nepavyko sukurti Live Training susiejimo.",
+      "lessonAlreadyLinked": "Ši pamoka jau susieta su Live Training.",
+      "invalidLessonLinkMode": "Pasirinkite, ar kurti naują Live Training, ar susieti esamą.",
+      "onlyScheduledCanBeLinked": "Su pamokomis galima susieti tik suplanuotus Live Training.",
+      "trainingAlreadyLinkedToLesson": "Šis Live Training šiame kurse jau susietas su pamoka.",
+      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Live Training, kad pakeistumėte sesijos duomenis.",
+      "unsupportedLessonLanguage": "Šis kursas nepalaiko pasirinktos kalbos.",
+      "baseLanguageAssignmentRequired": "Live Training pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
+      "invalidLessonType": "Live Training priskyrimus galima pridėti tik prie Live Training pamokų.",
+      "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training.",
+      "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
+      "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
+      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Live Training sesijų skaičius."
     }
   }
 }

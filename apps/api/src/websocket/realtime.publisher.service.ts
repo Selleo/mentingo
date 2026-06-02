@@ -8,6 +8,10 @@ import type { RealtimePublisher } from "src/websocket/realtime.publisher";
 export class SocketRealtimePublisher implements RealtimePublisher {
   constructor(private readonly wsGateway: WsGateway) {}
 
+  emitToAll(event: string, payload: unknown): void {
+    this.wsGateway.server.emit(event, payload);
+  }
+
   emitToRoom(event: string, roomId: string, payload: unknown): void {
     this.wsGateway.emitToRoom(roomId, event, payload);
   }

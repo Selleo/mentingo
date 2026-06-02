@@ -22,6 +22,7 @@ import {
   resourceEntity,
   resources,
   coursesSettingsHelpers,
+  liveLessons,
 } from "src/storage/schema";
 
 import type { LessonTypes } from "../lesson.type";
@@ -166,6 +167,16 @@ export class LessonRepository {
           END
         `,
         isExternal: sql<boolean>`${lessons.isExternal}`,
+        liveTrainingId: sql<UUIDType | null>`
+          (
+            SELECT ${liveLessons.liveTrainingId}
+            FROM ${liveLessons}
+            WHERE ${liveLessons.lessonId} = ${lessons.id}
+              AND ${liveLessons.language} IN (${language}, ${courses.baseLanguage})
+            ORDER BY CASE WHEN ${liveLessons.language} = ${language} THEN 0 ELSE 1 END
+            LIMIT 1
+          )
+        `,
         isFreemium: sql<boolean>`${chapters.isFreemium}`,
         isEnrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
         studentCourses: sql<string>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN ${studentCourses.id} ELSE NULL END`,

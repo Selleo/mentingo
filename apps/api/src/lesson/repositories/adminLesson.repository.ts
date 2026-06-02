@@ -9,6 +9,7 @@ import {
   aiMentorLessons,
   chapters,
   courses,
+  liveLessons,
   lessons,
   questionAnswerOptions,
   questions,
@@ -28,6 +29,7 @@ import type {
   UpdateLessonBody,
   UpdateQuizLessonBody,
 } from "../lesson.schema";
+import type { CreateLiveLessonInput } from "../lesson.type";
 import type {
   AiMentorType,
   AiMentorTTSPreset,
@@ -106,8 +108,8 @@ export class AdminLessonRepository {
     return lesson;
   }
 
-  async updateLesson(id: UUIDType, data: UpdateLessonBody) {
-    const [updatedLesson] = await this.db
+  async updateLesson(id: UUIDType, data: UpdateLessonBody, dbInstance: DatabasePg = this.db) {
+    const [updatedLesson] = await dbInstance
       .update(lessons)
       .set({
         ...data,
@@ -399,6 +401,53 @@ export class AdminLessonRepository {
     `);
   }
 
+  async getLiveLessonByLessonIdAndLanguage(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [liveLesson] = await dbInstance
+      .select({ id: liveLessons.id })
+      .from(liveLessons)
+      .where(and(eq(liveLessons.lessonId, lessonId), eq(liveLessons.language, language)));
+
+    return liveLesson ?? null;
+  }
+
+  async getResolvedLiveLessonByLessonId(
+    lessonId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [liveLesson] = await dbInstance
+      .select({
+        id: liveLessons.id,
+        liveTrainingId: liveLessons.liveTrainingId,
+        language: liveLessons.language,
+      })
+      .from(liveLessons)
+      .where(
+        and(
+          eq(liveLessons.lessonId, lessonId),
+          inArray(liveLessons.language, [language, baseLanguage]),
+        ),
+      )
+      .orderBy(sql`CASE WHEN ${liveLessons.language} = ${language} THEN 0 ELSE 1 END`)
+      .limit(1);
+
+    return liveLesson ?? null;
+  }
+
+  async createLiveLesson(data: CreateLiveLessonInput, dbInstance: DatabasePg = this.db) {
+    const [liveLesson] = await dbInstance
+      .insert(liveLessons)
+      .values(data)
+      .returning({ id: liveLessons.id });
+
+    return liveLesson;
+  }
+
   async updateLessonDisplayOrderAfterRemove(chapterId: UUIDType, dbInstance: DatabasePg = this.db) {
     return dbInstance.execute(sql`
         WITH ranked_chapters AS (
@@ -681,7 +730,11 @@ export class AdminLessonRepository {
 
   async getCourseByLesson(lessonId: UUIDType) {
     return this.db
-      .select({ ...getTableColumns(courses) })
+      .select({
+        ...getTableColumns(courses),
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(chapters.courseId, courses.id))
@@ -690,7 +743,11 @@ export class AdminLessonRepository {
 
   async getCourseByChapter(chapterId: UUIDType) {
     return this.db
-      .select({ ...getTableColumns(courses) })
+      .select({
+        ...getTableColumns(courses),
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
       .from(chapters)
       .innerJoin(courses, eq(chapters.courseId, courses.id))
       .where(eq(chapters.id, chapterId));

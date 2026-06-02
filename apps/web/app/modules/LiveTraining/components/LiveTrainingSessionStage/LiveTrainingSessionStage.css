@@ -1,0 +1,14 @@
+.live-training-inline-editable--text {
+  outline: 1px solid transparent;
+  outline-offset: 2px;
+}
+
+.live-training-inline-editable--text:hover {
+  outline-color: rgba(255, 255, 255, 0.7);
+  outline-style: dotted;
+}
+
+.live-training-inline-editable--text:focus-within {
+  outline-color: rgba(255, 255, 255, 0.75);
+  outline-style: solid;
+}

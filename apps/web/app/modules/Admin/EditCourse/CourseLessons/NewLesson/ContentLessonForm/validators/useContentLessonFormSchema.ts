@@ -19,7 +19,7 @@ export const contentLessonFormSchema = (t: typeof i18next.t) =>
       .refine((val) => val !== "<p></p>" && val.trim() !== "", {
         message: t("adminCourseView.curriculum.lesson.validation.descriptionRequired"),
       }),
-    type: z.nativeEnum(LessonType),
+    type: z.literal(LessonType.CONTENT),
   });
 
 export type ContentLessonFormValues = z.infer<ReturnType<typeof contentLessonFormSchema>>;

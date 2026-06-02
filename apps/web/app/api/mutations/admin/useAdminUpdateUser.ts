@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { GROUPS_QUERY_KEY } from "~/api/queries/admin/useGroups";
+import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { invalidateCertificateResetData } from "~/api/utils/invalidateCertificateResetData";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
@@ -41,6 +42,7 @@ export function useAdminUpdateUser() {
       await queryClient.invalidateQueries({
         queryKey: [COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY],
       });
+      await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateCertificateResetData();
       await invalidateLearningPathEnrollmentData();
 

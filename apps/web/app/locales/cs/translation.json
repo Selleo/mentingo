@@ -33,6 +33,7 @@
     "roles": {
       "admin": "Admin",
       "contentCreator": "Tvůrce obsahu",
+      "trainer": "Trainer",
       "student": "Student"
     },
     "languages": {
@@ -47,7 +48,8 @@
       "quiz": "Kvíz",
       "ai_mentor": "AI mentor",
       "embed": "Vložit",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Live Training"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."
@@ -307,6 +309,7 @@
     "findInApplication": "Najít v aplikaci",
     "courses": "Kurzy",
     "learningPaths": "Rozvojové cesty",
+    "calendar": "Kalendář",
     "content": "Obsah",
     "categories": "Kategorie",
     "users": "Uživatelé",
@@ -323,6 +326,329 @@
     },
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace"
+  },
+  "calendarView": {
+    "title": "Kalendář",
+    "description": "Zobrazit naplánované vzdělávací události.",
+    "loading": "Načítání událostí",
+    "empty": "Žádné události k zobrazení",
+    "today": "Dnes",
+    "view": {
+      "month": "Měsíc",
+      "week": "Týden",
+      "day": "Den",
+      "monthShort": "M",
+      "weekShort": "T",
+      "dayShort": "D"
+    },
+    "create": {
+      "title": "Přidat do kalendáře",
+      "description": "Vyberte, co chcete přidat pro zvolený čas.",
+      "noOptions": "Nejsou dostupné žádné položky k vytvoření.",
+      "liveKitRequired": "Nakonfigurujte LiveKit v nastavení prostředí, abyste povolili online Live Training. Offline školení zůstávají dostupná.",
+      "submit": "Vytvořit live training",
+      "toast": {
+        "success": "Live training byl vytvořen."
+      },
+      "liveTrainingOption": {
+        "title": "Live Training",
+        "description": "Naplánujte online nebo offline školení."
+      },
+      "section": {
+        "basics": "Základy",
+        "schedule": "Plán",
+        "delivery": "Realizace",
+        "permissions": "Oprávnění"
+      },
+      "field": {
+        "title": "Název",
+        "description": "Popis",
+        "language": "Jazyk",
+        "allDay": "Celý den",
+        "deliveryType": "Typ realizace",
+        "startsAt": "Začátek",
+        "endsAt": "Konec",
+        "maxParticipants": "Max. účastníků",
+        "location": "Místo",
+        "viewerPermissions": "Oprávnění diváků",
+        "microphoneEnabled": "Mikrofon",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Název školení",
+        "description": "Volitelný popis relace",
+        "location": "Místnost, adresa nebo místo setkání"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "tooltip": {
+        "title": "Tento název se zobrazí v kalendáři a v detailech Live Training.",
+        "description": "Volitelný kontext pro účastníky před připojením ke školení.",
+        "language": "Základní jazyk názvu a popisu tohoto Live Training.",
+        "allDay": "Použije celodenní kalendářní datum a vypne výběr času začátku a konce.",
+        "deliveryType": "Online relace jsou vzdálené. Offline relace vyžadují místo.",
+        "startsAt": "Plánovaný čas začátku zobrazený v kalendáři.",
+        "endsAt": "Plánovaný čas konce zobrazený v kalendáři.",
+        "maxParticipants": "Limit účastníků pro toto Live Training. Aktuální maximum je 100.",
+        "location": "Volitelné místo pro offline školení.",
+        "viewerPermissions": "Určuje, co mohou studenti používat při připojení jako diváci.",
+        "microphoneEnabled": "Povolí divákům používat mikrofon během relace.",
+        "cameraEnabled": "Povolí divákům používat kameru během relace."
+      },
+      "validation": {
+        "titleRequired": "Název je povinný.",
+        "invalidDateRange": "Čas konce musí být po začátku."
+      }
+    },
+    "details": {
+      "title": "Event details",
+      "description": "Calendar event metadata",
+      "unknown": "Unknown",
+      "author": "Author: {{name}}",
+      "trainers": "{{count}} trainer",
+      "trainers_plural": "{{count}} trainers",
+      "noTrainers": "No additional trainers",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hosts",
+      "noHosts": "No additional hosts",
+      "action": {
+        "edit": "Edit event",
+        "goToLiveTraining": "Go to Live Training"
+      },
+      "sourceType": {
+        "liveTraining": "Live Training"
+      },
+      "field": {
+        "time": "Time",
+        "training": "Training format",
+        "linkedCourses": "Linked courses",
+        "location": "Location",
+        "people": "People"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "In-person"
+      },
+      "status": {
+        "scheduled": "Scheduled",
+        "cancelled": "Cancelled",
+        "ended": "Ended",
+        "expired": "Expired"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Author",
+        "host": "Host",
+        "trainer": "Trainer",
+        "observer": "Observer"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Live Training",
+    "description": "This page will contain the full Live Training workspace.",
+    "errors": {
+      "idRequired": "Live Training id is required."
+    },
+    "status": {
+      "scheduled": "Scheduled",
+      "active": "Active",
+      "ended": "Ended",
+      "cancelled": "Cancelled",
+      "expired": "Expired"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "In-person"
+    },
+    "visibility": {
+      "all": "All users",
+      "linked_courses": "Linked courses"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "start": "Start session",
+      "join": "Join session",
+      "finish": "Finish session"
+    },
+    "stage": {
+      "preview": "Session preview",
+      "activeTitle": "Live session is active",
+      "waitingTitle": "Session is waiting",
+      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
+      "activeBadge": "Active",
+      "waitingBadge": "Waiting",
+      "participants": "Participants",
+      "viewerMic": "Viewer microphone",
+      "viewerCamera": "Viewer camera",
+      "scheduleTooltip": "Planned training time",
+      "timezoneTooltip": "Training timezone",
+      "maxParticipantsTooltip": "Maximum participants",
+      "locationTooltip": "Training location",
+      "offlineTitle": "Offline training",
+      "locationMissing": "Location has not been set."
+    },
+    "sidebar": {
+      "lifecycle": "Session lifecycle",
+      "status": "Status",
+      "participants": "Participants",
+      "peak": "Peak",
+      "people": "People",
+      "author": "Author",
+      "host": "Host",
+      "hosts": "Hosts",
+      "noHosts": "No hosts assigned.",
+      "trainer": "Trainer",
+      "trainers": "Trainers",
+      "noTrainers": "No trainers assigned.",
+      "unknownUser": "Unknown user",
+      "details": "Training details",
+      "maxParticipants": "Max participants",
+      "visibility": "Visibility",
+      "courses": "Linked courses",
+      "location": "Location",
+      "addHost": "Add",
+      "addHostHint": "Add host",
+      "removeHost": "Remove host {{name}}",
+      "addTrainer": "Add",
+      "addTrainerHint": "Add trainer",
+      "removeTrainer": "Remove trainer {{name}}",
+      "searchPeople": "Search people",
+      "noUserResults": "No users found",
+      "loadingUsers": "Loading users",
+      "loadMoreUsers": "Load more"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "files": "Files",
+      "sessions": "Sessions",
+      "settings": "Settings"
+    },
+    "files": {
+      "title": "Live Training files",
+      "description": "Materials are split by when students should use them.",
+      "beforeHeading": "Before training",
+      "beforeDescription": "Materials available before the training starts.",
+      "afterHeading": "After training",
+      "afterDescription": "Materials available after the training is finished.",
+      "empty": "No files attached yet.",
+      "afterLocked": "Post-session files unlock when the training is finished.",
+      "addFile": "Přidat soubor",
+      "download": "Stáhnout",
+      "removeFile": "Odebrat {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Soubor byl přidán.",
+        "removed": "Soubor byl odebrán."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Live session",
+      "waitingTitle": "Session je připravena k připojení",
+      "activeTitle": "Session je aktivní",
+      "inSession": "V session",
+      "roomTitle": "Live místnost",
+      "participants_one": "{{count}} účastník",
+      "participants_few": "{{count}} účastníci",
+      "participants_many": "{{count}} účastníků",
+      "participants_other": "{{count}} účastníků",
+      "microphone": "Mikrofon",
+      "camera": "Kamera",
+      "screenShare": "Sdílet obrazovku",
+      "screen": "Obrazovka",
+      "leave": "Odejít",
+      "finish": "Finish session",
+      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finishDialog": {
+        "title": "Finish session?",
+        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
+        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
+        "cancel": "Cancel",
+        "confirmEnd": "Finish session",
+        "confirmLeave": "Leave session"
+      },
+      "empty": "Čeká se na účastníky.",
+      "materials": "Materiály",
+      "beforeMaterials": "Před",
+      "afterMaterials": "Po",
+      "noMaterials": "Žádné soubory"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "description": "Each started session is stored separately with its attendance.",
+      "empty": "No sessions have been started yet.",
+      "activeParticipants_one": "{{count}} active participant",
+      "activeParticipants_few": "{{count}} active participants",
+      "activeParticipants_many": "{{count}} active participants",
+      "activeParticipants_other": "{{count}} active participants",
+      "uniqueParticipants_one": "{{count}} unique participant",
+      "uniqueParticipants_few": "{{count}} unique participants",
+      "uniqueParticipants_many": "{{count}} unique participants",
+      "uniqueParticipants_other": "{{count}} unique participants",
+      "peakParticipants": "Peak {{count}}",
+      "startedBy": "Started by",
+      "endedBy": "Ended by",
+      "notEnded": "Not ended",
+      "notAvailable": "N/A",
+      "endReason": "End reason",
+      "noEndReason": "No end reason",
+      "status": {
+        "waiting": "Waiting",
+        "active": "Active",
+        "ended": "Ended",
+        "failed": "Failed"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Co-trainer",
+        "moderator": "Moderator",
+        "observer": "Observer",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "No attendance has been recorded for this session yet.",
+        "user": "User",
+        "role": "Role",
+        "totalTime": "Time attended",
+        "firstJoinedAt": "First joined",
+        "lastLeftAt": "Last left",
+        "joinCount": "Joins"
+      },
+      "toast": {
+        "started": "Session byla spuštěna.",
+        "ended": "Session byla ukončena."
+      }
+    },
+    "attendance": {
+      "title": "Attendance",
+      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Less frequently used session settings will live here."
+    },
+    "boolean": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "deleteDialog": {
+      "title": "Smazat Live Training?",
+      "description": "Live Training bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
+      "assignedToLessonsDescription": "Tento Live Training je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Live Training.",
+      "assignedToLessonsDescription_plural": "Tento Live Training je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Live Training.",
+      "toast": {
+        "success": "Live Training byl smazán."
+      }
+    },
+    "edit": {
+      "saveChanges": "Uložit změny",
+      "toast": {
+        "success": "Live Training byl aktualizován."
+      }
+    }
   },
   "newsView": {
     "header": "Zprávy",
@@ -544,7 +870,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Zpracovávejte platby za kurzy a spravujte předplatné",
@@ -553,7 +880,8 @@
         "microsoft_authorization": "Umožněte uživatelům přihlásit se pomocí jejich účtu Microsoft",
         "slack_authorization": "Umožněte uživatelům přihlásit se pomocí účtu Slack",
         "openAI": "Povolit funkce AI Mentor",
-        "luma": "Povolit funkce generování kurzů AI"
+        "luma": "Povolit funkce generování kurzů AI",
+        "livekit": "Nakonfigurujte LiveKit, abyste povolili online video relace Live Training. Bez něj jsou dostupná pouze offline školení."
       }
     }
   },
@@ -963,7 +1291,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
       "noUserSelected": "Nebyl vybrán žádný uživatel",
-      "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli."
+      "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli.",
+      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Live Training."
     },
     "import": {
       "toast": {
@@ -1033,7 +1362,24 @@
         "integration_key": "integrační klíče",
         "integration_api": "integrační API",
         "tenant": "konfiguraci organizace",
+        "calendar": "kalendář",
+        "live_training": "živá školení",
+        "activity_log": "protokol aktivit",
         "other": "funkce platformy"
+      },
+      "descriptions": {
+        "calendar_read": "Může zobrazit události v kalendáři.",
+        "live_training_read": "Může zobrazit živá školení.",
+        "live_training_create": "Může vytvářet živá školení.",
+        "live_training_update": "Může upravovat libovolné živé školení.",
+        "live_training_update_own": "Může upravovat živá školení vytvořená tímto uživatelem.",
+        "live_training_delete": "Může mazat živá školení.",
+        "live_training_delete_own": "Může mazat živá školení vytvořená tímto uživatelem.",
+        "live_training_join": "Může se připojit k relacím živého školení.",
+        "live_training_start": "Může spouštět relace živého školení.",
+        "live_training_end": "Může ukončovat relace živého školení.",
+        "live_training_statistics": "Může zobrazit docházku a statistiky živých školení.",
+        "activity_log_read": "Může zobrazit protokoly aktivit."
       }
     },
     "dropdown": {
@@ -1203,6 +1549,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API klíč"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Uložit"
     },
@@ -1531,6 +1886,7 @@
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
         "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
+        "removeLiveTrainingLesson": "Opravdu chcete smazat tuto lekci Live Training z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -1623,6 +1979,9 @@
           "scormLessonPackageAttachedSuccessfully": "Balíček SCORM byl úspěšně připojen",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
+          "liveTrainingLessonCreated": "Lekce Live Training byla úspěšně vytvořena",
+          "liveTrainingLessonUpdated": "Lekce Live Training byla úspěšně aktualizována",
+          "liveTrainingLessonAttached": "Přiřazení Live Training bylo úspěšně připojeno",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
           "aiMentorLessonFileAddedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně nahrány",
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
@@ -1637,6 +1996,25 @@
           "embedLessonUpdatedSuccessfully": "Vložená lekce byla úspěšně aktualizována",
           "embedLessonCreateError": "Vytvoření vložené lekce se nezdařilo. Zkontrolujte prosím všechna pole a zkuste to znovu.",
           "embedLessonUpdateError": "Aktualizace lekce vložení se nezdařila. Zkontrolujte prosím všechna pole a zkuste to znovu."
+        },
+        "liveTraining": {
+          "createTitle": "Vytvořit lekci Live Training",
+          "editTitle": "Upravit lekci Live Training",
+          "lessonTitle": "Název lekce",
+          "lessonTitlePlaceholder": "Název lekce zobrazený v kurzu",
+          "createNewTab": "Vytvořit nový",
+          "linkExistingTab": "Propojit existující",
+          "linkExistingLoading": "Načítání naplánovaných Live Training...",
+          "linkExistingEmpty": "Nejsou dostupné žádné naplánované Live Training.",
+          "linkedTitle": "Propojený Live Training",
+          "linkedDescription": "Plán, trenéři, soubory a nastavení relace se spravují na stránce Live Training.",
+          "openLiveTraining": "Otevřít Live Training",
+          "openBaseLiveTraining": "Otevřít základní Live Training",
+          "languageMissingTitle": "Pro tento jazyk není přiřazen Live Training",
+          "languageMissingDescription": "Tato lekce používá Live Training ze základního jazyka kurzu. Vytvořte nebo propojte naplánovaný Live Training, pokud ho chcete pro vybraný jazyk změnit.",
+          "validation": {
+            "liveTrainingRequired": "Vyberte naplánovaný Live Training k propojení."
+          }
         },
         "field": {
           "title": "Titul",
@@ -1705,6 +2083,7 @@
           "aiMentor": "AI mentor",
           "embed": "Vložit",
           "scorm": "SCORM",
+          "liveTraining": "Live Training",
           "correct": "Opravit",
           "true": "Věrný",
           "false": "Falešný",
@@ -1724,6 +2103,7 @@
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
           "aiMentorLessonDescription": "Interaktivní rozhovor s virtuálním AI mentorem.",
           "scormLessonDescription": "Obsah lekce v balíčku SCORM.",
+          "liveTrainingLessonDescription": "Naplánovaná živá relace propojená s tímto kurzem.",
           "fillInTheBlanksDescription": "Tato otázka obsahuje větu; studenti musí přetáhnout správné slovo do prázdného místa.",
           "gapFillDescription": "Tato otázka bude obsahovat větu s chybějícími slovy, která studenti musí zadat.",
           "embedLessonDescription": "Externí zdroj (např. formulář Google, prezentace Canva nebo živý přenos YouTube).",
@@ -1951,9 +2331,9 @@
       "exportingButton": "Exportování...",
       "success": "Stahování balíčku SCORM bylo zahájeno.",
       "warning": {
-        "title": "Lekce AI Mentor budou přeskočeny",
-        "description": "Tento kurz obsahuje {{count}} lekci AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
-        "description_other": "Tento kurz obsahuje {{count}} lekce AI Mentor. Lekce AI Mentor nejsou v balíčcích SCORM podporovány. Chcete pokračovat?",
+        "title": "Nepodporované lekce budou přeskočeny",
+        "description": "Tento kurz obsahuje {{count}} lekci, která není v balíčcích SCORM podporována. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
+        "description_other": "Tento kurz obsahuje {{count}} lekcí, které nejsou v balíčcích SCORM podporovány. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
         "confirm": "Přesto exportovat"
       },
       "error": {
@@ -2195,6 +2575,18 @@
       "nextSco": "Další část",
       "tryAgain": "Zkuste to znovu",
       "lessonFinished": "Lekce SCORM byla dokončena."
+    },
+    "liveTraining": {
+      "activeLabel": "Live Training",
+      "activeTitle": "Sezení je aktivní",
+      "scheduledLabel": "Naplánováno",
+      "scheduledTitle": "Live Training je naplánován",
+      "endedLabel": "Ukončeno",
+      "endedTitle": "Live Training již skončil",
+      "inactiveLabel": "Live Training",
+      "inactiveTitle": "Žádné Live Training sezení není aktivní",
+      "locationNotice": "Místo",
+      "notAvailable": "Live Training není pro tuto lekci dostupný."
     },
     "videoProcessing": {
       "title": "Video se zpracovává",
@@ -2469,6 +2861,15 @@
       "coursesVisibilityDescription": "Umožněte návštěvníkům zobrazit seznam kurzů a přistupovat k bezplatným lekcím bez přihlášení",
       "modernCourseList": "Použijte moderní zobrazení seznamu kurzů",
       "modernCourseListDescription": "Povolte nový design seznamu kurzů se sekcemi hrdinů a nejlepších kurzů",
+      "calendar": "Povolit kalendář",
+      "calendarDescription": "Umožnit uživatelům zobrazit naplánované události v kalendáři",
+      "liveTraining": "Povolit Live Training",
+      "liveTrainingDescription": "Umožnit školitelům vytvářet a vést živá školení",
+      "liveTrainingMaxParallelSessions": "Maximální počet souběžných relací Live Training",
+      "liveTrainingMaxParallelSessionsDescription": "Omezte počet relací Live Training, které mohou být aktivní současně.",
+      "liveTrainingTooltip": "Zapněte pouze tehdy, když má tenant používat živé relace vedené trenéry.",
+      "liveTrainingDisableBlockedTooltip_one": "Aktuálně máte {{count}} uživatele s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
+      "liveTrainingDisableBlockedTooltip_other": "Aktuálně máte {{count}} uživatelů s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
       "finishedCourseNotification": "Oznámení o dokončeném kurzu",
       "finishedCourseNotificationDescription": "Dostávat upozornění, když uživatel dokončí kurz",
       "studentsWithOverdueCourseNotification": "Studenti s oznámeními o pozdních kurzech",
@@ -2478,6 +2879,9 @@
       "newUserNotificationsPreferenceChangeSuccess": "Předvolby upozornění pro nové uživatele byly úspěšně aktualizovány",
       "coursesVisibilityPreferenceChangeSuccess": "Předvolby viditelnosti kurzu pro neověřené uživatele byly úspěšně aktualizovány",
       "modernCourseListPreferenceChangeSuccess": "Předvolba seznamu moderních kurzů byla úspěšně aktualizována",
+      "calendarPreferenceChangeSuccess": "Předvolba kalendáře byla úspěšně aktualizována",
+      "liveTrainingPreferenceChangeSuccess": "Předvolba Live Training byla úspěšně aktualizována",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit relací Live Training byl úspěšně aktualizován",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
@@ -3044,6 +3448,7 @@
     "createQA": "Vytvořit nové otázky a odpovědi",
     "analytics": "Analytics",
     "progress": "Pokrok",
+    "calendar": "Kalendář",
     "tenant": "Podrobnosti organizace",
     "createTenant": "Vytvořit organizaci",
     "tenants": "Organizace",
@@ -3141,6 +3546,7 @@
       "user": "Uživatel",
       "category": "Kategorie",
       "announcement": "Oznámení",
+      "live_training": "Live Training",
       "global_settings": "Nastavení"
     },
     "table": {
@@ -3752,6 +4158,36 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Zadejte platný text pro vybraný jazyk.",
+      "notFound": "Live Training nebyl nalezen.",
+      "sessionNotFound": "Relace Live Training nebyla nalezena.",
+      "invalidDateRange": "Zadejte datum začátku i konce, nebo nechte obě pole prázdná.",
+      "invalidSchedule": "Čas konce musí být po čase začátku.",
+      "invalidTrainer": "Jeden nebo více vybraných trenérů nebylo nalezeno.",
+      "invalidCourse": "Jeden nebo více propojených kurzů nebylo nalezeno.",
+      "invalidResource": "Jeden nebo více vybraných zdrojů nebylo nalezeno.",
+      "resourceNotFound": "Soubor nebyl nalezen.",
+      "invalidResourceRelationshipType": "Vybraná sekce souborů je neplatná.",
+      "hostAssignmentForbidden": "Nemáte oprávnění přiřazovat hostitele.",
+      "hostMustHaveTrainerRole": "Přiřazení hostitelé musí mít roli Trainer.",
+      "trainerAssignmentForbidden": "Nemáte oprávnění přiřazovat trenéry.",
+      "linkNotCreated": "Propojení Live Training se nepodařilo vytvořit.",
+      "lessonAlreadyLinked": "Tato lekce již má propojený Live Training.",
+      "invalidLessonLinkMode": "Vyberte, zda chcete vytvořit nový Live Training, nebo propojit existující.",
+      "onlyScheduledCanBeLinked": "K lekcím lze propojit pouze naplánované Live Training.",
+      "trainingAlreadyLinkedToLesson": "Tento Live Training je v tomto kurzu již propojen s lekcí.",
+      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Live Training.",
+      "unsupportedLessonLanguage": "Tento kurz nepodporuje vybraný jazyk.",
+      "baseLanguageAssignmentRequired": "Lekce Live Training musí být nejprve vytvořena v základním jazyce kurzu.",
+      "invalidLessonType": "Přiřazení Live Training lze přidat pouze k lekcím Live Training.",
+      "deleteAssignedToLesson": "Tento Live Training je propojen s lekcí. Nejdříve smažte lekci a až potom Live Training.",
+      "liveKitNotConfigured": "LiveKit není nakonfigurován.",
+      "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Live Training."
     }
   }
 }

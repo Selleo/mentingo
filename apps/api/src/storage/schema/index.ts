@@ -6,6 +6,13 @@ import {
   LEARNING_PATH_CERTIFICATE_STATUSES,
   LEARNING_PATH_PROGRESS_STATUSES,
   LEARNING_PATH_STATUSES,
+  CALENDAR_EVENT_STATUSES,
+  LIVE_TRAINING_DELIVERY_TYPES,
+  LIVE_TRAINING_LINK_ENTITY_TYPES,
+  LIVE_TRAINING_MEMBER_ROLES,
+  LIVE_TRAINING_SESSION_STATUSES,
+  LIVE_TRAINING_STATUSES,
+  LIVE_TRAINING_VISIBILITY_SCOPES,
   SCORM_COMPLETION_STATUS,
   SCORM_PACKAGE_ENTITY_TYPE,
   SCORM_PACKAGE_STATUS,
@@ -15,6 +22,9 @@ import {
   SUPPORTED_LANGUAGES,
   SUPPORT_SESSION_STATUSES,
   TENANT_STATUSES,
+  ANNOUNCEMENT_EMAIL_TEMPLATES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -79,6 +89,18 @@ import type {
   LearningPathStatus,
   CertificateArchiveReason,
   CertificateStatus,
+  CalendarEventStatus,
+  AnnouncementEmailTemplate,
+  AnnouncementSourceType,
+  AnnouncementStatus,
+  LiveTrainingDeliveryType,
+  LiveTrainingLinkEntityType,
+  LiveTrainingMemberRole,
+  LiveTrainingParticipantRole,
+  LiveTrainingSettings,
+  LiveTrainingSessionStatus,
+  LiveTrainingStatus,
+  LiveTrainingVisibilityScope,
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -373,6 +395,347 @@ export const lessons = pgTable(
     tenantId,
   },
   withTenantIdIndex("lessons"),
+);
+
+export const calendarEvents = pgTable(
+  "calendar_events",
+  {
+    ...id,
+    ...timestamps,
+    uid: text("uid").notNull(),
+    sequence: integer("sequence").notNull().default(0),
+    status: text("status")
+      .notNull()
+      .$type<CalendarEventStatus>()
+      .default(CALENDAR_EVENT_STATUSES.SCHEDULED),
+    baseLanguage,
+    availableLocales,
+    title: jsonb("title").default({}).notNull().$type<LocalizedText>(),
+    description: jsonb("description").$type<LocalizedText>(),
+    startsAt: timestamp("starts_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    endsAt: timestamp("ends_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    allDay: boolean("all_day").notNull().default(false),
+    timezone: text("timezone").notNull(),
+    location: text("location"),
+    organizerUserId: uuid("organizer_user_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    rrule: text("rrule"),
+    exdates: jsonb("exdates"),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("calendar_events", (table) => ({
+    scheduleIdx: index("calendar_events_tenant_starts_ends_idx").on(
+      table.tenantId,
+      table.startsAt,
+      table.endsAt,
+    ),
+    uidIdx: index("calendar_events_tenant_uid_idx").on(table.tenantId, table.uid),
+  })),
+);
+
+export const liveTrainings = pgTable(
+  "live_trainings",
+  {
+    ...id,
+    ...timestamps,
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    authorId: uuid("author_id")
+      .references(() => users.id)
+      .notNull(),
+    baseLanguage,
+    availableLocales,
+    deliveryType: text("delivery_type")
+      .notNull()
+      .$type<LiveTrainingDeliveryType>()
+      .default(LIVE_TRAINING_DELIVERY_TYPES.ONLINE),
+    visibilityScope: text("visibility_scope")
+      .notNull()
+      .$type<LiveTrainingVisibilityScope>()
+      .default(LIVE_TRAINING_VISIBILITY_SCOPES.LINKED_COURSES),
+    status: text("status")
+      .notNull()
+      .$type<LiveTrainingStatus>()
+      .default(LIVE_TRAINING_STATUSES.SCHEDULED),
+    maxParticipants: integer("max_participants").notNull().default(100),
+    settings: jsonb("settings")
+      .default({
+        viewerPermissions: {
+          microphoneEnabled: false,
+          cameraEnabled: false,
+        },
+      })
+      .notNull()
+      .$type<LiveTrainingSettings>(),
+    metadata: jsonb("metadata").default({}).notNull(),
+    deletedAt: timestamp("deleted_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("live_trainings", (table) => ({
+    statusIdx: index("live_trainings_tenant_status_idx").on(table.tenantId, table.status),
+    authorIdx: index("live_trainings_author_idx").on(table.authorId),
+  })),
+);
+
+export const liveTrainingMembers = pgTable(
+  "live_training_members",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    role: text("role")
+      .notNull()
+      .$type<LiveTrainingMemberRole>()
+      .default(LIVE_TRAINING_MEMBER_ROLES.HOST),
+    displayOrder: integer("display_order"),
+    settings: jsonb("settings").default({}).notNull(),
+    metadata: jsonb("metadata").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("live_training_members", (table) => ({
+    memberUniqueIdx: uniqueIndex("live_training_members_training_user_unique_idx").on(
+      table.liveTrainingId,
+      table.userId,
+    ),
+    liveTrainingIdx: index("live_training_members_training_idx").on(
+      table.tenantId,
+      table.liveTrainingId,
+    ),
+    userIdx: index("live_training_members_user_idx").on(table.tenantId, table.userId),
+    roleIdx: index("live_training_members_role_idx").on(table.tenantId, table.role),
+  })),
+);
+
+export const liveTrainingLinks = pgTable(
+  "live_training_links",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    entityType: text("entity_type")
+      .notNull()
+      .$type<LiveTrainingLinkEntityType>()
+      .default(LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+    entityId: uuid("entity_id").notNull(),
+    metadata: jsonb("metadata").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("live_training_links", (table) => ({
+    linkUniqueIdx: uniqueIndex("live_training_links_training_entity_unique_idx").on(
+      table.liveTrainingId,
+      table.entityType,
+      table.entityId,
+    ),
+    liveTrainingIdx: index("live_training_links_training_idx").on(
+      table.tenantId,
+      table.liveTrainingId,
+    ),
+    entityIdx: index("live_training_links_entity_idx").on(
+      table.tenantId,
+      table.entityType,
+      table.entityId,
+    ),
+  })),
+);
+
+export const liveLessons = pgTable(
+  "live_lessons",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    liveTrainingLinkId: uuid("live_training_link_id")
+      .references(() => liveTrainingLinks.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    language: text("language")
+      .$type<SupportedLanguages>()
+      .notNull()
+      .default(SUPPORTED_LANGUAGES.EN),
+    tenantId,
+  },
+  withTenantIdIndex("live_lessons", (table) => ({
+    lessonLanguageUniqueIdx: uniqueIndex("live_lessons_lesson_language_unique_idx").on(
+      table.lessonId,
+      table.language,
+    ),
+    liveTrainingLinkIdx: index("live_lessons_training_link_idx").on(
+      table.tenantId,
+      table.liveTrainingLinkId,
+    ),
+    liveTrainingIdx: index("live_lessons_training_idx").on(table.tenantId, table.liveTrainingId),
+  })),
+);
+
+export const liveTrainingSessions = pgTable(
+  "live_training_sessions",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    status: text("status")
+      .notNull()
+      .$type<LiveTrainingSessionStatus>()
+      .default(LIVE_TRAINING_SESSION_STATUSES.WAITING),
+    startedAt: timestamp("started_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    endedAt: timestamp("ended_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    startedByUserId: uuid("started_by_user_id").references(() => users.id),
+    endedByUserId: uuid("ended_by_user_id").references(() => users.id),
+    endReason: text("end_reason"),
+    livekitRoomName: text("livekit_room_name"),
+    livekitRoomSid: text("livekit_room_sid"),
+    peakParticipantCount: integer("peak_participant_count").notNull().default(0),
+    uniqueParticipantCount: integer("unique_participant_count").notNull().default(0),
+    metadata: jsonb("metadata").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("live_training_sessions", (table) => ({
+    liveTrainingIdx: index("live_training_sessions_training_idx").on(
+      table.tenantId,
+      table.liveTrainingId,
+    ),
+    statusIdx: index("live_training_sessions_status_idx").on(table.tenantId, table.status),
+    livekitRoomNameIdx: index("live_training_sessions_livekit_room_name_idx").on(
+      table.tenantId,
+      table.livekitRoomName,
+    ),
+  })),
+);
+
+export const liveTrainingSessionParticipants = pgTable(
+  "live_training_session_participants",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingSessionId: uuid("live_training_session_id")
+      .references(() => liveTrainingSessions.id, { onDelete: "cascade" })
+      .notNull(),
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    role: text("role").notNull().$type<LiveTrainingParticipantRole>(),
+    firstJoinedAt: timestamp("first_joined_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    lastLeftAt: timestamp("last_left_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    totalSeconds: integer("total_seconds").notNull().default(0),
+    joinCount: integer("join_count").notNull().default(0),
+    livekitIdentity: text("livekit_identity"),
+    metadata: jsonb("metadata").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("live_training_session_participants", (table) => ({
+    sessionUserUniqueIdx: uniqueIndex(
+      "live_training_session_participants_session_user_unique_idx",
+    ).on(table.liveTrainingSessionId, table.userId),
+    sessionIdx: index("live_training_session_participants_session_idx").on(
+      table.tenantId,
+      table.liveTrainingSessionId,
+    ),
+    trainingUserIdx: index("live_training_session_participants_training_user_idx").on(
+      table.tenantId,
+      table.liveTrainingId,
+      table.userId,
+    ),
+    userIdx: index("live_training_session_participants_user_idx").on(table.tenantId, table.userId),
+  })),
+);
+
+export const liveTrainingAttendance = pgTable(
+  "live_training_attendance",
+  {
+    ...id,
+    ...timestamps,
+    liveTrainingSessionParticipantId: uuid("live_training_session_participant_id")
+      .references(() => liveTrainingSessionParticipants.id, { onDelete: "cascade" })
+      .notNull(),
+    liveTrainingSessionId: uuid("live_training_session_id")
+      .references(() => liveTrainingSessions.id, { onDelete: "cascade" })
+      .notNull(),
+    liveTrainingId: uuid("live_training_id")
+      .references(() => liveTrainings.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id)
+      .notNull(),
+    joinedAt: timestamp("joined_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    leftAt: timestamp("left_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    livekitParticipantSid: text("livekit_participant_sid"),
+    disconnectReason: text("disconnect_reason"),
+    metadata: jsonb("metadata").default({}).notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("live_training_attendance", (table) => ({
+    sessionUserIdx: index("live_training_attendance_session_user_idx").on(
+      table.tenantId,
+      table.liveTrainingSessionId,
+      table.userId,
+    ),
+    trainingUserIdx: index("live_training_attendance_training_user_idx").on(
+      table.tenantId,
+      table.liveTrainingId,
+      table.userId,
+    ),
+    joinedAtIdx: index("live_training_attendance_joined_at_idx").on(table.tenantId, table.joinedAt),
+  })),
 );
 
 export const aiMentorLessons = pgTable(
@@ -1122,6 +1485,22 @@ export const announcements = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     isEveryone: boolean("is_everyone").notNull().default(false),
+    status: text("status")
+      .$type<AnnouncementStatus>()
+      .notNull()
+      .default(ANNOUNCEMENT_STATUSES.PUBLISHED),
+    scheduledAt: timestampWithTimezone({ name: "scheduled_at" }),
+    publishedAt: timestampWithTimezone({ name: "published_at" }),
+    sendEmail: boolean("send_email").notNull().default(false),
+    emailTemplate: text("email_template")
+      .$type<AnnouncementEmailTemplate>()
+      .notNull()
+      .default(ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT),
+    sourceType: text("source_type")
+      .$type<AnnouncementSourceType>()
+      .notNull()
+      .default(ANNOUNCEMENT_SOURCE_TYPES.MANUAL),
+    sourceId: uuid("source_id"),
     baseLanguage,
     availableLocales,
     deletedAt: timestampWithTimezone({ name: "deleted_at" }),
@@ -1441,7 +1820,7 @@ export const resourceEntity = pgTable(
       .notNull(),
     entityId: uuid("entity_id").notNull(),
     entityType: varchar("entity_type", { length: 100 }).notNull(),
-    relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"), // attachment / cover_image
+    relationshipType: varchar("relationship_type", { length: 100 }).notNull().default("attachment"), // attachment / cover_image / live_training_before / live_training_after
     tenantId,
   },
   withTenantIdIndex("resource_entity", (table) => ({

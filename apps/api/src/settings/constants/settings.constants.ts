@@ -18,6 +18,8 @@ export const DEFAULT_EMAIL_TRIGGERS = {
   userCourseFinished: false,
 };
 
+export const DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS = 5;
+
 export const DEFAULT_GLOBAL_SETTINGS = {
   unregisteredUserQAAccessibility: false,
   QAEnabled: false,
@@ -28,6 +30,9 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   learningPathsEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   modernCourseListEnabled: true,
+  calendarEnabled: true,
+  liveTrainingEnabled: false,
+  liveTrainingMaxParallelSessions: DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS,
   companyInformation: DEFAULT_COMPANY_INFORMATION,
   enforceSSO: false,
   certificateBackgroundImage: null,

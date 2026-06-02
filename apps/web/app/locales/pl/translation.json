@@ -34,6 +34,7 @@
     "roles": {
       "admin": "Administrator",
       "contentCreator": "Twórca treści",
+      "trainer": "Trener",
       "student": "Uczeń"
     },
     "languages": {
@@ -48,7 +49,8 @@
       "quiz": "Quiz",
       "ai_mentor": "AI Mentor",
       "embed": "Osadzenie",
-      "scorm": "SCORM"
+      "scorm": "SCORM",
+      "live_training": "Szkolenia na żywo"
     },
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak."
@@ -306,6 +308,7 @@
     "analytics": "Analityka",
     "progress": "Postępy",
     "courses": "Kursy",
+    "calendar": "Kalendarz",
     "content": "Treści",
     "findInApplication": "Znajdź w aplikacji",
     "categories": "Kategorie",
@@ -327,6 +330,331 @@
     "learningPaths": "Ścieżki Rozwoju",
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju"
+  },
+  "calendarView": {
+    "title": "Kalendarz",
+    "description": "Przeglądaj zaplanowane wydarzenia edukacyjne.",
+    "loading": "Ładowanie wydarzeń",
+    "empty": "Brak wydarzeń do wyświetlenia",
+    "today": "Dzisiaj",
+    "view": {
+      "month": "Miesiąc",
+      "week": "Tydzień",
+      "day": "Dzień",
+      "monthShort": "M",
+      "weekShort": "T",
+      "dayShort": "D"
+    },
+    "create": {
+      "title": "Dodaj do kalendarza",
+      "description": "Wybierz, co chcesz dodać dla wybranego terminu.",
+      "noOptions": "Brak dostępnych elementów do utworzenia.",
+      "liveKitRequired": "Skonfiguruj LiveKit w ustawieniach środowiska, aby włączyć szkolenia na żywo online. Szkolenia stacjonarne pozostają dostępne.",
+      "submit": "Utwórz szkolenie na żywo",
+      "toast": {
+        "success": "Szkolenie na żywo zostało utworzone."
+      },
+      "liveTrainingOption": {
+        "title": "Szkolenie na żywo",
+        "description": "Zaplanuj szkolenie online lub stacjonarne."
+      },
+      "section": {
+        "basics": "Podstawowe",
+        "schedule": "Termin",
+        "delivery": "Forma",
+        "permissions": "Uprawnienia"
+      },
+      "field": {
+        "title": "Tytuł",
+        "description": "Opis",
+        "language": "Język",
+        "allDay": "Cały dzień",
+        "deliveryType": "Tryb",
+        "startsAt": "Rozpoczęcie",
+        "endsAt": "Zakończenie",
+        "maxParticipants": "Limit uczestników",
+        "location": "Lokalizacja",
+        "viewerPermissions": "Uprawnienia obserwatorów",
+        "microphoneEnabled": "Mikrofon",
+        "cameraEnabled": "Kamera"
+      },
+      "placeholder": {
+        "title": "Tytuł szkolenia",
+        "description": "Opcjonalny opis sesji",
+        "location": "Sala, adres lub miejsce spotkania"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Stacjonarnie"
+      },
+      "tooltip": {
+        "title": "Ta nazwa będzie widoczna w kalendarzu i szczegółach szkolenia na żywo.",
+        "description": "Opcjonalny kontekst dla uczestników przed dołączeniem do szkolenia.",
+        "language": "Język bazowy tytułu i opisu tego szkolenia na żywo.",
+        "allDay": "Używa całodniowych dat w kalendarzu i wyłącza wybór godzin rozpoczęcia oraz zakończenia.",
+        "deliveryType": "Sesje online są zdalne. Sesje stacjonarne wymagają lokalizacji.",
+        "startsAt": "Planowany czas rozpoczęcia widoczny w kalendarzu.",
+        "endsAt": "Planowany czas zakończenia widoczny w kalendarzu.",
+        "maxParticipants": "Limit uczestników szkolenia na żywo. Obecne maksimum to 100.",
+        "location": "Opcjonalne miejsce szkolenia stacjonarnego.",
+        "viewerPermissions": "Określa, z czego mogą korzystać studenci dołączający jako obserwatorzy.",
+        "microphoneEnabled": "Pozwala obserwatorom używać mikrofonu podczas sesji.",
+        "cameraEnabled": "Pozwala obserwatorom używać kamery podczas sesji."
+      },
+      "validation": {
+        "titleRequired": "Tytuł jest wymagany.",
+        "invalidDateRange": "Czas zakończenia musi być późniejszy niż rozpoczęcia."
+      }
+    },
+    "details": {
+      "title": "Szczegóły wydarzenia",
+      "description": "Metadane wydarzenia w kalendarzu",
+      "unknown": "Nieznany",
+      "author": "Autor: {{name}}",
+      "trainers": "{{count}} trener",
+      "trainers_plural": "{{count}} trenerów",
+      "noTrainers": "Brak dodatkowych trenerów",
+      "hosts": "{{count}} host",
+      "hosts_plural": "{{count}} hostów",
+      "noHosts": "Brak dodatkowych hostów",
+      "action": {
+        "edit": "Edytuj wydarzenie",
+        "goToLiveTraining": "Przejdź do szkolenia na żywo"
+      },
+      "sourceType": {
+        "liveTraining": "Szkolenie na żywo"
+      },
+      "field": {
+        "time": "Czas",
+        "training": "Forma szkolenia",
+        "linkedCourses": "Powiązane kursy",
+        "location": "Lokalizacja",
+        "people": "Osoby"
+      },
+      "deliveryType": {
+        "online": "Online",
+        "offline": "Stacjonarnie"
+      },
+      "status": {
+        "scheduled": "Zaplanowane",
+        "cancelled": "Anulowane",
+        "ended": "Zakończone",
+        "expired": "Wygasłe"
+      },
+      "role": {
+        "admin": "Admin",
+        "author": "Autor",
+        "host": "Host",
+        "trainer": "Trener",
+        "observer": "Obserwator"
+      }
+    }
+  },
+  "liveTrainingView": {
+    "title": "Szkolenia na żywo",
+    "description": "Ta strona będzie zawierać pełny widok roboczy szkoleń na żywo.",
+    "errors": {
+      "idRequired": "Identyfikator szkolenia na żywo jest wymagany."
+    },
+    "status": {
+      "scheduled": "Zaplanowane",
+      "active": "Aktywne",
+      "ended": "Zakończone",
+      "cancelled": "Anulowane",
+      "expired": "Wygasłe"
+    },
+    "deliveryType": {
+      "online": "Online",
+      "offline": "Stacjonarnie"
+    },
+    "visibility": {
+      "all": "Wszyscy użytkownicy",
+      "linked_courses": "Powiązane kursy"
+    },
+    "actions": {
+      "edit": "Edytuj",
+      "delete": "Usuń",
+      "start": "Rozpocznij sesję",
+      "join": "Dołącz do sesji",
+      "finish": "Zakończ sesję"
+    },
+    "stage": {
+      "preview": "Podgląd sesji",
+      "activeTitle": "Sesja live jest aktywna",
+      "waitingTitle": "Sesja oczekuje",
+      "runtimeDeferred": "Obsługa spotkania zostanie podłączona w kolejnym etapie. Ten podgląd nie uruchamia urządzeń multimedialnych.",
+      "activeBadge": "Aktywna",
+      "waitingBadge": "Oczekuje",
+      "participants": "Uczestnicy",
+      "viewerMic": "Mikrofon widza",
+      "viewerCamera": "Kamera widza",
+      "scheduleTooltip": "Planowany czas szkolenia",
+      "timezoneTooltip": "Strefa czasowa szkolenia",
+      "maxParticipantsTooltip": "Maksymalna liczba uczestników",
+      "locationTooltip": "Lokalizacja szkolenia",
+      "offlineTitle": "Szkolenie stacjonarne",
+      "locationMissing": "Lokalizacja nie została ustawiona"
+    },
+    "sidebar": {
+      "lifecycle": "Cykl życia sesji",
+      "status": "Status",
+      "participants": "Uczestnicy",
+      "peak": "Szczyt",
+      "people": "Osoby",
+      "author": "Autor",
+      "host": "Host",
+      "hosts": "Hostowie",
+      "noHosts": "Nie przypisano hostów",
+      "trainer": "Trener",
+      "trainers": "Trenerzy",
+      "noTrainers": "Nie przypisano trenerów",
+      "unknownUser": "Nieznany użytkownik",
+      "details": "Szczegóły szkolenia",
+      "maxParticipants": "Limit uczestników",
+      "visibility": "Widoczność",
+      "courses": "Powiązane kursy",
+      "location": "Lokalizacja",
+      "addHost": "Dodaj",
+      "addHostHint": "Dodaj hosta",
+      "removeHost": "Usuń hosta {{name}}",
+      "addTrainer": "Dodaj",
+      "addTrainerHint": "Dodaj trenera",
+      "removeTrainer": "Usuń trenera {{name}}",
+      "searchPeople": "Szukaj osób",
+      "noUserResults": "Nie znaleziono użytkowników",
+      "loadingUsers": "Ładowanie użytkowników",
+      "loadMoreUsers": "Załaduj więcej"
+    },
+    "tabs": {
+      "overview": "Przegląd",
+      "files": "Pliki",
+      "sessions": "Sesje",
+      "settings": "Ustawienia"
+    },
+    "files": {
+      "title": "Pliki szkolenia na żywo",
+      "description": "Materiały są podzielone według momentu użycia przez uczestników.",
+      "beforeHeading": "Przed szkoleniem",
+      "beforeDescription": "Materiały dostępne przed rozpoczęciem szkolenia.",
+      "afterHeading": "Po szkoleniu",
+      "afterDescription": "Materiały dostępne po zakończeniu szkolenia.",
+      "empty": "Nie dodano jeszcze plików.",
+      "afterLocked": "Pliki po szkoleniu zostaną odblokowane po zakończeniu szkolenia.",
+      "addFile": "Dodaj plik",
+      "download": "Pobierz",
+      "removeFile": "Usuń {{title}}",
+      "sizeInMb": "{{size}} MB",
+      "toast": {
+        "uploaded": "Plik został dodany.",
+        "removed": "Plik został usunięty."
+      }
+    },
+    "meeting": {
+      "previewLabel": "Sesja live",
+      "waitingTitle": "Sesja jest gotowa do dołączenia",
+      "activeTitle": "Sesja jest aktywna",
+      "inSession": "W sesji",
+      "roomTitle": "Pokój live",
+      "participants_one": "{{count}} uczestnik",
+      "participants_few": "{{count}} uczestników",
+      "participants_many": "{{count}} uczestników",
+      "participants_other": "{{count}} uczestników",
+      "microphone": "Mikrofon",
+      "camera": "Kamera",
+      "screenShare": "Udostępnij ekran",
+      "screen": "Ekran",
+      "leave": "Opuść",
+      "finish": "Zakończ sesję",
+      "sessionEndedToast": "Sesja {{trainingName}} zakończyła się",
+      "finishDialog": {
+        "title": "Zakończyć sesję?",
+        "lastHostDescription": "Jesteś jedynym hostem w tym pokoju. Opuszczenie pokoju zakończy sesję dla wszystkich.",
+        "otherHostsDescription": "Inni hostowie nadal są w tym pokoju. Możesz wyjść, a sesja będzie kontynuowana.",
+        "cancel": "Anuluj",
+        "confirmEnd": "Zakończ sesję",
+        "confirmLeave": "Opuść sesję"
+      },
+      "empty": "Oczekiwanie na uczestników",
+      "materials": "Materiały",
+      "beforeMaterials": "Przed",
+      "afterMaterials": "Po",
+      "noMaterials": "Brak plików"
+    },
+    "sessions": {
+      "title": "Sesje",
+      "description": "Każda rozpoczęta sesja jest zapisywana osobno wraz z obecnością.",
+      "empty": "Nie rozpoczęto jeszcze żadnej sesji.",
+      "activeParticipants_one": "{{count}} aktywny uczestnik",
+      "activeParticipants_few": "{{count}} aktywnych uczestników",
+      "activeParticipants_many": "{{count}} aktywnych uczestników",
+      "activeParticipants_other": "{{count}} aktywnych uczestników",
+      "uniqueParticipants_one": "{{count}} unikalny uczestnik",
+      "uniqueParticipants_few": "{{count}} unikalnych uczestników",
+      "uniqueParticipants_many": "{{count}} unikalnych uczestników",
+      "uniqueParticipants_other": "{{count}} unikalnych uczestników",
+      "peakParticipants": "Szczyt {{count}}",
+      "startedBy": "Rozpoczął",
+      "endedBy": "Zakończył",
+      "notEnded": "Nie zakończono",
+      "notAvailable": "Brak danych",
+      "endReason": "Powód zakończenia",
+      "noEndReason": "Brak powodu zakończenia",
+      "status": {
+        "waiting": "Oczekuje",
+        "active": "Aktywna",
+        "ended": "Zakończona",
+        "failed": "Nieudana"
+      },
+      "roles": {
+        "host": "Host",
+        "co_trainer": "Współtrener",
+        "moderator": "Moderator",
+        "observer": "Obserwator",
+        "admin": "Admin"
+      },
+      "attendance": {
+        "empty": "Dla tej sesji nie zapisano jeszcze obecności.",
+        "user": "Użytkownik",
+        "role": "Rola",
+        "totalTime": "Czas obecności",
+        "firstJoinedAt": "Pierwsze dołączenie",
+        "lastLeftAt": "Ostatnie wyjście",
+        "joinCount": "Dołączenia"
+      },
+      "toast": {
+        "started": "Sesja została rozpoczęta.",
+        "ended": "Sesja została zakończona."
+      }
+    },
+    "attendance": {
+      "title": "Obecność",
+      "description": "Obecność i przedziały uczestników zostaną wdrożone w etapie runtime."
+    },
+    "settings": {
+      "title": "Ustawienia",
+      "description": "Rzadziej używane ustawienia sesji będą dostępne tutaj."
+    },
+    "boolean": {
+      "yes": "Tak",
+      "no": "Nie"
+    },
+    "deleteDialog": {
+      "title": "Usunąć szkolenie na żywo?",
+      "description": "Szkolenie na żywo zostanie anulowane i usunięte z kalendarza. Tej akcji nie można cofnąć.",
+      "assignedToLessonsDescription_one": "To szkolenie na żywo jest połączone z {{count}} lekcją. Najpierw usuń powiązaną lekcję, a dopiero potem szkolenie na żywo.",
+      "assignedToLessonsDescription_few": "To szkolenie na żywo jest połączone z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem szkolenie na żywo.",
+      "assignedToLessonsDescription_many": "To szkolenie na żywo jest połączone z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem szkolenie na żywo.",
+      "assignedToLessonsDescription_other": "To szkolenie na żywo jest połączone z {{count}} lekcjami. Najpierw usuń powiązane lekcje, a dopiero potem szkolenie na żywo.",
+      "toast": {
+        "success": "Szkolenie na żywo zostało usunięte."
+      }
+    },
+    "edit": {
+      "saveChanges": "Zapisz zmiany",
+      "toast": {
+        "success": "Szkolenie na żywo zostało zaktualizowane."
+      }
+    }
   },
   "learningPathsView": {
     "title": "Ścieżki Rozwoju",
@@ -750,7 +1078,8 @@
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Luma"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Przetwarzanie płatności za kursy i zarządzanie subskrypcjami",
@@ -759,7 +1088,8 @@
         "microsoft_authorization": "Umożliwia użytkownikom logowanie przez konto Microsoft",
         "slack_authorization": "Umożliwia użytkownikom logowanie przez konto Slack",
         "openAI": "Włączenie funkcji AI Mentora",
-        "luma": "Włącz funkcje generowania kursów AI"
+        "luma": "Włącz funkcje generowania kursów AI",
+        "livekit": "Skonfiguruj LiveKit, aby włączyć sesje wideo szkoleń na żywo online. Bez tego dostępne są tylko szkolenia stacjonarne."
       }
     }
   },
@@ -1177,7 +1507,8 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
       "noUserSelected": "Nie wybrano żadnego użytkownika",
-      "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę."
+      "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę.",
+      "trainerRoleRequiresLiveTraining": "Rola Trener jest dostępna tylko wtedy, gdy szkolenia na żywo są włączone."
     },
     "other": {
       "selected": "Wybrany"
@@ -1245,6 +1576,9 @@
         "integration_key": "klucze integracji",
         "integration_api": "API integracji",
         "tenant": "konfigurację organizacji",
+        "calendar": "kalendarz",
+        "live_training": "szkolenia live",
+        "activity_log": "dziennik aktywności",
         "other": "funkcje platformy"
       },
       "descriptions": {
@@ -1307,6 +1641,18 @@
         "integration_key_manage": "Może zarządzać kluczami API integracji.",
         "integration_api_use": "Może korzystać z endpointów API integracji.",
         "tenant_manage": "Może zarządzać konfiguracją organizacji.",
+        "calendar_read": "Może przeglądać wydarzenia w kalendarzu.",
+        "live_training_read": "Może przeglądać szkolenia live.",
+        "live_training_create": "Może tworzyć szkolenia live.",
+        "live_training_update": "Może edytować dowolne szkolenie live.",
+        "live_training_update_own": "Może edytować utworzone przez siebie szkolenia live.",
+        "live_training_delete": "Może usuwać szkolenia live.",
+        "live_training_delete_own": "Może usuwać utworzone przez siebie szkolenia live.",
+        "live_training_join": "Może dołączać do sesji szkolenia live.",
+        "live_training_start": "Może rozpoczynać sesje szkolenia live.",
+        "live_training_end": "Może kończyć sesje szkolenia live.",
+        "live_training_statistics": "Może przeglądać obecność i statystyki szkoleń live.",
+        "activity_log_read": "Może przeglądać dziennik aktywności.",
         "course_ai_generation": "Może generować strukturę i treści kursu za pomocą narzędzi AI."
       }
     },
@@ -1478,6 +1824,15 @@
       },
       "LUMA_API_KEY": {
         "label": "Luma API Key"
+      },
+      "LIVEKIT_URL": {
+        "label": "LiveKit URL"
+      },
+      "LIVEKIT_API_KEY": {
+        "label": "LiveKit API Key"
+      },
+      "LIVEKIT_API_SECRET": {
+        "label": "LiveKit API Secret"
       },
       "save": "Zapisz"
     },
@@ -1809,6 +2164,7 @@
         "removeAiMentorLesson": "Czy na pewno chcesz usunąć tę lekcję AI Mentora z rozdziału?",
         "removeEmbedLesson": "Czy na pewno chcesz usunąć tę lekcję z osadzeniem z rozdziału?",
         "removeScormLesson": "Czy na pewno chcesz usunąć tę lekcję SCORM z rozdziału?",
+        "removeLiveTrainingLesson": "Czy na pewno chcesz usunąć tę lekcję szkolenia na żywo z rozdziału?",
         "removeChapter": "Czy na pewno chcesz usunąć ten rozdział?",
         "removeQuestion": "Czy na pewno chcesz usunąć pytanie?",
         "removeContent": "Czy na pewno chcesz usunąć treść?"
@@ -1903,6 +2259,9 @@
           "scormLessonPackageAttachedSuccessfully": "Pakiet SCORM dodano pomyślnie",
           "quizLessonCreatedSuccessfully": "Quiz utworzony pomyślnie",
           "aiMentorLessonCreatedSuccessfully": "Lekcja AI Mentora utworzona pomyślnie",
+          "liveTrainingLessonCreated": "Lekcja szkolenia na żywo została pomyślnie utworzona",
+          "liveTrainingLessonUpdated": "Lekcja szkolenia na żywo została zaktualizowana pomyślnie",
+          "liveTrainingLessonAttached": "Przypisanie szkolenia na żywo zostało dodane pomyślnie",
           "aiMentorLessonUpdatedSuccessfully": "Lekcja AI Mentora zaktualizowana pomyślnie",
           "aiMentorLessonFileAddedSuccessfully": "Pliki lekcji AI Mentora zostały pomyślnie przesłane",
           "courseGenerationFileAddedToUploadQueue": "Plik dodano do kolejki przesyłania",
@@ -1917,6 +2276,25 @@
           "embedLessonUpdatedSuccessfully": "Lekcja z osadzeniem została pomyślnie zaktualizowana",
           "embedLessonCreateError": "Nie udało się utworzyć lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie.",
           "embedLessonUpdateError": "Nie udało się zaktualizować lekcji z osadzeniem. Sprawdź wszystkie pola i spróbuj ponownie."
+        },
+        "liveTraining": {
+          "createTitle": "Utwórz lekcję szkolenia na żywo",
+          "editTitle": "Edytuj lekcję szkolenia na żywo",
+          "lessonTitle": "Tytuł lekcji",
+          "lessonTitlePlaceholder": "Tytuł lekcji widoczny w kursie",
+          "createNewTab": "Utwórz nowy",
+          "linkExistingTab": "Połącz istniejący",
+          "linkExistingLoading": "Ładowanie zaplanowanych szkoleń na żywo",
+          "linkExistingEmpty": "Brak dostępnych zaplanowanych szkoleń na żywo.",
+          "linkedTitle": "Połączone szkolenie na żywo",
+          "linkedDescription": "Harmonogram, trenerzy, pliki i ustawienia sesji są zarządzane na stronie szkolenia na żywo.",
+          "openLiveTraining": "Otwórz szkolenie na żywo",
+          "openBaseLiveTraining": "Otwórz bazowe szkolenie na żywo",
+          "languageMissingTitle": "Brak przypisanego szkolenia na żywo dla tego języka",
+          "languageMissingDescription": "Ta lekcja korzysta ze szkolenia na żywo w języku bazowym kursu. Utwórz albo połącz zaplanowane szkolenie na żywo, aby nadpisać je dla wybranego języka.",
+          "validation": {
+            "liveTrainingRequired": "Wybierz zaplanowane szkolenie na żywo do połączenia."
+          }
         },
         "field": {
           "title": "Tytuł",
@@ -1987,6 +2365,7 @@
           "aiMentor": "AI Mentor",
           "embed": "Osadzenie",
           "scorm": "SCORM",
+          "liveTraining": "Szkolenie na żywo",
           "correct": "Poprawna",
           "true": "Prawda",
           "false": "Fałsz",
@@ -2012,6 +2391,7 @@
           "quizLessonDescription": "Zestaw pytań do sprawdzenia wiedzy.",
           "aiMentorLessonDescription": "Interaktywna rozmowa z wirtualnym mentorem AI.",
           "scormLessonDescription": "Treść lekcji w pakiecie SCORM.",
+          "liveTrainingLessonDescription": "Zaplanowana sesja na żywo połączona z tym kursem.",
           "embedLessonDescription": "Zewnętrzna zawartość (np. formularz Google, prezentacja Canva lub transmisja live z YouTube).",
           "fillInTheBlanksDescription": "To pytanie zawiera zdanie, a studenci będą musieli przeciągnąć i upuścić słowo w odpowiednie miejsce.",
           "gapFillDescription": "To pytanie będzie miało zdanie z brakującymi słowami, które studenci muszą wpisać.",
@@ -2241,9 +2621,9 @@
       "exportingButton": "Eksportowanie...",
       "success": "Rozpoczęto pobieranie pakietu SCORM.",
       "warning": {
-        "title": "Lekcje AI Mentora zostaną pominięte",
-        "description": "Ten kurs zawiera {{count}} lekcję AI Mentora. Lekcje AI Mentora nie są obsługiwane w pakietach SCORM. Czy chcesz kontynuować?",
-        "description_other": "Ten kurs zawiera {{count}} lekcje AI Mentora. Lekcje AI Mentora nie są obsługiwane w pakietach SCORM. Czy chcesz kontynuować?",
+        "title": "Nieobsługiwane lekcje zostaną pominięte",
+        "description": "Ten kurs zawiera {{count}} lekcję nieobsługiwaną w pakietach SCORM. Lekcje AI Mentora i szkolenia na żywo są pomijane podczas eksportu. Czy chcesz kontynuować?",
+        "description_other": "Ten kurs zawiera {{count}} lekcji nieobsługiwanych w pakietach SCORM. Lekcje AI Mentora i szkolenia na żywo są pomijane podczas eksportu. Czy chcesz kontynuować?",
         "confirm": "Eksportuj mimo to"
       },
       "error": {
@@ -2488,6 +2868,18 @@
       "nextSco": "Następna sekcja",
       "tryAgain": "Spróbuj ponownie",
       "lessonFinished": "Lekcja SCORM została zakończona."
+    },
+    "liveTraining": {
+      "activeLabel": "Szkolenie na żywo",
+      "activeTitle": "Sesja jest aktywna",
+      "scheduledLabel": "Zaplanowano",
+      "scheduledTitle": "Szkolenie na żywo jest zaplanowane",
+      "endedLabel": "Zakończono",
+      "endedTitle": "Szkolenie na żywo już się zakończyło",
+      "inactiveLabel": "Szkolenie na żywo",
+      "inactiveTitle": "Brak aktywnej sesji szkolenia na żywo",
+      "locationNotice": "Lokalizacja",
+      "notAvailable": "Szkolenie na żywo nie jest dostępne dla tej lekcji."
     },
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",
@@ -2800,6 +3192,17 @@
       "coursesVisibilityDescription": "Pozwól odwiedzającym przeglądać listę kursów i korzystać z darmowych lekcji bez logowania",
       "modernCourseList": "Używaj nowoczesnej listy kursów",
       "modernCourseListDescription": "Włącz nowy wygląd listy kursów z sekcją hero i top kursami",
+      "calendar": "Włącz kalendarz",
+      "calendarDescription": "Pozwól użytkownikom przeglądać zaplanowane wydarzenia w kalendarzu",
+      "liveTraining": "Włącz szkolenia na żywo",
+      "liveTrainingDescription": "Pozwól trenerom tworzyć i prowadzić sesje szkoleniowe na żywo",
+      "liveTrainingMaxParallelSessions": "Maksymalna liczba równoległych sesji szkoleń na żywo",
+      "liveTrainingMaxParallelSessionsDescription": "Ogranicz liczbę sesji szkoleń na żywo aktywnych w tym samym czasie.",
+      "liveTrainingTooltip": "Włącz tylko wtedy, gdy tenant ma korzystać z sesji prowadzonych przez trenerów.",
+      "liveTrainingDisableBlockedTooltip_one": "Obecnie masz {{count}} użytkownika z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_few": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_many": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
+      "liveTrainingDisableBlockedTooltip_other": "Obecnie masz {{count}} użytkowników z rolą Trener. Odbierz ją, aby wyłączyć tę funkcję.",
       "finishedCourseNotification": "Powiadomienia o ukończonych kursach",
       "finishedCourseNotificationDescription": "Otrzymuj powiadomienia, gdy użytkownik ukończy kurs",
       "studentsWithOverdueCourseNotification": "Powiadomienia o studentach z zaległymi kursami",
@@ -2809,6 +3212,9 @@
       "newUserNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o nowych użytkownikach zostały pomyślnie zaktualizowane",
       "coursesVisibilityPreferenceChangeSuccess": "Preferencje widoczności kursów dla niezalogowanych użytkowników zostały zaktualizowane",
       "modernCourseListPreferenceChangeSuccess": "Preferencje nowoczesnej listy kursów zostały pomyślnie zaktualizowane",
+      "calendarPreferenceChangeSuccess": "Preferencje kalendarza zostały pomyślnie zaktualizowane",
+      "liveTrainingPreferenceChangeSuccess": "Preferencje szkoleń na żywo zostały pomyślnie zaktualizowane",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit sesji szkoleń na żywo został zaktualizowany",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o ukończonych kursach zostały pomyślnie zaktualizowane",
       "finishedCourseNotificationsPreferenceChangeError": "Nie udało się zaktualizować preferencji powiadomień o ukończonych kursach",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Preferencje powiadomień o zaległych kursach zostały pomyślnie zaktualizowane",
@@ -2962,7 +3368,17 @@
         "content": "Treść",
         "group": "Grupa",
         "language": "Język",
-        "everyone": "Wszyscy"
+        "everyone": "Wszyscy",
+        "schedule": "Zaplanuj ogłoszenie",
+        "scheduledAt": "Opublikuj o",
+        "sendEmail": "Wyślij e-mail"
+      },
+      "descriptions": {
+        "schedule": "Opublikuj to ogłoszenie automatycznie o wybranej godzinie.",
+        "sendEmail": "Wyślij treść ogłoszenia e-mailem po publikacji."
+      },
+      "tooltips": {
+        "scheduledAt": "Wybierz, kiedy ogłoszenie ma stać się widoczne."
       },
       "addedLanguages": "Dodane języki",
       "placeholders": {
@@ -2978,6 +3394,10 @@
         },
         "content": {
           "required": "Treść jest wymagana"
+        },
+        "schedule": {
+          "invalid": "Wybierz poprawną godzinę w odstępach co 5 minut",
+          "past": "Czas publikacji musi być w przyszłości"
         }
       }
     },
@@ -2995,7 +3415,10 @@
       "createFailed": "Nie udało się utworzyć ogłoszenia",
       "deletedSuccessfully": "Ogłoszenie zostało usunięte",
       "deleteFailed": "Nie udało się usunąć ogłoszenia",
-      "notFound": "Nie znaleziono ogłoszenia"
+      "notFound": "Nie znaleziono ogłoszenia",
+      "invalidSchedule": "Nieprawidłowy czas publikacji ogłoszenia",
+      "invalidScheduleStep": "Czas publikacji ogłoszenia musi używać odstępów co 5 minut",
+      "scheduleInPast": "Czas publikacji ogłoszenia musi być w przyszłości"
     }
   },
   "notifications": {
@@ -3015,7 +3438,9 @@
       "goToNotificationCenter": "Przejdź do centrum powiadomień"
     },
     "status": {
-      "unread": "Nieprzeczytane"
+      "unread": "Nieprzeczytane",
+      "scheduled": "Zaplanowane",
+      "published": "Opublikowane"
     },
     "empty": "Brak powiadomień",
     "deleteDialog": {
@@ -3360,6 +3785,10 @@
     "createQA": "Utwórz nowe Q&A",
     "analytics": "Analityka",
     "progress": "Postępy",
+    "calendar": "Kalendarz",
+    "learningPaths": "Ścieżki Rozwoju",
+    "adminLearningPaths": "Ścieżki Rozwoju",
+    "adminLearningPathEditor": "Edytor ścieżki rozwoju",
     "activityLogs": "Dziennik zdarzeń",
     "tenant": "Szczegóły organizacji",
     "createTenant": "Utwórz organizację",
@@ -3830,6 +4259,7 @@
       "user": "Użytkownik",
       "category": "Kategoria",
       "announcement": "Ogłoszenie",
+      "live_training": "Szkolenie na żywo",
       "global_settings": "Ustawienia"
     },
     "table": {
@@ -3841,6 +4271,36 @@
       "showDetails": "Pokaż szczegóły",
       "loading": "Ładowanie dziennika zdarzeń...",
       "empty": "Nie znaleziono dziennika zdarzeń."
+    }
+  },
+  "liveTraining": {
+    "errors": {
+      "invalidLocalizedField": "Podaj poprawny tekst dla wybranego języka.",
+      "notFound": "Nie znaleziono szkolenia na żywo.",
+      "sessionNotFound": "Nie znaleziono sesji szkolenia na żywo.",
+      "invalidDateRange": "Podaj jednocześnie datę początku i końca albo pozostaw obie puste.",
+      "invalidSchedule": "Czas zakończenia musi być późniejszy niż czas rozpoczęcia.",
+      "invalidTrainer": "Nie znaleziono jednego lub kilku wybranych trenerów.",
+      "invalidCourse": "Nie znaleziono jednego lub kilku powiązanych kursów.",
+      "invalidResource": "Nie znaleziono jednego lub kilku wybranych zasobów.",
+      "resourceNotFound": "Nie znaleziono pliku.",
+      "invalidResourceRelationshipType": "Wybrana sekcja plików jest nieprawidłowa.",
+      "hostAssignmentForbidden": "Nie masz uprawnień do przypisywania hostów.",
+      "hostMustHaveTrainerRole": "Przypisani hostowie muszą mieć rolę Trener.",
+      "trainerAssignmentForbidden": "Nie masz uprawnień do przypisywania trenerów.",
+      "linkNotCreated": "Nie udało się utworzyć powiązania szkolenia na żywo.",
+      "lessonAlreadyLinked": "Ta lekcja ma już powiązane szkolenie na żywo.",
+      "invalidLessonLinkMode": "Wybierz, czy chcesz utworzyć nowe szkolenie na żywo, czy połączyć istniejące.",
+      "onlyScheduledCanBeLinked": "Do lekcji można połączyć tylko zaplanowane szkolenia na żywo.",
+      "trainingAlreadyLinkedToLesson": "To szkolenie na żywo jest już połączone z lekcją w tym kursie.",
+      "lessonOnlyTitleEditable": "Tutaj można edytować tylko tytuł lekcji. Otwórz szkolenie na żywo, aby zmienić szczegóły sesji.",
+      "unsupportedLessonLanguage": "Ten kurs nie obsługuje wybranego języka.",
+      "baseLanguageAssignmentRequired": "Lekcję szkolenia na żywo trzeba najpierw utworzyć w języku bazowym kursu.",
+      "invalidLessonType": "Przypisania szkolenia na żywo można dodawać tylko do lekcji szkolenia na żywo.",
+      "deleteAssignedToLesson": "To szkolenie na żywo jest połączone z lekcją. Najpierw usuń lekcję, a dopiero potem szkolenie na żywo.",
+      "liveKitNotConfigured": "LiveKit nie jest skonfigurowany.",
+      "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
+      "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
     }
   }
 }

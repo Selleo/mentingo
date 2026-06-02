@@ -1,4 +1,6 @@
 import { emailTemplateFactory } from "./email-factory";
+import AnnouncementEmailTemplate from "./templates/AnnouncementEmail";
+export const AnnouncementEmail = emailTemplateFactory(AnnouncementEmailTemplate);
 import BaseEmailTemplateTemplate from "./templates/BaseEmailTemplate";
 export const BaseEmailTemplate = emailTemplateFactory(BaseEmailTemplateTemplate);
 import CertificateExpirationWarningEmailTemplate from "./templates/CertificateExpirationWarningEmail";
@@ -9,6 +11,12 @@ import CreatePasswordReminderEmailTemplate from "./templates/CreatePasswordRemin
 export const CreatePasswordReminderEmail = emailTemplateFactory(CreatePasswordReminderEmailTemplate);
 import FinishedCourseEmailTemplate from "./templates/FinishedCourseEmail";
 export const FinishedCourseEmail = emailTemplateFactory(FinishedCourseEmailTemplate);
+import LiveTrainingEndedEmailTemplate from "./templates/LiveTrainingEndedEmail";
+export const LiveTrainingEndedEmail = emailTemplateFactory(LiveTrainingEndedEmailTemplate);
+import LiveTrainingReminderEmailTemplate from "./templates/LiveTrainingReminderEmail";
+export const LiveTrainingReminderEmail = emailTemplateFactory(LiveTrainingReminderEmailTemplate);
+import LiveTrainingStartedEmailTemplate from "./templates/LiveTrainingStartedEmail";
+export const LiveTrainingStartedEmail = emailTemplateFactory(LiveTrainingStartedEmailTemplate);
 import MagicLinkEmailTemplate from "./templates/MagicLinkEmail";
 export const MagicLinkEmail = emailTemplateFactory(MagicLinkEmailTemplate);
 import NewUserEmailTemplate from "./templates/NewUserEmail";

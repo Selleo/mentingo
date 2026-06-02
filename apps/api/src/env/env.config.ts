@@ -22,6 +22,9 @@ export const ALLOWED_SECRETS = [
   "SLACK_OAUTH_ENABLED",
   "VITE_SLACK_OAUTH_ENABLED",
   "LUMA_API_KEY",
+  "LIVEKIT_URL",
+  "LIVEKIT_API_KEY",
+  "LIVEKIT_API_SECRET",
 ];
 
 export const SERVICE_GROUPS = {
@@ -53,4 +56,5 @@ export const SERVICE_GROUPS = {
   ],
   openAI: ["OPENAI_API_KEY"],
   luma: ["LUMA_API_KEY", "LUMA_BASE_URL"],
+  livekit: ["LIVEKIT_URL", "LIVEKIT_API_KEY", "LIVEKIT_API_SECRET"],
 };

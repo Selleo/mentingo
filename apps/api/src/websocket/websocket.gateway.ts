@@ -12,7 +12,9 @@ import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 import {
   AuthenticatedSocket,
   HeartbeatPayload,
+  JoinLiveTrainingPayload,
   JoinLessonPayload,
+  LeaveLiveTrainingPayload,
   LeaveLessonPayload,
 } from "src/websocket/websocket.types";
 
@@ -67,6 +69,40 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
         }
       }
     }
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("join:live-training")
+  async handleJoinLiveTraining(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: JoinLiveTrainingPayload,
+  ) {
+    const { liveTrainingId } = payload;
+    const userId = client.data.user.userId;
+
+    const roomName = getLiveTrainingRoomName(liveTrainingId);
+    await client.join(roomName);
+
+    this.logger.debug(`User ${userId} joined live training room: ${roomName}`);
+
+    return { success: true, room: roomName };
+  }
+
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage("leave:live-training")
+  async handleLeaveLiveTraining(
+    @ConnectedSocket() client: AuthenticatedSocket,
+    @MessageBody() payload: LeaveLiveTrainingPayload,
+  ) {
+    const { liveTrainingId } = payload;
+    const userId = client.data.user.userId;
+
+    const roomName = getLiveTrainingRoomName(liveTrainingId);
+    await client.leave(roomName);
+
+    this.logger.debug(`User ${userId} left live training room: ${roomName}`);
+
+    return { success: true };
   }
 
   @UseGuards(WsJwtGuard)
@@ -164,3 +200,6 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
     this.server.to(`user:${userId}`).emit(event, data);
   }
 }
+
+export const getLiveTrainingRoomName = (liveTrainingId: string) =>
+  `live-training:${liveTrainingId}`;
