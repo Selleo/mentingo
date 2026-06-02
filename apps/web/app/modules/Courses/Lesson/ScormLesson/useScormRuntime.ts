@@ -79,6 +79,12 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
       ]);
     };
 
+    const showRuntimeToast = (messageKey?: string | null) => {
+      if (!messageKey) return;
+
+      toast({ description: t(messageKey) });
+    };
+
     const updateLaunchRuntimeCache = (values: ScormRuntimeValues) => {
       queryClient.setQueriesData<LaunchScormAttemptResponse>(
         { queryKey: ["scorm", "launch", launch.lessonId] },
@@ -113,9 +119,10 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
+        const result = await commitRuntimeRef.current({ data: buildRuntimePayload(values) });
         updateLaunchRuntimeCache(values);
         await invalidateRuntimeProgressQueries();
+        showRuntimeToast(result.messageKey);
       } catch {
         dirtyValuesRef.current = { ...values, ...dirtyValuesRef.current };
       } finally {
@@ -138,11 +145,11 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
       beginRuntimeSave();
       try {
-        await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
+        const result = await finishRuntimeRef.current({ data: buildRuntimePayload(values) });
         updateLaunchRuntimeCache(values);
         await invalidateRuntimeProgressQueries();
         if (showToast) {
-          toast({ description: t("studentLessonView.scorm.lessonFinished") });
+          showRuntimeToast(result.messageKey);
         }
       } catch {
         dirtyValuesRef.current = { ...values, ...dirtyValuesRef.current };

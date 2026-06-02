@@ -5663,6 +5663,7 @@ export interface CommitScormAttemptResponse {
   data: {
     committed: boolean;
     lessonCompleted: boolean;
+    messageKey: string | null;
     scormStatus: string | null;
     nextScoId: string | null;
   };
@@ -5687,6 +5688,7 @@ export interface FinishScormAttemptResponse {
   data: {
     finished: boolean;
     lessonCompleted: boolean;
+    messageKey: string | null;
     scormStatus: string | null;
     nextScoId: string | null;
   };

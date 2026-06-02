@@ -27,7 +27,6 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
-import { FileService } from "src/file/file.service";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
@@ -59,12 +58,7 @@ import {
   scormRuntimeFinishResponseSchema,
   scormRuntimeFinishSchema,
 } from "./schemas/scormRuntime.schema";
-import { MAX_SCORM_PACKAGE_SIZE_BYTES } from "./scorm-package-limits";
-import {
-  SCORM_TUS_EXPOSED_HEADERS,
-  SCORM_TUS_STATE_TTL,
-  SCORM_TUS_VERSION,
-} from "./scorm-tus-upload.constants";
+import { SCORM_TUS_STATE_TTL } from "./scorm-tus-upload.constants";
 import { ScormTusUploadService } from "./scorm-tus-upload.service";
 import { ScormService } from "./scorm.service";
 
@@ -81,7 +75,6 @@ import type {
 export class ScormController {
   constructor(
     private readonly scormService: ScormService,
-    private readonly fileService: FileService,
     private readonly scormTusUploadService: ScormTusUploadService,
   ) {}
 
@@ -119,13 +112,13 @@ export class ScormController {
 
   @Options("import/tus")
   async tusOptionsBase(@Res() res: Response) {
-    this.setTusHeaders(res);
+    this.scormService.setTusHeaders(res);
     return res.status(204).send();
   }
 
   @Options("import/tus/:packageId")
   async tusOptionsUpload(@Res() res: Response) {
-    this.setTusHeaders(res);
+    this.scormService.setTusHeaders(res);
     return res.status(204).send();
   }
 
@@ -140,9 +133,11 @@ export class ScormController {
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
-    this.ensureTusVersion(req);
+    this.scormService.ensureTusVersion(req);
 
-    const metadata = this.parseTusMetadata(req.headers["upload-metadata"] as string | undefined);
+    const metadata = this.scormService.parseTusMetadata(
+      req.headers["upload-metadata"] as string | undefined,
+    );
     const packageId = metadata.uploadId as UUIDType | undefined;
 
     if (!packageId) {
@@ -155,7 +150,7 @@ export class ScormController {
     }
 
     const location = `/api/scorm/import/tus/${packageId}`;
-    this.setTusHeaders(res, { Location: location });
+    this.scormService.setTusHeaders(res, { Location: location });
 
     return res.status(201).send();
   }
@@ -172,14 +167,14 @@ export class ScormController {
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
-    this.ensureTusVersion(req);
+    this.scormService.ensureTusVersion(req);
 
     const session = await this.scormTusUploadService.getSession(packageId);
     if (!session || session.userId !== currentUserId) {
       throw new BadRequestException("adminScorm.errors.uploadSessionNotFound");
     }
 
-    this.setTusHeaders(res, {
+    this.scormService.setTusHeaders(res, {
       "Upload-Offset": String(session.offset),
       "Upload-Length": String(session.uploadLength),
     });
@@ -199,7 +194,7 @@ export class ScormController {
     @Res() res: Response,
     @CurrentUser("userId") currentUserId: UUIDType,
   ) {
-    this.ensureTusVersion(req);
+    this.scormService.ensureTusVersion(req);
 
     const uploadOffset = Number(req.headers["upload-offset"]);
     const chunk = req.body;
@@ -215,7 +210,7 @@ export class ScormController {
       currentUserId,
     );
 
-    this.setTusHeaders(res, { "Upload-Offset": String(result.offset) });
+    this.scormService.setTusHeaders(res, { "Upload-Offset": String(result.offset) });
 
     if (result.conflict) return res.status(409).send();
 
@@ -286,7 +281,7 @@ export class ScormController {
     const scormPackage = files?.[SCORM_PACKAGE_FIELD]?.[0];
     const thumbnail = files?.[SCORM_THUMBNAIL_FIELD]?.[0];
 
-    const thumbnailS3Key = await this.resolveThumbnailS3Key(
+    const thumbnailS3Key = await this.scormService.resolveThumbnailS3Key(
       createScormCourseBody.thumbnailS3Key,
       thumbnail,
       currentUser,
@@ -307,22 +302,6 @@ export class ScormController {
       id,
       message: "adminCourseView.toast.createCourseSuccessfully",
     });
-  }
-
-  private async resolveThumbnailS3Key(
-    existingThumbnailS3Key: string | undefined,
-    thumbnail: Express.Multer.File | undefined,
-    currentUser: CurrentUserType,
-  ) {
-    if (existingThumbnailS3Key) return existingThumbnailS3Key;
-    if (!thumbnail) return undefined;
-
-    const uploadedFile = await this.fileService.uploadFile(
-      thumbnail,
-      "course",
-      currentUser.tenantId,
-    );
-    return uploadedFile.fileKey;
   }
 
   @Post("lesson")
@@ -486,35 +465,5 @@ export class ScormController {
     });
 
     streamFileToResponse(response, file);
-  }
-
-  private ensureTusVersion(req: Request) {
-    if (req.headers["tus-resumable"] !== SCORM_TUS_VERSION) {
-      throw new BadRequestException("adminScorm.errors.unsupportedTusVersion");
-    }
-  }
-
-  private parseTusMetadata(header?: string) {
-    if (!header) return {};
-
-    return Object.fromEntries(
-      header.split(",").map((part) => {
-        const [key, encodedValue] = part.trim().split(" ");
-        if (!encodedValue) return [key, ""];
-
-        return [key, Buffer.from(encodedValue, "base64").toString("utf8")];
-      }),
-    );
-  }
-
-  private setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {
-    res.set({
-      "Tus-Resumable": SCORM_TUS_VERSION,
-      "Tus-Version": SCORM_TUS_VERSION,
-      "Tus-Extension": "creation",
-      "Tus-Max-Size": String(MAX_SCORM_PACKAGE_SIZE_BYTES),
-      "Access-Control-Expose-Headers": SCORM_TUS_EXPOSED_HEADERS,
-      ...extraHeaders,
-    });
   }
 }

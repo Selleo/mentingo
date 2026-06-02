@@ -2589,7 +2589,9 @@
       "previousSco": "Předchozí část",
       "nextSco": "Další část",
       "tryAgain": "Zkuste to znovu",
-      "lessonFinished": "Lekce SCORM byla dokončena."
+      "lessonFinished": "Lekce SCORM byla dokončena.",
+      "progressReset": "Postup SCORM byl resetován.",
+      "progressUpdated": "Postup SCORM byl aktualizován."
     },
     "liveTraining": {
       "activeLabel": "Live Training",

@@ -39,6 +39,12 @@ import {
 } from "src/storage/schema";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import {
+  STUDENT_LESSON_PROGRESS_MESSAGE_KEYS,
+  type MarkLessonAsIncompleteParams,
+  type MarkLessonProgressResult,
+} from "./studentLessonProgress.type";
+
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
 import type { ResponseAiJudgeJudgementBody } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
@@ -78,7 +84,7 @@ export class StudentLessonProgressService {
     aiMentorLessonData?: ResponseAiJudgeJudgementBody;
     language: SupportedLanguages;
     isQuizPassed?: boolean;
-  }) {
+  }): Promise<MarkLessonProgressResult> {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
@@ -94,7 +100,7 @@ export class StudentLessonProgressService {
       isLearningModeActive,
     });
 
-    if (!canTrackProgress) return;
+    if (!canTrackProgress) return { messageKey: null };
 
     if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
@@ -251,7 +257,9 @@ export class StudentLessonProgressService {
         dbInstance,
       );
 
-      if (isCompletedAsFreemium) return;
+      if (isCompletedAsFreemium) {
+        return { messageKey: STUDENT_LESSON_PROGRESS_MESSAGE_KEYS.LESSON_COMPLETED };
+      }
 
       await this.checkCourseIsCompletedForUser(
         lesson.courseId,
@@ -261,6 +269,10 @@ export class StudentLessonProgressService {
         actualLanguage,
       );
     }
+
+    return {
+      messageKey: lessonCompleted ? STUDENT_LESSON_PROGRESS_MESSAGE_KEYS.LESSON_COMPLETED : null,
+    };
   }
 
   async markLessonAsIncomplete({
@@ -270,14 +282,7 @@ export class StudentLessonProgressService {
     actor,
     dbInstance = this.db,
     resetStarted = false,
-  }: {
-    id: UUIDType;
-    studentId: UUIDType;
-    userPermissions?: PermissionKey[];
-    actor?: CurrentUserType;
-    dbInstance?: DatabasePg;
-    resetStarted?: boolean;
-  }) {
+  }: MarkLessonAsIncompleteParams): Promise<MarkLessonProgressResult> {
     const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(id, studentId);
 
     const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
@@ -293,7 +298,7 @@ export class StudentLessonProgressService {
       isLearningModeActive,
     });
 
-    if (!canTrackProgress) return;
+    if (!canTrackProgress) return { messageKey: null };
 
     if (isLearningModeActive && !accessCourseLessonWithDetails.isAssigned) {
       await this.ensureStudentCourseEnrollment(
@@ -340,7 +345,7 @@ export class StudentLessonProgressService {
       )
       .returning();
 
-    if (updated.length === 0) return;
+    if (updated.length === 0) return { messageKey: null };
 
     const resolvedActor = await this.resolveActor(studentId, actor, dbInstance);
 
@@ -355,6 +360,12 @@ export class StudentLessonProgressService {
     );
 
     await this.checkCourseIsCompletedForUser(lesson.courseId, studentId, resolvedActor, dbInstance);
+
+    return {
+      messageKey: resetStarted
+        ? STUDENT_LESSON_PROGRESS_MESSAGE_KEYS.LESSON_PROGRESS_RESET
+        : STUDENT_LESSON_PROGRESS_MESSAGE_KEYS.LESSON_PROGRESS_UPDATED,
+    };
   }
 
   async markLessonAsStarted(

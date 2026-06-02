@@ -43018,6 +43018,16 @@
               "lessonCompleted": {
                 "type": "boolean"
               },
+              "messageKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "scormStatus": {
                 "anyOf": [
                   {
@@ -43043,6 +43053,7 @@
             "required": [
               "committed",
               "lessonCompleted",
+              "messageKey",
               "scormStatus",
               "nextScoId"
             ]
@@ -43129,6 +43140,16 @@
               "lessonCompleted": {
                 "type": "boolean"
               },
+              "messageKey": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "scormStatus": {
                 "anyOf": [
                   {
@@ -43154,6 +43175,7 @@
             "required": [
               "finished",
               "lessonCompleted",
+              "messageKey",
               "scormStatus",
               "nextScoId"
             ]

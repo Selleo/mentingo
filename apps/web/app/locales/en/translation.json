@@ -2644,7 +2644,9 @@
       "previousSco": "Previous section",
       "nextSco": "Next section",
       "tryAgain": "Try again",
-      "lessonFinished": "SCORM lesson finished."
+      "lessonFinished": "SCORM lesson finished.",
+      "progressReset": "SCORM progress reset.",
+      "progressUpdated": "SCORM progress updated."
     },
     "liveTraining": {
       "activeLabel": "Live Training",

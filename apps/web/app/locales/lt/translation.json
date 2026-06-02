@@ -2589,7 +2589,9 @@
       "previousSco": "Ankstesnė dalis",
       "nextSco": "Kita dalis",
       "tryAgain": "Bandykite dar kartą",
-      "lessonFinished": "SCORM pamoka baigta."
+      "lessonFinished": "SCORM pamoka baigta.",
+      "progressReset": "SCORM pažanga nustatyta iš naujo.",
+      "progressUpdated": "SCORM pažanga atnaujinta."
     },
     "liveTraining": {
       "activeLabel": "Live Training",

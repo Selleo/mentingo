@@ -2882,7 +2882,9 @@
       "previousSco": "Poprzednia sekcja",
       "nextSco": "Następna sekcja",
       "tryAgain": "Spróbuj ponownie",
-      "lessonFinished": "Lekcja SCORM została zakończona."
+      "lessonFinished": "Lekcja SCORM została zakończona.",
+      "progressReset": "Postęp SCORM został zresetowany.",
+      "progressUpdated": "Postęp SCORM został zaktualizowany."
     },
     "liveTraining": {
       "activeLabel": "Szkolenie na żywo",

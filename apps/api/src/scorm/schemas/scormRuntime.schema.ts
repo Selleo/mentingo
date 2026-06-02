@@ -39,6 +39,7 @@ export type ScormRuntimeCommitBody = Static<typeof scormRuntimeCommitSchema>;
 export const scormRuntimeCommitResponseSchema = Type.Object({
   committed: Type.Boolean(),
   lessonCompleted: Type.Boolean(),
+  messageKey: Type.Union([Type.String(), Type.Null()]),
   scormStatus: Type.Union([Type.String(), Type.Null()]),
   nextScoId: Type.Union([UUIDSchema, Type.Null()]),
 });
@@ -52,6 +53,7 @@ export type ScormRuntimeFinishBody = Static<typeof scormRuntimeFinishSchema>;
 export const scormRuntimeFinishResponseSchema = Type.Object({
   finished: Type.Boolean(),
   lessonCompleted: Type.Boolean(),
+  messageKey: Type.Union([Type.String(), Type.Null()]),
   scormStatus: Type.Union([Type.String(), Type.Null()]),
   nextScoId: Type.Union([UUIDSchema, Type.Null()]),
 });

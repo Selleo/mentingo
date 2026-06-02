@@ -166,7 +166,7 @@
     "@types/passport-local": "1.0.38",
     "@types/passport-microsoft": "2.1.0",
     "@types/supertest": "6.0.2",
-    "@types/unzipper": "^0.10.11",
+    "@types/unzipper": "0.10.11",
     "@types/uuid": "10.0.0",
     "@types/xml2js": "0.4.14",
     "@types/yargs": "17.0.35",

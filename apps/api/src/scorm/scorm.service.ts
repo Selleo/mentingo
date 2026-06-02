@@ -27,6 +27,7 @@ import * as unzipper from "unzipper";
 import { DatabasePg } from "src/common";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { CourseService } from "src/courses/course.service";
+import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { S3Service } from "src/s3/s3.service";
@@ -38,6 +39,7 @@ import { ScormRepository } from "./repositories/scorm.repository";
 import { resolveScormContentType, resolveScormContentTypeFromFilename } from "./scorm-content-type";
 import {
   MAX_SCORM_EXTRACTED_FILE_COUNT,
+  MAX_SCORM_PACKAGE_SIZE_BYTES,
   MAX_SCORM_TOTAL_UNCOMPRESSED_SIZE_BYTES,
 } from "./scorm-package-limits";
 import { ScormQueueService } from "./scorm-queue.service";
@@ -58,11 +60,16 @@ import {
   normalizeScormRelativePath,
 } from "./scorm-storage-paths";
 import { addScorm12Times, SCORM_ZERO_TIME } from "./scorm-time";
-import { SCORM_STREAMED_EXTRACTION_UPLOAD_CONCURRENCY } from "./scorm-tus-upload.constants";
+import {
+  SCORM_STREAMED_EXTRACTION_UPLOAD_CONCURRENCY,
+  SCORM_TUS_EXPOSED_HEADERS,
+  SCORM_TUS_VERSION,
+} from "./scorm-tus-upload.constants";
 
 import type { InitScormImportBody } from "./schemas/scormImport.schema";
 import type { ScormTusUploadState } from "./scorm-tus-upload.types";
 import type { ScormPackageStatus } from "@repo/shared";
+import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -99,10 +106,57 @@ export class ScormService {
     private readonly s3Service: S3Service,
     private readonly courseService: CourseService,
     private readonly adminLessonService: AdminLessonService,
+    private readonly fileService: FileService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly wsGateway: WsGateway,
     private readonly scormQueueService: ScormQueueService,
   ) {}
+
+  ensureTusVersion(req: Request) {
+    if (req.headers["tus-resumable"] !== SCORM_TUS_VERSION) {
+      throw new BadRequestException("adminScorm.errors.unsupportedTusVersion");
+    }
+  }
+
+  parseTusMetadata(header?: string) {
+    if (!header) return {};
+
+    return Object.fromEntries(
+      header.split(",").map((part) => {
+        const [key, encodedValue] = part.trim().split(" ");
+        if (!encodedValue) return [key, ""];
+
+        return [key, Buffer.from(encodedValue, "base64").toString("utf8")];
+      }),
+    );
+  }
+
+  setTusHeaders(res: Response, extraHeaders: Record<string, string> = {}) {
+    res.set({
+      "Tus-Resumable": SCORM_TUS_VERSION,
+      "Tus-Version": SCORM_TUS_VERSION,
+      "Tus-Extension": "creation",
+      "Tus-Max-Size": String(MAX_SCORM_PACKAGE_SIZE_BYTES),
+      "Access-Control-Expose-Headers": SCORM_TUS_EXPOSED_HEADERS,
+      ...extraHeaders,
+    });
+  }
+
+  async resolveThumbnailS3Key(
+    existingThumbnailS3Key: string | undefined,
+    thumbnail: Express.Multer.File | undefined,
+    currentUser: CurrentUserType,
+  ) {
+    if (existingThumbnailS3Key) return existingThumbnailS3Key;
+    if (!thumbnail) return undefined;
+
+    const uploadedFile = await this.fileService.uploadFile(
+      thumbnail,
+      "course",
+      currentUser.tenantId,
+    );
+    return uploadedFile.fileKey;
+  }
 
   async initTusImport(params: InitTusImportParams): Promise<InitTusImportResult> {
     this.assertTusImportPermission(params.importRequest, params.currentUser);
@@ -852,24 +906,22 @@ export class ScormService {
       excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
     });
 
-    if (lessonCompleted) {
-      await this.studentLessonProgressService.markLessonAsCompleted({
-        id: body.lessonId,
-        studentId: currentUser.userId,
-        userPermissions: currentUser.permissions,
-        actor: currentUser,
-        language: body.language ?? SUPPORTED_LANGUAGES.EN,
-      });
-    } else {
-      await this.studentLessonProgressService.markLessonAsIncomplete({
-        id: body.lessonId,
-        studentId: currentUser.userId,
-        userPermissions: currentUser.permissions,
-        actor: currentUser,
-        resetStarted:
-          normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.NOT_ATTEMPTED,
-      });
-    }
+    const progressResult = lessonCompleted
+      ? await this.studentLessonProgressService.markLessonAsCompleted({
+          id: body.lessonId,
+          studentId: currentUser.userId,
+          userPermissions: currentUser.permissions,
+          actor: currentUser,
+          language: body.language ?? SUPPORTED_LANGUAGES.EN,
+        })
+      : await this.studentLessonProgressService.markLessonAsIncomplete({
+          id: body.lessonId,
+          studentId: currentUser.userId,
+          userPermissions: currentUser.permissions,
+          actor: currentUser,
+          resetStarted:
+            normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.NOT_ATTEMPTED,
+        });
 
     const navigation = await this.scormRepository.findScoNavigation({
       packageId: body.packageId,
@@ -879,6 +931,7 @@ export class ScormService {
 
     return {
       lessonCompleted,
+      messageKey: progressResult.messageKey,
       scormStatus: mergedCmiJson[SCORM_1_2_CMI_KEYS.LESSON_STATUS] ?? null,
       nextScoId: navigation.nextScoId,
     };
