@@ -181,11 +181,7 @@ export function useVoiceMentor({
       (level) => onLevelChangeRef.current(level),
       handleChunkSent,
     );
-    audioPlayerRef.current = new RealtimePCMPlayer({
-      sampleRate: 44100,
-      channels: 1,
-      leadTimeSeconds: 0.15,
-    });
+    audioPlayerRef.current = new RealtimePCMPlayer({ sampleRate: 44100, channels: 1 });
     audioPlayerRef.current.setOnIdle(() => {
       finalizeTurnIfReady();
     });
