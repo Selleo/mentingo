@@ -970,6 +970,7 @@ export class LiveTrainingSessionsService {
       await this.studentLessonProgressService.markLessonAsCompleted({
         id: row.lessonId,
         studentId: row.studentId,
+        userPermissions: [PERMISSIONS.LEARNING_PROGRESS_UPDATE],
         actor: input.currentUser,
         language: row.language,
       });
