@@ -184,6 +184,18 @@ export class SettingsController {
     return new BaseResponse(result);
   }
 
+  @Patch("admin/course-discussions")
+  @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
+  @Validate({
+    response: baseResponse(globalSettingsJSONSchema),
+  })
+  async updateCourseDiscussionsEnabled(
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
+    const result = await this.settingsService.updateGlobalCourseDiscussionsEnabled(currentUser);
+    return new BaseResponse(result);
+  }
+
   @Patch("admin/calendar")
   @RequirePermission(PERMISSIONS.SETTINGS_MANAGE)
   @Validate({

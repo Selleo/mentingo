@@ -12,6 +12,7 @@ import { Server } from "socket.io";
 
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import { CourseChatService } from "src/course-chat/course-chat.service";
+import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { WsJwtGuard } from "src/websocket/guards/ws-jwt.guard";
 import { AuthenticatedSocket } from "src/websocket/websocket.types";
@@ -38,6 +39,7 @@ export class CourseChatGateway implements OnGatewayDisconnect {
     private readonly courseChatService: CourseChatService,
     private readonly courseChatPresenceService: CourseChatPresenceService,
     private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async handleDisconnect(client: AuthenticatedSocket) {
@@ -57,6 +59,12 @@ export class CourseChatGateway implements OnGatewayDisconnect {
     const user = client.data.user;
 
     if (!courseId) throw new WsException("courseChat.errors.courseIdRequired");
+
+    const globalSettings = await this.settingsService.getGlobalSettingsByTenantId(user.tenantId);
+
+    if (!globalSettings.courseDiscussionsEnabled) {
+      throw new WsException("features.error.disabled");
+    }
 
     try {
       await this.tenantDbRunnerService.runWithTenant(user.tenantId, () =>

@@ -411,6 +411,63 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
+    describe("PATCH /api/settings/admin/course-discussions", () => {
+      let adminUser: UserWithCredentials;
+      let adminCookies: string;
+
+      beforeEach(async () => {
+        await truncateTables(db, ["settings"]);
+        await globalSettingsFactory.create({ userId: null });
+
+        adminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withAdminSettings(db)
+          .create();
+
+        adminCookies = await cookieFor(adminUser, app);
+      });
+
+      afterEach(async () => {
+        await truncateTables(db, ["settings"]);
+      });
+
+      it("should toggle the global course discussions setting as admin", async () => {
+        const response = await request(app.getHttpServer())
+          .patch("/api/settings/admin/course-discussions")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(response.body.data.courseDiscussionsEnabled).toBe(true);
+
+        const toggleResponse = await request(app.getHttpServer())
+          .patch("/api/settings/admin/course-discussions")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        expect(toggleResponse.body.data.courseDiscussionsEnabled).toBe(false);
+      });
+
+      it("should return 403 if user is not an admin", async () => {
+        const nonAdminUser = await userFactory
+          .withCredentials({ password: testPassword })
+          .withUserSettings(db)
+          .create();
+
+        const nonAdminCookies = await cookieFor(nonAdminUser, app);
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/course-discussions")
+          .set("Cookie", nonAdminCookies)
+          .expect(403);
+      });
+
+      it("should return 401 if not authenticated", async () => {
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/course-discussions")
+          .expect(401);
+      });
+    });
+
     describe("PATCH /api/settings/admin/enforce-sso", () => {
       let adminUser: UserWithCredentials;
       let adminCookies: string;
