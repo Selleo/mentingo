@@ -960,6 +960,13 @@
       "when": 1779896998213,
       "tag": "0136_add_scheduled_announcements",
       "breakpoints": true
+    },
+    {
+      "idx": 137,
+      "version": "7",
+      "when": 1780401336166,
+      "tag": "0137_enable_live_training_rls",
+      "breakpoints": true
     }
   ]
 }
