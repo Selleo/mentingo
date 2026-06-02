@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
+import { passwordStatusQueryOptions } from "../queries";
 import { useCurrentUserSuspense } from "../queries/useCurrentUser";
+import { queryClient } from "../queryClient";
 
 import type { ChangePasswordBody } from "../generated-api";
 import type { AxiosError } from "axios";
@@ -12,6 +14,7 @@ import type { ApiErrorResponse } from "~/api/types";
 
 type ChangePasswordOptions = {
   data: ChangePasswordBody;
+  hasPassword: boolean;
 };
 
 export function useChangePassword() {
@@ -28,10 +31,16 @@ export function useChangePassword() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: async (_data, options) => {
+      await queryClient.invalidateQueries(passwordStatusQueryOptions);
+
       toast({
         variant: "default",
-        description: t("changePasswordView.toast.passwordChangedSuccessfully"),
+        description: t(
+          options.hasPassword
+            ? "changePasswordView.toast.passwordChangedSuccessfully"
+            : "changePasswordView.toast.passwordCreatedSuccessfully",
+        ),
       });
     },
     onError: (error: AxiosError) => {

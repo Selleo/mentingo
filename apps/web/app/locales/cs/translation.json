@@ -593,6 +593,8 @@
   "changePasswordView": {
     "header": "Změňte heslo",
     "subHeader": "Aktualizujte své heslo zde.",
+    "setPasswordHeader": "Nastavit heslo",
+    "setPasswordSubHeader": "Vytvořte heslo ke svému účtu.",
     "field": {
       "oldPassword": "Staré heslo",
       "newPassword": "Nové heslo",

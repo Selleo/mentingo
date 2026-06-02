@@ -53,6 +53,16 @@ describe("UsersController (e2e)", () => {
     testCookies = await cookieFor(testUser, app);
   });
 
+  const magicLinkCookiesFor = async (user: UserWithCredentials) => {
+    const token = await authService.createMagicLinkToken(user.id);
+    const response = await request(app.getHttpServer())
+      .get("/api/auth/magic-link/verify")
+      .query({ token })
+      .expect(200);
+
+    return response.headers["set-cookie"];
+  };
+
   describe("GET /user/all", () => {
     it("should return all users", async () => {
       const response = await request(app.getHttpServer())
@@ -144,6 +154,29 @@ describe("UsersController (e2e)", () => {
     });
   });
 
+  describe("GET /user/password-status", () => {
+    it("should return true when current user has password credentials", async () => {
+      const response = await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      expect(response.body.data).toEqual({ hasPassword: true });
+    });
+
+    it("should return false when current user has no password credentials", async () => {
+      const userWithoutPassword = await userFactory.withAdminSettings(db).withAdminRole().create();
+      const cookies = await magicLinkCookiesFor(userWithoutPassword);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data).toEqual({ hasPassword: false });
+    });
+  });
+
   describe("PATCH /user/change-password?id=:id", () => {
     it("should change password when old password is correct", async () => {
       const newPassword = "newPassword123@";
@@ -174,6 +207,28 @@ describe("UsersController (e2e)", () => {
         .set("Cookie", testCookies)
         .send({ oldPassword: incorrectOldPassword, newPassword, confirmPassword: newPassword })
         .expect(401);
+    });
+
+    it("should set password without old password when user has no credentials", async () => {
+      const userWithoutPassword = await userFactory.withAdminSettings(db).withAdminRole().create();
+      const cookies = await magicLinkCookiesFor(userWithoutPassword);
+      const newPassword = "newPassword123@";
+
+      await request(app.getHttpServer())
+        .patch(`/api/user/change-password?id=${userWithoutPassword.id}`)
+        .set("Cookie", cookies)
+        .send({ newPassword, confirmPassword: newPassword })
+        .expect(200);
+
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: userWithoutPassword.email,
+          password: newPassword,
+        })
+        .expect(201);
+
+      expect(loginResponse.headers["set-cookie"]).toBeDefined();
     });
 
     it("should return 403 when changing another user's password", async () => {

@@ -1956,6 +1956,23 @@
         }
       }
     },
+    "/api/user/password-status": {
+      "get": {
+        "operationId": "UserController_getPasswordStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPasswordStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/change-password": {
       "patch": {
         "operationId": "UserController_changePassword",
@@ -18392,6 +18409,25 @@
           "data"
         ]
       },
+      "GetPasswordStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "hasPassword": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "hasPassword"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "ChangePasswordBody": {
         "type": "object",
         "properties": {
@@ -18440,8 +18476,7 @@
         },
         "required": [
           "newPassword",
-          "confirmPassword",
-          "oldPassword"
+          "confirmPassword"
         ]
       },
       "ChangePasswordResponse": {

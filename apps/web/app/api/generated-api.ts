@@ -1153,6 +1153,12 @@ export interface AdminUpdateUserResponse {
   };
 }
 
+export interface GetPasswordStatusResponse {
+  data: {
+    hasPassword: boolean;
+  };
+}
+
 export interface ChangePasswordBody {
   newPassword: string;
   confirmPassword: string;
@@ -1160,7 +1166,7 @@ export interface ChangePasswordBody {
    * @minLength 8
    * @maxLength 64
    */
-  oldPassword: string;
+  oldPassword?: string;
 }
 
 export type ChangePasswordResponse = null;
@@ -7024,6 +7030,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name UserControllerGetPasswordStatus
+     * @request GET:/api/user/password-status
+     */
+    userControllerGetPasswordStatus: (params: RequestParams = {}) =>
+      this.request<GetPasswordStatusResponse, any>({
+        path: `/api/user/password-status`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name UserControllerChangePassword
      * @request PATCH:/api/user/change-password
      */
@@ -8807,10 +8827,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name LessonControllerGetLessonImage
      * @request GET:/api/lesson/lesson-image/{resourceId}
      */
-    lessonControllerGetLessonImage: (resourceId: string, params: RequestParams = {}) =>
+    lessonControllerGetLessonImage: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/lesson/lesson-image/${resourceId}`,
         method: "GET",
+        query: query,
         ...params,
       }),
 
@@ -8820,10 +8847,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name LessonControllerGetLessonResource
      * @request GET:/api/lesson/lesson-resource/{resourceId}
      */
-    lessonControllerGetLessonResource: (resourceId: string, params: RequestParams = {}) =>
+    lessonControllerGetLessonResource: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/lesson/lesson-resource/${resourceId}`,
         method: "GET",
+        query: query,
         ...params,
       }),
 
@@ -11462,10 +11496,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name NewsControllerGetNewsResource
      * @request GET:/api/news/news-resource/{resourceId}
      */
-    newsControllerGetNewsResource: (resourceId: string, params: RequestParams = {}) =>
+    newsControllerGetNewsResource: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/news/news-resource/${resourceId}`,
         method: "GET",
+        query: query,
         ...params,
       }),
 
@@ -11795,10 +11836,17 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name ArticlesControllerGetArticleResource
      * @request GET:/api/articles/articles-resource/{resourceId}
      */
-    articlesControllerGetArticleResource: (resourceId: string, params: RequestParams = {}) =>
+    articlesControllerGetArticleResource: (
+      resourceId: string,
+      query?: {
+        preview?: "pdf";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<void, any>({
         path: `/api/articles/articles-resource/${resourceId}`,
         method: "GET",
+        query: query,
         ...params,
       }),
 

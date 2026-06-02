@@ -9,6 +9,7 @@ export { courseQueryOptions, useCourse, useCourseSuspense } from "./useCourse";
 export { allCoursesQueryOptions, useCourses, useCoursesSuspense } from "./useCourses";
 export { currentUserQueryOptions, useCurrentUser, useCurrentUserSuspense } from "./useCurrentUser";
 export { lessonQueryOptions, useLesson, useLessonSuspense } from "./useLesson";
+export { passwordStatusQueryOptions, usePasswordStatusSuspense } from "./usePasswordStatus";
 export { scormLaunchQueryOptions, useScormLaunch } from "./useScormLaunch";
 export {
   studentCoursesQueryOptions,

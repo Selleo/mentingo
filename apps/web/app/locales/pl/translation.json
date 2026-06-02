@@ -809,6 +809,8 @@
   "changePasswordView": {
     "header": "Zmień hasło",
     "subHeader": "Zaktualizuj swoje hasło tutaj.",
+    "setPasswordHeader": "Ustaw hasło",
+    "setPasswordSubHeader": "Utwórz hasło do swojego konta.",
     "field": {
       "oldPassword": "Stare hasło",
       "newPassword": "Nowe hasło",

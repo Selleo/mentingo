@@ -489,7 +489,12 @@ export class UserService {
       return await this.createPasswordService.createUserPassword(id, newPassword);
     }
 
+    if (!oldPassword) {
+      throw new BadRequestException("changePasswordView.validation.oldPassword");
+    }
+
     const isOldPasswordValid = await bcrypt.compare(oldPassword, userCredentials.password);
+
     if (!isOldPasswordValid) {
       throw new UnauthorizedException("Invalid old password");
     }
@@ -499,6 +504,16 @@ export class UserService {
       .update(credentials)
       .set({ password: hashedNewPassword })
       .where(eq(credentials.userId, id));
+  }
+
+  async getPasswordStatus(id: UUIDType) {
+    const [userCredentials] = await this.db
+      .select({ id: credentials.id })
+      .from(credentials)
+      .where(eq(credentials.userId, id))
+      .limit(1);
+
+    return { hasPassword: Boolean(userCredentials) };
   }
 
   async resetPassword(id: UUIDType, newPassword: string) {
@@ -514,7 +529,7 @@ export class UserService {
       .where(eq(credentials.userId, id));
 
     if (!userCredentials) {
-      throw new NotFoundException("User credentials not found");
+      return await this.createPasswordService.createUserPassword(id, newPassword);
     }
 
     const hashedNewPassword = await hashPassword(newPassword);
