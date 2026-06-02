@@ -1,6 +1,7 @@
 import { mixin, UnauthorizedException } from "@nestjs/common";
 import { AuthGuard } from "@nestjs/passport";
 
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { TenantStateService } from "src/storage/db/tenant-state.service";
 
@@ -20,6 +21,7 @@ export function TenantOAuthGuard(
     constructor(
       private readonly tenantResolver: TenantResolverService,
       private readonly tenantState: TenantStateService,
+      private readonly tenantDbRunner: TenantDbRunnerService,
     ) {
       super();
     }
@@ -33,21 +35,23 @@ export function TenantOAuthGuard(
     }
 
     async canActivate(context: ExecutionContext) {
-      const enabled = await this.isEnabled();
-
-      if (!enabled) return this.handleDisabled();
-
       const req = context.switchToHttp().getRequest();
+      const isCallback = this.isCallbackRequest(req);
+      const tenantId = await this.tenantResolver.resolveTenantId(req);
 
-      if (!this.isCallbackRequest(req)) {
-        const tenantId = await this.tenantResolver.resolveTenantId(req);
+      if (!tenantId) throw new UnauthorizedException("Missing tenantId");
 
-        if (!tenantId) throw new UnauthorizedException("Missing tenantId");
+      return this.tenantDbRunner.runWithTenant(tenantId, async () => {
+        const enabled = await this.isEnabled();
 
-        req.oauthState = await this.tenantState.sign(tenantId);
-      }
+        if (!enabled) return this.handleDisabled();
 
-      return super.canActivate(context) as any;
+        if (!isCallback) {
+          req.oauthState = await this.tenantState.sign(tenantId);
+        }
+
+        return super.canActivate(context) as any;
+      });
     }
 
     getAuthenticateOptions(context: ExecutionContext) {

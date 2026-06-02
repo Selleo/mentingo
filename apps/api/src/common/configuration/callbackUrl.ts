@@ -3,8 +3,12 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { configValidator } from "src/utils/configValidator";
 
-const baseUrl = process.env.CORS_ORIGIN || "http://localhost:5173";
-const getCallbackUrl = (name: string) => `${baseUrl}/api/auth/${name}/callback`;
+export const DEFAULT_CALLBACK_BASE_URL = process.env.CORS_ORIGIN || "http://localhost:5173";
+
+export const getCallbackPath = (name: string) => `/api/auth/${name}/callback`;
+
+export const getCallbackUrl = (name: string, baseUrl = DEFAULT_CALLBACK_BASE_URL) =>
+  `${baseUrl.replace(/\/$/, "")}${getCallbackPath(name)}`;
 
 const schema = Type.Object({
   MICROSOFT: Type.String(),

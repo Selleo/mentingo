@@ -24,6 +24,7 @@ import { GoogleOAuthGuard } from "src/common/guards/google-oauth.guard";
 import { MicrosoftOAuthGuard } from "src/common/guards/microsoft-oauth.guard";
 import { RefreshTokenGuard } from "src/common/guards/refresh-token.guard";
 import { SlackOAuthGuard } from "src/common/guards/slack-oauth.guard";
+import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import {
   isSupportModeSession,
   shouldEmitUserScopedEvents,
@@ -34,6 +35,7 @@ import { USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { currentUserResponseSchema } from "src/user/schemas/user.schema";
 
 import { AuthService } from "./auth.service";
@@ -72,6 +74,7 @@ export class AuthController {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
     private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantResolver: TenantResolverService,
   ) {
     this.CORS_ORIGIN = process.env.CORS_ORIGIN || "http://localhost:5173";
   }
@@ -337,16 +340,14 @@ export class AuthController {
         ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
         : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-      response.redirect(this.CORS_ORIGIN);
+      response.redirect(await this.getOAuthRedirectBaseUrl(request));
     } catch (e) {
       await this.authService.handleAuthFailed({
         email: googleUser.email,
         method: USER_LOGIN_METHOD.PROVIDER,
         error: (e as Error)?.message,
       });
-      response.redirect(
-        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
-      );
+      response.redirect(await this.getOAuthErrorRedirectUrl(request, e as Error));
     }
   }
 
@@ -374,16 +375,14 @@ export class AuthController {
         ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
         : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-      response.redirect(this.CORS_ORIGIN);
+      response.redirect(await this.getOAuthRedirectBaseUrl(request));
     } catch (e) {
       await this.authService.handleAuthFailed({
         email: microsoftUser.email,
         method: USER_LOGIN_METHOD.PROVIDER,
         error: (e as Error)?.message,
       });
-      response.redirect(
-        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
-      );
+      response.redirect(await this.getOAuthErrorRedirectUrl(request, e as Error));
     }
   }
 
@@ -411,16 +410,14 @@ export class AuthController {
         ? this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken)
         : this.tokenService.setTokenCookies(response, accessToken, refreshToken, true);
 
-      response.redirect(this.CORS_ORIGIN);
+      response.redirect(await this.getOAuthRedirectBaseUrl(request));
     } catch (e) {
       await this.authService.handleAuthFailed({
         email: slackUser.email,
         method: USER_LOGIN_METHOD.PROVIDER,
         error: (e as Error)?.message,
       });
-      response.redirect(
-        this.CORS_ORIGIN + "/auth/login?error=" + encodeURIComponent((e as Error).message),
-      );
+      response.redirect(await this.getOAuthErrorRedirectUrl(request, e as Error));
     }
   }
 
@@ -477,5 +474,20 @@ export class AuthController {
     const loginResponse = await this.authService.handleMagicLinkLogin(response, token);
 
     return new BaseResponse(loginResponse);
+  }
+
+  private async getOAuthRedirectBaseUrl(request: Request): Promise<string> {
+    return (
+      (await this.tenantResolver.resolveTenantHost(request)) ??
+      getRequestBaseUrl(request) ??
+      this.CORS_ORIGIN
+    );
+  }
+
+  private async getOAuthErrorRedirectUrl(request: Request, error: Error): Promise<string> {
+    const redirectUrl = new URL("/auth/login", await this.getOAuthRedirectBaseUrl(request));
+    redirectUrl.searchParams.set("error", error.message);
+
+    return redirectUrl.toString();
   }
 }
