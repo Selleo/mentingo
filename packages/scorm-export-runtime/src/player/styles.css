@@ -385,20 +385,33 @@ input[type="checkbox"] {
 
 .quiz-actions {
   display: flex;
+  gap: 10px;
   justify-content: flex-end;
+  flex-wrap: wrap;
 }
 
-.primary-button {
+.primary-button,
+.secondary-button {
   border: 0;
   border-radius: 8px;
   padding: 12px 18px;
-  color: var(--contrast);
-  background: var(--primary);
-  font-weight: 800;
+  font: inherit;
   cursor: pointer;
 }
 
-.primary-button:disabled {
+.primary-button {
+  color: var(--contrast);
+  background: var(--primary);
+}
+
+.secondary-button {
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  color: var(--primary-900);
+  background: #fff;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }

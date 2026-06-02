@@ -29,6 +29,7 @@ interface CertificatePreviewProps {
   minimalFrame?: boolean;
   initialColor?: string | null;
   onColorChange?: (color: string) => void;
+  onColorPickerOpenChange?: (isOpen: boolean) => void;
   certificateKind?: CertificateKind;
 }
 
@@ -47,6 +48,7 @@ const CertificatePreview = ({
   minimalFrame = false,
   initialColor,
   onColorChange,
+  onColorPickerOpenChange,
   certificateKind = CERTIFICATE_KIND.COURSE,
 }: CertificatePreviewProps) => {
   const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF(certificateKind);
@@ -87,11 +89,11 @@ const CertificatePreview = ({
   };
 
   return (
-    <div className="flex w-full justify-center">
-      <div className="w-full origin-center scale-100 md:scale-[0.8]">
+    <div className="flex w-[min(1120px,95vw)] justify-center">
+      <div className="w-full">
         <div
           className={cn("mx-auto w-full bg-white", {
-            "max-w-[98vw] rounded-t-lg sm:max-w-[95vw]": !minimalFrame,
+            "rounded-t-lg": !minimalFrame,
             "overflow-hidden": !minimalFrame && !showColorPicker,
             "overflow-visible": !minimalFrame && showColorPicker,
           })}
@@ -118,6 +120,7 @@ const CertificatePreview = ({
               colorTheme={colorTheme}
               setColorTheme={setColorTheme}
               onColorChange={onColorChange}
+              onColorPickerOpenChange={onColorPickerOpenChange}
               showColorPicker={showColorPicker}
               showDownloadButton={showDownloadButton}
               showShareButton={showShareButton && Boolean(certificateId)}

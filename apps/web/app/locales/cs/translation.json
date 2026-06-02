@@ -101,6 +101,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Soubor byl úspěšně nahrán",
       "videoFailed": "Nahrání videa se nezdařilo",
+      "videoTooLarge": "Video soubor překračuje maximální povolenou velikost",
       "videoReady": "Video je připraveno k použití",
       "videoUploading": "Nahráváme vaše video. Záložku prosím nezavírejte.",
       "videoUploadedProcessing": "Vaše nahrávání bylo dokončeno. Nyní se vaše video zpracovává. Neváhejte a zavřete kartu."
@@ -175,8 +176,15 @@
       "creatingCourse": "Vytváření kurzu...",
       "createCourse": "Vytvořit kurz"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "Balíček SCORM byl úspěšně nahrán"
+    "importFailure": {
+      "courseDescription": "Kurz byl odstraněn, protože balíček SCORM se nepodařilo importovat.",
+      "lessonDescription": "Lekce SCORM nebo balíček byly odstraněny, protože balíček se nepodařilo importovat."
+    },
+    "importProcessing": {
+      "description": "Balíček se stále importuje. Během dokončování importu můžete pokračovat v práci."
+    },
+    "importSuccess": {
+      "description": "Balíček SCORM je připraven."
     },
     "errors": {
       "packageRequired": "Balíček SCORM je povinný.",
@@ -193,6 +201,9 @@
       "packageAlreadyAttached": "Tato lekce SCORM již má balíček pro vybraný jazyk.",
       "invalidPackagePath": "Balíček SCORM obsahuje neplatnou cestu k souboru.",
       "externalPackagePath": "Balíček SCORM obsahuje externí cestu k souboru.",
+      "importFailed": "Import balíčku SCORM se nezdařil.",
+      "unknownImportJob": "Úloha importu SCORM nebyla rozpoznána.",
+      "unsupportedImportAction": "Akce importu SCORM není podporována.",
       "runtime": {
         "launchNotFound": "Spouštěcí obsah SCORM nebyl nalezen.",
         "unsupportedStandard": "Tento standard SCORM není podporován.",
@@ -1137,6 +1148,7 @@
       "category": "Kategorie",
       "price": "Cena",
       "type": "Typ",
+      "scorm": "SCORM",
       "state": "Stát",
       "status": "Postavení",
       "sharedCourse": "Sdíleno",
@@ -1778,6 +1790,7 @@
         "charactersLeft": "Postavy odešly",
         "reachedCharactersLimit": "Dosáhli jste limitu počtu znaků.",
         "reachedCharactersLimitHtml": "Příliš mnoho formátování. Snižte prosím množství formátování, aby se vešlo do limitu.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 nebo Hevc (max. 200 MB)",
         "enableCertificate": "Povolit certifikát",
         "enableCertificateDescription": "Zapněte toto, chcete-li vydávat certifikáty pro tento kurz a níže nakonfigurujte jejich podpis a náhled.",
         "certificateValidity": "Platnost certifikátu",
@@ -3136,8 +3149,9 @@
     "toast": {
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru. Nahrajte podporovaný soubor.",
-      "missingTenantContext": "Chybí kontext organizace pro nahrání souboru"
+      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
+      "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
+      "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "Nebyl nahrán žádný soubor",
@@ -3336,6 +3350,7 @@
       }
     },
     "presentation": {
+      "title": "Prezentace",
       "ariaLabel": {
         "drag": "Přetáhněte prezentaci vložit",
         "remove": "Odebrat vložení prezentace"

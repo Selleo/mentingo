@@ -464,27 +464,13 @@ export class ScormRepository {
     });
   }
 
-  async deleteImportedLesson(lessonId: string) {
+  async deleteLessonPackages(lessonId: string) {
     await this.db
       .delete(scormPackages)
       .where(
         and(
           eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
           eq(scormPackages.entityId, lessonId),
-        ),
-      );
-
-    await this.db.delete(lessons).where(eq(lessons.id, lessonId));
-  }
-
-  async deleteImportedLessonPackage(params: { lessonId: string; language: SupportedLanguages }) {
-    await this.db
-      .delete(scormPackages)
-      .where(
-        and(
-          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
-          eq(scormPackages.entityId, params.lessonId),
-          eq(scormPackages.language, params.language),
         ),
       );
   }

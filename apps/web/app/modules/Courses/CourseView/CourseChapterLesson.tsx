@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
 import { Icon } from "~/components/Icon";
@@ -12,6 +13,7 @@ import {
 import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
 
 import type { Lesson } from "./CourseChapter";
+import type { ProgressStatus } from "../Lesson/types";
 
 const progressBadge = {
   completed: "completed",
@@ -26,13 +28,23 @@ type CourseChapterLessonProps = {
 
 export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
   const { t } = useTranslation();
-  const { isPreviewMode } = useCourseAccessProvider();
+  const { isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
+
   const hasAccess = isPreviewMode || lesson.hasAccess;
-  const badgeProgress = isPreviewMode
+
+  const shouldIgnoreEnrollmentBlockedStatus =
+    isCourseStudentModeActive &&
+    lesson.hasAccess &&
+    lesson.status === LESSON_PROGRESS_STATUSES.BLOCKED;
+
+  const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
     ? LESSON_PROGRESS_STATUSES.NOT_STARTED
-    : hasAccess
-      ? lesson.status
-      : LESSON_PROGRESS_STATUSES.BLOCKED;
+    : lesson.status;
+
+  const badgeProgress: ProgressStatus = match({ isPreviewMode, hasAccess })
+    .with({ isPreviewMode: true }, () => LESSON_PROGRESS_STATUSES.NOT_STARTED)
+    .with({ hasAccess: true }, () => effectiveStatus)
+    .otherwise(() => LESSON_PROGRESS_STATUSES.BLOCKED);
 
   const lessonElement = (
     <div

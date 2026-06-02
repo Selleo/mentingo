@@ -101,6 +101,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Datei erfolgreich hochgeladen",
       "videoFailed": "Das Hochladen des Videos ist fehlgeschlagen",
+      "videoTooLarge": "Die Videodatei überschreitet die maximal zulässige Größe",
       "videoReady": "Das Video ist einsatzbereit",
       "videoUploading": "Wir laden Ihr Video hoch. Bitte schließen Sie den Tab nicht.",
       "videoUploadedProcessing": "Ihr Upload ist abgeschlossen. Jetzt wird Ihr Video verarbeitet. Schließen Sie den Tab gerne."
@@ -175,8 +176,15 @@
       "creatingCourse": "Kurs erstellen...",
       "createCourse": "Kurs erstellen"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM-Paket erfolgreich hochgeladen"
+    "importFailure": {
+      "courseDescription": "Der Kurs wurde entfernt, weil das SCORM-Paket nicht importiert werden konnte.",
+      "lessonDescription": "Die SCORM-Lektion oder das Paket wurde entfernt, weil das Paket nicht importiert werden konnte."
+    },
+    "importProcessing": {
+      "description": "Das Paket wird noch importiert. Sie können weiterarbeiten, während der Import abgeschlossen wird."
+    },
+    "importSuccess": {
+      "description": "Das SCORM-Paket ist bereit."
     },
     "errors": {
       "packageRequired": "SCORM-Paket ist erforderlich.",
@@ -193,6 +201,9 @@
       "packageAlreadyAttached": "Diese SCORM-Lektion hat bereits ein Paket für die ausgewählte Sprache.",
       "invalidPackagePath": "SCORM-Paket enthält einen ungültigen Dateipfad.",
       "externalPackagePath": "SCORM-Paket enthält einen externen Dateipfad.",
+      "importFailed": "SCORM-Paketimport fehlgeschlagen.",
+      "unknownImportJob": "SCORM-Importauftrag wurde nicht erkannt.",
+      "unsupportedImportAction": "SCORM-Importaktion wird nicht unterstützt.",
       "runtime": {
         "launchNotFound": "SCORM-Startinhalt wurde nicht gefunden.",
         "unsupportedStandard": "Dieser SCORM-Standard wird nicht unterstützt.",
@@ -1131,6 +1142,7 @@
       "category": "Kategorie",
       "price": "Preis",
       "type": "Typ",
+      "scorm": "SCORM",
       "state": "Zustand",
       "status": "Status",
       "sharedCourse": "Geteilt",
@@ -1772,6 +1784,7 @@
         "charactersLeft": "Charaktere übrig",
         "reachedCharactersLimit": "Sie haben die Zeichenbeschränkung erreicht.",
         "reachedCharactersLimitHtml": "Zu viel Formatierung. Bitte reduzieren Sie die Formatierung, damit sie innerhalb des Limits liegt.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 oder Hevc (max. 200 MB)",
         "enableCertificate": "Zertifikat aktivieren",
         "enableCertificateDescription": "Aktivieren Sie diese Option, um Zertifikate für diesen Kurs auszustellen und konfigurieren Sie unten deren Signatur und Vorschau.",
         "certificateValidity": "Zertifikatsgültigkeit",
@@ -3128,8 +3141,9 @@
     "toast": {
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
-      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine unterstützte Datei hoch.",
-      "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload"
+      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
+      "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",
+      "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch."
     },
     "import": {
       "noFileUploaded": "Keine Datei hochgeladen",
@@ -3328,6 +3342,7 @@
       }
     },
     "presentation": {
+      "title": "Präsentation",
       "ariaLabel": {
         "drag": "Präsentation per Drag & Drop einbetten",
         "remove": "Präsentationseinbettung entfernen"

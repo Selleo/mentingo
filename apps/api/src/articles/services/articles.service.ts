@@ -53,6 +53,7 @@ import type {
 } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
 import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
@@ -523,6 +524,7 @@ export class ArticlesService {
     res: Response,
     resourceId: UUIDType,
     currentUser?: CurrentUserType,
+    preview?: FilePreviewFormat,
   ) {
     await this.checkAccess(currentUser?.userId);
 
@@ -538,7 +540,12 @@ export class ArticlesService {
     ]);
 
     if (!resource.entityId || resource.entityType !== ENTITY_TYPES.ARTICLES) {
-      if (isAdminLike) return this.streamArticleResource(req, res, resource.reference);
+      if (isAdminLike) {
+        return this.streamArticleResource(req, res, resource.reference, {
+          contentType: resource.contentType,
+          preview,
+        });
+      }
 
       throw new NotFoundException("Article resource not found");
     }
@@ -558,12 +565,22 @@ export class ArticlesService {
       throw new NotFoundException("Article resource not found");
     }
 
-    return this.streamArticleResource(req, res, resource.reference);
+    return this.streamArticleResource(req, res, resource.reference, {
+      contentType: resource.contentType,
+      preview,
+    });
   }
 
-  private async streamArticleResource(req: Request, res: Response, reference: string) {
-    const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
+  private async streamArticleResource(
+    req: Request,
+    res: Response,
+    reference: string,
+    options?: FilePreviewOptions,
+  ) {
+    const file = await this.fileService.getFileDeliveryWithPreview(reference, {
+      ...options,
+      range: req.headers.range,
+    });
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);

@@ -22,6 +22,10 @@
   object-fit: contain;
 }
 
+.mentingo-video-js.mentingo-video-js--cover .vjs-tech {
+  object-fit: cover;
+}
+
 .mentingo-video-js .vjs-control-bar {
   position: absolute;
   left: 0;

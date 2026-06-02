@@ -8,6 +8,7 @@ export const QUEUE_NAMES = {
   LEARNING_PATH_EXPORT: "learning-path-export",
   LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
+  SCORM_IMPORT: "scorm-import",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

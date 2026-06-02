@@ -101,6 +101,7 @@
     "toast": {
       "fileUploadedSuccessfully": "Failas sėkmingai įkeltas",
       "videoFailed": "Vaizdo įrašo įkėlimas nepavyko",
+      "videoTooLarge": "Vaizdo failas viršija didžiausią leistiną dydį",
       "videoReady": "Vaizdo įrašas paruoštas naudoti",
       "videoUploading": "Įkeliame jūsų vaizdo įrašą. Neuždarykite skirtuko.",
       "videoUploadedProcessing": "Jūsų įkėlimas baigtas. Dabar jūsų vaizdo įrašas apdorojamas. Nedvejodami uždarykite skirtuką."
@@ -175,8 +176,15 @@
       "creatingCourse": "Kuriamas kursas...",
       "createCourse": "Sukurti kursą"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM paketas sėkmingai įkeltas"
+    "importFailure": {
+      "courseDescription": "Kursas pašalintas, nes SCORM paketo nepavyko importuoti.",
+      "lessonDescription": "SCORM pamoka arba paketas pašalinti, nes paketo nepavyko importuoti."
+    },
+    "importProcessing": {
+      "description": "Paketas vis dar importuojamas. Galite tęsti darbą, kol importas baigsis."
+    },
+    "importSuccess": {
+      "description": "SCORM paketas paruoštas."
     },
     "errors": {
       "packageRequired": "SCORM paketas yra privalomas.",
@@ -193,6 +201,9 @@
       "packageAlreadyAttached": "Ši SCORM pamoka jau turi paketą pasirinktai kalbai.",
       "invalidPackagePath": "SCORM pakete yra neteisingas failo kelias.",
       "externalPackagePath": "SCORM pakete yra išorinis failo kelias.",
+      "importFailed": "SCORM paketo importuoti nepavyko.",
+      "unknownImportJob": "SCORM importavimo užduotis neatpažinta.",
+      "unsupportedImportAction": "SCORM importavimo veiksmas nepalaikomas.",
       "runtime": {
         "launchNotFound": "SCORM paleidimo turinys nerastas.",
         "unsupportedStandard": "Šis SCORM standartas nepalaikomas.",
@@ -1137,6 +1148,7 @@
       "category": "Kategorija",
       "price": "Kaina",
       "type": "Tipas",
+      "scorm": "SCORM",
       "state": "valstybė",
       "status": "Būsena",
       "sharedCourse": "Bendrinama",
@@ -1778,6 +1790,7 @@
         "charactersLeft": "Liko simbolių",
         "reachedCharactersLimit": "Pasiekėte simbolių limitą.",
         "reachedCharactersLimitHtml": "Per daug formatavimo. Sumažinkite formatavimo kiekį, kad tilptų į limitą.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 arba Hevc (maks. 200 MB)",
         "enableCertificate": "Įgalinti sertifikatą",
         "enableCertificateDescription": "Įjunkite tai, kad išduotumėte šio kurso sertifikatus ir toliau sukonfigūruotumėte jų parašą bei peržiūrą.",
         "certificateValidity": "Sertifikato galiojimas",
@@ -3136,8 +3149,9 @@
     "toast": {
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas. Įkelkite palaikomą failą.",
-      "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui"
+      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
+      "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
+      "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "Failas neįkeltas",
@@ -3336,6 +3350,7 @@
       }
     },
     "presentation": {
+      "title": "Pristatymas",
       "ariaLabel": {
         "drag": "Vilkite pristatymo įdėjimą",
         "remove": "Pašalinti pristatymo įterpimą"

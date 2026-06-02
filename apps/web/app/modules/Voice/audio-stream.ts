@@ -30,6 +30,7 @@ const VAD_CONFIG = {
   redemptionMs: 1400,
   preSpeechPadMs: 220,
 } as const;
+const POST_REDEMPTION_EMPTY_AUDIO_MS = VAD_CONFIG.redemptionMs;
 
 export class RealtimePCMStreamerWorklet {
   private readonly protocol: StreamProtocol<unknown, unknown>;
@@ -48,6 +49,7 @@ export class RealtimePCMStreamerWorklet {
   private pendingSamples: number[] = [];
   private preSpeechSamples: number[] = [];
   private isSpeaking = false;
+  private hasActiveSpeechSegment = false;
   private readonly onSocketConnect = () => {
     this.emitReadyChunks();
   };
@@ -56,6 +58,7 @@ export class RealtimePCMStreamerWorklet {
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
+    this.hasActiveSpeechSegment = false;
   };
 
   constructor(
@@ -80,6 +83,7 @@ export class RealtimePCMStreamerWorklet {
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
+    this.hasActiveSpeechSegment = false;
 
     if (!this.micVad) {
       this.micVad = await MicVAD.new({
@@ -132,6 +136,7 @@ export class RealtimePCMStreamerWorklet {
         onSpeechStart: () => undefined,
         onSpeechRealStart: () => {
           this.isSpeaking = true;
+          this.hasActiveSpeechSegment = true;
           if (this.preSpeechSamples.length > 0) {
             this.pendingSamples.push(...this.preSpeechSamples);
             this.preSpeechSamples = [];
@@ -142,14 +147,15 @@ export class RealtimePCMStreamerWorklet {
           this.isSpeaking = false;
           this.preSpeechSamples = [];
           if (this.socket?.connected) {
-            this.emitReadyChunks();
-            this.pendingSamples = [];
+            this.emitSpeechEndBoundary();
           }
+          this.hasActiveSpeechSegment = false;
         },
         onVADMisfire: () => {
           this.isSpeaking = false;
           this.pendingSamples = [];
           this.preSpeechSamples = [];
+          this.hasActiveSpeechSegment = false;
         },
       });
     }
@@ -217,6 +223,7 @@ export class RealtimePCMStreamerWorklet {
     this.pendingSamples = [];
     this.preSpeechSamples = [];
     this.isSpeaking = false;
+    this.hasActiveSpeechSegment = false;
 
     if (this.micVad) {
       await this.micVad.destroy().catch(() => undefined);
@@ -248,6 +255,21 @@ export class RealtimePCMStreamerWorklet {
       this.socket.emit(chunkEmit.event, ...chunkEmit.args);
       this.onChunkSent?.(meta);
     }
+  }
+
+  private emitSpeechEndBoundary() {
+    if (!this.hasActiveSpeechSegment) {
+      this.pendingSamples = [];
+      return;
+    }
+
+    const trailingSilenceSamples = (this.targetSr * POST_REDEMPTION_EMPTY_AUDIO_MS) / 1000;
+    const chunkBoundaryPadding =
+      (this.chunkSamples - (this.pendingSamples.length % this.chunkSamples)) % this.chunkSamples;
+
+    this.pendingSamples.push(...Array(chunkBoundaryPadding + trailingSilenceSamples).fill(0));
+    this.emitReadyChunks();
+    this.pendingSamples = [];
   }
 }
 

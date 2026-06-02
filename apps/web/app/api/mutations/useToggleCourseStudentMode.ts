@@ -21,8 +21,10 @@ export const useToggleCourseStudentMode = (courseId: string) => {
       return response.data.data;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: currentUserQueryOptions.queryKey });
-      await queryClient.invalidateQueries({ queryKey: ["course"] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: currentUserQueryOptions.queryKey }),
+        queryClient.invalidateQueries({ queryKey: ["course"], refetchType: "active" }),
+      ]);
     },
     onError: (error: AxiosError) => {
       const { message } = error.response?.data as ApiErrorResponse;

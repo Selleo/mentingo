@@ -61,7 +61,7 @@ import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { COURSES_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 
-import { getCourseBadgeVariant, getCourseStatus, getCourseTypeLabel } from "./utils";
+import { getCourseBadgeVariant, getCourseStatus } from "./utils";
 
 import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { CourseType } from "@repo/shared";
@@ -203,17 +203,28 @@ const Courses = () => {
     },
     {
       accessorKey: "courseType",
-      header: t("adminCoursesView.field.type"),
+      header: t("adminCoursesView.field.scorm"),
       cell: ({ row }) => {
         const courseType = row.original.courseType ?? COURSE_TYPE.DEFAULT;
+
+        if (courseType !== COURSE_TYPE.SCORM) {
+          return (
+            <span
+              className="block w-full text-center"
+              data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
+            >
+              -
+            </span>
+          );
+        }
 
         return (
           <Badge
             data-testid={COURSES_PAGE_HANDLES.rowTypeBadge(row.original.id)}
-            variant={courseType === COURSE_TYPE.SCORM ? "success" : "secondaryWithOutline"}
+            variant="success"
             className="w-max"
           >
-            {getCourseTypeLabel(courseType as CourseType, t)}
+            {t("adminCoursesView.field.scorm")}
           </Badge>
         );
       },

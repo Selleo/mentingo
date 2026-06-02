@@ -20,7 +20,11 @@ import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
+import {
+  canTrackLessonProgress,
+  LEARNING_MODE_REQUIRED_ERROR_KEY,
+  shouldRequireLearningModeForProgress,
+} from "src/common/utils/lessonLearningAccess";
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -35,6 +39,7 @@ import { QuestionRepository } from "src/questions/question.repository";
 import { QuestionService } from "src/questions/question.service";
 import {
   chapters,
+  courses,
   courseStudentMode,
   lessons,
   studentCourses,
@@ -59,6 +64,7 @@ import type { EnrolledLessonWithSearch } from "../repositories/lesson.repository
 import type { Request, Response } from "express";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
 
 @Injectable()
 export class LessonService {
@@ -508,15 +514,15 @@ export class LessonService {
   ) {
     const { permissions } = await this.permissionsService.getUserAccess(currentUser.userId);
 
-    if (this.isLearnerOnly(permissions)) return;
-
     const [access] = await this.db
       .select({
         isAssigned: studentCourses.id,
+        isCourseAuthor: eq(courses.authorId, currentUser.userId),
         isStudentMode: courseStudentMode.id,
       })
       .from(lessons)
       .innerJoin(chapters, eq(lessons.chapterId, chapters.id))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(
         studentCourses,
         and(
@@ -535,10 +541,17 @@ export class LessonService {
 
     const hasLearnerAccess = this.canUseLearnerProgress(permissions, {
       hasEnrollment: !!access?.isAssigned,
+      isCourseAuthor: !!access?.isCourseAuthor,
       isLearningModeActive: !!access?.isStudentMode,
     });
 
     if (!hasLearnerAccess) {
+      const shouldRequireLearningMode = shouldRequireLearningModeForProgress(permissions, {
+        isCourseAuthor: !!access?.isCourseAuthor,
+      });
+
+      if (!shouldRequireLearningMode) return;
+
       throw new ForbiddenException(LEARNING_MODE_REQUIRED_ERROR_KEY);
     }
   }
@@ -548,6 +561,7 @@ export class LessonService {
     res: Response,
     currentUser: CurrentUserType,
     resourceId: UUIDType,
+    preview?: FilePreviewFormat,
   ) {
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
@@ -564,7 +578,10 @@ export class LessonService {
           PERMISSIONS.COURSE_UPDATE_OWN,
         ])
       ) {
-        return this.streamResource(req, res, lessonResource.reference);
+        return this.streamResource(req, res, lessonResource.reference, {
+          contentType: lessonResource.contentType,
+          preview,
+        });
       }
 
       throw new NotFoundException("common.toast.notFound");
@@ -579,12 +596,22 @@ export class LessonService {
       throw new ForbiddenException("You are not allowed to access this lesson!");
     }
 
-    return this.streamResource(req, res, lessonResource.reference);
+    return this.streamResource(req, res, lessonResource.reference, {
+      contentType: lessonResource.contentType,
+      preview,
+    });
   }
 
-  private async streamResource(req: Request, res: Response, reference: string) {
-    const rangeHeader = req.headers.range;
-    const file = await this.fileService.getFileDelivery(reference, rangeHeader);
+  private async streamResource(
+    req: Request,
+    res: Response,
+    reference: string,
+    options?: FilePreviewOptions,
+  ) {
+    const file = await this.fileService.getFileDeliveryWithPreview(reference, {
+      ...options,
+      range: req.headers.range,
+    });
 
     if (file.type === FILE_DELIVERY_TYPE.REDIRECT) {
       return res.redirect(file.url);
@@ -634,12 +661,9 @@ export class LessonService {
 
   private canUseLearnerProgress(
     permissions: PermissionKey[],
-    access: { hasEnrollment: boolean; isLearningModeActive: boolean },
+    access: { hasEnrollment: boolean; isCourseAuthor: boolean; isLearningModeActive: boolean },
   ) {
-    const canUseLearningMode = permissions.includes(PERMISSIONS.LEARNING_MODE_USE);
-    if (canUseLearningMode) return access.isLearningModeActive;
-
-    return true;
+    return canTrackLessonProgress(permissions, access);
   }
 
   // async studentAnswerOnQuestion(

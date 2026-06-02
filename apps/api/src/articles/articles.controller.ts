@@ -41,6 +41,7 @@ import { RequirePermission } from "src/common/decorators/require-permission.deco
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
+import { filePreviewQuerySchema, FilePreviewQuery } from "src/file/types/file-preview.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
@@ -227,15 +228,19 @@ export class ArticlesController {
   @Public()
   @Get("articles-resource/:resourceId")
   @Validate({
-    request: [{ type: "param", schema: UUIDSchema, name: "resourceId" }],
+    request: [
+      { type: "param", schema: UUIDSchema, name: "resourceId" },
+      { type: "query", name: "preview", schema: filePreviewQuerySchema },
+    ],
   })
   async getArticleResource(
     @Param("resourceId") resourceId: UUIDType,
+    @Query("preview") preview: FilePreviewQuery,
     @Req() req: Request,
     @Res() res: Response,
     @CurrentUser() currentUser?: CurrentUserType,
   ) {
-    return this.articlesService.getArticleResource(req, res, resourceId, currentUser);
+    return this.articlesService.getArticleResource(req, res, resourceId, currentUser, preview);
   }
 
   @Public()

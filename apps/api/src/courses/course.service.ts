@@ -409,30 +409,33 @@ export class CourseService {
         .leftJoin(users, eq(courses.authorId, users.id))
         .where(and(...conditions));
 
+      const courseIds = data.map((item) => item.id);
+      const trailerUrls = await this.getCourseTrailerUrls(courseIds);
+
       const dataWithS3SignedUrls = await Promise.all(
         data.map(async (item) => {
-          if (!item.thumbnailUrl) {
-            return item;
-          }
-
+          const trailerUrl = trailerUrls[item.id] ?? null;
           try {
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const signedUrl = item.thumbnailUrl
+              ? await this.fileService.getFileUrl(item.thumbnailUrl)
+              : item.thumbnailUrl;
+
             const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
               item.authorAvatarUrl,
             );
             return {
               ...item,
               thumbnailUrl: signedUrl,
+              trailerUrl,
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
             console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
-            return item;
+            return { ...item, trailerUrl };
           }
         }),
       );
 
-      const courseIds = dataWithS3SignedUrls.map((item) => item.id);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
 
       const dataWithSlugs = dataWithS3SignedUrls.map((item) => ({
@@ -457,17 +460,10 @@ export class CourseService {
 
     const { sortOrder, sortedField } = getSortOptions(sort);
 
-    const hasCourseUpdatePermissions = userHasAnyPermissionsCondition(
-      this.db,
-      users.id,
-      users.tenantId,
-      [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-    );
-
     const conditions = [
       eq(users.archived, false),
       isNull(users.deletedAt),
-      not(hasCourseUpdatePermissions),
+      ne(users.id, courses.authorId),
     ];
 
     if (keyword) {
@@ -509,6 +505,7 @@ export class CourseService {
         isEnrolledByGroup: sql<boolean>`${studentCourses.enrolledByGroupId} IS NOT NULL`,
       })
       .from(users)
+      .innerJoin(courses, eq(courses.id, courseId))
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
@@ -531,6 +528,7 @@ export class CourseService {
     const [{ totalItems }] = await this.db
       .select({ totalItems: countDistinct(users.id) })
       .from(users)
+      .innerJoin(courses, eq(courses.id, courseId))
       .leftJoin(
         studentCourses,
         and(eq(studentCourses.studentId, users.id), eq(studentCourses.courseId, courseId)),
@@ -4198,11 +4196,11 @@ export class CourseService {
       this.db
         .selectDistinct({
           language: requestedLanguages.language,
-          courseId: courses.id,
+          courseId: sql<UUIDType>`${courses.id}`.as("course_id"),
           courseTitle: this.localizationService
             .getLocalizedSqlField(courses.title, requestedLanguage)
             .as("course_title"),
-          groupId: groups.id,
+          groupId: sql<UUIDType>`${groups.id}`.as("group_id"),
           groupName: this.localizationService
             .getLocalizedSqlField(groups.name, requestedLanguage, groups)
             .as("group_name"),

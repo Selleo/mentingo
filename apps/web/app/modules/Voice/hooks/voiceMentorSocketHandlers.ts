@@ -117,7 +117,7 @@ export function createVoiceMentorSocketHandlers({
         return;
       }
 
-      await audioPlayerRef.current?.enqueue(bytes);
+      await audioPlayerRef.current?.enqueue(bytes, { sampleRate: data.sampleRate });
       onAudioChunkReceived?.();
       restartInactivityTimer();
     },

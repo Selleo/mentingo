@@ -5,7 +5,6 @@ import type { ApiErrorResponse } from "~/api/types";
 
 type ApiErrorResponseWithCount = ApiErrorResponse & {
   count?: number;
-  translationParams?: Record<string, unknown>;
 };
 
 const getFirstMessage = (message?: string | string[]) =>

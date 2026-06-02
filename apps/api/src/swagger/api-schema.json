@@ -6274,6 +6274,15 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "preview",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "const": "pdf",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -6293,6 +6302,15 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "preview",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "const": "pdf",
               "type": "string"
             }
           }
@@ -12809,6 +12827,15 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "name": "preview",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "const": "pdf",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -13522,6 +13549,15 @@
             "in": "path",
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "preview",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "const": "pdf",
               "type": "string"
             }
           }

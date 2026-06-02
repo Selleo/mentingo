@@ -101,6 +101,7 @@
     "toast": {
       "fileUploadedSuccessfully": "File uploaded successfully",
       "videoFailed": "Video upload failed",
+      "videoTooLarge": "Video file exceeds the maximum allowed size",
       "videoReady": "Video is ready to use",
       "videoUploading": "We're uploading your video. Please don't close the tab.",
       "videoUploadedProcessing": "Your upload has been finished. Now your video is getting processed. Feel free to close the tab."
@@ -175,8 +176,15 @@
       "creatingCourse": "Creating Course...",
       "createCourse": "Create Course"
     },
-    "toast": {
-      "scormUploadedSuccessfully": "SCORM package uploaded successfully"
+    "importFailure": {
+      "courseDescription": "The course was removed because the SCORM package could not be imported.",
+      "lessonDescription": "The SCORM lesson or package was removed because the package could not be imported."
+    },
+    "importProcessing": {
+      "description": "The package is still being imported. You can keep working while it finishes."
+    },
+    "importSuccess": {
+      "description": "The SCORM package is ready."
     },
     "errors": {
       "packageRequired": "SCORM package is required.",
@@ -193,6 +201,9 @@
       "packageAlreadyAttached": "This SCORM lesson already has a package for the selected language.",
       "invalidPackagePath": "SCORM package contains an invalid file path.",
       "externalPackagePath": "SCORM package contains an external file path.",
+      "importFailed": "SCORM package import failed.",
+      "unknownImportJob": "SCORM import job is not recognized.",
+      "unsupportedImportAction": "SCORM import action is not supported.",
       "runtime": {
         "launchNotFound": "SCORM launch content was not found.",
         "unsupportedStandard": "This SCORM standard is not supported.",
@@ -1132,6 +1143,7 @@
       "category": "Category",
       "price": "Price",
       "type": "Type",
+      "scorm": "SCORM",
       "state": "State",
       "status": "Status",
       "sharedCourse": "Shared",
@@ -1833,6 +1845,7 @@
         "charactersLeft": "Characters left",
         "reachedCharactersLimit": "You have reached the character limit.",
         "reachedCharactersLimitHtml": "Too much formatting. Please reduce the amount of formatting to fit within the limit.",
+        "trailerUploadDetails": "MP4, MOV, MPEG-2 or Hevc (max. 200 MB)",
         "enableCertificate": "Enable certificate",
         "enableCertificateDescription": "Turn this on to issue certificates for this course and configure their signature and preview below.",
         "certificateValidity": "Certificate validity",
@@ -3208,8 +3221,9 @@
     "toast": {
       "invalidData": "File upload failed - invalid file data",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type. Please upload a supported file.",
-      "missingTenantContext": "Missing tenant context for file upload"
+      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
+      "missingTenantContext": "Missing tenant context for file upload",
+      "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}."
     },
     "import": {
       "noFileUploaded": "No file uploaded",
@@ -3408,6 +3422,7 @@
       }
     },
     "presentation": {
+      "title": "Presentation",
       "ariaLabel": {
         "drag": "Drag presentation embed",
         "remove": "Remove presentation embed"

@@ -2,6 +2,7 @@ import { Link, useLocation } from "@remix-run/react";
 import { last } from "lodash-es";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import CourseProgress from "~/components/CourseProgress";
 import { Icon } from "~/components/Icon";
@@ -25,7 +26,7 @@ import {
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 import { getChaptersWithAccess } from "../utils";
 
-import { LESSON_PROGRESS_STATUSES } from "./types";
+import { LESSON_PROGRESS_STATUSES, type ProgressStatus } from "./types";
 import { getCurrentChapterId } from "./utils";
 
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -45,7 +46,7 @@ const progressBadge = {
 export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
   const { t } = useTranslation();
   const { state } = useLocation();
-  const { isPreviewMode } = useCourseAccessProvider();
+  const { isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
 
   const [activeChapter, setActiveChapter] = useState<string | undefined>(
     state?.chapterId ?? getCurrentChapterId(course, lessonId),
@@ -140,9 +141,34 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                       </AccordionTrigger>
                       <AccordionContent className="flex flex-col rounded-b-lg border border-t-0">
                         {lessons?.map(({ id, title, status, type, hasAccess }) => {
-                          const isBlocked =
-                            !isPreviewMode &&
-                            (status === LESSON_PROGRESS_STATUSES.BLOCKED || !hasAccess);
+                          const shouldIgnoreEnrollmentBlockedStatus =
+                            isCourseStudentModeActive &&
+                            hasAccess &&
+                            status === LESSON_PROGRESS_STATUSES.BLOCKED;
+
+                          const effectiveStatus = shouldIgnoreEnrollmentBlockedStatus
+                            ? LESSON_PROGRESS_STATUSES.NOT_STARTED
+                            : status;
+
+                          const isBlocked = match({
+                            isPreviewMode,
+                            shouldIgnoreEnrollmentBlockedStatus,
+                            hasAccess,
+                            status,
+                          })
+                            .with({ isPreviewMode: true }, () => false)
+                            .with({ shouldIgnoreEnrollmentBlockedStatus: true }, () => false)
+                            .with({ status: LESSON_PROGRESS_STATUSES.BLOCKED }, () => true)
+                            .with({ hasAccess: false }, () => true)
+                            .otherwise(() => false);
+
+                          const badgeStatus: ProgressStatus = isBlocked
+                            ? LESSON_PROGRESS_STATUSES.BLOCKED
+                            : effectiveStatus;
+
+                          const badgeIcon = isPreviewMode
+                            ? getPreviewIcon()
+                            : progressBadge[badgeStatus];
 
                           return (
                             <Link
@@ -162,13 +188,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                                     : undefined
                                 }
                                 variant="icon"
-                                icon={
-                                  isPreviewMode
-                                    ? getPreviewIcon()
-                                    : progressBadge[
-                                        isBlocked ? LESSON_PROGRESS_STATUSES.BLOCKED : status
-                                      ]
-                                }
+                                icon={badgeIcon}
                                 iconClasses="w-6 h-auto shrink-0"
                               />{" "}
                               <div className="flex flex-1 flex-col break-words overflow-x-hidden">
