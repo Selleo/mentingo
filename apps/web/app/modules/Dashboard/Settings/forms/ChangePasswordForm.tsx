@@ -1,9 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { z } from "zod";
 
 import { useChangePassword } from "~/api/mutations/useChangePassword";
+import { usePasswordStatusSuspense } from "~/api/queries";
 import PasswordValidationDisplay from "~/components/PasswordValidation/PasswordValidationDisplay";
 import { Button } from "~/components/ui/button";
 import {
@@ -24,19 +26,29 @@ import { passwordSchema } from "../schema/password.schema";
 
 import type { ChangePasswordBody } from "~/api/generated-api";
 
-const changePasswordSchema = z
-  .object({
-    oldPassword: z.string().min(1, "changePasswordView.validation.oldPassword"),
-    newPassword: passwordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine(({ newPassword, confirmPassword }) => newPassword === confirmPassword, {
-    path: ["confirmPassword"],
-  });
+const getChangePasswordSchema = (hasPassword: boolean) =>
+  z
+    .object({
+      oldPassword: hasPassword
+        ? z.string().min(1, "changePasswordView.validation.oldPassword")
+        : z.string().optional(),
+      newPassword: passwordSchema,
+      confirmPassword: z.string(),
+    })
+    .refine(({ newPassword, confirmPassword }) => newPassword === confirmPassword, {
+      path: ["confirmPassword"],
+      message: "changePasswordView.validation.passwordsDontMatch",
+    });
 
 export default function ChangePasswordForm() {
   const { mutate: changePassword } = useChangePassword();
   const { t } = useTranslation();
+
+  const {
+    data: { hasPassword },
+  } = usePasswordStatusSuspense();
+
+  const changePasswordSchema = useMemo(() => getChangePasswordSchema(hasPassword), [hasPassword]);
 
   const methods = useForm<ChangePasswordBody>({
     resolver: zodResolver(changePasswordSchema),
@@ -56,7 +68,14 @@ export default function ChangePasswordForm() {
   } = methods;
 
   const onSubmit = (data: ChangePasswordBody) => {
-    changePassword({ data });
+    const passwordData = hasPassword
+      ? data
+      : {
+          newPassword: data.newPassword,
+          confirmPassword: data.confirmPassword,
+        };
+
+    changePassword({ data: passwordData, hasPassword });
     reset();
   };
 
@@ -65,26 +84,38 @@ export default function ChangePasswordForm() {
       <Card id="change-password">
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardHeader>
-            <CardTitle className="h5">{t("changePasswordView.header")}</CardTitle>
+            <CardTitle className="h5">
+              {t(
+                hasPassword ? "changePasswordView.header" : "changePasswordView.setPasswordHeader",
+              )}
+            </CardTitle>
             <CardDescription className="body-lg-md">
-              {t("changePasswordView.subHeader")}
+              {t(
+                hasPassword
+                  ? "changePasswordView.subHeader"
+                  : "changePasswordView.setPasswordSubHeader",
+              )}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <Label htmlFor="oldPassword" className="body-base-md">
-              {t("changePasswordView.field.oldPassword")}
-            </Label>
-            <Input
-              id="oldPassword"
-              type="password"
-              data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_OLD}
-              className={cn({
-                "border-red-500 focus:!ring-red-500": errors.oldPassword,
-              })}
-              {...register("oldPassword")}
-            />
-            {errors.oldPassword?.message && (
-              <FormValidationError message={t(errors.oldPassword.message)} />
+            {hasPassword && (
+              <>
+                <Label htmlFor="oldPassword" className="body-base-md">
+                  {t("changePasswordView.field.oldPassword")}
+                </Label>
+                <Input
+                  id="oldPassword"
+                  type="password"
+                  data-testid={SETTINGS_PAGE_HANDLES.PASSWORD_OLD}
+                  className={cn({
+                    "border-red-500 focus:!ring-red-500": errors.oldPassword,
+                  })}
+                  {...register("oldPassword")}
+                />
+                {errors.oldPassword?.message && (
+                  <FormValidationError message={t(errors.oldPassword.message)} />
+                )}
+              </>
             )}
 
             <div className="space-y-2">

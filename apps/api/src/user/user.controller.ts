@@ -62,7 +62,12 @@ import {
   archiveUsersSchema,
   archiveUsersSchemaResponse,
 } from "./schemas/archiveUsers.schema";
-import { type ChangePasswordBody, changePasswordSchema } from "./schemas/changePassword.schema";
+import {
+  type ChangePasswordBody,
+  changePasswordSchema,
+  type PasswordStatusResponse,
+  passwordStatusSchema,
+} from "./schemas/changePassword.schema";
 import { deleteUsersSchema, type DeleteUsersSchema } from "./schemas/deleteUsers.schema";
 import {
   BulkAssignUserGroups,
@@ -303,6 +308,17 @@ export class UserController {
 
       return new BaseResponse(updatedUser);
     }
+  }
+
+  @Get("password-status")
+  @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
+  @Validate({
+    response: baseResponse(passwordStatusSchema),
+  })
+  async getPasswordStatus(
+    @CurrentUser("userId") currentUserId: UUIDType,
+  ): Promise<BaseResponse<PasswordStatusResponse>> {
+    return new BaseResponse(await this.usersService.getPasswordStatus(currentUserId));
   }
 
   @Patch("change-password")

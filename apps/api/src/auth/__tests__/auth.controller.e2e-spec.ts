@@ -654,6 +654,43 @@ describe("AuthController (e2e)", () => {
         .expect(201);
     });
 
+    it("should create password credentials when resetting password for a user without credentials", async () => {
+      const user = await userFactory.withUserSettings(db).create({
+        email: `resetpassword-without-credentials-${nanoid(8)}@example.com`,
+      });
+      const resetToken = nanoid(64);
+      const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
+
+      await db.insert(resetTokens).values({
+        userId: user.id,
+        tokenHash: hashToken(resetToken),
+        expiryDate,
+      });
+
+      await request(app.getHttpServer())
+        .post("/api/auth/reset-password")
+        .send({
+          resetToken,
+          newPassword: "Newpassword123@",
+        })
+        .expect(201);
+
+      const [remainingToken] = await db
+        .select()
+        .from(resetTokens)
+        .where(eq(resetTokens.userId, user.id));
+
+      expect(remainingToken).toBeUndefined();
+
+      await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: user.email,
+          password: "Newpassword123@",
+        })
+        .expect(201);
+    });
+
     it("should return 400 if new password does not match criteria", async () => {
       const response = await request(app.getHttpServer())
         .post("/api/auth/reset-password")

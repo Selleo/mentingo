@@ -935,6 +935,8 @@
   "changePasswordView": {
     "header": "Keisti slaptažodį",
     "subHeader": "Atnaujinkite slaptažodį čia.",
+    "setPasswordHeader": "Nustatyti slaptažodį",
+    "setPasswordSubHeader": "Sukurkite savo paskyros slaptažodį.",
     "field": {
       "oldPassword": "Senas slaptažodis",
       "newPassword": "Naujas slaptažodis",

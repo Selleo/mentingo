@@ -930,6 +930,8 @@
   "changePasswordView": {
     "header": "Change password",
     "subHeader": "Update your password here.",
+    "setPasswordHeader": "Set password",
+    "setPasswordSubHeader": "Create a password for your account.",
     "field": {
       "oldPassword": "Old password",
       "newPassword": "New password",

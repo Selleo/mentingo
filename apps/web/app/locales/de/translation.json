@@ -929,6 +929,8 @@
   "changePasswordView": {
     "header": "Kennwort ändern",
     "subHeader": "Aktualisieren Sie hier Ihr Passwort.",
+    "setPasswordHeader": "Passwort festlegen",
+    "setPasswordSubHeader": "Erstellen Sie ein Passwort für Ihr Konto.",
     "field": {
       "oldPassword": "Altes Passwort",
       "newPassword": "Neues Passwort",
