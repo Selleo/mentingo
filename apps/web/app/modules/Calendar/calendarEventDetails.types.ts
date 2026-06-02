@@ -10,3 +10,15 @@ export type CourseDueDatePayload = Extract<
   CalendarEventDetails["payload"],
   { courseDueDate: unknown }
 >["courseDueDate"];
+
+export type LiveTrainingCalendarEventDetails = CalendarEventDetails & {
+  payload: {
+    liveTraining: LiveTrainingPayload;
+  };
+};
+
+export type CourseDueDateCalendarEventDetails = CalendarEventDetails & {
+  payload: {
+    courseDueDate: CourseDueDatePayload;
+  };
+};
