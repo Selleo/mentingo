@@ -24,8 +24,12 @@ export function SocialLogin({
 }: SocialLoginProps) {
   const { t } = useTranslation();
 
-  const handleProviderSignIn = (provider: string) => () =>
-    (window.location.href = `${baseUrl}/api/auth/${provider}`);
+  const handleProviderSignIn = (provider: string) => () => {
+    const authUrl = new URL(`${baseUrl}/api/auth/${provider}`);
+    authUrl.searchParams.set("tenantOrigin", window.location.origin);
+
+    window.location.href = authUrl.toString();
+  };
 
   return (
     <>

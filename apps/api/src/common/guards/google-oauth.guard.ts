@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { EnvService } from "src/env/services/env.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { TenantStateService } from "src/storage/db/tenant-state.service";
 
@@ -22,9 +23,10 @@ export class GoogleOAuthGuard extends GoogleOAuthGuardBase {
   constructor(
     envService: EnvService,
     configService: ConfigService,
+    tenantDbRunner: TenantDbRunnerService,
     tenantResolver: TenantResolverService,
     tenantState: TenantStateService,
   ) {
-    super(envService, configService, tenantResolver, tenantState);
+    super(envService, configService, tenantDbRunner, tenantResolver, tenantState);
   }
 }

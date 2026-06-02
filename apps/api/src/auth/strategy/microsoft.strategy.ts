@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-microsoft";
 
+import { getCallbackPath } from "src/common/configuration/callbackUrl";
 import { EnvService } from "src/env/services/env.service";
 
 import type { Request } from "express";
@@ -18,7 +19,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
     super({
       clientID: "placeholder",
       clientSecret: "placeholder",
-      callbackURL: configService.get<string>("callback_url.MICROSOFT"),
+      callbackURL: getCallbackPath("microsoft"),
       scope: ["user.read"],
       tenant: "common",
     });
@@ -51,7 +52,7 @@ export class MicrosoftStrategy extends PassportStrategy(Strategy, "microsoft") {
           {
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("callback_url.MICROSOFT"),
+            callbackURL: getCallbackPath("microsoft"),
             scope: ["user.read"],
             tenant: "common",
           },

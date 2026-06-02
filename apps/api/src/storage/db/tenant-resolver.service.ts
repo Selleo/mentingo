@@ -72,6 +72,19 @@ export class TenantResolverService {
     return tenant?.id ?? null;
   }
 
+  async resolveTenantHost(req: Request): Promise<string | null> {
+    const tenantId = await this.resolveTenantId(req);
+    if (!tenantId) return null;
+
+    const [tenant] = await this.dbBase
+      .select({ host: tenants.host })
+      .from(tenants)
+      .where(eq(tenants.id, tenantId))
+      .limit(1);
+
+    return tenant?.host ?? null;
+  }
+
   private async resolveFromState(req: Request): Promise<string | null> {
     const path = (req.path ?? req.url ?? "") as string;
     if (!path.includes("/api/auth/") || !path.includes("/callback")) return null;
@@ -95,6 +108,9 @@ export class TenantResolverService {
   }
 
   private getRequestOrigin(req: Request): string | null {
+    const fromQuery = this.safeParseOrigin(this.getSingleQueryValue(req.query?.tenantOrigin));
+    if (fromQuery) return fromQuery;
+
     const fromHeader = this.safeParseOrigin(req.headers.referer ?? req.headers.origin);
     if (fromHeader) return fromHeader;
 
@@ -113,6 +129,10 @@ export class TenantResolverService {
     } catch {
       return null;
     }
+  }
+
+  private getSingleQueryValue(value: unknown): string | undefined {
+    return typeof value === "string" ? value : undefined;
   }
 
   private isInactiveAllowed(req: Request): boolean {

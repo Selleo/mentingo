@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-google-oauth20";
 
+import { getCallbackPath } from "src/common/configuration/callbackUrl";
 import { EnvService } from "src/env/services/env.service";
 
 import type { Request } from "express";
@@ -18,7 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     super({
       clientID: "placeholder",
       clientSecret: "placeholder",
-      callbackURL: configService.get<string>("callback_url.GOOGLE"),
+      callbackURL: getCallbackPath("google"),
       scope: ["email", "profile"],
     });
   }
@@ -49,7 +50,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
           {
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("callback_url.GOOGLE"),
+            callbackURL: getCallbackPath("google"),
             scope: ["email", "profile"],
           },
           (accessToken: string, refreshToken: string, profile: Profile, done: VerifyCallback) =>

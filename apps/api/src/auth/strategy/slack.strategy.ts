@@ -4,6 +4,7 @@ import { PassportStrategy } from "@nestjs/passport";
 import axios from "axios";
 import { Strategy } from "passport-oauth2";
 
+import { getCallbackPath } from "src/common/configuration/callbackUrl";
 import { EnvService } from "src/env/services/env.service";
 
 import type { Request } from "express";
@@ -21,7 +22,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
       tokenURL: "https://slack.com/api/openid.connect.token",
       clientID: "test_slack_client_id",
       clientSecret: "test_slack_client_secret",
-      callbackURL: configService.get<string>("callback_url.SLACK"),
+      callbackURL: getCallbackPath("slack"),
       scope: ["openid", "profile", "email"],
     });
   }
@@ -52,7 +53,7 @@ export class SlackStrategy extends PassportStrategy(Strategy, "slack") {
             tokenURL: "https://slack.com/api/openid.connect.token",
             clientID: id,
             clientSecret: secret,
-            callbackURL: this.configService.get<string>("callback_url.SLACK"),
+            callbackURL: getCallbackPath("slack"),
             scope: ["openid", "profile", "email"],
           },
           async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {

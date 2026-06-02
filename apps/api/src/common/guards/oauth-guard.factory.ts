@@ -2,6 +2,7 @@ import { ForbiddenException, type Type } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
 import { EnvService } from "src/env/services/env.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 import { TenantStateService } from "src/storage/db/tenant-state.service";
 
@@ -26,10 +27,11 @@ export const createTenantOAuthGuard = (
     constructor(
       private readonly envService: EnvService,
       private readonly configService: ConfigService,
+      tenantDbRunner: TenantDbRunnerService,
       tenantResolver: TenantResolverService,
       tenantState: TenantStateService,
     ) {
-      super(tenantResolver, tenantState);
+      super(tenantResolver, tenantState, tenantDbRunner);
     }
 
     protected async isEnabled(): Promise<boolean> {
@@ -38,7 +40,7 @@ export const createTenantOAuthGuard = (
         .then((r) => r.value)
         .catch(() => this.configService.get<string>(envKey));
 
-      return enabled === "true";
+      return enabled?.trim().toLowerCase() === "true";
     }
 
     protected handleDisabled(): boolean {
