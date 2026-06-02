@@ -91,7 +91,7 @@ test("admin can import a SCORM course and gets generated chapters and lessons", 
       true,
     );
 
-    await expect(page).toHaveURL(new RegExp(`/admin/beta-courses/${courseId}`));
+    await openEditCoursePageFlow(page, courseId);
     await expect(page.getByTestId(EDIT_COURSE_PAGE_HANDLES.COURSE_TYPE_BADGE)).toHaveText("SCORM");
   });
 });
