@@ -1,6 +1,7 @@
 import { Link } from "@remix-run/react";
-import { LIVE_TRAINING_DELIVERY_TYPES } from "@repo/shared";
-import { BookOpen, CalendarClock, MapPin, Radio, Users } from "lucide-react";
+import { CALENDAR_EVENT_SOURCE_TYPES, LIVE_TRAINING_DELIVERY_TYPES } from "@repo/shared";
+import { format } from "date-fns";
+import { BookOpen, CalendarCheck, CalendarClock, MapPin, Radio, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useCalendarEventDetails } from "~/api/queries/calendar/useCalendarEventDetails";
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Skeleton } from "~/components/ui/skeleton";
 import { cn } from "~/lib/utils";
 
 import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
@@ -22,12 +24,101 @@ import { CalendarEventDetailsSkeleton } from "./CalendarEventDetailsSkeleton";
 import { CalendarEventMetaRow } from "./CalendarEventMetaRow";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { ReactNode } from "react";
+import type {
+  CalendarEventDetails,
+  CalendarEventSourceType,
+  CourseDueDatePayload,
+  LiveTrainingPayload,
+} from "~/modules/Calendar/calendarEventDetails.types";
 
 type CalendarEventDetailsDialogProps = {
   open: boolean;
   eventId: string | null;
   language: SupportedLanguages;
   onOpenChange: (open: boolean) => void;
+};
+
+type CalendarEventMetaRowProps = {
+  icon: ReactNode;
+  label: string;
+  value: ReactNode;
+};
+
+const getLiveTrainingPayload = (
+  eventDetails?: CalendarEventDetails,
+): LiveTrainingPayload | null => {
+  if (!eventDetails || !("liveTraining" in eventDetails.payload)) return null;
+
+  return eventDetails.payload.liveTraining;
+};
+
+const getCourseDueDatePayload = (
+  eventDetails?: CalendarEventDetails,
+): CourseDueDatePayload | null => {
+  if (!eventDetails || !("courseDueDate" in eventDetails.payload)) return null;
+
+  return eventDetails.payload.courseDueDate;
+};
+
+const formatEventDateRange = (startsAt: string, endsAt: string, allDay: boolean) => {
+  const start = new Date(startsAt);
+  const end = new Date(endsAt);
+
+  if (allDay) {
+    const inclusiveEnd = new Date(end);
+    inclusiveEnd.setDate(inclusiveEnd.getDate() - 1);
+
+    if (start.toDateString() === inclusiveEnd.toDateString()) {
+      return format(start, "d MMM yyyy");
+    }
+
+    return `${format(start, "d MMM yyyy")} - ${format(inclusiveEnd, "d MMM yyyy")}`;
+  }
+
+  const isSameDay = start.toDateString() === end.toDateString();
+
+  if (isSameDay) {
+    return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "HH:mm")}`;
+  }
+
+  return `${format(start, "d MMM yyyy, HH:mm")} - ${format(end, "d MMM yyyy, HH:mm")}`;
+};
+
+function CalendarEventMetaRow({ icon, label, value }: CalendarEventMetaRowProps) {
+  return (
+    <div className="flex items-start gap-3 rounded-md border border-neutral-200 bg-white px-3 py-2.5">
+      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md bg-neutral-50 text-neutral-600">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-medium uppercase text-neutral-500">{label}</p>
+        <div className="mt-0.5 text-sm text-neutral-900">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function CalendarEventDetailsSkeleton() {
+  return (
+    <div className="grid gap-3">
+      <Skeleton className="h-16" />
+      <Skeleton className="h-16" />
+      <Skeleton className="h-16" />
+    </div>
+  );
+}
+
+const getSourceTypeTranslationKey = (sourceType?: CalendarEventSourceType) => {
+  if (sourceType === CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE) {
+    return "calendarView.details.sourceType.courseDueDate";
+  }
+
+  if (sourceType === CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING) {
+    return "calendarView.details.sourceType.liveTraining";
+  }
+
+  return "calendarView.details.description";
 };
 
 export function CalendarEventDetailsDialog({
@@ -41,7 +132,8 @@ export function CalendarEventDetailsDialog({
     enabled: open && Boolean(eventId),
   });
 
-  const liveTraining = eventDetails?.payload.liveTraining;
+  const liveTraining = getLiveTrainingPayload(eventDetails);
+  const courseDueDate = getCourseDueDatePayload(eventDetails);
   const linkedCourses = liveTraining?.linkedCourses ?? [];
   const hosts = liveTraining?.hosts ?? [];
 
@@ -67,7 +159,7 @@ export function CalendarEventDetailsDialog({
                 )}
               </DialogTitle>
               <DialogDescription className="mt-1">
-                {t("calendarView.details.sourceType.liveTraining")}
+                {t(getSourceTypeTranslationKey(eventDetails?.sourceType))}
               </DialogDescription>
             </div>
           </div>
@@ -183,6 +275,110 @@ export function CalendarEventDetailsDialog({
                 >
                   <Link to={`/live-training/${eventDetails.sourceId}`}>
                     {t("calendarView.details.action.goToLiveTraining")}
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+
+          {!isLoading && eventDetails && courseDueDate && (
+            <>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="default" fontWeight="normal">
+                  {t(`calendarView.details.status.${eventDetails.status}`)}
+                </Badge>
+                <Badge variant="secondary" fontWeight="normal">
+                  {t("calendarView.details.sourceType.courseDueDate")}
+                </Badge>
+              </div>
+
+              <div className="grid gap-3">
+                <CalendarEventMetaRow
+                  icon={<CalendarCheck className="size-4" />}
+                  label={t("calendarView.details.field.dueDate")}
+                  value={
+                    <span className="grid gap-0.5">
+                      <span>
+                        {formatEventDateRange(
+                          eventDetails.startsAt,
+                          eventDetails.endsAt,
+                          eventDetails.allDay,
+                        )}
+                      </span>
+                      <span className="text-xs text-neutral-500">{eventDetails.timezone}</span>
+                    </span>
+                  }
+                />
+
+                <CalendarEventMetaRow
+                  icon={<BookOpen className="size-4" />}
+                  label={t("calendarView.details.field.course")}
+                  value={courseDueDate.courseTitle}
+                />
+
+                <CalendarEventMetaRow
+                  icon={<Users className="size-4" />}
+                  label={t("calendarView.details.field.group")}
+                  value={courseDueDate.groupName}
+                />
+              </div>
+
+              <div className="border-t border-neutral-200 pt-4">
+                <Button asChild className="w-full gap-2">
+                  <Link to={`/course/${courseDueDate.courseId}`}>
+                    {t("calendarView.details.action.goToCourse")}
+                  </Link>
+                </Button>
+              </div>
+            </>
+          )}
+
+          {!isLoading && eventDetails && courseDueDate && (
+            <>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="default" fontWeight="normal">
+                  {t(`calendarView.details.status.${eventDetails.status}`)}
+                </Badge>
+                <Badge variant="secondary" fontWeight="normal">
+                  {t("calendarView.details.sourceType.courseDueDate")}
+                </Badge>
+              </div>
+
+              <div className="grid gap-3">
+                <CalendarEventMetaRow
+                  icon={<CalendarCheck className="size-4" />}
+                  label={t("calendarView.details.field.dueDate")}
+                  value={
+                    <span className="grid gap-0.5">
+                      <span>
+                        {formatEventDateRange(
+                          eventDetails.startsAt,
+                          eventDetails.endsAt,
+                          eventDetails.allDay,
+                        )}
+                      </span>
+                      <span className="text-xs text-neutral-500">{eventDetails.timezone}</span>
+                    </span>
+                  }
+                />
+
+                <CalendarEventMetaRow
+                  icon={<BookOpen className="size-4" />}
+                  label={t("calendarView.details.field.course")}
+                  value={courseDueDate.courseTitle}
+                />
+
+                <CalendarEventMetaRow
+                  icon={<Users className="size-4" />}
+                  label={t("calendarView.details.field.group")}
+                  value={courseDueDate.groupName}
+                />
+              </div>
+
+              <div className="border-t border-neutral-200 pt-4">
+                <Button asChild className="w-full gap-2">
+                  <Link to={`/course/${courseDueDate.courseId}`}>
+                    {t("calendarView.details.action.goToCourse")}
                   </Link>
                 </Button>
               </div>

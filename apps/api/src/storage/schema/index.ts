@@ -1352,6 +1352,9 @@ export const groupCourses = pgTable(
     enrolledBy: uuid("enrolled_by").references(() => users.id),
     isMandatory: boolean("is_mandatory").notNull().default(false),
     dueDate: timestamp("due_date", { withTimezone: true }),
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "set null" })
+      .unique(),
     tenantId,
   },
   withTenantIdIndex("group_courses", (table) => ({

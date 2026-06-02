@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  CALENDAR_EVENT_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
   ENTITY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
@@ -12,6 +13,8 @@ import { DB } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   courses,
+  groupCourses,
+  groups,
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainingSessions,
@@ -24,11 +27,17 @@ import {
 import type {
   CalendarEventListConditions,
   CalendarEventNormalizedRow,
+  CalendarEventInsert,
+  CourseDueDateCalendarEventPayload,
+  GroupCourseDueDateRow,
   LiveTrainingCalendarEventPayload,
 } from "./calendar.types";
+import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
+import type { CalendarEventListItem } from "./schemas/calendar-event-list.schema";
 import type {
   CalendarEventStatus,
   CalendarEventSourceType,
+  LocalizedText,
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
 } from "@repo/shared";
@@ -51,6 +60,92 @@ export class CalendarRepository {
       .select()
       .from(liveTrainingEvents)
       .orderBy(liveTrainingEvents.startsAt);
+  }
+
+  async getCourseDueDateCalendarEventRows(
+    conditions: CalendarEventListConditions,
+    language: SupportedLanguages,
+  ): Promise<(CalendarEventListItem & CalendarEventDetails)[]> {
+    const courseDueDateEvents = this.getCourseDueDateEventsCte(conditions, language);
+
+    return this.db
+      .with(courseDueDateEvents)
+      .select()
+      .from(courseDueDateEvents)
+      .orderBy(courseDueDateEvents.startsAt);
+  }
+
+  async getGroupCourseDueDateRows(
+    courseId: UUIDType,
+    groupIds: UUIDType[],
+  ): Promise<GroupCourseDueDateRow[]> {
+    if (!groupIds.length) return [];
+
+    return this.db
+      .select({
+        courseId: groupCourses.courseId,
+        groupId: groupCourses.groupId,
+        dueDate: sql<string>`${groupCourses.dueDate}`,
+        calendarEventId: groupCourses.calendarEventId,
+        courseTitle: sql<LocalizedText>`${courses.title}`,
+        courseBaseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        courseAvailableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
+      .from(groupCourses)
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .where(
+        and(
+          eq(groupCourses.courseId, courseId),
+          inArray(groupCourses.groupId, groupIds),
+          eq(groupCourses.isMandatory, true),
+          sql`${groupCourses.dueDate} IS NOT NULL`,
+        ),
+      );
+  }
+
+  async createCourseDueDateCalendarEvent(input: {
+    calendarEvent: CalendarEventInsert;
+    courseId: UUIDType;
+    groupId: UUIDType;
+  }) {
+    return this.db.transaction(async (trx) => {
+      const [calendarEvent] = await trx
+        .insert(calendarEvents)
+        .values(input.calendarEvent)
+        .returning({ id: calendarEvents.id });
+
+      await trx
+        .update(groupCourses)
+        .set({ calendarEventId: calendarEvent.id })
+        .where(
+          and(eq(groupCourses.courseId, input.courseId), eq(groupCourses.groupId, input.groupId)),
+        );
+
+      return calendarEvent.id;
+    });
+  }
+
+  async updateCourseDueDateCalendarEvent(calendarEventId: UUIDType, input: CalendarEventInsert) {
+    return this.db.update(calendarEvents).set(input).where(eq(calendarEvents.id, calendarEventId));
+  }
+
+  async removeCourseDueDateCalendarEvents(calendarEventIds: UUIDType[]) {
+    if (!calendarEventIds.length) return;
+
+    await this.db.transaction(async (trx) => {
+      await trx
+        .update(groupCourses)
+        .set({ calendarEventId: null })
+        .where(inArray(groupCourses.calendarEventId, calendarEventIds));
+
+      await trx
+        .update(calendarEvents)
+        .set({
+          status: CALENDAR_EVENT_STATUSES.CANCELLED,
+          deletedAt: new Date().toISOString(),
+        })
+        .where(inArray(calendarEvents.id, calendarEventIds));
+    });
   }
 
   async getLiveTrainingLinkedCourseRows(eventIds: UUIDType[], language: SupportedLanguages) {
@@ -196,6 +291,61 @@ export class CalendarRepository {
         })
         .from(calendarEvents)
         .innerJoin(liveTrainings, eq(liveTrainings.calendarEventId, calendarEvents.id))
+        .where(and(...conditions)),
+    );
+  }
+
+  private getCourseDueDateEventsCte(
+    conditions: CalendarEventListConditions,
+    language: SupportedLanguages,
+  ) {
+    return this.db.$with("course_due_date_calendar_events_normalized").as(
+      this.db
+        .select({
+          id: sql<UUIDType>`${calendarEvents.id}`.as("id"),
+          uid: sql<string>`${calendarEvents.uid}`.as("uid"),
+          sourceType:
+            sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE}`.as(
+              "source_type",
+            ),
+          sourceId: sql<UUIDType>`${groupCourses.courseId}`.as("source_id"),
+          title: this.localizationService
+            .getLocalizedSqlField(calendarEvents.title, language, calendarEvents)
+            .as("title"),
+          description: this.localizationService
+            .getLocalizedSqlField(calendarEvents.description, language, calendarEvents)
+            .as("description"),
+          startsAt: sql<string>`${calendarEvents.startsAt}`.as("starts_at"),
+          endsAt: sql<string>`${calendarEvents.endsAt}`.as("ends_at"),
+          allDay: sql<boolean>`${calendarEvents.allDay}`.as("all_day"),
+          timezone: sql<string>`${calendarEvents.timezone}`.as("timezone"),
+          location: sql<string | null>`${calendarEvents.location}`.as("location"),
+          status: sql<CalendarEventStatus>`${calendarEvents.status}`.as("status"),
+          payload: sql<CourseDueDateCalendarEventPayload>`
+            jsonb_build_object(
+              'courseDueDate',
+              jsonb_build_object(
+                'courseId', ${groupCourses.courseId},
+                'courseTitle', ${this.localizationService.getLocalizedSqlField(
+                  courses.title,
+                  language,
+                  courses,
+                )},
+                'groupId', ${groupCourses.groupId},
+                'groupName', ${this.localizationService.getLocalizedSqlField(
+                  groups.name,
+                  language,
+                  groups,
+                )},
+                'dueDate', ${groupCourses.dueDate}
+              )
+            )
+          `.as("payload"),
+        })
+        .from(groupCourses)
+        .innerJoin(calendarEvents, eq(calendarEvents.id, groupCourses.calendarEventId))
+        .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+        .innerJoin(groups, eq(groups.id, groupCourses.groupId))
         .where(and(...conditions)),
     );
   }

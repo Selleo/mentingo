@@ -6669,7 +6669,7 @@ export interface GetEventsResponse {
       /** @format uuid */
       id: string;
       uid: string;
-      sourceType: "live_training";
+      sourceType: "live_training" | "course_due_date";
       /** @format uuid */
       sourceId: string;
       title: string;
@@ -6680,19 +6680,31 @@ export interface GetEventsResponse {
       timezone: string;
       location: string | null;
       status: "scheduled" | "cancelled" | "ended" | "expired";
-      payload: {
-        liveTraining: {
-          deliveryType: "online" | "offline";
-          status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-          visibilityScope: "all" | "linked_courses";
-          sourceRole: "admin" | "author" | "trainer" | "observer";
-          linkedCourses: {
-            /** @format uuid */
-            courseId: string;
-            courseTitle: string;
-          }[];
-        };
-      };
+      payload:
+        | {
+            liveTraining: {
+              deliveryType: "online" | "offline";
+              status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+              visibilityScope: "all" | "linked_courses";
+              sourceRole: "admin" | "author" | "trainer" | "observer";
+              linkedCourses: {
+                /** @format uuid */
+                courseId: string;
+                courseTitle: string;
+              }[];
+            };
+          }
+        | {
+            courseDueDate: {
+              /** @format uuid */
+              courseId: string;
+              courseTitle: string;
+              /** @format uuid */
+              groupId: string;
+              groupName: string;
+              dueDate: string;
+            };
+          };
     }[];
   };
 }
@@ -6702,7 +6714,7 @@ export interface GetEventDetailsResponse {
     /** @format uuid */
     id: string;
     uid: string;
-    sourceType: "live_training";
+    sourceType: "live_training" | "course_due_date";
     /** @format uuid */
     sourceId: string;
     title: string;
@@ -6713,60 +6725,72 @@ export interface GetEventDetailsResponse {
     timezone: string;
     location: string | null;
     status: "scheduled" | "cancelled" | "ended" | "expired";
-    payload: {
-      liveTraining: {
-        deliveryType: "online" | "offline";
-        status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-        visibilityScope: "all" | "linked_courses";
-        sourceRole: "admin" | "author" | "trainer" | "observer";
-        linkedCourses: {
-          /** @format uuid */
-          courseId: string;
-          courseTitle: string;
-        }[];
-      } & {
-        author: {
-          /** @format uuid */
-          id: string;
-          fullName: string | null;
-          email: string;
-        };
-        hosts: {
-          /** @format uuid */
-          userId: string;
-          fullName: string | null;
-          email: string;
-          role: string;
-        }[];
-        materials: {
-          before: {
+    payload:
+      | {
+          liveTraining: {
+            deliveryType: "online" | "offline";
+            status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
+            visibilityScope: "all" | "linked_courses";
+            sourceRole: "admin" | "author" | "trainer" | "observer";
+            linkedCourses: {
+              /** @format uuid */
+              courseId: string;
+              courseTitle: string;
+            }[];
+          } & {
+            author: {
+              /** @format uuid */
+              id: string;
+              fullName: string | null;
+              email: string;
+            };
+            hosts: {
+              /** @format uuid */
+              userId: string;
+              fullName: string | null;
+              email: string;
+              role: string;
+            }[];
+            materials: {
+              before: {
+                /** @format uuid */
+                resourceId: string;
+                title: string;
+                mimeType: string | null;
+                size: number | null;
+                relationshipType: "live_training_before" | "live_training_after";
+              }[];
+              after: {
+                /** @format uuid */
+                resourceId: string;
+                title: string;
+                mimeType: string | null;
+                size: number | null;
+                relationshipType: "live_training_before" | "live_training_after";
+              }[];
+            };
+            latestSession: {
+              /** @format uuid */
+              id: string;
+              status: "waiting" | "active" | "ended" | "failed";
+              actualStartedAt: string | null;
+              actualEndedAt: string | null;
+              peakParticipants: number;
+              uniqueParticipantCount: number;
+            } | null;
+          };
+        }
+      | {
+          courseDueDate: {
             /** @format uuid */
-            resourceId: string;
-            title: string;
-            mimeType: string | null;
-            size: number | null;
-            relationshipType: "live_training_before" | "live_training_after";
-          }[];
-          after: {
+            courseId: string;
+            courseTitle: string;
             /** @format uuid */
-            resourceId: string;
-            title: string;
-            mimeType: string | null;
-            size: number | null;
-            relationshipType: "live_training_before" | "live_training_after";
-          }[];
+            groupId: string;
+            groupName: string;
+            dueDate: string;
+          };
         };
-        latestSession: {
-          /** @format uuid */
-          id: string;
-          status: "waiting" | "active" | "ended" | "failed";
-          actualStartedAt: string | null;
-          actualEndedAt: string | null;
-          peakParticipants: number;
-          uniqueParticipantCount: number;
-        } | null;
-      };
-    };
   };
 }
 

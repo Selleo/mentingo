@@ -433,17 +433,22 @@
       "noHosts": "Brak dodatkowych hostów",
       "action": {
         "edit": "Edytuj wydarzenie",
-        "goToLiveTraining": "Przejdź do szkolenia na żywo"
+        "goToLiveTraining": "Przejdź do szkolenia na żywo",
+        "goToCourse": "Przejdź do kursu"
       },
       "sourceType": {
-        "liveTraining": "Szkolenie na żywo"
+        "liveTraining": "Szkolenie na żywo",
+        "courseDueDate": "Termin kursu"
       },
       "field": {
         "time": "Czas",
         "training": "Forma szkolenia",
         "linkedCourses": "Powiązane kursy",
         "location": "Lokalizacja",
-        "people": "Osoby"
+        "people": "Osoby",
+        "dueDate": "Termin",
+        "course": "Kurs",
+        "group": "Grupa"
       },
       "deliveryType": {
         "online": "Online",
@@ -462,6 +467,10 @@
         "trainer": "Trener",
         "observer": "Obserwator"
       }
+    },
+    "errors": {
+      "courseDueDateRequired": "Termin jest wymagany do utworzenia wydarzenia kursu w kalendarzu.",
+      "courseTitleRequired": "Tytuł kursu jest wymagany do utworzenia wydarzenia kursu w kalendarzu."
     }
   },
   "liveTrainingView": {

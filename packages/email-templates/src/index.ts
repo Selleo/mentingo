@@ -7,6 +7,8 @@ import CertificateExpirationWarningEmailTemplate from "./templates/CertificateEx
 export const CertificateExpirationWarningEmail = emailTemplateFactory(CertificateExpirationWarningEmailTemplate);
 import CertificateExpiredEmailTemplate from "./templates/CertificateExpiredEmail";
 export const CertificateExpiredEmail = emailTemplateFactory(CertificateExpiredEmailTemplate);
+import CourseDueDateReminderEmailTemplate from "./templates/CourseDueDateReminderEmail";
+export const CourseDueDateReminderEmail = emailTemplateFactory(CourseDueDateReminderEmailTemplate);
 import CreatePasswordReminderEmailTemplate from "./templates/CreatePasswordReminderEmail";
 export const CreatePasswordReminderEmail = emailTemplateFactory(CreatePasswordReminderEmailTemplate);
 import FinishedCourseEmailTemplate from "./templates/FinishedCourseEmail";
@@ -41,3 +43,4 @@ import UserShortInactivityEmailTemplate from "./templates/UserShortInactivityEma
 export const UserShortInactivityEmail = emailTemplateFactory(UserShortInactivityEmailTemplate);
 import WelcomeEmailTemplate from "./templates/WelcomeEmail";
 export const WelcomeEmail = emailTemplateFactory(WelcomeEmailTemplate);
+export { getCourseDueDateReminderEmailTranslations } from "./translations/courseDueDateReminder";

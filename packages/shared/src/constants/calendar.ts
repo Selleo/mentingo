@@ -1,5 +1,6 @@
 export const CALENDAR_EVENT_SOURCE_TYPES = {
   LIVE_TRAINING: "live_training",
+  COURSE_DUE_DATE: "course_due_date",
 } as const;
 
 export type CalendarEventSourceType =

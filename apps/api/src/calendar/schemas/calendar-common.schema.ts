@@ -29,8 +29,28 @@ export const calendarEventLiveTrainingPayloadSchema = Type.Object({
   linkedCourses: Type.Array(calendarEventLinkedCourseSchema),
 });
 
-export const calendarEventPayloadSchema = Type.Object({
-  liveTraining: calendarEventLiveTrainingPayloadSchema,
+export const calendarEventCourseDueDatePayloadSchema = Type.Object({
+  courseId: UUIDSchema,
+  courseTitle: Type.String(),
+  groupId: UUIDSchema,
+  groupName: Type.String(),
+  dueDate: Type.String(),
+});
+
+export const calendarEventPayloadSchema = Type.Union([
+  Type.Object({
+    liveTraining: calendarEventLiveTrainingPayloadSchema,
+  }),
+  Type.Object({
+    courseDueDate: calendarEventCourseDueDatePayloadSchema,
+  }),
+]);
+
+export const calendarEventCourseDueDateDetailsPayloadSchema =
+  calendarEventCourseDueDatePayloadSchema;
+
+export const calendarEventCourseDueDateDetailsSchema = Type.Object({
+  courseDueDate: calendarEventCourseDueDateDetailsPayloadSchema,
 });
 
 export const calendarEventBaseSchema = Type.Object({
@@ -94,9 +114,12 @@ export const calendarEventLiveTrainingDetailsPayloadSchema = Type.Intersect([
   }),
 ]);
 
-export const calendarEventDetailsPayloadSchema = Type.Object({
-  liveTraining: calendarEventLiveTrainingDetailsPayloadSchema,
-});
+export const calendarEventDetailsPayloadSchema = Type.Union([
+  Type.Object({
+    liveTraining: calendarEventLiveTrainingDetailsPayloadSchema,
+  }),
+  calendarEventCourseDueDateDetailsSchema,
+]);
 
 export const calendarEventListItemSchema = Type.Object({
   ...calendarEventBaseSchema.properties,
@@ -115,6 +138,9 @@ export type CalendarEventBase = Static<typeof calendarEventBaseSchema>;
 export type CalendarEventLiveTrainingPayload = Static<
   typeof calendarEventLiveTrainingPayloadSchema
 >;
+export type CalendarEventCourseDueDatePayload = Static<
+  typeof calendarEventCourseDueDatePayloadSchema
+>;
 export type CalendarEventPayload = Static<typeof calendarEventPayloadSchema>;
 export type CalendarEventListItem = Static<typeof calendarEventListItemSchema>;
 export type CalendarEventAuthor = Static<typeof calendarEventAuthorSchema>;
@@ -123,6 +149,9 @@ export type CalendarEventMaterial = Static<typeof calendarEventMaterialSchema>;
 export type CalendarEventLatestSession = Static<typeof calendarEventLatestSessionSchema>;
 export type CalendarEventLiveTrainingDetailsPayload = Static<
   typeof calendarEventLiveTrainingDetailsPayloadSchema
+>;
+export type CalendarEventCourseDueDateDetailsPayload = Static<
+  typeof calendarEventCourseDueDateDetailsPayloadSchema
 >;
 export type CalendarEventDetailsPayload = Static<typeof calendarEventDetailsPayloadSchema>;
 export type CalendarEventDetailsItem = Static<typeof calendarEventDetailsItemSchema>;

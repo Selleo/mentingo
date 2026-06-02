@@ -7,13 +7,20 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  LocalizedText,
+  SupportedLanguages,
 } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
+import type { calendarEvents } from "src/storage/schema";
 
 export type CalendarEventListConditions = SQL[];
 
-export type CalendarEventSourcePayload = LiveTrainingCalendarEventPayload;
+export type CalendarEventInsert = typeof calendarEvents.$inferInsert;
+
+export type CalendarEventSourcePayload =
+  | LiveTrainingCalendarEventPayload
+  | CourseDueDateCalendarEventPayload;
 
 export type LiveTrainingCalendarEventPayload = {
   liveTraining: {
@@ -21,6 +28,16 @@ export type LiveTrainingCalendarEventPayload = {
     status: LiveTrainingStatus;
     visibilityScope: LiveTrainingVisibilityScope;
     linkedCourses: CalendarEventLinkedCourse[];
+  };
+};
+
+export type CourseDueDateCalendarEventPayload = {
+  courseDueDate: {
+    courseId: UUIDType;
+    courseTitle: string;
+    groupId: UUIDType;
+    groupName: string;
+    dueDate: string;
   };
 };
 
@@ -38,7 +55,7 @@ export type CalendarEventNormalizedRow = {
   location: string | null;
   status: CalendarEventStatus;
   payload: CalendarEventSourcePayload;
-  authorId: UUIDType;
+  authorId: UUIDType | null;
 };
 
 export type CalendarEventLinkedCourse = {
@@ -84,4 +101,14 @@ export type CalendarEventLatestSessionRow = {
 export type CalendarEventRoleContext = {
   authorId: UUIDType;
   hostIds: UUIDType[];
+};
+
+export type GroupCourseDueDateRow = {
+  courseId: UUIDType;
+  groupId: UUIDType;
+  dueDate: string;
+  calendarEventId: UUIDType | null;
+  courseTitle: LocalizedText;
+  courseBaseLanguage: SupportedLanguages;
+  courseAvailableLocales: SupportedLanguages[];
 };

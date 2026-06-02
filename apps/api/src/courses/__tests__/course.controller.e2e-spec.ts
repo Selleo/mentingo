@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker";
 import { JwtService } from "@nestjs/jwt";
 import {
+  CALENDAR_EVENT_SOURCE_TYPES,
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   PERMISSIONS,
@@ -18,6 +19,7 @@ import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  calendarEvents,
   categories,
   courses,
   coursesSummaryStats,
@@ -40,9 +42,13 @@ import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
+import type { CalendarEventTestResponse } from "./types/calendar-event-test.types";
 import type { CourseTest } from "../../../test/factory/course.factory";
+import type { UserWithCredentials } from "../../../test/factory/user.factory";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
+
+const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
@@ -60,6 +66,36 @@ describe("CourseController (e2e)", () => {
     isBunnyConfigured: jest.Mock;
   };
   const password = "password123";
+
+  const getCalendarEventsForUser = async (
+    user: UserWithCredentials,
+  ): Promise<CalendarEventTestResponse[]> => {
+    const cookies = await cookieFor(user, app);
+    const response = await request(app.getHttpServer())
+      .get("/api/calendar/events")
+      .query({
+        start: "2025-01-01T00:00:00.000Z",
+        end: "2025-02-01T00:00:00.000Z",
+        language: SUPPORTED_LANGUAGES.EN,
+        timezone: "UTC",
+      })
+      .set("Cookie", cookies)
+      .expect(200);
+
+    return response.body.data.events;
+  };
+
+  const waitForCalendarEventsForUser = async (user: UserWithCredentials, expectedCount: number) => {
+    let events: CalendarEventTestResponse[] = [];
+
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      events = await getCalendarEventsForUser(user);
+      if (events.length === expectedCount) return events;
+      await sleep(50);
+    }
+
+    return events;
+  };
 
   beforeAll(async () => {
     // It can be crashed, test and reapir it later
@@ -104,6 +140,7 @@ describe("CourseController (e2e)", () => {
 
   afterEach(async () => {
     await truncateTables(baseDb, [
+      "calendar_events",
       "courses",
       "chapters",
       "lessons",
@@ -2393,6 +2430,79 @@ describe("CourseController (e2e)", () => {
           expect(groupCourse.dueDate?.toISOString()).toBe(dueDate.toISOString());
         });
 
+        it("creates a course due-date calendar event visible to students in the group", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const student1 = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
+          const student2 = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
+          const otherStudent = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const group = await groupFactory.withMembers([student1.id, student2.id]).create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({
+              groups: [
+                {
+                  id: group.id,
+                  isMandatory: true,
+                  dueDate: "2025-01-15T12:00:00.000Z",
+                },
+              ],
+            })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const student1Events = await waitForCalendarEventsForUser(student1, 1);
+          const student2Events = await waitForCalendarEventsForUser(student2, 1);
+          const otherStudentEvents = await waitForCalendarEventsForUser(otherStudent, 0);
+
+          expect(student1Events).toEqual([
+            expect.objectContaining({
+              sourceType: CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE,
+              payload: {
+                courseDueDate: expect.objectContaining({
+                  courseId: course.id,
+                  groupId: group.id,
+                }),
+              },
+            }),
+          ]);
+          expect(student2Events).toEqual([
+            expect.objectContaining({
+              sourceType: CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE,
+              payload: {
+                courseDueDate: expect.objectContaining({
+                  courseId: course.id,
+                  groupId: group.id,
+                }),
+              },
+            }),
+          ]);
+          expect(otherStudentEvents).toHaveLength(0);
+        });
+
         it("updates existing group enrollment metadata", async () => {
           const admin = await userFactory
             .withCredentials({ password })
@@ -2791,6 +2901,74 @@ describe("CourseController (e2e)", () => {
           expect(studentEnrollment.status).toBe(COURSE_ENROLLMENT.NOT_ENROLLED);
           expect(studentEnrollment.enrolledByGroupId).toBe(null);
           expect(studentEnrollment.enrolledAt).toBe(null);
+        });
+
+        it("removes the course due-date calendar event when a group is unenrolled", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            status: "published",
+          });
+
+          const student = await userFactory
+            .withCredentials({ password })
+            .withUserSettings(db)
+            .create();
+          const group = await groupFactory.withMembers([student.id]).create();
+          const cookies = await cookieFor(admin, app);
+
+          await request(app.getHttpServer())
+            .post(`/api/course/${course.id}/enroll-groups-to-course`)
+            .send({
+              groups: [
+                {
+                  id: group.id,
+                  isMandatory: true,
+                  dueDate: "2025-01-15T12:00:00.000Z",
+                },
+              ],
+            })
+            .set("Cookie", cookies)
+            .expect(201);
+
+          const [createdEvent] = await waitForCalendarEventsForUser(student, 1);
+
+          if (!createdEvent) {
+            throw new Error("Expected course due-date calendar event to be created");
+          }
+
+          await request(app.getHttpServer())
+            .delete(`/api/course/${course.id}/unenroll-groups-from-course`)
+            .send({ groupIds: [group.id] })
+            .set("Cookie", cookies)
+            .expect(200);
+
+          const studentEventsAfterUnenroll = await waitForCalendarEventsForUser(student, 0);
+
+          const groupCourseRows = await db
+            .select()
+            .from(groupCourses)
+            .where(and(eq(groupCourses.courseId, course.id), eq(groupCourses.groupId, group.id)));
+
+          const [calendarEvent] = await db
+            .select()
+            .from(calendarEvents)
+            .where(eq(calendarEvents.id, createdEvent.id));
+
+          expect(studentEventsAfterUnenroll).toHaveLength(0);
+          expect(groupCourseRows).toHaveLength(0);
+          if (!calendarEvent) {
+            throw new Error("Expected removed calendar event to be soft deleted");
+          }
+
+          expect(calendarEvent.deletedAt).not.toBe(null);
         });
 
         it("keeps students enrolled via other groups", async () => {

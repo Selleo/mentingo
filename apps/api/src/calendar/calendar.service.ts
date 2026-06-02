@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import {
+  CALENDAR_EVENT_SOURCE_TYPES,
   CALENDAR_EVENT_SOURCE_ROLES,
   COURSE_ENROLLMENT,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
@@ -17,6 +18,8 @@ import { hasAnyPermission } from "src/common/permissions/permission.utils";
 import { SettingsService } from "src/settings/settings.service";
 import {
   calendarEvents,
+  courses,
+  groupCourses,
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
@@ -30,6 +33,7 @@ import type {
   CalendarEventMaterialRow,
   CalendarEventNormalizedRow,
   CalendarEventHostRow,
+  LiveTrainingCalendarEventPayload,
 } from "./calendar.types";
 import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
 import type {
@@ -78,7 +82,10 @@ export class CalendarService {
     query: GetCalendarEventsQuery,
     currentUser: CurrentUserType,
   ) {
-    return Promise.all([this.getLiveTrainingEvents(query, currentUser)]);
+    return Promise.all([
+      this.getLiveTrainingEvents(query, currentUser),
+      this.getCourseDueDateEvents(query, currentUser),
+    ]);
   }
 
   private async getCalendarSourceEventDetails(
@@ -86,7 +93,37 @@ export class CalendarService {
     language: SupportedLanguages,
     currentUser: CurrentUserType,
   ) {
-    return Promise.all([this.getLiveTrainingEventDetails(eventId, language, currentUser)]);
+    return Promise.all([
+      this.getLiveTrainingEventDetails(eventId, language, currentUser),
+      this.getCourseDueDateEventDetails(eventId, language, currentUser),
+    ]);
+  }
+
+  private async getCourseDueDateEvents(
+    query: GetCalendarEventsQuery,
+    currentUser: CurrentUserType,
+  ): Promise<CalendarEventListItem[]> {
+    const events = await this.calendarRepository.getCourseDueDateCalendarEventRows(
+      this.getCourseDueDateListConditions(query, currentUser),
+      query.language,
+    );
+
+    return events;
+  }
+
+  private async getCourseDueDateEventDetails(
+    eventId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ): Promise<CalendarEventDetails | null> {
+    const [event] = await this.calendarRepository.getCourseDueDateCalendarEventRows(
+      this.getCourseDueDateDetailConditions(eventId, currentUser),
+      language,
+    );
+
+    if (!event) return null;
+
+    return event;
   }
 
   private async getLiveTrainingEvents(
@@ -154,14 +191,22 @@ export class CalendarService {
 
     const listItem = this.mapLiveTrainingListItem(row, hosts, linkedCourses, currentUser);
     const isPrivilegedViewer = this.isPrivilegedViewer(row, hosts, currentUser);
+    const liveTrainingPayload = row.payload as LiveTrainingCalendarEventPayload;
+    const liveTrainingListPayload = (
+      listItem.payload as {
+        liveTraining: LiveTrainingCalendarEventPayload["liveTraining"] & {
+          sourceRole: CalendarEventSourceRole;
+        };
+      }
+    ).liveTraining;
 
     return {
       ...listItem,
       payload: {
         liveTraining: {
-          ...listItem.payload.liveTraining,
+          ...liveTrainingListPayload,
           author: author ?? {
-            id: row.authorId,
+            id: row.authorId ?? row.sourceId,
             fullName: null,
             email: "",
           },
@@ -173,7 +218,7 @@ export class CalendarService {
           })),
           materials: this.getVisibleMaterials(
             materials,
-            row.payload.liveTraining.status,
+            liveTrainingPayload.liveTraining.status,
             isPrivilegedViewer,
           ),
           latestSession,
@@ -189,6 +234,7 @@ export class CalendarService {
     currentUser: CurrentUserType,
   ): CalendarEventListItem {
     const sourceRole = this.getSourceRole(row, hosts, currentUser);
+    const payload = row.payload as LiveTrainingCalendarEventPayload;
 
     return {
       id: row.id,
@@ -205,7 +251,7 @@ export class CalendarService {
       status: row.status,
       payload: {
         liveTraining: {
-          ...row.payload.liveTraining,
+          ...payload.liveTraining,
           linkedCourses,
           sourceRole,
         },
@@ -282,6 +328,62 @@ export class CalendarService {
     return conditions;
   }
 
+  private getCourseDueDateListConditions(
+    query: GetCalendarEventsQuery,
+    currentUser: CurrentUserType,
+  ) {
+    const conditions = this.getCourseDueDateBaseConditions(currentUser);
+
+    const dateRangeCondition = and(
+      lt(calendarEvents.startsAt, query.end),
+      gt(calendarEvents.endsAt, query.start),
+    );
+
+    if (dateRangeCondition) conditions.push(dateRangeCondition);
+
+    return conditions;
+  }
+
+  private getCourseDueDateDetailConditions(eventId: UUIDType, currentUser: CurrentUserType) {
+    const conditions = this.getCourseDueDateBaseConditions(currentUser);
+    conditions.push(eq(calendarEvents.id, eventId));
+
+    return conditions;
+  }
+
+  private getCourseDueDateBaseConditions(currentUser: CurrentUserType) {
+    const conditions: SQL[] = [
+      isNull(calendarEvents.deletedAt),
+      eq(groupCourses.isMandatory, true),
+      sql`${groupCourses.dueDate} IS NOT NULL`,
+    ];
+
+    conditions.push(this.getCourseDueDateVisibilityCondition(currentUser));
+
+    return conditions;
+  }
+
+  private getCourseDueDateVisibilityCondition(currentUser: CurrentUserType): SQL {
+    const enrolledStudentCondition = sql`
+      EXISTS (
+        SELECT 1
+        FROM ${studentCourses}
+        WHERE ${studentCourses.courseId} = ${groupCourses.courseId}
+          AND ${studentCourses.enrolledByGroupId} = ${groupCourses.groupId}
+          AND ${studentCourses.studentId} = ${currentUser.userId}
+          AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
+      )
+    `;
+
+    if (this.canManageAnyCourseDueDate(currentUser)) return sql`TRUE`;
+
+    if (hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_UPDATE_OWN])) {
+      return or(enrolledStudentCondition, eq(courses.authorId, currentUser.userId)) ?? sql`FALSE`;
+    }
+
+    return enrolledStudentCondition;
+  }
+
   private getLiveTrainingVisibilityCondition(currentUser: CurrentUserType): SQL {
     if (this.canManageAnyLiveTraining(currentUser)) {
       return sql`TRUE`;
@@ -337,6 +439,10 @@ export class CalendarService {
     hosts: CalendarEventHostRow[],
     currentUser: CurrentUserType,
   ): CalendarEventSourceRole {
+    if (row.sourceType === CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE) {
+      return CALENDAR_EVENT_SOURCE_ROLES.OBSERVER;
+    }
+
     if (this.canManageAnyLiveTraining(currentUser)) {
       return CALENDAR_EVENT_SOURCE_ROLES.ADMIN;
     }
@@ -400,6 +506,10 @@ export class CalendarService {
       PERMISSIONS.LIVE_TRAINING_UPDATE,
       PERMISSIONS.LIVE_TRAINING_DELETE,
     ]);
+  }
+
+  private canManageAnyCourseDueDate(currentUser: CurrentUserType) {
+    return hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_ENROLLMENT]);
   }
 
   private async isLiveTrainingSourceEnabled(currentUser: CurrentUserType) {

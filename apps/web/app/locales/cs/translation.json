@@ -429,17 +429,22 @@
       "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
-        "goToLiveTraining": "Go to Live Training"
+        "goToLiveTraining": "Go to Live Training",
+        "goToCourse": "Přejít na kurz"
       },
       "sourceType": {
-        "liveTraining": "Live Training"
+        "liveTraining": "Live Training",
+        "courseDueDate": "Termín kurzu"
       },
       "field": {
         "time": "Time",
         "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
-        "people": "People"
+        "people": "People",
+        "dueDate": "Termín",
+        "course": "Kurz",
+        "group": "Skupina"
       },
       "deliveryType": {
         "online": "Online",
@@ -458,6 +463,10 @@
         "trainer": "Trainer",
         "observer": "Observer"
       }
+    },
+    "errors": {
+      "courseDueDateRequired": "Due date is required to create the course calendar event.",
+      "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
   "liveTrainingView": {
