@@ -28,6 +28,7 @@ export const userEmailTriggersJSONSchema = Type.Object({
 export const globalSettingsJSONSchema = Type.Object({
   unregisteredUserCoursesAccessibility: Type.Boolean(),
   modernCourseListEnabled: Type.Boolean(),
+  courseDiscussionsEnabled: Type.Boolean(),
   calendarEnabled: Type.Boolean(),
   liveTrainingEnabled: Type.Boolean(),
   liveTrainingMaxParallelSessions: Type.Number({ minimum: 1 }),

@@ -65,6 +65,7 @@ export const SETTINGS_PAGE_HANDLES = {
   ADMIN_PREFERENCES_CARD: "settings-admin-preferences-card",
   COURSES_VISIBILITY_SWITCH: "settings-courses-visibility-switch",
   MODERN_COURSE_LIST_SWITCH: "settings-modern-course-list-switch",
+  COURSE_DISCUSSIONS_SWITCH: "settings-course-discussions-switch",
   CALENDAR_SWITCH: "settings-calendar-switch",
   LIVE_TRAINING_SWITCH: "settings-live-training-switch",
   LIVE_TRAINING_MAX_PARALLEL_SESSIONS_INPUT: "settings-live-training-max-parallel-sessions-input",

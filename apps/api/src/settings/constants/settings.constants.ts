@@ -30,6 +30,7 @@ export const DEFAULT_GLOBAL_SETTINGS = {
   learningPathsEnabled: false,
   unregisteredUserCoursesAccessibility: false,
   modernCourseListEnabled: true,
+  courseDiscussionsEnabled: false,
   calendarEnabled: true,
   liveTrainingEnabled: false,
   liveTrainingMaxParallelSessions: DEFAULT_LIVE_TRAINING_MAX_PARALLEL_SESSIONS,

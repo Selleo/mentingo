@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
-import { PERMISSIONS, type PermissionKey } from "@repo/shared";
+import { FEATURES, PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import {
@@ -10,6 +10,7 @@ import {
   type BaseResponse,
   type PaginatedResponse,
 } from "src/common";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CourseChatService } from "src/course-chat/course-chat.service";
@@ -32,6 +33,7 @@ import {
 } from "src/course-chat/schemas/course-chat.schema";
 
 @Controller("course-chat")
+@RequireFeature(FEATURES.COURSE_DISCUSSIONS)
 export class CourseChatController {
   constructor(private readonly courseChatService: CourseChatService) {}
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { courseLookupQueryOptions, useCourse, useCurrentUser } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
@@ -97,6 +98,7 @@ export default function CourseViewPage() {
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
   const { data: course, error } = useCourse(id, language);
+  const { data: globalSettings } = useGlobalSettings();
 
   useEffect(() => {
     if (isAxiosError(error) && error.response?.status === 404) {
@@ -148,6 +150,7 @@ export default function CourseViewPage() {
         isForAdminLike: false,
         isForUnregistered: false,
         isForEnrolled: true,
+        isFeatureEnabled: Boolean(globalSettings?.courseDiscussionsEnabled),
       },
       {
         value: "moreFromAuthor",
@@ -173,7 +176,13 @@ export default function CourseViewPage() {
         isForEnrolled: false,
       },
     ],
-    [t, course, currentUser?.id, currentUser?.permissions],
+    [
+      t,
+      course,
+      currentUser?.id,
+      currentUser?.permissions,
+      globalSettings?.courseDiscussionsEnabled,
+    ],
   );
 
   const handleTabChange = useCallback(
@@ -209,8 +218,8 @@ export default function CourseViewPage() {
   };
 
   const visibleCourseTabs = courseViewTabs.filter(
-    ({ isForAdminLike, isForUnregistered, isForEnrolled }) =>
-      canView(isForAdminLike, isForUnregistered, isForEnrolled),
+    ({ isForAdminLike, isForUnregistered, isForEnrolled, isFeatureEnabled = true }) =>
+      isFeatureEnabled && canView(isForAdminLike, isForUnregistered, isForEnrolled),
   );
   const selectedTabQuery = searchParams.get("tab");
   const activeTab =

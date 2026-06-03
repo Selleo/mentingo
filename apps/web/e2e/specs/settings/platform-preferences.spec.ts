@@ -25,7 +25,7 @@ const getGlobalSettings = async (apiClient: FixtureApiClient) => {
   return response.data.data;
 };
 
-test("admin can toggle public course visibility and modern course list settings", async ({
+test("admin can toggle course platform settings", async ({
   apiClient,
   cleanup,
   withWorkerPage,
@@ -46,23 +46,30 @@ test("admin can toggle public course visibility and modern course list settings"
       if (currentSettings.modernCourseListEnabled !== originalSettings.modernCourseListEnabled) {
         await apiClient.api.settingsControllerUpdateModernCourseListEnabled();
       }
+
+      if (currentSettings.courseDiscussionsEnabled !== originalSettings.courseDiscussionsEnabled) {
+        await apiClient.api.settingsControllerUpdateCourseDiscussionsEnabled();
+      }
     });
 
     await openPlatformCustomizationSettings(page);
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH).click();
 
     await expect
       .poll(async () => {
         const settings = await getGlobalSettings(apiClient);
 
         return {
+          courseDiscussionsEnabled: settings.courseDiscussionsEnabled,
           modernCourseListEnabled: settings.modernCourseListEnabled,
           unregisteredUserCoursesAccessibility: settings.unregisteredUserCoursesAccessibility,
         };
       })
       .toEqual({
+        courseDiscussionsEnabled: !originalSettings.courseDiscussionsEnabled,
         modernCourseListEnabled: !originalSettings.modernCourseListEnabled,
         unregisteredUserCoursesAccessibility:
           !originalSettings.unregisteredUserCoursesAccessibility,

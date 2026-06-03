@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCourseDiscussions";
 import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
@@ -21,6 +22,7 @@ export default function CoursesAccessibilityPreferences({
   const { mutate: changeUnregisteredUserCoursesAccessibility } =
     useUnregisteredUserCoursesAccessibility();
   const { mutate: toggleModernCourseList } = useToggleModernCourseList();
+  const { mutate: toggleCourseDiscussions } = useToggleCourseDiscussions();
   const { mutate: toggleLiveTraining } = useToggleLiveTraining();
   const trainerRoleUserCount = globalSettings.trainerRoleUserCount ?? 0;
   const isLiveTrainingDisableBlocked =
@@ -47,6 +49,14 @@ export default function CoursesAccessibilityPreferences({
         checked={globalSettings.modernCourseListEnabled}
         onCheckedChange={toggleModernCourseList}
         testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
+      />
+      <SettingItem
+        id="courseDiscussions"
+        label={t("adminPreferences.field.courseDiscussions")}
+        description={t("adminPreferences.field.courseDiscussionsDescription")}
+        checked={globalSettings.courseDiscussionsEnabled}
+        onCheckedChange={toggleCourseDiscussions}
+        testId={SETTINGS_PAGE_HANDLES.COURSE_DISCUSSIONS_SWITCH}
       />
       <SettingItem
         id="liveTraining"

@@ -744,6 +744,34 @@ export class SettingsService {
     return this.parseGlobalSettings(updatedGlobalSettings);
   }
 
+  public async updateGlobalCourseDiscussionsEnabled(
+    actor?: CurrentUserType,
+  ): Promise<GlobalSettingsJSONContentSchema> {
+    const previousRecord = await this.getGlobalSettingsRecord();
+
+    const current =
+      previousRecord.settings.courseDiscussionsEnabled ??
+      DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled;
+
+    const [{ settings: updatedGlobalSettings }] = await this.db
+      .update(settings)
+      .set({
+        settings: setJsonbField(settings.settings, "courseDiscussionsEnabled", !current),
+      })
+      .where(isNull(settings.userId))
+      .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    const updatedRecord = await this.getGlobalSettingsRecord();
+
+    await this.recordSettingsUpdate({
+      actor,
+      previousSnapshot: this.buildSettingsSnapshot(previousRecord),
+      updatedSnapshot: updatedRecord ? this.buildSettingsSnapshot(updatedRecord) : null,
+    });
+
+    return this.parseGlobalSettings(updatedGlobalSettings);
+  }
+
   public async updateGlobalCalendarEnabled(
     actor?: CurrentUserType,
   ): Promise<GlobalSettingsJSONContentSchema> {
@@ -1793,6 +1821,8 @@ export class SettingsService {
       ...settings,
       modernCourseListEnabled:
         settings.modernCourseListEnabled ?? DEFAULT_GLOBAL_SETTINGS.modernCourseListEnabled,
+      courseDiscussionsEnabled:
+        settings.courseDiscussionsEnabled ?? DEFAULT_GLOBAL_SETTINGS.courseDiscussionsEnabled,
       learningPathsEnabled:
         settings.learningPathsEnabled ?? DEFAULT_GLOBAL_SETTINGS.learningPathsEnabled,
       calendarEnabled: true,
