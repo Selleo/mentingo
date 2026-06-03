@@ -1,3 +1,65 @@
+<a name="v4.10.0"></a>
+
+## [v4.10.0] - 03.06.2026
+
+### Features:
+
+- add a feature flag to control course discussions availability ([#1581](https://github.com/Selleo/mentingo/issues/1581))
+
+- add live trainings with calendar scheduling ([#1542](https://github.com/Selleo/mentingo/issues/1542))
+
+- add translation support for course categories ([#1539](https://github.com/Selleo/mentingo/issues/1539))
+
+- add translation support for announcements ([#1545](https://github.com/Selleo/mentingo/issues/1545))
+
+- add translation support for group names and characteristics ([#1543](https://github.com/Selleo/mentingo/issues/1543))
+
+- allow courses to repeat in cycles for continuous learning programs ([#1537](https://github.com/Selleo/mentingo/issues/1537))
+
+### Bug Fixes:
+
+- improve course management in support mode and resolve magic link issues for sub-tenants ([#1585](https://github.com/Selleo/mentingo/issues/1585))
+
+- enable proper SSO login in multi-tenant environments ([#1570](https://github.com/Selleo/mentingo/issues/1570))
+
+- restore overdue course email notifications ([#1563](https://github.com/Selleo/mentingo/issues/1563))
+
+- restore presentation previews for uploaded files ([#1552](https://github.com/Selleo/mentingo/issues/1552))
+
+- display trailer videos correctly in the continue learning section ([#1557](https://github.com/Selleo/mentingo/issues/1557))
+
+- make certificate modal close properly ([#1556](https://github.com/Selleo/mentingo/issues/1556))
+
+- display lesson statuses correctly in learning mode ([#1553](https://github.com/Selleo/mentingo/issues/1553))
+
+- restore course preview navigation and course card opening ([#1555](https://github.com/Selleo/mentingo/issues/1555))
+
+- make course discussions visible to enrolled learners ([#1533](https://github.com/Selleo/mentingo/issues/1533))
+
+- allow quizzes with student answers to be deleted safely ([#1523](https://github.com/Selleo/mentingo/issues/1523))
+
+### Chores:
+
+- refine live training email notifications and recipient management ([#1583](https://github.com/Selleo/mentingo/issues/1583))
+
+- improve password reset and change experience ([#1571](https://github.com/Selleo/mentingo/issues/1571))
+
+- refine voice mentor audio player behavior ([#1574](https://github.com/Selleo/mentingo/issues/1574))
+
+- improve SCORM experience and support streamable uploads ([#1564](https://github.com/Selleo/mentingo/issues/1564))
+
+- improve the voice mentor audio player experience ([#1561](https://github.com/Selleo/mentingo/issues/1561))
+
+- adjust enrolled students filtering and course learning requirements ([#1558](https://github.com/Selleo/mentingo/issues/1558))
+
+- improve the SCORM experience with usability and reliability enhancements ([#1551](https://github.com/Selleo/mentingo/issues/1551))
+
+- rename learning paths to development paths across the platform ([#1546](https://github.com/Selleo/mentingo/issues/1546))
+
+- improve the learning paths experience with usability enhancements ([#1531](https://github.com/Selleo/mentingo/issues/1531))
+
+- remove autoplay functionality ([#1524](https://github.com/Selleo/mentingo/issues/1524))
+
 <a name="v4.9.0"></a>
 
 ## [v4.9.0] - 16.05.2026
@@ -57,6 +119,10 @@
 ### Code Refactoring:
 
 - improve test setup to run checks fully in parallel ([#1430](https://github.com/Selleo/mentingo/issues/1430))
+
+### Documentation:
+
+- update changelog for version v4.9.0
 
 ### Tests:
 
@@ -2730,7 +2796,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.9.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.10.0...HEAD
+[v4.10.0]: https://github.com/Selleo/mentingo/compare/v4.9.0...v4.10.0
 [v4.9.0]: https://github.com/Selleo/mentingo/compare/v4.8.0...v4.9.0
 [v4.8.0]: https://github.com/Selleo/mentingo/compare/v4.7.0...v4.8.0
 [v4.7.0]: https://github.com/Selleo/mentingo/compare/v4.6.1...v4.7.0
