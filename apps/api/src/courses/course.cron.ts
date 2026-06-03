@@ -19,7 +19,7 @@ export class CourseCron {
     });
   }
 
-  @Cron(CronExpression.EVERY_5_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async notifyStudentsAboutCourseDueDatesPerDay() {
     await this.tenantRunner.runForEachTenant(async () => {
       await this.courseService.sendCourseDueDateReminders();

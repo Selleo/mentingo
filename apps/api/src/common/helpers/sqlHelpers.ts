@@ -1,6 +1,8 @@
-import { sql } from "drizzle-orm";
+import { sql, type SQL } from "drizzle-orm";
 
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
+
+type SqlExpression<T = unknown> = SQL<T> | AnyPgColumn;
 
 export function setJsonbField(
   field: any,
@@ -68,7 +70,7 @@ export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<strin
   return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
 
-export function mergeJsonbField(existingField: any, incomingField: any) {
+export function mergeJsonbField(existingField: SqlExpression, incomingField: SqlExpression) {
   return sql`
     CASE
       WHEN ${incomingField} IS NULL THEN ${existingField}

@@ -30,6 +30,7 @@ import type {
   CalendarEventNormalizedRow,
   CalendarEventInsert,
   CourseDueDateCalendarEventPayload,
+  CourseDueDateCalendarEventUpsertInput,
   GroupCourseDueDateRow,
   LiveTrainingCalendarEventPayload,
 } from "./calendar.types";
@@ -42,12 +43,6 @@ import type {
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
 } from "@repo/shared";
-
-type CourseDueDateCalendarEventUpsertInput = {
-  calendarEvent: CalendarEventInsert & { uid: string };
-  courseId: UUIDType;
-  groupId: UUIDType;
-};
 
 @Injectable()
 export class CalendarRepository {
@@ -128,7 +123,7 @@ export class CalendarRepository {
         .insert(calendarEvents)
         .values(events.map(({ calendarEvent }) => calendarEvent))
         .onConflictDoUpdate({
-          target: calendarEvents.uid,
+          target: [calendarEvents.tenantId, calendarEvents.uid],
           set: {
             status: sql`EXCLUDED.status`,
             baseLanguage: sql`EXCLUDED.base_language`,

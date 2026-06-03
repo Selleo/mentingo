@@ -19,6 +19,12 @@ export type CalendarEventListConditions = SQL[];
 
 export type CalendarEventInsert = typeof calendarEvents.$inferInsert;
 
+export type CourseDueDateCalendarEventUpsertInput = {
+  calendarEvent: CalendarEventInsert & { uid: string };
+  courseId: UUIDType;
+  groupId: UUIDType;
+};
+
 export type CalendarEventSourcePayload =
   | LiveTrainingCalendarEventPayload
   | CourseDueDateCalendarEventPayload;

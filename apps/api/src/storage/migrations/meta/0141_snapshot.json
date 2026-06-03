@@ -1,5 +1,5 @@
 {
-  "id": "366ca532-aea1-4400-9160-eb0e61010d62",
+  "id": "71bf1b02-6e35-476e-bdb3-80c636c92eaf",
   "prevId": "b01abde0-3a23-4727-94a2-377106f47e27",
   "version": "7",
   "dialect": "postgresql",
@@ -1346,9 +1346,15 @@
           "method": "btree",
           "with": {}
         },
-        "calendar_events_uid_unique_idx": {
-          "name": "calendar_events_uid_unique_idx",
+        "calendar_events_tenant_uid_unique_idx": {
+          "name": "calendar_events_tenant_uid_unique_idx",
           "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
             {
               "expression": "uid",
               "isExpression": false,
