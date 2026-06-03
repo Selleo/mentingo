@@ -1,5 +1,11 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ANNOUNCEMENT_STATUSES, PERMISSIONS } from "@repo/shared";
+import {
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
+  COURSE_ENROLLMENT,
+  LIVE_TRAINING_LINK_ENTITY_TYPES,
+  PERMISSIONS,
+} from "@repo/shared";
 import {
   eq,
   and,
@@ -29,7 +35,10 @@ import {
   announcements,
   groupAnnouncements,
   groupUsers,
+  liveLessons,
+  liveTrainingLinks,
   settings as settingsTable,
+  studentCourses,
   userAnnouncements,
   users,
 } from "src/storage/schema";
@@ -463,16 +472,63 @@ export class AnnouncementsRepository {
   }
 
   async getAnnouncementEmailRecipients(announcementId: UUIDType) {
+    const [announcement] = await this.getAnnouncementById(announcementId);
+
+    if (
+      announcement?.sourceType === ANNOUNCEMENT_SOURCE_TYPES.LIVE_TRAINING &&
+      announcement.sourceId
+    ) {
+      return this.getLiveTrainingSessionEmailRecipients(announcementId, announcement.sourceId);
+    }
+
     return this.db
-      .select({
-        id: users.id,
-        email: users.email,
-        language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
-      })
+      .select(this.getAnnouncementEmailRecipientFields())
       .from(userAnnouncements)
       .innerJoin(users, eq(users.id, userAnnouncements.userId))
       .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
       .where(and(eq(userAnnouncements.announcementId, announcementId), isNull(users.deletedAt)));
+  }
+
+  private async getLiveTrainingSessionEmailRecipients(
+    announcementId: UUIDType,
+    liveTrainingId: UUIDType,
+  ) {
+    return this.db
+      .selectDistinct(this.getAnnouncementEmailRecipientFields())
+      .from(userAnnouncements)
+      .innerJoin(users, eq(users.id, userAnnouncements.userId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, users.id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .innerJoin(
+        liveTrainingLinks,
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveTrainingId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+          eq(liveTrainingLinks.entityId, studentCourses.courseId),
+        ),
+      )
+      .innerJoin(
+        liveLessons,
+        and(
+          eq(liveLessons.liveTrainingId, liveTrainingId),
+          eq(liveLessons.liveTrainingLinkId, liveTrainingLinks.id),
+        ),
+      )
+      .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
+      .where(and(eq(userAnnouncements.announcementId, announcementId), isNull(users.deletedAt)));
+  }
+
+  private getAnnouncementEmailRecipientFields() {
+    return {
+      id: users.id,
+      email: users.email,
+      language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
+    };
   }
 
   private getLocalizedAnnouncementFields(language?: SupportedLanguages) {

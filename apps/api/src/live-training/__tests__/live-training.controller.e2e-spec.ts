@@ -14,6 +14,7 @@ import {
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
+import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -41,6 +42,7 @@ import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { UserWithCredentials } from "test/factory/user.factory";
+import type { EmailTestingAdapter } from "test/helpers/test-email.adapter";
 
 describe("LiveTrainingController (e2e)", () => {
   let app: INestApplication;
@@ -50,6 +52,7 @@ describe("LiveTrainingController (e2e)", () => {
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let chapterFactory: ReturnType<typeof createChapterFactory>;
+  let emailAdapter: EmailTestingAdapter;
 
   const password = "password123";
   const language = SUPPORTED_LANGUAGES.EN;
@@ -74,9 +77,11 @@ describe("LiveTrainingController (e2e)", () => {
     userFactory = createUserFactory(db);
     courseFactory = createCourseFactory(db);
     chapterFactory = createChapterFactory(db);
+    emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
   });
 
   afterEach(async () => {
+    emailAdapter.clearEmails();
     await truncateAllTables(baseDb, db);
   });
 
@@ -152,6 +157,18 @@ describe("LiveTrainingController (e2e)", () => {
       .returning();
 
     return resource;
+  };
+
+  const waitForEmails = async (count: number) => {
+    for (let attempt = 0; attempt < 25; attempt += 1) {
+      const emails = emailAdapter.getAllEmails();
+
+      if (emails.length >= count) return emails;
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+
+    return emailAdapter.getAllEmails();
   };
 
   const createOfflineLiveTraining = async (admin: UserWithCredentials, courseId?: UUIDType) => {
@@ -587,5 +604,104 @@ describe("LiveTrainingController (e2e)", () => {
     expect(liveLesson.liveTrainingLinkId).toBe(courseLink.id);
     expect(lessonProgress.completedAt).not.toBeNull();
     expect(lessonProgress.languageAnswered).toBe(language);
+  });
+
+  it("sends live training emails only to students enrolled in a course with the linked live lesson", async () => {
+    const admin = await createAdmin();
+    const enrolledStudent = await createStudent();
+    const linkedCourseWithoutLiveLessonStudent = await createStudent();
+    const unrelatedStudent = await createStudent();
+    const liveLessonCourse = await createTestCourse(admin.id);
+    const linkedCourseWithoutLiveLesson = await createTestCourse(admin.id);
+    const chapter = await chapterFactory.create({
+      courseId: liveLessonCourse.id,
+      authorId: admin.id,
+    });
+    const startsAt = getFutureDateOnScheduleStep(60);
+    const endsAt = getFutureDateOnScheduleStep(120);
+
+    await db.insert(studentCourses).values([
+      {
+        courseId: liveLessonCourse.id,
+        studentId: enrolledStudent.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      },
+      {
+        courseId: linkedCourseWithoutLiveLesson.id,
+        studentId: linkedCourseWithoutLiveLessonStudent.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      },
+    ]);
+
+    const lessonResponse = await request(app.getHttpServer())
+      .post("/api/lesson/beta-create-lesson/live")
+      .set("Cookie", await cookieFor(admin, app))
+      .send({
+        title: "Email scoped live lesson",
+        description: "Email scoped live lesson description",
+        chapterId: chapter.id,
+        language,
+        liveTraining: {
+          title: "Email scoped training",
+          description: "Linked from lesson",
+          startsAt,
+          endsAt,
+          timezone,
+          deliveryType: LIVE_TRAINING_DELIVERY_TYPES.OFFLINE,
+          location: "Room 40",
+        },
+      })
+      .expect(201);
+
+    const { liveTrainingId } = lessonResponse.body.data;
+
+    await db.insert(liveTrainingLinks).values({
+      liveTrainingId,
+      entityType: LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE,
+      entityId: linkedCourseWithoutLiveLesson.id,
+    });
+
+    const [liveLesson] = await db
+      .select()
+      .from(liveLessons)
+      .where(eq(liveLessons.liveTrainingId, liveTrainingId));
+
+    await db.insert(liveLessons).values({
+      liveTrainingId,
+      liveTrainingLinkId: liveLesson.liveTrainingLinkId,
+      lessonId: liveLesson.lessonId,
+      language: SUPPORTED_LANGUAGES.PL,
+    });
+
+    emailAdapter.clearEmails();
+
+    const startResponse = await request(app.getHttpServer())
+      .post(`/api/live-training/${liveTrainingId}/sessions/start`)
+      .query({ language })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(201);
+
+    const startEmails = await waitForEmails(1);
+
+    expect(startEmails.map((email) => email.to)).toEqual([enrolledStudent.email]);
+
+    emailAdapter.clearEmails();
+
+    await request(app.getHttpServer())
+      .post(`/api/live-training/${liveTrainingId}/sessions/${startResponse.body.data.id}/end`)
+      .query({ language })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(201);
+
+    const endEmails = await waitForEmails(1);
+
+    expect(endEmails.map((email) => email.to)).toEqual([enrolledStudent.email]);
+    expect([...startEmails, ...endEmails].map((email) => email.to)).not.toEqual(
+      expect.arrayContaining([
+        linkedCourseWithoutLiveLessonStudent.email,
+        unrelatedStudent.email,
+        admin.email,
+      ]),
+    );
   });
 });
