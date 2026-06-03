@@ -15,6 +15,7 @@ import { createTokens, formFieldAnswers, magicLinkTokens, resetTokens } from "sr
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
+import { DEFAULT_TEST_TENANT_HOST } from "../../../test/helpers/tenant-helpers";
 import { truncateTables } from "../../../test/helpers/test-helpers";
 import { AuthService } from "../auth.service";
 
@@ -963,6 +964,7 @@ describe("AuthController (e2e)", () => {
       expect(email?.to).toBe(user.email);
       expect(email?.subject).toBeDefined();
       expect(email?.html || email?.text).toContain("/auth/login?token=");
+      expect(email?.html || email?.text).toContain(`${DEFAULT_TEST_TENANT_HOST}/auth/login?token=`);
 
       const tokenMatch = (email?.html ?? email?.text ?? "").match(
         /\/auth\/login\?token=([^"&\s]+)/,
