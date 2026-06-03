@@ -196,7 +196,7 @@ const CreatePromotionCode = () => {
                     id="discountValue"
                     {...field}
                     type="number"
-                    onChange={(e) => field.onChange(Number(e.target.value))}
+                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : "")}
                     onWheel={(e) => e.currentTarget.blur()}
                   />
                 </FormControl>
