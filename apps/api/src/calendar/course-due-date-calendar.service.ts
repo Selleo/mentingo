@@ -16,9 +16,13 @@ export class CourseDueDateCalendarService {
       groupIds,
     );
 
-    for (const groupCourse of groupCourses) {
-      await this.syncGroupCourseDueDate(groupCourse);
-    }
+    await this.calendarRepository.upsertCourseDueDateCalendarEvents(
+      groupCourses.map((groupCourse) => ({
+        calendarEvent: this.buildCalendarEvent(groupCourse),
+        courseId: groupCourse.courseId,
+        groupId: groupCourse.groupId,
+      })),
+    );
   }
 
   async removeGroupCourseDueDates(calendarEventIds: Array<UUIDType | null>) {
@@ -27,17 +31,9 @@ export class CourseDueDateCalendarService {
     await this.calendarRepository.removeCourseDueDateCalendarEvents(removableCalendarEventIds);
   }
 
-  private async syncGroupCourseDueDate(groupCourse: GroupCourseDueDateRow) {
-    const calendarEvent = this.buildCalendarEvent(groupCourse);
-
-    await this.calendarRepository.upsertCourseDueDateCalendarEvent({
-      calendarEvent,
-      courseId: groupCourse.courseId,
-      groupId: groupCourse.groupId,
-    });
-  }
-
-  private buildCalendarEvent(groupCourse: GroupCourseDueDateRow): CalendarEventInsert {
+  private buildCalendarEvent(groupCourse: GroupCourseDueDateRow): CalendarEventInsert & {
+    uid: string;
+  } {
     const { startsAt, endsAt } = this.getAllDayUtcRange(groupCourse.dueDate);
     const { baseLanguage, availableLocales } = this.getCourseLanguages(groupCourse);
 

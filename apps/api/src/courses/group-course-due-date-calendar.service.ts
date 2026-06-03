@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { CALENDAR_EVENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { inArray, or, sql, type SQL } from "drizzle-orm";
 
-import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbFieldWithMultipleEntries, mergeJsonbField } from "src/common/helpers/sqlHelpers";
 import { calendarEvents } from "src/storage/schema";
 
 import type { DatabasePg, UUIDType } from "src/common";
@@ -10,32 +10,80 @@ import type {
   CancelDueDateCalendarEventsInput,
   GroupCourseDueDateCalendarCourse,
   UpsertDueDateCalendarEventInput,
+  UpsertDueDateCalendarEventsInput,
 } from "src/courses/types/group-course-due-date-calendar.types";
 
 @Injectable()
 export class GroupCourseDueDateCalendarService {
   async upsertDueDateCalendarEvent(dbInstance: DatabasePg, input: UpsertDueDateCalendarEventInput) {
-    if (!input.isMandatory || !input.dueDate) return null;
+    const syncedCalendarEventIdsByGroupId = await this.upsertDueDateCalendarEvents(dbInstance, [
+      input,
+    ]);
 
-    const calendarEventFields = this.buildCalendarEventFields(input);
-    const [syncedCalendarEvent] = await dbInstance
+    return syncedCalendarEventIdsByGroupId.get(input.groupId) ?? null;
+  }
+
+  async upsertDueDateCalendarEvents(
+    dbInstance: DatabasePg,
+    inputs: UpsertDueDateCalendarEventsInput,
+  ) {
+    const eligibleInputs = inputs.filter((input) => input.isMandatory && input.dueDate);
+
+    if (!eligibleInputs.length) return new Map<UUIDType, UUIDType>();
+
+    const calendarEventValues = eligibleInputs.map((input) => {
+      const calendarEventFields = this.buildCalendarEventFields(input);
+
+      return {
+        groupId: input.groupId,
+        uid: calendarEventFields.uid,
+        calendarEvent: {
+          ...calendarEventFields,
+          title: this.buildTitleInsert(input.course),
+        },
+      };
+    });
+
+    const syncedCalendarEvents = await dbInstance
       .insert(calendarEvents)
-      .values({
-        ...calendarEventFields,
-        title: this.buildTitleInsert(input.course),
-      })
+      .values(calendarEventValues.map(({ calendarEvent }) => calendarEvent))
       .onConflictDoUpdate({
         target: calendarEvents.uid,
         set: {
-          ...calendarEventFields,
+          status: sql`EXCLUDED.status`,
+          baseLanguage: sql`EXCLUDED.base_language`,
+          availableLocales: sql`EXCLUDED.available_locales`,
+          title: mergeJsonbField(calendarEvents.title, sql`EXCLUDED.title`),
+          startsAt: sql`EXCLUDED.starts_at`,
+          endsAt: sql`EXCLUDED.ends_at`,
+          allDay: sql`EXCLUDED.all_day`,
+          timezone: sql`EXCLUDED.timezone`,
+          location: sql`EXCLUDED.location`,
+          organizerUserId: sql`EXCLUDED.organizer_user_id`,
+          rrule: sql`EXCLUDED.rrule`,
+          exdates: sql`EXCLUDED.exdates`,
+          deletedAt: sql`EXCLUDED.deleted_at`,
           sequence: sql`${calendarEvents.sequence} + 1`,
-          title: this.buildTitleUpdate(input.course),
           updatedAt: sql`CURRENT_TIMESTAMP`,
         },
       })
-      .returning({ id: calendarEvents.id });
+      .returning({ id: calendarEvents.id, uid: calendarEvents.uid });
 
-    return syncedCalendarEvent.id;
+    const groupIdByUid = new Map(
+      calendarEventValues.map(({ groupId, uid }) => [uid, groupId] as const),
+    );
+
+    return new Map(
+      syncedCalendarEvents.map((calendarEvent) => {
+        const groupId = groupIdByUid.get(calendarEvent.uid);
+
+        if (!groupId) {
+          throw new BadRequestException("calendarView.errors.courseDueDateCalendarSyncFailed");
+        }
+
+        return [groupId, calendarEvent.id] as const;
+      }),
+    );
   }
 
   async cancelDueDateCalendarEvents(
@@ -94,22 +142,6 @@ export class GroupCourseDueDateCalendarService {
     return buildJsonbFieldWithMultipleEntries(
       Object.fromEntries(titleEntries.map(({ language, title }) => [language, title])),
     );
-  }
-
-  private buildTitleUpdate(course: GroupCourseDueDateCalendarCourse): SQL {
-    const title = this.getTitleEntries(course).reduce<SQL | undefined>(
-      (localizedTitle, titleEntry) =>
-        setJsonbField(
-          localizedTitle ?? calendarEvents.title,
-          titleEntry.language,
-          titleEntry.title,
-        ) ?? localizedTitle,
-      undefined,
-    );
-
-    if (!title) throw new BadRequestException("calendarView.errors.courseTitleRequired");
-
-    return title;
   }
 
   private getTitleEntries(course: GroupCourseDueDateCalendarCourse) {

@@ -1,14 +1,27 @@
-import { ANNOUNCEMENT_SOURCE_TYPES, COURSE_ENROLLMENT } from "@repo/shared";
+import {
+  ANNOUNCEMENT_SOURCE_TYPES,
+  COURSE_ENROLLMENT,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { addDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
+import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { CourseDueDateReminderEmailHandler } from "src/courses/handlers/course-due-date-reminder-email.handler";
 import { CourseDueDateReminderEmailEvent } from "src/events";
 import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { announcements, groupCourses, studentCourses, userAnnouncements } from "src/storage/schema";
+import {
+  announcements,
+  courses,
+  groupCourses,
+  settings,
+  studentCourses,
+  userAnnouncements,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
@@ -212,9 +225,245 @@ describe("Course due date reminders (e2e)", () => {
     );
   });
 
+  it("does not publish due-date reminder event when no students are eligible", async () => {
+    const optionalCourseStudent = await createStudent();
+    const completedCourseStudent = await createStudent();
+    const farDueDateStudent = await createStudent();
+
+    await createGroupCourseEnrollment({
+      student: optionalCourseStudent,
+      title: "Optional course due in seven days",
+      dueInDays: 7,
+      isMandatory: false,
+    });
+    await createGroupCourseEnrollment({
+      student: completedCourseStudent,
+      title: "Completed mandatory course due in seven days",
+      dueInDays: 7,
+      isMandatory: true,
+      completed: true,
+    });
+    await createGroupCourseEnrollment({
+      student: farDueDateStudent,
+      title: "Mandatory course due in three days",
+      dueInDays: 3,
+      isMandatory: true,
+    });
+
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish").mockResolvedValue(undefined);
+
+    await courseService.sendCourseDueDateReminders();
+
+    expect(
+      publishSpy.mock.calls.some(([event]) => event instanceof CourseDueDateReminderEmailEvent),
+    ).toBe(false);
+  });
+
+  it("uses recipient language for due-date reminder email and announcement content", async () => {
+    const student = await createStudent({ language: SUPPORTED_LANGUAGES.PL });
+    const englishTitle = "Localized reminder course";
+    const polishTitle = "Kurs z lokalnym terminem";
+    const course = await createGroupCourseEnrollment({
+      student,
+      title: englishTitle,
+      dueInDays: 1,
+      isMandatory: true,
+    });
+
+    await db
+      .update(courses)
+      .set({
+        title: buildJsonbFieldWithMultipleEntries({
+          en: englishTitle,
+          pl: polishTitle,
+        }),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+      })
+      .where(eq(courses.id, course.id));
+
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish").mockResolvedValue(undefined);
+
+    await courseService.sendCourseDueDateReminders();
+
+    const reminderEvent = getPublishedReminderEvent(publishSpy);
+
+    expect(reminderEvent.courseDueDateReminderEmailData.recipients).toEqual([
+      expect.objectContaining({
+        studentId: student.id,
+        courseName: polishTitle,
+        daysBeforeDueDate: "1",
+        defaultEmailSettings: expect.objectContaining({ language: SUPPORTED_LANGUAGES.PL }),
+      }),
+    ]);
+
+    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
+
+    const [sentEmail] = emailAdapter.getAllEmails();
+    expect(sentEmail.to).toBe(student.email);
+    expect(sentEmail.subject).toBe(`Zbliża się termin kursu - ${polishTitle}`);
+    expect(normalizeEmailText(sentEmail.text)).toContain(
+      `Termin ukończenia kursu "${polishTitle}" mija jutro.`,
+    );
+
+    const [announcementRow] = await getReminderAnnouncementRows();
+    expect(announcementRow).toEqual(
+      expect.objectContaining({
+        userId: student.id,
+        title: { pl: "Zbliża się termin kursu" },
+        content: { pl: `Termin ukończenia kursu "${polishTitle}" mija jutro.` },
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
+        sourceId: course.id,
+        sendEmail: false,
+      }),
+    );
+  });
+
+  it("does not duplicate reminders when the same student is linked to the course through multiple groups", async () => {
+    const student = await createStudent();
+    const course = await courseFactory.create({
+      title: "Duplicate enrollment reminder course",
+      description: "Duplicate enrollment reminder course description",
+      thumbnailS3Key: null,
+    });
+    const firstGroup = await groupFactory.withMembers([student.id]).create();
+    const secondGroup = await groupFactory.withMembers([student.id]).create();
+    const dueDate = createReminderDate(7);
+
+    await db.insert(groupCourses).values([
+      {
+        groupId: firstGroup.id,
+        courseId: course.id,
+        isMandatory: true,
+        dueDate,
+      },
+      {
+        groupId: secondGroup.id,
+        courseId: course.id,
+        isMandatory: true,
+        dueDate,
+      },
+    ]);
+    await db.insert(studentCourses).values({
+      studentId: student.id,
+      courseId: course.id,
+      enrolledByGroupId: null,
+      status: COURSE_ENROLLMENT.ENROLLED,
+      completedAt: null,
+    });
+
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish").mockResolvedValue(undefined);
+
+    await courseService.sendCourseDueDateReminders();
+
+    const reminderEvent = getPublishedReminderEvent(publishSpy);
+
+    expect(reminderEvent.courseDueDateReminderEmailData.recipients).toHaveLength(1);
+    expect(reminderEvent.courseDueDateReminderEmailData.recipients[0]).toEqual(
+      expect.objectContaining({
+        studentId: student.id,
+        courseId: course.id,
+      }),
+    );
+
+    await app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent);
+
+    expect(emailAdapter.getAllEmails()).toHaveLength(1);
+    expect(await getReminderAnnouncementRows()).toHaveLength(1);
+  });
+
+  it("continues processing due-date reminders when one recipient email fails", async () => {
+    const failedRecipient = await createStudent();
+    const successfulRecipient = await createStudent();
+
+    await createGroupCourseEnrollment({
+      student: failedRecipient,
+      title: "Failed reminder course",
+      dueInDays: 7,
+      isMandatory: true,
+    });
+    const successfulCourse = await createGroupCourseEnrollment({
+      student: successfulRecipient,
+      title: "Successful reminder course",
+      dueInDays: 1,
+      isMandatory: true,
+    });
+
+    const publishSpy = jest.spyOn(app.get(OutboxPublisher), "publish").mockResolvedValue(undefined);
+
+    await courseService.sendCourseDueDateReminders();
+
+    const reminderEvent = getPublishedReminderEvent(publishSpy);
+    const originalSendMail = emailAdapter.sendMail.bind(emailAdapter);
+
+    jest.spyOn(emailAdapter, "sendMail").mockImplementation(async (email) => {
+      if (email.to === failedRecipient.email) {
+        throw new Error("Simulated due-date reminder email failure");
+      }
+
+      await originalSendMail(email);
+    });
+
+    await expect(app.get(CourseDueDateReminderEmailHandler).handle(reminderEvent)).resolves.toBe(
+      undefined,
+    );
+
+    const sentEmails = emailAdapter.getAllEmails();
+    expect(sentEmails).toHaveLength(1);
+    expect(sentEmails[0]).toEqual(expect.objectContaining({ to: successfulRecipient.email }));
+
+    const announcementRows = await getReminderAnnouncementRows();
+    expect(announcementRows).toHaveLength(1);
+    expect(announcementRows[0]).toEqual(
+      expect.objectContaining({
+        userId: successfulRecipient.id,
+        sourceId: successfulCourse.id,
+      }),
+    );
+  });
+
   const normalizeEmailText = (text?: string) => text?.replace(/\s+/g, " ").trim() ?? "";
 
-  const createStudent = () => userFactory.withUserSettings(db).create();
+  const getPublishedReminderEvent = (
+    publishSpy: jest.SpyInstance<Promise<void>, Parameters<OutboxPublisher["publish"]>>,
+  ) => {
+    const reminderEvent = publishSpy.mock.calls
+      .map(([event]) => event)
+      .find(
+        (event): event is CourseDueDateReminderEmailEvent =>
+          event instanceof CourseDueDateReminderEmailEvent,
+      );
+
+    if (!reminderEvent) throw new Error("Expected course due date reminder email event");
+
+    return reminderEvent;
+  };
+
+  const getReminderAnnouncementRows = () =>
+    db
+      .select({
+        userId: userAnnouncements.userId,
+        title: announcements.title,
+        content: announcements.content,
+        sourceType: announcements.sourceType,
+        sourceId: announcements.sourceId,
+        sendEmail: announcements.sendEmail,
+      })
+      .from(userAnnouncements)
+      .innerJoin(announcements, eq(announcements.id, userAnnouncements.announcementId));
+
+  const createStudent = async (options?: { language?: SupportedLanguages }) => {
+    const student = await userFactory.withUserSettings(db).create();
+
+    if (options?.language) {
+      await db
+        .update(settings)
+        .set({ settings: setJsonbField(settings.settings, "language", options.language) })
+        .where(eq(settings.userId, student.id));
+    }
+
+    return student;
+  };
 
   const createReminderDate = (daysFromNow: number) => {
     const date = addDays(new Date(), daysFromNow);

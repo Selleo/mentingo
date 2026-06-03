@@ -15,6 +15,8 @@ export type UpsertDueDateCalendarEventInput = {
   isMandatory: boolean;
 };
 
+export type UpsertDueDateCalendarEventsInput = UpsertDueDateCalendarEventInput[];
+
 export type CancelDueDateCalendarEventsInput = {
   calendarEventIds: UUIDType[];
   calendarEventUids: string[];

@@ -17,6 +17,7 @@ import { getEmailSubject } from "src/common/emails/translations";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent, CourseDueDateReminderEmailEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { COURSE_DUE_DATE_REMINDER_EMAIL_BATCH_SIZE } from "../constants/course-due-date-reminders.constants";
 
@@ -32,6 +33,7 @@ export class CourseDueDateReminderEmailHandler
     private readonly emailService: EmailService,
     private readonly announcementsRepository: AnnouncementsRepository,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async handle(event: CourseDueDateReminderEmailEvent) {
@@ -92,29 +94,31 @@ export class CourseDueDateReminderEmailHandler
       recipient.daysBeforeDueDate,
     );
 
-    const announcement = await this.announcementsRepository.createAnnouncement({
-      groupId: null,
-      title: { [language]: heading },
-      content: { [language]: paragraphs.join("\n") },
-      baseLanguage: language,
-      availableLocales: [language],
-      authorId: recipient.courseAuthorId,
-      status: ANNOUNCEMENT_STATUSES.PUBLISHED,
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      sendEmail: false,
-      emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
-      sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
-      sourceId: recipient.courseId,
+    await this.tenantRunner.runWithTenant(recipient.tenantId, async () => {
+      const announcement = await this.announcementsRepository.createAnnouncement({
+        groupId: null,
+        title: { [language]: heading },
+        content: { [language]: paragraphs.join("\n") },
+        baseLanguage: language,
+        availableLocales: [language],
+        authorId: recipient.courseAuthorId,
+        status: ANNOUNCEMENT_STATUSES.PUBLISHED,
+        scheduledAt: null,
+        publishedAt: new Date().toISOString(),
+        sendEmail: false,
+        emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
+        sourceId: recipient.courseId,
+      });
+
+      await this.announcementsRepository.createUserAnnouncementRecords(
+        [recipient.studentId],
+        announcement.id,
+      );
+
+      await this.outboxPublisher.publish(
+        new AnnouncementPublishedEvent({ announcementId: announcement.id }),
+      );
     });
-
-    await this.announcementsRepository.createUserAnnouncementRecords(
-      [recipient.studentId],
-      announcement.id,
-    );
-
-    await this.outboxPublisher.publish(
-      new AnnouncementPublishedEvent({ announcementId: announcement.id }),
-    );
   }
 }

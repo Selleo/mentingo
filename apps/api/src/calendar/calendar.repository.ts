@@ -1,13 +1,14 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import {
   CALENDAR_EVENT_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
   ENTITY_TYPES,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
 } from "@repo/shared";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
+import { mergeJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
@@ -41,6 +42,12 @@ import type {
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
 } from "@repo/shared";
+
+type CourseDueDateCalendarEventUpsertInput = {
+  calendarEvent: CalendarEventInsert & { uid: string };
+  courseId: UUIDType;
+  groupId: UUIDType;
+};
 
 @Injectable()
 export class CalendarRepository {
@@ -103,41 +110,89 @@ export class CalendarRepository {
       );
   }
 
-  async createCourseDueDateCalendarEvent(input: {
-    calendarEvent: CalendarEventInsert;
-    courseId: UUIDType;
-    groupId: UUIDType;
-  }) {
+  async createCourseDueDateCalendarEvent(input: CourseDueDateCalendarEventUpsertInput) {
     return this.upsertCourseDueDateCalendarEvent(input);
   }
 
-  async upsertCourseDueDateCalendarEvent(input: {
-    calendarEvent: CalendarEventInsert;
-    courseId: UUIDType;
-    groupId: UUIDType;
-  }) {
+  async upsertCourseDueDateCalendarEvent(input: CourseDueDateCalendarEventUpsertInput) {
+    const [calendarEvent] = await this.upsertCourseDueDateCalendarEvents([input]);
+
+    return calendarEvent?.id ?? null;
+  }
+
+  async upsertCourseDueDateCalendarEvents(events: CourseDueDateCalendarEventUpsertInput[]) {
+    if (!events.length) return [];
+
     return this.db.transaction(async (trx) => {
-      const [calendarEvent] = await trx
+      const syncedCalendarEvents = await trx
         .insert(calendarEvents)
-        .values(input.calendarEvent)
+        .values(events.map(({ calendarEvent }) => calendarEvent))
         .onConflictDoUpdate({
           target: calendarEvents.uid,
           set: {
-            ...input.calendarEvent,
+            status: sql`EXCLUDED.status`,
+            baseLanguage: sql`EXCLUDED.base_language`,
+            availableLocales: sql`EXCLUDED.available_locales`,
+            title: mergeJsonbField(calendarEvents.title, sql`EXCLUDED.title`),
+            description: mergeJsonbField(calendarEvents.description, sql`EXCLUDED.description`),
+            startsAt: sql`EXCLUDED.starts_at`,
+            endsAt: sql`EXCLUDED.ends_at`,
+            allDay: sql`EXCLUDED.all_day`,
+            timezone: sql`EXCLUDED.timezone`,
+            location: sql`EXCLUDED.location`,
+            organizerUserId: sql`EXCLUDED.organizer_user_id`,
+            rrule: sql`EXCLUDED.rrule`,
+            exdates: sql`EXCLUDED.exdates`,
+            deletedAt: sql`EXCLUDED.deleted_at`,
             sequence: sql`${calendarEvents.sequence} + 1`,
             updatedAt: sql`CURRENT_TIMESTAMP`,
           },
         })
-        .returning({ id: calendarEvents.id });
+        .returning({ id: calendarEvents.id, uid: calendarEvents.uid });
+
+      const calendarEventIdsByUid = new Map(
+        syncedCalendarEvents.map((calendarEvent) => [calendarEvent.uid, calendarEvent.id]),
+      );
+
+      const groupCourseCalendarEventRows = events.map(({ calendarEvent, courseId, groupId }) => {
+        const calendarEventId = calendarEventIdsByUid.get(calendarEvent.uid);
+
+        if (!calendarEventId) {
+          throw new BadRequestException("calendarView.errors.courseDueDateCalendarSyncFailed");
+        }
+
+        return { courseId, groupId, calendarEventId };
+      });
+
+      const calendarEventIdUpdate = sql<UUIDType>`
+        CASE
+          ${sql.join(
+            groupCourseCalendarEventRows.map(
+              ({ courseId, groupId, calendarEventId }) => sql`
+                WHEN ${groupCourses.courseId} = ${courseId}::uuid
+                  AND ${groupCourses.groupId} = ${groupId}::uuid
+                THEN ${calendarEventId}::uuid
+              `,
+            ),
+            sql` `,
+          )}
+          ELSE ${groupCourses.calendarEventId}
+        END
+      `;
+      const groupCourseCalendarEventConditions = groupCourseCalendarEventRows.map(
+        ({ courseId, groupId }) =>
+          and(eq(groupCourses.courseId, courseId), eq(groupCourses.groupId, groupId)),
+      );
 
       await trx
         .update(groupCourses)
-        .set({ calendarEventId: calendarEvent.id })
-        .where(
-          and(eq(groupCourses.courseId, input.courseId), eq(groupCourses.groupId, input.groupId)),
-        );
+        .set({
+          calendarEventId: calendarEventIdUpdate,
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        })
+        .where(or(...groupCourseCalendarEventConditions));
 
-      return calendarEvent.id;
+      return syncedCalendarEvents;
     });
   }
 

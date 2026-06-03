@@ -68,6 +68,16 @@ export function buildJsonbFieldWithMultipleEntries(entries: Partial<Record<strin
   return sql`jsonb_build_object(${sql.join(pairs, sql`, `)})`;
 }
 
+export function mergeJsonbField(existingField: any, incomingField: any) {
+  return sql`
+    CASE
+      WHEN ${incomingField} IS NULL THEN ${existingField}
+      WHEN jsonb_typeof(${existingField}) = 'object' THEN ${existingField} || ${incomingField}
+      ELSE '{}'::jsonb || ${incomingField}
+    END
+  `;
+}
+
 /**
  * Builds a SQL IN clause for the given array of string values.
  * Example output: ('value1', 'value2', 'value3')

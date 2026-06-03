@@ -2362,30 +2362,40 @@ export class CourseService {
         sql`, `,
       )}]`;
 
-      const groupCoursesValues = [];
+      const dueDateCalendarEventInputs = [];
+      const groupCourseBaseValues = [];
 
       for (const groupId of groupIds) {
         const { isMandatory, dueDate } = groupInfoById.get(groupId) || {};
+        const groupCourseIsMandatory = isMandatory ?? false;
         const groupCourseDueDate = dueDate ? new Date(dueDate) : null;
 
-        const calendarEventId =
-          await this.groupCourseDueDateCalendarService.upsertDueDateCalendarEvent(trx, {
-            course,
-            courseId,
-            groupId,
-            dueDate: groupCourseDueDate,
-            isMandatory: isMandatory ?? false,
-          });
+        dueDateCalendarEventInputs.push({
+          course,
+          courseId,
+          groupId,
+          dueDate: groupCourseDueDate,
+          isMandatory: groupCourseIsMandatory,
+        });
 
-        groupCoursesValues.push({
+        groupCourseBaseValues.push({
           groupId,
           courseId,
           enrolledBy: currentUser?.userId || null,
-          isMandatory: isMandatory ?? false,
+          isMandatory: groupCourseIsMandatory,
           dueDate: groupCourseDueDate,
-          calendarEventId,
         });
       }
+
+      const calendarEventIdsByGroupId =
+        await this.groupCourseDueDateCalendarService.upsertDueDateCalendarEvents(
+          trx,
+          dueDateCalendarEventInputs,
+        );
+      const groupCoursesValues = groupCourseBaseValues.map((groupCourseBaseValue) => ({
+        ...groupCourseBaseValue,
+        calendarEventId: calendarEventIdsByGroupId.get(groupCourseBaseValue.groupId) ?? null,
+      }));
 
       await trx
         .insert(groupCourses)
