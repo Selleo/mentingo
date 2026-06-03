@@ -1,7 +1,9 @@
 import { faker } from "@faker-js/faker";
+import { JwtService } from "@nestjs/jwt";
 import {
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
@@ -337,6 +339,51 @@ describe("CourseController (e2e)", () => {
           expect(response.body.data.length).toBe(1);
           expect(response.body.data[0].author).toBe(
             `${contentCreator.firstName} ${contentCreator.lastName}`,
+          );
+        });
+      });
+
+      describe("when user has own and any course update permissions", () => {
+        it("returns all courses instead of applying the own-course filter", async () => {
+          const category = await categoryFactory.create();
+          const user = await userFactory
+            .withCredentials({ password })
+            .withContentCreatorSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+          const otherAuthor = await userFactory
+            .withCredentials({ password })
+            .withContentCreatorSettings(db)
+            .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+
+          const ownCourse = await courseFactory.create({
+            authorId: user.id,
+            categoryId: category.id,
+            status: "published",
+            thumbnailS3Key: null,
+          });
+          const otherCourse = await courseFactory.create({
+            authorId: otherAuthor.id,
+            categoryId: category.id,
+            status: "published",
+            thumbnailS3Key: null,
+          });
+
+          const accessToken = app.get(JwtService).sign({
+            userId: user.id,
+            email: user.email,
+            roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+            permissions: Object.values(PERMISSIONS),
+            tenantId: user.tenantId,
+          });
+
+          const response = await request(app.getHttpServer())
+            .get("/api/course/all")
+            .set("Cookie", `access_token=${accessToken}`)
+            .expect(200);
+
+          expect(response.body.data).toBeDefined();
+          expect(response.body.data.map((course: CourseTest) => course.id)).toEqual(
+            expect.arrayContaining([ownCourse.id, otherCourse.id]),
           );
         });
       });

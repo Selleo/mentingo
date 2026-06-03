@@ -887,8 +887,12 @@ export class AuthService {
         user.id,
       );
 
+      const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
+      const magicLinkUrl = new URL("/auth/login", tenantOrigin);
+      magicLinkUrl.searchParams.set("token", magicLinkToken);
+
       const magicLinkEmail = new MagicLinkEmail({
-        magicLink: `${CORS_ORIGIN}/auth/login?token=${magicLinkToken}`,
+        magicLink: magicLinkUrl.toString(),
         ...defaultEmailSettings,
       });
 

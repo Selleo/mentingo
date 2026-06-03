@@ -229,7 +229,10 @@ export class CourseService {
     const conditions = this.getFiltersConditions(filters, false, language);
     const orderConditions = this.getOrderConditions(filters);
 
-    if (currentUserId && hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN)) {
+    const canUpdateAnyCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE);
+    const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
+
+    if (currentUserId && canUpdateOwnCourse && !canUpdateAnyCourse) {
       conditions.push(eq(courses.authorId, currentUserId));
     }
 
