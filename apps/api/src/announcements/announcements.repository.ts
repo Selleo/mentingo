@@ -482,11 +482,7 @@ export class AnnouncementsRepository {
     }
 
     return this.db
-      .select({
-        id: users.id,
-        email: users.email,
-        language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
-      })
+      .select(this.getAnnouncementEmailRecipientFields())
       .from(userAnnouncements)
       .innerJoin(users, eq(users.id, userAnnouncements.userId))
       .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
@@ -498,11 +494,7 @@ export class AnnouncementsRepository {
     liveTrainingId: UUIDType,
   ) {
     return this.db
-      .selectDistinct({
-        id: users.id,
-        email: users.email,
-        language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
-      })
+      .selectDistinct(this.getAnnouncementEmailRecipientFields())
       .from(userAnnouncements)
       .innerJoin(users, eq(users.id, userAnnouncements.userId))
       .innerJoin(
@@ -529,6 +521,14 @@ export class AnnouncementsRepository {
       )
       .leftJoin(settingsTable, eq(settingsTable.userId, users.id))
       .where(and(eq(userAnnouncements.announcementId, announcementId), isNull(users.deletedAt)));
+  }
+
+  private getAnnouncementEmailRecipientFields() {
+    return {
+      id: users.id,
+      email: users.email,
+      language: sql<SupportedLanguages>`coalesce(${settingsTable.settings}->>'language', ${DEFAULT_STUDENT_SETTINGS.language})`,
+    };
   }
 
   private getLocalizedAnnouncementFields(language?: SupportedLanguages) {
