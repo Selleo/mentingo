@@ -440,7 +440,7 @@ export const calendarEvents = pgTable(
       table.startsAt,
       table.endsAt,
     ),
-    uidIdx: index("calendar_events_tenant_uid_idx").on(table.tenantId, table.uid),
+    uidUniqueIdx: uniqueIndex("calendar_events_uid_unique_idx").on(table.uid),
   })),
 );
 

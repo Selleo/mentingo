@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { CALENDAR_EVENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, desc, eq, inArray, isNull, or, type SQL } from "drizzle-orm";
+import { inArray, or, sql, type SQL } from "drizzle-orm";
 
 import { buildJsonbFieldWithMultipleEntries, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { calendarEvents } from "src/storage/schema";
@@ -18,29 +18,22 @@ export class GroupCourseDueDateCalendarService {
     if (!input.isMandatory || !input.dueDate) return null;
 
     const calendarEventFields = this.buildCalendarEventFields(input);
-    const [existingCalendarEvent] = await dbInstance
-      .select({ id: calendarEvents.id })
-      .from(calendarEvents)
-      .where(and(eq(calendarEvents.uid, calendarEventFields.uid), isNull(calendarEvents.deletedAt)))
-      .orderBy(desc(calendarEvents.createdAt))
-      .limit(1);
-
-    const [syncedCalendarEvent] = existingCalendarEvent
-      ? await dbInstance
-          .update(calendarEvents)
-          .set({
-            ...calendarEventFields,
-            title: this.buildTitleUpdate(input.course),
-          })
-          .where(eq(calendarEvents.id, existingCalendarEvent.id))
-          .returning({ id: calendarEvents.id })
-      : await dbInstance
-          .insert(calendarEvents)
-          .values({
-            ...calendarEventFields,
-            title: this.buildTitleInsert(input.course),
-          })
-          .returning({ id: calendarEvents.id });
+    const [syncedCalendarEvent] = await dbInstance
+      .insert(calendarEvents)
+      .values({
+        ...calendarEventFields,
+        title: this.buildTitleInsert(input.course),
+      })
+      .onConflictDoUpdate({
+        target: calendarEvents.uid,
+        set: {
+          ...calendarEventFields,
+          sequence: sql`${calendarEvents.sequence} + 1`,
+          title: this.buildTitleUpdate(input.course),
+          updatedAt: sql`CURRENT_TIMESTAMP`,
+        },
+      })
+      .returning({ id: calendarEvents.id });
 
     return syncedCalendarEvent.id;
   }

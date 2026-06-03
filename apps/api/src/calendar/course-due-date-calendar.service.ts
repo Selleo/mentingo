@@ -30,16 +30,7 @@ export class CourseDueDateCalendarService {
   private async syncGroupCourseDueDate(groupCourse: GroupCourseDueDateRow) {
     const calendarEvent = this.buildCalendarEvent(groupCourse);
 
-    if (groupCourse.calendarEventId) {
-      await this.calendarRepository.updateCourseDueDateCalendarEvent(
-        groupCourse.calendarEventId,
-        calendarEvent,
-      );
-
-      return;
-    }
-
-    await this.calendarRepository.createCourseDueDateCalendarEvent({
+    await this.calendarRepository.upsertCourseDueDateCalendarEvent({
       calendarEvent,
       courseId: groupCourse.courseId,
       groupId: groupCourse.groupId,

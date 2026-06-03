@@ -108,10 +108,26 @@ export class CalendarRepository {
     courseId: UUIDType;
     groupId: UUIDType;
   }) {
+    return this.upsertCourseDueDateCalendarEvent(input);
+  }
+
+  async upsertCourseDueDateCalendarEvent(input: {
+    calendarEvent: CalendarEventInsert;
+    courseId: UUIDType;
+    groupId: UUIDType;
+  }) {
     return this.db.transaction(async (trx) => {
       const [calendarEvent] = await trx
         .insert(calendarEvents)
         .values(input.calendarEvent)
+        .onConflictDoUpdate({
+          target: calendarEvents.uid,
+          set: {
+            ...input.calendarEvent,
+            sequence: sql`${calendarEvents.sequence} + 1`,
+            updatedAt: sql`CURRENT_TIMESTAMP`,
+          },
+        })
         .returning({ id: calendarEvents.id });
 
       await trx
@@ -126,7 +142,13 @@ export class CalendarRepository {
   }
 
   async updateCourseDueDateCalendarEvent(calendarEventId: UUIDType, input: CalendarEventInsert) {
-    return this.db.update(calendarEvents).set(input).where(eq(calendarEvents.id, calendarEventId));
+    return this.db
+      .update(calendarEvents)
+      .set({
+        ...input,
+        sequence: sql`${calendarEvents.sequence} + 1`,
+      })
+      .where(eq(calendarEvents.id, calendarEventId));
   }
 
   async removeCourseDueDateCalendarEvents(calendarEventIds: UUIDType[]) {
