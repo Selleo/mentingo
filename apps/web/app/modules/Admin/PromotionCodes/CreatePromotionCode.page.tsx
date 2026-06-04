@@ -139,9 +139,7 @@ const CreatePromotionCode = () => {
             name="code"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="code" className="text-right">
-                  {t("adminPromotionCodesView.field.code")}
-                </Label>
+                <Label htmlFor="code">{t("adminPromotionCodesView.field.code")}</Label>
                 <FormControl>
                   <Input id="code" {...field} />
                 </FormControl>
@@ -154,7 +152,7 @@ const CreatePromotionCode = () => {
             name="discountType"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="discountType" className="text-right">
+                <Label htmlFor="discountType">
                   {t("adminPromotionCodesView.field.discountType")}
                 </Label>
                 <FormControl>
@@ -188,7 +186,7 @@ const CreatePromotionCode = () => {
             name="discountValue"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="discountValue" className="text-right">
+                <Label htmlFor="discountValue">
                   {t("adminPromotionCodesView.field.discountValue")}
                 </Label>
                 <FormControl>
@@ -211,7 +209,7 @@ const CreatePromotionCode = () => {
             name="maxRedemptions"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="maxRedemptions" className="text-right">
+                <Label htmlFor="maxRedemptions">
                   {t("adminPromotionCodesView.field.maxRedemptions")}
                 </Label>
                 <FormControl>
@@ -231,9 +229,7 @@ const CreatePromotionCode = () => {
             name="expiresAt"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="expiresAt" className="text-right">
-                  {t("adminPromotionCodesView.field.expiresAt")}
-                </Label>
+                <Label htmlFor="expiresAt">{t("adminPromotionCodesView.field.expiresAt")}</Label>
                 <div className="relative">
                   <Input
                     id="expiresAt"
@@ -254,7 +250,7 @@ const CreatePromotionCode = () => {
             name="assignedCourses"
             render={({ field }) => (
               <FormItem>
-                <Label htmlFor="assignedCourses" className="text-right">
+                <Label htmlFor="assignedCourses">
                   {t("adminPromotionCodesView.field.assignedCourses")}
                 </Label>
                 <div className="flex h-96 flex-col gap-4 overflow-auto">
