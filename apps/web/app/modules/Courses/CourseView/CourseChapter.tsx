@@ -25,9 +25,10 @@ export type Lesson = GetCourseResponse["data"]["chapters"][0]["lessons"][0] & {
 type Chapter = GetCourseResponse["data"]["chapters"][0] & { lessons: Lesson[] };
 type CourseChapterProps = {
   chapter: Chapter;
+  isLast?: boolean;
 };
 
-export const CourseChapter = ({ chapter }: CourseChapterProps) => {
+export const CourseChapter = ({ chapter, isLast = false }: CourseChapterProps) => {
   const { t } = useTranslation();
   const { id: courseSlug } = useParams();
   const {
@@ -93,6 +94,7 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
             chapterProgress={chapter.chapterProgress}
             displayOrder={chapter.displayOrder}
             isPreviewMode={isPreviewMode}
+            showConnector={!isLast}
           />
           <div className="flex w-full flex-col">
             <AccordionTrigger

@@ -25,9 +25,15 @@ export function ChapterListOverview() {
         <h4 className="h6 text-neutral-950">{t("studentCourseView.header")}</h4>
         <p className="body-base-md text-neutral-800">{t("studentCourseView.subHeader")}</p>
       </div>
-      {chapters.map((chapter) => {
+      {chapters.map((chapter, index) => {
         if (!chapter) return null;
-        return <CourseChapter key={chapter.id} chapter={chapter} />;
+        return (
+          <CourseChapter
+            key={chapter.id}
+            chapter={chapter}
+            isLast={index === chapters.length - 1}
+          />
+        );
       })}
     </div>
   );
