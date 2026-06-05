@@ -18,7 +18,6 @@ import {
   SCORM_PACKAGE_ENTITY_TYPE,
   type MasterCourseEntityType,
 } from "@repo/shared";
-import { load as loadHtml } from "cheerio";
 import { eq } from "drizzle-orm";
 import { groupBy } from "lodash";
 import { v5 as uuidv5 } from "uuid";
@@ -32,16 +31,19 @@ import {
   SCORM_MASTER_COURSE_COPY_BATCH_SIZE,
   SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
 } from "src/courses/master-course-scorm.constants";
+import { MasterCourseSnapshotService } from "src/courses/master-course-snapshot.service";
 import { MasterCourseQueueService } from "src/courses/master-course.queue.service";
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { MASTER_COURSE_RESOURCE_REFERENCE_KIND } from "src/courses/types/master-course.types";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
+import { rewriteBlankAnswerIds } from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
   buildTenantResourceUrl,
   extractResourceIdsFromRichText,
   getLocalizedRichTextEntries,
+  mapLocalizedTextEntries,
   replaceResourceReferencesInRichText,
 } from "src/resource-library/resource-library.utils";
 import { S3Service } from "src/s3/s3.service";
@@ -52,7 +54,7 @@ import {
 import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { chapters, courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
-import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { normalizeJsonb, toJsonbBuildObject, toNullableJsonbBuildObject } from "src/utils/jsonb";
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -63,6 +65,7 @@ import type {
   MasterCourseExportResponse,
 } from "src/courses/schemas/masterCourse.schema";
 import type {
+  MasterCourseCopySourceReference,
   MasterCourseExportRecord,
   MasterCourseExternalResourceReference,
   MasterCourseResourceCollection,
@@ -73,13 +76,6 @@ import type { CoursesSettings } from "src/courses/types/settings";
 import type { MasterCourseExportJobData, MasterCourseSyncJobData } from "src/queue";
 import type { Readable } from "stream";
 
-type MasterCourseCopySourceReference = {
-  reference: string;
-  contentType?: string | null;
-  filename?: string | null;
-  isVideo?: boolean;
-};
-
 @Injectable()
 export class MasterCourseService {
   private readonly logger = new Logger(MasterCourseService.name);
@@ -87,6 +83,7 @@ export class MasterCourseService {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly masterCourseRepository: MasterCourseRepository,
+    private readonly masterCourseSnapshotService: MasterCourseSnapshotService,
     private readonly queueService: MasterCourseQueueService,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly s3Service: S3Service,
@@ -349,7 +346,8 @@ export class MasterCourseService {
         throw new NotFoundException("masterCourse.error.sourceCourseNotFound");
       }
 
-      const sourceSnapshot = await this.masterCourseRepository.getSourceSnapshot(sourceCourse);
+      const sourceSnapshot =
+        await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse);
 
       if (!sourceSnapshot) {
         throw new NotFoundException("masterCourse.error.sourceCategoryNotFound");
@@ -383,7 +381,7 @@ export class MasterCourseService {
 
     return this.tenantRunner.runWithTenant(exportLink.targetTenantId, async () => {
       const sourceLanguage = sourceSnapshot.course.baseLanguage;
-      const courseSettings = this.normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
+      const courseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
         certificateSignature: null,
@@ -522,12 +520,8 @@ export class MasterCourseService {
     );
 
     const targetCourseId = await this.masterCourseRepository.createTargetCourse({
-      title: settingsToJSONBuildObject(
-        this.normalizeJsonb<Record<string, unknown>>(params.sourceSnapshot.course.title, {}),
-      ),
-      description: settingsToJSONBuildObject(
-        this.normalizeJsonb<Record<string, unknown>>(params.sourceSnapshot.course.description, {}),
-      ),
+      title: toJsonbBuildObject(params.sourceSnapshot.course.title),
+      description: toJsonbBuildObject(params.sourceSnapshot.course.description),
       thumbnailS3Key: this.getCopiedInternalReference(
         params.resourceCollection,
         "courses",
@@ -546,7 +540,7 @@ export class MasterCourseService {
       categoryId: params.categoryId,
       stripeProductId: null,
       stripePriceId: null,
-      settings: settingsToJSONBuildObject(courseSettings),
+      settings: toJsonbBuildObject(courseSettings),
       baseLanguage: params.sourceSnapshot.course.baseLanguage,
       availableLocales: params.sourceSnapshot.course.availableLocales,
       originType: COURSE_ORIGIN_TYPES.EXPORTED,
@@ -571,7 +565,7 @@ export class MasterCourseService {
 
   private async syncCategoryFromSource(sourceSnapshot: SourceSnapshot): Promise<UUIDType> {
     const categoryValues = {
-      title: this.toJsonbBuildObject(sourceSnapshot.category.title),
+      title: toJsonbBuildObject(sourceSnapshot.category.title),
       baseLanguage: sourceSnapshot.category.baseLanguage,
       availableLocales: sourceSnapshot.category.availableLocales,
     };
@@ -635,12 +629,8 @@ export class MasterCourseService {
     );
 
     await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
-      title: settingsToJSONBuildObject(
-        this.normalizeJsonb<Record<string, unknown>>(course.title, {}),
-      ),
-      description: settingsToJSONBuildObject(
-        this.normalizeJsonb<Record<string, unknown>>(course.description, {}),
-      ),
+      title: toJsonbBuildObject(course.title),
+      description: toJsonbBuildObject(course.description),
       thumbnailS3Key: this.getCopiedInternalReference(
         params.resourceCollection,
         "courses",
@@ -659,7 +649,7 @@ export class MasterCourseService {
       categoryId,
       stripeProductId: null,
       stripePriceId: null,
-      settings: settingsToJSONBuildObject(copiedCourseSettings),
+      settings: toJsonbBuildObject(copiedCourseSettings),
       baseLanguage: course.baseLanguage,
       availableLocales: course.availableLocales,
       originType: COURSE_ORIGIN_TYPES.EXPORTED,
@@ -688,7 +678,7 @@ export class MasterCourseService {
         sourceChapter.id,
         () =>
           this.masterCourseRepository.createTargetChapter({
-            title: this.toJsonbBuildObject(sourceChapter.title),
+            title: toJsonbBuildObject(sourceChapter.title),
             courseId: params.targetCourseId,
             authorId: params.targetAuthorId,
             isFreemium: sourceChapter.isFreemium,
@@ -698,7 +688,7 @@ export class MasterCourseService {
       );
 
       await this.masterCourseRepository.updateTargetChapter(mappedId, {
-        title: this.toJsonbBuildObject(sourceChapter.title),
+        title: toJsonbBuildObject(sourceChapter.title),
         courseId: params.targetCourseId,
         authorId: params.targetAuthorId,
         isFreemium: sourceChapter.isFreemium,
@@ -735,8 +725,8 @@ export class MasterCourseService {
           this.masterCourseRepository.createTargetLesson({
             chapterId: mappedChapterId,
             type: sourceLesson.type,
-            title: this.toJsonbBuildObject(sourceLesson.title),
-            description: this.toNullableJsonbBuildObject(sourceLesson.description),
+            title: toJsonbBuildObject(sourceLesson.title),
+            description: toNullableJsonbBuildObject(sourceLesson.description),
             thresholdScore: sourceLesson.thresholdScore,
             attemptsLimit: sourceLesson.attemptsLimit,
             quizCooldownInHours: sourceLesson.quizCooldownInHours,
@@ -757,8 +747,8 @@ export class MasterCourseService {
       await this.masterCourseRepository.updateTargetLesson(mappedId, {
         chapterId: mappedChapterId,
         type: sourceLesson.type,
-        title: this.toJsonbBuildObject(sourceLesson.title),
-        description: this.toNullableJsonbBuildObject(sourceLesson.description),
+        title: toJsonbBuildObject(sourceLesson.title),
+        description: toNullableJsonbBuildObject(sourceLesson.description),
         thresholdScore: sourceLesson.thresholdScore,
         attemptsLimit: sourceLesson.attemptsLimit,
         quizCooldownInHours: sourceLesson.quizCooldownInHours,
@@ -817,12 +807,10 @@ export class MasterCourseService {
           this.masterCourseRepository.createTargetQuestion({
             lessonId: mappedLessonId,
             type: sourceQuestion.type,
-            description: this.toNullableJsonbBuildObject(sourceQuestion.description),
-            title: this.toJsonbBuildObject(sourceQuestion.title),
+            description: toNullableJsonbBuildObject(sourceQuestion.description),
+            title: toJsonbBuildObject(sourceQuestion.title),
             displayOrder: sourceQuestion.displayOrder,
-            solutionExplanation: this.toNullableJsonbBuildObject(
-              sourceQuestion.solutionExplanation,
-            ),
+            solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
             photoS3Key: this.getCopiedInternalReference(
               params.resourceCollection,
               "questions",
@@ -838,10 +826,10 @@ export class MasterCourseService {
       await this.masterCourseRepository.updateTargetQuestion(mappedId, {
         lessonId: mappedLessonId,
         type: sourceQuestion.type,
-        description: this.toNullableJsonbBuildObject(sourceQuestion.description),
-        title: this.toJsonbBuildObject(sourceQuestion.title),
+        description: toNullableJsonbBuildObject(sourceQuestion.description),
+        title: toJsonbBuildObject(sourceQuestion.title),
         displayOrder: sourceQuestion.displayOrder,
-        solutionExplanation: this.toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+        solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
         photoS3Key: this.getCopiedInternalReference(
           params.resourceCollection,
           "questions",
@@ -877,20 +865,20 @@ export class MasterCourseService {
         () =>
           this.masterCourseRepository.createTargetOption({
             questionId: mappedQuestionId,
-            optionText: this.toJsonbBuildObject(sourceOption.optionText),
+            optionText: toJsonbBuildObject(sourceOption.optionText),
             isCorrect: sourceOption.isCorrect,
             displayOrder: sourceOption.displayOrder,
-            matchedWord: this.toNullableJsonbBuildObject(sourceOption.matchedWord),
+            matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
             scaleAnswer: sourceOption.scaleAnswer,
           }),
       );
 
       await this.masterCourseRepository.updateTargetOption(mappedId, {
         questionId: mappedQuestionId,
-        optionText: this.toJsonbBuildObject(sourceOption.optionText),
+        optionText: toJsonbBuildObject(sourceOption.optionText),
         isCorrect: sourceOption.isCorrect,
         displayOrder: sourceOption.displayOrder,
-        matchedWord: this.toNullableJsonbBuildObject(sourceOption.matchedWord),
+        matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
         scaleAnswer: sourceOption.scaleAnswer,
       });
 
@@ -984,7 +972,7 @@ export class MasterCourseService {
         checksum,
         status: sourceDocument.status,
         errorMessage: sourceDocument.errorMessage,
-        metadata: this.normalizeJsonb(sourceDocument.metadata, {}),
+        metadata: normalizeJsonb(sourceDocument.metadata, {}),
       };
       const existingDocument = await this.masterCourseRepository.findDocumentByChecksum(checksum);
       const targetDocumentId =
@@ -1006,7 +994,7 @@ export class MasterCourseService {
       await this.masterCourseRepository.createDocumentChunk({
         documentId: targetDocumentId,
         chunkIndex: sourceChunk.chunkIndex,
-        metadata: this.normalizeJsonb(sourceChunk.metadata, {}),
+        metadata: normalizeJsonb(sourceChunk.metadata, {}),
         content: sourceChunk.content,
         embedding: sourceChunk.embedding,
       });
@@ -1289,7 +1277,7 @@ export class MasterCourseService {
       );
 
       await this.masterCourseRepository.updateTargetLesson(mappedLessonId, {
-        description: this.toNullableJsonbBuildObject(description),
+        description: toNullableJsonbBuildObject(description),
       });
     }
   }
@@ -1313,7 +1301,7 @@ export class MasterCourseService {
       );
 
       await this.masterCourseRepository.updateTargetQuestion(mappedQuestionId, {
-        description: this.toNullableJsonbBuildObject(description),
+        description: toNullableJsonbBuildObject(description),
       });
     }
   }
@@ -1339,7 +1327,7 @@ export class MasterCourseService {
     resourceIdMap: Map<string, string>,
     targetTenantHost: string,
   ) {
-    return this.mapLocalizedTextEntries(value, (content) =>
+    return mapLocalizedTextEntries(value, (content) =>
       replaceResourceReferencesInRichText(content, resourceIdMap, {
         buildResourceUrl: (resourceId, route) =>
           buildTenantResourceUrl(targetTenantHost, resourceId, route),
@@ -1355,62 +1343,7 @@ export class MasterCourseService {
   }
 
   private rewriteLocalizedBlankAnswerIds(value: unknown, optionMap: Map<UUIDType, UUIDType>) {
-    return this.mapLocalizedTextEntries(value, (content) =>
-      this.rewriteBlankAnswerIds(content, optionMap),
-    );
-  }
-
-  private rewriteBlankAnswerIds(content: string, optionMap: Map<UUIDType, UUIDType>) {
-    const $ = loadHtml(content, null, false);
-
-    $("blank-answer-id").each((_, element) => {
-      const sourceOptionId = $(element).text().trim();
-      const targetOptionId = optionMap.get(sourceOptionId);
-
-      if (targetOptionId) $(element).text(targetOptionId);
-    });
-
-    $("*").each((_, element) => {
-      const tagName = (element as { tagName?: string }).tagName;
-      const sourceOptionId = tagName?.match(/^blank-answer-([0-9a-f-]{36})$/i)?.[1];
-      if (!sourceOptionId) return;
-
-      const targetOptionId = optionMap.get(sourceOptionId);
-      if (!targetOptionId) return;
-
-      const innerHtml = $(element).html() ?? "";
-      $(element).replaceWith(
-        `<blank-answer-${targetOptionId}>${innerHtml}</blank-answer-${targetOptionId}>`,
-      );
-    });
-
-    return $.html();
-  }
-
-  private mapLocalizedTextEntries(value: unknown, mapEntry: (content: string) => string) {
-    const localizedValue =
-      typeof value === "string" ? (this.tryParseJsonString(value) ?? value) : value;
-
-    if (!localizedValue || typeof localizedValue !== "object" || Array.isArray(localizedValue)) {
-      return value;
-    }
-
-    return Object.fromEntries(
-      Object.entries(localizedValue as Record<string, unknown>).map(([language, content]) => [
-        language,
-        typeof content === "string" ? mapEntry(content) : content,
-      ]),
-    );
-  }
-
-  private toJsonbBuildObject(value: unknown) {
-    return settingsToJSONBuildObject(this.normalizeJsonb<Record<string, unknown>>(value, {}));
-  }
-
-  private toNullableJsonbBuildObject(value: unknown) {
-    if (value === null || value === undefined) return null;
-
-    return this.toJsonbBuildObject(value);
+    return mapLocalizedTextEntries(value, (content) => rewriteBlankAnswerIds(content, optionMap));
   }
 
   private buildSourceResourceCollection(
@@ -1431,7 +1364,7 @@ export class MasterCourseService {
       reference: sourceSnapshot.course.thumbnailS3Key,
     });
 
-    const courseSettings = this.normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
+    const courseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
       lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
       certificateSignature: null,
@@ -1522,7 +1455,7 @@ export class MasterCourseService {
         reference: sourceAiMentor.avatarReference,
       });
 
-      const customTtsReference = this.normalizeJsonb<Record<string, unknown>>(
+      const customTtsReference = normalizeJsonb<Record<string, unknown>>(
         sourceAiMentor.customTtsReference,
         {},
       );
@@ -1707,7 +1640,7 @@ export class MasterCourseService {
   private getResourceOriginalFilename(
     resource: SourceSnapshot["courseResources"][number]["resource"],
   ) {
-    const metadata = this.normalizeJsonb<Record<string, unknown>>(resource.metadata, {});
+    const metadata = normalizeJsonb<Record<string, unknown>>(resource.metadata, {});
     const originalFilename = metadata.originalFilename;
 
     return typeof originalFilename === "string"
@@ -2035,7 +1968,7 @@ export class MasterCourseService {
     sourceAiMentor: SourceSnapshot["aiMentors"][number],
     resourceCollection: MasterCourseResourceCollection,
   ) {
-    const customTtsReference = this.normalizeJsonb<Record<string, unknown>>(
+    const customTtsReference = normalizeJsonb<Record<string, unknown>>(
       sourceAiMentor.customTtsReference,
       {},
     );
@@ -2113,15 +2046,11 @@ export class MasterCourseService {
     for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
       const sourceResource = resourceReference.source.resource;
       const resourceValues = {
-        title: settingsToJSONBuildObject(
-          this.normalizeJsonb<Record<string, unknown>>(sourceResource.title, {}),
-        ),
-        description: settingsToJSONBuildObject(
-          this.normalizeJsonb<Record<string, unknown>>(sourceResource.description, {}),
-        ),
+        title: toJsonbBuildObject(sourceResource.title),
+        description: toJsonbBuildObject(sourceResource.description),
         reference: resourceReference.target.reference ?? resourceReference.source.reference,
         contentType: sourceResource.contentType,
-        metadata: this.normalizeJsonb(sourceResource.metadata, {}),
+        metadata: normalizeJsonb(sourceResource.metadata, {}),
         uploadedBy: params.targetAuthorId,
         archived: false,
       };
@@ -2312,53 +2241,5 @@ export class MasterCourseService {
 
     if (!tenant?.isManaging)
       throw new ForbiddenException("superAdminTenants.error.managingTenantRequired");
-  }
-
-  private normalizeJsonb<T>(value: unknown, fallback: T): T {
-    if (value === null || value === undefined) return fallback;
-
-    if (typeof value === "string") {
-      const parsed = this.tryParseJsonString(value);
-      return parsed === undefined ? fallback : (parsed as T);
-    }
-
-    return value as T;
-  }
-
-  private getLocalizedText(value: unknown, language: string): string | null | undefined {
-    if (value === undefined) return undefined;
-    if (value === null) return null;
-
-    const normalizedValue =
-      typeof value === "string" ? (this.tryParseJsonString(value) ?? value) : value;
-
-    if (typeof normalizedValue === "string") return normalizedValue;
-    if (typeof normalizedValue === "object") {
-      return this.extractLocalizedFromRecord(normalizedValue as Record<string, unknown>, language);
-    }
-
-    return String(normalizedValue);
-  }
-
-  private tryParseJsonString(value: string): unknown | undefined {
-    try {
-      return JSON.parse(value) as unknown;
-    } catch {
-      return undefined;
-    }
-  }
-
-  private extractLocalizedFromRecord(
-    record: Record<string, unknown>,
-    language: string,
-  ): string | null {
-    const byLanguage = record[language];
-    if (typeof byLanguage === "string") return byLanguage;
-
-    const firstText = Object.values(record).find(
-      (item): item is string => typeof item === "string",
-    );
-
-    return firstText ?? null;
   }
 }

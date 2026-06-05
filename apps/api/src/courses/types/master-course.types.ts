@@ -38,6 +38,13 @@ export const MASTER_COURSE_RESOURCE_REFERENCE_KIND = {
 export type MasterCourseResourceReferenceKind =
   (typeof MASTER_COURSE_RESOURCE_REFERENCE_KIND)[keyof typeof MASTER_COURSE_RESOURCE_REFERENCE_KIND];
 
+export type MasterCourseCopySourceReference = {
+  reference: string;
+  contentType?: string | null;
+  filename?: string | null;
+  isVideo?: boolean;
+};
+
 type MasterCourseResourceReferenceBase = {
   group: MasterCourseResourceGroupKey;
   source: {

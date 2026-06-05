@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
-  LESSON_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   PERMISSIONS,
   SCORM_PACKAGE_ENTITY_TYPE,
@@ -14,10 +13,6 @@ import { and, asc, eq, getTableColumns, inArray, isNull, ne, or, sql } from "dri
 import { DatabasePg, type UUIDType } from "src/common";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
-import {
-  extractResourceIdsFromRichText,
-  getLocalizedRichTextEntries,
-} from "src/resource-library/resource-library.utils";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -64,7 +59,6 @@ import type {
   ResourceInsert,
   ScormPackageInsert,
   ScormScoInsert,
-  SourceSnapshot,
 } from "src/courses/types/master-course.types";
 
 @Injectable()
@@ -318,7 +312,7 @@ export class MasterCourseRepository {
     await this.db.delete(targetTable).where(inArray((targetTable as any).id, targetIds));
   }
 
-  async getSourceSnapshot(sourceCourse: CourseSelect): Promise<SourceSnapshot | null> {
+  async getSourceCategoryWithBaseTitle(sourceCourse: CourseSelect) {
     const [sourceCategoryRow] = await this.db
       .select({
         ...getTableColumns(categories),
@@ -332,135 +326,143 @@ export class MasterCourseRepository {
       .where(eq(categories.id, sourceCourse.categoryId))
       .limit(1);
 
-    if (!sourceCategoryRow) return null;
+    return sourceCategoryRow;
+  }
 
-    const { baseTitle, ...sourceCategory } = sourceCategoryRow;
-
-    const chapterRows = await this.db
+  async getSourceChapters(sourceCourseId: UUIDType) {
+    return this.db
       .select(getTableColumns(chapters))
       .from(chapters)
-      .where(eq(chapters.courseId, sourceCourse.id))
+      .where(eq(chapters.courseId, sourceCourseId))
       .orderBy(chapters.displayOrder);
+  }
 
-    const lessonRows = await this.db
+  async getSourceLessons(sourceCourseId: UUIDType) {
+    return this.db
       .select(getTableColumns(lessons))
       .from(lessons)
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(eq(chapters.courseId, sourceCourse.id))
+      .where(eq(chapters.courseId, sourceCourseId))
       .orderBy(lessons.displayOrder);
+  }
 
-    const lessonIds = lessonRows.map((row) => row.id);
-    const questionRows = lessonIds.length
-      ? await this.db
-          .select(getTableColumns(questions))
-          .from(questions)
-          .where(inArray(questions.lessonId, lessonIds))
-          .orderBy(questions.displayOrder)
-      : [];
+  async getSourceQuestions(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
 
-    const questionIds = questionRows.map((row) => row.id);
-    const optionRows = questionIds.length
-      ? await this.db
-          .select(getTableColumns(questionAnswerOptions))
-          .from(questionAnswerOptions)
-          .where(inArray(questionAnswerOptions.questionId, questionIds))
-          .orderBy(questionAnswerOptions.displayOrder)
-      : [];
+    return this.db
+      .select(getTableColumns(questions))
+      .from(questions)
+      .where(inArray(questions.lessonId, lessonIds))
+      .orderBy(questions.displayOrder);
+  }
 
-    const aiMentorRows = lessonIds.length
-      ? await this.db
-          .select(getTableColumns(aiMentorLessons))
-          .from(aiMentorLessons)
-          .where(inArray(aiMentorLessons.lessonId, lessonIds))
-      : [];
-    const aiMentorIds = aiMentorRows.map((row) => row.id);
-    const aiMentorDocumentLinkRows = aiMentorIds.length
-      ? await this.db
-          .select(getTableColumns(documentToAiMentorLesson))
-          .from(documentToAiMentorLesson)
-          .where(inArray(documentToAiMentorLesson.aiMentorLessonId, aiMentorIds))
-      : [];
-    const aiMentorDocumentIds = aiMentorDocumentLinkRows.map((row) => row.documentId);
-    const aiMentorDocumentRows = aiMentorDocumentIds.length
-      ? await this.db
-          .select(getTableColumns(documents))
-          .from(documents)
-          .where(inArray(documents.id, aiMentorDocumentIds))
-      : [];
-    const aiMentorDocChunkRows = aiMentorDocumentIds.length
-      ? await this.db
-          .select(getTableColumns(docChunks))
-          .from(docChunks)
-          .where(inArray(docChunks.documentId, aiMentorDocumentIds))
-          .orderBy(docChunks.documentId, docChunks.chunkIndex)
-      : [];
-    const scormLessonIds = lessonRows
-      .filter((lesson) => lesson.type === LESSON_TYPES.SCORM)
-      .map((lesson) => lesson.id);
-    const scormPackageRows = scormLessonIds.length
-      ? await this.db
-          .selectDistinct(getTableColumns(scormPackages))
-          .from(scormPackages)
-          .innerJoin(scormScos, eq(scormScos.packageId, scormPackages.id))
-          .where(
-            and(
-              inArray(scormScos.lessonId, scormLessonIds),
-              sql`(
-                (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${scormScos.lessonId})
-                OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${sourceCourse.id})
-              )`,
-            ),
-          )
-      : [];
-    const scormPackageIds = scormPackageRows.map((row) => row.id);
-    const scormScoRows = scormPackageIds.length
-      ? await this.db
-          .select(getTableColumns(scormScos))
-          .from(scormScos)
-          .where(
-            and(
-              inArray(scormScos.packageId, scormPackageIds),
-              inArray(scormScos.lessonId, scormLessonIds),
-            ),
-          )
-          .orderBy(scormScos.packageId, scormScos.displayOrder)
-      : [];
+  async getSourceOptions(questionIds: UUIDType[]) {
+    if (!questionIds.length) return [];
 
-    const lessonResourceRows = lessonIds.length
-      ? await this.db
-          .select({
-            resource: getTableColumns(resources),
-            relation: getTableColumns(resourceEntity),
-          })
-          .from(resourceEntity)
-          .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-          .where(
-            and(
-              eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
-              inArray(resourceEntity.entityId, lessonIds),
-              eq(resources.archived, false),
-            ),
-          )
-      : [];
-    const lessonContentResourceIds = [
-      ...new Set(
-        lessonRows.flatMap((lesson) =>
-          getLocalizedRichTextEntries(lesson.description).flatMap(([, content]) =>
-            extractResourceIdsFromRichText(content),
-          ),
+    return this.db
+      .select(getTableColumns(questionAnswerOptions))
+      .from(questionAnswerOptions)
+      .where(inArray(questionAnswerOptions.questionId, questionIds))
+      .orderBy(questionAnswerOptions.displayOrder);
+  }
+
+  async getSourceAiMentors(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(aiMentorLessons))
+      .from(aiMentorLessons)
+      .where(inArray(aiMentorLessons.lessonId, lessonIds));
+  }
+
+  async getSourceAiMentorDocumentLinks(aiMentorIds: UUIDType[]) {
+    if (!aiMentorIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(documentToAiMentorLesson))
+      .from(documentToAiMentorLesson)
+      .where(inArray(documentToAiMentorLesson.aiMentorLessonId, aiMentorIds));
+  }
+
+  async getSourceDocuments(documentIds: UUIDType[]) {
+    if (!documentIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(documents))
+      .from(documents)
+      .where(inArray(documents.id, documentIds));
+  }
+
+  async getSourceDocChunks(documentIds: UUIDType[]) {
+    if (!documentIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(docChunks))
+      .from(docChunks)
+      .where(inArray(docChunks.documentId, documentIds))
+      .orderBy(docChunks.documentId, docChunks.chunkIndex);
+  }
+
+  async getSourceScormPackages(sourceCourseId: UUIDType, scormLessonIds: UUIDType[]) {
+    if (!scormLessonIds.length) return [];
+
+    return this.db
+      .selectDistinct(getTableColumns(scormPackages))
+      .from(scormPackages)
+      .innerJoin(scormScos, eq(scormScos.packageId, scormPackages.id))
+      .where(
+        and(
+          inArray(scormScos.lessonId, scormLessonIds),
+          sql`(
+            (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${scormScos.lessonId})
+            OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${sourceCourseId})
+          )`,
         ),
-      ),
-    ];
-    const lessonContentResourceRows = lessonContentResourceIds.length
-      ? await this.db
-          .select(getTableColumns(resources))
-          .from(resources)
-          .where(
-            and(inArray(resources.id, lessonContentResourceIds), eq(resources.archived, false)),
-          )
-      : [];
+      );
+  }
 
-    const courseResourceRows = await this.db
+  async getSourceScormScos(packageIds: UUIDType[], scormLessonIds: UUIDType[]) {
+    if (!packageIds.length || !scormLessonIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(scormScos))
+      .from(scormScos)
+      .where(
+        and(inArray(scormScos.packageId, packageIds), inArray(scormScos.lessonId, scormLessonIds)),
+      )
+      .orderBy(scormScos.packageId, scormScos.displayOrder);
+  }
+
+  async getSourceLessonResources(lessonIds: UUIDType[]) {
+    if (!lessonIds.length) return [];
+
+    return this.db
+      .select({
+        resource: getTableColumns(resources),
+        relation: getTableColumns(resourceEntity),
+      })
+      .from(resourceEntity)
+      .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
+      .where(
+        and(
+          eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
+          inArray(resourceEntity.entityId, lessonIds),
+          eq(resources.archived, false),
+        ),
+      );
+  }
+
+  async getResourcesByIds(resourceIds: UUIDType[]) {
+    if (!resourceIds.length) return [];
+
+    return this.db
+      .select(getTableColumns(resources))
+      .from(resources)
+      .where(and(inArray(resources.id, resourceIds), eq(resources.archived, false)));
+  }
+
+  async getSourceCourseResources(sourceCourseId: UUIDType) {
+    return this.db
       .select({
         resource: getTableColumns(resources),
         relation: getTableColumns(resourceEntity),
@@ -470,29 +472,10 @@ export class MasterCourseRepository {
       .where(
         and(
           eq(resourceEntity.entityType, ENTITY_TYPES.COURSE),
-          eq(resourceEntity.entityId, sourceCourse.id),
+          eq(resourceEntity.entityId, sourceCourseId),
           eq(resources.archived, false),
         ),
       );
-
-    return {
-      course: sourceCourse,
-      category: sourceCategory,
-      categoryBaseTitle: baseTitle,
-      chapters: chapterRows,
-      lessons: lessonRows,
-      questions: questionRows,
-      options: optionRows,
-      aiMentors: aiMentorRows,
-      aiMentorDocumentLinks: aiMentorDocumentLinkRows,
-      aiMentorDocuments: aiMentorDocumentRows,
-      aiMentorDocChunks: aiMentorDocChunkRows,
-      scormPackages: scormPackageRows,
-      scormScos: scormScoRows,
-      lessonContentResources: lessonContentResourceRows,
-      lessonResources: lessonResourceRows,
-      courseResources: courseResourceRows,
-    };
   }
 
   async findTargetAuthor() {

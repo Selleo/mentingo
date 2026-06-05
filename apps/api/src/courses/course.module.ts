@@ -29,6 +29,7 @@ import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
+import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
 import { MasterCourseService } from "./master-course.service";
@@ -65,6 +66,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     LocalizationService,
     CourseCron,
     MasterCourseService,
+    MasterCourseSnapshotService,
     MasterCourseRepository,
     MasterCourseQueueService,
     MasterCourseWorker,

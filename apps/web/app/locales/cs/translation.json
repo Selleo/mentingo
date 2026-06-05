@@ -3487,6 +3487,7 @@
       "chapterNotFound": "Kapitola nebyla nalezena",
       "lessonNotFound": "Lekce nebyla nalezena",
       "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
+      "sourceTenantMissing": "Zdrojovy tenant nebyl nalezen",
       "exportedCourseCannotBeSource": "Exportovany kurz nelze pouzit jako zdroj",
       "exportLinkMissing": "Vazba exportu kurzu nebyla nalezena",
       "jobNotFound": "Uloha exportu kurzu nebyla nalezena",
@@ -3494,6 +3495,8 @@
       "targetCategoryMissing": "Kategorie ciloveho kurzu nebyla nalezena",
       "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
       "targetCourseMissing": "Cilovy kurz nebyl nalezen",
+      "videoStorageNotConfigured": "Ukladani videa neni pro tohoto tenanta nakonfigurovano",
+      "sourceVideoMissing": "Zdrojove video nebylo nalezeno",
       "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"
     }
   },
