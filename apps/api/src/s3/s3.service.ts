@@ -6,6 +6,7 @@ import {
   CreateMultipartUploadCommand,
   UploadPartCommand,
   CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
   CopyObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
@@ -13,6 +14,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 
 import { S3_OPERATION_TIMEOUT_MS } from "src/s3/s3.constants";
 
@@ -84,7 +86,7 @@ export class S3Service {
   private async sendWithTimeout<T>(
     operation: string,
     sendOperation: (abortSignal: AbortSignal) => Promise<T>,
-    context?: { key?: string },
+    context?: { key?: string; ignoreNotFound?: boolean },
   ): Promise<T> {
     const abortController = new AbortController();
 
@@ -108,12 +110,14 @@ export class S3Service {
         throw new Error(timeoutMessage);
       }
 
-      this.logger.error(
-        `S3 ${operation}${keyContext} failed${
-          statusCode ? ` with status ${statusCode}` : ""
-        }: ${message}`,
-        error instanceof Error ? error.stack : undefined,
-      );
+      if (!context?.ignoreNotFound || !this.isNotFoundError(error)) {
+        this.logger.error(
+          `S3 ${operation}${keyContext} failed${
+            statusCode ? ` with status ${statusCode}` : ""
+          }: ${message}`,
+          error instanceof Error ? error.stack : undefined,
+        );
+      }
       throw error;
     } finally {
       clearTimeout(timeout);
@@ -129,6 +133,25 @@ export class S3Service {
 
     const metadata = (error as { $metadata?: { httpStatusCode?: number } }).$metadata;
     return metadata?.httpStatusCode;
+  }
+
+  private isNotFoundError(error: unknown) {
+    if (!error || typeof error !== "object") return false;
+
+    const maybeError = error as {
+      $metadata?: { httpStatusCode?: number };
+      name?: string;
+      Code?: string;
+      code?: string;
+    };
+
+    return (
+      maybeError.$metadata?.httpStatusCode === 404 ||
+      maybeError.name === "NotFound" ||
+      maybeError.name === "NoSuchKey" ||
+      maybeError.Code === "NoSuchKey" ||
+      maybeError.code === "NoSuchKey"
+    );
   }
 
   isConfigured(): boolean {
@@ -309,6 +332,63 @@ export class S3Service {
     );
   }
 
+  async abortMultipartUpload(key: string, uploadId: string): Promise<void> {
+    const command = new AbortMultipartUploadCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      UploadId: uploadId,
+    });
+
+    await this.sendWithTimeout(
+      "abortMultipartUpload",
+      (abortSignal) => this.s3Client.send(command, { abortSignal }),
+      { key },
+    );
+  }
+
+  async uploadStreamMultipart(
+    stream: Readable,
+    key: string,
+    contentType: string,
+    partSize = DEFAULT_TUS_CHUNK_SIZE,
+  ): Promise<void> {
+    const { uploadId } = await this.createMultipartUpload(key, contentType);
+    const parts: Array<{ ETag: string; PartNumber: number }> = [];
+    let buffered = Buffer.alloc(0);
+
+    const uploadPart = async (part: Buffer) => {
+      const partNumber = parts.length + 1;
+      const etag = await this.uploadMultipartPart(key, uploadId, partNumber, part);
+      parts.push({ ETag: etag, PartNumber: partNumber });
+    };
+
+    try {
+      for await (const chunk of stream) {
+        const nextChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        buffered = Buffer.concat([buffered, nextChunk]);
+
+        while (buffered.length >= partSize) {
+          await uploadPart(buffered.subarray(0, partSize));
+          buffered = buffered.subarray(partSize);
+        }
+      }
+
+      if (buffered.length > 0) {
+        await uploadPart(buffered);
+      }
+
+      if (!parts.length) {
+        throw new Error("Cannot upload empty stream");
+      }
+
+      await this.completeMultipartUpload(key, uploadId, parts);
+    } catch (error) {
+      stream.destroy(error instanceof Error ? error : undefined);
+      await this.abortMultipartUpload(key, uploadId).catch(() => undefined);
+      throw error;
+    }
+  }
+
   async getFileStream(key: string, range?: string): Promise<FileStreamPayload> {
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -366,12 +446,12 @@ export class S3Service {
       await this.sendWithTimeout(
         "getFileExists",
         (abortSignal) => this.s3Client.send(command, { abortSignal }),
-        { key },
+        { key, ignoreNotFound: true },
       );
 
       return true;
     } catch (err) {
-      if (err?.$metadata.httpStatusCode === 404) return false;
+      if (this.isNotFoundError(err)) return false;
       throw err;
     }
   }

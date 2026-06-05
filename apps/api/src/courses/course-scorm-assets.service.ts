@@ -4,6 +4,7 @@ import { importedScormPackagePath } from "@repo/scorm-export-generator";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { FileService } from "src/file/file.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { S3Service } from "src/s3/s3.service";
 
 import type {
   CourseScormAssetCollectionResult,
@@ -23,6 +24,7 @@ export class CourseScormAssetsService {
   constructor(
     private readonly fileService: FileService,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly s3Service: S3Service,
   ) {}
 
   async collectAssets(
@@ -77,6 +79,10 @@ export class CourseScormAssetsService {
         asset,
         packagePath: asset.sourceReference,
       };
+    }
+
+    if (!(await this.s3Service.getFileExists(asset.sourceReference))) {
+      throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
     }
 
     const buffer = await this.fileService.getRawFileBuffer(asset.sourceReference);

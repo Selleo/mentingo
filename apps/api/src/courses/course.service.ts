@@ -260,8 +260,6 @@ export class CourseService {
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
         courseType: courses.courseType,
-        sourceCourseId: courses.sourceCourseId,
-        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -283,8 +281,6 @@ export class CourseService {
         courses.currency,
         courses.status,
         courses.originType,
-        courses.sourceCourseId,
-        courses.sourceTenantId,
         coursesSummaryStats.freePurchasedCount,
         coursesSummaryStats.paidPurchasedCount,
         courses.createdAt,
@@ -833,8 +829,6 @@ export class CourseService {
           >`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
           originType: courses.originType,
           isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
-          sourceCourseId: courses.sourceCourseId,
-          sourceTenantId: courses.sourceTenantId,
         })
         .from(courses)
         .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -873,8 +867,6 @@ export class CourseService {
           courses.availableLocales,
           courses.baseLanguage,
           courses.originType,
-          courses.sourceCourseId,
-          courses.sourceTenantId,
           groupCourses.dueDate,
         )
         .orderBy(
@@ -1131,8 +1123,6 @@ export class CourseService {
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
-        sourceCourseId: courses.sourceCourseId,
-        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(categories, eq(courses.categoryId, categories.id))
@@ -1576,8 +1566,6 @@ export class CourseService {
         dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
         originType: courses.originType,
         isContentReadonly: sql<boolean>`${courses.originType} = 'exported'`,
-        sourceCourseId: courses.sourceCourseId,
-        sourceTenantId: courses.sourceTenantId,
       })
       .from(courses)
       .leftJoin(

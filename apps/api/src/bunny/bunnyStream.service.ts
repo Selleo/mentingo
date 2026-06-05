@@ -6,6 +6,7 @@ import axios from "axios";
 
 import { BUNNY_CDN_TOKEN_EXPIRY } from "src/bunny/bunnyStream.constants";
 import { EnvService } from "src/env/services/env.service";
+import { dbAls } from "src/storage/db/db-als.store";
 
 import type { AxiosInstance } from "axios";
 import type { Readable } from "node:stream";
@@ -26,7 +27,7 @@ type BunnyConfig = {
 
 @Injectable()
 export class BunnyStreamService {
-  private cache?: { cfg: BunnyConfig; expiresAt: number };
+  private cache = new Map<string, { cfg: BunnyConfig; expiresAt: number }>();
 
   constructor(
     private readonly configService: ConfigService,
@@ -35,8 +36,10 @@ export class BunnyStreamService {
 
   private async getConfig(): Promise<BunnyConfig> {
     const now = Date.now();
-    if (this.cache && this.cache.expiresAt > now) {
-      return this.cache.cfg;
+    const cacheKey = dbAls.getStore()?.tenantId ?? "global";
+    const cachedConfig = this.cache.get(cacheKey);
+    if (cachedConfig && cachedConfig.expiresAt > now) {
+      return cachedConfig.cfg;
     }
 
     const [apiKey, signingKey, libraryId, cdnUrl, tokenSigningKey] = await Promise.all([
@@ -98,7 +101,7 @@ export class BunnyStreamService {
       cdnUrl,
     };
 
-    this.cache = { cfg, expiresAt: now + 60000 };
+    this.cache.set(cacheKey, { cfg, expiresAt: now + 60000 });
     return cfg;
   }
 
@@ -137,6 +140,14 @@ export class BunnyStreamService {
     return Boolean(apiKey && libraryId && cdnUrl && tokenSigningKey);
   }
 
+  async getMediaConfigurationSignature(): Promise<string> {
+    const cfg = await this.getConfig();
+
+    return createHash("sha256")
+      .update([cfg.libraryId, cfg.apiKey, cfg.cdnUrl ?? "", cfg.tokenSigningKey].join("\0"))
+      .digest("hex");
+  }
+
   async upload(file: Express.Multer.File): Promise<{
     fileKey: string;
     fileUrl: string;
@@ -159,6 +170,35 @@ export class BunnyStreamService {
       };
     } catch (error) {
       throw error;
+    }
+  }
+
+  async uploadStream(params: {
+    title: string;
+    stream: Readable;
+    contentType?: string;
+  }): Promise<{ fileKey: string; bunnyGuid: string }> {
+    const cfg = await this.getConfig();
+    const httpClient = this.createHttpClient(cfg);
+    const { data: video } = await httpClient.post("/videos", {
+      title: params.title,
+    });
+
+    try {
+      await httpClient.put(`/videos/${video.guid}`, params.stream, {
+        headers: { "Content-Type": params.contentType ?? "application/octet-stream" },
+        timeout: 0,
+      });
+
+      return {
+        fileKey: `bunny-${video.guid}`,
+        bunnyGuid: video.guid,
+      };
+    } catch (error) {
+      await this.delete(video.guid).catch(() => undefined);
+      throw new Error(
+        `Bunny stream upload failed for video ${video.guid}: ${this.getAxiosErrorMessage(error)}`,
+      );
     }
   }
 
@@ -286,8 +326,24 @@ export class BunnyStreamService {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) return null;
 
-      throw error;
+      throw new Error(
+        `Bunny MP4 fallback download failed for video ${videoId} at ${resolution}p: ${this.getAxiosErrorMessage(
+          error,
+        )}`,
+      );
     }
+  }
+
+  private getAxiosErrorMessage(error: unknown) {
+    if (!axios.isAxiosError(error)) {
+      return error instanceof Error ? error.message : String(error);
+    }
+
+    const status = error.response?.status;
+    const statusText = error.response?.statusText;
+    const detail = [status, statusText].filter(Boolean).join(" ");
+
+    return detail || error.message;
   }
 
   private buildMp4FallbackHeaders(referer?: string | null) {

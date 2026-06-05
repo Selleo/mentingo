@@ -251,6 +251,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
         if (filter?.type === "select" || filter?.type === "state") {
           const value = values?.[filter?.name];
+          const options = filter.options?.filter((option) => option.value.trim().length > 0);
 
           return (
             <Select
@@ -277,7 +278,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                     {filter?.placeholder ?? t("common.other.all")}
                   </SelectItem>
                 )}
-                {filter?.options?.map(({ value, label }) => (
+                {options?.map(({ value, label }) => (
                   <SelectItem
                     key={value}
                     data-testid={filter.optionTestId?.({ value, label })}

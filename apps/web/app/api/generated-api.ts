@@ -1755,8 +1755,6 @@ export interface GetAllCoursesResponse {
     stripePriceId?: string | null;
     originType?: "regular" | "master" | "exported";
     isContentReadonly?: boolean;
-    sourceCourseId?: string | null;
-    sourceTenantId?: string | null;
   }[];
   pagination: {
     totalItems: number;
@@ -1795,8 +1793,6 @@ export interface GetStudentCoursesResponse {
     stripePriceId?: string | null;
     originType?: "regular" | "master" | "exported";
     isContentReadonly?: boolean;
-    sourceCourseId?: string | null;
-    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1863,8 +1859,6 @@ export interface GetAvailableCoursesResponse {
     stripePriceId?: string | null;
     originType?: "regular" | "master" | "exported";
     isContentReadonly?: boolean;
-    sourceCourseId?: string | null;
-    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1907,8 +1901,6 @@ export interface GetTopCoursesResponse {
     stripePriceId?: string | null;
     originType?: "regular" | "master" | "exported";
     isContentReadonly?: boolean;
-    sourceCourseId?: string | null;
-    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -1945,8 +1937,6 @@ export interface GetContentCreatorCoursesResponse {
     stripePriceId?: string | null;
     originType?: "regular" | "master" | "exported";
     isContentReadonly?: boolean;
-    sourceCourseId?: string | null;
-    sourceTenantId?: string | null;
     completedChapterCount: number;
     enrolled?: boolean;
     dueDate: string | null;
@@ -2009,8 +1999,6 @@ export interface GetCourseResponse {
     status: "draft" | "published" | "private";
     originType: "regular" | "master" | "exported";
     isContentReadonly: boolean;
-    sourceCourseId: string | null;
-    sourceTenantId: string | null;
     courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
@@ -2131,8 +2119,6 @@ export interface GetBetaCourseByIdResponse {
     status: "draft" | "published" | "private";
     originType: "regular" | "master" | "exported";
     isContentReadonly: boolean;
-    sourceCourseId: string | null;
-    sourceTenantId: string | null;
     courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
@@ -2142,6 +2128,8 @@ export interface GetBetaCourseByIdResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    sourceCourseId?: string | null;
+    sourceTenantId?: string | null;
   };
 }
 

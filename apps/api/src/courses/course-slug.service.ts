@@ -17,6 +17,10 @@ export type CourseSlugResult =
   | { type: "uuid"; courseId: string; slug: string };
 
 const SLUG_MATCH = /^([a-z0-9]{5})-([^ ]+)$/;
+const SUPPORTED_LANGUAGE_VALUES = new Set<string>(Object.values(SUPPORTED_LANGUAGES));
+
+const isSupportedLanguage = (language: string): language is SupportedLanguages =>
+  SUPPORTED_LANGUAGE_VALUES.has(language);
 
 @Injectable()
 export class CourseSlugService {
@@ -62,9 +66,13 @@ export class CourseSlugService {
   async regenerateCoursesSlugs(courseIds: string[]) {
     if (!courseIds.length) return [];
 
-    const result: Array<{ courseId: string; lang: string; slug: string; courseShortId: string }> =
-      [];
-    const langsToDelete: Array<{ courseShortId: string; lang: string }> = [];
+    const result: Array<{
+      courseId: string;
+      lang: SupportedLanguages;
+      slug: string;
+      courseShortId: string;
+    }> = [];
+    const langsToDelete: Array<{ courseShortId: string; lang: SupportedLanguages }> = [];
 
     const coursesWithTitles = await this.db
       .select({ id: courses.id, courseShortId: courses.shortId, title: courses.title })
@@ -82,6 +90,8 @@ export class CourseSlugService {
       if (!titleObj || typeof titleObj !== "object") continue;
 
       for (const [lang, title] of Object.entries(titleObj)) {
+        if (!isSupportedLanguage(lang)) continue;
+
         if (!title || typeof title !== "string") {
           langsToDelete.push({ courseShortId: shortId, lang });
           continue;
@@ -123,10 +133,7 @@ export class CourseSlugService {
     }));
   }
 
-  async getCoursesSlugs(
-    lang: string | undefined,
-    courseIds: string[],
-  ): Promise<Map<string, string>> {
+  async getCoursesSlugs(lang: SupportedLanguages | undefined, courseIds: string[]) {
     const resolvedLang = lang || SUPPORTED_LANGUAGES.EN;
     const result = new Map<string, string>();
     if (!courseIds.length) return result;

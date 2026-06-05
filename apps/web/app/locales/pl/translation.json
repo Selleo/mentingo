@@ -4195,10 +4195,16 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Nie znaleziono kursu źródłowego",
+      "sourceCategoryNotFound": "Nie znaleziono kategorii kursu źródłowego",
+      "courseNotFound": "Nie znaleziono kursu",
+      "chapterNotFound": "Nie znaleziono rozdziału",
+      "lessonNotFound": "Nie znaleziono lekcji",
       "noTargetTenants": "Wybierz co najmniej jednego docelowego tenanta",
       "exportedCourseCannotBeSource": "Wyeksportowany kurs nie może być użyty jako źródło",
       "exportLinkMissing": "Nie znaleziono powiązania eksportu kursu",
       "jobNotFound": "Nie znaleziono zadania eksportu kursu",
+      "targetTenantMissing": "Nie znaleziono docelowego tenanta",
+      "targetCategoryMissing": "Nie znaleziono kategorii kursu docelowego",
       "targetAuthorMissing": "Nie znaleziono autora w docelowym tenancie",
       "targetCourseMissing": "Nie znaleziono kursu docelowego",
       "exportedCourseReadonly": "Wyeksportowany kurs jest tylko do odczytu"

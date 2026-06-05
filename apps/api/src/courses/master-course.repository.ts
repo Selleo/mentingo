@@ -2,18 +2,22 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import {
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
+  LESSON_TYPES,
   MASTER_COURSE_EXPORT_SYNC_STATUSES,
   PERMISSIONS,
-  SUPPORTED_LANGUAGES,
+  SCORM_PACKAGE_ENTITY_TYPE,
   type MasterCourseEntityType,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, asc, eq, getTableColumns, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, eq, getTableColumns, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
+import {
+  extractResourceIdsFromRichText,
+  getLocalizedRichTextEntries,
+} from "src/resource-library/resource-library.utils";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
@@ -21,6 +25,9 @@ import {
   chapters,
   courses,
   coursesSummaryStats,
+  docChunks,
+  documents,
+  documentToAiMentorLesson,
   lessons,
   masterCourseEntityMap,
   masterCourseExports,
@@ -28,20 +35,35 @@ import {
   questions,
   resourceEntity,
   resources,
+  scormPackages,
+  scormScos,
   tenants,
   users,
 } from "src/storage/schema";
 
 import type {
   AiMentorLessonInsert,
-  ChapterInsert,
-  CourseInsert,
-  LessonInsert,
+  CategoryJsonbInsert,
+  CategoryJsonbUpdate,
+  CourseSelect,
+  ChapterJsonbInsert,
+  ChapterJsonbUpdate,
+  CourseJsonbInsert,
+  CourseJsonbUpdate,
+  DocChunkInsert,
+  DocumentInsert,
+  DocumentToAiMentorLessonInsert,
+  LessonJsonbInsert,
+  LessonJsonbUpdate,
   MasterCourseExportRecord,
-  QuestionAnswerOptionInsert,
-  QuestionInsert,
+  QuestionAnswerOptionJsonbInsert,
+  QuestionAnswerOptionJsonbUpdate,
+  QuestionJsonbInsert,
+  QuestionJsonbUpdate,
   ResourceEntityInsert,
   ResourceInsert,
+  ScormPackageInsert,
+  ScormScoInsert,
   SourceSnapshot,
 } from "src/courses/types/master-course.types";
 
@@ -179,7 +201,7 @@ export class MasterCourseRepository {
       .where(
         and(
           eq(masterCourseExports.sourceCourseId, sourceCourseId),
-          eq(masterCourseExports.syncStatus, MASTER_COURSE_EXPORT_SYNC_STATUSES.ACTIVE),
+          ne(masterCourseExports.syncStatus, MASTER_COURSE_EXPORT_SYNC_STATUSES.PAUSED),
         ),
       );
   }
@@ -296,27 +318,23 @@ export class MasterCourseRepository {
     await this.db.delete(targetTable).where(inArray((targetTable as any).id, targetIds));
   }
 
-  async getSourceSnapshot(sourceCourseId: UUIDType): Promise<SourceSnapshot> {
-    const [sourceCourse] = await this.db
-      .select()
-      .from(courses)
-      .where(eq(courses.id, sourceCourseId))
-      .limit(1);
-
-    if (!sourceCourse) throw new NotFoundException("Course not found");
-
-    const [sourceCategory] = await this.db
+  async getSourceSnapshot(sourceCourse: CourseSelect): Promise<SourceSnapshot | null> {
+    const [sourceCategoryRow] = await this.db
       .select({
-        id: categories.id,
-        title: this.localizationService.getLocalizedSqlField(
+        ...getTableColumns(categories),
+        baseTitle: this.localizationService.getLocalizedSqlField(
           categories.title,
-          sourceCourse.baseLanguage as SupportedLanguages,
+          sourceCourse.baseLanguage,
           categories,
         ),
       })
       .from(categories)
       .where(eq(categories.id, sourceCourse.categoryId))
       .limit(1);
+
+    if (!sourceCategoryRow) return null;
+
+    const { baseTitle, ...sourceCategory } = sourceCategoryRow;
 
     const chapterRows = await this.db
       .select(getTableColumns(chapters))
@@ -355,6 +373,58 @@ export class MasterCourseRepository {
           .from(aiMentorLessons)
           .where(inArray(aiMentorLessons.lessonId, lessonIds))
       : [];
+    const aiMentorIds = aiMentorRows.map((row) => row.id);
+    const aiMentorDocumentLinkRows = aiMentorIds.length
+      ? await this.db
+          .select(getTableColumns(documentToAiMentorLesson))
+          .from(documentToAiMentorLesson)
+          .where(inArray(documentToAiMentorLesson.aiMentorLessonId, aiMentorIds))
+      : [];
+    const aiMentorDocumentIds = aiMentorDocumentLinkRows.map((row) => row.documentId);
+    const aiMentorDocumentRows = aiMentorDocumentIds.length
+      ? await this.db
+          .select(getTableColumns(documents))
+          .from(documents)
+          .where(inArray(documents.id, aiMentorDocumentIds))
+      : [];
+    const aiMentorDocChunkRows = aiMentorDocumentIds.length
+      ? await this.db
+          .select(getTableColumns(docChunks))
+          .from(docChunks)
+          .where(inArray(docChunks.documentId, aiMentorDocumentIds))
+          .orderBy(docChunks.documentId, docChunks.chunkIndex)
+      : [];
+    const scormLessonIds = lessonRows
+      .filter((lesson) => lesson.type === LESSON_TYPES.SCORM)
+      .map((lesson) => lesson.id);
+    const scormPackageRows = scormLessonIds.length
+      ? await this.db
+          .selectDistinct(getTableColumns(scormPackages))
+          .from(scormPackages)
+          .innerJoin(scormScos, eq(scormScos.packageId, scormPackages.id))
+          .where(
+            and(
+              inArray(scormScos.lessonId, scormLessonIds),
+              sql`(
+                (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.LESSON} AND ${scormPackages.entityId} = ${scormScos.lessonId})
+                OR (${scormPackages.entityType} = ${SCORM_PACKAGE_ENTITY_TYPE.COURSE} AND ${scormPackages.entityId} = ${sourceCourse.id})
+              )`,
+            ),
+          )
+      : [];
+    const scormPackageIds = scormPackageRows.map((row) => row.id);
+    const scormScoRows = scormPackageIds.length
+      ? await this.db
+          .select(getTableColumns(scormScos))
+          .from(scormScos)
+          .where(
+            and(
+              inArray(scormScos.packageId, scormPackageIds),
+              inArray(scormScos.lessonId, scormLessonIds),
+            ),
+          )
+          .orderBy(scormScos.packageId, scormScos.displayOrder)
+      : [];
 
     const lessonResourceRows = lessonIds.length
       ? await this.db
@@ -370,6 +440,23 @@ export class MasterCourseRepository {
               inArray(resourceEntity.entityId, lessonIds),
               eq(resources.archived, false),
             ),
+          )
+      : [];
+    const lessonContentResourceIds = [
+      ...new Set(
+        lessonRows.flatMap((lesson) =>
+          getLocalizedRichTextEntries(lesson.description).flatMap(([, content]) =>
+            extractResourceIdsFromRichText(content),
+          ),
+        ),
+      ),
+    ];
+    const lessonContentResourceRows = lessonContentResourceIds.length
+      ? await this.db
+          .select(getTableColumns(resources))
+          .from(resources)
+          .where(
+            and(inArray(resources.id, lessonContentResourceIds), eq(resources.archived, false)),
           )
       : [];
 
@@ -390,12 +477,19 @@ export class MasterCourseRepository {
 
     return {
       course: sourceCourse,
-      categoryTitle: sourceCategory?.title ?? "General",
+      category: sourceCategory,
+      categoryBaseTitle: baseTitle,
       chapters: chapterRows,
       lessons: lessonRows,
       questions: questionRows,
       options: optionRows,
       aiMentors: aiMentorRows,
+      aiMentorDocumentLinks: aiMentorDocumentLinkRows,
+      aiMentorDocuments: aiMentorDocumentRows,
+      aiMentorDocChunks: aiMentorDocChunkRows,
+      scormPackages: scormPackageRows,
+      scormScos: scormScoRows,
+      lessonContentResources: lessonContentResourceRows,
       lessonResources: lessonResourceRows,
       courseResources: courseResourceRows,
     };
@@ -419,31 +513,45 @@ export class MasterCourseRepository {
     return targetAuthor;
   }
 
-  async findCategoryByTitle(title: string) {
+  async findCategoryByBaseTitle(title: string, baseLanguage: SupportedLanguages) {
     const [existingCategory] = await this.db
-      .select({ id: categories.id })
+      .select(getTableColumns(categories))
       .from(categories)
-      .where(
-        sql`${this.localizationService.getLocalizedSqlField(
-          categories.title,
-          undefined,
-          categories,
-        )} = ${title}`,
-      )
+      .where(sql`COALESCE(${categories.title}::jsonb ->> ${baseLanguage}, '') = ${title}`)
       .limit(1);
 
     return existingCategory;
   }
 
-  async createCategory(title: string) {
+  async createCategoryFromSource(
+    values: Pick<CategoryJsonbInsert, "title" | "baseLanguage" | "availableLocales">,
+  ) {
     const [createdCategory] = await this.db
       .insert(categories)
       .values({
-        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, title),
+        title: values.title,
+        baseLanguage: values.baseLanguage,
+        availableLocales: values.availableLocales,
+        archived: false,
       })
+      .onConflictDoNothing()
       .returning({ id: categories.id });
 
     return createdCategory;
+  }
+
+  async updateCategoryFromSource(
+    categoryId: UUIDType,
+    values: Pick<CategoryJsonbUpdate, "title" | "baseLanguage" | "availableLocales">,
+  ) {
+    await this.db
+      .update(categories)
+      .set({
+        title: values.title,
+        baseLanguage: values.baseLanguage,
+        availableLocales: values.availableLocales,
+      })
+      .where(eq(categories.id, categoryId));
   }
 
   async findCourseByIdInTenant(courseId: UUIDType | null | undefined) {
@@ -462,7 +570,7 @@ export class MasterCourseRepository {
     await this.db.insert(coursesSummaryStats).values({ courseId, authorId }).onConflictDoNothing();
   }
 
-  async createTargetCourse(values: CourseInsert): Promise<UUIDType> {
+  async createTargetCourse(values: CourseJsonbInsert): Promise<UUIDType> {
     const [createdCourse] = await this.db
       .insert(courses)
       .values(values)
@@ -470,7 +578,7 @@ export class MasterCourseRepository {
     return createdCourse.id;
   }
 
-  async updateTargetCourse(courseId: UUIDType, values: Partial<CourseInsert>): Promise<void> {
+  async updateTargetCourse(courseId: UUIDType, values: CourseJsonbUpdate): Promise<void> {
     await this.db.update(courses).set(values).where(eq(courses.id, courseId));
   }
 
@@ -478,25 +586,25 @@ export class MasterCourseRepository {
     await this.db.update(courses).set({ chapterCount }).where(eq(courses.id, courseId));
   }
 
-  async createTargetChapter(values: ChapterInsert): Promise<UUIDType> {
+  async createTargetChapter(values: ChapterJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db.insert(chapters).values(values).returning({ id: chapters.id });
     return created.id;
   }
 
-  async updateTargetChapter(chapterId: UUIDType, values: Partial<ChapterInsert>) {
+  async updateTargetChapter(chapterId: UUIDType, values: ChapterJsonbUpdate) {
     await this.db.update(chapters).set(values).where(eq(chapters.id, chapterId));
   }
 
-  async createTargetLesson(values: LessonInsert): Promise<UUIDType> {
+  async createTargetLesson(values: LessonJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db.insert(lessons).values(values).returning({ id: lessons.id });
     return created.id;
   }
 
-  async updateTargetLesson(lessonId: UUIDType, values: Partial<LessonInsert>) {
+  async updateTargetLesson(lessonId: UUIDType, values: LessonJsonbUpdate) {
     await this.db.update(lessons).set(values).where(eq(lessons.id, lessonId));
   }
 
-  async createTargetQuestion(values: QuestionInsert): Promise<UUIDType> {
+  async createTargetQuestion(values: QuestionJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db
       .insert(questions)
       .values(values)
@@ -504,11 +612,11 @@ export class MasterCourseRepository {
     return created.id;
   }
 
-  async updateTargetQuestion(questionId: UUIDType, values: Partial<QuestionInsert>) {
+  async updateTargetQuestion(questionId: UUIDType, values: QuestionJsonbUpdate) {
     await this.db.update(questions).set(values).where(eq(questions.id, questionId));
   }
 
-  async createTargetOption(values: QuestionAnswerOptionInsert): Promise<UUIDType> {
+  async createTargetOption(values: QuestionAnswerOptionJsonbInsert): Promise<UUIDType> {
     const [created] = await this.db
       .insert(questionAnswerOptions)
       .values(values)
@@ -516,7 +624,7 @@ export class MasterCourseRepository {
     return created.id;
   }
 
-  async updateTargetOption(optionId: UUIDType, values: Partial<QuestionAnswerOptionInsert>) {
+  async updateTargetOption(optionId: UUIDType, values: QuestionAnswerOptionJsonbUpdate) {
     await this.db
       .update(questionAnswerOptions)
       .set(values)
@@ -533,12 +641,60 @@ export class MasterCourseRepository {
     return existingAiMentor;
   }
 
-  async createAiMentor(values: AiMentorLessonInsert) {
-    await this.db.insert(aiMentorLessons).values(values);
+  async createAiMentor(values: AiMentorLessonInsert): Promise<UUIDType> {
+    const [created] = await this.db
+      .insert(aiMentorLessons)
+      .values(values)
+      .returning({ id: aiMentorLessons.id });
+    return created.id;
   }
 
   async updateAiMentor(aiMentorId: UUIDType, values: Partial<AiMentorLessonInsert>) {
     await this.db.update(aiMentorLessons).set(values).where(eq(aiMentorLessons.id, aiMentorId));
+  }
+
+  async removeAiMentorDocumentLinks(aiMentorLessonIds: UUIDType[]) {
+    if (!aiMentorLessonIds.length) return;
+
+    await this.db
+      .delete(documentToAiMentorLesson)
+      .where(inArray(documentToAiMentorLesson.aiMentorLessonId, aiMentorLessonIds));
+  }
+
+  async createDocument(values: DocumentInsert): Promise<UUIDType> {
+    const [created] = await this.db
+      .insert(documents)
+      .values(values)
+      .returning({ id: documents.id });
+    return created.id;
+  }
+
+  async findDocumentByChecksum(checksum: string) {
+    const [document] = await this.db
+      .select({ id: documents.id })
+      .from(documents)
+      .where(eq(documents.checksum, checksum))
+      .limit(1);
+
+    return document;
+  }
+
+  async updateDocument(documentId: UUIDType, values: Partial<DocumentInsert>) {
+    await this.db.update(documents).set(values).where(eq(documents.id, documentId));
+  }
+
+  async removeDocumentChunks(documentIds: UUIDType[]) {
+    if (!documentIds.length) return;
+
+    await this.db.delete(docChunks).where(inArray(docChunks.documentId, documentIds));
+  }
+
+  async createDocumentChunk(values: DocChunkInsert) {
+    await this.db.insert(docChunks).values(values);
+  }
+
+  async createAiMentorDocumentLink(values: DocumentToAiMentorLessonInsert) {
+    await this.db.insert(documentToAiMentorLesson).values(values).onConflictDoNothing();
   }
 
   async removeLessonResourceRelations(lessonIds: UUIDType[]) {
@@ -573,7 +729,48 @@ export class MasterCourseRepository {
     return created.id;
   }
 
+  async updateResource(resourceId: UUIDType, values: Partial<ResourceInsert>) {
+    await this.db.update(resources).set(values).where(eq(resources.id, resourceId));
+  }
+
+  async deleteResourcesByIds(resourceIds: UUIDType[]) {
+    if (!resourceIds.length) return;
+
+    await this.db.delete(resources).where(inArray(resources.id, resourceIds));
+  }
+
   async createResourceRelation(values: ResourceEntityInsert) {
     await this.db.insert(resourceEntity).values(values);
+  }
+
+  async removeScormPackagesForMappedTargets(params: {
+    targetCourseId: UUIDType;
+    targetLessonIds: UUIDType[];
+  }) {
+    const conditions = [
+      and(
+        eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.COURSE),
+        eq(scormPackages.entityId, params.targetCourseId),
+      ),
+    ];
+
+    if (params.targetLessonIds.length) {
+      conditions.push(
+        and(
+          eq(scormPackages.entityType, SCORM_PACKAGE_ENTITY_TYPE.LESSON),
+          inArray(scormPackages.entityId, params.targetLessonIds),
+        ),
+      );
+    }
+
+    await this.db.delete(scormPackages).where(or(...conditions));
+  }
+
+  async createScormPackage(values: ScormPackageInsert) {
+    await this.db.insert(scormPackages).values(values);
+  }
+
+  async createScormSco(values: ScormScoInsert) {
+    await this.db.insert(scormScos).values(values);
   }
 }

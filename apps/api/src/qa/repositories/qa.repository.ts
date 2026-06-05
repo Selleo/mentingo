@@ -102,7 +102,11 @@ export class QARepository {
       );
   }
 
-  async createLanguage(qaId: UUIDType, languages: string[], language: SupportedLanguages) {
+  async createLanguage(
+    qaId: UUIDType,
+    languages: SupportedLanguages[],
+    language: SupportedLanguages,
+  ) {
     return this.db
       .update(questionsAndAnswers)
       .set({ availableLocales: languages })

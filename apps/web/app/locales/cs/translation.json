@@ -3482,10 +3482,16 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Zdrojovy kurz nebyl nalezen",
+      "sourceCategoryNotFound": "Kategorie zdrojoveho kurzu nebyla nalezena",
+      "courseNotFound": "Kurz nebyl nalezen",
+      "chapterNotFound": "Kapitola nebyla nalezena",
+      "lessonNotFound": "Lekce nebyla nalezena",
       "noTargetTenants": "Vyberte alespon jednoho ciloveho tenanta",
       "exportedCourseCannotBeSource": "Exportovany kurz nelze pouzit jako zdroj",
       "exportLinkMissing": "Vazba exportu kurzu nebyla nalezena",
       "jobNotFound": "Uloha exportu kurzu nebyla nalezena",
+      "targetTenantMissing": "Cilovy tenant nebyl nalezen",
+      "targetCategoryMissing": "Kategorie ciloveho kurzu nebyla nalezena",
       "targetAuthorMissing": "Autor v cilovem tenantovi nebyl nalezen",
       "targetCourseMissing": "Cilovy kurz nebyl nalezen",
       "exportedCourseReadonly": "Exportovany kurz je jen pro cteni"

@@ -4156,10 +4156,16 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Source course not found",
+      "sourceCategoryNotFound": "Source course category not found",
+      "courseNotFound": "Course not found",
+      "chapterNotFound": "Chapter not found",
+      "lessonNotFound": "Lesson not found",
       "noTargetTenants": "Select at least one target tenant",
       "exportedCourseCannotBeSource": "Exported course cannot be used as a source",
       "exportLinkMissing": "Course export link not found",
       "jobNotFound": "Course export job not found",
+      "targetTenantMissing": "Target tenant not found",
+      "targetCategoryMissing": "Target course category not found",
       "targetAuthorMissing": "Target tenant author not found",
       "targetCourseMissing": "Target course not found",
       "exportedCourseReadonly": "Exported course is read-only"
