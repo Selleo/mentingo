@@ -1,5 +1,7 @@
+import type { CoursesSettings } from "./settings";
 import type { EntityType } from "@repo/shared";
 import type { InferInsertModel, InferSelectModel, SQL } from "drizzle-orm";
+import type { UUIDType } from "src/common";
 import type { ResourceRelationshipType } from "src/file/file.constants";
 import type {
   aiMentorLessons,
@@ -28,6 +30,11 @@ export type MasterCourseResourceGroupKey = "courses" | "chapters" | "lessons" | 
 export type MasterCourseResourceEntityType = Extract<
   EntityType,
   "course" | "chapter" | "lesson" | "question"
+>;
+export type MasterCourseExternalResourceEntityType = Extract<EntityType, "course" | "lesson">;
+export type MasterCourseInternalResourceEntityType = Extract<
+  EntityType,
+  "course" | "lesson" | "question"
 >;
 
 export const MASTER_COURSE_RESOURCE_REFERENCE_KIND = {
@@ -213,4 +220,160 @@ export type SourceSnapshot = {
   lessonContentResources: Array<ResourceSelect>;
   lessonResources: Array<ResourceWithRelation>;
   courseResources: Array<ResourceWithRelation>;
+};
+
+export type EnsureCourseExportSyncedParams = {
+  sourceCourseId: UUIDType;
+  sourceTenantId: UUIDType;
+  targetTenantId: UUIDType;
+};
+
+export type CreateTargetCourseFromSourceParams = {
+  exportLink: MasterCourseExportRecord;
+  sourceSnapshot: SourceSnapshot;
+  sourceLanguage: string;
+  courseSettings: CoursesSettings;
+  categoryId: UUIDType;
+  targetAuthorId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type UpdateTargetCourseFromSourceParams = {
+  targetCourseId: UUIDType;
+  sourceSnapshot: SourceSnapshot;
+  sourceLanguage: string;
+  courseSettings: CoursesSettings;
+  categoryId: UUIDType;
+  sourceTenantId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+  targetAuthorId: UUIDType;
+};
+
+export type SyncChaptersParams = {
+  exportId: UUIDType;
+  sourceLanguage: string;
+  sourceSnapshot: SourceSnapshot;
+  targetCourseId: UUIDType;
+  targetAuthorId: UUIDType;
+};
+
+export type SyncLessonsParams = {
+  exportId: UUIDType;
+  sourceLanguage: string;
+  sourceSnapshot: SourceSnapshot;
+  chapterMap: Map<UUIDType, UUIDType>;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type SyncQuestionsParams = {
+  exportId: UUIDType;
+  sourceLanguage: string;
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetAuthorId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type SyncOptionsParams = {
+  exportId: UUIDType;
+  sourceLanguage: string;
+  sourceSnapshot: SourceSnapshot;
+  questionMap: Map<UUIDType, UUIDType>;
+};
+
+export type SyncScormPackagesParams = {
+  exportId: UUIDType;
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+  targetTenantId: UUIDType;
+};
+
+export type GetTargetScormPackageEntityIdParams = {
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+};
+
+export type CopyScormPackageStorageParams = {
+  sourceOriginalFileReference: string;
+  targetOriginalFileReference: string;
+  sourceExtractedFilesReference: string;
+  targetExtractedFilesReference: string;
+};
+
+export type SyncLessonResourceReferencesParams = {
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
+  resourceCollection: MasterCourseResourceCollection;
+  targetTenantHost: string;
+};
+
+export type SyncFillInTheBlanksQuestionReferencesParams = {
+  sourceSnapshot: SourceSnapshot;
+  questionMap: Map<UUIDType, UUIDType>;
+  optionMap: Map<UUIDType, UUIDType>;
+};
+
+export type AddExternalResourceReferenceParams = {
+  group: MasterCourseResourceGroupKey;
+  sourceEntityType: MasterCourseExternalResourceEntityType;
+  sourceEntityId: UUIDType;
+  relationshipType: string;
+  resource: ResourceSelect;
+  relation?: ResourceEntitySelect;
+};
+
+export type AddInternalResourceReferenceParams = {
+  group: MasterCourseResourceGroupKey;
+  sourceEntityType: MasterCourseInternalResourceEntityType;
+  sourceEntityId: UUIDType;
+  fieldPath: string;
+  reference: unknown;
+  contentType?: string | null;
+  filename?: string | null;
+  isVideo?: boolean;
+};
+
+export type CopySourceResourceReferencesParams = {
+  exportId: UUIDType;
+  sourceTenantId: UUIDType;
+  sourceTenantOrigin: string;
+  targetTenantId: UUIDType;
+};
+
+export type ResolveTargetResourceReferenceParams = CopySourceResourceReferencesParams & {
+  targetBunnyConfigured: boolean;
+  sourceAndTargetShareBunnyMediaConfiguration: boolean;
+  copiedReferences: Map<string, string>;
+};
+
+export type CopyVideoReferenceParams = Omit<
+  ResolveTargetResourceReferenceParams,
+  "copiedReferences"
+>;
+
+export type BuildCopiedResourceReferenceParams = {
+  exportId: UUIDType;
+  targetTenantId: UUIDType;
+  fallbackExtension?: string;
+};
+
+export type GetTargetResourceEntityIdParams = {
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+};
+
+export type SyncResourcesParams = {
+  exportId: UUIDType;
+  lessonMap: Map<UUIDType, UUIDType>;
+  targetCourseId: UUIDType;
+  targetAuthorId: UUIDType;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
+export type CreateOrQueueExportForTargetParams = {
+  sourceCourseId: UUIDType;
+  sourceTenantId: UUIDType;
+  targetTenantId: UUIDType;
+  actorId: UUIDType;
 };

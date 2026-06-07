@@ -65,12 +65,33 @@ import type {
   MasterCourseExportResponse,
 } from "src/courses/schemas/masterCourse.schema";
 import type {
+  AddExternalResourceReferenceParams,
+  AddInternalResourceReferenceParams,
+  BuildCopiedResourceReferenceParams,
+  CopyScormPackageStorageParams,
+  CopySourceResourceReferencesParams,
+  CopyVideoReferenceParams,
+  CreateOrQueueExportForTargetParams,
+  CreateTargetCourseFromSourceParams,
+  EnsureCourseExportSyncedParams,
+  GetTargetResourceEntityIdParams,
+  GetTargetScormPackageEntityIdParams,
   MasterCourseCopySourceReference,
   MasterCourseExportRecord,
   MasterCourseExternalResourceReference,
   MasterCourseResourceCollection,
   MasterCourseResourceGroupKey,
+  ResolveTargetResourceReferenceParams,
   SourceSnapshot,
+  SyncChaptersParams,
+  SyncFillInTheBlanksQuestionReferencesParams,
+  SyncLessonResourceReferencesParams,
+  SyncLessonsParams,
+  SyncOptionsParams,
+  SyncQuestionsParams,
+  SyncResourcesParams,
+  SyncScormPackagesParams,
+  UpdateTargetCourseFromSourceParams,
 } from "src/courses/types/master-course.types";
 import type { CoursesSettings } from "src/courses/types/settings";
 import type { MasterCourseExportJobData, MasterCourseSyncJobData } from "src/queue";
@@ -277,11 +298,7 @@ export class MasterCourseService {
     await this.syncExportLink(exportLink.id);
   }
 
-  async ensureCourseExportSynced(params: {
-    sourceCourseId: UUIDType;
-    sourceTenantId: UUIDType;
-    targetTenantId: UUIDType;
-  }): Promise<UUIDType> {
+  async ensureCourseExportSynced(params: EnsureCourseExportSyncedParams): Promise<UUIDType> {
     const sourceCourse = await this.tenantRunner.runWithTenant(params.sourceTenantId, () =>
       this.masterCourseRepository.getCourseById(params.sourceCourseId),
     );
@@ -504,15 +521,9 @@ export class MasterCourseService {
     });
   }
 
-  private async createTargetCourseFromSource(params: {
-    exportLink: MasterCourseExportRecord;
-    sourceSnapshot: SourceSnapshot;
-    sourceLanguage: string;
-    courseSettings: CoursesSettings;
-    categoryId: UUIDType;
-    targetAuthorId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-  }): Promise<UUIDType> {
+  private async createTargetCourseFromSource(
+    params: CreateTargetCourseFromSourceParams,
+  ): Promise<UUIDType> {
     const courseSettings = this.applyCopiedCourseSettingsReferences(
       params.courseSettings,
       params.sourceSnapshot.course.id,
@@ -606,16 +617,9 @@ export class MasterCourseService {
     return conflictingCategory.id;
   }
 
-  private async updateTargetCourseFromSource(params: {
-    targetCourseId: UUIDType;
-    sourceSnapshot: SourceSnapshot;
-    sourceLanguage: string;
-    courseSettings: CoursesSettings;
-    categoryId: UUIDType;
-    sourceTenantId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-    targetAuthorId: UUIDType;
-  }): Promise<void> {
+  private async updateTargetCourseFromSource(
+    params: UpdateTargetCourseFromSourceParams,
+  ): Promise<void> {
     const {
       sourceTenantId,
       sourceSnapshot: { course },
@@ -658,13 +662,7 @@ export class MasterCourseService {
     });
   }
 
-  private async syncChapters(params: {
-    exportId: UUIDType;
-    sourceLanguage: string;
-    sourceSnapshot: SourceSnapshot;
-    targetCourseId: UUIDType;
-    targetAuthorId: UUIDType;
-  }) {
+  private async syncChapters(params: SyncChaptersParams) {
     const chapterMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceChapter of params.sourceSnapshot.chapters) {
@@ -702,13 +700,7 @@ export class MasterCourseService {
     return chapterMap;
   }
 
-  private async syncLessons(params: {
-    exportId: UUIDType;
-    sourceLanguage: string;
-    sourceSnapshot: SourceSnapshot;
-    chapterMap: Map<UUIDType, UUIDType>;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async syncLessons(params: SyncLessonsParams) {
     const lessonMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceLesson of params.sourceSnapshot.lessons) {
@@ -785,14 +777,7 @@ export class MasterCourseService {
     ).length;
   }
 
-  private async syncQuestions(params: {
-    exportId: UUIDType;
-    sourceLanguage: string;
-    sourceSnapshot: SourceSnapshot;
-    lessonMap: Map<UUIDType, UUIDType>;
-    targetAuthorId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async syncQuestions(params: SyncQuestionsParams) {
     const questionMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceQuestion of params.sourceSnapshot.questions) {
@@ -846,12 +831,7 @@ export class MasterCourseService {
     return questionMap;
   }
 
-  private async syncOptions(params: {
-    exportId: UUIDType;
-    sourceLanguage: string;
-    sourceSnapshot: SourceSnapshot;
-    questionMap: Map<UUIDType, UUIDType>;
-  }) {
+  private async syncOptions(params: SyncOptionsParams) {
     const optionMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceOption of params.sourceSnapshot.options) {
@@ -1028,13 +1008,7 @@ export class MasterCourseService {
     return uuidv5(value, SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE) as UUIDType;
   }
 
-  private async syncScormPackages(params: {
-    exportId: UUIDType;
-    sourceSnapshot: SourceSnapshot;
-    lessonMap: Map<UUIDType, UUIDType>;
-    targetCourseId: UUIDType;
-    targetTenantId: UUIDType;
-  }) {
+  private async syncScormPackages(params: SyncScormPackagesParams) {
     const targetLessonIds = Array.from(params.lessonMap.values());
 
     if (!params.sourceSnapshot.scormPackages.length) {
@@ -1162,10 +1136,7 @@ export class MasterCourseService {
 
   private getTargetScormPackageEntityId(
     sourcePackage: SourceSnapshot["scormPackages"][number],
-    params: {
-      lessonMap: Map<UUIDType, UUIDType>;
-      targetCourseId: UUIDType;
-    },
+    params: GetTargetScormPackageEntityIdParams,
   ) {
     if (sourcePackage.entityType === SCORM_PACKAGE_ENTITY_TYPE.COURSE) return params.targetCourseId;
     if (sourcePackage.entityType === SCORM_PACKAGE_ENTITY_TYPE.LESSON) {
@@ -1175,12 +1146,7 @@ export class MasterCourseService {
     return undefined;
   }
 
-  private async copyScormPackageStorage(params: {
-    sourceOriginalFileReference: string;
-    targetOriginalFileReference: string;
-    sourceExtractedFilesReference: string;
-    targetExtractedFilesReference: string;
-  }) {
+  private async copyScormPackageStorage(params: CopyScormPackageStorageParams) {
     await this.s3Service.copyFile(
       params.sourceOriginalFileReference,
       params.targetOriginalFileReference,
@@ -1255,12 +1221,7 @@ export class MasterCourseService {
     return value;
   }
 
-  private async syncLessonResourceReferences(params: {
-    sourceSnapshot: SourceSnapshot;
-    lessonMap: Map<UUIDType, UUIDType>;
-    resourceCollection: MasterCourseResourceCollection;
-    targetTenantHost: string;
-  }) {
+  private async syncLessonResourceReferences(params: SyncLessonResourceReferencesParams) {
     for (const sourceLesson of params.sourceSnapshot.lessons) {
       if (sourceLesson.type !== LESSON_TYPES.CONTENT) continue;
 
@@ -1282,11 +1243,9 @@ export class MasterCourseService {
     }
   }
 
-  private async syncFillInTheBlanksQuestionReferences(params: {
-    sourceSnapshot: SourceSnapshot;
-    questionMap: Map<UUIDType, UUIDType>;
-    optionMap: Map<UUIDType, UUIDType>;
-  }) {
+  private async syncFillInTheBlanksQuestionReferences(
+    params: SyncFillInTheBlanksQuestionReferencesParams,
+  ) {
     if (!params.optionMap.size) return;
 
     for (const sourceQuestion of params.sourceSnapshot.questions) {
@@ -1486,14 +1445,7 @@ export class MasterCourseService {
 
   private addExternalResourceReference(
     collection: MasterCourseResourceCollection,
-    params: {
-      group: MasterCourseResourceGroupKey;
-      sourceEntityType: typeof ENTITY_TYPES.COURSE | typeof ENTITY_TYPES.LESSON;
-      sourceEntityId: UUIDType;
-      relationshipType: string;
-      resource: SourceSnapshot["courseResources"][number]["resource"];
-      relation?: SourceSnapshot["courseResources"][number]["relation"];
-    },
+    params: AddExternalResourceReferenceParams,
   ) {
     const sourceReference = this.normalizeResourceReference(params.resource.reference);
     if (!sourceReference) return;
@@ -1541,19 +1493,7 @@ export class MasterCourseService {
 
   private addInternalResourceReference(
     collection: MasterCourseResourceCollection,
-    params: {
-      group: MasterCourseResourceGroupKey;
-      sourceEntityType:
-        | typeof ENTITY_TYPES.COURSE
-        | typeof ENTITY_TYPES.LESSON
-        | typeof ENTITY_TYPES.QUESTION;
-      sourceEntityId: UUIDType;
-      fieldPath: string;
-      reference: unknown;
-      contentType?: string | null;
-      filename?: string | null;
-      isVideo?: boolean;
-    },
+    params: AddInternalResourceReferenceParams,
   ) {
     const sourceReference = this.normalizeResourceReference(params.reference);
     if (!sourceReference) return;
@@ -1657,12 +1597,7 @@ export class MasterCourseService {
 
   private async copySourceResourceReferences(
     collection: MasterCourseResourceCollection,
-    params: {
-      exportId: UUIDType;
-      sourceTenantId: UUIDType;
-      sourceTenantOrigin: string;
-      targetTenantId: UUIDType;
-    },
+    params: CopySourceResourceReferencesParams,
   ) {
     const copiedReferences = new Map<string, string>();
     const targetBunnyConfigured = await this.tenantRunner.runWithTenant(params.targetTenantId, () =>
@@ -1692,15 +1627,7 @@ export class MasterCourseService {
 
   private async resolveTargetResourceReference(
     source: MasterCourseCopySourceReference,
-    params: {
-      exportId: UUIDType;
-      sourceTenantId: UUIDType;
-      sourceTenantOrigin: string;
-      targetTenantId: UUIDType;
-      targetBunnyConfigured: boolean;
-      sourceAndTargetShareBunnyMediaConfiguration: boolean;
-      copiedReferences: Map<string, string>;
-    },
+    params: ResolveTargetResourceReferenceParams,
   ) {
     const existingTargetReference = params.copiedReferences.get(source.reference);
     if (existingTargetReference) return existingTargetReference;
@@ -1739,14 +1666,7 @@ export class MasterCourseService {
 
   private async copyVideoReference(
     source: MasterCourseCopySourceReference,
-    params: {
-      exportId: UUIDType;
-      sourceTenantId: UUIDType;
-      sourceTenantOrigin: string;
-      targetTenantId: UUIDType;
-      targetBunnyConfigured: boolean;
-      sourceAndTargetShareBunnyMediaConfiguration: boolean;
-    },
+    params: CopyVideoReferenceParams,
   ) {
     if (source.reference.startsWith("http://") || source.reference.startsWith("https://")) {
       return source.reference;
@@ -1898,11 +1818,7 @@ export class MasterCourseService {
 
   private buildCopiedResourceReference(
     sourceReference: string,
-    params: {
-      exportId: UUIDType;
-      targetTenantId: UUIDType;
-      fallbackExtension?: string;
-    },
+    params: BuildCopiedResourceReferenceParams,
   ) {
     const extension =
       path.extname(sourceReference.split("?")[0] ?? "") || params.fallbackExtension || "";
@@ -1991,10 +1907,7 @@ export class MasterCourseService {
 
   private getTargetResourceEntityId(
     resourceReference: MasterCourseExternalResourceReference,
-    params: {
-      lessonMap: Map<UUIDType, UUIDType>;
-      targetCourseId: UUIDType;
-    },
+    params: GetTargetResourceEntityIdParams,
   ) {
     if (resourceReference.source.entityType === ENTITY_TYPES.COURSE) return params.targetCourseId;
     if (resourceReference.source.entityType === ENTITY_TYPES.LESSON) {
@@ -2015,13 +1928,7 @@ export class MasterCourseService {
     return [sourceEntityType, sourceEntityId, fieldPath].join(":");
   }
 
-  private async syncResources(params: {
-    exportId: UUIDType;
-    lessonMap: Map<UUIDType, UUIDType>;
-    targetCourseId: UUIDType;
-    targetAuthorId: UUIDType;
-    resourceCollection: MasterCourseResourceCollection;
-  }) {
+  private async syncResources(params: SyncResourcesParams) {
     const targetLessonIds = Array.from(params.lessonMap.values());
 
     await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
@@ -2191,12 +2098,7 @@ export class MasterCourseService {
     return Array.from(new Set(targetTenantIds)).filter((tenantId) => tenantId !== sourceTenantId);
   }
 
-  private async createOrQueueExportForTarget(params: {
-    sourceCourseId: UUIDType;
-    sourceTenantId: UUIDType;
-    targetTenantId: UUIDType;
-    actorId: UUIDType;
-  }) {
+  private async createOrQueueExportForTarget(params: CreateOrQueueExportForTargetParams) {
     const existingExport = await this.masterCourseRepository.findExportLinkByPair(
       params.sourceTenantId,
       params.sourceCourseId,
