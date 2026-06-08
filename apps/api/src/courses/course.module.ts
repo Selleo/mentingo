@@ -31,6 +31,7 @@ import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
 import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
+import { CourseDueDateReminderEmailHandler } from "./handlers/course-due-date-reminder-email.handler";
 import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
