@@ -28,6 +28,7 @@ import {
   settings,
   studentCourses,
   studentLessonProgress,
+  userAnnouncements,
 } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -604,6 +605,29 @@ describe("LiveTrainingController (e2e)", () => {
     expect(liveLesson.liveTrainingLinkId).toBe(courseLink.id);
     expect(lessonProgress.completedAt).not.toBeNull();
     expect(lessonProgress.languageAnswered).toBe(language);
+  });
+
+  it("does not create in-app notifications when a live training has no linked course", async () => {
+    const admin = await createAdmin();
+    await createStudent();
+    await createStudent();
+    const liveTraining = await createOfflineLiveTraining(admin);
+
+    const startResponse = await request(app.getHttpServer())
+      .post(`/api/live-training/${liveTraining.id}/sessions/start`)
+      .query({ language })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/api/live-training/${liveTraining.id}/sessions/${startResponse.body.data.id}/end`)
+      .query({ language })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(201);
+
+    const createdNotifications = await db.select().from(userAnnouncements);
+
+    expect(createdNotifications).toHaveLength(0);
   });
 
   it("sends live training emails only to students enrolled in a course with the linked live lesson", async () => {
