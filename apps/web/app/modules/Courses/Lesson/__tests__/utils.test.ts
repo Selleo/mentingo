@@ -6,6 +6,7 @@ import {
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
 import {
   findFirstInProgressLessonId,
+  findFirstNonCompletedLessonId,
   findFirstNotStartedLessonId,
   getEmptyQuizAnswers,
   getUserAnswers,
@@ -118,6 +119,99 @@ describe("findFirstInProgressLessonId", () => {
       chapters: [],
     } as unknown as GetCourseResponse["data"];
     const firstLessonId = findFirstInProgressLessonId(courseData);
+    expect(firstLessonId).toBe(undefined);
+  });
+});
+
+describe("findFirstNonCompletedLessonId", () => {
+  it("returns the first in-progress or not-started lesson in course order", () => {
+    const courseData = {
+      chapters: [
+        {
+          lessons: [
+            {
+              id: "1665722f-9dbe-48ca-8625-1669d92b9972",
+              status: "completed",
+            },
+            {
+              id: "805eca43-9162-4e19-b3f6-e2506b79f531",
+              status: "in_progress",
+            },
+          ],
+        },
+        {
+          lessons: [
+            {
+              id: "d3d82d8c-b16a-42f3-9d8f-9ea2ea1998e6",
+              status: "not_started",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstNonCompletedLessonId(courseData);
+
+    expect(firstLessonId).toBe("805eca43-9162-4e19-b3f6-e2506b79f531");
+  });
+
+  it("skips blocked lessons when choosing the next target", () => {
+    const courseData = {
+      chapters: [
+        {
+          lessons: [
+            {
+              id: "1665722f-9dbe-48ca-8625-1669d92b9972",
+              status: "completed",
+            },
+            {
+              id: "805eca43-9162-4e19-b3f6-e2506b79f531",
+              status: "blocked",
+            },
+            {
+              id: "d3d82d8c-b16a-42f3-9d8f-9ea2ea1998e6",
+              status: "not_started",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstNonCompletedLessonId(courseData);
+
+    expect(firstLessonId).toBe("d3d82d8c-b16a-42f3-9d8f-9ea2ea1998e6");
+  });
+
+  it("returns undefined when only completed or blocked lessons exist", () => {
+    const courseData = {
+      chapters: [
+        {
+          lessons: [
+            {
+              id: "1665722f-9dbe-48ca-8625-1669d92b9972",
+              status: "completed",
+            },
+            {
+              id: "805eca43-9162-4e19-b3f6-e2506b79f531",
+              status: "blocked",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstNonCompletedLessonId(courseData);
+
+    expect(firstLessonId).toBe(undefined);
+  });
+
+  it("returns undefined for empty chapters", () => {
+    const courseData = {
+      chapters: [],
+    } as unknown as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstNonCompletedLessonId(courseData);
+
     expect(firstLessonId).toBe(undefined);
   });
 });
