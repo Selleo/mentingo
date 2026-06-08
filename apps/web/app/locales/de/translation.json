@@ -3474,12 +3474,21 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Quellkurs nicht gefunden",
+      "sourceCategoryNotFound": "Quellkurs-Kategorie nicht gefunden",
+      "courseNotFound": "Kurs nicht gefunden",
+      "chapterNotFound": "Kapitel nicht gefunden",
+      "lessonNotFound": "Lektion nicht gefunden",
       "noTargetTenants": "Waehlen Sie mindestens einen Ziel-Tenant aus",
+      "sourceTenantMissing": "Quell-Tenant nicht gefunden",
       "exportedCourseCannotBeSource": "Ein exportierter Kurs kann nicht als Quelle verwendet werden",
       "exportLinkMissing": "Kurs-Exportverknuepfung nicht gefunden",
       "jobNotFound": "Kurs-Exportauftrag nicht gefunden",
+      "targetTenantMissing": "Ziel-Tenant nicht gefunden",
+      "targetCategoryMissing": "Zielkurs-Kategorie nicht gefunden",
       "targetAuthorMissing": "Autor im Ziel-Tenant nicht gefunden",
       "targetCourseMissing": "Zielkurs nicht gefunden",
+      "videoStorageNotConfigured": "Videospeicher ist fuer diesen Tenant nicht konfiguriert",
+      "sourceVideoMissing": "Quellvideo nicht gefunden",
       "exportedCourseReadonly": "Exportierter Kurs ist schreibgeschuetzt"
     }
   },

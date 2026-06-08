@@ -15,6 +15,7 @@ import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
 import { LumaModule } from "src/luma/luma.module";
+import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
@@ -28,6 +29,7 @@ import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
+import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
 import { MasterCourseService } from "./master-course.service";
@@ -42,6 +44,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     forwardRef(() => ChapterModule),
     forwardRef(() => LessonModule),
     LearningTimeModule,
+    S3Module,
     SettingsModule,
     LocalizationModule,
     CertificatesModule,
@@ -63,6 +66,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     LocalizationService,
     CourseCron,
     MasterCourseService,
+    MasterCourseSnapshotService,
     MasterCourseRepository,
     MasterCourseQueueService,
     MasterCourseWorker,

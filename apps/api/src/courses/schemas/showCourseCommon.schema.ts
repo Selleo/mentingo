@@ -23,8 +23,6 @@ export const commonShowCourseSchema = Type.Object({
   status: coursesStatusOptions,
   originType: Type.Enum(COURSE_ORIGIN_TYPES),
   isContentReadonly: Type.Boolean(),
-  sourceCourseId: Type.Union([UUIDSchema, Type.Null()]),
-  sourceTenantId: Type.Union([UUIDSchema, Type.Null()]),
   courseType: Type.Enum(COURSE_TYPE),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),
@@ -55,8 +53,6 @@ export const commonShowBetaCourseSchema = Type.Object({
   status: coursesStatusOptions,
   originType: Type.Enum(COURSE_ORIGIN_TYPES),
   isContentReadonly: Type.Boolean(),
-  sourceCourseId: Type.Union([UUIDSchema, Type.Null()]),
-  sourceTenantId: Type.Union([UUIDSchema, Type.Null()]),
   courseType: Type.Enum(COURSE_TYPE),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),
@@ -66,6 +62,8 @@ export const commonShowBetaCourseSchema = Type.Object({
   title: Type.String(),
   availableLocales: Type.Array(Type.Enum(SUPPORTED_LANGUAGES)),
   baseLanguage: Type.Enum(SUPPORTED_LANGUAGES),
+  sourceCourseId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
+  sourceTenantId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
 });
 
 export type CommonShowCourse = Static<typeof commonShowCourseSchema>;

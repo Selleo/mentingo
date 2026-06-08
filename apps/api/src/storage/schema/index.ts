@@ -322,11 +322,8 @@ export const courses = pgTable(
     sourceCourseId: uuid("source_course_id"),
     sourceTenantId: uuid("source_tenant_id"),
     settings: coursesSettings.column.notNull(),
-    baseLanguage: text("base_language").notNull().default("en"),
-    availableLocales: text("available_locales")
-      .array()
-      .notNull()
-      .default(sql`ARRAY['en']::text[]`),
+    baseLanguage,
+    availableLocales,
     tenantId,
   },
   withTenantIdIndex("courses", (table) => ({
@@ -344,7 +341,7 @@ export const courseSlugs = pgTable(
     courseShortId: varchar("course_short_id", { length: 5 })
       .references(() => courses.shortId, { onDelete: "cascade", onUpdate: "cascade" })
       .notNull(),
-    lang: text("lang").notNull(),
+    lang: text("lang").$type<SupportedLanguages>().notNull(),
     tenantId,
   },
   withTenantIdIndex("course_slugs", (table) => ({
@@ -1783,9 +1780,10 @@ export const questionsAndAnswers = pgTable(
     title: jsonb("title").default({}).notNull(),
     description: jsonb("description").default({}).notNull(),
     metadata: jsonb("metadata").default({}),
-    baseLanguage: text("base_language").notNull().default("en"),
+    baseLanguage,
     availableLocales: text("available_locales")
       .array()
+      .$type<SupportedLanguages[]>()
       .notNull()
       .default(sql`ARRAY['en']::text[]`),
     tenantId,

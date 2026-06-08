@@ -1,6 +1,8 @@
 import { load as loadHtml } from "cheerio";
 import { sql, type SQL } from "drizzle-orm";
 
+import { tryParseJsonString } from "src/utils/jsonb";
+
 import type { Element } from "domhandler";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 
@@ -160,5 +162,20 @@ export const getLocalizedRichTextEntries = (localizedContent: unknown): [string,
 
   return Object.entries(localizedContent).filter(
     (entry): entry is [string, string] => typeof entry[1] === "string",
+  );
+};
+
+export const mapLocalizedTextEntries = (value: unknown, mapEntry: (content: string) => string) => {
+  const localizedValue = typeof value === "string" ? (tryParseJsonString(value) ?? value) : value;
+
+  if (!localizedValue || typeof localizedValue !== "object" || Array.isArray(localizedValue)) {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(localizedValue as Record<string, unknown>).map(([language, content]) => [
+      language,
+      typeof content === "string" ? mapEntry(content) : content,
+    ]),
   );
 };

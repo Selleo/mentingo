@@ -33,8 +33,6 @@ export const courseSchema = Type.Object({
   stripePriceId: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   originType: Type.Optional(Type.Enum(COURSE_ORIGIN_TYPES)),
   isContentReadonly: Type.Optional(Type.Boolean()),
-  sourceCourseId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
-  sourceTenantId: Type.Optional(Type.Union([UUIDSchema, Type.Null()])),
 });
 
 export const studentCourseSchema = Type.Object({

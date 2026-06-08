@@ -3483,12 +3483,21 @@
   "masterCourse": {
     "error": {
       "sourceCourseNotFound": "Saltinio kursas nerastas",
+      "sourceCategoryNotFound": "Saltinio kurso kategorija nerasta",
+      "courseNotFound": "Kursas nerastas",
+      "chapterNotFound": "Skyrius nerastas",
+      "lessonNotFound": "Pamoka nerasta",
       "noTargetTenants": "Pasirinkite bent viena tiksline organizacija",
+      "sourceTenantMissing": "Saltinio tenantas nerastas",
       "exportedCourseCannotBeSource": "Eksportuotas kursas negali buti naudojamas kaip saltinis",
       "exportLinkMissing": "Kurso eksporto rysys nerastas",
       "jobNotFound": "Kurso eksporto uzduotis nerasta",
+      "targetTenantMissing": "Tikslinis tenantas nerastas",
+      "targetCategoryMissing": "Tikslinio kurso kategorija nerasta",
       "targetAuthorMissing": "Tikslines organizacijos autorius nerastas",
       "targetCourseMissing": "Tikslinis kursas nerastas",
+      "videoStorageNotConfigured": "Vaizdo irasu saugykla siam tenantui nesukonfiguruota",
+      "sourceVideoMissing": "Saltinio vaizdo irasas nerastas",
       "exportedCourseReadonly": "Eksportuotas kursas yra tik skaitomas"
     }
   },

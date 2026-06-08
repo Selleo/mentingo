@@ -22776,28 +22776,6 @@
                 },
                 "isContentReadonly": {
                   "type": "boolean"
-                },
-                "sourceCourseId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "sourceTenantId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 }
               },
               "required": [
@@ -23007,28 +22985,6 @@
                 },
                 "isContentReadonly": {
                   "type": "boolean"
-                },
-                "sourceCourseId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "sourceTenantId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 },
                 "completedChapterCount": {
                   "type": "number"
@@ -23360,28 +23316,6 @@
                 "isContentReadonly": {
                   "type": "boolean"
                 },
-                "sourceCourseId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "sourceTenantId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -23613,28 +23547,6 @@
                 "isContentReadonly": {
                   "type": "boolean"
                 },
-                "sourceCourseId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "sourceTenantId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "completedChapterCount": {
                   "type": "number"
                 },
@@ -23839,28 +23751,6 @@
                 },
                 "isContentReadonly": {
                   "type": "boolean"
-                },
-                "sourceCourseId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "sourceTenantId": {
-                  "anyOf": [
-                    {
-                      "format": "uuid",
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
                 },
                 "completedChapterCount": {
                   "type": "number"
@@ -24178,28 +24068,6 @@
               "isContentReadonly": {
                 "type": "boolean"
               },
-              "sourceCourseId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "sourceTenantId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "courseType": {
                 "anyOf": [
                   {
@@ -24326,8 +24194,6 @@
               "status",
               "originType",
               "isContentReadonly",
-              "sourceCourseId",
-              "sourceTenantId",
               "courseType",
               "priceInCents",
               "title",
@@ -24930,28 +24796,6 @@
               "isContentReadonly": {
                 "type": "boolean"
               },
-              "sourceCourseId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "sourceTenantId": {
-                "anyOf": [
-                  {
-                    "format": "uuid",
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "courseType": {
                 "anyOf": [
                   {
@@ -25046,6 +24890,28 @@
                     "type": "string"
                   }
                 ]
+              },
+              "sourceCourseId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "sourceTenantId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -25058,8 +24924,6 @@
               "status",
               "originType",
               "isContentReadonly",
-              "sourceCourseId",
-              "sourceTenantId",
               "courseType",
               "priceInCents",
               "title",

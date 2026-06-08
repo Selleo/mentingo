@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { isSupportedLanguage, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { customAlphabet } from "nanoid";
 import slugify from "slugify";
@@ -62,9 +62,13 @@ export class CourseSlugService {
   async regenerateCoursesSlugs(courseIds: string[]) {
     if (!courseIds.length) return [];
 
-    const result: Array<{ courseId: string; lang: string; slug: string; courseShortId: string }> =
-      [];
-    const langsToDelete: Array<{ courseShortId: string; lang: string }> = [];
+    const result: Array<{
+      courseId: string;
+      lang: SupportedLanguages;
+      slug: string;
+      courseShortId: string;
+    }> = [];
+    const langsToDelete: Array<{ courseShortId: string; lang: SupportedLanguages }> = [];
 
     const coursesWithTitles = await this.db
       .select({ id: courses.id, courseShortId: courses.shortId, title: courses.title })
@@ -82,6 +86,8 @@ export class CourseSlugService {
       if (!titleObj || typeof titleObj !== "object") continue;
 
       for (const [lang, title] of Object.entries(titleObj)) {
+        if (!isSupportedLanguage(lang)) continue;
+
         if (!title || typeof title !== "string") {
           langsToDelete.push({ courseShortId: shortId, lang });
           continue;
@@ -123,10 +129,7 @@ export class CourseSlugService {
     }));
   }
 
-  async getCoursesSlugs(
-    lang: string | undefined,
-    courseIds: string[],
-  ): Promise<Map<string, string>> {
+  async getCoursesSlugs(lang: SupportedLanguages | undefined, courseIds: string[]) {
     const resolvedLang = lang || SUPPORTED_LANGUAGES.EN;
     const result = new Map<string, string>();
     if (!courseIds.length) return result;
