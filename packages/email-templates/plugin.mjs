@@ -57,6 +57,20 @@ const generateIndexContent = () => {
         path.pushContainer("body", importDeclaration);
         path.pushContainer("body", exportDeclaration);
       });
+
+      path.pushContainer(
+        "body",
+        t.exportNamedDeclaration(
+          null,
+          [
+            t.exportSpecifier(
+              t.identifier("getCourseDueDateReminderEmailTranslations"),
+              t.identifier("getCourseDueDateReminderEmailTranslations")
+            ),
+          ],
+          t.stringLiteral("./translations/courseDueDateReminder")
+        )
+      );
     },
   });
 

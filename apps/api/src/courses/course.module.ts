@@ -2,6 +2,7 @@ import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 
 import { AiModule } from "src/ai/ai.module";
+import { AnnouncementsModule } from "src/announcements/announcements.module";
 import { BunnyStreamModule } from "src/bunny/bunnyStream.module";
 import { CertificatesModule } from "src/certificates/certificates.module";
 import { ChapterModule } from "src/chapter/chapter.module";
@@ -29,6 +30,8 @@ import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
 import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
+import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
+import { CourseDueDateReminderEmailHandler } from "./handlers/course-due-date-reminder-email.handler";
 import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
@@ -48,6 +51,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     SettingsModule,
     LocalizationModule,
     CertificatesModule,
+    AnnouncementsModule,
     EmailModule,
     CqrsModule,
     AiModule,
@@ -62,7 +66,9 @@ import { MasterCourseWorker } from "./master-course.worker";
     CourseScormSnapshotService,
     CourseFeaturePolicyService,
     CourseSlugService,
+    GroupCourseDueDateCalendarService,
     CourseHandler,
+    CourseDueDateReminderEmailHandler,
     LocalizationService,
     CourseCron,
     MasterCourseService,

@@ -106,6 +106,13 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Pranešimas apie vėluojančius kursus",
     cs: "Upozornění na kurzy po termínu",
   },
+  courseDueDateReminderEmail: {
+    en: "Course deadline approaching - {{courseName}}",
+    pl: "Zbliża się termin kursu - {{courseName}}",
+    de: "Kursfrist naht - {{courseName}}",
+    lt: "Artėja kurso terminas - {{courseName}}",
+    cs: "Termín kurzu se blíží - {{courseName}}",
+  },
   magicLinkEmail: {
     en: "Login link",
     pl: "Link do logowania",

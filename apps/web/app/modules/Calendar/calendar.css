@@ -205,6 +205,19 @@
   color: var(--primary-950);
 }
 
+.calendar-shell .fc .calendar-event--course_due_date {
+  border-color: var(--warning-200);
+  border-left-color: var(--warning-600);
+  background: var(--warning-50);
+  color: var(--warning-900);
+}
+
+.calendar-shell .fc .calendar-event--course_due_date:hover {
+  border-color: var(--warning-300);
+  background: var(--warning-100);
+  color: var(--warning-950);
+}
+
 .calendar-shell .fc .fc-event-main {
   color: inherit;
 }

@@ -430,17 +430,22 @@
       "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
-        "goToLiveTraining": "Go to Live Training"
+        "goToLiveTraining": "Go to Live Training",
+        "goToCourse": "Go to course"
       },
       "sourceType": {
-        "liveTraining": "Live Training"
+        "liveTraining": "Live Training",
+        "courseDueDate": "Course due date"
       },
       "field": {
         "time": "Time",
         "training": "Training format",
         "linkedCourses": "Linked courses",
         "location": "Location",
-        "people": "People"
+        "people": "People",
+        "dueDate": "Due date",
+        "course": "Course",
+        "group": "Group"
       },
       "deliveryType": {
         "online": "Online",
@@ -459,6 +464,10 @@
         "trainer": "Trainer",
         "observer": "Observer"
       }
+    },
+    "errors": {
+      "courseDueDateRequired": "Due date is required to create the course calendar event.",
+      "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
   "liveTrainingView": {

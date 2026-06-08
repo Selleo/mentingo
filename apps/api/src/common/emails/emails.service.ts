@@ -1,6 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { SettingsService } from "src/settings/settings.service";
@@ -11,6 +12,7 @@ import { EmailAdapter } from "./adapters/email.adapter";
 
 import type { Attachment, Email } from "./email.interface";
 import type { SupportedLanguages } from "@repo/shared";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 import type { EmailConfigSchema } from "src/common/configuration/email";
 import type { DefaultEmailSettings } from "src/events/types";
@@ -96,6 +98,19 @@ export class EmailService {
           language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
       };
     });
+  }
+
+  getDefaultEmailPropertiesSql(userSettingsColumn: AnyPgColumn, globalSettingsColumn: AnyPgColumn) {
+    return sql<DefaultEmailSettings>`
+      jsonb_build_object(
+        'language',
+        ${userSettingsColumn}->>'language',
+        'primaryColor',
+        COALESCE(NULLIF(${globalSettingsColumn}->>'primaryColor', ''), '#4796FD'),
+        'companyName',
+        COALESCE(NULLIF(${globalSettingsColumn} #>> '{companyInformation,companyName}', ''), 'Mentingo.com')
+      )
+    `;
   }
 
   async getFinalLanguage(userId: UUIDType, dbInstance?: DatabasePg): Promise<SupportedLanguages> {

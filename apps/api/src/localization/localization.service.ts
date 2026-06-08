@@ -87,18 +87,21 @@ export class LocalizationService {
   ) {
     const aliased = joinedAliasName ? alias(baseTable, joinedAliasName) : baseTable;
 
-    const langExpr = language ? sql`${language}` : aliased.baseLanguage;
+    const langExpr = language ? sql`${language}` : sql`${aliased.baseLanguage}`;
+
+    const langKey = sql`(${langExpr})::text`;
+    const baseLanguageKey = sql`(${aliased.baseLanguage})::text`;
 
     return sql<string>`
       COALESCE(
         CASE
-          WHEN ${aliased.availableLocales} @> ARRAY[${langExpr}]::text[]
-      THEN COALESCE(
-      ${fieldColumn}::jsonb ->> ${langExpr}::text,
-      ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
-      )
-      ELSE ${fieldColumn}::jsonb ->> ${aliased.baseLanguage}::text
-      END,
+          WHEN ${aliased.availableLocales} @> ARRAY[${langKey}]::text[]
+          THEN COALESCE(
+            ${fieldColumn}::jsonb ->> ${langKey},
+            ${fieldColumn}::jsonb ->> ${baseLanguageKey}
+          )
+          ELSE ${fieldColumn}::jsonb ->> ${baseLanguageKey}
+        END,
       ''
       )
     `;

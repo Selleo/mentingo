@@ -6,6 +6,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from "@nestjs/common";
 import { OverdueCoursesEmail } from "@repo/email-templates";
@@ -15,10 +16,12 @@ import {
   COURSE_ENROLLMENT,
   ENTITY_TYPES,
   PERMISSIONS,
+  type LocalizedText,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
+import { addDays, endOfDay, startOfDay } from "date-fns";
 import {
   and,
   between,
@@ -37,6 +40,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { camelCase, isEmpty, isEqual, pickBy } from "lodash";
 import { match } from "ts-pattern";
 
@@ -57,7 +61,12 @@ import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
-import { CreateCourseEvent, UpdateCourseEvent, EnrollCourseEvent } from "src/events";
+import {
+  CourseDueDateReminderEmailEvent,
+  CreateCourseEvent,
+  UpdateCourseEvent,
+  EnrollCourseEvent,
+} from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -90,9 +99,11 @@ import {
   quizAttempts,
   resourceEntity,
   resources,
+  settings,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
+  tenants,
   users,
   courseStudentsStats,
 } from "src/storage/schema";
@@ -105,9 +116,11 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
 import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
+import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-reminders.constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
+import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
 import { MasterCourseService } from "./master-course.service";
 import {
   COURSE_ENROLLMENT_SCOPES,
@@ -159,6 +172,10 @@ import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type {
+  CourseDueDateReminderDays,
+  CourseDueDateReminderRecipient,
+} from "src/courses/types/course-due-date-reminder.types";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type {
@@ -187,6 +204,8 @@ type OverdueCoursesByLanguageRow = {
 
 @Injectable()
 export class CourseService {
+  private readonly logger = new Logger(CourseService.name);
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly adminChapterRepository: AdminChapterRepository,
@@ -208,6 +227,7 @@ export class CourseService {
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly lumaService: LumaService,
     private readonly certificatesService: CertificatesService,
+    private readonly groupCourseDueDateCalendarService: GroupCourseDueDateCalendarService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -2286,7 +2306,16 @@ export class CourseService {
     const groupIds = groupsToEnroll.map((group) => group.id);
     const groupInfoById = new Map(groupsToEnroll.map((group) => [group.id, group]));
 
-    const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
+    const [course] = await this.db
+      .select({
+        authorId: courses.authorId,
+        title: sql<LocalizedText>`${courses.title}`,
+        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
+        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+      })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
     if (!course) throw new NotFoundException(`Course ${courseId} not found`);
 
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
@@ -2300,6 +2329,31 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to enroll groups to this course");
     }
 
+    const existingDueDateCalendarEvents = await this.db
+      .select({
+        groupId: groupCourses.groupId,
+        calendarEventId: groupCourses.calendarEventId,
+      })
+      .from(groupCourses)
+      .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
+
+    const eligibleDueDateGroupIds = new Set(
+      groupsToEnroll.filter((group) => group.isMandatory && group.dueDate).map((group) => group.id),
+    );
+
+    const ineligibleDueDateGroups = groupsToEnroll.filter(
+      (group) => !eligibleDueDateGroupIds.has(group.id),
+    );
+
+    const dueDateCalendarEventIdsToRemove = existingDueDateCalendarEvents
+      .filter((groupCourse) => !eligibleDueDateGroupIds.has(groupCourse.groupId))
+      .map((groupCourse) => groupCourse.calendarEventId)
+      .filter((calendarEventId): calendarEventId is UUIDType => Boolean(calendarEventId));
+
+    const dueDateCalendarEventUidsToRemove = ineligibleDueDateGroups.map((group) =>
+      this.groupCourseDueDateCalendarService.getUid(courseId, group.id),
+    );
+
     let newStudentIds: string[] = [];
 
     await this.db.transaction(async (trx) => {
@@ -2308,17 +2362,40 @@ export class CourseService {
         sql`, `,
       )}]`;
 
-      const groupCoursesValues = groupIds.map((groupId) => {
-        const { isMandatory, dueDate } = groupInfoById.get(groupId) || {};
+      const dueDateCalendarEventInputs = [];
+      const groupCourseBaseValues = [];
 
-        return {
+      for (const groupId of groupIds) {
+        const { isMandatory, dueDate } = groupInfoById.get(groupId) || {};
+        const groupCourseIsMandatory = isMandatory ?? false;
+        const groupCourseDueDate = dueDate ? new Date(dueDate) : null;
+
+        dueDateCalendarEventInputs.push({
+          course,
+          courseId,
+          groupId,
+          dueDate: groupCourseDueDate,
+          isMandatory: groupCourseIsMandatory,
+        });
+
+        groupCourseBaseValues.push({
           groupId,
           courseId,
           enrolledBy: currentUser?.userId || null,
-          isMandatory: isMandatory ?? false,
-          dueDate: dueDate ? new Date(dueDate) : null,
-        };
-      });
+          isMandatory: groupCourseIsMandatory,
+          dueDate: groupCourseDueDate,
+        });
+      }
+
+      const calendarEventIdsByGroupId =
+        await this.groupCourseDueDateCalendarService.upsertDueDateCalendarEvents(
+          trx,
+          dueDateCalendarEventInputs,
+        );
+      const groupCoursesValues = groupCourseBaseValues.map((groupCourseBaseValue) => ({
+        ...groupCourseBaseValue,
+        calendarEventId: calendarEventIdsByGroupId.get(groupCourseBaseValue.groupId) ?? null,
+      }));
 
       await trx
         .insert(groupCourses)
@@ -2329,8 +2406,14 @@ export class CourseService {
             isMandatory: sql`EXCLUDED.is_mandatory`,
             enrolledBy: sql`EXCLUDED.enrolled_by`,
             dueDate: sql`EXCLUDED.due_date`,
+            calendarEventId: sql`EXCLUDED.calendar_event_id`,
           },
         });
+
+      await this.groupCourseDueDateCalendarService.cancelDueDateCalendarEvents(trx, {
+        calendarEventIds: dueDateCalendarEventIdsToRemove,
+        calendarEventUids: dueDateCalendarEventUidsToRemove,
+      });
 
       const groupOrder = sql<number>`array_position(${groupIdsArray}, ${groupUsers.groupId})`;
 
@@ -2448,7 +2531,10 @@ export class CourseService {
 
   async unenrollGroupsFromCourse(courseId: UUIDType, groupIds: UUIDType[]) {
     const groupEnrollments = await this.db
-      .select({ groupId: groupCourses.groupId })
+      .select({
+        groupId: groupCourses.groupId,
+        calendarEventId: groupCourses.calendarEventId,
+      })
       .from(groupCourses)
       .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
 
@@ -2474,7 +2560,20 @@ export class CourseService {
 
     const studentIdsToUnenroll = studentsToUnenroll.map((s) => s.id);
 
+    const dueDateCalendarEventIdsToRemove = groupEnrollments
+      .map((groupEnrollment) => groupEnrollment.calendarEventId)
+      .filter((calendarEventId): calendarEventId is UUIDType => Boolean(calendarEventId));
+
+    const dueDateCalendarEventUidsToRemove = groupEnrollments.map((groupEnrollment) =>
+      this.groupCourseDueDateCalendarService.getUid(courseId, groupEnrollment.groupId),
+    );
+
     await this.db.transaction(async (trx) => {
+      await this.groupCourseDueDateCalendarService.cancelDueDateCalendarEvents(trx, {
+        calendarEventIds: dueDateCalendarEventIdsToRemove,
+        calendarEventUids: dueDateCalendarEventUidsToRemove,
+      });
+
       await trx
         .delete(groupCourses)
         .where(and(eq(groupCourses.courseId, courseId), inArray(groupCourses.groupId, groupIds)));
@@ -4161,6 +4260,92 @@ export class CourseService {
         );
       }),
     );
+  }
+
+  async sendCourseDueDateReminders() {
+    const recipients = await this.getCourseDueDateReminderRecipients();
+
+    if (!recipients.length) return;
+
+    await this.outboxPublisher.publish(new CourseDueDateReminderEmailEvent({ recipients }));
+  }
+
+  private async getCourseDueDateReminderRecipients(): Promise<CourseDueDateReminderRecipient[]> {
+    const globalSettings = alias(settings, "global_settings");
+    const userSettings = alias(settings, "user_settings");
+
+    const reminderWindows = COURSE_DUE_DATE_REMINDER_DAYS.map((daysBeforeDueDate) => {
+      const reminderDate = addDays(new Date(), daysBeforeDueDate);
+
+      return {
+        daysBeforeDueDate,
+        startsAt: startOfDay(reminderDate).toISOString(),
+        endsAt: endOfDay(reminderDate).toISOString(),
+      };
+    });
+
+    const dueDateCondition = or(
+      ...reminderWindows.map(
+        ({ startsAt, endsAt }) =>
+          sql`${groupCourses.dueDate} BETWEEN ${startsAt}::timestamptz AND ${endsAt}::timestamptz`,
+      ),
+    );
+
+    if (!dueDateCondition) return [];
+
+    return this.db
+      .selectDistinct({
+        studentId: users.id,
+        studentEmail: users.email,
+        tenantId: users.tenantId,
+        tenantHost: tenants.host,
+        courseId: courses.id,
+        courseAuthorId: courses.authorId,
+        courseName: this.localizationService.getLocalizedSqlField(
+          courses.title,
+          sql<SupportedLanguages>`${userSettings.settings}->>'language'`,
+        ),
+        dueDate: sql<string>`${groupCourses.dueDate}`,
+        daysBeforeDueDate: sql<CourseDueDateReminderDays>`CASE ${sql.join(
+          reminderWindows.map(
+            ({ daysBeforeDueDate, startsAt, endsAt }) =>
+              sql`WHEN ${groupCourses.dueDate} BETWEEN ${startsAt}::timestamptz AND ${endsAt}::timestamptz THEN ${daysBeforeDueDate}`,
+          ),
+          sql` `,
+        )} END`,
+        defaultEmailSettings: this.emailService.getDefaultEmailPropertiesSql(
+          userSettings.settings,
+          globalSettings.settings,
+        ),
+      })
+      .from(groupCourses)
+      .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.courseId, groupCourses.courseId),
+          eq(studentCourses.studentId, groupUsers.userId),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          or(
+            eq(studentCourses.enrolledByGroupId, groupCourses.groupId),
+            isNull(studentCourses.enrolledByGroupId),
+          ),
+        ),
+      )
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .innerJoin(userSettings, eq(userSettings.userId, users.id))
+      .leftJoin(globalSettings, isNull(globalSettings.userId))
+      .innerJoin(tenants, eq(tenants.id, users.tenantId))
+      .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+      .where(
+        and(
+          eq(groupCourses.isMandatory, true),
+          isNotNull(groupCourses.dueDate),
+          dueDateCondition,
+          isNull(studentCourses.completedAt),
+          isNull(users.deletedAt),
+        ),
+      );
   }
 
   private async getOverdueCoursesByLanguage(

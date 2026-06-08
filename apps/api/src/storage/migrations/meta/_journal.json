@@ -967,6 +967,34 @@
       "when": 1780401336166,
       "tag": "0137_enable_live_training_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 138,
+      "version": "7",
+      "when": 1780411668771,
+      "tag": "0138_add_group_course_calendar_event_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 139,
+      "version": "7",
+      "when": 1780411673600,
+      "tag": "0139_backfill_group_course_due_date_calendar_events",
+      "breakpoints": true
+    },
+    {
+      "idx": 140,
+      "version": "7",
+      "when": 1780483850390,
+      "tag": "0140_dedupe_calendar_event_uids",
+      "breakpoints": true
+    },
+    {
+      "idx": 141,
+      "version": "7",
+      "when": 1780516533407,
+      "tag": "0141_unique_calendar_event_tenant_uid",
+      "breakpoints": true
     }
   ]
 }
