@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { importedScormPackagePath } from "@repo/scorm-export-generator";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -20,6 +20,8 @@ import type {
 
 @Injectable()
 export class CourseScormAssetsService {
+  private readonly logger = new Logger(CourseScormAssetsService.name);
+
   constructor(
     private readonly fileService: FileService,
     private readonly bunnyStreamService: BunnyStreamService,
@@ -82,6 +84,14 @@ export class CourseScormAssetsService {
     const buffer = await this.fileService.getRawFileBuffer(asset.sourceReference);
 
     if (!buffer) {
+      this.logger.error({
+        message: "SCORM export missing asset: file buffer could not be resolved",
+        assetId: asset.id,
+        assetType: asset.type,
+        sourceReference: asset.sourceReference,
+        packagePath: asset.packagePath,
+        contentType: asset.contentType,
+      });
       throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
     }
 
@@ -100,6 +110,19 @@ export class CourseScormAssetsService {
     options: CourseScormCollectAssetsOptions,
   ): Promise<CourseScormAssetResolution> {
     const videoId = asset.sourceReference.replace("bunny-", "");
+    const isConfigured = await this.bunnyStreamService.isConfigured();
+
+    if (!isConfigured) {
+      this.logger.error({
+        message: "SCORM export failed: Bunny Stream is not configured",
+        assetId: asset.id,
+        assetType: asset.type,
+        sourceReference: asset.sourceReference,
+        packagePath: asset.packagePath,
+        contentType: asset.contentType,
+      });
+      throw new BadRequestException("adminCourseView.scormExport.error.bunnyNotConfigured");
+    }
 
     try {
       const file = await this.bunnyStreamService.downloadMp4Fallback(
@@ -116,7 +139,16 @@ export class CourseScormAssetsService {
           stream: file.stream,
         },
       };
-    } catch {
+    } catch (error) {
+      this.logger.error({
+        message: "SCORM export missing asset: Bunny video could not be downloaded",
+        assetId: asset.id,
+        assetType: asset.type,
+        sourceReference: asset.sourceReference,
+        packagePath: asset.packagePath,
+        contentType: asset.contentType,
+        error: error instanceof Error ? error.message : String(error),
+      });
       throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
     }
   }
@@ -270,7 +302,7 @@ export class CourseScormAssetsService {
 
   private resourceReferenceRegex(resourceId: string) {
     return new RegExp(
-      `(?:https?:\\/\\/[^"'\\s>]+)?(?:\\/api\\/lesson\\/)?lesson-resource\\/${resourceId}`,
+      `(?:https?:\\/\\/[^"'\\s>]+)?(?:\\/api\\/lesson\\/)?lesson-resource\\/${resourceId}(?:\\?[^"'\\s>]*)?`,
       "g",
     );
   }

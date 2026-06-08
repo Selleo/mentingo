@@ -25,6 +25,7 @@
       "globalSettingsNotFound": "Ustawienia globalne nie zostały znalezione",
       "somethingWentWrong": "Coś poszło nie tak...",
       "notFound": "Nie znaleziono zasobu",
+      "lessonAccessDenied": "Nie masz uprawnień do tej lekcji.",
       "tooManyRequests": "Zbyt wiele prób. Spróbuj ponownie za {{seconds}} sekund."
     },
     "tooltip": {
@@ -2649,6 +2650,7 @@
         "noExportableLessons": "Ten kurs nie zawiera lekcji, które można wyeksportować do SCORM.",
         "unsupportedLessonType": "Ten kurs zawiera typ lekcji, którego nie można wyeksportować do SCORM.",
         "missingAsset": "Ten kurs zawiera plik lub zasób, którego nie udało się przygotować do eksportu.",
+        "bunnyNotConfigured": "Eksport wideo nie jest skonfigurowany. Skonfiguruj Bunny Stream przed eksportem kursów z lekcjami wideo.",
         "invalidSnapshot": "Nie udało się przygotować tego kursu do eksportu SCORM.",
         "fallback": "Eksport SCORM nie powiódł się."
       }

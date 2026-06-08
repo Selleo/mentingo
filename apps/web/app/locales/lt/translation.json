@@ -24,6 +24,7 @@
       "globalSettingsNotFound": "Bendrieji nustatymai nerasta",
       "somethingWentWrong": "Kažkas ne taip...",
       "notFound": "Išteklius nerastas",
+      "lessonAccessDenied": "Neturite leidimo pasiekti šios pamokos.",
       "tooManyRequests": "Per daug prašymų. Bandykite dar kartą po {{seconds}} sekundžių."
     },
     "tooltip": {
@@ -2359,6 +2360,7 @@
         "noExportableLessons": "Šiame kurse nėra pamokų, kurias galima eksportuoti į SCORM.",
         "unsupportedLessonType": "Šiame kurse yra pamokos tipas, kurio negalima eksportuoti į SCORM.",
         "missingAsset": "Šiame kurse yra failas arba išteklius, kurio nepavyko paruošti eksportui.",
+        "bunnyNotConfigured": "Vaizdo įrašų eksportas nesukonfigūruotas. Prieš eksportuodami kursus su vaizdo pamokomis sukonfigūruokite Bunny Stream.",
         "invalidSnapshot": "Nepavyko paruošti šio kurso SCORM eksportui.",
         "fallback": "SCORM eksportas nepavyko."
       }
