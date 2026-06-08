@@ -29,8 +29,8 @@ export function useCreatePassword() {
       const response = await ApiClient.api.authControllerCreatePassword(options.data);
       return response.data;
     },
-    onSuccess: ({ data }) => {
-      handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
+    onSuccess: async ({ data }) => {
+      await handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
     },
     onError: (error: AxiosError) => {
       const { message } = (error.response?.data as ApiErrorResponse) || {};

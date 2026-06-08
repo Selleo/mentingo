@@ -24,7 +24,7 @@ type HandleAuthSuccessOptions = {
   setHasVerifiedMFA: (value: boolean) => void;
 };
 
-export function handleAuthSuccess({
+export async function handleAuthSuccess({
   user,
   setLoggedIn,
   setCurrentUser,
@@ -38,12 +38,11 @@ export function handleAuthSuccess({
     roleSlugs: user.roleSlugs ?? [],
   };
 
-  queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
-  queryClient.invalidateQueries(currentUserQueryOptions);
-  queryClient.invalidateQueries(userSettingsQueryOptions);
-  queryClient.invalidateQueries(mfaSetupQueryOptions);
-
   setLoggedIn(true);
   setCurrentUser(normalizedUser);
   setHasVerifiedMFA(!normalizedUser.shouldVerifyMFA);
+
+  await queryClient.invalidateQueries(currentUserQueryOptions);
+  queryClient.invalidateQueries(userSettingsQueryOptions);
+  queryClient.invalidateQueries(mfaSetupQueryOptions);
 }

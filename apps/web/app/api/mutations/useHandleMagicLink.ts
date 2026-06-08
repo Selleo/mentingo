@@ -6,11 +6,8 @@ import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
-import { currentUserQueryOptions } from "../queries/useCurrentUser";
-import { userSettingsQueryOptions } from "../queries/useUserSettings";
-import { queryClient } from "../queryClient";
 
-import { mfaSetupQueryOptions } from "./useSetupMFA";
+import { handleAuthSuccess } from "./helpers/handleAuthSuccess";
 
 import type { ApiErrorResponse } from "../types";
 import type { AxiosError } from "axios";
@@ -35,24 +32,8 @@ export function useHandleMagicLink() {
 
       return data;
     },
-    onSuccess: ({ data }) => {
-      const { shouldVerifyMFA } = data;
-      const normalizedUser = {
-        ...data,
-        isSupportMode: false,
-        studentModeCourseIds: [],
-        roleSlugs: [],
-        permissions: [],
-      };
-
-      queryClient.setQueryData(currentUserQueryOptions.queryKey, { data: normalizedUser });
-      queryClient.invalidateQueries(currentUserQueryOptions);
-      queryClient.invalidateQueries(userSettingsQueryOptions);
-      queryClient.invalidateQueries(mfaSetupQueryOptions);
-
-      setLoggedIn(true);
-      setCurrentUser(normalizedUser);
-      setHasVerifiedMFA(!shouldVerifyMFA);
+    onSuccess: async ({ data }) => {
+      await handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
     },
     onError: (error: AxiosError) => {
       const { message } = error.response?.data as ApiErrorResponse;
