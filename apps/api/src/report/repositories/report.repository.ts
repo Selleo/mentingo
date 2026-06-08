@@ -70,14 +70,20 @@ export class ReportRepository {
         AND slp.completed_at IS NOT NULL
     )`;
 
+    const localizedGroupNameQuery = this.localizationService.getLocalizedSqlField(
+      groups.name,
+      language,
+      groups,
+    );
+
     const reportData = await this.db
       .select({
         studentName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         groupName: sql<string | null>`(
-          SELECT STRING_AGG(DISTINCT g.name, ', ')
-          FROM ${groups} g
-          JOIN ${groupUsers} gu ON gu.group_id = g.id
-          WHERE gu.user_id = ${users.id}
+          SELECT STRING_AGG(DISTINCT NULLIF(${localizedGroupNameQuery}, ''), ', ')
+          FROM ${groups}
+          JOIN ${groupUsers} ON ${groupUsers.groupId} = ${groups.id}
+          WHERE ${groupUsers.userId} = ${users.id}
         )`,
         courseName: this.localizationService.getLocalizedSqlField(courses.title, language),
         lessonCount: lessonCountQuery.as("lesson_count"),

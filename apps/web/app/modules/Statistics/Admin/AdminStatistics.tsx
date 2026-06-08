@@ -133,15 +133,27 @@ export const AdminStatistics = () => {
       </div>
       <div
         data-testid={ADMIN_STATISTICS_HANDLES.PAGE}
-        className="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-4 md:gap-y-6 xl:h-full xl:grid-cols-4 xl:grid-rows-[minmax(min-content,_auto)]"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 lg:grid-cols-6 xl:h-full"
       >
-        <div data-testid={ADMIN_STATISTICS_HANDLES.MOST_POPULAR_COURSES_CHART}>
+        <div
+          data-testid={ADMIN_STATISTICS_HANDLES.MOST_POPULAR_COURSES_CHART}
+          className="md:col-span-1 lg:col-span-3"
+        >
           <FiveMostPopularCoursesChart
             data={statistics?.fiveMostPopularCourses}
             isLoading={isLoading}
           />
         </div>
-        <div data-testid={ADMIN_STATISTICS_HANDLES.COURSE_COMPLETION_CHART}>
+        <div
+          data-testid={ADMIN_STATISTICS_HANDLES.ENROLLMENT_CHART}
+          className="md:col-span-1 lg:col-span-3"
+        >
+          <EnrollmentChart isLoading={isLoading} data={statistics?.courseStudentsStats} />
+        </div>
+        <div
+          data-testid={ADMIN_STATISTICS_HANDLES.COURSE_COMPLETION_CHART}
+          className="md:col-span-1 lg:col-span-2"
+        >
           <CourseCompletionPercentageChart
             isLoading={isLoading}
             label={`${statistics?.totalCoursesCompletionStats.completionPercentage}`}
@@ -150,7 +162,10 @@ export const AdminStatistics = () => {
             chartData={coursesCompletionChartData}
           />
         </div>
-        <div data-testid={ADMIN_STATISTICS_HANDLES.FREEMIUM_CONVERSION_CHART}>
+        <div
+          data-testid={ADMIN_STATISTICS_HANDLES.FREEMIUM_CONVERSION_CHART}
+          className="md:col-span-1 lg:col-span-2"
+        >
           <ConversionsAfterFreemiumLessonChart
             isLoading={isLoading}
             label={`${statistics?.conversionAfterFreemiumLesson.conversionPercentage}`}
@@ -159,10 +174,10 @@ export const AdminStatistics = () => {
             chartData={conversionsChartData}
           />
         </div>
-        <div data-testid={ADMIN_STATISTICS_HANDLES.ENROLLMENT_CHART}>
-          <EnrollmentChart isLoading={isLoading} data={statistics?.courseStudentsStats} />
-        </div>
-        <div data-testid={ADMIN_STATISTICS_HANDLES.AVERAGE_QUIZ_SCORE_CHART}>
+        <div
+          data-testid={ADMIN_STATISTICS_HANDLES.AVERAGE_QUIZ_SCORE_CHART}
+          className="md:col-span-2 lg:col-span-2"
+        >
           <AvgScoreAcrossAllQuizzesChart
             isLoading={isLoading}
             label={`${correctAnswers}/${totalAnswers}`}
