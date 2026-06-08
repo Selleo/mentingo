@@ -48,7 +48,7 @@ export class GroupCourseDueDateCalendarService {
       .insert(calendarEvents)
       .values(calendarEventValues.map(({ calendarEvent }) => calendarEvent))
       .onConflictDoUpdate({
-        target: calendarEvents.uid,
+        target: [calendarEvents.tenantId, calendarEvents.uid],
         set: {
           status: sql`EXCLUDED.status`,
           baseLanguage: sql`EXCLUDED.base_language`,
