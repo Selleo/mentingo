@@ -24,6 +24,7 @@
       "globalSettingsNotFound": "Globální nastavení nenalezeno",
       "somethingWentWrong": "Něco se pokazilo...",
       "notFound": "Zdroj nenalezen",
+      "lessonAccessDenied": "Nemáte oprávnění k přístupu k této lekci.",
       "tooManyRequests": "Příliš mnoho požadavků. Zkuste to znovu za {{seconds}} sekund."
     },
     "tooltip": {
@@ -2368,6 +2369,7 @@
         "noExportableLessons": "Tento kurz neobsahuje lekce, které lze exportovat do SCORM.",
         "unsupportedLessonType": "Tento kurz obsahuje typ lekce, který nelze exportovat do SCORM.",
         "missingAsset": "Tento kurz obsahuje soubor nebo zdroj, který se nepodařilo připravit pro export.",
+        "bunnyNotConfigured": "Export videa není nakonfigurován. Před exportem kurzů s video lekcemi nakonfigurujte Bunny Stream.",
         "invalidSnapshot": "Tento kurz se nepodařilo připravit pro export SCORM.",
         "fallback": "Export SCORM se nezdařil."
       }

@@ -25,6 +25,7 @@ import { UserModule } from "src/user/user.module";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
 import { CourseScormExportService } from "./course-scorm-export.service";
+import { CourseScormSnapshotRepository } from "./course-scorm-snapshot.repository";
 import { CourseScormSnapshotService } from "./course-scorm-snapshot.service";
 import { CourseSlugService } from "./course-slug.service";
 import { CourseController } from "./course.controller";
@@ -63,6 +64,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     CourseService,
     CourseScormAssetsService,
     CourseScormExportService,
+    CourseScormSnapshotRepository,
     CourseScormSnapshotService,
     CourseFeaturePolicyService,
     CourseSlugService,

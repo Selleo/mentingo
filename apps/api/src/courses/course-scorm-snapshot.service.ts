@@ -1,15 +1,15 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ENTITY_TYPES, SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
 import { and, asc, eq, getTableColumns, inArray, sql } from "drizzle-orm";
 import { groupBy } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
-import { extractLessonResourceIds } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
+import { extractResourceIdsFromRichText } from "src/resource-library/resource-library.utils";
 import { SettingsService } from "src/settings/settings.service";
 import {
   categories,
@@ -25,6 +25,7 @@ import {
 } from "src/storage/schema";
 
 import { SCORM_EXPORTABLE_LESSON_TYPES } from "./course-scorm-export.constants";
+import { CourseScormSnapshotRepository } from "./course-scorm-snapshot.repository";
 
 import type {
   CourseScormBuildLessonsByIdOptions,
@@ -46,10 +47,13 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class CourseScormSnapshotService {
+  private readonly logger = new Logger(CourseScormSnapshotService.name);
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
     private readonly settingsService: SettingsService,
+    private readonly courseScormSnapshotRepository: CourseScormSnapshotRepository,
   ) {}
 
   async buildSnapshot(
@@ -81,11 +85,22 @@ export class CourseScormSnapshotService {
     }
 
     const lessonIds = lessonRows.map((lesson) => lesson.id);
-    const [lessonAssets, quizQuestions, quizOptions, scormScoRows] = await Promise.all([
+    const [
+      linkedLessonAssets,
+      referencedContentLessonAssets,
+      quizQuestions,
+      quizOptions,
+      scormScoRows,
+    ] = await Promise.all([
       this.getLessonAssets(lessonIds, language),
+      this.getReferencedContentLessonAssets(lessonRows, language),
       this.getQuizQuestions(lessonIds, language),
       this.getQuizOptions(lessonIds, language),
       this.getScormScoRows(lessonIds, language),
+    ]);
+    const lessonAssets = this.dedupeLessonAssets([
+      ...linkedLessonAssets,
+      ...referencedContentLessonAssets,
     ]);
 
     this.validateRequiredAssets({
@@ -224,6 +239,47 @@ export class CourseScormSnapshotService {
         ),
       )
       .orderBy(resources.createdAt);
+  }
+
+  private async getReferencedContentLessonAssets(
+    lessonRows: CourseScormLessonRow[],
+    language: SupportedLanguages,
+  ): Promise<CourseScormLessonAssetRow[]> {
+    const resourceIdsByLessonId = new Map<UUIDType, UUIDType[]>();
+
+    for (const lesson of lessonRows) {
+      if (lesson.type !== LESSON_TYPES.CONTENT) continue;
+
+      const resourceIds = extractResourceIdsFromRichText(lesson.description ?? "") as UUIDType[];
+      if (resourceIds.length) resourceIdsByLessonId.set(lesson.id, [...new Set(resourceIds)]);
+    }
+
+    const resourceIds = [...new Set(Array.from(resourceIdsByLessonId.values()).flat())];
+    if (!resourceIds.length) return [];
+
+    const resourceRows = await this.courseScormSnapshotRepository.getActiveResourceAssetsByIds(
+      resourceIds,
+      language,
+    );
+    const resourcesById = new Map(resourceRows.map((resource) => [resource.id, resource]));
+
+    return Array.from(resourceIdsByLessonId.entries()).flatMap(([lessonId, ids]) =>
+      ids.flatMap((resourceId) => {
+        const resource = resourcesById.get(resourceId);
+        if (!resource) return [];
+
+        return {
+          lessonId,
+          ...resource,
+        };
+      }),
+    );
+  }
+
+  private dedupeLessonAssets(lessonAssets: CourseScormLessonAssetRow[]) {
+    return Array.from(
+      new Map(lessonAssets.map((asset) => [`${asset.lessonId}:${asset.id}`, asset])).values(),
+    );
   }
 
   private async getQuizQuestions(lessonIds: UUIDType[], language: SupportedLanguages) {
@@ -480,12 +536,25 @@ export class CourseScormSnapshotService {
 
     for (const asset of lessonAssets) {
       if (!asset.reference) {
+        this.logger.error({
+          message: "SCORM export missing asset: lesson asset row has no reference",
+          lessonId: asset.lessonId,
+          resourceId: asset.id,
+          contentType: asset.contentType,
+          title: asset.title,
+        });
         throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
       }
     }
 
     for (const question of quizQuestions) {
       if (question.photoS3Key === "") {
+        this.logger.error({
+          message: "SCORM export missing asset: quiz question photo reference is empty",
+          questionId: question.id,
+          lessonId: question.lessonId,
+          questionType: question.type,
+        });
         throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
       }
     }
@@ -498,11 +567,26 @@ export class CourseScormSnapshotService {
       if (lesson.type === LESSON_TYPES.EMBED) {
         const [embedResource] = lessonAssetsByLessonId[lesson.id] ?? [];
         if (!embedResource?.reference) {
+          this.logger.error({
+            message: "SCORM export missing asset: embed lesson has no attachment reference",
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            foundAssets: (lessonAssetsByLessonId[lesson.id] ?? []).map((asset) => ({
+              resourceId: asset.id,
+              reference: asset.reference,
+              contentType: asset.contentType,
+            })),
+          });
           throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
         }
       }
 
       if (lesson.type === LESSON_TYPES.SCORM && !scormScosByLessonId[lesson.id]?.length) {
+        this.logger.error({
+          message: "SCORM export missing asset: SCORM lesson has no ready SCO rows",
+          lessonId: lesson.id,
+          lessonTitle: lesson.title,
+        });
         throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
       }
     }
@@ -512,7 +596,7 @@ export class CourseScormSnapshotService {
     lesson: CourseScormLessonRow,
     lessonAssets: CourseScormLessonAssetRow[],
   ) {
-    const referencedResourceIds = extractLessonResourceIds(lesson.description ?? "");
+    const referencedResourceIds = extractResourceIdsFromRichText(lesson.description ?? "");
     if (!referencedResourceIds.length) return;
 
     const availableResourceIds = new Set(lessonAssets.map((asset) => asset.id));
@@ -521,6 +605,23 @@ export class CourseScormSnapshotService {
     );
 
     if (hasMissingResource) {
+      this.logger.error({
+        message:
+          "SCORM export missing asset: content references resources not linked as lesson attachments",
+        lessonId: lesson.id,
+        lessonTitle: lesson.title,
+        referencedResourceIds,
+        availableAttachmentResourceIds: [...availableResourceIds],
+        missingResourceIds: referencedResourceIds.filter(
+          (resourceId) => !availableResourceIds.has(resourceId),
+        ),
+        foundAssets: lessonAssets.map((asset) => ({
+          resourceId: asset.id,
+          reference: asset.reference,
+          contentType: asset.contentType,
+          title: asset.title,
+        })),
+      });
       throw new BadRequestException("adminCourseView.scormExport.error.missingAsset");
     }
   }

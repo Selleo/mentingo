@@ -288,6 +288,123 @@ describe("CourseController (e2e)", () => {
       expect(courseJson.lessons[secondLesson.id].html).toContain(runtimeAssetPath);
       expect(manifestEntry!.getData().toString("utf8")).toContain(canonicalAssetPath);
     });
+
+    it("exports rich-text video, downloadable, and preview assets without keeping preview query params", async () => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        title: "SCORM Export Rich Text Assets",
+        description: "SCORM export rich text asset test course",
+        thumbnailS3Key: null,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "SCORM Export Chapter",
+        displayOrder: 1,
+        lessonCount: 2,
+      });
+      const [lesson, linkedLesson] = await db
+        .insert(lessons)
+        .values([
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.CONTENT,
+            title: buildJsonbField("en", "Content lesson with mixed assets"),
+            description: buildJsonbField("en", ""),
+            displayOrder: 1,
+          },
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.CONTENT,
+            title: buildJsonbField("en", "Lesson with stale asset relations"),
+            description: buildJsonbField("en", ""),
+            displayOrder: 2,
+          },
+        ])
+        .returning();
+      const [videoResource, downloadableResource, previewResource] = await db
+        .insert(resources)
+        .values([
+          {
+            title: buildJsonbField("en", "Content video"),
+            reference: "lesson-content/video.mp4",
+            contentType: "video/mp4",
+            uploadedBy: admin.id,
+          },
+          {
+            title: buildJsonbField("en", "Downloadable file"),
+            reference: "lesson-content/document.pdf",
+            contentType: "application/pdf",
+            uploadedBy: admin.id,
+          },
+          {
+            title: buildJsonbField("en", "Preview presentation"),
+            reference: "lesson-content/slides.pptx",
+            contentType:
+              "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            uploadedBy: admin.id,
+          },
+        ])
+        .returning();
+
+      await db.insert(resourceEntity).values(
+        [videoResource, downloadableResource, previewResource].map((resource) => ({
+          resourceId: resource.id,
+          entityId: linkedLesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        })),
+      );
+
+      await db
+        .update(lessons)
+        .set({
+          description: buildJsonbField(
+            "en",
+            [
+              `<div data-node-type="video" data-src="/api/lesson/lesson-resource/${videoResource.id}"></div>`,
+              `<div data-node-type="downloadable-file" data-src="/api/lesson/lesson-resource/${downloadableResource.id}" data-name="document.pdf"></div>`,
+              `<div data-node-type="pdf-preview" data-src="/api/lesson/lesson-resource/${previewResource.id}?preview=pdf" data-name="slides.pptx"></div>`,
+            ].join(""),
+          ),
+        })
+        .where(eq(lessons.id, lesson.id));
+
+      mockFileService.getRawFileBuffer.mockImplementation(async (reference: string) =>
+        Buffer.from(`file:${reference}`),
+      );
+
+      const response = await request(app.getHttpServer())
+        .post(`/api/course/${course.id}/scorm-export?language=en`)
+        .set("Cookie", await cookieFor(admin, app))
+        .responseType("arraybuffer")
+        .expect(201);
+
+      const zip = new AdmZip(response.body);
+      const courseJsonEntry = zip.getEntry("data/course.json");
+      expect(courseJsonEntry).toBeDefined();
+
+      const courseJson = JSON.parse(courseJsonEntry!.getData().toString("utf8"));
+      const exportedHtml = courseJson.lessons[lesson.id].html;
+      const videoAssetPath = `../assets/lessons/${lesson.id}/video.mp4`;
+      const downloadableAssetPath = `../assets/lessons/${lesson.id}/document.pdf`;
+      const previewAssetPath = `../assets/lessons/${lesson.id}/slides.pptx`;
+
+      expect(exportedHtml).toContain(`data-src="${videoAssetPath}"`);
+      expect(exportedHtml).toContain(`data-src="${downloadableAssetPath}"`);
+      expect(exportedHtml).toContain(`data-src="${previewAssetPath}"`);
+      expect(exportedHtml).not.toContain("?preview=pdf");
+      expect(zip.getEntry(`assets/lessons/${lesson.id}/video.mp4`)).toBeDefined();
+      expect(zip.getEntry(`assets/lessons/${lesson.id}/document.pdf`)).toBeDefined();
+      expect(zip.getEntry(`assets/lessons/${lesson.id}/slides.pptx`)).toBeDefined();
+    });
   });
 
   describe("GET /api/course/all", () => {

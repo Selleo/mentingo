@@ -24,6 +24,7 @@
       "globalSettingsNotFound": "Global settings not found",
       "somethingWentWrong": "Something went wrong...",
       "notFound": "Resource not found",
+      "lessonAccessDenied": "You do not have permission to access this lesson.",
       "tooManyRequests": "Too many requests. Try again in {{seconds}} seconds."
     },
     "tooltip": {
@@ -2423,6 +2424,7 @@
         "noExportableLessons": "This course has no lessons that can be exported to SCORM.",
         "unsupportedLessonType": "This course contains a lesson type that cannot be exported to SCORM.",
         "missingAsset": "This course contains a file or resource that could not be resolved for export.",
+        "bunnyNotConfigured": "Video export is not configured. Configure Bunny Stream before exporting courses with video lessons.",
         "invalidSnapshot": "This course could not be prepared for SCORM export.",
         "fallback": "SCORM export failed."
       }

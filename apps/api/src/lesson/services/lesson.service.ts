@@ -592,8 +592,16 @@ export class LessonService {
       currentUser.userId,
     );
 
+    if (!lesson) {
+      if (isStudent) {
+        throw new ForbiddenException("common.toast.lessonAccessDenied");
+      }
+
+      throw new NotFoundException("common.toast.notFound");
+    }
+
     if (!lesson.isAssigned && isStudent && !lesson.isFreemium) {
-      throw new ForbiddenException("You are not allowed to access this lesson!");
+      throw new ForbiddenException("common.toast.lessonAccessDenied");
     }
 
     return this.streamResource(req, res, lessonResource.reference, {

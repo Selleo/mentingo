@@ -43,6 +43,8 @@ export type CourseScormLessonAssetRow = {
   title: string;
 };
 
+export type CourseScormResourceAssetRow = Omit<CourseScormLessonAssetRow, "lessonId">;
+
 export type CourseScormQuizQuestionRow = {
   id: UUIDType;
   lessonId: UUIDType;
