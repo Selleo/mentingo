@@ -38,7 +38,6 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { Textarea } from "~/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
@@ -352,12 +351,16 @@ const AiMentorLessonForm = ({
                         </Tooltip>
                       </Label>
                       <FormControl>
-                        <Textarea
-                          data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT}
-                          {...field}
-                          id="description"
-                          className="placeholder:body-base h-[164px] resize-none placeholder:text-neutral-600"
-                        />
+                        <div data-testid={AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT}>
+                          <BaseEditor
+                            id="description"
+                            content={field.value}
+                            placeholder={t(
+                              "adminCourseView.curriculum.lesson.placeholder.taskDescription",
+                            )}
+                            {...field}
+                          />
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

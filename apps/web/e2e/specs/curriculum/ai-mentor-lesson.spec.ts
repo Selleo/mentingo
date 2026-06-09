@@ -29,6 +29,8 @@ test("admin can create and preview an AI mentor lesson", async ({
       title: `ai-mentor-chapter-${Date.now()}`,
     });
     const lessonTitle = `ai-mentor-lesson-${Date.now()}`;
+    const formattedDescriptionText = "Practice the topic with a mentor.";
+    const boldShortcut = process.platform === "darwin" ? "Meta+B" : "Control+B";
 
     cleanup.add(async () => {
       await courseFactory.delete(course.id);
@@ -40,10 +42,18 @@ test("admin can create and preview an AI mentor lesson", async ({
     await fillAiMentorLessonFormFlow(page, {
       title: lessonTitle,
       name: "Ada",
-      description: "Practice the topic with a mentor.",
+      description: formattedDescriptionText,
       instructions: "Ask concise questions.",
       completionConditions: "Learner answers two questions.",
     });
+    const descriptionEditor = page
+      .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT)
+      .locator(".ProseMirror");
+    await descriptionEditor.fill("");
+    await descriptionEditor.click();
+    await page.keyboard.press(boldShortcut);
+    await page.keyboard.type(formattedDescriptionText);
+    await page.keyboard.press(boldShortcut);
     await saveAiMentorLessonFormFlow(page);
 
     await expect
@@ -58,10 +68,16 @@ test("admin can create and preview an AI mentor lesson", async ({
     const lessonId = updatedCourse.chapters[0]!.lessons!.find(
       (lesson) => lesson.title === lessonTitle,
     )!.id;
+    const savedLesson = updatedCourse.chapters[0]!.lessons!.find(
+      (lesson) => lesson.title === lessonTitle,
+    )!;
+
+    expect(savedLesson.description).toContain("<strong>");
 
     await openExistingLessonFlow(page, chapter.id, lessonId);
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
+    await expect(page.getByText(formattedDescriptionText).first()).toBeVisible();
   });
 });
 

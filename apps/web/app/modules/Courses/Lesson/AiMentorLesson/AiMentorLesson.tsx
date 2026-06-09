@@ -13,6 +13,7 @@ import {
 import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { LoaderWithTextSequence } from "~/components/LoaderWithTextSequence";
+import Viewer from "~/components/RichText/Viever";
 import {
   Accordion,
   AccordionContent,
@@ -210,7 +211,9 @@ const AiMentorLesson = ({
             </div>
           </div>
           <div className="border-t border-neutral-100 px-4 py-4 text-neutral-800">
-            <div className="max-h-24 overflow-y-auto">{lesson.description}</div>
+            <div className="max-h-24 overflow-y-auto">
+              <Viewer content={lesson.description ?? ""} />
+            </div>
           </div>
         </div>
       )}
@@ -248,7 +251,9 @@ const AiMentorLesson = ({
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 py-4 text-neutral-800 border-t border-neutral-100">
-              <div className="max-h-24 overflow-y-auto">{lesson.description}</div>
+              <div className="max-h-24 overflow-y-auto">
+                <Viewer content={lesson.description ?? ""} />
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
