@@ -34,8 +34,8 @@ export function useRegisterUser() {
 
       return response.data;
     },
-    onSuccess: ({ data }) => {
-      handleAuthSuccess({
+    onSuccess: async ({ data }) => {
+      await handleAuthSuccess({
         user: data as LoginResponse["data"],
         setLoggedIn,
         setCurrentUser,

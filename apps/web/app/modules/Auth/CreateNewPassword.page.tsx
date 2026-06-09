@@ -14,6 +14,7 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
+import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
 import { passwordSchema } from "~/modules/Dashboard/Settings/schema/password.schema";
 import { detectBrowserLanguage } from "~/utils/browser-language";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -98,7 +99,7 @@ export default function CreateNewPasswordPage() {
         toast({
           description: t("changePasswordView.toast.passwordCreatedSuccessfully"),
         });
-        navigate("/auth/login");
+        navigate(LOGIN_REDIRECT_URL);
       });
     }
   };
