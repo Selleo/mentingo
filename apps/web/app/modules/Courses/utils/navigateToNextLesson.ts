@@ -1,5 +1,6 @@
 import {
   findFirstLessonId,
+  findFirstLessonIdForCompletedCourse,
   findFirstNonCompletedLessonId,
   getCurrentChapterId,
 } from "../Lesson/utils";
@@ -14,7 +15,7 @@ export const navigateToNextLesson = (
 ) => {
   const lessonId = options.openFirstLesson
     ? findFirstLessonId(course)
-    : findFirstNonCompletedLessonId(course);
+    : (findFirstNonCompletedLessonId(course) ?? findFirstLessonIdForCompletedCourse(course));
 
   if (!lessonId) return;
 

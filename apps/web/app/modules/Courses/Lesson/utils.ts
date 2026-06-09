@@ -320,6 +320,16 @@ export const findFirstLessonId = (course: GetCourseResponse["data"]) => {
   return find(allLessons, (lesson) => Boolean(lesson?.id))?.id;
 };
 
+export const findFirstLessonIdForCompletedCourse = (course: GetCourseResponse["data"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+
+  const isCompletedCourse =
+    allLessons.length > 0 &&
+    allLessons.every((lesson) => lesson.status === LESSON_PROGRESS_STATUSES.COMPLETED);
+
+  return isCompletedCourse ? allLessons[0]?.id : undefined;
+};
+
 export const isNextBlocked = (
   currentLessonIndex: number,
   totalLessons: number,

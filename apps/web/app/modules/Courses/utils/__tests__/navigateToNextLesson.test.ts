@@ -69,6 +69,34 @@ describe("navigateToNextLesson", () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it("navigates to the first lesson when the course is completed", () => {
+    const courseData = {
+      slug: "course-slug",
+      chapters: [
+        {
+          id: "chapter-1",
+          lessons: [
+            {
+              id: "first-lesson",
+              status: "completed",
+            },
+            {
+              id: "second-lesson",
+              status: "completed",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+    const navigate = vi.fn() as unknown as NavigateFunction;
+
+    navigateToNextLesson(courseData, navigate);
+
+    expect(navigate).toHaveBeenCalledWith("/course/course-slug/lesson/first-lesson", {
+      state: { chapterId: "chapter-1" },
+    });
+  });
+
   it("navigates to the first lesson when requested for preview mode", () => {
     const courseData = {
       slug: "course-slug",
