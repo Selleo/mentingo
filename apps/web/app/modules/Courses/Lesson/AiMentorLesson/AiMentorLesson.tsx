@@ -40,9 +40,15 @@ interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
   lessonLoading: boolean;
   previewUser?: LessonPreviewUser;
+  hideControls?: boolean;
 }
 
-const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonProps) => {
+const AiMentorLesson = ({
+  lesson,
+  lessonLoading,
+  previewUser,
+  hideControls = false,
+}: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
   const courseExperience = useOptionalCourseAccessProvider();
@@ -188,7 +194,28 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
         <LoaderWithTextSequence preset="aiMentor" />
       ) : null}
 
-      {!lessonLoading && hasTaskDescription && (
+      {!lessonLoading && hasTaskDescription && hideControls && (
+        <div
+          data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION}
+          className="w-full mb-10 rounded-xl border border-l-4 border-primary-600 bg-white shadow-sm"
+        >
+          <div className="flex w-full items-start gap-3 px-4 py-3 text-left">
+            <div className="text-primary-700">
+              <Icon name="BookOpen" className="size-5" />
+            </div>
+            <div className="flex-1">
+              <div className="font-semibold text-neutral-900">
+                {t("studentCourseView.lesson.aiMentorLesson.taskDescription")}
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-neutral-100 px-4 py-4 text-neutral-800">
+            <div className="max-h-24 overflow-y-auto">{lesson.description}</div>
+          </div>
+        </div>
+      )}
+
+      {!lessonLoading && hasTaskDescription && !hideControls && (
         <Accordion
           data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION}
           type="single"
@@ -253,7 +280,7 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
         )}
       </div>
 
-      {isThreadActive && !isJudgePending && (
+      {isThreadActive && !isJudgePending && !hideControls && (
         <LessonForm
           lessonId={lesson.id}
           mentorName={
@@ -272,32 +299,36 @@ const AiMentorLesson = ({ lesson, lessonLoading, previewUser }: AiMentorLessonPr
         />
       )}
 
-      <hr className="mt-4 w-full border-t border-[#EDEDED]" />
-      <div className="mt-4 flex w-full justify-center">
-        {isThreadActive && !isJudgePending ? (
-          <Button
-            data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
-            variant="primary"
-            size="lg"
-            className="max-w-fit gap-2"
-            onClick={handleJudge}
-          >
-            {t("studentCourseView.lesson.aiMentorLesson.check")}
-            <Icon name="ArrowRight" className="size-5" />
-          </Button>
-        ) : (
-          <Button
-            data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
-            variant="outline"
-            size="lg"
-            className="max-w-fit gap-2"
-            onClick={() => setShowRetakeModal(true)}
-          >
-            {t("studentCourseView.lesson.aiMentorLesson.retake")}
-            <Icon name="ArrowRight" className="size-5" />
-          </Button>
-        )}
-      </div>
+      {!hideControls && (
+        <>
+          <hr className="mt-4 w-full border-t border-[#EDEDED]" />
+          <div className="mt-4 flex w-full justify-center">
+            {isThreadActive && !isJudgePending ? (
+              <Button
+                data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
+                variant="primary"
+                size="lg"
+                className="max-w-fit gap-2"
+                onClick={handleJudge}
+              >
+                {t("studentCourseView.lesson.aiMentorLesson.check")}
+                <Icon name="ArrowRight" className="size-5" />
+              </Button>
+            ) : (
+              <Button
+                data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
+                variant="outline"
+                size="lg"
+                className="max-w-fit gap-2"
+                onClick={() => setShowRetakeModal(true)}
+              >
+                {t("studentCourseView.lesson.aiMentorLesson.retake")}
+                <Icon name="ArrowRight" className="size-5" />
+              </Button>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };

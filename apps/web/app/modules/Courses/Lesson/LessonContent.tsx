@@ -26,6 +26,7 @@ type LessonContentProps = {
   lesson: GetLessonByIdResponse["data"];
   course: GetCourseResponse["data"];
   previewUser?: LessonPreviewUser;
+  hideControls?: boolean;
   lessonsAmount: number;
   handlePrevious: () => void;
   handleNext: () => void;
@@ -38,6 +39,7 @@ export const LessonContent = ({
   lesson,
   course,
   previewUser,
+  hideControls = false,
   lessonsAmount,
   handlePrevious,
   handleNext,
@@ -223,7 +225,7 @@ export const LessonContent = ({
                 </p>
                 {lesson.type === LessonType.AI_MENTOR && (
                   <Tooltip>
-                    <TooltipTrigger>
+                    <TooltipTrigger asChild>
                       <Badge variant="secondary" className="uppercase">
                         Beta
                       </Badge>
@@ -241,33 +243,36 @@ export const LessonContent = ({
                 {lesson.title}
               </p>
             </div>
-            <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
-              <div className="flex flex-row gap-x-4">
-                <Button
-                  variant="outline"
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  disabled={isPreviousDisabled || isFirstLesson}
-                  onClick={handlePrevious}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
-                </Button>
-                <Button
-                  data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
-                  variant="outline"
-                  disabled={isNextDisabled}
-                  className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
-                  onClick={handleNext}
-                >
-                  <Icon name="ArrowRight" className="h-auto w-4" />
-                </Button>
+            {!hideControls && (
+              <div className="mt-4 flex flex-col gap-2 sm:ml-8 sm:mt-0 sm:items-end">
+                <div className="flex flex-row gap-x-4">
+                  <Button
+                    variant="outline"
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    disabled={isPreviousDisabled || isFirstLesson}
+                    onClick={handlePrevious}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4 rotate-180" />
+                  </Button>
+                  <Button
+                    data-testid={LEARNING_HANDLES.NEXT_LESSON_BUTTON}
+                    variant="outline"
+                    disabled={isNextDisabled}
+                    className="w-full gap-x-1 sm:w-auto disabled:opacity-0"
+                    onClick={handleNext}
+                  >
+                    <Icon name="ArrowRight" className="h-auto w-4" />
+                  </Button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           <LessonContentRenderer
             lesson={lesson}
             user={user}
             previewUser={previewUser}
+            hideControls={hideControls}
             lessonLoading={lessonLoading}
             onVideoEnded={handleVideoEnded}
           />
