@@ -1372,6 +1372,7 @@
         "category": "kategorijas",
         "group": "grupes",
         "course": "kursus",
+        "course_discussion": "kursų diskusijas",
         "learning_path": "tobulėjimo kelius",
         "learning_mode": "mokymosi režimą",
         "learning_progress": "mokymosi pažangą",
@@ -1394,6 +1395,12 @@
         "other": "platformos funkcijas"
       },
       "descriptions": {
+        "course_discussion_read": "Gali peržiūrėti kursų diskusijas.",
+        "course_discussion_message_create": "Gali kurti žinutes kursų diskusijose.",
+        "course_discussion_message_react": "Gali reaguoti į kursų diskusijų žinutes.",
+        "course_discussion_message_delete_own": "Gali trinti savo kursų diskusijų žinutes.",
+        "course_discussion_message_delete": "Gali trinti kursų diskusijų žinutes.",
+        "announcement_delete": "Gali trinti pranešimus.",
         "calendar_read": "Gali peržiūrėti kalendoriaus įvykius.",
         "live_training_read": "Gali peržiūrėti gyvus mokymus.",
         "live_training_create": "Gali kurti gyvus mokymus.",

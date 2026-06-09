@@ -1372,6 +1372,7 @@
         "category": "kategorie",
         "group": "skupiny",
         "course": "kurzy",
+        "course_discussion": "diskuse ke kurzům",
         "learning_path": "rozvojové cesty",
         "learning_mode": "režim učení",
         "learning_progress": "studijní postup",
@@ -1394,6 +1395,12 @@
         "other": "funkce platformy"
       },
       "descriptions": {
+        "course_discussion_read": "Může zobrazit diskuse ke kurzům.",
+        "course_discussion_message_create": "Může vytvářet zprávy v diskusích ke kurzům.",
+        "course_discussion_message_react": "Může reagovat na zprávy v diskusích ke kurzům.",
+        "course_discussion_message_delete_own": "Může mazat vlastní zprávy v diskusích ke kurzům.",
+        "course_discussion_message_delete": "Může mazat zprávy v diskusích ke kurzům.",
+        "announcement_delete": "Může mazat oznámení.",
         "calendar_read": "Může zobrazit události v kalendáři.",
         "live_training_read": "Může zobrazit živá školení.",
         "live_training_create": "Může vytvářet živá školení.",
