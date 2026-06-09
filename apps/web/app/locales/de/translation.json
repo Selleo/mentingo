@@ -1366,6 +1366,7 @@
         "category": "Kategorien",
         "group": "Gruppen",
         "course": "Kurse",
+        "course_discussion": "Kursdiskussionen",
         "learning_path": "Entwicklungspfade",
         "learning_mode": "Lernmodus",
         "learning_progress": "Lernfortschritt",
@@ -1388,6 +1389,12 @@
         "other": "Plattformfunktionen"
       },
       "descriptions": {
+        "course_discussion_read": "Kann Kursdiskussionen anzeigen.",
+        "course_discussion_message_create": "Kann Nachrichten in Kursdiskussionen erstellen.",
+        "course_discussion_message_react": "Kann auf Nachrichten in Kursdiskussionen reagieren.",
+        "course_discussion_message_delete_own": "Kann eigene Nachrichten in Kursdiskussionen löschen.",
+        "course_discussion_message_delete": "Kann Nachrichten in Kursdiskussionen löschen.",
+        "announcement_delete": "Kann Ankündigungen löschen.",
         "calendar_read": "Kalenderereignisse anzeigen.",
         "live_training_read": "Live Trainings anzeigen.",
         "live_training_create": "Live Trainings erstellen.",

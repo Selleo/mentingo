@@ -79,9 +79,9 @@ export const PermissionsMatrix = ({
               {roles.map((role) => (
                 <th
                   key={role.slug}
-                  className="sticky top-0 z-30 h-12 min-w-32 bg-background px-4 text-left align-middle font-medium text-muted-foreground"
+                  className="sticky top-0 z-30 h-12 min-w-fit px-4 bg-background text-left align-middle font-medium text-muted-foreground"
                 >
-                  <Badge className="grid place-items-center" variant="secondary">
+                  <Badge className="grid place-items-center whitespace-nowrap" variant="secondary">
                     {role.label}
                   </Badge>
                 </th>
