@@ -27,6 +27,12 @@ export const useImportUsers = (searchParams?: UsersParams) => {
 
       return response.data;
     },
+    onMutate: () => {
+      toast({
+        variant: "loading",
+        description: t("adminUsersView.import.toast.processing"),
+      });
+    },
     onSuccess: async ({ data }) => {
       const { importedUsersAmount, skippedUsersAmount } = data;
 

@@ -1317,6 +1317,7 @@
     },
     "import": {
       "toast": {
+        "processing": "User import is processing...",
         "success": "Import completed successfully.\nImported {{ importedUsersAmount }} users.\nSkipped {{ skippedUsersAmount }} existing users."
       }
     },

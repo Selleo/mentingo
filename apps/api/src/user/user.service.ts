@@ -689,12 +689,7 @@ export class UserService {
   ) {
     const db = dbInstance ?? this.db;
 
-    const [existingUser] = await db
-      .select()
-      .from(users)
-      .where(and(eq(users.email, data.email)));
-
-    if (existingUser) throw new ConflictException("User already exists");
+    await this.assertUserEmailAvailable(data.email);
 
     const { createdUser, token, newUsersLanguage } = await this.createUserTransaction(
       db,
@@ -761,6 +756,16 @@ export class UserService {
     );
 
     return createdUser;
+  }
+
+  private async assertUserEmailAvailable(email: string) {
+    const [existingUser] = await this.dbAdmin
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    if (existingUser) throw new ConflictException("registerView.toast.userAlreadyExists");
   }
 
   private async createUserTransaction(
@@ -955,10 +960,11 @@ export class UserService {
     );
 
     for (const userData of usersData) {
-      const [existingUser] = await this.db
-        .select()
+      const [existingUser] = await this.dbAdmin
+        .select({ email: users.email })
         .from(users)
-        .where(eq(users.email, userData.email));
+        .where(eq(users.email, userData.email))
+        .limit(1);
 
       if (existingUser) {
         importStats.skippedUsersAmount++;
