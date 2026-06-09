@@ -139,7 +139,6 @@ export class LessonService {
         contentType: resource.contentType,
         title: typeof resource.title === "string" ? resource.title : undefined,
         description: typeof resource.description === "string" ? resource.description : undefined,
-        fileName: this.extractOriginalFilename(resource.metadata),
       }));
 
       const {
@@ -149,9 +148,8 @@ export class LessonService {
         videos,
       } = injectResourcesIntoContent(lesson.description, mappedResources, {
         resourceIdRegex: createLessonResourceIdRegex(),
-        trackNodeTypes: ["video", "presentation", "downloadable-file"],
-        isImageResource: (resource) => this.isImageResource(resource),
-        buildImageTag: (resource) => this.buildImageTag(resource),
+        trackNodeTypes: ["video", "image", "presentation", "downloadable-file"],
+        convertImageAnchors: false,
       });
 
       const hasVideo = this.hasOnlyVideo(contentCount);
@@ -635,28 +633,6 @@ export class LessonService {
     language: SupportedLanguages,
   ): Promise<EnrolledLessonWithSearch[]> {
     return this.lessonRepository.getLessonsByRole(currentUser, filters, language);
-  }
-
-  extractOriginalFilename(metadata: unknown) {
-    if (!metadata || typeof metadata !== "object") return undefined;
-    if ("originalFilename" in metadata && typeof metadata.originalFilename === "string")
-      return metadata.originalFilename;
-    return undefined;
-  }
-
-  private buildImageTag(resource: { fileUrl: string; title?: string }) {
-    return `<img src="${resource.fileUrl}" alt="${resource.title ?? ""}" />`;
-  }
-
-  private isImageResource(resource: {
-    contentType: string | null;
-    fileUrl: string;
-    fileName?: string;
-  }) {
-    if ((resource.contentType ?? "").startsWith("image/")) return true;
-    if (resource.fileName && /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileName))
-      return true;
-    return /\.(png|jpe?g|gif|webp|svg|bmp|tiff)(\?|#|$)/i.test(resource.fileUrl);
   }
 
   private hasOnlyVideo(contentCount: Record<string, number>) {

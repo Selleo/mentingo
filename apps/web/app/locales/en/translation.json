@@ -3468,6 +3468,12 @@
         "remove": "Remove presentation embed"
       }
     },
+    "image": {
+      "ariaLabel": {
+        "drag": "Drag image",
+        "remove": "Remove image"
+      }
+    },
     "downloadableFile": {
       "ariaLabel": {
         "drag": "Drag file",

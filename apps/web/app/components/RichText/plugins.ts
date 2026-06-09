@@ -1,6 +1,5 @@
 import { mergeAttributes } from "@tiptap/core";
 import { Heading } from "@tiptap/extension-heading";
-import { Image } from "@tiptap/extension-image";
 import { Link } from "@tiptap/extension-link";
 import { Placeholder } from "@tiptap/extension-placeholder";
 import { Table } from "@tiptap/extension-table";
@@ -17,6 +16,7 @@ import {
   DownloadableFileEmbedViewer,
 } from "~/components/RichText/extensions/downloadableFile";
 import { Iframe } from "~/components/RichText/extensions/iframe";
+import { ImageEmbedEditor, ImageEmbedViewer } from "~/components/RichText/extensions/image";
 import {
   LoadingAiAssetEditor,
   LoadingAiAssetViewer,
@@ -90,11 +90,6 @@ const basePlugins = [
       target: "_blank",
     },
   }),
-  Image.configure({
-    HTMLAttributes: {
-      class: "max-w-full h-auto m-0",
-    },
-  }),
   Iframe,
 ];
 
@@ -123,6 +118,7 @@ export const getContentEditorPlugins = (options?: RichTextResourceNodeOptions) =
   }),
   DownloadableFileEmbedEditor.configure(options),
   LoadingAiAssetEditor,
+  ImageEmbedEditor.configure(options),
   PdfPreviewEmbedEditor.configure(options),
   PresentationEmbedEditor.configure(options),
   VideoEmbedEditor.configure(options),
@@ -137,6 +133,7 @@ export const contentViewerPlugins = [
   ...tablePlugins,
   DownloadableFileEmbedViewer,
   LoadingAiAssetViewer,
+  ImageEmbedViewer,
   PdfPreviewEmbedViewer,
   PresentationEmbedViewer,
   VideoEmbedViewer,

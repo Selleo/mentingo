@@ -14,6 +14,7 @@ import { useResourceLibraryAssetUsages } from "~/api/queries/useResourceLibraryA
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { Pagination } from "~/components/Pagination/Pagination";
+import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -26,7 +27,6 @@ import { Input } from "~/components/ui/input";
 import { useToast } from "~/components/ui/use-toast";
 import { buildRichTextFileUploadHandler } from "~/hooks/buildRichTextFileUploadHandler";
 import { useDebounce } from "~/hooks/useDebounce";
-import { insertResourceIntoEditor } from "~/hooks/useEntityResourceUpload";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 import { cn } from "~/lib/utils";
@@ -44,7 +44,7 @@ import { AssetLibraryDeleteConfirmation } from "./AssetLibraryDeleteConfirmation
 import type { SupportedLanguages } from "@repo/shared";
 import type { Editor } from "@tiptap/react";
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
-import type { RichTextResourceDisplayMode } from "~/hooks/useEntityResourceUpload";
+import type { RichTextResourceDisplayMode } from "~/components/RichText/utils/richTextResource.types";
 import type { RichTextResourceLibraryEntityType } from "~/types/resourceLibrary";
 
 export type AssetLibraryConfig = {

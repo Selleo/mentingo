@@ -14,23 +14,21 @@ import {
   insertVideoUploadPlaceholder,
   updateVideoUploadNodeById,
 } from "~/components/RichText/extensions/utils/videoUploadNode";
+import { buildEntityResourceUrl } from "~/components/RichText/utils/buildEntityResourceUrl";
+import { insertResourceIntoEditor } from "~/components/RichText/utils/insertResourceIntoEditor";
 import {
+  RICH_TEXT_RESOURCE_DISPLAY_MODE,
   RICH_TEXT_RESOURCE_TYPE,
-  buildEntityResourceUrl,
-  insertResourceIntoEditor,
-} from "~/hooks/useEntityResourceUpload";
+} from "~/components/RichText/utils/richTextResource.types";
 import { UPLOAD_STATUS } from "~/hooks/useRichTextUploadQueue";
 
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import type { InitVideoUploadResponse } from "~/api/generated-api";
+import type {
+  RichTextResourceDisplayMode,
+  RichTextResourceType,
+} from "~/components/RichText/utils/richTextResource.types";
 import type { RichTextUploadKind, RichTextUploadStatus } from "~/hooks/useRichTextUploadQueue";
-
-const DISPLAY_MODE = {
-  PREVIEW: "preview",
-  DOWNLOAD: "download",
-} as const;
-
-type DisplayMode = (typeof DISPLAY_MODE)[keyof typeof DISPLAY_MODE];
 
 const createSerialQueue = () => {
   let tail = Promise.resolve();
@@ -49,7 +47,7 @@ const displayModePromptQueue = createSerialQueue();
 const editorMutationQueue = createSerialQueue();
 
 const askForDisplayModeSequentially = (
-  askForDisplayMode: (filename: string) => Promise<DisplayMode | null>,
+  askForDisplayMode: (filename: string) => Promise<RichTextResourceDisplayMode | null>,
   filename: string,
 ) => {
   return displayModePromptQueue(() => askForDisplayMode(filename));
@@ -188,7 +186,7 @@ const handleResourceUpload = async ({
   entityType: EntityType;
   resourceType: RichTextResourceType;
   displayModePrompt: boolean;
-  askForDisplayMode: (filename: string) => Promise<DisplayMode | null>;
+  askForDisplayMode: (filename: string) => Promise<RichTextResourceDisplayMode | null>;
   uploadResourceFile: (file: File) => Promise<string>;
   fallbackUploadErrorMessage: string;
   uploadQueue?: BuildRichTextFileUploadHandlerArgs["uploadQueue"];
@@ -200,7 +198,7 @@ const handleResourceUpload = async ({
     uploadQueue?.setStatus(queueId, UPLOAD_STATUS.UPLOADING);
   }
 
-  let displayMode: DisplayMode = DISPLAY_MODE.PREVIEW;
+  let displayMode: RichTextResourceDisplayMode = RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW;
 
   if (insertOnUpload && displayModePrompt) {
     const selectedMode = await askForDisplayModeSequentially(askForDisplayMode, file.name);
@@ -254,7 +252,7 @@ type BuildRichTextFileUploadHandlerArgs = {
   getVideoSessionForFile: (file: File) => Promise<InitVideoUploadResponse>;
   uploadVideo: (args: VideoUploadArgs) => Promise<void>;
   uploadResourceFile: (file: File) => Promise<string>;
-  askForDisplayMode: (filename: string) => Promise<DisplayMode | null>;
+  askForDisplayMode: (filename: string) => Promise<RichTextResourceDisplayMode | null>;
   onVideoUploadError: (error: unknown) => void;
   fallbackUploadErrorMessage: string;
   insertOnUpload?: boolean;
@@ -271,9 +269,8 @@ type BuildRichTextFileUploadHandlerArgs = {
   };
 };
 
-type RichTextResourceType = (typeof RICH_TEXT_RESOURCE_TYPE)[keyof typeof RICH_TEXT_RESOURCE_TYPE];
-
 type FileCharacteristics = {
+  isImage: boolean;
   isVideo: boolean;
   isPresentation: boolean;
   isPdf: boolean;
@@ -282,6 +279,7 @@ type FileCharacteristics = {
 };
 
 const getFileCharacteristics = (file: File): FileCharacteristics => {
+  const isImage = ALLOWED_LESSON_IMAGE_FILE_TYPES.includes(file.type);
   const isVideo = ALLOWED_VIDEO_FILE_TYPES.includes(file.type);
   const isPresentation = ALLOWED_PRESENTATION_FILE_TYPES.includes(file.type);
   const isPdf = ALLOWED_PDF_FILE_TYPES.includes(file.type);
@@ -291,16 +289,19 @@ const getFileCharacteristics = (file: File): FileCharacteristics => {
     ALLOWED_WORD_FILE_TYPES.includes(file.type);
 
   return {
+    isImage,
     isVideo,
     isPresentation,
     isPdf,
     isDocument,
     resourceType: match({
+      isImage,
       isVideo,
       isPresentation,
       isPdf,
       isDocument,
     })
+      .with({ isImage: true }, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
       .with({ isVideo: true }, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
       .with({ isPresentation: true }, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
       .with({ isPdf: true }, () => RICH_TEXT_RESOURCE_TYPE.PDF)

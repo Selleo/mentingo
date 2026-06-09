@@ -6,6 +6,7 @@ import {
 } from "../Question/FillInTheBlanks/dnd/FillInTheBlanksDnd";
 import {
   findFirstInProgressLessonId,
+  findFirstLessonIdForCompletedCourse,
   findFirstNonCompletedLessonId,
   findFirstNotStartedLessonId,
   getEmptyQuizAnswers,
@@ -211,6 +212,64 @@ describe("findFirstNonCompletedLessonId", () => {
     } as unknown as GetCourseResponse["data"];
 
     const firstLessonId = findFirstNonCompletedLessonId(courseData);
+
+    expect(firstLessonId).toBe(undefined);
+  });
+});
+
+describe("findFirstLessonIdForCompletedCourse", () => {
+  it("returns the first lesson id when every lesson is completed", () => {
+    const courseData = {
+      chapters: [
+        {
+          lessons: [
+            {
+              id: "1665722f-9dbe-48ca-8625-1669d92b9972",
+              status: "completed",
+            },
+            {
+              id: "805eca43-9162-4e19-b3f6-e2506b79f531",
+              status: "completed",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstLessonIdForCompletedCourse(courseData);
+
+    expect(firstLessonId).toBe("1665722f-9dbe-48ca-8625-1669d92b9972");
+  });
+
+  it("returns undefined when any lesson is not completed", () => {
+    const courseData = {
+      chapters: [
+        {
+          lessons: [
+            {
+              id: "1665722f-9dbe-48ca-8625-1669d92b9972",
+              status: "completed",
+            },
+            {
+              id: "805eca43-9162-4e19-b3f6-e2506b79f531",
+              status: "blocked",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstLessonIdForCompletedCourse(courseData);
+
+    expect(firstLessonId).toBe(undefined);
+  });
+
+  it("returns undefined for empty chapters", () => {
+    const courseData = {
+      chapters: [],
+    } as unknown as GetCourseResponse["data"];
+
+    const firstLessonId = findFirstLessonIdForCompletedCourse(courseData);
 
     expect(firstLessonId).toBe(undefined);
   });

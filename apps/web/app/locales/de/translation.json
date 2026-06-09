@@ -3388,6 +3388,12 @@
         "remove": "Präsentationseinbettung entfernen"
       }
     },
+    "image": {
+      "ariaLabel": {
+        "drag": "Bild ziehen",
+        "remove": "Bild entfernen"
+      }
+    },
     "downloadableFile": {
       "ariaLabel": {
         "drag": "Datei ziehen",

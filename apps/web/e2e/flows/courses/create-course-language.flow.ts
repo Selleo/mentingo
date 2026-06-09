@@ -28,7 +28,16 @@ export const createCourseLanguageFlow = async (page: Page, language: SupportedLa
   const createDialog = page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_DIALOG);
 
   await createDialog.waitFor();
-  await page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_CONFIRM_BUTTON).click();
+
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        response.url().includes("/api/course/beta-create-language/"),
+    ),
+    page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.CREATE_CONFIRM_BUTTON).click(),
+  ]);
+
   await createDialog.waitFor({ state: "hidden" });
   await dismissGenerateMissingTranslationsDialogFlow(page);
   await waitForDialogOverlaysHiddenFlow(page);

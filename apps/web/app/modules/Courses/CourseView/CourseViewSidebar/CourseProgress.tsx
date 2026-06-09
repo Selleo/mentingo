@@ -31,8 +31,8 @@ export const CourseProgress = ({ course }: CourseProgressProps) => {
   const isCourseEmpty = !course.chapters.length || course.chapters?.[0]?.lessonCount === 0;
 
   const handleNavigateToLesson = useCallback(() => {
-    navigateToNextLesson(course, navigate);
-  }, [course, navigate]);
+    navigateToNextLesson(course, navigate, { openFirstLesson: isPreviewMode });
+  }, [course, isPreviewMode, navigate]);
 
   return (
     <>

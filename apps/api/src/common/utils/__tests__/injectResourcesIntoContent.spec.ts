@@ -16,6 +16,45 @@ const getVideoAutoplayActions = (html: string) => {
 };
 
 describe("injectResourcesIntoContent", () => {
+  it("counts image nodes without rewriting image resource anchors when disabled", () => {
+    const content = [
+      `<div data-node-type="image" data-src="/api/lesson/lesson-resource/${resourceA}" data-resource-id="${resourceA}" data-alt="Diagram"></div>`,
+      `<p><a href="/api/lesson/lesson-resource/${resourceB}" data-resource-id="${resourceB}">Legacy image</a></p>`,
+    ].join("");
+
+    const result = injectResourcesIntoContent(
+      content,
+      [
+        { id: resourceA, fileUrl: "https://cdn.example.com/a.png", contentType: "image/png" },
+        { id: resourceB, fileUrl: "https://cdn.example.com/b.png", contentType: "image/png" },
+      ],
+      {
+        resourceIdRegex: createLessonResourceIdRegex(),
+        trackNodeTypes: ["image"],
+        convertImageAnchors: false,
+      },
+    );
+
+    expect(result.contentCount.image).toBe(1);
+    expect(result.html).toContain('data-node-type="image"');
+    expect(result.html).toContain(">Legacy image</a>");
+  });
+
+  it("keeps legacy image anchor conversion available by default", () => {
+    const content = `<p><a href="/api/lesson/lesson-resource/${resourceA}" data-resource-id="${resourceA}">Legacy image</a></p>`;
+
+    const result = injectResourcesIntoContent(
+      content,
+      [{ id: resourceA, fileUrl: "https://cdn.example.com/a.png", contentType: "image/png" }],
+      {
+        resourceIdRegex: createLessonResourceIdRegex(),
+      },
+    );
+
+    expect(result.contentCount.image).toBe(1);
+    expect(result.html).toContain('<img src="https://cdn.example.com/a.png" alt="">');
+  });
+
   it("normalizes stale autoplay metadata while injecting resources", () => {
     const content = [
       "<p>Intro text.</p>",

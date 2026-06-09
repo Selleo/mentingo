@@ -1,5 +1,9 @@
 import { useTranslation } from "react-i18next";
 
+import {
+  RICH_TEXT_RESOURCE_DISPLAY_MODE,
+  type RichTextResourceDisplayMode,
+} from "~/components/RichText/utils/richTextResource.types";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -14,8 +18,6 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
 
 import { RICH_TEXT_HANDLES } from "../../../../e2e/data/common/handles";
-
-import type { RichTextResourceDisplayMode } from "~/hooks/useEntityResourceUpload";
 
 type UploadDisplayModeDialogProps = {
   open: boolean;
@@ -36,6 +38,11 @@ export const UploadDisplayModeDialog = ({
 }: UploadDisplayModeDialogProps) => {
   const { t } = useTranslation();
 
+  const displayModeOptions = [
+    RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW,
+    RICH_TEXT_RESOURCE_DISPLAY_MODE.DOWNLOAD,
+  ] as const;
+
   return (
     <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? onCancel() : undefined)}>
       <DialogContent data-testid={RICH_TEXT_HANDLES.UPLOAD_DISPLAY_MODE_DIALOG}>
@@ -51,7 +58,7 @@ export const UploadDisplayModeDialog = ({
           onValueChange={(value) => onModeChange(value as RichTextResourceDisplayMode)}
           className="gap-3"
         >
-          {(["preview", "download"] as const).map((option) => (
+          {displayModeOptions.map((option) => (
             <Label
               key={option}
               htmlFor={`upload-display-mode-${option}`}

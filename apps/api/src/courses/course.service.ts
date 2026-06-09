@@ -689,11 +689,12 @@ export class CourseService {
     download: number;
     presentation: number;
   } {
-    const supportedNodeTypes = ["video", "downloadable-file", "presentation"];
+    const supportedNodeTypes = ["video", "image", "downloadable-file", "presentation"];
 
     const { contentCount } = injectResourcesIntoContent(content, [], {
       resourceIdRegex: createLessonResourceIdRegex(),
       trackNodeTypes: supportedNodeTypes,
+      convertImageAnchors: false,
     });
     const videoCount = Number(contentCount.video) || 0;
     const imageCount = Number(contentCount.image) || 0;
