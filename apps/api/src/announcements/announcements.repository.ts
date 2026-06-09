@@ -332,6 +332,23 @@ export class AnnouncementsRepository {
 
     if (!announcement) return;
 
+    if (
+      announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.LIVE_TRAINING &&
+      announcement.sourceId
+    ) {
+      const recipients = await this.getLiveTrainingAnnouncementRecipientIds(
+        announcement.sourceId,
+        announcement.authorId,
+      );
+
+      await this.createUserAnnouncementRecords(
+        recipients.map((recipient) => recipient.id),
+        announcement.id,
+      );
+
+      return;
+    }
+
     if (announcement.groupId) {
       const usersRelatedToGroup = await this.db
         .select({ userId: groupUsers.userId })
@@ -362,6 +379,38 @@ export class AnnouncementsRepository {
       allUserIds.map((user) => user.id),
       announcement.id,
     );
+  }
+
+  private async getLiveTrainingAnnouncementRecipientIds(
+    liveTrainingId: UUIDType,
+    authorId: UUIDType,
+  ) {
+    return this.db
+      .selectDistinct({ id: users.id })
+      .from(users)
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, users.id),
+          eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .innerJoin(
+        liveTrainingLinks,
+        and(
+          eq(liveTrainingLinks.liveTrainingId, liveTrainingId),
+          eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+          eq(liveTrainingLinks.entityId, studentCourses.courseId),
+        ),
+      )
+      .innerJoin(
+        liveLessons,
+        and(
+          eq(liveLessons.liveTrainingId, liveTrainingId),
+          eq(liveLessons.liveTrainingLinkId, liveTrainingLinks.id),
+        ),
+      )
+      .where(and(not(eq(users.id, authorId)), isNull(users.deletedAt)));
   }
 
   async findTenantsWithDueScheduledAnnouncements(
