@@ -134,6 +134,7 @@ export default function LessonPreviewDialog({
             <LessonContent
               lesson={lesson}
               course={course}
+              hideControls={isAiMentorLesson}
               previewUser={{
                 firstName,
                 lastName,

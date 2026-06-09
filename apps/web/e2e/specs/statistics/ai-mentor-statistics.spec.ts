@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { COURSE_STATISTICS_HANDLES } from "../../data/statistics/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openCourseStatisticsTabFlow } from "../../flows/statistics/open-course-statistics-tab.flow";
@@ -74,6 +75,22 @@ test("admin can view AI mentor statistics after prepared mentor progress", async
           COURSE_STATISTICS_HANDLES.aiMentorResultsPreviewButton(studentId, aiMentorLesson.id),
         ),
       ).toBeVisible();
+      await page
+        .getByTestId(
+          COURSE_STATISTICS_HANDLES.aiMentorResultsPreviewButton(studentId, aiMentorLesson.id),
+        )
+        .click();
+      const previewDialog = page.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_DIALOG);
+      await expect(previewDialog).toBeVisible();
+      await expect(page.getByTestId(LEARNING_HANDLES.NEXT_LESSON_BUTTON)).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_INPUT)).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MESSAGE_ACTION_BUTTON)).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeHidden();
+      await expect(previewDialog.getByRole("button")).toHaveCount(1);
+      await previewDialog.getByRole("button").click();
+      await expect(previewDialog).toBeHidden();
 
       await page.getByTestId(COURSE_STATISTICS_HANDLES.AI_MENTOR_LESSON_FILTER).click();
       await page

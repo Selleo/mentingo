@@ -17,12 +17,20 @@ type LessonContentRendererProps = {
   lesson: GetLessonByIdResponse["data"];
   user: CurrentUserResponse["data"] | undefined;
   previewUser?: LessonPreviewUser;
+  hideControls?: boolean;
   lessonLoading: boolean;
   onVideoEnded?: (index: number | null) => void;
 };
 
 export const LessonContentRenderer = memo(
-  ({ lesson, user, previewUser, lessonLoading, onVideoEnded }: LessonContentRendererProps) => {
+  ({
+    lesson,
+    user,
+    previewUser,
+    hideControls = false,
+    lessonLoading,
+    onVideoEnded,
+  }: LessonContentRendererProps) => {
     return match(lesson.type)
       .with("content", () => (
         <Viewer
@@ -33,7 +41,12 @@ export const LessonContentRenderer = memo(
       ))
       .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
       .with("ai_mentor", () => (
-        <AiMentorLesson lesson={lesson} lessonLoading={lessonLoading} previewUser={previewUser} />
+        <AiMentorLesson
+          lesson={lesson}
+          lessonLoading={lessonLoading}
+          previewUser={previewUser}
+          hideControls={hideControls}
+        />
       ))
       .with("embed", () => (
         <EmbedLesson lessonResources={lesson.lessonResources ?? []} lesson={lesson} />
