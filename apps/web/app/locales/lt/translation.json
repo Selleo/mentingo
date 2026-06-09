@@ -3389,6 +3389,12 @@
         "remove": "Pašalinti pristatymo įterpimą"
       }
     },
+    "image": {
+      "ariaLabel": {
+        "drag": "Vilkite paveikslėlį",
+        "remove": "Pašalinti paveikslėlį"
+      }
+    },
     "downloadableFile": {
       "ariaLabel": {
         "drag": "Vilkite failą",

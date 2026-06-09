@@ -995,6 +995,13 @@
       "when": 1780516533407,
       "tag": "0141_unique_calendar_event_tenant_uid",
       "breakpoints": true
+    },
+    {
+      "idx": 142,
+      "version": "7",
+      "when": 1780998251819,
+      "tag": "0142_backfill_content_lesson_image_nodes",
+      "breakpoints": true
     }
   ]
 }

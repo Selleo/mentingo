@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { UploadDisplayModeDialog } from "~/components/RichText/components/UploadDisplayModeDialog";
-
-import type { RichTextResourceDisplayMode } from "./useEntityResourceUpload";
+import {
+  RICH_TEXT_RESOURCE_DISPLAY_MODE,
+  type RichTextResourceDisplayMode,
+} from "~/components/RichText/utils/richTextResource.types";
 
 type PendingDialogData = {
   fileName: string;
@@ -11,11 +13,13 @@ type PendingDialogData = {
 
 export const useUploadDisplayModeDialog = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [mode, setMode] = useState<RichTextResourceDisplayMode>("preview");
+  const [mode, setMode] = useState<RichTextResourceDisplayMode>(
+    RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW,
+  );
   const pendingRef = useRef<PendingDialogData | null>(null);
 
   const askForDisplayMode = useCallback((fileName: string) => {
-    setMode("preview");
+    setMode(RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW);
     setIsOpen(true);
 
     return new Promise<RichTextResourceDisplayMode | null>((resolve) => {

@@ -3726,6 +3726,12 @@
         "remove": "Usuń osadzoną prezentację"
       }
     },
+    "image": {
+      "ariaLabel": {
+        "drag": "Przeciągnij obraz",
+        "remove": "Usuń obraz"
+      }
+    },
     "downloadableFile": {
       "ariaLabel": {
         "drag": "Przeciągnij plik",

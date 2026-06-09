@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { match } from "ts-pattern";
 
-import { RICH_TEXT_RESOURCE_TYPE } from "~/hooks/useEntityResourceUpload";
+import { RICH_TEXT_RESOURCE_TYPE } from "~/components/RichText/utils/richTextResource.types";
 
 import type { ResourceLibraryAsset } from "~/api/queries/useResourceLibraryAssets";
 
@@ -35,6 +35,7 @@ export const isAssetLibraryVideoFile = (file: File) => ALLOWED_VIDEO_FILE_TYPES.
 
 export const getRichTextResourceTypeFromAsset = (asset: ResourceLibraryAsset) =>
   match(asset.type)
+    .with(RESOURCE_LIBRARY_ASSET_TYPE.IMAGE, () => RICH_TEXT_RESOURCE_TYPE.IMAGE)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.VIDEO, () => RICH_TEXT_RESOURCE_TYPE.VIDEO)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.PRESENTATION, () => RICH_TEXT_RESOURCE_TYPE.PRESENTATION)
     .with(RESOURCE_LIBRARY_ASSET_TYPE.PDF, () => RICH_TEXT_RESOURCE_TYPE.PDF)

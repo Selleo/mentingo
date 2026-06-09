@@ -20,6 +20,7 @@ type InjectResourcesOptions<T extends ContentResource> = {
   trackNodeTypes?: string[];
   isImageResource?: (resource: T) => boolean;
   buildImageTag?: (resource: T) => string;
+  convertImageAnchors?: boolean;
 };
 
 export const injectResourcesIntoContent = <T extends ContentResource>(
@@ -44,6 +45,7 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   const $ = loadHtml(normalizedContent);
   const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
   const trackNodeTypes = new Set(options.trackNodeTypes ?? []);
+  const convertImageAnchors = options.convertImageAnchors ?? true;
 
   const isImageResource =
     options.isImageResource ?? ((resource) => (resource.contentType ?? "").startsWith("image/"));
@@ -89,30 +91,32 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
     }
   });
 
-  $("a").each((_, element) => {
-    const anchor = $(element);
-    const href = anchor.attr("href") || "";
-    const dataResourceId = anchor.attr("data-resource-id");
+  if (convertImageAnchors) {
+    $("a").each((_, element) => {
+      const anchor = $(element);
+      const href = anchor.attr("href") || "";
+      const dataResourceId = anchor.attr("data-resource-id");
 
-    const matchingResource =
-      (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
-      resources.find((resource) => href.includes(String(resource.id)));
+      const matchingResource =
+        (dataResourceId && resourceMap.get(dataResourceId as UUIDType)) ||
+        resources.find((resource) => href.includes(String(resource.id)));
 
-    if (!matchingResource) return;
+      if (!matchingResource) return;
 
-    if (isImageResource(matchingResource)) {
-      const parent = anchor.parent();
-      const imgTag = buildImageTag(matchingResource);
-      increment("image");
+      if (isImageResource(matchingResource)) {
+        const parent = anchor.parent();
+        const imgTag = buildImageTag(matchingResource);
+        increment("image");
 
-      if (parent.is("p")) {
-        anchor.remove();
-        parent.after(imgTag);
-      } else {
-        anchor.replaceWith(imgTag);
+        if (parent.is("p")) {
+          anchor.remove();
+          parent.after(imgTag);
+        } else {
+          anchor.replaceWith(imgTag);
+        }
       }
-    }
-  });
+    });
+  }
 
   const bodyChildren = $("body").children();
   return {

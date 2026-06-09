@@ -314,6 +314,12 @@ export const findFirstInProgressLessonId = (course: GetCourseResponse["data"]) =
   return find(allLessons, (lesson) => lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS)?.id;
 };
 
+export const findFirstLessonId = (course: GetCourseResponse["data"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+
+  return find(allLessons, (lesson) => Boolean(lesson?.id))?.id;
+};
+
 export const isNextBlocked = (
   currentLessonIndex: number,
   totalLessons: number,

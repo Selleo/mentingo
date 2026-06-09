@@ -3389,6 +3389,12 @@
         "remove": "Odebrat vložení prezentace"
       }
     },
+    "image": {
+      "ariaLabel": {
+        "drag": "Přetáhněte obrázek",
+        "remove": "Odebrat obrázek"
+      }
+    },
     "downloadableFile": {
       "ariaLabel": {
         "drag": "Přetáhněte soubor",

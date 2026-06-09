@@ -1,4 +1,8 @@
-import { findFirstNonCompletedLessonId, getCurrentChapterId } from "../Lesson/utils";
+import {
+  findFirstLessonId,
+  findFirstNonCompletedLessonId,
+  getCurrentChapterId,
+} from "../Lesson/utils";
 
 import type { NavigateFunction } from "@remix-run/react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -6,8 +10,11 @@ import type { GetCourseResponse } from "~/api/generated-api";
 export const navigateToNextLesson = (
   course: GetCourseResponse["data"],
   navigate: NavigateFunction,
+  options: { openFirstLesson?: boolean } = {},
 ) => {
-  const lessonId = findFirstNonCompletedLessonId(course);
+  const lessonId = options.openFirstLesson
+    ? findFirstLessonId(course)
+    : findFirstNonCompletedLessonId(course);
 
   if (!lessonId) return;
 
