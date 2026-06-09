@@ -373,3 +373,14 @@ export const getQuizTooltipText = (
 
   return t("studentLessonView.tooltip.noCooldown");
 };
+
+export const findFirstNonCompletedLessonId = (course: GetCourseResponse["data"]) => {
+  const allLessons = flatMap(course.chapters, (chapter) => chapter.lessons);
+
+  return find(
+    allLessons,
+    (lesson) =>
+      lesson.status === LESSON_PROGRESS_STATUSES.NOT_STARTED ||
+      lesson.status === LESSON_PROGRESS_STATUSES.IN_PROGRESS,
+  )?.id;
+};
