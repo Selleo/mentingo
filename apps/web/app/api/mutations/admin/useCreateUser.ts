@@ -1,11 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { COURSE_OWNERSHIP_CANDIDATES_QUERY_KEY } from "~/api/queries/admin/useCourseOwnershipCandidates";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -36,14 +36,8 @@ export function useCreateUser() {
       toast({ description: t("adminUserView.toast.userCreatedSuccessfully") });
     },
     onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          description: error.response?.data.message,
-          variant: "destructive",
-        });
-      }
       toast({
-        description: error.message,
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
         variant: "destructive",
       });
     },

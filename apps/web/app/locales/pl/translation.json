@@ -1527,6 +1527,7 @@
     },
     "import": {
       "toast": {
+        "processing": "Import użytkowników jest przetwarzany...",
         "success": "Import zakończony pomyślnie.\nZaimportowano {{ importedUsersAmount }} użytkowników.\nPominieto {{ skippedUsersAmount }} istniejących użytkowników."
       }
     },

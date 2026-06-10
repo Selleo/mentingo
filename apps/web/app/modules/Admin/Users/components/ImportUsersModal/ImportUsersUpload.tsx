@@ -18,6 +18,7 @@ interface ImportUsersUploadProps {
   fileUrl: string | undefined;
   setFileUrl: (url: string | undefined) => void;
   handleUsersImport: () => void;
+  isImportingUsers: boolean;
 }
 
 export const ImportUsersUpload = ({
@@ -26,6 +27,7 @@ export const ImportUsersUpload = ({
   fileUrl,
   setFileUrl,
   handleUsersImport,
+  isImportingUsers,
 }: ImportUsersUploadProps) => {
   const { t } = useTranslation();
   return (
@@ -34,9 +36,9 @@ export const ImportUsersUpload = ({
         <DialogTitle>{t("adminUsersView.modal.title.import")}</DialogTitle>
       </DialogHeader>
       <DialogDescription>
-        <div className="body-sm text-muted-foreground">
+        <span className="body-sm block text-muted-foreground">
           {t("adminUsersView.modal.description.import")}
-        </div>
+        </span>
       </DialogDescription>
 
       <div className="py-4">
@@ -65,7 +67,7 @@ export const ImportUsersUpload = ({
       <DialogFooter>
         <Button
           data-testid={USERS_IMPORT_MODAL_HANDLES.SUBMIT}
-          disabled={!file}
+          disabled={!file || isImportingUsers}
           onClick={handleUsersImport}
         >
           {t("adminUsersView.modal.title.import")}

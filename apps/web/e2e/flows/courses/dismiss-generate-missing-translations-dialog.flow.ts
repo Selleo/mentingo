@@ -3,13 +3,23 @@ import { waitForDialogOverlaysHiddenFlow } from "../common/wait-for-dialog-overl
 
 import type { Page } from "@playwright/test";
 
-export const dismissGenerateMissingTranslationsDialogFlow = async (page: Page) => {
+export const dismissGenerateMissingTranslationsDialogFlow = async (
+  page: Page,
+  options: { timeout?: number } = {},
+) => {
+  const { timeout = 10_000 } = options;
+
   const generateDialog = page.getByTestId(COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_DIALOG);
   const generateCancelButton = page.getByTestId(
     COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON,
   );
 
-  if (!(await generateDialog.isVisible({ timeout: 10_000 }).catch(() => false))) {
+  const isGenerateDialogVisible = await generateDialog
+    .waitFor({ state: "visible", timeout })
+    .then(() => true)
+    .catch(() => false);
+
+  if (!isGenerateDialogVisible) {
     await waitForDialogOverlaysHiddenFlow(page);
     return;
   }

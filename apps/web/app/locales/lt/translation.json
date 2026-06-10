@@ -1322,6 +1322,7 @@
     },
     "import": {
       "toast": {
+        "processing": "Naudotojų importavimas apdorojamas...",
         "success": "Importavimas sėkmingai baigtas.\nImportuota {{ importedUsersAmount }} naudotojų.\nPraleista {{ skippedUsersAmount }} esamų naudotojų."
       }
     },

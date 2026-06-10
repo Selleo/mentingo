@@ -1322,6 +1322,7 @@
     },
     "import": {
       "toast": {
+        "processing": "Import uživatelů se zpracovává...",
         "success": "Import byl úspěšně dokončen.\nPočet importovaných uživatelů: {{ importedUsersAmount }}.\nPřeskočeno {{ skippedUsersAmount }} stávajících uživatelů."
       }
     },

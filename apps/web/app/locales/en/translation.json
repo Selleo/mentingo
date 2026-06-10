@@ -1317,6 +1317,7 @@
     },
     "import": {
       "toast": {
+        "processing": "User import is processing...",
         "success": "Import completed successfully.\nImported {{ importedUsersAmount }} users.\nSkipped {{ skippedUsersAmount }} existing users."
       }
     },
@@ -2467,7 +2468,7 @@
       "requiredCheckbox": "This consent is required."
     },
     "toast": {
-      "userAlreadyExists": "User with this email already exists.",
+      "userAlreadyExists": "User with this email already exists",
       "createAccountFailed": "Unable to create account. Please try again.",
       "requiredFormFieldMissing": "Please accept all required consents.",
       "invalidFormField": "One of the submitted registration fields is invalid."

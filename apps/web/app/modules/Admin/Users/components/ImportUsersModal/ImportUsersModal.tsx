@@ -21,10 +21,10 @@ export const ImportUsersModal = ({ open, onClose, searchParams }: ImportUsersMod
 
   const [importUsersResult, setImportUsersResult] = useState<ImportUsersResponse | null>(null);
 
-  const { mutate: importUsers } = useImportUsers(searchParams);
+  const { mutate: importUsers, isPending: isImportingUsers } = useImportUsers(searchParams);
 
   const handleUsersImport = () => {
-    if (!file) return;
+    if (!file || isImportingUsers) return;
 
     importUsers(file, {
       onSuccess: (data) => {
@@ -46,6 +46,7 @@ export const ImportUsersModal = ({ open, onClose, searchParams }: ImportUsersMod
           fileUrl={fileUrl}
           setFileUrl={setFileUrl}
           handleUsersImport={handleUsersImport}
+          isImportingUsers={isImportingUsers}
         />
       )}
     </Dialog>
