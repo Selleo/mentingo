@@ -90,6 +90,6 @@ test("admin sees a conflict when creating a duplicate email", async ({
     await submitCreateUserFormFlow(page);
 
     await expect(page).toHaveURL(/\/admin\/users\/new$/);
-    await assertToastVisible(page, "User already exists");
+    await assertToastVisible(page, "User with this email already exists");
   });
 });
