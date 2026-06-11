@@ -2554,11 +2554,11 @@
       },
       "confirmation": {
         "title": "Potwierdź zapis",
-        "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz zapisać wybranych studentów do tego kursu?"
       },
       "unenrollConfirmation": {
         "title": "Potwierdź wypisanie",
-        "description": "Czy na pewno chcesz wypisać wybranych studentów z tego kursu? Tej operacji nie można cofnąć."
+        "description": "Czy na pewno chcesz wypisać wybranych studentów z tego kursu?"
       },
       "successResponse": "studentów zostało zapisanych do kursu."
     },

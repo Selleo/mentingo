@@ -2244,7 +2244,7 @@
       },
       "confirmation": {
         "title": "Bestätigen Sie die Anmeldung",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten für diesen Kurs anmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten für diesen Kurs anmelden möchten?"
       },
       "enrollGroups": "Melden Sie Gruppen an",
       "enrollGroupsModal": {
@@ -2255,7 +2255,7 @@
       "members": "{{count}} Mitglieder",
       "unenrollConfirmation": {
         "title": "Abmeldebestätigung",
-        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten von diesem Kurs abmelden möchten? Diese Aktion kann nicht rückgängig gemacht werden."
+        "description": "Sind Sie sicher, dass Sie die ausgewählten Studenten von diesem Kurs abmelden möchten?"
       },
       "toast": {
         "someStudentsUnenrolled": "Sie können diese Studenten nicht abmelden, da {{count}} von ihnen nicht eingeschrieben sind.",

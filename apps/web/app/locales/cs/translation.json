@@ -2250,7 +2250,7 @@
       },
       "confirmation": {
         "title": "Potvrďte registraci",
-        "description": "Opravdu chcete vybrané studenty zapsat do tohoto kurzu? Tuto akci nelze vrátit zpět."
+        "description": "Opravdu chcete vybrané studenty zapsat do tohoto kurzu?"
       },
       "enrollGroups": "Zaregistrujte skupiny",
       "enrollGroupsModal": {
@@ -2261,7 +2261,7 @@
       "members": "{{count}} členů",
       "unenrollConfirmation": {
         "title": "Potvrzení odhlášení",
-        "description": "Opravdu chcete zrušit zápis vybraných studentů z tohoto kurzu? Tuto akci nelze vrátit zpět."
+        "description": "Opravdu chcete zrušit zápis vybraných studentů z tohoto kurzu?"
       },
       "toast": {
         "someStudentsUnenrolled": "Tyto studenty nemůžete zrušit, protože {{count}} z nich není zapsáno.",
