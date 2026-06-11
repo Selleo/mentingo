@@ -13,6 +13,8 @@ import { Pagination } from "~/components/Pagination/Pagination";
 import { Card, CardContent } from "~/components/ui/card";
 import { useToast } from "~/components/ui/use-toast";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { CourseChatMessageForm } from "./CourseChatMessageForm";
 import { EmptyState, MainFeedSkeleton } from "./CourseChatStates";
 import { getMentionedUserIds } from "./courseChatUtils";
@@ -123,10 +125,18 @@ export function CourseChatTab({
         />
       )),
     )
-    .otherwise(() => <EmptyState text={t("studentCourseView.courseChat.emptyThreads")} />);
+    .otherwise(() => (
+      <EmptyState
+        text={t("studentCourseView.courseChat.emptyThreads")}
+        testId={COURSE_DISCUSSION_HANDLES.EMPTY_STATE}
+      />
+    ));
 
   return (
-    <Card className="overflow-hidden border-neutral-200 shadow-sm">
+    <Card
+      className="overflow-hidden border-neutral-200 shadow-sm"
+      data-testid={COURSE_DISCUSSION_HANDLES.ROOT}
+    >
       <CardContent className="min-h-[560px] bg-neutral-50 p-0">
         <div className="flex min-w-0 flex-col">
           <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-3 py-4 md:px-5">
@@ -152,6 +162,13 @@ export function CourseChatTab({
             formClassName="border-t border-neutral-200 bg-background p-3 md:px-5"
             wrapperClassName="flex flex-col gap-1.5 rounded-lg border border-neutral-200 bg-background p-1.5 shadow-sm transition focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100"
             textareaClassName="min-h-6 resize-none overflow-hidden border-0 px-1 py-0.5 text-sm leading-5 shadow-none focus-visible:ring-0"
+            testIds={{
+              form: COURSE_DISCUSSION_HANDLES.THREAD_FORM,
+              input: COURSE_DISCUSSION_HANDLES.THREAD_INPUT,
+              sendButton: COURSE_DISCUSSION_HANDLES.THREAD_SEND_BUTTON,
+              mentionList: COURSE_DISCUSSION_HANDLES.THREAD_MENTION_LIST,
+              mentionOption: COURSE_DISCUSSION_HANDLES.threadMentionOption,
+            }}
           />
         </div>
       </CardContent>

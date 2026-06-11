@@ -8,6 +8,8 @@ import {
 import { Button } from "~/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { ReactionButton } from "./ReactionButton";
 
 import type { CourseChatMessageReaction } from "~/api/queries/course-chat/courseChatTypes";
@@ -48,6 +50,7 @@ export function ChatMessageActions({
           disabled={toggleReaction.isPending}
           tooltip={reactWithLabel(reaction)}
           compact
+          testId={COURSE_DISCUSSION_HANDLES.messageReactionAction(messageId, reaction)}
           onClick={() => toggleReaction.mutate({ messageId, reaction })}
         />
       ))}
@@ -61,6 +64,7 @@ export function ChatMessageActions({
                 size="xs"
                 aria-label={t("studentCourseView.courseChat.reply")}
                 className="size-6 rounded-full p-0 text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+                data-testid={COURSE_DISCUSSION_HANDLES.messageReplyAction(messageId)}
                 onClick={onReply}
               >
                 <Reply className="size-3.5" />
@@ -81,6 +85,7 @@ export function ChatMessageActions({
                 aria-label={t("studentCourseView.courseChat.deleteMessage")}
                 className="size-6 rounded-full p-0 text-neutral-600 hover:bg-red-50 hover:text-red-700"
                 disabled={isDeleting}
+                data-testid={COURSE_DISCUSSION_HANDLES.messageDeleteAction(messageId)}
                 onClick={onDelete}
               >
                 <Trash2 className="size-3.5" />

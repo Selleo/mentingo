@@ -1,8 +1,11 @@
 import { Skeleton } from "~/components/ui/skeleton";
 
-export function EmptyState({ text }: { text: string }) {
+export function EmptyState({ text, testId }: { text: string; testId?: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-neutral-300 bg-background p-6 text-center">
+    <div
+      className="rounded-lg border border-dashed border-neutral-300 bg-background p-6 text-center"
+      data-testid={testId}
+    >
       <p className="body-sm text-neutral-600">{text}</p>
     </div>
   );

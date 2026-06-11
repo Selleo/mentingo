@@ -17,10 +17,15 @@ type MentionTextareaProps = {
   placeholder: string;
   maxLength: number;
   className?: string;
+  testIds?: {
+    input?: string;
+    mentionList?: string;
+    mentionOption?: (userId: string) => string;
+  };
 };
 
 export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaProps>(
-  ({ value, onChange, onKeyDown, users, placeholder, maxLength, className }, ref) => {
+  ({ value, onChange, onKeyDown, users, placeholder, maxLength, className, testIds }, ref) => {
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [highlightedIndex, setHighlightedIndex] = useState(0);
     const [isPickerDismissed, setIsPickerDismissed] = useState(false);
@@ -112,9 +117,13 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
           maxLength={maxLength}
           rows={1}
           className={className}
+          data-testid={testIds?.input}
         />
         {matchingUsers.length > 0 && (
-          <div className="absolute bottom-full left-0 z-10 mb-2 w-72 rounded-xl border border-neutral-200 bg-background p-2 shadow-lg">
+          <div
+            className="absolute bottom-full left-0 z-10 mb-2 w-72 rounded-xl border border-neutral-200 bg-background p-2 shadow-lg"
+            data-testid={testIds?.mentionList}
+          >
             {matchingUsers.map((user, index) => {
               const userName = getUserDisplayName(user);
 
@@ -126,6 +135,7 @@ export const MentionTextarea = forwardRef<HTMLTextAreaElement, MentionTextareaPr
                     "flex w-full items-center gap-3 rounded-lg p-2 text-left hover:bg-neutral-50",
                     { "bg-neutral-50": index === highlightedIndex },
                   )}
+                  data-testid={testIds?.mentionOption?.(user.id)}
                   onMouseDown={(event) => {
                     event.preventDefault();
                     insertMention(user);

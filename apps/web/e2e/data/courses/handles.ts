@@ -141,6 +141,36 @@ export const COURSE_OVERVIEW_HANDLES = {
   START_LEARNING_BUTTON: "course-overview-start-learning-button",
 } as const;
 
+const reactionHandleValue = (reaction: string) => reaction.codePointAt(0)?.toString(16) ?? reaction;
+
+export const COURSE_DISCUSSION_HANDLES = {
+  TAB: "course-discussion-tab",
+  ROOT: "course-discussion-root",
+  EMPTY_STATE: "course-discussion-empty-state",
+  THREAD_FORM: "course-discussion-thread-form",
+  THREAD_INPUT: "course-discussion-thread-input",
+  THREAD_SEND_BUTTON: "course-discussion-thread-send-button",
+  THREAD_MENTION_LIST: "course-discussion-thread-mention-list",
+  threadMentionOption: (userId: string) => `course-discussion-thread-mention-option-${userId}`,
+  thread: (messageId: string) => `course-discussion-thread-${messageId}`,
+  message: (messageId: string) => `course-discussion-message-${messageId}`,
+  messageContent: (messageId: string) => `course-discussion-message-content-${messageId}`,
+  messageReplyAction: (messageId: string) => `course-discussion-message-reply-${messageId}`,
+  messageDeleteAction: (messageId: string) => `course-discussion-message-delete-${messageId}`,
+  messageReactionAction: (messageId: string, reaction: string) =>
+    `course-discussion-message-reaction-action-${messageId}-${reactionHandleValue(reaction)}`,
+  messageReactionSummary: (messageId: string, reaction: string) =>
+    `course-discussion-message-reaction-summary-${messageId}-${reactionHandleValue(reaction)}`,
+  repliesToggle: (messageId: string) => `course-discussion-replies-toggle-${messageId}`,
+  replies: (messageId: string) => `course-discussion-replies-${messageId}`,
+  replyForm: (messageId: string) => `course-discussion-reply-form-${messageId}`,
+  replyInput: (messageId: string) => `course-discussion-reply-input-${messageId}`,
+  replySendButton: (messageId: string) => `course-discussion-reply-send-button-${messageId}`,
+  DELETE_DIALOG: "course-discussion-delete-dialog",
+  DELETE_DIALOG_CANCEL_BUTTON: "course-discussion-delete-dialog-cancel-button",
+  DELETE_DIALOG_CONFIRM_BUTTON: "course-discussion-delete-dialog-confirm-button",
+} as const;
+
 export const COURSE_ENROLLED_HANDLES = {
   ROOT: "course-enrolled-root",
   SEARCH_INPUT: "course-enrolled-search-input",
