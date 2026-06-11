@@ -69,7 +69,7 @@ export const getNavigationConfig = (
           ? ([
               {
                 label: t("navigationSideBar.learningPaths"),
-                path: "learning-paths",
+                path: "development-paths",
                 iconName: "Route",
                 testId: NAVIGATION_HANDLES.LEARNING_PATHS_LINK,
               },

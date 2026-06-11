@@ -18,7 +18,7 @@ export const routes: (
         route("", "modules/Dashboard/PublicDashboard.layout.tsx", () => {
           route("courses", "modules/Courses/Courses.page.tsx");
           route("course/:id", "modules/Courses/CourseView/CourseView.page.tsx");
-          route("learning-paths", "modules/LearningPaths/LearningPaths.page.tsx");
+          route("development-paths", "modules/LearningPaths/LearningPaths.page.tsx");
           route("calendar", "modules/Calendar/Calendar.page.tsx");
           route("live-training/:id/room", "modules/LiveTraining/LiveTraining.page.tsx", {
             id: "live-training-room",

@@ -38,6 +38,6 @@ describe("getDefaultAuthenticatedRedirect", () => {
       getDefaultAuthenticatedRedirect(user, globalSettings({ learningPathsEnabled: true }), {
         exclude: ["/courses"],
       }),
-    ).toBe("/learning-paths");
+    ).toBe("/development-paths");
   });
 });

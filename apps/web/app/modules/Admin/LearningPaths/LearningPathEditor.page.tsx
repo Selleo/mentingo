@@ -37,7 +37,7 @@ export default function LearningPathEditorPage() {
   const { permissions } = usePermissions();
   const { data: currentUser } = useCurrentUserSuspense();
 
-  const isCreateMode = pathname.endsWith("/admin/learning-paths/new");
+  const isCreateMode = pathname.endsWith("/admin/development-paths/new");
   const appLanguage = useLanguageStore((state) => state.language);
 
   const [editorLanguage, setEditorLanguage] = useState<SupportedLanguages>(
@@ -69,13 +69,13 @@ export default function LearningPathEditorPage() {
       breadcrumbs={[
         {
           title: t("adminLearningPathsView.breadcrumbs.learningPaths"),
-          href: "/admin/learning-paths",
+          href: "/admin/development-paths",
         },
         {
           title: isCreateMode
             ? t("adminLearningPathsView.breadcrumbs.create")
             : t("adminLearningPathsView.breadcrumbs.edit"),
-          href: isCreateMode ? "/admin/learning-paths/new" : `/admin/learning-paths/${id}`,
+          href: isCreateMode ? "/admin/development-paths/new" : `/admin/development-paths/${id}`,
         },
       ]}
     >

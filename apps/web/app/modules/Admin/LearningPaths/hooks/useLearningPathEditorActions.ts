@@ -58,7 +58,7 @@ export function useLearningPathEditorActions({
     if (isCreateMode) {
       const createdLearningPath = await createLearningPath(payload);
 
-      navigate(`/admin/learning-paths/${createdLearningPath.data.id}`);
+      navigate(`/admin/development-paths/${createdLearningPath.data.id}`);
       return;
     }
 
