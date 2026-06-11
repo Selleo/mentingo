@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from "@nestjs/common";
@@ -66,6 +67,8 @@ import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuer
 
 @Injectable()
 export class LearningPathService {
+  private readonly logger = new Logger(LearningPathService.name);
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
@@ -1162,7 +1165,7 @@ export class LearningPathService {
     try {
       return await this.fileService.getFileUrl(reference);
     } catch (error) {
-      console.error(`Failed to get signed URL for ${reference}:`, error);
+      this.logger.error(`Failed to get signed URL for ${reference}:`, error);
       return reference;
     }
   }

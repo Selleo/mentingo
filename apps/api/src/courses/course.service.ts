@@ -328,7 +328,7 @@ export class CourseService {
           );
           return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
         } catch (error) {
-          console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+          this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
           return item;
         }
       }),
@@ -450,7 +450,7 @@ export class CourseService {
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+            this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return { ...item, trailerUrl };
           }
         }),
@@ -655,7 +655,7 @@ export class CourseService {
     try {
       return await this.fileService.getFileUrl(thumbnailReference);
     } catch (error) {
-      console.error(`Failed to get signed URL for ${thumbnailReference}:`, error);
+      this.logger.error(`Failed to get signed URL for ${thumbnailReference}:`, error);
       return thumbnailReference;
     }
   }
@@ -950,7 +950,7 @@ export class CourseService {
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+            this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
           }
         }),
@@ -3269,7 +3269,7 @@ export class CourseService {
             const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
             return { ...question, photoS3SingedUrl: signedUrl };
           } catch (error) {
-            console.error(
+            this.logger.error(
               `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
               error,
             );
