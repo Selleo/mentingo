@@ -17,6 +17,7 @@ export type CourseSlugResult =
   | { type: "uuid"; courseId: string; slug: string };
 
 const SLUG_MATCH = /^([a-z0-9]{5})-([^ ]+)$/;
+const COURSE_SLUG_FALLBACK = "course";
 
 @Injectable()
 export class CourseSlugService {
@@ -244,11 +245,14 @@ export class CourseSlugService {
   }
 
   private createSlugFromText(text: string): string {
-    return slugify(text, {
-      remove: /[*+~.()'"!:@_\[\]{}|#%^&><?`]/g,
+    const slug = slugify(text, {
       lower: true,
       replacement: "-",
+      strict: true,
+      trim: true,
     });
+
+    return slug || COURSE_SLUG_FALLBACK;
   }
 
   private parseSlug(slug?: string | null) {

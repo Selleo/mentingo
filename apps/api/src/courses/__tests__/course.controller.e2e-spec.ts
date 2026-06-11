@@ -3860,6 +3860,76 @@ describe("CourseController (e2e)", () => {
       expect(courseAfterLookup.shortId).toHaveLength(5);
     });
 
+    it("generates ASCII-only slugs from titles with emoji", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        title: "Course 😀 title",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toMatch(/^[a-z0-9]{5}-[a-z0-9-]+$/);
+      expect(response.body.data.slug).toMatch(/^[a-z0-9]{5}-course-title$/);
+    });
+
+    it("transliterates accented Latin characters in generated slugs", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        title: "Zażółć gęślą jaźń",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toMatch(/^[a-z0-9]{5}-zazolc-gesla-jazn$/);
+    });
+
+    it("uses a fallback slug when the title has no URL-safe characters", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        title: "😀!!!",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course/lookup")
+        .query({ id: course.id, language: "en" })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(response.body.data.status).toBe("found");
+      expect(response.body.data.slug).toMatch(/^[a-z0-9]{5}-course$/);
+    });
+
     it("returns found status when accessing with correct slug", async () => {
       const author = await userFactory
         .withCredentials({ password })
