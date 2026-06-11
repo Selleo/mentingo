@@ -64,7 +64,7 @@ function StudentLearningPathsPage() {
       breadcrumbs={[
         {
           title: t("learningPathsView.breadcrumbs.learningPaths"),
-          href: "/learning-paths",
+          href: "/development-paths",
         },
       ]}
     >

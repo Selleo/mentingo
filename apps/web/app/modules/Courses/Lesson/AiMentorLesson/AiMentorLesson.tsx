@@ -36,6 +36,7 @@ import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 const chatUrl = apiUrl ? `${apiUrl}/api/ai/chat` : "/api/ai/chat";
+const taskDescriptionViewerClassName = "h-[11lh] overflow-y-auto";
 
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
@@ -211,7 +212,7 @@ const AiMentorLesson = ({
             </div>
           </div>
           <div className="border-t border-neutral-100 px-4 py-4 text-neutral-800">
-            <div className="max-h-24 overflow-y-auto">
+            <div className={taskDescriptionViewerClassName}>
               <Viewer content={lesson.description ?? ""} />
             </div>
           </div>
@@ -251,7 +252,7 @@ const AiMentorLesson = ({
               />
             </AccordionTrigger>
             <AccordionContent className="px-4 py-4 text-neutral-800 border-t border-neutral-100">
-              <div className="max-h-24 overflow-y-auto">
+              <div className={taskDescriptionViewerClassName}>
                 <Viewer content={lesson.description ?? ""} />
               </div>
             </AccordionContent>

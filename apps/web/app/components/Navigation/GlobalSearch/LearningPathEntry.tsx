@@ -16,7 +16,7 @@ export const LearningPathEntry = ({
 
   return (
     <Link
-      to={`/learning-paths?${searchParams.toString()}`}
+      to={`/development-paths?${searchParams.toString()}`}
       onClick={onSelect}
       className="group focus:outline-none focus-visible:outline-none"
     >

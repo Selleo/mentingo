@@ -15,7 +15,7 @@ export function AdminLearningPathsPageContent() {
       breadcrumbs={[
         {
           title: t("adminLearningPathsView.breadcrumbs.learningPaths"),
-          href: "/learning-paths",
+          href: "/development-paths",
         },
       ]}
     >

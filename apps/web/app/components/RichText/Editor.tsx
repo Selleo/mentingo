@@ -31,6 +31,8 @@ type EditorProps = {
   placeholder?: string;
   id?: string;
   parentClassName?: string;
+  contentClassName?: string;
+  editorClassName?: string;
   lessonId?: string;
   allowFiles?: boolean;
   acceptedFileTypes?: readonly string[];
@@ -48,6 +50,8 @@ const Editor = ({
   onCtrlSave,
   id,
   parentClassName,
+  contentClassName,
+  editorClassName,
   allowFiles = false,
   acceptedFileTypes = ALLOWED_LESSON_IMAGE_FILE_TYPES,
   assetLibrary,
@@ -139,7 +143,11 @@ const Editor = ({
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
-        class: `prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 ${EMPTY_EDITOR_MIN_HEIGHT_CLASS} !max-w-full`,
+        class: cn(
+          "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 !max-w-full",
+          EMPTY_EDITOR_MIN_HEIGHT_CLASS,
+          editorClassName,
+        ),
       },
     },
   });
@@ -168,6 +176,7 @@ const Editor = ({
     defaultClasses.ul,
     defaultClasses.ol,
     defaultClasses.taskList,
+    contentClassName,
   );
 
   return (

@@ -106,7 +106,7 @@ export const routeAccessConfig = createRouteConfig({
   // Client and public
   "course/:id": PUBLIC,
   courses: PUBLIC,
-  "learning-paths": LEARNING_PATH_READ_ACCESS,
+  "development-paths": LEARNING_PATH_READ_ACCESS,
   calendar: CALENDAR_READ_ACCESS,
   "live-training/:id": LIVE_TRAINING_READ_ACCESS,
   "live-training/:id/room": LIVE_TRAINING_READ_ACCESS,
@@ -135,11 +135,11 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
-  "admin/learning-paths": LEARNING_PATH_ADMIN_ACCESS,
-  "admin/learning-paths/new": {
+  "admin/development-paths": LEARNING_PATH_ADMIN_ACCESS,
+  "admin/development-paths/new": {
     allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
   },
-  "admin/learning-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
+  "admin/development-paths/:id": LEARNING_PATH_ADMIN_ACCESS,
   "admin/users/*": USER_MANAGEMENT_ACCESS,
   "admin/groups/*": {
     allOf: [PERMISSIONS.GROUP_MANAGE],

@@ -45,11 +45,11 @@ export const getDefaultAuthenticatedRedirect = (
   }
 
   if (
-    isAvailableRoute("/learning-paths", excludedRoutes) &&
+    isAvailableRoute("/development-paths", excludedRoutes) &&
     globalSettings?.learningPathsEnabled !== false &&
     hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ)
   ) {
-    return "/learning-paths";
+    return "/development-paths";
   }
 
   return DEFAULT_AUTHENTICATED_ROUTE;

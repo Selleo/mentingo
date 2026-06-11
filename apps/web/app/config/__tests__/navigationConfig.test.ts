@@ -27,7 +27,7 @@ describe("findMatchingRoute", () => {
   });
 
   it("should find learning path routes", () => {
-    expect(findMatchingRoute("learning-paths")).toEqual({
+    expect(findMatchingRoute("development-paths")).toEqual({
       anyOf: [PERMISSIONS.LEARNING_PATH_READ],
     });
   });
@@ -39,7 +39,7 @@ describe("findMatchingRoute", () => {
   });
 
   it("should find admin learning path routes", () => {
-    expect(findMatchingRoute("admin/learning-paths/new")).toEqual({
+    expect(findMatchingRoute("admin/development-paths/new")).toEqual({
       allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
     });
   });
@@ -213,18 +213,18 @@ describe("getNavigationConfig", () => {
   it("should hide learning paths when the feature is disabled", () => {
     const items = getCourseItems(false, true);
 
-    expect(items.some((item) => item.path === "learning-paths")).toBe(false);
+    expect(items.some((item) => item.path === "development-paths")).toBe(false);
   });
 
   it("should hide learning paths when students have no available paths", () => {
     const items = getCourseItems(true, false);
 
-    expect(items.some((item) => item.path === "learning-paths")).toBe(false);
+    expect(items.some((item) => item.path === "development-paths")).toBe(false);
   });
 
   it("should show learning paths when enabled and available", () => {
     const items = getCourseItems(true, true);
 
-    expect(items.some((item) => item.path === "learning-paths")).toBe(true);
+    expect(items.some((item) => item.path === "development-paths")).toBe(true);
   });
 });
