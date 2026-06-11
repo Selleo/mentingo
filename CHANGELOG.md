@@ -1,3 +1,53 @@
+<a name="v4.11.0"></a>
+
+## [v4.11.0] - 11.06.2026
+
+### Features:
+
+- add course due date notifications ([#1567](https://github.com/Selleo/mentingo/issues/1567))
+
+### Bug Fixes:
+
+- restore proper color picker rendering across the platform ([#1615](https://github.com/Selleo/mentingo/issues/1615))
+
+- preserve AI mentor lesson content when changing mentor avatars ([#1613](https://github.com/Selleo/mentingo/issues/1613))
+
+- add missing translations in the permission matrix ([#1603](https://github.com/Selleo/mentingo/issues/1603))
+
+- improve continue learning button behavior and navigation logic ([#1601](https://github.com/Selleo/mentingo/issues/1601))
+
+- correct signup redirection for imported users ([#1596](https://github.com/Selleo/mentingo/issues/1596))
+
+- improve SCORM export reliability and error handling ([#1595](https://github.com/Selleo/mentingo/issues/1595))
+
+- restore reliable report downloads ([#1599](https://github.com/Selleo/mentingo/issues/1599))
+
+### Chores:
+
+- improve modern course layout performance with faster loading ([#1612](https://github.com/Selleo/mentingo/issues/1612))
+
+- allow only latin charactest in course links ([#1618](https://github.com/Selleo/mentingo/issues/1618))
+
+- update development path URLs across the platform ([#1616](https://github.com/Selleo/mentingo/issues/1616))
+
+- include lesson files in global search results ([#1614](https://github.com/Selleo/mentingo/issues/1614))
+
+- make import button disabled while processing ([#1608](https://github.com/Selleo/mentingo/issues/1608))
+
+- allow formatting AI mentor task descriptions ([#1607](https://github.com/Selleo/mentingo/issues/1607))
+
+- show image links as custom nodes while editing content ([#1606](https://github.com/Selleo/mentingo/issues/1606))
+
+- hide AI mentor lesson actions in admin preview mode ([#1602](https://github.com/Selleo/mentingo/issues/1602))
+
+- adjust live training notifications ([#1600](https://github.com/Selleo/mentingo/issues/1600))
+
+- improve course sharing functionality ([#1593](https://github.com/Selleo/mentingo/issues/1593))
+
+### Documentation:
+
+- adjust README to consider most value for HR and L&D enterprise ([#1611](https://github.com/Selleo/mentingo/issues/1611))
+
 <a name="v4.10.0"></a>
 
 ## [v4.10.0] - 03.06.2026
@@ -59,6 +109,10 @@
 - improve the learning paths experience with usability enhancements ([#1531](https://github.com/Selleo/mentingo/issues/1531))
 
 - remove autoplay functionality ([#1524](https://github.com/Selleo/mentingo/issues/1524))
+
+### Documentation:
+
+- update changelog for version v4.10.0
 
 <a name="v4.9.0"></a>
 
@@ -2796,7 +2850,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.10.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.11.0...HEAD
+[v4.11.0]: https://github.com/Selleo/mentingo/compare/v4.10.0...v4.11.0
 [v4.10.0]: https://github.com/Selleo/mentingo/compare/v4.9.0...v4.10.0
 [v4.9.0]: https://github.com/Selleo/mentingo/compare/v4.8.0...v4.9.0
 [v4.8.0]: https://github.com/Selleo/mentingo/compare/v4.7.0...v4.8.0
