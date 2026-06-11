@@ -26784,6 +26784,16 @@
                 },
                 "searchRank": {
                   "type": "number"
+                },
+                "matchedAttachmentFileName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [

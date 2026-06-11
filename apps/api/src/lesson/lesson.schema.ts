@@ -371,6 +371,7 @@ export const enrolledLessonSchema = Type.Object({
   chapterTitle: Type.String(),
   chapterDisplayOrder: Type.Number(),
   searchRank: Type.Optional(Type.Number()),
+  matchedAttachmentFileName: Type.Optional(Type.Union([Type.String(), Type.Null()])),
 });
 
 export const initializeLessonContextSchema = Type.Object({
