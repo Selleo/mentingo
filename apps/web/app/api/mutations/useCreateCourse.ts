@@ -7,6 +7,7 @@ import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
+import { invalidateCourseListData } from "../utils/invalidateCourseListData";
 
 import type { CreateCourseBody } from "../generated-api";
 
@@ -24,8 +25,12 @@ export function useCreateCourse() {
 
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(currentUserQueryOptions);
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries(currentUserQueryOptions),
+        invalidateCourseListData(),
+      ]);
+
       toast({ description: t("adminCourseView.toast.createCourseSuccessfully") });
     },
     onError: (error) => {

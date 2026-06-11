@@ -104,12 +104,12 @@ const HeroBanner = ({
           }}
         />
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute inset-0 pointer-events-none -bottom-0.5"
           style={{
             backgroundImage: `
-              linear-gradient(0deg, #f2f5fc 0%, rgba(242,245,252,0.95) 8%, rgba(242,245,252,0.4) 25%, rgba(242,245,252,0.08) 50%, rgba(242,245,252,0) 75%),
-              radial-gradient(80% 70% at 0% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%),
-              radial-gradient(80% 70% at 100% 100%, rgba(242,245,252,0.95) 0%, rgba(242,245,252,0.7) 30%, rgba(242,245,252,0.2) 55%, rgba(242,245,252,0) 100%)
+              linear-gradient(0deg, var(--primary-50) 0%, color-mix(in srgb, var(--primary-50) 72%, var(--primary-200)) 8%, color-mix(in srgb, var(--primary-200) 24%, transparent) 25%, color-mix(in srgb, var(--primary-200) 5%, transparent) 50%, transparent 75%),
+              radial-gradient(80% 70% at 0% 100%, var(--primary-50) 0%, color-mix(in srgb, var(--primary-200) 42%, transparent) 30%, color-mix(in srgb, var(--primary-200) 12%, transparent) 55%, transparent 100%),
+              radial-gradient(80% 70% at 100% 100%, var(--primary-50) 0%, color-mix(in srgb, var(--primary-200) 42%, transparent) 30%, color-mix(in srgb, var(--primary-200) 12%, transparent) 55%, transparent 100%)
             `,
           }}
         />
@@ -118,9 +118,9 @@ const HeroBanner = ({
       {trailerUrl && (
         <div className="absolute inset-0 z-10 hidden md:block">
           <HeroTrailerVideo src={trailerUrl} />
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-50/95 via-primary-50/70 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary-50/80 via-primary-50/30 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-50/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary-200/75 via-primary-200/45 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary-200/55 via-primary-200/18 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-[50%] bg-gradient-to-t from-primary-50 via-primary-200/32 to-transparent" />
         </div>
       )}
 

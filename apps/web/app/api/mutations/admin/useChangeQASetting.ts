@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { AllowedQASettings } from "@repo/shared";
-import type { AxiosError } from "axios";
 
 export function useChangeQASetting() {
   const { toast } = useToast();
@@ -24,10 +24,11 @@ export function useChangeQASetting() {
 
       queryClient.invalidateQueries({ queryKey: globalSettingsQueryOptions.queryKey });
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as { message: string };
-
-      toast({ description: t(message), variant: "destructive" });
+    onError: (error) => {
+      toast({
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
+        variant: "destructive",
+      });
     },
   });
 }

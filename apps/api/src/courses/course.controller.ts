@@ -103,6 +103,7 @@ import {
 } from "src/courses/schemas/updateCourseSettings.schema";
 import {
   allCoursesValidation,
+  availableCourseCategoriesValidation,
   coursesValidation,
   studentCoursesValidation,
   studentsWithEnrolmentValidation,
@@ -132,6 +133,7 @@ import {
 
 import type { GetCourseSettings } from "./schemas/coursesSettings.schema";
 import type { EnrolledStudent } from "./schemas/enrolledStudent.schema";
+import type { AllCategoriesResponse } from "src/category/schemas/category.schema";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -299,6 +301,42 @@ export class CourseController {
     const query = { filters, page, perPage, sort, excludeCourseId, language };
 
     const data = await this.courseService.getAvailableCourses(query, currentUserId);
+
+    return new PaginatedResponse(data);
+  }
+
+  @Get("available-categories")
+  @Validate(availableCourseCategoriesValidation)
+  @Public()
+  async getAvailableCourseCategories(
+    @Query("title") title: string,
+    @Query("description") description: string,
+    @Query("searchQuery") searchQuery: string,
+    @Query("category") category: string,
+    @Query("author") author: string,
+    @Query("creationDateRange[0]") creationDateRangeStart: string,
+    @Query("creationDateRange[1]") creationDateRangeEnd: string,
+    @Query("page") page: number,
+    @Query("perPage") perPage: number,
+    @Query("sort") sort: SortCourseFieldsOptions,
+    @Query("excludeCourseId") excludeCourseId: UUIDType,
+    @Query("language") language: SupportedLanguages,
+    @CurrentUser("userId") currentUserId?: UUIDType,
+  ): Promise<PaginatedResponse<AllCategoriesResponse>> {
+    const filters: CoursesFilterSchema = {
+      title,
+      description,
+      searchQuery,
+      category,
+      author,
+      creationDateRange:
+        creationDateRangeStart && creationDateRangeEnd
+          ? [creationDateRangeStart, creationDateRangeEnd]
+          : undefined,
+    };
+    const query = { filters, page, perPage, sort, excludeCourseId, language };
+
+    const data = await this.courseService.getAvailableCourseCategories(query, currentUserId);
 
     return new PaginatedResponse(data);
   }

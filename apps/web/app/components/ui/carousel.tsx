@@ -134,12 +134,29 @@ Carousel.displayName = "Carousel";
 
 type CarouselContentProps = React.HTMLAttributes<HTMLDivElement> & {
   viewportClassName?: string;
+  viewportRef?: React.MutableRefObject<HTMLDivElement | null> | React.RefCallback<HTMLDivElement>;
 };
 
 const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
-  ({ className, viewportClassName, onWheel, ...props }, ref) => {
+  ({ className, viewportClassName, viewportRef, onWheel, ...props }, ref) => {
     const { carouselRef, orientation, scrollNext, scrollPrev } = useCarousel();
     const wheelState = React.useRef({ direction: 0, count: 0, timer: null as ReturnType<typeof setTimeout> | null });
+
+    const setViewportRefs = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        carouselRef(node);
+
+        if (typeof viewportRef === "function") {
+          viewportRef(node);
+          return;
+        }
+
+        if (viewportRef) {
+          viewportRef.current = node;
+        }
+      },
+      [carouselRef, viewportRef],
+    );
 
     React.useEffect(() => {
       const timer = wheelState.current.timer;
@@ -191,7 +208,7 @@ const CarouselContent = React.forwardRef<HTMLDivElement, CarouselContentProps>(
 
     return (
       <div
-        ref={carouselRef}
+        ref={setViewportRefs}
         className={cn("overflow-y-visible", viewportClassName)}
         onWheel={handleWheel}
       >

@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { AxiosError } from "axios";
 
 type CreateLanguageOptions = {
   language: SupportedLanguages;
@@ -31,10 +31,11 @@ export function useCreateLanguage() {
 
       await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as { message: string };
-
-      toast({ description: t(message), variant: "destructive" });
+    onError: (error) => {
+      toast({
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
+        variant: "destructive",
+      });
     },
   });
 }

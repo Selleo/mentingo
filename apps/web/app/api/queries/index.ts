@@ -1,9 +1,20 @@
 export {
+  infiniteAvailableCoursesQueryOptions,
   availableCoursesQueryOptions,
+  useInfiniteAvailableCourses,
   useAvailableCourses,
   useAvailableCoursesSuspense,
 } from "./useAvailableCourses";
-export { categoriesQueryOptions, useCategories, useCategoriesSuspense } from "./useCategories";
+export {
+  infiniteAvailableCourseCategoriesQueryOptions,
+  categoriesQueryOptions,
+  infiniteCategoriesQueryOptions,
+  useCategories,
+  useCategoriesSuspense,
+  useInfiniteAvailableCourseCategories,
+  useInfiniteCategories,
+} from "./useCategories";
+export type { AvailableCourseCategorySearchParams } from "../types";
 export { courseLookupQueryOptions, getCourseLookupQueryKey } from "./useCourseLookup";
 export { courseQueryOptions, useCourse, useCourseSuspense } from "./useCourse";
 export { allCoursesQueryOptions, useCourses, useCoursesSuspense } from "./useCourses";
@@ -12,7 +23,9 @@ export { lessonQueryOptions, useLesson, useLessonSuspense } from "./useLesson";
 export { passwordStatusQueryOptions, usePasswordStatusSuspense } from "./usePasswordStatus";
 export { scormLaunchQueryOptions, useScormLaunch } from "./useScormLaunch";
 export {
+  infiniteStudentCoursesQueryOptions,
   studentCoursesQueryOptions,
+  useInfiniteStudentCourses,
   useStudentCourses,
   useStudentCoursesSuspense,
 } from "./useStudentCourses";

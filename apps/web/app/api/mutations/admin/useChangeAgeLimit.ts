@@ -4,9 +4,9 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { AxiosError } from "axios";
 import type { UpdateAgeLimitBody } from "~/api/generated-api";
 
 export function useChangeAgeLimit() {
@@ -24,10 +24,11 @@ export function useChangeAgeLimit() {
 
       await queryClient.invalidateQueries({ queryKey: globalSettingsQueryOptions.queryKey });
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as { message: string };
-
-      toast({ description: t(message), variant: "destructive" });
+    onError: (error) => {
+      toast({
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
+        variant: "destructive",
+      });
     },
   });
 }
