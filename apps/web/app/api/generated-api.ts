@@ -1872,6 +1872,24 @@ export interface GetAvailableCoursesResponse {
   appliedFilters?: object;
 }
 
+export interface GetAvailableCourseCategoriesResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs")[];
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs";
+    archived: boolean | null;
+    createdAt: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
 export interface GetTopCoursesResponse {
   data: {
     /** @format uuid */
@@ -8925,6 +8943,52 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<GetAvailableCoursesResponse, any>({
         path: `/api/course/available-courses`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetAvailableCourseCategories
+     * @request GET:/api/course/available-categories
+     */
+    courseControllerGetAvailableCourseCategories: (
+      query?: {
+        title?: string;
+        description?: string;
+        searchQuery?: string;
+        category?: string;
+        author?: string;
+        "creationDateRange[0]"?: string;
+        "creationDateRange[1]"?: string;
+        /** @min 1 */
+        page?: number;
+        perPage?: number;
+        sort?:
+          | "title"
+          | "category"
+          | "creationDate"
+          | "author"
+          | "chapterCount"
+          | "enrolledParticipantsCount"
+          | "-title"
+          | "-category"
+          | "-creationDate"
+          | "-author"
+          | "-chapterCount"
+          | "-enrolledParticipantsCount";
+        /** @format uuid */
+        excludeCourseId?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAvailableCourseCategoriesResponse, any>({
+        path: `/api/course/available-categories`,
         method: "GET",
         query: query,
         format: "json",

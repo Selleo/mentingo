@@ -7,9 +7,9 @@ import { GROUPS_BY_COURSE_QUERY_KEY } from "~/api/queries/admin/useGroupsByCours
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
 import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { AxiosError } from "axios";
 import type { UnenrollGroupsFromCourseBody } from "~/api/generated-api";
 
 export function useUnenrollGroupsFromCourse(courseId = "") {
@@ -37,12 +37,10 @@ export function useUnenrollGroupsFromCourse(courseId = "") {
 
       await invalidateCourseStatisticsQueries();
     },
-    onError: (error: AxiosError) => {
-      const { message } = error.response?.data as { message: string };
-
+    onError: (error) => {
       return toast({
         variant: "destructive",
-        description: t(message),
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });

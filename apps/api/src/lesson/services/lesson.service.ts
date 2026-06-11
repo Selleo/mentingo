@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -68,6 +69,8 @@ import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-
 
 @Injectable()
 export class LessonService {
+  private readonly logger = new Logger(LessonService.name);
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly lessonRepository: LessonRepository,
@@ -248,7 +251,7 @@ export class LessonService {
 
           return questionResult;
         } catch (error) {
-          console.error(`Failed to get signed URL for ${question.photoS3Key}:`, error);
+          this.logger.error(`Failed to get signed URL for ${question.photoS3Key}:`, error);
           return question;
         }
       }),

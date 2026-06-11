@@ -1,8 +1,9 @@
 import { Link } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { formatDate } from "date-fns";
+import { isEqual } from "lodash-es";
 import { BookOpen, Clock, Play } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
@@ -390,4 +391,9 @@ const ModernCourseCard = ({
   );
 };
 
-export default ModernCourseCard;
+const areModernCourseCardPropsEqual = (
+  previousProps: ModernCourseCardProps,
+  nextProps: ModernCourseCardProps,
+) => isEqual(previousProps, nextProps);
+
+export default memo(ModernCourseCard, areModernCourseCardPropsEqual);

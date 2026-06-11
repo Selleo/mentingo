@@ -170,6 +170,7 @@ import type { CoursesSettings } from "./types/settings";
 import type { SQL } from "drizzle-orm";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { CourseActivityLogSnapshot } from "src/activity-logs/types";
+import type { AllCategoriesResponse } from "src/category/schemas/category.schema";
 import type { Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -327,7 +328,7 @@ export class CourseService {
           );
           return { ...item, thumbnailUrl: signedUrl, authorAvatarUrl: authorAvatarSignedUrl };
         } catch (error) {
-          console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+          this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
           return item;
         }
       }),
@@ -449,7 +450,7 @@ export class CourseService {
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+            this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return { ...item, trailerUrl };
           }
         }),
@@ -646,6 +647,19 @@ export class CourseService {
     return trailers[courseId] ?? null;
   }
 
+  private async getSignedCourseThumbnailUrl(
+    thumbnailReference: string | null,
+  ): Promise<string | null> {
+    if (!thumbnailReference) return thumbnailReference;
+
+    try {
+      return await this.fileService.getFileUrl(thumbnailReference);
+    } catch (error) {
+      this.logger.error(`Failed to get signed URL for ${thumbnailReference}:`, error);
+      return thumbnailReference;
+    }
+  }
+
   private countWordsFromHtml(content: string): number {
     const $ = loadHtml(content);
     const text = $.text();
@@ -778,6 +792,30 @@ export class CourseService {
     return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
   }
 
+  private async getAvailableCoursesConditions(
+    trx: DatabasePg,
+    query: CoursesQuery,
+    currentUserId?: UUIDType,
+  ) {
+    const { filters = {}, language } = query;
+
+    const availableCourseIds = await this.getAvailableCourseIds(
+      trx,
+      currentUserId,
+      undefined,
+      query.excludeCourseId,
+    );
+
+    const conditions = [eq(courses.status, "published")];
+    conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
+
+    if (availableCourseIds.length > 0) {
+      conditions.push(inArray(courses.id, availableCourseIds));
+    }
+
+    return conditions;
+  }
+
   async getAvailableCourses(
     query: CoursesQuery,
     currentUserId?: UUIDType,
@@ -792,13 +830,6 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     return this.db.transaction(async (trx) => {
-      const availableCourseIds = await this.getAvailableCourseIds(
-        trx,
-        currentUserId,
-        undefined,
-        query.excludeCourseId,
-      );
-
       const lessonCountSql = sql<number>`(
         SELECT COUNT(*)::int
         FROM ${lessons}
@@ -806,14 +837,8 @@ export class CourseService {
         WHERE ${chapters.courseId} = ${courses.id}
       )`;
 
-      const conditions = [eq(courses.status, "published")];
-      conditions.push(...(this.getFiltersConditions(filters, true, language) as SQL<unknown>[]));
-
+      const conditions = await this.getAvailableCoursesConditions(trx, query, currentUserId);
       const orderConditions = this.getOrderConditions(filters);
-
-      if (availableCourseIds.length > 0) {
-        conditions.push(inArray(courses.id, availableCourseIds));
-      }
 
       const queryDB = trx
         .select({
@@ -925,7 +950,7 @@ export class CourseService {
               authorAvatarUrl: authorAvatarSignedUrl,
             };
           } catch (error) {
-            console.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
+            this.logger.error(`Failed to get signed URL for ${item.thumbnailUrl}:`, error);
             return item;
           }
         }),
@@ -953,6 +978,56 @@ export class CourseService {
         data: dataWithDuration,
         pagination: {
           totalItems: totalItems || 0,
+          page,
+          perPage,
+        },
+      };
+    });
+  }
+
+  async getAvailableCourseCategories(
+    query: CoursesQuery,
+    currentUserId?: UUIDType,
+  ): Promise<{ data: AllCategoriesResponse; pagination: Pagination }> {
+    const { perPage = DEFAULT_PAGE_SIZE, page = 1, language } = query;
+
+    return this.db.transaction(async (trx) => {
+      const conditions = await this.getAvailableCoursesConditions(trx, query, currentUserId);
+
+      const availableCategories = trx
+        .select({ categoryId: courses.categoryId })
+        .from(courses)
+        .leftJoin(categories, eq(courses.categoryId, categories.id))
+        .leftJoin(users, eq(courses.authorId, users.id))
+        .where(and(...conditions, isNotNull(courses.categoryId)))
+        .groupBy(courses.categoryId)
+        .as("available_course_categories");
+
+      const queryDB = trx
+        .select({
+          ...getTableColumns(categories),
+          archived: sql<boolean | null>`NULL`,
+          createdAt: sql<string | null>`NULL`,
+          title: this.localizationService.getLocalizedSqlField(
+            categories.title,
+            language,
+            categories,
+          ),
+        })
+        .from(categories)
+        .innerJoin(availableCategories, eq(availableCategories.categoryId, categories.id))
+        .orderBy(
+          this.localizationService.getLocalizedSqlField(categories.title, language, categories),
+        );
+
+      const dynamicQuery = queryDB.$dynamic();
+      const data = await addPagination(dynamicQuery, page, perPage);
+      const [{ totalItems }] = await trx.select({ totalItems: count() }).from(availableCategories);
+
+      return {
+        data,
+        pagination: {
+          totalItems,
           page,
           perPage,
         },
@@ -3194,7 +3269,7 @@ export class CourseService {
             const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
             return { ...question, photoS3SingedUrl: signedUrl };
           } catch (error) {
-            console.error(
+            this.logger.error(
               `Failed to get signed URL for question thumbnail ${question.photoS3Key}:`,
               error,
             );
@@ -3371,6 +3446,27 @@ export class CourseService {
         return count(studentCourses.courseId);
       default:
         return courses.title;
+    }
+  }
+
+  private getAvailableCourseSortExpression(sort: CourseSortField, language?: SupportedLanguages) {
+    switch (sort) {
+      case CourseSortFields.author:
+        return sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`;
+      case CourseSortFields.category:
+        return this.localizationService.getLocalizedSqlField(
+          categories.title,
+          language,
+          categories,
+        );
+      case CourseSortFields.creationDate:
+        return sql`${courses.createdAt}`;
+      case CourseSortFields.chapterCount:
+        return count(studentCourses.courseId);
+      case CourseSortFields.enrolledParticipantsCount:
+        return count(studentCourses.courseId);
+      default:
+        return this.localizationService.getLocalizedSqlField(courses.title, language);
     }
   }
 

@@ -9,12 +9,7 @@ import {
 import { useLayoutEffect } from "react";
 import { match } from "ts-pattern";
 
-import {
-  availableCoursesQueryOptions,
-  currentUserQueryOptions,
-  studentCoursesQueryOptions,
-} from "~/api/queries";
-import { categoriesQueryOptions } from "~/api/queries/useCategories";
+import { currentUserQueryOptions } from "~/api/queries";
 import { allCoursesQueryOptions } from "~/api/queries/useCourses";
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -25,8 +20,6 @@ import Loader from "~/modules/common/Loader/Loader";
 import type React from "react";
 
 const prefetchQueriesForUser = async (permissions: PermissionKey[] | undefined) => {
-  await queryClient.prefetchQuery(categoriesQueryOptions());
-
   const canManageCourses = hasAnyPermission(permissions, [
     PERMISSIONS.COURSE_UPDATE,
     PERMISSIONS.COURSE_UPDATE_OWN,
@@ -34,11 +27,7 @@ const prefetchQueriesForUser = async (permissions: PermissionKey[] | undefined) 
 
   if (canManageCourses) {
     await queryClient.prefetchQuery(allCoursesQueryOptions());
-    return;
   }
-
-  await queryClient.prefetchQuery(availableCoursesQueryOptions());
-  await queryClient.prefetchQuery(studentCoursesQueryOptions());
 };
 
 export const clientLoader = async () => {
