@@ -25,6 +25,7 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   groupCourses,
+  lessonLearningTime,
   lessons,
   resourceEntity,
   resources,
@@ -141,6 +142,7 @@ describe("CourseController (e2e)", () => {
   afterEach(async () => {
     await truncateTables(baseDb, [
       "calendar_events",
+      "lesson_learning_time",
       "courses",
       "chapters",
       "lessons",
@@ -159,6 +161,147 @@ describe("CourseController (e2e)", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  describe("course statistics after student deletion", () => {
+    it("excludes soft-deleted students from statistics endpoints", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Deleted student statistics chapter",
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+      const [quizLesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.QUIZ,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Deleted student quiz"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+          thresholdScore: 0,
+          displayOrder: 1,
+        })
+        .returning();
+      const completedAt = new Date().toISOString();
+
+      await db.insert(coursesSummaryStats).values({
+        courseId: course.id,
+        authorId: admin.id,
+        freePurchasedCount: 1,
+        completedCourseStudentCount: 1,
+      });
+      await db.insert(studentCourses).values({
+        studentId: student.id,
+        courseId: course.id,
+        progress: "completed",
+        completedAt,
+        finishedChapterCount: 1,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      });
+      await db.insert(studentLessonProgress).values({
+        studentId: student.id,
+        chapterId: chapter.id,
+        lessonId: quizLesson.id,
+        completedQuestionCount: 5,
+        quizScore: 80,
+        attempts: 1,
+        isQuizPassed: true,
+        isStarted: true,
+        completedAt,
+      });
+      await db.insert(lessonLearningTime).values({
+        userId: student.id,
+        lessonId: quizLesson.id,
+        courseId: course.id,
+        totalSeconds: 120,
+      });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-quiz-results`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data).toEqual([
+            expect.objectContaining({
+              studentId: student.id,
+              lessonId: quizLesson.id,
+              quizScore: 80,
+            }),
+          ]);
+        });
+
+      await request(app.getHttpServer())
+        .delete("/api/user")
+        .send({ userIds: [student.id] })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics`)
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.enrolledCount).toBe(0);
+          expect(body.data.completionPercentage).toBe(0);
+          expect(body.data.averageCompletionPercentage).toBe(0);
+          expect(body.data.averageSeconds).toBe(0);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-progress`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data).toEqual([]);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-quiz-results`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data).toEqual([]);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([]);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/learning-time`)
+        .query({ perPage: 100 })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.users).toEqual([]);
+        });
+    });
   });
 
   describe("POST /api/course/:courseId/scorm-export", () => {

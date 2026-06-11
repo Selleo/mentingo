@@ -3,6 +3,7 @@ import { AxiosError } from "axios";
 import { useTranslation } from "react-i18next";
 
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
+import { invalidateCourseStatisticsQueries } from "~/api/utils/courseStatisticsUtils";
 import { invalidateLearningPathEnrollmentData } from "~/api/utils/invalidateLearningPathEnrollmentData";
 import { useToast } from "~/components/ui/use-toast";
 
@@ -28,6 +29,7 @@ export function useBulkDeleteUsers() {
       await queryClient.invalidateQueries({ queryKey: ["users"] });
       await queryClient.invalidateQueries(globalSettingsQueryOptions);
       await invalidateLearningPathEnrollmentData();
+      await invalidateCourseStatisticsQueries();
 
       return response.data;
     },
