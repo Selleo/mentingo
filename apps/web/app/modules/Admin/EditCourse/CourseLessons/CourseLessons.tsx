@@ -46,7 +46,8 @@ interface CourseLessonsProps {
   isCourseGenerationDisabled: boolean;
   showCourseGenerationButton: boolean;
   isCourseGenerated: boolean;
-  onCourseGenerationFinished: () => void;
+  shouldClearCourseGenerationRuntime: boolean;
+  isCourseGenerationLocked: boolean;
   draft?: GetCourseGenerationDraftResponse;
 }
 
@@ -59,7 +60,8 @@ const CourseLessons = ({
   isCourseGenerationDisabled,
   showCourseGenerationButton,
   isCourseGenerated,
-  onCourseGenerationFinished,
+  shouldClearCourseGenerationRuntime,
+  isCourseGenerationLocked,
 }: CourseLessonsProps) => {
   const [contentTypeToDisplay, setContentTypeToDisplay] = useState<string>(ContentTypes.EMPTY);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
@@ -73,6 +75,7 @@ const CourseLessons = ({
   const [currentGenerationMessageKey, setCurrentGenerationMessageKey] = useState<string | null>(
     null,
   );
+  const [previewChapters, setPreviewChapters] = useState<Chapter[]>([]);
   const [showGenerationCompletedNotice, setShowGenerationCompletedNotice] = useState(false);
   const hasSeenGeneratedRef = useRef(isCourseGenerated);
   const { t } = useTranslation();
@@ -82,6 +85,8 @@ const CourseLessons = ({
     !isBaseLanguage || !showCourseGenerationButton || isCourseGenerated;
   const shouldShowCourseGenerationButton =
     !shouldUnmountCourseGenerationButton && !isCourseGenerationDisabled;
+  const isCurriculumLocked =
+    isCourseGenerationLocked || isBackgroundGenerating || isGenerationProcessing;
 
   useEffect(() => {
     if (!chapters) return;
@@ -106,12 +111,24 @@ const CourseLessons = ({
   }, [chapters, selectedChapter, selectedLesson]);
 
   useEffect(() => {
-    if (!isCourseGenerated) return;
+    if (!shouldClearCourseGenerationRuntime) return;
     setIsBackgroundGenerating(false);
     setIsGenerationProcessing(false);
     setCurrentGenerationMessageKey(null);
     setIsGenerationDrawerOpen(false);
-  }, [isCourseGenerated]);
+  }, [shouldClearCourseGenerationRuntime]);
+
+  useEffect(() => {
+    if (!chapters?.length) return;
+    setPreviewChapters([]);
+  }, [chapters?.length]);
+
+  useEffect(() => {
+    if (!isCurriculumLocked) return;
+    setContentTypeToDisplay(ContentTypes.EMPTY);
+    setSelectedChapter(null);
+    setSelectedLesson(null);
+  }, [isCurriculumLocked]);
 
   useEffect(() => {
     if (!hasSeenGeneratedRef.current && isCourseGenerated) {
@@ -121,6 +138,8 @@ const CourseLessons = ({
   }, [isCourseGenerated]);
 
   const addChapter = useCallback(() => {
+    if (isCurriculumLocked) return;
+
     if (isCurrentFormDirty) {
       setIsLeavingContent(true);
       setIsNewChapter(true);
@@ -136,6 +155,7 @@ const CourseLessons = ({
     openLeaveModal,
     setContentTypeToDisplay,
     setSelectedChapter,
+    isCurriculumLocked,
   ]);
 
   useEffect(() => {
@@ -221,9 +241,19 @@ const CourseLessons = ({
     () => chapters?.map((chapter) => ({ ...chapter, sortableId: chapter.id })) ?? [],
     [chapters],
   );
+  const sortablePreviewChapters: Sortable<Chapter>[] = useMemo(
+    () => previewChapters.map((chapter) => ({ ...chapter, sortableId: chapter.id })),
+    [previewChapters],
+  );
+  const hasCanonicalChapters = sortableChapters.length > 0;
+  const shouldShowPreviewChapters = sortablePreviewChapters.length > 0 && !hasCanonicalChapters;
   const shouldShowGenerationSkeletons =
-    isBackgroundGenerating && sortableChapters.length === 0 && !isCourseGenerated;
+    isBackgroundGenerating &&
+    !hasCanonicalChapters &&
+    !shouldShowPreviewChapters &&
+    !isCourseGenerated;
   const shouldShowProgressStrip = isBackgroundGenerating && !isCourseGenerated;
+  const isAddChapterDisabled = !isBaseLanguage || isCurriculumLocked;
 
   const handleGenerationProcessingStateChange = useCallback(
     (state: { currentMessageKey: string | null; isProcessing: boolean }) => {
@@ -262,7 +292,7 @@ const CourseLessons = ({
           ) : (
             <ChaptersList
               canRefetchChapterList={canRefetchChapterList}
-              chapters={sortableChapters}
+              chapters={shouldShowPreviewChapters ? sortablePreviewChapters : sortableChapters}
               setContentTypeToDisplay={setContentTypeToDisplay}
               setSelectedChapter={setSelectedChapter}
               setSelectedLesson={setSelectedLesson}
@@ -270,6 +300,7 @@ const CourseLessons = ({
               selectedLesson={selectedLesson}
               language={language}
               baseLanguage={baseLanguage}
+              isCourseGenerationLocked={isCurriculumLocked}
             />
           )}
         </div>
@@ -304,7 +335,7 @@ const CourseLessons = ({
             <Button
               data-testid={CURRICULUM_HANDLES.ADD_CHAPTER_BUTTON}
               onClick={addChapter}
-              disabled={!isBaseLanguage}
+              disabled={isAddChapterDisabled}
               className={cn(
                 "rounded-lg px-4 py-2",
                 shouldShowCourseGenerationButton ? "w-1/2" : "w-full",
@@ -314,7 +345,7 @@ const CourseLessons = ({
               {t("adminCourseView.curriculum.chapter.button.addChapter")}
             </Button>
           )}
-          {shouldShowCourseGenerationButton && (
+          {shouldShowCourseGenerationButton && !isCurriculumLocked && (
             <CourseGenerationButton
               testId={CURRICULUM_HANDLES.COURSE_GENERATION_BUTTON}
               className="w-1/2"
@@ -330,9 +361,7 @@ const CourseLessons = ({
         onOpenChange={setIsGenerationDrawerOpen}
         onBackgroundGenerationStateChange={setIsBackgroundGenerating}
         onInvalidate={handleGenerationInvalidate}
-        onGenerationFinished={() => {
-          onCourseGenerationFinished();
-        }}
+        onPreviewChaptersChange={setPreviewChapters}
         onProcessingStateChange={handleGenerationProcessingStateChange}
       />
       <div className="min-w-0 flex-1 self-start md:sticky md:top-8">{renderContent}</div>

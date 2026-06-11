@@ -25,6 +25,7 @@ import {
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
+  COURSE_GENERATION_SYNC_STATUS,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -93,6 +94,7 @@ import type {
   AnnouncementEmailTemplate,
   AnnouncementSourceType,
   AnnouncementStatus,
+  CourseGenerationSyncStatus,
   LiveTrainingDeliveryType,
   LiveTrainingLinkEntityType,
   LiveTrainingMemberRole,
@@ -331,6 +333,34 @@ export const courses = pgTable(
   })),
 );
 export const coursesSettingsHelpers = coursesSettings.getHelpers(courses.settings);
+
+export const lumaCourseGenerationSyncs = pgTable(
+  "luma_course_generation_syncs",
+  {
+    ...id,
+    ...timestamps,
+    courseId: uuid("course_id")
+      .references(() => courses.id, { onDelete: "cascade" })
+      .notNull()
+      .unique(),
+    draftId: uuid("draft_id"),
+    status: text("status")
+      .$type<CourseGenerationSyncStatus>()
+      .notNull()
+      .default(COURSE_GENERATION_SYNC_STATUS.NOT_STARTED),
+    attemptCount: integer("attempt_count").notNull().default(0),
+    startedAt: timestampWithTimezone({ name: "started_at" }),
+    processedAt: timestampWithTimezone({ name: "processed_at" }),
+    failedAt: timestampWithTimezone({ name: "failed_at" }),
+    dismissedAt: timestampWithTimezone({ name: "dismissed_at" }),
+    lastError: text("last_error"),
+    tenantId,
+  },
+  withTenantIdIndex("luma_course_generation_syncs", (table) => ({
+    courseIdIdx: index("luma_course_generation_syncs_course_id_idx").on(table.courseId),
+    statusIdx: index("luma_course_generation_syncs_status_idx").on(table.status),
+  })),
+);
 
 export const courseSlugs = pgTable(
   "course_slugs",

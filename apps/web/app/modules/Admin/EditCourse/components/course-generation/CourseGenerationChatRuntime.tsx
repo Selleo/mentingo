@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo } from "react";
 
 import { CourseGenerationDrawer } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationDrawer";
 import {
   getCurrentMessageKey,
   hasCourseGeneratedFlag,
 } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
+import { getCourseGenerationPreviewChapters } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationCourseCache.utils";
 import { useCourseGenerationChat } from "~/modules/Admin/EditCourse/hooks/useCourseGenerationChat";
 
 import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
+import type { Chapter } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type CourseGenerationChatRuntimeProps = {
   draft?: GetCourseGenerationDraftResponse;
@@ -16,8 +18,8 @@ type CourseGenerationChatRuntimeProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onBackgroundGenerationStateChange?: (isBackgroundGenerating: boolean) => void;
-  onGenerationFinished?: () => void;
   onInvalidate?: () => void;
+  onPreviewChaptersChange?: (chapters: Chapter[]) => void;
   onProcessingStateChange?: (state: {
     currentMessageKey: string | null;
     isProcessing: boolean;
@@ -30,12 +32,11 @@ export function CourseGenerationChatRuntime({
   open,
   onOpenChange,
   onBackgroundGenerationStateChange,
-  onGenerationFinished,
   onInvalidate,
+  onPreviewChaptersChange,
   onProcessingStateChange,
 }: CourseGenerationChatRuntimeProps) {
   const courseId = draft?.integrationId ?? "";
-  const hasFinishedRef = useRef(false);
   const generationChat = useCourseGenerationChat({
     courseId,
     draftId: draft?.draftId,
@@ -44,19 +45,21 @@ export function CourseGenerationChatRuntime({
 
   const currentMessageKey = getCurrentMessageKey(generationChat.data);
   const hasGenerated = hasCourseGeneratedFlag(generationChat.data);
+  const previewChapters = useMemo(
+    () => getCourseGenerationPreviewChapters(generationChat.data),
+    [generationChat.data],
+  );
   const isProcessing =
     (generationChat.status === "submitted" || generationChat.status === "streaming") &&
     !hasGenerated;
 
   useEffect(() => {
-    onProcessingStateChange?.({ currentMessageKey, isProcessing });
-  }, [currentMessageKey, isProcessing, onProcessingStateChange]);
+    onPreviewChaptersChange?.(previewChapters);
+  }, [onPreviewChaptersChange, previewChapters]);
 
   useEffect(() => {
-    if (!hasGenerated || hasFinishedRef.current) return;
-    hasFinishedRef.current = true;
-    onGenerationFinished?.();
-  }, [hasGenerated, onGenerationFinished]);
+    onProcessingStateChange?.({ currentMessageKey, isProcessing });
+  }, [currentMessageKey, isProcessing, onProcessingStateChange]);
 
   const chat = {
     messages: generationChat.messages.map((message) => ({

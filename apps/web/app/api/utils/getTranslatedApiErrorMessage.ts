@@ -11,6 +11,10 @@ const getFirstMessage = (message?: string | string[]) =>
   Array.isArray(message) ? message[0] : message;
 
 export const getTranslatedApiErrorMessage = (error: unknown, t: TFunction, fallback: string) => {
+  if (typeof error === "string" && error.trim()) {
+    return t(error, { defaultValue: error });
+  }
+
   if (error instanceof AxiosError) {
     const responseData = error.response?.data as ApiErrorResponseWithCount | undefined;
     const message = getFirstMessage(responseData?.message);

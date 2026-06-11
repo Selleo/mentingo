@@ -30,6 +30,7 @@ import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { LumaCourseGenerationSyncService } from "src/luma/luma-course-generation-sync.service";
 import { LumaService } from "src/luma/luma.service";
 import {
   chatOptionsSchema,
@@ -38,6 +39,7 @@ import {
   courseGenerationFilesSchema,
   courseGenerationIngestBodySchema,
   courseGenerationMessagesSchema,
+  courseGenerationSyncStatusSchema,
   deleteCourseGenerationFileParamsSchema,
   integrationDraftSchema,
   integrationIdSchema,
@@ -48,7 +50,10 @@ import type { CreateDraftOptions, DeleteIngestedDocumentOptions } from "@japro/l
 @Controller("luma")
 @UseGuards(PermissionsGuard)
 export class LumaController {
-  constructor(private readonly lumaService: LumaService) {}
+  constructor(
+    private readonly lumaService: LumaService,
+    private readonly lumaCourseGenerationSyncService: LumaCourseGenerationSyncService,
+  ) {}
 
   @Post("course-generation/chat")
   @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
@@ -66,20 +71,20 @@ export class LumaController {
     res.setHeader("X-Vercel-AI-Data-Stream", "v1");
 
     const response = await this.lumaService.chatWithCourseAgent(data, currentUser);
-    const streamState = this.lumaService.createStreamState();
+    let syncEnqueued = false;
 
     try {
       for await (const chunk of response.data as AsyncIterable<Buffer>) {
-        const transformedChunk = await this.lumaService.handleChunk(chunk, {
-          integrationId: data.integrationId,
-          currentUser,
-          state: streamState,
-        });
+        res.write(chunk);
 
-        if (transformedChunk) res.write(transformedChunk);
+        if (!syncEnqueued && this.lumaService.hasCourseGeneratedEvent(chunk)) {
+          syncEnqueued = true;
+          await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
+            data.integrationId,
+            currentUser,
+          );
+        }
       }
-
-      await this.lumaService.flushPendingIngestions(streamState, currentUser);
 
       res.end();
     } catch (err) {
@@ -136,6 +141,35 @@ export class LumaController {
     const data: CreateDraftOptions = { integrationId, draftName, courseLanguage };
 
     return this.lumaService.getDraft(data, currentUser);
+  }
+
+  @Post("course-generation/sync")
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
+  @Validate({
+    request: [{ type: "body", schema: integrationIdSchema }],
+    response: courseGenerationSyncStatusSchema,
+  })
+  async syncGeneratedCourse(
+    @Body() data: IntegrationIdOptions,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
+      data.integrationId,
+      currentUser,
+    );
+  }
+
+  @Post("course-generation/sync/dismiss")
+  @RequirePermission(PERMISSIONS.COURSE_AI_GENERATION)
+  @Validate({
+    request: [{ type: "body", schema: integrationIdSchema }],
+    response: courseGenerationSyncStatusSchema,
+  })
+  async dismissGeneratedCourseSync(
+    @Body() data: IntegrationIdOptions,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return this.lumaCourseGenerationSyncService.dismissSync(data.integrationId, currentUser);
   }
 
   @Post("course-generation/files/ingest")

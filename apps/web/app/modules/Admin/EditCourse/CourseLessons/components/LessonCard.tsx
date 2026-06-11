@@ -18,9 +18,16 @@ interface LessonCardProps {
   onClickLessonCard: (lesson: Lesson) => void;
   dragTrigger: ReactNode;
   selectedLesson: Lesson | null;
+  isCourseGenerationLocked: boolean;
 }
 
-const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: LessonCardProps) => {
+const LessonCard = ({
+  item,
+  onClickLessonCard,
+  dragTrigger,
+  selectedLesson,
+  isCourseGenerationLocked,
+}: LessonCardProps) => {
   const { t } = useTranslation();
 
   const getIcon = useMemo(() => mapTypeToIcon(item.type), [item.type]);
@@ -45,14 +52,17 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
       data-testid={CURRICULUM_HANDLES.lessonCard(item.id)}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
+      tabIndex={isCourseGenerationLocked ? -1 : 0}
       role="button"
+      aria-disabled={isCourseGenerationLocked}
       aria-label={`Lesson: ${item.title}`}
       className={cn(
         "flex gap-x-3 rounded-lg border bg-white p-3 hover:border-neutral-300 hover:bg-neutral-50",
         {
           "border-neutral-200": selectedLesson?.id !== item.id,
           "border-primary-500 bg-primary-50": selectedLesson?.id === item.id,
+          "cursor-not-allowed opacity-60 hover:border-neutral-200 hover:bg-white":
+            isCourseGenerationLocked,
         },
       )}
     >

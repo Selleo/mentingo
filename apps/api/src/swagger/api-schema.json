@@ -5755,6 +5755,60 @@
         }
       }
     },
+    "/api/luma/course-generation/sync": {
+      "post": {
+        "operationId": "LumaController_syncGeneratedCourse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncGeneratedCourseBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncGeneratedCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/luma/course-generation/sync/dismiss": {
+      "post": {
+        "operationId": "LumaController_dismissGeneratedCourseSync",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DismissGeneratedCourseSyncBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DismissGeneratedCourseSyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/luma/course-generation/files/ingest": {
       "post": {
         "operationId": "LumaController_ingestCourseGenerationFiles",
@@ -5829,6 +5883,738 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/ingestion/ingest": {
+      "post": {
+        "operationId": "IngestionController_ingest",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "lessonId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "lessonId",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ingestion/{lessonId}": {
+      "get": {
+        "operationId": "IngestionController_getAllAssignedDocumentsForLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAssignedDocumentsForLessonResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingestion/{documentLinkId}": {
+      "delete": {
+        "operationId": "IngestionController_deleteDocumentLink",
+        "parameters": [
+          {
+            "name": "documentLinkId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ai/thread": {
+      "get": {
+        "operationId": "AiController_getThread",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/thread/messages": {
+      "get": {
+        "operationId": "AiController_getThreadMessages",
+        "parameters": [
+          {
+            "name": "thread",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/chat": {
+      "post": {
+        "operationId": "AiController_streamChat",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StreamChatBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/ai/judge/{threadId}": {
+      "post": {
+        "operationId": "AiController_judgeThread",
+        "parameters": [
+          {
+            "name": "threadId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JudgeThreadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/retake/{lessonId}": {
+      "post": {
+        "operationId": "AiController_retakeLesson",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/studentLessonProgress": {
+      "post": {
+        "operationId": "StudentLessonProgressController_markLessonAsCompleted",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarkLessonAsCompletedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/all": {
+      "get": {
+        "operationId": "CertificatesController_getAllCertificates",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/certificate": {
+      "get": {
+        "operationId": "CertificatesController_getCertificate",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "courseId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/download": {
+      "post": {
+        "operationId": "CertificatesController_downloadCertificate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DownloadCertificateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/certificates/share-link": {
+      "post": {
+        "operationId": "CertificatesController_createCertificateShareLink",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCertificateShareLinkBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateCertificateShareLinkResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/validity-impact": {
+      "post": {
+        "operationId": "CertificatesController_getCertificateValidityImpact",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetCertificateValidityImpactBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateValidityImpactResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset-options": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateResetOptions",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResetOptionsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset-users": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateResetUsers",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCertificateResetUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/course/{courseId}/reset": {
+      "post": {
+        "operationId": "CertificatesController_resetCourseCertificates",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetCourseCertificatesBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetCourseCertificatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/certificates/share": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateSharePage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/certificates/share-image": {
+      "get": {
+        "operationId": "CertificatesController_getCertificateShareImage",
+        "parameters": [
+          {
+            "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
           }
         }
       }
@@ -6609,738 +7395,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "/api/studentLessonProgress": {
-      "post": {
-        "operationId": "StudentLessonProgressController_markLessonAsCompleted",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MarkLessonAsCompletedResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/all": {
-      "get": {
-        "operationId": "CertificatesController_getAllCertificates",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllCertificatesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/certificate": {
-      "get": {
-        "operationId": "CertificatesController_getCertificate",
-        "parameters": [
-          {
-            "name": "userId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "courseId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCertificateResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/download": {
-      "post": {
-        "operationId": "CertificatesController_downloadCertificate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DownloadCertificateBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/certificates/share-link": {
-      "post": {
-        "operationId": "CertificatesController_createCertificateShareLink",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCertificateShareLinkBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateCertificateShareLinkResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/course/{courseId}/validity-impact": {
-      "post": {
-        "operationId": "CertificatesController_getCertificateValidityImpact",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetCertificateValidityImpactBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCertificateValidityImpactResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/course/{courseId}/reset-options": {
-      "get": {
-        "operationId": "CertificatesController_getCertificateResetOptions",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCertificateResetOptionsResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/course/{courseId}/reset-users": {
-      "get": {
-        "operationId": "CertificatesController_getCertificateResetUsers",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "search",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "language",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "default": "en",
-              "anyOf": [
-                {
-                  "const": "en",
-                  "type": "string"
-                },
-                {
-                  "const": "pl",
-                  "type": "string"
-                },
-                {
-                  "const": "de",
-                  "type": "string"
-                },
-                {
-                  "const": "lt",
-                  "type": "string"
-                },
-                {
-                  "const": "cs",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCertificateResetUsersResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/course/{courseId}/reset": {
-      "post": {
-        "operationId": "CertificatesController_resetCourseCertificates",
-        "parameters": [
-          {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResetCourseCertificatesBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResetCourseCertificatesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/certificates/share": {
-      "get": {
-        "operationId": "CertificatesController_getCertificateSharePage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/certificates/share-image": {
-      "get": {
-        "operationId": "CertificatesController_getCertificateShareImage",
-        "parameters": [
-          {
-            "name": "certificateId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "lang",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/ai/thread": {
-      "get": {
-        "operationId": "AiController_getThread",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/thread/messages": {
-      "get": {
-        "operationId": "AiController_getThreadMessages",
-        "parameters": [
-          {
-            "name": "thread",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThreadMessagesResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/chat": {
-      "post": {
-        "operationId": "AiController_streamChat",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StreamChatBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/ai/judge/{threadId}": {
-      "post": {
-        "operationId": "AiController_judgeThread",
-        "parameters": [
-          {
-            "name": "threadId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/JudgeThreadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ai/retake/{lessonId}": {
-      "post": {
-        "operationId": "AiController_retakeLesson",
-        "parameters": [
-          {
-            "name": "lessonId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/ingestion/ingest": {
-      "post": {
-        "operationId": "IngestionController_ingest",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "lessonId": {
-                    "type": "string",
-                    "format": "uuid"
-                  },
-                  "files": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "binary"
-                    }
-                  }
-                },
-                "required": [
-                  "lessonId",
-                  "files"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/ingestion/{lessonId}": {
-      "get": {
-        "operationId": "IngestionController_getAllAssignedDocumentsForLesson",
-        "parameters": [
-          {
-            "name": "lessonId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetAllAssignedDocumentsForLessonResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/ingestion/{documentLinkId}": {
-      "delete": {
-        "operationId": "IngestionController_deleteDocumentLink",
-        "parameters": [
-          {
-            "name": "documentLinkId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
           }
         }
       }
@@ -26978,12 +27032,346 @@
           },
           "isCourseGenerated": {
             "type": "boolean"
+          },
+          "coreSync": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "not_started",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "dismissed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "draftId": {
+                "anyOf": [
+                  {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "attemptCount": {
+                "type": "number"
+              },
+              "startedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "processedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "failedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "dismissedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastError": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "status",
+              "draftId",
+              "attemptCount",
+              "startedAt",
+              "processedAt",
+              "failedAt",
+              "dismissedAt",
+              "lastError"
+            ]
           }
         },
         "required": [
           "integrationId",
           "draftId",
-          "isCourseGenerated"
+          "isCourseGenerated",
+          "coreSync"
+        ]
+      },
+      "SyncGeneratedCourseBody": {
+        "type": "object",
+        "properties": {
+          "integrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "integrationId"
+        ]
+      },
+      "SyncGeneratedCourseResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "const": "not_started",
+                "type": "string"
+              },
+              {
+                "const": "processing",
+                "type": "string"
+              },
+              {
+                "const": "failed",
+                "type": "string"
+              },
+              {
+                "const": "processed",
+                "type": "string"
+              },
+              {
+                "const": "dismissed",
+                "type": "string"
+              }
+            ]
+          },
+          "draftId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attemptCount": {
+            "type": "number"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "processedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dismissedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lastError": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "draftId",
+          "attemptCount",
+          "startedAt",
+          "processedAt",
+          "failedAt",
+          "dismissedAt",
+          "lastError"
+        ]
+      },
+      "DismissGeneratedCourseSyncBody": {
+        "type": "object",
+        "properties": {
+          "integrationId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "integrationId"
+        ]
+      },
+      "DismissGeneratedCourseSyncResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "const": "not_started",
+                "type": "string"
+              },
+              {
+                "const": "processing",
+                "type": "string"
+              },
+              {
+                "const": "failed",
+                "type": "string"
+              },
+              {
+                "const": "processed",
+                "type": "string"
+              },
+              {
+                "const": "dismissed",
+                "type": "string"
+              }
+            ]
+          },
+          "draftId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "attemptCount": {
+            "type": "number"
+          },
+          "startedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "processedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "failedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "dismissedAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lastError": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "draftId",
+          "attemptCount",
+          "startedAt",
+          "processedAt",
+          "failedAt",
+          "dismissedAt",
+          "lastError"
         ]
       },
       "IngestCourseGenerationFilesBody": {
@@ -27020,6 +27408,787 @@
             "contentType"
           ]
         }
+      },
+      "GetAllAssignedDocumentsForLessonResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "size": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "type",
+                "size"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "archived",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "userId",
+              "userLanguage",
+              "createdAt",
+              "updatedAt",
+              "status"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetThreadMessagesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "allOf": [
+                {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "content": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "content"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "role": {
+                          "anyOf": [
+                            {
+                              "const": "system",
+                              "type": "string"
+                            },
+                            {
+                              "const": "user",
+                              "type": "string"
+                            },
+                            {
+                              "const": "assistant",
+                              "type": "string"
+                            },
+                            {
+                              "const": "tool",
+                              "type": "string"
+                            },
+                            {
+                              "const": "summary",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "isJudge": {
+                          "type": "boolean"
+                        },
+                        "userName": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "role"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "StreamChatBody": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "content": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "content"
+        ]
+      },
+      "JudgeThreadResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
+              },
+              "passed": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "summary",
+              "passed"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "MarkLessonAsCompletedResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAllCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "userId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "courseTitle": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "completionDate": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "fullName": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateSignatureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "certificateFontColor": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "issuedAt": {
+                  "type": "string"
+                },
+                "expiresAt": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "userId",
+                "courseId",
+                "issuedAt",
+                "createdAt"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "GetCertificateResponse": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "userId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "learningPathId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "courseTitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "completionDate": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "fullName": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateSignatureUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "certificateFontColor": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "createdAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "userId",
+              "learningPathId",
+              "createdAt"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "DownloadCertificateBody": {
+        "type": "object",
+        "properties": {
+          "certificateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "certificateId",
+          "language"
+        ]
+      },
+      "CreateCertificateShareLinkBody": {
+        "type": "object",
+        "properties": {
+          "certificateId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "certificateId"
+        ]
+      },
+      "CreateCertificateShareLinkResponse": {
+        "type": "object",
+        "properties": {
+          "shareUrl": {
+            "type": "string"
+          },
+          "linkedinShareUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "shareUrl",
+          "linkedinShareUrl"
+        ]
+      },
+      "GetCertificateValidityImpactBody": {
+        "type": "object",
+        "properties": {
+          "certificateValidity": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "period",
+                        "type": "string"
+                      },
+                      "value": {
+                        "minimum": 1,
+                        "type": "number"
+                      },
+                      "unit": {
+                        "anyOf": [
+                          {
+                            "const": "days",
+                            "type": "string"
+                          },
+                          {
+                            "const": "months",
+                            "type": "string"
+                          },
+                          {
+                            "const": "years",
+                            "type": "string"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "value",
+                      "unit"
+                    ]
+                  },
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "fixedDate",
+                        "type": "string"
+                      },
+                      "date": {
+                        "format": "date",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "date"
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "certificateValidity"
+        ]
+      },
+      "GetCertificateValidityImpactResponse": {
+        "type": "object",
+        "properties": {
+          "activeCertificateCount": {
+            "type": "number"
+          },
+          "immediatelyExpiringCertificateCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "activeCertificateCount",
+          "immediatelyExpiringCertificateCount"
+        ]
+      },
+      "GetCertificateResetOptionsResponse": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "activeCertificateCount": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "activeCertificateCount"
+              ]
+            }
+          },
+          "activeCertificateUserCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "groups",
+          "activeCertificateUserCount"
+        ]
+      },
+      "GetCertificateResetUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "firstName",
+                "lastName",
+                "email"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "ResetCourseCertificatesBody": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "anyOf": [
+              {
+                "const": "all",
+                "type": "string"
+              },
+              {
+                "const": "groups",
+                "type": "string"
+              },
+              {
+                "const": "users",
+                "type": "string"
+              }
+            ]
+          },
+          "groupIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "sendEmail": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "ResetCourseCertificatesResponse": {
+        "type": "object",
+        "properties": {
+          "affectedCertificateCount": {
+            "type": "number"
+          },
+          "affectedUserCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "affectedCertificateCount",
+          "affectedUserCount"
+        ]
       },
       "GetLessonsResponse": {
         "type": "object",
@@ -31675,787 +32844,6 @@
             "required": [
               "message"
             ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "MarkLessonAsCompletedResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "message": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "message"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetAllCertificatesResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "userId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "courseId": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "courseTitle": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "completionDate": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "fullName": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "certificateSignatureUrl": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "certificateFontColor": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "issuedAt": {
-                  "type": "string"
-                },
-                "expiresAt": {
-                  "anyOf": [
-                    {
-                      "type": "string"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
-                "createdAt": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "userId",
-                "courseId",
-                "issuedAt",
-                "createdAt"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "GetCertificateResponse": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "learningPathId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "courseTitle": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "completionDate": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "fullName": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "certificateSignatureUrl": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "certificateFontColor": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "userId",
-              "learningPathId",
-              "createdAt"
-            ]
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "DownloadCertificateBody": {
-        "type": "object",
-        "properties": {
-          "certificateId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "language": {
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              }
-            ]
-          }
-        },
-        "required": [
-          "certificateId",
-          "language"
-        ]
-      },
-      "CreateCertificateShareLinkBody": {
-        "type": "object",
-        "properties": {
-          "certificateId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "certificateId"
-        ]
-      },
-      "CreateCertificateShareLinkResponse": {
-        "type": "object",
-        "properties": {
-          "shareUrl": {
-            "type": "string"
-          },
-          "linkedinShareUrl": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "shareUrl",
-          "linkedinShareUrl"
-        ]
-      },
-      "GetCertificateValidityImpactBody": {
-        "type": "object",
-        "properties": {
-          "certificateValidity": {
-            "anyOf": [
-              {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "const": "period",
-                        "type": "string"
-                      },
-                      "value": {
-                        "minimum": 1,
-                        "type": "number"
-                      },
-                      "unit": {
-                        "anyOf": [
-                          {
-                            "const": "days",
-                            "type": "string"
-                          },
-                          {
-                            "const": "months",
-                            "type": "string"
-                          },
-                          {
-                            "const": "years",
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "type",
-                      "value",
-                      "unit"
-                    ]
-                  },
-                  {
-                    "additionalProperties": false,
-                    "type": "object",
-                    "properties": {
-                      "type": {
-                        "const": "fixedDate",
-                        "type": "string"
-                      },
-                      "date": {
-                        "format": "date",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "type",
-                      "date"
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "certificateValidity"
-        ]
-      },
-      "GetCertificateValidityImpactResponse": {
-        "type": "object",
-        "properties": {
-          "activeCertificateCount": {
-            "type": "number"
-          },
-          "immediatelyExpiringCertificateCount": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "activeCertificateCount",
-          "immediatelyExpiringCertificateCount"
-        ]
-      },
-      "GetCertificateResetOptionsResponse": {
-        "type": "object",
-        "properties": {
-          "groups": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "activeCertificateCount": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "activeCertificateCount"
-              ]
-            }
-          },
-          "activeCertificateUserCount": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "groups",
-          "activeCertificateUserCount"
-        ]
-      },
-      "GetCertificateResetUsersResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "firstName": {
-                  "type": "string"
-                },
-                "lastName": {
-                  "type": "string"
-                },
-                "email": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "firstName",
-                "lastName",
-                "email"
-              ]
-            }
-          },
-          "pagination": {
-            "type": "object",
-            "properties": {
-              "totalItems": {
-                "type": "number"
-              },
-              "page": {
-                "type": "number"
-              },
-              "perPage": {
-                "type": "number"
-              }
-            },
-            "required": [
-              "totalItems",
-              "page",
-              "perPage"
-            ]
-          },
-          "appliedFilters": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {}
-            }
-          }
-        },
-        "required": [
-          "data",
-          "pagination"
-        ]
-      },
-      "ResetCourseCertificatesBody": {
-        "type": "object",
-        "properties": {
-          "scope": {
-            "anyOf": [
-              {
-                "const": "all",
-                "type": "string"
-              },
-              {
-                "const": "groups",
-                "type": "string"
-              },
-              {
-                "const": "users",
-                "type": "string"
-              }
-            ]
-          },
-          "groupIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "userIds": {
-            "type": "array",
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          "sendEmail": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "scope"
-        ]
-      },
-      "ResetCourseCertificatesResponse": {
-        "type": "object",
-        "properties": {
-          "affectedCertificateCount": {
-            "type": "number"
-          },
-          "affectedUserCount": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "affectedCertificateCount",
-          "affectedUserCount"
-        ]
-      },
-      "GetThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "aiMentorLessonId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userId": {
-                "format": "uuid",
-                "type": "string"
-              },
-              "userLanguage": {
-                "anyOf": [
-                  {
-                    "const": "en",
-                    "type": "string"
-                  },
-                  {
-                    "const": "pl",
-                    "type": "string"
-                  },
-                  {
-                    "const": "de",
-                    "type": "string"
-                  },
-                  {
-                    "const": "lt",
-                    "type": "string"
-                  },
-                  {
-                    "const": "cs",
-                    "type": "string"
-                  }
-                ]
-              },
-              "createdAt": {
-                "type": "string"
-              },
-              "updatedAt": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "active",
-                    "type": "string"
-                  },
-                  {
-                    "const": "completed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "archived",
-                    "type": "string"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "aiMentorLessonId",
-              "userId",
-              "userLanguage",
-              "createdAt",
-              "updatedAt",
-              "status"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetThreadMessagesResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "allOf": [
-                {
-                  "type": "object",
-                  "allOf": [
-                    {
-                      "type": "object",
-                      "properties": {
-                        "content": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "content"
-                      ]
-                    },
-                    {
-                      "type": "object",
-                      "properties": {
-                        "role": {
-                          "anyOf": [
-                            {
-                              "const": "system",
-                              "type": "string"
-                            },
-                            {
-                              "const": "user",
-                              "type": "string"
-                            },
-                            {
-                              "const": "assistant",
-                              "type": "string"
-                            },
-                            {
-                              "const": "tool",
-                              "type": "string"
-                            },
-                            {
-                              "const": "summary",
-                              "type": "string"
-                            }
-                          ]
-                        },
-                        "isJudge": {
-                          "type": "boolean"
-                        },
-                        "userName": {
-                          "anyOf": [
-                            {
-                              "type": "string"
-                            },
-                            {
-                              "type": "null"
-                            }
-                          ]
-                        }
-                      },
-                      "required": [
-                        "role"
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "id"
-                  ]
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "StreamChatBody": {
-        "type": "object",
-        "properties": {
-          "threadId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "content": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "threadId",
-          "content"
-        ]
-      },
-      "JudgeThreadResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "summary": {
-                "type": "string"
-              },
-              "passed": {
-                "type": "boolean"
-              }
-            },
-            "required": [
-              "summary",
-              "passed"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
-      "GetAllAssignedDocumentsForLessonResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                },
-                "size": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "id",
-                "name",
-                "type",
-                "size"
-              ]
-            }
           }
         },
         "required": [

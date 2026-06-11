@@ -384,7 +384,7 @@ export class StudentLessonProgressService {
     );
 
     const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
-      hasEnrollment: !!accessCourseLessonWithDetails.isAssigned,
+      hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
       isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
       isLearningModeActive,
     });

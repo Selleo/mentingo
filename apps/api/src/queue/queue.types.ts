@@ -1,4 +1,5 @@
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 export const QUEUE_NAMES = {
   DOCUMENT_INGESTION: "document-ingestion",
@@ -9,6 +10,7 @@ export const QUEUE_NAMES = {
   LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
   SCORM_IMPORT: "scorm-import",
+  LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -57,4 +59,9 @@ export interface LearningPathSyncJobData {
   sourceTenantId: string;
   targetTenantId: string;
   triggerEventType: string;
+}
+
+export interface LumaCourseGenerationSyncJobData {
+  courseId: UUIDType;
+  currentUser: CurrentUserType;
 }

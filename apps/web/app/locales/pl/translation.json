@@ -2001,6 +2001,10 @@
       "lumaServiceUnavailable": "Usługa Luma jest obecnie niedostępna.",
       "courseHasChapters": "Ten kurs ma już rozdziały.",
       "courseGeneratedSavedSuccessfully": "Wygenerowany kurs został zapisany.",
+      "lumaCourseGenerationSyncProcessed": "Wygenerowany kurs został zapisany.",
+      "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Wygenerowany kurs został zapisany, ale nie udało się dodać części obrazów.",
+      "lumaCourseGenerationSyncFailed": "Nie udało się zapisać wygenerowanego kursu.",
+      "lumaCourseGenerationSyncDismissed": "Synchronizacja wygenerowanego kursu została odrzucona.",
       "maxOneVideoUploaded": "Nie możesz przesłać więcej niż 1 wideo.",
       "successfullyTransferredCourseOwnership": "Własność kursu została pomyślnie przeniesiona"
     },
@@ -2046,7 +2050,14 @@
       "exitWarning": "Trwa generowanie kursu. Czy na pewno chcesz opuścić tę stronę?",
       "finishedTitle": "Generowanie kursu zakończone",
       "finishedDescription": "Rozdziały i lekcje są gotowe do przejrzenia.",
-      "preparingStructure": "Przygotowywanie struktury rozdziałów..."
+      "preparingStructure": "Przygotowywanie struktury rozdziałów...",
+      "syncProcessingTitle": "Finalizowanie wygenerowanego kursu",
+      "syncProcessingDescription": "Zapisujemy wygenerowane rozdziały, lekcje, quizy i zasoby. Kurs będzie gotowy do przejrzenia po zakończeniu.",
+      "syncProcessingAction": "Przetwarzanie...",
+      "syncFailedTitle": "Synchronizacja wygenerowanego kursu nie powiodła się",
+      "syncFailedDescription": "Coś poszło nie tak podczas zapisywania wygenerowanego kursu.",
+      "syncRetry": "Ponów",
+      "syncDismiss": "Odrzuć"
     },
     "settings": {
       "breadcrumbs": {
@@ -4327,6 +4338,11 @@
       "showDetails": "Pokaż szczegóły",
       "loading": "Ładowanie dziennika zdarzeń...",
       "empty": "Nie znaleziono dziennika zdarzeń."
+    }
+  },
+  "luma": {
+    "errors": {
+      "invalidBlankAnswerId": "Wygenerowany quiz zawiera nieprawidłowy identyfikator pustego miejsca. Spróbuj ponownie wygenerować kurs."
     }
   },
   "liveTraining": {

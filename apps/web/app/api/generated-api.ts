@@ -2590,6 +2590,48 @@ export interface GetCourseGenerationDraftResponse {
   /** @format uuid */
   draftId: string;
   isCourseGenerated: boolean;
+  coreSync: {
+    status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
+    draftId: string | null;
+    attemptCount: number;
+    startedAt: string | null;
+    processedAt: string | null;
+    failedAt: string | null;
+    dismissedAt: string | null;
+    lastError: string | null;
+  };
+}
+
+export interface SyncGeneratedCourseBody {
+  /** @format uuid */
+  integrationId: string;
+}
+
+export interface SyncGeneratedCourseResponse {
+  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
+  draftId: string | null;
+  attemptCount: number;
+  startedAt: string | null;
+  processedAt: string | null;
+  failedAt: string | null;
+  dismissedAt: string | null;
+  lastError: string | null;
+}
+
+export interface DismissGeneratedCourseSyncBody {
+  /** @format uuid */
+  integrationId: string;
+}
+
+export interface DismissGeneratedCourseSyncResponse {
+  status: "not_started" | "processing" | "failed" | "processed" | "dismissed";
+  draftId: string | null;
+  attemptCount: number;
+  startedAt: string | null;
+  processedAt: string | null;
+  failedAt: string | null;
+  dismissedAt: string | null;
+  lastError: string | null;
 }
 
 export interface IngestCourseGenerationFilesBody {
@@ -9860,6 +9902,44 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/luma/course-generation/draft`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerSyncGeneratedCourse
+     * @request POST:/api/luma/course-generation/sync
+     */
+    lumaControllerSyncGeneratedCourse: (
+      data: SyncGeneratedCourseBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SyncGeneratedCourseResponse, any>({
+        path: `/api/luma/course-generation/sync`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LumaControllerDismissGeneratedCourseSync
+     * @request POST:/api/luma/course-generation/sync/dismiss
+     */
+    lumaControllerDismissGeneratedCourseSync: (
+      data: DismissGeneratedCourseSyncBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<DismissGeneratedCourseSyncResponse, any>({
+        path: `/api/luma/course-generation/sync/dismiss`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

@@ -1724,6 +1724,10 @@
       "lumaServiceUnavailable": "„Luma“ paslauga šiuo metu nepasiekiama.",
       "courseHasChapters": "Šis kursas jau turi skyrių.",
       "courseGeneratedSavedSuccessfully": "Sugeneruotas kursas sėkmingai išsaugotas.",
+      "lumaCourseGenerationSyncProcessed": "Sugeneruotas kursas sėkmingai išsaugotas.",
+      "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Sugeneruotas kursas išsaugotas, bet kai kurių vaizdų nepavyko pridėti.",
+      "lumaCourseGenerationSyncFailed": "Nepavyko išsaugoti sugeneruoto kurso.",
+      "lumaCourseGenerationSyncDismissed": "Sugeneruoto kurso sinchronizavimas atmestas.",
       "maxOneVideoUploaded": "Negalite įkelti daugiau nei 1 vaizdo įrašo.",
       "successfullyTransferredCourseOwnership": "Kurso nuosavybės teisė sėkmingai perduota"
     },
@@ -1769,7 +1773,14 @@
       "exitWarning": "Kurso generavimas vyksta. Ar tikrai norite išeiti iš šio puslapio?",
       "finishedTitle": "Kurso generavimas baigtas",
       "finishedDescription": "Jūsų skyriai ir pamokos yra paruošti peržiūrėti.",
-      "preparingStructure": "Ruošiama skyriaus struktūra..."
+      "preparingStructure": "Ruošiama skyriaus struktūra...",
+      "syncProcessingTitle": "Baigiamas sugeneruotas kursas",
+      "syncProcessingDescription": "Įrašome sugeneruotus skyrius, pamokas, testus ir išteklius. Kursą galėsite peržiūrėti, kai tai bus baigta.",
+      "syncProcessingAction": "Apdorojama...",
+      "syncFailedTitle": "Sugeneruoto kurso sinchronizavimas nepavyko",
+      "syncFailedDescription": "Įrašant sugeneruotą kursą kažkas nepavyko.",
+      "syncRetry": "Bandyti dar kartą",
+      "syncDismiss": "Atmesti"
     },
     "settings": {
       "breadcrumbs": {
@@ -4215,6 +4226,11 @@
       "ownerNotAdmin": "API rakto savininkas nebeturi administratoriaus teisių",
       "missingApiKeyHeader": "Trūksta X-API-Key antraštės",
       "missingTenantIdHeader": "Trūksta X-Tenant-Id antraštės"
+    }
+  },
+  "luma": {
+    "errors": {
+      "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą."
     }
   },
   "liveTraining": {
