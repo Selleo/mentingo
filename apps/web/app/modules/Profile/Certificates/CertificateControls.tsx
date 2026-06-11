@@ -1,14 +1,12 @@
 import * as PopoverPrimitive from "@radix-ui/react-popover";
-import { HEX_COLOR_REGEX } from "@repo/shared";
 import { Download, Loader2, Palette, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { HexColorPicker } from "react-colorful";
 import { useTranslation } from "react-i18next";
 
 import { Linkedin } from "~/assets/svgs";
+import { ColorPickerField } from "~/components/ColorPickerField";
 import RectangularSwitch from "~/components/RectangularSwitch";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { cn } from "~/lib/utils";
 
 import { applyUniformCertificateColor } from "./certificateTheme";
@@ -72,14 +70,6 @@ const CertificateControls = ({
     onColorChange?.(value);
   };
 
-  const handleHexColorInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.startsWith("#")
-      ? event.target.value
-      : `#${event.target.value}`;
-
-    if (HEX_COLOR_REGEX.test(value)) updateAllColors(value);
-  };
-
   return (
     <div className="flex flex-wrap items-center justify-end gap-3">
       <RectangularSwitch
@@ -110,23 +100,12 @@ const CertificateControls = ({
             align="end"
             sideOffset={8}
             className={cn(
-              "z-[60] w-[260px] rounded-lg border bg-white p-3 text-popover-foreground shadow-md outline-none",
+              "z-[60] rounded-lg border bg-white p-3 text-popover-foreground shadow-md outline-none",
               "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
               "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             )}
           >
-            <div className="flex flex-col items-center gap-3">
-              <HexColorPicker color={colorTheme.titleColor} onChange={updateAllColors} />
-              <div className="flex items-center justify-center space-x-1">
-                <span className="text-sm text-gray-500">#</span>
-                <Input
-                  type="text"
-                  value={colorTheme.titleColor.replace(/^#/, "").toLowerCase()}
-                  onChange={handleHexColorInputChange}
-                  className="w-24"
-                />
-              </div>
-            </div>
+            <ColorPickerField color={colorTheme.titleColor} onChange={updateAllColors} />
           </PopoverPrimitive.Content>
         </PopoverPrimitive.Root>
       )}

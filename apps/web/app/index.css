@@ -259,6 +259,92 @@ html {
   .subtle {
     @apply text-sm leading-5;
   }
+
+  .color-picker-field {
+    width: 200px;
+  }
+
+  .color-picker-field .react-colorful {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 200px;
+    flex-direction: column;
+    cursor: default;
+    user-select: none;
+  }
+
+  .color-picker-field .react-colorful__saturation {
+    position: relative;
+    flex-grow: 1;
+    border-color: transparent;
+    border-bottom: 12px solid #000;
+    border-radius: 8px 8px 0 0;
+    background-image: linear-gradient(0deg, #000, transparent),
+      linear-gradient(90deg, #fff, hsl(0 0% 100% / 0));
+    box-shadow: inset 0 0 0 1px rgb(0 0 0 / 5%);
+  }
+
+  .color-picker-field .react-colorful__hue {
+    position: relative;
+    height: 24px;
+    border-radius: 0;
+    background: linear-gradient(
+      90deg,
+      red 0,
+      #ff0 17%,
+      #0f0 33%,
+      #0ff 50%,
+      #00f 67%,
+      #f0f 83%,
+      red
+    );
+  }
+
+  .color-picker-field .react-colorful__last-control {
+    border-radius: 0;
+  }
+
+  .color-picker-field .react-colorful__interactive {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    outline: none;
+    touch-action: none;
+  }
+
+  .color-picker-field .react-colorful__pointer {
+    position: absolute;
+    z-index: 1;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    border: 2px solid #fff;
+    border-radius: 9999px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 20%);
+    transform: translate(-50%, -50%);
+  }
+
+  .color-picker-field .react-colorful__interactive:focus .react-colorful__pointer {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+
+  .color-picker-field .react-colorful__pointer-fill {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    content: "";
+    pointer-events: none;
+  }
+
+  .color-picker-field .react-colorful__saturation-pointer {
+    z-index: 3;
+  }
+
+  .color-picker-field .react-colorful__hue-pointer {
+    z-index: 2;
+  }
 }
 
 /* css for lesson-item question type presentation -> Presentation.tsx  */
