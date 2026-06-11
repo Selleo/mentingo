@@ -2603,6 +2603,7 @@ export interface GetLessonsResponse {
     chapterTitle: string;
     chapterDisplayOrder: number;
     searchRank?: number;
+    matchedAttachmentFileName?: string | null;
   }[];
 }
 

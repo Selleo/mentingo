@@ -1,6 +1,15 @@
+import { ENTITY_TYPES } from "@repo/shared";
 import { sql } from "drizzle-orm";
 
-import { courses, lessons, questionAnswerOptions, questions } from "src/storage/schema";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import {
+  courses,
+  lessons,
+  questionAnswerOptions,
+  questions,
+  resourceEntity,
+  resources,
+} from "src/storage/schema";
 
 export function getCourseTsVector() {
   return sql`
@@ -37,6 +46,23 @@ export function getLessonTsVector() {
           )
         FROM ${questions} q
         WHERE q.lesson_id = ${lessons.id}
+      ), ''::text)::tsvector ||
+      COALESCE((
+        SELECT
+          string_agg(
+            (
+              setweight(to_tsvector('english', COALESCE(r.metadata->>'originalFilename', '')), 'D') ||
+              setweight(jsonb_to_tsvector('english', COALESCE(r.title, '{}'::jsonb), '["string"]'), 'D') ||
+              setweight(to_tsvector('english', regexp_replace(r.reference, '^.*/', '')), 'D')
+            )::text,
+            ' '
+          )
+        FROM ${resourceEntity} re
+        INNER JOIN ${resources} r ON r.id = re.resource_id
+        WHERE re.entity_id = ${lessons.id}
+          AND re.entity_type = ${ENTITY_TYPES.LESSON}
+          AND re.relationship_type = ${RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT}
+          AND r.archived = false
       ), ''::text)::tsvector
     )
   `;
