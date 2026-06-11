@@ -156,7 +156,7 @@ const AiMentorLessonForm = ({
       revokeObjectUrl();
       setAvatarPreview(null);
       setSelectedAvatarFile(null);
-      setRemoveAvatar(true);
+      setRemoveAvatar(false);
       return;
     }
 
@@ -165,10 +165,13 @@ const AiMentorLessonForm = ({
       const objectUrl = URL.createObjectURL(file);
       objectUrlRef.current = objectUrl;
       setAvatarPreview(objectUrl);
-      setSelectedAvatarFile(file);
+      setSelectedAvatarFile(null);
       setRemoveAvatar(false);
       return;
     }
+
+    setSelectedAvatarFile(null);
+    setRemoveAvatar(false);
   };
 
   const handleRemoveAvatar = () => {

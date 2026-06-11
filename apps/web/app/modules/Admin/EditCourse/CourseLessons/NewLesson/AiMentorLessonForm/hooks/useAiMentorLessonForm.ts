@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -22,6 +21,11 @@ import {
 } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 import { aiMentorLessonFormSchema } from "../validators/useAiMentorLessonFormSchema";
+
+import {
+  getAiMentorLessonFormDefaultValues,
+  type LessonFormScope,
+} from "./useAiMentorLessonForm.helpers";
 
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
@@ -49,39 +53,29 @@ export const useAiMentorLessonForm = ({
   const { mutateAsync: updateAiMentorLesson } = useUpdateAiMentorLesson();
   const { mutateAsync: deleteAiMentorLesson } = useDeleteLesson();
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
+  const lessonFormScopeRef = useRef<LessonFormScope | null>(null);
 
   const form = useForm<AiMentorLessonFormValues>({
     resolver: zodResolver(aiMentorLessonFormSchema(t)),
-    defaultValues: {
-      title: lessonToEdit?.title || "",
-      description: lessonToEdit?.description || "",
-      aiMentorInstructions: lessonToEdit?.aiMentor?.aiMentorInstructions || "",
-      completionConditions: lessonToEdit?.aiMentor?.completionConditions || "",
-      type: lessonToEdit?.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
-      name: lessonToEdit?.aiMentor?.name || "",
-      voiceMode: lessonToEdit?.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
-      ttsPreset: lessonToEdit?.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
-      customTtsReference: lessonToEdit?.aiMentor?.customTtsReference || "",
-    },
+    defaultValues: getAiMentorLessonFormDefaultValues(lessonToEdit),
   });
 
   const { reset, setValue, watch } = form;
 
   useEffect(() => {
-    if (lessonToEdit) {
-      reset({
-        title: lessonToEdit.title,
-        description: lessonToEdit.description || "",
-        aiMentorInstructions: lessonToEdit.aiMentor?.aiMentorInstructions || "",
-        completionConditions: lessonToEdit.aiMentor?.completionConditions || "",
-        type: lessonToEdit.aiMentor?.type || AI_MENTOR_TYPE.MENTOR,
-        name: lessonToEdit.aiMentor?.name || "",
-        voiceMode: lessonToEdit.aiMentor?.voiceMode || AI_MENTOR_VOICE_MODE.PRESET,
-        ttsPreset: lessonToEdit.aiMentor?.ttsPreset || AI_MENTOR_TTS_PRESET.MALE,
-        customTtsReference: lessonToEdit.aiMentor?.customTtsReference || "",
-      });
-    }
-  }, [lessonToEdit, reset]);
+    if (!lessonToEdit) return;
+
+    const nextScope = { lessonId: lessonToEdit.id, language };
+    const shouldKeepDirtyValues =
+      lessonFormScopeRef.current?.lessonId === nextScope.lessonId &&
+      lessonFormScopeRef.current.language === nextScope.language;
+
+    reset(
+      getAiMentorLessonFormDefaultValues(lessonToEdit),
+      shouldKeepDirtyValues ? { keepDirtyValues: true } : undefined,
+    );
+    lessonFormScopeRef.current = nextScope;
+  }, [language, lessonToEdit, reset]);
 
   const handleSuggestionClick = (suggestionType: SuggestionType) => {
     const currentInstructions = watch("aiMentorInstructions");
