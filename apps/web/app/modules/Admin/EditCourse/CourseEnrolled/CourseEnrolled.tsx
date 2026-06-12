@@ -385,6 +385,7 @@ export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement 
   const page = pagination?.page ?? searchParams.page ?? 1;
   const perPage = pagination?.perPage ?? searchParams.perPage ?? ITEMS_PER_PAGE_OPTIONS[0];
   const totalItems = pagination?.totalItems ?? usersData.length;
+  const hasSelectedUsers = Object.values(rowSelection).some(Boolean);
 
   const handlePageChange = (page: number) =>
     startTransition(() => setSearchParams((prev) => ({ ...prev, page })));
@@ -442,10 +443,11 @@ export const CourseEnrolled = ({ language }: CourseEnrolledProps): ReactElement 
               data-testid={COURSE_ENROLLED_HANDLES.USER_ACTIONS_TRIGGER}
               variant="outline"
               className="flex gap-2"
+              disabled={!hasSelectedUsers}
             >
               <User className="size-4" />
               {t("adminCourseView.enrolled.enroll")}
-              <Icon className="size-4 text-black" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
+              <Icon className="size-4" name={openDropdown ? "ArrowUp" : "ArrowDown"} />
             </Button>
           </DropdownMenuTrigger>
 

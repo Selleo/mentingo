@@ -66,6 +66,11 @@ test("admin can verify enrolled users and filter by keyword and group", async ({
       ),
     ).toBeVisible();
 
+    const userActionsTrigger = page.getByTestId(COURSE_ENROLLED_HANDLES.USER_ACTIONS_TRIGGER);
+    await expect(userActionsTrigger).toBeDisabled();
+    await page.getByTestId(COURSE_ENROLLED_HANDLES.row(notEnrolledUser.id)).click();
+    await expect(userActionsTrigger).toBeEnabled();
+
     await page.getByTestId(COURSE_ENROLLED_HANDLES.sortButton("email")).click();
     await expect(page.getByTestId(COURSE_ENROLLED_HANDLES.row(directUser.id))).toBeVisible();
 

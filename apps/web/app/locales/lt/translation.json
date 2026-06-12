@@ -2250,7 +2250,7 @@
       },
       "confirmation": {
         "title": "Patvirtinti registraciją",
-        "description": "Ar tikrai norite įtraukti pasirinktus studentus į šį kursą? Šio veiksmo anuliuoti negalima."
+        "description": "Ar tikrai norite įtraukti pasirinktus studentus į šį kursą?"
       },
       "enrollGroups": "Registruokitės į grupes",
       "enrollGroupsModal": {
@@ -2261,7 +2261,7 @@
       "members": "{{count}} narių",
       "unenrollConfirmation": {
         "title": "Išsiregistravimo patvirtinimas",
-        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio kurso? Šio veiksmo anuliuoti negalima."
+        "description": "Ar tikrai norite išregistruoti pasirinktus studentus iš šio kurso?"
       },
       "toast": {
         "someStudentsUnenrolled": "Negalite atšaukti šių mokinių registracijos, nes {{count}} iš jų neužregistruoti.",

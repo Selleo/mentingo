@@ -2305,7 +2305,7 @@
       },
       "confirmation": {
         "title": "Confirm enrollment",
-        "description": "Are you sure you want to enroll the selected students in this course? This action cannot be undone."
+        "description": "Are you sure you want to enroll the selected students in this course?"
       },
       "enrollGroups": "Enroll groups",
       "enrollGroupsModal": {
@@ -2316,7 +2316,7 @@
       "members": "{{count}} members",
       "unenrollConfirmation": {
         "title": "Unenroll confirmation",
-        "description": "Are you sure you want to unenroll the selected students from this course? This action cannot be undone."
+        "description": "Are you sure you want to unenroll the selected students from this course?"
       },
       "toast": {
         "someStudentsUnenrolled": "You cannot unenroll these students because {{count}} of them are not enrolled.",
