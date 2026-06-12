@@ -8,6 +8,7 @@ type ReactionButtonProps = {
   disabled: boolean;
   tooltip: string;
   compact?: boolean;
+  testId?: string;
   onClick: () => void;
 };
 
@@ -18,6 +19,7 @@ export function ReactionButton({
   disabled,
   tooltip,
   compact = false,
+  testId,
   onClick,
 }: ReactionButtonProps) {
   return (
@@ -36,6 +38,7 @@ export function ReactionButton({
               },
             )}
             disabled={disabled}
+            data-testid={testId}
             onClick={onClick}
           >
             <span aria-hidden className="text-[12px] leading-none">

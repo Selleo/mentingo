@@ -3,6 +3,7 @@ import { ACCESS_GUARD, PERMISSIONS, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { isAxiosError } from "axios";
 import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
 import { courseLookupQueryOptions, useCourse, useCurrentUser } from "~/api/queries";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -21,6 +22,7 @@ import { LearningModeBanner } from "~/modules/Courses/Lesson/LearningModeBanner"
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../e2e/data/courses/handles";
 import { COURSE_STATISTICS_HANDLES } from "../../../../e2e/data/statistics/handles";
 
 import { ChapterListOverview } from "./components/ChapterListOverview";
@@ -36,6 +38,12 @@ const COURSE_VIEW_TAB_QUERY_VALUES = {
   MORE_FROM_AUTHOR: "MoreFromAuthor",
   STATISTICS: "Statistics",
 } as const;
+
+const getCourseViewTabTestId = (tabValue: string) =>
+  match(tabValue)
+    .with("chat", () => COURSE_DISCUSSION_HANDLES.TAB)
+    .with("statistics", () => COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB)
+    .otherwise(() => undefined);
 
 const resolvePreferredLanguage = (url: URL): SupportedLanguages => {
   const languageFromQuery = url.searchParams.get("language");
@@ -245,11 +253,7 @@ export default function CourseViewPage() {
                     <TabsTrigger
                       key={tab.value}
                       value={tab.value}
-                      data-testid={
-                        tab.value === "statistics"
-                          ? COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB
-                          : undefined
-                      }
+                      data-testid={getCourseViewTabTestId(tab.value)}
                       className="flex h-full rounded-none items-center gap-1.5 data-[state=active]:shadow-none text-neutral-900 data-[state=active]:text-primary-700 data-[state=active]:border-b-2 data-[state=active]:border-b-primary-700"
                     >
                       <span className="body-sm">{tab.title}</span>{" "}

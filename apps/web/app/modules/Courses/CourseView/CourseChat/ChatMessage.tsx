@@ -10,6 +10,8 @@ import {
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { ChatMessageActions } from "./ChatMessageActions";
 import { renderMessageContent } from "./courseChatUtils";
 import { DeleteCourseChatMessageDialog } from "./DeleteCourseChatMessageDialog";
@@ -65,7 +67,10 @@ export function ChatMessage({
   };
 
   return (
-    <div className="group flex w-full min-w-0 gap-2.5">
+    <div
+      className="group flex w-full min-w-0 gap-2.5"
+      data-testid={COURSE_DISCUSSION_HANDLES.message(message.id)}
+    >
       {showAvatar && !isDeleted ? (
         <MessageAvatar
           userName={authorName}
@@ -103,6 +108,7 @@ export function ChatMessage({
               "rounded-tl-md",
               messageBubbleClassName,
             )}
+            data-testid={COURSE_DISCUSSION_HANDLES.messageContent(message.id)}
           >
             <p className={cn("whitespace-pre-wrap break-words", { italic: isDeleted })}>
               {isDeleted
@@ -123,6 +129,10 @@ export function ChatMessage({
                 tooltip={t("studentCourseView.courseChat.reactWith", {
                   reaction: reactionSummary.reaction,
                 })}
+                testId={COURSE_DISCUSSION_HANDLES.messageReactionSummary(
+                  message.id,
+                  reactionSummary.reaction,
+                )}
                 onClick={() =>
                   toggleReaction.mutate({
                     messageId: message.id,

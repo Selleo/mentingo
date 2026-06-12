@@ -60,7 +60,7 @@ jobs:
       matrix:
         shard: [1, 2, 3, 4, 5]
     env:
-      E2E_BROWSER: ${{ github.event_name == 'push' && github.ref_name == 'staging' && 'chromium' || (github.event_name == 'push' && 'all' || (inputs.browser || 'all')) }}
+      E2E_BROWSER: ${{ github.event_name == 'push' && 'chromium' || (inputs.browser || 'all') }}
       PLAYWRIGHT_SHARD: ${{ matrix.shard }}
 
     services:

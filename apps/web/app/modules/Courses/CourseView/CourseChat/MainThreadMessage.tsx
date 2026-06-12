@@ -8,6 +8,8 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { getDateLocale } from "~/utils/getDateLocale";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import { ChatMessage } from "./ChatMessage";
 import { CourseChatMessageForm } from "./CourseChatMessageForm";
 import { MessagesSkeleton } from "./CourseChatStates";
@@ -95,7 +97,10 @@ export function MainThreadMessage({
     .otherwise(() => null);
 
   return (
-    <article className="rounded-2xl bg-transparent">
+    <article
+      className="rounded-2xl bg-transparent"
+      data-testid={COURSE_DISCUSSION_HANDLES.thread(message.id)}
+    >
       <ChatMessage
         message={message}
         users={users}
@@ -117,6 +122,7 @@ export function MainThreadMessage({
           variant="ghost"
           size="sm"
           className="h-6 gap-1.5 px-2 text-xs text-neutral-600"
+          data-testid={COURSE_DISCUSSION_HANDLES.repliesToggle(message.id)}
           onClick={onToggle}
         >
           <MessagesSquare className="size-3.5" />
@@ -128,7 +134,10 @@ export function MainThreadMessage({
       </div>
 
       {isOpen && (
-        <div className="mt-1.5 border-l border-primary-100 pl-3 md:ml-10">
+        <div
+          className="mt-1.5 border-l border-primary-100 pl-3 md:ml-10"
+          data-testid={COURSE_DISCUSSION_HANDLES.replies(message.id)}
+        >
           <div className="flex flex-col gap-2.5 pr-2">
             {repliesContent}
 
@@ -154,6 +163,11 @@ export function MainThreadMessage({
                 formClassName="flex flex-col gap-2"
                 wrapperClassName="flex flex-col gap-1.5 rounded-lg border border-neutral-200 bg-background p-1.5 shadow-sm transition focus-within:border-primary-300 focus-within:ring-2 focus-within:ring-primary-100"
                 textareaClassName="min-h-6 resize-none overflow-hidden border-0 px-1 py-0.5 text-sm leading-5 shadow-none focus-visible:ring-0"
+                testIds={{
+                  form: COURSE_DISCUSSION_HANDLES.replyForm(message.id),
+                  input: COURSE_DISCUSSION_HANDLES.replyInput(message.id),
+                  sendButton: COURSE_DISCUSSION_HANDLES.replySendButton(message.id),
+                }}
               />
             )}
           </div>

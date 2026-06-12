@@ -27,6 +27,13 @@ type CourseChatMessageFormProps = {
   wrapperClassName?: string;
   textareaClassName?: string;
   autoFocus?: boolean;
+  testIds?: {
+    form?: string;
+    input?: string;
+    sendButton?: string;
+    mentionList?: string;
+    mentionOption?: (userId: string) => string;
+  };
 };
 
 export function CourseChatMessageForm({
@@ -38,6 +45,7 @@ export function CourseChatMessageForm({
   wrapperClassName,
   textareaClassName,
   autoFocus,
+  testIds,
 }: CourseChatMessageFormProps) {
   const { t } = useTranslation();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -63,7 +71,7 @@ export function CourseChatMessageForm({
   };
 
   return (
-    <form className={formClassName} onSubmit={handleSubmit}>
+    <form className={formClassName} data-testid={testIds?.form} onSubmit={handleSubmit}>
       <div className={wrapperClassName}>
         <Controller
           control={form.control}
@@ -78,6 +86,11 @@ export function CourseChatMessageForm({
               placeholder={placeholder}
               maxLength={5000}
               className={textareaClassName}
+              testIds={{
+                input: testIds?.input,
+                mentionList: testIds?.mentionList,
+                mentionOption: testIds?.mentionOption,
+              }}
             />
           )}
         />
@@ -87,6 +100,7 @@ export function CourseChatMessageForm({
           className="size-8 self-end rounded-lg p-0"
           aria-label={t("studentCourseView.courseChat.send")}
           disabled={!content.trim() || isSubmitting}
+          data-testid={testIds?.sendButton}
         >
           <Send className="size-4" />
         </Button>

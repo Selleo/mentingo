@@ -8,6 +8,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 type DeleteCourseChatMessageDialogProps = {
   open: boolean;
   isDeleting: boolean;
@@ -31,7 +33,7 @@ export function DeleteCourseChatMessageDialog({
 }: DeleteCourseChatMessageDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent data-testid={COURSE_DISCUSSION_HANDLES.DELETE_DIALOG}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -42,10 +44,17 @@ export function DeleteCourseChatMessageDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
+            data-testid={COURSE_DISCUSSION_HANDLES.DELETE_DIALOG_CANCEL_BUTTON}
           >
             {cancelLabel}
           </Button>
-          <Button type="button" variant="destructive" onClick={onConfirm} disabled={isDeleting}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isDeleting}
+            data-testid={COURSE_DISCUSSION_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON}
+          >
             {deleteLabel}
           </Button>
         </DialogFooter>
