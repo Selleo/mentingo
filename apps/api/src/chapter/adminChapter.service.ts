@@ -1,10 +1,9 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { COURSE_FEATURE, ENTITY_TYPES } from "@repo/shared";
-import { eq, getTableColumns, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { isEqual } from "lodash";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
 import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateChapterEvent, DeleteChapterEvent, UpdateChapterEvent } from "src/events";
@@ -61,18 +60,17 @@ export class AdminChapterService {
         });
       }
 
-      const [chapter] = await trx
-        .insert(chapters)
-        .values({
-          ...body,
+      const chapter = await this.adminChapterRepository.createChapterForCourse(
+        {
+          courseId: body.courseId,
           authorId: currentUser.userId,
-          title: buildJsonbField(language, body.title),
+          title: body.title,
           displayOrder: maxDisplayOrder.displayOrder + 1,
-        })
-        .returning({
-          ...getTableColumns(chapters),
-          title: sql<string>`${chapters.title}->>${language}::text`,
-        });
+          language,
+          isFreemium: body.isFreemium,
+        },
+        trx,
+      );
 
       if (!chapter) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
 

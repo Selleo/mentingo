@@ -15,6 +15,7 @@ import { EnvService } from "src/env/services/env.service";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
+import { LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS } from "src/luma/luma-course-generation-sync.constants";
 import { LumaCourseGenerationSyncRepository } from "src/luma/luma-course-generation-sync.repository";
 
 import type {
@@ -211,7 +212,10 @@ export class LumaService {
       processedAt: sync?.processedAt ?? null,
       failedAt: sync?.failedAt ?? null,
       dismissedAt: sync?.dismissedAt ?? null,
-      lastError: sync?.lastError ?? null,
+      lastError:
+        sync?.status === COURSE_GENERATION_SYNC_STATUS.FAILED && sync.lastError
+          ? LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED
+          : null,
     };
   }
 

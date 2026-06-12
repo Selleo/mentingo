@@ -7,6 +7,7 @@ import { load as loadHtml } from "cheerio";
 import { count, eq, sql } from "drizzle-orm";
 import { validate as uuidValidate } from "uuid";
 
+import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
@@ -65,6 +66,7 @@ export class LumaGeneratedCourseImportService {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly fileService: FileService,
+    private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonRepository: AdminLessonRepository,
     private readonly ingestionService: IngestionService,
     private readonly lumaCourseGenerationSyncRepository: LumaCourseGenerationSyncRepository,
@@ -144,16 +146,16 @@ export class LumaGeneratedCourseImportService {
   }
 
   private async insertChapter(data: InsertChapterData) {
-    const [chapter] = await data.trx
-      .insert(chapters)
-      .values({
+    const chapter = await this.adminChapterRepository.createChapterForCourse(
+      {
         courseId: data.courseId,
         authorId: data.currentUser.userId,
-        title: buildJsonbField(data.language, this.sanitizeText(data.title)),
-        isFreemium: false,
+        title: this.sanitizeText(data.title),
         displayOrder: data.displayOrder,
-      })
-      .returning({ id: chapters.id });
+        language: data.language,
+      },
+      data.trx,
+    );
 
     return chapter.id;
   }

@@ -43,12 +43,12 @@ export class LumaCourseGenerationSyncService {
     try {
       await this.lumaCourseGenerationSyncQueueService.enqueueSyncJob({ courseId, currentUser });
     } catch (error) {
-      const lastError = this.sanitizeError(error);
+      const lastError = this.getErrorMessageForStorage(error);
       const failed = await this.lumaCourseGenerationSyncRepository.markFailed(courseId, lastError);
       const serialized = this.serialize(failed);
       this.publishStatusChanged(courseId, serialized, currentUser.userId, {
         messageKey: LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED,
-        error: lastError,
+        error: LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED,
       });
 
       return serialized;
@@ -82,7 +82,7 @@ export class LumaCourseGenerationSyncService {
 
       return serialized;
     } catch (error) {
-      const lastError = this.sanitizeError(error);
+      const lastError = this.getErrorMessageForStorage(error);
       this.logger.error(
         `Luma course generation sync failed for course ${data.courseId}: ${lastError}`,
         error instanceof Error ? error.stack : undefined,
@@ -95,7 +95,7 @@ export class LumaCourseGenerationSyncService {
       const serialized = this.serialize(failed);
       this.publishStatusChanged(data.courseId, serialized, data.currentUser.userId, {
         messageKey: LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED,
-        error: lastError,
+        error: LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED,
       });
 
       return serialized;
@@ -127,7 +127,7 @@ export class LumaCourseGenerationSyncService {
       processedAt: sync?.processedAt ?? null,
       failedAt: sync?.failedAt ?? null,
       dismissedAt: sync?.dismissedAt ?? null,
-      lastError: sync?.lastError ?? null,
+      lastError: this.getPublicLastError(sync),
     };
   }
 
@@ -150,7 +150,26 @@ export class LumaCourseGenerationSyncService {
     });
   }
 
-  private sanitizeError(_error: unknown) {
+  private getPublicLastError(sync: LumaCourseGenerationSyncRecord | null) {
+    if (!sync?.lastError) return null;
+    if (sync.status !== COURSE_GENERATION_SYNC_STATUS.FAILED) return null;
+
     return LUMA_COURSE_GENERATION_SYNC_MESSAGE_KEYS.FAILED;
+  }
+
+  private getErrorMessageForStorage(error: unknown) {
+    const message = this.toErrorMessage(error).trim();
+    return (message || "Unknown Luma course generation sync error").slice(0, 1000);
+  }
+
+  private toErrorMessage(error: unknown): string {
+    if (typeof error === "string") return error;
+    if (error instanceof Error) return error.message;
+
+    try {
+      return JSON.stringify(error);
+    } catch {
+      return String(error);
+    }
   }
 }

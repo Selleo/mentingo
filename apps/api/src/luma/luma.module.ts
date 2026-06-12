@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { ChapterModule } from "src/chapter/chapter.module";
 import { FileModule } from "src/file/files.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
 import { LessonModule } from "src/lesson/lesson.module";
@@ -17,6 +18,7 @@ import { LumaService } from "./luma.service";
 
 @Module({
   imports: [
+    ChapterModule,
     FileModule,
     IngestionModule,
     LessonModule,
