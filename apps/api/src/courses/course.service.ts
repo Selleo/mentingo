@@ -3526,6 +3526,7 @@ export class CourseService {
                 COUNT(DISTINCT CASE WHEN sc.progress = 'completed' THEN sc.student_id END) AS completed_count,
                 COUNT(DISTINCT sc.student_id) AS total_count
               FROM ${studentCourses} AS sc
+              JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
               WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
             ) AS stats
           ),
@@ -3543,6 +3544,7 @@ export class CourseService {
             JOIN ${lessons} AS l ON slp.lesson_id = l.id
             JOIN ${chapters} AS ch ON l.chapter_id = ch.id
             JOIN ${studentCourses} AS sc ON slp.student_id = sc.student_id AND ch.course_id = sc.course_id
+            JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
             WHERE ch.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
             ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
           ) AS stats
@@ -3556,6 +3558,7 @@ export class CourseService {
                 sc.progress AS progress,
                 COUNT(*) AS count
               FROM ${studentCourses} AS sc
+              JOIN ${users} AS active_users ON active_users.id = sc.student_id AND active_users.deleted_at IS NULL
               WHERE sc.course_id = ${id} AND sc.status = ${COURSE_ENROLLMENT.ENROLLED}
               ${userIds.length ? sql`AND sc.student_id IN ${userIds}` : sql``}
               GROUP BY sc.progress
@@ -3566,10 +3569,12 @@ export class CourseService {
       })
       .from(coursesSummaryStats)
       .leftJoin(studentCourses, eq(coursesSummaryStats.courseId, studentCourses.courseId))
+      .leftJoin(users, eq(studentCourses.studentId, users.id))
       .where(
         and(
           eq(coursesSummaryStats.courseId, id),
           eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+          isNull(users.deletedAt),
           ...(userIds.length ? [inArray(studentCourses.studentId, userIds)] : []),
         ),
       );
@@ -3610,6 +3615,9 @@ export class CourseService {
             JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${
               studentCourses.studentId
             } AND ${studentCourses.courseId} = ${chapters.courseId}
+            JOIN ${users} AS active_users ON active_users.id = ${
+              studentCourses.studentId
+            } AND active_users.deleted_at IS NULL
             JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
             WHERE ${chapters.courseId} = ${courseId}
               AND ${lessons.type} = 'quiz'
@@ -3681,6 +3689,7 @@ export class CourseService {
       eq(studentCourses.courseId, courseId),
       this.getSearchQueryConditions(searchQuery, language),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      isNull(users.deletedAt),
     ];
 
     conditions.push(...(await this.getStatisticsConditions({ groupId })));
@@ -3761,6 +3770,7 @@ export class CourseService {
       isNotNull(studentLessonProgress.attempts),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(chapters.courseId, courseId),
+      isNull(users.deletedAt),
       or(
         sql`${quizNameExpression} ILIKE ${`%${searchQuery}%`}`,
         this.getSearchQueryConditions(searchQuery, language),
@@ -3857,6 +3867,7 @@ export class CourseService {
       eq(studentLessonProgress.id, aiMentorStudentLessonProgress.studentLessonProgressId),
       eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
       eq(chapters.courseId, courseId),
+      isNull(users.deletedAt),
       or(
         this.getSearchQueryConditions(searchQuery, language),
         sql`${lessonNameExpression} ILIKE ${`%${searchQuery}%`}`,

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, type SupportedLanguages } from "@repo/shared";
-import { and, countDistinct, eq, ne, sql } from "drizzle-orm";
+import { and, countDistinct, eq, isNull, ne, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -79,7 +79,7 @@ export class LearningTimeRepository {
       .innerJoin(users, eq(lessonLearningTime.userId, users.id))
       .innerJoin(lessons, eq(lessonLearningTime.lessonId, lessons.id))
       .innerJoin(courses, eq(lessonLearningTime.courseId, courses.id))
-      .where(eq(lessonLearningTime.courseId, courseId));
+      .where(and(eq(lessonLearningTime.courseId, courseId), isNull(users.deletedAt)));
   }
 
   async getAverageLearningTimePerLesson(courseId: UUIDType, conditions: SQL<unknown>[] = []) {
@@ -92,9 +92,10 @@ export class LearningTimeRepository {
         totalSeconds: sql<number>`SUM(${lessonLearningTime.totalSeconds})::INTEGER`,
       })
       .from(lessonLearningTime)
+      .innerJoin(users, eq(lessonLearningTime.userId, users.id))
       .innerJoin(lessons, eq(lessonLearningTime.lessonId, lessons.id))
       .innerJoin(courses, eq(lessonLearningTime.courseId, courses.id))
-      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions))
+      .where(and(eq(lessonLearningTime.courseId, courseId), isNull(users.deletedAt), ...conditions))
       .groupBy(
         lessonLearningTime.lessonId,
         lessons.title,
@@ -129,7 +130,9 @@ export class LearningTimeRepository {
       .leftJoin(users, eq(users.id, lessonLearningTime.userId))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions));
+      .where(
+        and(eq(lessonLearningTime.courseId, courseId), isNull(users.deletedAt), ...conditions),
+      );
 
     return totalItems ?? 0;
   }
@@ -141,7 +144,10 @@ export class LearningTimeRepository {
         uniqueUsers: sql<number>`COUNT(DISTINCT ${lessonLearningTime.userId})::INTEGER`,
       })
       .from(lessonLearningTime)
-      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions));
+      .innerJoin(users, eq(lessonLearningTime.userId, users.id))
+      .where(
+        and(eq(lessonLearningTime.courseId, courseId), isNull(users.deletedAt), ...conditions),
+      );
 
     return result[0] ?? { totalSeconds: 0, uniqueUsers: 0 };
   }
@@ -167,7 +173,7 @@ export class LearningTimeRepository {
       .innerJoin(users, eq(lessonLearningTime.userId, users.id))
       .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
       .leftJoin(groups, eq(groups.id, groupUsers.groupId))
-      .where(and(eq(lessonLearningTime.courseId, courseId), ...conditions))
+      .where(and(eq(lessonLearningTime.courseId, courseId), isNull(users.deletedAt), ...conditions))
       .groupBy(
         lessonLearningTime.userId,
         users.firstName,
@@ -182,7 +188,8 @@ export class LearningTimeRepository {
     return this.db
       .select({ id: groupUsers.userId })
       .from(groupUsers)
-      .where(eq(groupUsers.groupId, groupId));
+      .innerJoin(users, eq(users.id, groupUsers.userId))
+      .where(and(eq(groupUsers.groupId, groupId), isNull(users.deletedAt)));
   }
 
   async getStudentsInCourse(courseId: UUIDType) {
@@ -197,6 +204,7 @@ export class LearningTimeRepository {
         and(
           eq(studentCourses.courseId, courseId),
           ne(studentCourses.status, COURSE_ENROLLMENT.NOT_ENROLLED),
+          isNull(users.deletedAt),
         ),
       );
   }
@@ -215,6 +223,7 @@ export class LearningTimeRepository {
         and(
           eq(studentCourses.courseId, courseId),
           ne(studentCourses.status, COURSE_ENROLLMENT.NOT_ENROLLED),
+          isNull(users.deletedAt),
         ),
       )
       .groupBy(groups.id);
