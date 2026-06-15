@@ -6,6 +6,7 @@ export const LOGIN_PAGE_HANDLES = {
   FORGOT_PASSWORD_LINK: "login-page-forgot-password-link",
   MAGIC_LINK_LINK: "login-page-magic-link-link",
   REGISTER_LINK: "login-page-register-link",
+  VERSION_CHANGELOG_LINK: "login-page-version-changelog-link",
 } as const;
 
 export const REGISTER_PAGE_HANDLES = {
