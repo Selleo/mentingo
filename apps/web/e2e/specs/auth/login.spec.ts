@@ -1,5 +1,6 @@
 import { USER_ROLE } from "~/config/userRoles";
 
+import versionJson from "../../../version.json" with { type: "json" };
 import {
   LOGIN_PAGE_HANDLES,
   MAGIC_LINK_PAGE_HANDLES,
@@ -14,6 +15,8 @@ import { fillLoginFormFlow } from "../../flows/auth/fill-login-form.flow";
 import { openLoginPageFlow } from "../../flows/auth/open-login-page.flow";
 import { submitLoginFormFlow } from "../../flows/auth/submit-login-form.flow";
 import { assertToastVisible } from "../../utils/assert-toast-visible";
+
+const { version } = versionJson;
 
 test("admin can sign in and sign out", async ({ apiClient, withReadonlyPage }) => {
   await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
@@ -56,6 +59,21 @@ test("visitor can navigate between auth pages", async ({ withReadonlyPage }) => 
 
     await page.getByTestId(REGISTER_PAGE_HANDLES.SIGN_IN_LINK).click();
     await expect(page).toHaveURL("/auth/login");
+  });
+});
+
+test("visitor can open changelog for the current app version", async ({ withReadonlyPage }) => {
+  await withReadonlyPage(USER_ROLE.admin, async ({ page }) => {
+    await openLoginPageFlow(page);
+
+    const changelogLink = page.getByTestId(LOGIN_PAGE_HANDLES.VERSION_CHANGELOG_LINK);
+
+    await expect(changelogLink).toBeVisible();
+    await expect(changelogLink).toHaveAttribute(
+      "href",
+      `https://github.com/Selleo/mentingo/blob/main/CHANGELOG.md#${version}`,
+    );
+    await expect(changelogLink).toHaveAttribute("target", "_blank");
   });
 });
 

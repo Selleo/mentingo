@@ -34,6 +34,8 @@ import type { LoginBody } from "~/api/generated-api";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.login");
 
+const CHANGELOG_URL = "https://github.com/Selleo/mentingo/blob/main/CHANGELOG.md";
+
 const loginSchema = (t: (key: string) => string) =>
   z.object({
     email: z.string().email({ message: t("loginView.validation.email") }),
@@ -261,7 +263,15 @@ export default function LoginPage() {
           )}
 
           <p className="bottom-4 mt-4 text-center text-sm text-neutral-300">
-            {t("common.other.appVersion", { version })}
+            <a
+              href={`${CHANGELOG_URL}#${version}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-testid={LOGIN_PAGE_HANDLES.VERSION_CHANGELOG_LINK}
+              className="underline-offset-2 hover:underline"
+            >
+              {t("common.other.appVersion", { version })}
+            </a>
           </p>
         </CardContent>
       </Card>
