@@ -85,6 +85,7 @@ import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
+  ResourceForEntity,
 } from "src/file/types/resource.types";
 import type { UploadFileResult } from "src/file/types/upload-file-result.type";
 
@@ -862,7 +863,7 @@ export class FileService {
     entityType: EntityType,
     relationshipType?: string,
     language?: SupportedLanguages,
-  ) {
+  ): Promise<ResourceForEntity[]> {
     const conditions = [
       eq(resourceEntity.entityId, entityId),
       eq(resourceEntity.entityType, entityType),
@@ -881,6 +882,7 @@ export class FileService {
     const results = await this.db
       .select({
         ...resourceSelect,
+        resourceEntityId: resourceEntity.id,
       })
       .from(resources)
       .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))

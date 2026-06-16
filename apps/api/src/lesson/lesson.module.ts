@@ -5,6 +5,7 @@ import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
 import { SearchIndexModule } from "src/global-search/search-index.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
+import { LessonVideoProgressModule } from "src/lesson-video-progress/lesson-video-progress.module";
 import { LiveTrainingModule } from "src/live-training/live-training.module";
 import { LocalizationModule } from "src/localization/localization.module";
 import { LocalizationService } from "src/localization/localization.service";
@@ -33,6 +34,7 @@ import { LessonService } from "./services/lesson.service";
     ResourceLibraryModule,
     LiveTrainingModule,
     SettingsModule,
+    LessonVideoProgressModule,
     forwardRef(() => CourseModule),
   ],
   controllers: [LessonController],

@@ -40,7 +40,17 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
     updateCourseSettings({ courseId, data: { quizFeedbackEnabled: nextValue } });
   };
 
+  const handleVideoCompletionTrackingToggle = (nextValue: boolean) => {
+    if (!courseId) return;
+    updateCourseSettings({ courseId, data: { videoCompletionTrackingEnabled: nextValue } });
+  };
+
   const isDisabled = isLoading || isUpdatingCourseSettings;
+  const testIdBySettingKey: Record<string, string> = {
+    lessonSequenceEnabled: COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH,
+    quizFeedbackEnabled: COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH,
+    videoCompletionTrackingEnabled: COURSE_SETTINGS_HANDLES.VIDEO_COMPLETION_TRACKING_SWITCH,
+  };
 
   const settings: CourseSettingsSwitch[] = [
     {
@@ -61,6 +71,15 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
       onToggle: handleQuizFeedbackToggle,
       ariaLabel: t("adminCourseView.settings.other.enableQuizFeedback"),
     },
+    {
+      key: "videoCompletionTrackingEnabled",
+      feature: COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING,
+      label: t("adminCourseView.settings.other.enableVideoCompletionTracking"),
+      description: t("adminCourseView.settings.other.enableVideoCompletionTrackingDescription"),
+      isEnabled: data?.videoCompletionTrackingEnabled,
+      onToggle: handleVideoCompletionTrackingToggle,
+      ariaLabel: t("adminCourseView.settings.other.enableVideoCompletionTracking"),
+    },
   ].filter((setting) => isCourseFeatureEnabledForCourseType(courseType, setting.feature));
 
   if (!settings.length) return null;
@@ -73,11 +92,7 @@ export const CourseSettingsSwitches = ({ courseId, courseType = COURSE_TYPE.DEFA
           className="rounded-lg border border-neutral-300 p-4 gap-3 items-center flex"
         >
           <Switch
-            data-testid={
-              setting.key === "lessonSequenceEnabled"
-                ? COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH
-                : COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH
-            }
+            data-testid={testIdBySettingKey[setting.key]}
             checked={setting.isEnabled}
             onCheckedChange={setting.onToggle}
             disabled={isDisabled}

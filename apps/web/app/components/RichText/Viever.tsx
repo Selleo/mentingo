@@ -12,12 +12,19 @@ import {
 } from "./styles";
 import { RICH_TEXT_VIEWER_VARIANT, type RichTextViewerVariant } from "./viewerTypes";
 
+import type { SupportedLanguages } from "@repo/shared";
+
 type ViewerProps = {
   content: string;
   style?: "default" | "prose";
   className?: string;
   variant?: RichTextViewerVariant;
   onVideoEnded?: (index: number | null) => void;
+  videoCoverageTracking?: {
+    enabled: boolean;
+    lessonId?: string;
+    language?: SupportedLanguages;
+  };
 };
 
 const Viewer = ({
@@ -26,6 +33,7 @@ const Viewer = ({
   className,
   variant = RICH_TEXT_VIEWER_VARIANT.DEFAULT,
   onVideoEnded,
+  videoCoverageTracking,
 }: ViewerProps) => {
   const variantStyles = {
     default: {
@@ -83,10 +91,10 @@ const Viewer = ({
 
     return plugins.map((extension) =>
       extension.name === "video" && variant === RICH_TEXT_VIEWER_VARIANT.CONTENT
-        ? extension.configure({ onVideoEnded: handleVideoEnded })
+        ? extension.configure({ onVideoEnded: handleVideoEnded, videoCoverageTracking })
         : extension,
     );
-  }, [handleVideoEnded, variant]);
+  }, [handleVideoEnded, variant, videoCoverageTracking]);
 
   const editor = useEditor(
     {

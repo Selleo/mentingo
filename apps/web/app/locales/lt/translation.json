@@ -92,6 +92,8 @@
     "sequenceUpdateFailed": "Nepavyko atnaujinti pamokų sekos",
     "quizFeedbackUpdatedSuccessfully": "Parinktis „Viktorinos atsiliepimai“ sėkmingai atnaujinta",
     "quizFeedbackUpdateFailed": "Nepavyko atnaujinti parinkties „Viktorinos atsiliepimai“.",
+    "videoCompletionTrackingUpdatedSuccessfully": "Parinktis „Vaizdo įrašo užbaigimo sekimas“ sėkmingai atnaujinta",
+    "videoCompletionTrackingUpdateFailed": "Nepavyko atnaujinti parinkties „Vaizdo įrašo užbaigimo sekimas“.",
     "settingsUpdatedSuccessfully": "Nustatymai sėkmingai atnaujinti",
     "settingsUpdateFailed": "Nepavyko atnaujinti nustatymų"
   },
@@ -1742,7 +1744,8 @@
       "featureUnavailable": {
         "curriculum": "SCORM kursuose mokymo programos redagavimas nepasiekiamas.",
         "lessonSequence": "SCORM kursuose pamokų eigos privalomas laikymasis nepasiekiamas.",
-        "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami."
+        "quizFeedback": "SCORM kursuose viktorinos grįžtamojo ryšio nustatymai nepasiekiami.",
+        "videoCompletionTracking": "SCORM kursuose vaizdo įrašo užbaigimo sekimas nepasiekiamas."
       },
       "notFound": {
         "course": "Kursas nerastas.",
@@ -1898,6 +1901,8 @@
         "requireSequentialLessons": "Reikalauti, kad mokiniai baigtų pamokas eilės tvarka",
         "enableQuizFeedback": "Atsiliepimai apie viktoriną",
         "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
+        "enableVideoCompletionTracking": "Vaizdo įrašo užbaigimo sekimas",
+        "enableVideoCompletionTrackingDescription": "Reikalauti, kad mokiniai peržiūrėtų pakankamai unikalios vidinių pamokos vaizdo įrašų dalies, prieš laikant vaizdo įrašą užbaigtu.",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
         "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."
@@ -2658,6 +2663,16 @@
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",
       "body": "Šiek tiek palaukite. Jis pasirodys čia, kai bus paruoštas."
+    },
+    "videoProgress": {
+      "errors": {
+        "resourceNotFound": "Nepavyko išsaugoti šios pamokos vaizdo įrašo pažangos.",
+        "unsupportedLessonType": "Vaizdo įrašo pažanga pasiekiama tik turinio pamokoms.",
+        "unsupportedBucketSize": "Vaizdo įrašo pažanga naudoja nepalaikomą sekimo intervalą.",
+        "invalidResourceType": "Šio ištekliaus negalima sekti kaip pamokos vaizdo įrašo.",
+        "trackingDisabled": "Vaizdo įrašo užbaigimo sekimas šiame kurse išjungtas.",
+        "accessDenied": "Neturite prieigos atnaujinti šios pamokos vaizdo įrašo pažangos."
+      }
     },
     "playNext": {
       "title": "Toliau",

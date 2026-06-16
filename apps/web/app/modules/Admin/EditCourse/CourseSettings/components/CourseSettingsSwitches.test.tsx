@@ -16,6 +16,7 @@ const mockUseCourseSettings = vi.fn(() => ({
   data: {
     quizFeedbackEnabled: true,
     lessonSequenceEnabled: false,
+    videoCompletionTrackingEnabled: true,
   },
   isLoading: false,
 }));
@@ -45,6 +46,7 @@ describe("CourseSettingsSwitches", () => {
       data: {
         quizFeedbackEnabled: true,
         lessonSequenceEnabled: false,
+        videoCompletionTrackingEnabled: true,
       },
       isLoading: false,
     });
@@ -55,6 +57,7 @@ describe("CourseSettingsSwitches", () => {
 
     expect(screen.getByLabelText(/enforce lesson sequence/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/quiz feedback/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/video completion tracking/i)).toBeInTheDocument();
   });
 
   it("displays quiz feedback switch as checked when enabled", () => {
@@ -62,6 +65,7 @@ describe("CourseSettingsSwitches", () => {
       data: {
         quizFeedbackEnabled: true,
         lessonSequenceEnabled: false,
+        videoCompletionTrackingEnabled: true,
       },
       isLoading: false,
     });
@@ -77,6 +81,7 @@ describe("CourseSettingsSwitches", () => {
       data: {
         quizFeedbackEnabled: false,
         lessonSequenceEnabled: false,
+        videoCompletionTrackingEnabled: true,
       },
       isLoading: false,
     });
@@ -110,6 +115,7 @@ describe("CourseSettingsSwitches", () => {
       data: {
         quizFeedbackEnabled: false,
         lessonSequenceEnabled: false,
+        videoCompletionTrackingEnabled: true,
       },
       isLoading: false,
     });
@@ -123,6 +129,22 @@ describe("CourseSettingsSwitches", () => {
       expect(mockMutate).toHaveBeenCalledWith({
         courseId: "test-course-id",
         data: { quizFeedbackEnabled: true },
+      });
+    });
+  });
+
+  it("calls updateCourseSettings when video completion tracking switch is toggled", async () => {
+    const user = userEvent.setup();
+
+    renderWith({ withQuery: true }).render(<CourseSettingsSwitches courseId="test-course-id" />);
+
+    const videoTrackingSwitch = screen.getByLabelText(/video completion tracking/i);
+    await user.click(videoTrackingSwitch);
+
+    await waitFor(() => {
+      expect(mockMutate).toHaveBeenCalledWith({
+        courseId: "test-course-id",
+        data: { videoCompletionTrackingEnabled: false },
       });
     });
   });

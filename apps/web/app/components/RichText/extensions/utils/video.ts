@@ -3,10 +3,14 @@ import {
   detectVideoProviderFromUrl,
   extractVimeoId,
   extractYoutubeId,
+  parseVideoCoverageRanges,
   tryParseUrl,
   type VideoProvider,
+  type VideoCoverageRange,
 } from "@repo/shared";
 import { match } from "ts-pattern";
+
+import { parseFiniteNumberOrNull } from "~/lib/number";
 
 import { VIDEO_UPLOAD_NODE_STATUS } from "./videoUploadNode";
 
@@ -26,6 +30,12 @@ export type VideoEmbedAttrs = {
   uploadLabel: string | null;
   uploadStatus: VideoUploadNodeStatus | null;
   uploadErrorMessage: string | null;
+  resourceEntityId: string | null;
+  videoCoveragePercent: number | null;
+  videoIsWatched: boolean;
+  videoWatchedRanges: VideoCoverageRange[];
+  videoDurationSeconds: number | null;
+  videoBucketSizeSeconds: number | null;
 };
 
 const isVideoSourceType = (value: string | null | undefined): value is VideoSourceType =>
@@ -78,6 +88,12 @@ type VideoEmbedAttrsInput = {
   uploadLabel?: string | null;
   uploadStatus?: VideoUploadNodeStatus | null;
   uploadErrorMessage?: string | null;
+  resourceEntityId?: string | null;
+  videoCoveragePercent?: number | string | null;
+  videoIsWatched?: boolean | string | null;
+  videoWatchedRanges?: VideoCoverageRange[] | string | null;
+  videoDurationSeconds?: number | string | null;
+  videoBucketSizeSeconds?: number | string | null;
 };
 
 export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): VideoEmbedAttrs => {
@@ -112,6 +128,12 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
         : null,
     uploadErrorMessage:
       typeof attrs.uploadErrorMessage === "string" ? attrs.uploadErrorMessage : null,
+    resourceEntityId: typeof attrs.resourceEntityId === "string" ? attrs.resourceEntityId : null,
+    videoCoveragePercent: parseFiniteNumberOrNull(attrs.videoCoveragePercent),
+    videoIsWatched: attrs.videoIsWatched === true || attrs.videoIsWatched === "true",
+    videoWatchedRanges: parseVideoCoverageRanges(attrs.videoWatchedRanges),
+    videoDurationSeconds: parseFiniteNumberOrNull(attrs.videoDurationSeconds),
+    videoBucketSizeSeconds: parseFiniteNumberOrNull(attrs.videoBucketSizeSeconds),
   };
 };
 
@@ -133,6 +155,12 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
   const uploadStatus =
     (element.getAttribute("data-upload-status") as VideoUploadNodeStatus | null) ?? null;
   const uploadErrorMessage = element.getAttribute("data-upload-error-message") ?? null;
+  const resourceEntityId = element.getAttribute("data-resource-entity-id") ?? null;
+  const videoCoveragePercent = element.getAttribute("data-video-coverage-percent") ?? null;
+  const videoIsWatched = element.getAttribute("data-video-is-watched") ?? null;
+  const videoWatchedRanges = element.getAttribute("data-video-watched-ranges") ?? null;
+  const videoDurationSeconds = element.getAttribute("data-video-duration-seconds") ?? null;
+  const videoBucketSizeSeconds = element.getAttribute("data-video-bucket-size-seconds") ?? null;
 
   const sourceType: VideoSourceType = match(sourceTypeAttr)
     .when(isVideoSourceType, (value) => value)
@@ -152,5 +180,11 @@ export const getVideoEmbedAttrsFromElement = (element: HTMLElement): VideoEmbedA
     uploadLabel,
     uploadStatus,
     uploadErrorMessage,
+    resourceEntityId,
+    videoCoveragePercent,
+    videoIsWatched,
+    videoWatchedRanges,
+    videoDurationSeconds,
+    videoBucketSizeSeconds,
   });
 };

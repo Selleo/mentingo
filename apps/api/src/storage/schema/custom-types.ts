@@ -5,3 +5,9 @@ export const tsvector = customType<{ data: string; driverData: string }>({
     return "tsvector";
   },
 });
+
+export const int4multirange = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return "int4multirange";
+  },
+});

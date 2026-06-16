@@ -3,6 +3,9 @@ import { JwtService } from "@nestjs/jwt";
 import {
   CALENDAR_EVENT_SOURCE_TYPES,
   COURSE_ENROLLMENT,
+  COURSE_FEATURE,
+  COURSE_FEATURE_ERROR_TRANSLATION_KEY,
+  COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
@@ -3661,6 +3664,32 @@ describe("CourseController (e2e)", () => {
 
           expect(getResponse.body.data.quizFeedbackEnabled).toBe(false);
           expect(getResponse.body.data.lessonSequenceEnabled).toBe(true);
+        });
+
+        it("rejects video completion tracking setting for SCORM courses", async () => {
+          const admin = await userFactory
+            .withCredentials({ password })
+            .withAdminSettings(db)
+            .withAdminRole()
+            .create();
+          const cookies = await cookieFor(admin, app);
+          const category = await categoryFactory.create();
+          const course = await courseFactory.create({
+            authorId: admin.id,
+            categoryId: category.id,
+            courseType: COURSE_TYPE.SCORM,
+            status: "published",
+          });
+
+          const response = await request(app.getHttpServer())
+            .patch(`/api/course/settings/${course.id}`)
+            .send({ videoCompletionTrackingEnabled: true })
+            .set("Cookie", cookies)
+            .expect(400);
+
+          expect(response.body.message).toBe(
+            COURSE_FEATURE_ERROR_TRANSLATION_KEY[COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING],
+          );
         });
 
         it("returns 404 when course does not exist", async () => {

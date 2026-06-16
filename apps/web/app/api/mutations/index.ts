@@ -12,6 +12,7 @@ export { useDownloadCertificatePdf } from "./useDownloadCertificatePdf";
 export { useLoginUser } from "./useLoginUser";
 export { useLogoutUser } from "./useLogoutUser";
 export { useMarkLessonAsCompleted } from "./useMarkLessonAsCompleted";
+export { syncLessonVideoCompletionQueries, useLessonVideoProgress } from "./useLessonVideoProgress";
 export { useRegisterUser } from "./useRegisterUser";
 export { useStripePaymentIntent } from "./useStripePaymentIntent";
 export { useSubmitQuiz } from "./useSubmitQuiz";

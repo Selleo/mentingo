@@ -1,7 +1,9 @@
 import type { ResourceCategory, ResourceRelationshipType } from "../file.constants";
 import type { EntityType, SupportedLanguages } from "@repo/shared";
+import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { resources } from "src/storage/schema";
 
 export type CreateResourceForEntityParams = {
   reference: string;
@@ -27,4 +29,16 @@ export type UploadResourceParams = {
   description?: Partial<Record<SupportedLanguages, string>>;
   currentUser?: CurrentUserType;
   options?: { folderIncludesResource?: boolean; contextId?: UUIDType };
+};
+
+export type ResourceForEntity = Omit<
+  InferSelectModel<typeof resources>,
+  "title" | "description" | "metadata"
+> & {
+  title: unknown;
+  description: unknown;
+  metadata: unknown;
+  resourceEntityId: UUIDType;
+  fileUrl: string;
+  fileUrlError?: boolean;
 };

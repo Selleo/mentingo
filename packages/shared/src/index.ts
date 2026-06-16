@@ -44,4 +44,5 @@ export * from "./types/videoUploadTypes";
 export * from "./types/voiceSocketEvents";
 export * from "./utils/certificate";
 export * from "./utils/permissions";
+export * from "./utils/videoCoverage";
 export * from "./utils/videoUrls";

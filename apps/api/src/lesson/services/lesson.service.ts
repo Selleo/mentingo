@@ -31,6 +31,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { LessonVideoProgressService } from "src/lesson-video-progress/lesson-video-progress.service";
 import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
@@ -83,6 +84,7 @@ export class LessonService {
     private readonly localizationService: LocalizationService,
     private readonly permissionsService: PermissionsService,
     private readonly liveTrainingService: LiveTrainingService,
+    private readonly lessonVideoProgressService: LessonVideoProgressService,
   ) {}
 
   async getLessonById(
@@ -134,14 +136,31 @@ export class LessonService {
         RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
         actualLanguage,
       );
+      const videoResourceEntityIds = lessonResources
+        .filter(
+          (resource) => resource.contentType?.startsWith("video/") && resource.resourceEntityId,
+        )
+        .map((resource) => resource.resourceEntityId);
+      const videoProgressRows = await this.lessonVideoProgressService.getProgressForResources({
+        lessonId: id,
+        studentId: userId,
+        resourceEntityIds: videoResourceEntityIds,
+      });
+      const videoProgressByResourceEntityId = new Map(
+        videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
+      );
 
       const mappedResources = lessonResources.map((resource) => ({
         id: resource.id,
+        resourceEntityId: resource.resourceEntityId,
         fileUrl: resource.fileUrl,
         fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
         contentType: resource.contentType,
         title: typeof resource.title === "string" ? resource.title : undefined,
         description: typeof resource.description === "string" ? resource.description : undefined,
+        videoProgress: resource.resourceEntityId
+          ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
+          : undefined,
       }));
 
       const {
@@ -162,6 +181,8 @@ export class LessonService {
         description: updatedDescription ?? lesson.description,
         hasOnlyVideo: hasVideo,
         hasVideo: contentCount.video > 0,
+        hasTrackedVideo:
+          Boolean(lesson.videoCompletionTrackingEnabled) && videoResourceEntityIds.length > 0,
         hasAutoplayTrigger,
         videos,
       };

@@ -16,17 +16,21 @@ import { cn } from "~/lib/utils";
 import { getVideoAspectRatio } from "./aspectRatio";
 import "./videojs-vimeo-tech";
 import "./videoPlayer.css";
+import { useVideoCoverageTracker } from "./useVideoCoverageTracker";
 
 import type { VideoAspectRatio } from "./aspectRatio";
+import type { VideoCoverageSnapshot, VideoCoverageTrackingOptions } from "./videoCoverage.types";
 
 interface VideoPlayerProps {
   url: string;
   onAspectRatioChange?: (aspectRatio: VideoAspectRatio) => void;
   onEnded?: () => void;
+  onCoverageChange?: (snapshot: VideoCoverageSnapshot) => void;
   autoPlay?: boolean;
   fill?: boolean;
   className?: string;
   provider: VideoProvider;
+  coverageTracking?: VideoCoverageTrackingOptions;
 }
 
 type VideoJSType = ReturnType<typeof videojs>;
@@ -70,11 +74,14 @@ export const VideoPlayer = ({
   provider,
   onAspectRatioChange,
   onEnded,
+  onCoverageChange,
   autoPlay = false,
   fill = true,
   className,
+  coverageTracking,
 }: VideoPlayerProps) => {
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [player, setPlayer] = useState<VideoJSType | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSType | null>(null);
@@ -82,6 +89,12 @@ export const VideoPlayer = ({
   const onAspectRatioChangeRef = useRef(onAspectRatioChange);
   const onEndedRef = useRef(onEnded);
   const controlsVisibilityTimeoutRef = useRef<number | null>(null);
+  const coverage = useVideoCoverageTracker(
+    player,
+    coverageTracking ?? {
+      enabled: false,
+    },
+  );
 
   useEffect(() => {
     onAspectRatioChangeRef.current = onAspectRatioChange;
@@ -144,6 +157,7 @@ export const VideoPlayer = ({
     videoRef.current?.appendChild(videoElement);
 
     const player = (playerRef.current = videojs(videoElement, options));
+    setPlayer(player);
 
     player.ready(() => {
       enableCustomControls(player);
@@ -239,9 +253,51 @@ export const VideoPlayer = ({
       if (playerRef.current && !playerRef.current.isDisposed()) {
         playerRef.current.dispose();
         playerRef.current = null;
+        setPlayer(null);
       }
     };
   }, [clearControlsVisibilityTimer]);
+
+  useEffect(() => {
+    onCoverageChange?.(coverage.snapshot);
+  }, [coverage.snapshot, onCoverageChange]);
+
+  useEffect(() => {
+    if (!player || !coverageTracking?.enabled) return;
+
+    const holder = player.el()?.querySelector(".vjs-progress-holder") as HTMLElement | null;
+    if (!holder) return;
+
+    holder.querySelector(".mentingo-video-coverage-markers")?.remove();
+
+    const durationSeconds = coverage.snapshot.durationSeconds ?? player.duration();
+    if (!durationSeconds || !Number.isFinite(durationSeconds) || durationSeconds <= 0) return;
+
+    const markerRoot = document.createElement("div");
+    markerRoot.className = "mentingo-video-coverage-markers";
+
+    for (const [start, end] of coverage.snapshot.watchedRanges) {
+      const marker = document.createElement("span");
+      const left = Math.max(0, Math.min(100, (start / durationSeconds) * 100));
+      const width = Math.max(0, Math.min(100 - left, ((end - start) / durationSeconds) * 100));
+
+      marker.className = "mentingo-video-coverage-marker";
+      marker.style.left = `${left}%`;
+      marker.style.width = `${width}%`;
+      markerRoot.appendChild(marker);
+    }
+
+    holder.appendChild(markerRoot);
+
+    return () => {
+      markerRoot.remove();
+    };
+  }, [
+    coverage.snapshot.durationSeconds,
+    coverage.snapshot.watchedRanges,
+    coverageTracking?.enabled,
+    player,
+  ]);
 
   return (
     <div

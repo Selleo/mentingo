@@ -17,6 +17,7 @@ import type { AxiosError } from "axios";
 type UpdateCourseSettingsBody = {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
+  videoCompletionTrackingEnabled?: boolean;
   removeCertificateSignature?: boolean;
   certificateSignature?: File;
   certificateFontColor?: string;
@@ -55,6 +56,9 @@ export function useUpdateCourseSettings() {
           return t("lessons.sequenceUpdatedSuccessfully");
         })
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdatedSuccessfully"))
+        .with(["videoCompletionTrackingEnabled"], () =>
+          t("lessons.videoCompletionTrackingUpdatedSuccessfully"),
+        )
         .with(["certificateSignature"], () =>
           t("adminCourseView.toast.certificateUpdatedSuccessfully"),
         )
@@ -83,6 +87,9 @@ export function useUpdateCourseSettings() {
       const description = match(changedValues)
         .with(["lessonSequenceEnabled"], () => t("lessons.sequenceUpdateFailed"))
         .with(["quizFeedbackEnabled"], () => t("lessons.quizFeedbackUpdateFailed"))
+        .with(["videoCompletionTrackingEnabled"], () =>
+          t("lessons.videoCompletionTrackingUpdateFailed"),
+        )
         .with(["certificateSignature"], () => t("adminCourseView.toast.certificateUpdateError"))
         .with(["removeCertificateSignature"], () =>
           t("adminCourseView.toast.certificateUpdateError"),

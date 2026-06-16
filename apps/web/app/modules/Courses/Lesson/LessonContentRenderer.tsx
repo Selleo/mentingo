@@ -10,6 +10,7 @@ import { LiveTrainingLesson } from "./LiveTrainingLesson/LiveTrainingLesson";
 import { Quiz } from "./Quiz";
 import { ScormLesson } from "./ScormLesson/ScormLesson";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
@@ -20,6 +21,11 @@ type LessonContentRendererProps = {
   hideControls?: boolean;
   lessonLoading: boolean;
   onVideoEnded?: (index: number | null) => void;
+  videoCoverageTracking?: {
+    enabled: boolean;
+    lessonId: string;
+    language: SupportedLanguages;
+  };
 };
 
 export const LessonContentRenderer = memo(
@@ -30,6 +36,7 @@ export const LessonContentRenderer = memo(
     hideControls = false,
     lessonLoading,
     onVideoEnded,
+    videoCoverageTracking,
   }: LessonContentRendererProps) => {
     return match(lesson.type)
       .with("content", () => (
@@ -37,6 +44,7 @@ export const LessonContentRenderer = memo(
           variant={RICH_TEXT_VIEWER_VARIANT.CONTENT}
           content={lesson?.description ?? ""}
           onVideoEnded={onVideoEnded}
+          videoCoverageTracking={videoCoverageTracking}
         />
       ))
       .with("quiz", () => <Quiz lesson={lesson} userId={user?.id || ""} />)
