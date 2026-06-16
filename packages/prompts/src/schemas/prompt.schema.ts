@@ -34,6 +34,7 @@ export const translationPromptSchema = Type.Object({
 
 export const voiceMentorAddonSchema = Type.Object({
   language: Type.String(),
+  interruptionContext: Type.String(),
 });
 
 export const PROMPT_MAP = {
