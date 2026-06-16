@@ -1,17 +1,14 @@
-import { PackageOpen } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 import { LessonType, type Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
+import { LessonTypeIcon } from "~/modules/Courses/CourseView/LessonTypeIcon";
 import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
-import { mapTypeToIcon } from "../CourseLessons.helpers";
 
 import type { ReactNode } from "react";
-import type { IconName } from "~/types/shared";
 
 interface LessonCardProps {
   item: Lesson;
@@ -22,8 +19,6 @@ interface LessonCardProps {
 
 const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: LessonCardProps) => {
   const { t } = useTranslation();
-
-  const getIcon = useMemo(() => mapTypeToIcon(item.type), [item.type]);
 
   const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
@@ -58,11 +53,7 @@ const LessonCard = ({ item, onClickLessonCard, dragTrigger, selectedLesson }: Le
     >
       {dragTrigger}
       <div className="flex min-w-0 items-start gap-x-2">
-        {item.type === LessonType.SCORM ? (
-          <PackageOpen className="size-6 shrink-0 text-primary-700" aria-hidden="true" />
-        ) : (
-          <Icon name={getIcon as IconName} className="size-6 shrink-0 text-primary-700" />
-        )}
+        <LessonTypeIcon type={item.type} className="size-6 shrink-0 text-primary-700" />
         <hgroup className="min-w-0">
           <p
             className="text-l break-words"

@@ -14,11 +14,10 @@ export function useCreateLiveTraining() {
 
   return useMutation({
     mutationFn: async (data: CreateLiveTrainingBody) => {
-      const response = await ApiClient.api.liveTrainingControllerCreateLiveTraining(data);
-      return response.data;
+      await ApiClient.api.liveTrainingControllerCreateLiveTraining(data);
     },
-    onSuccess: async () => {
-      await invalidateLiveTrainingData({ includeCalendar: true });
+    onSuccess: () => {
+      void invalidateLiveTrainingData({ includeCalendar: true });
       toast({
         variant: "default",
         description: t("calendarView.create.toast.success"),

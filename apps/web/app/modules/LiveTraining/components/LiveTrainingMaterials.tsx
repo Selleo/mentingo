@@ -1,5 +1,5 @@
 import { LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES, LIVE_TRAINING_STATUSES } from "@repo/shared";
-import { Download, FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { Download, Folder, Loader2, Plus, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -77,7 +77,7 @@ function MaterialCard({
       <div className="min-w-0">
         <div className="mb-3 flex items-center gap-2">
           <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-            <FileText className="size-4" />
+            <Folder className="size-4" />
           </span>
           <Badge variant="outline" fontWeight="normal" className="rounded px-2 py-0.5 text-xs">
             {getReadableFileTypeLabel(material.contentType)}

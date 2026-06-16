@@ -1,4 +1,4 @@
-import { useTracks } from "@livekit/components-react";
+import { useSpeakingParticipants, useTracks } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { Users } from "lucide-react";
 import { useMemo } from "react";
@@ -36,32 +36,59 @@ const getParticipantUserId = (trackRef: TrackReferenceOrPlaceholder) => {
   return getParticipantMetadata(trackRef.participant.metadata).userId;
 };
 
+const isFocusedSpeakerCameraTrack = (
+  trackRef: TrackReferenceOrPlaceholder,
+  focusedSpeakerIdentity?: string,
+) =>
+  trackRef.participant.identity === focusedSpeakerIdentity &&
+  trackRef.source === Track.Source.Camera;
+
 export function LiveTrainingParticipantGrid({
+  hasPinnedTrack,
   liveTrainingId,
   onTrackSelect,
 }: LiveTrainingParticipantGridProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const tracks = useTracks([
-    { source: Track.Source.Camera, withPlaceholder: true },
-    { source: Track.Source.ScreenShare, withPlaceholder: false },
-  ]);
+  const tracks = useTracks(
+    [
+      { source: Track.Source.Camera, withPlaceholder: true },
+      { source: Track.Source.ScreenShare, withPlaceholder: false },
+    ],
+    { onlySubscribed: false },
+  );
+  const activeSpeakers = useSpeakingParticipants();
+  const activeSpeakerIdentities = useMemo(
+    () => new Set(activeSpeakers.map((participant) => participant.identity)),
+    [activeSpeakers],
+  );
+  const focusedSpeakerIdentity = hasPinnedTrack ? undefined : activeSpeakers[0]?.identity;
+  const sortedTracks = useMemo(() => {
+    if (!focusedSpeakerIdentity) return tracks;
+
+    return [...tracks].sort((trackA, trackB) => {
+      const trackAFocusScore = isFocusedSpeakerCameraTrack(trackA, focusedSpeakerIdentity) ? 1 : 0;
+      const trackBFocusScore = isFocusedSpeakerCameraTrack(trackB, focusedSpeakerIdentity) ? 1 : 0;
+
+      return trackBFocusScore - trackAFocusScore;
+    });
+  }, [focusedSpeakerIdentity, tracks]);
   const participantUserIds = useMemo(
     () =>
       Array.from(
         new Set(
-          tracks
+          sortedTracks
             .map((trackRef) => getParticipantUserId(trackRef))
             .filter((userId): userId is string => Boolean(userId)),
         ),
       ).sort(),
-    [tracks],
+    [sortedTracks],
   );
   const { data: profilePictures = [] } = useLiveTrainingParticipantProfilePictures(
     liveTrainingId,
     participantUserIds,
     language,
-    { enabled: tracks.length > 0 },
+    { enabled: sortedTracks.length > 0 },
   );
   const profilePictureByUserId = useMemo(
     () =>
@@ -74,7 +101,7 @@ export function LiveTrainingParticipantGrid({
     [profilePictures],
   );
 
-  if (tracks.length === 0) {
+  if (sortedTracks.length === 0) {
     return (
       <div className="flex size-full min-h-[20rem] items-center justify-center rounded-md bg-white/[0.03] text-white/70 lg:min-h-0">
         <div className="grid justify-items-center gap-2 text-center">
@@ -86,10 +113,11 @@ export function LiveTrainingParticipantGrid({
   }
 
   return (
-    <div className="live-training-room-grid grid size-full min-h-[20rem] grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] auto-rows-fr gap-3 lg:min-h-0">
-      {tracks.map((trackRef) => (
+    <div className="live-training-room-grid grid size-full min-h-[20rem] auto-rows-auto content-start items-start gap-3 overflow-y-auto grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] lg:min-h-0">
+      {sortedTracks.map((trackRef) => (
         <LiveTrainingParticipantTile
           key={`${trackRef.participant.identity}-${trackRef.source}`}
+          isSpeaking={activeSpeakerIdentities.has(trackRef.participant.identity)}
           onClick={() =>
             onTrackSelect(
               trackRef,

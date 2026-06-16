@@ -11,7 +11,7 @@ import {
   SYSTEM_ROLE_SLUGS,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
@@ -172,11 +172,34 @@ describe("LiveTrainingController (e2e)", () => {
     return emailAdapter.getAllEmails();
   };
 
+  const getLatestLiveTrainingByTitle = async (authorId: UUIDType, title: string) => {
+    const [liveTraining] = await db
+      .select({
+        id: liveTrainings.id,
+        calendarEventId: liveTrainings.calendarEventId,
+      })
+      .from(liveTrainings)
+      .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))
+      .where(
+        and(
+          eq(calendarEvents.organizerUserId, authorId),
+          sql`${calendarEvents.title}->>${language} = ${title}`,
+          isNull(liveTrainings.deletedAt),
+        ),
+      )
+      .orderBy(desc(liveTrainings.createdAt))
+      .limit(1);
+
+    expect(liveTraining).toBeDefined();
+
+    return liveTraining;
+  };
+
   const createOfflineLiveTraining = async (admin: UserWithCredentials, courseId?: UUIDType) => {
     const startsAt = getFutureDateOnScheduleStep(60);
     const endsAt = getFutureDateOnScheduleStep(120);
 
-    const response = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post("/api/live-training")
       .set("Cookie", await cookieFor(admin, app))
       .send({
@@ -193,7 +216,7 @@ describe("LiveTrainingController (e2e)", () => {
       })
       .expect(201);
 
-    return response.body.data;
+    return getLatestLiveTrainingByTitle(admin.id, "Offline product training");
   };
 
   beforeEach(async () => {
@@ -208,7 +231,7 @@ describe("LiveTrainingController (e2e)", () => {
     const startsAt = getFutureDateOnScheduleStep(60);
     const endsAt = getFutureDateOnScheduleStep(120);
 
-    const response = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post("/api/live-training")
       .set("Cookie", await cookieFor(admin, app))
       .send({
@@ -227,13 +250,7 @@ describe("LiveTrainingController (e2e)", () => {
       })
       .expect(201);
 
-    const liveTraining = response.body.data;
-
-    expect(liveTraining.title).toBe("Live Training kickoff");
-    expect(liveTraining.location).toBe("Room A");
-    expect(liveTraining.linkedCourseIds).toEqual([course.id]);
-    expect(liveTraining.materials.before).toHaveLength(1);
-    expect(liveTraining.materials.after).toHaveLength(1);
+    const liveTraining = await getLatestLiveTrainingByTitle(admin.id, "Live Training kickoff");
 
     const [calendarEvent] = await db
       .select()
@@ -380,7 +397,7 @@ describe("LiveTrainingController (e2e)", () => {
     await request(app.getHttpServer())
       .delete(`/api/live-training/${liveTraining.id}`)
       .set("Cookie", await cookieFor(admin, app))
-      .expect(200);
+      .expect(204);
 
     const [deletedLiveTraining] = await db
       .select()
@@ -465,7 +482,7 @@ describe("LiveTrainingController (e2e)", () => {
       status: COURSE_ENROLLMENT.ENROLLED,
     });
 
-    const createResponse = await request(app.getHttpServer())
+    await request(app.getHttpServer())
       .post("/api/live-training")
       .set("Cookie", await cookieFor(admin, app))
       .send({
@@ -480,7 +497,7 @@ describe("LiveTrainingController (e2e)", () => {
         afterResourceIds: [afterResource.id],
       })
       .expect(201);
-    const liveTraining = createResponse.body.data;
+    const liveTraining = await getLatestLiveTrainingByTitle(admin.id, "Materials training");
 
     const beforeEndResponse = await request(app.getHttpServer())
       .get(`/api/live-training/${liveTraining.id}`)

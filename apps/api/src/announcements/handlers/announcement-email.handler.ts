@@ -6,7 +6,7 @@ import {
   LiveTrainingReminderEmail,
   LiveTrainingStartedEmail,
 } from "@repo/email-templates";
-import { ANNOUNCEMENT_EMAIL_TEMPLATES } from "@repo/shared";
+import { ANNOUNCEMENT_EMAIL_TEMPLATES, isSupportedLanguage } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
@@ -49,14 +49,19 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
     await processInBatches(
       recipients,
       async (recipient) => {
-        const title = this.getLocalizedValue(
+        const emailLanguage = this.getEmailLanguage(
           announcement.title,
           recipient.language,
           announcement.baseLanguage,
         );
+        const title = this.getLocalizedValue(
+          announcement.title,
+          emailLanguage,
+          announcement.baseLanguage,
+        );
         const localizedContent = this.getLocalizedValue(
           announcement.content,
-          recipient.language,
+          emailLanguage,
           announcement.baseLanguage,
         );
         const content = htmlToPlainText(localizedContent);
@@ -66,7 +71,7 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
           template: announcement.emailTemplate,
           link: this.getButtonLink(tenantOrigin, announcement.emailTemplate, announcement.sourceId),
           ...defaultEmailSettings,
-          language: recipient.language,
+          language: emailLanguage,
         });
 
         await this.emailService.sendEmailWithLogo(
@@ -95,6 +100,22 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
     baseLanguage: SupportedLanguages,
   ) {
     return value[language] ?? value[baseLanguage] ?? Object.values(value)[0] ?? "";
+  }
+
+  private getEmailLanguage(
+    value: LocalizedText,
+    language: string,
+    baseLanguage: SupportedLanguages,
+  ): SupportedLanguages {
+    if (isSupportedLanguage(language) && value[language]) {
+      return language;
+    }
+
+    if (value[baseLanguage]) {
+      return baseLanguage;
+    }
+
+    return Object.keys(value).find(isSupportedLanguage) ?? baseLanguage;
   }
 
   private buildEmail(input: {

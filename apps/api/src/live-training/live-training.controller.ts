@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Patch,
@@ -49,7 +50,6 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 
 import { LiveTrainingService } from "./live-training.service";
 import {
-  createLiveTrainingResponseSchema,
   createLiveTrainingSchema,
   type CreateLiveTrainingBody,
 } from "./schemas/create-live-training.schema";
@@ -161,19 +161,12 @@ export class LiveTrainingController {
   @RequirePermission(PERMISSIONS.LIVE_TRAINING_CREATE)
   @Validate({
     request: [{ type: "body", schema: createLiveTrainingSchema }],
-    response: createLiveTrainingResponseSchema,
   })
   async createLiveTraining(
     @Body() body: CreateLiveTrainingBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<LiveTrainingDetails>> {
-    const liveTraining = await this.liveTrainingService.createLiveTraining(
-      body,
-      body.language,
-      currentUser,
-    );
-
-    return new BaseResponse(liveTraining);
+  ): Promise<void> {
+    await this.liveTrainingService.createLiveTraining(body, body.language, currentUser);
   }
 
   @Get(":id/host-candidates")
@@ -241,17 +234,15 @@ export class LiveTrainingController {
 
   @Delete(":id")
   @RequirePermission(PERMISSIONS.LIVE_TRAINING_DELETE, PERMISSIONS.LIVE_TRAINING_DELETE_OWN)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
-    response: baseResponse(liveTrainingDeleteResponseSchema),
   })
   async deleteLiveTraining(
     @Param("id") id: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<LiveTrainingDeleteResponse>> {
+  ): Promise<void> {
     await this.liveTrainingService.deleteLiveTraining(id, currentUser);
-
-    return new BaseResponse({ message: "liveTrainingView.deleteDialog.toast.success" });
   }
 
   @Post(":id/resources")

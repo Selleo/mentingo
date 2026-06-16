@@ -1,4 +1,4 @@
-import { Download, FileText } from "lucide-react";
+import { Download, Folder } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Badge } from "~/components/ui/badge";
@@ -41,7 +41,7 @@ export function LiveTrainingMaterialList({
           <div className="min-w-0">
             <div className="mb-3 flex items-center gap-2">
               <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-                <FileText className="size-4" />
+                <Folder className="size-4" />
               </span>
               <Badge variant="outline" fontWeight="normal" className="rounded px-2 py-0.5 text-xs">
                 {getReadableFileTypeLabel(material.contentType)}

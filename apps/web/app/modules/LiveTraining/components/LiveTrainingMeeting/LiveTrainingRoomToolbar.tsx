@@ -1,7 +1,7 @@
 import { useParticipants, useRoomContext, useTrackToggle } from "@livekit/components-react";
 import { LIVE_TRAINING_PARTICIPANT_ROLES } from "@repo/shared";
 import { RoomEvent, Track } from "livekit-client";
-import { Files, Mic, MicOff, PhoneOff, ScreenShare, Video, VideoOff } from "lucide-react";
+import { Folder, Mic, MicOff, PhoneOff, ScreenShare, Video, VideoOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -279,7 +279,7 @@ export function LiveTrainingRoomToolbar({
             aria-label={t("liveTrainingView.meeting.materials")}
             onClick={onOpenMaterials}
           >
-            <Files className="size-4" />
+            <Folder className="size-4" />
           </button>
         </ToolbarTooltip>
 

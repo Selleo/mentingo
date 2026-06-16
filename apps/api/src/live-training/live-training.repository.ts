@@ -221,7 +221,14 @@ export class LiveTrainingRepository {
     id: UUIDType,
     language?: SupportedLanguages,
     dbInstance: DatabasePg = this.db,
+    options: { includeDeleted?: boolean } = {},
   ) {
+    const conditions = [eq(liveTrainings.id, id)];
+
+    if (!options.includeDeleted) {
+      conditions.push(isNull(liveTrainings.deletedAt), isNull(calendarEvents.deletedAt));
+    }
+
     const [row] = await dbInstance
       .select({
         ...getTableColumns(liveTrainings),
@@ -251,13 +258,7 @@ export class LiveTrainingRepository {
       .from(liveTrainings)
       .innerJoin(calendarEvents, eq(calendarEvents.id, liveTrainings.calendarEventId))
       .innerJoin(users, eq(users.id, liveTrainings.authorId))
-      .where(
-        and(
-          eq(liveTrainings.id, id),
-          isNull(liveTrainings.deletedAt),
-          isNull(calendarEvents.deletedAt),
-        ),
-      );
+      .where(and(...conditions));
 
     return row ?? null;
   }
