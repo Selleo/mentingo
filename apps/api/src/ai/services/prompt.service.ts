@@ -15,16 +15,11 @@ import { aiMentorThreads } from "src/storage/schema";
 
 import type { OnModuleInit } from "@nestjs/common";
 import type { promptId } from "@repo/prompts";
-import type { Static, TSchema } from "@sinclair/typebox";
+import type { Static } from "@sinclair/typebox";
 import type { ThreadOwnershipBody } from "src/ai/utils/ai.schema";
 import type { MessageRole } from "src/ai/utils/ai.type";
+import type { CompiledTemplate } from "src/ai/utils/prompt.type";
 import type { UUIDType } from "src/common";
-
-type CompiledTemplate = {
-  id: promptId;
-  template: Handlebars.TemplateDelegate;
-  varsSchema?: TSchema;
-};
 
 @Injectable()
 export class PromptService implements OnModuleInit {
