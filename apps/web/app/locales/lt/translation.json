@@ -50,7 +50,7 @@
       "ai_mentor": "AI mentorius",
       "embed": "Įterpti",
       "scorm": "SCORM",
-      "live_training": "Live Training"
+      "live_training": "Tiesioginiai mokymai"
     },
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko."
@@ -360,13 +360,13 @@
       "title": "Pridėti į kalendorių",
       "description": "Pasirinkite, ką norite pridėti pasirinktam laikui.",
       "noOptions": "Nėra kalendoriaus elementų, kuriuos galima sukurti.",
-      "liveKitRequired": "Sukonfigūruokite LiveKit aplinkos nustatymuose, kad įjungtumėte online Live Training. Offline mokymai lieka pasiekiami.",
-      "submit": "Sukurti live training",
+      "liveKitRequired": "Sukonfigūruokite LiveKit aplinkos nustatymuose, kad įjungtumėte online Tiesioginiai mokymai. Offline mokymai lieka pasiekiami.",
+      "submit": "Sukurti tiesioginius mokymus",
       "toast": {
-        "success": "Live training sukurtas."
+        "success": "Tiesioginiai mokymai sukurtas."
       },
       "liveTrainingOption": {
-        "title": "Live Training",
+        "title": "Tiesioginiai mokymai",
         "description": "Suplanuokite internetinius arba gyvus mokymus."
       },
       "section": {
@@ -399,14 +399,14 @@
         "offline": "In-person"
       },
       "tooltip": {
-        "title": "Šis pavadinimas rodomas kalendoriuje ir Live Training informacijoje.",
+        "title": "Šis pavadinimas rodomas kalendoriuje ir Tiesioginiai mokymai informacijoje.",
         "description": "Neprivalomas kontekstas dalyviams prieš prisijungiant prie mokymų.",
-        "language": "Pagrindinė šio Live Training pavadinimo ir aprašymo kalba.",
+        "language": "Pagrindinė šio Tiesioginiai mokymai pavadinimo ir aprašymo kalba.",
         "allDay": "Naudoja visos dienos kalendoriaus datas ir išjungia pradžios bei pabaigos laiko pasirinkimą.",
         "deliveryType": "Online sesijos vyksta nuotoliniu būdu. Offline sesijoms reikia vietos.",
         "startsAt": "Planuojamas pradžios laikas, rodomas kalendoriuje.",
         "endsAt": "Planuojamas pabaigos laikas, rodomas kalendoriuje.",
-        "maxParticipants": "Šio Live Training dalyvių limitas. Dabartinis maksimumas yra 100.",
+        "maxParticipants": "Šio Tiesioginiai mokymai dalyvių limitas. Dabartinis maksimumas yra 100.",
         "location": "Neprivaloma offline mokymų vieta.",
         "viewerPermissions": "Nustato, ką studentai gali naudoti prisijungę kaip stebėtojai.",
         "microphoneEnabled": "Leisti stebėtojams naudoti mikrofoną sesijos metu.",
@@ -430,11 +430,11 @@
       "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
-        "goToLiveTraining": "Go to Live Training",
+        "goToLiveTraining": "Go to Tiesioginiai mokymai",
         "goToCourse": "Eiti į kursą"
       },
       "sourceType": {
-        "liveTraining": "Live Training",
+        "liveTraining": "Tiesioginiai mokymai",
         "courseDueDate": "Kurso terminas"
       },
       "field": {
@@ -471,10 +471,10 @@
     }
   },
   "liveTrainingView": {
-    "title": "Live Training",
-    "description": "This page will contain the full Live Training workspace.",
+    "title": "Tiesioginiai mokymai",
+    "description": "This page will contain the full Tiesioginiai mokymai workspace.",
     "errors": {
-      "idRequired": "Live Training id is required."
+      "idRequired": "Tiesioginiai mokymai id is required."
     },
     "status": {
       "scheduled": "Scheduled",
@@ -552,7 +552,7 @@
       "settings": "Settings"
     },
     "files": {
-      "title": "Live Training files",
+      "title": "Tiesioginiai mokymai files",
       "description": "Materials are split by when students should use them.",
       "beforeHeading": "Before training",
       "beforeDescription": "Materials available before the training starts.",
@@ -659,18 +659,18 @@
       "no": "No"
     },
     "deleteDialog": {
-      "title": "Ištrinti Live Training?",
-      "description": "Live Training bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
-      "assignedToLessonsDescription": "Šis Live Training susietas su {{count}} pamoka. Pirmiausia ištrinkite susijusią pamoką, tada Live Training.",
-      "assignedToLessonsDescription_plural": "Šis Live Training susietas su {{count}} pamokomis. Pirmiausia ištrinkite susijusias pamokas, tada Live Training.",
+      "title": "Ištrinti Tiesioginiai mokymai?",
+      "description": "Tiesioginiai mokymai bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
+      "assignedToLessonsDescription": "Šis Tiesioginiai mokymai susietas su {{count}} pamoka. Pirmiausia ištrinkite susijusią pamoką, tada Tiesioginiai mokymai.",
+      "assignedToLessonsDescription_plural": "Šis Tiesioginiai mokymai susietas su {{count}} pamokomis. Pirmiausia ištrinkite susijusias pamokas, tada Tiesioginiai mokymai.",
       "toast": {
-        "success": "Live Training ištrintas."
+        "success": "Tiesioginiai mokymai ištrintas."
       }
     },
     "edit": {
       "saveChanges": "Išsaugoti pakeitimus",
       "toast": {
-        "success": "Live Training atnaujintas."
+        "success": "Tiesioginiai mokymai atnaujintas."
       }
     }
   },
@@ -905,7 +905,7 @@
         "slack_authorization": "Leisti vartotojams prisijungti naudojant savo „Slack“ paskyrą",
         "openAI": "Įgalinti AI Mentor funkcijas",
         "luma": "Įgalinti AI kursų generavimo funkcijas",
-        "livekit": "Sukonfigūruokite LiveKit, kad įjungtumėte online Live Training vaizdo sesijas. Be jo pasiekiami tik offline mokymai."
+        "livekit": "Sukonfigūruokite LiveKit, kad įjungtumėte online Tiesioginiai mokymai vaizdo sesijas. Be jo pasiekiami tik offline mokymai."
       }
     }
   },
@@ -1318,7 +1318,7 @@
       "cannotUpdateOwnRole": "Administratorius negali pakeisti savo vaidmens",
       "noUserSelected": "Nepasirinktas joks vartotojas",
       "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį.",
-      "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Live Training."
+      "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Tiesioginiai mokymai."
     },
     "import": {
       "toast": {
@@ -1920,7 +1920,7 @@
         "removeAiMentorLesson": "Ar tikrai norite ištrinti šią AI mentoriaus pamoką iš skyriaus?",
         "removeEmbedLesson": "Ar tikrai norite ištrinti šią įdėjimo pamoką iš skyriaus?",
         "removeScormLesson": "Ar tikrai norite ištrinti šią SCORM pamoką iš skyriaus?",
-        "removeLiveTrainingLesson": "Ar tikrai norite ištrinti šią Live Training pamoką iš skyriaus?",
+        "removeLiveTrainingLesson": "Ar tikrai norite ištrinti šią Tiesioginiai mokymai pamoką iš skyriaus?",
         "removeChapter": "Ar tikrai norite ištrinti šį skyrių?",
         "removeQuestion": "Ar tikrai norite ištrinti klausimą?",
         "removeContent": "Ar tikrai norite ištrinti turinį?"
@@ -2014,9 +2014,9 @@
           "scormLessonPackageAttachedSuccessfully": "SCORM paketas sėkmingai pridėtas",
           "quizLessonCreatedSuccessfully": "Viktorina sėkmingai sukurta",
           "aiMentorLessonCreatedSuccessfully": "AI mentoriaus pamoka sėkmingai sukurta",
-          "liveTrainingLessonCreated": "Live Training pamoka sėkmingai sukurta",
-          "liveTrainingLessonUpdated": "Live Training pamoka sėkmingai atnaujinta",
-          "liveTrainingLessonAttached": "Live Training priskyrimas sėkmingai pridėtas",
+          "liveTrainingLessonCreated": "Tiesioginiai mokymai pamoka sėkmingai sukurta",
+          "liveTrainingLessonUpdated": "Tiesioginiai mokymai pamoka sėkmingai atnaujinta",
+          "liveTrainingLessonAttached": "Tiesioginiai mokymai priskyrimas sėkmingai pridėtas",
           "aiMentorLessonUpdatedSuccessfully": "AI mentoriaus pamoka sėkmingai atnaujinta",
           "aiMentorLessonFileAddedSuccessfully": "AI Mentor pamokų failai sėkmingai įkelti",
           "courseGenerationFileAddedToUploadQueue": "Failas įtrauktas į įkėlimo eilę",
@@ -2033,22 +2033,22 @@
           "embedLessonUpdateError": "Nepavyko atnaujinti įdėjimo pamokos. Patikrinkite visus laukus ir bandykite dar kartą."
         },
         "liveTraining": {
-          "createTitle": "Sukurti Live Training pamoką",
-          "editTitle": "Redaguoti Live Training pamoką",
+          "createTitle": "Sukurti Tiesioginiai mokymai pamoką",
+          "editTitle": "Redaguoti Tiesioginiai mokymai pamoką",
           "lessonTitle": "Pamokos pavadinimas",
           "lessonTitlePlaceholder": "Kurse rodomas pamokos pavadinimas",
           "createNewTab": "Sukurti naują",
           "linkExistingTab": "Susieti esamą",
-          "linkExistingLoading": "Įkeliami suplanuoti Live Training...",
-          "linkExistingEmpty": "Nėra pasiekiamų suplanuotų Live Training.",
-          "linkedTitle": "Susietas Live Training",
-          "linkedDescription": "Tvarkaraštis, treneriai, failai ir sesijos nustatymai valdomi Live Training puslapyje.",
-          "openLiveTraining": "Atidaryti Live Training",
-          "openBaseLiveTraining": "Atidaryti bazinį Live Training",
-          "languageMissingTitle": "Šiai kalbai Live Training nepriskirtas",
-          "languageMissingDescription": "Ši pamoka naudoja kurso bazinės kalbos Live Training. Sukurkite arba susiekite suplanuotą Live Training, jei norite jį pakeisti pasirinktai kalbai.",
+          "linkExistingLoading": "Įkeliami suplanuoti Tiesioginiai mokymai...",
+          "linkExistingEmpty": "Nėra pasiekiamų suplanuotų Tiesioginiai mokymai.",
+          "linkedTitle": "Susietas Tiesioginiai mokymai",
+          "linkedDescription": "Tvarkaraštis, treneriai, failai ir sesijos nustatymai valdomi Tiesioginiai mokymai puslapyje.",
+          "openLiveTraining": "Atidaryti Tiesioginiai mokymai",
+          "openBaseLiveTraining": "Atidaryti bazinį Tiesioginiai mokymai",
+          "languageMissingTitle": "Šiai kalbai Tiesioginiai mokymai nepriskirtas",
+          "languageMissingDescription": "Ši pamoka naudoja kurso bazinės kalbos Tiesioginiai mokymai. Sukurkite arba susiekite suplanuotą Tiesioginiai mokymai, jei norite jį pakeisti pasirinktai kalbai.",
           "validation": {
-            "liveTrainingRequired": "Pasirinkite suplanuotą Live Training susiejimui."
+            "liveTrainingRequired": "Pasirinkite suplanuotą Tiesioginiai mokymai susiejimui."
           }
         },
         "field": {
@@ -2118,7 +2118,7 @@
           "aiMentor": "AI mentorius",
           "embed": "Įterpti",
           "scorm": "SCORM",
-          "liveTraining": "Live Training",
+          "liveTraining": "Tiesioginiai mokymai",
           "correct": "Teisingai",
           "true": "Tiesa",
           "false": "Netiesa",
@@ -2367,8 +2367,8 @@
       "success": "SCORM paketo atsisiuntimas pradėtas.",
       "warning": {
         "title": "Nepalaikomos pamokos bus praleistos",
-        "description": "Šiame kurse yra {{count}} pamoka, kuri nepalaikoma SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
-        "description_other": "Šiame kurse yra {{count}} pamokų, kurios nepalaikomos SCORM paketuose. AI Mentor ir Live Training pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
+        "description": "Šiame kurse yra {{count}} pamoka, kuri nepalaikoma SCORM paketuose. AI Mentor ir Tiesioginiai mokymai pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
+        "description_other": "Šiame kurse yra {{count}} pamokų, kurios nepalaikomos SCORM paketuose. AI Mentor ir Tiesioginiai mokymai pamokos eksportuojant praleidžiamos. Ar norite tęsti?",
         "confirm": "Vis tiek eksportuoti"
       },
       "error": {
@@ -2615,16 +2615,16 @@
       "progressUpdated": "SCORM pažanga atnaujinta."
     },
     "liveTraining": {
-      "activeLabel": "Live Training",
+      "activeLabel": "Tiesioginiai mokymai",
       "activeTitle": "Sesija aktyvi",
       "scheduledLabel": "Suplanuota",
-      "scheduledTitle": "Live Training suplanuotas",
+      "scheduledTitle": "Tiesioginiai mokymai suplanuotas",
       "endedLabel": "Baigta",
-      "endedTitle": "Live Training jau baigėsi",
-      "inactiveLabel": "Live Training",
-      "inactiveTitle": "Nėra aktyvios Live Training sesijos",
+      "endedTitle": "Tiesioginiai mokymai jau baigėsi",
+      "inactiveLabel": "Tiesioginiai mokymai",
+      "inactiveTitle": "Nėra aktyvios Tiesioginiai mokymai sesijos",
       "locationNotice": "Vieta",
-      "notAvailable": "Live Training šiai pamokai nepasiekiamas."
+      "notAvailable": "Tiesioginiai mokymai šiai pamokai nepasiekiamas."
     },
     "videoProcessing": {
       "title": "Vaizdo įrašas apdorojamas",
@@ -2903,10 +2903,10 @@
       "courseDiscussionsDescription": "Leiskite užsiregistravusiems naudotojams peržiūrėti kursų diskusijas ir jose dalyvauti",
       "calendar": "Įjungti kalendorių",
       "calendarDescription": "Leiskite naudotojams peržiūrėti suplanuotus įvykius kalendoriuje",
-      "liveTraining": "Įjungti Live Training",
+      "liveTraining": "Įjungti Tiesioginiai mokymai",
       "liveTrainingDescription": "Leiskite treneriams kurti ir vesti tiesiogines mokymo sesijas",
-      "liveTrainingMaxParallelSessions": "Maksimalus lygiagrečių Live Training sesijų skaičius",
-      "liveTrainingMaxParallelSessionsDescription": "Apribokite, kiek Live Training sesijų gali būti aktyvios vienu metu.",
+      "liveTrainingMaxParallelSessions": "Maksimalus lygiagrečių Tiesioginiai mokymai sesijų skaičius",
+      "liveTrainingMaxParallelSessionsDescription": "Apribokite, kiek Tiesioginiai mokymai sesijų gali būti aktyvios vienu metu.",
       "liveTrainingTooltip": "Įjunkite tik tada, kai klientas turi naudoti trenerių vedamas tiesiogines sesijas.",
       "liveTrainingDisableBlockedTooltip_one": "Šiuo metu turite {{count}} naudotoją su Trenerio vaidmeniu. Atšaukite jį, kad galėtumėte išjungti šią funkciją.",
       "liveTrainingDisableBlockedTooltip_other": "Šiuo metu turite {{count}} naudotojų su Trenerio vaidmeniu. Atšaukite juos, kad galėtumėte išjungti šią funkciją.",
@@ -2921,8 +2921,8 @@
       "modernCourseListPreferenceChangeSuccess": "Šiuolaikinės kursų sąrašo nuostatos sėkmingai atnaujintos",
       "courseDiscussionsPreferenceChangeSuccess": "Kursų diskusijų nuostata sėkmingai atnaujinta",
       "calendarPreferenceChangeSuccess": "Kalendoriaus nuostata sėkmingai atnaujinta",
-      "liveTrainingPreferenceChangeSuccess": "Live Training nuostata sėkmingai atnaujinta",
-      "liveTrainingMaxParallelSessionsChangeSuccess": "Live Training sesijų limitas sėkmingai atnaujintas",
+      "liveTrainingPreferenceChangeSuccess": "Tiesioginiai mokymai nuostata sėkmingai atnaujinta",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Tiesioginiai mokymai sesijų limitas sėkmingai atnaujintas",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie baigtą kursą nuostatos sėkmingai atnaujintos",
       "finishedCourseNotificationsPreferenceChangeError": "Nepavyko atnaujinti pranešimo apie baigtą kursą nuostatų",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Pranešimų apie pradelstą kursą nuostatos sėkmingai atnaujintos",
@@ -3603,7 +3603,7 @@
       "user": "Vartotojas",
       "category": "Kategorija",
       "announcement": "Pranešimas",
-      "live_training": "Live Training",
+      "live_training": "Tiesioginiai mokymai",
       "global_settings": "Nustatymai"
     },
     "table": {
@@ -4220,8 +4220,8 @@
   "liveTraining": {
     "errors": {
       "invalidLocalizedField": "Įveskite tinkamą tekstą pasirinktai kalbai.",
-      "notFound": "Live Training nerastas.",
-      "sessionNotFound": "Live Training sesija nerasta.",
+      "notFound": "Tiesioginiai mokymai nerastas.",
+      "sessionNotFound": "Tiesioginiai mokymai sesija nerasta.",
       "invalidDateRange": "Nurodykite ir pradžios, ir pabaigos datą arba palikite abi tuščias.",
       "invalidSchedule": "Pabaigos laikas turi būti vėlesnis už pradžios laiką.",
       "invalidTrainer": "Vienas ar keli pasirinkti treneriai nerasti.",
@@ -4232,19 +4232,19 @@
       "hostAssignmentForbidden": "Neturite teisės priskirti hostų.",
       "hostMustHaveTrainerRole": "Priskirti hostai turi turėti Trainer rolę.",
       "trainerAssignmentForbidden": "Neturite teisės priskirti trenerių.",
-      "linkNotCreated": "Nepavyko sukurti Live Training susiejimo.",
-      "lessonAlreadyLinked": "Ši pamoka jau susieta su Live Training.",
-      "invalidLessonLinkMode": "Pasirinkite, ar kurti naują Live Training, ar susieti esamą.",
-      "onlyScheduledCanBeLinked": "Su pamokomis galima susieti tik suplanuotus Live Training.",
-      "trainingAlreadyLinkedToLesson": "Šis Live Training šiame kurse jau susietas su pamoka.",
-      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Live Training, kad pakeistumėte sesijos duomenis.",
+      "linkNotCreated": "Nepavyko sukurti Tiesioginiai mokymai susiejimo.",
+      "lessonAlreadyLinked": "Ši pamoka jau susieta su Tiesioginiai mokymai.",
+      "invalidLessonLinkMode": "Pasirinkite, ar kurti naują Tiesioginiai mokymai, ar susieti esamą.",
+      "onlyScheduledCanBeLinked": "Su pamokomis galima susieti tik suplanuotus Tiesioginiai mokymai.",
+      "trainingAlreadyLinkedToLesson": "Šis Tiesioginiai mokymai šiame kurse jau susietas su pamoka.",
+      "lessonOnlyTitleEditable": "Čia galima redaguoti tik pamokos pavadinimą. Atidarykite Tiesioginiai mokymai, kad pakeistumėte sesijos duomenis.",
       "unsupportedLessonLanguage": "Šis kursas nepalaiko pasirinktos kalbos.",
-      "baseLanguageAssignmentRequired": "Live Training pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
-      "invalidLessonType": "Live Training priskyrimus galima pridėti tik prie Live Training pamokų.",
-      "deleteAssignedToLesson": "Šis Live Training susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Live Training.",
+      "baseLanguageAssignmentRequired": "Tiesioginiai mokymai pamoką pirmiausia reikia sukurti pagrindine kurso kalba.",
+      "invalidLessonType": "Tiesioginiai mokymai priskyrimus galima pridėti tik prie Tiesioginiai mokymai pamokų.",
+      "deleteAssignedToLesson": "Šis Tiesioginiai mokymai susietas su pamoka. Pirmiausia ištrinkite pamoką, tada Tiesioginiai mokymai.",
       "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
-      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Live Training sesijų skaičius."
+      "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }
   }
 }
