@@ -17,7 +17,7 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
+import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { SettingsService } from "src/settings/settings.service";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
 
@@ -32,13 +32,13 @@ import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
+import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 // News uses a custom pagination: first page shows up to 7 items, following pages up to 9.
 const FIRST_PAGE_SIZE = 7;
 const SUBSEQUENT_PAGE_SIZE = 9;
 
 type StoredNewsResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
-type ResourceMetadata = StoredNewsResource["metadata"] & { originalFilename?: unknown };
 
 @Injectable()
 export class NewsService {
@@ -48,7 +48,7 @@ export class NewsService {
     private readonly fileService: FileService,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
-    private readonly resourceLibraryRepository: ResourceLibraryRepository,
+    private readonly resourceLibraryService: ResourceLibraryService,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
@@ -132,7 +132,7 @@ export class NewsService {
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.updateError");
 
     if ("content" in updateNewsData && updateNewsData.content !== undefined) {
-      await this.resourceLibraryRepository.syncNewsAssetRelations(newsId);
+      await this.resourceLibraryService.syncNewsAssetRelations(newsId);
     }
 
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
@@ -457,7 +457,7 @@ export class NewsService {
       .where(and(eq(resources.id, resourceId), ne(resources.archived, true)));
 
     if (!resource) {
-      throw new NotFoundException("News resource not found");
+      throw new NotFoundException("newsView.resourceNotFound");
     }
 
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
@@ -473,7 +473,7 @@ export class NewsService {
         });
       }
 
-      throw new NotFoundException("News resource not found");
+      throw new NotFoundException("newsView.resourceNotFound");
     }
 
     const [existingNews] = await this.db
@@ -494,7 +494,7 @@ export class NewsService {
     const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
-      throw new NotFoundException("News resource not found");
+      throw new NotFoundException("newsView.resourceNotFound");
     }
 
     return this.streamNewsResource(req, res, resource.reference, {
@@ -866,7 +866,7 @@ export class NewsService {
   private extractOriginalFilename(metadata: StoredNewsResource["metadata"]) {
     if (!metadata || typeof metadata !== "object") return undefined;
 
-    const { originalFilename } = metadata as ResourceMetadata;
+    const { originalFilename } = metadata as StoredNewsResource["metadata"] & ResourceMetadata;
 
     return typeof originalFilename === "string" ? originalFilename : undefined;
   }

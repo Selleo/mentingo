@@ -104,6 +104,7 @@ import type {
 } from "@repo/shared";
 import type { ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 export const users = pgTable(
   "users",
@@ -1806,7 +1807,7 @@ export const resources = pgTable(
     description: jsonb("description").notNull().default({}),
     reference: varchar("reference", { length: 500 }).notNull(),
     contentType: varchar("content_type", { length: 100 }).notNull(),
-    metadata: jsonb("metadata").default({}),
+    metadata: jsonb("metadata").$type<ResourceMetadata>().default({}),
     uploadedBy: uuid("uploaded_by_id").references(() => users.id, { onDelete: "set null" }),
     archived,
     tenantId,

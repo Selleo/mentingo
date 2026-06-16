@@ -671,6 +671,7 @@
   "newsView": {
     "header": "Nachricht",
     "notFound": "Nachrichten nicht gefunden.",
+    "resourceNotFound": "News-Ressource nicht gefunden.",
     "previousNews": "Vorherige Nachrichten",
     "nextNews": "Nächste Neuigkeiten",
     "prompt": {
@@ -4071,6 +4072,7 @@
   },
   "articlesView": {
     "notFound": "Wissensdatenbankeintrag nicht gefunden",
+    "resourceNotFound": "Wissensdatenbank-Ressource nicht gefunden",
     "previousArticle": "Vorheriger Wissensdatenbankeintrag",
     "nextArticle": "Nächster Wissensdatenbankeintrag",
     "deleteModal": {

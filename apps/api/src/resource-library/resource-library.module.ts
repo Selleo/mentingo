@@ -11,6 +11,6 @@ import { ResourceLibraryService } from "./resource-library.service";
   imports: [FileModule, LocalizationModule],
   controllers: [ResourceLibraryController],
   providers: [ResourceLibraryService, ResourceLibraryRepository],
-  exports: [ResourceLibraryRepository],
+  exports: [ResourceLibraryService, ResourceLibraryRepository],
 })
 export class ResourceLibraryModule {}

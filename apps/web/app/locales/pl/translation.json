@@ -909,6 +909,7 @@
   "newsView": {
     "header": "Aktualności",
     "notFound": "Nie znaleziono aktualności.",
+    "resourceNotFound": "Nie znaleziono zasobu aktualności.",
     "previousNews": "Poprzednia aktualność",
     "nextNews": "Następna aktualność",
     "previousArticle": "Poprzedni wpis do bazy wiedzy",
@@ -4080,6 +4081,7 @@
   },
   "articlesView": {
     "notFound": "Nie znaleziono wpisu do bazy wiedzy",
+    "resourceNotFound": "Nie znaleziono zasobu bazy wiedzy",
     "previousArticle": "Poprzedni wpis do bazy wiedzy",
     "nextArticle": "Następny wpis do bazy wiedzy",
     "deleteModal": {
