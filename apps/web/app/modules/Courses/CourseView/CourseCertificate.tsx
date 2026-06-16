@@ -35,18 +35,19 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
 
   const certificateInfo = useMemo(() => {
     if (!course || !currentUser || !isEffectiveStudentExperience) {
-      return { studentName: "", courseName: "", formattedDate: "" };
+      return { studentName: "", courseName: "", formattedDate: "", formattedExpiryDate: "" };
     }
 
     const studentName = certificate?.fullName || `${currentUser.firstName} ${currentUser.lastName}`;
     const courseName = certificate?.courseTitle || course.title;
     const completionDate = certificate ? certificate.completionDate : null;
     const formattedDate = formatCertificateDate(completionDate);
+    const formattedExpiryDate = formatCertificateDate(certificate?.expiresAt);
 
-    return { studentName, courseName, formattedDate };
+    return { studentName, courseName, formattedDate, formattedExpiryDate };
   }, [certificate, currentUser, course, isEffectiveStudentExperience]);
 
-  const { studentName, courseName, formattedDate } = certificateInfo;
+  const { studentName, courseName, formattedDate, formattedExpiryDate } = certificateInfo;
 
   const handleOpenCertificatePreview = () => setCertificatePreview(true);
   const handleCloseCertificatePreview = () => setCertificatePreview(false);
@@ -84,6 +85,7 @@ const CourseCertificate = ({ courseId }: { courseId: string }) => {
               studentName={studentName}
               courseName={courseName}
               completionDate={formattedDate}
+              expiryDate={formattedExpiryDate || undefined}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage}

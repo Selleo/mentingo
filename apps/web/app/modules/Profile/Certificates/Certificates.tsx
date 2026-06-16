@@ -6,6 +6,7 @@ import { useCertificates } from "~/api/queries/useCertificates";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
+import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
 import { default as CertificateComponent } from "./Certificate";
 
@@ -14,6 +15,7 @@ interface CertificatesProps {
     studentName: string;
     courseName: string;
     completionDate: string;
+    expiryDate?: string;
   }) => void;
 }
 
@@ -74,11 +76,13 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
           const formattedDate = completionDate
             ? format(new Date(completionDate), "dd.MM.yyyy")
             : "";
+          const formattedExpiryDate = formatCertificateDate(certificate.expiresAt);
 
           return (
             <div key={certificate.id} className="w-full">
               <CertificateComponent
                 courseName={certificate.courseTitle || ""}
+                courseExpiryDate={formattedExpiryDate || undefined}
                 certData={certificate}
                 courseCompletionDate={formattedDate}
                 onOpenCertificatePreview={onOpenCertificatePreview}

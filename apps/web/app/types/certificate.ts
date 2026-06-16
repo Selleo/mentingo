@@ -8,6 +8,7 @@ export interface CertificateType {
   fullName?: string | null;
   certificateSignatureUrl?: string | null;
   certificateFontColor?: string | null;
+  expiresAt?: string | null;
   createdAt: string;
 }
 
