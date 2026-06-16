@@ -1,10 +1,18 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
 
+import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
+import { DB } from "src/storage/db/db.providers";
+
+import {
+  extractResourceIdsFromRichText,
+  getLocalizedRichTextEntries,
+  removeResourceReferencesFromRichText,
+} from "./resource-library.utils";
 
 import type {
   AssetLibraryAsset,
@@ -22,6 +30,7 @@ export class ResourceLibraryService {
   constructor(
     private readonly fileService: FileService,
     private readonly resourceLibraryRepository: ResourceLibraryRepository,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async getAssets(params: {
@@ -57,7 +66,22 @@ export class ResourceLibraryService {
 
   async getAssetUsages(resourceId: UUIDType, language?: SupportedLanguages) {
     await this.assertAssetExists(resourceId);
-    return this.resourceLibraryRepository.getAssetUsages(resourceId, language);
+
+    const relationUsages = await this.resourceLibraryRepository.getAssetRelationUsages(
+      resourceId,
+      language,
+    );
+    const contentUsages = await this.resourceLibraryRepository.getAssetContentReferenceUsages(
+      resourceId,
+      language,
+    );
+    const usageByEntity = new Map<string, (typeof relationUsages)[number]>();
+
+    [...contentUsages, ...relationUsages].forEach((usage) => {
+      usageByEntity.set(`${usage.entityType}:${usage.entityId}`, usage);
+    });
+
+    return Array.from(usageByEntity.values());
   }
 
   async linkAsset(resourceId: UUIDType, body: LinkAssetBody) {
@@ -128,13 +152,57 @@ export class ResourceLibraryService {
   async deleteAsset(resourceId: UUIDType) {
     await this.assertAssetExists(resourceId);
 
-    const deletedUsages =
-      await this.resourceLibraryRepository.archiveAssetAndDeleteRelations(resourceId);
+    const deletedUsages = await this.db.transaction(async (trx) => {
+      const relationCount = await this.resourceLibraryRepository.countAssetRelations(
+        resourceId,
+        trx,
+      );
+
+      await this.removeAssetReferencesFromContent(resourceId, trx);
+      await this.resourceLibraryRepository.deleteAssetRelations(resourceId, trx);
+      await this.resourceLibraryRepository.archiveAsset(resourceId, trx);
+
+      return relationCount;
+    });
 
     return {
       message: "resourceLibrary.toast.assetDeletedSuccessfully",
       deletedUsages,
     };
+  }
+
+  async syncLessonAssetRelations(lessonId: UUIDType) {
+    const description = await this.resourceLibraryRepository.getLessonContent(lessonId);
+
+    await this.syncEntityAssetRelations({
+      entityId: lessonId,
+      entityType: ENTITY_TYPES.LESSON,
+      contents: getLocalizedRichTextEntries(description).map(([, content]) => content),
+    });
+  }
+
+  async syncArticleAssetRelations(articleId: UUIDType) {
+    const content = await this.resourceLibraryRepository.getArticleContent(articleId);
+
+    await this.syncEntityAssetRelations({
+      entityId: articleId,
+      entityType: ENTITY_TYPES.ARTICLES,
+      contents: getLocalizedRichTextEntries(content).map(
+        ([, localizedContent]) => localizedContent,
+      ),
+    });
+  }
+
+  async syncNewsAssetRelations(newsId: UUIDType) {
+    const content = await this.resourceLibraryRepository.getNewsContent(newsId);
+
+    await this.syncEntityAssetRelations({
+      entityId: newsId,
+      entityType: ENTITY_TYPES.NEWS,
+      contents: getLocalizedRichTextEntries(content).map(
+        ([, localizedContent]) => localizedContent,
+      ),
+    });
   }
 
   private async assertAssetExists(resourceId: UUIDType) {
@@ -170,6 +238,92 @@ export class ResourceLibraryService {
       case ENTITY_TYPES.LESSON:
       default:
         return RESOURCE_CATEGORIES.LESSON;
+    }
+  }
+
+  private async syncEntityAssetRelations(params: {
+    entityId: UUIDType;
+    entityType: RichTextAssetEntityType;
+    contents: string[];
+  }) {
+    const resourceIds = [
+      ...new Set(params.contents.flatMap((content) => extractResourceIdsFromRichText(content))),
+    ] as UUIDType[];
+
+    await this.db.transaction(async (trx) =>
+      this.resourceLibraryRepository.replaceEntityAttachmentRelations(
+        {
+          entityId: params.entityId,
+          entityType: params.entityType,
+          resourceIds,
+        },
+        trx,
+      ),
+    );
+  }
+
+  private async removeAssetReferencesFromContent(resourceId: UUIDType, dbInstance: DatabasePg) {
+    const lessonRows = await this.resourceLibraryRepository.getLessonRowsReferencingAsset(
+      resourceId,
+      dbInstance,
+    );
+
+    for (const { id, description } of lessonRows) {
+      for (const [language, localizedContent] of getLocalizedRichTextEntries(description)) {
+        const { content, hasChanged } = removeResourceReferencesFromRichText(
+          localizedContent,
+          resourceId,
+        );
+
+        if (hasChanged) {
+          await this.resourceLibraryRepository.updateLessonDescription(
+            { lessonId: id, language, content },
+            dbInstance,
+          );
+        }
+      }
+    }
+
+    const articleRows = await this.resourceLibraryRepository.getArticleRowsReferencingAsset(
+      resourceId,
+      dbInstance,
+    );
+
+    for (const { id, content } of articleRows) {
+      for (const [language, localizedContent] of getLocalizedRichTextEntries(content)) {
+        const { content: cleanedContent, hasChanged } = removeResourceReferencesFromRichText(
+          localizedContent,
+          resourceId,
+        );
+
+        if (hasChanged) {
+          await this.resourceLibraryRepository.updateArticleContent(
+            { articleId: id, language, content: cleanedContent },
+            dbInstance,
+          );
+        }
+      }
+    }
+
+    const newsRows = await this.resourceLibraryRepository.getNewsRowsReferencingAsset(
+      resourceId,
+      dbInstance,
+    );
+
+    for (const { id, content } of newsRows) {
+      for (const [language, localizedContent] of getLocalizedRichTextEntries(content)) {
+        const { content: cleanedContent, hasChanged } = removeResourceReferencesFromRichText(
+          localizedContent,
+          resourceId,
+        );
+
+        if (hasChanged) {
+          await this.resourceLibraryRepository.updateNewsContent(
+            { newsId: id, language, content: cleanedContent },
+            dbInstance,
+          );
+        }
+      }
     }
   }
 }

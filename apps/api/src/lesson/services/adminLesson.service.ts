@@ -36,7 +36,7 @@ import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
+import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
@@ -86,7 +86,7 @@ export class AdminLessonService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
-    private readonly resourceLibraryRepository: ResourceLibraryRepository,
+    private readonly resourceLibraryService: ResourceLibraryService,
     private readonly liveTrainingService: LiveTrainingService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
@@ -683,7 +683,7 @@ export class AdminLessonService {
     const updatedLesson = await this.adminLessonRepository.updateLesson(id, data);
 
     if (data.description !== undefined) {
-      await this.resourceLibraryRepository.syncLessonAssetRelations(id);
+      await this.resourceLibraryService.syncLessonAssetRelations(id);
     }
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);

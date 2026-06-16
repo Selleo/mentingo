@@ -677,6 +677,7 @@
   "newsView": {
     "header": "Zprávy",
     "notFound": "Novinky nenalezeny.",
+    "resourceNotFound": "Zdroj novinky nebyl nalezen.",
     "previousNews": "Předchozí novinky",
     "nextNews": "Další novinky",
     "prompt": {
@@ -4079,6 +4080,7 @@
   },
   "articlesView": {
     "notFound": "Záznam znalostní báze nebyl nalezen",
+    "resourceNotFound": "Zdroj znalostní báze nebyl nalezen",
     "previousArticle": "Předchozí záznam znalostní báze",
     "nextArticle": "Další záznam znalostní báze",
     "deleteModal": {

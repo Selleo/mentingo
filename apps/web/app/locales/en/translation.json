@@ -672,6 +672,7 @@
   "newsView": {
     "header": "News",
     "notFound": "News not found.",
+    "resourceNotFound": "News resource not found.",
     "previousNews": "Previous news",
     "nextNews": "Next news",
     "prompt": {
@@ -4041,6 +4042,7 @@
   },
   "articlesView": {
     "notFound": "Knowledge base entry not found",
+    "resourceNotFound": "Knowledge base resource not found",
     "previousArticle": "Previous knowledge base entry",
     "nextArticle": "Next knowledge base entry",
     "deleteModal": {

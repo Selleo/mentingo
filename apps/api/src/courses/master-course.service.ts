@@ -83,6 +83,7 @@ import type {
   MasterCourseResourceGroupKey,
   ResolveTargetResourceReferenceParams,
   SourceSnapshot,
+  SyncAiMentorsParams,
   SyncChaptersParams,
   SyncFillInTheBlanksQuestionReferencesParams,
   SyncLessonResourceReferencesParams,
@@ -479,7 +480,11 @@ export class MasterCourseService {
         questionMap,
       });
 
-      const aiMentorMap = await this.syncAiMentors(sourceSnapshot, lessonMap, resourceCollection);
+      const aiMentorMap = await this.syncAiMentors({
+        sourceSnapshot,
+        lessonMap,
+        resourceCollection,
+      });
       await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, exportLink.targetTenantId);
       await this.syncScormPackages({
         exportId: exportLink.id,
@@ -868,11 +873,9 @@ export class MasterCourseService {
     return optionMap;
   }
 
-  private async syncAiMentors(
-    sourceSnapshot: SourceSnapshot,
-    lessonMap: Map<UUIDType, UUIDType>,
-    resourceCollection: MasterCourseResourceCollection,
-  ) {
+  private async syncAiMentors(params: SyncAiMentorsParams) {
+    const { lessonMap, sourceSnapshot, resourceCollection } = params;
+
     const aiMentorMap = new Map<UUIDType, UUIDType>();
 
     for (const sourceAiMentor of sourceSnapshot.aiMentors) {

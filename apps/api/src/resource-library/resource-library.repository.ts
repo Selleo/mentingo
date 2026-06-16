@@ -29,21 +29,13 @@ import {
   RICH_TEXT_ENTITY_TYPES,
   RICH_TEXT_RELATIONSHIP_TYPES,
 } from "./resource-library.constants";
-import {
-  getAssetDisplayFileName,
-  getLocalizedRichTextEntries,
-  getMetadataTextValue,
-  extractResourceIdsFromRichText,
-  removeResourceReferencesFromRichText,
-} from "./resource-library.utils";
+import { getAssetDisplayFileName, getMetadataTextValue } from "./resource-library.utils";
 
 import type {
   ResourceLibraryAssetType,
   RichTextAssetEntityType,
 } from "./schemas/resource-library.schema";
 import type { AnyPgColumn } from "drizzle-orm/pg-core";
-import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type * as schema from "src/storage/schema";
 
 @Injectable()
 export class ResourceLibraryRepository {
@@ -83,20 +75,7 @@ export class ResourceLibraryRepository {
     });
   }
 
-  async getAssetUsages(resourceId: UUIDType, language?: SupportedLanguages) {
-    const relationUsages = await this.getRelationUsages(resourceId, language);
-    const contentUsages = await this.getContentReferenceUsages(resourceId, language);
-
-    const usageByEntity = new Map<string, (typeof relationUsages)[number]>();
-
-    [...contentUsages, ...relationUsages].forEach((usage) => {
-      usageByEntity.set(`${usage.entityType}:${usage.entityId}`, usage);
-    });
-
-    return Array.from(usageByEntity.values());
-  }
-
-  private async getRelationUsages(resourceId: UUIDType, language?: SupportedLanguages) {
+  async getAssetRelationUsages(resourceId: UUIDType, language?: SupportedLanguages) {
     const lessonUsages = await this.db
       .select({
         id: resourceEntity.id,
@@ -154,7 +133,7 @@ export class ResourceLibraryRepository {
     return [...lessonUsages, ...articleUsages, ...newsUsages];
   }
 
-  private async getContentReferenceUsages(resourceId: UUIDType, language?: SupportedLanguages) {
+  async getAssetContentReferenceUsages(resourceId: UUIDType, language?: SupportedLanguages) {
     const pattern = this.getResourceIdSearchPattern(resourceId);
 
     const lessonUsages = await this.db
@@ -274,46 +253,34 @@ export class ResourceLibraryRepository {
       .onConflictDoNothing();
   }
 
-  async syncLessonAssetRelations(lessonId: UUIDType) {
+  async getLessonContent(lessonId: UUIDType) {
     const [lesson] = await this.db
       .select({ description: lessons.description })
       .from(lessons)
       .where(eq(lessons.id, lessonId))
       .limit(1);
 
-    await this.syncEntityAssetRelations({
-      entityId: lessonId,
-      entityType: ENTITY_TYPES.LESSON,
-      contents: getLocalizedRichTextEntries(lesson?.description).map(([, content]) => content),
-    });
+    return lesson?.description;
   }
 
-  async syncArticleAssetRelations(articleId: UUIDType) {
+  async getArticleContent(articleId: UUIDType) {
     const [article] = await this.db
       .select({ content: articles.content })
       .from(articles)
       .where(eq(articles.id, articleId))
       .limit(1);
 
-    await this.syncEntityAssetRelations({
-      entityId: articleId,
-      entityType: ENTITY_TYPES.ARTICLES,
-      contents: getLocalizedRichTextEntries(article?.content).map(([, content]) => content),
-    });
+    return article?.content;
   }
 
-  async syncNewsAssetRelations(newsId: UUIDType) {
+  async getNewsContent(newsId: UUIDType) {
     const [newsItem] = await this.db
       .select({ content: news.content })
       .from(news)
       .where(eq(news.id, newsId))
       .limit(1);
 
-    await this.syncEntityAssetRelations({
-      entityId: newsId,
-      entityType: ENTITY_TYPES.NEWS,
-      contents: getLocalizedRichTextEntries(newsItem?.content).map(([, content]) => content),
-    });
+    return newsItem?.content;
   }
 
   async deleteAssetRelation(params: {
@@ -340,71 +307,68 @@ export class ResourceLibraryRepository {
     return deletedRelations.length;
   }
 
-  private async syncEntityAssetRelations(params: {
-    entityId: UUIDType;
-    entityType: RichTextAssetEntityType;
-    contents: string[];
-  }) {
-    const resourceIds = [
-      ...new Set(params.contents.flatMap((content) => extractResourceIdsFromRichText(content))),
-    ] as UUIDType[];
-
-    await this.db.transaction(async (trx) => {
-      await trx
-        .delete(resourceEntity)
-        .where(
-          and(
-            eq(resourceEntity.entityId, params.entityId),
-            eq(resourceEntity.entityType, params.entityType),
-            eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
-          ),
-        );
-
-      if (!resourceIds.length) return;
-
-      const existingResources = await trx
-        .select({ id: resources.id })
-        .from(resources)
-        .where(and(inArray(resources.id, resourceIds), eq(resources.archived, false)));
-
-      if (!existingResources.length) return;
-
-      await trx
-        .insert(resourceEntity)
-        .values(
-          existingResources.map((resource) => ({
-            resourceId: resource.id,
-            entityId: params.entityId,
-            entityType: params.entityType,
-            relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-          })),
-        )
-        .onConflictDoNothing();
-    });
-  }
-
-  async archiveAssetAndDeleteRelations(resourceId: UUIDType) {
-    return this.db.transaction(async (trx) => {
-      const [{ deletedUsages }] = await trx
-        .select({ deletedUsages: countDistinct(resourceEntity.id) })
-        .from(resourceEntity)
-        .where(eq(resourceEntity.resourceId, resourceId));
-
-      await this.removeAssetReferencesFromContent(resourceId, trx);
-      await trx.delete(resourceEntity).where(eq(resourceEntity.resourceId, resourceId));
-      await trx.update(resources).set({ archived: true }).where(eq(resources.id, resourceId));
-
-      return deletedUsages;
-    });
-  }
-
-  private async removeAssetReferencesFromContent(
-    resourceId: UUIDType,
-    dbInstance: PostgresJsDatabase<typeof schema>,
+  async deleteEntityAttachmentRelations(
+    params: {
+      entityId: UUIDType;
+      entityType: RichTextAssetEntityType;
+    },
+    dbInstance: DatabasePg = this.db,
   ) {
+    await dbInstance
+      .delete(resourceEntity)
+      .where(
+        and(
+          eq(resourceEntity.entityId, params.entityId),
+          eq(resourceEntity.entityType, params.entityType),
+          eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
+        ),
+      );
+  }
+
+  async getExistingAssetIds(resourceIds: UUIDType[], dbInstance: DatabasePg = this.db) {
+    if (!resourceIds.length) return [];
+
+    return dbInstance
+      .select({ id: resources.id })
+      .from(resources)
+      .where(and(inArray(resources.id, resourceIds), eq(resources.archived, false)));
+  }
+
+  async createAssetRelations(
+    params: {
+      resourceId: UUIDType;
+      entityId: UUIDType;
+      entityType: RichTextAssetEntityType;
+      relationshipType: string;
+    }[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    if (!params.length) return;
+
+    await dbInstance.insert(resourceEntity).values(params).onConflictDoNothing();
+  }
+
+  async countAssetRelations(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const [{ deletedUsages }] = await dbInstance
+      .select({ deletedUsages: countDistinct(resourceEntity.id) })
+      .from(resourceEntity)
+      .where(eq(resourceEntity.resourceId, resourceId));
+
+    return deletedUsages;
+  }
+
+  async deleteAssetRelations(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance.delete(resourceEntity).where(eq(resourceEntity.resourceId, resourceId));
+  }
+
+  async archiveAsset(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
+    await dbInstance.update(resources).set({ archived: true }).where(eq(resources.id, resourceId));
+  }
+
+  async getLessonRowsReferencingAsset(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
     const pattern = this.getResourceIdSearchPattern(resourceId);
 
-    const lessonRows = await dbInstance
+    return dbInstance
       .select({
         id: lessons.id,
         description: lessons.description,
@@ -413,66 +377,99 @@ export class ResourceLibraryRepository {
       .where(
         this.localizationService.getLocalizedFieldSearchCondition(lessons.description, pattern),
       );
+  }
 
-    for (const { id, description } of lessonRows) {
-      for (const [language, localizedContent] of getLocalizedRichTextEntries(description)) {
-        const { content, hasChanged } = removeResourceReferencesFromRichText(
-          localizedContent,
-          resourceId,
-        );
+  async getArticleRowsReferencingAsset(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const pattern = this.getResourceIdSearchPattern(resourceId);
 
-        if (hasChanged) {
-          await dbInstance
-            .update(lessons)
-            .set({
-              description: setJsonbField(lessons.description, language, content, true, true),
-            })
-            .where(eq(lessons.id, id));
-        }
-      }
-    }
-
-    const articleRows = await dbInstance
+    return dbInstance
       .select({ id: articles.id, content: articles.content })
       .from(articles)
       .where(this.localizationService.getLocalizedFieldSearchCondition(articles.content, pattern));
+  }
 
-    for (const { id, content } of articleRows) {
-      for (const [language, localizedContent] of getLocalizedRichTextEntries(content)) {
-        const { content: cleanedContent, hasChanged } = removeResourceReferencesFromRichText(
-          localizedContent,
-          resourceId,
-        );
+  async getNewsRowsReferencingAsset(resourceId: UUIDType, dbInstance: DatabasePg = this.db) {
+    const pattern = this.getResourceIdSearchPattern(resourceId);
 
-        if (hasChanged) {
-          await dbInstance
-            .update(articles)
-            .set({ content: setJsonbField(articles.content, language, cleanedContent, true, true) })
-            .where(eq(articles.id, id));
-        }
-      }
-    }
-
-    const newsRows = await dbInstance
+    return dbInstance
       .select({ id: news.id, content: news.content })
       .from(news)
       .where(this.localizationService.getLocalizedFieldSearchCondition(news.content, pattern));
+  }
 
-    for (const { id, content } of newsRows) {
-      for (const [language, localizedContent] of getLocalizedRichTextEntries(content)) {
-        const { content: cleanedContent, hasChanged } = removeResourceReferencesFromRichText(
-          localizedContent,
-          resourceId,
-        );
+  async updateLessonDescription(
+    params: {
+      lessonId: UUIDType;
+      language: string;
+      content: string;
+    },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(lessons)
+      .set({
+        description: setJsonbField(
+          lessons.description,
+          params.language,
+          params.content,
+          true,
+          true,
+        ),
+      })
+      .where(eq(lessons.id, params.lessonId));
+  }
 
-        if (hasChanged) {
-          await dbInstance
-            .update(news)
-            .set({ content: setJsonbField(news.content, language, cleanedContent, true, true) })
-            .where(eq(news.id, id));
-        }
-      }
-    }
+  async updateArticleContent(
+    params: {
+      articleId: UUIDType;
+      language: string;
+      content: string;
+    },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(articles)
+      .set({
+        content: setJsonbField(articles.content, params.language, params.content, true, true),
+      })
+      .where(eq(articles.id, params.articleId));
+  }
+
+  async updateNewsContent(
+    params: {
+      newsId: UUIDType;
+      language: string;
+      content: string;
+    },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await dbInstance
+      .update(news)
+      .set({ content: setJsonbField(news.content, params.language, params.content, true, true) })
+      .where(eq(news.id, params.newsId));
+  }
+
+  async replaceEntityAttachmentRelations(
+    params: {
+      entityId: UUIDType;
+      entityType: RichTextAssetEntityType;
+      resourceIds: UUIDType[];
+    },
+    dbInstance: DatabasePg = this.db,
+  ) {
+    await this.deleteEntityAttachmentRelations(params, dbInstance);
+
+    const existingResources = await this.getExistingAssetIds(params.resourceIds, dbInstance);
+
+    await this.createAssetRelations(
+      existingResources.map((resource) => ({
+        resourceId: resource.id,
+        entityId: params.entityId,
+        entityType: params.entityType,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      })),
+      dbInstance,
+    );
   }
 
   private getAssetConditions(search?: string, type?: ResourceLibraryAssetType): SQL[] {

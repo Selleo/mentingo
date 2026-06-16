@@ -677,6 +677,7 @@
   "newsView": {
     "header": "Naujienos",
     "notFound": "Naujienos nerasta.",
+    "resourceNotFound": "Naujienos išteklius nerastas.",
     "previousNews": "Ankstesnės naujienos",
     "nextNews": "Kitos naujienos",
     "prompt": {
@@ -4080,6 +4081,7 @@
   },
   "articlesView": {
     "notFound": "Žinių bazės įrašas nerastas",
+    "resourceNotFound": "Žinių bazės išteklius nerastas",
     "previousArticle": "Ankstesnis žinių bazės įrašas",
     "nextArticle": "Kitas žinių bazės įrašas",
     "deleteModal": {

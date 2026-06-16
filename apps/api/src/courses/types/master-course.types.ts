@@ -281,6 +281,12 @@ export type SyncOptionsParams = {
   questionMap: Map<UUIDType, UUIDType>;
 };
 
+export type SyncAiMentorsParams = {
+  sourceSnapshot: SourceSnapshot;
+  lessonMap: Map<UUIDType, UUIDType>;
+  resourceCollection: MasterCourseResourceCollection;
+};
+
 export type SyncScormPackagesParams = {
   exportId: UUIDType;
   sourceSnapshot: SourceSnapshot;

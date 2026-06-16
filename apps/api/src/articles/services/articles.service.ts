@@ -29,7 +29,7 @@ import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
+import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { SettingsService } from "src/settings/settings.service";
 import { articles, articleSections } from "src/storage/schema";
 
@@ -54,10 +54,10 @@ import type {
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
+import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
 
 type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
-type ResourceMetadata = StoredArticleResource["metadata"] & { originalFilename?: unknown };
 
 @Injectable()
 export class ArticlesService {
@@ -67,7 +67,7 @@ export class ArticlesService {
     private readonly articlesRepository: ArticlesRepository,
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
-    private readonly resourceLibraryRepository: ResourceLibraryRepository,
+    private readonly resourceLibraryService: ResourceLibraryService,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
@@ -346,7 +346,7 @@ export class ArticlesService {
     if (!updatedArticle) throw new BadRequestException("adminArticleView.toast.updateError");
 
     if ("content" in updateArticleData && updateArticleData.content !== undefined) {
-      await this.resourceLibraryRepository.syncArticleAssetRelations(articleId);
+      await this.resourceLibraryService.syncArticleAssetRelations(articleId);
     }
 
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
@@ -531,7 +531,7 @@ export class ArticlesService {
     const resource = await this.articlesRepository.getResource(resourceId);
 
     if (!resource) {
-      throw new NotFoundException("Article resource not found");
+      throw new NotFoundException("articlesView.resourceNotFound");
     }
 
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
@@ -547,7 +547,7 @@ export class ArticlesService {
         });
       }
 
-      throw new NotFoundException("Article resource not found");
+      throw new NotFoundException("articlesView.resourceNotFound");
     }
 
     const [article] = await this.articlesRepository.getArticleById(resource.entityId);
@@ -562,7 +562,7 @@ export class ArticlesService {
     const isPublic = Boolean(article.isPublic && article.publishedAt !== null);
 
     if (!isAdminLike && !isAuthor && !isPublic) {
-      throw new NotFoundException("Article resource not found");
+      throw new NotFoundException("articlesView.resourceNotFound");
     }
 
     return this.streamArticleResource(req, res, resource.reference, {
@@ -897,7 +897,7 @@ export class ArticlesService {
   private extractOriginalFilename(metadata: StoredArticleResource["metadata"]) {
     if (!metadata || typeof metadata !== "object") return undefined;
 
-    const { originalFilename } = metadata as ResourceMetadata;
+    const { originalFilename } = metadata as StoredArticleResource["metadata"] & ResourceMetadata;
 
     return typeof originalFilename === "string" ? originalFilename : undefined;
   }
