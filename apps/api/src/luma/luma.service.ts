@@ -1,4 +1,4 @@
-import { createLumaClient } from "@japro/luma-sdk";
+import { createLumaClient, isLumaCourseGeneratedEvent } from "@japro/luma-sdk";
 import {
   BadRequestException,
   ConflictException,
@@ -8,7 +8,7 @@ import {
   ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { COURSE_GENERATION_STREAM_EVENT_TYPE, COURSE_GENERATION_SYNC_STATUS } from "@repo/shared";
+import { COURSE_GENERATION_SYNC_STATUS } from "@repo/shared";
 import { isAxiosError } from "axios";
 
 import { EnvService } from "src/env/services/env.service";
@@ -150,19 +150,26 @@ export class LumaService {
     return this.withLumaErrorHandling(() => luma.getDraftFiles(data));
   }
 
-  hasCourseGeneratedEvent(chunk: Buffer) {
-    const chunkString = chunk.toString();
-    const frames = chunkString.replace(/\r\n/g, "\n").split("\n");
+  hasCourseGeneratedEvent(chunk: Buffer, pendingFrame = "") {
+    const chunkString = `${pendingFrame}${chunk.toString()}`.replace(/\r\n/g, "\n");
+    const hasTrailingNewline = chunkString.endsWith("\n");
+    const frames = chunkString.split("\n");
+    const nextPendingFrame = hasTrailingNewline ? "" : (frames.pop() ?? "");
+    let hasCourseGeneratedEvent = false;
 
     for (const frame of frames) {
       if (!frame.trim()) continue;
       if (!frame.startsWith("2:")) continue;
       if (this.parseDataChunk(frame).some((payload) => this.isCourseGeneratedPayload(payload))) {
-        return true;
+        hasCourseGeneratedEvent = true;
+        break;
       }
     }
 
-    return false;
+    return {
+      hasCourseGeneratedEvent,
+      pendingFrame: nextPendingFrame,
+    };
   }
 
   private parseDataChunk(chunkString: string): unknown[] {
@@ -178,12 +185,7 @@ export class LumaService {
   }
 
   private isCourseGeneratedPayload(payload: unknown) {
-    return (
-      !!payload &&
-      typeof payload === "object" &&
-      "type" in payload &&
-      payload.type === COURSE_GENERATION_STREAM_EVENT_TYPE.COURSE_GENERATED
-    );
+    return isLumaCourseGeneratedEvent(payload);
   }
 
   private async withCoreSyncStatus<

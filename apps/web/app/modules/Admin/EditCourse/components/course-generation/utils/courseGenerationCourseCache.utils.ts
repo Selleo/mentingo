@@ -14,6 +14,23 @@ type StreamEvents = {
   lessons: Array<Lesson & { chapterId: string }>;
 };
 
+type PreviewChapterGeneratedEvent = CourseGenerationChapterGeneratedEvent & {
+  chapterIndex?: number;
+  generation: {
+    title: string;
+    targetLessonCount?: number;
+  };
+};
+
+type PreviewLessonGeneratedEvent = CourseGenerationLessonGeneratedEvent & {
+  chapterIndex: number;
+  lessonIndex: number;
+  generation: {
+    lessonType: "AI_MENTOR" | "CONTENT" | "QUIZ";
+    title: string;
+  };
+};
+
 const LUMA_PREVIEW_LESSON_TYPES = {
   AI_MENTOR: "AI_MENTOR",
   CONTENT: "CONTENT",
@@ -28,33 +45,27 @@ function toObject(value: unknown): Record<string, unknown> | null {
   return isPlainObject(value) ? (value as Record<string, unknown>) : null;
 }
 
-function isPreviewChapterGeneratedEvent(
-  value: unknown,
-): value is CourseGenerationChapterGeneratedEvent {
+function isPreviewChapterGeneratedEvent(value: unknown): value is PreviewChapterGeneratedEvent {
   const event = toObject(value);
   const generation = toObject(event?.generation);
 
   return (
     event?.type === COURSE_GENERATION_STREAM_EVENT_TYPE.DESIGNER_CHAPTER_GENERATED &&
     generation !== null &&
-    typeof generation.chapter_index === "number" &&
-    typeof generation.title === "string" &&
-    typeof generation.target_lesson_count === "number"
+    typeof generation.title === "string"
   );
 }
 
-function isPreviewLessonGeneratedEvent(
-  value: unknown,
-): value is CourseGenerationLessonGeneratedEvent {
+function isPreviewLessonGeneratedEvent(value: unknown): value is PreviewLessonGeneratedEvent {
   const event = toObject(value);
   const generation = toObject(event?.generation);
 
   return (
     event?.type === COURSE_GENERATION_STREAM_EVENT_TYPE.ARCHITECT_LESSON_GENERATED &&
-    typeof event.chapter_index === "number" &&
-    typeof event.lesson_index === "number" &&
+    typeof event.chapterIndex === "number" &&
+    typeof event.lessonIndex === "number" &&
     generation !== null &&
-    typeof generation.lesson_type === "string" &&
+    typeof generation.lessonType === "string" &&
     typeof generation.title === "string"
   );
 }
@@ -70,7 +81,7 @@ function getTempId(prefix: string, index: number, title: string | null) {
 }
 
 function normalizeLessonType(
-  value: CourseGenerationLessonGeneratedEvent["generation"]["lesson_type"],
+  value: PreviewLessonGeneratedEvent["generation"]["lessonType"],
 ): LessonType {
   if (value === LUMA_PREVIEW_LESSON_TYPES.AI_MENTOR) {
     return LessonType.AI_MENTOR;
@@ -83,12 +94,18 @@ function normalizeLessonType(
   return LessonType.CONTENT;
 }
 
-function mapPreviewChapter(event: CourseGenerationChapterGeneratedEvent): {
+function mapPreviewChapter(
+  event: PreviewChapterGeneratedEvent,
+  fallbackPreviewIndex: number,
+): {
   chapter: Chapter;
   previewIndex: number;
 } {
-  const { generation } = event;
-  const previewIndex = generation.chapter_index;
+  const generation = event.generation;
+  const previewIndex =
+    typeof event.chapterIndex === "number" ? event.chapterIndex : fallbackPreviewIndex;
+  const targetLessonCount =
+    typeof generation.targetLessonCount === "number" ? generation.targetLessonCount : 0;
   const id = getTempId("chapter", previewIndex, generation.title);
 
   return {
@@ -98,7 +115,7 @@ function mapPreviewChapter(event: CourseGenerationChapterGeneratedEvent): {
       updatedAt: new Date(0).toISOString(),
       displayOrder: previewIndex + 1,
       isFree: false,
-      lessonCount: generation.target_lesson_count,
+      lessonCount: targetLessonCount,
       lessons: [],
     },
     previewIndex,
@@ -106,16 +123,17 @@ function mapPreviewChapter(event: CourseGenerationChapterGeneratedEvent): {
 }
 
 function mapPreviewLesson(
-  event: CourseGenerationLessonGeneratedEvent,
+  event: PreviewLessonGeneratedEvent,
   chapterIdsByPreviewIndex: Map<number, string>,
 ): (Lesson & { chapterId: string }) | null {
   const { generation } = event;
-  const chapterId = chapterIdsByPreviewIndex.get(event.chapter_index);
+
+  const chapterId = chapterIdsByPreviewIndex.get(event.chapterIndex);
 
   if (!chapterId) return null;
 
-  const type = normalizeLessonType(generation.lesson_type);
-  const id = getTempId("lesson", event.lesson_index, generation.title);
+  const type = normalizeLessonType(generation.lessonType);
+  const id = getTempId("lesson", event.lessonIndex, generation.title);
 
   return {
     id,
@@ -124,7 +142,7 @@ function mapPreviewLesson(
     chapterId,
     description: "",
     updatedAt: new Date(0).toISOString(),
-    displayOrder: event.lesson_index + 1,
+    displayOrder: event.lessonIndex + 1,
   };
 }
 
@@ -135,7 +153,7 @@ function extractPreviewEvents(streamData: unknown): StreamEvents {
 
   for (const item of flatten(streamData)) {
     if (isPreviewChapterGeneratedEvent(item)) {
-      const previewChapter = mapPreviewChapter(item);
+      const previewChapter = mapPreviewChapter(item, chapters.length);
       chapters.push(previewChapter.chapter);
       chapterIdsByPreviewIndex.set(previewChapter.previewIndex, previewChapter.chapter.id);
       continue;
