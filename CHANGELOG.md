@@ -1,3 +1,29 @@
+<a name="v4.12.0"></a>
+
+## [v4.12.0] - 17.06.2026
+
+### Bug Fixes:
+
+- exclude deleted users from course statistics ([#1621](https://github.com/Selleo/mentingo/issues/1621))
+
+### Chores:
+
+- improve AI-powered course generation quality and reliability ([#1620](https://github.com/Selleo/mentingo/issues/1620))
+
+- improve voice mentor responses ([#1626](https://github.com/Selleo/mentingo/issues/1626))
+
+- add a direct link to the changelog from the login page version number ([#1627](https://github.com/Selleo/mentingo/issues/1627))
+
+- disable enrollment actions until users are selected ([#1622](https://github.com/Selleo/mentingo/issues/1622))
+
+### Code Refactoring:
+
+- improve resource library structure for easier maintenance ([#1628](https://github.com/Selleo/mentingo/issues/1628))
+
+### Tests:
+
+- add coverage for course discussions ([#1623](https://github.com/Selleo/mentingo/issues/1623))
+
 <a name="v4.11.0"></a>
 
 ## [v4.11.0] - 11.06.2026
@@ -45,6 +71,8 @@
 - improve course sharing functionality ([#1593](https://github.com/Selleo/mentingo/issues/1593))
 
 ### Documentation:
+
+- update changelog for version v4.11.0
 
 - adjust README to consider most value for HR and L&D enterprise ([#1611](https://github.com/Selleo/mentingo/issues/1611))
 
@@ -2850,7 +2878,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.11.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.12.0...HEAD
+[v4.12.0]: https://github.com/Selleo/mentingo/compare/v4.11.0...v4.12.0
 [v4.11.0]: https://github.com/Selleo/mentingo/compare/v4.10.0...v4.11.0
 [v4.10.0]: https://github.com/Selleo/mentingo/compare/v4.9.0...v4.10.0
 [v4.9.0]: https://github.com/Selleo/mentingo/compare/v4.8.0...v4.9.0
