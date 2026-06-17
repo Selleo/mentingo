@@ -6,12 +6,12 @@ import { CourseChatController } from "src/course-chat/course-chat.controller";
 import { CourseChatGateway } from "src/course-chat/course-chat.gateway";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatService } from "src/course-chat/course-chat.service";
+import { FileModule } from "src/file/files.module";
 import { LocalizationModule } from "src/localization/localization.module";
-import { S3Module } from "src/s3/s3.module";
 import { SettingsModule } from "src/settings/settings.module";
 
 @Module({
-  imports: [LocalizationModule, S3Module, SettingsModule],
+  imports: [FileModule, LocalizationModule, SettingsModule],
   controllers: [CourseChatController],
   providers: [
     CourseChatService,

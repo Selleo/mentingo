@@ -329,7 +329,7 @@ export class UserService {
     const { avatarReference, ...user } = userBio;
 
     const profilePictureUrl = avatarReference
-      ? await this.s3Service.getSignedUrl(avatarReference)
+      ? await this.fileService.getFileUrl(avatarReference)
       : null;
 
     return {
@@ -858,7 +858,7 @@ export class UserService {
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
     if (!avatarReference) return null;
-    return await this.s3Service.getSignedUrl(avatarReference);
+    return await this.fileService.getFileUrl(avatarReference);
   };
 
   public async getAdminsToNotifyAboutNewUser(emailToExclude: string) {

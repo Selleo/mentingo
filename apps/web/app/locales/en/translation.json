@@ -3262,6 +3262,7 @@
   "files": {
     "toast": {
       "invalidData": "File upload failed - invalid file data",
+      "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
       "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
       "missingTenantContext": "Missing tenant context for file upload",

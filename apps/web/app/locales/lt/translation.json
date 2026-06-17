@@ -3190,6 +3190,7 @@
   "files": {
     "toast": {
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
+      "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
       "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",

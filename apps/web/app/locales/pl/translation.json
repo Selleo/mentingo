@@ -3527,6 +3527,7 @@
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
       "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
