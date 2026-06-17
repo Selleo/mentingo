@@ -457,7 +457,20 @@ export class ResourceLibraryRepository {
     },
     dbInstance: DatabasePg = this.db,
   ) {
-    await this.deleteEntityAttachmentRelations(params, dbInstance);
+    const relationScope = and(
+      eq(resourceEntity.entityId, params.entityId),
+      eq(resourceEntity.entityType, params.entityType),
+      eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
+    );
+
+    if (!params.resourceIds.length) {
+      await dbInstance.delete(resourceEntity).where(relationScope);
+      return;
+    }
+
+    await dbInstance
+      .delete(resourceEntity)
+      .where(and(relationScope, not(inArray(resourceEntity.resourceId, params.resourceIds))));
 
     const existingResources = await this.getExistingAssetIds(params.resourceIds, dbInstance);
 
