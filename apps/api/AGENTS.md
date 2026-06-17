@@ -52,6 +52,8 @@ Backend-specific instructions for `apps/api`. Preserve tenant isolation, generat
 - Protect endpoints with `@RequirePermission(PERMISSIONS.X)` from `@repo/shared`.
 - Read actor scope from `@CurrentUser()`; do not trust body/query user IDs for authorization.
 - Use `OutboxPublisher.publish(...)` for durable domain events instead of direct side effects when existing flow uses outbox/events.
+- Use BullMQ queues for long-running or retryable command side effects such as imports, file/resource copying, external-service synchronization, or generated-content processing; HTTP handlers should claim state and enqueue work instead of doing the heavy side effect inline.
+- Keep reusable workflow/API/domain types out of service files. Put service contracts in `*.types.ts`, API contracts in schema files, and persistence shapes in repository/schema files.
 - Generate migrations only through Drizzle Kit. Use normal generated migrations for schema changes and `--custom` mainly for data migrations or other custom SQL changes.
 - Do not put database schema modifications in custom migrations. Schema changes must be produced by Drizzle's normal generated migration flow; custom migrations are for data manipulation/backfills or non-generatable custom SQL only.
 - Always pass a meaningful `--name=<meaningful_name>` when generating migrations.

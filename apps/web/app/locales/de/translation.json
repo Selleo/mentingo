@@ -1719,6 +1719,10 @@
       "lumaServiceUnavailable": "Der Luma-Dienst ist derzeit nicht verfügbar.",
       "courseHasChapters": "Dieser Kurs hat bereits Kapitel.",
       "courseGeneratedSavedSuccessfully": "Der generierte Kurs wurde erfolgreich gespeichert.",
+      "lumaCourseGenerationSyncProcessed": "Der generierte Kurs wurde erfolgreich gespeichert.",
+      "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Der generierte Kurs wurde gespeichert, aber einige Bilder konnten nicht eingefügt werden.",
+      "lumaCourseGenerationSyncFailed": "Der generierte Kurs konnte nicht gespeichert werden.",
+      "lumaCourseGenerationSyncDismissed": "Die Synchronisierung des generierten Kurses wurde verworfen.",
       "maxOneVideoUploaded": "Sie können nicht mehr als ein Video hochladen.",
       "successfullyTransferredCourseOwnership": "Der Kursbesitz wurde erfolgreich übertragen"
     },
@@ -1764,7 +1768,14 @@
       "exitWarning": "Die Kurserstellung ist im Gange. Sind Sie sicher, dass Sie diese Seite verlassen möchten?",
       "finishedTitle": "Kursgenerierung abgeschlossen",
       "finishedDescription": "Ihre Kapitel und Lektionen können jetzt überprüft werden.",
-      "preparingStructure": "Kapitelstruktur wird vorbereitet..."
+      "preparingStructure": "Kapitelstruktur wird vorbereitet...",
+      "syncProcessingTitle": "Generierten Kurs finalisieren",
+      "syncProcessingDescription": "Wir speichern die generierten Kapitel, Lektionen, Quizze und Ressourcen. Sie können den Kurs überprüfen, sobald dies abgeschlossen ist.",
+      "syncProcessingAction": "Wird verarbeitet...",
+      "syncFailedTitle": "Synchronisierung des generierten Kurses fehlgeschlagen",
+      "syncFailedDescription": "Beim Speichern des generierten Kurses ist ein Fehler aufgetreten.",
+      "syncRetry": "Erneut versuchen",
+      "syncDismiss": "Ausblenden"
     },
     "settings": {
       "breadcrumbs": {
@@ -4208,6 +4219,11 @@
       "ownerNotAdmin": "Der Besitzer des API-Schlüssels verfügt nicht mehr über Administratorberechtigungen",
       "missingApiKeyHeader": "Fehlender X-API-Key-Header",
       "missingTenantIdHeader": "Fehlender X-Tenant-Id-Header"
+    }
+  },
+  "luma": {
+    "errors": {
+      "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren."
     }
   },
   "liveTraining": {

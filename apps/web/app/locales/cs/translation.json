@@ -1725,6 +1725,10 @@
       "lumaServiceUnavailable": "Služba Luma je momentálně nedostupná.",
       "courseHasChapters": "Tento kurz již obsahuje kapitoly.",
       "courseGeneratedSavedSuccessfully": "Vygenerovaný kurz byl úspěšně uložen.",
+      "lumaCourseGenerationSyncProcessed": "Vygenerovaný kurz byl úspěšně uložen.",
+      "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Vygenerovaný kurz byl uložen, ale některé obrázky se nepodařilo přidat.",
+      "lumaCourseGenerationSyncFailed": "Vygenerovaný kurz se nepodařilo uložit.",
+      "lumaCourseGenerationSyncDismissed": "Synchronizace vygenerovaného kurzu byla zrušena.",
       "maxOneVideoUploaded": "Nemůžete nahrát více než 1 video.",
       "successfullyTransferredCourseOwnership": "Vlastnictví kurzu bylo úspěšně převedeno"
     },
@@ -1770,7 +1774,14 @@
       "exitWarning": "Probíhá generování kurzu. Opravdu chcete opustit tuto stránku?",
       "finishedTitle": "Generování kurzu dokončeno",
       "finishedDescription": "Vaše kapitoly a lekce jsou připraveny ke kontrole.",
-      "preparingStructure": "Příprava struktury kapitol..."
+      "preparingStructure": "Příprava struktury kapitol...",
+      "syncProcessingTitle": "Dokončování vygenerovaného kurzu",
+      "syncProcessingDescription": "Ukládáme vygenerované kapitoly, lekce, kvízy a zdroje. Kurz bude možné zkontrolovat po dokončení.",
+      "syncProcessingAction": "Zpracovává se...",
+      "syncFailedTitle": "Synchronizace vygenerovaného kurzu selhala",
+      "syncFailedDescription": "Při ukládání vygenerovaného kurzu se něco pokazilo.",
+      "syncRetry": "Zkusit znovu",
+      "syncDismiss": "Zavřít"
     },
     "settings": {
       "breadcrumbs": {
@@ -4216,6 +4227,11 @@
       "ownerNotAdmin": "Vlastník klíče API již nemá oprávnění správce",
       "missingApiKeyHeader": "Chybí hlavička X-API-Key",
       "missingTenantIdHeader": "Chybí hlavička X-Tenant-Id"
+    }
+  },
+  "luma": {
+    "errors": {
+      "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu."
     }
   },
   "liveTraining": {

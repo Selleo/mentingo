@@ -74,7 +74,10 @@ Start with this file, then read the more specific `AGENTS.md` files for the area
 
 - When backend changes introduce side effects, cross-module reactions, notifications, analytics updates, background work, or workflow state transitions, explicitly consider an event-driven design and suggest it when it fits better than direct service coupling.
 - Keep event-driven work repo-native: use existing outbox, queue, websocket, or domain-event patterns where available instead of inventing a parallel mechanism.
+- Use BullMQ for long-running or retryable command work such as imports, file/resource copying, external-service synchronization, or generated-content processing; keep HTTP handlers to validation, state claiming, and job enqueueing.
+- Use the outbox for durable domain events emitted from committed database changes, especially when downstream handlers should react reliably after the source transaction succeeds.
 - Do not force events for simple synchronous reads/writes; use them when they reduce coupling, improve reliability, or make side effects auditable/retryable.
+- Do not define reusable workflow/API/domain types inside service files. Put shared service contracts in `*.types.ts`, API contracts in schema files, and persistence shapes in repository/schema files.
 
 ## Definition Of Done
 

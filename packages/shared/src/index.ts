@@ -19,6 +19,7 @@ export * from "./constants/learningPath";
 export * from "./constants/lessonTypes";
 export * from "./constants/liveTraining";
 export * from "./constants/loginPageDocuments";
+export * from "./constants/lumaCourseGeneration";
 export * from "./constants/lumaFileIngestion";
 export * from "./constants/masterCourse";
 export * from "./constants/newsSettings";

@@ -1,16 +1,25 @@
+import { COURSE_GENERATION_MESSAGE_KEY, COURSE_GENERATION_STREAM_EVENT_TYPE } from "@repo/shared";
 import { flattenDeep, isPlainObject } from "lodash-es";
+
+import type { CourseGenerationMessageKey } from "@repo/shared";
 
 type ChatContentPart = {
   text?: unknown;
 };
 
 type ThinkingStateChunk = {
+  type?: unknown;
   message_key?: unknown;
   course_generated?: unknown;
 };
 
 const flattenEntries = (data: unknown): unknown[] =>
   flattenDeep(Array.isArray(data) ? data : [data]) as unknown[];
+
+const courseGenerationMessageKeys = new Set<string>(Object.values(COURSE_GENERATION_MESSAGE_KEY));
+
+const isCourseGenerationMessageKey = (value: unknown): value is CourseGenerationMessageKey =>
+  typeof value === "string" && courseGenerationMessageKeys.has(value);
 
 export const getMessageText = (content: unknown): string => {
   if (typeof content === "string") return content;
@@ -30,15 +39,15 @@ export const getMessageText = (content: unknown): string => {
   return "";
 };
 
-export const getCurrentMessageKey = (data: unknown): string | null => {
+export const getCurrentMessageKey = (data: unknown): CourseGenerationMessageKey | null => {
   const entries = flattenEntries(data);
   for (let idx = entries.length - 1; idx >= 0; idx -= 1) {
     const entry = entries[idx];
     if (!isPlainObject(entry)) continue;
 
     const messageKey = (entry as ThinkingStateChunk).message_key;
-    if (typeof messageKey === "string" && messageKey.trim().length > 0) {
-      return messageKey.trim();
+    if (isCourseGenerationMessageKey(messageKey)) {
+      return messageKey;
     }
   }
 
@@ -50,6 +59,8 @@ export const hasCourseGeneratedFlag = (data: unknown): boolean => {
   for (let idx = entries.length - 1; idx >= 0; idx -= 1) {
     const entry = entries[idx];
     if (!isPlainObject(entry)) continue;
+    if ((entry as ThinkingStateChunk).type === COURSE_GENERATION_STREAM_EVENT_TYPE.COURSE_GENERATED)
+      return true;
     if ((entry as ThinkingStateChunk).course_generated === true) return true;
   }
 

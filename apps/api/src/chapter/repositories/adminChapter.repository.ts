@@ -3,7 +3,7 @@ import { SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
 import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
-import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -21,6 +21,7 @@ import type { UpdateChapterBody } from "../schemas/chapter.schema";
 import type { SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { CreateChapterForCourseData } from "src/courses/types/course.types";
 import type {
   AdminLessonWithContentSchema,
   AdminQuestionBody,
@@ -46,6 +47,24 @@ export class AdminChapterRepository {
       .from(chapters)
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(chapters.id, chapterId));
+  }
+
+  async createChapterForCourse(data: CreateChapterForCourseData, dbInstance: DatabasePg = this.db) {
+    const [chapter] = await dbInstance
+      .insert(chapters)
+      .values({
+        courseId: data.courseId,
+        authorId: data.authorId,
+        title: buildJsonbField(data.language, data.title),
+        displayOrder: data.displayOrder,
+        isFreemium: data.isFreemium ?? false,
+      })
+      .returning({
+        ...getTableColumns(chapters),
+        title: sql<string>`${chapters.title}->>${data.language}::text`,
+      });
+
+    return chapter;
   }
 
   async changeChapterDisplayOrder(

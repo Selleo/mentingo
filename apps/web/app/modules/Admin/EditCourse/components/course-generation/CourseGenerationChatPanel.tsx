@@ -1,3 +1,4 @@
+import { COURSE_GENERATION_MESSAGE_KEY } from "@repo/shared";
 import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -10,6 +11,7 @@ import {
   getCurrentMessageKey,
   getMessageText,
 } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
+import { hasCourseGenerationPreviewEvents } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationCourseCache.utils";
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
@@ -65,7 +67,11 @@ export function CourseGenerationChatPanel({
 
   useEffect(() => {
     if (generationStartedRef.current) return;
-    if (getCurrentMessageKey(streamData) !== "DESIGNING_CHAPTERS") return;
+    const hasStartedGeneration =
+      getCurrentMessageKey(streamData) === COURSE_GENERATION_MESSAGE_KEY.DESIGNING_CHAPTERS ||
+      hasCourseGenerationPreviewEvents(streamData);
+
+    if (!hasStartedGeneration) return;
     generationStartedRef.current = true;
     onGenerationStarted?.();
   }, [streamData, onGenerationStarted]);

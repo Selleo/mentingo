@@ -636,8 +636,7 @@ export class AdminLessonRepository {
     trx?: DatabasePg,
   ) {
     const dbInstance = trx ?? this.db;
-
-    return dbInstance.transaction(async (tx) => {
+    const createResources = async (tx: DatabasePg) => {
       const insertedResources = await tx
         .insert(resources)
         .values(
@@ -650,7 +649,9 @@ export class AdminLessonRepository {
         )
         .returning();
 
-      if (!insertedResources.length) return [];
+      if (!insertedResources.length) {
+        return [];
+      }
 
       await tx.insert(resourceEntity).values(
         insertedResources.map((inserted) => ({
@@ -661,7 +662,9 @@ export class AdminLessonRepository {
       );
 
       return insertedResources;
-    });
+    };
+
+    return trx ? createResources(dbInstance) : dbInstance.transaction(createResources);
   }
 
   async updateLessonResources(

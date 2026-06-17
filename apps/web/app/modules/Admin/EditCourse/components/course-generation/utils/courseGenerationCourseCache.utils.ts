@@ -1,177 +1,186 @@
+import { COURSE_GENERATION_STREAM_EVENT_TYPE } from "@repo/shared";
 import { flattenDeep, isPlainObject } from "lodash-es";
 
-import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 
-import type { QueryClient } from "@tanstack/react-query";
-import type { GetBetaCourseByIdResponse } from "~/api/generated-api";
-
-type Course = GetBetaCourseByIdResponse["data"];
-type Chapter = Course["chapters"][number];
-type Lesson = NonNullable<Chapter["lessons"]>[number] & { chapterId: string };
-type CachedCourse = Course | { data: Course };
+import type {
+  CourseGenerationChapterGeneratedEvent,
+  CourseGenerationLessonGeneratedEvent,
+} from "@repo/shared";
+import type { Chapter, Lesson } from "~/modules/Admin/EditCourse/EditCourse.types";
 
 type StreamEvents = {
   chapters: Chapter[];
-  lessons: Lesson[];
-  invalidate: boolean;
+  lessons: Array<Lesson & { chapterId: string }>;
 };
 
-type CourseEnvelope = { data: Course };
-
-function toObject(value: unknown): Record<string, unknown> | null {
-  return isPlainObject(value) ? (value as Record<string, unknown>) : null;
-}
+const LUMA_PREVIEW_LESSON_TYPES = {
+  AI_MENTOR: "AI_MENTOR",
+  CONTENT: "CONTENT",
+  QUIZ: "QUIZ",
+} as const;
 
 function flatten(value: unknown): unknown[] {
   return flattenDeep(Array.isArray(value) ? value : [value]) as unknown[];
 }
 
-function asChapter(value: unknown): Chapter | null {
-  const chapter = toObject(value);
-  return chapter && typeof chapter.id === "string" ? (chapter as unknown as Chapter) : null;
+function toObject(value: unknown): Record<string, unknown> | null {
+  return isPlainObject(value) ? (value as Record<string, unknown>) : null;
 }
 
-function asLesson(value: unknown): Lesson | null {
-  const lesson = toObject(value);
-  if (!lesson) return null;
-  if (typeof lesson.id !== "string") return null;
-  if (typeof lesson.chapterId !== "string") return null;
-  return lesson as unknown as Lesson;
+function isPreviewChapterGeneratedEvent(
+  value: unknown,
+): value is CourseGenerationChapterGeneratedEvent {
+  const event = toObject(value);
+  const generation = toObject(event?.generation);
+
+  return (
+    event?.type === COURSE_GENERATION_STREAM_EVENT_TYPE.DESIGNER_CHAPTER_GENERATED &&
+    generation !== null &&
+    typeof generation.chapter_index === "number" &&
+    typeof generation.title === "string" &&
+    typeof generation.target_lesson_count === "number"
+  );
 }
 
-function extractEvents(streamData: unknown): StreamEvents {
+function isPreviewLessonGeneratedEvent(
+  value: unknown,
+): value is CourseGenerationLessonGeneratedEvent {
+  const event = toObject(value);
+  const generation = toObject(event?.generation);
+
+  return (
+    event?.type === COURSE_GENERATION_STREAM_EVENT_TYPE.ARCHITECT_LESSON_GENERATED &&
+    typeof event.chapter_index === "number" &&
+    typeof event.lesson_index === "number" &&
+    generation !== null &&
+    typeof generation.lesson_type === "string" &&
+    typeof generation.title === "string"
+  );
+}
+
+function getTempId(prefix: string, index: number, title: string | null) {
+  const suffix = title
+    ?.toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+    .slice(0, 48);
+
+  return suffix ? `luma-preview-${prefix}-${index}-${suffix}` : `luma-preview-${prefix}-${index}`;
+}
+
+function normalizeLessonType(
+  value: CourseGenerationLessonGeneratedEvent["generation"]["lesson_type"],
+): LessonType {
+  if (value === LUMA_PREVIEW_LESSON_TYPES.AI_MENTOR) {
+    return LessonType.AI_MENTOR;
+  }
+
+  if (value === LUMA_PREVIEW_LESSON_TYPES.QUIZ) {
+    return LessonType.QUIZ;
+  }
+
+  return LessonType.CONTENT;
+}
+
+function mapPreviewChapter(event: CourseGenerationChapterGeneratedEvent): {
+  chapter: Chapter;
+  previewIndex: number;
+} {
+  const { generation } = event;
+  const previewIndex = generation.chapter_index;
+  const id = getTempId("chapter", previewIndex, generation.title);
+
+  return {
+    chapter: {
+      id,
+      title: generation.title,
+      updatedAt: new Date(0).toISOString(),
+      displayOrder: previewIndex + 1,
+      isFree: false,
+      lessonCount: generation.target_lesson_count,
+      lessons: [],
+    },
+    previewIndex,
+  };
+}
+
+function mapPreviewLesson(
+  event: CourseGenerationLessonGeneratedEvent,
+  chapterIdsByPreviewIndex: Map<number, string>,
+): (Lesson & { chapterId: string }) | null {
+  const { generation } = event;
+  const chapterId = chapterIdsByPreviewIndex.get(event.chapter_index);
+
+  if (!chapterId) return null;
+
+  const type = normalizeLessonType(generation.lesson_type);
+  const id = getTempId("lesson", event.lesson_index, generation.title);
+
+  return {
+    id,
+    title: generation.title,
+    type,
+    chapterId,
+    description: "",
+    updatedAt: new Date(0).toISOString(),
+    displayOrder: event.lesson_index + 1,
+  };
+}
+
+function extractPreviewEvents(streamData: unknown): StreamEvents {
   const chapters: Chapter[] = [];
-  const lessons: Lesson[] = [];
-  let invalidate: boolean = false;
+  const lessons: Array<Lesson & { chapterId: string }> = [];
+  const chapterIdsByPreviewIndex = new Map<number, string>();
 
   for (const item of flatten(streamData)) {
-    const entry = toObject(item);
-    if (!entry) continue;
-
-    if (entry.type === "designer.chapter.generated") {
-      const chapter = asChapter(entry.chapter);
-      if (chapter) chapters.push(chapter);
+    if (isPreviewChapterGeneratedEvent(item)) {
+      const previewChapter = mapPreviewChapter(item);
+      chapters.push(previewChapter.chapter);
+      chapterIdsByPreviewIndex.set(previewChapter.previewIndex, previewChapter.chapter.id);
       continue;
     }
 
-    if (entry.type === "architect.lesson.generated") {
-      const lesson = asLesson(entry.lesson);
+    if (isPreviewLessonGeneratedEvent(item)) {
+      const lesson = mapPreviewLesson(item, chapterIdsByPreviewIndex);
       if (lesson) lessons.push(lesson);
-    }
-
-    if (entry.type === "assets.generated") {
-      invalidate = true;
     }
   }
 
-  return { chapters, lessons, invalidate };
+  return { chapters, lessons };
 }
 
 function sortByDisplayOrder<T extends { displayOrder: number }>(items: T[]): T[] {
   return [...items].sort((a, b) => a.displayOrder - b.displayOrder);
 }
 
-function isCourseEnvelope(value: CachedCourse): value is CourseEnvelope {
-  return isPlainObject((value as CourseEnvelope).data);
-}
-
-function getCourse(cachedData: unknown): Course | null {
-  const root = toObject(cachedData) as CachedCourse | null;
-  if (!root) return null;
-
-  if (isCourseEnvelope(root)) {
-    const nested = root.data as Course;
-    return typeof nested.id === "string" ? nested : null;
-  }
-
-  return typeof (root as Course).id === "string" ? (root as Course) : null;
-}
-
-function setCourse(cachedData: unknown, nextCourse: Course): unknown {
-  const root = toObject(cachedData) as CachedCourse | null;
-  if (!root) return cachedData;
-
-  if (isCourseEnvelope(root)) {
-    return {
-      ...root,
-      data: {
-        ...(root.data as Record<string, unknown>),
-        ...nextCourse,
-      },
-    };
-  }
-
-  return {
-    ...root,
-    ...nextCourse,
-  };
-}
-
-function applyEvents(course: Course, events: StreamEvents): Course {
-  let changed = false;
-  const chapters = Array.isArray(course.chapters) ? [...course.chapters] : [];
+export function getCourseGenerationPreviewChapters(streamData: unknown): Chapter[] {
+  const events = extractPreviewEvents(streamData);
+  const chapters = new Map<string, Chapter>();
 
   for (const chapter of events.chapters) {
-    if (chapters.some((existing) => existing.id === chapter.id)) continue;
-
-    chapters.push({
-      ...chapter,
-      lessons: Array.isArray(chapter.lessons) ? chapter.lessons : [],
-      lessonCount: chapter.lessonCount ?? 0,
-    });
-    changed = true;
+    if (chapters.has(chapter.id)) continue;
+    chapters.set(chapter.id, chapter);
   }
-
-  const sortedChapters = sortByDisplayOrder(chapters);
 
   for (const lesson of events.lessons) {
-    const chapterIndex = sortedChapters.findIndex((chapter) => chapter.id === lesson.chapterId);
-    if (chapterIndex < 0) continue;
+    const chapter = chapters.get(lesson.chapterId);
+    if (!chapter) continue;
+    if (chapter.lessons.some((existingLesson) => existingLesson.id === lesson.id)) continue;
 
-    const chapter = sortedChapters[chapterIndex];
-    const lessons = Array.isArray(chapter.lessons) ? [...chapter.lessons] : [];
-    if (lessons.some((existing) => existing.id === lesson.id)) continue;
-
-    lessons.push(lesson);
-    sortedChapters[chapterIndex] = {
+    const lessons = sortByDisplayOrder([...chapter.lessons, lesson]);
+    chapters.set(chapter.id, {
       ...chapter,
-      lessons: sortByDisplayOrder(lessons),
+      lessons,
       lessonCount: lessons.length,
-    };
-    changed = true;
+    });
   }
 
-  if (!changed) return course;
-
-  return {
-    ...course,
-    chapters: sortedChapters,
-  };
+  return sortByDisplayOrder([...chapters.values()]);
 }
 
-export function updateGeneratedCourseCacheFromStreamData(
-  queryClient: QueryClient,
-  courseId: string,
-  streamData: unknown,
-) {
-  const events = extractEvents(streamData);
-
-  if (!events.chapters.length && !events.lessons.length) {
-    return { chapterEventsCount: 0, lessonEventsCount: 0, invalidate: events.invalidate };
-  }
-
-  for (const [queryKey, cachedData] of queryClient.getQueriesData({
-    queryKey: [COURSE_QUERY_KEY],
-  })) {
-    const course = getCourse(cachedData);
-    if (!course || course.id !== courseId) continue;
-
-    queryClient.setQueryData(queryKey, setCourse(cachedData, applyEvents(course, events)));
-  }
-
-  return {
-    chapterEventsCount: events.chapters.length,
-    lessonEventsCount: events.lessons.length,
-    invalidate: events.invalidate,
-  };
+export function hasCourseGenerationPreviewEvents(streamData: unknown): boolean {
+  return flatten(streamData).some(
+    (item) => isPreviewChapterGeneratedEvent(item) || isPreviewLessonGeneratedEvent(item),
+  );
 }

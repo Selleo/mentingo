@@ -1780,6 +1780,10 @@
       "lumaServiceUnavailable": "Luma service is currently unavailable.",
       "courseHasChapters": "This course already has chapters.",
       "courseGeneratedSavedSuccessfully": "Generated course saved successfully.",
+      "lumaCourseGenerationSyncProcessed": "Generated course saved successfully.",
+      "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Generated course saved, but some images could not be included.",
+      "lumaCourseGenerationSyncFailed": "Generated course could not be saved.",
+      "lumaCourseGenerationSyncDismissed": "Generated course sync dismissed.",
       "maxOneVideoUploaded": "You cannot upload more than 1 video.",
       "successfullyTransferredCourseOwnership": "Course ownership transferred successfully"
     },
@@ -1825,7 +1829,14 @@
       "exitWarning": "Course generation is in progress. Are you sure you want to leave this page?",
       "finishedTitle": "Course generation finished",
       "finishedDescription": "Your chapters and lessons are ready to review.",
-      "preparingStructure": "Preparing chapter structure..."
+      "preparingStructure": "Preparing chapter structure...",
+      "syncProcessingTitle": "Finalizing generated course",
+      "syncProcessingDescription": "We are saving the generated chapters, lessons, quizzes, and resources. You can review the course when this finishes.",
+      "syncProcessingAction": "Processing...",
+      "syncFailedTitle": "Generated course sync failed",
+      "syncFailedDescription": "Something went wrong while saving the generated course.",
+      "syncRetry": "Retry",
+      "syncDismiss": "Dismiss"
     },
     "settings": {
       "breadcrumbs": {
@@ -4290,6 +4301,11 @@
       "showDetails": "Show details",
       "loading": "Loading activity logs...",
       "empty": "No activity logs found."
+    }
+  },
+  "luma": {
+    "errors": {
+      "invalidBlankAnswerId": "The generated quiz contains an invalid blank answer id. Please retry course generation."
     }
   },
   "liveTraining": {

@@ -1,15 +1,9 @@
 import { useChat } from "@ai-sdk/react";
 import { useCallback, useEffect, useRef } from "react";
 
-import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
-import { COURSE_GENERATION_DRAFT_QUERY_KEY } from "~/api/queries/admin/useCourseGenerationDraft";
-import {
-  getCourseGenerationMessagesQueryKey,
-  useCourseGenerationMessages,
-} from "~/api/queries/admin/useCourseGenerationMessages";
-import { queryClient } from "~/api/queryClient";
+import { useCourseGenerationMessages } from "~/api/queries/admin/useCourseGenerationMessages";
 import { hasCourseGeneratedFlag } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
-import { updateGeneratedCourseCacheFromStreamData } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationCourseCache.utils";
+import { invalidateCourseGenerationSyncQueries } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationSync.utils";
 
 import type { Message } from "@ai-sdk/react";
 
@@ -43,20 +37,7 @@ export function useCourseGenerationChat({
   const invalidateGenerationQueries = useCallback(async () => {
     if (!courseId) return;
 
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: getCourseGenerationMessagesQueryKey(courseId),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: [COURSE_GENERATION_DRAFT_QUERY_KEY],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY],
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ["course"],
-      }),
-    ]);
+    await invalidateCourseGenerationSyncQueries(courseId);
 
     onInvalidateRef.current?.();
   }, [courseId]);
@@ -99,17 +80,8 @@ export function useCourseGenerationChat({
   }, [courseGenerationMessages, setMessages]);
 
   useEffect(() => {
-    if (!courseId || !Array.isArray(data)) return;
-    const events = updateGeneratedCourseCacheFromStreamData(queryClient, courseId, data);
-
-    if (events.invalidate) void invalidateGenerationQueries();
-  }, [courseId, data, invalidateGenerationQueries]);
-
-  useEffect(() => {
     if (!hasCourseGeneratedFlag(data)) return;
-    void queryClient.invalidateQueries({
-      queryKey: [COURSE_GENERATION_DRAFT_QUERY_KEY],
-    });
-  }, [data]);
+    void invalidateGenerationQueries();
+  }, [data, invalidateGenerationQueries]);
   return chat;
 }

@@ -26,6 +26,7 @@ type LessonCardListProps = {
   lessons: Sortable<Lesson>[];
   selectedLesson: Lesson | null;
   language: SupportedLanguages;
+  isCourseGenerationLocked: boolean;
 };
 
 export const LessonCardList = ({
@@ -36,6 +37,7 @@ export const LessonCardList = ({
   chapter,
   selectedLesson,
   language,
+  isCourseGenerationLocked,
 }: LessonCardListProps) => {
   const { id: courseId } = useParams();
   const { mutateAsync: mutateLessonDisplayOrder } = useChangeLessonDisplayOrder();
@@ -50,6 +52,8 @@ export const LessonCardList = ({
 
   const onClickLessonCard = useCallback(
     (lesson: Lesson) => {
+      if (isCourseGenerationLocked) return;
+
       if (isCurrentFormDirty) {
         setPendingLesson(lesson);
         setIsLeavingContent(true);
@@ -72,6 +76,7 @@ export const LessonCardList = ({
       chapter,
       openLeaveModal,
       setIsLeavingContent,
+      isCourseGenerationLocked,
     ],
   );
 
@@ -81,6 +86,8 @@ export const LessonCardList = ({
       newChapterPosition: number,
       newDisplayOrder: number,
     ) => {
+      if (isCourseGenerationLocked) return;
+
       setLessonsList(updatedItems);
 
       await mutateLessonDisplayOrder({
@@ -94,7 +101,7 @@ export const LessonCardList = ({
       await queryClient.invalidateQueries({ queryKey: getCourseQueryKey(courseId!, language) });
       await queryClient.invalidateQueries({ queryKey: ["course"] });
     },
-    [courseId, mutateLessonDisplayOrder, language],
+    [courseId, mutateLessonDisplayOrder, language, isCourseGenerationLocked],
   );
 
   useEffect(() => {
@@ -121,6 +128,7 @@ export const LessonCardList = ({
             item={item}
             onClickLessonCard={onClickLessonCard}
             selectedLesson={selectedLesson}
+            isCourseGenerationLocked={isCourseGenerationLocked}
             dragTrigger={
               <SortableList.DragHandle>
                 <Icon

@@ -49,6 +49,7 @@ interface ChapterCardProps {
   setOpenItem: (value: string | undefined) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  isCourseGenerationLocked: boolean;
 }
 
 const ChapterCard = ({
@@ -64,6 +65,7 @@ const ChapterCard = ({
   setOpenItem,
   language,
   baseLanguage,
+  isCourseGenerationLocked,
 }: ChapterCardProps) => {
   const { id: courseId } = useParams();
 
@@ -76,16 +78,24 @@ const ChapterCard = ({
   const isBaseLanguage = language === baseLanguage;
 
   const addLessonLogic = useCallback(() => {
+    if (isCourseGenerationLocked) return;
+
     setSelectedLesson(null);
     setContentTypeToDisplay(ContentTypes.SELECT_LESSON_TYPE);
     setSelectedChapter(chapter);
-  }, [chapter, setContentTypeToDisplay, setSelectedChapter, setSelectedLesson]);
+  }, [
+    chapter,
+    setContentTypeToDisplay,
+    setSelectedChapter,
+    setSelectedLesson,
+    isCourseGenerationLocked,
+  ]);
 
   const handleAddLessonClick = useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation();
 
-      if (!isBaseLanguage) return;
+      if (!isBaseLanguage || isCourseGenerationLocked) return;
 
       if (isCurrentFormDirty) {
         setIsNewLesson(true);
@@ -95,10 +105,12 @@ const ChapterCard = ({
 
       addLessonLogic();
     },
-    [openLeaveModal, addLessonLogic, isCurrentFormDirty, isBaseLanguage],
+    [openLeaveModal, addLessonLogic, isCurrentFormDirty, isBaseLanguage, isCourseGenerationLocked],
   );
 
   const onClickChapterCard = useCallback(() => {
+    if (isCourseGenerationLocked) return;
+
     if (isCurrentFormDirty) {
       setPendingChapter(chapter);
       setIsLeavingContent(true);
@@ -117,6 +129,7 @@ const ChapterCard = ({
     isCurrentFormDirty,
     setIsLeavingContent,
     setSelectedLesson,
+    isCourseGenerationLocked,
   ]);
 
   const onAccordionClick = useCallback(
@@ -146,6 +159,7 @@ const ChapterCard = ({
     async (event: React.MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
+      if (isCourseGenerationLocked) return;
 
       const currentOpenState = openItem;
 
@@ -165,7 +179,15 @@ const ChapterCard = ({
         }, 0);
       }
     },
-    [chapter, updateFreemiumStatus, courseId, openItem, setOpenItem, language],
+    [
+      chapter,
+      updateFreemiumStatus,
+      courseId,
+      openItem,
+      setOpenItem,
+      language,
+      isCourseGenerationLocked,
+    ],
   );
 
   const sortableLessons: Sortable<Lesson>[] = useMemo(
@@ -210,6 +232,7 @@ const ChapterCard = ({
                 language={language}
                 setSelectedChapter={setSelectedChapter}
                 chapter={chapter}
+                isCourseGenerationLocked={isCourseGenerationLocked}
               />
             </AccordionContent>
             <div className="mt-3 flex items-center justify-between">
@@ -249,7 +272,7 @@ const ChapterCard = ({
                     data-testid={CURRICULUM_HANDLES.addLessonButton(chapter.id)}
                     variant="outline"
                     onClick={handleAddLessonClick}
-                    disabled={!isBaseLanguage}
+                    disabled={!isBaseLanguage || isCourseGenerationLocked}
                   >
                     <Icon name="Plus" className="mr-2 text-primary-800" />
                     {t("adminCourseView.curriculum.lesson.button.addLesson")}
@@ -267,6 +290,7 @@ const ChapterCard = ({
                   id="freemiumToggle"
                   onClick={onSwitchClick}
                   checked={chapter.isFree}
+                  disabled={isCourseGenerationLocked}
                 >
                   <Switch.Thumb
                     className={cn(
@@ -315,6 +339,7 @@ type ChaptersListProps = {
   isLeaveModalOpen?: boolean;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  isCourseGenerationLocked: boolean;
 };
 
 function getChapterWithLatestLesson(chapters: Chapter[]): string | null {
@@ -351,6 +376,7 @@ const ChaptersList = ({
   canRefetchChapterList,
   baseLanguage,
   language,
+  isCourseGenerationLocked,
 }: ChaptersListProps) => {
   const { id: courseId } = useParams();
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
@@ -375,6 +401,7 @@ const ChaptersList = ({
       newDisplayOrder: number,
     ) => {
       if (!courseId) return;
+      if (isCourseGenerationLocked) return;
       setChapterList(updatedItems);
 
       await mutateChapterDisplayOrder({
@@ -400,7 +427,7 @@ const ChaptersList = ({
         setOpenItem(openItem);
       }, 0);
     },
-    [courseId, mutateChapterDisplayOrder, openItem, language],
+    [courseId, mutateChapterDisplayOrder, openItem, language, isCourseGenerationLocked],
   );
 
   if (!chapters) return;
@@ -433,6 +460,7 @@ const ChaptersList = ({
               openItem={openItem}
               language={language}
               baseLanguage={baseLanguage}
+              isCourseGenerationLocked={isCourseGenerationLocked}
               dragTrigger={
                 <SortableList.DragHandle>
                   <Icon
