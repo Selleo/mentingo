@@ -1,4 +1,4 @@
-import { PackageOpen, Video } from "lucide-react";
+import { PackageOpen, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
@@ -69,7 +69,7 @@ const lessonTypes: readonly LessonTypeConfig[] = [
   {
     contentType: ContentTypes.LIVE_TRAINING_LESSON_FORM,
     handle: LESSON_TYPE_OPTION_HANDLES.LIVE_TRAINING,
-    lucideIcon: Video,
+    lucideIcon: Users,
     title: "adminCourseView.curriculum.lesson.other.liveTraining",
     description: "adminCourseView.curriculum.lesson.other.liveTrainingLessonDescription",
   },

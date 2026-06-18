@@ -2,13 +2,10 @@ import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { ProgressBadge } from "~/components/Badges/ProgressBadge";
-import { Icon } from "~/components/Icon";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
-import {
-  getLessonTypeTranslationKey,
-  LessonTypesIcons,
-} from "~/modules/Courses/CourseView/lessonTypes";
+import { LessonTypeIcon } from "~/modules/Courses/CourseView/LessonTypeIcon";
+import { getLessonTypeTranslationKey } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { LESSON_PROGRESS_STATUSES } from "../Lesson/types";
 
@@ -52,7 +49,7 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
         "opacity-30": !hasAccess && !isPreviewMode,
       })}
     >
-      <Icon name={LessonTypesIcons[lesson.type]} className="size-6 text-accent-foreground" />
+      <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
       <div className="flex w-full flex-col justify-center">
         <p
           className="body-sm-md text-neutral-950 break-all overflow-x-hidden text-left"

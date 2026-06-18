@@ -10,6 +10,7 @@ import {
   UpdateLiveTrainingEvent,
   UpdateLiveTrainingMaterialsEvent,
 } from "src/events";
+import { LiveTrainingService } from "src/live-training/live-training.service";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
@@ -39,7 +40,10 @@ const LiveTrainingActivityEvents = [
 @Injectable()
 @EventsHandler(...LiveTrainingActivityEvents)
 export class LiveTrainingActivityHandler implements IEventHandler<LiveTrainingEventType> {
-  constructor(private readonly activityLogsService: ActivityLogsService) {}
+  constructor(
+    private readonly activityLogsService: ActivityLogsService,
+    private readonly liveTrainingService: LiveTrainingService,
+  ) {}
 
   async handle(event: LiveTrainingEventType) {
     if (event instanceof CreateLiveTrainingEvent) return await this.handleCreate(event);
@@ -60,13 +64,19 @@ export class LiveTrainingActivityHandler implements IEventHandler<LiveTrainingEv
   }
 
   private async handleCreate(event: CreateLiveTrainingEvent) {
+    const createdLiveTraining = await this.liveTrainingService.buildLiveTrainingActivitySnapshot(
+      event.liveTrainingCreationData.liveTrainingId,
+      event.liveTrainingCreationData.language,
+      undefined,
+      { includeDeleted: true },
+    );
     const metadata = buildActivityLogMetadata({
       previous: {},
-      updated: event.liveTrainingCreationData.createdLiveTraining,
+      updated: createdLiveTraining,
       schema: "create",
       context: {
-        deliveryType: event.liveTrainingCreationData.createdLiveTraining.deliveryType,
-        status: event.liveTrainingCreationData.createdLiveTraining.status,
+        deliveryType: createdLiveTraining.deliveryType,
+        status: createdLiveTraining.status,
       },
     });
 
@@ -101,13 +111,20 @@ export class LiveTrainingActivityHandler implements IEventHandler<LiveTrainingEv
   }
 
   private async handleDelete(event: DeleteLiveTrainingEvent) {
+    const deletedLiveTraining = await this.liveTrainingService.buildLiveTrainingActivitySnapshot(
+      event.liveTrainingDeleteData.liveTrainingId,
+      event.liveTrainingDeleteData.language,
+      undefined,
+      { includeDeleted: true },
+    );
+
     await this.activityLogsService.recordActivity({
       actor: event.liveTrainingDeleteData.actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
       resourceId: event.liveTrainingDeleteData.liveTrainingId,
       context: {
-        title: event.liveTrainingDeleteData.deletedLiveTrainingData?.title ?? "",
+        title: deletedLiveTraining.title ?? "",
       },
     });
   }

@@ -1,12 +1,3 @@
-export const LessonTypesIcons = {
-  content: "Content",
-  quiz: "Quiz",
-  ai_mentor: "AiMentor",
-  embed: "Embed",
-  scorm: "Archive",
-  live_training: "LiveTraining",
-} as const;
-
 const lessonTypeTranslationSuffix = {
   content: "content",
   quiz: "quiz",

@@ -53,7 +53,7 @@ export class LiveTrainingFactory {
     await this.ensureLiveTrainingEnabled();
 
     const title = input.title ?? `Offline Live Training ${randomUUID().slice(0, 8)}`;
-    const response = await this.apiClient.api.liveTrainingControllerCreateLiveTraining({
+    await this.apiClient.api.liveTrainingControllerCreateLiveTraining({
       language,
       title,
       description: input.description ?? `Description for ${title}`,
@@ -71,7 +71,13 @@ export class LiveTrainingFactory {
       afterResourceIds: input.afterResourceIds,
     });
 
-    return response.data.data;
+    const createdLiveTraining = await this.findByTitle(title, language);
+
+    if (!createdLiveTraining) {
+      throw new Error(`Live training "${title}" was not found after creation`);
+    }
+
+    return this.get(createdLiveTraining.id, language);
   }
 
   async get(id: string, language: SupportedLanguages = SUPPORTED_LANGUAGES.EN) {

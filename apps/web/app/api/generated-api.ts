@@ -3941,101 +3941,6 @@ export interface CreateLiveTrainingBody {
   afterResourceIds?: string[];
 }
 
-export interface CreateLiveTrainingResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    calendarEventId: string;
-    title: string;
-    description: string | null;
-    startsAt: string;
-    endsAt: string;
-    allDay: boolean;
-    timezone: string;
-    location: string | null;
-    deliveryType: "online" | "offline";
-    visibilityScope: "all" | "linked_courses";
-    status: "scheduled" | "active" | "ended" | "cancelled" | "expired";
-    maxParticipants: number;
-    /** @format uuid */
-    authorId: string;
-    hostIds: string[];
-    linkedCourseIds: string[];
-  } & {
-    settings: {
-      viewerPermissions: {
-        microphoneEnabled: boolean;
-        cameraEnabled: boolean;
-      };
-    };
-    metadata: object;
-    author: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    };
-    hosts: {
-      /** @format uuid */
-      id: string;
-      fullName: string | null;
-      profilePictureUrl: string | null;
-    }[];
-    linkedCourses: {
-      /** @format uuid */
-      id: string;
-      title: string;
-    }[];
-    linkedLessonCount: number;
-    currentSession: {
-      /** @format uuid */
-      id: string;
-      status: "waiting" | "active" | "ended" | "failed";
-      startedAt: string | null;
-      endedAt: string | null;
-      startedByUserId: string | null;
-      endedByUserId: string | null;
-      startedBy: {
-        /** @format uuid */
-        id: string;
-        fullName: string | null;
-        profilePictureUrl: string | null;
-      } | null;
-      endedBy: {
-        /** @format uuid */
-        id: string;
-        fullName: string | null;
-        profilePictureUrl: string | null;
-      } | null;
-      activeParticipantCount: number;
-      uniqueParticipantCount: number;
-      peakParticipantCount: number;
-      endReason: string | null;
-    } | null;
-    materials: {
-      before: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        size: number | null;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-      after: {
-        /** @format uuid */
-        resourceId: string;
-        title: string;
-        description: string | null;
-        contentType: string;
-        size: number | null;
-        relationshipType: "live_training_before" | "live_training_after";
-      }[];
-    };
-  };
-}
-
 export interface GetHostCandidatesResponse {
   data: ({
     /** @format uuid */
@@ -4182,12 +4087,6 @@ export interface UpdateLiveTrainingResponse {
         relationshipType: "live_training_before" | "live_training_after";
       }[];
     };
-  };
-}
-
-export interface DeleteLiveTrainingResponse {
-  data: {
-    message: string;
   };
 }
 
@@ -10973,12 +10872,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       data: CreateLiveTrainingBody,
       params: RequestParams = {},
     ) =>
-      this.request<CreateLiveTrainingResponse, any>({
+      this.request<void, any>({
         path: `/api/live-training`,
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
         ...params,
       }),
 
@@ -11031,10 +10929,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request DELETE:/api/live-training/{id}
      */
     liveTrainingControllerDeleteLiveTraining: (id: string, params: RequestParams = {}) =>
-      this.request<DeleteLiveTrainingResponse, any>({
+      this.request<void, any>({
         path: `/api/live-training/${id}`,
         method: "DELETE",
-        format: "json",
         ...params,
       }),
 

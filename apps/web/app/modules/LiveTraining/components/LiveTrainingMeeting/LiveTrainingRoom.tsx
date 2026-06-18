@@ -58,6 +58,7 @@ function LiveTrainingRoomContent({
 
       <div className="min-h-0 h-full">
         <LiveTrainingParticipantGrid
+          hasPinnedTrack={Boolean(fullscreenTrack)}
           liveTrainingId={liveTraining.id}
           onTrackSelect={(trackRef, profilePictureUrl) =>
             setFullscreenTrack({ trackRef, profilePictureUrl })

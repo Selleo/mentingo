@@ -50,7 +50,7 @@
       "ai_mentor": "AI mentor",
       "embed": "Vložit",
       "scorm": "SCORM",
-      "live_training": "Live Training"
+      "live_training": "Živé školení"
     },
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo."
@@ -360,13 +360,13 @@
       "title": "Přidat do kalendáře",
       "description": "Vyberte, co chcete přidat pro zvolený čas.",
       "noOptions": "Nejsou dostupné žádné položky k vytvoření.",
-      "liveKitRequired": "Nakonfigurujte LiveKit v nastavení prostředí, abyste povolili online Live Training. Offline školení zůstávají dostupná.",
-      "submit": "Vytvořit live training",
+      "liveKitRequired": "Nakonfigurujte LiveKit v nastavení prostředí, abyste povolili online Živé školení. Offline školení zůstávají dostupná.",
+      "submit": "Vytvořit živé školení",
       "toast": {
-        "success": "Live training byl vytvořen."
+        "success": "Živé školení byl vytvořen."
       },
       "liveTrainingOption": {
-        "title": "Live Training",
+        "title": "Živé školení",
         "description": "Naplánujte online nebo offline školení."
       },
       "section": {
@@ -399,14 +399,14 @@
         "offline": "In-person"
       },
       "tooltip": {
-        "title": "Tento název se zobrazí v kalendáři a v detailech Live Training.",
+        "title": "Tento název se zobrazí v kalendáři a v detailech Živé školení.",
         "description": "Volitelný kontext pro účastníky před připojením ke školení.",
-        "language": "Základní jazyk názvu a popisu tohoto Live Training.",
+        "language": "Základní jazyk názvu a popisu tohoto Živé školení.",
         "allDay": "Použije celodenní kalendářní datum a vypne výběr času začátku a konce.",
         "deliveryType": "Online relace jsou vzdálené. Offline relace vyžadují místo.",
         "startsAt": "Plánovaný čas začátku zobrazený v kalendáři.",
         "endsAt": "Plánovaný čas konce zobrazený v kalendáři.",
-        "maxParticipants": "Limit účastníků pro toto Live Training. Aktuální maximum je 100.",
+        "maxParticipants": "Limit účastníků pro toto Živé školení. Aktuální maximum je 100.",
         "location": "Volitelné místo pro offline školení.",
         "viewerPermissions": "Určuje, co mohou studenti používat při připojení jako diváci.",
         "microphoneEnabled": "Povolí divákům používat mikrofon během relace.",
@@ -430,11 +430,11 @@
       "noHosts": "No additional hosts",
       "action": {
         "edit": "Edit event",
-        "goToLiveTraining": "Go to Live Training",
+        "goToLiveTraining": "Go to Živé školení",
         "goToCourse": "Přejít na kurz"
       },
       "sourceType": {
-        "liveTraining": "Live Training",
+        "liveTraining": "Živé školení",
         "courseDueDate": "Termín kurzu"
       },
       "field": {
@@ -471,10 +471,10 @@
     }
   },
   "liveTrainingView": {
-    "title": "Live Training",
-    "description": "This page will contain the full Live Training workspace.",
+    "title": "Živé školení",
+    "description": "This page will contain the full Živé školení workspace.",
     "errors": {
-      "idRequired": "Live Training id is required."
+      "idRequired": "Živé školení id is required."
     },
     "status": {
       "scheduled": "Scheduled",
@@ -552,7 +552,7 @@
       "settings": "Settings"
     },
     "files": {
-      "title": "Live Training files",
+      "title": "Živé školení files",
       "description": "Materials are split by when students should use them.",
       "beforeHeading": "Before training",
       "beforeDescription": "Materials available before the training starts.",
@@ -659,18 +659,18 @@
       "no": "No"
     },
     "deleteDialog": {
-      "title": "Smazat Live Training?",
-      "description": "Live Training bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
-      "assignedToLessonsDescription": "Tento Live Training je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Live Training.",
-      "assignedToLessonsDescription_plural": "Tento Live Training je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Live Training.",
+      "title": "Smazat Živé školení?",
+      "description": "Živé školení bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
+      "assignedToLessonsDescription": "Tento Živé školení je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Živé školení.",
+      "assignedToLessonsDescription_plural": "Tento Živé školení je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Živé školení.",
       "toast": {
-        "success": "Live Training byl smazán."
+        "success": "Živé školení byl smazán."
       }
     },
     "edit": {
       "saveChanges": "Uložit změny",
       "toast": {
-        "success": "Live Training byl aktualizován."
+        "success": "Živé školení byl aktualizován."
       }
     }
   },
@@ -906,7 +906,7 @@
         "slack_authorization": "Umožněte uživatelům přihlásit se pomocí účtu Slack",
         "openAI": "Povolit funkce AI Mentor",
         "luma": "Povolit funkce generování kurzů AI",
-        "livekit": "Nakonfigurujte LiveKit, abyste povolili online video relace Live Training. Bez něj jsou dostupná pouze offline školení."
+        "livekit": "Nakonfigurujte LiveKit, abyste povolili online video relace Živé školení. Bez něj jsou dostupná pouze offline školení."
       }
     }
   },
@@ -1319,7 +1319,7 @@
       "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
       "noUserSelected": "Nebyl vybrán žádný uživatel",
       "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli.",
-      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Live Training."
+      "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Živé školení."
     },
     "import": {
       "toast": {
@@ -1932,7 +1932,7 @@
         "removeAiMentorLesson": "Opravdu chcete smazat tuto lekci AI Mentor z kapitoly?",
         "removeEmbedLesson": "Opravdu chcete smazat tuto vloženou lekci z kapitoly?",
         "removeScormLesson": "Opravdu chcete smazat tuto lekci SCORM z kapitoly?",
-        "removeLiveTrainingLesson": "Opravdu chcete smazat tuto lekci Live Training z kapitoly?",
+        "removeLiveTrainingLesson": "Opravdu chcete smazat tuto lekci Živé školení z kapitoly?",
         "removeChapter": "Opravdu chcete smazat tuto kapitolu?",
         "removeQuestion": "Opravdu chcete smazat otázku?",
         "removeContent": "Opravdu chcete smazat obsah?"
@@ -2026,9 +2026,9 @@
           "scormLessonPackageAttachedSuccessfully": "Balíček SCORM byl úspěšně připojen",
           "quizLessonCreatedSuccessfully": "Kvíz byl úspěšně vytvořen",
           "aiMentorLessonCreatedSuccessfully": "Lekce AI Mentor byla úspěšně vytvořena",
-          "liveTrainingLessonCreated": "Lekce Live Training byla úspěšně vytvořena",
-          "liveTrainingLessonUpdated": "Lekce Live Training byla úspěšně aktualizována",
-          "liveTrainingLessonAttached": "Přiřazení Live Training bylo úspěšně připojeno",
+          "liveTrainingLessonCreated": "Lekce Živé školení byla úspěšně vytvořena",
+          "liveTrainingLessonUpdated": "Lekce Živé školení byla úspěšně aktualizována",
+          "liveTrainingLessonAttached": "Přiřazení Živé školení bylo úspěšně připojeno",
           "aiMentorLessonUpdatedSuccessfully": "Lekce AI Mentor byla úspěšně aktualizována",
           "aiMentorLessonFileAddedSuccessfully": "Soubory lekcí AI Mentor byly úspěšně nahrány",
           "courseGenerationFileAddedToUploadQueue": "Soubor byl přidán do fronty nahrávání",
@@ -2045,22 +2045,22 @@
           "embedLessonUpdateError": "Aktualizace lekce vložení se nezdařila. Zkontrolujte prosím všechna pole a zkuste to znovu."
         },
         "liveTraining": {
-          "createTitle": "Vytvořit lekci Live Training",
-          "editTitle": "Upravit lekci Live Training",
+          "createTitle": "Vytvořit lekci Živé školení",
+          "editTitle": "Upravit lekci Živé školení",
           "lessonTitle": "Název lekce",
           "lessonTitlePlaceholder": "Název lekce zobrazený v kurzu",
           "createNewTab": "Vytvořit nový",
           "linkExistingTab": "Propojit existující",
-          "linkExistingLoading": "Načítání naplánovaných Live Training...",
-          "linkExistingEmpty": "Nejsou dostupné žádné naplánované Live Training.",
-          "linkedTitle": "Propojený Live Training",
-          "linkedDescription": "Plán, trenéři, soubory a nastavení relace se spravují na stránce Live Training.",
-          "openLiveTraining": "Otevřít Live Training",
-          "openBaseLiveTraining": "Otevřít základní Live Training",
-          "languageMissingTitle": "Pro tento jazyk není přiřazen Live Training",
-          "languageMissingDescription": "Tato lekce používá Live Training ze základního jazyka kurzu. Vytvořte nebo propojte naplánovaný Live Training, pokud ho chcete pro vybraný jazyk změnit.",
+          "linkExistingLoading": "Načítání naplánovaných Živé školení...",
+          "linkExistingEmpty": "Nejsou dostupné žádné naplánované Živé školení.",
+          "linkedTitle": "Propojený Živé školení",
+          "linkedDescription": "Plán, trenéři, soubory a nastavení relace se spravují na stránce Živé školení.",
+          "openLiveTraining": "Otevřít Živé školení",
+          "openBaseLiveTraining": "Otevřít základní Živé školení",
+          "languageMissingTitle": "Pro tento jazyk není přiřazen Živé školení",
+          "languageMissingDescription": "Tato lekce používá Živé školení ze základního jazyka kurzu. Vytvořte nebo propojte naplánovaný Živé školení, pokud ho chcete pro vybraný jazyk změnit.",
           "validation": {
-            "liveTrainingRequired": "Vyberte naplánovaný Live Training k propojení."
+            "liveTrainingRequired": "Vyberte naplánovaný Živé školení k propojení."
           }
         },
         "field": {
@@ -2130,7 +2130,7 @@
           "aiMentor": "AI mentor",
           "embed": "Vložit",
           "scorm": "SCORM",
-          "liveTraining": "Live Training",
+          "liveTraining": "Živé školení",
           "correct": "Opravit",
           "true": "Věrný",
           "false": "Falešný",
@@ -2379,8 +2379,8 @@
       "success": "Stahování balíčku SCORM bylo zahájeno.",
       "warning": {
         "title": "Nepodporované lekce budou přeskočeny",
-        "description": "Tento kurz obsahuje {{count}} lekci, která není v balíčcích SCORM podporována. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
-        "description_other": "Tento kurz obsahuje {{count}} lekcí, které nejsou v balíčcích SCORM podporovány. Lekce AI Mentor a Live Training se při exportu přeskočí. Chcete pokračovat?",
+        "description": "Tento kurz obsahuje {{count}} lekci, která není v balíčcích SCORM podporována. Lekce AI Mentor a Živé školení se při exportu přeskočí. Chcete pokračovat?",
+        "description_other": "Tento kurz obsahuje {{count}} lekcí, které nejsou v balíčcích SCORM podporovány. Lekce AI Mentor a Živé školení se při exportu přeskočí. Chcete pokračovat?",
         "confirm": "Přesto exportovat"
       },
       "error": {
@@ -2627,16 +2627,16 @@
       "progressUpdated": "Postup SCORM byl aktualizován."
     },
     "liveTraining": {
-      "activeLabel": "Live Training",
+      "activeLabel": "Živé školení",
       "activeTitle": "Sezení je aktivní",
       "scheduledLabel": "Naplánováno",
-      "scheduledTitle": "Live Training je naplánován",
+      "scheduledTitle": "Živé školení je naplánován",
       "endedLabel": "Ukončeno",
-      "endedTitle": "Live Training již skončil",
-      "inactiveLabel": "Live Training",
-      "inactiveTitle": "Žádné Live Training sezení není aktivní",
+      "endedTitle": "Živé školení již skončil",
+      "inactiveLabel": "Živé školení",
+      "inactiveTitle": "Žádné Živé školení sezení není aktivní",
       "locationNotice": "Místo",
-      "notAvailable": "Live Training není pro tuto lekci dostupný."
+      "notAvailable": "Živé školení není pro tuto lekci dostupný."
     },
     "videoProcessing": {
       "title": "Video se zpracovává",
@@ -2915,10 +2915,10 @@
       "courseDiscussionsDescription": "Umožnit zapsaným uživatelům zobrazovat diskuse v kurzech a zapojovat se do nich",
       "calendar": "Povolit kalendář",
       "calendarDescription": "Umožnit uživatelům zobrazit naplánované události v kalendáři",
-      "liveTraining": "Povolit Live Training",
+      "liveTraining": "Povolit Živé školení",
       "liveTrainingDescription": "Umožnit školitelům vytvářet a vést živá školení",
-      "liveTrainingMaxParallelSessions": "Maximální počet souběžných relací Live Training",
-      "liveTrainingMaxParallelSessionsDescription": "Omezte počet relací Live Training, které mohou být aktivní současně.",
+      "liveTrainingMaxParallelSessions": "Maximální počet souběžných relací Živé školení",
+      "liveTrainingMaxParallelSessionsDescription": "Omezte počet relací Živé školení, které mohou být aktivní současně.",
       "liveTrainingTooltip": "Zapněte pouze tehdy, když má tenant používat živé relace vedené trenéry.",
       "liveTrainingDisableBlockedTooltip_one": "Aktuálně máte {{count}} uživatele s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
       "liveTrainingDisableBlockedTooltip_other": "Aktuálně máte {{count}} uživatelů s rolí Trenér. Odeberte ji, abyste mohli tuto funkci vypnout.",
@@ -2933,8 +2933,8 @@
       "modernCourseListPreferenceChangeSuccess": "Předvolba seznamu moderních kurzů byla úspěšně aktualizována",
       "courseDiscussionsPreferenceChangeSuccess": "Předvolba diskusí v kurzech byla úspěšně aktualizována",
       "calendarPreferenceChangeSuccess": "Předvolba kalendáře byla úspěšně aktualizována",
-      "liveTrainingPreferenceChangeSuccess": "Předvolba Live Training byla úspěšně aktualizována",
-      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit relací Live Training byl úspěšně aktualizován",
+      "liveTrainingPreferenceChangeSuccess": "Předvolba Živé školení byla úspěšně aktualizována",
+      "liveTrainingMaxParallelSessionsChangeSuccess": "Limit relací Živé školení byl úspěšně aktualizován",
       "finishedCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o dokončeném kurzu byly úspěšně aktualizovány",
       "finishedCourseNotificationsPreferenceChangeError": "Aktualizace předvoleb oznámení o dokončeném kurzu se nezdařila",
       "overdueCourseNotificationsPreferenceChangeSuccess": "Předvolby oznámení o zpoždění kurzu byly úspěšně aktualizovány",
@@ -3614,7 +3614,7 @@
       "user": "Uživatel",
       "category": "Kategorie",
       "announcement": "Oznámení",
-      "live_training": "Live Training",
+      "live_training": "Živé školení",
       "global_settings": "Nastavení"
     },
     "table": {
@@ -4237,8 +4237,8 @@
   "liveTraining": {
     "errors": {
       "invalidLocalizedField": "Zadejte platný text pro vybraný jazyk.",
-      "notFound": "Live Training nebyl nalezen.",
-      "sessionNotFound": "Relace Live Training nebyla nalezena.",
+      "notFound": "Živé školení nebyl nalezen.",
+      "sessionNotFound": "Relace Živé školení nebyla nalezena.",
       "invalidDateRange": "Zadejte datum začátku i konce, nebo nechte obě pole prázdná.",
       "invalidSchedule": "Čas konce musí být po čase začátku.",
       "invalidTrainer": "Jeden nebo více vybraných trenérů nebylo nalezeno.",
@@ -4249,19 +4249,19 @@
       "hostAssignmentForbidden": "Nemáte oprávnění přiřazovat hostitele.",
       "hostMustHaveTrainerRole": "Přiřazení hostitelé musí mít roli Trainer.",
       "trainerAssignmentForbidden": "Nemáte oprávnění přiřazovat trenéry.",
-      "linkNotCreated": "Propojení Live Training se nepodařilo vytvořit.",
-      "lessonAlreadyLinked": "Tato lekce již má propojený Live Training.",
-      "invalidLessonLinkMode": "Vyberte, zda chcete vytvořit nový Live Training, nebo propojit existující.",
-      "onlyScheduledCanBeLinked": "K lekcím lze propojit pouze naplánované Live Training.",
-      "trainingAlreadyLinkedToLesson": "Tento Live Training je v tomto kurzu již propojen s lekcí.",
-      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Live Training.",
+      "linkNotCreated": "Propojení Živé školení se nepodařilo vytvořit.",
+      "lessonAlreadyLinked": "Tato lekce již má propojený Živé školení.",
+      "invalidLessonLinkMode": "Vyberte, zda chcete vytvořit nový Živé školení, nebo propojit existující.",
+      "onlyScheduledCanBeLinked": "K lekcím lze propojit pouze naplánované Živé školení.",
+      "trainingAlreadyLinkedToLesson": "Tento Živé školení je v tomto kurzu již propojen s lekcí.",
+      "lessonOnlyTitleEditable": "Zde lze upravit pouze název lekce. Pro změnu detailů relace otevřete Živé školení.",
       "unsupportedLessonLanguage": "Tento kurz nepodporuje vybraný jazyk.",
-      "baseLanguageAssignmentRequired": "Lekce Live Training musí být nejprve vytvořena v základním jazyce kurzu.",
-      "invalidLessonType": "Přiřazení Live Training lze přidat pouze k lekcím Live Training.",
-      "deleteAssignedToLesson": "Tento Live Training je propojen s lekcí. Nejdříve smažte lekci a až potom Live Training.",
+      "baseLanguageAssignmentRequired": "Lekce Živé školení musí být nejprve vytvořena v základním jazyce kurzu.",
+      "invalidLessonType": "Přiřazení Živé školení lze přidat pouze k lekcím Živé školení.",
+      "deleteAssignedToLesson": "Tento Živé školení je propojen s lekcí. Nejdříve smažte lekci a až potom Živé školení.",
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
-      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Live Training."
+      "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
     }
   }
 }

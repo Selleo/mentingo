@@ -44,7 +44,6 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
 
-import { LiveTrainingAnnouncementsService } from "./live-training-announcements.service";
 import { LiveTrainingRepository } from "./live-training.repository";
 
 import type {
@@ -80,7 +79,6 @@ export class LiveTrainingService {
     private readonly fileService: FileService,
     private readonly envService: EnvService,
     private readonly outboxPublisher: OutboxPublisher,
-    private readonly liveTrainingAnnouncementsService: LiveTrainingAnnouncementsService,
   ) {}
 
   async getLiveTrainings(
@@ -206,23 +204,16 @@ export class LiveTrainingService {
     body: CreateLiveTrainingBody,
     language: SupportedLanguages,
     currentUser: CurrentUserType,
-  ): Promise<LiveTrainingDetails> {
+  ): Promise<void> {
     const liveTrainingId = await this.createLiveTrainingRecord(body, language, currentUser);
-    const liveTrainingSnapshot = await this.buildLiveTrainingActivitySnapshot(
-      liveTrainingId,
-      language,
-    );
 
     await this.outboxPublisher.publish(
       new CreateLiveTrainingEvent({
         liveTrainingId,
         actor: currentUser,
-        createdLiveTraining: liveTrainingSnapshot,
+        language,
       }),
     );
-    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(liveTrainingId, currentUser);
-
-    return this.getLiveTrainingDetailsOrThrow(liveTrainingId, language, currentUser);
   }
 
   async createCourseLinkedLiveTrainingInTransaction(
@@ -253,21 +244,14 @@ export class LiveTrainingService {
       throw new BadRequestException("liveTraining.errors.linkNotCreated");
     }
 
-    const liveTrainingSnapshot = await this.buildLiveTrainingActivitySnapshot(
-      liveTrainingId,
-      language,
-      dbInstance,
-    );
-
     await this.outboxPublisher.publish(
       new CreateLiveTrainingEvent({
         liveTrainingId,
         actor: currentUser,
-        createdLiveTraining: liveTrainingSnapshot,
+        language,
       }),
       dbInstance,
     );
-    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(liveTrainingId, currentUser);
 
     return { liveTrainingId, liveTrainingLinkId: courseLink.id };
   }
@@ -531,7 +515,6 @@ export class LiveTrainingService {
         updatedLiveTrainingData: updatedSnapshot,
       }),
     );
-    await this.liveTrainingAnnouncementsService.syncStartsSoonReminder(id, currentUser);
 
     return this.getLiveTrainingDetailsOrThrow(id, language, currentUser);
   }
@@ -544,11 +527,6 @@ export class LiveTrainingService {
     }
 
     this.assertCanDeleteLiveTraining(row.authorId, currentUser);
-    const deletedSnapshot = await this.buildLiveTrainingActivitySnapshot(
-      id,
-      row.baseLanguage as SupportedLanguages,
-    );
-
     const linkedLessonCount = await this.liveTrainingRepository.getLinkedLessonCount(row.id);
 
     if (linkedLessonCount > 0) {
@@ -560,13 +538,12 @@ export class LiveTrainingService {
       row.calendarEventId,
       row.sequence + 1,
     );
-    await this.liveTrainingAnnouncementsService.cancelStartsSoonReminder(row.id);
 
     await this.outboxPublisher.publish(
       new DeleteLiveTrainingEvent({
         liveTrainingId: row.id,
         actor: currentUser,
-        deletedLiveTrainingData: deletedSnapshot,
+        language: row.baseLanguage as SupportedLanguages,
       }),
     );
   }
@@ -771,8 +748,14 @@ export class LiveTrainingService {
     id: UUIDType,
     language: SupportedLanguages,
     dbInstance?: DatabasePg,
+    options: { includeDeleted?: boolean } = {},
   ): Promise<LiveTrainingActivityLogSnapshot> {
-    const row = await this.liveTrainingRepository.getLiveTrainingBaseRow(id, language, dbInstance);
+    const row = await this.liveTrainingRepository.getLiveTrainingBaseRow(
+      id,
+      language,
+      dbInstance,
+      options,
+    );
 
     if (!row) {
       throw new NotFoundException("liveTraining.errors.notFound");
