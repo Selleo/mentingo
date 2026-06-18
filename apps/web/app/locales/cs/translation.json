@@ -2687,7 +2687,14 @@
       "trueOrFalseRequired": "Vyžaduje se pravdivá nebo nepravdivá odpověď.",
       "photoQuestionMustHaveAnswer": "Na tuto fotografickou otázku je vyžadována odpověď.",
       "unansweredQuestions": "Zdá se, že jste ještě nezkontrolovali všechny odpovědi. Zkontrolujte je a zkuste to znovu!",
-      "unansweredQuestionsWithNames": "Odpovězte na chybějící otázky: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Odpovězte na chybějící otázky: {{questionNames}}",
+      "quizAlreadyAnswered": "Tento kvíz jste již vyplnili.",
+      "lessonAssignmentRequired": "K této lekci nejste přiřazeni.",
+      "quizEvaluationFailed": "Vyhodnocení kvízu se nezdařilo. Zkuste to prosím znovu.",
+      "quizNotAnsweredYet": "Tento kvíz jste ještě nevyplnili.",
+      "courseEnrollmentRequired": "Nejste zapsáni do tohoto kurzu.",
+      "quizRetakeUnavailable": "Odpovědi v kvízu nelze resetovat kvůli limitu pokusů nebo čekací době.",
+      "quizResetFailed": "Odpovědi v kvízu se nepodařilo resetovat. Zkuste to prosím znovu."
     }
   },
   "studentCourseView": {

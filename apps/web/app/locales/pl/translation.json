@@ -2980,7 +2980,14 @@
       "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!",
-      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}",
+      "quizAlreadyAnswered": "Ten quiz został już rozwiązany.",
+      "lessonAssignmentRequired": "Nie masz przypisania do tej lekcji.",
+      "quizEvaluationFailed": "Nie udało się ocenić quizu. Spróbuj ponownie.",
+      "quizNotAnsweredYet": "Ten quiz nie został jeszcze rozwiązany.",
+      "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
+      "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
+      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
     }
   },
   "studentCourseView": {

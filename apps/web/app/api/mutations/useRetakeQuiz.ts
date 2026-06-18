@@ -1,9 +1,10 @@
 import { useMutation } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { useTranslation } from "react-i18next";
 
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
+import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMessage";
 
 type RetakeQuizProps = {
   lessonId: string;
@@ -12,6 +13,7 @@ type RetakeQuizProps = {
 
 export function useRetakeQuiz({ lessonId, handleOnSuccess }: RetakeQuizProps) {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async () => {
@@ -22,15 +24,9 @@ export function useRetakeQuiz({ lessonId, handleOnSuccess }: RetakeQuizProps) {
       handleOnSuccess();
     },
     onError: (error) => {
-      if (error instanceof AxiosError) {
-        return toast({
-          variant: "destructive",
-          description: error.response?.data.message,
-        });
-      }
       toast({
         variant: "destructive",
-        description: error.message,
+        description: getTranslatedApiErrorMessage(error, t, t("common.toast.somethingWentWrong")),
       });
     },
   });

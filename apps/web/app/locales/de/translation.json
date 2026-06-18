@@ -2681,7 +2681,14 @@
       "trueOrFalseRequired": "Es ist eine wahre oder falsche Antwort erforderlich.",
       "photoQuestionMustHaveAnswer": "Für diese Fotofrage ist eine Antwort erforderlich.",
       "unansweredQuestions": "Anscheinend haben Sie noch nicht alle Antworten überprüft. Bitte überprüfen Sie sie und versuchen Sie es erneut!",
-      "unansweredQuestionsWithNames": "Bitte beantworten Sie die fehlenden Fragen: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Bitte beantworten Sie die fehlenden Fragen: {{questionNames}}",
+      "quizAlreadyAnswered": "Sie haben dieses Quiz bereits beantwortet.",
+      "lessonAssignmentRequired": "Sie sind dieser Lektion nicht zugewiesen.",
+      "quizEvaluationFailed": "Die Quizbewertung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "quizNotAnsweredYet": "Sie haben dieses Quiz noch nicht beantwortet.",
+      "courseEnrollmentRequired": "Sie sind nicht in diesen Kurs eingeschrieben.",
+      "quizRetakeUnavailable": "Die Quizantworten können wegen des Versuchslimits oder der Wartezeit nicht zurückgesetzt werden.",
+      "quizResetFailed": "Die Quizantworten konnten nicht zurückgesetzt werden. Bitte versuchen Sie es erneut."
     }
   },
   "studentCourseView": {

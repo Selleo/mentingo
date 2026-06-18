@@ -54,7 +54,6 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   className={cn("size-4", {
                     grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
                   })}
-                  {...(studentAnswer === "true" && { checked: true })}
                   type="radio"
                   value="true"
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
@@ -67,7 +66,6 @@ export const TrueOrFalse = ({ question, isCompleted }: TrueOrFalseProps) => {
                   className={cn("size-4", {
                     grayscale: isQuizFeedbackRedacted && isQuizSubmitted,
                   })}
-                  {...(studentAnswer === "false" && { checked: true })}
                   {...register(`trueOrFalseQuestions.${question.id}.${id}`)}
                   name={`trueOrFalseQuestions.${question.id}.${id}`}
                   type="radio"
