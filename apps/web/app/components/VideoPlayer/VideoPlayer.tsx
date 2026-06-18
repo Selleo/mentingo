@@ -19,13 +19,12 @@ import "./videoPlayer.css";
 import { useVideoCoverageTracker } from "./useVideoCoverageTracker";
 
 import type { VideoAspectRatio } from "./aspectRatio";
-import type { VideoCoverageSnapshot, VideoCoverageTrackingOptions } from "./videoCoverage.types";
+import type { VideoCoverageTrackingOptions } from "./videoCoverage.types";
 
 interface VideoPlayerProps {
   url: string;
   onAspectRatioChange?: (aspectRatio: VideoAspectRatio) => void;
   onEnded?: () => void;
-  onCoverageChange?: (snapshot: VideoCoverageSnapshot) => void;
   autoPlay?: boolean;
   fill?: boolean;
   className?: string;
@@ -74,7 +73,6 @@ export const VideoPlayer = ({
   provider,
   onAspectRatioChange,
   onEnded,
-  onCoverageChange,
   autoPlay = false,
   fill = true,
   className,
@@ -257,10 +255,6 @@ export const VideoPlayer = ({
       }
     };
   }, [clearControlsVisibilityTimer]);
-
-  useEffect(() => {
-    onCoverageChange?.(coverage.snapshot);
-  }, [coverage.snapshot, onCoverageChange]);
 
   useEffect(() => {
     if (!player || !coverageTracking?.enabled) return;

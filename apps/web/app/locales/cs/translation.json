@@ -1902,7 +1902,7 @@
         "enableQuizFeedback": "Zpětná vazba kvízu",
         "enableQuizFeedbackDescription": "Po odeslání kvízu student uvidí, které odpovědi byly správné, nesprávné nebo nezodpovězené.",
         "enableVideoCompletionTracking": "Sledování dokončení videa",
-        "enableVideoCompletionTrackingDescription": "Vyžadujte, aby studenti zhlédli dostatečnou jedinečnou část interních videí lekce, než se video započítá jako dokončené.",
+        "enableVideoCompletionTrackingDescription": "Účastník musí zhlédnout alespoň 90 % každého videa v lekci, aby byla lekce označena jako dokončená.",
         "fallbackLanguageWarningTitle": "Poznámka: chybějící překlady",
         "fallbackLanguageWarningDescription": "Některá pole v této jazykové verzi jsou prázdná. Na těchto místech studenti uvidí obsah z výchozího jazyka, dokud nepřidáte překlady.",
         "baseLanguageTooltip": "Tento jazyk nemůžete změnit ani odebrat. Je výchozí a bude vždy součástí kurzu."

@@ -1,5 +1,5 @@
 import { VIDEO_EMBED_PROVIDERS } from "@repo/shared";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useThumbnail } from "~/api/queries/useThumbnail";
 import { Icon } from "~/components/Icon";
@@ -12,7 +12,7 @@ import {
 } from "./aspectRatio";
 import { VideoPlayer } from "./VideoPlayer";
 
-import type { VideoCoverageSnapshot, VideoCoverageTrackingOptions } from "./videoCoverage.types";
+import type { VideoCoverageTrackingOptions } from "./videoCoverage.types";
 import type { CSSProperties, KeyboardEvent, SyntheticEvent } from "react";
 import type { VideoProvider } from "~/components/RichText/extensions/utils/video";
 
@@ -28,37 +28,11 @@ type Props = {
 export function Video({ src, url, provider, index = null, onEnded, coverageTracking }: Props) {
   const [isActive, setIsActive] = useState(false);
   const [aspectRatio, setAspectRatio] = useState(DEFAULT_VIDEO_ASPECT_RATIO);
-  const [coverage, setCoverage] = useState<VideoCoverageSnapshot | null>(() =>
-    coverageTracking?.enabled
-      ? {
-          coveragePercent: coverageTracking.initialCoveragePercent ?? 0,
-          watchedRanges: coverageTracking.initialWatchedRanges ?? [],
-          isWatched: Boolean(coverageTracking.initialIsWatched),
-          durationSeconds: coverageTracking.initialDurationSeconds ?? null,
-          bucketSizeSeconds: coverageTracking.initialBucketSizeSeconds ?? 1,
-        }
-      : null,
-  );
 
   const { data: thumbnailUrl } = useThumbnail(src, provider);
 
   const resolvedUrl = src ?? url ?? null;
   const resolvedProvider = provider ?? null;
-
-  useEffect(() => {
-    if (!coverageTracking?.enabled) {
-      setCoverage(null);
-      return;
-    }
-
-    setCoverage({
-      coveragePercent: coverageTracking.initialCoveragePercent ?? 0,
-      watchedRanges: coverageTracking.initialWatchedRanges ?? [],
-      isWatched: Boolean(coverageTracking.initialIsWatched),
-      durationSeconds: coverageTracking.initialDurationSeconds ?? null,
-      bucketSizeSeconds: coverageTracking.initialBucketSizeSeconds ?? 1,
-    });
-  }, [coverageTracking]);
 
   const handleActivate = useCallback(() => {
     if (!resolvedUrl) return;
@@ -96,9 +70,6 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
     [aspectRatio],
   );
   const isVerticalVideo = isVerticalVideoAspectRatio(aspectRatio);
-  const shouldShowCoverage = Boolean(coverageTracking?.enabled && coverage);
-  const coveragePercent = Math.round((coverage?.coveragePercent ?? 0) * 100);
-  const clampedCoveragePercent = Math.min(100, Math.max(0, coveragePercent));
   const wrapperStyle = useMemo(
     () =>
       ({
@@ -119,7 +90,6 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
               autoPlay
               onAspectRatioChange={setAspectRatio}
               onEnded={handleEnded}
-              onCoverageChange={setCoverage}
               coverageTracking={coverageTracking}
               className="size-full"
             />
@@ -150,29 +120,6 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
           </div>
         )}
       </div>
-      {shouldShowCoverage && (
-        <div
-          className="relative h-5 w-full overflow-hidden rounded-b bg-primary/20"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-valuenow={coveragePercent}
-        >
-          <div
-            className="h-full bg-primary transition-[width]"
-            style={{ width: `${clampedCoveragePercent}%` }}
-          />
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-semibold text-primary-950">
-            {coveragePercent}%
-          </span>
-          <span
-            className="absolute inset-0 flex items-center justify-center overflow-hidden text-xs font-semibold text-white"
-            style={{ clipPath: `inset(0 ${100 - clampedCoveragePercent}% 0 0)` }}
-          >
-            {coveragePercent}%
-          </span>
-        </div>
-      )}
     </div>
   );
 }

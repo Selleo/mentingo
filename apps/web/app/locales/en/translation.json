@@ -1957,7 +1957,7 @@
         "enableQuizFeedback": "Quiz feedback",
         "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
         "enableVideoCompletionTracking": "Video completion tracking",
-        "enableVideoCompletionTrackingDescription": "Require students to watch enough unique coverage of internal lesson videos before the video counts as completed.",
+        "enableVideoCompletionTrackingDescription": "Require learners to watch at least 90% of each video in a lesson before it is marked as completed.",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."

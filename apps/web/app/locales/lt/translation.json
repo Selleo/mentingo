@@ -1902,7 +1902,7 @@
         "enableQuizFeedback": "Atsiliepimai apie viktoriną",
         "enableQuizFeedbackDescription": "Pateikęs viktoriną, mokinys matys, kurie atsakymai buvo teisingi, neteisingi ar neatsakyti.",
         "enableVideoCompletionTracking": "Vaizdo įrašo užbaigimo sekimas",
-        "enableVideoCompletionTrackingDescription": "Reikalauti, kad mokiniai peržiūrėtų pakankamai unikalios vidinių pamokos vaizdo įrašų dalies, prieš laikant vaizdo įrašą užbaigtu.",
+        "enableVideoCompletionTrackingDescription": "Besimokantysis turi peržiūrėti bent 90 % kiekvieno pamokos vaizdo įrašo, kad pamoka būtų pažymėta kaip baigta.",
         "fallbackLanguageWarningTitle": "Pastaba: trūksta vertimų",
         "fallbackLanguageWarningDescription": "Kai kurie šios kalbos versijos laukai yra tušti. Tose vietose mokiniai matys turinį iš numatytosios kalbos, kol nepridėsite vertimų.",
         "baseLanguageTooltip": "Negalite pakeisti ar pašalinti šios kalbos. Tai yra numatytoji ir visada bus kurso dalis."

@@ -1896,7 +1896,7 @@
         "enableQuizFeedback": "Quiz-Feedback",
         "enableQuizFeedbackDescription": "Nach dem Absenden des Quiz sieht der Schüler, welche Antworten richtig, falsch oder unbeantwortet waren.",
         "enableVideoCompletionTracking": "Video-Abschlussverfolgung",
-        "enableVideoCompletionTrackingDescription": "Schüler müssen genügend eindeutige Abschnitte interner Lektionsvideos ansehen, bevor das Video als abgeschlossen zählt.",
+        "enableVideoCompletionTrackingDescription": "Lernende müssen mindestens 90% jedes Videos in einer Lektion ansehen, bevor sie als abgeschlossen markiert wird.",
         "fallbackLanguageWarningTitle": "Hinweis: fehlende Übersetzungen",
         "fallbackLanguageWarningDescription": "Einige Felder in dieser Sprachversion sind leer. An diesen Stellen sehen die Schüler Inhalte in der Standardsprache, bis Sie Übersetzungen hinzufügen.",
         "baseLanguageTooltip": "Sie können diese Sprache nicht ändern oder entfernen. Dies ist die Standardeinstellung und wird immer Teil des Kurses sein."

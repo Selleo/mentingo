@@ -2180,7 +2180,7 @@
         "enableQuizFeedback": "Feedback po quizie",
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
         "enableVideoCompletionTracking": "Śledzenie ukończenia wideo",
-        "enableVideoCompletionTrackingDescription": "Wymagaj od studentów obejrzenia wystarczającej unikalnej części wewnętrznych wideo w lekcji, zanim wideo zostanie uznane za ukończone.",
+        "enableVideoCompletionTrackingDescription": "Uczestnik musi obejrzeć co najmniej 90% każdego filmu w lekcji, aby lekcja została oznaczona jako ukończona.",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
