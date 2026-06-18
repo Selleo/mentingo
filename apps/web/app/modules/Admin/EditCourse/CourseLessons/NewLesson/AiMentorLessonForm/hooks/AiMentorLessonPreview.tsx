@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import { createPortal } from "react-dom";
 
-import { useLesson } from "~/api/queries";
+import { useCurrentUser, useLesson } from "~/api/queries";
 import { Button } from "~/components/ui/button";
 import AiMentorLesson from "~/modules/Courses/Lesson/AiMentorLesson/AiMentorLesson";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -15,7 +15,12 @@ interface AiMentorPreviewProps {
 
 const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
   const { language } = useLanguageStore();
-  const { data: lessonData, isFetching: lessonLoading } = useLesson(lesson.id, language);
+  const { data: currentUser } = useCurrentUser();
+  const { data: lessonData, isFetching: lessonLoading } = useLesson(
+    lesson.id,
+    language,
+    currentUser?.id || "",
+  );
 
   const modal = (
     <div className="fixed left-0 top-0 z-10 box-border flex size-full justify-center bg-gray-900/50 p-4">

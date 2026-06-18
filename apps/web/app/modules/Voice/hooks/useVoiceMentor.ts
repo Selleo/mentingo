@@ -34,6 +34,7 @@ type VoiceMentorProps = {
   onAudioInterrupted?: () => void;
   onSpeechChunkSent?: () => void;
   onAudioChunkReceived?: () => void;
+  onMentorAudioLevel?: (level: number) => void;
 };
 
 export function useVoiceMentor({
@@ -47,6 +48,7 @@ export function useVoiceMentor({
   onAudioInterrupted,
   onSpeechChunkSent,
   onAudioChunkReceived,
+  onMentorAudioLevel,
 }: VoiceMentorProps) {
   const streamerRef = useRef<RealtimePCMStreamerWorklet | null>(null);
   const audioPlayerRef = useRef<RealtimePCMPlayer | null>(null);
@@ -62,11 +64,13 @@ export function useVoiceMentor({
   const onAudioInterruptedRef = useRef(onAudioInterrupted);
   const onSpeechChunkSentRef = useRef(onSpeechChunkSent);
   const onAudioChunkReceivedRef = useRef(onAudioChunkReceived);
+  const onMentorAudioLevelRef = useRef(onMentorAudioLevel);
   const showErrorToastRef = useRef<(translationKey: string) => void>(() => undefined);
   const { t } = useTranslation();
   const { toast } = useToast();
 
   const [isRecording, setIsRecording] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
 
   useEffect(() => {
     onLevelChangeRef.current = onLevelChange;
@@ -105,6 +109,10 @@ export function useVoiceMentor({
   }, [onAudioChunkReceived]);
 
   useEffect(() => {
+    onMentorAudioLevelRef.current = onMentorAudioLevel;
+  }, [onMentorAudioLevel]);
+
+  useEffect(() => {
     showErrorToastRef.current = (translationKey: string) => {
       toast({
         variant: "destructive",
@@ -136,6 +144,7 @@ export function useVoiceMentor({
       clearInactivityTimer();
       clearTurnState();
       setIsRecording(false);
+      setIsMuted(false);
     }
   }, []);
 
@@ -181,7 +190,11 @@ export function useVoiceMentor({
       (level) => onLevelChangeRef.current(level),
       handleChunkSent,
     );
-    audioPlayerRef.current = new RealtimePCMPlayer({ sampleRate: 44100, channels: 1 });
+    audioPlayerRef.current = new RealtimePCMPlayer({
+      sampleRate: 44100,
+      channels: 1,
+      onLevelChange: (level) => onMentorAudioLevelRef.current?.(level),
+    });
     audioPlayerRef.current.setOnIdle(() => {
       finalizeTurnIfReady();
     });
@@ -241,6 +254,7 @@ export function useVoiceMentor({
       });
 
       setIsRecording(true);
+      setIsMuted(false);
       return true;
     } catch (error) {
       console.error("Failed to start voice mentor recording", error);
@@ -254,6 +268,7 @@ export function useVoiceMentor({
     try {
       await streamerRef.current.stop();
       setIsRecording(false);
+      setIsMuted(false);
       return true;
     } catch (error) {
       console.error("Failed to stop voice mentor recording", error);
@@ -289,11 +304,26 @@ export function useVoiceMentor({
     }
   };
 
+  const setVoiceMentorMuted = async (muted: boolean) => {
+    if (!isRecording || !streamerRef.current) return false;
+
+    try {
+      await streamerRef.current.setMuted(muted);
+      setIsMuted(muted);
+      return true;
+    } catch (error) {
+      console.error("Failed to toggle voice mentor mute", error);
+      return false;
+    }
+  };
+
   return {
     isRecording,
+    isMuted,
     startVoiceMentor,
     stopVoiceMentor,
     cancelVoiceMentor,
     triggerWelcomeMessage,
+    setVoiceMentorMuted,
   };
 }

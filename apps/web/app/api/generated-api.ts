@@ -1138,6 +1138,8 @@ export interface InitVideoUploadBody {
     | "question"
     | "news"
     | "articles"
+    | "learning_path"
+    | "qa"
     | "user"
     | "category"
     | "announcement"
@@ -2991,6 +2993,8 @@ export interface GetLessonByIdResponse {
       score: number | null;
       percentage: number | null;
       requiredScore: number | null;
+      passed: boolean | null;
+      summary: string | null;
     } | null;
     aiMentor?: {
       name: string;
@@ -3909,6 +3913,10 @@ export interface JudgeThreadResponse {
   data: {
     summary: string;
     passed: boolean;
+    minScore: number;
+    score: number;
+    maxScore: number;
+    percentage: number;
   };
 }
 

@@ -29,6 +29,8 @@ interface LessonFormProps {
   handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   setInput: Dispatch<SetStateAction<string>>;
   messages: Message[];
+  hasTaskDescription: boolean;
+  onOpenTaskDescription: () => void;
 }
 
 export const LessonForm = ({
@@ -44,12 +46,15 @@ export const LessonForm = ({
   handleInputChange,
   setInput,
   messages,
+  hasTaskDescription,
+  onOpenTaskDescription,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isVoiceMentorAudioStarted, setIsVoiceMentorAudioStarted] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
+  const [mentorVoiceLevel, setMentorVoiceLevel] = useState(0);
   const [latestTranscript, setLatestTranscript] = useState("");
   const [latestResponse, setLatestResponse] = useState("");
   const { data: lumaConfigured } = useLumaConfigured();
@@ -67,9 +72,11 @@ export const LessonForm = ({
   });
   const {
     isRecording: isVoiceMentorMode,
+    isMuted: isVoiceMentorMuted,
     startVoiceMentor,
     cancelVoiceMentor,
     triggerWelcomeMessage,
+    setVoiceMentorMuted,
   } = useVoiceMentor({
     lessonId,
     setInput,
@@ -100,6 +107,7 @@ export const LessonForm = ({
     onAudioChunkReceived: () => {
       voiceModeUI.onAudioChunkReceived();
     },
+    onMentorAudioLevel: setMentorVoiceLevel,
   });
 
   useEffect(() => {
@@ -158,6 +166,7 @@ export const LessonForm = ({
     await stopRecording();
     setIsVoiceMode(false);
     setVoiceLevel(0);
+    setMentorVoiceLevel(0);
     voiceModeUI.onMicCaptureStopped();
   };
 
@@ -165,6 +174,7 @@ export const LessonForm = ({
     await cancelTranscription();
     setIsVoiceMode(false);
     setVoiceLevel(0);
+    setMentorVoiceLevel(0);
     voiceModeUI.onMicCaptureStopped();
   };
 
@@ -178,6 +188,7 @@ export const LessonForm = ({
     }
     hasTriggeredWelcomeRef.current = false;
     setIsVoiceMentorAudioStarted(false);
+    setMentorVoiceLevel(0);
     setShowEmojiPicker(false);
     const started = await startVoiceMentor();
     if (!started) {
@@ -197,6 +208,7 @@ export const LessonForm = ({
 
     voiceModeUI.onMicCaptureStopped();
     setVoiceLevel(0);
+    setMentorVoiceLevel(0);
   };
 
   const closeVoiceOverlay = async () => {
@@ -211,7 +223,7 @@ export const LessonForm = ({
   };
 
   return (
-    <div className="mt-8 w-full relative">
+    <div className="relative mt-3 w-full">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -222,7 +234,7 @@ export const LessonForm = ({
           handleSubmit();
         }}
       >
-        <div className="flex w-full flex-col rounded-2xl border border-[#E4E6EB] bg-[#F5F6F7] px-6 py-4">
+        <div className="flex w-full flex-col rounded-lg border border-[#E4E6EB] bg-[#F5F6F7] px-4 py-3">
           <div>
             <LessonComposerCenterContent
               isVoiceMode={isVoiceMode}
@@ -235,7 +247,7 @@ export const LessonForm = ({
             />
           </div>
 
-          <div className="mt-2 flex items-center justify-between">
+          <div className="mt-2 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <LessonComposerLeftControl
                 isVoiceMode={isVoiceMode}
@@ -257,6 +269,9 @@ export const LessonForm = ({
               onSubmit={handleSubmit}
               sendLabel={t("studentCourseView.lesson.aiMentorLesson.send")}
               toggleVoiceInputLabel={t("studentCourseView.lesson.aiMentorLesson.toggleVoiceInput")}
+              dictateVoiceInputLabel={t(
+                "studentCourseView.lesson.aiMentorLesson.dictateVoiceInput",
+              )}
               startVoiceMentorLabel={t("studentCourseView.lesson.aiMentorLesson.startVoiceMentor")}
               stopVoiceRecordingLabel={t(
                 "studentCourseView.lesson.aiMentorLesson.stopVoiceRecording",
@@ -278,10 +293,15 @@ export const LessonForm = ({
         open={isVoiceMentorMode}
         state={voiceModeUI.voiceModeState}
         voiceLevel={voiceLevel}
+        mentorVoiceLevel={mentorVoiceLevel}
         transcript={latestTranscript}
         response={latestResponse}
         mentorName={mentorName}
         mentorAvatarUrl={mentorAvatarUrl}
+        hasTaskDescription={hasTaskDescription}
+        onOpenTaskDescription={onOpenTaskDescription}
+        isMicMuted={isVoiceMentorMuted}
+        onMicMutedChange={(muted) => void setVoiceMentorMuted(muted)}
         onExit={() => void closeVoiceOverlay()}
       />
     </div>

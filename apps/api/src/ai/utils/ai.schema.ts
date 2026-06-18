@@ -75,7 +75,7 @@ export const aiMentorLessonSchema = Type.Object({
 export const aiJudgeJudgementSchema = Type.Object({
   summary: Type.String({
     description:
-      "Supportive overview of what was done well, and how to improve — but NEVER mention grading rules, criteria, numbers, or conditions.",
+      "Supportive overview of what was done well and what to improve. It may reference learner-facing progress and improvement areas, but must not quote hidden/internal grading logic verbatim.",
   }),
   minScore: Type.Integer({
     description: "Minimum score required to pass implied from the lesson conditions",
@@ -104,6 +104,10 @@ export const threadOwnershipSchema = Type.Object({
 export const responseJudgeSchema = Type.Object({
   summary: Type.String(),
   passed: Type.Boolean(),
+  minScore: Type.Integer(),
+  score: Type.Integer(),
+  maxScore: Type.Integer(),
+  percentage: Type.Integer(),
 });
 
 export const streamChatSchema = Type.Object({

@@ -50,6 +50,7 @@ export class RealtimePCMStreamerWorklet {
   private preSpeechSamples: number[] = [];
   private isSpeaking = false;
   private hasActiveSpeechSegment = false;
+  private isMuted = false;
   private readonly onSocketConnect = () => {
     this.emitReadyChunks();
   };
@@ -59,6 +60,7 @@ export class RealtimePCMStreamerWorklet {
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.isMuted = false;
   };
 
   constructor(
@@ -110,7 +112,13 @@ export class RealtimePCMStreamerWorklet {
         },
         onFrameProcessed: (probabilities, frame) => {
           const level = Number(probabilities.isSpeech) || 0;
-          this.onLevelChange?.(Math.max(0, Math.min(1, level)));
+          this.onLevelChange?.(this.isMuted ? 0 : Math.max(0, Math.min(1, level)));
+
+          if (this.isMuted) {
+            this.pendingSamples = [];
+            this.preSpeechSamples = [];
+            return;
+          }
 
           const pcm16Frame = float32ToPcm16(frame);
           if (pcm16Frame.length > 0) {
@@ -135,6 +143,10 @@ export class RealtimePCMStreamerWorklet {
         },
         onSpeechStart: () => undefined,
         onSpeechRealStart: () => {
+          if (this.isMuted) {
+            return;
+          }
+
           this.isSpeaking = true;
           this.hasActiveSpeechSegment = true;
           if (this.preSpeechSamples.length > 0) {
@@ -146,7 +158,7 @@ export class RealtimePCMStreamerWorklet {
         onSpeechEnd: () => {
           this.isSpeaking = false;
           this.preSpeechSamples = [];
-          if (this.socket?.connected) {
+          if (!this.isMuted && this.socket?.connected) {
             this.emitSpeechEndBoundary();
           }
           this.hasActiveSpeechSegment = false;
@@ -203,6 +215,26 @@ export class RealtimePCMStreamerWorklet {
     return ackPayload;
   }
 
+  async setMuted(isMuted: boolean) {
+    this.isMuted = isMuted;
+    this.pendingSamples = [];
+    this.preSpeechSamples = [];
+    this.isSpeaking = false;
+    this.hasActiveSpeechSegment = false;
+    this.onLevelChange?.(0);
+
+    if (!this.micVad) {
+      return;
+    }
+
+    if (isMuted) {
+      await this.micVad.pause?.().catch(() => undefined);
+      return;
+    }
+
+    await this.micVad.start?.().catch(() => undefined);
+  }
+
   async cancel(): Promise<void> {
     const cancelEmit = this.protocol.buildCancelEmit();
 
@@ -224,6 +256,7 @@ export class RealtimePCMStreamerWorklet {
     this.preSpeechSamples = [];
     this.isSpeaking = false;
     this.hasActiveSpeechSegment = false;
+    this.isMuted = false;
 
     if (this.micVad) {
       await this.micVad.destroy().catch(() => undefined);
