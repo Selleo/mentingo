@@ -2024,6 +2024,17 @@
       "create": {
         "courseFailed": "Nie udało się utworzyć kursu.",
         "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "Instrukcje AI Mentora i warunki ukończenia są wymagane.",
+        "customTtsReferenceRequired": "Własny wzorzec TTS jest wymagany w trybie niestandardowym.",
+        "aiMentorCreateFailed": "Nie udało się utworzyć lekcji AI Mentora.",
+        "questionsRequired": "Wymagane jest co najmniej jedno pytanie.",
+        "quizCreateFailed": "Nie udało się utworzyć quizu.",
+        "optionUpdateFailed": "Nie udało się zaktualizować odpowiedzi quizu.",
+        "optionInsertFailed": "Nie udało się dodać odpowiedzi quizu.",
+        "embedCreateFailed": "Nie udało się utworzyć lekcji z osadzeniem.",
+        "signedUrlDownloadFailed": "Nie udało się pobrać pliku z podpisanego adresu URL."
       }
     },
     "thinking": {

@@ -1741,6 +1741,17 @@
       "create": {
         "courseFailed": "Kurs konnte nicht erstellt werden.",
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "AI-Mentor-Anweisungen und Abschlussbedingungen sind erforderlich.",
+        "customTtsReferenceRequired": "Eine eigene TTS-Referenz ist im benutzerdefinierten Modus erforderlich.",
+        "aiMentorCreateFailed": "AI-Mentor-Lektion konnte nicht erstellt werden.",
+        "questionsRequired": "Mindestens eine Frage ist erforderlich.",
+        "quizCreateFailed": "Quizlektion konnte nicht erstellt werden.",
+        "optionUpdateFailed": "Quizoption konnte nicht aktualisiert werden.",
+        "optionInsertFailed": "Quizoption konnte nicht hinzugefügt werden.",
+        "embedCreateFailed": "Einbettungslektion konnte nicht erstellt werden.",
+        "signedUrlDownloadFailed": "Die Datei konnte nicht von der signierten URL heruntergeladen werden."
       }
     },
     "thinking": {

@@ -1016,6 +1016,27 @@
       "when": 1781005825417,
       "tag": "0144_enable_luma_course_generation_syncs_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1781704492260,
+      "tag": "0145_add_search_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 146,
+      "version": "7",
+      "when": 1781704501470,
+      "tag": "0146_backfill_search_documents",
+      "breakpoints": true
+    },
+    {
+      "idx": 147,
+      "version": "7",
+      "when": 1781704515073,
+      "tag": "0147_enable_search_documents_rls",
+      "breakpoints": true
     }
   ]
 }

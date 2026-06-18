@@ -30,6 +30,8 @@ import {
 } from "src/events";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { learningPaths } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
@@ -76,6 +78,7 @@ export class LearningPathService {
     private readonly fileService: FileService,
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly learningPathExportService: LearningPathExportService,
+    private readonly searchIndexService: SearchIndexService,
   ) {}
 
   private assertPermission(currentUser: CurrentUserType, permission: PermissionKey) {
@@ -342,6 +345,8 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.CREATE_FAILED);
     }
 
+    await this.searchIndexService.refreshLearningPath(createdLearningPath.id);
+
     return this.ensureLocalizedLearningPathExists(createdLearningPath.id, body.language);
   }
 
@@ -559,6 +564,8 @@ export class LearningPathService {
       "update-learning-path",
     );
 
+    await this.searchIndexService.refreshLearningPath(learningPathId);
+
     return this.ensureLocalizedLearningPathExists(
       updatedLearningPath.id,
       language ?? updatedLearningPath.baseLanguage,
@@ -588,6 +595,8 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
     }
 
+    await this.searchIndexService.refreshLearningPath(learningPathId);
+
     return this.ensureLocalizedLearningPathExists(updatedLearningPath.id, language);
   }
 
@@ -614,6 +623,11 @@ export class LearningPathService {
     if (!deletedLearningPath) {
       throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
     }
+
+    await this.searchIndexService.deleteEntityDocuments({
+      entityType: SEARCH_ENTITY_TYPES.LEARNING_PATH,
+      entityId: learningPathId,
+    });
   }
 
   async addCoursesToLearningPath(

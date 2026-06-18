@@ -1802,6 +1802,17 @@
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "AI Mentor instructions and completion conditions are required.",
+        "customTtsReferenceRequired": "Custom TTS reference is required for custom voice mode.",
+        "aiMentorCreateFailed": "Failed to create AI Mentor lesson.",
+        "questionsRequired": "At least one question is required.",
+        "quizCreateFailed": "Failed to create quiz lesson.",
+        "optionUpdateFailed": "Failed to update quiz option.",
+        "optionInsertFailed": "Failed to add quiz option.",
+        "embedCreateFailed": "Failed to create embed lesson.",
+        "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
       }
     },
     "thinking": {
