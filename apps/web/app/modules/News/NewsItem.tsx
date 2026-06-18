@@ -31,12 +31,13 @@ function NewsItem({
 
   return (
     <button
+      type="button"
       data-testid={NEWS_PAGE_HANDLES.item(id)}
       className={cn(
-        "relative overflow-hidden rounded-lg py-7 px-6 flex flex-col justify-end min-h-[380px] group",
+        "relative flex w-full flex-col justify-end overflow-hidden rounded-lg px-6 py-7 min-h-[380px] group",
         className,
         {
-          "px-10 py-11 min-h-[550px]": isBig,
+          "px-10 py-11 md:aspect-video md:min-h-0": isBig,
         },
       )}
       onClick={() => navigate(`/news/${id}`)}
