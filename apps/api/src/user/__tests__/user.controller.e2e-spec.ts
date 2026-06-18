@@ -126,6 +126,27 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data.groups[0].id).toBe(updateData.id);
     });
 
+    it("should clear groups for user", async () => {
+      const group = await groupService.createGroup({
+        language: SUPPORTED_LANGUAGES.EN,
+        name: "Test group",
+      });
+
+      await request(app.getHttpServer())
+        .patch(`/api/user?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ groups: [group.id] })
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/user?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ groups: [] })
+        .expect(200);
+
+      expect(response.body.data.groups).toEqual([]);
+    });
+
     it("should update user", async () => {
       const updateData = { email: "newemail@example.com" };
 

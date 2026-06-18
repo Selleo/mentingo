@@ -457,9 +457,6 @@ export class GroupService {
   ): Promise<UserGroupAssignmentResult> {
     const requestedGroupIds = [...new Set(groupIds)];
 
-    if (!requestedGroupIds.length)
-      throw new BadRequestException("adminUsersView.toast.noGroupSelected");
-
     const userGroups = await trx
       .select({ tenantId: users.tenantId, groupId: groupUsers.groupId })
       .from(users)
@@ -470,13 +467,15 @@ export class GroupService {
 
     if (!user) throw new NotFoundException("adminUserView.error.userNotFound");
 
-    const existingGroups = await trx
-      .select({ id: groups.id })
-      .from(groups)
-      .where(inArray(groups.id, requestedGroupIds));
+    if (requestedGroupIds.length) {
+      const existingGroups = await trx
+        .select({ id: groups.id })
+        .from(groups)
+        .where(inArray(groups.id, requestedGroupIds));
 
-    if (existingGroups.length !== requestedGroupIds.length) {
-      throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
+      if (existingGroups.length !== requestedGroupIds.length) {
+        throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
+      }
     }
 
     const currentGroupIds = new Set(
