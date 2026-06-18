@@ -1,3 +1,11 @@
+import type {
+  LumaAssetRequestedEvent,
+  LumaChapterGeneratedEvent,
+  LumaCourseGeneratedEvent,
+  LumaCourseGenerationStreamEvent as SdkLumaCourseGenerationStreamEvent,
+  LumaLessonGeneratedEvent,
+} from "@japro/luma-sdk";
+
 export const COURSE_GENERATION_SYNC_SOCKET_EVENT = "luma-course-generation:sync-status-changed";
 
 export const COURSE_GENERATION_SYNC_STATUS = {
@@ -51,45 +59,15 @@ export type CourseGenerationCourseGeneratedFlagEvent = {
   course_generated: true;
 };
 
-export type CourseGenerationCourseGeneratedEvent = {
-  type: (typeof COURSE_GENERATION_STREAM_EVENT_TYPE)["COURSE_GENERATED"];
-  draftId: string;
-};
+export type CourseGenerationCourseGeneratedEvent = LumaCourseGeneratedEvent;
 
-export type CourseGenerationChapterGeneratedEvent = {
-  type: (typeof COURSE_GENERATION_STREAM_EVENT_TYPE)["DESIGNER_CHAPTER_GENERATED"];
-  generation: {
-    chapter_index: number;
-    title: string;
-    target_lesson_count: number;
-  };
-};
+export type CourseGenerationChapterGeneratedEvent = LumaChapterGeneratedEvent;
 
-export type CourseGenerationLessonGeneratedEvent = {
-  type: (typeof COURSE_GENERATION_STREAM_EVENT_TYPE)["ARCHITECT_LESSON_GENERATED"];
-  chapter_index: number;
-  lesson_index: number;
-  generation: {
-    lesson_type: "AI_MENTOR" | "CONTENT" | "QUIZ";
-    title: string;
-  };
-  relevant_context: string | null;
-};
+export type CourseGenerationLessonGeneratedEvent = LumaLessonGeneratedEvent;
 
-export type CourseGenerationAssetRequestedEvent = {
-  type: (typeof COURSE_GENERATION_STREAM_EVENT_TYPE)["ASSET_REQUESTED"];
-  draftId: string;
-  assetId: string;
-  chapterIndex?: number;
-  lessonIndex?: number;
-  provider?: string;
-  status?: string;
-};
+export type CourseGenerationAssetRequestedEvent = LumaAssetRequestedEvent;
 
 export type CourseGenerationStreamEvent =
   | CourseGenerationMessageKeyEvent
   | CourseGenerationCourseGeneratedFlagEvent
-  | CourseGenerationCourseGeneratedEvent
-  | CourseGenerationChapterGeneratedEvent
-  | CourseGenerationLessonGeneratedEvent
-  | CourseGenerationAssetRequestedEvent;
+  | SdkLumaCourseGenerationStreamEvent;
