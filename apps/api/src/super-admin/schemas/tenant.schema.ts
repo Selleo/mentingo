@@ -1,4 +1,4 @@
-import { TENANT_STATUSES } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, TENANT_STATUSES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -36,7 +36,7 @@ export const createTenantSchema = Type.Object(
     adminEmail: Type.String({ format: "email" }),
     adminFirstName: Type.String({ minLength: 1 }),
     adminLastName: Type.String({ minLength: 1 }),
-    adminLanguage: Type.Optional(Type.String()),
+    adminLanguage: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
   },
   { additionalProperties: false },
 );

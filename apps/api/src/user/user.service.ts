@@ -37,6 +37,7 @@ import {
 import { alias } from "drizzle-orm/pg-core";
 import { isEqual } from "lodash";
 import { nanoid } from "nanoid";
+import { match } from "ts-pattern";
 
 import { CreatePasswordService } from "src/auth/create-password.service";
 import { hashToken } from "src/auth/utils/hash-auth-token";
@@ -62,7 +63,11 @@ import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
-import { importUserSchema } from "src/user/schemas/createUser.schema";
+import {
+  USER_CREATION_FLOW_TYPE,
+  type CreateUserContext,
+  type CreateUserCoreResult,
+} from "src/user/user.types";
 import { WsGateway } from "src/websocket/websocket.gateway";
 
 import {
@@ -104,9 +109,9 @@ import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
-import type { CreateUserBody, ImportUserResponse } from "src/user/schemas/createUser.schema";
+import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 import type { AdminOverdueCourseNotificationRecipient } from "src/user/types/admin-overdue-course-notification-recipient.type";
-import type { CreateUserOptions, CreateUserTransactionResult } from "src/user/user.types";
+import type { CreateUserSettingsResolution } from "src/user/types/create-user-settings-resolution.type";
 
 @Injectable()
 export class UserService {
@@ -684,78 +689,85 @@ export class UserService {
   public async createUser(
     data: CreateUserBody,
     dbInstance?: DatabasePg,
-    creator?: CurrentUserType,
-    options?: CreateUserOptions,
+    context: CreateUserContext = { flowType: USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER },
   ) {
-    const db = dbInstance ?? this.db;
+    const createUser = async (trx: DatabasePg) => {
+      await this.assertUserEmailAvailable(data.email);
 
-    await this.assertUserEmailAvailable(data.email);
-
-    const { createdUser, token, newUsersLanguage } = await this.createUserTransaction(
-      db,
-      data,
-      creator,
-      options,
-    );
-
-    if (options?.registration) return createdUser;
-
-    if (creator) {
-      if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
-
-      const snapshot = await this.buildUserActivitySnapshot(createdUser.id);
-
-      await this.outboxPublisher.publish(
-        new CreateUserEvent({
-          userId: createdUser.id,
-          actor: creator,
-          createdUserData: snapshot,
-        }),
+      const { createdUser, token, newUsersLanguage } = await this.createUserCore(
+        trx,
+        data,
+        context,
       );
 
-      await this.outboxPublisher.publish(
-        new UserInviteEvent({
-          creatorId: creator.userId,
-          email: createdUser.email,
-          token,
-          userId: createdUser.id,
-          tenantId: createdUser.tenantId,
-        }),
-      );
+      return await match(context)
+        .with({ flowType: USER_CREATION_FLOW_TYPE.REGISTRATION }, () => createdUser)
+        .with({ flowType: USER_CREATION_FLOW_TYPE.ADMIN }, async (adminContext) => {
+          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
 
-      return createdUser;
-    }
+          const snapshot = await this.buildUserActivitySnapshot(createdUser.id, trx);
 
-    if (options?.invite) {
-      if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
+          await this.outboxPublisher.publish(
+            new CreateUserEvent({
+              userId: createdUser.id,
+              actor: adminContext.creator,
+              createdUserData: snapshot,
+            }),
+            trx,
+          );
 
-      await this.outboxPublisher.publish(
-        new UserInviteEvent({
-          email: createdUser.email,
-          token,
-          userId: createdUser.id,
-          tenantId: createdUser.tenantId,
-          invitedByUserName: options.invite.invitedByUserName,
-          origin: options.invite.origin,
-        }),
-      );
+          await this.outboxPublisher.publish(
+            new UserInviteEvent({
+              creatorId: adminContext.creator.userId,
+              email: createdUser.email,
+              token,
+              userId: createdUser.id,
+              tenantId: createdUser.tenantId,
+            }),
+            trx,
+          );
 
-      return createdUser;
-    }
+          return createdUser;
+        })
+        .with({ flowType: USER_CREATION_FLOW_TYPE.INVITE }, async (inviteContext) => {
+          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
 
-    if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
+          await this.outboxPublisher.publish(
+            new UserInviteEvent({
+              email: createdUser.email,
+              token,
+              userId: createdUser.id,
+              tenantId: createdUser.tenantId,
+              invitedByUserName: inviteContext.invitedByUserName,
+              origin: inviteContext.origin,
+            }),
+            trx,
+          );
 
-    await this.outboxPublisher.publish(
-      new UserPasswordReminderEvent({
-        email: createdUser.email,
-        token,
-        userId: createdUser.id,
-        tenantId: createdUser.tenantId,
-        language: newUsersLanguage,
-      }),
-    );
+          return createdUser;
+        })
+        .with({ flowType: USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER }, async () => {
+          if (!token) throw new InternalServerErrorException("common.toast.somethingWentWrong");
 
-    return createdUser;
+          await this.outboxPublisher.publish(
+            new UserPasswordReminderEvent({
+              email: createdUser.email,
+              token,
+              userId: createdUser.id,
+              tenantId: createdUser.tenantId,
+              language: newUsersLanguage,
+            }),
+            trx,
+          );
+
+          return createdUser;
+        })
+        .exhaustive();
+    };
+
+    if (dbInstance) return await createUser(dbInstance);
+
+    return await this.db.transaction(createUser);
   }
 
   private async assertUserEmailAvailable(email: string) {
@@ -768,92 +780,113 @@ export class UserService {
     if (existingUser) throw new ConflictException("registerView.toast.userAlreadyExists");
   }
 
-  private async createUserTransaction(
-    db: DatabasePg,
+  private async createUserCore(
+    trx: DatabasePg,
     data: CreateUserBody,
-    creator?: CurrentUserType,
-    options?: CreateUserOptions,
-  ): Promise<CreateUserTransactionResult> {
-    return db.transaction(async (trx) => {
-      const { roleSlugs, ...userData } = data;
-      const [createdUser] = await trx.insert(users).values(userData).returning();
+    context: CreateUserContext,
+  ): Promise<CreateUserCoreResult> {
+    const { roleSlugs, ...userData } = data;
+    const [createdUser] = await trx.insert(users).values(userData).returning();
 
-      await this.replaceUserRoleAssignments(createdUser.id, createdUser.tenantId, roleSlugs, trx);
+    if (!createdUser) throw new InternalServerErrorException("common.toast.somethingWentWrong");
 
-      await trx.insert(userOnboarding).values({ userId: createdUser.id });
+    await this.insertUserRoleAssignmentsForNewUser(
+      [{ userId: createdUser.id, tenantId: createdUser.tenantId, roleSlugs }],
+      trx,
+    );
 
-      let newUsersLanguage: SupportedLanguages = SUPPORTED_LANGUAGES.EN;
+    await trx.insert(userOnboarding).values({ userId: createdUser.id });
 
-      if (creator) {
-        const creatorSettings = await this.settingsService.getUserSettings(
-          creator.userId,
-          this.dbAdmin,
-        );
+    const { newUsersLanguage, settingsOverride } = await this.resolveCreateUserSettings(
+      data,
+      context,
+      trx,
+    );
 
-        newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
-          data.language as SupportedLanguages,
-        )
-          ? (data.language as SupportedLanguages)
-          : (creatorSettings.language as SupportedLanguages);
-      }
+    await this.settingsService.createSettingsIfNotExists(
+      createdUser.id,
+      roleSlugs,
+      settingsOverride,
+      trx,
+    );
 
-      if (options?.registration) {
-        newUsersLanguage = Object.values(SUPPORTED_LANGUAGES).includes(
-          data.language as SupportedLanguages,
-        )
-          ? (data.language as SupportedLanguages)
-          : SUPPORTED_LANGUAGES.EN;
-      }
-
-      const settingsOverride =
-        creator || options?.registration ? { language: newUsersLanguage } : undefined;
-
-      await this.settingsService.createSettingsIfNotExists(
-        createdUser.id,
-        roleSlugs,
-        settingsOverride,
-        trx,
-      );
-
-      if (options?.registration) {
-        await trx.insert(credentials).values({
-          userId: createdUser.id,
-          password: options.registration.hashedPassword,
-        });
-
-        return { createdUser, newUsersLanguage };
-      }
-
-      const token = nanoid(64);
-      const hashedCreateToken = hashToken(token);
-      const expiryDate = new Date();
-      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
-
-      await trx.insert(createTokens).values({
+    if (context.flowType === USER_CREATION_FLOW_TYPE.REGISTRATION) {
+      await trx.insert(credentials).values({
         userId: createdUser.id,
-        tokenHash: hashedCreateToken,
-        expiryDate,
-        reminderCount: 0,
+        password: context.hashedPassword,
       });
 
-      const rolePermissions = await this.getPermissionsForRoleSlugs(
-        roleSlugs,
-        createdUser.tenantId,
-        trx,
-      );
-      const canManageContent =
-        rolePermissions.includes(PERMISSIONS.COURSE_UPDATE) ||
-        rolePermissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
-      const canManageTenant = rolePermissions.includes(PERMISSIONS.TENANT_MANAGE);
+      return { createdUser, newUsersLanguage };
+    }
 
-      if (canManageContent || canManageTenant) {
-        await trx
-          .insert(userDetails)
-          .values({ userId: createdUser.id, contactEmail: createdUser.email });
-      }
+    const token = await this.createUserPasswordToken(createdUser.id, trx);
 
-      return { createdUser, token, newUsersLanguage };
+    const rolePermissions = await this.getPermissionsForRoleSlugs(
+      roleSlugs,
+      createdUser.tenantId,
+      trx,
+    );
+
+    const canManageContent =
+      rolePermissions.includes(PERMISSIONS.COURSE_UPDATE) ||
+      rolePermissions.includes(PERMISSIONS.COURSE_UPDATE_OWN);
+
+    const canManageTenant = rolePermissions.includes(PERMISSIONS.TENANT_MANAGE);
+
+    if (canManageContent || canManageTenant) {
+      await trx
+        .insert(userDetails)
+        .values({ userId: createdUser.id, contactEmail: createdUser.email });
+    }
+
+    return { createdUser, token, newUsersLanguage };
+  }
+
+  private async createUserPasswordToken(userId: UUIDType, trx: DatabasePg) {
+    const token = nanoid(64);
+
+    const hashedCreateToken = hashToken(token);
+
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
+    await trx.insert(createTokens).values({
+      userId,
+      tokenHash: hashedCreateToken,
+      expiryDate,
+      reminderCount: 0,
     });
+
+    return token;
+  }
+
+  private async resolveCreateUserSettings(
+    data: CreateUserBody,
+    context: CreateUserContext,
+    trx: DatabasePg,
+  ): Promise<CreateUserSettingsResolution> {
+    const newUsersLanguage = await match(context)
+      .with({ flowType: USER_CREATION_FLOW_TYPE.ADMIN }, async (adminContext) => {
+        if (data.language) return data.language;
+
+        const creatorSettings = await this.settingsService.getUserSettings(
+          adminContext.creator.userId,
+          trx,
+        );
+
+        return creatorSettings.language;
+      })
+      .otherwise(() => data.language ?? SUPPORTED_LANGUAGES.EN);
+
+    const settingsOverride = match(context)
+      .with(
+        { flowType: USER_CREATION_FLOW_TYPE.ADMIN },
+        { flowType: USER_CREATION_FLOW_TYPE.REGISTRATION },
+        () => ({ language: newUsersLanguage }),
+      )
+      .otherwise(() => undefined);
+
+    return { newUsersLanguage, settingsOverride };
   }
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
@@ -944,75 +977,6 @@ export class UserService {
       );
 
     return adminsWithSettings;
-  }
-
-  async importUsers(usersDataFile: Express.Multer.File, creator: CurrentUserType) {
-    const importStats: ImportUserResponse = {
-      importedUsersAmount: 0,
-      skippedUsersAmount: 0,
-      importedUsersList: [],
-      skippedUsersList: [],
-    };
-
-    const usersData = await this.fileService.parseExcelFile<typeof importUserSchema>(
-      usersDataFile,
-      importUserSchema,
-    );
-
-    for (const userData of usersData) {
-      const [existingUser] = await this.dbAdmin
-        .select({ email: users.email })
-        .from(users)
-        .where(eq(users.email, userData.email))
-        .limit(1);
-
-      if (existingUser) {
-        importStats.skippedUsersAmount++;
-        importStats.skippedUsersList.push({
-          email: userData.email,
-          reason: "files.import.userFailReason.alreadyExists",
-        });
-        continue;
-      }
-
-      await this.db.transaction(async (trx) => {
-        const { groups: groupNames, ...userInfo } = userData;
-
-        const createdUser = await this.createUser({ ...userInfo }, trx, creator);
-
-        importStats.importedUsersAmount++;
-        importStats.importedUsersList.push(userData.email);
-
-        if (!groupNames?.length) return;
-
-        const existingGroups = await trx
-          .select()
-          .from(groups)
-          .where(
-            inArray(
-              this.localizationService.getLocalizedSqlField(
-                groups.name,
-                SUPPORTED_LANGUAGES.EN,
-                groups,
-              ),
-              groupNames,
-            ),
-          );
-
-        if (!existingGroups.length) return;
-
-        await this.groupService.setUserGroups(
-          existingGroups.map((group) => group.id),
-          createdUser.id,
-          {
-            db: trx,
-            actor: creator,
-          },
-        );
-      });
-    }
-
-    return importStats;
   }
 
   public async bulkArchiveUsers(userIds: UUIDType[]) {
@@ -1365,7 +1329,52 @@ export class UserService {
     );
   }
 
-  private async assertTrainerRoleAvailable(tenantId: UUIDType, roleSlugs: string[]): Promise<void> {
+  private async insertUserRoleAssignmentsForNewUser(
+    assignments: Array<{
+      userId: UUIDType;
+      tenantId: UUIDType;
+      roleSlugs: string[];
+    }>,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    if (!assignments.length) return;
+
+    const [{ userId, tenantId, roleSlugs }] = assignments;
+
+    await this.ensureSystemRolesForTenant(tenantId, dbInstance);
+
+    const uniqueRoleSlugs = [...new Set(roleSlugs)];
+
+    if (!uniqueRoleSlugs.length) {
+      throw new BadRequestException("adminUsersView.toast.userMustHaveAtLeastOneRole");
+    }
+
+    await this.assertTrainerRoleAvailable(tenantId, uniqueRoleSlugs);
+
+    const roles = await dbInstance
+      .select({
+        id: permissionRoles.id,
+        slug: permissionRoles.slug,
+      })
+      .from(permissionRoles)
+      .where(
+        and(eq(permissionRoles.tenantId, tenantId), inArray(permissionRoles.slug, uniqueRoleSlugs)),
+      );
+
+    if (roles.length !== uniqueRoleSlugs.length) {
+      throw new BadRequestException("adminUsersView.toast.invalidRole");
+    }
+
+    await dbInstance.insert(permissionUserRoles).values(
+      roles.map((role) => ({
+        userId,
+        roleId: role.id,
+        tenantId,
+      })),
+    );
+  }
+
+  public async assertTrainerRoleAvailable(tenantId: UUIDType, roleSlugs: string[]): Promise<void> {
     if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.TRAINER)) return;
 
     const isLiveTrainingEnabled =
@@ -1376,7 +1385,7 @@ export class UserService {
     throw new BadRequestException("adminUsersView.toast.trainerRoleRequiresLiveTraining");
   }
 
-  private async ensureSystemRolesForTenant(
+  public async ensureSystemRolesForTenant(
     tenantId: UUIDType,
     dbInstance: DatabasePg = this.db,
   ): Promise<void> {
@@ -1460,7 +1469,7 @@ export class UserService {
     }
   }
 
-  private async getPermissionsForRoleSlugs(
+  public async getPermissionsForRoleSlugs(
     roleSlugs: string[],
     tenantId: UUIDType,
     dbInstance: DatabasePg = this.db,

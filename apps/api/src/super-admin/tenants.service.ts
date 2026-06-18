@@ -13,6 +13,7 @@ import { DEFAULT_GLOBAL_SETTINGS } from "src/settings/constants/settings.constan
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { settings } from "src/storage/schema";
 import { UserService } from "src/user/user.service";
+import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 import { invalidateCorsCache } from "src/utils/cors";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -102,13 +103,11 @@ export class TenantsService {
           roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
           language: input.adminLanguage,
         },
-        this.db,
         undefined,
         {
-          invite: {
-            invitedByUserName,
-            origin: createdTenant.host,
-          },
+          flowType: USER_CREATION_FLOW_TYPE.INVITE,
+          invitedByUserName,
+          origin: createdTenant.host,
         },
       );
     });

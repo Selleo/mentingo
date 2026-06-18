@@ -1,3 +1,4 @@
+import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { CommonUser } from "src/common/schemas/common-user.schema";
 import type { UserLoginMethod } from "src/events/user/user-login.event";
@@ -11,7 +12,7 @@ export type RegisterUserWithHashedPasswordInput = {
   email: string;
   firstName: string;
   lastName: string;
-  language: string;
+  language: SupportedLanguages;
   hashedPassword: string;
 };
 

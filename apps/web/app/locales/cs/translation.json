@@ -1318,6 +1318,7 @@
     "toast": {
       "cannotUpdateOwnRole": "Správce nemůže změnit svou vlastní roli",
       "noUserSelected": "Nebyl vybrán žádný uživatel",
+      "noGroupSelected": "Vyberte alespoň jednu skupinu.",
       "userMustHaveAtLeastOneRole": "Uživatel musí mít alespoň jednu roli.",
       "trainerRoleRequiresLiveTraining": "Role Trenér je dostupná pouze při zapnutém Live Training."
     },
@@ -1461,6 +1462,11 @@
       "tabs": {
         "imported": "Importováno",
         "skipped": "Přeskočeno"
+      },
+      "importResult": {
+        "email": "E-mail",
+        "processed": "Zpracováno {{count}} řádků",
+        "reason": "Důvod"
       }
     },
     "breadcrumbs": {
@@ -3210,10 +3216,15 @@
       "noFileUploaded": "Nebyl nahrán žádný soubor",
       "invalidFileData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Soubor je prázdný",
+      "noValidUsers": "Import se nezdařil – nebyli nalezeni žádní platní uživatelé.",
       "requiredDataMissing": "Import se nezdařil – chybí požadovaná data.",
       "invalidFileType": "Neplatný typ souboru. Nahrajte prosím platný soubor.",
       "userFailReason": {
-        "alreadyExists": "uživatel s tímto e-mailem již existuje"
+        "alreadyExists": "Uživatel s tímto e-mailem již existuje",
+        "duplicateEmail": "Duplicitní e-mail v importním souboru",
+        "invalidRole": "Neplatná role",
+        "trainerRoleUnavailable": "Role školitele vyžaduje povolená živá školení",
+        "unknownGroup": "Neznámá skupina"
       }
     }
   },
@@ -3597,6 +3608,7 @@
       "unenroll_course": "Odregistrováno",
       "start_course": "Spuštěno",
       "group_assignment": "Přiřazeno",
+      "users_import": "Uživatelé importováni",
       "complete_lesson": "Dokončeno",
       "complete_course": "Dokončeno",
       "complete_chapter": "Dokončeno",

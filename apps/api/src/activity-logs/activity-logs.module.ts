@@ -19,6 +19,7 @@ import { LiveTrainingActivityHandler } from "./handlers/live-training-activity.h
 import { NewsActivityHandler } from "./handlers/news-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 import { UserActivityHandler } from "./handlers/user-activity.handler";
+import { UsersImportActivityHandler } from "./handlers/users-import-activity.handler";
 import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
 @Global()
@@ -35,6 +36,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     CategoryActivityHandler,
     SettingsActivityHandler,
     UserActivityHandler,
+    UsersImportActivityHandler,
     EnvActivityHandler,
     AuthActivityHandler,
     LiveTrainingActivityHandler,

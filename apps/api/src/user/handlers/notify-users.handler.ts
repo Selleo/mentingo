@@ -17,6 +17,7 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseService } from "src/courses/course.service";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
@@ -27,6 +28,7 @@ import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.e
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
+import { UsersImportInviteEmailsEvent } from "src/events/user/users-import-invite-emails.event";
 import { SettingsService } from "src/settings/settings.service";
 import { StatisticsService } from "src/statistics/statistics.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -43,6 +45,7 @@ type EventType =
   | UserPasswordReminderEvent
   | UserWelcomeEvent
   | UsersAssignedToCourseEvent
+  | UsersImportInviteEmailsEvent
   | UsersShortInactivityEvent
   | UsersLongInactivityEvent
   | UserChapterFinishedEvent
@@ -54,11 +57,14 @@ const UserNotificationEvents = [
   UserPasswordReminderEvent,
   UserWelcomeEvent,
   UsersAssignedToCourseEvent,
+  UsersImportInviteEmailsEvent,
   UsersShortInactivityEvent,
   UsersLongInactivityEvent,
   UserChapterFinishedEvent,
   UserCourseFinishedEvent,
 ] as const;
+
+const USERS_IMPORT_INVITE_EMAIL_CONCURRENCY = 5;
 
 const eventTriggerMap: Record<string, keyof UserEmailTriggersSchema> = {
   UserFirstLoginEvent: "userFirstLogin",
@@ -86,6 +92,11 @@ export class NotifyUsersHandler implements IEventHandler {
 
     if (event instanceof UserInviteEvent) {
       await this.notifyUserAboutInvite(event);
+      return;
+    }
+
+    if (event instanceof UsersImportInviteEmailsEvent) {
+      await this.notifyUsersAboutImportInvites(event);
       return;
     }
 
@@ -165,6 +176,30 @@ export class NotifyUsersHandler implements IEventHandler {
         { tenantId },
       );
     });
+  }
+
+  async notifyUsersAboutImportInvites(event: UsersImportInviteEmailsEvent) {
+    const { tenantId, creatorId, origin, invitedByUserName, recipients } =
+      event.usersImportInviteEmails;
+
+    await processInBatches(
+      recipients,
+      ({ email, userId, token }) =>
+        this.notifyUserAboutInvite(
+          new UserInviteEvent({
+            creatorId,
+            email,
+            token,
+            userId,
+            tenantId,
+            invitedByUserName,
+            origin,
+          }),
+        ),
+      {
+        batchSize: USERS_IMPORT_INVITE_EMAIL_CONCURRENCY,
+      },
+    );
   }
 
   async notifyUserAboutFirstLogin(event: UserFirstLoginEvent) {

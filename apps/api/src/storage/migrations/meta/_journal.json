@@ -1016,6 +1016,13 @@
       "when": 1781005825417,
       "tag": "0144_enable_luma_course_generation_syncs_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 145,
+      "version": "7",
+      "when": 1781769894620,
+      "tag": "0145_add_users_import_activity_action",
+      "breakpoints": true
     }
   ]
 }

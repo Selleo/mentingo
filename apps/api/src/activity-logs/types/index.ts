@@ -13,6 +13,7 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   UNENROLL_COURSE: "unenroll_course",
   START_COURSE: "start_course",
   GROUP_ASSIGNMENT: "group_assignment",
+  USERS_IMPORT: "users_import",
   COMPLETE_LESSON: "complete_lesson",
   COMPLETE_COURSE: "complete_course",
   COMPLETE_CHAPTER: "complete_chapter",

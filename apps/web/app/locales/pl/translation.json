@@ -1535,6 +1535,7 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator nie może zmienić własnej roli",
       "noUserSelected": "Nie wybrano żadnego użytkownika",
+      "noGroupSelected": "Wybierz co najmniej jedną grupę.",
       "userMustHaveAtLeastOneRole": "Użytkownik musi mieć co najmniej jedną rolę.",
       "trainerRoleRequiresLiveTraining": "Rola Trener jest dostępna tylko wtedy, gdy szkolenia na żywo są włączone."
     },
@@ -1739,6 +1740,11 @@
       "tabs": {
         "imported": "Zaimportowani użytkownicy",
         "skipped": "Pominięci użytkownicy"
+      },
+      "importResult": {
+        "email": "E-mail",
+        "processed": "Przetworzono {{count}} wierszy",
+        "reason": "Powód"
       }
     },
     "breadcrumbs": {
@@ -3547,10 +3553,15 @@
       "noFileUploaded": "Nie przesłano pliku",
       "invalidFileData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Przesłany plik jest pusty",
+      "noValidUsers": "Import nie powiódł się – nie znaleziono poprawnych użytkowników.",
       "requiredDataMissing": "Import nie powiódł się – brak wymaganych danych w pliku.",
       "invalidFileType": "Nieprawidłowy typ pliku. Wybierz poprawny plik",
       "userFailReason": {
-        "alreadyExists": "użytkownik o tym adresie e-mail już istnieje"
+        "alreadyExists": "Użytkownik o tym adresie e-mail już istnieje",
+        "duplicateEmail": "Zduplikowany adres e-mail w pliku importu",
+        "invalidRole": "Nieprawidłowa rola",
+        "trainerRoleUnavailable": "Rola trenera wymaga włączenia szkoleń na żywo",
+        "unknownGroup": "Nieznana grupa"
       }
     }
   },
@@ -4311,6 +4322,7 @@
       "unenroll_course": "Wypisano",
       "start_course": "Rozpoczęto",
       "group_assignment": "Przypisano",
+      "users_import": "Zaimportowano użytkowników",
       "complete_lesson": "Ukończono",
       "complete_course": "Ukończono",
       "complete_chapter": "Ukończono",

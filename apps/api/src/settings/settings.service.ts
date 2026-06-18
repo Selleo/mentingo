@@ -87,6 +87,10 @@ import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
+import type {
+  CreateSettingsForUsersGroup,
+  CreateSettingsForUsersItem,
+} from "src/settings/types/create-settings-for-users.types";
 
 const STATIC_SETTINGS_IMAGE_CACHE_CONTROL = "public, max-age=86400";
 const GLOBAL_SETTINGS_NOT_FOUND_MESSAGE = "common.toast.globalSettingsNotFound";
@@ -531,6 +535,62 @@ export class SettingsService {
       .returning({ settings: sql<SettingsJSONContentSchema>`${settings.settings}` });
 
     return createdSettings;
+  }
+
+  public async createSettingsForUsers(
+    userSettings: CreateSettingsForUsersItem[],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<void> {
+    if (!userSettings.length) return;
+
+    const settingsGroups = new Map<string, CreateSettingsForUsersGroup>();
+
+    for (const userSetting of userSettings) {
+      const uniqueRoleSlugs = [...new Set(userSetting.roleSlugs)].sort();
+
+      const key = JSON.stringify({
+        roleSlugs: uniqueRoleSlugs,
+        customSettings: userSetting.customSettings ?? {},
+      });
+
+      const settingsGroup = settingsGroups.get(key);
+
+      if (settingsGroup) {
+        settingsGroup.userIds.push(userSetting.userId);
+        continue;
+      }
+
+      settingsGroups.set(key, {
+        roleSlugs: uniqueRoleSlugs,
+        customSettings: userSetting.customSettings,
+        userIds: [userSetting.userId],
+      });
+    }
+
+    const settingsRows = [];
+
+    for (const settingsGroup of settingsGroups.values()) {
+      const resolvedPermissions = await this.resolvePermissionsForRoleSlugs(
+        settingsGroup.roleSlugs,
+        dbInstance,
+      );
+
+      const defaultSettings = this.getDefaultSettingsForPermissions(resolvedPermissions);
+
+      const finalSettings = {
+        ...defaultSettings,
+        ...settingsGroup.customSettings,
+      };
+
+      settingsRows.push(
+        ...settingsGroup.userIds.map((userId) => ({
+          userId,
+          settings: settingsToJSONBuildObject(finalSettings),
+        })),
+      );
+    }
+
+    await dbInstance.insert(settings).values(settingsRows);
   }
 
   public async getUserSettings(

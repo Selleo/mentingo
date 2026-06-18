@@ -1313,6 +1313,7 @@
     "toast": {
       "cannotUpdateOwnRole": "Administrator cannot change their own role",
       "noUserSelected": "No user selected",
+      "noGroupSelected": "Select at least one group.",
       "userMustHaveAtLeastOneRole": "User must have at least one role.",
       "trainerRoleRequiresLiveTraining": "The Trainer role is available only when Live Training is enabled."
     },
@@ -1516,6 +1517,11 @@
       "tabs": {
         "imported": "Imported",
         "skipped": "Skipped"
+      },
+      "importResult": {
+        "email": "Email",
+        "processed": "{{count}} rows processed",
+        "reason": "Reason"
       }
     },
     "breadcrumbs": {
@@ -3282,10 +3288,15 @@
       "noFileUploaded": "No file uploaded",
       "invalidFileData": "File upload failed - invalid file data",
       "fileEmpty": "File is empty",
+      "noValidUsers": "Import failed – no valid users found.",
       "requiredDataMissing": "Import failed – required data missing.",
       "invalidFileType": "Invalid file type. Please upload a valid file.",
       "userFailReason": {
-        "alreadyExists": "user with this email already exists"
+        "alreadyExists": "User with this email already exists",
+        "duplicateEmail": "Duplicate email in import file",
+        "invalidRole": "Invalid role",
+        "trainerRoleUnavailable": "Trainer role requires live training to be enabled",
+        "unknownGroup": "Unknown group"
       }
     }
   },
@@ -4272,6 +4283,7 @@
       "unenroll_course": "Unenrolled",
       "start_course": "Started",
       "group_assignment": "Assigned",
+      "users_import": "Users imported",
       "complete_lesson": "Completed",
       "complete_course": "Completed",
       "complete_chapter": "Completed",
