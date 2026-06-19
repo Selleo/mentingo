@@ -520,6 +520,7 @@ export class CertificatesService implements OnModuleDestroy {
       studentName: certificate.fullName || "",
       courseName: certificate.courseTitle || "",
       completionDate: this.formatDate(certificateDate || null),
+      expiryDate: this.formatDate(certificate.expiresAt || null),
       platformLogoUrl: platformLogoImageUrl,
       signatureImageUrl: certificateSignatureImageUrl,
       backgroundImageUrl,
@@ -833,6 +834,7 @@ export class CertificatesService implements OnModuleDestroy {
       studentName: context.certificate.fullName || "",
       courseName: context.certificate.courseTitle || "",
       completionDate: context.formattedDate,
+      expiryDate: this.formatDate(context.certificate.expiresAt || null),
       platformLogoUrl: context.settings.platformLogoS3Key,
       signatureImageUrl: context.certificateSignatureUrl,
       backgroundImageUrl: context.settings.certificateBackgroundImage,
@@ -903,7 +905,7 @@ export class CertificatesService implements OnModuleDestroy {
     certificateId: UUIDType,
     language: SupportedLanguages,
   ): string {
-    return `${tenantId}/certificate-share/${certificateId}/${language}.png`;
+    return `${tenantId}/certificate-share/v2/${certificateId}/${language}.png`;
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {

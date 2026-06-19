@@ -149,10 +149,12 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
   const [certificatePreview, setCertificatePreview] = useState<{
     isOpen: boolean;
     completionDate: string;
+    expiryDate?: string;
     certData?: CertificateType;
   }>({
     isOpen: false,
     completionDate: "",
+    expiryDate: undefined,
     certData: undefined,
   });
   const formatedDate = useMemo(() => {
@@ -172,6 +174,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
 
   const handleOpenCertificatePreview = (data: {
     completionDate: string;
+    expiryDate?: string;
     certData?: CertificateType;
   }) => {
     setCertificatePreview({
@@ -221,6 +224,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
               studentName={certificatePreview.certData?.fullName || ""}
               courseName={certificatePreview.certData?.courseTitle || ""}
               completionDate={formatedDate}
+              expiryDate={certificatePreview.expiryDate}
               onClose={handleCloseCertificatePreview}
               platformLogo={globalSettings?.platformLogoS3Key}
               certificateBackgroundImageUrl={globalSettings?.certificateBackgroundImage || null}

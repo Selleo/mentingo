@@ -5,6 +5,7 @@ import type { CertificateType } from "~/types/certificate";
 interface CertificateProps {
   courseName: string;
   courseCompletionDate: string;
+  courseExpiryDate?: string;
   certData?: CertificateType;
   platformLogo?: string | null;
   backgroundImageUrl?: string | null;
@@ -12,6 +13,7 @@ interface CertificateProps {
     studentName: string;
     courseName: string;
     completionDate: string;
+    expiryDate?: string;
     certData?: CertificateType;
   }) => void;
 }
@@ -19,6 +21,7 @@ interface CertificateProps {
 const Certificate = ({
   courseName,
   courseCompletionDate,
+  courseExpiryDate,
   certData,
   onOpenCertificatePreview,
 }: CertificateProps) => {
@@ -29,6 +32,7 @@ const Certificate = ({
         studentName: certData?.fullName || "Student Name",
         courseName: certData?.courseTitle || courseName,
         completionDate: courseCompletionDate,
+        expiryDate: courseExpiryDate,
         certData: certData,
       });
     }
