@@ -1837,6 +1837,7 @@ export class SettingsService {
       loginPageFiles: Array.isArray(settings.loginPageFiles)
         ? settings.loginPageFiles
         : JSON.parse(settings.loginPageFiles ?? "[]"),
+      userEmailTriggers: settings.userEmailTriggers ?? DEFAULT_GLOBAL_SETTINGS.userEmailTriggers,
       ageLimit: settings.ageLimit ?? null,
     };
   }
