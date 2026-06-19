@@ -2646,6 +2646,245 @@ export type GetCourseGenerationFilesResponse = {
   contentType: string;
 }[];
 
+export interface GetChapterWithLessonResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    lessonCount: number;
+    lessons: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
+      displayOrder: number;
+      status: "not_started" | "in_progress" | "completed" | "blocked";
+      quizQuestionCount: number | null;
+      isExternal?: boolean;
+      lessonResources?: {
+        /** @format uuid */
+        id: string;
+        fileUrl: string;
+        contentType: string;
+        title?: string;
+        description?: string;
+        fileName?: string;
+        allowFullscreen?: boolean;
+      }[];
+    }[];
+    completedLessonCount?: number;
+    chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
+    isFreemium?: boolean;
+    enrolled?: boolean;
+    isSubmitted?: boolean;
+    createdAt?: string;
+    updatedAt?: string;
+    quizCount?: number;
+    displayOrder: number;
+  };
+}
+
+export type BetaCreateChapterBody = {
+  title: string;
+  lessons?: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
+    description?: string | null;
+    displayOrder: number;
+    fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
+    fileType?: string | null;
+    questions?: {
+      /** @format uuid */
+      id?: string;
+      type:
+        | "brief_response"
+        | "detailed_response"
+        | "match_words"
+        | "scale_1_5"
+        | "single_choice"
+        | "multiple_choice"
+        | "true_or_false"
+        | "photo_question_single_choice"
+        | "photo_question_multiple_choice"
+        | "fill_in_the_blanks_text"
+        | "fill_in_the_blanks_dnd";
+      description?: string | null;
+      title: string;
+      displayOrder?: number;
+      solutionExplanation?: string;
+      photoS3Key?: string | null;
+      options?: {
+        /** @format uuid */
+        id?: string;
+        /** @maxLength 250 */
+        optionText: string;
+        displayOrder: number | null;
+        isStudentAnswer?: boolean | null;
+        isCorrect: boolean;
+        /** @format uuid */
+        questionId?: string;
+        matchedWord?: string | null;
+        scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      }[];
+      /** @default "en" */
+      language?: "en" | "pl" | "de" | "lt" | "cs";
+    }[];
+    aiMentor?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      lessonId: string;
+      aiMentorInstructions: string;
+      completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
+      voiceMode: "preset" | "custom";
+      ttsPreset: "male" | "female";
+      customTtsReference: string | null;
+    } | null;
+    liveTrainingId?: string | null;
+    updatedAt?: string;
+  }[];
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
+  isFreemium?: boolean;
+  enrolled?: boolean;
+  isSubmitted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  quizCount?: number;
+} & {
+  /** @format uuid */
+  courseId: string;
+};
+
+export interface BetaCreateChapterResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    message: string;
+  };
+}
+
+export type UpdateChapterBody = ({
+  title?: string;
+  lessons?: {
+    /** @format uuid */
+    id: string;
+    title: string;
+    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
+    description?: string | null;
+    displayOrder: number;
+    fileS3Key?: string | null;
+    avatarReferenceUrl?: string;
+    fileType?: string | null;
+    questions?: {
+      /** @format uuid */
+      id?: string;
+      type:
+        | "brief_response"
+        | "detailed_response"
+        | "match_words"
+        | "scale_1_5"
+        | "single_choice"
+        | "multiple_choice"
+        | "true_or_false"
+        | "photo_question_single_choice"
+        | "photo_question_multiple_choice"
+        | "fill_in_the_blanks_text"
+        | "fill_in_the_blanks_dnd";
+      description?: string | null;
+      title: string;
+      displayOrder?: number;
+      solutionExplanation?: string;
+      photoS3Key?: string | null;
+      options?: {
+        /** @format uuid */
+        id?: string;
+        /** @maxLength 250 */
+        optionText: string;
+        displayOrder: number | null;
+        isStudentAnswer?: boolean | null;
+        isCorrect: boolean;
+        /** @format uuid */
+        questionId?: string;
+        matchedWord?: string | null;
+        scaleAnswer?: number | null;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      }[];
+      /** @default "en" */
+      language?: "en" | "pl" | "de" | "lt" | "cs";
+    }[];
+    aiMentor?: {
+      /** @format uuid */
+      id: string;
+      /** @format uuid */
+      lessonId: string;
+      aiMentorInstructions: string;
+      completionConditions: string;
+      type: "mentor" | "teacher" | "roleplay";
+      avatarReference: string | null;
+      voiceMode: "preset" | "custom";
+      ttsPreset: "male" | "female";
+      customTtsReference: string | null;
+    } | null;
+    liveTrainingId?: string | null;
+    updatedAt?: string;
+  }[];
+  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
+  isFreemium?: boolean;
+  enrolled?: boolean;
+  isSubmitted?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  quizCount?: number;
+} & {
+  /** @format uuid */
+  courseId?: string;
+}) & {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs";
+};
+
+export interface UpdateChapterResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateChapterDisplayOrderBody {
+  /** @format uuid */
+  chapterId: string;
+  displayOrder: number;
+}
+
+export interface UpdateChapterDisplayOrderResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface RemoveChapterResponse {
+  data: {
+    message: string;
+  };
+}
+
+export interface UpdateFreemiumStatusBody {
+  isFreemium: boolean;
+}
+
+export interface UpdateFreemiumStatusResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface GetLessonsResponse {
   data: {
     /** @format uuid */
@@ -4466,245 +4705,6 @@ export interface GetEnvKeyResponse {
   data: {
     name: string;
     value: string;
-  };
-}
-
-export interface GetChapterWithLessonResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    lessonCount: number;
-    lessons: {
-      /** @format uuid */
-      id: string;
-      title: string;
-      type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
-      displayOrder: number;
-      status: "not_started" | "in_progress" | "completed" | "blocked";
-      quizQuestionCount: number | null;
-      isExternal?: boolean;
-      lessonResources?: {
-        /** @format uuid */
-        id: string;
-        fileUrl: string;
-        contentType: string;
-        title?: string;
-        description?: string;
-        fileName?: string;
-        allowFullscreen?: boolean;
-      }[];
-    }[];
-    completedLessonCount?: number;
-    chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
-    isFreemium?: boolean;
-    enrolled?: boolean;
-    isSubmitted?: boolean;
-    createdAt?: string;
-    updatedAt?: string;
-    quizCount?: number;
-    displayOrder: number;
-  };
-}
-
-export type BetaCreateChapterBody = {
-  title: string;
-  lessons?: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
-    description?: string | null;
-    displayOrder: number;
-    fileS3Key?: string | null;
-    avatarReferenceUrl?: string;
-    fileType?: string | null;
-    questions?: {
-      /** @format uuid */
-      id?: string;
-      type:
-        | "brief_response"
-        | "detailed_response"
-        | "match_words"
-        | "scale_1_5"
-        | "single_choice"
-        | "multiple_choice"
-        | "true_or_false"
-        | "photo_question_single_choice"
-        | "photo_question_multiple_choice"
-        | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
-      description?: string | null;
-      title: string;
-      displayOrder?: number;
-      solutionExplanation?: string;
-      photoS3Key?: string | null;
-      options?: {
-        /** @format uuid */
-        id?: string;
-        /** @maxLength 250 */
-        optionText: string;
-        displayOrder: number | null;
-        isStudentAnswer?: boolean | null;
-        isCorrect: boolean;
-        /** @format uuid */
-        questionId?: string;
-        matchedWord?: string | null;
-        scaleAnswer?: number | null;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
-      }[];
-      /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs";
-    }[];
-    aiMentor?: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      lessonId: string;
-      aiMentorInstructions: string;
-      completionConditions: string;
-      type: "mentor" | "teacher" | "roleplay";
-      avatarReference: string | null;
-      voiceMode: "preset" | "custom";
-      ttsPreset: "male" | "female";
-      customTtsReference: string | null;
-    } | null;
-    liveTrainingId?: string | null;
-    updatedAt?: string;
-  }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
-  isFreemium?: boolean;
-  enrolled?: boolean;
-  isSubmitted?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  quizCount?: number;
-} & {
-  /** @format uuid */
-  courseId: string;
-};
-
-export interface BetaCreateChapterResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    message: string;
-  };
-}
-
-export type UpdateChapterBody = ({
-  title?: string;
-  lessons?: {
-    /** @format uuid */
-    id: string;
-    title: string;
-    type: "content" | "quiz" | "ai_mentor" | "embed" | "scorm" | "live_training";
-    description?: string | null;
-    displayOrder: number;
-    fileS3Key?: string | null;
-    avatarReferenceUrl?: string;
-    fileType?: string | null;
-    questions?: {
-      /** @format uuid */
-      id?: string;
-      type:
-        | "brief_response"
-        | "detailed_response"
-        | "match_words"
-        | "scale_1_5"
-        | "single_choice"
-        | "multiple_choice"
-        | "true_or_false"
-        | "photo_question_single_choice"
-        | "photo_question_multiple_choice"
-        | "fill_in_the_blanks_text"
-        | "fill_in_the_blanks_dnd";
-      description?: string | null;
-      title: string;
-      displayOrder?: number;
-      solutionExplanation?: string;
-      photoS3Key?: string | null;
-      options?: {
-        /** @format uuid */
-        id?: string;
-        /** @maxLength 250 */
-        optionText: string;
-        displayOrder: number | null;
-        isStudentAnswer?: boolean | null;
-        isCorrect: boolean;
-        /** @format uuid */
-        questionId?: string;
-        matchedWord?: string | null;
-        scaleAnswer?: number | null;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
-      }[];
-      /** @default "en" */
-      language?: "en" | "pl" | "de" | "lt" | "cs";
-    }[];
-    aiMentor?: {
-      /** @format uuid */
-      id: string;
-      /** @format uuid */
-      lessonId: string;
-      aiMentorInstructions: string;
-      completionConditions: string;
-      type: "mentor" | "teacher" | "roleplay";
-      avatarReference: string | null;
-      voiceMode: "preset" | "custom";
-      ttsPreset: "male" | "female";
-      customTtsReference: string | null;
-    } | null;
-    liveTrainingId?: string | null;
-    updatedAt?: string;
-  }[];
-  chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
-  isFreemium?: boolean;
-  enrolled?: boolean;
-  isSubmitted?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  quizCount?: number;
-} & {
-  /** @format uuid */
-  courseId?: string;
-}) & {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs";
-};
-
-export interface UpdateChapterResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface UpdateChapterDisplayOrderBody {
-  /** @format uuid */
-  chapterId: string;
-  displayOrder: number;
-}
-
-export interface UpdateChapterDisplayOrderResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface RemoveChapterResponse {
-  data: {
-    message: string;
-  };
-}
-
-export interface UpdateFreemiumStatusBody {
-  isFreemium: boolean;
-}
-
-export interface UpdateFreemiumStatusResponse {
-  data: {
-    message: string;
   };
 }
 
@@ -9895,6 +9895,133 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name ChapterControllerGetChapterWithLesson
+     * @request GET:/api/chapter
+     */
+    chapterControllerGetChapterWithLesson: (
+      query: {
+        /** @format uuid */
+        id: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetChapterWithLessonResponse, any>({
+        path: `/api/chapter`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChapterControllerUpdateChapter
+     * @request PATCH:/api/chapter
+     */
+    chapterControllerUpdateChapter: (
+      data: UpdateChapterBody,
+      query?: {
+        /** @format uuid */
+        id?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateChapterResponse, any>({
+        path: `/api/chapter`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChapterControllerRemoveChapter
+     * @request DELETE:/api/chapter
+     */
+    chapterControllerRemoveChapter: (
+      query: {
+        /** @format uuid */
+        chapterId: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<RemoveChapterResponse, any>({
+        path: `/api/chapter`,
+        method: "DELETE",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChapterControllerBetaCreateChapter
+     * @request POST:/api/chapter/beta-create-chapter
+     */
+    chapterControllerBetaCreateChapter: (data: BetaCreateChapterBody, params: RequestParams = {}) =>
+      this.request<BetaCreateChapterResponse, any>({
+        path: `/api/chapter/beta-create-chapter`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChapterControllerUpdateChapterDisplayOrder
+     * @request PATCH:/api/chapter/chapter-display-order
+     */
+    chapterControllerUpdateChapterDisplayOrder: (
+      data: UpdateChapterDisplayOrderBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateChapterDisplayOrderResponse, any>({
+        path: `/api/chapter/chapter-display-order`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name ChapterControllerUpdateFreemiumStatus
+     * @request PATCH:/api/chapter/freemium-status
+     */
+    chapterControllerUpdateFreemiumStatus: (
+      data: UpdateFreemiumStatusBody,
+      query?: {
+        /** @format uuid */
+        chapterId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateFreemiumStatusResponse, any>({
+        path: `/api/chapter/freemium-status`,
+        method: "PATCH",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name LessonControllerGetLessons
      * @request GET:/api/lesson/all
      */
@@ -11426,133 +11553,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetEnvKeyResponse, any>({
         path: `/api/env/${envName}`,
         method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerGetChapterWithLesson
-     * @request GET:/api/chapter
-     */
-    chapterControllerGetChapterWithLesson: (
-      query: {
-        /** @format uuid */
-        id: string;
-        /** @default "en" */
-        language?: "en" | "pl" | "de" | "lt" | "cs";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetChapterWithLessonResponse, any>({
-        path: `/api/chapter`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerUpdateChapter
-     * @request PATCH:/api/chapter
-     */
-    chapterControllerUpdateChapter: (
-      data: UpdateChapterBody,
-      query?: {
-        /** @format uuid */
-        id?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateChapterResponse, any>({
-        path: `/api/chapter`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerRemoveChapter
-     * @request DELETE:/api/chapter
-     */
-    chapterControllerRemoveChapter: (
-      query: {
-        /** @format uuid */
-        chapterId: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<RemoveChapterResponse, any>({
-        path: `/api/chapter`,
-        method: "DELETE",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerBetaCreateChapter
-     * @request POST:/api/chapter/beta-create-chapter
-     */
-    chapterControllerBetaCreateChapter: (data: BetaCreateChapterBody, params: RequestParams = {}) =>
-      this.request<BetaCreateChapterResponse, any>({
-        path: `/api/chapter/beta-create-chapter`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerUpdateChapterDisplayOrder
-     * @request PATCH:/api/chapter/chapter-display-order
-     */
-    chapterControllerUpdateChapterDisplayOrder: (
-      data: UpdateChapterDisplayOrderBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateChapterDisplayOrderResponse, any>({
-        path: `/api/chapter/chapter-display-order`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name ChapterControllerUpdateFreemiumStatus
-     * @request PATCH:/api/chapter/freemium-status
-     */
-    chapterControllerUpdateFreemiumStatus: (
-      data: UpdateFreemiumStatusBody,
-      query?: {
-        /** @format uuid */
-        chapterId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateFreemiumStatusResponse, any>({
-        path: `/api/chapter/freemium-status`,
-        method: "PATCH",
-        query: query,
-        body: data,
-        type: ContentType.Json,
         format: "json",
         ...params,
       }),

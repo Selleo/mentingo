@@ -34,6 +34,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { hasPermission } from "src/common/permissions/permission.utils";
@@ -172,6 +173,7 @@ export class UserController {
   }
 
   @Get("details")
+  @Public()
   @RequirePermission(PERMISSIONS.USER_READ_SELF)
   @Validate({
     request: [{ type: "query", name: "userId", schema: UUIDSchema, required: true }],
@@ -179,7 +181,7 @@ export class UserController {
   })
   async getUserDetails(
     @Query("userId") userId: UUIDType,
-    @CurrentUser() currentUser: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | null,
   ): Promise<BaseResponse<UserDetailsResponse>> {
     const userDetails = await this.usersService.getUserDetails(userId, currentUser);
     return new BaseResponse(userDetails);
