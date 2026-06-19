@@ -296,19 +296,17 @@ export class UserService {
 
   public async getUserDetails(
     userId: UUIDType,
-    currentUser: CurrentUserType,
+    currentUser: CurrentUserType | null,
   ): Promise<UserDetailsResponse> {
-    const { userId: currentUserId } = currentUser;
-
     const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
+        id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
         avatarReference: users.avatarReference,
-        id: users.id,
         description: userDetails.description,
-        contactEmail: userDetails.contactEmail,
-        contactPhone: userDetails.contactPhoneNumber,
+        contactEmail: currentUser ? userDetails.contactEmail : sql<null>`NULL`,
+        contactPhone: currentUser ? userDetails.contactPhoneNumber : sql<null>`NULL`,
         jobTitle: userDetails.jobTitle,
       })
       .from(users)
@@ -317,14 +315,16 @@ export class UserService {
 
     if (!userBio) throw new NotFoundException("common.toast.notFound");
 
-    const canViewSelf = userId === currentUserId;
-    const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
-    const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
-    const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
+    if (currentUser) {
+      const canViewSelf = userId === currentUser.userId;
+      const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+      const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
+      const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
 
-    const canView = canViewSelf || canManageUsers || targetIsAdmin;
+      const canView = canViewSelf || canManageUsers || targetIsAdmin;
 
-    if (!canView) throw new ForbiddenException("common.toast.noAccess");
+      if (!canView) throw new ForbiddenException("common.toast.noAccess");
+    }
 
     const { avatarReference, ...user } = userBio;
 
