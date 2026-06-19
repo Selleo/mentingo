@@ -1,9 +1,15 @@
+import { Inject } from "@nestjs/common";
 import { EventsHandler } from "@nestjs/cqrs";
 import { FinishedCourseEmail, NewUserEmail } from "@repo/email-templates";
 
+import { DatabasePg } from "src/common";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
+import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseCompletedEvent, UserPasswordCreatedEvent, UserRegisteredEvent } from "src/events";
+import { DB_ADMIN } from "src/storage/db/db.providers";
 
 import { UserService } from "../user.service";
 
@@ -22,6 +28,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
   constructor(
     private userService: UserService,
     private emailService: EmailService,
+    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
   async handle(event: EventType) {
@@ -40,8 +47,11 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutNewUser(email);
 
-    await Promise.allSettled(
-      adminsToNotify.map(async ({ id: adminId, email: adminsEmail, tenantId }) => {
+    await processInBatches(
+      adminsToNotify,
+      async ({ id: adminId, email: adminsEmail, tenantId }) => {
+        const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId);
+
         const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
           tenantId,
           adminId,
@@ -49,7 +59,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
         const { text, html } = new NewUserEmail({
           userName: `${firstName} ${lastName}`,
-          profileLink: `${process.env.CORS_ORIGIN}/profile/${user.id}`,
+          profileLink: `${baseOrigin}/profile/${user.id}`,
           ...defaultEmailSettings,
         });
 
@@ -62,7 +72,8 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           },
           { tenantId },
         );
-      }),
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
     );
   }
 
@@ -73,8 +84,11 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
 
     const adminsToNotify = await this.userService.getAdminsToNotifyAboutFinishedCourse();
 
-    await Promise.allSettled(
-      adminsToNotify.map(async ({ id: adminId, email: adminsEmail, tenantId }) => {
+    await processInBatches(
+      adminsToNotify,
+      async ({ id: adminId, email: adminsEmail, tenantId }) => {
+        const baseOrigin = await resolveTenantOrigin(this.dbAdmin, tenantId);
+
         const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
           tenantId,
           adminId,
@@ -83,7 +97,7 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
         const { text, html } = new FinishedCourseEmail({
           userName,
           courseName: courseTitle,
-          progressLink: `${process.env.CORS_ORIGIN}/course/${courseId}`,
+          progressLink: `${baseOrigin}/course/${courseId}`,
           ...defaultEmailSettings,
         });
 
@@ -96,7 +110,8 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           },
           { tenantId },
         );
-      }),
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
     );
   }
 }

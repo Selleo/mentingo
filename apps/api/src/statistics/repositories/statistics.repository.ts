@@ -1,8 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
-import { and, desc, eq, exists, gte, inArray, isNull, lt, notExists, sql } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
+import { userHasPermissionCondition } from "src/common/permissions/permission-sql.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import {
   chapters,
@@ -11,10 +12,6 @@ import {
   courseStudentsStats,
   lessons,
   quizAttempts,
-  permissionRoleRuleSets,
-  permissionRoles,
-  permissionRuleSetPermissions,
-  permissionUserRoles,
   studentChapterProgress,
   studentCourses,
   studentLessonProgress,
@@ -65,7 +62,7 @@ export class StatisticsRepository {
         ${studentCourses.studentId} = ${userId}
           AND ${studentCourses.completedAt} IS NOT NULL
           AND ${studentCourses.completedAt} >= date_trunc('month', CURRENT_DATE) - INTERVAL '11 months'
-          
+
         GROUP BY
           date_trunc('month', ${studentCourses.completedAt})
       ),
@@ -373,7 +370,7 @@ export class StatisticsRepository {
       WHERE NOT EXISTS (SELECT 1 FROM next_lesson_in_current_course)
         LIMIT 1
       )
-      SELECT 
+      SELECT
         courses.id AS "courseId",
         ${this.localizationService.getLocalizedSqlField(courses.title, language)} AS "courseTitle",
         ${this.localizationService.getLocalizedSqlField(
@@ -386,7 +383,7 @@ export class StatisticsRepository {
           chapters.title,
           language,
         )} AS "chapterTitle",
-        CASE 
+        CASE
           WHEN scp.completed_at IS NOT NULL THEN ${PROGRESS_STATUSES.COMPLETED}
           WHEN scp.completed_lesson_count > 0 THEN ${PROGRESS_STATUSES.IN_PROGRESS}
           ELSE ${PROGRESS_STATUSES.NOT_STARTED}
@@ -398,7 +395,7 @@ export class StatisticsRepository {
       JOIN courses ON nl.course_id = courses.id
       JOIN chapters ON nl.chapter_id = chapters.id
       JOIN student_courses sc ON sc.course_id = courses.id AND sc.student_id = ${studentId}
-      LEFT JOIN student_chapter_progress scp ON chapters.id = scp.chapter_id 
+      LEFT JOIN student_chapter_progress scp ON chapters.id = scp.chapter_id
         AND scp.student_id = ${studentId}
       WHERE sc.status = ${COURSE_ENROLLMENT.ENROLLED};
     `)) as unknown as NextLesson[];
@@ -433,40 +430,11 @@ export class StatisticsRepository {
       .orderBy(studentLessonProgress.studentId, desc(studentLessonProgress.createdAt));
   }
   async getInactiveStudents(inactivityDays: number) {
-    const hasProgressPermission = exists(
-      this.db
-        .select({ userId: permissionUserRoles.userId })
-        .from(permissionUserRoles)
-        .innerJoin(
-          permissionRoles,
-          and(
-            eq(permissionRoles.id, permissionUserRoles.roleId),
-            eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRoleRuleSets,
-          and(
-            eq(permissionRoleRuleSets.roleId, permissionRoles.id),
-            eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
-          ),
-        )
-        .innerJoin(
-          permissionRuleSetPermissions,
-          and(
-            eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
-            eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
-          ),
-        )
-        .where(
-          and(
-            eq(permissionUserRoles.userId, users.id),
-            inArray(permissionRuleSetPermissions.permission, [
-              PERMISSIONS.LEARNING_MODE_USE,
-              PERMISSIONS.LEARNING_PROGRESS_UPDATE,
-            ]),
-          ),
-        ),
+    const hasProgressPermission = userHasPermissionCondition(
+      this.db,
+      users.id,
+      users.tenantId,
+      PERMISSIONS.LEARNING_PROGRESS_UPDATE,
     );
 
     return this.db
@@ -476,41 +444,6 @@ export class StatisticsRepository {
       .where(
         and(
           hasProgressPermission,
-          notExists(
-            this.db
-              .select({ userId: permissionUserRoles.userId })
-              .from(permissionUserRoles)
-              .innerJoin(
-                permissionRoles,
-                and(
-                  eq(permissionRoles.id, permissionUserRoles.roleId),
-                  eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
-                ),
-              )
-              .innerJoin(
-                permissionRoleRuleSets,
-                and(
-                  eq(permissionRoleRuleSets.roleId, permissionRoles.id),
-                  eq(permissionRoleRuleSets.tenantId, permissionRoles.tenantId),
-                ),
-              )
-              .innerJoin(
-                permissionRuleSetPermissions,
-                and(
-                  eq(permissionRuleSetPermissions.ruleSetId, permissionRoleRuleSets.ruleSetId),
-                  eq(permissionRuleSetPermissions.tenantId, permissionRoleRuleSets.tenantId),
-                ),
-              )
-              .where(
-                and(
-                  eq(permissionUserRoles.userId, users.id),
-                  inArray(permissionRuleSetPermissions.permission, [
-                    PERMISSIONS.COURSE_UPDATE,
-                    PERMISSIONS.COURSE_UPDATE_OWN,
-                  ]),
-                ),
-              ),
-          ),
           eq(
             sql`DATE(${userStatistics.lastActivityDate})`,
             sql`CURRENT_DATE - (${inactivityDays}::INTEGER * INTERVAL '1 day')`,

@@ -222,6 +222,7 @@ export class UserService {
   public async getRoles(tenantId: UUIDType) {
     const isLiveTrainingEnabled =
       await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+
     const conditions = [eq(permissionRoles.tenantId, tenantId)];
 
     if (!isLiveTrainingEnabled) {
@@ -1196,6 +1197,7 @@ export class UserService {
     const shortInactivity = await this.statisticsService.getInactiveStudents(
       USER_SHORT_INACTIVITY_DAYS,
     );
+
     const longInactivity =
       await this.statisticsService.getInactiveStudents(USER_LONG_INACTIVITY_DAYS);
 

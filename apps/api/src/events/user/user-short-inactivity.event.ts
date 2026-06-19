@@ -6,6 +6,7 @@ export type InactiveUser = {
   email: string;
 };
 export type InactiveUsers = {
+  tenantId: UUIDType;
   users: InactiveUser[];
 };
 
