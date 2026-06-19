@@ -12,6 +12,8 @@ import {
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import type { AiMentorEvaluation } from "./AiMentorEvaluationDialog.types";
 
 type AiMentorEvaluationDialogProps = {
@@ -139,7 +141,12 @@ export function AiMentorEvaluationDialog({
         </div>
 
         <DialogFooter className="border-t border-neutral-100 px-6 py-4">
-          <Button type="button" variant="primary" onClick={() => onOpenChange(false)}>
+          <Button
+            data-testid={LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON}
+            type="button"
+            variant="primary"
+            onClick={() => onOpenChange(false)}
+          >
             {t("common.button.close")}
           </Button>
         </DialogFooter>

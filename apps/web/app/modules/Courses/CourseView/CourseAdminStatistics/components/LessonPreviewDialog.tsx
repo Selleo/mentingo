@@ -165,7 +165,12 @@ export default function LessonPreviewDialog({
                 {currentChapter?.title}
               </p>
             </div>
-            <Button size="icon" variant="outline" onClick={onClose}>
+            <Button
+              data-testid={COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_CLOSE_BUTTON}
+              size="icon"
+              variant="outline"
+              onClick={onClose}
+            >
               <Icon name="X" className="size-4" />
             </Button>
           </DialogTitle>
@@ -206,6 +211,7 @@ export default function LessonPreviewDialog({
             {isAiMentorLesson && (
               <div className="grid w-full grid-cols-2 gap-2 px-10 pb-6">
                 <Button
+                  data-testid={COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_TASK_DESCRIPTION_BUTTON}
                   type="button"
                   variant="outline"
                   className="h-9 min-w-0 justify-center gap-2 rounded-md border-neutral-200 bg-white px-2 text-xs font-medium text-neutral-800 shadow-none hover:border-primary-200 hover:bg-primary-50 hover:text-primary-800 sm:text-sm"
@@ -221,6 +227,7 @@ export default function LessonPreviewDialog({
                   <TooltipTrigger asChild>
                     <span className="min-w-0">
                       <Button
+                        data-testid={COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_RESULT_BUTTON}
                         type="button"
                         variant="outline"
                         className={cn(
