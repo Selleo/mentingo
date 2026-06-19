@@ -2742,7 +2742,14 @@
       "trueOrFalseRequired": "A true or false response is required.",
       "photoQuestionMustHaveAnswer": "An answer is required for this photo question.",
       "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!",
-      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}",
+      "quizAlreadyAnswered": "You have already answered this quiz.",
+      "lessonAssignmentRequired": "You are not assigned to this lesson.",
+      "quizEvaluationFailed": "Quiz evaluation failed. Please try again.",
+      "quizNotAnsweredYet": "You have not answered this quiz yet.",
+      "courseEnrollmentRequired": "You are not enrolled in this course.",
+      "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
+      "quizResetFailed": "Failed to reset quiz answers. Please try again."
     }
   },
   "studentCourseView": {

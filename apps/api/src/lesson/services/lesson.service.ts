@@ -95,7 +95,7 @@ export class LessonService {
 
     const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
 
-    if (!hasLessonAccess) throw new UnauthorizedException("You don't have access to this lesson");
+    if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.LESSON,
@@ -110,10 +110,10 @@ export class LessonService {
 
     const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
 
-    if (!lesson) throw new NotFoundException("Lesson not found");
+    if (!lesson) throw new NotFoundException("common.toast.notFound");
 
     if (isStudent && !lesson.isFreemium && !lesson.isEnrolled)
-      throw new UnauthorizedException("You don't have access");
+      throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
     if (
       lesson.type === LESSON_TYPES.QUIZ ||
@@ -314,12 +314,16 @@ export class LessonService {
       userId,
     );
 
+    if (!accessCourseLessonWithDetails) {
+      throw new NotFoundException("common.toast.notFound");
+    }
+
     if (accessCourseLessonWithDetails.lessonIsCompleted) {
-      throw new ConflictException("You have already answered this quiz");
+      throw new ConflictException("studentLessonView.validation.quizAlreadyAnswered");
     }
 
     if (!accessCourseLessonWithDetails.isAssigned && !accessCourseLessonWithDetails.isFreemium)
-      throw new UnauthorizedException("You don't have assignment to this lesson");
+      throw new UnauthorizedException("studentLessonView.validation.lessonAssignmentRequired");
 
     const quizSettings = await this.lessonRepository.getLessonSettings(studentQuizAnswers.lessonId);
 
@@ -434,12 +438,7 @@ export class LessonService {
           score: quizScore,
         };
       } catch (error) {
-        throw new ConflictException(
-          "Quiz evaluation failed, problem with question: " +
-            error?.message +
-            " problem is: " +
-            error?.response?.error,
-        );
+        throw new ConflictException("studentLessonView.validation.quizEvaluationFailed");
       }
     });
   }
@@ -454,12 +453,16 @@ export class LessonService {
       userId,
     );
 
+    if (!accessCourseLessonWithDetails) {
+      throw new NotFoundException("common.toast.notFound");
+    }
+
     if (!accessCourseLessonWithDetails.lessonIsCompleted) {
-      throw new ConflictException("You have not answered this quiz yet");
+      throw new ConflictException("studentLessonView.validation.quizNotAnsweredYet");
     }
 
     if (!accessCourseLessonWithDetails.isAssigned) {
-      throw new ConflictException("You are not enrolled to this course");
+      throw new ConflictException("studentLessonView.validation.courseEnrollmentRequired");
     }
 
     const quizSettings = await this.lessonRepository.getLessonSettings(lessonId);
@@ -474,9 +477,7 @@ export class LessonService {
         quizSettings?.quizCooldownInHours,
       )
     ) {
-      throw new ConflictException(
-        "Quiz answers cannot be deleted due to attempts limit or cooldown",
-      );
+      throw new ConflictException("studentLessonView.validation.quizRetakeUnavailable");
     }
 
     attempts += 1;
@@ -504,7 +505,7 @@ export class LessonService {
           null,
         );
       } catch (error) {
-        throw new ConflictException(`Failed to delete student quiz answers: ${error.message}`);
+        throw new ConflictException("studentLessonView.validation.quizResetFailed");
       }
     });
   }

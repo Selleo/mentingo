@@ -2687,7 +2687,14 @@
       "trueOrFalseRequired": "Reikalingas teisingas arba klaidingas atsakymas.",
       "photoQuestionMustHaveAnswer": "Atsakymas reikalingas į šį klausimą su nuotrauka.",
       "unansweredQuestions": "Atrodo, kad dar nepatikrinote visų atsakymų. Peržiūrėkite juos ir bandykite dar kartą!",
-      "unansweredQuestionsWithNames": "Atsakykite į trūkstamus klausimus: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Atsakykite į trūkstamus klausimus: {{questionNames}}",
+      "quizAlreadyAnswered": "Jūs jau atsakėte į šią viktoriną.",
+      "lessonAssignmentRequired": "Jūs nesate priskirti šiai pamokai.",
+      "quizEvaluationFailed": "Nepavyko įvertinti viktorinos. Bandykite dar kartą.",
+      "quizNotAnsweredYet": "Jūs dar neatsakėte į šią viktoriną.",
+      "courseEnrollmentRequired": "Jūs nesate užregistruoti į šį kursą.",
+      "quizRetakeUnavailable": "Viktorinos atsakymų negalima atstatyti dėl bandymų limito arba laukimo laikotarpio.",
+      "quizResetFailed": "Nepavyko atstatyti viktorinos atsakymų. Bandykite dar kartą."
     }
   },
   "studentCourseView": {
