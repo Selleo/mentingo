@@ -300,13 +300,13 @@ export class UserService {
   ): Promise<UserDetailsResponse> {
     const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
+        id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
         avatarReference: users.avatarReference,
-        id: users.id,
         description: userDetails.description,
-        contactEmail: userDetails.contactEmail,
-        contactPhone: userDetails.contactPhoneNumber,
+        contactEmail: currentUser ? userDetails.contactEmail : sql<null>`NULL`,
+        contactPhone: currentUser ? userDetails.contactPhoneNumber : sql<null>`NULL`,
         jobTitle: userDetails.jobTitle,
       })
       .from(users)
@@ -318,8 +318,10 @@ export class UserService {
     if (currentUser) {
       const canViewSelf = userId === currentUser.userId;
       const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+      const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
+      const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
 
-      const canView = canViewSelf || canManageUsers;
+      const canView = canViewSelf || canManageUsers || targetIsAdmin;
 
       if (!canView) throw new ForbiddenException("common.toast.noAccess");
     }
