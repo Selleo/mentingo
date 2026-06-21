@@ -7,22 +7,9 @@ export const COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY = [
   "admin",
 ];
 
-export type CourseStudentsAiMentorResultsQueryParams = {
-  page?: number;
-  perPage?: number;
-  lessonId?: string;
-  groupId?: string;
-  search?: string;
-  sort?:
-    | "studentName"
-    | "lessonName"
-    | "score"
-    | "lastSession"
-    | "-studentName"
-    | "-lessonName"
-    | "-score"
-    | "-lastSession";
-};
+export type CourseStudentsAiMentorResultsQueryParams = NonNullable<
+  Parameters<typeof ApiClient.api.courseControllerGetCourseStudentsAiMentorResults>[1]
+>;
 
 interface CourseStudentsAiMentorResultsOptions {
   id: string;
