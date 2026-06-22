@@ -2,54 +2,54 @@
 
 ## Business Overview
 
-Lesson delivery and learning mode let learners start a course, move through lessons, complete learning activities, and build progress toward course completion. The feature covers the learner lesson page, navigation between lessons, lesson sequencing rules, completion behavior, and learning-time tracking.
+Lesson delivery and learning mode are the learner-facing course experience. They let learners start a course, move through lessons, complete activities, respect sequencing rules, and build measurable progress toward course completion.
 
-For HR and L&D teams, this is where assigned learning turns into measurable activity. It helps learners follow the intended course flow, prevents premature access when sequencing is required, and records completion so admins can later report on training progress.
+For HR and L&D teams, this is where assigned training becomes evidence of learning activity. The feature guides learners through the intended flow, prevents premature access when sequencing is enabled, and records progress for later reporting.
 
-The main workflow starts when a learner opens a course and clicks start learning. Mentingo opens the first available lesson, renders the right lesson type, tracks active learning time, marks lessons complete when the learner satisfies the lesson rules, and moves the learner through the course.
+The main workflow starts when a learner opens a course and chooses to start or continue learning. Mentingo opens the right lesson, renders the correct lesson type, tracks active learning time, completes lessons when the rules are satisfied, and moves the learner through the course.
 
 ## Who Uses It
 
-- Learners use it to take course lessons and continue training.
-- L&D admins configure lesson sequence and course settings that shape learner flow.
-- Content creators preview learning mode to verify the course experience.
+- Learners take course lessons, answer quizzes, complete embedded or SCORM content, and continue training.
+- L&D administrators configure sequencing and course settings that shape the learner flow.
+- Content creators preview the learning experience before or after publishing.
 - Reporting users rely on the resulting progress, completion, and learning-time data.
 
 ## Feature Functions
 
-- Start a course from the course overview and open the correct lesson.
-- Render content, quiz, AI mentor, embed, SCORM, and live training lesson types.
+- Start or continue a course from the course overview.
+- Render content, quiz, AI mentor, embed, SCORM, and live training lessons.
 - Navigate to previous and next lessons from the learner lesson page.
-- Enforce lesson sequencing when a course requires ordered completion.
-- Mark lessons complete automatically or after lesson-specific completion rules.
-- Track active learning time with heartbeat-based session tracking.
-- Update chapter and course progress when lessons are completed.
+- Enforce lesson sequencing when ordered completion is enabled.
+- Keep later lessons locked after unmet requirements, such as a failed required quiz.
+- Mark lessons complete automatically or after lesson-specific completion criteria.
+- Update chapter and course progress as lessons are completed.
+- Track active lesson time while the learner studies.
 
 ## End-User Value
 
-Learners get a clear, guided training experience instead of a disconnected set of content pages. HR and L&D teams get more reliable completion data because lesson access, progress, and course completion follow explicit rules.
+Learners get a clear, guided training experience instead of disconnected content pages. HR and L&D teams get more reliable progress and completion data because lesson access, completion, and navigation follow explicit rules.
 
-Learning-time tracking adds a reporting signal beyond simple completion, helping teams understand participation and time investment.
+Learning-time tracking adds another reporting signal, helping teams understand both completion and time investment.
 
 ## How It Works
 
-The learner lesson page loads the current course and lesson in the selected language. It renders the correct lesson player and shows course navigation, chapter context, and a lesson sidebar.
+The lesson page loads the selected course and lesson in the active content language. It shows the lesson content, chapter context, navigation controls, and the course lesson sidebar.
 
-For simple content and embed lessons, Mentingo can mark the lesson complete automatically when the learner opens the lesson or finishes the final video. Quiz and AI mentor lessons require their own completion checks before progress advances. When sequence mode is enabled, the learner cannot skip ahead until previous lessons are complete, and failing a required quiz keeps the next lesson locked.
+Each lesson type has its own completion behavior. Content and embed lessons can complete when opened or when required video content finishes. Quiz lessons depend on quiz submission and passing rules. AI mentor, SCORM, and live training lessons use their own lesson-specific state. When sequence mode is enabled, Mentingo blocks access to later lessons until earlier lessons are complete.
 
-While the lesson page is open, the web app sends learning-time heartbeats over the shared socket connection. The backend records active learning sessions and queues periodic learning-time updates.
+While the learner studies, the page also runs the learning-time tracker. Completion events update lesson, chapter, and course progress and can trigger downstream completion behavior such as certificates or reporting updates.
 
 ## Key Technical Context
 
 - Learner lesson UI lives in `apps/web/app/modules/Courses/Lesson`.
-- The lesson route is `/course/:courseId/lesson/:lessonId`, with a layout loader that redirects unauthenticated users to login.
-- Lesson access is guarded by `LEARNING_PROGRESS_UPDATE` or `LEARNING_MODE_USE` at route/API level, while the lesson route itself is public so the layout can handle redirects.
-- Progress mutations use `apps/api/src/studentLessonProgress/studentLessonProgress.controller.ts` and `studentLessonProgress.service.ts`.
+- The route is `/course/:courseId/lesson/:lessonId`.
+- Lesson rendering is centralized in `LessonContentRenderer`.
+- Lesson access and progress updates use `PERMISSIONS.LEARNING_PROGRESS_UPDATE` and `PERMISSIONS.LEARNING_MODE_USE`.
+- Progress updates are handled through `apps/api/src/studentLessonProgress`.
 - Learning-time tracking uses `apps/web/app/hooks/useLearningTimeTracker.ts` and `apps/api/src/learning-time`.
-- Completion publishes lesson, chapter, and course completion events through the existing outbox flow.
 
 ## Test Evidence
 
-Frontend E2E tests in `apps/web/e2e/specs/learning` cover starting learning, continuing to the next content lesson, opening lessons out of order when sequence is disabled, blocking skipped lessons when sequence is enabled, keeping the next lesson locked after a failed required quiz, completing embed lessons, and SCORM launch/resume/completion.
-
-Backend E2E tests in `apps/api/src/learning-time/__tests__/learning-time.e2e-spec.ts` cover learning-time queue processing, accumulation across jobs, and parallel updates for different users.
+- Web E2E coverage verifies starting learning, continuing to the next content lesson, opening lessons out of order when sequence is disabled, blocking skipped lessons when sequence is enabled, keeping the next lesson locked after a failed required quiz, submitting and retaking quizzes, completing embed lessons, accessing AI mentor entry points, and SCORM launch/resume/completion behavior.
+- API E2E coverage verifies quiz feedback visibility rules, lesson completion restrictions for authors/admins outside learning mode, admin/content-creator learning-mode behavior, quiz submission rules, quiz lesson deletion with submitted answers, and learning-time queue processing.

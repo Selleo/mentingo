@@ -2,51 +2,48 @@
 
 ## Business Overview
 
-Onboarding tours guide users through key pages after they enter the platform. They reduce friction for new learners by pointing out the dashboard, course lists, announcements, settings, profile, and provider information areas that are most relevant to self-service learning.
+Onboarding Tours help learners understand key Mentingo pages the first time they use them. Instead of relying on separate instructions or support messages, Mentingo can guide a learner through visible areas of the dashboard, courses, announcements, profile, settings, and provider information pages.
 
-The feature stores completion per page, so a user is not repeatedly shown the same guide once they have finished or dismissed it. Users can reset onboarding from settings when they want to see the tours again.
+The feature is designed to reduce friction during first use. Learners receive short, page-specific guidance only where it is relevant, and Mentingo remembers which tours they have already completed so the same guidance does not keep interrupting them.
+
+For HR and L&D teams, guided onboarding supports faster adoption of the learning platform. Learners can discover where to check progress, find courses, review announcements, manage account settings, view certificates, and read provider information without needing manual walkthroughs from administrators.
 
 ## Who Uses It
 
-- New learners discovering the LMS interface for the first time.
-- Returning learners who reset onboarding after missing or dismissing guidance.
-- Administrators and support teams who want learners to self-orient without manual instructions.
-- Product teams adding page-specific tours to learner-facing workflows.
+- New learners use page-level guidance to understand important learning, profile, announcement, settings, and provider-information areas.
+- Returning learners can reset onboarding from account settings when they want to see the product guidance again.
+- HR, L&D, and support teams benefit from fewer basic navigation questions because first-use guidance is built into the learner experience.
 
 ## Feature Functions
 
-- Define page-specific tour steps for dashboard, courses, announcements, settings, profile, and provider information.
-- Automatically open a tour when a user has not completed that page's onboarding.
-- Mark a page's onboarding as completed when the user reaches the last step.
-- Mark onboarding as completed when the user closes the tour through the provider-level close handler.
-- Persist completion flags per user and page.
-- Reset all onboarding flags for the current user.
-- Reopen the tour after reset.
-- Skip tour auto-opening in E2E and test environments to keep automated tests stable.
+- Show guided steps on key learner pages such as dashboard, courses, announcements, settings, profile, and provider information.
+- Localize tour text through the normal Mentingo interface language system.
+- Open a page tour only when the signed-in user has not completed that tour yet.
+- Mark a page tour as completed when the learner reaches the final step.
+- Persist onboarding completion per user and per page.
+- Let a user reset onboarding from account preferences.
+- Keep completed tours from repeatedly interrupting normal platform use.
 
 ## End-User Value
 
-Learners can understand the platform faster without reading external documentation. Completion tracking keeps the experience from becoming repetitive, while reset gives users a way to revisit guidance after a UI change, support interaction, or long absence.
+Onboarding Tours make Mentingo easier to adopt without adding administrator work. Learners get contextual help at the moment they need it, and HR or L&D teams can roll out the platform with less dependency on separate training calls, screenshots, or support instructions.
 
 ## How It Works
 
-The web app uses Reactour through a global `TourProvider`. Page modules pass localized step definitions into `useTourSetup`, along with loading state, completion state from the current user, and the matching `OnboardingPages` value. If the user has not completed that page and the app is not running in a test environment, the hook sets the tour steps and opens the tour.
+When a learner opens a supported page, Mentingo checks whether that user's tour for the page is already complete. If it is not complete, the page supplies a short set of guided steps and opens the tour after the page finishes loading. When the learner reaches the final step, Mentingo records that the page tour is complete for that user.
 
-Completion is persisted through generated API client calls to user onboarding endpoints. The backend stores onboarding flags in the `user_onboarding` table, updates a single page flag when completed, and can reset all known pages to `false` for the current user.
+The account settings page includes a reset option. When a user resets onboarding, Mentingo clears the saved completion state for all supported onboarding pages, so tours can appear again the next time those pages are visited.
+
+Tours are skipped in test/E2E environments so automated tests can exercise the pages without UI overlays changing the interaction flow.
 
 ## Key Technical Context
 
-- Main web implementation: `apps/web/app/modules/Onboarding`.
-- Global tour provider integration: `apps/web/app/modules/Global/Providers.tsx`.
-- Main API implementation: `apps/api/src/user/user.controller.ts` and `apps/api/src/user/user.service.ts`.
-- Shared page enum: `packages/shared/src/types/onboarding.ts`.
-- Completion endpoint: `PATCH /api/user/onboarding-status/:page`.
-- Reset endpoint: `PATCH /api/user/onboarding-status/reset`.
-- Both onboarding mutations require `PERMISSIONS.ACCOUNT_UPDATE_SELF`.
+- The shared onboarding pages are defined in `packages/shared/src/types/onboarding.ts`: dashboard, courses, announcements, profile, settings, and provider information.
+- The web onboarding setup is implemented in `apps/web/app/modules/Onboarding`, especially `useTourSetup` and the learner step definitions in `routes/student.ts`.
+- Completion and reset endpoints are in `apps/api/src/user/user.controller.ts` and `apps/api/src/user/user.service.ts`.
+- Users need `PERMISSIONS.ACCOUNT_UPDATE_SELF` to mark or reset their own onboarding status; the provider-information tour is shown only where the user can update learning progress.
+- The current-user response includes onboarding status, which lets the frontend decide whether each page tour should appear.
 
 ## Test Evidence
 
-- Web E2E covers resetting onboarding from account preferences and verifies that the current user's settings onboarding flag becomes incomplete again.
-- API authentication/current-user tests cover returning onboarding status as part of user payloads.
-- Source-level evidence covers tour setup, page-step definitions, close-handler completion, backend persistence, reset behavior, and test-environment auto-skip.
-- I did not find a dedicated frontend E2E spec that walks through every onboarding tour step; automated coverage focuses on reset behavior and current-user status.
+Frontend Playwright coverage verifies that a user with onboarding reset access can reset onboarding from account preferences and that the current-user response reflects the reset status. API behavior is covered through the user controller/service implementation; the source search did not find full E2E coverage for every individual guided tour step.

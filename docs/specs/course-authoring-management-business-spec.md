@@ -2,55 +2,55 @@
 
 ## Business Overview
 
-Course authoring and management let content creators and L&D admins create, configure, publish, maintain, and retire learning products in Mentingo. This feature covers the administrative lifecycle around a course before and after learners see it in the catalog.
+Course authoring and management is the administrative lifecycle for Mentingo courses. It lets L&D teams create courses, maintain metadata, prepare content privately, publish training when ready, localize it for supported languages, manage operational settings, and retire draft material safely.
 
-For HR and L&D teams, this is the control center for the learning library. It allows the organization to create structured training, localize it, define operational settings, manage pricing or certificates where configured, transfer ownership, and remove draft content safely.
-
-The main workflow starts in the admin course list. An admin creates a course, edits its metadata and settings, builds or manages related tabs, changes status, and later transfers, exports, or deletes the course when needed.
+For HR and L&D teams, this is the control center for the learning catalog. It keeps course ownership, status, settings, pricing, certificates, enrollment, language variants, and export actions inside one governed workflow.
 
 ## Who Uses It
 
-- Content creators create and update courses they own.
-- L&D admins manage the wider course library and publishing workflow.
-- Tenant admins configure course settings, certificates, pricing, sharing, and ownership.
-- Managing tenant admins can export eligible master courses to other tenants.
+- Content creators creating and maintaining courses they own.
+- L&D administrators managing the broader course catalog and publication flow.
+- Course administrators configuring settings, certificates, pricing, language variants, enrollment, and ownership.
+- Managing-tenant administrators exporting eligible master courses to other tenants.
 
 ## Feature Functions
 
-- Create standard courses from the admin create page.
-- Browse manageable courses from the admin course list.
+- Create standard courses from the admin create workflow.
+- Choose supported course types where the tenant configuration allows them.
+- Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
 - Change course status, including draft and published states.
-- Configure course settings such as certificate behavior and lesson-related options.
-- Manage course pricing when Stripe is configured.
-- Add, delete, and generate course language variants.
+- Configure course settings such as certificate behavior and lesson sequencing options.
+- Manage course pricing when Stripe pricing is configured.
+- Add, edit, delete, and generate course language variants.
+- Manage course enrollment for users and groups from the course edit area.
 - Transfer course ownership to another eligible user.
-- Delete one draft course or bulk delete selected draft courses.
-- Export supported courses as SCORM packages or master courses where permissions and configuration allow it.
+- Delete draft courses individually or in bulk.
+- Export supported courses as SCORM packages or master-course exports when permissions and configuration allow it.
 
 ## End-User Value
 
-This feature gives L&D teams governance over the training catalog. Teams can prepare content privately, publish it when ready, keep ownership accountable, and localize course content for multilingual learners.
+The feature gives L&D teams governance over the training library. Teams can prepare courses before learners see them, publish only when content is ready, keep accountability through ownership, and maintain multilingual versions for different learner populations.
 
-Operationally, the feature reduces risk by enforcing permissions, preventing deletion of published courses, and keeping settings such as certificates, pricing, and exports inside the course management workflow.
+Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
 
 ## How It Works
 
-Admins enter the course management area from `/admin/courses`. Creating a course validates required data and redirects to the edit course screen. The edit screen is tab-based, with status, curriculum, enrollment, pricing, settings, sharing, and other course-type-specific sections shown according to course capabilities and tenant configuration.
+Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose the relevant management areas for that course.
 
-Course mutations are permission-gated. Full course admins can update managed courses, while content creators can update their own courses when they have the own-course permission. Language management is handled from the edit screen through available locales and base-language rules.
+The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
+
+Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. Language operations respect supported-language and base-language rules.
 
 ## Key Technical Context
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
-- Routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
-- Course create, update, settings, language, deletion, SCORM export, master export, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
-- Key permissions include `COURSE_CREATE`, `COURSE_READ_MANAGEABLE`, `COURSE_UPDATE`, `COURSE_UPDATE_OWN`, `COURSE_DELETE`, and `COURSE_EXPORT`.
-- The API enforces ownership-sensitive updates and blocks deletion of published courses.
-- The edit UI adapts to course type, enabled integrations, available locales, AI/Luma configuration, Stripe configuration, and managing-tenant status.
+- Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
+- Course create, update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
+- Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
+- The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 
 ## Test Evidence
 
-Frontend E2E tests in `apps/web/e2e/specs/courses` cover creating courses, blocking invalid course data, updating course settings, updating course status, deleting draft courses, bulk deleting draft courses, transferring course ownership, student-mode preview, and course language variants.
-
-Source-level API evidence shows permission checks and service behavior for course creation, updates, settings, language management, deletion, ownership transfer, and export operations. The cited Playwright coverage focuses on the primary admin workflows.
+- Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
+- Source-level API evidence covers permission checks and service paths for course creation, updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.

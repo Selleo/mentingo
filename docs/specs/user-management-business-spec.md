@@ -2,53 +2,50 @@
 
 ## Business Overview
 
-User management lets HR and L&D admins manage people inside a tenant. Admins can browse users, filter and sort the user list, create users, update identity fields, assign roles and groups, import users from a file, archive accounts, and delete eligible learner accounts.
+User Management lets HR and L&D administrators manage people inside a tenant. Admins can browse users, filter and sort the user list, create users, update user details, assign roles and groups, import users from a file, archive accounts, and delete eligible learner accounts.
 
-For HR and L&D teams, this feature turns organizational structure into learning access. Users can be assigned to roles and groups that control what they can do and what training they can receive. Bulk actions reduce repetitive admin work when onboarding teams, reorganizing groups, or cleaning up old learner records.
+For learning operations, this turns organizational structure into platform access. Roles control what a person can do, groups help assign or segment training, and account lifecycle actions help teams keep the tenant clean as people join, move teams, or leave.
 
-The main workflow starts on the admin users page. An admin searches or filters users, selects one user for details or selects many users for bulk changes, and applies updates. Mentingo validates the change, updates related access, and keeps user sessions consistent when roles change.
+The main workflow starts on the admin users page. An administrator finds users through search and filters, opens details for one user or selects many users for bulk action, and Mentingo validates and applies the change while keeping sessions and permissions consistent.
 
 ## Who Uses It
 
-- HR admins create, import, update, archive, and delete tenant users.
-- L&D admins assign groups and roles so people receive the right learning access.
-- Platform admins use user details and permission visibility to audit access.
+- HR administrators create, import, update, archive, and delete learner accounts.
+- L&D administrators assign roles and groups so people receive the right learning access.
+- Platform administrators inspect user permissions and status for access review.
 - Learners benefit indirectly because their role, group, language, and account status determine their learning experience.
 
 ## Feature Functions
 
-- Browse, filter, sort, paginate, and select users.
-- Create individual users with identity, role, and language.
-- Import many users from a CSV or spreadsheet-style file.
-- Assign roles to one user or many users.
-- Assign groups to one user or many users.
-- Archive users from a details page or bulk action.
-- Delete selected student users while preventing self-deletion and non-student deletion.
-- Show a user's effective permissions from assigned roles.
+- Browse, search, filter, sort, paginate, and select users.
+- Create individual users with name, email, language, and one or more roles.
+- Import many users from an Excel/CSV-style file and show imported versus skipped results.
+- Update a user's identity fields, status, roles, and groups.
+- Bulk-update roles for selected users.
+- Bulk-update group assignments for selected users.
+- Archive users from the details page or through a bulk action.
+- Delete selected student-level users while preventing self-deletion and non-student deletion.
 
 ## End-User Value
 
-The feature reduces manual HR administration, supports structured learning delivery, and gives admins control over account lifecycle. Group and role management help map teams, departments, or learner segments to the right access. Guardrails around role changes and deletion reduce operational risk.
+User Management reduces manual administration and supports structured learning delivery. Admins can onboard individuals or groups, keep access aligned with organizational changes, and safely clean up old learner records without accidentally removing privileged accounts.
 
 ## How It Works
 
-Admins open the users page and use keyword, role, status, and group filters to find people. The table supports pagination, sorting, row selection, and navigation to user details. From details, an admin can change core user fields, status, roles, and groups.
+An admin opens the users page and filters by keyword, role, archived status, or group. The table supports sorting, pagination, row selection, role/group badges, and navigation to a user's details page. The details page lets the admin edit core fields, roles, groups, and archived status, and review effective permissions.
 
-For high-volume changes, admins select users and apply bulk role, group, archive, or delete actions. Bulk role changes cannot target the current admin's own account. Deletion is restricted to student-level users and cannot include the current user. When roles change, Mentingo revokes affected sessions and notifies users so their permissions are refreshed.
+For high-volume work, admins select users and apply bulk role, group, archive, or delete actions. Bulk role changes cannot include the current admin's own account. Deletion is limited to users who look like learner/student accounts and cannot include the actor; Mentingo soft-deletes eligible users, anonymizes their core identity fields, and deflates affected course statistics.
 
-For imports, admins upload a file. Mentingo creates users, assigns known groups, reports imported users, and reports skipped users such as duplicate emails. Malformed files show an error without creating users.
+For imports, admins upload a supported spreadsheet file. Mentingo creates new users, assigns known groups from the file, reports imported users, and reports skipped users such as duplicate emails. Malformed files show an error without completing the import.
 
 ## Key Technical Context
 
 - Frontend user management lives in `apps/web/app/modules/Admin/Users` and is routed under `/admin/users`.
-- API endpoints are in `apps/api/src/user/user.controller.ts`; business rules are in `apps/api/src/user/user.service.ts`.
-- User management endpoints require `USER_MANAGE`; self-service account endpoints use account-level permissions.
-- User creation and updates publish user activity/invite events through existing outbox patterns.
-- Role changes revoke active sessions and send a websocket permission-updated notification.
-- Deletion is guarded so admins can delete only student users and cannot delete themselves.
+- User-management API endpoints are in `apps/api/src/user/user.controller.ts`; lifecycle and bulk rules are in `apps/api/src/user/user.service.ts`.
+- Administrative user-management endpoints require `PERMISSIONS.USER_MANAGE`; self-service profile, password, and onboarding endpoints use account-level permissions.
+- User creation creates onboarding/settings records, assigns role slugs, and may create a one-year invitation token for password setup.
+- Role changes revoke active sessions and send a websocket permissions-updated notification.
 
 ## Test Evidence
 
-Frontend E2E tests in `apps/web/e2e/specs/users` cover browsing, filtering, sorting, pagination, opening details, creating users, duplicate email handling, updating user fields, assigning roles and groups, importing users, bulk role updates, bulk group assignment, bulk archive, single archive, and guarded bulk deletion.
-
-Backend E2E tests in `apps/api/src/user/__tests__/user.controller.e2e-spec.ts` cover listing users, getting a user by ID, updating self-visible data and groups, password status and changes, deletion protections, and user details access. The web E2E suite provides stronger coverage for newer bulk and import workflows than the backend controller E2E file.
+Frontend E2E coverage verifies browsing, filtering, sorting, pagination, opening details, creating users, invalid and duplicate user creation, updating basic fields, updating roles and groups, importing users, bulk role updates, bulk group assignment, bulk archiving, single-user archiving, and guarded bulk deletion. Backend E2E coverage verifies listing users, fetching users, updating user/group data, password status and changes, deletion protections, user details access, bulk group updates, bulk role updates, own-role-change rejection, and non-admin authorization denial.

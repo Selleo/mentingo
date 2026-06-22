@@ -2,52 +2,55 @@
 
 ## Business Overview
 
-Announcements and Notifications give the platform a controlled communication channel for operational updates, learning reminders, and group-specific messages. Administrators can publish multilingual announcements immediately or schedule them for later delivery.
+Announcements and Notifications give Mentingo a built-in communication channel for learning operations. Administrators and permitted content creators can publish updates for everyone or for a selected group, while learners receive those messages in the notification popover and notification center.
 
-The notification center gives learners and staff a persistent place to read, mark, and revisit messages.
+For HR and L&D teams, this supports planned and targeted communication: onboarding reminders, course-related updates, live-training notices, compliance nudges, and group-specific messages that should stay close to the learning experience.
+
+The main workflow has two sides. A manager creates a localized announcement, chooses the audience, decides whether it should publish now or later, and optionally enables email delivery. A learner sees relevant unread messages, opens them from the notification popover or `/notifications`, and marks one or all messages as read.
 
 ## Who Uses It
 
-- Administrators who publish tenant-wide or group-specific announcements.
-- HR and L&D teams who need scheduled communication around learning programs.
-- Learners who receive and read notifications.
-- Trainers and course managers who need a consistent way to reach participants when linked workflows generate announcements.
+- Administrators publish organization-wide announcements, delete outdated messages, and review the tenant's announcement history.
+- Content creators with announcement permissions publish updates for learning audiences they manage.
+- HR and L&D teams schedule multilingual reminders or program updates for learners and selected groups.
+- Learners read relevant announcements, track unread messages, and clear notifications after review.
 
 ## Feature Functions
 
-- Create announcements with one or more language translations.
-- Choose the base language for fallback content.
-- Target all users or a specific group.
-- Publish immediately or schedule for a future date and time.
-- Optionally send announcement emails.
-- Show unread counts and unread badges.
-- Mark one announcement as read or mark all as read.
-- Delete announcements when permitted.
-- Load paginated announcement history in the notification center.
-- Localize title and content according to the user interface language.
+- Create localized announcements with a base language and one or more translations.
+- Target all users or a specific group so messages reach the right learners.
+- Publish announcements immediately or schedule them for future delivery.
+- Optionally send email copies when an announcement is published.
+- Show unread counts and highlighted unread messages in the notification experience.
+- Let learners mark one announcement or all announcements as read.
+- Load more announcement history when the notification center has additional pages.
+- Let users with delete permission remove announcements from the visible feed.
 
 ## End-User Value
 
-Learners receive relevant updates in the platform and, when configured, by email. Administrators can coordinate communication without relying on external tools. Group targeting keeps messages focused, while scheduled delivery supports planned program communication.
+Learners receive learning-related updates where they already work, instead of relying only on external email or chat tools. HR and L&D teams can coordinate communication across languages, audiences, and timing while keeping the message history available inside Mentingo.
+
+Group targeting improves relevance: learners see updates meant for them, while unrelated groups are not interrupted by messages they do not need.
 
 ## How It Works
 
-Administrators create announcements from the notification UI. The system validates translations, base language, target group, and scheduling rules. Immediate announcements are delivered right away; scheduled announcements are claimed and published when due.
+A permitted user opens the notification center and creates an announcement. They write the title and content for the selected language, add more language versions when needed, choose everyone or a group, and decide whether to schedule the message or send email. Mentingo validates the base language, duplicate languages, required content, schedule step, and permissions.
 
-Published announcements create user-specific notification records. Users see unread counts, can mark messages as read, and can browse their own feed. Administrators and permitted users can also view broader announcement history and delete announcements.
+If the announcement is published immediately, Mentingo delivers it to the matching users. If it is scheduled, the scheduler later claims due announcements tenant by tenant and then delivers them. Learners see their own feed and unread count; managers with announcement management permissions see the broader admin announcement feed.
 
-Email delivery is event-driven. When an announcement is published and email sending is enabled, recipients receive localized content using the best available translation fallback.
+System-generated announcements can also use the same scheduling and delivery services for source-driven messages such as live-training or course-reminder flows.
 
 ## Key Technical Context
 
-- Frontend route: `/notifications`.
-- API endpoints are implemented under `apps/api/src/announcements`.
-- Permissions include `ANNOUNCEMENT_READ`, `ANNOUNCEMENT_CREATE`, and `ANNOUNCEMENT_DELETE`.
-- Delivery is split across announcement service, scheduler service, delivery service, and email event handler.
-- Scheduled announcements are stored as scheduled, later published by the scheduler, then delivered to users.
-- Announcement events also support source-driven system announcements, including Live Training email templates.
+- Frontend notification center lives at `/notifications` in `apps/web/app/modules/Notifications`.
+- API endpoints live in `apps/api/src/announcements/announcements.controller.ts`.
+- Access is controlled by `ANNOUNCEMENT_READ`, `ANNOUNCEMENT_CREATE`, and `ANNOUNCEMENT_DELETE`.
+- Scheduling and publishing are handled by `AnnouncementsSchedulerService`; delivery to user feeds is handled by `AnnouncementsDeliveryService`.
+- Announcement statuses are `scheduled` and `published`; source types include manual announcements, live training, and course due-date reminders.
+- Announcement creation and read activity publish events that activity logs and email delivery consume.
 
 ## Test Evidence
 
-- API E2E coverage verifies fetching announcements, language fallback, unread counts, current-user feeds, group targeting, creation validation, scheduled delivery, read/read-all actions, soft deletion, and permission denial for unauthorized users.
-- Web E2E coverage verifies learner reading flows, notification center navigation, mark-read and mark-all-read behavior, pagination, localized content, admin creation, group-specific announcements, and deletion.
+API E2E coverage verifies fetching announcement feeds, localized responses, unread counts, current-user feeds, group visibility, creation validation, scheduling, read/read-all actions, soft deletion, and permission denial for unauthorized users.
+
+Web E2E coverage verifies admin creation, localized creation, group announcements, deletion, learner reading from the popover, notification-center navigation, mark-one and mark-all read flows, pagination, localized content, and group visibility.

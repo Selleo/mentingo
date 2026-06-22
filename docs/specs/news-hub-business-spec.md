@@ -2,51 +2,50 @@
 
 ## Business Overview
 
-News Hub is the platform’s publishing area for company, learning, and program updates. It supports public and authenticated news browsing, multilingual content, drafts, rich media, and manager-controlled publishing.
+The News Hub gives HR, L&D, and internal communications teams a governed place to publish company and learning updates inside Mentingo. It turns ad hoc messages into structured news posts that learners can browse, open, and return to later.
 
-For HR and L&D teams, News Hub provides an editorial channel that can support learning campaigns, internal communication, onboarding updates, and public-facing education content when enabled.
+The feature supports both everyday learner communication and editorial work. Learners see published news in their current interface language, while authorized news managers can create drafts, prepare localized versions, add rich content, and decide whether a published item can also be read by public visitors.
+
+For HR and L&D, the value is consistency: policy updates, program announcements, platform changes, or training-related messages can live in the same learning environment where employees already complete courses and check announcements.
 
 ## Who Uses It
 
-- Administrators and content managers who create and publish news.
-- Course and learning program owners who communicate updates.
-- Learners and employees who browse published news.
-- Public visitors when unregistered news access is enabled.
+- HR and L&D administrators publish learning-program updates, policy notices, or internal communications that should be visible in the learner portal.
+- Content managers prepare drafts, enrich posts with images or embedded resources, and review the post before publishing.
+- Learners browse current news, open full articles, and move between related posts without leaving Mentingo.
+- Public visitors can read selected published posts when the tenant allows public News access and the specific post is marked public.
 
 ## Feature Functions
 
-- Browse published news with custom pagination.
-- View news details with cover image, summary, author, publish date, rich content, table of contents, and previous/next navigation.
-- Create draft news items.
-- Edit title, summary, status, public visibility, cover image, and rich content.
-- Add, update, or remove language versions subject to base-language rules.
-- Upload and embed images, documents, presentations, videos, and other supported resources.
-- Preview news content before publishing.
-- Delete or archive news when permitted.
-- Separate published and draft views for users with management permissions.
-- Allow public access only when tenant settings and item visibility permit it.
+- Browse published news in a paginated News Hub.
+- Open a news detail page with title, summary, cover image, author, publication date, rich content, table of contents, and previous or next navigation.
+- Create draft news posts from the News page.
+- Edit title, summary, content, status, visibility, and cover image before publishing.
+- Manage localized news versions so different audiences can read the same update in their selected language.
+- Upload and embed supporting files, images, and videos in rich news content.
+- Preview rich content before publishing.
+- Limit draft, edit, delete, and public-read behavior through tenant settings, post visibility, publication status, and news permissions.
 
 ## End-User Value
 
-Learners get a central place for current organizational and learning-related updates. Content teams can prepare drafts, publish multilingual articles, and embed supporting assets without leaving the platform. Public access settings let organizations decide whether news should also support external communication.
+News Hub gives learners a clear source for organizational and learning-related updates, while HR and L&D teams get a controlled publishing workflow instead of scattered messages. Multilingual content improves reach across international teams, and public/private visibility helps teams reuse Mentingo news for external-facing updates when appropriate.
 
 ## How It Works
 
-Published news is available through the News page according to tenant settings, user authentication, and item-level public visibility. Managers can create an empty draft, edit content through the news form, upload resources, preview the article, and publish when ready.
+A news manager opens the News page, creates an empty draft, and fills in the post in the News form. The form supports a cover image, title, summary, rich content, publication status, public visibility, and language selection. Managers can preview the rich content before saving and can return later to update or delete the post.
 
-The detail page renders the localized article, cover media, metadata, rich content, and adjacent article links. Resource access is checked so private news assets are not exposed to unauthorized visitors.
+Learners and visitors open the News page to see published items. The list highlights the first item on the first page, paginates the rest, and opens each post into a detailed article view. On the detail page, Mentingo renders the localized content, supporting media, article metadata, table of contents, and previous/next post navigation.
 
-Management actions are permission-controlled. Users with global or own-news permissions can access draft lists, edit allowed items, manage languages, upload resources, and archive news.
+Drafts are visible only to users who can manage news. Public visitors can access the News Hub only when public News access is enabled for the tenant and the post itself is published and public.
 
 ## Key Technical Context
 
-- Frontend routes include `/news`, `/news/:newsId`, `/news/add`, and `/news/:newsId/edit`.
-- Public list, detail, and resource endpoints are available under `apps/api/src/news`, with manager-only endpoints for draft, preview, create, update, language management, delete, and upload.
-- Permissions include `NEWS_READ_PUBLIC`, `NEWS_MANAGE`, and `NEWS_MANAGE_OWN`.
-- News visibility depends on the News feature flag, unregistered-user news access setting, authentication state, article status, and `isPublic`.
-- Resource uploads support common document, video, image, spreadsheet, and presentation formats.
+- The user-facing web routes are `/news`, `/news/:newsId`, `/news/add`, and `/news/:newsId/edit`, implemented under `apps/web/app/modules/News`.
+- The backend News API lives in `apps/api/src/news`; it exposes public read routes, manager draft routes, preview generation, localized updates, deletion, and resource upload.
+- News management uses `PERMISSIONS.NEWS_MANAGE` and `PERMISSIONS.NEWS_MANAGE_OWN`; public reading is gated by tenant News settings, post status, post visibility, and `PERMISSIONS.NEWS_READ_PUBLIC`.
+- News content follows the active content language and supports localized resource handling through the shared language selector pattern.
+- Rich text uploads reuse the existing Mentingo upload pipeline for images, documents, and videos attached to the news entity.
 
 ## Test Evidence
 
-- Web E2E coverage verifies list browsing, detail opening, admin create/update/delete flows, public access to published news, public denial for private news, and role-specific browsing for content creators and students.
-- Backend behavior is evidenced by the News controller and service implementation. No dedicated backend News E2E spec was found in the current API test tree.
+Frontend Playwright coverage proves that admins can browse, open, create, update, and delete news, and that visitors can access published public news while private news stays hidden. The current source search did not find dedicated backend News E2E specs, so backend behavior is evidenced primarily by controller/service implementation and the frontend E2E flows that exercise the API.

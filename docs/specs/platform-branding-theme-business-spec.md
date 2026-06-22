@@ -1,48 +1,50 @@
-# Platform Branding and Theme Business Spec
+# Platform Branding Theme Business Spec
 
 ## Business Overview
 
-Platform Branding and Theme lets administrators customize the tenant’s visual identity. The feature covers platform logos, simple logos, login background images, certificate backgrounds, and theme colors.
+Platform Branding and Theme let administrators adapt Mentingo's visual identity to the tenant's organization. The feature supports logos, login imagery, certificate background imagery, and theme colors so the learning experience can feel like an extension of the company's own environment.
 
-For HR and L&D teams, this supports white-label presentation and a more trusted learner experience. Learners see the platform as part of their organization rather than a generic learning tool.
+This is especially useful for HR and L&D rollouts where learner trust and recognition matter. A branded login page, consistent platform logo, and organization-specific certificates help employees understand that Mentingo is part of their company's learning ecosystem.
+
+The customization workflow is managed from Settings by authorized administrators. They can upload or remove supported branding assets and adjust the primary and contrast colors used across the interface.
 
 ## Who Uses It
 
-- Platform admins who maintain tenant branding.
-- HR and L&D administrators who align the LMS with internal identity guidelines.
-- Learners who experience branded navigation, login screens, and certificates.
-- External certificate viewers who see tenant-branded certificate assets.
+- Tenant administrators configure platform logos, login imagery, certificate imagery, and color settings for the organization.
+- HR and L&D teams use branding to make learning programs feel official and recognizable to employees.
+- Learners benefit from a more familiar and trusted platform experience when Mentingo reflects the organization's identity.
 
 ## Feature Functions
 
 - Upload and remove the main platform logo.
 - Upload and remove the simple platform logo.
 - Upload and remove the login background image.
-- Upload and remove the default certificate background image.
-- Change primary and contrast theme colors.
-- Preview draft theme colors before saving.
-- Cancel theme color edits and restore the last saved colors.
-- Serve versioned or cached branding image URLs to client screens.
+- Upload and remove the certificate background image.
+- Change the platform primary color and contrast color.
+- Preview color changes in the interface before saving.
+- Cancel unsaved color changes and restore the last saved theme.
+- Serve configured branding assets through public, cache-aware image URLs.
 
 ## End-User Value
 
-Organizations can keep the LMS visually aligned with their brand. Learners get a consistent experience from login through course navigation and certificate sharing, while administrators can update visuals without developer involvement.
+Branding improves platform recognition and learner confidence. HR and L&D teams can present training, certificates, and login experiences under the organization's visual identity, while administrators retain control over updates without needing engineering support.
 
 ## How It Works
 
-Administrators open the Platform Customization tab in Settings. Image inputs upload branding assets to the backend and update global settings. Remove actions clear the selected asset. Theme color controls apply draft colors immediately in the browser, then persist them only when the administrator saves.
+An administrator opens Settings and switches to the platform customization area. From there, Mentingo offers upload controls for platform logos, login background, and certificate background. When a file is uploaded, the tenant's public settings update so the relevant part of the product can render the new asset.
 
-Global settings expose the saved assets and color values so the app can render tenant-specific branding across public and authenticated screens.
+Theme color controls let the administrator adjust the primary and contrast colors. Mentingo applies color changes live while editing, then saves them only when the administrator confirms. Canceling restores the last saved colors so draft changes do not accidentally alter the platform.
+
+Public pages can request the configured assets through versioned image URLs. This lets unauthenticated experiences such as the login page show the tenant's branding while still keeping asset updates cache-friendly.
 
 ## Key Technical Context
 
-- Frontend customization lives in `CustomizePlatformTabContent`, `OrganizationTheme`, logo forms, login background upload, and certificate background upload components.
-- Theme runtime behavior lives in `apps/web/app/modules/Theme`.
-- API endpoints include platform logo, simple logo, login background, certificate background, and color schema settings under `apps/api/src/settings`.
-- Hex colors are validated with the shared theme color regex.
-- Settings image endpoints support versioned URLs and cached image responses.
+- The customization UI is assembled in `apps/web/app/modules/Dashboard/Settings/components/admin/CustomizePlatformTabContent.tsx`.
+- Theme editing is implemented by `OrganizationTheme` and `apps/web/app/modules/Theme`, which updates CSS color variables for live preview.
+- Branding asset and color updates are handled by the Settings API in `apps/api/src/settings/settings.controller.ts`.
+- Administrative updates require `PERMISSIONS.SETTINGS_MANAGE`; asset read endpoints are public where unauthenticated pages need branding.
+- File uploads reuse existing image validation and settings-image streaming, including versioned/cached URLs for configured assets.
 
 ## Test Evidence
 
-- Web E2E coverage verifies upload and removal for platform logo, simple platform logo, login background image, and certificate background image; it also verifies theme color save-after-reload and cancel-without-persisting behavior.
-- API E2E coverage verifies global settings expose versioned image URLs, color schema updates, invalid color rejection, permission denial, and login background public/cached image behavior.
+Frontend Playwright coverage verifies that admins can upload and remove platform logo, simple logo, login background, and certificate background assets; it also verifies saving theme colors across reloads and canceling draft color changes. Backend E2E coverage verifies versioned settings image URLs, color-schema validation and permission checks, and cache-aware login-background image responses including 304 behavior.

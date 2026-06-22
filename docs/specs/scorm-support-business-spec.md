@@ -2,51 +2,50 @@
 
 ## Business Overview
 
-SCORM support lets Mentingo import, deliver, track, and export standards-based e-learning packages. This allows HR and L&D teams to use vendor-supplied training, legacy SCORM content, and internally authored SCORM modules inside the same LMS as native courses.
+SCORM Support lets Mentingo import, deliver, track, and export standards-based e-learning packages. It allows HR and L&D teams to use vendor-supplied training, legacy SCORM modules, and internally authored SCORM content inside the same platform as native Mentingo courses.
 
-The feature covers two major workflows: importing SCORM packages as full courses or individual lessons, and running SCORM content for learners with progress persistence. It also supports exporting Mentingo courses as SCORM packages when organizations need portability.
+The feature supports both course creation and learner delivery. Administrators can create a full course from a SCORM package or add SCORM as a lesson inside an existing curriculum. Learners can launch the package, move between SCOs when the package has multiple sections, resume previous runtime state, and complete the lesson when SCORM completion rules are satisfied.
+
+For organizations with existing SCORM investments, this reduces migration friction. Mentingo can host SCORM material while keeping learner progress, completion, certificates, and reporting in the same LMS environment.
 
 ## Who Uses It
 
-- Administrators importing SCORM packages as complete courses.
-- Course creators attaching SCORM packages as lessons inside existing curricula.
-- Learners launching SCORM lessons, resuming previous progress, navigating SCOs, and completing packages.
-- L&D teams exporting compatible course content for external LMS environments.
+- Course administrators import SCORM packages as new courses when reusing vendor or legacy training.
+- Course creators add SCORM packages as lessons inside existing curricula.
+- Learners launch SCORM lessons, resume progress, navigate package sections, and complete the learning activity.
+- L&D teams export supported Mentingo courses as SCORM packages when content must be portable to another LMS.
 
 ## Feature Functions
 
-- Create a new SCORM course from a `.zip` package, title, category, language, description, and thumbnail.
-- Attach a SCORM package to an existing chapter as a lesson.
-- Upload large SCORM packages through resumable TUS import sessions.
+- Create a draft SCORM course from a `.zip` package, course metadata, category, language, and optional thumbnail.
+- Add a SCORM package as a lesson in an existing chapter.
+- Attach a separate SCORM package for another lesson language.
+- Upload large packages through resumable TUS import sessions.
 - Validate that imported packages contain a SCORM manifest.
-- Extract SCORM metadata into courses, chapters, lessons, packages, and SCO records.
 - Launch SCORM runtime sessions for authorized learners.
-- Persist SCORM runtime data on commit and finish events.
-- Resume learner state across launches.
-- Require all SCOs to complete successfully where package structure requires it.
-- Serve extracted SCORM content only to authorized learners and administrators.
+- Persist commit, finish, resume, and multi-SCO completion state.
 - Export supported Mentingo course content as a SCORM zip.
 
 ## End-User Value
 
-Organizations can preserve existing SCORM investments while still using Mentingo as the central learning hub. Learners get continuity through resume and completion tracking. Administrators can mix SCORM and native learning content without having to operate separate systems.
+SCORM Support helps HR and L&D teams preserve existing content investments while centralizing learning delivery in Mentingo. Learners get a consistent launch and resume experience, and administrators can combine SCORM and native Mentingo lessons without operating separate LMS tools.
 
 ## How It Works
 
-Administrators start from the SCORM course creation screen or from curriculum lesson creation. The frontend collects metadata, uploads thumbnails through the file API, initializes a SCORM import session, streams the package through TUS, and completes the import. Smaller multipart import paths are also supported by the API.
+An administrator starts from SCORM course creation or from a curriculum lesson form. They upload a SCORM package, add required metadata, and submit the import. Mentingo validates the package, extracts the manifest and content, creates the course or lesson structure, and stores package/SCO metadata for runtime delivery.
 
-The backend validates the SCORM package, extracts files, stores package and SCO metadata, and creates the appropriate course or lesson structure. During learning, the web player exposes a SCORM 1.2-compatible runtime API using `scorm-again`; set, commit, and finish events are sent back to the API so learner progress can be stored and resumed.
+When a learner opens a SCORM lesson, Mentingo launches the selected SCO in the lesson player and exposes a SCORM 1.2-compatible runtime API to the package. Runtime changes are committed back to Mentingo, so the learner can resume later. When the package finishes, Mentingo updates learning progress and only treats multi-SCO content as complete when the required SCO completion rules are met.
+
+For portability, authorized course managers can export supported Mentingo course content as a SCORM package. Unsupported lesson types require confirmation and may be skipped during export.
 
 ## Key Technical Context
 
-- Main API implementation: `apps/api/src/scorm`.
-- Course export support: `apps/api/src/courses/course-scorm-export.service.ts` and related course controller endpoints.
-- Main web implementation: `apps/web/app/modules/Admin/Scorm`, `apps/web/app/modules/Courses/Lesson/ScormLesson`, and `apps/web/app/modules/Courses/Lesson/ScormLesson/useScormRuntime.ts`.
-- Course import permissions include `COURSE_CREATE`, `COURSE_UPDATE`, and `COURSE_UPDATE_OWN` depending on the operation.
-- Shared SCORM constants live in `packages/shared/src/constants/scorm.ts`.
+- The SCORM API is implemented in `apps/api/src/scorm`; course export support is in `apps/api/src/courses/course-scorm-export.service.ts`.
+- The main web surfaces are `apps/web/app/modules/Admin/Scorm`, `apps/web/app/modules/Courses/Lesson/ScormLesson`, and `useScormRuntime`.
+- Import endpoints require `COURSE_CREATE`, `COURSE_UPDATE`, or `COURSE_UPDATE_OWN` depending on whether the user creates a course or updates curriculum content.
+- Runtime launch, commit, finish, and content streaming require course read access and also verify learner/admin authorization for the package content.
+- Resumable package upload uses the SCORM TUS upload flow before completing the import.
 
 ## Test Evidence
 
-- API E2E covers SCORM course import, invalid manifest rejection, SCORM lesson import, attaching separate language packages, runtime launch/commit/resume/finish, completion requirements across SCOs, authorized content serving, and denial for unenrolled learners.
-- Web E2E covers choosing standard versus SCORM course creation, importing a SCORM course with generated chapters and lessons, invalid package submit blocking, hiding unsupported admin features on SCORM courses, creating/inspecting/deleting a SCORM lesson, learner launch/resume/fullscreen/finish, and multi-SCO navigation/completion.
-- Course export E2E covers exporting SCORM zips, rewriting reused lesson assets into packaged files, exporting rich-text video/downloadable/preview assets, and confirming export when unsupported lessons will be skipped.
+API E2E coverage verifies SCORM course import, invalid manifest rejection, lesson import, separate language package attachment, runtime launch/commit/resume/finish, multi-SCO completion requirements, authorized content serving, and denial for unenrolled learners. Web E2E coverage verifies SCORM course creation, invalid package blocking, SCORM lesson creation/inspection/deletion, learner launch/resume/fullscreen/finish, and multi-SCO navigation/completion. Course export E2E verifies SCORM zip export, packaged asset rewriting, rich-text asset export, and confirmation when unsupported lessons will be skipped.

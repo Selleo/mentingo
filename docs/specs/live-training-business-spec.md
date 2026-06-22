@@ -2,49 +2,53 @@
 
 ## Business Overview
 
-Live Training lets organizations run scheduled instructor-led sessions inside the learning platform. It supports both online sessions, when LiveKit is configured, and offline sessions for classroom or external meeting delivery.
+Live Training lets organizations run scheduled instructor-led sessions inside Mentingo. Sessions can be online when LiveKit is configured, or offline for classroom, workshop, or external meeting delivery.
 
-The feature connects live events to courses, calendar visibility, lesson completion, participant access, materials, and follow-up communication. It gives HR and L&D teams a structured way to blend self-paced learning with trainer-led experiences.
+For HR and L&D teams, Live Training supports blended learning: self-paced courses can be combined with trainer-led sessions, calendar scheduling, materials, attendance-related completion, and participant communication.
+
+Administrators create sessions from the Live Training or Calendar workflow, trainers host or support sessions, and learners open session details, join online rooms when available, and access the right materials before or after the session.
 
 ## Who Uses It
 
-- HR and L&D administrators who schedule and manage live training sessions.
-- Trainers and course authors who host or support sessions.
-- Learners who attend training and access before/after materials.
-- Managers who need visibility into mandatory or course-linked training activity.
+- HR and L&D administrators schedule and manage live training sessions.
+- Trainers and assigned hosts start, run, and end sessions.
+- Learners attend sessions, join online rooms when available, and access materials.
+- Course creators link live sessions to course lessons for blended-learning programs.
 
 ## Feature Functions
 
 - Create, edit, and delete standalone or course-linked live training events.
 - Configure delivery type, date, time, location, hosts, maximum participants, and viewer permissions.
 - Start, join, and end live training sessions through permission-controlled actions.
-- Attach before-session and after-session resources.
-- Link sessions to course lessons so attendance and completion can contribute to learning progress.
-- Restrict material visibility so learners receive follow-up resources only after the session is completed.
-- Sync scheduled sessions to the calendar and update/cancel the paired calendar event when the session changes.
-- Send session-related in-app and email announcements for eligible course participants.
+- Attach before-session and after-session materials.
+- Link sessions to course lessons so session completion can contribute to learning progress.
+- Restrict learner material visibility based on the session lifecycle.
+- Show scheduled sessions in the calendar and keep calendar events aligned after edits or deletion.
+- Send session-related in-app and email announcements to eligible participants.
 
 ## End-User Value
 
-Learners get one place to find session details, join online rooms when available, and access supporting materials at the right time. Trainers can manage live delivery without leaving the platform. L&D teams can combine live instruction with course workflows, making blended learning easier to coordinate and track.
+Learners get one place to find session details, join online rooms when available, and access supporting materials at the right time. Trainers can manage delivery without leaving the learning platform.
+
+L&D teams can coordinate blended programs more reliably because scheduling, course linkage, materials, participant visibility, and completion behavior are connected.
 
 ## How It Works
 
-Administrators create a live training item either from the Live Training workflow or directly from the Calendar. If online delivery is available, the system exposes online session actions; otherwise, sessions can be run as offline events.
+Administrators create a live training item with title, schedule, delivery type, hosts, location or online room behavior, participant visibility, and optional course links. Sessions can also be created from the calendar, which pre-fills scheduling context.
 
-When a live training is connected to a course lesson, learner access is based on enrollment and course visibility. Starting and ending sessions changes learner-facing state. For offline course-linked sessions, ending the session can complete the linked lesson for enrolled learners.
+When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
 
-Materials are split into before-session and after-session resources. Privileged users can manage and preview all materials, while learners receive access according to the session lifecycle.
+Materials are separated into before-session and after-session resources. Privileged users can manage and preview materials, while learners see resources according to their access and the session lifecycle. Live session state changes are pushed to open pages so learners and hosts see the current session state.
 
 ## Key Technical Context
 
 - Frontend routes include `/live-training/:id` and `/live-training/:id/room`.
-- API endpoints are implemented under `apps/api/src/live-training`.
-- Access is guarded by the Live Training feature flag and permissions such as `LIVE_TRAINING_READ`, `LIVE_TRAINING_CREATE`, `LIVE_TRAINING_UPDATE`, `LIVE_TRAINING_JOIN`, `LIVE_TRAINING_START`, and `LIVE_TRAINING_END`.
-- The web page listens for live training session socket updates and refetches state when sessions move through waiting, active, ended, or failed states.
-- Live Training integrates with Calendar, Course lessons, announcements, resource uploads, and LiveKit configuration.
+- Frontend implementation lives under `apps/web/app/modules/LiveTraining`.
+- API endpoints live under `apps/api/src/live-training`.
+- Access is guarded by the Live Training feature flag plus permissions such as `PERMISSIONS.LIVE_TRAINING_READ`, create/update/delete, join, start, end, and statistics.
+- Live Training integrates with Calendar, course lessons, resource uploads, announcements/email, realtime session updates, and LiveKit online rooms.
 
 ## Test Evidence
 
 - API E2E coverage verifies creation with calendar events, course links, host access, calendar updates, soft deletion, material visibility, learner visibility, session ending, and notification/email behavior.
-- Web E2E coverage verifies disabled online delivery when LiveKit is unavailable, lesson view behavior, material permissions, trainer visibility, offline session start/end, edit/delete, and calendar-driven creation/navigation.
+- Web E2E coverage verifies disabled online delivery when LiveKit is unavailable, live-training lesson view behavior, material permissions, trainer/host visibility, offline session start/end, edit/delete, and calendar-driven creation/navigation.

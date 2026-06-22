@@ -1,56 +1,51 @@
-# Quiz And Assessment Engine Business Spec
+# Quiz Assessment Engine Business Spec
 
 ## Business Overview
 
-The quiz and assessment engine lets content creators build scored quiz lessons and lets learners submit answers, receive scoring, retake quizzes when allowed, and complete lessons only when they satisfy quiz rules.
+The Quiz Assessment Engine lets course authors add scored checks inside Mentingo courses. It gives learners a structured way to answer questions, submit an assessment, see their score, and retake the quiz when the course rules allow it.
 
-For HR and L&D teams, quizzes provide a lightweight assessment mechanism inside courses. They can confirm that learners understood required material, enforce passing thresholds, and preserve assessment results for course progress and reporting.
+For HR and L&D teams, quizzes make learning completion more meaningful. Instead of tracking only whether a learner opened a lesson, teams can require a passing score, control retake attempts, and use quiz completion as part of course progression and certificate workflows.
 
-The main workflow starts in course authoring, where a creator adds a quiz lesson and configures questions plus quiz settings. Learners later answer every required question, submit the quiz, see their score, and retake it if attempts and cooldown rules allow.
+The core workflow starts in curriculum authoring, where a creator adds a quiz lesson and configures questions plus quiz settings. Learners later answer the quiz in the lesson player, submit their answers, and progress only when the quiz rules are satisfied.
 
 ## Who Uses It
 
-- Content creators design quiz lessons and configure question types.
-- L&D admins define passing thresholds, attempt limits, and cooldown rules.
-- Learners answer quiz questions and retake assessments when allowed.
-- Reporting users use quiz results to understand learner performance.
+- Course authors create quiz lessons and add question types that match the learning objective.
+- L&D administrators configure passing thresholds, attempt limits, and cooldowns for assessment governance.
+- Learners submit answers, review scores, and retake quizzes when allowed.
+- Training managers use quiz outcomes as evidence that learners understood required material.
 
 ## Feature Functions
 
-- Create quiz lessons with supported question types.
-- Support choice, true/false, brief response, detailed response, fill-in-the-blanks, and photo question rendering.
-- Configure passing threshold, attempts limit, and quiz cooldown.
-- Require learners to answer all quiz questions before submission.
-- Score submitted answers and store the learner's result.
-- Mark quiz lessons complete only when the learner passes.
-- Let learners retake quizzes when attempts and cooldown rules allow.
-- Redact quiz feedback for learners when course settings require it.
+- Create quiz lessons inside the curriculum builder.
+- Add single choice, multiple choice, true/false, photo choice, fill-in-the-blanks, brief response, and detailed response questions.
+- Reorder questions and edit quiz translations while locking structural edits in non-base languages.
+- Configure passing threshold, optional attempt limit, and optional retake cooldown.
+- Require learners to answer every quiz question before submission.
+- Score learner submissions and store question results.
+- Mark the lesson complete only when the learner passes the quiz.
+- Let learners retake eligible quizzes and show why retake is unavailable when attempts or cooldown rules block it.
 
 ## End-User Value
 
-Quizzes help organizations move beyond passive content completion. HR and L&D teams can prove that learners passed required checks, while learners get a clear score and retake path when training design allows another attempt.
-
-The threshold and cooldown settings make assessments more controllable for compliance-oriented or mastery-based courses.
+Quizzes help organizations confirm knowledge, not just content exposure. HR and L&D teams can add lightweight assessments to compliance, onboarding, or skills training, while learners get clear feedback about their score and whether another attempt is available.
 
 ## How It Works
 
-Creators configure quiz questions in the curriculum builder. They choose question types and set assessment rules such as passing threshold and retake limits.
+A course author adds a quiz lesson in the curriculum builder, gives it a title, chooses question types, fills in answer options or response fields, and configures assessment rules. If the course is translated, Mentingo allows translation edits while preventing non-base-language structural changes such as adding or reordering questions.
 
-Learners answer the quiz in the lesson player. Mentingo validates that all expected questions have answers, evaluates the submission, calculates the score, and updates quiz progress. If the score meets the passing threshold, the lesson is marked complete and course progress can advance. If not, sequence rules can keep later lessons locked.
+A learner opens the quiz lesson, answers every rendered question, and submits the form. Mentingo validates that no expected question is missing, evaluates the answers, calculates the percentage score, and compares the result with the passing threshold. Passing submissions complete the lesson and can unlock course progression; failed submissions keep progression rules in place.
 
-When a learner retakes a quiz, the system clears the previous student answers only if the learner is eligible under attempt and cooldown rules, then lets the learner submit a new attempt.
+When a learner retakes a quiz, Mentingo first checks the attempt limit and cooldown. If retake is allowed, previous answers are cleared and a new attempt begins. If not, the retake button remains disabled and the interface explains the remaining limit or cooldown.
 
 ## Key Technical Context
 
-- Learner quiz UI lives in `apps/web/app/modules/Courses/Lesson/Quiz.tsx` and `apps/web/app/modules/Courses/Lesson/Question`.
-- Quiz authoring UI lives under `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm`.
-- Quiz evaluation and retake endpoints are in `apps/api/src/lesson/lesson.controller.ts`.
-- Answer evaluation logic is in `apps/api/src/questions/question.service.ts`.
-- Quiz completion updates student lesson progress through `StudentLessonProgressService`.
-- Access uses learner progress permissions: `LEARNING_PROGRESS_UPDATE` or `LEARNING_MODE_USE`.
+- Learner quiz delivery lives in `apps/web/app/modules/Courses/Lesson/Quiz.tsx` and the question components under `apps/web/app/modules/Courses/Lesson/Question`.
+- Quiz authoring lives in `apps/web/app/modules/Admin/EditCourse/CourseLessons/NewLesson/QuizLessonForm`.
+- Quiz evaluation and retake behavior are implemented in `apps/api/src/lesson/services/lesson.service.ts`; question scoring lives in `apps/api/src/questions/question.service.ts`.
+- Passing quiz completion publishes a `QuizCompletedEvent` through the outbox and updates student lesson progress.
+- Match-words and scale question types exist in code paths but are not exposed in the current question selector; brief and detailed responses currently evaluate as passing when a single answer is submitted.
 
 ## Test Evidence
 
-Frontend E2E tests cover quiz creation for choice, text, fill-in-the-blanks, and photo questions, plus unavailable question types in the curriculum builder. Learner tests cover submitting a quiz with every rendered question type, retaking a quiz lesson, retaking a final quiz after certificate completion, and sequence behavior after failing a required quiz.
-
-Source evidence shows backend validation for missing answers, duplicate completed submissions, passing-threshold scoring, answer storage, retake attempts, cooldown checks, and quiz completion events.
+Frontend E2E coverage verifies quiz authoring for choice, text, fill-in-the-blanks, and photo questions; confirms unavailable question types in the builder; verifies learner submission with every rendered question type; covers quiz retake, final-quiz retake after certificate completion, and blocked progression after failing a required quiz. Source evidence covers backend validation for missing answers, duplicate completed submissions, threshold scoring, answer storage, retake attempts, cooldown checks, and quiz completion events.

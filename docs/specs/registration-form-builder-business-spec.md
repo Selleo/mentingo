@@ -2,48 +2,50 @@
 
 ## Business Overview
 
-Registration Form Builder lets administrators add custom checkbox fields to the registration process. It supports multilingual labels, required fields, display order, and archive/restore behavior.
+Registration Form Builder lets administrators add organization-specific checkbox acknowledgements to the public registration form. It supports multilingual labels, required checkboxes, display order, and archive/restore behavior.
 
-For HR and L&D teams, this helps capture explicit acknowledgements during account creation, such as policy consent, terms confirmation, data-processing acknowledgement, or organization-specific registration requirements.
+For HR and L&D teams, this helps collect consent-style confirmations during account creation. Examples include acknowledging platform rules, accepting training policies, confirming data-processing notices, or agreeing to organization-specific onboarding requirements.
+
+The feature connects tenant configuration with the sign-up experience. Administrators maintain active and archived registration fields in Settings, and new users see the localized active fields when creating an account.
 
 ## Who Uses It
 
-- HR administrators who define registration requirements.
-- Platform administrators who manage tenant onboarding controls.
-- New users who answer custom registration fields during sign-up.
-- Auditors who need consistent consent-style registration inputs.
+- HR administrators define required registration acknowledgements for learner onboarding.
+- Platform administrators maintain registration requirements as policies change.
+- New users complete required checkboxes before creating an account.
+- Compliance or operations teams benefit from a consistent sign-up flow for organization-specific confirmations.
 
 ## Feature Functions
 
 - Add custom checkbox fields to the registration form.
-- Provide localized labels for supported languages.
-- Mark a field as required or optional.
+- Provide localized checkbox labels for supported languages.
+- Mark each checkbox as required or optional.
 - Reorder fields with drag-and-drop.
-- Save new and edited fields.
-- Archive persisted fields without deleting their history.
-- Restore archived fields.
-- Hide the builder from users without user-management permission.
+- Save new or edited registration fields.
+- Archive persisted fields so they no longer appear during sign-up.
+- Restore archived fields when an old requirement becomes active again.
+- Validate required labels before saving the builder configuration.
 
 ## End-User Value
 
-Administrators can tailor registration to organizational needs without custom development. Required checkboxes help ensure important acknowledgements are collected before account creation, while archived fields let teams retire old requirements without losing administrative control.
+Registration Form Builder lets teams adapt sign-up to their onboarding and compliance needs without custom development. Administrators can add, reorder, retire, and restore acknowledgement fields, while new users see only the active fields relevant to registration.
 
 ## How It Works
 
-Administrators open Platform Customization in Settings and use the Registration Form Builder card. They add checkbox fields, edit labels by language, set required status, reorder fields, and save the configuration.
+An administrator opens Settings, switches to platform customization, and uses the Registration Form Builder card. They can add a checkbox, enter localized labels, set whether it is required, reorder the list, and save the configuration.
 
-The public registration form requests the localized active fields for the user’s language. Archived fields remain visible to administrators but are not returned in the public localized form.
+When a new user opens registration, Mentingo requests the public registration form in the selected interface language. Active fields are rendered as checkboxes, required fields must be selected before submit, and archived fields are excluded from the public sign-up form.
+
+Administrators can still see archived fields in the builder. Archiving a persisted field immediately saves that archived state; restoring it makes the field available again after the builder state is saved.
 
 ## Key Technical Context
 
-- Builder UI lives in `RegistrationFormBuilder` under Settings platform customization.
-- Public registration fields are served by `GET /api/settings/registration-form?language=...`.
-- Admin management uses `GET /api/settings/admin/registration-form` and `PATCH /api/settings/admin/registration-form`.
-- Supported registration field type is currently checkbox.
-- Shared constants define registration form and field types in `packages/shared/src/constants/registrationForm.ts`.
+- The builder UI is `apps/web/app/modules/Dashboard/Settings/components/admin/RegistrationFormBuilder.tsx`, shown in platform customization when the current admin can manage users.
+- Public sign-up rendering is in `apps/web/app/modules/Auth/Register.page.tsx`.
+- Public registration fields come from `GET /settings/registration-form?language=...`; admin management uses `GET /settings/admin/registration-form` and `PATCH /settings/admin/registration-form`.
+- Admin registration-form API endpoints require `PERMISSIONS.SETTINGS_MANAGE`; the Settings UI also hides the builder when user-management access is missing.
+- Registration form persistence lives in `apps/api/src/settings/settings.service.ts`, which filters archived fields for public reads and normalizes display order after updates.
 
 ## Test Evidence
 
-- Web E2E coverage verifies adding/editing checkbox labels and required state, validation when labels are missing, and archiving/restoring persisted fields.
-- Settings permission-visibility E2E coverage verifies users without user-management permission do not see the registration form builder.
-- API schema and service evidence confirm localized public fields, admin inclusion of archived fields, and display-order normalization.
+Frontend Playwright coverage verifies adding and editing checkbox labels, required-state persistence, validation when labels are missing, and archiving/restoring persisted fields. Settings permission-visibility coverage verifies that users without user-management permission do not see the builder. Backend behavior is evidenced through Settings controller/service implementation; no dedicated backend registration-form E2E spec was found in this pass.

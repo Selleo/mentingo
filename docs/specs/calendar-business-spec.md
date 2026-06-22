@@ -2,49 +2,50 @@
 
 ## Business Overview
 
-Calendar gives learners, trainers, and administrators a consolidated schedule for time-based learning obligations. It surfaces live training events and mandatory course due dates in one view, helping teams understand what is coming up without checking multiple modules.
+Calendar gives learners, trainers, and administrators one place to see time-based learning commitments. It combines scheduled live training with mandatory course due dates so users do not need to inspect separate course and live-training screens to understand what is coming up.
 
-For HR and L&D operations, the calendar is the planning layer for instructor-led training and a reminder surface for required course completion.
+For HR and L&D operations, the calendar is a planning and coordination view. It helps administrators schedule instructor-led sessions in context and gives learners a clear reminder surface for required learning.
 
 ## Who Uses It
 
-- Learners who need to see upcoming live sessions and mandatory due dates.
-- Administrators who schedule training from a calendar view.
-- Trainers and course authors who need visibility into sessions they host or manage.
-- L&D managers who track time-sensitive learning commitments.
+- Learners checking upcoming live sessions and mandatory course deadlines.
+- Administrators scheduling live training from a calendar view.
+- Trainers and authors who need visibility into training sessions connected to them.
+- L&D managers reviewing time-sensitive learning obligations across the tenant.
 
 ## Feature Functions
 
-- Display calendar events by selected visible date range.
-- Show live training events and mandatory course due-date events.
-- Open event details from the calendar.
-- Create offline or online live training from a selected calendar date range when permitted.
+- Display calendar events for the visible date range.
+- Show live training events and mandatory course due-date events in a unified feed.
+- Open event details directly from the calendar.
 - Navigate from a live training event to the live training detail page.
-- Localize event details according to the selected interface language.
-- Respect feature flags and permissions for event visibility and creation.
+- Create an offline or online live training session from a selected calendar date range when permitted.
+- Localize event titles and details according to the selected language.
+- Apply permission, enrollment, authorship, host, and feature-flag rules before showing events or creation controls.
 
 ## End-User Value
 
-Learners can quickly see scheduled training and course deadlines. Administrators can schedule live sessions in the context of existing commitments. Trainers get a clearer view of events they host or author, reducing coordination gaps.
+Learners can quickly answer what training is scheduled and when mandatory courses are due. Administrators can create live sessions while seeing existing commitments, which reduces accidental scheduling conflicts. Trainers get a more direct view of events they host or manage.
 
 ## How It Works
 
-The web calendar requests events for the current date range and user timezone. The API combines eligible live training events and mandatory course due-date events, sorts them by start date, and returns a unified calendar feed.
+The calendar page requests events for the current date range, selected language, and user timezone. The API returns a normalized event list instead of exposing separate live-training and due-date queries to the web app.
 
-Event details are resolved by event source type. A live training event opens live training details, while a course due-date event opens course-related information. Creating from the calendar opens a live training dialog prefilled with the selected date range.
+Event details are resolved by source type. Live training events show session details and a link to the live-training page. Course due-date events represent mandatory group-course deadlines and show the relevant course deadline information.
 
-Visibility depends on the event source. Live training visibility considers management permissions, author or host status, all-user visibility settings, and linked course enrollment. Course due dates are shown for enrolled learners and users with relevant course management permissions.
+Course due-date events are synchronized from group-course due dates. The synchronization updates existing events, creates missing ones, and reactivates cancelled events instead of producing duplicate calendar records.
 
 ## Key Technical Context
 
 - Frontend route: `/calendar`.
+- Frontend implementation: `apps/web/app/modules/Calendar`.
+- API implementation: `apps/api/src/calendar`.
 - API endpoints: `GET /api/calendar/events` and `GET /api/calendar/events/:eventId`.
-- Access requires `CALENDAR_READ`.
-- Live training creation from calendar additionally requires Live Training to be enabled and `LIVE_TRAINING_CREATE`.
-- Event source types include Live Training and Course Due Date.
-- The Calendar service validates date ranges, applies tenant settings, and resolves source-specific detail views.
+- Access requires `PERMISSIONS.CALENDAR_READ`.
+- Creating live training from the calendar also depends on the Live Training feature and `PERMISSIONS.LIVE_TRAINING_CREATE`.
+- Supported event source types include Live Training and Course Due Date.
 
 ## Test Evidence
 
-- API E2E coverage verifies due-date event synchronization, update behavior, and reactivation of cancelled due-date events without duplicate UIDs.
-- Web E2E coverage verifies opening a Live Training calendar event, navigating to details, and creating an offline Live Training session from the calendar.
+- Web E2E coverage verifies opening a live training event from the calendar, seeing event details, navigating to the live-training detail page, and creating an offline live training session from the calendar.
+- API E2E coverage verifies due-date event synchronization, updating existing due-date events, creating missing due-date events, and reactivating cancelled events without duplicate UIDs.

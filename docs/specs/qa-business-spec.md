@@ -2,48 +2,50 @@
 
 ## Business Overview
 
-Q&A gives organizations a lightweight frequently asked questions area. It is separate from the Articles Knowledge Base: Q&A is designed for short, direct question-and-answer content, while the knowledge base is handled by the Articles feature with sections, drafts, and richer article publishing workflows.
+Q&A gives organizations a simple place for short question-and-answer guidance. It is useful for common HR, learning-program, platform, or onboarding questions that do not need the richer publishing workflow of Articles.
 
-The feature supports multilingual entries, public access settings, and permission-controlled editing, making it useful for onboarding, platform support, learning-program guidance, and internal HR answers.
+The feature supports learner self-service and administrator-controlled content maintenance. Learners can browse and open answers in the current language, while authorized administrators can create entries, edit translations, and decide whether Q&A should be visible to public visitors.
+
+For HR and L&D teams, Q&A reduces repetitive support work. It lets teams publish concise answers once, keep them consistent across languages, and make them available inside the same learning environment where employees take courses and read updates.
 
 ## Who Uses It
 
-- HR and L&D administrators who publish common answers.
-- Content creators who maintain localized Q&A entries.
-- Learners and employees who browse or search for answers.
-- Public visitors when guest Q&A access is enabled.
+- HR and L&D administrators publish frequently asked questions about learning programs, onboarding, or platform use.
+- Content administrators maintain localized Q&A entries and keep answers current as policies or processes change.
+- Learners browse the Q&A page to get direct answers without contacting support.
+- Public visitors can read Q&A entries when the tenant has enabled public Q&A access.
 
 ## Feature Functions
 
-- Browse a list of Q&A entries in an accordion-style interface.
-- Search and open a focused Q&A entry.
-- Create new Q&A items with a base language.
-- Edit question titles and answer descriptions by language.
-- Add or remove non-base language versions.
+- Browse Q&A entries in an accordion-style list.
+- Open a focused Q&A entry from a shared link or query parameter.
+- Create a Q&A entry with a selected base language.
+- Edit the question title and answer description for each available language.
+- Add and remove non-base language versions.
 - Delete Q&A entries when permitted.
-- Hide unsupported language variants from regular learners.
-- Gate guest access through tenant-level settings.
+- Hide entries from non-managers when the current language is not available.
+- Control whether Q&A and public Q&A access are enabled at tenant level.
 
 ## End-User Value
 
-Learners can answer common questions faster, reducing repetitive support requests. HR and L&D teams can keep guidance consistent across languages and decide whether answers should be available only to signed-in users or also to visitors.
+Q&A helps learners find answers quickly and gives HR or L&D teams a reusable support channel. Multilingual entries improve consistency across international teams, and public access controls let organizations decide whether the guidance is internal-only or visitor-facing.
 
 ## How It Works
 
-Users open the Q&A page and see available entries for the current language. Managers can create new entries, choose the base language, edit localized text, add extra language versions, and delete entries.
+A learner opens the Q&A page and sees available entries for the current interface language. Each entry expands to show the answer, and a focused Q&A link can open a specific answer directly.
 
-The system checks whether Q&A is enabled and whether guest access is allowed before returning public content. For signed-in users, permissions determine whether the user only reads the Q&A list or can manage entries.
+An administrator with Q&A management access can create a new entry, choose its base language, enter the title and description, and save it. When editing, the administrator can switch languages, add a missing translation, update localized text, or remove a non-base translation. The base language cannot be removed.
 
-Language management protects the base language: editors can add supported languages and remove non-base translations, but cannot delete the base-language version.
+Tenant settings determine whether Q&A is available at all and whether unauthenticated visitors may access it. If public access is disabled, guests are blocked even though signed-in users can still use Q&A when the feature is enabled.
 
 ## Key Technical Context
 
-- Frontend routes include `/qa`, `/qa/new`, and `/qa/:id`.
-- API endpoints live under `apps/api/src/qa`.
-- Access is controlled by the Q&A feature flag, unregistered Q&A access setting, and permissions such as `QA_READ_PUBLIC`, `QA_MANAGE`, and `QA_MANAGE_OWN`.
-- Q&A create, update, and delete operations publish activity events.
+- The user-facing routes are `/qa`, `/qa/new`, and `/qa/:id`, implemented under `apps/web/app/modules/QA`.
+- The backend Q&A API lives in `apps/api/src/qa` and exposes list, detail, create, update, language add/remove, and delete workflows.
+- Reading uses `PERMISSIONS.QA_READ_PUBLIC`; management API endpoints require `PERMISSIONS.QA_MANAGE`.
+- The Q&A page itself is public at the route level, but `ContentAccessGuard` and backend settings enforce tenant Q&A availability and unregistered-user access.
+- Q&A changes publish activity events through the outbox-backed Q&A event handlers.
 
 ## Test Evidence
 
-- API E2E coverage verifies authenticated and guest list access, disabled-feature behavior, guest-access denial, requested-language reads, create/update/delete, invalid body handling, language add/remove, duplicate language rejection, unsupported language rejection, and base-language deletion protection.
-- Web E2E coverage verifies list behavior, create/update/delete, public access, role access, settings gates, and language visibility/management flows.
+Frontend Playwright coverage verifies Q&A list behavior, create/update/delete flows, role-specific read/manage access, public access on/off behavior, feature-gate navigation, language visibility, and language add/update/delete management. Backend E2E coverage verifies authenticated and guest reads, disabled-feature and guest-access denial, requested-language reads, create/update/delete behavior, invalid bodies, duplicate or unsupported language handling, and base-language deletion protection.

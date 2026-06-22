@@ -70,9 +70,8 @@ Use this skill to explain how a Mentingo feature works and why it matters to HR 
 Frame the feature for HR and L&D stakeholders:
 
 - Who uses it: HR admins, L&D managers, content creators, learners, managers, support, or platform admins.
-- What workflow it improves: assigning learning, managing content, tracking progress, handling compliance, coordinating live training, answering learner questions, maintaining tenant settings, or operating the platform.
-- What value it creates: less manual work, clearer ownership, safer access control, better learner experience, better reporting, multilingual delivery, auditability, or operational consistency.
-- What user outcome matters: a learner completes training, an admin manages people/content faster, an L&D team proves participation, or HR reduces operational risk.
+- What concrete job they are trying to finish: building onboarding from internal documents, creating sales-technique training for a team, assigning compliance courses, practicing real-life roleplay scenarios, proving completion, or reviewing learner outcomes.
+- What value it creates: faster training creation, better learner practice, clearer ownership, safer access control, better reporting, multilingual delivery, auditability, or operational consistency.
 
 Keep implementation details as evidence, not the headline.
 
@@ -82,6 +81,21 @@ Translate implementation nouns into product nouns:
 - Say "HR can target a specific group", not "the service filters by `groupId`".
 - Say "the system excludes users who manage announcements", not "users with user-management permission are excluded", unless the permission detail is the point.
 - Say "due-date reminders reach the learner who needs to act", not "a direct announcement row is inserted".
+
+## Editorial Rules
+
+Apply these rules before writing or updating a spec.
+
+- Lead with business value, then explain mechanics. The first sentence of each section should make sense to an HR, L&D, manager, or learner audience without code knowledge.
+- Make roles concrete and source-backed. Name a role only when UI, route access, permissions, tests, or product copy show that role can actually use or benefit from the feature. If source evidence is weak, omit the role or mark it as an inference in `Key Technical Context`.
+- Write `Who Uses It` as persona + scenario + outcome, not generic role labels. Prefer "HR managers create onboarding courses from internal documentation" over "L&D admins accelerate training."
+- Order `Feature Functions` by user value. Put the most important business capabilities first; put availability rules, configuration gates, restrictions, and safeguards near the end or in `Key Technical Context`.
+- Keep `End-User Value` positive and outcome-focused. Do not spend this section on limitations, eligibility rules, configuration requirements, or implementation constraints.
+- Start `How It Works` with the human workflow: what the user wants, what they do, how Mentingo helps, and what visible result they get. Put configuration checks, empty-state rules, background processing, and source-code mechanics after the user-facing flow.
+- Explain external or internal platform names the first time they matter. For example, describe Luma as Mentingo's connected AI service for course generation, AI mentor behavior, or voice-mode configuration before relying on the name.
+- Do not promote invisible implementation details to product capabilities. If a user cannot directly understand or operate something in the UI, keep it in `Key Technical Context` or omit it.
+- Remove duplicate bullets and vague wording. Avoid unexplained phrases like "validity impact", "create or load a draft", "existing curriculum", "when supported by configuration", or "voice input" when the product meaning is really configuration or setup.
+- When a feature is powered mostly by an external service and source code shows only the integration boundary, describe the visible user conversation or workflow as an evidence-backed inference and keep vendor mechanics brief.
 
 ## File Output
 
@@ -110,7 +124,7 @@ Explain in a few paragraphs:
 
 ### Who Uses It
 
-List the primary roles and what each role does with the feature.
+List the primary roles and what each role does with the feature. Each bullet should include a concrete use case or outcome, not only a role name.
 
 ### Feature Functions
 
@@ -121,15 +135,21 @@ List the main things the feature lets users or the system do, phrased as product
 - Send updates to participants in a live training.
 - Let learners review unread messages.
 
-Do not describe functions as database writes, service methods, controller endpoints, queues, or permission checks. Move those details to `Key Technical Context` only if they are essential.
+Put the highest-value user capabilities first. Put restrictions, setup requirements, and configuration-dependent behavior last unless they are the main business point.
+
+Do not describe functions as database writes, service methods, controller endpoints, queues, permission checks, generated images, cache refreshes, or backend-only calculations. Move those details to `Key Technical Context` only if they are essential.
 
 ### End-User Value
 
 Summarize value in HR/L&D terms: operational efficiency, learning delivery, learner experience, reporting/compliance, access control, tenant isolation, or multilingual support when relevant.
 
+Focus this section on benefits. Put limitations and technical constraints in `How It Works` or `Key Technical Context`.
+
 ### How It Works
 
-Describe the workflow at product level in business language. Explain what the user does, what the system does for them, and what outcome appears in the product. Include only enough technical detail to make the behavior credible.
+Describe the workflow at product level in business language. Start with what the user is trying to accomplish, what they do, what Mentingo does for them, and what outcome appears in the product. Include only enough technical detail to make the behavior credible.
+
+If the implementation has important eligibility or setup rules, explain them after the main user-facing workflow. Do not open this section with configuration checks unless the configuration experience itself is the feature.
 
 Do not write database-shaped prose here. Avoid table names, record names, DTO names, permissions constants, repositories, and service internals. If the implementation has special targeting, delivery, access, or automation rules, translate them into user-facing behavior.
 
@@ -149,6 +169,7 @@ List only the most important implementation facts, usually 3-6 bullets. Prefer:
 - The main API/domain area if it affects the workflow.
 - Critical permissions, tenant isolation, or language behavior.
 - One or two source files that best support the feature summary.
+- Important external integrations or configuration boundaries, explained in product language.
 
 Do not list every controller, service, repository, schema, hook, generated method, or helper discovered during research.
 
@@ -163,3 +184,4 @@ Explain only the most important frontend E2E and backend E2E coverage: what user
 - Use exact feature terms from the product when discoverable.
 - Prefer active, business-readable language over code structure narration.
 - Do not oversell. If tests or source evidence do not prove a claim, label it as an inference.
+- Before finishing, reread the spec as a reviewer and remove unsupported roles, implementation-first bullets, duplicate capabilities, unexplained vendor terms, vague labels, and limitations placed in value sections.

@@ -1,54 +1,58 @@
-# Authentication And Account Access Business Spec
+# Authentication and Account Access Business Spec
 
 ## Business Overview
 
-Authentication and account access let learners, admins, content creators, and platform operators enter Mentingo through the right path for their organization. The feature covers standard email/password login, public registration when enabled, password recovery, magic-link login, MFA verification, SSO-aware screens, and logout.
+Authentication and Account Access control how people enter Mentingo and how the app keeps that access secure after login. The feature covers email/password sign-in, public registration when allowed, invite-based password creation, password recovery, magic-link login, MFA, OAuth/SSO entry points, token refresh, current-user resolution, and logout.
 
-For HR and L&D teams, this is the entry point to every learning workflow. It reduces support work by letting users recover accounts independently, supports stronger security through MFA and SSO enforcement, and respects tenant-level registration rules.
+For HR and L&D teams, reliable access is the start of every learning workflow. Learners need a low-friction way back into training, administrators need stronger controls for management accounts, and tenant operators need settings that match company security expectations.
 
-The main user workflow starts on the auth pages. A visitor signs in, registers, requests a reset link, uses a magic link, or completes MFA. After successful authentication, Mentingo sets the session and redirects the user into the learning experience, usually the course catalog.
+The main workflow begins on the auth pages. A visitor signs in, registers, follows an invite, requests a reset link, uses a magic link, or completes MFA. After successful authentication, Mentingo sets session cookies, resolves the user's permissions and onboarding state, and routes them into the app.
 
 ## Who Uses It
 
-- Learners use it to register, sign in, recover access, and continue training.
-- HR and L&D admins use it to access management workflows and protect admin accounts with MFA.
-- Platform admins use it with tenant-level SSO, registration, and security settings.
-- Public visitors use it when public registration, password recovery, or magic-link access is available.
+- Learners register when self-registration is open, sign in to continue courses, recover passwords, or use magic-link access when they cannot use a password.
+- Invited employees create their first password from an invitation email and then enter the course area.
+- HR and L&D administrators sign in to manage users, courses, reporting, announcements, and tenant learning operations.
+- Tenant administrators use MFA, SSO enforcement, invite-only registration, registration forms, and login branding settings to match company access policy.
 
 ## Feature Functions
 
-- Let users sign in with email and password.
-- Let visitors register new learner accounts when registration is open.
-- Send password recovery links and let users reset credentials.
-- Send magic-link emails for passwordless login.
-- Require MFA setup or verification when enabled by user preference or role policy.
-- Support OAuth/SSO entry points for Google, Microsoft, and Slack when configured.
-- Keep sessions active through refresh tokens and clear them on logout.
+- Let users sign in with email and password when password login is allowed.
+- Let visitors register new accounts when SSO enforcement and invite-only registration do not block self-registration.
+- Let invited users create a password from an email link.
+- Let users request password recovery emails and set a new password from a reset link.
+- Let users request and consume magic-link emails for passwordless login.
+- Require MFA verification when a user's settings or role policy require it.
+- Support Google, Microsoft, and Slack OAuth entry points when configured.
+- Refresh sessions with refresh tokens and clear session cookies on logout.
 
 ## End-User Value
 
-The feature improves learner experience and operational reliability by giving users several safe ways to access the platform. It helps HR reduce account-access support tickets, supports enterprise security expectations, and lets organizations control whether users can self-register or must use SSO/invitations.
+The feature gives learners and staff multiple safe ways to reach the platform without turning account access into an HR support queue. Password recovery, invite links, and magic links help users unblock themselves, while MFA and SSO support stronger controls for organizations that need them.
+
+Because current-user responses include permissions and onboarding state, Mentingo can send users to the right experience after login and protect management areas from users who should not access them.
 
 ## How It Works
 
-A user opens the login page and chooses a sign-in route. If email/password login is allowed, Mentingo validates the credentials, checks whether MFA is required, and either sends the user to MFA or into the app. If SSO is enforced, the UI hides the password flow and guides the user toward configured providers.
+A user chooses the appropriate auth path from the login area. For email/password login, Mentingo validates credentials, checks archived status, applies login rate limiting, and decides whether MFA is still required. If MFA is required, the user receives temporary auth cookies and must complete the MFA page before entering the app.
 
-Visitors can register when invite-only registration and SSO enforcement are not blocking it. The registration form validates required identity fields, password strength, age limit when configured, language, and any tenant-specific registration checkboxes. Successful registration creates the account, signs the user in, and sends them to the learning area.
+For registration, Mentingo checks tenant settings first. If SSO is enforced or registration is invite-only, self-registration is blocked. Otherwise, the registration flow validates identity fields, password rules, language, and tenant registration-form answers before creating the account and signing the user in.
 
-For recovery flows, a user submits their email, receives a reset or magic-link email, follows the link, and either sets a new password or signs in directly. MFA uses a setup code when the account has not configured MFA yet, then verifies time-based codes on later logins.
+For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.
 
 ## Key Technical Context
 
-- Frontend auth pages live in `apps/web/app/modules/Auth` and are routed under `/auth/*` in `apps/web/routes.ts`.
+- Frontend auth pages live in `apps/web/app/modules/Auth` under `/auth/*`.
 - API behavior is centered in `apps/api/src/auth/auth.controller.ts` and `apps/api/src/auth/auth.service.ts`.
-- Session state is cookie-based, with access and refresh token handling in the auth controller/service flow.
-- Tenant settings affect login and registration, especially SSO enforcement, invite-only registration, MFA-enforced roles, login assets, and registration form fields.
-- Auth responses include current-user permissions, role slugs, onboarding state, MFA state, and support-mode state so the app can route users correctly.
+- MFA routing is enforced in `apps/web/app/Guards/MFAGuard.tsx`; route permissions are enforced separately by `RouteGuard`.
+- Session handling uses access and refresh token cookies through the auth/token service flow.
+- Tenant settings influence SSO enforcement, invite-only registration, MFA-enforced roles, login assets, and registration form requirements.
+- User password status and password changes are covered through user endpoints in `apps/api/src/user`.
 
 ## Test Evidence
 
-Frontend E2E tests cover sign-in/sign-out, auth page navigation, invalid credentials, public registration, password recovery, magic-link login, and MFA setup/verification in `apps/web/e2e/specs/auth`.
+Web E2E tests cover sign-in/sign-out, auth-page navigation, invalid credentials, public registration validation, invite password creation, password recovery, magic-link login, and MFA setup/verification.
 
-Backend E2E tests in `apps/api/src/auth/__tests__/auth.controller.e2e-spec.ts` cover registration validation, duplicate accounts, language fallback, required registration answers, login cookies, invalid credentials, login rate limiting, logout cookie clearing, token refresh, current-user response, password reset, create-password flows, and MFA issuer behavior.
+Backend E2E tests cover registration validation, duplicate accounts, language behavior, registration checkbox answers, login cookies, invalid credentials, login rate limiting, logout cookie clearing, refresh tokens, current-user data, password reset, create-password flows, magic-link token hashing and consumption, and MFA issuer behavior.
 
-OAuth provider callback behavior is visible in source but is not covered by the cited Playwright flows in the same depth as password, magic-link, and MFA access.
+OAuth provider callbacks and support-mode auth are visible in source, but the cited E2E coverage is strongest for password, invite, recovery, magic-link, session, and MFA flows.

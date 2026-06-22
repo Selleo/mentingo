@@ -2,53 +2,54 @@
 
 ## Business Overview
 
-AI course generation helps content creators generate an initial course curriculum from a prompt and optional source files. It is designed for empty courses where an admin or creator wants AI assistance to draft chapters and lessons quickly.
+AI Course Generation helps course creators turn a training need into a first curriculum draft without starting from a blank page. A creator can describe the course they need, optionally attach source material, and let Mentingo's connected AI course generation service, Luma, propose chapters and lessons inside the normal curriculum builder.
 
-For HR and L&D teams, this reduces the blank-page problem in course creation. A team can start with a training topic or uploaded source material, generate a draft structure, and then refine the result in the normal curriculum builder.
+For HR and L&D teams, this is useful when they need to move quickly from business knowledge to structured training. An HR manager can start an onboarding course from internal documents, or a sales team manager can draft a course about company-specific sales techniques and then refine it before publishing.
 
-The main workflow happens inside the course curriculum tab. When generation is available, the creator opens the AI generation drawer, uploads or references source material, sends a prompt, watches generation progress, and receives generated chapters and lessons inside the course.
+The main workflow starts in an empty course. The creator opens the curriculum tab, chooses the AI generation action, explains the course goal in a chat-style drawer, attaches supporting files if needed, and reviews generated course structure as it appears in the course.
 
 ## Who Uses It
 
-- Content creators use it to draft course structure and lesson content faster.
-- L&D admins use it to accelerate first versions of internal training.
-- Tenant admins control availability indirectly through Luma configuration.
-- Learners benefit later when generated drafts are reviewed, edited, and published as normal courses.
+- Course creators use it to create a first draft of a new course from a topic, audience, expected outcomes, or source documents.
+- HR managers use it to turn onboarding policies, internal guides, or compliance material into an editable course outline faster.
+- Team managers use it to draft team-specific training, such as a sales technique course based on how their company actually sells.
+- Learners benefit after the generated draft is reviewed, edited, and published as a normal Mentingo course.
 
 ## Feature Functions
 
-- Show the course generation action only when Luma course generation is configured.
-- Hide generation for courses that already have chapters.
-- Create or load a generation draft for the current course and language.
-- Let creators prompt the AI course generation agent.
-- Let creators ingest source files for generation when supported by configuration.
-- Stream generation progress in the course generation drawer.
-- Create generated chapters and lessons in the existing curriculum.
-- Replace generated asset placeholders and ingest generated lesson assets where applicable.
+- Speed up early course design by generating chapters and lessons from a creator's prompt.
+- Let creators attach supported source files so the AI service can use internal context while drafting.
+- Show generation progress in the curriculum builder while the course structure is being created.
+- Add generated chapters and lessons directly into the course so creators can continue editing them with existing authoring tools.
+- Support generated content, quiz, and AI mentor lesson shapes when the AI output includes them.
+- Keep generated work inside the base-language curriculum flow.
+- Make generation available only when Luma course generation is configured and the course has no chapters.
 
 ## End-User Value
 
-AI course generation saves time during early course design. It gives L&D teams a starting structure that can be reviewed and edited, while preserving the existing authoring workflow and permission model.
+AI Course Generation shortens the path from training idea to editable curriculum. HR and L&D teams can create a structured starting point from company knowledge, then use human review to adapt tone, accuracy, assessments, and publishing readiness.
 
-Because generation is limited to empty courses, it reduces the risk of overwriting hand-authored curriculum.
+It keeps the authoring workflow familiar: generated material lands in the same curriculum builder where creators already manage chapters, lessons, resources, and language-specific content.
 
 ## How It Works
 
-The edit course page checks Luma configuration and the current course structure. If generation is enabled, the course is in its base-language curriculum context, and no chapters exist, the generation button becomes available.
+A creator opens an empty course and starts AI generation from the curriculum area. In the drawer, they explain what the course should teach, who it is for, and what outcomes matter. They can also attach supported source files, such as documents that describe the topic or internal process.
 
-Opening the drawer creates or retrieves a Luma draft tied to the course. The creator sends a prompt and can ingest source files. As the Luma agent streams events, Mentingo transforms generated chapter and lesson events into real course content. When generation finishes, the course curriculum cache is refreshed and the creator can continue editing the generated draft like any other course.
+Mentingo sends the conversation and attached context to Luma, the connected AI course generation service. As Luma streams back course-design events, Mentingo turns the visible result into course chapters and lessons. The creator can close the drawer after generation starts, see completion feedback, and then review the generated curriculum like any other course content.
+
+Generation is intentionally limited to eligible empty courses and requires the Luma course generation configuration. That keeps the feature focused on creating first drafts rather than overwriting hand-authored curriculum.
 
 ## Key Technical Context
 
-- Frontend course generation UI lives under `apps/web/app/modules/Admin/EditCourse/components/course-generation`.
-- Draft loading uses `apps/web/app/api/queries/admin/useCourseGenerationDraft.ts`.
-- Backend endpoints live in `apps/api/src/luma/luma.controller.ts`.
-- Main backend transformation logic is in `apps/api/src/luma/luma.service.ts`.
-- Access requires `COURSE_AI_GENERATION`; Luma configuration is exposed through the env configuration endpoint.
-- Generation chat and file ingestion check that the course still has no chapters before proceeding.
+- Frontend UI lives under `apps/web/app/modules/Admin/EditCourse/components/course-generation`.
+- Backend integration endpoints live in `apps/api/src/luma/luma.controller.ts`.
+- `LumaService` creates or retrieves the draft, streams chat responses, ingests source files, and turns generated chapter/lesson events into Mentingo course content.
+- Access requires `COURSE_AI_GENERATION`.
+- Luma configuration is exposed through `GET /api/env/luma`; the UI hides generation when `courseGenerationEnabled` is false.
+- Chat and file ingestion check that the course still has no chapters before proceeding.
 
 ## Test Evidence
 
-Frontend E2E tests in `apps/web/e2e/specs/ai/course-generation.spec.ts` cover opening the generation drawer when available, hiding the button when Luma generation is unavailable, hiding the button when a course already has chapters, and starting generation from a prompt.
+Frontend E2E tests in `apps/web/e2e/specs/ai/course-generation.spec.ts` cover opening the generation drawer, hiding the action when Luma generation is unavailable, hiding the action when a course already has chapters, and starting generation from a prompt.
 
-The prompt-based generation test is environment-dependent and skips when Luma course generation is not configured. Backend behavior is primarily evidenced from source for draft creation, chat streaming, file ingestion, generated chapter/lesson persistence, and Luma error handling.
+The prompt-based generation test is environment-dependent and skips when Luma course generation is not configured. Backend behavior is evidenced from source for draft creation, streaming, file ingestion, generated chapter/lesson persistence, and Luma error handling.

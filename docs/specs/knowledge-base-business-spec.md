@@ -2,49 +2,53 @@
 
 ## Business Overview
 
-Knowledge Base lets organizations publish structured, multilingual reference content inside the learning platform. Content can be organized into sections, edited as drafts, enriched with media and attachments, and optionally made available to public visitors when tenant settings allow it.
+Knowledge Base lets organizations publish structured reference content inside Mentingo. Articles can be organized into sections, maintained in multiple languages, enriched with media and attachments, edited as drafts, and optionally exposed to public visitors when tenant settings allow it.
 
 For HR and L&D teams, this creates a maintained reference space for policies, onboarding guidance, learning support, and company knowledge that does not need to be packaged as a course.
 
+The main workflow starts from the Articles area. Readers browse the table of contents and open published articles, while permitted editors create sections, draft articles, edit rich content, preview changes, publish updates, and delete outdated content.
+
 ## Who Uses It
 
-- HR and L&D administrators who manage knowledge-base structure and access.
-- Content creators who write, translate, and update knowledge-base articles.
-- Learners and employees who browse published knowledge content.
-- Public visitors when unregistered knowledge-base access is enabled.
+- HR and L&D administrators publish policies, onboarding guidance, and learning support articles.
+- Content creators write, translate, preview, and update knowledge-base articles.
+- Learners and employees browse published articles in their selected language.
+- Public visitors read allowed articles when unregistered article access is enabled.
 
 ## Feature Functions
 
 - Organize articles into knowledge-base sections.
-- Create, edit, publish, archive, and delete knowledge-base content.
-- Manage draft articles separately from published articles.
-- Add and remove article or section language versions while preserving base-language rules.
-- Upload cover images and rich-text resources such as documents, images, videos, spreadsheets, and presentations.
-- Preview rich content before publishing.
-- Show published articles through a section table of contents.
-- Restrict public access based on tenant settings and article visibility.
+- Create draft articles from the table of contents.
+- Edit article title, summary, cover image, and rich-text content.
+- Upload article resources such as documents, images, videos, spreadsheets, and presentations.
+- Preview rich content before saving changes.
+- Add or remove article and section language versions.
+- Show published articles with author, publish date, cover image, page table of contents, and previous/next navigation.
+- Restrict article access based on tenant public-access settings, article visibility, draft mode, and article permissions.
 
 ## End-User Value
 
-Learners get a central place to find current organizational knowledge in their language. Content teams can maintain guidance without rebuilding courses, while HR and L&D leaders can choose whether selected knowledge should be internal-only or publicly accessible.
+Learners and employees get a central place to find current organizational knowledge in their language. HR and L&D teams can maintain reference material without turning every policy or support page into a course.
+
+Public access controls let organizations decide when selected knowledge should support external audiences, while draft and permission rules keep unfinished or internal-only content protected.
 
 ## How It Works
 
-Users open the Knowledge Base area and are directed to available published content from the table of contents. Article details show title, summary, author, publish date, cover image, rich content, page table of contents, and previous/next navigation.
+Readers open the Articles area and are directed to available published content from the table of contents. Article detail pages show the article content, author, publish date, cover image, in-page navigation, and previous/next article links.
 
-Permitted editors can create sections, create draft articles, add translations, upload media, preview content, and publish or archive articles. Public users can access knowledge-base content only when the tenant allows unregistered article access and the article itself is visible in the requested language.
+Editors with article permissions can create sections and draft articles, edit localized article content, upload resources into rich text, preview rendered content, and delete articles or sections. Language selectors keep base-language and available-language behavior explicit so translations do not silently replace the canonical version.
 
-The system keeps base-language and available-language rules explicit so translated content does not silently replace or remove the canonical version.
+Public visitors can reach articles only when tenant settings allow unregistered article access and the article is visible in the requested language. Authenticated admins can access private or draft content according to their permissions.
 
 ## Key Technical Context
 
 - Frontend routes include `/articles`, `/articles/:articleId`, and `/articles/:articleId/edit`.
 - The implementation currently lives in the Articles module: `apps/web/app/modules/Articles` and `apps/api/src/articles`.
-- API endpoints include public list/detail/resource reads plus permission-gated section, draft, edit, language, upload, preview, and delete operations.
-- Access is controlled by the Articles feature flag, unregistered article access setting, and `ARTICLE_MANAGE` / `ARTICLE_MANAGE_OWN` permissions.
-- Content changes publish activity events for create, update, delete, section, and language-management actions.
+- Articles are gated by the Articles feature/access settings plus `PERMISSIONS.ARTICLE_MANAGE` and `PERMISSIONS.ARTICLE_MANAGE_OWN` for editor actions.
+- Public list/detail/resource endpoints support reader access, while draft, section, edit, language, upload, preview, and delete operations are permission-gated.
+- Article resources reuse the platform's file and rich-text upload handling.
 
 ## Test Evidence
 
-- API E2E coverage verifies public published visibility, authenticated admin access to private articles, draft restrictions, draft listing, section creation/update, language add/remove, and table-of-contents responses.
-- Web E2E coverage verifies article creation with sections, update, delete, public access, role access, list behavior, and opening article details.
+- Web E2E coverage verifies article creation with sections, browsing the article list, opening article details, updating articles, deleting articles, public access behavior, and role-based access.
+- API E2E coverage verifies public published visibility, authenticated admin access to private articles, draft restrictions, draft listing, section creation and update, section language add/remove, and table-of-contents responses.

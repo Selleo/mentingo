@@ -2,51 +2,56 @@
 
 ## Business Overview
 
-Certificates provide formal recognition for completed courses and learning paths. They help HR and L&D teams document achievement, support compliance evidence, and give learners a portable credential they can download or share externally.
+Certificates provide formal proof that a learner completed a course or learning path. They support HR and L&D needs around recognition, compliance evidence, auditability, and external sharing of learning achievements.
 
-The feature also gives administrators controls for certificate expiration, reset, and validity changes when course requirements change.
+The feature also gives course managers controlled ways to handle certificate validity and resets when course requirements change. Existing certificates can remain valid for historical record, receive updated validity rules, expire automatically, or be reset when the organization needs learners to re-complete training.
 
 ## Who Uses It
 
-- Learners who download or share certificates after completing training.
-- HR and L&D administrators who manage certificate validity and reset certificates when requirements change.
-- Course managers who need to understand the impact of validity updates.
-- External viewers who open public certificate share pages or preview images.
+- Learners viewing, downloading, or sharing certificates from their profile.
+- HR and L&D administrators reviewing learner certificate records.
+- Course administrators managing certificate availability, validity, and resets for courses they can update.
+- External viewers opening public certificate share pages created by learners.
 
 ## Feature Functions
 
-- List a user’s active certificates on their profile.
-- Preview certificates for courses and learning paths.
+- List active certificates for a learner profile.
+- Open certificate previews for completed courses and learning paths.
 - Switch certificate preview language between supported certificate languages.
-- Download certificate PDFs.
-- Create LinkedIn share links and public certificate share pages.
-- Generate public certificate preview images.
-- Calculate validity impact before changing course certificate rules.
-- Reset course certificates for all users, selected groups, or selected users.
-- Optionally notify affected users by email when certificates are reset.
-- Archive expired or reset certificates while preserving audit activity.
+- Download certificate PDFs with generated filenames.
+- Share certificates externally through LinkedIn/public share links.
+- Configure whether a course issues certificates.
+- Set certificate validity rules for a course.
+- Show the impact of validity changes before applying them to active certificates.
+- Reset course certificates for all holders, selected groups, or selected users.
+- Optionally notify affected learners when certificates are reset.
+- Archive expired or reset certificates while preserving activity history.
 
 ## End-User Value
 
-Learners get visible proof of completed training and can share it beyond the platform. HR and L&D teams get a reliable record of completion while retaining control when certificate rules, course content, or compliance expectations change.
+Learners receive portable proof of completion that they can keep, download, and share outside Mentingo. HR and L&D teams get a reliable record of achievement for audits, compliance programs, and internal mobility.
+
+For administrators, the reset and validity tools reduce operational risk. When a course changes materially, the team can identify affected certificate holders, choose the right reset scope, and keep historical certificate activity instead of silently overwriting records.
 
 ## How It Works
 
-When a learner completes eligible training, the system can create a certificate with course or learning path metadata, validity dates, tenant branding, and visual settings. Users can view certificates from their profile, download a PDF, or create a shareable public link.
+Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
 
-Certificate managers can preview how validity changes affect existing certificates. Reset actions archive current certificates, reset relevant progress, and optionally send notifications to affected learners. Reset scope can target all holders, specific groups, or specific users.
+Course certificate settings are managed from the admin course settings workflow. Administrators can enable certificate issuance, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates.
 
-Public certificate sharing uses generated share URLs and rendered share images while keeping ownership and tenant access checks in place for protected operations.
+Certificate reset actions archive matching active certificates, reset the relevant learner progress, record certificate activity, and optionally send reset emails. Reset scope can target all certificate holders for the course, selected groups, or selected users with active certificates.
 
 ## Key Technical Context
 
-- Profile certificate UI lives under the Profile module and renders certificate cards, preview overlays, PDF download, language toggle, and LinkedIn sharing.
+- Profile certificate UI lives under `apps/web/app/modules/Profile/Certificates`.
+- Course certificate settings and reset UI live under `apps/web/app/modules/Admin/EditCourse/CourseSettings`.
 - API endpoints are implemented under `apps/api/src/certificates`.
-- Core permissions include `CERTIFICATE_READ`, `CERTIFICATE_RENDER`, and `CERTIFICATE_SHARE`; course certificate reset and validity operations require course update permissions.
-- Certificate rendering uses tenant branding inputs such as logo, background, signature, and color theme.
-- Public share and share-image endpoints are intentionally exposed for external certificate preview flows.
+- Core permissions include `PERMISSIONS.CERTIFICATE_READ`, `PERMISSIONS.CERTIFICATE_RENDER`, and `PERMISSIONS.CERTIFICATE_SHARE`.
+- Course certificate validity and reset operations require `PERMISSIONS.COURSE_UPDATE` or `PERMISSIONS.COURSE_UPDATE_OWN`.
+- Public share endpoints intentionally allow external certificate page and image access for share workflows.
 
 ## Test Evidence
 
-- API E2E coverage verifies authenticated certificate listing, archived certificate exclusion, pagination and sorting, single certificate retrieval, PDF download, validity impact, expiration handling, reset by all/users/groups, reset validation, reset options, reset-user search, manager authorization, and activity logging.
-- Frontend behavior is evidenced by profile certificate components for listing, preview, download, language toggle, and LinkedIn sharing. No dedicated frontend E2E certificate spec was found in the current test tree.
+- API E2E coverage verifies authenticated certificate listing, archived certificate exclusion, pagination and sorting, single certificate retrieval, PDF downloads, custom download filenames, validity-impact counts, bulk validity application, expiration handling, reset by all/users/groups, reset validation, reset options, reset-user search, authorization, and activity logging.
+- Frontend unit/source evidence covers profile certificate cards, previews, downloads, language toggles, LinkedIn sharing controls, certificate theme behavior, course certificate settings, validity-impact confirmation, and reset dialogs.
+- I did not find a dedicated frontend E2E certificate spec in the current test tree.

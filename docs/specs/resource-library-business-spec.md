@@ -2,48 +2,50 @@
 
 ## Business Overview
 
-The resource library is Mentingo's reusable asset layer for rich training content. It gives content teams a controlled way to upload files once, reuse them in lessons, news, and articles, and understand where each asset is used before changing or deleting it.
+Resource Library is Mentingo's reusable asset workflow for rich training and communication content. It lets authors upload files into a shared library from the rich-text editor, reuse existing assets, and check where an asset is used before deleting it.
 
-This matters for HR and L&D teams because the same policy document, image, workbook, or video may appear in multiple learning contexts. A central resource library reduces duplicate uploads and makes content maintenance safer.
+This matters for HR and L&D teams because the same policy PDF, workbook, image, presentation, or video may appear in multiple lessons, news posts, or articles. A managed library reduces duplicate uploads and makes asset maintenance safer.
+
+The feature is not a standalone learner page. It appears inside authoring flows where content teams work with rich text and supporting files.
 
 ## Who Uses It
 
-- Course authors adding downloadable files, previews, images, videos, presentations, and documents to lessons.
-- News and article managers embedding shared assets in communications.
-- Administrators and content owners checking where a file is used before archiving it.
-- Learners who open or download assets embedded in learning and communication content.
+- Course authors reuse documents, images, presentations, and videos while building lesson content.
+- News and article managers insert existing assets into rich communication content.
+- Content administrators review asset usage before deleting a shared file.
+- Learners benefit indirectly because embedded resources stay consistent across lessons, articles, and news.
 
 ## Feature Functions
 
-- Upload resource-library assets with title, description, language, optional owner entity, and file metadata.
-- Search and filter assets by keyword, type, and language.
-- Return paginated asset lists with usage counts.
-- Show usages from explicit resource relations and rich-text references.
-- Link an existing asset to a rich-text entity.
-- Unlink an asset from a rich-text entity.
-- Archive an asset and remove related rich-text references.
-- Support image, video, PDF, presentation, and document asset types.
+- Open an asset-library dialog from rich-text authoring contexts.
+- Search and paginate existing assets for the current authoring language.
+- Upload a supported file into the library from the editor workflow.
+- Insert a selected asset into rich text using the right preview or display mode.
+- Track where assets are linked or embedded across supported rich-text entities.
+- Show usage details before deletion so authors understand the impact.
+- Delete an asset and remove related rich-text references.
+- Support image, video, PDF, presentation, spreadsheet, and document uploads.
 
 ## End-User Value
 
-Content teams can keep learning material consistent and easier to maintain. When an asset is reused, administrators can see its impact before removing it. Learners get more reliable content links because asset references are managed centrally instead of being pasted as unmanaged URLs.
+Resource Library helps content teams keep training materials consistent and easier to maintain. Authors can reuse the same approved asset instead of uploading duplicates, and administrators can see the impact of deletion before removing a resource that may appear in several learning or communication contexts.
 
 ## How It Works
 
-The API exposes a resource-library controller for asset listing, usage lookup, linking, unlinking, upload, and deletion. Uploads delegate to the file service and return resource URLs that can be inserted into rich text. The service records relations between assets and supported entities, then scans localized rich-text fields to find additional embedded usages.
+An author opens the asset-library dialog from a rich-text editor while editing a lesson, article, or news post. Mentingo lists reusable assets for the current language, supports search and pagination, and lets the author insert an existing asset into the editor.
 
-On the web side, query and mutation hooks fetch assets and upload new resource-library files through the generated API client. Rich-text upload and replacement utilities use resource IDs and resource URLs so references can be tracked, rewritten, or removed safely.
+If the needed file is not already available, the author can upload it from the dialog. Mentingo stores the asset in the resource library and returns a rich-text URL that can be inserted into the current content. For assets that need a display choice, the editor asks how the resource should appear before insertion.
+
+When deleting an asset, Mentingo shows where it is used and asks for confirmation. Confirmed deletion archives the asset, removes explicit relations, and cleans up rich-text references so authors are not left with unmanaged links.
 
 ## Key Technical Context
 
-- Main API implementation: `apps/api/src/resource-library`.
-- Main web hooks: `apps/web/app/api/queries/useResourceLibraryAssets.ts` and `apps/web/app/api/mutations/useUploadResourceLibraryAsset.ts`.
+- The rich-text dialog is implemented in `apps/web/app/components/RichText/components/AssetLibraryDialog.tsx`.
+- The Resource Library API lives in `apps/api/src/resource-library` and supports asset listing, usage lookup, linking, unlinking, upload, and deletion.
 - Supported rich-text entity types are lessons, articles, and news.
-- Access is granted through resource-library permissions derived from course update, own-course update, article manage, own-article manage, news manage, and own-news manage permissions.
-- Asset MIME type support maps to shared resource asset categories for images, videos, PDFs, presentations, and documents.
+- Access is granted through content-management permissions for courses, articles, and news via `RESOURCE_LIBRARY_PERMISSIONS`.
+- Resource utilities scan localized rich-text content for resource IDs, deduplicate usages, replace resource references, and remove references during deletion.
 
 ## Test Evidence
 
-- API E2E covers required authentication and permissions, paginated asset search/filtering, usage counts, usage detail deduplication, unknown-asset 404s, linking and unlinking assets, uploading through `FileService`, and archiving with relation and rich-text cleanup.
-- Unit tests cover extracting resource IDs from rich text, deduplicating IDs, removing resource references, replacing resource references, rewriting absolute tenant URLs, and collecting localized rich-text entries.
-- Web behavior is currently evidenced through generated hooks and rich-text integration; I did not find a dedicated frontend E2E spec for a standalone resource-library screen.
+Backend E2E coverage verifies required authentication and permissions, paginated asset search/filtering, usage counts, usage detail deduplication, unknown-asset 404s, linking and unlinking assets, uploading through the file service, and deletion cleanup. Unit tests cover resource-ID extraction, deduplication, reference removal and replacement, tenant URL rewriting, and localized rich-text entry collection. Frontend behavior is evidenced through the rich-text dialog and API hooks; no dedicated frontend E2E spec for the asset-library dialog was found in this pass.

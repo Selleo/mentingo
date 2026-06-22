@@ -2,47 +2,50 @@
 
 ## Business Overview
 
-Organization Settings let administrators control tenant-wide operational policies. These settings cover authentication requirements, user registration rules, email trigger behavior, MFA enforcement, default course currency, live training capacity, age limits, and login-page support files.
+Organization Settings give tenant administrators a central place to control platform-wide policies that affect access, security, communication, learner eligibility, and operational limits. These settings let HR, L&D, and platform administrators adapt Mentingo to the organization's governance model without changing product code.
 
-For HR and L&D teams, this area centralizes the policies that affect user onboarding, security posture, payment defaults, and organization-level communication behavior.
+The feature covers decisions such as whether users must sign in through SSO, whether registration is invite-only, which system email triggers are enabled, which roles must use MFA, what default course currency should be used, whether age limits apply, how many live trainings may run in parallel, and which supporting files should appear on the login page.
+
+For HR and L&D, this matters because learning programs often need to follow company security rules, onboarding policies, commercial configuration, and employee eligibility constraints. Organization Settings make those controls visible and maintainable by authorized administrators.
 
 ## Who Uses It
 
-- HR and L&D administrators who manage registration and communication policies.
-- Platform admins who configure security requirements such as SSO and MFA.
-- Billing or course admins who need default course currency behavior.
-- Support and operations teams who maintain login-page documents and configuration health.
+- Tenant administrators configure organization-wide authentication, registration, security, and learner eligibility rules.
+- HR and L&D operations owners manage communication triggers and login-page support materials that affect learner onboarding.
+- Learning operations teams set live-training capacity rules and default course currency when those features are enabled.
+- Support-mode users are directed to the organization area when their access is focused on tenant configuration rather than personal account settings.
 
 ## Feature Functions
 
-- Toggle SSO enforcement when OAuth login is available.
-- Enable or disable invite-only registration.
-- Toggle user email triggers.
-- Enforce MFA by role for admins, students, and content creators.
-- Set the default course currency when Stripe is configured.
-- Set or clear an organization age limit.
-- Configure live training parallel-session limits.
-- Upload and manage login-page support files.
+- Enforce SSO sign-in when an OAuth provider is enabled for the tenant.
+- Require invite-only registration when open self-registration should be disabled.
+- Enable or disable user email triggers used by operational learning workflows.
+- Require MFA for selected roles.
+- Set the default course currency when Stripe-based course pricing is configured.
+- Set, change, or clear the tenant age limit.
+- Define the maximum number of live trainings that may run in parallel.
+- Upload, preview, and remove login-page support documents with administrator-provided display names.
 
 ## End-User Value
 
-Administrators can adapt the tenant to company policy without code changes. The organization can tighten access rules, control registration availability, manage learner communication, and keep operational settings consistent across the platform.
+Organization Settings help administrators keep Mentingo aligned with company policy and learner-program operations. Learners experience the right access rules, security expectations, and onboarding materials, while administrators gain a single control point for settings that would otherwise require support or engineering work.
 
 ## How It Works
 
-Users with settings management access open Settings and select the Organization tab. Each setting is presented as a focused card or control. Changes are saved through settings endpoints and reflected in global settings, so affected parts of the app can immediately use the updated policy.
+An administrator opens Settings and uses the Organization tab to review configuration status and adjust tenant-wide controls. Mentingo shows controls that are relevant to the current tenant setup, such as SSO enforcement only when supported OAuth login is enabled and default currency only when Stripe is configured.
 
-Some controls are shown only when relevant. For example, SSO enforcement appears when OAuth is enabled, and default currency appears when Stripe is configured. Support-mode users do not see personal account settings and are directed toward organization-level context.
+Changes are saved through dedicated settings controls and immediately affect the tenant's platform behavior. Login-page documents can be added with a display name, previewed, and removed; these files are available publicly on the login page so unauthenticated learners or visitors can access the organization's supporting materials.
+
+Users without settings-management access do not see administrator organization controls. The Settings navigation also adapts by showing only the tabs and cards the current user's permissions allow.
 
 ## Key Technical Context
 
-- Frontend route: `/settings`; organization controls live in `OrganizationTabContent`.
-- API endpoints live under `apps/api/src/settings`.
-- Organization updates require settings-management permissions through guarded admin settings endpoints.
-- Settings updates record activity-log entries through the settings activity flow.
-- Public/global settings are also exposed where unauthenticated screens need tenant behavior such as registration or branding.
+- The Organization tab is assembled in `apps/web/app/modules/Dashboard/Settings/components/admin/OrganizationTabContent.tsx`.
+- Organization settings are handled by `apps/api/src/settings/settings.controller.ts` and the settings service, with public global settings used where unauthenticated pages need tenant configuration.
+- Administrative changes require `PERMISSIONS.SETTINGS_MANAGE`.
+- Settings behavior is tenant-scoped and stored in global tenant settings rather than per-user settings.
+- Login-page documents use the Settings login-page files endpoints and existing file validation for supported document types.
 
 ## Test Evidence
 
-- Web E2E coverage verifies SSO enforcement persistence, invite-only registration persistence, user email trigger persistence, role-based MFA enforcement, default currency changes with Stripe configured, and age-limit update/clear behavior.
-- API E2E coverage verifies global settings retrieval, SSO enforcement updates, permission denial for non-admin users, and related settings update behavior.
+Frontend Playwright coverage verifies SSO enforcement, invite-only registration, user email trigger persistence, role-based MFA, default currency, age-limit updates, settings navigation/access rules, and login-page file upload, validation, preview, deletion, and max-file behavior. Backend E2E coverage verifies global settings reads and updates, permission denials, SSO, learning-path/course-discussion/calendar/live-training settings, and login-page file access rules.
