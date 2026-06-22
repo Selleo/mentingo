@@ -48,6 +48,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
@@ -58,6 +59,7 @@ import { userHasAnyPermissionsCondition } from "src/common/permissions/permissio
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
@@ -70,6 +72,8 @@ import {
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -229,6 +233,7 @@ export class CourseService {
     private readonly lumaService: LumaService,
     private readonly certificatesService: CertificatesService,
     private readonly groupCourseDueDateCalendarService: GroupCourseDueDateCalendarService,
+    private readonly searchIndexService: SearchIndexService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -1995,6 +2000,8 @@ export class CourseService {
       .insert(coursesSummaryStats)
       .values({ courseId: newCourse.id, authorId: currentUser.userId });
 
+    await this.searchIndexService.refreshCourse(newCourse.id, dbInstance);
+
     return newCourse;
   }
 
@@ -2171,6 +2178,8 @@ export class CourseService {
         }
 
         const updatedSnapshot = await this.buildCourseActivitySnapshot(id, language, trx);
+
+        await this.searchIndexService.refreshCourse(id, trx);
 
         return {
           updatedCourse,
@@ -3023,6 +3032,12 @@ export class CourseService {
       if (!deletedCourse) {
         throw new ConflictException("Failed to delete course");
       }
+
+      await this.searchIndexService.deleteEntityDocuments({
+        entityType: SEARCH_ENTITY_TYPES.COURSE,
+        entityId: id,
+        db: trx,
+      });
 
       return null;
     });
@@ -4212,10 +4227,14 @@ export class CourseService {
 
     const newLanguages = [...availableLocales, language];
 
-    await this.db
-      .update(courses)
-      .set({ availableLocales: newLanguages })
-      .where(eq(courses.id, courseId));
+    await this.db.transaction(async (trx) => {
+      await trx
+        .update(courses)
+        .set({ availableLocales: newLanguages })
+        .where(eq(courses.id, courseId));
+
+      await this.searchIndexService.refreshCourse(courseId, trx);
+    });
   }
 
   async deleteLanguage(
@@ -4236,7 +4255,7 @@ export class CourseService {
 
     const data = await this.getBetaCourseById(courseId, language, currentUser);
 
-    return this.db.transaction(async (trx) => {
+    await this.db.transaction(async (trx) => {
       const chapterIds = data.chapters.map(({ id }) => id);
       const lessonIds: UUIDType[] = [];
       const questionIds: UUIDType[] = [];
@@ -4294,6 +4313,10 @@ export class CourseService {
           availableLocales: sql`ARRAY_REMOVE(${courses.availableLocales}, ${language})`,
         })
         .where(eq(courses.id, courseId));
+
+      await this.searchIndexService.refreshCourse(courseId, trx);
+
+      await this.searchIndexService.refreshLessons(lessonIds, trx);
     });
   }
 
@@ -4345,8 +4368,9 @@ export class CourseService {
       overdueCoursesByLanguage.map(({ language, courses }) => [language, courses]),
     );
 
-    await Promise.allSettled(
-      adminsToNotify.map(async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
+    await processInBatches(
+      adminsToNotify,
+      async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
         const coursesForLanguage = overdueCoursesMap.get(defaultEmailSettings.language);
 
         if (!coursesForLanguage?.length) return;
@@ -4366,7 +4390,8 @@ export class CourseService {
           },
           { tenantId },
         );
-      }),
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
     );
   }
 

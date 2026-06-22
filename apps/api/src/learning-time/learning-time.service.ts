@@ -6,10 +6,10 @@ import { validate as uuidValidate } from "uuid";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { FileService } from "src/file/file.service";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
-import { S3Service } from "src/s3/s3.service";
 import { groups, lessonLearningTime, users } from "src/storage/schema";
 import { WsGateway } from "src/websocket";
 
@@ -50,7 +50,7 @@ export class LearningTimeService implements OnModuleInit {
     private readonly queueService: QueueService,
     private readonly learningTimeRepository: LearningTimeRepository,
     private readonly wsGateway: WsGateway,
-    private readonly s3Service: S3Service,
+    private readonly fileService: FileService,
     private readonly localizationService: LocalizationService,
     @Inject(CACHE_MANAGER) private cacheManager: CacheManager,
   ) {}
@@ -344,7 +344,7 @@ export class LearningTimeService implements OnModuleInit {
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
     if (!avatarReference) return null;
-    return await this.s3Service.getSignedUrl(avatarReference);
+    return await this.fileService.getFileUrl(avatarReference);
   };
 
   private async getFilteredUserIds(query: LearningTimeQuery) {

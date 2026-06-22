@@ -7,13 +7,13 @@ export const useGroupsOptions = (groups?: Array<{ id: string; name: string }>) =
 
   const filterGroups = useMemo(
     () => (value: string, search: string) =>
-      selectedGroups
-        .find((g) => g.value === value)
-        ?.label.toLowerCase()
+      groups
+        ?.find((group) => group.id === value)
+        ?.name.toLowerCase()
         .includes(search.toLowerCase())
         ? 1
         : 0,
-    [selectedGroups],
+    [groups],
   );
 
   const options = useMemo(

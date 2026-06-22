@@ -1,11 +1,11 @@
-import type { LiveTrainingActivityLogSnapshot } from "src/activity-logs/types";
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { ActorUserType } from "src/common/types/actor-user.type";
 
 type LiveTrainingDeleteData = {
   liveTrainingId: UUIDType;
   actor: ActorUserType;
-  deletedLiveTrainingData: LiveTrainingActivityLogSnapshot | null;
+  language: SupportedLanguages;
 };
 
 export class DeleteLiveTrainingEvent {

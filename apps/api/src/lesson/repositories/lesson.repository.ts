@@ -144,12 +144,16 @@ export class LessonRepository {
           score: number | null;
           percentage: number | null;
           requiredScore: number | null;
+          passed: boolean | null;
+          summary: string | null;
         } | null>`
           json_build_object(
             'minScore', ${aiMentorStudentLessonProgress.minScore},
             'maxScore', ${aiMentorStudentLessonProgress.maxScore},
             'score', ${aiMentorStudentLessonProgress.score},
             'percentage', ${aiMentorStudentLessonProgress.percentage},
+            'passed', ${aiMentorStudentLessonProgress.passed},
+            'summary', ${aiMentorStudentLessonProgress.summary},
             'requiredScore',
               CASE
                 WHEN ${aiMentorStudentLessonProgress.maxScore} > 0

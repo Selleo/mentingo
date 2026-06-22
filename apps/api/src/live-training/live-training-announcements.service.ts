@@ -112,11 +112,17 @@ export class LiveTrainingAnnouncementsService {
     liveTraining: LiveTrainingNotificationRow,
     emailTemplate: AnnouncementEmailTemplate,
   ) {
-    return liveTraining.availableLocales.map((language) => ({
+    return this.getAnnouncementLanguages(liveTraining).map((language) => ({
       language,
       title: this.getTitleForTemplate(emailTemplate, language),
       content: this.getContentForTemplate(liveTraining, emailTemplate, language),
     }));
+  }
+
+  private getAnnouncementLanguages(liveTraining: LiveTrainingNotificationRow) {
+    return Array.from(
+      new Set([...liveTraining.availableLocales, ...Object.values(SUPPORTED_LANGUAGES)]),
+    );
   }
 
   private getTitleForTemplate(
@@ -145,25 +151,25 @@ export class LiveTrainingAnnouncementsService {
         return this.translate(language, {
           en: `Training ${linkedTitle} starts at ${formattedStart}.`,
           pl: `Szkolenie ${linkedTitle} rozpocznie się ${formattedStart}.`,
-          de: `Das Training ${linkedTitle} beginnt am ${formattedStart}.`,
-          lt: `Mokymai ${linkedTitle} prasidės ${formattedStart}.`,
-          cs: `Školení ${linkedTitle} začne ${formattedStart}.`,
+          de: `Die Live-Schulung ${linkedTitle} beginnt am ${formattedStart}.`,
+          lt: `Tiesioginiai mokymai ${linkedTitle} prasidės ${formattedStart}.`,
+          cs: `Živé školení ${linkedTitle} začne ${formattedStart}.`,
         });
       case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED:
         return this.translate(language, {
           en: `Training ${linkedTitle} is active now.`,
           pl: `Szkolenie ${linkedTitle} jest teraz aktywne.`,
-          de: `Das Training ${linkedTitle} ist jetzt aktiv.`,
-          lt: `Mokymai ${linkedTitle} dabar vyksta.`,
-          cs: `Školení ${linkedTitle} nyní probíhá.`,
+          de: `Die Live-Schulung ${linkedTitle} ist jetzt aktiv.`,
+          lt: `Tiesioginiai mokymai ${linkedTitle} dabar vyksta.`,
+          cs: `Živé školení ${linkedTitle} nyní probíhá.`,
         });
       default:
         return this.translate(language, {
           en: `Training ${linkedTitle} has ended.`,
           pl: `Szkolenie ${linkedTitle} zostało zakończone.`,
-          de: `Das Training ${linkedTitle} wurde beendet.`,
-          lt: `Mokymai ${linkedTitle} baigėsi.`,
-          cs: `Školení ${linkedTitle} skončilo.`,
+          de: `Die Live-Schulung ${linkedTitle} wurde beendet.`,
+          lt: `Tiesioginiai mokymai ${linkedTitle} baigėsi.`,
+          cs: `Živé školení ${linkedTitle} skončilo.`,
         });
     }
   }

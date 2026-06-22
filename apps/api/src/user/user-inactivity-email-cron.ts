@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Cron } from "@nestjs/schedule";
+import { Cron, CronExpression } from "@nestjs/schedule";
 
 import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
@@ -15,20 +15,20 @@ export class UserInactivityEmailCron {
     private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
-  @Cron("0 9 * * *")
+  @Cron(CronExpression.EVERY_DAY_AT_9AM)
   async checkUsersInactivity() {
-    await this.tenantRunner.runForEachTenant(async () => {
-      const studentsToNotify = await this.userService.checkUsersInactivity();
+    await this.tenantRunner.runForEachTenant(async (tenantId) => {
+      const { shortInactivity, longInactivity } = await this.userService.checkUsersInactivity();
 
-      if (studentsToNotify.shortInactivity) {
+      if (shortInactivity.length) {
         await this.outboxPublisher.publish(
-          new UsersShortInactivityEvent({ users: studentsToNotify.shortInactivity }),
+          new UsersShortInactivityEvent({ tenantId, users: shortInactivity }),
         );
       }
 
-      if (studentsToNotify.longInactivity) {
+      if (longInactivity.length) {
         await this.outboxPublisher.publish(
-          new UsersLongInactivityEvent({ users: studentsToNotify.longInactivity }),
+          new UsersLongInactivityEvent({ tenantId, users: longInactivity }),
         );
       }
     });

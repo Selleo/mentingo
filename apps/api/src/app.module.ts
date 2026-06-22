@@ -48,6 +48,7 @@ import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
+import { GlobalSearchModule } from "./global-search/global-search.module";
 import { GroupModule } from "./group/group.module";
 import { HealthModule } from "./health/health.module";
 import { IngestionModule } from "./ingestion/ingestion.module";
@@ -142,6 +143,7 @@ import type { RedisClient } from "src/redis";
     CourseChatModule,
     LearningPathModule,
     GroupModule,
+    GlobalSearchModule,
     LessonModule,
     QuestionsModule,
     StudentLessonProgressModule,

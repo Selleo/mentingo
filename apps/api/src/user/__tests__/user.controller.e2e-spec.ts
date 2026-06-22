@@ -5,6 +5,7 @@ import request from "supertest";
 import { AuthService } from "src/auth/auth.service";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { userDetails as userDetailsTable } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -329,6 +330,22 @@ describe("UsersController (e2e)", () => {
         .get(`/api/user/details?userId=${testUser.id}`)
         .set("Cookie", cookies)
         .expect(200);
+    });
+
+    it("should hide contact fields for unauthenticated requests", async () => {
+      await db.insert(userDetailsTable).values({
+        userId: testUser.id,
+        contactEmail: "hidden@example.com",
+        contactPhoneNumber: "123456789",
+        tenantId: testUser.tenantId,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/user/details?userId=${testUser.id}`)
+        .expect(200);
+
+      expect(response.body.data.contactEmail).toBeNull();
+      expect(response.body.data.contactPhone).toBeNull();
     });
 
     it("should return forbidden", async () => {

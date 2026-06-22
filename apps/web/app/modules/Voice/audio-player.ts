@@ -5,6 +5,7 @@ type StreamingAudioPlayerOptions = {
   channels?: number;
   gain?: number;
   leadTimeSeconds?: number;
+  onLevelChange?: (level: number) => void;
 };
 
 export class RealtimePCMPlayer {
@@ -12,6 +13,7 @@ export class RealtimePCMPlayer {
   private readonly channels: number;
   private readonly leadTimeSeconds: number;
   private readonly gain: number;
+  private readonly onLevelChange?: (level: number) => void;
 
   private audioCtx: AudioContext | null = null;
   private gainNode: GainNode | null = null;
@@ -24,11 +26,13 @@ export class RealtimePCMPlayer {
     channels = 1,
     gain = 1,
     leadTimeSeconds = 0.02,
+    onLevelChange,
   }: StreamingAudioPlayerOptions = {}) {
     this.sampleRate = sampleRate;
     this.channels = channels;
     this.gain = gain;
     this.leadTimeSeconds = leadTimeSeconds;
+    this.onLevelChange = onLevelChange;
   }
 
   async start() {
@@ -62,6 +66,7 @@ export class RealtimePCMPlayer {
     if (samples.length === 0) {
       return;
     }
+    this.onLevelChange?.(this.calculateRmsLevel(samples));
 
     const frameCount = Math.floor(samples.length / this.channels);
     if (frameCount <= 0) {
@@ -89,6 +94,7 @@ export class RealtimePCMPlayer {
     source.onended = () => {
       this.activeSources.delete(source);
       if (this.activeSources.size === 0) {
+        this.onLevelChange?.(0);
         this.onIdle?.();
       }
     };
@@ -115,6 +121,7 @@ export class RealtimePCMPlayer {
 
     this.activeSources.clear();
     this.nextStartTime = this.audioCtx.currentTime + this.leadTimeSeconds;
+    this.onLevelChange?.(0);
   }
 
   async destroy() {
@@ -128,6 +135,7 @@ export class RealtimePCMPlayer {
     this.gainNode = null;
     this.nextStartTime = 0;
     this.onIdle = null;
+    this.onLevelChange?.(0);
   }
 
   private pcm16leToFloat32(chunk: StreamingAudioChunk): Float32Array {
@@ -147,5 +155,18 @@ export class RealtimePCMPlayer {
     }
 
     return out;
+  }
+
+  private calculateRmsLevel(samples: Float32Array) {
+    if (samples.length === 0) {
+      return 0;
+    }
+
+    let sumSquares = 0;
+    for (const sample of samples) {
+      sumSquares += sample * sample;
+    }
+
+    return Math.max(0, Math.min(1, Math.sqrt(sumSquares / samples.length) * 4));
   }
 }

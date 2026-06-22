@@ -1808,6 +1808,17 @@
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "AI Mentor instructions and completion conditions are required.",
+        "customTtsReferenceRequired": "Custom TTS reference is required for custom voice mode.",
+        "aiMentorCreateFailed": "Failed to create AI Mentor lesson.",
+        "questionsRequired": "At least one question is required.",
+        "quizCreateFailed": "Failed to create quiz lesson.",
+        "optionUpdateFailed": "Failed to update quiz option.",
+        "optionInsertFailed": "Failed to add quiz option.",
+        "embedCreateFailed": "Failed to create embed lesson.",
+        "signedUrlDownloadFailed": "Failed to download the file from the signed URL."
       }
     },
     "thinking": {
@@ -2748,7 +2759,14 @@
       "trueOrFalseRequired": "A true or false response is required.",
       "photoQuestionMustHaveAnswer": "An answer is required for this photo question.",
       "unansweredQuestions": "It seems you haven't checked all the answers yet. Please review them and try again!",
-      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Please answer the missing questions: {{questionNames}}",
+      "quizAlreadyAnswered": "You have already answered this quiz.",
+      "lessonAssignmentRequired": "You are not assigned to this lesson.",
+      "quizEvaluationFailed": "Quiz evaluation failed. Please try again.",
+      "quizNotAnsweredYet": "You have not answered this quiz yet.",
+      "courseEnrollmentRequired": "You are not enrolled in this course.",
+      "quizRetakeUnavailable": "Quiz answers cannot be reset because of the attempts limit or cooldown.",
+      "quizResetFailed": "Failed to reset quiz answers. Please try again."
     }
   },
   "studentCourseView": {
@@ -2782,14 +2800,35 @@
         "addEmoji": "Add emoji",
         "closeVoiceMode": "Close voice mode",
         "toggleVoiceInput": "Toggle voice input",
-        "startVoiceMentor": "Start voice mentor",
+        "dictateVoiceInput": "Dictate message",
+        "startVoiceMentor": "Talk with mentor",
         "stopVoiceRecording": "Stop voice recording",
         "taskDescription": "Task description",
+        "taskButton": "Task description",
+        "resultButton": "Result",
+        "resultButtonDisabledTooltip": "Check the lesson first to see your result.",
         "taskDescriptionExpand": "Click to expand",
         "taskDescriptionCollapse": "Click to collapse",
+        "evaluation": {
+          "passedTitle": "Lesson passed",
+          "failedTitle": "Lesson not passed",
+          "passedDescription": "Your answer met the requirements for this lesson.",
+          "failedDescription": "Review the feedback and try again when you're ready.",
+          "scoreLabel": "Score",
+          "scoreValue": "{{score}}/{{maxScore}} conditions met ({{percentage}}%)",
+          "thresholdLabel": "Passing threshold",
+          "thresholdValue": "{{requiredScore}}/{{maxScore}} required ({{threshold}}%)",
+          "feedbackTitle": "What to improve",
+          "openDetails": "Open evaluation details"
+        },
         "voiceOverlay": {
           "headerEyebrow": "Voice UI",
           "exit": "Exit voice mode",
+          "mute": "Mute",
+          "unmute": "Unmute",
+          "micOn": "Mic on",
+          "muted": "Muted",
+          "mutedHint": "Your microphone is muted. The mentor cannot hear you.",
           "youSaid": "You said",
           "states": {
             "idle": {
@@ -3279,6 +3318,7 @@
   "files": {
     "toast": {
       "invalidData": "File upload failed - invalid file data",
+      "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
       "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
       "missingTenantContext": "Missing tenant context for file upload",

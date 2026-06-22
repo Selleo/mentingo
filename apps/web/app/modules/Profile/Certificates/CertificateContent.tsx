@@ -13,6 +13,7 @@ interface CertificateContentProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  expiryDate?: string;
   isModal?: boolean;
   isDownload?: boolean;
   backgroundImageUrl?: string | null;
@@ -33,6 +34,7 @@ const translations = {
     },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
+    expiryDate: "Wygasa",
     signature: "Podpis",
   },
   en: {
@@ -44,6 +46,7 @@ const translations = {
     },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",
+    expiryDate: "Expires",
     signature: "Signature",
   },
 };
@@ -55,6 +58,7 @@ const CertificateContent = ({
   studentName,
   courseName,
   completionDate,
+  expiryDate,
   isModal,
   isDownload,
   backgroundImageUrl,
@@ -136,7 +140,7 @@ const CertificateContent = ({
         </p>
       </div>
 
-      <div className="flex items-end gap-x-52">
+      <div className={cn("flex items-end", expiryDate ? "gap-x-16" : "gap-x-52")}>
         <div className={signatureClasses}>
           <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
             {completionDate}
@@ -146,6 +150,18 @@ const CertificateContent = ({
             {translations[lang].date}
           </p>
         </div>
+
+        {expiryDate && (
+          <div className={signatureClasses}>
+            <p className={text2Classes} style={{ color: colorTheme.bodyTextColor }}>
+              {expiryDate}
+            </p>
+            <hr className={hrClasses} style={{ borderColor: colorTheme.lineColor }} />
+            <p className={textClasses} style={{ color: colorTheme.labelTextColor }}>
+              {translations[lang].expiryDate}
+            </p>
+          </div>
+        )}
 
         <div className={signatureClasses}>
           {signatureImageUrl && (

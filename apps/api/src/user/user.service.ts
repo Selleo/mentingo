@@ -227,6 +227,7 @@ export class UserService {
   public async getRoles(tenantId: UUIDType) {
     const isLiveTrainingEnabled =
       await this.settingsService.isLiveTrainingEnabledForTenant(tenantId);
+
     const conditions = [eq(permissionRoles.tenantId, tenantId)];
 
     if (!isLiveTrainingEnabled) {
@@ -301,19 +302,17 @@ export class UserService {
 
   public async getUserDetails(
     userId: UUIDType,
-    currentUser: CurrentUserType,
+    currentUser: CurrentUserType | null,
   ): Promise<UserDetailsResponse> {
-    const { userId: currentUserId } = currentUser;
-
     const [userBio]: UserDetailsWithAvatarKey[] = await this.db
       .select({
+        id: users.id,
         firstName: users.firstName,
         lastName: users.lastName,
         avatarReference: users.avatarReference,
-        id: users.id,
         description: userDetails.description,
-        contactEmail: userDetails.contactEmail,
-        contactPhone: userDetails.contactPhoneNumber,
+        contactEmail: currentUser ? userDetails.contactEmail : sql<null>`NULL`,
+        contactPhone: currentUser ? userDetails.contactPhoneNumber : sql<null>`NULL`,
         jobTitle: userDetails.jobTitle,
       })
       .from(users)
@@ -322,19 +321,21 @@ export class UserService {
 
     if (!userBio) throw new NotFoundException("common.toast.notFound");
 
-    const canViewSelf = userId === currentUserId;
-    const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
-    const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
-    const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
+    if (currentUser) {
+      const canViewSelf = userId === currentUser.userId;
+      const canManageUsers = hasPermission(currentUser.permissions, PERMISSIONS.USER_MANAGE);
+      const { roleSlugs: targetRoleSlugs } = await this.getUserAccess(userId);
+      const targetIsAdmin = targetRoleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN);
 
-    const canView = canViewSelf || canManageUsers || targetIsAdmin;
+      const canView = canViewSelf || canManageUsers || targetIsAdmin;
 
-    if (!canView) throw new ForbiddenException("common.toast.noAccess");
+      if (!canView) throw new ForbiddenException("common.toast.noAccess");
+    }
 
     const { avatarReference, ...user } = userBio;
 
     const profilePictureUrl = avatarReference
-      ? await this.s3Service.getSignedUrl(avatarReference)
+      ? await this.fileService.getFileUrl(avatarReference)
       : null;
 
     return {
@@ -891,7 +892,7 @@ export class UserService {
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
     if (!avatarReference) return null;
-    return await this.s3Service.getSignedUrl(avatarReference);
+    return await this.fileService.getFileUrl(avatarReference);
   };
 
   public async getAdminsToNotifyAboutNewUser(emailToExclude: string) {
@@ -1160,6 +1161,7 @@ export class UserService {
     const shortInactivity = await this.statisticsService.getInactiveStudents(
       USER_SHORT_INACTIVITY_DAYS,
     );
+
     const longInactivity =
       await this.statisticsService.getInactiveStudents(USER_LONG_INACTIVITY_DAYS);
 

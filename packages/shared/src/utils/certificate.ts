@@ -26,6 +26,7 @@ export type BuildCertificateMarkupOptions = {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  expiryDate?: string;
   platformLogoUrl?: string | null;
   signatureImageUrl?: string | null;
   backgroundImageUrl?: string | null;
@@ -55,6 +56,7 @@ const certificateTranslations = {
     },
     confirmation: "potwierdzając tym samym realizację programu szkoleniowego.",
     date: "Data",
+    expiryDate: "Wygasa",
     signature: "Podpis",
   },
   en: {
@@ -67,6 +69,7 @@ const certificateTranslations = {
     },
     confirmation: "thereby confirming participation in the full training program.",
     date: "Date",
+    expiryDate: "Expires",
     signature: "Signature",
   },
   de: {
@@ -79,6 +82,7 @@ const certificateTranslations = {
     },
     confirmation: "und bestätigt damit die Teilnahme am gesamten Schulungsprogramm.",
     date: "Datum",
+    expiryDate: "Läuft ab",
     signature: "Unterschrift",
   },
   lt: {
@@ -91,6 +95,7 @@ const certificateTranslations = {
     },
     confirmation: "taip patvirtindamas dalyvavimą visoje mokymo programoje.",
     date: "Data",
+    expiryDate: "Galioja iki",
     signature: "Parašas",
   },
   cs: {
@@ -103,6 +108,7 @@ const certificateTranslations = {
     },
     confirmation: "čímž potvrzuje účast na celém školicím programu.",
     date: "Datum",
+    expiryDate: "Platí do",
     signature: "Podpis",
   },
 } as const;
@@ -112,6 +118,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
     studentName = "",
     courseName = "",
     completionDate = "",
+    expiryDate = "",
     platformLogoUrl,
     signatureImageUrl,
     backgroundImageUrl,
@@ -134,6 +141,27 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
 
   const signatureImageMarkup = signatureImageUrl
     ? `<img src="${escapeHtml(signatureImageUrl)}" alt="${escapeHtml(t.signature)}" class="mb-2 h-16 w-full object-contain" />`
+    : "";
+  const footerGapClass = expiryDate ? "gap-x-16" : "gap-x-52";
+  const expiryDateMarkup = expiryDate
+    ? `<div class="flex w-[280px] flex-col items-center">
+        <p
+          class="text-[18px] text-gray-600"
+          style="color:${escapeHtml(colorTheme.bodyTextColor)};"
+        >
+          ${escapeHtml(expiryDate)}
+        </p>
+        <hr
+          class="mx-auto mb-3 w-full"
+          style="border-color:${escapeHtml(colorTheme.lineColor)};"
+        />
+        <p
+          class="text-[18px] uppercase text-gray-800"
+          style="color:${escapeHtml(colorTheme.labelTextColor)};"
+        >
+          ${escapeHtml(t.expiryDate)}
+        </p>
+      </div>`
     : "";
 
   const certificateBodyMarkup = `<div
@@ -183,7 +211,7 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
       </p>
     </div>
 
-    <div class="flex items-end gap-x-52">
+    <div class="flex items-end ${footerGapClass}">
       <div class="flex w-[280px] flex-col items-center">
         <p
           class="text-[18px] text-gray-600"
@@ -202,6 +230,8 @@ export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): 
           ${escapeHtml(t.date)}
         </p>
       </div>
+
+      ${expiryDateMarkup}
 
       <div class="flex w-[280px] flex-col items-center">
         ${signatureImageMarkup}

@@ -31,6 +31,13 @@ import sharp from "sharp";
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
+import { ImageVariantService } from "src/file/image-variants/image-variant.service";
+import {
+  getAllImageVariantKeys,
+  getImageVariantKey,
+  isImageVariantReference,
+} from "src/file/image-variants/image-variant.utils";
 import { FILE_DELIVERY_TYPE, type FileDeliveryResult } from "src/file/types/file-delivery.type";
 import {
   FILE_PREVIEW_FORMAT,
@@ -74,10 +81,12 @@ import type {
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
 } from "src/file/types/resource.types";
+import type { UploadFileResult } from "src/file/types/upload-file-result.type";
 
 @Injectable()
 export class FileService {
@@ -90,6 +99,7 @@ export class FileService {
     private readonly bunnyVideoProvider: BunnyVideoProvider,
     private readonly s3VideoProvider: S3VideoProvider,
     private readonly thumbnailService: ThumbnailService,
+    private readonly imageVariantService: ImageVariantService,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
@@ -104,7 +114,27 @@ export class FileService {
       return this.bunnyStreamService.getUrl(videoId);
     }
 
+    if (isImageVariantReference(fileKey)) {
+      return this.getImageUrlByQuality(fileKey);
+    }
+
     return this.s3Service.getSignedUrl(fileKey);
+  }
+
+  async getImageUrlByQuality(
+    reference: string,
+    quality: ImageQuality = IMAGE_QUALITY.HIGH,
+  ): Promise<string> {
+    if (!isImageVariantReference(reference)) return this.s3Service.getSignedUrl(reference);
+
+    return this.s3Service.getSignedUrl(this.getFileStorageKeyByQuality(reference, quality));
+  }
+
+  async getFileContentType(fileKey: string): Promise<string | null> {
+    if (!fileKey) return null;
+    if (isImageVariantReference(fileKey)) return "image/webp";
+
+    return this.s3Service.getFileContentType(fileKey);
   }
 
   async isBunnyConfigured(): Promise<boolean> {
@@ -130,7 +160,7 @@ export class FileService {
         return sharp(Buffer.from(arrayBuffer), { density: 300 }).toBuffer();
       }
 
-      const buffer = await this.s3Service.getFileBuffer(fileKey);
+      const buffer = await this.s3Service.getFileBuffer(this.getFileStorageKey(fileKey));
       return sharp(buffer, { density: 300 }).toBuffer();
     } catch (error) {
       return null;
@@ -151,15 +181,19 @@ export class FileService {
         return Buffer.from(await response.arrayBuffer());
       }
 
-      return await this.s3Service.getFileBuffer(fileKey);
+      return await this.s3Service.getFileBuffer(this.getFileStorageKey(fileKey));
     } catch {
       return null;
     }
   }
 
-  async uploadFile(file: Express.Multer.File, resource: string, tenantId?: UUIDType) {
+  async uploadFile(
+    file: Express.Multer.File,
+    resource: string,
+    tenantId?: UUIDType,
+  ): Promise<UploadFileResult> {
     if (file.size === 0) {
-      throw new BadRequestException("File upload failed - empty file");
+      throw new BadRequestException("files.toast.fileEmpty");
     }
 
     if (!tenantId) throw new BadRequestException("files.toast.missingTenantContext");
@@ -183,6 +217,22 @@ export class FileService {
       });
     }
 
+    const imageVariantResult = await this.imageVariantService.createVariants({
+      buffer: file.buffer,
+      resource,
+      mimeType: file.mimetype,
+      tenantId,
+    });
+
+    if (imageVariantResult) {
+      return {
+        fileKey: imageVariantResult.referenceKey,
+        fileUrl: await this.getImageUrlByQuality(imageVariantResult.referenceKey),
+        contentType: imageVariantResult.contentType,
+        imageVariants: imageVariantResult.metadata,
+      };
+    }
+
     const fileExtension = path.extname(file.originalname);
 
     const fileKey = prefixTenantStorageKey(`${resource}/${randomUUID()}${fileExtension}`, tenantId);
@@ -199,6 +249,7 @@ export class FileService {
     return {
       fileKey,
       fileUrl,
+      contentType: file.mimetype,
     };
   }
 
@@ -427,6 +478,13 @@ export class FileService {
         const videoId = fileKey.replace("bunny-", "");
         return await this.bunnyStreamService.delete(videoId);
       }
+      if (isImageVariantReference(fileKey)) {
+        await Promise.all(
+          getAllImageVariantKeys(fileKey).map((key) => this.s3Service.deleteFile(key)),
+        );
+        return;
+      }
+
       return await this.s3Service.deleteFile(fileKey);
     } catch (error) {
       this.logFileOperationFailure("delete", fileKey, error);
@@ -436,7 +494,7 @@ export class FileService {
 
   async getFileStream(fileKey: string, range?: string) {
     try {
-      return await this.s3Service.getFileStream(fileKey, range);
+      return await this.s3Service.getFileStream(this.getFileStorageKey(fileKey), range);
     } catch (error) {
       this.logFileOperationFailure("retrieve", fileKey, error);
       throw new BadRequestException("Failed to retrieve file");
@@ -454,6 +512,16 @@ export class FileService {
 
   async listFileReferencesByPrefix(prefix: string) {
     return this.s3Service.listFileKeysByPrefix(prefix);
+  }
+
+  private getFileStorageKey(reference: string) {
+    return this.getFileStorageKeyByQuality(reference, IMAGE_QUALITY.HIGH);
+  }
+
+  private getFileStorageKeyByQuality(reference: string, quality: ImageQuality) {
+    if (!isImageVariantReference(reference)) return reference;
+
+    return getImageVariantKey(reference, quality);
   }
 
   async getFileDelivery(fileKey: string, range?: string): Promise<FileDeliveryResult> {
@@ -676,7 +744,7 @@ export class FileService {
 
     const checksum = getChecksum(file);
 
-    const { fileKey } = await this.uploadFile(file, resourceFolder, currentUser?.tenantId);
+    const uploadResult = await this.uploadFile(file, resourceFolder, currentUser?.tenantId);
 
     const { insertedResource } = await this.db.transaction(async (trx) => {
       const [insertedResource] = await trx
@@ -684,12 +752,13 @@ export class FileService {
         .values({
           title: buildJsonbFieldWithMultipleEntries(title || {}),
           description: buildJsonbFieldWithMultipleEntries(description || {}),
-          reference: fileKey,
-          contentType: file.mimetype,
+          reference: uploadResult.fileKey,
+          contentType: uploadResult.contentType,
           metadata: settingsToJSONBuildObject({
             originalFilename: file.originalname,
             size: file.size,
             checksum,
+            ...(uploadResult.imageVariants ? { imageVariants: uploadResult.imageVariants } : {}),
           }),
           uploadedBy: currentUser?.userId || null,
         })
@@ -719,8 +788,8 @@ export class FileService {
 
     return {
       resourceId: insertedResource.id,
-      fileKey,
-      fileUrl: await this.getFileUrl(fileKey),
+      fileKey: uploadResult.fileKey,
+      fileUrl: await this.getFileUrl(uploadResult.fileKey),
     };
   }
 

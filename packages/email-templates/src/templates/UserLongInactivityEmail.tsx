@@ -5,7 +5,7 @@ import { BaseEmailTemplate } from "./BaseEmailTemplate";
 import { DefaultEmailSettings } from "types";
 
 export type UserLongInactivityProps = {
-  courseName: string;
+  courseName?: string;
   courseLink: string;
 } & DefaultEmailSettings;
 

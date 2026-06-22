@@ -18,6 +18,7 @@ interface CertificatePreviewProps {
   studentName?: string;
   courseName?: string;
   completionDate?: string;
+  expiryDate?: string;
   onClose?: () => void;
   platformLogo?: string | null;
   certificateBackgroundImageUrl?: string | null;
@@ -37,6 +38,7 @@ const CertificatePreview = ({
   studentName,
   courseName,
   completionDate,
+  expiryDate,
   onClose,
   platformLogo,
   certificateBackgroundImageUrl,
@@ -131,6 +133,7 @@ const CertificatePreview = ({
             studentName={studentName}
             courseName={courseName}
             completionDate={completionDate}
+            expiryDate={expiryDate}
             isModal
             platformLogo={platformLogo}
             backgroundImageUrl={certificateBackgroundImageUrl}

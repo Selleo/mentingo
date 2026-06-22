@@ -15,6 +15,8 @@ import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
@@ -49,6 +51,7 @@ export class NewsService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
     private readonly resourceLibraryService: ResourceLibraryService,
+    private readonly searchIndexService: SearchIndexService,
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
@@ -81,6 +84,8 @@ export class NewsService {
         language,
       }),
     );
+
+    await this.searchIndexService.refreshNews(createdNews.id);
 
     return createdNews;
   }
@@ -134,6 +139,8 @@ export class NewsService {
     if ("content" in updateNewsData && updateNewsData.content !== undefined) {
       await this.resourceLibraryService.syncNewsAssetRelations(newsId);
     }
+
+    await this.searchIndexService.refreshNews(newsId);
 
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
@@ -319,6 +326,8 @@ export class NewsService {
 
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.removeLanguageError");
 
+    await this.searchIndexService.refreshNews(newsId);
+
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
     if (currentUser && !this.areNewsSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
@@ -354,6 +363,11 @@ export class NewsService {
       .returning({ id: news.id });
 
     if (!deletedNews) throw new BadRequestException("adminNewsView.toast.deleteError");
+
+    await this.searchIndexService.deleteEntityDocuments({
+      entityType: SEARCH_ENTITY_TYPES.NEWS,
+      entityId: newsId,
+    });
 
     if (currentUser) {
       await this.outboxPublisher.publish(
@@ -588,6 +602,8 @@ export class NewsService {
       });
 
     if (!createdLanguage) throw new BadRequestException("adminNewsView.toast.createLanguageError");
+
+    await this.searchIndexService.refreshNews(newsId);
 
     const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 

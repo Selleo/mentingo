@@ -13,6 +13,7 @@ import type { TrackReferenceOrPlaceholder } from "@livekit/components-react";
 type LiveTrainingParticipantTileProps = {
   profilePictureUrl?: string | null;
   trackRef: TrackReferenceOrPlaceholder;
+  isSpeaking?: boolean;
   variant?: "grid" | "fullscreen";
   onClick?: () => void;
 };
@@ -31,6 +32,7 @@ const getParticipantInitials = (name: string) => {
 export function LiveTrainingParticipantTile({
   profilePictureUrl,
   trackRef,
+  isSpeaking = false,
   variant = "grid",
   onClick,
 }: LiveTrainingParticipantTileProps) {
@@ -46,6 +48,7 @@ export function LiveTrainingParticipantTile({
   const isScreenShareEnabled = trackRef.participant.isScreenShareEnabled;
   const shouldShowVideoTrack =
     hasVideoTrack && (isScreenShare ? isScreenShareEnabled : isCameraEnabled);
+  const shouldMirrorVideo = trackRef.participant.isLocal && !isScreenShare;
 
   return (
     <button
@@ -53,20 +56,26 @@ export function LiveTrainingParticipantTile({
       disabled={!onClick}
       onClick={onClick}
       className={cn(
-        "group relative flex overflow-hidden rounded-md bg-primary-950 text-left shadow-sm ring-1 ring-primary-200/10 transition-colors",
+        "group relative flex overflow-hidden rounded-md bg-primary-950 text-left shadow-sm transition-[background-color,box-shadow] duration-200",
         {
           "min-h-44 cursor-pointer hover:bg-primary-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200":
             Boolean(onClick),
-          "h-full min-h-44": !isFullscreen,
+          "shadow-[0_0_28px_rgba(16,185,129,0.28)]": isSpeaking && !isFullscreen,
+          "h-full min-h-40 w-full": !isFullscreen,
           "size-full min-h-0 cursor-default rounded-none bg-black ring-0": isFullscreen,
         },
       )}
     >
+      {!isFullscreen && (
+        <div className="pointer-events-none absolute inset-0 z-30 rounded-md border border-primary-200/10" />
+      )}
+
       {shouldShowVideoTrack ? (
         <VideoTrack
           trackRef={trackRef}
           className={cn("relative z-10 size-full object-cover", {
             "object-contain": isScreenShare || isFullscreen,
+            "-scale-x-100": shouldMirrorVideo,
           })}
         />
       ) : (
@@ -105,7 +114,11 @@ export function LiveTrainingParticipantTile({
 
       <div className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-3 bg-gradient-to-t from-black/70 to-transparent p-3">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="inline-flex min-w-0 items-center gap-2 truncate rounded bg-black/45 py-1 pl-1 pr-2 text-sm font-medium text-white backdrop-blur-sm">
+          <span
+            className={cn(
+              "inline-flex min-w-0 items-center gap-2 truncate rounded bg-black/45 py-1 pl-1 pr-2 text-sm font-medium text-white backdrop-blur-sm",
+            )}
+          >
             <ParticipantAvatar
               participantName={participantName}
               participantInitials={participantInitials}
@@ -123,6 +136,10 @@ export function LiveTrainingParticipantTile({
           </span>
         )}
       </div>
+
+      {isSpeaking && !isFullscreen && (
+        <div className="pointer-events-none absolute inset-0 z-40 rounded-md border-2 border-emerald-400 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.35)]" />
+      )}
     </button>
   );
 }

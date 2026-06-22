@@ -17,6 +17,15 @@ type FillInTheBlanksProps = {
 export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps) => {
   const { t } = useTranslation();
   const { isQuizFeedbackRedacted } = useQuizContext();
+  const hasSubmittedAnswer = question.options?.some(
+    ({ isStudentAnswer, studentAnswer }) =>
+      Boolean(studentAnswer) || typeof isStudentAnswer === "boolean",
+  );
+  const showCorrectSentence =
+    Boolean(isCompleted || hasSubmittedAnswer) &&
+    Boolean(question.solutionExplanation) &&
+    !question.passQuestion &&
+    !isQuizFeedbackRedacted;
 
   if (!question.description) return null;
 
@@ -46,17 +55,14 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
           );
         }}
       />
-      {isCompleted &&
-        !!question?.solutionExplanation &&
-        !question.passQuestion &&
-        !isQuizFeedbackRedacted && (
-          <div>
-            <span className="body-base-md text-error-700">
-              {t("studentLessonView.other.correctSentence")}
-            </span>
-            <Viewer content={question.solutionExplanation} />
-          </div>
-        )}
+      {showCorrectSentence && (
+        <div>
+          <span className="body-base-md text-error-700">
+            {t("studentLessonView.other.correctSentence")}
+          </span>
+          <Viewer content={question.solutionExplanation ?? ""} />
+        </div>
+      )}
     </Card>
   );
 };

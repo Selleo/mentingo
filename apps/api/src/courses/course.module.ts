@@ -11,6 +11,7 @@ import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admi
 import { CourseHandler } from "src/courses/handlers/course.handler";
 import { MasterCourseSyncHandler } from "src/courses/handlers/master-course-sync.handler";
 import { FileModule } from "src/file/files.module";
+import { SearchIndexModule } from "src/global-search/search-index.module";
 import { LearningTimeModule } from "src/learning-time/learning-time.module";
 import { LessonModule } from "src/lesson/lesson.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -54,6 +55,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     CertificatesModule,
     AnnouncementsModule,
     EmailModule,
+    SearchIndexModule,
     CqrsModule,
     AiModule,
     forwardRef(() => StripeModule),

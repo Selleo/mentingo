@@ -1,4 +1,4 @@
-import { Download, FileText } from "lucide-react";
+import { Download, Folder } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -42,7 +42,7 @@ export function MeetingMaterialList({
               className="flex min-w-0 items-center gap-2 rounded border border-neutral-200 bg-white p-2"
             >
               <span className="flex size-8 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-                <FileText className="size-4" />
+                <Folder className="size-4" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-neutral-950" title={material.title}>

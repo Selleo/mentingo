@@ -2030,6 +2030,17 @@
       "create": {
         "courseFailed": "Nie udało się utworzyć kursu.",
         "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "Instrukcje AI Mentora i warunki ukończenia są wymagane.",
+        "customTtsReferenceRequired": "Własny wzorzec TTS jest wymagany w trybie niestandardowym.",
+        "aiMentorCreateFailed": "Nie udało się utworzyć lekcji AI Mentora.",
+        "questionsRequired": "Wymagane jest co najmniej jedno pytanie.",
+        "quizCreateFailed": "Nie udało się utworzyć quizu.",
+        "optionUpdateFailed": "Nie udało się zaktualizować odpowiedzi quizu.",
+        "optionInsertFailed": "Nie udało się dodać odpowiedzi quizu.",
+        "embedCreateFailed": "Nie udało się utworzyć lekcji z osadzeniem.",
+        "signedUrlDownloadFailed": "Nie udało się pobrać pliku z podpisanego adresu URL."
       }
     },
     "thinking": {
@@ -2986,7 +2997,14 @@
       "trueOrFalseRequired": "Wymagana jest odpowiedź prawda lub fałsz.",
       "photoQuestionMustHaveAnswer": "Wymagana jest odpowiedź na pytanie ze zdjęciem.",
       "unansweredQuestions": "Wygląda na to, że nie zaznaczyłaś/zaznaczyłeś wszystkich odpowiedzi. Proszę przejrzyj je i spróbuj ponownie!",
-      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}"
+      "unansweredQuestionsWithNames": "Uzupełnij brakujące pytania: {{questionNames}}",
+      "quizAlreadyAnswered": "Ten quiz został już rozwiązany.",
+      "lessonAssignmentRequired": "Nie masz przypisania do tej lekcji.",
+      "quizEvaluationFailed": "Nie udało się ocenić quizu. Spróbuj ponownie.",
+      "quizNotAnsweredYet": "Ten quiz nie został jeszcze rozwiązany.",
+      "courseEnrollmentRequired": "Nie jesteś zapisany/a na ten kurs.",
+      "quizRetakeUnavailable": "Nie można zresetować odpowiedzi z powodu limitu podejść lub okresu oczekiwania.",
+      "quizResetFailed": "Nie udało się zresetować odpowiedzi quizu. Spróbuj ponownie."
     }
   },
   "studentCourseView": {
@@ -3020,14 +3038,35 @@
         "addEmoji": "Dodaj emoji",
         "closeVoiceMode": "Zamknij tryb głosowy",
         "toggleVoiceInput": "Włącz wejście głosowe",
-        "startVoiceMentor": "Uruchom mentora głosowego",
+        "dictateVoiceInput": "Dyktuj wiadomość",
+        "startVoiceMentor": "Rozmawiaj z mentorem",
         "stopVoiceRecording": "Zatrzymaj nagrywanie głosu",
         "taskDescription": "Opis zadania",
+        "taskButton": "Opis zadania",
+        "resultButton": "Wynik",
+        "resultButtonDisabledTooltip": "Najpierw sprawdź lekcję, aby zobaczyć wynik.",
         "taskDescriptionExpand": "Kliknij, aby rozwinąć",
         "taskDescriptionCollapse": "Kliknij, aby zwinąć",
+        "evaluation": {
+          "passedTitle": "Lekcja zaliczona",
+          "failedTitle": "Lekcja niezaliczona",
+          "passedDescription": "Twoja odpowiedź spełniła wymagania tej lekcji.",
+          "failedDescription": "Przejrzyj informację zwrotną i spróbuj ponownie, gdy będziesz gotowy/a.",
+          "scoreLabel": "Wynik",
+          "scoreValue": "Spełniono {{score}}/{{maxScore}} warunków ({{percentage}}%)",
+          "thresholdLabel": "Próg zaliczenia",
+          "thresholdValue": "Wymagane {{requiredScore}}/{{maxScore}} ({{threshold}}%)",
+          "feedbackTitle": "Co poprawić",
+          "openDetails": "Otwórz szczegóły oceny"
+        },
         "voiceOverlay": {
           "headerEyebrow": "Interfejs głosowy",
           "exit": "Zamknij tryb głosowy",
+          "mute": "Wycisz",
+          "unmute": "Włącz mikrofon",
+          "micOn": "Mikrofon włączony",
+          "muted": "Wyciszony",
+          "mutedHint": "Twój mikrofon jest wyciszony. Mentor Cię nie słyszy.",
           "youSaid": "Powiedziałeś/aś",
           "states": {
             "idle": {
@@ -3544,6 +3583,7 @@
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
+      "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
       "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",

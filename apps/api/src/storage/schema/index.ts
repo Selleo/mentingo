@@ -55,6 +55,7 @@ import {
 } from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
+import { tsvector } from "./custom-types";
 import {
   archived,
   availableLocales,
@@ -1806,6 +1807,42 @@ export const outboxEvents = pgTable(
   },
   withTenantIdIndex("outbox_events", (table) => ({
     pollIdx: index("outbox_events_poll_idx").on(table.tenantId, table.status, table.createdAt),
+  })),
+);
+
+export const searchDocuments = pgTable(
+  "search_documents",
+  {
+    ...id,
+    ...timestamps,
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id").notNull(),
+    documentType: text("document_type").notNull(),
+    language: text("language").$type<SupportedLanguages>().notNull(),
+    content: text("content").notNull(),
+    searchVector: tsvector("search_vector").notNull(),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>().notNull().default({}),
+    tenantId,
+  },
+  withTenantIdIndex("search_documents", (table) => ({
+    vectorIdx: index("search_documents_vector_idx").using("gin", table.searchVector),
+    languageEntityTypeIdx: index("search_documents_language_entity_type_idx").on(
+      table.tenantId,
+      table.language,
+      table.entityType,
+    ),
+    entityIdx: index("search_documents_entity_idx").on(
+      table.tenantId,
+      table.entityType,
+      table.entityId,
+    ),
+    documentUniqueIdx: uniqueIndex("search_documents_document_unique_idx").on(
+      table.tenantId,
+      table.entityType,
+      table.entityId,
+      table.documentType,
+      table.language,
+    ),
   })),
 );
 

@@ -1,3 +1,19 @@
+<a name="v4.12.1"></a>
+
+## [v4.12.1] - 19.06.2026
+
+### Bug Fixes:
+
+- show author avatar and name for unregistered users ([#1653](https://github.com/Selleo/mentingo/issues/1653))
+
+- show course preview cards correctly during AI course generation ([#1645](https://github.com/Selleo/mentingo/issues/1645))
+
+- improve hero news image display ([#1644](https://github.com/Selleo/mentingo/issues/1644))
+
+### Chores:
+
+- improve live training experience based on feedback ([#1630](https://github.com/Selleo/mentingo/issues/1630))
+
 <a name="v4.12.0"></a>
 
 ## [v4.12.0] - 17.06.2026
@@ -19,6 +35,10 @@
 ### Code Refactoring:
 
 - improve resource library structure for easier maintenance ([#1628](https://github.com/Selleo/mentingo/issues/1628))
+
+### Documentation:
+
+- update changelog for version v4.12.0
 
 ### Tests:
 
@@ -2878,7 +2898,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.12.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.12.1...HEAD
+[v4.12.1]: https://github.com/Selleo/mentingo/compare/v4.12.0...v4.12.1
 [v4.12.0]: https://github.com/Selleo/mentingo/compare/v4.11.0...v4.12.0
 [v4.11.0]: https://github.com/Selleo/mentingo/compare/v4.10.0...v4.11.0
 [v4.10.0]: https://github.com/Selleo/mentingo/compare/v4.9.0...v4.10.0

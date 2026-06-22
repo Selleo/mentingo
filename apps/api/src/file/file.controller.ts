@@ -101,7 +101,12 @@ export class FileController {
       maxVideoSize: MAX_VIDEO_SIZE,
     });
 
-    return await this.fileService.uploadFile(file, resource, currentUser.tenantId);
+    const uploadResult = await this.fileService.uploadFile(file, resource, currentUser.tenantId);
+
+    return {
+      fileKey: uploadResult.fileKey,
+      fileUrl: uploadResult.fileUrl,
+    };
   }
 
   @RequirePermission(

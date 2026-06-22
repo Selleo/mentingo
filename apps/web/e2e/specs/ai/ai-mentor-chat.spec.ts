@@ -108,6 +108,7 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeVisible({
         timeout: 90_000,
       });
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
 
       await expect
         .poll(

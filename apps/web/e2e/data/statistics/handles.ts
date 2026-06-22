@@ -32,6 +32,10 @@ export const COURSE_STATISTICS_HANDLES = {
     `course-statistics-ai-mentor-results-preview-button-${studentId}-${lessonId}`,
   learningTimeRow: (studentId: string) => `course-statistics-learning-time-row-${studentId}`,
   LESSON_PREVIEW_DIALOG: "course-statistics-lesson-preview-dialog",
+  LESSON_PREVIEW_CLOSE_BUTTON: "course-statistics-lesson-preview-close-button",
+  LESSON_PREVIEW_TASK_DESCRIPTION_BUTTON:
+    "course-statistics-lesson-preview-task-description-button",
+  LESSON_PREVIEW_RESULT_BUTTON: "course-statistics-lesson-preview-result-button",
 } as const;
 
 export const ADMIN_STATISTICS_HANDLES = {

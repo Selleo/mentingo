@@ -17,10 +17,10 @@ import { CategoryChip } from "~/components/ui/CategoryChip";
 import { useLessonsSequence } from "~/hooks/useLessonsSequence";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { LessonTypeIcon } from "~/modules/Courses/CourseView/LessonTypeIcon";
 import {
   CHAPTER_PROGRESS_STATUSES,
   getLessonTypeTranslationKey,
-  LessonTypesIcons,
 } from "~/modules/Courses/CourseView/lessonTypes";
 
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
@@ -197,10 +197,7 @@ export const LessonSidebar = ({ course, lessonId }: LessonSidebarProps) => {
                                   {t(getLessonTypeTranslationKey(type), { defaultValue: type })}
                                 </p>
                               </div>
-                              <Icon
-                                name={LessonTypesIcons[type]}
-                                className="size-6 text-primary-700"
-                              />
+                              <LessonTypeIcon type={type} className="size-6 text-primary-700" />
                             </Link>
                           );
                         })}

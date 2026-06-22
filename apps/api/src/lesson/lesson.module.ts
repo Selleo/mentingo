@@ -3,6 +3,7 @@ import { forwardRef, Module } from "@nestjs/common";
 import { AiModule } from "src/ai/ai.module";
 import { CourseModule } from "src/courses/course.module";
 import { FileModule } from "src/file/files.module";
+import { SearchIndexModule } from "src/global-search/search-index.module";
 import { IngestionModule } from "src/ingestion/ingestion.module";
 import { LiveTrainingModule } from "src/live-training/live-training.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -22,6 +23,7 @@ import { LessonService } from "./services/lesson.service";
 @Module({
   imports: [
     FileModule,
+    SearchIndexModule,
     QuestionsModule,
     StudentLessonProgressModule,
     AiModule,

@@ -10,8 +10,12 @@
     "cssVariables": true,
     "prefix": ""
   },
+  "iconLibrary": "lucide",
   "aliases": {
     "components": "~/components",
     "utils": "~/lib/utils"
+  },
+  "registries": {
+    "@agents-ui": "https://livekit.com/ui/r/{name}.json"
   }
 }

@@ -18,12 +18,10 @@ export function useDeleteLiveTraining() {
 
   return useMutation({
     mutationFn: async ({ id }: DeleteLiveTrainingOptions) => {
-      const response = await ApiClient.api.liveTrainingControllerDeleteLiveTraining(id);
-
-      return response.data;
+      await ApiClient.api.liveTrainingControllerDeleteLiveTraining(id);
     },
-    onSuccess: async () => {
-      await invalidateLiveTrainingData({
+    onSuccess: () => {
+      void invalidateLiveTrainingData({
         includeCalendar: true,
         includeCoursesAndLessons: true,
       });

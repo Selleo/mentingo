@@ -2,13 +2,12 @@ import { Logger } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { CertificateExpiredEmail, CertificateExpirationWarningEmail } from "@repo/email-templates";
 
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
-
-import { CERTIFICATE_EMAIL_BATCH_SIZE } from "../certificates.batch.constants";
 
 import type { CertificateActivityReason } from "../certificates.types";
 import type { CertificateEmailRecipient } from "src/events/certificate/certificate-email-recipient";
@@ -118,7 +117,7 @@ export class CertificateEmailHandler implements IEventHandler<CertificateEmailEv
     processItem: (item: T) => Promise<void>,
   ) {
     await processInBatches(items, processItem, {
-      batchSize: CERTIFICATE_EMAIL_BATCH_SIZE,
+      batchSize: EMAIL_BATCH_SIZE,
       throwOnError: false,
       onItemError: (error, _item, itemIndex) => {
         const reason = error instanceof Error ? error.stack : String(error);

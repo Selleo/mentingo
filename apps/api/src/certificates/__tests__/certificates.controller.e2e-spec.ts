@@ -114,9 +114,12 @@ describe("CertificatesController (e2e)", () => {
           hasCertificate: true,
         });
 
+        const expiresAt = new Date("2026-06-30T23:59:59.999Z").toISOString();
+
         await db.insert(certificates).values({
           userId: student.id,
           courseId: course.id,
+          expiresAt,
         });
 
         const response = await request(app.getHttpServer())
@@ -131,6 +134,9 @@ describe("CertificatesController (e2e)", () => {
         expect(response.body.data[0].courseTitle).toBe(course.title);
         expect(response.body.data[0].completionDate).toEqual(expect.any(String));
         expect(response.body.data[0].issuedAt).toEqual(expect.any(String));
+        expect(new Date(response.body.data[0].expiresAt).getTime()).toBe(
+          new Date(expiresAt).getTime(),
+        );
         expect(response.body.data[0].fullName).toBe(`${student.firstName} ${student.lastName}`);
         expect(response.body.data[0].userId).toBe(student.id);
         expect(response.body.pagination.totalItems).toBe(1);

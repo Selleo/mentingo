@@ -12,14 +12,13 @@ import {
 import { format } from "date-fns";
 
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { AnnouncementPublishedEvent, CourseDueDateReminderEmailEvent } from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
-
-import { COURSE_DUE_DATE_REMINDER_EMAIL_BATCH_SIZE } from "../constants/course-due-date-reminders.constants";
 
 import type { CourseDueDateReminderRecipient } from "../types/course-due-date-reminder.types";
 
@@ -40,7 +39,7 @@ export class CourseDueDateReminderEmailHandler
     const { recipients } = event.courseDueDateReminderEmailData;
 
     await processInBatches(recipients, (recipient) => this.sendCourseDueDateReminder(recipient), {
-      batchSize: COURSE_DUE_DATE_REMINDER_EMAIL_BATCH_SIZE,
+      batchSize: EMAIL_BATCH_SIZE,
       throwOnError: false,
       onItemError: (error, recipient) => {
         const reason = error instanceof Error ? error.stack : String(error);

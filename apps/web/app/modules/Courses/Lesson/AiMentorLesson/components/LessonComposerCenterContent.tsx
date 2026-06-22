@@ -77,7 +77,7 @@ export function LessonComposerCenterContent({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="w-full border-none bg-transparent py-2 text-base font-normal max-w-full overflow-x-hidden resize-none max-h-48 h-auto text-gray-500 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
+            className="h-auto max-h-28 w-full max-w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent py-1.5 text-base font-normal text-gray-600 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
           />
         )}
       </AnimatePresence>

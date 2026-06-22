@@ -50,6 +50,13 @@ export const EMAIL_SUBJECTS_TRANSLATIONS = {
     lt: "Tęsk savo kursą - {{courseName}}",
     cs: "Pokračuj ve svém kurzu - {{courseName}}",
   },
+  userShortInactivityPlatformEmail: {
+    en: "Continue your journey on the platform",
+    pl: "Kontynuuj naukę na platformie",
+    de: "Setze deine Lernreise auf der Plattform fort",
+    lt: "Tęskite mokymosi kelionę platformoje",
+    cs: "Pokračuj ve své cestě na platformě",
+  },
   userLongInactivityEmail: {
     en: "Come back to your courses",
     pl: "Wróć do swoich kursów",

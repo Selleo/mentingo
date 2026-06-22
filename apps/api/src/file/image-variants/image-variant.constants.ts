@@ -1,0 +1,32 @@
+export const IMAGE_VARIANT_CONTENT_TYPE = "image/webp";
+
+export const IMAGE_QUALITY = {
+  SMALL: "640w",
+  MEDIUM: "960w",
+  LARGE: "1280w",
+  HIGH: "1920w",
+} as const;
+
+export const IMAGE_VARIANT_WIDTHS = {
+  [IMAGE_QUALITY.SMALL]: 640,
+  [IMAGE_QUALITY.MEDIUM]: 960,
+  [IMAGE_QUALITY.LARGE]: 1280,
+  [IMAGE_QUALITY.HIGH]: 1920,
+} as const;
+
+export const IMAGE_VARIANT_DEFINITIONS = [
+  { quality: IMAGE_QUALITY.SMALL, width: IMAGE_VARIANT_WIDTHS[IMAGE_QUALITY.SMALL] },
+  { quality: IMAGE_QUALITY.MEDIUM, width: IMAGE_VARIANT_WIDTHS[IMAGE_QUALITY.MEDIUM] },
+  { quality: IMAGE_QUALITY.LARGE, width: IMAGE_VARIANT_WIDTHS[IMAGE_QUALITY.LARGE] },
+  { quality: IMAGE_QUALITY.HIGH, width: IMAGE_VARIANT_WIDTHS[IMAGE_QUALITY.HIGH] },
+] as const;
+
+export const SUPPORTED_IMAGE_VARIANT_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
+export const SUPPORTED_IMAGE_VARIANT_MIME_TYPE_SET = new Set<string>(
+  SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
+);

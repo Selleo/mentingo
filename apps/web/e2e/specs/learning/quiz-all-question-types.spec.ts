@@ -4,6 +4,7 @@ import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { answerAllRenderedQuizQuestionTypesFlow } from "../../flows/learning/answer-all-rendered-quiz-question-types.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
+import { retakeQuizFlow } from "../../flows/learning/retake-quiz.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { submitQuizFlow } from "../../flows/learning/submit-quiz.flow";
 import {
@@ -98,6 +99,12 @@ test("student can submit a quiz containing every rendered question type", async 
         });
 
       await waitForUserQuizAttemptCountFlow(apiClient, expectedQuizAttemptCount);
+
+      await retakeQuizFlow(page);
+
+      await expect(page.locator('input[name^="trueOrFalseQuestions."]:checked')).toHaveCount(0);
+      await expect(page.getByTestId("text-blank-1")).toBeEditable();
+      await expect(page.getByTestId("text-blank-1")).toHaveValue("");
     },
     { root: true },
   );

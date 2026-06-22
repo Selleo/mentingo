@@ -72,18 +72,37 @@ export class LumaController {
 
     const response = await this.lumaService.chatWithCourseAgent(data, currentUser);
     let syncEnqueued = false;
+    let pendingCourseGeneratedFrame = "";
 
     try {
       for await (const chunk of response.data as AsyncIterable<Buffer>) {
         res.write(chunk);
 
-        if (!syncEnqueued && this.lumaService.hasCourseGeneratedEvent(chunk)) {
+        const courseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
+          chunk,
+          pendingCourseGeneratedFrame,
+        );
+        pendingCourseGeneratedFrame = courseGeneratedDetection.pendingFrame;
+
+        if (!syncEnqueued && courseGeneratedDetection.hasCourseGeneratedEvent) {
           syncEnqueued = true;
           await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
             data.integrationId,
             currentUser,
           );
         }
+      }
+
+      const finalCourseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
+        Buffer.from("\n"),
+        pendingCourseGeneratedFrame,
+      );
+
+      if (!syncEnqueued && finalCourseGeneratedDetection.hasCourseGeneratedEvent) {
+        await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
+          data.integrationId,
+          currentUser,
+        );
       }
 
       res.end();

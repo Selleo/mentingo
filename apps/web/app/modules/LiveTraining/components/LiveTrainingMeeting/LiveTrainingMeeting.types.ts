@@ -33,6 +33,7 @@ export type LiveTrainingRoomToolbarProps = {
 
 export type LiveTrainingParticipantGridProps = {
   liveTrainingId: string;
+  hasPinnedTrack: boolean;
   onTrackSelect: (trackRef: TrackReferenceOrPlaceholder, profilePictureUrl?: string | null) => void;
 };
 
