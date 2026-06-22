@@ -61,7 +61,7 @@ export function LiveTrainingParticipantTile({
           "min-h-44 cursor-pointer hover:bg-primary-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200":
             Boolean(onClick),
           "shadow-[0_0_28px_rgba(16,185,129,0.28)]": isSpeaking && !isFullscreen,
-          "h-full min-h-40 w-full": !isFullscreen,
+          "aspect-[16/10] min-h-0 w-full max-w-[min(100%,calc(100cqh*16/10))]": !isFullscreen,
           "size-full min-h-0 cursor-default rounded-none bg-black ring-0": isFullscreen,
         },
       )}

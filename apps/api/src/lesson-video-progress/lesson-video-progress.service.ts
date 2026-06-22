@@ -9,6 +9,7 @@ import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { DB } from "src/storage/db/db.providers";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
 import {
@@ -30,7 +31,7 @@ export class LessonVideoProgressService {
     private readonly lessonVideoProgressRepository: LessonVideoProgressRepository,
     private readonly watchSessionService: LessonVideoWatchSessionService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async upsertProgress(body: UpsertLessonVideoProgress, currentUser: CurrentUserType) {

@@ -36,15 +36,7 @@ const getParticipantUserId = (trackRef: TrackReferenceOrPlaceholder) => {
   return getParticipantMetadata(trackRef.participant.metadata).userId;
 };
 
-const isFocusedSpeakerCameraTrack = (
-  trackRef: TrackReferenceOrPlaceholder,
-  focusedSpeakerIdentity?: string,
-) =>
-  trackRef.participant.identity === focusedSpeakerIdentity &&
-  trackRef.source === Track.Source.Camera;
-
 export function LiveTrainingParticipantGrid({
-  hasPinnedTrack,
   liveTrainingId,
   onTrackSelect,
 }: LiveTrainingParticipantGridProps) {
@@ -62,33 +54,22 @@ export function LiveTrainingParticipantGrid({
     () => new Set(activeSpeakers.map((participant) => participant.identity)),
     [activeSpeakers],
   );
-  const focusedSpeakerIdentity = hasPinnedTrack ? undefined : activeSpeakers[0]?.identity;
-  const sortedTracks = useMemo(() => {
-    if (!focusedSpeakerIdentity) return tracks;
-
-    return [...tracks].sort((trackA, trackB) => {
-      const trackAFocusScore = isFocusedSpeakerCameraTrack(trackA, focusedSpeakerIdentity) ? 1 : 0;
-      const trackBFocusScore = isFocusedSpeakerCameraTrack(trackB, focusedSpeakerIdentity) ? 1 : 0;
-
-      return trackBFocusScore - trackAFocusScore;
-    });
-  }, [focusedSpeakerIdentity, tracks]);
   const participantUserIds = useMemo(
     () =>
       Array.from(
         new Set(
-          sortedTracks
+          tracks
             .map((trackRef) => getParticipantUserId(trackRef))
             .filter((userId): userId is string => Boolean(userId)),
         ),
       ).sort(),
-    [sortedTracks],
+    [tracks],
   );
   const { data: profilePictures = [] } = useLiveTrainingParticipantProfilePictures(
     liveTrainingId,
     participantUserIds,
     language,
-    { enabled: sortedTracks.length > 0 },
+    { enabled: tracks.length > 0 },
   );
   const profilePictureByUserId = useMemo(
     () =>
@@ -101,7 +82,7 @@ export function LiveTrainingParticipantGrid({
     [profilePictures],
   );
 
-  if (sortedTracks.length === 0) {
+  if (tracks.length === 0) {
     return (
       <div className="flex size-full min-h-[20rem] items-center justify-center rounded-md bg-white/[0.03] text-white/70 lg:min-h-0">
         <div className="grid justify-items-center gap-2 text-center">
@@ -113,8 +94,8 @@ export function LiveTrainingParticipantGrid({
   }
 
   return (
-    <div className="live-training-room-grid grid size-full min-h-0 auto-rows-[minmax(10rem,1fr)] grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-3 overflow-y-auto">
-      {sortedTracks.map((trackRef) => (
+    <div className="live-training-room-grid grid size-full min-h-0 content-start justify-items-center grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-3 overflow-y-auto [container-type:size]">
+      {tracks.map((trackRef) => (
         <LiveTrainingParticipantTile
           key={`${trackRef.participant.identity}-${trackRef.source}`}
           isSpeaking={activeSpeakerIdentities.has(trackRef.participant.identity)}

@@ -3425,8 +3425,10 @@ describe("CourseController (e2e)", () => {
           expect(response.body.data).toBeDefined();
           expect(response.body.data.quizFeedbackEnabled).toBeDefined();
           expect(response.body.data.lessonSequenceEnabled).toBeDefined();
+          expect(response.body.data.videoCompletionTrackingEnabled).toBe(true);
           expect(typeof response.body.data.quizFeedbackEnabled).toBe("boolean");
           expect(typeof response.body.data.lessonSequenceEnabled).toBe("boolean");
+          expect(typeof response.body.data.videoCompletionTrackingEnabled).toBe("boolean");
         });
 
         it("returns course settings with custom values", async () => {
@@ -3454,6 +3456,7 @@ describe("CourseController (e2e)", () => {
 
           expect(response.body.data.quizFeedbackEnabled).toBe(false);
           expect(response.body.data.lessonSequenceEnabled).toBe(true);
+          expect(response.body.data.videoCompletionTrackingEnabled).toBe(true);
         });
 
         it("returns 404 when course does not exist", async () => {

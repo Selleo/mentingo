@@ -4,6 +4,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { DB } from "src/storage/db/db.providers";
 import {
   chapters,
   courses,
@@ -28,7 +29,7 @@ import type {
 
 @Injectable()
 export class LessonVideoProgressRepository {
-  constructor(@Inject("DB") private readonly db: DatabasePg) {}
+  constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async getLessonVideoContext(
     params: LessonVideoIdentity,
@@ -159,7 +160,7 @@ export class LessonVideoProgressRepository {
     const rows = await dbInstance
       .select({
         resourceEntityId: resourceEntity.id,
-        progressIsWatched: lessonVideoProgress.isWatched,
+        isWatched: sql<boolean>`COALESCE(${lessonVideoProgress.isWatched}, FALSE)`,
       })
       .from(resourceEntity)
       .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
@@ -181,10 +182,7 @@ export class LessonVideoProgressRepository {
         ),
       );
 
-    return rows.map((row) => ({
-      resourceEntityId: row.resourceEntityId,
-      isWatched: row.progressIsWatched === true,
-    }));
+    return rows;
   }
 
   async getProgressForResourceIds(
@@ -209,15 +207,9 @@ export class LessonVideoProgressRepository {
 
   private mapProgressRow(row: typeof lessonVideoProgress.$inferSelect): LessonVideoProgressRow {
     return {
-      lessonId: row.lessonId,
-      resourceEntityId: row.resourceEntityId,
-      durationSeconds: row.durationSeconds,
-      bucketSizeSeconds: row.bucketSizeSeconds,
+      ...row,
       watchedRanges: parseInt4Multirange(row.watchedRanges),
-      coveredBucketCount: row.coveredBucketCount,
       coveragePercent: Number(row.coveragePercent),
-      isWatched: row.isWatched,
-      watchedAt: row.watchedAt,
     };
   }
 }

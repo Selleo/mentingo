@@ -1051,6 +1051,20 @@
       "when": 1782128282522,
       "tag": "0149_add_support_session_target_user",
       "breakpoints": true
+    },
+    {
+      "idx": 150,
+      "version": "7",
+      "when": 1782136299383,
+      "tag": "0150_add_lesson_video_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 151,
+      "version": "7",
+      "when": 1782136304580,
+      "tag": "0151_enable_lesson_video_progress_rls",
+      "breakpoints": true
     }
   ]
 }

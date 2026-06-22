@@ -1,3 +1,4 @@
+import type { ResourceMetadata } from "./resource-metadata.type";
 import type { ResourceCategory, ResourceRelationshipType } from "../file.constants";
 import type { EntityType, SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
@@ -31,14 +32,27 @@ export type UploadResourceParams = {
   options?: { folderIncludesResource?: boolean; contextId?: UUIDType };
 };
 
-export type ResourceForEntity = Omit<
+export type LocalizedResourceText = Partial<Record<SupportedLanguages, string>>;
+
+type ResourceForEntityBase = Omit<
   InferSelectModel<typeof resources>,
   "title" | "description" | "metadata"
 > & {
-  title: unknown;
-  description: unknown;
-  metadata: unknown;
   resourceEntityId: UUIDType;
   fileUrl: string;
   fileUrlError?: boolean;
 };
+
+export type RawResourceForEntity = ResourceForEntityBase & {
+  title: LocalizedResourceText;
+  description: LocalizedResourceText;
+  metadata: ResourceMetadata | null;
+};
+
+export type LocalizedResourceForEntity = ResourceForEntityBase & {
+  title: string;
+  description: string;
+  metadata: ResourceMetadata | null;
+};
+
+export type ResourceForEntity = RawResourceForEntity | LocalizedResourceForEntity;

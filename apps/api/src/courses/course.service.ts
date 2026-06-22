@@ -1909,9 +1909,9 @@ export class CourseService {
       : null;
 
     return {
+      ...course.settings,
       videoCompletionTrackingEnabled:
         course.settings.videoCompletionTrackingEnabled ?? VIDEO_COMPLETION_TRACKING_ENABLED,
-      ...course.settings,
       certificateSignatureUrl,
     };
   }

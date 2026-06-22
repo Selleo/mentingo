@@ -33,6 +33,7 @@ import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { SettingsService } from "src/settings/settings.service";
+import { DB } from "src/storage/db/db.providers";
 import { articles, articleSections } from "src/storage/schema";
 
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
@@ -57,9 +58,10 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { FilePreviewFormat, FilePreviewOptions } from "src/file/types/file-preview.type";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
+import type { LocalizedResourceForEntity } from "src/file/types/resource.types";
 import type { ResourceWithUrlError } from "src/lesson/lesson-resource.types";
 
-type StoredArticleResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
+type StoredArticleResource = LocalizedResourceForEntity;
 
 @Injectable()
 export class ArticlesService {
@@ -71,7 +73,7 @@ export class ArticlesService {
     private readonly settingsService: SettingsService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly searchIndexService: SearchIndexService,
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
   ) {}
 
   async createArticleSection(

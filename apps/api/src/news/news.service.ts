@@ -21,10 +21,12 @@ import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
 import { SettingsService } from "src/settings/settings.service";
+import { DB } from "src/storage/db/db.providers";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
 
 import { baseNewsTitle } from "./constants";
 
+import type { StoredNewsResource } from "./news.types";
 import type { CreateNews } from "./schemas/createNews.schema";
 import type { NewsResource, NewsResources } from "./schemas/selectNews.schema";
 import type { UpdateNews } from "./schemas/updateNews.schema";
@@ -40,12 +42,10 @@ import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 const FIRST_PAGE_SIZE = 7;
 const SUBSEQUENT_PAGE_SIZE = 9;
 
-type StoredNewsResource = Awaited<ReturnType<FileService["getResourcesForEntity"]>>[number];
-
 @Injectable()
 export class NewsService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
     private readonly fileService: FileService,
     private readonly outboxPublisher: OutboxPublisher,
