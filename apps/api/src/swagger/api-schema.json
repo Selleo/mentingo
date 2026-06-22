@@ -19963,14 +19963,6 @@
                 "type": "string"
               },
               {
-                "const": "learning_path",
-                "type": "string"
-              },
-              {
-                "const": "qa",
-                "type": "string"
-              },
-              {
                 "const": "user",
                 "type": "string"
               },
