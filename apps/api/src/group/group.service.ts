@@ -20,6 +20,7 @@ import {
 } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseService } from "src/courses/course.service";
 import {
   CreateGroupEvent,
@@ -27,6 +28,7 @@ import {
   EnrollUserToGroupEvent,
   UpdateGroupEvent,
 } from "src/events";
+import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { GroupSortFields } from "src/group/group.schema";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -47,12 +49,8 @@ import type {
   GroupBaseLanguageUpdateBody,
   UpdateGroupBody,
 } from "src/group/group.types";
+import type { UserGroupAssignmentResult } from "src/group/types/user-group-assignment-result.type";
 import type { UserResponse } from "src/user/schemas/user.schema";
-
-type UserGroupAssignmentResult = {
-  groupIdsToAssign: UUIDType[];
-  groupIdsToRemove: UUIDType[];
-};
 
 @Injectable()
 export class GroupService {
@@ -434,8 +432,9 @@ export class GroupService {
       await this.syncUserGroupEnrollment(userId, groupIdsToAssign, groupIdsToRemove, trx);
 
       if (actor && groupIdsToAssign.length) {
-        await Promise.all(
-          groupIdsToAssign.map((groupId) =>
+        await processInBatches(
+          groupIdsToAssign,
+          (groupId) =>
             this.outboxPublisher.publish(
               new EnrollUserToGroupEvent({
                 groupId,
@@ -444,7 +443,7 @@ export class GroupService {
               }),
               trx,
             ),
-          ),
+          { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
         );
       }
     });

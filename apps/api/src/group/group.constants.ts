@@ -1,0 +1,1 @@
+export const GROUP_ENROLLMENT_EVENT_BATCH_SIZE = 25;
