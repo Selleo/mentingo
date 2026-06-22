@@ -3,6 +3,7 @@ import { Type, type Static } from "@sinclair/typebox";
 import { UUIDSchema } from "src/common";
 
 import type { LiveTrainingSettings } from "@repo/shared";
+import type { Request } from "express";
 import type { Room, TrackSource, WebhookEvent } from "livekit-server-sdk";
 
 export const liveKitConfigSchema = Type.Object({
@@ -98,5 +99,10 @@ export type CreateLiveKitRoomResult = Static<typeof createLiveKitRoomResultSchem
 export type LiveKitViewerPermissions = LiveTrainingSettings["viewerPermissions"];
 
 export type LiveKitWebhookResult = WebhookEvent;
+
+export type LiveKitWebhookRequest = Request & {
+  rawBody?: string | Buffer;
+  body?: unknown;
+};
 
 export type LiveKitPublishSource = TrackSource;
