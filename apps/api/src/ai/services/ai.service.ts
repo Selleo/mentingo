@@ -251,14 +251,11 @@ export class AiService {
       tokenCount,
     });
 
+    const { status: _status, ...judgeData } = judged.data;
+
     return {
       data: {
-        summary: judged.data.summary,
-        passed: judged.data.passed,
-        minScore: judged.data.minScore,
-        score: judged.data.score,
-        maxScore: judged.data.maxScore,
-        percentage: judged.data.percentage,
+        ...judgeData,
       },
     };
   }

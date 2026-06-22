@@ -198,13 +198,7 @@ const AiMentorLesson = ({
     if (!lesson.aiMentorDetails) return null;
 
     return {
-      summary: lesson.aiMentorDetails.summary,
-      passed: lesson.aiMentorDetails.passed,
-      minScore: lesson.aiMentorDetails.minScore,
-      score: lesson.aiMentorDetails.score,
-      maxScore: lesson.aiMentorDetails.maxScore,
-      percentage: lesson.aiMentorDetails.percentage,
-      requiredScore: lesson.aiMentorDetails.requiredScore,
+      ...lesson.aiMentorDetails,
     };
   }, [lesson.aiMentorDetails]);
   const evaluation = latestEvaluation ?? persistedEvaluation;
@@ -261,9 +255,9 @@ const AiMentorLesson = ({
           </Dialog>
         )}
 
-        {lessonLoading || isCurrentThreadMessagesLoading ? (
+        {(lessonLoading || isCurrentThreadMessagesLoading) && (
           <LoaderWithTextSequence preset="aiMentor" />
-        ) : null}
+        )}
 
         {!lessonLoading && !hideControls && (
           <div className="mb-5 grid w-full grid-cols-2 gap-2 border-b border-neutral-100 pb-3">
