@@ -1747,6 +1747,17 @@
       "create": {
         "courseFailed": "Nepavyko sukurti kurso.",
         "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "AI mentoriaus instrukcijos ir užbaigimo sąlygos yra būtinos.",
+        "customTtsReferenceRequired": "Pasirinktiniame režime būtina nurodyti tinkintą TTS nuorodą.",
+        "aiMentorCreateFailed": "Nepavyko sukurti AI mentoriaus pamokos.",
+        "questionsRequired": "Būtinas bent vienas klausimas.",
+        "quizCreateFailed": "Nepavyko sukurti testo pamokos.",
+        "optionUpdateFailed": "Nepavyko atnaujinti testo parinkties.",
+        "optionInsertFailed": "Nepavyko pridėti testo parinkties.",
+        "embedCreateFailed": "Nepavyko sukurti įdėjimo pamokos.",
+        "signedUrlDownloadFailed": "Nepavyko atsisiųsti failo iš pasirašyto URL."
       }
     },
     "thinking": {

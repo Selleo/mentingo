@@ -3,6 +3,8 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { CreateQAEvent } from "src/events/qa/create-qa.event";
 import { DeleteQAEvent } from "src/events/qa/delete-qa.event";
 import { UpdateQAEvent } from "src/events/qa/update-qa.event";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -21,6 +23,7 @@ export class QAService {
     private readonly settingsService: SettingsService,
     private readonly localizationService: LocalizationService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly searchIndexService: SearchIndexService,
   ) {}
 
   async createQA(data: CreateQABody, currentUser: CurrentUserType) {
@@ -35,6 +38,8 @@ export class QAService {
         createdQA: qa,
       }),
     );
+
+    await this.searchIndexService.refreshQA(qa.id);
   }
 
   async getQA(qaId: UUIDType, language: SupportedLanguages, userId: UUIDType) {
@@ -73,6 +78,8 @@ export class QAService {
       }),
     );
 
+    await this.searchIndexService.refreshQA(qaId);
+
     return updatedQA;
   }
 
@@ -104,6 +111,8 @@ export class QAService {
       }),
     );
 
+    await this.searchIndexService.refreshQA(qaId);
+
     return updatedQA;
   }
 
@@ -123,6 +132,11 @@ export class QAService {
         actor: currentUser,
       }),
     );
+
+    await this.searchIndexService.deleteEntityDocuments({
+      entityType: SEARCH_ENTITY_TYPES.QA,
+      entityId: qaId,
+    });
 
     return this.qaRepository.deleteQA(qaId);
   }
@@ -148,6 +162,8 @@ export class QAService {
         qaId,
       }),
     );
+
+    await this.searchIndexService.refreshQA(qaId);
 
     return updatedQA;
   }

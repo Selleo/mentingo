@@ -29,6 +29,8 @@ import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/eve
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { CONTEXT_TTL, getContextKey } from "src/file/utils/resourceCacheKeys";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { DocumentService } from "src/ingestion/services/document.service";
 import { MAX_LESSON_TITLE_LENGTH } from "src/lesson/repositories/lesson.constants";
 import { LessonService } from "src/lesson/services/lesson.service";
@@ -88,6 +90,7 @@ export class AdminLessonService {
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly liveTrainingService: LiveTrainingService,
+    private readonly searchIndexService: SearchIndexService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -150,6 +153,7 @@ export class AdminLessonService {
     }
 
     await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, dbInstance);
+    await this.searchIndexService.refreshLesson(lesson.id, dbInstance);
 
     return { lessonId: lesson.id, language };
   }
@@ -233,6 +237,7 @@ export class AdminLessonService {
       );
 
       await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId, trx);
+      await this.searchIndexService.refreshLesson(lesson.id, trx);
 
       return { lessonId: lesson.id, liveTrainingId: liveTraining.liveTrainingId, language };
     });
@@ -329,6 +334,8 @@ export class AdminLessonService {
         },
         trx,
       );
+
+      await this.searchIndexService.refreshLesson(lessonId, trx);
 
       return assignedLiveTraining;
     });
@@ -447,14 +454,14 @@ export class AdminLessonService {
     }
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
-      throw new BadRequestException("Instructions and conditions required");
+      throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
     if (!data.name?.trim().length) data.name = "AI Mentor";
     const voiceMode = data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET;
     const customTtsReference = data.customTtsReference?.trim() || null;
 
     if (voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !customTtsReference) {
-      throw new BadRequestException("Custom TTS reference is required for custom voice mode");
+      throw new BadRequestException("adminCourseView.errors.lesson.customTtsReferenceRequired");
     }
 
     const lesson = await this.createAiMentorLessonWithTransaction(
@@ -468,7 +475,8 @@ export class AdminLessonService {
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    if (!lesson) throw new BadRequestException("Failed to create AI mentor lesson");
+    if (!lesson)
+      throw new BadRequestException("adminCourseView.errors.lesson.aiMentorCreateFailed");
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
@@ -501,7 +509,8 @@ export class AdminLessonService {
       });
     }
 
-    if (!data.questions?.length) throw new BadRequestException("Questions are required");
+    if (!data.questions?.length)
+      throw new BadRequestException("adminCourseView.errors.lesson.questionsRequired");
 
     const { language } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.CHAPTER,
@@ -517,7 +526,7 @@ export class AdminLessonService {
 
     await this.adminLessonRepository.updateLessonCountForChapter(data.chapterId);
 
-    if (!lesson) throw new BadRequestException("Failed to create quiz lesson");
+    if (!lesson) throw new BadRequestException("adminCourseView.errors.lesson.quizCreateFailed");
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
@@ -550,7 +559,7 @@ export class AdminLessonService {
     );
 
     if (!availableLocales.includes(data.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const lesson = await this.lessonRepository.getLesson(id, data.language);
@@ -565,7 +574,7 @@ export class AdminLessonService {
     if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
     if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
-      throw new BadRequestException("Instructions and conditions required");
+      throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -611,14 +620,15 @@ export class AdminLessonService {
     );
 
     if (!availableLocales.includes(data.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const lesson = await this.lessonRepository.getLesson(id, data.language);
 
     if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
-    if (!data.questions?.length) throw new BadRequestException("Questions are required");
+    if (!data.questions?.length)
+      throw new BadRequestException("adminCourseView.errors.lesson.questionsRequired");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -658,7 +668,7 @@ export class AdminLessonService {
       id,
     );
     if (!availableLocales.includes(data.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const lesson = await this.lessonRepository.getLesson(id, data.language);
@@ -685,6 +695,8 @@ export class AdminLessonService {
     if (data.description !== undefined) {
       await this.resourceLibraryService.syncLessonAssetRelations(id);
     }
+
+    await this.searchIndexService.refreshLesson(id);
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
 
@@ -738,6 +750,11 @@ export class AdminLessonService {
         currentUser,
         trx,
       );
+      await this.searchIndexService.deleteEntityDocuments({
+        entityType: SEARCH_ENTITY_TYPES.LESSON,
+        entityId: lessonId,
+        db: trx,
+      });
     });
 
     await this.outboxPublisher.publish(
@@ -834,6 +851,8 @@ export class AdminLessonService {
         trx,
       );
 
+      await this.searchIndexService.refreshLesson(lesson.id, trx);
+
       return lesson;
     });
   }
@@ -852,7 +871,7 @@ export class AdminLessonService {
       );
 
       if (!availableLocales.includes(data.language)) {
-        throw new BadRequestException("This course does not support this language");
+        throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
 
       const [updatedLesson] = await this.adminLessonRepository.updateAiMentorLesson(
@@ -866,7 +885,7 @@ export class AdminLessonService {
       );
 
       if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
-        throw new BadRequestException("Instructions and conditions required");
+        throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
       if (data.name?.trim().length === 0) {
         data.name = "AI Mentor";
@@ -876,7 +895,7 @@ export class AdminLessonService {
       const customTtsReference = data.customTtsReference?.trim() || null;
 
       if (voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && !customTtsReference) {
-        throw new BadRequestException("Custom TTS reference is required for custom voice mode");
+        throw new BadRequestException("adminCourseView.errors.lesson.customTtsReferenceRequired");
       }
 
       await this.adminLessonRepository.updateAiMentorLessonData(
@@ -895,6 +914,7 @@ export class AdminLessonService {
       );
 
       await this.aiRepository.setThreadsToArchived(id, userId, trx);
+      await this.searchIndexService.refreshLesson(id, trx);
 
       return updatedLesson;
     });
@@ -954,6 +974,8 @@ export class AdminLessonService {
         await trx.insert(questionAnswerOptions).values(optionsToInsert);
       }
 
+      await this.searchIndexService.refreshLesson(lesson.id, trx);
+
       return lesson;
     });
   }
@@ -972,7 +994,7 @@ export class AdminLessonService {
       );
 
       if (!availableLocales.includes(data.language)) {
-        throw new BadRequestException("This course does not support this language");
+        throw new BadRequestException("adminCourseView.toast.languageNotSupported");
       }
 
       await this.adminLessonRepository.updateQuizLessonWithQuestionsAndOptions(id, data);
@@ -1125,9 +1147,7 @@ export class AdminLessonService {
                   trx,
                 );
                 if (!result || result.length === 0) {
-                  throw new BadRequestException(
-                    `Failed to update option with ID: ${option.id} in question ${question.title} - ${question.type}`,
-                  );
+                  throw new BadRequestException("adminCourseView.errors.lesson.optionUpdateFailed");
                 }
               } else {
                 const result = await this.adminLessonRepository.insertOption(
@@ -1136,13 +1156,15 @@ export class AdminLessonService {
                   trx,
                 );
                 if (!result || result.length === 0) {
-                  throw new BadRequestException("Failed to insert new option");
+                  throw new BadRequestException("adminCourseView.errors.lesson.optionInsertFailed");
                 }
               }
             }
           }
         }
       }
+
+      await this.searchIndexService.refreshLesson(id, trx);
 
       return id;
     });
@@ -1169,33 +1191,47 @@ export class AdminLessonService {
       data.chapterId,
     );
 
-    const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(data.chapterId);
-
-    const lesson = await this.adminLessonRepository.createLessonForChapter(
-      {
-        ...data,
-        displayOrder: maxDisplayOrder + 1,
-      },
-      language,
-    );
-
-    if (!lesson) throw new BadRequestException("Failed to create embed lesson");
-
-    await this.adminLessonRepository.updateLessonCountForChapter(lesson.chapterId);
-
-    if (data.resources && data.resources.length > 0) {
-      await this.adminLessonRepository.createLessonResources(
-        lesson.id,
-        data.resources.map((resource) => ({
-          reference: resource.fileUrl,
-          contentType: "text/html",
-          metadata: {
-            allowFullscreen: resource.allowFullscreen ?? false,
-          },
-          uploadedById: currentUser.userId,
-        })),
+    const lesson = await this.db.transaction(async (trx) => {
+      const maxDisplayOrder = await this.adminLessonRepository.getMaxDisplayOrder(
+        data.chapterId,
+        trx,
       );
-    }
+
+      const createdLesson = await this.adminLessonRepository.createLessonForChapter(
+        {
+          ...data,
+          displayOrder: maxDisplayOrder + 1,
+        },
+        language,
+        trx,
+      );
+
+      if (!createdLesson)
+        throw new BadRequestException("adminCourseView.errors.lesson.embedCreateFailed");
+
+      await this.adminLessonRepository.updateLessonCountForChapter(createdLesson.chapterId, trx);
+
+      if (data.resources && data.resources.length > 0) {
+        await this.adminLessonRepository.createLessonResources(
+          createdLesson.id,
+          data.resources.map((resource) => ({
+            reference: resource.fileUrl,
+            contentType: "text/html",
+            metadata: {
+              allowFullscreen: resource.allowFullscreen ?? false,
+            },
+            uploadedById: currentUser.userId,
+          })),
+          trx,
+        );
+      }
+
+      await this.searchIndexService.refreshLesson(createdLesson.id, trx);
+
+      return createdLesson;
+    });
+
+    if (!lesson) throw new BadRequestException("adminCourseView.errors.lesson.embedCreateFailed");
 
     const createdLessonSnapshot = await this.buildLessonActivitySnapshot(lesson.id, language);
 
@@ -1236,7 +1272,7 @@ export class AdminLessonService {
     );
 
     if (!availableLocales.includes(data.language)) {
-      throw new BadRequestException("This course does not support this language");
+      throw new BadRequestException("adminCourseView.toast.languageNotSupported");
     }
 
     const lesson = await this.lessonRepository.getLesson(lessonId, data.language);
@@ -1245,48 +1281,31 @@ export class AdminLessonService {
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
-    const updatedLesson = await this.adminLessonRepository.updateLesson(lessonId, data);
+    const updatedLesson = await this.db.transaction(async (trx) => {
+      const lessonUpdate = await this.adminLessonRepository.updateLesson(lessonId, data, trx);
 
-    if (data.resources && data.resources.length === 0) {
-      await this.adminLessonRepository.deleteLessonResources(lessonId);
-    } else if (data.resources) {
-      const existingResourcesIds = (
-        await this.adminLessonRepository.getLessonResourcesForLesson(lessonId, data.language)
-      ).map((r) => r.id);
+      if (data.resources && data.resources.length === 0) {
+        await this.adminLessonRepository.deleteLessonResources(lessonId, trx);
+      } else if (data.resources) {
+        const existingResourcesIds = (
+          await this.adminLessonRepository.getLessonResourcesForLesson(lessonId, data.language, trx)
+        ).map((r) => r.id);
 
-      const resourceIdsToDelete = existingResourcesIds.filter(
-        (existingId) =>
-          !data.resources
-            .map((res) => res.id)
-            .filter((id): id is UUIDType => id !== undefined)
-            .includes(existingId),
-      );
+        const resourceIdsToDelete = existingResourcesIds.filter(
+          (existingId) =>
+            !data.resources
+              .map((res) => res.id)
+              .filter((id): id is UUIDType => id !== undefined)
+              .includes(existingId),
+        );
 
-      if (resourceIdsToDelete.length > 0)
-        await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete);
+        if (resourceIdsToDelete.length > 0)
+          await this.adminLessonRepository.deleteLessonResourcesByIds(resourceIdsToDelete, trx);
 
-      const resourcesToUpdate = data.resources.reduce((acc, resource) => {
-        if (resource.id && existingResourcesIds.includes(resource.id)) {
-          acc.push({
-            id: resource.id,
-            reference: resource.fileUrl,
-            contentType: "text/html",
-            metadata: {
-              allowFullscreen: resource.allowFullscreen ?? false,
-            },
-          });
-        }
-
-        return acc;
-      }, [] as EmbedLessonResourceType[]);
-
-      if (resourcesToUpdate.length > 0)
-        await this.adminLessonRepository.updateLessonResources(resourcesToUpdate);
-
-      const resourcesToCreate = data.resources.reduce(
-        (acc, resource) => {
-          if (!resource.id) {
+        const resourcesToUpdate = data.resources.reduce((acc, resource) => {
+          if (resource.id && existingResourcesIds.includes(resource.id)) {
             acc.push({
+              id: resource.id,
               reference: resource.fileUrl,
               contentType: "text/html",
               metadata: {
@@ -1296,13 +1315,36 @@ export class AdminLessonService {
           }
 
           return acc;
-        },
-        [] as Omit<EmbedLessonResourceType, "id">[],
-      );
+        }, [] as EmbedLessonResourceType[]);
 
-      if (resourcesToCreate.length > 0)
-        await this.adminLessonRepository.createLessonResources(lessonId, resourcesToCreate);
-    }
+        if (resourcesToUpdate.length > 0)
+          await this.adminLessonRepository.updateLessonResources(resourcesToUpdate, trx);
+
+        const resourcesToCreate = data.resources.reduce(
+          (acc, resource) => {
+            if (!resource.id) {
+              acc.push({
+                reference: resource.fileUrl,
+                contentType: "text/html",
+                metadata: {
+                  allowFullscreen: resource.allowFullscreen ?? false,
+                },
+              });
+            }
+
+            return acc;
+          },
+          [] as Omit<EmbedLessonResourceType, "id">[],
+        );
+
+        if (resourcesToCreate.length > 0)
+          await this.adminLessonRepository.createLessonResources(lessonId, resourcesToCreate, trx);
+      }
+
+      await this.searchIndexService.refreshLesson(lessonId, trx);
+
+      return lessonUpdate;
+    });
 
     const updatedLessonSnapshot = await this.buildLessonActivitySnapshot(lessonId, data.language);
 
@@ -1388,6 +1430,8 @@ export class AdminLessonService {
       },
     ]);
 
+    await this.searchIndexService.refreshLesson(lessonId);
+
     return {
       resourceId: resource.id,
       fileKey,
@@ -1399,7 +1443,7 @@ export class AdminLessonService {
     const response = await fetch(signedUrl);
 
     if (!response.ok) {
-      throw new BadRequestException(`Failed to download file from signed URL: ${response.status}`);
+      throw new BadRequestException("adminCourseView.errors.lesson.signedUrlDownloadFailed");
     }
 
     const contentTypeHeader = response.headers.get("content-type");

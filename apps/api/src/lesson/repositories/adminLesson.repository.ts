@@ -600,7 +600,11 @@ export class AdminLessonRepository {
     return result.id;
   }
 
-  async getLessonResourcesForLesson(lessonId: UUIDType, language?: SupportedLanguages) {
+  async getLessonResourcesForLesson(
+    lessonId: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
     const resourceSelect = language
       ? {
           ...getTableColumns(resources),
@@ -609,7 +613,7 @@ export class AdminLessonRepository {
         }
       : getTableColumns(resources);
 
-    return this.db
+    return dbInstance
       .select({
         ...resourceSelect,
       })

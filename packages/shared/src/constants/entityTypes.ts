@@ -5,6 +5,8 @@ export const ENTITY_TYPES = {
   QUESTION: "question",
   NEWS: "news",
   ARTICLES: "articles",
+  LEARNING_PATH: "learning_path",
+  QA: "qa",
   USER: "user",
   CATEGORY: "category",
   ANNOUNCEMENT: "announcement",

@@ -1747,6 +1747,17 @@
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
         "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
+      },
+      "lesson": {
+        "aiMentorRequiredContent": "Pokyny pro AI Mentora a podmínky dokončení jsou povinné.",
+        "customTtsReferenceRequired": "Vlastní reference TTS je v vlastním režimu povinná.",
+        "aiMentorCreateFailed": "Lekci AI Mentora se nepodařilo vytvořit.",
+        "questionsRequired": "Je vyžadována alespoň jedna otázka.",
+        "quizCreateFailed": "Kvízovou lekci se nepodařilo vytvořit.",
+        "optionUpdateFailed": "Možnost kvízu se nepodařilo aktualizovat.",
+        "optionInsertFailed": "Možnost kvízu se nepodařilo přidat.",
+        "embedCreateFailed": "Vloženou lekci se nepodařilo vytvořit.",
+        "signedUrlDownloadFailed": "Soubor se nepodařilo stáhnout z podepsané adresy URL."
       }
     },
     "thinking": {

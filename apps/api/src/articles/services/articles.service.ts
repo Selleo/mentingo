@@ -27,6 +27,8 @@ import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { ResourceLibraryService } from "src/resource-library/resource-library.service";
@@ -68,6 +70,7 @@ export class ArticlesService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly settingsService: SettingsService,
     private readonly resourceLibraryService: ResourceLibraryService,
+    private readonly searchIndexService: SearchIndexService,
     @Inject("DB") private readonly db: DatabasePg,
   ) {}
 
@@ -304,6 +307,8 @@ export class ArticlesService {
       }),
     );
 
+    await this.searchIndexService.refreshArticle(createdArticle.id);
+
     return createdArticle;
   }
 
@@ -348,6 +353,8 @@ export class ArticlesService {
     if ("content" in updateArticleData && updateArticleData.content !== undefined) {
       await this.resourceLibraryService.syncArticleAssetRelations(articleId);
     }
+
+    await this.searchIndexService.refreshArticle(articleId);
 
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
@@ -415,6 +422,8 @@ export class ArticlesService {
     if (!updatedArticle)
       throw new BadRequestException("adminArticleView.toast.removeLanguageError");
 
+    await this.searchIndexService.refreshArticle(articleId);
+
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
@@ -447,6 +456,11 @@ export class ArticlesService {
     );
 
     if (!deletedArticle) throw new BadRequestException("adminArticleView.toast.deleteError");
+
+    await this.searchIndexService.deleteEntityDocuments({
+      entityType: SEARCH_ENTITY_TYPES.ARTICLE,
+      entityId: articleId,
+    });
 
     if (currentUser) {
       await this.outboxPublisher.publish(
@@ -668,6 +682,8 @@ export class ArticlesService {
 
     if (!createdLanguage)
       throw new BadRequestException("adminArticleView.toast.createLanguageError");
+
+    await this.searchIndexService.refreshArticle(articleId);
 
     const updatedSnapshot = await this.buildArticleActivitySnapshot(articleId, language);
 
