@@ -113,7 +113,7 @@ export function LiveTrainingParticipantGrid({
   }
 
   return (
-    <div className="live-training-room-grid grid size-full min-h-[20rem] auto-rows-auto content-start items-start gap-3 overflow-y-auto grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))] lg:min-h-0">
+    <div className="live-training-room-grid grid size-full min-h-0 auto-rows-[minmax(10rem,1fr)] grid-cols-[repeat(auto-fit,minmax(min(100%,16rem),1fr))] gap-3 overflow-y-auto">
       {sortedTracks.map((trackRef) => (
         <LiveTrainingParticipantTile
           key={`${trackRef.participant.identity}-${trackRef.source}`}

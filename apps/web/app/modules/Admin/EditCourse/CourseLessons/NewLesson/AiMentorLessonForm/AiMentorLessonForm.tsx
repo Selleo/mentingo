@@ -548,43 +548,74 @@ const AiMentorLessonForm = ({
                 </div>
               ) : null}
 
-              <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-2">
-                <div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="aiMentorInstructions" className="mb-2 block">
-                        <span className="mr-1 text-red-500">*</span>
-                        {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
-                      </Label>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Icon
-                              name="Info"
-                              className="h-auto w-6 cursor-default text-neutral-800"
-                            />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          align="center"
-                          className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                        >
-                          {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
-                          <TooltipArrow className="fill-black" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
+              <div className="mb-4">
+                <div className="mb-2 grid gap-3 lg:grid-cols-2">
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="aiMentorInstructions" className="block">
+                      <span className="mr-1 text-red-500">*</span>
+                      {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Icon
+                            name="Info"
+                            className="h-auto w-6 cursor-default text-neutral-800"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
+                    </Tooltip>
                   </div>
+
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="completionConditions" className="block">
+                      <span className="mr-1 text-red-500">*</span>
+                      {t("adminCourseView.curriculum.lesson.field.completionConditions")}
+                    </Label>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Icon
+                            name="Info"
+                            className="h-auto w-6 cursor-default text-neutral-800"
+                          />
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {t("adminCourseView.curriculum.lesson.other.completionConditionsTooltip")}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+
+                <div className="grid overflow-hidden rounded-lg border border-neutral-300 bg-white lg:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="aiMentorInstructions"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex min-h-0 flex-1 flex-col">
                         <FormControl>
-                          <div data-testid={AI_MENTOR_LESSON_FORM_HANDLES.INSTRUCTIONS_INPUT}>
+                          <div
+                            data-testid={AI_MENTOR_LESSON_FORM_HANDLES.INSTRUCTIONS_INPUT}
+                            className="h-[22rem] min-h-0"
+                          >
                             <BaseEditor
-                              parentClassName="lg:rounded-r-none"
+                              parentClassName="flex h-full min-h-0 flex-col rounded-none border-0"
+                              contentClassName="min-h-0 flex-1 overflow-y-auto"
+                              editorClassName="!min-h-0"
                               content={field.value}
                               placeholder={t(
                                 "adminCourseView.curriculum.lesson.placeholder.aiMentorInstructions",
@@ -597,46 +628,21 @@ const AiMentorLessonForm = ({
                       </FormItem>
                     )}
                   />
-                </div>
 
-                <div>
-                  <div className="mt-4 flex items-center justify-between lg:mt-0">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="completionConditions" className="mb-2 block">
-                        <span className="mr-1 text-red-500">*</span>
-                        {t("adminCourseView.curriculum.lesson.field.completionConditions")}
-                      </Label>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span>
-                            <Icon
-                              name="Info"
-                              className="h-auto w-6 cursor-default text-neutral-800"
-                            />
-                          </span>
-                        </TooltipTrigger>
-                        <TooltipContent
-                          side="top"
-                          align="center"
-                          className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                        >
-                          {t("adminCourseView.curriculum.lesson.other.completionConditionsTooltip")}
-                          <TooltipArrow className="fill-black" />
-                        </TooltipContent>
-                      </Tooltip>
-                    </div>
-                  </div>
                   <FormField
                     control={form.control}
                     name="completionConditions"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex min-h-0 flex-1 flex-col border-t border-neutral-200 lg:border-l lg:border-t-0">
                         <FormControl>
                           <div
                             data-testid={AI_MENTOR_LESSON_FORM_HANDLES.COMPLETION_CONDITIONS_INPUT}
+                            className="h-[22rem] min-h-0"
                           >
                             <BaseEditor
-                              parentClassName="lg:rounded-l-none"
+                              parentClassName="flex h-full min-h-0 flex-col rounded-none border-0 border-t border-neutral-100"
+                              contentClassName="min-h-0 flex-1 overflow-y-auto"
+                              editorClassName="!min-h-0"
                               content={field.value}
                               placeholder={t(
                                 "adminCourseView.curriculum.lesson.placeholder.completionConditions",

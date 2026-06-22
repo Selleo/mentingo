@@ -1,64 +1,144 @@
 import { VOICE_MODE_STATE, type VoiceModeState } from "@repo/shared";
-import { AudioLines, Sparkles, X } from "lucide-react";
+import { BookOpen, Mic, MicOff, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
+import { AgentAudioVisualizerAura } from "~/components/agents-ui/agent-audio-visualizer-aura";
+import { AgentAudioVisualizerWave } from "~/components/agents-ui/agent-audio-visualizer-wave";
+import { Icon } from "~/components/Icon";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { cn } from "~/lib/utils";
-import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
+const VOICE_VISUALIZER_COLOR = "var(--primary)";
 
 type VoiceMentorModeOverlayProps = {
   open: boolean;
   state: VoiceModeState;
   voiceLevel: number;
+  mentorVoiceLevel: number;
   transcript: string;
   response: string;
   mentorName: string;
   mentorAvatarUrl?: string | null;
+  hasTaskDescription: boolean;
+  onOpenTaskDescription: () => void;
+  isMicMuted: boolean;
+  onMicMutedChange: (muted: boolean) => void;
   onExit: () => void;
 };
+
+type VoiceConversationMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+};
+
+function VoiceMentorAvatar({
+  mentorName,
+  mentorAvatarUrl,
+}: {
+  mentorName: string;
+  mentorAvatarUrl?: string | null;
+}) {
+  if (mentorAvatarUrl) {
+    return (
+      <img src={mentorAvatarUrl} alt={mentorName} className="size-8 rounded-full object-cover" />
+    );
+  }
+
+  return (
+    <div className="flex size-10 items-center justify-center rounded-full bg-primary-100 shadow-sm ring-1 ring-primary-100">
+      <Icon name="AiMentor" className="size-7 p-1 text-primary-600" aria-label={mentorName} />
+    </div>
+  );
+}
+
+function VoiceConversationBubble({
+  message,
+  mentorName,
+  mentorAvatarUrl,
+}: {
+  message: VoiceConversationMessage;
+  mentorName: string;
+  mentorAvatarUrl?: string | null;
+}) {
+  if (message.role === "user") {
+    return (
+      <div className="ml-auto max-w-[82%] rounded-2xl rounded-br-md bg-primary-700 px-4 py-3 text-sm leading-relaxed text-contrast shadow-sm">
+        {message.content}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex max-w-[86%] items-start gap-3">
+      <div className="mt-1 shrink-0">
+        <VoiceMentorAvatar mentorName={mentorName} mentorAvatarUrl={mentorAvatarUrl} />
+      </div>
+      <div className="rounded-2xl rounded-bl-md bg-white/90 px-4 py-3 text-sm leading-relaxed text-neutral-900 shadow-sm ring-1 ring-primary-100/80">
+        {message.content}
+      </div>
+    </div>
+  );
+}
 
 export function VoiceMentorModeOverlay({
   open,
   state,
   voiceLevel,
+  mentorVoiceLevel,
   transcript,
   response,
   mentorName,
   mentorAvatarUrl,
+  hasTaskDescription,
+  onOpenTaskDescription,
+  isMicMuted,
+  onMicMutedChange,
   onExit,
 }: VoiceMentorModeOverlayProps) {
   const { t } = useTranslation();
-  const stateMeta: Record<VoiceModeState, { title: string; subtitle: string }> = {
-    [VOICE_MODE_STATE.IDLE]: {
-      title: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.idle.title"),
-      subtitle: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.idle.subtitle"),
-    },
-    [VOICE_MODE_STATE.LISTENING]: {
-      title: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.listening.title"),
-      subtitle: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.listening.subtitle"),
-    },
-    [VOICE_MODE_STATE.THINKING]: {
-      title: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.thinking.title"),
-      subtitle: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.thinking.subtitle"),
-    },
-    [VOICE_MODE_STATE.SPEAKING]: {
-      title: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.speaking.title"),
-      subtitle: t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.speaking.subtitle"),
-    },
+  const stateTitle: Record<VoiceModeState, string> = {
+    [VOICE_MODE_STATE.IDLE]: t(
+      "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.idle.title",
+    ),
+    [VOICE_MODE_STATE.LISTENING]: t(
+      "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.listening.title",
+    ),
+    [VOICE_MODE_STATE.THINKING]: t(
+      "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.thinking.title",
+    ),
+    [VOICE_MODE_STATE.SPEAKING]: t(
+      "studentCourseView.lesson.aiMentorLesson.voiceOverlay.states.speaking.title",
+    ),
   };
-  const meta = stateMeta[state];
-  const isSpeaking = state === VOICE_MODE_STATE.SPEAKING;
-  const isThinking = state === VOICE_MODE_STATE.THINKING;
-  const showVoiceBars = state === VOICE_MODE_STATE.LISTENING || state === VOICE_MODE_STATE.SPEAKING;
-  const speakingPulsePeak = 1 + Math.min(0.06, voiceLevel / 1000);
+  const isListening = state === VOICE_MODE_STATE.LISTENING && !isMicMuted;
+  const voiceVolume = isListening ? Math.max(0, Math.min(1, voiceLevel)) : 0;
+  const mentorVolume =
+    state === VOICE_MODE_STATE.SPEAKING ? Math.max(0, Math.min(1, mentorVoiceLevel)) : 0;
+  const auraState = state === VOICE_MODE_STATE.SPEAKING ? "speaking" : "thinking";
+  const micButtonVariant = isMicMuted ? "outline" : "primary";
+  const micButtonLabel = isMicMuted
+    ? t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.muted")
+    : t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.micOn");
+  const visibleBottomMessages = [
+    transcript && {
+      id: "voice-transcript",
+      role: "user" as const,
+      content: transcript,
+    },
+    response && {
+      id: "voice-response",
+      role: "assistant" as const,
+      content: response,
+    },
+  ].filter((message): message is VoiceConversationMessage => Boolean(message));
 
   return (
     <AnimatePresence>
-      {open ? (
+      {open && (
         <motion.div
           key="voice-mentor-overlay"
           data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY}
@@ -69,137 +149,52 @@ export function VoiceMentorModeOverlay({
           className="fixed inset-0 z-50 overflow-y-auto overscroll-contain bg-[radial-gradient(circle_at_top,var(--primary-100),transparent_52%),linear-gradient(180deg,var(--primary-50)_0%,#FFFFFF_100%)]"
         >
           <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col px-6 py-6 md:px-10">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary-700/70">
-                  {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.headerEyebrow")}
-                </p>
-                <h2 className="text-lg font-semibold text-neutral-900">{mentorName}</h2>
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                <h2 className="truncate text-lg font-semibold text-neutral-900">{mentorName}</h2>
               </div>
-              <Button
-                data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_EXIT_BUTTON}
-                variant="outline"
-                onClick={onExit}
-                className="gap-2 rounded-xl bg-white/85"
-              >
-                <X className="size-4" />
-                {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.exit")}
-              </Button>
+              <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+                {hasTaskDescription && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onOpenTaskDescription}
+                    className="h-10 min-w-28 gap-2 rounded-xl bg-white/85 px-4"
+                  >
+                    <BookOpen className="size-4" />
+                    {t("studentCourseView.lesson.aiMentorLesson.taskButton")}
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant={micButtonVariant}
+                  aria-pressed={!isMicMuted}
+                  aria-label={
+                    isMicMuted
+                      ? t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.unmute")
+                      : t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.mute")
+                  }
+                  onClick={() => onMicMutedChange(!isMicMuted)}
+                  className={cn("h-10 min-w-28 gap-2 rounded-xl px-4", {
+                    "bg-white/85": isMicMuted,
+                  })}
+                >
+                  {isMicMuted ? <MicOff className="size-4" /> : <Mic className="size-4" />}
+                  {micButtonLabel}
+                </Button>
+                <Button
+                  data-testid={LEARNING_HANDLES.AI_MENTOR_VOICE_OVERLAY_EXIT_BUTTON}
+                  variant="outline"
+                  onClick={onExit}
+                  className="h-10 min-w-28 gap-2 rounded-xl bg-white/85 px-4"
+                >
+                  <X className="size-4" />
+                  {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.exit")}
+                </Button>
+              </div>
             </div>
 
-            <div className="flex flex-1 flex-col items-center justify-center gap-8">
-              <div className="relative flex items-center justify-center py-4">
-                <motion.div
-                  className="absolute size-56 rounded-full border-2 border-primary/70"
-                  animate={
-                    isSpeaking || isThinking
-                      ? {
-                          scale: isThinking
-                            ? [1, 1, 1.03, 1.03, 1.06, 1.06, 1]
-                            : [1, speakingPulsePeak, 1.01, speakingPulsePeak + 0.01, 1],
-                          opacity: isThinking
-                            ? [0.36, 0.36, 0.46, 0.46, 0.56, 0.56, 0.36]
-                            : [0.45, 0.62, 0.5, 0.62, 0.45],
-                        }
-                      : undefined
-                  }
-                  transition={
-                    isSpeaking || isThinking
-                      ? {
-                          duration: isThinking ? 2.4 : 0.58,
-                          repeat: Infinity,
-                          ease: "linear",
-                          times: isThinking
-                            ? [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1]
-                            : [0, 0.18, 0.45, 0.72, 1],
-                        }
-                      : undefined
-                  }
-                />
-                <motion.div
-                  className="absolute size-48 rounded-full border-2 border-primary/50"
-                  animate={
-                    isSpeaking || isThinking
-                      ? {
-                          scale: isThinking
-                            ? [1, 1, 1.04, 1.04, 1.08, 1.08, 1]
-                            : [1, speakingPulsePeak + 0.02, 1.01, speakingPulsePeak + 0.015, 1],
-                          opacity: isThinking
-                            ? [0.22, 0.22, 0.32, 0.32, 0.42, 0.42, 0.22]
-                            : [0.32, 0.5, 0.36, 0.5, 0.32],
-                        }
-                      : undefined
-                  }
-                  transition={
-                    isSpeaking || isThinking
-                      ? {
-                          duration: isThinking ? 2.4 : 0.58,
-                          repeat: Infinity,
-                          ease: "linear",
-                          times: isThinking
-                            ? [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1]
-                            : [0, 0.18, 0.45, 0.72, 1],
-                          delay: isThinking ? 0.2 : 0.07,
-                        }
-                      : undefined
-                  }
-                />
-
-                <motion.div
-                  className={cn(
-                    "relative z-10 flex size-44 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-primary-500 via-primary-600 to-primary-800 shadow-xl shadow-primary-100",
-                  )}
-                  animate={
-                    isThinking
-                      ? {
-                          scale: [1, 1, 1.02, 1.02, 1.035, 1.035, 1],
-                        }
-                      : undefined
-                  }
-                  transition={
-                    isThinking
-                      ? {
-                          duration: 2.4,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                          times: [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1],
-                        }
-                      : undefined
-                  }
-                >
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ["-100%", "220%"] }}
-                    transition={{ duration: 2.2, repeat: Infinity, ease: "linear" }}
-                  />
-
-                  <div className="relative z-10">
-                    {showVoiceBars ? (
-                      <div className="w-24">
-                        <VoiceLevelBars voiceLevel={voiceLevel} barClassName="bg-contrast" />
-                      </div>
-                    ) : state === VOICE_MODE_STATE.THINKING ? (
-                      <motion.div
-                        animate={{
-                          scale: [1, 1, 1.1, 1.1, 1.16, 1.16, 1],
-                          opacity: [0.82, 0.82, 0.92, 0.92, 1, 1, 0.82],
-                        }}
-                        transition={{
-                          duration: 2.4,
-                          repeat: Infinity,
-                          ease: "easeInOut",
-                          times: [0, 0.12, 0.28, 0.42, 0.58, 0.72, 1],
-                        }}
-                      >
-                        <Sparkles className="size-12 text-white" />
-                      </motion.div>
-                    ) : (
-                      <AudioLines className="size-12 text-white" />
-                    )}
-                  </div>
-                </motion.div>
-              </div>
-
+            <div className="flex flex-1 flex-col justify-center gap-5">
               <motion.div
                 key={state}
                 initial={{ opacity: 0, y: 8 }}
@@ -207,60 +202,66 @@ export function VoiceMentorModeOverlay({
                 transition={{ duration: 0.18 }}
                 className="text-center"
               >
-                <h3 className="text-4xl font-semibold text-neutral-900">{meta.title}</h3>
-                <p className="mt-2 text-base text-neutral-600">{meta.subtitle}</p>
+                <h3 className="text-xl font-semibold text-neutral-900">{stateTitle[state]}</h3>
               </motion.div>
 
-              <div className="grid w-full max-w-3xl gap-3">
-                {transcript ? (
-                  <Card className="rounded-2xl border-primary-200/80 bg-white/85 p-4">
-                    <p className="mb-1 text-xs font-semibold uppercase tracking-[0.14em] text-primary-700">
-                      {t("studentCourseView.lesson.aiMentorLesson.voiceOverlay.youSaid")}
-                    </p>
-                    <p className="text-sm leading-relaxed text-neutral-900">{transcript}</p>
-                  </Card>
-                ) : null}
+              <div className="relative flex min-h-56 items-center justify-center">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                  className="relative flex size-64 items-center justify-center"
+                >
+                  <motion.div
+                    aria-hidden={!isListening}
+                    animate={{ opacity: isListening ? 1 : 0 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <AgentAudioVisualizerWave
+                      state="speaking"
+                      size="lg"
+                      color={VOICE_VISUALIZER_COLOR}
+                      colorShift={0.08}
+                      lineWidth={2}
+                      blur={0.75}
+                      volumeOverride={voiceVolume}
+                      className="w-80"
+                    />
+                  </motion.div>
+                  <motion.div
+                    aria-hidden={isListening}
+                    animate={{ opacity: isListening ? 0 : 1 }}
+                    transition={{ duration: 0.22, ease: "easeOut" }}
+                    className="absolute inset-0 flex items-center justify-center"
+                  >
+                    <AgentAudioVisualizerAura
+                      state={auraState}
+                      size="lg"
+                      color={VOICE_VISUALIZER_COLOR}
+                      colorShift={0}
+                      themeMode="light"
+                      volumeOverride={mentorVolume}
+                      className="scale-110"
+                    />
+                  </motion.div>
+                </motion.div>
+              </div>
 
-                {response ? (
-                  <Card className="rounded-2xl border-primary-300/80 bg-primary-50/90 p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      {mentorAvatarUrl ? (
-                        <img
-                          src={mentorAvatarUrl}
-                          alt={mentorName}
-                          className="size-6 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="size-6 rounded-full bg-primary-300" />
-                      )}
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary-700">
-                        {mentorName}
-                      </p>
-                    </div>
-                    <p className="text-sm leading-relaxed text-neutral-900">{response}</p>
-                  </Card>
-                ) : (
-                  <Card className="rounded-2xl border-dashed border-primary-300/70 bg-white/65 p-4">
-                    <p className="text-sm text-neutral-600">
-                      {state === VOICE_MODE_STATE.THINKING
-                        ? t(
-                            "studentCourseView.lesson.aiMentorLesson.voiceOverlay.responsePlaceholder.thinking",
-                          )
-                        : state === VOICE_MODE_STATE.LISTENING
-                          ? t(
-                              "studentCourseView.lesson.aiMentorLesson.voiceOverlay.responsePlaceholder.listening",
-                            )
-                          : t(
-                              "studentCourseView.lesson.aiMentorLesson.voiceOverlay.responsePlaceholder.default",
-                            )}
-                    </p>
-                  </Card>
-                )}
+              <div className="mx-auto grid w-full max-w-3xl gap-4">
+                {visibleBottomMessages.map((message) => (
+                  <VoiceConversationBubble
+                    key={message.id}
+                    message={message}
+                    mentorName={mentorName}
+                    mentorAvatarUrl={mentorAvatarUrl}
+                  />
+                ))}
               </div>
             </div>
           </div>
         </motion.div>
-      ) : null}
+      )}
     </AnimatePresence>
   );
 }

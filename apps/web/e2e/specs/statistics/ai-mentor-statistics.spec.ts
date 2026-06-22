@@ -88,8 +88,18 @@ test("admin can view AI mentor statistics after prepared mentor progress", async
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeHidden();
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeHidden();
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeHidden();
-      await expect(previewDialog.getByRole("button")).toHaveCount(1);
-      await previewDialog.getByRole("button").click();
+      await expect(
+        previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_CLOSE_BUTTON),
+      ).toBeVisible();
+      await expect(
+        previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_TASK_DESCRIPTION_BUTTON),
+      ).toBeVisible();
+      await expect(
+        previewDialog.getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_RESULT_BUTTON),
+      ).toBeVisible();
+      await previewDialog
+        .getByTestId(COURSE_STATISTICS_HANDLES.LESSON_PREVIEW_CLOSE_BUTTON)
+        .click();
       await expect(previewDialog).toBeHidden();
 
       await page.getByTestId(COURSE_STATISTICS_HANDLES.AI_MENTOR_LESSON_FILTER).click();

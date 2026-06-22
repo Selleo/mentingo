@@ -243,6 +243,8 @@ export const lessonShowSchema = Type.Object({
         score: Type.Union([Type.Number(), Type.Null()]),
         percentage: Type.Union([Type.Number(), Type.Null()]),
         requiredScore: Type.Union([Type.Number(), Type.Null()]),
+        passed: Type.Union([Type.Boolean(), Type.Null()]),
+        summary: Type.Union([Type.String(), Type.Null()]),
       }),
       Type.Null(),
     ]),

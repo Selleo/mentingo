@@ -29430,6 +29430,26 @@
                             "type": "null"
                           }
                         ]
+                      },
+                      "passed": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "summary": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
                       }
                     },
                     "required": [
@@ -29437,7 +29457,9 @@
                       "maxScore",
                       "score",
                       "percentage",
-                      "requiredScore"
+                      "requiredScore",
+                      "passed",
+                      "summary"
                     ]
                   },
                   {
@@ -34155,11 +34177,27 @@
               },
               "passed": {
                 "type": "boolean"
+              },
+              "minScore": {
+                "type": "integer"
+              },
+              "score": {
+                "type": "integer"
+              },
+              "maxScore": {
+                "type": "integer"
+              },
+              "percentage": {
+                "type": "integer"
               }
             },
             "required": [
               "summary",
-              "passed"
+              "passed",
+              "minScore",
+              "score",
+              "maxScore",
+              "percentage"
             ]
           }
         },

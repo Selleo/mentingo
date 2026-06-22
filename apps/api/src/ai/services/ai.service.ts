@@ -251,7 +251,13 @@ export class AiService {
       tokenCount,
     });
 
-    return { data: { summary: judged.data.summary, passed: judged.data.passed } };
+    const { status: _status, ...judgeData } = judged.data;
+
+    return {
+      data: {
+        ...judgeData,
+      },
+    };
   }
 
   async isThreadActive(threadId: UUIDType, userId?: UUIDType) {

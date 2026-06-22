@@ -4,12 +4,9 @@ import { generateObject, generateText, jsonSchema } from "ai";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { PromptService } from "src/ai/services/prompt.service";
-import {
-  type AiJudgeJudgementBody,
-  aiJudgeJudgementSchema,
-  type ResponseAiJudgeJudgementBody,
-} from "src/ai/utils/ai.schema";
+import { type AiJudgeJudgementBody, aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
+import { evaluateAiJudgeResult } from "src/ai/utils/judgeEvaluation";
 
 @Injectable()
 export class ChatService {
@@ -58,7 +55,7 @@ export class ChatService {
             experimental_telemetry: { isEnabled: true },
           });
 
-          const judged = this.evaluate(result.object as AiJudgeJudgementBody);
+          const judged = evaluateAiJudgeResult(result.object as AiJudgeJudgementBody);
           updateActiveObservation({ input: { system, prompt }, output: judged });
 
           return judged;
@@ -72,17 +69,5 @@ export class ChatService {
       },
       { name: "Generate Evaluation", asType: "generation" },
     )();
-  }
-
-  private async evaluate(result: AiJudgeJudgementBody): Promise<ResponseAiJudgeJudgementBody> {
-    const passed = result.score >= result.minScore;
-
-    if (result.score === result.maxScore) {
-      return { ...result, percentage: 100, passed };
-    }
-
-    const percentage = result.maxScore > 0 ? Math.ceil((result.score / result.maxScore) * 100) : 0;
-
-    return { ...result, percentage, passed };
   }
 }
