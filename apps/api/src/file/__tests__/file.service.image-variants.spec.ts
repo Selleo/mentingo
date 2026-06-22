@@ -65,6 +65,17 @@ describe("FileService image variant references", () => {
     expect(s3Service.getSignedUrl).toHaveBeenCalledWith("tenant/course/variants/image-1920w.webp");
   });
 
+  it("returns remote URLs without signing them", async () => {
+    await expect(service.getFileUrl("https://cdn.example.com/image.png")).resolves.toBe(
+      "https://cdn.example.com/image.png",
+    );
+    await expect(service.getFileUrl("http://cdn.example.com/image.png")).resolves.toBe(
+      "http://cdn.example.com/image.png",
+    );
+
+    expect(s3Service.getSignedUrl).not.toHaveBeenCalled();
+  });
+
   it("streams the high quality concrete variant", async () => {
     await service.getFileDelivery(variantReference);
 
