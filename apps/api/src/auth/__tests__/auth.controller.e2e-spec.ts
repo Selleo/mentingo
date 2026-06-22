@@ -1,4 +1,4 @@
-import { SYSTEM_ROLE_SLUGS, PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import * as cookie from "cookie";
 import { eq } from "drizzle-orm";
 import { isArray, omit } from "lodash";
@@ -97,7 +97,7 @@ describe("AuthController (e2e)", () => {
         password: "Password123@",
         firstName: "Tyler",
         lastName: "Durden",
-        language: "en",
+        language: SUPPORTED_LANGUAGES.EN,
       };
 
       await authService.register(existingUser);
@@ -115,22 +115,22 @@ describe("AuthController (e2e)", () => {
       expect(response.body.message).toEqual("Validation failed (body)");
     });
 
-    it("should fallback to 'en' when registering with unsupported language (e.g., 'ar')", async () => {
+    it("should return 400 when registering with unsupported language (e.g., 'ar')", async () => {
       const user = userFactory.build();
       const password = "Password123@";
 
-      const registeredUser = await authService.register({
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        password,
-        language: "ar",
-      });
+      const response = await request(app.getHttpServer())
+        .post("/api/auth/register")
+        .send({
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          password,
+          language: "ar",
+        })
+        .expect(400);
 
-      const userSettings = await settingsService.getUserSettings(registeredUser.id);
-
-      expect(userSettings).toBeDefined();
-      expect(userSettings.language).toBe("en");
+      expect(response.body.message).toEqual("Validation failed (body)");
     });
 
     it("should save correct language when registering with supported language other than 'en'", async () => {

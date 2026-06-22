@@ -1318,6 +1318,7 @@
     "toast": {
       "cannotUpdateOwnRole": "Administratorius negali pakeisti savo vaidmens",
       "noUserSelected": "Nepasirinktas joks vartotojas",
+      "noGroupSelected": "Pasirinkite bent vieną grupę.",
       "userMustHaveAtLeastOneRole": "Vartotojas turi turėti bent vieną vaidmenį.",
       "trainerRoleRequiresLiveTraining": "Trenerio vaidmuo pasiekiamas tik tada, kai įjungtas Tiesioginiai mokymai."
     },
@@ -1461,6 +1462,11 @@
       "tabs": {
         "imported": "Importuota",
         "skipped": "Praleistas"
+      },
+      "importResult": {
+        "email": "El. paštas",
+        "processed": "Apdorota {{count}} eilučių",
+        "reason": "Priežastis"
       }
     },
     "breadcrumbs": {
@@ -3250,10 +3256,15 @@
       "noFileUploaded": "Failas neįkeltas",
       "invalidFileData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failas tuščias",
+      "noValidUsers": "Importuoti nepavyko – nerasta tinkamų naudotojų.",
       "requiredDataMissing": "Nepavyko importuoti – trūksta būtinų duomenų.",
       "invalidFileType": "Neteisingas failo tipas. Įkelkite tinkamą failą.",
       "userFailReason": {
-        "alreadyExists": "vartotojas su šiuo el. pašto adresu jau egzistuoja"
+        "alreadyExists": "Vartotojas su šiuo el. pašto adresu jau egzistuoja",
+        "duplicateEmail": "Importo faile yra pasikartojantis el. pašto adresas",
+        "invalidRole": "Neteisinga rolė",
+        "trainerRoleUnavailable": "Trenerio rolei reikia įjungtų tiesioginių mokymų",
+        "unknownGroup": "Nežinoma grupė"
       }
     }
   },
@@ -3638,6 +3649,7 @@
       "unenroll_course": "Atsisakyta",
       "start_course": "Pradėta",
       "group_assignment": "Priskirta",
+      "users_import": "Naudotojai importuoti",
       "complete_lesson": "Užbaigta",
       "complete_course": "Užbaigta",
       "complete_chapter": "Užbaigta",

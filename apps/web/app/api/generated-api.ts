@@ -1465,7 +1465,7 @@ export interface CreateUserBody {
    */
   lastName: string;
   roleSlugs: string[];
-  language?: string;
+  language?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateUserResponse {
@@ -5543,6 +5543,94 @@ export interface GetLearningPathJobStatusResponse {
   };
 }
 
+export interface SearchResponse {
+  data: {
+    allCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      category?: string;
+      thumbnailUrl?: string | null;
+      courseChapterCount?: number;
+      completedChapterCount?: number;
+    }[];
+    myCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      category?: string;
+      thumbnailUrl?: string | null;
+      courseChapterCount?: number;
+      completedChapterCount?: number;
+    }[];
+    availableCourses: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      category?: string;
+      thumbnailUrl?: string | null;
+      courseChapterCount?: number;
+      completedChapterCount?: number;
+    }[];
+    learningPaths: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      thumbnailReference?: string | null;
+      courses: {
+        /** @format uuid */
+        id: string;
+      }[];
+    }[];
+    lessons: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      /** @format uuid */
+      courseId: string;
+      matchedAttachmentFileName?: string | null;
+    }[];
+    news: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    articles: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    qa: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    users: {
+      /** @format uuid */
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      profilePictureUrl?: string | null;
+      groups: {
+        /** @format uuid */
+        id: string;
+        name: string;
+      }[];
+    }[];
+    categories: {
+      /** @format uuid */
+      id: string;
+      title: string;
+    }[];
+    groups: {
+      /** @format uuid */
+      id: string;
+      name: string;
+    }[];
+  };
+}
+
 export type InitScormImportBody =
   | {
       action: "create-course";
@@ -5913,6 +6001,7 @@ export interface GetActivityLogsResponse {
       | "unenroll_course"
       | "start_course"
       | "group_assignment"
+      | "users_import"
       | "complete_lesson"
       | "complete_course"
       | "complete_chapter"
@@ -6587,7 +6676,7 @@ export interface CreateTenantBody {
   adminFirstName: string;
   /** @minLength 1 */
   adminLastName: string;
-  adminLanguage?: string;
+  adminLanguage?: "en" | "pl" | "de" | "lt" | "cs";
 }
 
 export interface CreateTenantResponse {
@@ -12579,6 +12668,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/learning-path/certificates/share-image`,
         method: "GET",
         query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name GlobalSearchControllerSearch
+     * @request GET:/api/global-search
+     */
+    globalSearchControllerSearch: (
+      query?: {
+        searchQuery?: string;
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<SearchResponse, any>({
+        path: `/api/global-search`,
+        method: "GET",
+        query: query,
+        format: "json",
         ...params,
       }),
 

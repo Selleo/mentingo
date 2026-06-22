@@ -1,3 +1,4 @@
+import { SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
 export const createUserSchema = Type.Object({
@@ -5,7 +6,7 @@ export const createUserSchema = Type.Object({
   firstName: Type.String({ minLength: 1, maxLength: 64 }),
   lastName: Type.String({ minLength: 1, maxLength: 64 }),
   roleSlugs: Type.Array(Type.String()),
-  language: Type.Optional(Type.String()),
+  language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
 });
 
 export type CreateUserBody = Static<typeof createUserSchema>;
@@ -16,7 +17,7 @@ export const importUserSchema = Type.Object({
   lastName: Type.String(),
   roleSlugs: Type.Array(Type.String()),
   groups: Type.Optional(Type.Array(Type.String())),
-  language: Type.Optional(Type.String()),
+  language: Type.Optional(Type.Enum(SUPPORTED_LANGUAGES)),
 });
 
 export const skippedUserImportSchema = Type.Object({

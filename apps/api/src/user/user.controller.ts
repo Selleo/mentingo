@@ -56,6 +56,7 @@ import {
   AVATAR_MAX_RESOLUTION,
   AVATAR_MAX_SIZE,
 } from "src/user/user.constants";
+import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
@@ -95,6 +96,7 @@ import {
   userSchema,
 } from "./schemas/user.schema";
 import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
+import { UserImportService } from "./services/user-import.service";
 import { UserService } from "./user.service";
 
 import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
@@ -103,7 +105,10 @@ import type { Static } from "@sinclair/typebox";
 
 @Controller("user")
 export class UserController {
-  constructor(private readonly usersService: UserService) {}
+  constructor(
+    private readonly usersService: UserService,
+    private readonly userImportService: UserImportService,
+  ) {}
 
   @Get("all")
   @RequirePermission(PERMISSIONS.USER_MANAGE)
@@ -412,7 +417,10 @@ export class UserController {
     @Body() data: CreateUserBody,
     @CurrentUser() creator: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const { id } = await this.usersService.createUser(data, undefined, creator);
+    const { id } = await this.usersService.createUser(data, undefined, {
+      flowType: USER_CREATION_FLOW_TYPE.ADMIN,
+      creator,
+    });
 
     return new BaseResponse({
       id,
@@ -447,7 +455,7 @@ export class UserController {
     usersFile: Express.Multer.File,
     @CurrentUser() creator: CurrentUserType,
   ) {
-    const importStats = await this.usersService.importUsers(usersFile, creator);
+    const importStats = await this.userImportService.importUsers(usersFile, creator);
 
     return new BaseResponse(importStats);
   }

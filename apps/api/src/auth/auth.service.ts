@@ -59,11 +59,13 @@ import {
   users,
 } from "../storage/schema";
 import { UserService } from "../user/user.service";
+import { USER_CREATION_FLOW_TYPE } from "../user/user.types";
 
 import { CreatePasswordService } from "./create-password.service";
 import { ResetPasswordService } from "./reset-password.service";
 import { TokenService } from "./token.service";
 
+import type { CreateAccountBody } from "./schemas/create-account.schema";
 import type { CreatePasswordBody } from "./schemas/create-password.schema";
 import type { AuthFailedData, RegisterUserWithHashedPasswordInput, TokenUser } from "./types";
 import type { Response } from "express";
@@ -100,14 +102,7 @@ export class AuthService {
     password,
     language,
     formAnswers,
-  }: {
-    email: string;
-    firstName: string;
-    lastName: string;
-    password: string;
-    language: string;
-    formAnswers?: Record<string, boolean>;
-  }) {
+  }: CreateAccountBody) {
     const [existingUser] = await this.dbAdmin
       .select({ id: users.id })
       .from(users)
@@ -143,18 +138,19 @@ export class AuthService {
         await trx.insert(formFieldAnswers).values(registrationAnswers);
       }
 
+      await this.outboxPublisher.publish(
+        new UserWelcomeEvent({
+          email: user.email,
+          userId: user.id,
+          tenantId: user.tenantId,
+        }),
+        trx,
+      );
+
       return user;
     });
 
     if (!createdUser) throw new BadRequestException("registerView.toast.createAccountFailed");
-
-    await this.outboxPublisher.publish(
-      new UserWelcomeEvent({
-        email: createdUser.email,
-        userId: createdUser.id,
-        tenantId: createdUser.tenantId,
-      }),
-    );
 
     return createdUser;
   }
@@ -172,8 +168,10 @@ export class AuthService {
         language,
       },
       dbInstance,
-      undefined,
-      { registration: { hashedPassword } },
+      {
+        flowType: USER_CREATION_FLOW_TYPE.REGISTRATION,
+        hashedPassword,
+      },
     );
 
     const { avatarReference, ...userWithoutAvatar } = createdUser;
@@ -181,7 +179,7 @@ export class AuthService {
     const usersProfilePictureUrl =
       await this.userService.getUsersProfilePictureUrl(avatarReference);
 
-    await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser));
+    await this.outboxPublisher.publish(new UserRegisteredEvent(createdUser), dbInstance);
 
     return { ...userWithoutAvatar, profilePictureUrl: usersProfilePictureUrl };
   }
@@ -777,12 +775,16 @@ export class AuthService {
     }
 
     if (!user && !inviteOnlyRegistration) {
-      user = await this.userService.createUser({
-        email: userCallback.email,
-        firstName: userCallback.firstName,
-        lastName: userCallback.lastName,
-        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
-      });
+      user = await this.userService.createUser(
+        {
+          email: userCallback.email,
+          firstName: userCallback.firstName,
+          lastName: userCallback.lastName,
+          roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        },
+        undefined,
+        { flowType: USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER },
+      );
     }
 
     const tokens = await this.getTokens(user);

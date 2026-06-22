@@ -29,6 +29,8 @@ export * from "./user/support-mode-enter.event";
 export * from "./user/user-logout.event";
 export * from "./user/user-first-login.event";
 export * from "./user/user-invite.event";
+export * from "./user/users-import-invite-emails.event";
+export * from "./user/users-import.event";
 export * from "./user/user-short-inactivity.event";
 export * from "./user/user-long-inactivity.event";
 export * from "./user/user-password-reminder.event";

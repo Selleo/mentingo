@@ -72,6 +72,7 @@ import {
   type SortUserFieldsOptions,
 } from "src/user/schemas/userQuery";
 import { UserService } from "src/user/user.service";
+import { USER_CREATION_FLOW_TYPE } from "src/user/user.types";
 
 import type { GroupKeywordFilterBody } from "src/group/group.schema";
 import type { AllGroupsResponse } from "src/group/group.types";
@@ -239,7 +240,10 @@ export class IntegrationController {
     @Body() data: Static<typeof createUserSchema>,
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<{ id: UUIDType; message: string }>> {
-    const user = await this.userService.createUser(data, undefined, currentUser);
+    const user = await this.userService.createUser(data, undefined, {
+      flowType: USER_CREATION_FLOW_TYPE.ADMIN,
+      creator: currentUser,
+    });
 
     return new BaseResponse({ id: user.id, message: "User created successfully" });
   }

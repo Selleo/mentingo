@@ -21416,7 +21416,28 @@
             }
           },
           "language": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [
@@ -44797,6 +44818,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "users_import",
+                      "type": "string"
+                    },
+                    {
                       "const": "complete_lesson",
                       "type": "string"
                     },
@@ -48052,7 +48077,28 @@
             "type": "string"
           },
           "adminLanguage": {
-            "type": "string"
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
           }
         },
         "required": [

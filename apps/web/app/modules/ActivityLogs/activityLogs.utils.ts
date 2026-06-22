@@ -97,6 +97,12 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     iconClassName: "text-indigo-700",
     ringClassName: "border-indigo-600",
   },
+  users_import: {
+    icon: Users2,
+    badgeClassName: "border-cyan-200 bg-cyan-50 text-cyan-700",
+    iconClassName: "text-cyan-700",
+    ringClassName: "border-cyan-600",
+  },
   complete_lesson: {
     icon: CheckCircle2,
     badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",

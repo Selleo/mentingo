@@ -1,3 +1,4 @@
+import { UsersImportInviteEmailsEvent } from "src/events";
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
@@ -173,5 +174,36 @@ describe("NotifyUsersHandler", () => {
       );
       expect(notificationSpy).toHaveBeenCalledWith(event);
     });
+  });
+
+  it("sends import invite emails in batches of 5", async () => {
+    let inFlight = 0;
+    let maxInFlight = 0;
+
+    const notifyUserAboutInvite = jest
+      .spyOn(handler, "notifyUserAboutInvite")
+      .mockImplementation(async () => {
+        inFlight += 1;
+        maxInFlight = Math.max(maxInFlight, inFlight);
+
+        await new Promise((resolve) => setTimeout(resolve, 0));
+
+        inFlight -= 1;
+      });
+
+    const event = new UsersImportInviteEmailsEvent({
+      tenantId: "00000000-0000-0000-0000-000000000001",
+      creatorId: "00000000-0000-0000-0000-000000000002",
+      recipients: Array.from({ length: 45 }, (_, index) => ({
+        email: `imported-${index}@example.com`,
+        userId: `00000000-0000-0000-0000-${String(index + 1).padStart(12, "0")}`,
+        token: `token-${index}`,
+      })),
+    });
+
+    await handler.notifyUsersAboutImportInvites(event);
+
+    expect(notifyUserAboutInvite).toHaveBeenCalledTimes(45);
+    expect(maxInFlight).toBe(5);
   });
 });

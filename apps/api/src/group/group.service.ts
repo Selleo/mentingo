@@ -20,6 +20,7 @@ import {
 } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { CourseService } from "src/courses/course.service";
 import {
   CreateGroupEvent,
@@ -27,6 +28,7 @@ import {
   EnrollUserToGroupEvent,
   UpdateGroupEvent,
 } from "src/events";
+import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { GroupSortFields } from "src/group/group.schema";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -47,6 +49,7 @@ import type {
   GroupBaseLanguageUpdateBody,
   UpdateGroupBody,
 } from "src/group/group.types";
+import type { UserGroupAssignmentResult } from "src/group/types/user-group-assignment-result.type";
 import type { UserResponse } from "src/user/schemas/user.schema";
 
 @Injectable()
@@ -418,90 +421,140 @@ export class GroupService {
   ) {
     const actor = options.actor;
     const db = options.db ?? this.db;
-    let assignedGroupIds: UUIDType[] = [];
 
     await db.transaction(async (trx) => {
-      const [user] = await trx
-        .select()
-        .from(users)
-        .where(and(eq(users.id, userId), isNull(users.deletedAt)));
-
-      if (!user) {
-        throw new NotFoundException("User not found");
-      }
-
-      const { permissions: userPermissions } = await this.permissionsService.getUserAccess(
+      const { groupIdsToAssign, groupIdsToRemove } = await this.replaceUserGroupAssignments(
+        groupIds,
         userId,
         trx,
       );
 
-      const canManageUsers = hasPermission(userPermissions, PERMISSIONS.USER_MANAGE);
+      await this.syncUserGroupEnrollment(userId, groupIdsToAssign, groupIdsToRemove, trx);
 
-      const currentUserGroups = await trx
-        .select({ groupId: groupUsers.groupId })
-        .from(groupUsers)
-        .where(eq(groupUsers.userId, userId));
-
-      const currentGroupIds = currentUserGroups.map(({ groupId }) => groupId);
-      const removedGroupIds = currentGroupIds.filter((groupId) => !groupIds.includes(groupId));
-
-      await trx.delete(groupUsers).where(eq(groupUsers.userId, userId));
-
-      if (removedGroupIds.length && !canManageUsers) {
-        await trx
-          .update(studentCourses)
-          .set({
-            status: COURSE_ENROLLMENT.NOT_ENROLLED,
-            enrolledAt: null,
-            enrolledByGroupId: null,
-          })
-          .where(
-            and(
-              eq(studentCourses.studentId, userId),
-              inArray(studentCourses.enrolledByGroupId, removedGroupIds),
+      if (actor && groupIdsToAssign.length) {
+        await processInBatches(
+          groupIdsToAssign,
+          (groupId) =>
+            this.outboxPublisher.publish(
+              new EnrollUserToGroupEvent({
+                groupId,
+                userId,
+                actor,
+              }),
+              trx,
             ),
-          );
+          { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
+        );
       }
+    });
+  }
 
-      if (groupIds.length === 0) return;
+  private async replaceUserGroupAssignments(
+    groupIds: UUIDType[],
+    userId: UUIDType,
+    trx: DatabasePg,
+  ): Promise<UserGroupAssignmentResult> {
+    const requestedGroupIds = [...new Set(groupIds)];
 
+    const userGroups = await trx
+      .select({ tenantId: users.tenantId, groupId: groupUsers.groupId })
+      .from(users)
+      .leftJoin(groupUsers, eq(groupUsers.userId, users.id))
+      .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+    const user = userGroups[0];
+
+    if (!user) throw new NotFoundException("adminUserView.error.userNotFound");
+
+    if (requestedGroupIds.length) {
       const existingGroups = await trx
         .select({ id: groups.id })
         .from(groups)
-        .where(inArray(groups.id, groupIds));
+        .where(inArray(groups.id, requestedGroupIds));
 
-      if (existingGroups.length !== groupIds.length)
-        throw new BadRequestException("One or more groups doesn't exist");
-
-      if (existingGroups.length > 0) {
-        const groupsToAssign = existingGroups.map((group) => ({ userId, groupId: group.id }));
-
-        await trx.insert(groupUsers).values(groupsToAssign);
-        assignedGroupIds = groupsToAssign.map(({ groupId }) => groupId);
-
-        if (!canManageUsers) {
-          await Promise.all(
-            groupsToAssign.map(({ groupId }) =>
-              this.enrollUserToCoursesInGroup(groupId, userId, trx),
-            ),
-          );
-        }
+      if (existingGroups.length !== requestedGroupIds.length) {
+        throw new BadRequestException("adminGroupsView.updateGroup.groupNotFound");
       }
-    });
-
-    if (actor && assignedGroupIds.length) {
-      await Promise.all(
-        assignedGroupIds.map((groupId) =>
-          this.outboxPublisher.publish(
-            new EnrollUserToGroupEvent({
-              groupId,
-              userId,
-              actor,
-            }),
-          ),
-        ),
-      );
     }
+
+    const currentGroupIds = new Set(
+      userGroups.flatMap(({ groupId }) => (groupId ? [groupId] : [])),
+    );
+    const requestedGroupIdSet = new Set(requestedGroupIds);
+
+    const groupIdsToAssign = requestedGroupIds.filter((groupId) => !currentGroupIds.has(groupId));
+    const groupIdsToRemove = [...currentGroupIds].filter(
+      (groupId) => !requestedGroupIdSet.has(groupId),
+    );
+
+    if (groupIdsToRemove.length) {
+      await trx
+        .delete(groupUsers)
+        .where(and(eq(groupUsers.userId, userId), inArray(groupUsers.groupId, groupIdsToRemove)));
+    }
+
+    if (groupIdsToAssign.length) {
+      await trx
+        .insert(groupUsers)
+        .values(groupIdsToAssign.map((groupId) => ({ userId, groupId })))
+        .onConflictDoNothing();
+    }
+
+    return {
+      groupIdsToAssign,
+      groupIdsToRemove,
+    };
+  }
+
+  public async insertUsersGroupAssignmentsBulk(
+    assignments: Array<{ userId: UUIDType; groupIds: UUIDType[] }>,
+    trx: DatabasePg,
+  ) {
+    const groupAssignments = assignments.flatMap(({ userId, groupIds }) =>
+      [...new Set(groupIds)].map((groupId) => ({ userId, groupId })),
+    );
+
+    if (!groupAssignments.length) return;
+
+    await trx.insert(groupUsers).values(groupAssignments).onConflictDoNothing();
+  }
+
+  private async syncUserGroupEnrollment(
+    userId: UUIDType,
+    groupIdsToAssign: UUIDType[],
+    groupIdsToRemove: UUIDType[],
+    trx: DatabasePg,
+  ) {
+    if (!groupIdsToAssign.length && !groupIdsToRemove.length) return;
+
+    const { permissions: userPermissions } = await this.permissionsService.getUserAccess(
+      userId,
+      trx,
+    );
+
+    const canManageUsers = hasPermission(userPermissions, PERMISSIONS.USER_MANAGE);
+
+    if (canManageUsers) return;
+
+    if (groupIdsToRemove.length) {
+      await trx
+        .update(studentCourses)
+        .set({
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+          enrolledAt: null,
+          enrolledByGroupId: null,
+        })
+        .where(
+          and(
+            eq(studentCourses.studentId, userId),
+            inArray(studentCourses.enrolledByGroupId, groupIdsToRemove),
+          ),
+        );
+    }
+
+    await Promise.all(
+      groupIdsToAssign.map((groupId) => this.enrollUserToCoursesInGroup(groupId, userId, trx)),
+    );
   }
 
   private getFiltersConditions(filters: GroupKeywordFilterBody, language?: SupportedLanguages) {

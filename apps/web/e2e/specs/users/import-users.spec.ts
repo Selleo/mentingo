@@ -182,7 +182,7 @@ test("admin sees an error when the import file is malformed", async ({
   });
 });
 
-test("admin imports users even when groups do not exist", async ({
+test("admin sees an error when all imported users reference unknown groups", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -214,23 +214,15 @@ test("admin imports users even when groups do not exist", async ({
     await uploadUsersImportFileFlow(page, importFile.filePath);
     await submitImportUsersFlow(page);
 
-    const importResult = page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT);
-
-    await expect(importResult).toBeVisible();
-    await expect(importResult.getByText(importedEmail)).toBeVisible();
+    await assertToastVisible(page, "Import failed – no valid users found.");
+    await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.RESULT)).toHaveCount(0);
+    await expect(page.getByTestId(USERS_IMPORT_MODAL_HANDLES.ROOT)).toBeVisible();
 
     await expect
       .poll(async () => {
         const importedUser = await userFactory.getByEmail(importedEmail);
 
-        if (!importedUser) {
-          return false;
-        }
-
-        return (
-          importedUser.roleSlugs.includes(SYSTEM_ROLE_SLUGS.STUDENT) &&
-          importedUser.groups.length === 0
-        );
+        return importedUser === null;
       })
       .toBe(true);
   });
