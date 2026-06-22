@@ -3200,6 +3200,7 @@
   "files": {
     "toast": {
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
+      "fileEmpty": "Datei-Upload fehlgeschlagen – die Datei ist leer",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
       "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
       "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",

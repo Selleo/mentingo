@@ -10,6 +10,7 @@ export const PRESENTATION_PDF_PREVIEW_CONTENT_TYPE = "application/pdf";
 export const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
+  "image/webp",
   "image/svg+xml",
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -22,6 +23,7 @@ export const EXTENSION_TO_MIME_TYPE_MAP: Record<string, string> = {
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
   png: "image/png",
+  webp: "image/webp",
   svg: "image/svg+xml",
   pdf: "application/pdf",
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",

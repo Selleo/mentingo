@@ -614,8 +614,14 @@ export class LearningPathCertificateService {
     if (!s3Key) return null;
 
     try {
-      const [fileBuffer] = await Promise.all([this.s3Service.getFileBuffer(s3Key)]);
-      return this.toDataUri(fileBuffer, "image/png");
+      const [fileBuffer, contentType] = await Promise.all([
+        this.fileService.getRawFileBuffer(s3Key),
+        this.fileService.getFileContentType(s3Key).catch(() => null),
+      ]);
+
+      if (!fileBuffer?.length || !contentType) return null;
+
+      return this.toDataUri(fileBuffer, contentType);
     } catch {
       return null;
     }

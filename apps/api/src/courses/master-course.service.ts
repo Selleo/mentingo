@@ -36,6 +36,11 @@ import { MasterCourseQueueService } from "src/courses/master-course.queue.servic
 import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { MASTER_COURSE_RESOURCE_REFERENCE_KIND } from "src/courses/types/master-course.types";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
+import {
+  getAllImageVariantKeys,
+  isImageVariantReference,
+} from "src/file/image-variants/image-variant.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import { rewriteBlankAnswerIds } from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
@@ -1648,6 +1653,12 @@ export class MasterCourseService {
       targetTenantId: params.targetTenantId,
     });
 
+    if (isImageVariantReference(source.reference)) {
+      await this.copyImageVariantReference(source.reference, targetReference);
+      params.copiedReferences.set(source.reference, targetReference);
+      return targetReference;
+    }
+
     if (await this.s3Service.getFileExists(targetReference)) {
       params.copiedReferences.set(source.reference, targetReference);
       return targetReference;
@@ -1665,6 +1676,23 @@ export class MasterCourseService {
     params.copiedReferences.set(source.reference, targetReference);
 
     return targetReference;
+  }
+
+  private async copyImageVariantReference(sourceReference: string, targetReference: string) {
+    const sourceKeys = getAllImageVariantKeys(sourceReference);
+    const targetKeys = getAllImageVariantKeys(targetReference);
+    const targetHighKey = targetKeys[targetKeys.length - 1];
+
+    if (targetHighKey && (await this.s3Service.getFileExists(targetHighKey))) return;
+
+    await Promise.all(
+      sourceKeys.map(async (sourceKey, index) => {
+        const targetKey = targetKeys[index];
+        if (!targetKey || !(await this.s3Service.getFileExists(sourceKey))) return;
+
+        await this.s3Service.copyFile(sourceKey, targetKey, IMAGE_VARIANT_CONTENT_TYPE);
+      }),
+    );
   }
 
   private async copyVideoReference(

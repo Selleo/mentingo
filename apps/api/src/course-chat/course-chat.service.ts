@@ -18,8 +18,8 @@ import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatMessageCreatedEvent } from "src/events/course-chat/course-chat-message-created.event";
 import { CourseChatReplyCreatedEvent } from "src/events/course-chat/course-chat-reply-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
+import { FileService } from "src/file/file.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
-import { S3Service } from "src/s3/s3.service";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
 import type { PermissionKey } from "@repo/shared";
@@ -52,7 +52,7 @@ export class CourseChatService {
     private readonly outboxPublisher: OutboxPublisher,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: CourseChatRealtimePublisher,
-    private readonly s3Service?: S3Service,
+    private readonly fileService: FileService,
   ) {}
 
   async assertUserEnrolledInCourse(courseId: UUIDType, userId: UUIDType) {
@@ -423,9 +423,6 @@ export class CourseChatService {
   }
 
   private async getAvatarUrlByReference(avatarReferences: (string | null)[]) {
-    if (!this.s3Service) return new Map<string, string>();
-    const s3Service = this.s3Service;
-
     const uniqueAvatarReferences = Array.from(
       new Set(avatarReferences.filter((reference): reference is string => Boolean(reference))),
     );
@@ -434,7 +431,7 @@ export class CourseChatService {
       uniqueAvatarReferences.map(
         async (avatarReference): Promise<[string, string]> => [
           avatarReference,
-          await s3Service.getSignedUrl(avatarReference),
+          await this.fileService.getFileUrl(avatarReference),
         ],
       ),
     );

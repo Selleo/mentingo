@@ -3208,6 +3208,7 @@
   "files": {
     "toast": {
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
+      "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
       "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
