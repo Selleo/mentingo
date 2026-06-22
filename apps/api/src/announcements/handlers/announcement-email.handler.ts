@@ -9,6 +9,7 @@ import {
 import { ANNOUNCEMENT_EMAIL_TEMPLATES, isSupportedLanguage } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
 import { processInBatches } from "src/common/utils/processInBatches";
@@ -19,8 +20,6 @@ import { AnnouncementsRepository } from "../announcements.repository";
 
 import type { AnnouncementEmailTemplate, LocalizedText, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
-
-const EMAIL_BATCH_SIZE = 25;
 
 @EventsHandler(AnnouncementPublishedEvent)
 export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPublishedEvent> {

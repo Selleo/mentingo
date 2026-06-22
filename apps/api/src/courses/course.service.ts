@@ -48,6 +48,7 @@ import { AiService } from "src/ai/services/ai.service";
 import { CertificatesService } from "src/certificates/certificates.service";
 import { AdminChapterRepository } from "src/chapter/repositories/adminChapter.repository";
 import { DatabasePg } from "src/common";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
@@ -58,6 +59,7 @@ import { userHasAnyPermissionsCondition } from "src/common/permissions/permissio
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
+import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
@@ -4345,8 +4347,9 @@ export class CourseService {
       overdueCoursesByLanguage.map(({ language, courses }) => [language, courses]),
     );
 
-    await Promise.allSettled(
-      adminsToNotify.map(async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
+    await processInBatches(
+      adminsToNotify,
+      async ({ email, tenantId, tenantHost, defaultEmailSettings }) => {
         const coursesForLanguage = overdueCoursesMap.get(defaultEmailSettings.language);
 
         if (!coursesForLanguage?.length) return;
@@ -4366,7 +4369,8 @@ export class CourseService {
           },
           { tenantId },
         );
-      }),
+      },
+      { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
     );
   }
 

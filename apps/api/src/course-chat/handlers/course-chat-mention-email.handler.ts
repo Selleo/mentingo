@@ -3,9 +3,11 @@ import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
 
 import { DatabasePg } from "src/common";
+import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { resolveTenantOrigin } from "src/common/helpers/resolveTenantOrigin";
+import { processInBatches } from "src/common/utils/processInBatches";
 import {
   getCourseChatMentionEmailButtonText,
   getCourseChatMentionEmailHeading,
@@ -56,8 +58,9 @@ export class CourseChatMentionEmailHandler
 
       if (!message || !recipients.length) return;
 
-      await Promise.allSettled(
-        recipients.map(async (recipient) => {
+      await processInBatches(
+        recipients,
+        async (recipient) => {
           const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
             tenantId,
             recipient.id,
@@ -94,7 +97,8 @@ export class CourseChatMentionEmailHandler
             },
             { tenantId },
           );
-        }),
+        },
+        { batchSize: EMAIL_BATCH_SIZE, throwOnError: false },
       );
     });
   }
