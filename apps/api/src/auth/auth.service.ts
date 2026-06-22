@@ -34,7 +34,6 @@ import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { buildCreateNewPasswordLink } from "src/common/helpers/buildCreateNewPasswordLink";
 import hashPassword from "src/common/helpers/hashPassword";
-import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UserLoginFailedEvent } from "src/events/user/user-login-failed-event";
 import { UserLoginEvent, USER_LOGIN_METHOD } from "src/events/user/user-login.event";
 import { UserPasswordCreatedEvent } from "src/events/user/user-password-created.event";
@@ -292,19 +291,8 @@ export class AuthService {
   }
 
   public async currentUser(currentUser: CurrentUserType) {
-    const { isSupportMode, dbInstance, sourceUserId, sourceTenantId } = getSupportModeContext(
-      currentUser,
-      this.db,
-      this.dbAdmin,
-    );
-
-    if (isSupportMode) {
-      return this.resolveSupportModeCurrentUser(
-        currentUser,
-        sourceUserId,
-        sourceTenantId,
-        dbInstance,
-      );
+    if (currentUser.isSupportMode) {
+      return this.resolveSupportModeCurrentUser(currentUser);
     }
 
     const { userId, tenantId } = currentUser;
@@ -345,28 +333,28 @@ export class AuthService {
     };
   }
 
-  private async resolveSupportModeCurrentUser(
-    currentUser: CurrentUserType,
-    sourceUserId: UUIDType,
-    sourceTenantId: UUIDType,
-    dbInstance: DatabasePg,
-  ) {
-    const { supportSessionId } = currentUser;
+  private async resolveSupportModeCurrentUser(currentUser: CurrentUserType) {
+    const { supportSessionId, targetUserId } = currentUser;
 
-    if (!supportSessionId) throw new UnauthorizedException("Support session is invalid");
+    if (!supportSessionId || !targetUserId)
+      throw new UnauthorizedException("supportMode.errors.invalidSession");
 
     const session = await this.supportModeService.assertActiveSession(supportSessionId);
 
-    const user = await this.userService.getUserById(sourceUserId, dbInstance);
-    const onboardingStatus = await this.getOnboardingStatus(sourceUserId, dbInstance);
+    if (!session.targetUserId || session.targetUserId !== targetUserId) {
+      throw new UnauthorizedException("supportMode.errors.invalidSession");
+    }
 
-    const supportPermissions = Object.values(PERMISSIONS) as PermissionKey[];
+    const user = await this.userService.getUserById(targetUserId, this.dbAdmin);
+    const onboardingStatus = await this.getOnboardingStatus(targetUserId, this.dbAdmin);
 
-    const isManagingTenantAdmin = await this.isManagingTenantAdmin(
-      sourceTenantId,
-      supportPermissions,
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(
+      targetUserId,
+      this.dbAdmin,
     );
-    const studentModeCourseIds = await this.getStudentModeCourseIds(sourceUserId, dbInstance);
+
+    const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+    const studentModeCourseIds = await this.getStudentModeCourseIds(targetUserId, this.dbAdmin);
 
     return {
       ...user,
@@ -375,10 +363,15 @@ export class AuthService {
       isManagingTenantAdmin,
       isSupportMode: true,
       studentModeCourseIds,
-      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-      permissions: supportPermissions,
+      roleSlugs,
+      permissions,
       supportContext: {
-        ...session,
+        originalUserId: session.originalUserId,
+        originalTenantId: session.originalTenantId,
+        targetUserId: session.targetUserId,
+        targetTenantId: session.targetTenantId,
+        expiresAt: session.expiresAt,
+        returnUrl: session.returnUrl,
       },
     };
   }
@@ -491,25 +484,53 @@ export class AuthService {
 
     if (remainingSeconds <= 0) throw new ForbiddenException("supportMode.errors.sessionExpired");
 
-    const [originalUser] = await this.dbAdmin
-      .select({ email: users.email })
-      .from(users)
-      .where(and(eq(users.id, session.originalUserId), isNull(users.deletedAt)))
-      .limit(1);
+    if (!session.targetUserId) throw new UnauthorizedException("supportMode.errors.invalidSession");
 
-    if (!originalUser) throw new UnauthorizedException("Support session is invalid");
+    const [[originalUser], [targetUser]] = await Promise.all([
+      this.dbAdmin
+        .select({ id: users.id, email: users.email })
+        .from(users)
+        .where(and(eq(users.id, session.originalUserId), isNull(users.deletedAt)))
+        .limit(1),
+      this.dbAdmin
+        .select({ id: users.id, email: users.email, tenantId: users.tenantId })
+        .from(users)
+        .where(
+          and(
+            eq(users.id, session.targetUserId),
+            eq(users.tenantId, session.targetTenantId),
+            eq(users.archived, false),
+            isNull(users.deletedAt),
+          ),
+        )
+        .limit(1),
+    ]);
+
+    if (!originalUser || !targetUser)
+      throw new UnauthorizedException("supportMode.errors.invalidSession");
+
+    const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(
+      targetUser.id,
+      this.dbAdmin,
+    );
+
+    if (!roleSlugs.includes(SYSTEM_ROLE_SLUGS.ADMIN)) {
+      throw new UnauthorizedException("supportMode.errors.targetAdminRequired");
+    }
 
     const supportPayload = {
-      userId: session.originalUserId,
-      email: originalUser.email,
-      roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-      permissions: Object.values(PERMISSIONS) as PermissionKey[],
-      tenantId: session.targetTenantId,
+      userId: targetUser.id,
+      email: targetUser.email,
+      roleSlugs,
+      permissions,
+      tenantId: targetUser.tenantId,
       isSupportMode: true,
       supportSessionId: session.id,
       supportExpiresAt: session.expiresAt,
       originalUserId: session.originalUserId,
+      originalUserEmail: originalUser.email,
       originalTenantId: session.originalTenantId,
+      targetUserId: targetUser.id,
       returnUrl: session.returnUrl,
     };
 

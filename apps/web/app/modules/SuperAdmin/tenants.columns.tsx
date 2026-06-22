@@ -1,7 +1,8 @@
 import { Link } from "@remix-run/react";
-import { HandHelping, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { SupportModePopover } from "~/modules/SuperAdmin/SupportModePopover";
 
 import { TENANTS_PAGE_HANDLES } from "../../../e2e/data/tenants/handles";
 
@@ -13,7 +14,7 @@ export type Tenant = FindAllTenantsResponse["data"][number] & { isCurrentTenant?
 
 export const getTenantsColumns = (
   t: typeof i18next.t,
-  onSupportLogin: (tenantId: string) => Promise<void>,
+  onSupportLogin: (tenantId: string, targetUserId: string) => Promise<void>,
   isSupportLoginLoading: boolean,
 ): ColumnDef<Tenant>[] => [
   {
@@ -48,16 +49,11 @@ export const getTenantsColumns = (
     cell: ({ row }) => (
       <div className="text-right flex items-center justify-end gap-2">
         {!row.original.isCurrentTenant && (
-          <Button
-            data-testid={TENANTS_PAGE_HANDLES.supportModeButton(row.original.id)}
-            size="sm"
-            className="gap-2"
-            onClick={() => onSupportLogin(row.original.id)}
-            disabled={isSupportLoginLoading}
-          >
-            <HandHelping className="size-4" aria-hidden="true" />
-            {t("superAdminTenantsView.table.actions.enterSupportMode")}
-          </Button>
+          <SupportModePopover
+            tenant={row.original}
+            isSubmitting={isSupportLoginLoading}
+            onProceed={onSupportLogin}
+          />
         )}
         <Button asChild variant="outline" size="sm" className="gap-2">
           <Link

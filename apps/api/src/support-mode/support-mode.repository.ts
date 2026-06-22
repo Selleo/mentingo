@@ -1,13 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SUPPORT_SESSION_STATUSES } from "@repo/shared";
-import { and, eq, gt, isNull, lte, or } from "drizzle-orm";
+import { SUPPORT_SESSION_STATUSES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { and, count, eq, gt, ilike, isNull, lte, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB_ADMIN } from "src/storage/db/db.providers";
-import { supportSessions, tenants } from "src/storage/schema";
+import {
+  permissionRoles,
+  permissionUserRoles,
+  supportSessions,
+  tenants,
+  users,
+} from "src/storage/schema";
 
 import type {
   CreateSupportSessionRecord,
+  FindSupportAdminUsersParams,
+  SupportAdminUserRecord,
   SupportSession,
   SupportTenant,
 } from "./support-mode.types";
@@ -24,6 +32,102 @@ export class SupportModeRepository {
       .limit(1);
 
     return tenant ?? null;
+  }
+
+  async findSupportAdminUsers({
+    tenantId,
+    page,
+    perPage,
+    search,
+  }: FindSupportAdminUsersParams): Promise<SupportAdminUserRecord[]> {
+    return this.dbAdmin
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        label: this.getSupportAdminUserLabelSql(),
+        avatarReference: users.avatarReference,
+      })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(this.buildSupportAdminUserWhereClause(tenantId, search))
+      .orderBy(users.firstName, users.lastName, users.email)
+      .limit(perPage)
+      .offset((page - 1) * perPage);
+  }
+
+  async countSupportAdminUsers({
+    tenantId,
+    search,
+  }: Pick<FindSupportAdminUsersParams, "tenantId" | "search">): Promise<number> {
+    const [{ totalItems }] = await this.dbAdmin
+      .select({ totalItems: count() })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(this.buildSupportAdminUserWhereClause(tenantId, search));
+
+    return totalItems;
+  }
+
+  async findSupportAdminUserById(
+    tenantId: string,
+    targetUserId: string,
+  ): Promise<SupportAdminUserRecord | null> {
+    const [user] = await this.dbAdmin
+      .select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        label: this.getSupportAdminUserLabelSql(),
+        avatarReference: users.avatarReference,
+      })
+      .from(users)
+      .innerJoin(
+        permissionUserRoles,
+        and(
+          eq(permissionUserRoles.userId, users.id),
+          eq(permissionUserRoles.tenantId, users.tenantId),
+        ),
+      )
+      .innerJoin(
+        permissionRoles,
+        and(
+          eq(permissionRoles.id, permissionUserRoles.roleId),
+          eq(permissionRoles.tenantId, permissionUserRoles.tenantId),
+        ),
+      )
+      .where(and(this.buildSupportAdminUserWhereClause(tenantId), eq(users.id, targetUserId)))
+      .limit(1);
+
+    return user ?? null;
   }
 
   async createSupportSession(supportSessionRecord: CreateSupportSessionRecord): Promise<void> {
@@ -134,5 +238,34 @@ export class SupportModeRepository {
       .returning({ id: supportSessions.id });
 
     return revoked.length;
+  }
+
+  private buildSupportAdminUserWhereClause(tenantId: string, search?: string) {
+    const conditions = [
+      eq(users.tenantId, tenantId),
+      eq(users.archived, false),
+      isNull(users.deletedAt),
+      eq(permissionRoles.slug, SYSTEM_ROLE_SLUGS.ADMIN),
+    ];
+
+    const normalizedSearch = search?.trim();
+
+    if (normalizedSearch) {
+      const searchPattern = `%${normalizedSearch}%`;
+
+      const searchCondition = or(
+        ilike(users.firstName, searchPattern),
+        ilike(users.lastName, searchPattern),
+        ilike(users.email, searchPattern),
+      );
+
+      if (searchCondition) conditions.push(searchCondition);
+    }
+
+    return and(...conditions);
+  }
+
+  private getSupportAdminUserLabelSql() {
+    return sql<string>`concat(${users.firstName}, ' ', ${users.lastName}, ' (', ${users.email}, ')')`;
   }
 }

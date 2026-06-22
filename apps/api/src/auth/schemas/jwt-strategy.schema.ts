@@ -15,7 +15,9 @@ export const jwtPayloadSchema = Type.Object({
   supportSessionId: Type.Optional(UUIDSchema),
   supportExpiresAt: Type.Optional(Type.String()),
   originalUserId: Type.Optional(UUIDSchema),
+  originalUserEmail: Type.Optional(Type.String({ format: "email" })),
   originalTenantId: Type.Optional(UUIDSchema),
+  targetUserId: Type.Optional(UUIDSchema),
   returnUrl: Type.Optional(Type.String()),
 });
 

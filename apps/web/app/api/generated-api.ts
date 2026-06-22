@@ -9,6 +9,93 @@
  * ---------------------------------------------------------------
  */
 
+export interface FileUploadResponse {
+  fileKey: string;
+  fileUrl?: string;
+  status?: string;
+  uploadId?: string;
+}
+
+export interface InitVideoUploadBody {
+  /** @minLength 1 */
+  filename: string;
+  /** @min 1 */
+  sizeBytes: number;
+  /** @minLength 1 */
+  mimeType: string;
+  title?: string;
+  resource?: string;
+  /** @format uuid */
+  contextId?: string;
+  /** @format uuid */
+  entityId?: string;
+  entityType:
+    | "course"
+    | "chapter"
+    | "lesson"
+    | "question"
+    | "news"
+    | "articles"
+    | "learning_path"
+    | "qa"
+    | "user"
+    | "category"
+    | "announcement"
+    | "global_settings"
+    | "live_training";
+  relationshipType?: string;
+  linkToEntity?: boolean;
+}
+
+export interface InitVideoUploadResponse {
+  /** @format uuid */
+  uploadId: string;
+  provider: "bunny" | "s3";
+  fileKey: string;
+  bunnyGuid?: string;
+  tusEndpoint?: string;
+  tusHeaders?: object;
+  expiresAt?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
+  /** @format uuid */
+  resourceId?: string;
+}
+
+export type GetVideoUploadStatusResponse = {
+  uploadId: string;
+  placeholderKey: string;
+  status: "queued" | "uploaded" | "processed" | "failed";
+  provider?: "bunny" | "s3";
+  fileKey?: string;
+  fileUrl?: string;
+  bunnyVideoId?: string;
+  multipartUploadId?: string;
+  /** @min 1 */
+  partSize?: number;
+  fileType?: string;
+  error?: string;
+  userId?: string;
+} | null;
+
+export interface HandleBunnyWebhookBody {
+  status?: number | string;
+  Status?: number | string;
+  videoId?: string;
+  VideoId?: string;
+  videoGuid?: string;
+  VideoGuid?: string;
+  guid?: string;
+  Guid?: string;
+}
+
+export interface GetThumbnailResponse {
+  data: {
+    url: string;
+  };
+}
+
 export interface RegisterBody {
   /** @format email */
   email: string;
@@ -211,6 +298,8 @@ export interface CurrentUserResponse {
       originalUserId: string;
       /** @format uuid */
       originalTenantId: string;
+      /** @format uuid */
+      targetUserId: string;
       /** @format uuid */
       targetTenantId: string;
       expiresAt: string;
@@ -1109,93 +1198,6 @@ export interface GetLoginPageFilesResponse {
     name: string;
     resourceUrl: string;
   }[];
-}
-
-export interface FileUploadResponse {
-  fileKey: string;
-  fileUrl?: string;
-  status?: string;
-  uploadId?: string;
-}
-
-export interface InitVideoUploadBody {
-  /** @minLength 1 */
-  filename: string;
-  /** @min 1 */
-  sizeBytes: number;
-  /** @minLength 1 */
-  mimeType: string;
-  title?: string;
-  resource?: string;
-  /** @format uuid */
-  contextId?: string;
-  /** @format uuid */
-  entityId?: string;
-  entityType:
-    | "course"
-    | "chapter"
-    | "lesson"
-    | "question"
-    | "news"
-    | "articles"
-    | "learning_path"
-    | "qa"
-    | "user"
-    | "category"
-    | "announcement"
-    | "global_settings"
-    | "live_training";
-  relationshipType?: string;
-  linkToEntity?: boolean;
-}
-
-export interface InitVideoUploadResponse {
-  /** @format uuid */
-  uploadId: string;
-  provider: "bunny" | "s3";
-  fileKey: string;
-  bunnyGuid?: string;
-  tusEndpoint?: string;
-  tusHeaders?: object;
-  expiresAt?: string;
-  multipartUploadId?: string;
-  /** @min 1 */
-  partSize?: number;
-  /** @format uuid */
-  resourceId?: string;
-}
-
-export type GetVideoUploadStatusResponse = {
-  uploadId: string;
-  placeholderKey: string;
-  status: "queued" | "uploaded" | "processed" | "failed";
-  provider?: "bunny" | "s3";
-  fileKey?: string;
-  fileUrl?: string;
-  bunnyVideoId?: string;
-  multipartUploadId?: string;
-  /** @min 1 */
-  partSize?: number;
-  fileType?: string;
-  error?: string;
-  userId?: string;
-} | null;
-
-export interface HandleBunnyWebhookBody {
-  status?: number | string;
-  Status?: number | string;
-  videoId?: string;
-  VideoId?: string;
-  videoGuid?: string;
-  VideoGuid?: string;
-  guid?: string;
-  Guid?: string;
-}
-
-export interface GetThumbnailResponse {
-  data: {
-    url: string;
-  };
 }
 
 export interface GetUserStatisticsResponse {
@@ -6713,6 +6715,30 @@ export interface UpdateTenantByIdResponse {
   };
 }
 
+export interface FindSupportUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format email */
+    email: string;
+    firstName: string;
+    lastName: string;
+    label: string;
+    profilePictureUrl: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateSupportSessionBody {
+  /** @format uuid */
+  targetUserId: string;
+}
+
 export interface CreateSupportSessionResponse {
   data: {
     redirectUrl: string;
@@ -7012,6 +7038,184 @@ export class HttpClient<SecurityDataType = unknown> {
  */
 export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDataType> {
   api = {
+    /**
+     * No description
+     *
+     * @name FileControllerUploadFile
+     * @request POST:/api/file
+     */
+    fileControllerUploadFile: (
+      data: {
+        /** @format binary */
+        file?: File;
+        /** Optional resource type */
+        resource?: string;
+        /** Optional lesson ID for existing lessons */
+        lessonId?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FileUploadResponse, any>({
+        path: `/api/file`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerDeleteFile
+     * @request DELETE:/api/file
+     */
+    fileControllerDeleteFile: (
+      query: {
+        /** Key of the file to delete */
+        fileKey: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/file`,
+        method: "DELETE",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerInitVideoUpload
+     * @request POST:/api/file/videos/init
+     */
+    fileControllerInitVideoUpload: (data: InitVideoUploadBody, params: RequestParams = {}) =>
+      this.request<InitVideoUploadResponse, any>({
+        path: `/api/file/videos/init`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsBase
+     * @request OPTIONS:/api/file/videos/tus
+     */
+    fileControllerTusOptionsBase: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerCreateTusUpload
+     * @request POST:/api/file/videos/tus
+     */
+    fileControllerCreateTusUpload: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus`,
+        method: "POST",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerTusOptionsUpload
+     * @request OPTIONS:/api/file/videos/tus/{id}
+     */
+    fileControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "OPTIONS",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetTusUpload
+     * @request HEAD:/api/file/videos/tus/{id}
+     */
+    fileControllerGetTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "HEAD",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerPatchTusUpload
+     * @request PATCH:/api/file/videos/tus/{id}
+     */
+    fileControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/videos/tus/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetVideoUploadStatus
+     * @request GET:/api/file/videos/{id}
+     */
+    fileControllerGetVideoUploadStatus: (id: string, params: RequestParams = {}) =>
+      this.request<GetVideoUploadStatusResponse, any>({
+        path: `/api/file/videos/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerHandleBunnyWebhook
+     * @request POST:/api/file/bunny/webhook
+     */
+    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/file/bunny/webhook`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name FileControllerGetThumbnail
+     * @request GET:/api/file/thumbnail
+     */
+    fileControllerGetThumbnail: (
+      query: {
+        /** @minLength 1 */
+        sourceUrl: string;
+        provider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetThumbnailResponse, any>({
+        path: `/api/file/thumbnail`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
     /**
      * No description
      *
@@ -7993,184 +8197,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/settings/login-page-files/${id}`,
         method: "DELETE",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerUploadFile
-     * @request POST:/api/file
-     */
-    fileControllerUploadFile: (
-      data: {
-        /** @format binary */
-        file?: File;
-        /** Optional resource type */
-        resource?: string;
-        /** Optional lesson ID for existing lessons */
-        lessonId?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FileUploadResponse, any>({
-        path: `/api/file`,
-        method: "POST",
-        body: data,
-        type: ContentType.FormData,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerDeleteFile
-     * @request DELETE:/api/file
-     */
-    fileControllerDeleteFile: (
-      query: {
-        /** Key of the file to delete */
-        fileKey: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/file`,
-        method: "DELETE",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerInitVideoUpload
-     * @request POST:/api/file/videos/init
-     */
-    fileControllerInitVideoUpload: (data: InitVideoUploadBody, params: RequestParams = {}) =>
-      this.request<InitVideoUploadResponse, any>({
-        path: `/api/file/videos/init`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerTusOptionsBase
-     * @request OPTIONS:/api/file/videos/tus
-     */
-    fileControllerTusOptionsBase: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/videos/tus`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerCreateTusUpload
-     * @request POST:/api/file/videos/tus
-     */
-    fileControllerCreateTusUpload: (params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/videos/tus`,
-        method: "POST",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerTusOptionsUpload
-     * @request OPTIONS:/api/file/videos/tus/{id}
-     */
-    fileControllerTusOptionsUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/videos/tus/${id}`,
-        method: "OPTIONS",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerGetTusUpload
-     * @request HEAD:/api/file/videos/tus/{id}
-     */
-    fileControllerGetTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/videos/tus/${id}`,
-        method: "HEAD",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerPatchTusUpload
-     * @request PATCH:/api/file/videos/tus/{id}
-     */
-    fileControllerPatchTusUpload: (id: string, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/videos/tus/${id}`,
-        method: "PATCH",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerGetVideoUploadStatus
-     * @request GET:/api/file/videos/{id}
-     */
-    fileControllerGetVideoUploadStatus: (id: string, params: RequestParams = {}) =>
-      this.request<GetVideoUploadStatusResponse, any>({
-        path: `/api/file/videos/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerHandleBunnyWebhook
-     * @request POST:/api/file/bunny/webhook
-     */
-    fileControllerHandleBunnyWebhook: (data: HandleBunnyWebhookBody, params: RequestParams = {}) =>
-      this.request<void, any>({
-        path: `/api/file/bunny/webhook`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name FileControllerGetThumbnail
-     * @request GET:/api/file/thumbnail
-     */
-    fileControllerGetThumbnail: (
-      query: {
-        /** @minLength 1 */
-        sourceUrl: string;
-        provider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<GetThumbnailResponse, any>({
-        path: `/api/file/thumbnail`,
-        method: "GET",
-        query: query,
-        format: "json",
         ...params,
       }),
 
@@ -14119,13 +14145,44 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name TenantsControllerFindSupportUsers
+     * @request GET:/api/super-admin/tenants/{id}/support-users
+     */
+    tenantsControllerFindSupportUsers: (
+      id: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FindSupportUsersResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name TenantsControllerCreateSupportSession
      * @request POST:/api/super-admin/tenants/{id}/support-session
      */
-    tenantsControllerCreateSupportSession: (id: string, params: RequestParams = {}) =>
+    tenantsControllerCreateSupportSession: (
+      id: string,
+      data: CreateSupportSessionBody,
+      params: RequestParams = {},
+    ) =>
       this.request<CreateSupportSessionResponse, any>({
         path: `/api/super-admin/tenants/${id}/support-session`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

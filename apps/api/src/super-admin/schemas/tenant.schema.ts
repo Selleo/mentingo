@@ -49,3 +49,26 @@ export const updateTenantSchema = Type.Object(
   },
   { additionalProperties: false },
 );
+
+export const createSupportSessionSchema = Type.Object(
+  {
+    targetUserId: UUIDSchema,
+  },
+  { additionalProperties: false },
+);
+
+export const createSupportSessionResponseSchema = Type.Object({
+  redirectUrl: Type.String(),
+  expiresAt: Type.String(),
+});
+
+export const supportAdminUserSchema = Type.Object({
+  id: UUIDSchema,
+  email: Type.String({ format: "email" }),
+  firstName: Type.String(),
+  lastName: Type.String(),
+  label: Type.String(),
+  profilePictureUrl: Type.Union([Type.String(), Type.Null()]),
+});
+
+export const supportAdminUsersSchema = Type.Array(supportAdminUserSchema);

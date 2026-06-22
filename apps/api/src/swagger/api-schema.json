@@ -1,6 +1,265 @@
 {
   "openapi": "3.0.0",
   "paths": {
+    "/api/file": {
+      "post": {
+        "operationId": "FileController_uploadFile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "resource": {
+                    "type": "string",
+                    "description": "Optional resource type"
+                  },
+                  "lessonId": {
+                    "type": "string",
+                    "description": "Optional lesson ID for existing lessons"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "FileController_deleteFile",
+        "parameters": [
+          {
+            "name": "fileKey",
+            "required": true,
+            "in": "query",
+            "description": "Key of the file to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File deleted successfully"
+          }
+        }
+      }
+    },
+    "/api/file/videos/init": {
+      "post": {
+        "operationId": "FileController_initVideoUpload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InitVideoUploadBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InitVideoUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/videos/tus": {
+      "options": {
+        "operationId": "FileController_tusOptionsBase",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "FileController_createTusUpload",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/videos/tus/{id}": {
+      "options": {
+        "operationId": "FileController_tusOptionsUpload",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "head": {
+        "operationId": "FileController_getTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      },
+      "patch": {
+        "operationId": "FileController_patchTusUpload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/videos/{id}": {
+      "get": {
+        "operationId": "FileController_getVideoUploadStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVideoUploadStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/file/bunny/webhook": {
+      "post": {
+        "operationId": "FileController_handleBunnyWebhook",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HandleBunnyWebhookBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/file/thumbnail": {
+      "get": {
+        "operationId": "FileController_getThumbnail",
+        "parameters": [
+          {
+            "name": "sourceUrl",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "name": "provider",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "self",
+                  "type": "string"
+                },
+                {
+                  "const": "youtube",
+                  "type": "string"
+                },
+                {
+                  "const": "vimeo",
+                  "type": "string"
+                },
+                {
+                  "const": "bunny",
+                  "type": "string"
+                },
+                {
+                  "const": "unknown",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetThumbnailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/register": {
       "post": {
         "operationId": "AuthController_register",
@@ -1273,265 +1532,6 @@
         "responses": {
           "200": {
             "description": ""
-          }
-        }
-      }
-    },
-    "/api/file": {
-      "post": {
-        "operationId": "FileController_uploadFile",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "file": {
-                    "type": "string",
-                    "format": "binary"
-                  },
-                  "resource": {
-                    "type": "string",
-                    "description": "Optional resource type"
-                  },
-                  "lessonId": {
-                    "type": "string",
-                    "description": "Optional lesson ID for existing lessons"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "File uploaded successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FileUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "operationId": "FileController_deleteFile",
-        "parameters": [
-          {
-            "name": "fileKey",
-            "required": true,
-            "in": "query",
-            "description": "Key of the file to delete",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "File deleted successfully"
-          }
-        }
-      }
-    },
-    "/api/file/videos/init": {
-      "post": {
-        "operationId": "FileController_initVideoUpload",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/InitVideoUploadBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/InitVideoUploadResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/file/videos/tus": {
-      "options": {
-        "operationId": "FileController_tusOptionsBase",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "operationId": "FileController_createTusUpload",
-        "parameters": [],
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/file/videos/tus/{id}": {
-      "options": {
-        "operationId": "FileController_tusOptionsUpload",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "head": {
-        "operationId": "FileController_getTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      },
-      "patch": {
-        "operationId": "FileController_patchTusUpload",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/file/videos/{id}": {
-      "get": {
-        "operationId": "FileController_getVideoUploadStatus",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetVideoUploadStatusResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/file/bunny/webhook": {
-      "post": {
-        "operationId": "FileController_handleBunnyWebhook",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HandleBunnyWebhookBody"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/file/thumbnail": {
-      "get": {
-        "operationId": "FileController_getThumbnail",
-        "parameters": [
-          {
-            "name": "sourceUrl",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            }
-          },
-          {
-            "name": "provider",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "self",
-                  "type": "string"
-                },
-                {
-                  "const": "youtube",
-                  "type": "string"
-                },
-                {
-                  "const": "vimeo",
-                  "type": "string"
-                },
-                {
-                  "const": "bunny",
-                  "type": "string"
-                },
-                {
-                  "const": "unknown",
-                  "type": "string"
-                }
-              ]
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetThumbnailResponse"
-                }
-              }
-            }
           }
         }
       }
@@ -14506,6 +14506,59 @@
         }
       }
     },
+    "/api/super-admin/tenants/{id}/support-users": {
+      "get": {
+        "operationId": "TenantsController_findSupportUsers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindSupportUsersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/super-admin/tenants/{id}/support-session": {
       "post": {
         "operationId": "TenantsController_createSupportSession",
@@ -14520,6 +14573,16 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupportSessionBody"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -14676,6 +14739,324 @@
   "servers": [],
   "components": {
     "schemas": {
+      "FileUploadResponse": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "type": "string"
+          },
+          "fileUrl": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "uploadId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileKey"
+        ]
+      },
+      "InitVideoUploadBody": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sizeBytes": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "mimeType": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "string"
+          },
+          "contextId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "entityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "entityType": {
+            "anyOf": [
+              {
+                "const": "course",
+                "type": "string"
+              },
+              {
+                "const": "chapter",
+                "type": "string"
+              },
+              {
+                "const": "lesson",
+                "type": "string"
+              },
+              {
+                "const": "question",
+                "type": "string"
+              },
+              {
+                "const": "news",
+                "type": "string"
+              },
+              {
+                "const": "articles",
+                "type": "string"
+              },
+              {
+                "const": "learning_path",
+                "type": "string"
+              },
+              {
+                "const": "qa",
+                "type": "string"
+              },
+              {
+                "const": "user",
+                "type": "string"
+              },
+              {
+                "const": "category",
+                "type": "string"
+              },
+              {
+                "const": "announcement",
+                "type": "string"
+              },
+              {
+                "const": "global_settings",
+                "type": "string"
+              },
+              {
+                "const": "live_training",
+                "type": "string"
+              }
+            ]
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "linkToEntity": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "filename",
+          "sizeBytes",
+          "mimeType",
+          "entityType"
+        ]
+      },
+      "InitVideoUploadResponse": {
+        "type": "object",
+        "properties": {
+          "uploadId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "const": "bunny",
+                "type": "string"
+              },
+              {
+                "const": "s3",
+                "type": "string"
+              }
+            ]
+          },
+          "fileKey": {
+            "type": "string"
+          },
+          "bunnyGuid": {
+            "type": "string"
+          },
+          "tusEndpoint": {
+            "type": "string"
+          },
+          "tusHeaders": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {
+                "type": "string"
+              }
+            }
+          },
+          "expiresAt": {
+            "type": "string"
+          },
+          "multipartUploadId": {
+            "type": "string"
+          },
+          "partSize": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "resourceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "uploadId",
+          "provider",
+          "fileKey"
+        ]
+      },
+      "GetVideoUploadStatusResponse": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "uploadId": {
+                "type": "string"
+              },
+              "placeholderKey": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "queued",
+                    "type": "string"
+                  },
+                  {
+                    "const": "uploaded",
+                    "type": "string"
+                  },
+                  {
+                    "const": "processed",
+                    "type": "string"
+                  },
+                  {
+                    "const": "failed",
+                    "type": "string"
+                  }
+                ]
+              },
+              "provider": {
+                "anyOf": [
+                  {
+                    "const": "bunny",
+                    "type": "string"
+                  },
+                  {
+                    "const": "s3",
+                    "type": "string"
+                  }
+                ]
+              },
+              "fileKey": {
+                "type": "string"
+              },
+              "fileUrl": {
+                "type": "string"
+              },
+              "bunnyVideoId": {
+                "type": "string"
+              },
+              "multipartUploadId": {
+                "type": "string"
+              },
+              "partSize": {
+                "minimum": 1,
+                "type": "integer"
+              },
+              "fileType": {
+                "type": "string"
+              },
+              "error": {
+                "type": "string"
+              },
+              "userId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "uploadId",
+              "placeholderKey",
+              "status"
+            ]
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "HandleBunnyWebhookBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "Status": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "videoId": {
+            "type": "string"
+          },
+          "VideoId": {
+            "type": "string"
+          },
+          "videoGuid": {
+            "type": "string"
+          },
+          "VideoGuid": {
+            "type": "string"
+          },
+          "guid": {
+            "type": "string"
+          },
+          "Guid": {
+            "type": "string"
+          }
+        }
+      },
+      "GetThumbnailResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "RegisterBody": {
         "type": "object",
         "properties": {
@@ -15483,6 +15864,10 @@
                     "format": "uuid",
                     "type": "string"
                   },
+                  "targetUserId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
                   "targetTenantId": {
                     "format": "uuid",
                     "type": "string"
@@ -15497,6 +15882,7 @@
                 "required": [
                   "originalUserId",
                   "originalTenantId",
+                  "targetUserId",
                   "targetTenantId",
                   "expiresAt",
                   "returnUrl"
@@ -19941,324 +20327,6 @@
         },
         "required": [
           "resources"
-        ]
-      },
-      "FileUploadResponse": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "type": "string"
-          },
-          "fileUrl": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "uploadId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fileKey"
-        ]
-      },
-      "InitVideoUploadBody": {
-        "type": "object",
-        "properties": {
-          "filename": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "sizeBytes": {
-            "minimum": 1,
-            "type": "integer"
-          },
-          "mimeType": {
-            "minLength": 1,
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "resource": {
-            "type": "string"
-          },
-          "contextId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "entityId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "entityType": {
-            "anyOf": [
-              {
-                "const": "course",
-                "type": "string"
-              },
-              {
-                "const": "chapter",
-                "type": "string"
-              },
-              {
-                "const": "lesson",
-                "type": "string"
-              },
-              {
-                "const": "question",
-                "type": "string"
-              },
-              {
-                "const": "news",
-                "type": "string"
-              },
-              {
-                "const": "articles",
-                "type": "string"
-              },
-              {
-                "const": "learning_path",
-                "type": "string"
-              },
-              {
-                "const": "qa",
-                "type": "string"
-              },
-              {
-                "const": "user",
-                "type": "string"
-              },
-              {
-                "const": "category",
-                "type": "string"
-              },
-              {
-                "const": "announcement",
-                "type": "string"
-              },
-              {
-                "const": "global_settings",
-                "type": "string"
-              },
-              {
-                "const": "live_training",
-                "type": "string"
-              }
-            ]
-          },
-          "relationshipType": {
-            "type": "string"
-          },
-          "linkToEntity": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "filename",
-          "sizeBytes",
-          "mimeType",
-          "entityType"
-        ]
-      },
-      "InitVideoUploadResponse": {
-        "type": "object",
-        "properties": {
-          "uploadId": {
-            "format": "uuid",
-            "type": "string"
-          },
-          "provider": {
-            "anyOf": [
-              {
-                "const": "bunny",
-                "type": "string"
-              },
-              {
-                "const": "s3",
-                "type": "string"
-              }
-            ]
-          },
-          "fileKey": {
-            "type": "string"
-          },
-          "bunnyGuid": {
-            "type": "string"
-          },
-          "tusEndpoint": {
-            "type": "string"
-          },
-          "tusHeaders": {
-            "type": "object",
-            "patternProperties": {
-              "^(.*)$": {
-                "type": "string"
-              }
-            }
-          },
-          "expiresAt": {
-            "type": "string"
-          },
-          "multipartUploadId": {
-            "type": "string"
-          },
-          "partSize": {
-            "minimum": 1,
-            "type": "integer"
-          },
-          "resourceId": {
-            "format": "uuid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "uploadId",
-          "provider",
-          "fileKey"
-        ]
-      },
-      "GetVideoUploadStatusResponse": {
-        "anyOf": [
-          {
-            "type": "object",
-            "properties": {
-              "uploadId": {
-                "type": "string"
-              },
-              "placeholderKey": {
-                "type": "string"
-              },
-              "status": {
-                "anyOf": [
-                  {
-                    "const": "queued",
-                    "type": "string"
-                  },
-                  {
-                    "const": "uploaded",
-                    "type": "string"
-                  },
-                  {
-                    "const": "processed",
-                    "type": "string"
-                  },
-                  {
-                    "const": "failed",
-                    "type": "string"
-                  }
-                ]
-              },
-              "provider": {
-                "anyOf": [
-                  {
-                    "const": "bunny",
-                    "type": "string"
-                  },
-                  {
-                    "const": "s3",
-                    "type": "string"
-                  }
-                ]
-              },
-              "fileKey": {
-                "type": "string"
-              },
-              "fileUrl": {
-                "type": "string"
-              },
-              "bunnyVideoId": {
-                "type": "string"
-              },
-              "multipartUploadId": {
-                "type": "string"
-              },
-              "partSize": {
-                "minimum": 1,
-                "type": "integer"
-              },
-              "fileType": {
-                "type": "string"
-              },
-              "error": {
-                "type": "string"
-              },
-              "userId": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "uploadId",
-              "placeholderKey",
-              "status"
-            ]
-          },
-          {
-            "type": "null"
-          }
-        ]
-      },
-      "HandleBunnyWebhookBody": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "Status": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ]
-          },
-          "videoId": {
-            "type": "string"
-          },
-          "VideoId": {
-            "type": "string"
-          },
-          "videoGuid": {
-            "type": "string"
-          },
-          "VideoGuid": {
-            "type": "string"
-          },
-          "guid": {
-            "type": "string"
-          },
-          "Guid": {
-            "type": "string"
-          }
-        }
-      },
-      "GetThumbnailResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "url"
-            ]
-          }
-        },
-        "required": [
-          "data"
         ]
       },
       "GetUserStatisticsResponse": {
@@ -48239,6 +48307,96 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "FindSupportUsersResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "email": {
+                  "format": "email",
+                  "type": "string"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "profilePictureUrl": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "email",
+                "firstName",
+                "lastName",
+                "label",
+                "profilePictureUrl"
+              ]
+            }
+          },
+          "pagination": {
+            "type": "object",
+            "properties": {
+              "totalItems": {
+                "type": "number"
+              },
+              "page": {
+                "type": "number"
+              },
+              "perPage": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "totalItems",
+              "page",
+              "perPage"
+            ]
+          },
+          "appliedFilters": {
+            "type": "object",
+            "patternProperties": {
+              "^(.*)$": {}
+            }
+          }
+        },
+        "required": [
+          "data",
+          "pagination"
+        ]
+      },
+      "CreateSupportSessionBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "targetUserId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "targetUserId"
         ]
       },
       "CreateSupportSessionResponse": {

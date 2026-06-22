@@ -18,6 +18,7 @@ export type SupportTokenClaims = {
   supportExpiresAt: string;
   originalUserId: string;
   originalTenantId: string;
+  targetUserId: string;
   returnUrl: string;
 };
 
@@ -26,6 +27,32 @@ export type SupportTenant = {
   name: string;
   host: string;
   status: TenantStatus;
+};
+
+export type SupportAdminUser = {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  label: string;
+  profilePictureUrl: string | null;
+};
+
+export type SupportAdminUserRecord = Omit<SupportAdminUser, "profilePictureUrl"> & {
+  avatarReference: string | null;
+};
+
+export type ListSupportAdminUsersQuery = {
+  page?: number;
+  perPage?: number;
+  search?: string;
+};
+
+export type FindSupportAdminUsersParams = {
+  tenantId: string;
+  page: number;
+  perPage: number;
+  search?: string;
 };
 
 export type CreateSupportSessionRecord = InferInsertModel<typeof supportSessions>;

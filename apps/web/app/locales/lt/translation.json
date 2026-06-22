@@ -4157,6 +4157,11 @@
       "message": "Jūs veikiate palaikymo režimu",
       "timeLeft": "Liko {{minutes}} min",
       "exit": "Išeikite iš palaikymo režimo"
+    },
+    "errors": {
+      "generic": "Nepavyko paleisti palaikymo režimo",
+      "targetAdminRequired": "Pasirinkite aktyvų administratorių iš pasirinktos organizacijos",
+      "invalidSession": "Palaikymo sesija netinkama"
     }
   },
   "superAdminTenantsView": {
@@ -4180,8 +4185,15 @@
       "edit": "Redaguoti",
       "actions": {
         "title": "Veiksmai",
-        "enterSupportMode": "Įjunkite palaikymo režimą"
+        "enterSupportMode": "Įjunkite palaikymo režimą",
+        "impersonateAdmin": "Apsimesti administratoriumi"
       }
+    },
+    "supportModePopover": {
+      "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
+      "loading": "Įkeliami administratoriai...",
+      "empty": "Aktyvių administratorių nerasta.",
+      "loadMore": "Įkelti daugiau naudotojų"
     },
     "status": {
       "active": "Aktyvus",
