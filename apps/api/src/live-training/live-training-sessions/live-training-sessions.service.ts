@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_PARTICIPANT_ROLES,
@@ -69,6 +69,8 @@ const INVALIDATING_SESSION_STATUSES = new Set<string>([
 
 @Injectable()
 export class LiveTrainingSessionsService {
+  private readonly logger = new Logger(LiveTrainingSessionsService.name);
+
   constructor(
     private readonly liveTrainingSessionsRepository: LiveTrainingSessionsRepository,
     private readonly liveKitService: LiveKitService,
@@ -550,7 +552,7 @@ export class LiveTrainingSessionsService {
   }
 
   async handleLiveKitWebhook(input: HandleLiveKitWebhookInput) {
-    const event = await this.liveKitService.receiveWebhook(input.body, input.authorizationHeader);
+    const event = await this.receiveLiveKitWebhook(input);
     const roomName = this.getWebhookRoomName(event);
 
     if (!roomName) return event;
@@ -560,11 +562,34 @@ export class LiveTrainingSessionsService {
 
     if (!sessionTenant) return event;
 
+    if (input.requestTenantId && sessionTenant.tenantId !== input.requestTenantId) {
+      this.logger.warn(
+        `LiveKit webhook tenant mismatch: ${JSON.stringify({
+          requestTenantId: input.requestTenantId,
+          sessionTenantId: sessionTenant.tenantId,
+          roomName,
+          event: event.event,
+        })}`,
+      );
+
+      return event;
+    }
+
     await this.tenantDbRunner.runWithTenant(sessionTenant.tenantId, async () => {
       await this.processLiveKitWebhookEvent(event, sessionTenant);
     });
 
     return event;
+  }
+
+  private async receiveLiveKitWebhook(input: HandleLiveKitWebhookInput) {
+    if (!input.requestTenantId) {
+      return this.liveKitService.receiveWebhook(input.body, input.authorizationHeader);
+    }
+
+    return this.tenantDbRunner.runWithTenant(input.requestTenantId, () =>
+      this.liveKitService.receiveWebhook(input.body, input.authorizationHeader),
+    );
   }
 
   private async processLiveKitWebhookEvent(

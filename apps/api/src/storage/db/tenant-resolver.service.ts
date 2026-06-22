@@ -114,10 +114,13 @@ export class TenantResolverService {
     const fromHeader = this.safeParseOrigin(req.headers.referer ?? req.headers.origin);
     if (fromHeader) return fromHeader;
 
-    const host = req.headers.host;
+    const host = this.getFirstHeaderValue(req.headers["x-forwarded-host"]) ?? req.headers.host;
     if (!host) return null;
 
-    const protocol = (req.protocol as string | undefined) ?? "http";
+    const protocol =
+      this.getFirstHeaderValue(req.headers["x-forwarded-proto"]) ??
+      (req.protocol as string | undefined) ??
+      "http";
     return `${protocol}://${host}`.replace(/\/$/, "");
   }
 
@@ -133,6 +136,12 @@ export class TenantResolverService {
 
   private getSingleQueryValue(value: unknown): string | undefined {
     return typeof value === "string" ? value : undefined;
+  }
+
+  private getFirstHeaderValue(value: string | string[] | undefined): string | undefined {
+    if (Array.isArray(value)) return value[0]?.split(",")[0]?.trim();
+
+    return value?.split(",")[0]?.trim();
   }
 
   private isInactiveAllowed(req: Request): boolean {

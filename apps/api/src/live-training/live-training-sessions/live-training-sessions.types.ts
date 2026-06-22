@@ -6,6 +6,7 @@ import { UUIDSchema, baseResponse } from "src/common";
 export const handleLiveKitWebhookInputSchema = Type.Object({
   body: Type.String(),
   authorizationHeader: Type.Optional(Type.String()),
+  requestTenantId: Type.Optional(UUIDSchema),
 });
 
 export const liveTrainingSessionUserSchema = Type.Object({
