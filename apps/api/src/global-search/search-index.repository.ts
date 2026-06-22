@@ -28,6 +28,9 @@ import {
 
 import type {
   DeleteSearchDocumentsInput,
+  DocumentSelectionInput,
+  LessonLocalizedFieldQueryInput,
+  QuestionLocalizedFieldQueryInput,
   ReplaceSearchDocumentsInput,
   SearchDocumentWeight,
 } from "./global-search.types";
@@ -51,7 +54,7 @@ export class SearchIndexRepository {
     if (documents.length === 0) return;
 
     await db.insert(searchDocuments).values(
-      documents.map((document) => ({
+      documents.map(({ weight, ...document }) => ({
         entityType: input.entityType,
         entityId: input.entityId,
         documentType: document.documentType,
@@ -63,7 +66,7 @@ export class SearchIndexRepository {
             to_tsvector(${getSearchLanguageConfig(
               document.language,
             )}::regconfig, ${document.content.trim()}),
-            ${document.weight}
+            ${weight}
           )
         `,
       })),
@@ -208,19 +211,9 @@ export class SearchIndexRepository {
     await db
       .insert(searchDocuments)
       .values(
-        documents.map((document) => ({
-          tenantId: document.tenantId,
-          entityType: document.entityType,
-          entityId: document.entityId,
-          documentType: document.documentType,
-          language: document.language,
-          content: document.content,
-          metadata: document.metadata,
-          searchVector: this.buildSearchVector(
-            document.language,
-            document.content,
-            document.weight,
-          ),
+        documents.map(({ weight, ...document }) => ({
+          ...document,
+          searchVector: this.buildSearchVector(document.language, document.content, weight),
         })),
       )
       .onConflictDoUpdate({
@@ -308,14 +301,7 @@ export class SearchIndexRepository {
     lateralAlias,
     documentType,
     weight,
-  }: {
-    db: DatabasePg;
-    lessonIds: UUIDType[];
-    fieldExpression: unknown;
-    lateralAlias: string;
-    documentType: string;
-    weight: SearchDocumentWeight;
-  }) {
+  }: LessonLocalizedFieldQueryInput) {
     return db
       .select(
         this.buildDocumentSelection({
@@ -351,15 +337,7 @@ export class SearchIndexRepository {
     documentType,
     weight,
     metadata,
-  }: {
-    db: DatabasePg;
-    lessonIds: UUIDType[];
-    fieldExpression: unknown;
-    lateralAlias: string;
-    documentType: ReturnType<typeof sql<string>>;
-    weight: SearchDocumentWeight;
-    metadata: ReturnType<typeof sql<Record<string, unknown>>>;
-  }) {
+  }: QuestionLocalizedFieldQueryInput) {
     return db
       .select(
         this.buildDocumentSelection({
@@ -486,15 +464,7 @@ export class SearchIndexRepository {
     content,
     weight,
     metadata = sql<Record<string, unknown>>`'{}'::jsonb`,
-  }: {
-    tenantId: unknown;
-    entityId: unknown;
-    documentType: ReturnType<typeof sql<string>>;
-    language: ReturnType<typeof sql<SupportedLanguages>>;
-    content: ReturnType<typeof sql<string>>;
-    weight: SearchDocumentWeight;
-    metadata?: ReturnType<typeof sql<Record<string, unknown>>>;
-  }) {
+  }: DocumentSelectionInput) {
     return {
       tenantId: sql<UUIDType>`${tenantId}`.as("tenant_id"),
       entityType: sql<string>`${SEARCH_ENTITY_TYPES.LESSON}`.as("entity_type"),

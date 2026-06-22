@@ -4,6 +4,8 @@ import type {
   SEARCH_ENTITY_TYPES,
 } from "./global-search.constants";
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { DatabasePg, UUIDType } from "src/common";
 
 export type SearchEntityType = (typeof SEARCH_ENTITY_TYPES)[keyof typeof SEARCH_ENTITY_TYPES];
@@ -17,6 +19,37 @@ export type SearchDocumentInput = {
   content: string;
   weight: SearchDocumentWeight;
   metadata?: Record<string, unknown>;
+};
+
+export type SearchDocumentSqlExpression<T = unknown> = SQL<T> | AnyPgColumn;
+
+export type LessonLocalizedFieldQueryInput = {
+  db: DatabasePg;
+  lessonIds: UUIDType[];
+  fieldExpression: SearchDocumentSqlExpression;
+  lateralAlias: string;
+  documentType: string;
+  weight: SearchDocumentWeight;
+};
+
+export type QuestionLocalizedFieldQueryInput = {
+  db: DatabasePg;
+  lessonIds: UUIDType[];
+  fieldExpression: SearchDocumentSqlExpression;
+  lateralAlias: string;
+  documentType: SQL<string>;
+  weight: SearchDocumentWeight;
+  metadata: SQL<Record<string, unknown>>;
+};
+
+export type DocumentSelectionInput = {
+  tenantId: SearchDocumentSqlExpression<UUIDType>;
+  entityId: SearchDocumentSqlExpression<UUIDType>;
+  documentType: SQL<string>;
+  language: SQL<SupportedLanguages>;
+  content: SQL<string>;
+  weight: SearchDocumentWeight;
+  metadata?: SQL<Record<string, unknown>>;
 };
 
 export type ReplaceSearchDocumentsInput = {
