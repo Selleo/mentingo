@@ -43,7 +43,7 @@ import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { SessionRevocationService } from "src/redis";
 import { SettingsService } from "src/settings/settings.service";
-import { DB_ADMIN } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { SupportModeService } from "src/support-mode/support-mode.service";
 
 import {
@@ -78,7 +78,7 @@ import type { ProviderLoginUserType } from "src/utils/types/provider-login-user.
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private jwtService: JwtService,
@@ -102,7 +102,7 @@ export class AuthService {
     language,
     formAnswers,
   }: CreateAccountBody) {
-    const [existingUser] = await this.dbAdmin
+    const [existingUser] = await this.db
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, email));

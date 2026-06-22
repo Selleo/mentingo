@@ -5,7 +5,7 @@ import * as express from "express";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { createDbProxy, DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { DEFAULT_TEST_TENANT_HOST, ensureTenant } from "./helpers/tenant-helpers";
@@ -18,6 +18,7 @@ import type { Provider } from "@nestjs/common";
 type E2ETestOptions = {
   customProviders?: Provider[];
   enableActivityLogs?: boolean;
+  useDbProxy?: boolean;
 };
 
 export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provider[] = {}) {
@@ -50,6 +51,8 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     providers: [...customProviders],
   })
     .overrideProvider(DB)
+    .useValue(options.useDbProxy ? createDbProxy(db) : db)
+    .overrideProvider(DB_APP)
     .useValue(db)
     .overrideProvider(DB_ADMIN)
     .useValue(dbAdmin)

@@ -114,7 +114,7 @@ export const users = pgTable(
   {
     ...id,
     ...timestamps,
-    email: text("email").notNull().unique(),
+    email: text("email").notNull(),
     firstName: text("first_name").notNull(),
     lastName: text("last_name").notNull(),
     avatarReference: varchar("avatar_reference", { length: 500 }),
@@ -126,7 +126,9 @@ export const users = pgTable(
     }),
     tenantId,
   },
-  withTenantIdIndex("users"),
+  withTenantIdIndex("users", (table) => ({
+    emailUniqueIdx: uniqueIndex("users_tenant_id_email_unique_idx").on(table.tenantId, table.email),
+  })),
 );
 
 export const userDetails = pgTable(
