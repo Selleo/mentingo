@@ -9,6 +9,7 @@ import type { ApiErrorResponse } from "~/api/types";
 
 type CreateSupportSessionOptions = {
   tenantId: string;
+  targetUserId: string;
 };
 
 export function useCreateSupportSession() {
@@ -16,8 +17,11 @@ export function useCreateSupportSession() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ tenantId }: CreateSupportSessionOptions) => {
-      const { data } = await ApiClient.api.tenantsControllerCreateSupportSession(tenantId);
+    mutationFn: async ({ tenantId, targetUserId }: CreateSupportSessionOptions) => {
+      const { data } = await ApiClient.api.tenantsControllerCreateSupportSession(tenantId, {
+        targetUserId,
+      });
+
       return data;
     },
     onError: (error: AxiosError) => {

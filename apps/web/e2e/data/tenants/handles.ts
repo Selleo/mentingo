@@ -11,6 +11,11 @@ export const TENANTS_PAGE_HANDLES = {
   editButton: (tenantId: string) => `tenants-page-edit-button-${tenantId}`,
   SUPPORT_MODE_BUTTON_PREFIX: "tenants-page-support-mode-button-",
   supportModeButton: (tenantId: string) => `tenants-page-support-mode-button-${tenantId}`,
+  SUPPORT_MODE_POPOVER: "tenants-page-support-mode-popover",
+  SUPPORT_MODE_SEARCH: "tenants-page-support-mode-search",
+  SUPPORT_MODE_SUBMIT: "tenants-page-support-mode-submit",
+  SUPPORT_MODE_USER_OPTION_PREFIX: "tenants-page-support-mode-user-option-",
+  supportModeUserOption: (userId: string) => `tenants-page-support-mode-user-option-${userId}`,
 } as const;
 
 export const TENANT_FORM_HANDLES = {

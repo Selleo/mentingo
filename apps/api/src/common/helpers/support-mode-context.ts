@@ -8,7 +8,8 @@ export const isSupportModeSession = (
     currentUser?.isSupportMode &&
       currentUser.supportSessionId &&
       currentUser.originalUserId &&
-      currentUser.originalTenantId,
+      currentUser.originalTenantId &&
+      currentUser.targetUserId,
   );
 };
 

@@ -11,7 +11,9 @@ export type CurrentUserType = {
   supportSessionId?: UUIDType;
   supportExpiresAt?: string;
   originalUserId?: UUIDType;
+  originalUserEmail?: string;
   originalTenantId?: UUIDType;
+  targetUserId?: UUIDType;
   returnUrl?: string;
   iat?: number;
   exp?: number;
@@ -21,5 +23,7 @@ export type SupportModeCurrentUser = CurrentUserType & {
   isSupportMode: true;
   supportSessionId: UUIDType;
   originalUserId: UUIDType;
+  originalUserEmail?: string;
   originalTenantId: UUIDType;
+  targetUserId: UUIDType;
 };

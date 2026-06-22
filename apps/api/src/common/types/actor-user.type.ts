@@ -10,7 +10,9 @@ export type ActorUserType = {
   isSupportMode?: boolean;
   supportSessionId?: UUIDType;
   originalUserId?: UUIDType;
+  originalUserEmail?: string;
   originalTenantId?: UUIDType;
+  targetUserId?: UUIDType;
   iat?: number;
   exp?: number;
 };

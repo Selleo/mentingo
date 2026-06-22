@@ -4148,6 +4148,11 @@
       "message": "Sie befinden sich im Support-Modus",
       "timeLeft": "Noch {{minutes}} Min. übrig",
       "exit": "Verlassen Sie den Support-Modus"
+    },
+    "errors": {
+      "generic": "Support-Modus konnte nicht gestartet werden",
+      "targetAdminRequired": "Wählen Sie einen aktiven Administrator aus der ausgewählten Organisation",
+      "invalidSession": "Support-Sitzung ist ungültig"
     }
   },
   "superAdminTenantsView": {
@@ -4171,8 +4176,15 @@
       "edit": "Bearbeiten",
       "actions": {
         "title": "Aktionen",
-        "enterSupportMode": "Wechseln Sie in den Support-Modus"
+        "enterSupportMode": "Wechseln Sie in den Support-Modus",
+        "impersonateAdmin": "Admin imitieren"
       }
+    },
+    "supportModePopover": {
+      "searchPlaceholder": "Nach Name oder E-Mail suchen...",
+      "loading": "Administratoren werden geladen...",
+      "empty": "Keine aktiven Administratoren gefunden.",
+      "loadMore": "Weitere Benutzer laden"
     },
     "status": {
       "active": "Aktiv",

@@ -118,9 +118,14 @@ export class ActivityLogsService {
   private getActorFromPayload(actor: ActorUserType): ActorType {
     const roleSlugs = actor.roleSlugs.join(", ");
 
+    const isSupportMode = actor.isSupportMode;
+
+    const supportActorId = isSupportMode ? actor.originalUserId : undefined;
+    const supportActorEmail = isSupportMode ? actor.originalUserEmail : undefined;
+
     return {
-      actorId: actor.userId,
-      actorEmail: actor.email,
+      actorId: supportActorId ?? actor.userId,
+      actorEmail: supportActorEmail ?? actor.email,
       actorRole: roleSlugs,
     };
   }

@@ -4117,6 +4117,11 @@
       "message": "You are running in support mode",
       "timeLeft": "{{minutes}} min left",
       "exit": "Exit support mode"
+    },
+    "errors": {
+      "generic": "Could not start support mode",
+      "targetAdminRequired": "Choose an active admin user from the selected organization",
+      "invalidSession": "Support session is invalid"
     }
   },
   "superAdminTenantsView": {
@@ -4140,8 +4145,15 @@
       "edit": "Edit",
       "actions": {
         "title": "Actions",
-        "enterSupportMode": "Enter support mode"
+        "enterSupportMode": "Enter support mode",
+        "impersonateAdmin": "Impersonate admin"
       }
+    },
+    "supportModePopover": {
+      "searchPlaceholder": "Search by name or email...",
+      "loading": "Loading admin users...",
+      "empty": "No active admin users found.",
+      "loadMore": "Load more users"
     },
     "status": {
       "active": "Active",

@@ -4156,6 +4156,11 @@
       "message": "Jste spuštěni v režimu podpory",
       "timeLeft": "Zbývá {{minutes}} min",
       "exit": "Ukončete režim podpory"
+    },
+    "errors": {
+      "generic": "Režim podpory se nepodařilo spustit",
+      "targetAdminRequired": "Vyberte aktivního administrátora z vybrané organizace",
+      "invalidSession": "Relace podpory je neplatná"
     }
   },
   "superAdminTenantsView": {
@@ -4179,8 +4184,15 @@
       "edit": "Upravit",
       "actions": {
         "title": "Akce",
-        "enterSupportMode": "Vstupte do režimu podpory"
+        "enterSupportMode": "Vstupte do režimu podpory",
+        "impersonateAdmin": "Vydávat se za admina"
       }
+    },
+    "supportModePopover": {
+      "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
+      "loading": "Načítání administrátorů...",
+      "empty": "Nebyli nalezeni žádní aktivní administrátoři.",
+      "loadMore": "Načíst další uživatele"
     },
     "status": {
       "active": "Aktivní",

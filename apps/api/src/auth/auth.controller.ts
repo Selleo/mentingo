@@ -223,7 +223,7 @@ export class AuthController {
       supportSessionId: currentUser.supportSessionId,
       sourceUserId: currentUser.originalUserId,
       sourceTenantId: currentUser.originalTenantId,
-      targetUserId: currentUser.userId,
+      targetUserId: currentUser.targetUserId,
       targetTenantId: currentUser.tenantId,
       actor: currentUser,
     };
@@ -254,7 +254,6 @@ export class AuthController {
   }
 
   @Post("support/exit")
-  @RequirePermission(PERMISSIONS.TENANT_MANAGE)
   @Validate({
     response: baseResponse(Type.Object({ redirectUrl: Type.String() })),
   })

@@ -4156,6 +4156,11 @@
       "message": "Działasz w trybie wsparcia",
       "timeLeft": "Pozostało {{minutes}} min",
       "exit": "Wyjdź z trybu wsparcia"
+    },
+    "errors": {
+      "generic": "Nie można uruchomić trybu wsparcia",
+      "targetAdminRequired": "Wybierz aktywnego administratora z wybranej organizacji",
+      "invalidSession": "Sesja wsparcia jest nieprawidłowa"
     }
   },
   "superAdminTenantsView": {
@@ -4179,8 +4184,15 @@
       "edit": "Edytuj",
       "actions": {
         "title": "Akcje",
-        "enterSupportMode": "Wejdź w tryb wsparcia"
+        "enterSupportMode": "Wejdź w tryb wsparcia",
+        "impersonateAdmin": "Podszyj się pod admina"
       }
+    },
+    "supportModePopover": {
+      "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
+      "loading": "Ładowanie administratorów...",
+      "empty": "Nie znaleziono aktywnych administratorów.",
+      "loadMore": "Załaduj więcej użytkowników"
     },
     "status": {
       "active": "Aktywny",

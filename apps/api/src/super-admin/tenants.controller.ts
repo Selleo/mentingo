@@ -23,14 +23,23 @@ import { SupportModeService } from "src/support-mode/support-mode.service";
 
 import {
   createTenantSchema,
+  createSupportSessionResponseSchema,
+  createSupportSessionSchema,
+  supportAdminUsersSchema,
   tenantResponseSchema,
   tenantsListSchema,
   updateTenantSchema,
 } from "./schemas/tenant.schema";
 import { TenantsService } from "./tenants.service";
-import { CreateTenantBody, UpdateTenantBody } from "./types";
+import { CreateSupportSessionBody, CreateTenantBody, UpdateTenantBody } from "./types";
 
-import type { TenantResponse, TenantsListResponse } from "./types";
+import type {
+  CreateSupportSessionResponse,
+  SupportAdminUsersResponse,
+  TenantResponse,
+  TenantsListResponse,
+  ListSupportAdminUsersQuery,
+} from "./types";
 
 @Controller("super-admin/tenants")
 @UseGuards(PermissionsGuard, ManagingTenantAdminGuard)
@@ -104,21 +113,47 @@ export class TenantsController {
     return new BaseResponse(tenant);
   }
 
+  @Get(":id/support-users")
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: Type.String({ format: "uuid" }) },
+      { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
+      { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+    ],
+    response: paginatedResponse(supportAdminUsersSchema),
+  })
+  async findSupportUsers(
+    @Param("id") id: string,
+    @Query("page") page?: number,
+    @Query("perPage") perPage?: number,
+    @Query("search") search?: string,
+  ): Promise<PaginatedResponse<SupportAdminUsersResponse>> {
+    const query: ListSupportAdminUsersQuery = { page, perPage, search };
+    const users = await this.supportModeService.listSupportAdminUsers(id, query);
+
+    return new PaginatedResponse(users);
+  }
+
   @Post(":id/support-session")
   @Validate({
-    request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
-    response: baseResponse(
-      Type.Object({
-        redirectUrl: Type.String(),
-        expiresAt: Type.String(),
-      }),
-    ),
+    request: [
+      { type: "param", name: "id", schema: Type.String({ format: "uuid" }) },
+      { type: "body", schema: createSupportSessionSchema },
+    ],
+    response: baseResponse(createSupportSessionResponseSchema),
   })
   async createSupportSession(
     @Param("id") id: string,
+    @Body() body: CreateSupportSessionBody,
     @CurrentUser() currentUser: CurrentUserType,
-  ): Promise<BaseResponse<{ redirectUrl: string; expiresAt: string }>> {
-    const session = await this.supportModeService.createSupportSession(currentUser, id);
+  ): Promise<BaseResponse<CreateSupportSessionResponse>> {
+    const session = await this.supportModeService.createSupportSession(
+      currentUser,
+      id,
+      body.targetUserId,
+    );
+
     return new BaseResponse(session);
   }
 }

@@ -43,14 +43,15 @@ export default function TenantsPage() {
     () =>
       getTenantsColumns(
         t,
-        async (tenantId: string) => {
-          const response = await createSupportSession({ tenantId });
-          window.location.assign(response.data.redirectUrl);
+        async (tenantId: string, targetUserId: string) => {
+          const supportModeResponse = await createSupportSession({ tenantId, targetUserId });
+          window.location.assign(supportModeResponse.data.redirectUrl);
         },
         isCreatingSupportSession,
       ),
     [createSupportSession, isCreatingSupportSession, t],
   );
+
   const filters = useMemo<FilterConfig[]>(
     () => [
       {

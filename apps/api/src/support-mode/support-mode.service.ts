@@ -10,28 +10,60 @@ import { ConfigService } from "@nestjs/config";
 import { SUPPORT_SESSION_STATUSES, TENANT_STATUSES } from "@repo/shared";
 import { nanoid } from "nanoid";
 
+import { processInBatches } from "src/common/utils/processInBatches";
+import { FileService } from "src/file/file.service";
+
 import { SupportModeRepository } from "./support-mode.repository";
 
-import type { CreateSupportSessionResult, SupportSession } from "./support-mode.types";
+import type {
+  CreateSupportSessionResult,
+  ListSupportAdminUsersQuery,
+  SupportAdminUser,
+  SupportAdminUserRecord,
+  SupportSession,
+} from "./support-mode.types";
+import type { PaginatedResponse } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class SupportModeService {
+  private static readonly SUPPORT_ADMIN_USER_MAPPING_BATCH_SIZE = 10;
   private static readonly GRANT_TTL_MS = 60 * 1000;
   private static readonly SESSION_TTL_MS = 60 * 60 * 1000;
 
   constructor(
     private readonly supportModeRepository: SupportModeRepository,
     private readonly configService: ConfigService,
+    private readonly fileService: FileService,
   ) {}
+
+  async listSupportAdminUsers(
+    tenantId: string,
+    { page = 1, perPage = 20, search }: ListSupportAdminUsersQuery,
+  ): Promise<PaginatedResponse<SupportAdminUser[]>> {
+    const [records, totalItems] = await Promise.all([
+      this.supportModeRepository.findSupportAdminUsers({ tenantId, page, perPage, search }),
+      this.supportModeRepository.countSupportAdminUsers({ tenantId, search }),
+    ]);
+
+    const data = await this.toSupportAdminUsers(records);
+    const pagination = { page, perPage, totalItems };
+
+    return {
+      data,
+      pagination,
+    };
+  }
 
   async createSupportSession(
     requestingUser: CurrentUserType,
     targetTenantId: string,
+    targetUserId: string,
   ): Promise<CreateSupportSessionResult> {
-    const [originalTenant, targetTenant] = await Promise.all([
+    const [originalTenant, targetTenant, targetUser] = await Promise.all([
       this.supportModeRepository.findTenantById(requestingUser.tenantId),
       this.supportModeRepository.findTenantById(targetTenantId),
+      this.supportModeRepository.findSupportAdminUserById(targetTenantId, targetUserId),
     ]);
 
     if (!originalTenant || !targetTenant)
@@ -42,6 +74,8 @@ export class SupportModeService {
 
     if (targetTenant.status !== TENANT_STATUSES.ACTIVE)
       throw new ForbiddenException("tenant.error.inactive");
+
+    if (!targetUser) throw new BadRequestException("supportMode.errors.targetAdminRequired");
 
     const grantToken = nanoid(64);
     const hashedGrantToken = this.hashGrant(grantToken);
@@ -64,6 +98,7 @@ export class SupportModeService {
       originalUserId: requestingUser.userId,
       originalTenantId: requestingUser.tenantId,
       targetTenantId,
+      targetUserId,
       hashedGrantToken,
       grantExpiresAt: grantTokenExpiresAt,
       expiresAt: sessionExpiresAt,
@@ -120,5 +155,24 @@ export class SupportModeService {
     if (!secret) throw new UnauthorizedException("supportMode.errors.misconfiguredSecret");
 
     return createHmac("sha256", secret).update(grantToken, "utf8").digest("hex");
+  }
+
+  private async toSupportAdminUsers(
+    records: SupportAdminUserRecord[],
+  ): Promise<SupportAdminUser[]> {
+    return processInBatches(records, (record) => this.toSupportAdminUser(record), {
+      batchSize: SupportModeService.SUPPORT_ADMIN_USER_MAPPING_BATCH_SIZE,
+    });
+  }
+
+  private async toSupportAdminUser(record: SupportAdminUserRecord): Promise<SupportAdminUser> {
+    const { avatarReference, ...user } = record;
+
+    return {
+      ...user,
+      profilePictureUrl: avatarReference
+        ? await this.fileService.getFileUrl(avatarReference)
+        : null,
+    };
   }
 }
