@@ -1,12 +1,14 @@
 import { TabsList } from "@radix-ui/react-tabs";
 import { PERMISSIONS } from "@repo/shared";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
 
 import { useCourseAverageScorePerQuiz } from "~/api/queries/admin/useCourseAverageScorePerQuiz";
 import { useCourseStatisticsFilter } from "~/api/queries/admin/useCourseLearningTimeStatisticsFilterOptions";
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
+import { useCourseStudentsAiMentorResults } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Select,
@@ -37,22 +39,18 @@ import {
   CourseStudentsQuizResultsTable,
 } from "./components";
 import { CourseStudentsAiMentorResultsTable } from "./components/CourseStudentsAiMentorResults";
+import {
+  CourseAdminStatisticsTabs,
+  getVisibleCourseStatisticsTabs,
+} from "./utils/courseAdminStatisticsTabs";
 
+import type { CourseAdminStatisticsTab } from "./utils/courseAdminStatisticsTabs";
 import type { GetCourseResponse } from "~/api/generated-api";
 import type { CourseLearningTimeFilterQuery } from "~/api/queries/admin/useCourseLearningTimeStatistics";
 import type { CourseStatisticsParams } from "~/api/queries/admin/useCourseStatistics";
 import type { CourseStudentsAiMentorResultsQueryParams } from "~/api/queries/admin/useCourseStudentsAiMentorResults";
 import type { CourseStudentsProgressQueryParams } from "~/api/queries/admin/useCourseStudentsProgress";
 import type { CourseStudentsQuizResultsQueryParams } from "~/api/queries/admin/useCourseStudentsQuizResults";
-
-const StatisticsTabs = {
-  progress: "progress",
-  quizResults: "quizResults",
-  aiMentorResults: "aiMentorResults",
-  learningTime: "learningTime",
-} as const;
-
-type AdminCourseStatisticsTab = (typeof StatisticsTabs)[keyof typeof StatisticsTabs];
 
 interface CourseAdminStatisticsProps {
   course?: GetCourseResponse["data"];
@@ -85,7 +83,9 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
   const [courseStatisticsParams, setCourseStatisticsParams] = useState<CourseStatisticsParams>({});
 
-  const [activeTab, setActiveTab] = useState<AdminCourseStatisticsTab>("progress");
+  const [activeTab, setActiveTab] = useState<CourseAdminStatisticsTab>(
+    CourseAdminStatisticsTabs.progress,
+  );
 
   const [progressSearchParams, setProgressSearchParams] =
     useState<CourseStudentsProgressQueryParams>({});
@@ -142,6 +142,32 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
     enabled: canManageCourses,
     query: courseStatisticsParams,
   });
+  const { data: aiConfigured } = useAIConfigured();
+
+  const isAIConfigured = aiConfigured?.enabled === true;
+
+  const { data: aiMentorResultsPreview } = useCourseStudentsAiMentorResults({
+    id: courseId,
+    enabled: canManageCourses && Boolean(courseId),
+    query: {
+      page: 1,
+      perPage: 1,
+      language,
+    },
+  });
+
+  const hasAiMentorResults = (aiMentorResultsPreview?.pagination.totalItems ?? 0) > 0;
+
+  const visibleStatisticsTabs = useMemo(
+    () => getVisibleCourseStatisticsTabs({ hasAiMentorResults, isAIConfigured }),
+    [hasAiMentorResults, isAIConfigured],
+  );
+
+  useEffect(() => {
+    if (!visibleStatisticsTabs.includes(activeTab)) {
+      setActiveTab(CourseAdminStatisticsTabs.progress);
+    }
+  }, [activeTab, visibleStatisticsTabs]);
 
   const filterConfig: FilterConfig[] = [
     {
@@ -403,7 +429,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                     .otherwise(() => null)}
                 </div>
                 <TabsList className="h-[42px] rounded-sm p-1 bg-primary-50 flex items-center">
-                  {Object.values(StatisticsTabs).map((tab) => (
+                  {visibleStatisticsTabs.map((tab) => (
                     <TabsTrigger
                       key={tab}
                       data-testid={
@@ -424,7 +450,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                 </TabsList>
               </div>
             </div>
-            <TabsContent value="progress">
+            <TabsContent value={CourseAdminStatisticsTabs.progress}>
               <CourseStudentsProgressTable
                 courseId={courseId}
                 lessonCount={lessonCount}
@@ -432,7 +458,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                 onFilterChange={handleProgressFilterChange}
               />
             </TabsContent>
-            <TabsContent value="quizResults">
+            <TabsContent value={CourseAdminStatisticsTabs.quizResults}>
               <CourseStudentsQuizResultsTable
                 courseId={courseId}
                 course={course}
@@ -440,15 +466,17 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
                 onFilterChange={handleQuizFilterChange}
               />
             </TabsContent>
-            <TabsContent value="aiMentorResults">
-              <CourseStudentsAiMentorResultsTable
-                courseId={courseId}
-                course={course}
-                searchParams={aiMentorSearchParams}
-                onFilterChange={handleAiMentorFilterChange}
-              />
-            </TabsContent>
-            <TabsContent value="learningTime">
+            {visibleStatisticsTabs.includes(CourseAdminStatisticsTabs.aiMentorResults) && (
+              <TabsContent value={CourseAdminStatisticsTabs.aiMentorResults}>
+                <CourseStudentsAiMentorResultsTable
+                  courseId={courseId}
+                  course={course}
+                  searchParams={aiMentorSearchParams}
+                  onFilterChange={handleAiMentorFilterChange}
+                />
+              </TabsContent>
+            )}
+            <TabsContent value={CourseAdminStatisticsTabs.learningTime}>
               <CourseStudentsLearningTimeTable
                 courseId={courseId}
                 searchParams={learningTimeParams}
