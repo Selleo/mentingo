@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { syncLessonVideoCompletionQueries, useLessonVideoProgress } from "~/api/mutations";
 
-import { useVideoCoverageTracker } from "../useVideoCoverageTracker";
+import { getVideoResumeTimeSeconds, useVideoCoverageTracker } from "../useVideoCoverageTracker";
 
 import type { VideoCoverageRange } from "../videoCoverage.types";
 import type videojs from "video.js";
@@ -238,5 +238,50 @@ describe("useVideoCoverageTracker", () => {
     });
 
     await waitFor(() => expect(syncLessonCompletionQueries).toHaveBeenCalledWith("lesson-id"));
+  });
+});
+
+describe("getVideoResumeTimeSeconds", () => {
+  it("returns the end of the first watched range when the video has an unwatched gap", () => {
+    expect(
+      getVideoResumeTimeSeconds({
+        watchedRanges: [
+          [0, 50],
+          [60, 100],
+        ],
+        durationSeconds: 100,
+        isWatched: false,
+      }),
+    ).toBe(50);
+  });
+
+  it("starts from the beginning when the first watched range reaches the end", () => {
+    expect(
+      getVideoResumeTimeSeconds({
+        watchedRanges: [[0, 100]],
+        durationSeconds: 100,
+        isWatched: false,
+      }),
+    ).toBe(0);
+  });
+
+  it("starts from the beginning when the video is already watched", () => {
+    expect(
+      getVideoResumeTimeSeconds({
+        watchedRanges: [[0, 50]],
+        durationSeconds: 100,
+        isWatched: true,
+      }),
+    ).toBe(0);
+  });
+
+  it("starts from the beginning when there are no watched ranges", () => {
+    expect(
+      getVideoResumeTimeSeconds({
+        watchedRanges: [],
+        durationSeconds: 100,
+        isWatched: false,
+      }),
+    ).toBe(0);
   });
 });

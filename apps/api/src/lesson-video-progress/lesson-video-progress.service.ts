@@ -68,9 +68,6 @@ export class LessonVideoProgressService {
       if (!context.resourceContentType?.startsWith("video/")) {
         throw new BadRequestException(LESSON_VIDEO_PROGRESS_ERROR_KEYS.INVALID_RESOURCE_TYPE);
       }
-      if (!context.videoCompletionTrackingEnabled) {
-        throw new BadRequestException(LESSON_VIDEO_PROGRESS_ERROR_KEYS.TRACKING_DISABLED);
-      }
 
       const lessonProgressAccess = await this.studentLessonProgressService.getLessonProgressAccess(
         body.lessonId,
@@ -141,7 +138,9 @@ export class LessonVideoProgressService {
       }
 
       const watchedProgress =
-        !progress.isWatched && progress.coveragePercent >= VIDEO_COMPLETION_COVERAGE_THRESHOLD
+        context.videoCompletionTrackingEnabled &&
+        !progress.isWatched &&
+        progress.coveragePercent >= VIDEO_COMPLETION_COVERAGE_THRESHOLD
           ? await this.lessonVideoProgressRepository.markWatched(
               {
                 studentId: currentUser.userId,
@@ -152,17 +151,20 @@ export class LessonVideoProgressService {
             )
           : progress;
 
-      const requiredVideos =
-        await this.lessonVideoProgressRepository.getRequiredVideoProgressForLesson(
-          {
-            lessonId: body.lessonId,
-            studentId: currentUser.userId,
-          },
-          trx,
-        );
+      const requiredVideos = context.videoCompletionTrackingEnabled
+        ? await this.lessonVideoProgressRepository.getRequiredVideoProgressForLesson(
+            {
+              lessonId: body.lessonId,
+              studentId: currentUser.userId,
+            },
+            trx,
+          )
+        : [];
 
       const lessonCompleted =
-        requiredVideos.length > 0 && requiredVideos.every((video) => video.isWatched);
+        context.videoCompletionTrackingEnabled &&
+        requiredVideos.length > 0 &&
+        requiredVideos.every((video) => video.isWatched);
 
       if (lessonCompleted && !context.lessonCompleted) {
         await this.studentLessonProgressService.markLessonAsCompleted({

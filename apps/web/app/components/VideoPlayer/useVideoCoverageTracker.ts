@@ -19,6 +19,7 @@ type VideoJSType = ReturnType<typeof videojs>;
 const DEFAULT_BUCKET_SIZE_SECONDS = 1;
 const DEFAULT_FLUSH_INTERVAL_MS = 15_000;
 const MEDIA_DELTA_TOLERANCE_SECONDS = 1.5;
+const VIDEO_RESUME_END_TOLERANCE_SECONDS = 1;
 
 type FlushOptions = {
   syncCompletionQueries?: boolean;
@@ -47,6 +48,29 @@ const getInitialSnapshot = ({
   durationSeconds: initialDurationSeconds ?? null,
   bucketSizeSeconds: initialBucketSizeSeconds ?? DEFAULT_BUCKET_SIZE_SECONDS,
 });
+
+export const getVideoResumeTimeSeconds = ({
+  watchedRanges,
+  durationSeconds,
+  isWatched,
+}: Pick<VideoCoverageSnapshot, "watchedRanges" | "durationSeconds" | "isWatched">) => {
+  if (isWatched) return 0;
+
+  const [firstRange] = mergeVideoCoverageRanges(watchedRanges);
+  if (!firstRange) return 0;
+
+  const [, resumeTimeSeconds] = firstRange;
+
+  if (
+    typeof durationSeconds === "number" &&
+    Number.isFinite(durationSeconds) &&
+    resumeTimeSeconds >= Math.max(0, durationSeconds - VIDEO_RESUME_END_TOLERANCE_SECONDS)
+  ) {
+    return 0;
+  }
+
+  return Math.max(0, resumeTimeSeconds);
+};
 
 export const useVideoCoverageTracker = (
   player: VideoJSType | null,
@@ -318,10 +342,12 @@ export const useVideoCoverageTracker = (
     () => Math.round(snapshot.coveragePercent * 100),
     [snapshot.coveragePercent],
   );
+  const resumeTimeSeconds = useMemo(() => getVideoResumeTimeSeconds(snapshot), [snapshot]);
 
   return {
     snapshot,
     coveragePercentLabel,
+    resumeTimeSeconds,
     flush,
   };
 };

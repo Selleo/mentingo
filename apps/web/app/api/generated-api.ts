@@ -2990,6 +2990,7 @@ export interface GetLessonByIdResponse {
     hasOnlyVideo?: boolean;
     hasVideo?: boolean;
     hasTrackedVideo?: boolean;
+    videoCompletionTrackingEnabled?: boolean;
     hasAutoplayTrigger?: boolean;
     videos?: string[];
     isQuizFeedbackRedacted?: boolean;

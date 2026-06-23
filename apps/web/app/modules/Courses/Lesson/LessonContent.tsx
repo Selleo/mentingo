@@ -59,16 +59,18 @@ export const LessonContent = ({
   const { data: user } = useCurrentUser();
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { sequenceEnabled } = useLessonsSequence(course.id);
-  const videoCoverageTrackingEnabled = Boolean(
+  const videoProgressPersistenceEnabled = Boolean(
     lesson.hasTrackedVideo && isEffectiveStudentExperience && !isPreviewMode,
   );
+  const videoCompletionTrackingEnabled = Boolean(lesson.videoCompletionTrackingEnabled);
   const videoCoverageTracking = useMemo(
     () => ({
-      enabled: videoCoverageTrackingEnabled,
+      enabled: videoProgressPersistenceEnabled,
+      showCoverageMarkers: videoProgressPersistenceEnabled && videoCompletionTrackingEnabled,
       lessonId: lesson.id,
       language,
     }),
-    [language, lesson.id, videoCoverageTrackingEnabled],
+    [language, lesson.id, videoCompletionTrackingEnabled, videoProgressPersistenceEnabled],
   );
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>

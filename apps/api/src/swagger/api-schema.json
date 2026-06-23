@@ -29490,6 +29490,9 @@
               "hasTrackedVideo": {
                 "type": "boolean"
               },
+              "videoCompletionTrackingEnabled": {
+                "type": "boolean"
+              },
               "hasAutoplayTrigger": {
                 "type": "boolean"
               },

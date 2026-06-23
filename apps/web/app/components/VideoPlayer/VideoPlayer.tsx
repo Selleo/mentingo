@@ -84,6 +84,7 @@ export const VideoPlayer = ({
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSType | null>(null);
   const lastSourceRef = useRef<string | null>(null);
+  const resumeAppliedSourceRef = useRef<string | null>(null);
   const onAspectRatioChangeRef = useRef(onAspectRatioChange);
   const onEndedRef = useRef(onEnded);
   const controlsVisibilityTimeoutRef = useRef<number | null>(null);
@@ -176,13 +177,14 @@ export const VideoPlayer = ({
     if (!player || !url) return;
 
     const sourceTypes = getSourceTypes(url, type);
-    const sourceKey = `${url}::${sourceTypes.join("|")}`;
+    const sourceKey = `${url}::${coverageTracking?.resourceEntityId ?? ""}::${sourceTypes.join("|")}`;
 
     if (lastSourceRef.current === sourceKey) {
       return;
     }
 
     lastSourceRef.current = sourceKey;
+    resumeAppliedSourceRef.current = null;
 
     let attemptIndex = 0;
 
@@ -217,7 +219,39 @@ export const VideoPlayer = ({
     return () => {
       player.off("error", onError);
     };
-  }, [autoPlay, url, type]);
+  }, [autoPlay, coverageTracking?.resourceEntityId, url, type]);
+
+  useEffect(() => {
+    const sourceKey = lastSourceRef.current;
+    if (!player || !coverageTracking?.enabled || !sourceKey) return;
+
+    if (resumeAppliedSourceRef.current === sourceKey) return;
+
+    const applyResumeTime = () => {
+      const duration = player.duration();
+      const resumeTimeSeconds =
+        typeof duration === "number" && Number.isFinite(duration) && duration > 0
+          ? Math.min(coverage.resumeTimeSeconds, Math.max(0, duration - 0.5))
+          : coverage.resumeTimeSeconds;
+
+      if (resumeTimeSeconds > 0) {
+        player.currentTime(resumeTimeSeconds);
+      }
+
+      resumeAppliedSourceRef.current = sourceKey;
+    };
+
+    if (player.readyState() >= 1) {
+      applyResumeTime();
+      return;
+    }
+
+    player.one("loadedmetadata", applyResumeTime);
+
+    return () => {
+      player.off("loadedmetadata", applyResumeTime);
+    };
+  }, [coverage.resumeTimeSeconds, coverageTracking?.enabled, player]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -257,7 +291,7 @@ export const VideoPlayer = ({
   }, [clearControlsVisibilityTimer]);
 
   useEffect(() => {
-    if (!player || !coverageTracking?.enabled) return;
+    if (!player || !coverageTracking?.showCoverageMarkers) return;
 
     const holder = player.el()?.querySelector(".vjs-progress-holder") as HTMLElement | null;
     if (!holder) return;
@@ -289,7 +323,7 @@ export const VideoPlayer = ({
   }, [
     coverage.snapshot.durationSeconds,
     coverage.snapshot.watchedRanges,
-    coverageTracking?.enabled,
+    coverageTracking?.showCoverageMarkers,
     player,
   ]);
 

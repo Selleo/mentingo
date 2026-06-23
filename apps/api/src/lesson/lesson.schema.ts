@@ -233,6 +233,7 @@ export const lessonShowSchema = Type.Object({
   hasOnlyVideo: Type.Optional(Type.Boolean()),
   hasVideo: Type.Optional(Type.Boolean()),
   hasTrackedVideo: Type.Optional(Type.Boolean()),
+  videoCompletionTrackingEnabled: Type.Optional(Type.Boolean()),
   hasAutoplayTrigger: Type.Optional(Type.Boolean()),
   videos: Type.Optional(Type.Array(Type.String())),
   isQuizFeedbackRedacted: Type.Optional(Type.Boolean()),

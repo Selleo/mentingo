@@ -4,6 +4,7 @@ export type { VideoCoverageRange };
 
 export type VideoCoverageTrackingOptions = {
   enabled: boolean;
+  showCoverageMarkers?: boolean;
   lessonId?: string;
   resourceEntityId?: string | null;
   language?: SupportedLanguages;
