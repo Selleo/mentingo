@@ -1,6 +1,7 @@
 .mentingo-video-js {
   --vjs-theme-primary: var(--primary);
   --vjs-theme-contrast: var(--contrast, #fff);
+  --vjs-watched-marker: color-mix(in srgb, var(--primary) 72%, var(--vjs-theme-contrast) 28%);
   --vjs-surface: color-mix(in srgb, var(--ring) 40%, #000 80%);
   --vjs-border: color-mix(in srgb, var(--vjs-theme-contrast) 12%, transparent);
   --vjs-track: color-mix(in srgb, var(--vjs-theme-contrast) 20%, transparent);
@@ -11,6 +12,14 @@
   border-radius: 0;
   overflow: hidden;
   background: #000;
+}
+
+.mentingo-video-js,
+.mentingo-video-js.video-js,
+[data-vjs-player]:has(.mentingo-video-js),
+.mentingo-video-js .vjs-poster,
+.mentingo-video-js .vjs-tech {
+  border-radius: 0 !important;
 }
 
 .mentingo-video-js .vjs-poster {
@@ -153,20 +162,43 @@
 
 .mentingo-video-js .vjs-progress-control .vjs-progress-holder {
   height: 0.25rem;
-  border-radius: 9999px;
+  border-radius: 0.125rem;
   margin: 0;
   background: var(--vjs-track);
+  overflow: hidden;
+  position: relative;
+}
+
+.mentingo-video-js .mentingo-video-coverage-markers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.mentingo-video-js .mentingo-video-coverage-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 0.125rem;
+  background: var(--vjs-watched-marker);
 }
 
 .mentingo-video-js .vjs-slider {
   background: var(--vjs-track);
-  border-radius: 9999px;
+  border-radius: 0.125rem;
 }
 
-.mentingo-video-js .vjs-play-progress,
+.mentingo-video-js .vjs-play-progress {
+  background: var(--vjs-theme-primary);
+  border-radius: 0.125rem;
+  z-index: 1;
+}
+
 .mentingo-video-js .vjs-volume-level {
   background: var(--vjs-theme-primary);
-  border-radius: 9999px;
+  border-radius: 0.125rem;
+  z-index: 1;
 }
 
 .mentingo-video-js .vjs-load-progress,

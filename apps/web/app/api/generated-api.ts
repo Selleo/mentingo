@@ -2226,6 +2226,7 @@ export interface UpdateHasCertificateResponse {
 export interface UpdateCourseSettingsBody {
   lessonSequenceEnabled?: boolean;
   quizFeedbackEnabled?: boolean;
+  videoCompletionTrackingEnabled?: boolean;
   certificateFontColor?: string;
   certificateValidity?:
     | (
@@ -2260,6 +2261,8 @@ export interface GetCourseSettingsResponse {
     lessonSequenceEnabled: boolean;
     /** @default true */
     quizFeedbackEnabled: boolean;
+    /** @default true */
+    videoCompletionTrackingEnabled?: boolean;
     /** @default null */
     certificateSignature: string | null;
     /** @default null */
@@ -2986,6 +2989,7 @@ export interface GetLessonByIdResponse {
     }[];
     hasOnlyVideo?: boolean;
     hasVideo?: boolean;
+    hasTrackedVideo?: boolean;
     hasAutoplayTrigger?: boolean;
     videos?: string[];
     isQuizFeedbackRedacted?: boolean;
@@ -4715,6 +4719,45 @@ export interface GetEnvKeyResponse {
   data: {
     name: string;
     value: string;
+  };
+}
+
+export interface UpsertProgressBody {
+  /** @format uuid */
+  lessonId: string;
+  /** @format uuid */
+  resourceEntityId: string;
+  /** @min 1 */
+  durationSeconds: number;
+  /**
+   * @min 1
+   * @default 1
+   */
+  bucketSize?: number;
+  watchedRanges: [number, number][];
+  /**
+   * @min 0
+   * @default 0
+   */
+  activeWatchSecondsDelta?: number;
+  /** @default "en" */
+  language?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface UpsertProgressResponse {
+  data: {
+    /** @format uuid */
+    lessonId: string;
+    /** @format uuid */
+    resourceEntityId: string;
+    durationSeconds: number;
+    bucketSizeSeconds: number;
+    coveredBucketCount: number;
+    coveragePercent: number;
+    watchedRanges: [number, number][];
+    isWatched: boolean;
+    watchedAt: string | null;
+    lessonCompleted: boolean;
   };
 }
 
@@ -11676,6 +11719,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetEnvKeyResponse, any>({
         path: `/api/env/${envName}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name LessonVideoProgressControllerUpsertProgress
+     * @request POST:/api/lesson-video-progress
+     */
+    lessonVideoProgressControllerUpsertProgress: (
+      data: UpsertProgressBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpsertProgressResponse, any>({
+        path: `/api/lesson-video-progress`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

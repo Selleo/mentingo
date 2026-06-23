@@ -55,7 +55,7 @@ import {
 } from "src/learning-path/types/learning-path-settings.types";
 import { safeJsonb } from "src/utils/safe-jsonb";
 
-import { tsvector } from "./custom-types";
+import { int4multirange, tsvector } from "./custom-types";
 import {
   archived,
   availableLocales,
@@ -1906,6 +1906,51 @@ export const resourceEntity = pgTable(
       table.relationshipType,
     ),
     unq: unique().on(table.resourceId, table.entityId, table.entityType, table.relationshipType),
+  })),
+);
+
+export const lessonVideoProgress = pgTable(
+  "lesson_video_progress",
+  {
+    ...id,
+    ...timestamps,
+    studentId: uuid("student_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    lessonId: uuid("lesson_id")
+      .references(() => lessons.id, { onDelete: "cascade" })
+      .notNull(),
+    resourceEntityId: uuid("resource_entity_id")
+      .references(() => resourceEntity.id, { onDelete: "cascade" })
+      .notNull(),
+    durationSeconds: integer("duration_seconds").notNull(),
+    bucketSizeSeconds: integer("bucket_size_seconds").default(1).notNull(),
+    watchedRanges: int4multirange("watched_ranges")
+      .default(sql`'{}'::int4multirange`)
+      .notNull(),
+    coveredBucketCount: integer("covered_bucket_count").default(0).notNull(),
+    coveragePercent: numeric("coverage_percent", { precision: 5, scale: 4 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    activeWatchSeconds: numeric("active_watch_seconds", { precision: 10, scale: 2 })
+      .$type<number>()
+      .default(0)
+      .notNull(),
+    isWatched: boolean("is_watched").default(false).notNull(),
+    watchedAt: timestamp("watched_at", {
+      mode: "string",
+      withTimezone: true,
+      precision: 3,
+    }),
+    tenantId,
+  },
+  withTenantIdIndex("lesson_video_progress", (table) => ({
+    lessonIdx: index("lesson_video_progress_lesson_idx").on(table.lessonId),
+    resourceEntityIdx: index("lesson_video_progress_resource_entity_idx").on(
+      table.resourceEntityId,
+    ),
+    unq: unique().on(table.studentId, table.lessonId, table.resourceEntityId),
   })),
 );
 

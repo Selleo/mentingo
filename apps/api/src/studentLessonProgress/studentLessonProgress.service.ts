@@ -15,7 +15,7 @@ import { canTrackLessonProgress } from "src/common/utils/lessonLearningAccess";
 import { CourseCompletedEvent, LessonCompletedEvent } from "src/events";
 import { UserChapterFinishedEvent } from "src/events/user/user-chapter-finished.event";
 import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.event";
-import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -41,6 +41,7 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import {
   STUDENT_LESSON_PROGRESS_MESSAGE_KEYS,
+  type LessonProgressAccessResult,
   type MarkLessonAsIncompleteParams,
   type MarkLessonProgressResult,
 } from "./studentLessonProgress.type";
@@ -61,6 +62,40 @@ export class StudentLessonProgressService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly localizationService: LocalizationService,
   ) {}
+
+  async getLessonProgressAccess(
+    id: UUIDType,
+    studentId: UUIDType,
+    userPermissions: PermissionKey[] = [],
+    dbInstance: DatabasePg = this.db,
+  ): Promise<LessonProgressAccessResult | null> {
+    const [accessCourseLessonWithDetails] = await this.checkLessonAssignment(
+      id,
+      studentId,
+      dbInstance,
+    );
+
+    if (!accessCourseLessonWithDetails) return null;
+
+    const isLearningModeActive = await this.resolveLearningModeStatusByPermissions(
+      id,
+      studentId,
+      userPermissions,
+      dbInstance,
+    );
+
+    const canTrackProgress = this.canUseLearnerProgressByPermissions(userPermissions, {
+      hasEnrollment: Boolean(accessCourseLessonWithDetails.isAssigned),
+      isCourseAuthor: accessCourseLessonWithDetails.isCourseAuthor,
+      isLearningModeActive,
+    });
+
+    return {
+      ...accessCourseLessonWithDetails,
+      isLearningModeActive,
+      canTrackProgress,
+    };
+  }
 
   async markLessonAsCompleted({
     id,
@@ -840,7 +875,7 @@ export class StudentLessonProgressService {
         isFreemium: sql<boolean>`CASE WHEN ${chapters.isFreemium} THEN TRUE ELSE FALSE END`,
         attempts: sql<number>`${studentLessonProgress.attempts}`,
         lessonIsCompleted: sql<boolean>`CASE WHEN ${studentLessonProgress.completedAt} IS NOT NULL THEN TRUE ELSE FALSE END`,
-        lessonType: lessons.type,
+        lessonType: sql<LessonTypes>`${lessons.type}`,
         chapterId: sql<string>`${chapters.id}`,
         courseId: sql<string>`${chapters.courseId}`,
         isCourseAuthor: sql<boolean>`${courses.authorId} = ${userId}`,

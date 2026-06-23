@@ -93,6 +93,8 @@
     "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji",
     "quizFeedbackUpdatedSuccessfully": "Opcja \"Feedback po quizie\" została pomyślnie zaktualizowana",
     "quizFeedbackUpdateFailed": "Nie udało się zaktualizować opcji \"Feedback po quizie\"",
+    "videoCompletionTrackingUpdatedSuccessfully": "Opcja \"Śledzenie ukończenia wideo\" została pomyślnie zaktualizowana",
+    "videoCompletionTrackingUpdateFailed": "Nie udało się zaktualizować opcji \"Śledzenie ukończenia wideo\"",
     "settingsUpdatedSuccessfully": "Ustawienia zostały pomyślnie zaktualizowane",
     "settingsUpdateFailed": "Nie udało się zaktualizować ustawień"
   },
@@ -2019,7 +2021,8 @@
       "featureUnavailable": {
         "curriculum": "Edycja programu nie jest dostępna dla kursów SCORM.",
         "lessonSequence": "Wymuszanie kolejności lekcji nie jest dostępne dla kursów SCORM.",
-        "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM."
+        "quizFeedback": "Ustawienia informacji zwrotnej quizu nie są dostępne dla kursów SCORM.",
+        "videoCompletionTracking": "Śledzenie ukończenia wideo nie jest dostępne dla kursów SCORM."
       },
       "notFound": {
         "course": "Nie znaleziono kursu.",
@@ -2176,6 +2179,8 @@
         "requireSequentialLessons": "Wymagaj ukończenia lekcji w kolejności",
         "enableQuizFeedback": "Feedback po quizie",
         "enableQuizFeedbackDescription": "Po przesłaniu quizu student zobaczy, które odpowiedzi były poprawne, niepoprawne lub pominięte.",
+        "enableVideoCompletionTracking": "Śledzenie ukończenia wideo",
+        "enableVideoCompletionTrackingDescription": "Uczestnik musi obejrzeć co najmniej 90% każdego filmu w lekcji, aby lekcja została oznaczona jako ukończona.",
         "fallbackLanguageWarningTitle": "Uwaga: brakujące tłumaczenia",
         "fallbackLanguageWarningDescription": "Niektóre pola w tej wersji językowej są puste. W tych miejscach system wyświetli studentom treści z języka domyślnego, dopóki nie dodasz tłumaczeń.",
         "baseLanguageTooltip": "Nie można zmienić ani usunąć tego języka. Jest on domyślny i zawsze będzie częścią kursu."
@@ -2951,6 +2956,16 @@
     "videoProcessing": {
       "title": "Wideo jest przetwarzane",
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
+    },
+    "videoProgress": {
+      "errors": {
+        "resourceNotFound": "Nie udało się zapisać postępu wideo dla tej lekcji.",
+        "unsupportedLessonType": "Postęp wideo jest dostępny tylko dla lekcji z treścią.",
+        "unsupportedBucketSize": "Postęp wideo używa nieobsługiwanego interwału śledzenia.",
+        "invalidResourceType": "Ten zasób nie może być śledzony jako wideo lekcji.",
+        "trackingDisabled": "Śledzenie ukończenia wideo jest wyłączone dla tego kursu.",
+        "accessDenied": "Nie masz dostępu do aktualizacji postępu wideo dla tej lekcji."
+      }
     },
     "playNext": {
       "title": "Następnie",

@@ -47,6 +47,7 @@ import { uploadKey, videoKey } from "src/file/utils/bunnyCacheKeys";
 import { isEmptyObject, normalizeCellValue, normalizeHeader } from "src/file/utils/excel.utils";
 import getChecksum from "src/file/utils/getChecksum";
 import { S3Service } from "src/s3/s3.service";
+import { DB } from "src/storage/db/db.providers";
 import { resources, resourceEntity } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
@@ -85,6 +86,10 @@ import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
+  LocalizedResourceForEntity,
+  LocalizedResourceText,
+  RawResourceForEntity,
+  ResourceForEntity,
 } from "src/file/types/resource.types";
 import type { UploadFileResult } from "src/file/types/upload-file-result.type";
 
@@ -100,7 +105,7 @@ export class FileService {
     private readonly s3VideoProvider: S3VideoProvider,
     private readonly thumbnailService: ThumbnailService,
     private readonly imageVariantService: ImageVariantService,
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
     private readonly notificationGateway: VideoUploadNotificationGateway,
   ) {}
@@ -860,9 +865,20 @@ export class FileService {
   async getResourcesForEntity(
     entityId: UUIDType,
     entityType: EntityType,
+    relationshipType: string | undefined,
+    language: SupportedLanguages,
+  ): Promise<LocalizedResourceForEntity[]>;
+  async getResourcesForEntity(
+    entityId: UUIDType,
+    entityType: EntityType,
+    relationshipType?: string,
+  ): Promise<RawResourceForEntity[]>;
+  async getResourcesForEntity(
+    entityId: UUIDType,
+    entityType: EntityType,
     relationshipType?: string,
     language?: SupportedLanguages,
-  ) {
+  ): Promise<ResourceForEntity[]> {
     const conditions = [
       eq(resourceEntity.entityId, entityId),
       eq(resourceEntity.entityType, entityType),
@@ -870,17 +886,23 @@ export class FileService {
       relationshipType ? eq(resourceEntity.relationshipType, relationshipType) : null,
     ].filter((condition): condition is ReturnType<typeof eq> => Boolean(condition));
 
+    const tableColumns = getTableColumns(resources);
     const resourceSelect = language
       ? {
-          ...getTableColumns(resources),
-          title: sql`COALESCE(${resources.title}->>${language}::text,'')`,
-          description: sql`COALESCE(${resources.description}->>${language}::text,'')`,
+          ...tableColumns,
+          title: sql<string>`COALESCE(${resources.title}->>${language}::text,'')`,
+          description: sql<string>`COALESCE(${resources.description}->>${language}::text,'')`,
         }
-      : getTableColumns(resources);
+      : {
+          ...tableColumns,
+          title: sql<LocalizedResourceText>`${resources.title}`,
+          description: sql<LocalizedResourceText>`${resources.description}`,
+        };
 
     const results = await this.db
       .select({
         ...resourceSelect,
+        resourceEntityId: resourceEntity.id,
       })
       .from(resources)
       .innerJoin(resourceEntity, eq(resources.id, resourceEntity.resourceId))

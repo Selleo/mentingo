@@ -119,7 +119,11 @@ import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import { getSortOptions } from "../common/helpers/getSortOptions";
 
-import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "./constants";
+import {
+  LESSON_SEQUENCE_ENABLED,
+  QUIZ_FEEDBACK_ENABLED,
+  VIDEO_COMPLETION_TRACKING_ENABLED,
+} from "./constants";
 import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-reminders.constants";
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
@@ -1807,6 +1811,13 @@ export class CourseService {
       );
     }
 
+    if (settings.videoCompletionTrackingEnabled !== undefined) {
+      this.courseFeaturePolicyService.assertFeatureEnabled(
+        course.courseType,
+        COURSE_FEATURE.VIDEO_COMPLETION_TRACKING_SETTING,
+      );
+    }
+
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
       ENTITY_TYPE.COURSE,
       courseId,
@@ -1899,6 +1910,8 @@ export class CourseService {
 
     return {
       ...course.settings,
+      videoCompletionTrackingEnabled:
+        course.settings.videoCompletionTrackingEnabled ?? VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignatureUrl,
     };
   }
@@ -1967,6 +1980,7 @@ export class CourseService {
     const settings = sql`json_build_object(
       'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
       'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
+      'videoCompletionTrackingEnabled', ${isScormCourse ? false : VIDEO_COMPLETION_TRACKING_ENABLED}::boolean,
       'certificateSignature', NULL,
       'certificateFontColor', NULL,
       'certificateValidity', NULL

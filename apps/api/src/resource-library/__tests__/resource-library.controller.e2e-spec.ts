@@ -19,6 +19,7 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
+import { ResourceLibraryService } from "../resource-library.service";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -36,6 +37,7 @@ describe("ResourceLibraryController (e2e)", () => {
   let courseFactory: ReturnType<typeof createCourseFactory>;
   let chapterFactory: ReturnType<typeof createChapterFactory>;
   let articleFactory: ReturnType<typeof createArticleFactory>;
+  let resourceLibraryService: ResourceLibraryService;
 
   const password = "Password123!";
   const mockFileService = {
@@ -113,6 +115,7 @@ describe("ResourceLibraryController (e2e)", () => {
     courseFactory = createCourseFactory(db);
     chapterFactory = createChapterFactory(db);
     articleFactory = createArticleFactory(db);
+    resourceLibraryService = app.get(ResourceLibraryService);
   });
 
   afterEach(async () => {
@@ -318,6 +321,50 @@ describe("ResourceLibraryController (e2e)", () => {
         .where(eq(resourceEntity.resourceId, asset.id));
 
       expect(relationsAfterUnlink).toHaveLength(0);
+    });
+  });
+
+  describe("resource relation sync", () => {
+    it("preserves relations that are still referenced and removes stale relations", async () => {
+      const admin = await createAdmin();
+      const keptAsset = await createResource();
+      const staleAsset = await createResource();
+      const lesson = await createLesson(admin.id, {
+        description: `<p><img src="/api/lesson/lesson-resource/${keptAsset.id}" /></p>`,
+      });
+
+      const [keptRelation] = await db
+        .insert(resourceEntity)
+        .values({
+          resourceId: keptAsset.id,
+          entityId: lesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        })
+        .returning();
+
+      await db.insert(resourceEntity).values({
+        resourceId: staleAsset.id,
+        entityId: lesson.id,
+        entityType: ENTITY_TYPES.LESSON,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      });
+
+      await resourceLibraryService.syncLessonAssetRelations(lesson.id);
+
+      const relations = await db
+        .select()
+        .from(resourceEntity)
+        .where(eq(resourceEntity.entityId, lesson.id));
+
+      expect(relations).toHaveLength(1);
+      expect(relations[0]).toMatchObject({
+        id: keptRelation.id,
+        resourceId: keptAsset.id,
+        entityId: lesson.id,
+        entityType: ENTITY_TYPES.LESSON,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      });
     });
   });
 

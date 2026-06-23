@@ -7,12 +7,20 @@ import type { UUIDType } from "src/common";
 
 export type ContentResource = {
   id: UUIDType;
+  resourceEntityId?: UUIDType;
   fileUrl: string;
   fileUrlError?: boolean;
   contentType: string | null;
   title?: string;
   description?: string;
   fileName?: string;
+  videoProgress?: {
+    coveragePercent: number;
+    isWatched: boolean;
+    watchedRanges: readonly (readonly [number, number])[];
+    durationSeconds?: number;
+    bucketSizeSeconds?: number;
+  };
 };
 
 type InjectResourcesOptions<T extends ContentResource> = {
@@ -87,6 +95,37 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
         $(element).attr("data-error", "true");
       } else {
         $(element).removeAttr("data-error");
+      }
+
+      if (resource?.resourceEntityId && resource.contentType?.startsWith("video/")) {
+        $(element).attr("data-source-type", "internal");
+        $(element).attr("data-resource-entity-id", resource.resourceEntityId);
+        $(element).attr(
+          "data-video-coverage-percent",
+          String(resource.videoProgress?.coveragePercent ?? 0),
+        );
+        $(element).attr(
+          "data-video-is-watched",
+          String(resource.videoProgress?.isWatched ?? false),
+        );
+        $(element).attr(
+          "data-video-watched-ranges",
+          JSON.stringify(resource.videoProgress?.watchedRanges ?? []),
+        );
+
+        if (resource.videoProgress?.durationSeconds) {
+          $(element).attr(
+            "data-video-duration-seconds",
+            String(resource.videoProgress.durationSeconds),
+          );
+        }
+
+        if (resource.videoProgress?.bucketSizeSeconds) {
+          $(element).attr(
+            "data-video-bucket-size-seconds",
+            String(resource.videoProgress.bucketSizeSeconds),
+          );
+        }
       }
     }
   });

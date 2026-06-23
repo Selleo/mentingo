@@ -112,7 +112,11 @@ const Editor = ({
         return true;
       }
 
-      activeEditor?.chain().focus().setVideoEmbed({ src: pastedUrl, sourceType: "external" }).run();
+      activeEditor
+        ?.chain()
+        .focus()
+        .setVideoEmbed({ src: pastedUrl, sourceType: "external" as const })
+        .run();
       return true;
     },
     [allowFiles, onUpload],

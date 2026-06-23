@@ -26,7 +26,11 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { DatabasePg } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { processInBatches } from "src/common/utils/processInBatches";
-import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "src/courses/constants";
+import {
+  LESSON_SEQUENCE_ENABLED,
+  QUIZ_FEEDBACK_ENABLED,
+  VIDEO_COMPLETION_TRACKING_ENABLED,
+} from "src/courses/constants";
 import {
   SCORM_MASTER_COURSE_COPY_BATCH_SIZE,
   SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
@@ -407,6 +411,7 @@ export class MasterCourseService {
       const courseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
         lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
         quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+        videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
         certificateSignature: null,
         certificateFontColor: null,
         certificateValidity: null,
@@ -1334,6 +1339,7 @@ export class MasterCourseService {
     const courseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
       lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
       quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+      videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
       certificateSignature: null,
       certificateFontColor: null,
       certificateValidity: null,

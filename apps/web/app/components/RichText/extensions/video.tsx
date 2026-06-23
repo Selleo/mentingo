@@ -19,18 +19,34 @@ import {
   getVideoEmbedAttrsFromElement,
   normalizeVideoEmbedAttributes,
   type VideoEmbedAttrs,
-  type VideoProvider,
   type VideoSourceType,
 } from "./utils/video";
 
+import type { SupportedLanguages } from "@repo/shared";
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
 
 type VideoViewerOptions = {
   onVideoEnded?: (index: number | null) => void;
+  videoCoverageTracking?: {
+    enabled: boolean;
+    lessonId?: string;
+    language?: SupportedLanguages;
+  };
 };
 
 type VideoEditorOptions = RichTextResourceNodeOptions;
+
+const getStringAttribute = (value: unknown) => (typeof value === "string" ? value : null);
+
+const getBooleanAttribute = (value: unknown) =>
+  typeof value === "boolean" || typeof value === "string" ? value : null;
+
+const getNumberAttribute = (value: unknown) =>
+  typeof value === "number" || typeof value === "string" ? value : null;
+
+const getVideoWatchedRangesAttribute = (value: unknown) =>
+  Array.isArray(value) || typeof value === "string" ? value : null;
 
 const renderUploadCard = (label: string, errorMessage?: string | null) => (
   <div className="flex w-full flex-col gap-1.5 rounded border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm text-neutral-700">
@@ -60,6 +76,20 @@ const getVideoDataAttributes = (attrs: VideoEmbedAttrs) => ({
   "data-provider": attrs.provider,
   "data-src": attrs.src ?? "",
   ...(attrs.index !== null ? { "data-index": attrs.index } : {}),
+  ...(attrs.resourceEntityId ? { "data-resource-entity-id": attrs.resourceEntityId } : {}),
+  ...(attrs.videoCoveragePercent !== null
+    ? { "data-video-coverage-percent": attrs.videoCoveragePercent }
+    : {}),
+  ...(attrs.videoIsWatched ? { "data-video-is-watched": "true" } : {}),
+  ...(attrs.videoWatchedRanges.length > 0
+    ? { "data-video-watched-ranges": JSON.stringify(attrs.videoWatchedRanges) }
+    : {}),
+  ...(attrs.videoDurationSeconds !== null
+    ? { "data-video-duration-seconds": attrs.videoDurationSeconds }
+    : {}),
+  ...(attrs.videoBucketSizeSeconds !== null
+    ? { "data-video-bucket-size-seconds": attrs.videoBucketSizeSeconds }
+    : {}),
   ...(attrs.hasError ? { "data-error": "true" } : {}),
   ...getVideoUploadNodeDataAttributes(attrs),
 });
@@ -193,15 +223,38 @@ const VideoEditorView = ({ node, editor, getPos }: NodeViewProps) => {
 
 const VideoViewerView = ({ node, extension }: NodeViewProps) => {
   const attrs = normalizeVideoEmbedAttributes(node.attrs);
-  const { onVideoEnded } = extension.options as VideoViewerOptions;
+  const { onVideoEnded, videoCoverageTracking } = extension.options as VideoViewerOptions;
 
   if (!attrs.src) return null;
 
   if (attrs.hasError) return null;
 
+  const trackingEnabled = Boolean(
+    videoCoverageTracking?.enabled &&
+      attrs.sourceType === "internal" &&
+      attrs.resourceEntityId &&
+      attrs.src.includes("/api/lesson/lesson-resource/"),
+  );
+
   return (
     <NodeViewWrapper className="video-node">
-      <Video src={attrs.src} provider={attrs.provider} index={attrs.index} onEnded={onVideoEnded} />
+      <Video
+        src={attrs.src}
+        provider={attrs.provider}
+        index={attrs.index}
+        onEnded={onVideoEnded}
+        coverageTracking={{
+          enabled: trackingEnabled,
+          lessonId: videoCoverageTracking?.lessonId,
+          resourceEntityId: attrs.resourceEntityId,
+          language: videoCoverageTracking?.language,
+          initialCoveragePercent: attrs.videoCoveragePercent ?? 0,
+          initialWatchedRanges: attrs.videoWatchedRanges,
+          initialIsWatched: attrs.videoIsWatched,
+          initialDurationSeconds: attrs.videoDurationSeconds,
+          initialBucketSizeSeconds: attrs.videoBucketSizeSeconds,
+        }}
+      />
     </NodeViewWrapper>
   );
 };
@@ -242,6 +295,24 @@ const baseVideoNodeConfig: NodeConfig = {
       uploadErrorMessage: {
         default: null,
       },
+      resourceEntityId: {
+        default: null,
+      },
+      videoCoveragePercent: {
+        default: null,
+      },
+      videoIsWatched: {
+        default: false,
+      },
+      videoWatchedRanges: {
+        default: [],
+      },
+      videoDurationSeconds: {
+        default: null,
+      },
+      videoBucketSizeSeconds: {
+        default: null,
+      },
     };
   },
 
@@ -273,25 +344,37 @@ const baseVideoNodeConfig: NodeConfig = {
       uploadLabel,
       uploadStatus,
       uploadErrorMessage,
+      resourceEntityId,
+      videoCoveragePercent,
+      videoIsWatched,
+      videoWatchedRanges,
+      videoDurationSeconds,
+      videoBucketSizeSeconds,
       ...rest
     } = HTMLAttributes as Record<string, unknown>;
 
     const normalized = normalizeVideoEmbedAttributes({
-      src: typeof src === "string" ? src : null,
-      sourceType: sourceType as VideoSourceType,
-      provider: provider as VideoProvider,
-      hasError: hasError as boolean,
-      index: index as number | string | null,
+      src: getStringAttribute(src),
+      sourceType: getStringAttribute(sourceType),
+      provider: getStringAttribute(provider),
+      hasError: getBooleanAttribute(hasError),
+      index: getNumberAttribute(index),
       ...normalizeVideoUploadNodeAttrs({
-        uploadId: typeof uploadId === "string" ? uploadId : null,
-        uploadLabel: typeof uploadLabel === "string" ? uploadLabel : null,
+        uploadId: getStringAttribute(uploadId),
+        uploadLabel: getStringAttribute(uploadLabel),
         uploadStatus:
           uploadStatus === VIDEO_UPLOAD_NODE_STATUS.UPLOADING ||
           uploadStatus === VIDEO_UPLOAD_NODE_STATUS.FAILED
             ? uploadStatus
             : null,
-        uploadErrorMessage: typeof uploadErrorMessage === "string" ? uploadErrorMessage : null,
+        uploadErrorMessage: getStringAttribute(uploadErrorMessage),
       }),
+      resourceEntityId: getStringAttribute(resourceEntityId),
+      videoCoveragePercent: getNumberAttribute(videoCoveragePercent),
+      videoIsWatched: getBooleanAttribute(videoIsWatched),
+      videoWatchedRanges: getVideoWatchedRangesAttribute(videoWatchedRanges),
+      videoDurationSeconds: getNumberAttribute(videoDurationSeconds),
+      videoBucketSizeSeconds: getNumberAttribute(videoBucketSizeSeconds),
     });
 
     return ["div", mergeAttributes(getVideoDataAttributes(normalized), rest)];
@@ -329,6 +412,7 @@ export const VideoEmbedViewer = Node.create<VideoViewerOptions>({
   addOptions() {
     return {
       onVideoEnded: undefined,
+      videoCoverageTracking: undefined,
     };
   },
   addNodeView() {

@@ -9243,6 +9243,33 @@
         }
       }
     },
+    "/api/lesson-video-progress": {
+      "post": {
+        "operationId": "LessonVideoProgressController_upsertProgress",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertProgressBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertProgressResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stripe": {
       "post": {
         "operationId": "StripeController_createPaymentIntent",
@@ -25735,6 +25762,9 @@
           "quizFeedbackEnabled": {
             "type": "boolean"
           },
+          "videoCompletionTrackingEnabled": {
+            "type": "boolean"
+          },
           "certificateFontColor": {
             "type": "string"
           },
@@ -25844,6 +25874,10 @@
                 "type": "boolean"
               },
               "quizFeedbackEnabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "videoCompletionTrackingEnabled": {
                 "default": true,
                 "type": "boolean"
               },
@@ -29451,6 +29485,9 @@
                 "type": "boolean"
               },
               "hasVideo": {
+                "type": "boolean"
+              },
+              "hasTrackedVideo": {
                 "type": "boolean"
               },
               "hasAutoplayTrigger": {
@@ -38749,6 +38786,163 @@
             "required": [
               "name",
               "value"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpsertProgressBody": {
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "resourceEntityId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "durationSeconds": {
+            "minimum": 1,
+            "type": "number"
+          },
+          "bucketSize": {
+            "minimum": 1,
+            "default": 1,
+            "type": "number"
+          },
+          "watchedRanges": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": [
+                {
+                  "minimum": 0,
+                  "type": "number"
+                },
+                {
+                  "minimum": 0,
+                  "type": "number"
+                }
+              ],
+              "additionalItems": false,
+              "minItems": 2,
+              "maxItems": 2
+            }
+          },
+          "activeWatchSecondsDelta": {
+            "minimum": 0,
+            "default": 0,
+            "type": "number"
+          },
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "required": [
+          "lessonId",
+          "resourceEntityId",
+          "durationSeconds",
+          "watchedRanges"
+        ]
+      },
+      "UpsertProgressResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "resourceEntityId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "durationSeconds": {
+                "type": "number"
+              },
+              "bucketSizeSeconds": {
+                "type": "number"
+              },
+              "coveredBucketCount": {
+                "type": "number"
+              },
+              "coveragePercent": {
+                "type": "number"
+              },
+              "watchedRanges": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    },
+                    {
+                      "minimum": 0,
+                      "type": "number"
+                    }
+                  ],
+                  "additionalItems": false,
+                  "minItems": 2,
+                  "maxItems": 2
+                }
+              },
+              "isWatched": {
+                "type": "boolean"
+              },
+              "watchedAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lessonCompleted": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "lessonId",
+              "resourceEntityId",
+              "durationSeconds",
+              "bucketSizeSeconds",
+              "coveredBucketCount",
+              "coveragePercent",
+              "watchedRanges",
+              "isWatched",
+              "watchedAt",
+              "lessonCompleted"
             ]
           }
         },

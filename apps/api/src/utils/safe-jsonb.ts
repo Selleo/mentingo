@@ -10,7 +10,7 @@ import type { Static, TObject } from "@sinclair/typebox";
 export const safeJsonb = <Schema extends TObject>(name: string, schema: Schema) => {
   type DataType = Static<Schema>;
   const compiledSchema = TypeCompiler.Compile(schema);
-  const defaultValue = Value.Create(schema) as DataType;
+  const defaultValue = Value.Default(schema, Value.Create(schema)) as DataType;
 
   const columnType = customType<{ data: DataType }>({
     dataType() {

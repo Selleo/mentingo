@@ -138,6 +138,9 @@ export class LessonRepository {
         isQuizPassed: sql<boolean | null>`${studentLessonProgress.isQuizPassed}`,
         attempts: sql<number | null>`${studentLessonProgress.attempts}`,
         quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
+        videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
+          "videoCompletionTrackingEnabled",
+        ),
         aiMentorDetails: sql<{
           minScore: number | null;
           maxScore: number | null;

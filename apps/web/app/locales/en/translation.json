@@ -92,6 +92,8 @@
     "sequenceUpdateFailed": "Failed to update lesson sequence",
     "quizFeedbackUpdatedSuccessfully": "\"Quiz feedback\" option updated successfully",
     "quizFeedbackUpdateFailed": "Failed to update \"Quiz feedback\" option",
+    "videoCompletionTrackingUpdatedSuccessfully": "\"Video completion tracking\" option updated successfully",
+    "videoCompletionTrackingUpdateFailed": "Failed to update \"Video completion tracking\" option",
     "settingsUpdatedSuccessfully": "Settings updated successfully",
     "settingsUpdateFailed": "Failed to update settings"
   },
@@ -1797,7 +1799,8 @@
       "featureUnavailable": {
         "curriculum": "Curriculum editing is not available for SCORM courses.",
         "lessonSequence": "Lesson sequence enforcement is not available for SCORM courses.",
-        "quizFeedback": "Quiz feedback settings are not available for SCORM courses."
+        "quizFeedback": "Quiz feedback settings are not available for SCORM courses.",
+        "videoCompletionTracking": "Video completion tracking is not available for SCORM courses."
       },
       "notFound": {
         "course": "Course not found.",
@@ -1953,6 +1956,8 @@
         "requireSequentialLessons": "Require students to complete lessons in order",
         "enableQuizFeedback": "Quiz feedback",
         "enableQuizFeedbackDescription": "After submitting the quiz, the student will see which answers were correct, incorrect, or unanswered.",
+        "enableVideoCompletionTracking": "Video completion tracking",
+        "enableVideoCompletionTrackingDescription": "Require learners to watch at least 90% of each video in a lesson before it is marked as completed.",
         "fallbackLanguageWarningTitle": "Note: missing translations",
         "fallbackLanguageWarningDescription": "Some fields in this language version are empty. In those places, students will see content from the default language until you add translations.",
         "baseLanguageTooltip": "You cannot change or remove this language. It is the default and will always be part of the course."
@@ -2713,6 +2718,16 @@
     "videoProcessing": {
       "title": "Video is being processed",
       "body": "Please wait a moment. It will appear here once it is ready."
+    },
+    "videoProgress": {
+      "errors": {
+        "resourceNotFound": "Video progress could not be saved for this lesson.",
+        "unsupportedLessonType": "Video progress is only available for content lessons.",
+        "unsupportedBucketSize": "Video progress uses an unsupported tracking interval.",
+        "invalidResourceType": "This resource cannot be tracked as a lesson video.",
+        "trackingDisabled": "Video completion tracking is disabled for this course.",
+        "accessDenied": "You do not have access to update video progress for this lesson."
+      }
     },
     "playNext": {
       "title": "Up next",

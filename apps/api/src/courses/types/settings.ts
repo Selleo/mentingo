@@ -1,7 +1,11 @@
 import { CERTIFICATE_VALIDITY_TYPES, CERTIFICATE_VALIDITY_UNITS } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
-import { LESSON_SEQUENCE_ENABLED, QUIZ_FEEDBACK_ENABLED } from "../constants";
+import {
+  LESSON_SEQUENCE_ENABLED,
+  QUIZ_FEEDBACK_ENABLED,
+  VIDEO_COMPLETION_TRACKING_ENABLED,
+} from "../constants";
 
 export const certificateValiditySchema = Type.Union([
   Type.Object(
@@ -29,6 +33,11 @@ export const coursesSettingsSchema = Type.Object(
     quizFeedbackEnabled: Type.Boolean({
       default: QUIZ_FEEDBACK_ENABLED,
     }),
+    videoCompletionTrackingEnabled: Type.Optional(
+      Type.Boolean({
+        default: VIDEO_COMPLETION_TRACKING_ENABLED,
+      }),
+    ),
     certificateSignature: Type.Union([Type.String(), Type.Null()], {
       default: null,
     }),

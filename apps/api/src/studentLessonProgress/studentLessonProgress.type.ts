@@ -1,6 +1,7 @@
 import type { PermissionKey } from "@repo/shared";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { LessonTypes } from "src/lesson/lesson.type";
 
 export const STUDENT_LESSON_PROGRESS_MESSAGE_KEYS = {
   LESSON_COMPLETED: "studentLessonView.scorm.lessonFinished",
@@ -22,4 +23,17 @@ export type MarkLessonAsIncompleteParams = {
 
 export type MarkLessonProgressResult = {
   messageKey: StudentLessonProgressMessageKey | null;
+};
+
+export type LessonProgressAccessResult = {
+  isAssigned: boolean;
+  isFreemium: boolean;
+  attempts: number | null;
+  lessonIsCompleted: boolean;
+  lessonType: LessonTypes;
+  chapterId: string;
+  courseId: string;
+  isCourseAuthor: boolean;
+  isLearningModeActive: boolean;
+  canTrackProgress: boolean;
 };

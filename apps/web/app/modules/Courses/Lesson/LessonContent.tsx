@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useMarkLessonAsCompleted } from "~/api/mutations";
@@ -59,6 +59,17 @@ export const LessonContent = ({
   const { data: user } = useCurrentUser();
   const { mutate: markLessonAsCompleted } = useMarkLessonAsCompleted(user?.id || "");
   const { sequenceEnabled } = useLessonsSequence(course.id);
+  const videoCoverageTrackingEnabled = Boolean(
+    lesson.hasTrackedVideo && isEffectiveStudentExperience && !isPreviewMode,
+  );
+  const videoCoverageTracking = useMemo(
+    () => ({
+      enabled: videoCoverageTrackingEnabled,
+      lessonId: lesson.id,
+      language,
+    }),
+    [language, lesson.id, videoCoverageTrackingEnabled],
+  );
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
     chapter.lessons.some(({ id }) => id === lesson.id),
@@ -186,6 +197,8 @@ export const LessonContent = ({
         return;
       }
 
+      if (lesson.hasTrackedVideo) return;
+
       const videosCount = lesson.videos?.length ?? 0;
       if (videosCount === 0) return;
 
@@ -200,6 +213,7 @@ export const LessonContent = ({
       language,
       lesson.id,
       lesson.lessonCompleted,
+      lesson.hasTrackedVideo,
       lesson.type,
       lesson.videos,
       markLessonAsCompleted,
@@ -275,6 +289,7 @@ export const LessonContent = ({
             hideControls={hideControls}
             lessonLoading={lessonLoading}
             onVideoEnded={handleVideoEnded}
+            videoCoverageTracking={videoCoverageTracking}
           />
         </div>
       </div>

@@ -167,5 +167,8 @@ test("SCORM courses hide unsupported admin course features", async ({
     ).toHaveCount(0);
     await expect(page.getByTestId(COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH)).toHaveCount(0);
     await expect(page.getByTestId(COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH)).toHaveCount(0);
+    await expect(
+      page.getByTestId(COURSE_SETTINGS_HANDLES.VIDEO_COMPLETION_TRACKING_SWITCH),
+    ).toHaveCount(0);
   });
 });
