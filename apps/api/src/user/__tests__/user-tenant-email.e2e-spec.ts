@@ -11,7 +11,6 @@ import { UserService } from "src/user/user.service";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory } from "../../../test/factory/user.factory";
-import { truncateTables } from "../../../test/helpers/test-helpers";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -48,16 +47,6 @@ describe("Tenant-scoped user emails (e2e)", () => {
     await tenantRunner.runWithTenant(defaultTenantId, () =>
       settingsFactory.create({ userId: null }),
     );
-  });
-
-  afterEach(async () => {
-    await truncateTables(baseDb, [
-      "magic_link_tokens",
-      "reset_tokens",
-      "settings",
-      "users",
-      "groups",
-    ]);
   });
 
   afterAll(async () => {
