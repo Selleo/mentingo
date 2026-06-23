@@ -1,3 +1,37 @@
+<a name="v4.13.0"></a>
+
+## [v4.13.0] - 22.06.2026
+
+### Features:
+
+- generate multiple image resolutions automatically on upload ([#1640](https://github.com/Selleo/mentingo/issues/1640))
+
+### Bug Fixes:
+
+- prevent external HTTP resources from being routed through S3 ([#1661](https://github.com/Selleo/mentingo/issues/1661))
+
+- resolve tenants correctly in LiveKit webhooks based on the host ([#1663](https://github.com/Selleo/mentingo/issues/1663))
+
+- make email triggers work properly and improve their test coverage ([#1654](https://github.com/Selleo/mentingo/issues/1654))
+
+- reset quiz questions properly when retaking a quiz ([#1652](https://github.com/Selleo/mentingo/issues/1652))
+
+- improve group selector search in the user edit view ([#1649](https://github.com/Selleo/mentingo/issues/1649))
+
+### Chores:
+
+- improve support mode by allowing admin user impersonation ([#1660](https://github.com/Selleo/mentingo/issues/1660))
+
+- improve user import reliability and performance ([#1646](https://github.com/Selleo/mentingo/issues/1646))
+
+- improve AI mentor lesson feedback and voice mode experience ([#1650](https://github.com/Selleo/mentingo/issues/1650))
+
+- centralize global search and improve its reliability ([#1648](https://github.com/Selleo/mentingo/issues/1648))
+
+- hide AI mentor results when AI services are not configured ([#1656](https://github.com/Selleo/mentingo/issues/1656))
+
+- display certificate expiry dates for clearer certificate validity ([#1631](https://github.com/Selleo/mentingo/issues/1631))
+
 <a name="v4.12.1"></a>
 
 ## [v4.12.1] - 19.06.2026
@@ -13,6 +47,10 @@
 ### Chores:
 
 - improve live training experience based on feedback ([#1630](https://github.com/Selleo/mentingo/issues/1630))
+
+### Documentation:
+
+- update changelog for version v4.12.1
 
 <a name="v4.12.0"></a>
 
@@ -2898,7 +2936,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.12.1...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.13.0...HEAD
+[v4.13.0]: https://github.com/Selleo/mentingo/compare/v4.12.1...v4.13.0
 [v4.12.1]: https://github.com/Selleo/mentingo/compare/v4.12.0...v4.12.1
 [v4.12.0]: https://github.com/Selleo/mentingo/compare/v4.11.0...v4.12.0
 [v4.11.0]: https://github.com/Selleo/mentingo/compare/v4.10.0...v4.11.0
