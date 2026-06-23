@@ -1065,6 +1065,13 @@
       "when": 1782136304580,
       "tag": "0151_enable_lesson_video_progress_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 152,
+      "version": "7",
+      "when": 1782200564873,
+      "tag": "0152_tenant_scoped_user_email_unique",
+      "breakpoints": true
     }
   ]
 }
