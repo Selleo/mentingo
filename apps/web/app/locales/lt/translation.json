@@ -585,6 +585,7 @@
       "camera": "Kamera",
       "screenShare": "Bendrinti ekraną",
       "screen": "Ekranas",
+      "presentOnStage": "Rodyti scenoje",
       "leave": "Išeiti",
       "finish": "Finish session",
       "sessionEndedToast": "Your session {{trainingName}} has ended",

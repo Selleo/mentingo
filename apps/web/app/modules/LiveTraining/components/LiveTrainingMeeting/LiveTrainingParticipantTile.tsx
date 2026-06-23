@@ -1,21 +1,26 @@
 import { isTrackReference, VideoTrack } from "@livekit/components-react";
 import { Track } from "livekit-client";
-import { Mic, MicOff, MonitorUp, Video, VideoOff } from "lucide-react";
+import { MonitorUp, Mic, MicOff, Pin, Video, VideoOff } from "lucide-react";
+import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
 import { ParticipantAvatar } from "./ParticipantAvatar";
 import { ParticipantStateIndicator } from "./ParticipantStateIndicator";
+import { useParticipantAccentColor } from "./useParticipantAccentColor";
 
 import type { TrackReferenceOrPlaceholder } from "@livekit/components-react";
+import type { KeyboardEvent } from "react";
 
 type LiveTrainingParticipantTileProps = {
   profilePictureUrl?: string | null;
   trackRef: TrackReferenceOrPlaceholder;
   isSpeaking?: boolean;
-  variant?: "grid" | "fullscreen";
+  variant?: "grid" | "rail" | "stage" | "fullscreen";
+  isMainStage?: boolean;
   onClick?: () => void;
+  onPresentOnStage?: () => void;
 };
 
 const getParticipantName = (trackRef: TrackReferenceOrPlaceholder) =>
@@ -29,19 +34,28 @@ const getParticipantInitials = (name: string) => {
   return `${firstInitial}${secondInitial}`.toUpperCase();
 };
 
+const isInteractiveElement = (element: EventTarget | null) =>
+  element instanceof HTMLElement &&
+  Boolean(element.closest("button, a, input, select, textarea, [role='button'], [tabindex]"));
+
 export function LiveTrainingParticipantTile({
   profilePictureUrl,
   trackRef,
   isSpeaking = false,
   variant = "grid",
+  isMainStage = false,
   onClick,
+  onPresentOnStage,
 }: LiveTrainingParticipantTileProps) {
   const { t } = useTranslation();
   const participantName = getParticipantName(trackRef);
   const participantInitials = getParticipantInitials(participantName);
+  const accentColor = useParticipantAccentColor(profilePictureUrl);
   const isScreenShare = trackRef.source === Track.Source.ScreenShare;
   const hasVideoTrack = isTrackReference(trackRef);
   const isFullscreen = variant === "fullscreen";
+  const isStage = variant === "stage";
+  const isRail = variant === "rail";
   const emptyCameraAvatarSize = isFullscreen ? "fullscreen" : "lg";
   const isMicrophoneEnabled = trackRef.participant.isMicrophoneEnabled;
   const isCameraEnabled = trackRef.participant.isCameraEnabled;
@@ -49,25 +63,51 @@ export function LiveTrainingParticipantTile({
   const shouldShowVideoTrack =
     hasVideoTrack && (isScreenShare ? isScreenShareEnabled : isCameraEnabled);
   const shouldMirrorVideo = trackRef.participant.isLocal && !isScreenShare;
+  const tileBackgroundColor = isScreenShare && shouldShowVideoTrack ? "#000" : accentColor;
+  const interactiveProps = onClick
+    ? {
+        role: "button",
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          if (isInteractiveElement(event.target) && event.target !== event.currentTarget) return;
+
+          event.preventDefault();
+          onClick();
+        },
+      }
+    : {};
 
   return (
-    <button
-      type="button"
-      disabled={!onClick}
-      onClick={onClick}
+    <motion.div
+      {...interactiveProps}
       className={cn(
-        "group relative flex overflow-hidden rounded-md bg-primary-950 text-left shadow-sm transition-[background-color,box-shadow] duration-200",
+        "group relative flex overflow-hidden rounded-md text-left shadow-sm transition-shadow duration-200",
         {
-          "min-h-44 cursor-pointer hover:bg-primary-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200":
+          "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200":
             Boolean(onClick),
           "shadow-[0_0_28px_rgba(16,185,129,0.28)]": isSpeaking && !isFullscreen,
-          "aspect-[16/10] min-h-0 w-full max-w-[min(100%,calc(100cqh*16/10))]": !isFullscreen,
+          "size-full": variant === "grid",
+          "aspect-[16/10] min-h-[9.5rem] w-full": isRail,
+          "size-full min-h-[22rem]": isStage,
           "size-full min-h-0 cursor-default rounded-none bg-black ring-0": isFullscreen,
         },
       )}
+      style={{
+        backgroundColor: tileBackgroundColor,
+        backgroundImage: shouldShowVideoTrack
+          ? undefined
+          : `radial-gradient(circle at 28% 18%, color-mix(in srgb, ${accentColor} 72%, white 28%), transparent 35%), linear-gradient(135deg, ${accentColor}, color-mix(in srgb, ${accentColor} 55%, black 45%))`,
+      }}
     >
       {!isFullscreen && (
-        <div className="pointer-events-none absolute inset-0 z-30 rounded-md border border-primary-200/10" />
+        <div
+          className={cn("pointer-events-none absolute inset-0 z-20 rounded-md border", {
+            "border-white/50": isMainStage,
+            "border-primary-200/10": !isMainStage,
+          })}
+        />
       )}
 
       {shouldShowVideoTrack ? (
@@ -79,8 +119,9 @@ export function LiveTrainingParticipantTile({
           })}
         />
       ) : (
-        <div className="relative z-10 flex size-full items-center justify-center bg-primary-950">
+        <div className="relative z-10 flex size-full items-center justify-center">
           <ParticipantAvatar
+            accentColor={accentColor}
             participantName={participantName}
             participantInitials={participantInitials}
             profilePictureUrl={profilePictureUrl}
@@ -89,26 +130,47 @@ export function LiveTrainingParticipantTile({
         </div>
       )}
 
-      <div className="absolute right-3 top-3 z-20 flex gap-1.5">
-        <ParticipantStateIndicator
-          enabled={isMicrophoneEnabled}
-          enabledIcon={<Mic className="size-3.5" />}
-          disabledIcon={<MicOff className="size-3.5" />}
-          label={t("liveTrainingView.meeting.microphone")}
-        />
-        <ParticipantStateIndicator
-          enabled={isCameraEnabled}
-          enabledIcon={<Video className="size-3.5" />}
-          disabledIcon={<VideoOff className="size-3.5" />}
-          label={t("liveTrainingView.meeting.camera")}
-        />
-        {isScreenShareEnabled && (
+      <div className="absolute right-3 top-3 z-30 flex gap-1.5">
+        {!isScreenShare && (
+          <>
+            <ParticipantStateIndicator
+              enabled={isMicrophoneEnabled}
+              enabledIcon={<Mic className="size-3.5" />}
+              disabledIcon={<MicOff className="size-3.5" />}
+              label={t("liveTrainingView.meeting.microphone")}
+            />
+            <ParticipantStateIndicator
+              enabled={isCameraEnabled}
+              enabledIcon={<Video className="size-3.5" />}
+              disabledIcon={<VideoOff className="size-3.5" />}
+              label={t("liveTrainingView.meeting.camera")}
+            />
+          </>
+        )}
+        {isScreenShareEnabled && !isScreenShare && (
           <ParticipantStateIndicator
             enabled
             enabledIcon={<MonitorUp className="size-3.5" />}
             disabledIcon={<MonitorUp className="size-3.5" />}
             label={t("liveTrainingView.meeting.screen")}
           />
+        )}
+        {isScreenShare && onPresentOnStage && (
+          <button
+            type="button"
+            className="inline-flex size-7 items-center justify-center rounded bg-black/45 text-white backdrop-blur-sm transition-colors duration-200 hover:bg-primary-500 focus:bg-primary-500 focus-visible:outline-none"
+            onClick={(event) => {
+              event.stopPropagation();
+              onPresentOnStage();
+            }}
+            onKeyDown={(event) => {
+              event.stopPropagation();
+            }}
+            aria-label={t("liveTrainingView.meeting.presentOnStage")}
+            title={t("liveTrainingView.meeting.presentOnStage")}
+          >
+            <Pin className="size-3.5 rotate-45" />
+          </button>
         )}
       </div>
 
@@ -120,6 +182,7 @@ export function LiveTrainingParticipantTile({
             )}
           >
             <ParticipantAvatar
+              accentColor={accentColor}
               participantName={participantName}
               participantInitials={participantInitials}
               profilePictureUrl={profilePictureUrl}
@@ -129,17 +192,19 @@ export function LiveTrainingParticipantTile({
           </span>
         </div>
 
-        {isScreenShare && (
-          <span className="inline-flex shrink-0 items-center gap-1 rounded bg-primary-400/20 px-2 py-1 text-[11px] font-medium text-primary-50 backdrop-blur-sm">
-            <MonitorUp className="size-3" />
-            {t("liveTrainingView.meeting.screen")}
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-1.5">
+          {isScreenShare && (
+            <span className="inline-flex items-center gap-1 rounded bg-primary-400/20 px-2 py-1 text-[11px] font-medium text-primary-50 backdrop-blur-sm">
+              <MonitorUp className="size-3" />
+              {t("liveTrainingView.meeting.screen")}
+            </span>
+          )}
+        </div>
       </div>
 
       {isSpeaking && !isFullscreen && (
         <div className="pointer-events-none absolute inset-0 z-40 rounded-md border-2 border-emerald-400 shadow-[inset_0_0_0_1px_rgba(52,211,153,0.35)]" />
       )}
-    </button>
+    </motion.div>
   );
 }

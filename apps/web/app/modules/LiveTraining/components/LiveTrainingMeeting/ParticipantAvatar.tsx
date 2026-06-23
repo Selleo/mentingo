@@ -6,6 +6,7 @@ type ParticipantAvatarProps = {
   participantInitials: string;
   profilePictureUrl?: string | null;
   size: "sm" | "lg" | "fullscreen";
+  accentColor?: string;
 };
 
 export function ParticipantAvatar({
@@ -13,14 +14,16 @@ export function ParticipantAvatar({
   participantInitials,
   profilePictureUrl,
   size,
+  accentColor = "var(--primary-700)",
 }: ParticipantAvatarProps) {
   return (
     <Avatar
-      className={cn("shrink-0 bg-primary-800 ring-1 ring-primary-200/20", {
+      className={cn("shrink-0 ring-1 ring-white/20", {
         "size-7": size === "sm",
         "size-20": size === "lg",
         "size-32": size === "fullscreen",
       })}
+      style={{ backgroundColor: accentColor }}
     >
       {profilePictureUrl && (
         <AvatarImage
@@ -30,10 +33,11 @@ export function ParticipantAvatar({
         />
       )}
       <AvatarFallback
-        className={cn("bg-primary-800 font-semibold text-primary-50", {
+        className={cn("font-semibold text-white", {
           "text-xs": size === "sm",
           "text-2xl": size !== "sm",
         })}
+        style={{ backgroundColor: accentColor }}
       >
         {participantInitials}
       </AvatarFallback>

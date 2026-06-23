@@ -585,6 +585,7 @@
       "camera": "Kamera",
       "screenShare": "Sdílet obrazovku",
       "screen": "Obrazovka",
+      "presentOnStage": "Zobrazit na scéně",
       "leave": "Odejít",
       "finish": "Finish session",
       "sessionEndedToast": "Your session {{trainingName}} has ended",

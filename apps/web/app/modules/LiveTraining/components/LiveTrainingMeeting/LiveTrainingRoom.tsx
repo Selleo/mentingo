@@ -1,5 +1,6 @@
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
 import "@livekit/components-styles";
+import { LayoutGroup } from "motion/react";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -36,12 +37,13 @@ function LiveTrainingRoomContent({
   const { t } = useTranslation();
   const [isMaterialsOpen, setIsMaterialsOpen] = useState(false);
   const [fullscreenTrack, setFullscreenTrack] = useState<{
+    layoutId?: string;
     trackRef: TrackReferenceOrPlaceholder;
     profilePictureUrl?: string | null;
   } | null>(null);
 
   return (
-    <div className="fixed inset-0 z-[61] grid h-screen w-screen min-h-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden bg-primary-950 p-3 sm:p-4">
+    <div className="fixed inset-0 z-[61] grid h-[100dvh] w-[100dvw] min-h-0 min-w-0 grid-rows-[auto_minmax(0,1fr)_auto] gap-3 overflow-hidden bg-primary-950 p-3 sm:p-4">
       <div className="flex min-w-0 items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-wide text-white/45">
@@ -56,14 +58,23 @@ function LiveTrainingRoomContent({
         </Badge>
       </div>
 
-      <div className="min-h-0 h-full">
-        <LiveTrainingParticipantGrid
-          liveTrainingId={liveTraining.id}
-          onTrackSelect={(trackRef, profilePictureUrl) =>
-            setFullscreenTrack({ trackRef, profilePictureUrl })
-          }
+      <LayoutGroup>
+        <div className="h-full min-h-0 min-w-0">
+          <LiveTrainingParticipantGrid
+            liveTrainingId={liveTraining.id}
+            onTrackSelect={(trackRef, profilePictureUrl, layoutId) =>
+              setFullscreenTrack({ layoutId, trackRef, profilePictureUrl })
+            }
+          />
+        </div>
+
+        <LiveTrainingFullscreenTrackOverlay
+          layoutId={fullscreenTrack?.layoutId}
+          profilePictureUrl={fullscreenTrack?.profilePictureUrl}
+          trackRef={fullscreenTrack?.trackRef ?? null}
+          onClose={() => setFullscreenTrack(null)}
         />
-      </div>
+      </LayoutGroup>
 
       <RoomAudioRenderer />
       <LiveTrainingRoomToolbar
@@ -100,11 +111,6 @@ function LiveTrainingRoomContent({
           </div>
         </DrawerContent>
       </Drawer>
-      <LiveTrainingFullscreenTrackOverlay
-        profilePictureUrl={fullscreenTrack?.profilePictureUrl}
-        trackRef={fullscreenTrack?.trackRef ?? null}
-        onClose={() => setFullscreenTrack(null)}
-      />
     </div>
   );
 }
@@ -132,7 +138,7 @@ export function LiveTrainingRoom({
     >
       <div className="fixed inset-0 z-[60] bg-primary-950" />
       <div className="fixed inset-x-0 top-0 z-[60] h-px bg-primary-300/30" />
-      <div className="fixed inset-0 z-[61]">
+      <div className="fixed inset-0 z-[61] min-h-0 min-w-0 overflow-hidden">
         <LiveTrainingRoomContent
           credentials={credentials}
           liveTraining={liveTraining}
