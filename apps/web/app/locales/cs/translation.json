@@ -1439,7 +1439,8 @@
         "role": "Uložit",
         "group": "Uložit",
         "archive": "Archiv",
-        "continue": "Potvrdit"
+        "continue": "Potvrdit",
+        "downloadSample": "Stáhnout ukázkový soubor"
       },
       "description": {
         "delete": "Opravdu chcete tyto účty smazat? Tato akce je nevratná.",
@@ -1458,6 +1459,16 @@
       },
       "note": {
         "import": "Poznámka: Stávající uživatelé budou přeskočeni. Pokud je zadaná skupina a neexistuje, nová skupina se nevytvoří. Jazykové pole je nepovinné; pokud není zadán nebo je neplatný, výchozí jazyk bude nastaven na jazyk správce."
+      },
+      "sampleFile": {
+        "filename": "ukazka-importu-uzivatelu.csv",
+        "row": {
+          "firstName": "Jan",
+          "lastName": "Novák",
+          "email": "jan.novak@example.com",
+          "groupOne": "skupina1",
+          "groupTwo": "skupina2"
+        }
       },
       "tabs": {
         "imported": "Importováno",

@@ -1713,7 +1713,8 @@
         "role": "Zapisz",
         "group": "Zapisz",
         "archive": "Archiwizuj",
-        "continue": "Zatwierdź"
+        "continue": "Zatwierdź",
+        "downloadSample": "Pobierz plik przykładowy"
       },
       "description": {
         "delete": "Czy na pewno chcesz usunąć te konta? Ta operacja jest nieodwracalna.",
@@ -1736,6 +1737,16 @@
       },
       "note": {
         "import": "Notatka: Istniejący użytkownicy zostaną pominięci. Jeśli podana jest grupa, a nie istnieje, nie zostanie utworzona nowa grupa. Jeśli język nie jest podany, bądź podany będzie nieprawidłowy to domyślnie zostanie ustawiony na język interfejsu administratora."
+      },
+      "sampleFile": {
+        "filename": "przyklad-importu-uzytkownikow.csv",
+        "row": {
+          "firstName": "Jan",
+          "lastName": "Kowalski",
+          "email": "jan.kowalski@example.com",
+          "groupOne": "grupa1",
+          "groupTwo": "grupa2"
+        }
       },
       "tabs": {
         "imported": "Zaimportowani użytkownicy",
