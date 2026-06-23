@@ -40,7 +40,7 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   const defaultTenantId = await ensureTenant(dbAdmin);
 
   const dbName = new URL(pgConnectionString).pathname.replace(/^\//, "");
-  await pgSqlAdmin.unsafe(`ALTER DATABASE "${dbName}" SET app.tenant_id = '${defaultTenantId}'`);
+  await pgSql.unsafe(`ALTER DATABASE "${dbName}" SET app.tenant_id = '${defaultTenantId}'`);
 
   await pgSql`SELECT set_config('app.tenant_id', ${defaultTenantId}, false)`;
 
