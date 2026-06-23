@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 import path from "path";
 
+import { sql as drizzleSql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
@@ -24,6 +25,45 @@ async function waitForPostgres(url: string, maxAttempts = 5): Promise<void> {
       await new Promise((r) => setTimeout(r, 1000));
     }
   }
+}
+
+async function ensureTestAppRole(db: ReturnType<typeof drizzle>) {
+  await db.execute(drizzleSql`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'lms_app_user') THEN
+        CREATE ROLE lms_app_user LOGIN;
+      END IF;
+    END
+    $$;
+  `);
+
+  await db.execute(drizzleSql`
+    ALTER ROLE lms_app_user
+      WITH
+      LOGIN
+      PASSWORD 'replace_with_strong_password'
+      NOSUPERUSER
+      NOCREATEDB
+      NOCREATEROLE
+      NOBYPASSRLS;
+  `);
+
+  await db.execute(drizzleSql`
+    DO $$
+    BEGIN
+      EXECUTE format('GRANT CONNECT ON DATABASE %I TO lms_app_user', current_database());
+    END
+    $$;
+  `);
+  await db.execute(drizzleSql`GRANT USAGE ON SCHEMA public TO lms_app_user;`);
+  await db.execute(
+    drizzleSql`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO lms_app_user;`,
+  );
+  await db.execute(drizzleSql`
+    ALTER DEFAULT PRIVILEGES IN SCHEMA public
+      GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO lms_app_user;
+  `);
 }
 
 export default async function globalSetup() {
@@ -57,6 +97,7 @@ export default async function globalSetup() {
     await migrate(db, {
       migrationsFolder: path.join(__dirname, "../src/storage/migrations"),
     });
+    await ensureTestAppRole(db);
     console.info("✅ Migrations completed successfully");
   } finally {
     await testSql.end();
