@@ -8,6 +8,7 @@ import { useEnrollCourse } from "~/api/mutations";
 import {
   availableCoursesQueryOptions,
   courseQueryOptions,
+  useCurrentUser,
   studentCoursesQueryOptions,
   useCourse,
 } from "~/api/queries";
@@ -16,6 +17,7 @@ import { queryClient } from "~/api/queryClient";
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
+import { resolveCourseExperienceState } from "~/modules/Courses/context/CourseAccessProvider";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { findFirstInProgressLessonId, findFirstNotStartedLessonId } from "../../Lesson/utils";
@@ -47,11 +49,12 @@ const HeroBanner = ({
   const { language } = useLanguageStore();
   const navigate = useNavigate();
 
+  const { data: currentUser } = useCurrentUser();
+  const { hasAccess: canUseLearningMode } = usePermissions({
+    required: PERMISSIONS.LEARNING_MODE_USE,
+  });
   const { hasAccess: canUpdateLearningProgress } = usePermissions({
     required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
-  });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
   });
   const { mutateAsync: enrollCourse } = useEnrollCourse();
 
@@ -70,11 +73,33 @@ const HeroBanner = ({
   const firstInProgressLessonId = heroCourseData
     ? findFirstInProgressLessonId(heroCourseData)
     : null;
+  const courseExperienceState = useMemo(() => {
+    if (!heroCourseData) return null;
+
+    return resolveCourseExperienceState({
+      course: heroCourseData,
+      forcePreviewMode: false,
+      currentUserId: currentUser?.id,
+      canUseLearningMode,
+      canUpdateLearningProgress,
+      activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
+    });
+  }, [
+    heroCourseData,
+    currentUser?.id,
+    currentUser?.studentModeCourseIds,
+    canUseLearningMode,
+    canUpdateLearningProgress,
+  ]);
+  const isPreviewMode = courseExperienceState?.isPreviewMode ?? canUseLearningMode;
 
   const handleNavigateToLesson = useCallback(async () => {
     if (!heroCourseData) return;
 
-    if (!heroCourseData.enrolled && canUpdateLearningProgress) {
+    const shouldEnrollBeforeNavigation =
+      !isPreviewMode && !heroCourseData.enrolled && canUpdateLearningProgress;
+
+    if (shouldEnrollBeforeNavigation) {
       await enrollCourse(
         { id: heroCourseData.id },
         {
@@ -89,8 +114,10 @@ const HeroBanner = ({
       );
     }
 
-    navigateToNextLesson(heroCourseData, navigate);
-  }, [heroCourseData, navigate, enrollCourse, canUpdateLearningProgress, language]);
+    navigateToNextLesson(heroCourseData, navigate, {
+      openFirstLesson: isPreviewMode || shouldEnrollBeforeNavigation,
+    });
+  }, [heroCourseData, isPreviewMode, navigate, enrollCourse, canUpdateLearningProgress, language]);
 
   return (
     <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
@@ -149,7 +176,7 @@ const HeroBanner = ({
             <Button onClick={handleNavigateToLesson}>
               <Play className="mr-2 h-4 w-4" fill="currentColor" />
               {t(
-                canManageCourses
+                isPreviewMode
                   ? "adminCourseView.common.preview"
                   : !hasCourseProgress
                     ? "studentCourseView.sideSection.button.startLearning"
