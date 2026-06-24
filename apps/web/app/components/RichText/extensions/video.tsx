@@ -30,6 +30,7 @@ type VideoViewerOptions = {
   onVideoEnded?: (index: number | null) => void;
   videoCoverageTracking?: {
     enabled: boolean;
+    showCoverageMarkers?: boolean;
     lessonId?: string;
     language?: SupportedLanguages;
   };
@@ -237,7 +238,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
   );
 
   return (
-    <NodeViewWrapper className="video-node">
+    <NodeViewWrapper className="video-node not-prose">
       <Video
         src={attrs.src}
         provider={attrs.provider}
@@ -245,6 +246,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
         onEnded={onVideoEnded}
         coverageTracking={{
           enabled: trackingEnabled,
+          showCoverageMarkers: trackingEnabled && videoCoverageTracking?.showCoverageMarkers,
           lessonId: videoCoverageTracking?.lessonId,
           resourceEntityId: attrs.resourceEntityId,
           language: videoCoverageTracking?.language,

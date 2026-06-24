@@ -220,6 +220,34 @@ describe("LessonVideoProgressService", () => {
     });
   });
 
+  it("stores progress without watched or lesson completion side effects when tracking is disabled", async () => {
+    const { service, repository, studentLessonProgressService } = createService();
+    const thresholdProgress = progressRow({
+      watchedRanges: [[0, 90]],
+      coveredBucketCount: 90,
+      coveragePercent: VIDEO_COMPLETION_COVERAGE_THRESHOLD,
+    });
+
+    repository.getLessonVideoContext.mockResolvedValue({
+      ...context,
+      videoCompletionTrackingEnabled: false,
+    });
+    repository.mergeWatchedRanges.mockResolvedValue(thresholdProgress);
+
+    const result = await service.upsertProgress(body({ watchedRanges: [[0, 90]] }), currentUser);
+
+    expect(repository.mergeWatchedRanges).toHaveBeenCalled();
+    expect(repository.markWatched).not.toHaveBeenCalled();
+    expect(repository.getRequiredVideoProgressForLesson).not.toHaveBeenCalled();
+    expect(studentLessonProgressService.markLessonAsCompleted).not.toHaveBeenCalled();
+    expect(result).toMatchObject({
+      watchedRanges: [[0, 90]],
+      coveragePercent: VIDEO_COMPLETION_COVERAGE_THRESHOLD,
+      isWatched: false,
+      lessonCompleted: false,
+    });
+  });
+
   it("completes the lesson when every required video is watched", async () => {
     const { service, repository, studentLessonProgressService, trx } = createService();
     const watchedProgress = progressRow({

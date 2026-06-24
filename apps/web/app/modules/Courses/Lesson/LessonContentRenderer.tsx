@@ -23,6 +23,7 @@ type LessonContentRendererProps = {
   onVideoEnded?: (index: number | null) => void;
   videoCoverageTracking?: {
     enabled: boolean;
+    showCoverageMarkers?: boolean;
     lessonId: string;
     language: SupportedLanguages;
   };

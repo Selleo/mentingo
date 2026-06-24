@@ -181,8 +181,7 @@ export class LessonService {
         description: updatedDescription ?? lesson.description,
         hasOnlyVideo: hasVideo,
         hasVideo: contentCount.video > 0,
-        hasTrackedVideo:
-          Boolean(lesson.videoCompletionTrackingEnabled) && videoResourceEntityIds.length > 0,
+        hasTrackedVideo: videoResourceEntityIds.length > 0,
         hasAutoplayTrigger,
         videos,
       };
