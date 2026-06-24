@@ -20,6 +20,7 @@ export const insertResourceIntoEditor = ({
   file,
   resourceType = RICH_TEXT_RESOURCE_TYPE.OTHER,
   displayMode = RICH_TEXT_RESOURCE_DISPLAY_MODE.PREVIEW,
+  videoProvider,
 }: InsertResourceArgs) => {
   const resourceUrl = buildEntityResourceUrl(resourceId, entityType);
 
@@ -37,7 +38,7 @@ export const insertResourceIntoEditor = ({
     .with(RICH_TEXT_RESOURCE_TYPE.VIDEO, () =>
       insertContentIntoEditor(editor, {
         type: RICH_TEXT_RESOURCE_TYPE.VIDEO,
-        attrs: { src: resourceUrl, sourceType: "internal" },
+        attrs: { src: resourceUrl, sourceType: "internal", provider: videoProvider },
       }),
     )
     .with(RICH_TEXT_RESOURCE_TYPE.PRESENTATION, () =>

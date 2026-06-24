@@ -65,6 +65,8 @@ const extractBunnyId = (sourceUrl: string, url: URL | null): string | null => {
 };
 
 export const detectVideoProviderFromUrl = (sourceUrl: string): VideoProvider => {
+  if (sourceUrl.startsWith("bunny-")) return VIDEO_EMBED_PROVIDERS.BUNNY;
+
   const url = tryParseUrl(sourceUrl);
   if (!url) return VIDEO_EMBED_PROVIDERS.UNKNOWN;
 

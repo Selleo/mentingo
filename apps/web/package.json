@@ -144,6 +144,7 @@
     "tus-js-client": "4.1.0",
     "vaul": "1.1.2",
     "video.js": "8.23.6",
+    "videojs-contrib-quality-levels": "4.1.0",
     "videojs-youtube": "3.0.1",
     "vite-plugin-cjs-interop": "2.1.4",
     "vite-plugin-svgr": "4.2.0",

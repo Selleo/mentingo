@@ -56,6 +56,10 @@ export class ThumbnailService {
   ) {
     if (!sourceUrl) throw new BadRequestException("Missing sourceUrl");
 
+    if (extractResourceIdFromSourceUrl(sourceUrl)) {
+      return this.getInternalThumbnail(sourceUrl, currentUser);
+    }
+
     const resolvedProvider =
       provider === VIDEO_EMBED_PROVIDERS.UNKNOWN ? detectVideoProviderFromUrl(sourceUrl) : provider;
 

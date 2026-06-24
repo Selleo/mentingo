@@ -1,4 +1,4 @@
-import type { EntityType, SupportedLanguages } from "@repo/shared";
+import type { EntityType, SupportedLanguages, VideoProvider } from "@repo/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 
 export type UploadResourceArgs = {
@@ -38,4 +38,5 @@ export type InsertResourceArgs = {
   file: Pick<File, "name">;
   resourceType?: RichTextResourceType;
   displayMode?: RichTextResourceDisplayMode;
+  videoProvider?: VideoProvider;
 };

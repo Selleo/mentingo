@@ -3948,6 +3948,7 @@ export interface GetAssetsResponse {
     size: number | null;
     originalFilename: string | null;
     reference: string;
+    videoProvider?: "self" | "youtube" | "vimeo" | "bunny" | "unknown";
     uploadedBy: string | null;
     /** @format date-time */
     createdAt: string;

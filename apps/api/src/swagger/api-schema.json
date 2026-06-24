@@ -34441,6 +34441,30 @@
                 "reference": {
                   "type": "string"
                 },
+                "videoProvider": {
+                  "anyOf": [
+                    {
+                      "const": "self",
+                      "type": "string"
+                    },
+                    {
+                      "const": "youtube",
+                      "type": "string"
+                    },
+                    {
+                      "const": "vimeo",
+                      "type": "string"
+                    },
+                    {
+                      "const": "bunny",
+                      "type": "string"
+                    },
+                    {
+                      "const": "unknown",
+                      "type": "string"
+                    }
+                  ]
+                },
                 "uploadedBy": {
                   "anyOf": [
                     {

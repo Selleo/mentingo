@@ -31,6 +31,7 @@ import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
+import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
 import { LessonVideoProgressService } from "src/lesson-video-progress/lesson-video-progress.service";
 import { LiveTrainingService } from "src/live-training/live-training.service";
 import { LocalizationService } from "src/localization/localization.service";
@@ -158,6 +159,9 @@ export class LessonService {
         contentType: resource.contentType,
         title: typeof resource.title === "string" ? resource.title : undefined,
         description: typeof resource.description === "string" ? resource.description : undefined,
+        provider: resource.contentType?.startsWith("video/")
+          ? getVideoProviderFromReference(resource.reference)
+          : undefined,
         videoProgress: resource.resourceEntityId
           ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
           : undefined,

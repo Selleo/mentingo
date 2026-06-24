@@ -1,6 +1,11 @@
 import { join } from "node:path";
 
-import { ENTITY_TYPES, RESOURCE_LIBRARY_ASSET_TYPE, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  ENTITY_TYPES,
+  RESOURCE_LIBRARY_ASSET_TYPE,
+  SYSTEM_ROLE_SLUGS,
+  VIDEO_EMBED_PROVIDERS,
+} from "@repo/shared";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -205,6 +210,34 @@ describe("ResourceLibraryController (e2e)", () => {
         uploadedBy: admin.id,
         usageCount: 1,
       });
+    });
+
+    it("returns derived Bunny provider for video assets from their stored reference", async () => {
+      const admin = await createAdmin();
+      const bunnyAsset = await createResource({
+        title: buildJsonbField("en", "Bunny video"),
+        reference: "bunny-11111111-1111-1111-1111-111111111111",
+        contentType: "video/mp4",
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/resource-library/assets")
+        .query({
+          language: "en",
+          page: 1,
+          perPage: 10,
+          search: "Bunny",
+        })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data).toEqual([
+        expect.objectContaining({
+          id: bunnyAsset.id,
+          type: RESOURCE_LIBRARY_ASSET_TYPE.VIDEO,
+          videoProvider: VIDEO_EMBED_PROVIDERS.BUNNY,
+        }),
+      ]);
     });
   });
 

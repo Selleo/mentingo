@@ -6,6 +6,7 @@ import {
   VIDEO_EMBED_PROVIDERS,
 } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { match } from "ts-pattern";
 import videojs from "video.js";
 
@@ -14,6 +15,17 @@ import "videojs-youtube";
 import { cn } from "~/lib/utils";
 
 import { getVideoAspectRatio } from "./aspectRatio";
+import {
+  applyHlsQualitySelection,
+  getHlsQualityLevels,
+  getHlsQualityOptions,
+  HLS_AUTO_HD_VALUE,
+  type HlsQualityLevelList,
+  type HlsQualityOption,
+  type HlsQualitySelection,
+} from "./hlsQuality";
+import { addHlsQualityControlComponent } from "./hlsQualityControlComponent";
+import { HlsQualitySelector } from "./HlsQualitySelector";
 import "./videojs-vimeo-tech";
 import "./videoPlayer.css";
 import { useVideoCoverageTracker } from "./useVideoCoverageTracker";
@@ -33,8 +45,13 @@ interface VideoPlayerProps {
 }
 
 type VideoJSType = ReturnType<typeof videojs>;
+type VideoJsPlayerWithQualityLevels = VideoJSType & {
+  qualityLevels?: () => HlsQualityLevelList;
+};
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
+const HLS_MIME_TYPE = "application/vnd.apple.mpegurl";
+const MP4_MIME_TYPE = "video/mp4";
 
 const enableCustomControls = (player: VideoJSType) => {
   player.controls(true);
@@ -47,16 +64,21 @@ const getTypeByProvider = (provider: VideoProvider) =>
   match(provider)
     .with(VIDEO_EMBED_PROVIDERS.YOUTUBE, () => "video/youtube")
     .with(VIDEO_EMBED_PROVIDERS.VIMEO, () => "video/vimeo")
-    .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => "application/vnd.apple.mpegurl")
-    .with(VIDEO_EMBED_PROVIDERS.SELF, () => "video/mp4")
+    .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => HLS_MIME_TYPE)
+    .with(VIDEO_EMBED_PROVIDERS.SELF, () => MP4_MIME_TYPE)
     .otherwise(() => "");
 
-const getSourceTypes = (url: string, type: string) => {
+const getSourceTypes = (url: string, type: string, provider: VideoProvider) => {
   const isInternalLessonResource = /\/api\/lesson\/lesson-resource\//i.test(url);
+
+  if (!isInternalLessonResource) return [type].filter(Boolean);
 
   return Array.from(
     new Set(
-      isInternalLessonResource ? [type, "application/vnd.apple.mpegurl", "video/mp4"] : [type],
+      match(provider)
+        .with(VIDEO_EMBED_PROVIDERS.BUNNY, () => [HLS_MIME_TYPE])
+        .with(VIDEO_EMBED_PROVIDERS.SELF, () => [MP4_MIME_TYPE])
+        .otherwise(() => [HLS_MIME_TYPE, type, MP4_MIME_TYPE]),
     ),
   ).filter(Boolean) as string[];
 };
@@ -80,9 +102,15 @@ export const VideoPlayer = ({
 }: VideoPlayerProps) => {
   const [controlsVisible, setControlsVisible] = useState(true);
   const [player, setPlayer] = useState<VideoJSType | null>(null);
+  const [qualityControlHost, setQualityControlHost] = useState<HTMLDivElement | null>(null);
+  const [hlsQualityOptions, setHlsQualityOptions] = useState<HlsQualityOption[]>([]);
+  const [hlsQualitySelection, setHlsQualitySelection] =
+    useState<HlsQualitySelection>(HLS_AUTO_HD_VALUE);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const videoRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<VideoJSType | null>(null);
+  const userSelectedHlsQualityRef = useRef(false);
+  const hlsQualitySelectionRef = useRef<HlsQualitySelection>(HLS_AUTO_HD_VALUE);
   const lastSourceRef = useRef<string | null>(null);
   const resumeAppliedSourceRef = useRef<string | null>(null);
   const onAspectRatioChangeRef = useRef(onAspectRatioChange);
@@ -119,6 +147,50 @@ export const VideoPlayer = ({
     clearControlsVisibilityTimer();
     setControlsVisible(false);
   }, [clearControlsVisibilityTimer]);
+
+  const setHlsSelection = useCallback((selection: HlsQualitySelection) => {
+    hlsQualitySelectionRef.current = selection;
+    setHlsQualitySelection(selection);
+  }, []);
+
+  const syncHlsQuality = useCallback(
+    (player: VideoJSType) => {
+      const qualityLevelsList = (player as VideoJsPlayerWithQualityLevels).qualityLevels?.();
+      const qualityLevels = getHlsQualityLevels(qualityLevelsList);
+      const options = getHlsQualityOptions(qualityLevels);
+      const currentSelection = hlsQualitySelectionRef.current;
+      const selectionExists = options.some((option) => option.value === currentSelection);
+      const nextSelection =
+        selectionExists && userSelectedHlsQualityRef.current ? currentSelection : HLS_AUTO_HD_VALUE;
+
+      setHlsQualityOptions(options);
+      setHlsSelection(nextSelection);
+
+      if (options.length) {
+        applyHlsQualitySelection(qualityLevels, nextSelection);
+      }
+    },
+    [setHlsSelection],
+  );
+
+  const selectHlsQuality = useCallback(
+    (selection: HlsQualitySelection) => {
+      const currentPlayer = playerRef.current;
+      if (!currentPlayer) return;
+
+      const qualityLevelsList = (currentPlayer as VideoJsPlayerWithQualityLevels).qualityLevels?.();
+      const qualityLevels = getHlsQualityLevels(qualityLevelsList);
+
+      userSelectedHlsQualityRef.current = true;
+      setHlsSelection(selection);
+      applyHlsQualitySelection(qualityLevels, selection);
+    },
+    [setHlsSelection],
+  );
+
+  useEffect(() => {
+    qualityControlHost?.classList.toggle("vjs-hidden", hlsQualityOptions.length === 0);
+  }, [hlsQualityOptions.length, qualityControlHost]);
 
   const resolvedProvider = useMemo(
     () => (provider === VIDEO_EMBED_PROVIDERS.UNKNOWN ? detectVideoProviderFromUrl(url) : provider),
@@ -157,26 +229,47 @@ export const VideoPlayer = ({
 
     const player = (playerRef.current = videojs(videoElement, options));
     setPlayer(player);
+    const qualityLevels = (player as VideoJsPlayerWithQualityLevels).qualityLevels?.();
 
     player.ready(() => {
       enableCustomControls(player);
+      setQualityControlHost(addHlsQualityControlComponent(player));
     });
+
+    const handleHlsQualitySync = () => syncHlsQuality(player);
 
     player.on("loadedmetadata", () => {
       const aspectRatio = getPlayerAspectRatio(player);
       if (aspectRatio) onAspectRatioChangeRef.current?.(aspectRatio);
+      handleHlsQualitySync();
     });
 
     player.on("ended", () => {
       onEndedRef.current?.();
     });
-  }, [options]);
+
+    player.on("loadedplaylist", handleHlsQualitySync);
+    player.on("loadeddata", handleHlsQualitySync);
+    player.on("canplay", handleHlsQualitySync);
+    player.on("playing", handleHlsQualitySync);
+    qualityLevels?.on("addqualitylevel", handleHlsQualitySync);
+    qualityLevels?.on("change", handleHlsQualitySync);
+
+    return () => {
+      player.off("loadedplaylist", handleHlsQualitySync);
+      player.off("loadeddata", handleHlsQualitySync);
+      player.off("canplay", handleHlsQualitySync);
+      player.off("playing", handleHlsQualitySync);
+      qualityLevels?.off("addqualitylevel", handleHlsQualitySync);
+      qualityLevels?.off("change", handleHlsQualitySync);
+    };
+  }, [options, syncHlsQuality]);
 
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !url) return;
 
-    const sourceTypes = getSourceTypes(url, type);
+    const sourceTypes = getSourceTypes(url, type, resolvedProvider);
     const sourceKey = `${url}::${coverageTracking?.resourceEntityId ?? ""}::${sourceTypes.join("|")}`;
 
     if (lastSourceRef.current === sourceKey) {
@@ -195,9 +288,13 @@ export const VideoPlayer = ({
       player.error(undefined);
       player.removeClass?.("vjs-error");
       enableCustomControls(player);
+      userSelectedHlsQualityRef.current = false;
+      setHlsQualityOptions([]);
+      setHlsSelection(HLS_AUTO_HD_VALUE);
 
       player.src(source);
       player.load();
+      syncHlsQuality(player);
       if (autoPlay) {
         void player.play()?.catch(() => undefined);
       }
@@ -219,7 +316,15 @@ export const VideoPlayer = ({
     return () => {
       player.off("error", onError);
     };
-  }, [autoPlay, coverageTracking?.resourceEntityId, url, type]);
+  }, [
+    autoPlay,
+    coverageTracking?.resourceEntityId,
+    resolvedProvider,
+    setHlsSelection,
+    syncHlsQuality,
+    url,
+    type,
+  ]);
 
   useEffect(() => {
     const sourceKey = lastSourceRef.current;
@@ -281,6 +386,7 @@ export const VideoPlayer = ({
     return () => {
       lastSourceRef.current = null;
       clearControlsVisibilityTimer();
+      setQualityControlHost(null);
 
       if (playerRef.current && !playerRef.current.isDisposed()) {
         playerRef.current.dispose();
@@ -339,6 +445,15 @@ export const VideoPlayer = ({
       )}
     >
       <div ref={videoRef} className="size-full" />
+      {qualityControlHost &&
+        createPortal(
+          <HlsQualitySelector
+            options={hlsQualityOptions}
+            selection={hlsQualitySelection}
+            onSelect={selectHlsQuality}
+          />,
+          qualityControlHost,
+        )}
     </div>
   );
 };

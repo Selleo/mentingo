@@ -1,4 +1,4 @@
-import { ENTITY_TYPES, RESOURCE_LIBRARY_ASSET_TYPE } from "@repo/shared";
+import { ENTITY_TYPES, RESOURCE_LIBRARY_ASSET_TYPE, VIDEO_EMBED_PROVIDERS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -23,6 +23,7 @@ export const assetLibraryAssetSchema = Type.Object({
   size: Type.Union([Type.Number(), Type.Null()]),
   originalFilename: Type.Union([Type.String(), Type.Null()]),
   reference: Type.String(),
+  videoProvider: Type.Optional(Type.Enum(VIDEO_EMBED_PROVIDERS)),
   uploadedBy: Type.Union([UUIDSchema, Type.Null()]),
   createdAt: Type.String({ format: "date-time" }),
   usageCount: Type.Number(),
