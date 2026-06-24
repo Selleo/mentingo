@@ -1,0 +1,4 @@
+interface:
+  display_name: "Mentingo Feature Overview"
+  short_description: "Explain Mentingo features for HR/L&D"
+  default_prompt: "Use $mentingo-feature-overview to explain how the selected Mentingo feature works and what value it gives HR and L&D users."
