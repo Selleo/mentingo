@@ -267,18 +267,14 @@ export class ArticlesController {
   @Public()
   @Get()
   @Validate({
-    request: [
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
-    ],
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
   })
   async getArticles(
     @Query("language") language: SupportedLanguages,
-    @Query("searchQuery") searchQuery?: string,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<GetArticlesResponse> {
-    return this.articlesService.getArticles(language, currentUser, searchQuery);
+    return this.articlesService.getArticles(language, currentUser);
   }
 
   @Post("article")

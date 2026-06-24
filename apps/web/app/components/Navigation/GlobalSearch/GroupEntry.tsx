@@ -1,12 +1,12 @@
 import { Link } from "@remix-run/react";
 
-import type { GetAllGroupsResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const GroupEntry = ({
   item,
   onSelect,
 }: {
-  item: GetAllGroupsResponse["data"][number];
+  item: SearchResponse["data"]["groups"][number];
   onSelect: () => void;
 }) => {
   return (

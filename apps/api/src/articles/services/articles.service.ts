@@ -25,6 +25,7 @@ import {
 } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
@@ -376,11 +377,7 @@ export class ArticlesService {
     return updatedArticle;
   }
 
-  async getArticles(
-    requestedLanguage: SupportedLanguages,
-    currentUser?: CurrentUserType,
-    searchQuery?: string,
-  ) {
+  async getArticles(requestedLanguage: SupportedLanguages, currentUser?: CurrentUserType) {
     await this.checkAccess(currentUser?.userId);
 
     const conditions = this.articlesRepository.getVisibleArticleConditions(
@@ -388,7 +385,7 @@ export class ArticlesService {
       currentUser,
     );
 
-    return this.articlesRepository.getArticles(requestedLanguage, conditions, searchQuery);
+    return this.articlesRepository.getArticles(requestedLanguage, conditions);
   }
 
   async getDraftArticles(requestedLanguage: SupportedLanguages) {
@@ -784,6 +781,7 @@ export class ArticlesService {
       ENTITY_TYPES.ARTICLES,
       RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       language,
+      { quality: IMAGE_QUALITY.MD },
     );
 
     const groupedResources: ArticleResources = {
@@ -817,6 +815,7 @@ export class ArticlesService {
       ENTITY_TYPES.ARTICLES,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
+      { quality: IMAGE_QUALITY.LG },
     );
 
     if (cover) groupedResources.coverImage = this.mapResourceToArticleResource(cover);

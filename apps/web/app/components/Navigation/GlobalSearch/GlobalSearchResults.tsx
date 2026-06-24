@@ -1,25 +1,7 @@
-import { PERMISSIONS } from "@repo/shared";
-import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import {
-  allCoursesQueryOptions,
-  categoriesQueryOptions,
-  lessonsQueryOptions,
-  studentCoursesQueryOptions,
-  usersQueryOptions,
-} from "~/api/queries";
-import { groupsQueryOptions } from "~/api/queries/admin/useGroups";
-import { qaSearchQueryOptions } from "~/api/queries/useAllQA";
-import { articlesSearchQueryOptions } from "~/api/queries/useArticlesSearch";
-import { availableCoursesQueryOptions } from "~/api/queries/useAvailableCourses";
-import { contentCreatorCoursesOptions } from "~/api/queries/useContentCreatorCourses";
-import { useCurrentUser } from "~/api/queries/useCurrentUser";
+import { useGlobalSearch } from "~/api/queries/useGlobalSearch";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { learningPathsQueryOptions } from "~/api/queries/useLearningPaths";
-import { newsSearchQueryOptions } from "~/api/queries/useNewsList";
-import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
-import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { ArticleEntry } from "./ArticleEntry";
@@ -47,197 +29,80 @@ export const GlobalSearchResults = ({
   activeIndex: number;
   setTotalItems: (count: number) => void;
 }) => {
-  const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
-  const { permissions } = usePermissions();
   const { language } = useLanguageStore();
   const isLearningPathsEnabled = globalSettings?.learningPathsEnabled !== false;
-
-  const {
-    canSearchAllCourses,
-    canSearchUsers,
-    canSearchCategories,
-    canSearchGroups,
-    canSearchOwnCourses,
-    canSearchStudentCourses,
-    canSearchAvailableCourses,
-    canSearchLessons,
-    canSearchNews,
-    canSearchArticles,
-    canSearchQA,
-    canSearchLearningPaths,
-  } = useMemo(() => {
-    return {
-      canSearchAllCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_UPDATE]),
-      canSearchUsers: hasPermission(permissions, PERMISSIONS.USER_MANAGE),
-      canSearchCategories: hasAnyPermission(permissions, [
-        PERMISSIONS.CATEGORY_READ,
-        PERMISSIONS.CATEGORY_MANAGE,
-      ]),
-      canSearchGroups: hasAnyPermission(permissions, [
-        PERMISSIONS.GROUP_READ,
-        PERMISSIONS.GROUP_MANAGE,
-      ]),
-      canSearchOwnCourses: hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN),
-      canSearchStudentCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ_ASSIGNED]),
-      canSearchAvailableCourses: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
-      canSearchLessons: hasAnyPermission(permissions, [PERMISSIONS.COURSE_READ]),
-      canSearchNews: hasAnyPermission(permissions, [
-        PERMISSIONS.NEWS_READ_PUBLIC,
-        PERMISSIONS.NEWS_MANAGE,
-        PERMISSIONS.NEWS_MANAGE_OWN,
-      ]),
-      canSearchArticles: hasAnyPermission(permissions, [
-        PERMISSIONS.ARTICLE_READ_PUBLIC,
-        PERMISSIONS.ARTICLE_MANAGE,
-        PERMISSIONS.ARTICLE_MANAGE_OWN,
-      ]),
-      canSearchQA: hasAnyPermission(permissions, [
-        PERMISSIONS.QA_READ_PUBLIC,
-        PERMISSIONS.QA_MANAGE,
-        PERMISSIONS.QA_MANAGE_OWN,
-      ]),
-      canSearchLearningPaths: hasPermission(permissions, PERMISSIONS.LEARNING_PATH_READ),
-    };
-  }, [permissions]);
-
   const isSearchReady = debouncedSearch.length >= 3;
-  const shouldSearchContentCreatorCourses = isSearchReady && canSearchOwnCourses;
-  const shouldSearchStudentCourses =
-    isSearchReady && canSearchStudentCourses && !shouldSearchContentCreatorCourses;
 
-  const tabsToDisplay = useQueries({
-    queries: [
-      allCoursesQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchAllCourses },
-      ),
-      usersQueryOptions({ keyword: debouncedSearch }, { enabled: isSearchReady && canSearchUsers }),
-      categoriesQueryOptions(
-        { title: debouncedSearch },
-        { enabled: isSearchReady && canSearchCategories },
-      ),
-      groupsQueryOptions({ name: debouncedSearch }, { enabled: isSearchReady && canSearchGroups }),
-      contentCreatorCoursesOptions(
-        currentUser?.id,
-        { searchQuery: debouncedSearch, language },
-        canSearchOwnCourses,
-        { enabled: shouldSearchContentCreatorCourses },
-      ),
-      studentCoursesQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: shouldSearchStudentCourses },
-      ),
-      availableCoursesQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchAvailableCourses },
-      ),
-      lessonsQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchLessons },
-      ),
-      learningPathsQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchLearningPaths && isLearningPathsEnabled },
-      ),
-      newsSearchQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchNews },
-      ),
-      articlesSearchQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchArticles },
-      ),
-      qaSearchQueryOptions(
-        { searchQuery: debouncedSearch, language },
-        { enabled: isSearchReady && canSearchQA },
-      ),
-    ],
-    combine: (results) => {
-      const [
-        allCourses,
-        users,
-        categories,
-        groups,
-        contentCreatorCourses,
-        studentCourses,
-        availableCourses,
-        lessons,
-        learningPaths,
-        newsResults,
-        articlesResults,
-        qaResults,
-      ] = results;
+  const { data: searchResults, isFetching } = useGlobalSearch(
+    { searchQuery: debouncedSearch, language },
+    { enabled: isSearchReady },
+  );
 
-      const myCoursesData = shouldSearchContentCreatorCourses
-        ? contentCreatorCourses?.data
-        : studentCourses?.data;
+  const tabsToDisplay = useMemo<{ isFetching: boolean; items: GlobalSearchItem[] }>(() => {
+    const mapped: GlobalSearchItem[] = [
+      {
+        resultType: "allCourses",
+        resultData: searchResults?.allCourses ?? [],
+        Component: CourseEntry,
+      },
+      {
+        resultType: "myCourses",
+        resultData: searchResults?.myCourses ?? [],
+        Component: MyCourseEntry,
+      },
+      {
+        resultType: "availableCourses",
+        resultData: searchResults?.availableCourses ?? [],
+        Component: CourseEntry,
+      },
+      {
+        resultType: "learningPaths",
+        resultData: isLearningPathsEnabled ? (searchResults?.learningPaths ?? []) : [],
+        Component: LearningPathEntry,
+      },
+      {
+        resultType: "lessons",
+        resultData: searchResults?.lessons ?? [],
+        Component: LessonEntry,
+      },
+      {
+        resultType: "users",
+        resultData: searchResults?.users ?? [],
+        Component: UserEntry,
+      },
+      {
+        resultType: "categories",
+        resultData: searchResults?.categories ?? [],
+        Component: CategoryEntry,
+      },
+      {
+        resultType: "groups",
+        resultData: searchResults?.groups ?? [],
+        Component: GroupEntry,
+      },
+      {
+        resultType: "news",
+        resultData: searchResults?.news ?? [],
+        Component: NewsEntry,
+      },
+      {
+        resultType: "articles",
+        resultData: searchResults?.articles ?? [],
+        Component: ArticleEntry,
+      },
+      {
+        resultType: "qa",
+        resultData: searchResults?.qa ?? [],
+        Component: QAEntry,
+      },
+    ];
 
-      const myCoursesComponent = shouldSearchContentCreatorCourses ? CourseEntry : MyCourseEntry;
-
-      const mapped: GlobalSearchItem[] = [
-        {
-          resultType: "allCourses",
-          resultData: allCourses?.data ?? [],
-          Component: CourseEntry,
-        },
-        {
-          resultType: "myCourses",
-          resultData: myCoursesData ?? [],
-          Component: myCoursesComponent,
-        },
-        {
-          resultType: "availableCourses",
-          resultData: availableCourses?.data ?? [],
-          Component: CourseEntry,
-        },
-        {
-          resultType: "learningPaths",
-          resultData: learningPaths?.data?.data ?? [],
-          Component: LearningPathEntry,
-        },
-        {
-          resultType: "lessons",
-          resultData: lessons?.data ?? [],
-          Component: LessonEntry,
-        },
-        {
-          resultType: "users",
-          resultData: users?.data?.data ?? [],
-          Component: UserEntry,
-        },
-        {
-          resultType: "categories",
-          resultData: categories?.data ?? [],
-          Component: CategoryEntry,
-        },
-        {
-          resultType: "groups",
-          resultData: groups?.data ?? [],
-          Component: GroupEntry,
-        },
-        {
-          resultType: "news",
-          resultData: newsResults?.data ?? [],
-          Component: NewsEntry,
-        },
-        {
-          resultType: "articles",
-          resultData: articlesResults?.data ?? [],
-          Component: ArticleEntry,
-        },
-        {
-          resultType: "qa",
-          resultData: qaResults?.data ?? [],
-          Component: QAEntry,
-        },
-      ];
-
-      const isFetching = results.some((result) => Boolean(result?.isFetching));
-
-      return { items: mapped, isFetching };
-    },
-  });
+    return {
+      isFetching,
+      items: mapped,
+    };
+  }, [isFetching, isLearningPathsEnabled, searchResults]);
 
   return (
     <GlobalSearchContent

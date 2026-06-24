@@ -8,7 +8,6 @@ export type NewsListParams = {
   language?: SupportedLanguages;
   page?: number;
   perPage?: number;
-  searchQuery?: string;
 };
 
 type QueryOptions = {
@@ -27,27 +26,9 @@ export const newsListQueryOptions = (
       const response = await ApiClient.api.newsControllerGetNewsList({
         language: params?.language ?? "en",
         page: params?.page,
-        searchQuery: params?.searchQuery,
       });
       return response.data;
     },
-    ...options,
-  });
-
-export const newsSearchQueryOptions = (
-  params: { searchQuery: string; language?: SupportedLanguages },
-  options: QueryOptions = { enabled: true },
-) =>
-  queryOptions({
-    queryKey: ["news-search", params],
-    queryFn: async () => {
-      const response = await ApiClient.api.newsControllerGetNewsList({
-        language: params?.language ?? "en",
-        searchQuery: params.searchQuery,
-      });
-      return response.data;
-    },
-    select: (data) => data.data,
     ...options,
   });
 

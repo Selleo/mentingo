@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
 import { UUIDSchema, UUIDType } from "src/common";
@@ -57,18 +56,14 @@ export class QAController {
   @Public()
   @Get()
   @Validate({
-    request: [
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
-    ],
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: allQAResponseSchema,
   })
   async getAllQA(
     @Query("language") language: SupportedLanguages,
-    @Query("searchQuery") searchQuery: string | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<AllQAResponseBody> {
-    return this.qaService.getAllQA(language, userId, searchQuery);
+    return this.qaService.getAllQA(language, userId);
   }
 
   @Post()

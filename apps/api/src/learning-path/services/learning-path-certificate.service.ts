@@ -15,6 +15,7 @@ import { escape } from "lodash";
 import puppeteer, { type Browser, type Page } from "puppeteer";
 
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
 
@@ -264,7 +265,9 @@ export class LearningPathCertificateService {
       completionDate: this.formatDate(certificate.issuedAt || null),
       fullName: certificate.fullName,
       certificateSignatureUrl: certificate.certificateSignature
-        ? await this.fileService.getFileUrl(certificate.certificateSignature)
+        ? await this.fileService.getFileUrl(certificate.certificateSignature, {
+            quality: IMAGE_QUALITY.SM,
+          })
         : null,
       certificateFontColor: certificate.certificateFontColor,
       createdAt: certificate.createdAt,
@@ -295,7 +298,9 @@ export class LearningPathCertificateService {
     );
 
     const certificateSignatureUrl = certificate.certificateSignature
-      ? await this.fileService.getFileUrl(certificate.certificateSignature)
+      ? await this.fileService.getFileUrl(certificate.certificateSignature, {
+          quality: IMAGE_QUALITY.SM,
+        })
       : null;
 
     return {

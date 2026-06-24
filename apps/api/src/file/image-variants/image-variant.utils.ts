@@ -34,6 +34,6 @@ export const getImageVariantKey = (reference: string, quality: ImageQuality) => 
 export const getAllImageVariantKeys = (reference: string) =>
   IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
 
-export const getDefaultImageQuality = (): ImageQuality => IMAGE_QUALITY.HIGH;
+export const getDefaultImageQuality = (): ImageQuality => IMAGE_QUALITY.XL;
 
 export const getImageVariantContentType = () => IMAGE_VARIANT_CONTENT_TYPE;

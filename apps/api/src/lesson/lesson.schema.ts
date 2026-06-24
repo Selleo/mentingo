@@ -358,7 +358,6 @@ export const updateEmbedLessonSchema = Type.Object({
 export const lessonsFilterSchema = Type.Object({
   title: Type.Optional(Type.String()),
   description: Type.Optional(Type.String()),
-  searchQuery: Type.Optional(Type.String()),
   lessonCompleted: Type.Optional(Type.Boolean()),
 });
 

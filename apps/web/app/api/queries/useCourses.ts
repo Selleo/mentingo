@@ -13,8 +13,6 @@ export type CourseParams = {
   title?: string;
   /** Filter by course description only */
   description?: string;
-  /** Search across both title AND description fields simultaneously */
-  searchQuery?: string;
   category?: string;
   state?: CourseStatus;
   sort?: SortOption;
@@ -38,7 +36,6 @@ export const allCoursesQueryOptions = (
     const response = await ApiClient.api.courseControllerGetAllCourses({
       ...(searchParams?.title && { title: searchParams.title }),
       ...(searchParams?.description && { description: searchParams.description }),
-      ...(searchParams?.searchQuery && { searchQuery: searchParams.searchQuery }),
       ...(searchParams?.category && { category: searchParams.category }),
       ...(searchParams?.authorId && { authorId: searchParams.authorId }),
       ...(searchParams?.state && { status: searchParams.state }),

@@ -96,7 +96,6 @@ export class LessonController {
     request: [
       { type: "query", name: "title", schema: Type.String() },
       { type: "query", name: "description", schema: Type.String() },
-      { type: "query", name: "searchQuery", schema: Type.String() },
       { type: "query", name: "lessonCompleted", schema: Type.String() },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
@@ -105,7 +104,6 @@ export class LessonController {
   async getLessons(
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("lessonCompleted") lessonCompleted: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser: CurrentUserType,
@@ -113,7 +111,6 @@ export class LessonController {
     const filters: LessonsFilters = {
       title,
       description,
-      searchQuery,
       lessonCompleted: lessonCompleted ? lessonCompleted === "true" : undefined,
     };
     const lessons = await this.lessonService.getLessons(currentUser, filters, language);

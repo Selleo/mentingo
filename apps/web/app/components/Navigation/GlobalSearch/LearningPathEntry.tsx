@@ -3,13 +3,13 @@ import { BookOpen } from "lucide-react";
 
 import DefaultPhotoCourse from "~/assets/svgs/default-photo-course.svg";
 
-import type { GetLearningPathsResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const LearningPathEntry = ({
   item,
   onSelect,
 }: {
-  item: GetLearningPathsResponse["data"][number];
+  item: SearchResponse["data"]["learningPaths"][number];
   onSelect: () => void;
 }) => {
   const searchParams = new URLSearchParams({ searchQuery: item.title });

@@ -67,7 +67,7 @@ describe("ImageVariantService", () => {
       Object.values(IMAGE_QUALITY).sort(),
     );
 
-    expect(s3Service.uploadFile).toHaveBeenCalledTimes(4);
+    expect(s3Service.uploadFile).toHaveBeenCalledTimes(IMAGE_VARIANT_DEFINITIONS.length);
 
     const uploadByKey = new Map<string, { buffer: Buffer; contentType: string }>();
 
@@ -106,6 +106,32 @@ describe("ImageVariantService", () => {
 
     expect(result).toBeNull();
     expect(s3Service.uploadFile).not.toHaveBeenCalled();
+  });
+
+  it("repairs variants for an existing logical reference", async () => {
+    const sourceBuffer = await sharp({
+      create: {
+        width: 120,
+        height: 60,
+        channels: 3,
+        background: "#ffffff",
+      },
+    })
+      .webp()
+      .toBuffer();
+
+    const referenceKey = "tenant/course/variants/existing.webp";
+    const result = await service.createVariantsForReference({
+      buffer: sourceBuffer,
+      referenceKey,
+      mimeType: IMAGE_VARIANT_CONTENT_TYPE,
+    });
+
+    expect(result?.referenceKey).toBe(referenceKey);
+    expect(s3Service.uploadFile).toHaveBeenCalledTimes(IMAGE_VARIANT_DEFINITIONS.length);
+    expect(Object.keys(result?.metadata.variants ?? {}).sort()).toEqual(
+      Object.values(IMAGE_QUALITY).sort(),
+    );
   });
 
   it("throws a translation-key conflict when generation or upload fails", async () => {

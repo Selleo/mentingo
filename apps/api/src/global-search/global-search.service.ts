@@ -2,6 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
+import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 
 import { GLOBAL_SEARCH_MIN_QUERY_LENGTH, SEARCH_ENTITY_TYPES } from "./global-search.constants";
 import { GlobalSearchRepository } from "./global-search.repository";
@@ -14,7 +16,10 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class GlobalSearchService {
-  constructor(private readonly globalSearchRepository: GlobalSearchRepository) {}
+  constructor(
+    private readonly globalSearchRepository: GlobalSearchRepository,
+    private readonly fileService: FileService,
+  ) {}
 
   async search(
     searchQuery: string,
@@ -73,7 +78,7 @@ export class GlobalSearchService {
       this.getGroups(trimmedQuery, language, currentUser),
     ]);
 
-    return {
+    return this.resolveImageUrls({
       allCourses,
       myCourses,
       availableCourses,
@@ -85,7 +90,55 @@ export class GlobalSearchService {
       users: usersResults,
       categories: categoriesResults,
       groups: groupsResults,
+    });
+  }
+
+  private async resolveImageUrls(response: GlobalSearchResponse): Promise<GlobalSearchResponse> {
+    const [allCourses, myCourses, availableCourses, learningPaths, users] = await Promise.all([
+      this.resolveCourseImageUrls(response.allCourses),
+      this.resolveCourseImageUrls(response.myCourses),
+      this.resolveCourseImageUrls(response.availableCourses),
+      Promise.all(
+        response.learningPaths.map(async (learningPath) => ({
+          ...learningPath,
+          thumbnailReference: learningPath.thumbnailReference
+            ? await this.fileService.getFileUrl(learningPath.thumbnailReference, {
+                quality: IMAGE_QUALITY.XXS,
+              })
+            : learningPath.thumbnailReference,
+        })),
+      ),
+      Promise.all(
+        response.users.map(async (user) => ({
+          ...user,
+          profilePictureUrl: user.profilePictureUrl
+            ? await this.fileService.getFileUrl(user.profilePictureUrl, {
+                quality: IMAGE_QUALITY.XXS,
+              })
+            : user.profilePictureUrl,
+        })),
+      ),
+    ]);
+
+    return {
+      ...response,
+      allCourses,
+      myCourses,
+      availableCourses,
+      learningPaths,
+      users,
     };
+  }
+
+  private resolveCourseImageUrls(courses: GlobalSearchResponse["allCourses"]) {
+    return Promise.all(
+      courses.map(async (course) => ({
+        ...course,
+        thumbnailUrl: course.thumbnailUrl
+          ? await this.fileService.getFileUrl(course.thumbnailUrl, { quality: IMAGE_QUALITY.XXS })
+          : course.thumbnailUrl,
+      })),
+    );
   }
 
   private getAllCourses(

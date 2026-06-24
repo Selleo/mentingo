@@ -21,7 +21,6 @@ export const allCoursesValidation = {
   request: [
     { type: "query" as const, name: "title", schema: Type.String() },
     { type: "query" as const, name: "description", schema: Type.String() },
-    { type: "query" as const, name: "searchQuery", schema: Type.String() },
     { type: "query" as const, name: "category", schema: Type.String() },
     { type: "query" as const, name: "author", schema: Type.String() },
     {
@@ -50,7 +49,6 @@ export const studentCoursesValidation = {
   request: [
     { type: "query" as const, name: "title", schema: Type.String() },
     { type: "query" as const, name: "description", schema: Type.String() },
-    { type: "query" as const, name: "searchQuery", schema: Type.String() },
     { type: "query" as const, name: "category", schema: Type.String() },
     { type: "query" as const, name: "author", schema: Type.String() },
     {
@@ -79,7 +77,6 @@ export const coursesValidation = {
   request: [
     { type: "query" as const, name: "title", schema: Type.String() },
     { type: "query" as const, name: "description", schema: Type.String() },
-    { type: "query" as const, name: "searchQuery", schema: Type.String() },
     { type: "query" as const, name: "category", schema: Type.String() },
     { type: "query" as const, name: "author", schema: Type.String() },
     {
@@ -109,7 +106,6 @@ export const availableCourseCategoriesValidation = {
   request: [
     { type: "query" as const, name: "title", schema: Type.String() },
     { type: "query" as const, name: "description", schema: Type.String() },
-    { type: "query" as const, name: "searchQuery", schema: Type.String() },
     { type: "query" as const, name: "category", schema: Type.String() },
     { type: "query" as const, name: "author", schema: Type.String() },
     {

@@ -5,105 +5,98 @@ import { NoData } from "~/assets/svgs";
 import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
 
-import type {
-  GetAllCategoriesResponse,
-  GetAllCoursesResponse,
-  GetAllGroupsResponse,
-  GetAllQAResponse,
-  GetArticlesResponse,
-  GetAvailableCoursesResponse,
-  GetLessonsResponse,
-  GetLearningPathsResponse,
-  GetNewsListResponse,
-  GetStudentCoursesResponse,
-  GetUsersResponse,
-} from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
+
+type GlobalSearchData = SearchResponse["data"];
 
 export type GlobalSearchItem =
   | {
       resultType: "allCourses";
-      resultData: GetAllCoursesResponse["data"];
+      resultData: GlobalSearchData["allCourses"];
       Component: (props: {
-        item: GetAllCoursesResponse["data"][number];
+        item: GlobalSearchData["allCourses"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "myCourses";
-      resultData: GetStudentCoursesResponse["data"];
+      resultData: GlobalSearchData["myCourses"];
       Component: (props: {
-        item: GetStudentCoursesResponse["data"][number];
+        item: GlobalSearchData["myCourses"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "availableCourses";
-      resultData: GetAvailableCoursesResponse["data"];
+      resultData: GlobalSearchData["availableCourses"];
       Component: (props: {
-        item: GetAvailableCoursesResponse["data"][number];
+        item: GlobalSearchData["availableCourses"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "learningPaths";
-      resultData: GetLearningPathsResponse["data"];
+      resultData: GlobalSearchData["learningPaths"];
       Component: (props: {
-        item: GetLearningPathsResponse["data"][number];
+        item: GlobalSearchData["learningPaths"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "users";
-      resultData: GetUsersResponse["data"];
+      resultData: GlobalSearchData["users"];
       Component: (props: {
-        item: GetUsersResponse["data"][number];
+        item: GlobalSearchData["users"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "categories";
-      resultData: GetAllCategoriesResponse["data"];
+      resultData: GlobalSearchData["categories"];
       Component: (props: {
-        item: GetAllCategoriesResponse["data"][number];
+        item: GlobalSearchData["categories"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "groups";
-      resultData: GetAllGroupsResponse["data"];
+      resultData: GlobalSearchData["groups"];
       Component: (props: {
-        item: GetAllGroupsResponse["data"][number];
+        item: GlobalSearchData["groups"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "lessons";
-      resultData: GetLessonsResponse["data"];
+      resultData: GlobalSearchData["lessons"];
       Component: (props: {
-        item: GetLessonsResponse["data"][number];
+        item: GlobalSearchData["lessons"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "news";
-      resultData: GetNewsListResponse["data"];
+      resultData: GlobalSearchData["news"];
       Component: (props: {
-        item: GetNewsListResponse["data"][number];
+        item: GlobalSearchData["news"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "articles";
-      resultData: GetArticlesResponse;
+      resultData: GlobalSearchData["articles"];
       Component: (props: {
-        item: GetArticlesResponse[number];
+        item: GlobalSearchData["articles"][number];
         onSelect: () => void;
       }) => JSX.Element;
     }
   | {
       resultType: "qa";
-      resultData: GetAllQAResponse;
-      Component: (props: { item: GetAllQAResponse[number]; onSelect: () => void }) => JSX.Element;
+      resultData: GlobalSearchData["qa"];
+      Component: (props: {
+        item: GlobalSearchData["qa"][number];
+        onSelect: () => void;
+      }) => JSX.Element;
     };
 
 export const GlobalSearchContent = ({

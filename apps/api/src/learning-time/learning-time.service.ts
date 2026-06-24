@@ -7,6 +7,7 @@ import { getSortOptions } from "src/common/helpers/getSortOptions";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { LearningTimeRepository } from "src/learning-time/learning-time.repository";
 import { LocalizationService } from "src/localization/localization.service";
 import { QUEUE_NAMES, QueueService } from "src/queue";
@@ -344,7 +345,7 @@ export class LearningTimeService implements OnModuleInit {
 
   public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
     if (!avatarReference) return null;
-    return await this.fileService.getFileUrl(avatarReference);
+    return await this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS });
   };
 
   private async getFilteredUserIds(query: LearningTimeQuery) {

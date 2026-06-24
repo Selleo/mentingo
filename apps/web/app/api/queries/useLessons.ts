@@ -8,7 +8,6 @@ import type { GetLessonsResponse } from "~/api/generated-api";
 export type EnrolledLessonsParams = {
   title?: string;
   description?: string;
-  searchQuery?: string;
   lessonCompleted?: boolean;
   language?: SupportedLanguages;
 };
@@ -27,7 +26,6 @@ export const lessonsQueryOptions = (
       const response = await ApiClient.api.lessonControllerGetLessons({
         title: searchParams?.title,
         description: searchParams?.description,
-        searchQuery: searchParams?.searchQuery,
         language: searchParams?.language ?? SUPPORTED_LANGUAGES.EN,
         ...(searchParams?.lessonCompleted !== undefined && {
           lessonCompleted: String(searchParams.lessonCompleted),

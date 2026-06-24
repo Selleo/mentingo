@@ -1,9 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq, getTableColumns, sql } from "drizzle-orm";
+import { eq, getTableColumns, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { LocalizationService } from "src/localization/localization.service";
 import { questionsAndAnswers } from "src/storage/schema";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
@@ -61,22 +60,7 @@ export class QARepository {
     return qa;
   }
 
-  async getAllQA(language?: SupportedLanguages, searchQuery?: string) {
-    const conditions: ReturnType<typeof sql>[] = [];
-
-    const isSearching = searchQuery && searchQuery.trim().length >= 3;
-    const searchTerm = isSearching ? searchQuery.trim() : null;
-    const qaTsVector = sql`(
-      setweight(jsonb_to_tsvector('english', ${questionsAndAnswers.title}, '["string"]'), 'A') ||
-      setweight(jsonb_to_tsvector('english', COALESCE(${questionsAndAnswers.description}, '{}'::jsonb), '["string"]'), 'B')
-    )`;
-
-    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
-
-    if (isSearching && searchTerm) {
-      conditions.push(sql`${qaTsVector} @@ ${tsQuery}`);
-    }
-
+  async getAllQA(language?: SupportedLanguages) {
     return this.db
       .select({
         ...getTableColumns(questionsAndAnswers),
@@ -94,12 +78,7 @@ export class QARepository {
         availableLocales: sql<SupportedLanguages[]>`${questionsAndAnswers.availableLocales}`,
       })
       .from(questionsAndAnswers)
-      .where(conditions.length > 0 ? and(...conditions) : undefined)
-      .orderBy(
-        isSearching && searchTerm
-          ? sql`ts_rank(${qaTsVector}, ${tsQuery}) DESC`
-          : sql`${questionsAndAnswers.createdAt} DESC`,
-      );
+      .orderBy(sql`${questionsAndAnswers.createdAt} DESC`);
   }
 
   async createLanguage(

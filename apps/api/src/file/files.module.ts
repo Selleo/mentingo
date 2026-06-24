@@ -26,6 +26,6 @@ import { VideoUploadNotificationGateway } from "./video-upload-notification.gate
     VideoProcessingStateService,
     VideoUploadNotificationGateway,
   ],
-  exports: [FileService],
+  exports: [FileService, ImageVariantService],
 })
 export class FileModule {}

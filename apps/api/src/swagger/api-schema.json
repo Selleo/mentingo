@@ -2829,14 +2829,6 @@
             }
           },
           {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -3016,14 +3008,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -3343,14 +3327,6 @@
             }
           },
           {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -3523,14 +3499,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -3813,14 +3781,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -6109,14 +6069,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -13054,14 +13006,6 @@
                 }
               ]
             }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -13497,14 +13441,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -14187,14 +14123,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],

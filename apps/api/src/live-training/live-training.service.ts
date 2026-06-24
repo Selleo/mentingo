@@ -40,6 +40,7 @@ import {
 } from "src/events";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 import { calendarEvents, liveTrainingLinks, liveTrainings } from "src/storage/schema";
@@ -964,7 +965,7 @@ export class LiveTrainingService {
   private async getProfilePictureUrl(avatarReference: string | null) {
     if (!avatarReference) return null;
 
-    return this.fileService.getFileUrl(avatarReference);
+    return this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS });
   }
 
   private canManageAny(currentUser: CurrentUserType) {

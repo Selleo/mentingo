@@ -27,6 +27,7 @@ import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
@@ -158,19 +159,25 @@ export class SettingsService {
     const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
-      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      ? await this.fileService.getFileUrl(certificateBackgroundImage, {
+          quality: IMAGE_QUALITY.LG,
+        })
       : null;
 
     const platformLogoUrl = platformLogoS3Key
-      ? await this.fileService.getFileUrl(platformLogoS3Key)
+      ? await this.fileService.getFileUrl(platformLogoS3Key, { quality: IMAGE_QUALITY.SM })
       : null;
 
     const platformSimpleLogoUrl = platformSimpleLogoS3Key
-      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key)
+      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key, {
+          quality: IMAGE_QUALITY.XXS,
+        })
       : null;
 
     const loginBackgroundSignedUrl = loginBackgroundImageS3Key
-      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
+      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key, {
+          quality: IMAGE_QUALITY.XL,
+        })
       : null;
 
     return {
@@ -281,19 +288,25 @@ export class SettingsService {
     const reorderedEmailTriggers = this.reorderEmailTriggers(userEmailTriggers);
 
     const certificateBackgroundSignedUrl = certificateBackgroundImage
-      ? await this.fileService.getFileUrl(certificateBackgroundImage)
+      ? await this.fileService.getFileUrl(certificateBackgroundImage, {
+          quality: IMAGE_QUALITY.LG,
+        })
       : null;
 
     const platformLogoUrl = platformLogoS3Key
-      ? await this.fileService.getFileUrl(platformLogoS3Key)
+      ? await this.fileService.getFileUrl(platformLogoS3Key, { quality: IMAGE_QUALITY.SM })
       : null;
 
     const platformSimpleLogoUrl = platformSimpleLogoS3Key
-      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key)
+      ? await this.fileService.getFileUrl(platformSimpleLogoS3Key, {
+          quality: IMAGE_QUALITY.XXS,
+        })
       : null;
 
     const loginBackgroundSignedUrl = loginBackgroundImageS3Key
-      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key)
+      ? await this.fileService.getFileUrl(loginBackgroundImageS3Key, {
+          quality: IMAGE_QUALITY.XL,
+        })
       : null;
 
     return {

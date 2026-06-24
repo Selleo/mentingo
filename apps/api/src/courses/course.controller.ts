@@ -169,7 +169,6 @@ export class CourseController {
   async getAllCourses(
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange") creationDateRange: string[],
@@ -184,7 +183,6 @@ export class CourseController {
     const filters: CoursesFilterSchema = {
       title,
       description,
-      searchQuery,
       category,
       author,
       status,
@@ -215,7 +213,6 @@ export class CourseController {
   async getStudentCourses(
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange[0]") creationDateRangeStart: string,
@@ -229,7 +226,6 @@ export class CourseController {
     const filters: CoursesFilterSchema = {
       title,
       description,
-      searchQuery,
       category,
       author,
       creationDateRange:
@@ -275,7 +271,6 @@ export class CourseController {
   async getAvailableCourses(
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange[0]") creationDateRangeStart: string,
@@ -290,7 +285,6 @@ export class CourseController {
     const filters: CoursesFilterSchema = {
       title,
       description,
-      searchQuery,
       category,
       author,
       creationDateRange:
@@ -311,7 +305,6 @@ export class CourseController {
   async getAvailableCourseCategories(
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("category") category: string,
     @Query("author") author: string,
     @Query("creationDateRange[0]") creationDateRangeStart: string,
@@ -326,7 +319,6 @@ export class CourseController {
     const filters: CoursesFilterSchema = {
       title,
       description,
-      searchQuery,
       category,
       author,
       creationDateRange:
@@ -375,7 +367,6 @@ export class CourseController {
       { type: "query", name: "excludeCourseId", schema: UUIDSchema },
       { type: "query", name: "title", schema: Type.String() },
       { type: "query", name: "description", schema: Type.String() },
-      { type: "query", name: "searchQuery", schema: Type.String() },
       { type: "query", name: "language", schema: supportedLanguagesSchema },
     ],
     response: baseResponse(allCoursesForContentCreatorSchema),
@@ -386,7 +377,6 @@ export class CourseController {
     @Query("excludeCourseId") excludeCourseId: UUIDType,
     @Query("title") title: string,
     @Query("description") description: string,
-    @Query("searchQuery") searchQuery: string,
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") currentUserId: UUIDType,
   ): Promise<BaseResponse<AllCoursesForContentCreatorResponse>> {
@@ -397,7 +387,6 @@ export class CourseController {
       scope,
       title,
       description,
-      searchQuery,
       language,
     };
 

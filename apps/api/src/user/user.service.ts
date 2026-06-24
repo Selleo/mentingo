@@ -55,6 +55,7 @@ import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { GroupService } from "src/group/group.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -108,6 +109,7 @@ import type { UserDetailsResponse, UserDetailsWithAvatarKey } from "./schemas/us
 import type { UserActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type { ChangePasswordBody } from "src/user/schemas/changePassword.schema";
 import type { CreateUserBody } from "src/user/schemas/createUser.schema";
 import type { AdminOverdueCourseNotificationRecipient } from "src/user/types/admin-overdue-course-notification-recipient.type";
@@ -334,9 +336,7 @@ export class UserService {
 
     const { avatarReference, ...user } = userBio;
 
-    const profilePictureUrl = avatarReference
-      ? await this.fileService.getFileUrl(avatarReference)
-      : null;
+    const profilePictureUrl = await this.getUsersProfilePictureUrl(avatarReference);
 
     return {
       ...user,
@@ -890,9 +890,12 @@ export class UserService {
     return { newUsersLanguage, settingsOverride };
   }
 
-  public getUsersProfilePictureUrl = async (avatarReference: string | null) => {
+  public getUsersProfilePictureUrl = async (
+    avatarReference: string | null,
+    options: { quality?: ImageQuality } = { quality: IMAGE_QUALITY.XXS },
+  ) => {
     if (!avatarReference) return null;
-    return await this.fileService.getFileUrl(avatarReference);
+    return await this.fileService.getFileUrl(avatarReference, options);
   };
 
   public async getAdminsToNotifyAboutNewUser(emailToExclude: string) {

@@ -19,3 +19,16 @@ Autoplay uses a new attribute to know each action. In order to set that attribut
 ```sh
 npx tsx ./scripts/migrateAutoplay.ts
 ```
+
+# Image Variant Migration Script
+
+Backfills stored image references to the image variant format. The script is idempotent: old
+original image references are converted to new variant references, and existing variant references
+are repaired when one of the expected sizes is missing.
+
+> **Note:** Legacy original S3 objects are kept for rollback. Unsupported formats, remote URLs, and
+> Bunny video references are skipped.
+
+```sh
+npx tsx ./scripts/migrateImageVariants.ts
+```
