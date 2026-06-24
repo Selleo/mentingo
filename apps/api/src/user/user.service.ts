@@ -693,7 +693,7 @@ export class UserService {
     context: CreateUserContext = { flowType: USER_CREATION_FLOW_TYPE.PASSWORD_REMINDER },
   ) {
     const createUser = async (trx: DatabasePg) => {
-      await this.assertUserEmailAvailable(data.email);
+      await this.assertUserEmailAvailable(data.email, trx);
 
       const { createdUser, token, newUsersLanguage } = await this.createUserCore(
         trx,
@@ -771,8 +771,8 @@ export class UserService {
     return await this.db.transaction(createUser);
   }
 
-  private async assertUserEmailAvailable(email: string) {
-    const [existingUser] = await this.dbAdmin
+  private async assertUserEmailAvailable(email: string, dbInstance: DatabasePg) {
+    const [existingUser] = await dbInstance
       .select({ id: users.id })
       .from(users)
       .where(eq(users.email, email))

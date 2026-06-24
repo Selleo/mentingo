@@ -116,7 +116,7 @@ export class UserImportService {
     const importValidationLookup = this.prepareImportValidationLookupData(usersData);
 
     const [usersWithExistingEmails, resolvedImportData] = await Promise.all([
-      this.userImportRepository.findExistingUsersByEmails(importValidationLookup.emails),
+      this.userImportRepository.findExistingUsersByEmails(importValidationLookup.emails, trx),
       this.userImportRepository.findImportValidationData(importValidationLookup, trx),
     ]);
 

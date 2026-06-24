@@ -4,7 +4,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
-import { DB_ADMIN } from "src/storage/db/db.providers";
+import { DB } from "src/storage/db/db.providers";
 import {
   createTokens,
   groups,
@@ -29,14 +29,14 @@ import type {
 @Injectable()
 export class UserImportRepository {
   constructor(
-    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
-  async findExistingUsersByEmails(emails: string[]) {
+  async findExistingUsersByEmails(emails: string[], dbInstance: DatabasePg = this.db) {
     if (!emails.length) return [];
 
-    return this.dbAdmin
+    return dbInstance
       .select({ email: users.email })
       .from(users)
       .where(inArray(users.email, emails));

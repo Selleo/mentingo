@@ -1,12 +1,15 @@
 import { Test, type TestingModule } from "@nestjs/testing";
 import cookieParser from "cookie-parser";
+import { drizzle } from "drizzle-orm/postgres-js";
 import * as express from "express";
+import postgres from "postgres";
 
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { createDbProxy, DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import * as schema from "src/storage/schema";
 
 import { DEFAULT_TEST_TENANT_HOST, ensureTenant } from "./helpers/tenant-helpers";
 import { EmailTestingAdapter } from "./helpers/test-email.adapter";
@@ -14,10 +17,52 @@ import { truncateAllTables } from "./helpers/test-helpers";
 import { setupTestDatabase } from "./test-database";
 
 import type { Provider } from "@nestjs/common";
+import type { DatabasePg } from "src/common";
 
 type E2ETestOptions = {
   customProviders?: Provider[];
   enableActivityLogs?: boolean;
+  useDbProxy?: boolean;
+};
+
+const TEST_APP_ROLE = "lms_test_app_user";
+const TEST_APP_ROLE_PASSWORD = "replace_with_strong_password";
+
+const getAppDatabaseUrl = (databaseUrl: string) => {
+  const url = new URL(databaseUrl);
+  url.username = TEST_APP_ROLE;
+  url.password = TEST_APP_ROLE_PASSWORD;
+
+  return url.toString();
+};
+
+const ensureTestAppRole = async (pgSqlAdmin: ReturnType<typeof postgres>) => {
+  await pgSqlAdmin.unsafe(`
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${TEST_APP_ROLE}') THEN
+        CREATE ROLE ${TEST_APP_ROLE} LOGIN;
+      END IF;
+    END
+    $$;
+  `);
+  await pgSqlAdmin.unsafe(`
+    ALTER ROLE ${TEST_APP_ROLE}
+      WITH
+      LOGIN
+      PASSWORD '${TEST_APP_ROLE_PASSWORD}'
+      NOSUPERUSER
+      NOCREATEDB
+      NOCREATEROLE
+      NOBYPASSRLS;
+  `);
+  await pgSqlAdmin.unsafe(`GRANT USAGE ON SCHEMA public TO ${TEST_APP_ROLE}`);
+  await pgSqlAdmin.unsafe(
+    `GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${TEST_APP_ROLE}`,
+  );
+  await pgSqlAdmin.unsafe(
+    `GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO ${TEST_APP_ROLE}`,
+  );
 };
 
 export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provider[] = {}) {
@@ -45,12 +90,24 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
 
   await truncateAllTables(dbAdmin, db);
 
+  let pgSqlApp: ReturnType<typeof postgres> | null = null;
+  let dbApp: DatabasePg = db;
+
+  if (options.useDbProxy) {
+    await ensureTestAppRole(pgSqlAdmin);
+    pgSqlApp = postgres(getAppDatabaseUrl(pgConnectionString), { max: 10 });
+    dbApp = drizzle(pgSqlApp, { schema }) as DatabasePg;
+    await pgSqlApp`SELECT set_config('app.tenant_id', ${defaultTenantId}, false)`;
+  }
+
   let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
     providers: [...customProviders],
   })
     .overrideProvider(DB)
-    .useValue(db)
+    .useValue(options.useDbProxy ? createDbProxy(dbApp) : db)
+    .overrideProvider(DB_APP)
+    .useValue(dbApp)
     .overrideProvider(DB_ADMIN)
     .useValue(dbAdmin)
     .overrideProvider(EmailAdapter)
@@ -128,7 +185,11 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
   let cleanupPromise: Promise<void> | null = null;
 
   const cleanup = async () => {
-    cleanupPromise ??= Promise.all([pgSql.end(), pgSqlAdmin.end()]).then(() => undefined);
+    cleanupPromise ??= Promise.all([
+      pgSql.end(),
+      pgSqlAdmin.end(),
+      pgSqlApp?.end() ?? Promise.resolve(),
+    ]).then(() => undefined);
     await cleanupPromise;
   };
 

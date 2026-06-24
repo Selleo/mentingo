@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { defer, lastValueFrom } from "rxjs";
+import { defer, from, lastValueFrom } from "rxjs";
 
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
 import { TenantResolverService } from "./tenant-resolver.service";
@@ -34,13 +34,15 @@ export class TenantRlsInterceptor implements NestInterceptor {
       return next.handle();
     }
 
-    return defer(async () => {
-      const tenantId = await this.tenantResolver.resolveTenantId(req);
+    return defer(() =>
+      from(
+        this.tenantResolver.resolveTenantId(req).then((tenantId) => {
+          if (!tenantId) throw new UnauthorizedException("Missing tenantId");
 
-      if (!tenantId) throw new UnauthorizedException("Missing tenantId");
-
-      return this.runner.runWithTenant(tenantId, () => lastValueFrom(next.handle()));
-    });
+          return this.runner.runWithTenant(tenantId, () => lastValueFrom(next.handle()));
+        }),
+      ),
+    );
   }
 
   private shouldBypassTenantResolution(path: string): boolean {
