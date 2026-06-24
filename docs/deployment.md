@@ -526,11 +526,17 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
 2.  Create a `docker-compose.yml` file with the following content:
 
     ```yaml
+    x-logging: &default-logging
+      driver: "journald"
+      options:
+        tag: "{{.Name}}"
+
     services:
       app:
         image: app:latest
         container_name: app
         restart: unless-stopped
+        logging: *default-logging
         env_file: .env.prd.api
         command: server
         ports:
@@ -556,6 +562,7 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
         image: ui:latest
         container_name: frontend
         restart: unless-stopped
+        logging: *default-logging
         env_file: .env.prd.ui
         ports:
           - "3080:8080"
@@ -576,7 +583,28 @@ This guide provides a complete walkthrough for deploying the Mentingo applicatio
         driver: local
     ```
 
-3.  Create two environment files.
+3.  Configure how long Linux should keep Docker logs stored by `journald`.
+
+    Open the `journald` configuration file as administrator:
+
+    ```bash
+    sudo vim /etc/systemd/journald.conf
+    ```
+
+    Find the `[Journal]` section and add or uncomment `MaxRetentionSec`. Set it to the retention period you want, for example:
+
+    ```ini
+    [Journal]
+    MaxRetentionSec=14day
+    ```
+
+    Save the file and restart `systemd-journald` to apply the change:
+
+    ```bash
+    sudo systemctl restart systemd-journald
+    ```
+
+4.  Create two environment files.
 
     **File 1: `.env.prd.api`**
 
