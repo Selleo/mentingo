@@ -1023,7 +1023,11 @@
       "updatedSelectedUsersSuccessfully": "Successfully updated selected users",
       "deletedSelectedUsersSuccessfully": "Successfully deleted selected users",
       "archivedSelectedUsersSuccessfully": "Successfully archived selected users",
-      "archiveSelectedUsersError": "Failed to archive selected users"
+      "archiveSelectedUsersError": "Failed to archive selected users",
+      "passwordResetEmailsSent": "Password reset emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
+      "passwordResetEmailsError": "Failed to send password reset emails",
+      "passwordCreationEmailsSent": "Password creation emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
+      "passwordCreationEmailsError": "Failed to send password creation emails"
     },
     "field": {
       "description": "Description",
@@ -1479,6 +1483,8 @@
     "dropdown": {
       "roles": "Roles",
       "groups": "Groups",
+      "passwordReset": "Send password reset email",
+      "passwordCreation": "Resend password creation email",
       "delete": "Delete",
       "archive": "Archive"
     },
@@ -1487,6 +1493,8 @@
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
+        "passwordReset": "Send password reset email",
+        "passwordCreation": "Resend password creation email",
         "archive": "Archive user accounts",
         "confirmation": "Are you sure you want to proceed?",
         "import": "Import users",
@@ -1496,6 +1504,8 @@
         "delete": "Delete",
         "role": "Save",
         "group": "Save",
+        "passwordReset": "Send",
+        "passwordCreation": "Send",
         "archive": "Archive",
         "continue": "Confirm",
         "downloadSample": "Download sample file"
@@ -1506,6 +1516,8 @@
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "passwordReset": "Send password reset emails to selected users with existing passwords. Users without passwords will be skipped.",
+        "passwordCreation": "Resend password creation emails to selected users without passwords. Users with existing passwords will be skipped.",
         "archive": "Are you sure you want to archive these accounts?",
         "import": "Upload a .csv or .xlsx file with the following columns: firstName, lastName, email, role (admin, student or content_creator), groups (\"group1,group2\"), language (en or pl).",
         "noUsersImported": "No users were imported.",
@@ -1577,7 +1589,9 @@
       "userWithCreatedCoursesError": "Cannot delete a user who is the author of existing courses. Only anonymization and archiving are available."
     },
     "button": {
-      "createUser": "Create user"
+      "createUser": "Create user",
+      "passwordResetEmail": "Send password reset email",
+      "passwordCreationEmail": "Resend password creation email"
     },
     "error": {
       "userNotFound": "User not found"
@@ -4363,6 +4377,8 @@
       "start_course": "Started",
       "group_assignment": "Assigned",
       "users_import": "Users imported",
+      "send_password_reset_email": "Password reset email sent",
+      "resend_password_creation_email": "Password creation email resent",
       "complete_lesson": "Completed",
       "complete_course": "Completed",
       "complete_chapter": "Completed",

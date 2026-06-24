@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { endOfDay, startOfDay } from "date-fns";
 import { count, desc, getTableColumns, and, like, gte, lte } from "drizzle-orm";
 
@@ -23,6 +23,8 @@ import type { ActorUserType } from "src/common/types/actor-user.type";
 
 @Injectable()
 export class ActivityLogsService {
+  private readonly logger = new Logger(ActivityLogsService.name);
+
   constructor(
     @Inject("DB") private readonly db: DatabasePg,
     private readonly activityLogsQueueService: ActivityLogsQueueService,
@@ -55,13 +57,20 @@ export class ActivityLogsService {
       context: payload.context ?? null,
     };
 
-    await this.db.insert(activityLogs).values({
-      ...payload.actor,
-      actionType: payload.operation,
-      resourceType: payload.resourceType ?? null,
-      resourceId: payload.resourceId ?? null,
-      metadata: settingsToJSONBuildObject(metadata),
-    });
+    try {
+      await this.db.insert(activityLogs).values({
+        ...payload.actor,
+        actionType: payload.operation,
+        resourceType: payload.resourceType ?? null,
+        resourceId: payload.resourceId ?? null,
+        metadata: settingsToJSONBuildObject(metadata),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to persist activity log for operation ${payload.operation}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   async getActivityLogs({

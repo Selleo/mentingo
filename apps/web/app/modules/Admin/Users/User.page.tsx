@@ -1,12 +1,14 @@
 import { useParams } from "@remix-run/react";
 import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
 import { startCase } from "lodash-es";
-import { UserCircle2 } from "lucide-react";
+import { KeyRound, Mail, UserCircle2 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useAdminUpdateUser } from "~/api/mutations/admin/useAdminUpdateUser";
+import { useBulkResendPasswordCreationEmails } from "~/api/mutations/admin/useBulkResendPasswordCreationEmails";
+import { useBulkSendPasswordResetEmails } from "~/api/mutations/admin/useBulkSendPasswordResetEmails";
 import { userQueryOptions, useUserById } from "~/api/queries/admin/useUserById";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
@@ -49,6 +51,10 @@ const User = () => {
 
   const { data: user, isLoading } = useUserById(id, language);
   const { mutateAsync: updateUser } = useAdminUpdateUser();
+  const { mutateAsync: sendPasswordResetEmail, isPending: isSendingPasswordResetEmail } =
+    useBulkSendPasswordResetEmails();
+  const { mutateAsync: resendPasswordCreationEmail, isPending: isResendingPasswordCreationEmail } =
+    useBulkResendPasswordCreationEmails();
 
   const {
     control,
@@ -98,6 +104,14 @@ const User = () => {
     });
   };
 
+  const handleSendPasswordResetEmail = () => {
+    sendPasswordResetEmail({ userIds: [id] });
+  };
+
+  const handleResendPasswordCreationEmail = () => {
+    resendPasswordCreationEmail({ userIds: [id] });
+  };
+
   const breadcrumbs = [
     { title: t("adminUserView.breadcrumbs.users"), href: "/admin/users" },
     { title: t("adminUserView.breadcrumbs.userDetails"), href: `/admin/users/${id}` },
@@ -116,7 +130,7 @@ const User = () => {
                 </h2>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div>
               <Badge
                 data-testid={USER_PAGE_HANDLES.STATUS_BADGE}
                 variant={user.archived ? "outline" : "secondary"}
@@ -128,14 +142,40 @@ const User = () => {
           </div>
         </div>
         <Tabs defaultValue="information" className="w-full">
-          <TabsList className="h-auto rounded-lg border bg-neutral-50 p-1">
-            <TabsTrigger data-testid={USER_PAGE_HANDLES.INFORMATION_TAB} value="information">
-              {t("adminUserView.tabs.information")}
-            </TabsTrigger>
-            <TabsTrigger data-testid={USER_PAGE_HANDLES.PERMISSIONS_TAB} value="permissions">
-              {t("adminUserView.tabs.permissions")}
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <TabsList className="rounded-lg border bg-neutral-50 p-1">
+              <TabsTrigger data-testid={USER_PAGE_HANDLES.INFORMATION_TAB} value="information">
+                {t("adminUserView.tabs.information")}
+              </TabsTrigger>
+              <TabsTrigger data-testid={USER_PAGE_HANDLES.PERMISSIONS_TAB} value="permissions">
+                {t("adminUserView.tabs.permissions")}
+              </TabsTrigger>
+            </TabsList>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <Button
+                data-testid={USER_PAGE_HANDLES.PASSWORD_RESET_EMAIL_BUTTON}
+                type="button"
+                variant="outline"
+                className="h-10 gap-2"
+                onClick={handleSendPasswordResetEmail}
+                disabled={isSendingPasswordResetEmail}
+              >
+                <KeyRound className="size-4 shrink-0" />
+                {t("adminUserView.button.passwordResetEmail")}
+              </Button>
+              <Button
+                data-testid={USER_PAGE_HANDLES.PASSWORD_CREATION_EMAIL_BUTTON}
+                type="button"
+                variant="outline"
+                className="h-10 gap-2"
+                onClick={handleResendPasswordCreationEmail}
+                disabled={isResendingPasswordCreationEmail}
+              >
+                <Mail className="size-4 shrink-0" />
+                {t("adminUserView.button.passwordCreationEmail")}
+              </Button>
+            </div>
+          </div>
           <TabsContent value="information" className="pt-4">
             <form
               onSubmit={handleSubmit(onSubmit)}

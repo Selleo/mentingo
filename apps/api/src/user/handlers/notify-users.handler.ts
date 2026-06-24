@@ -27,6 +27,7 @@ import { UserCourseFinishedEvent } from "src/events/user/user-course-finished.ev
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UsersLongInactivityEvent } from "src/events/user/user-long-inactivity.event";
+import { UserPasswordEmailsEvent } from "src/events/user/user-password-emails.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { UsersShortInactivityEvent } from "src/events/user/user-short-inactivity.event";
 import { UserWelcomeEvent } from "src/events/user/user-welcome.event";
@@ -46,6 +47,7 @@ type EventType =
   | UserInviteEvent
   | UserFirstLoginEvent
   | UserPasswordReminderEvent
+  | UserPasswordEmailsEvent
   | UserWelcomeEvent
   | UsersAssignedToCourseEvent
   | UsersImportInviteEmailsEvent
@@ -58,6 +60,7 @@ const UserNotificationEvents = [
   UserInviteEvent,
   UserFirstLoginEvent,
   UserPasswordReminderEvent,
+  UserPasswordEmailsEvent,
   UserWelcomeEvent,
   UsersAssignedToCourseEvent,
   UsersImportInviteEmailsEvent,
@@ -94,6 +97,11 @@ export class NotifyUsersHandler implements IEventHandler {
 
     if (event instanceof UserPasswordReminderEvent) {
       await this.notifyUserAboutPasswordReminder(event);
+      return;
+    }
+
+    if (event instanceof UserPasswordEmailsEvent) {
+      await this.notifyUsersAboutPasswordEmails(event);
       return;
     }
 
@@ -320,6 +328,25 @@ export class NotifyUsersHandler implements IEventHandler {
         { tenantId },
       );
     });
+  }
+
+  async notifyUsersAboutPasswordEmails(event: UserPasswordEmailsEvent) {
+    const { emails } = event.userPasswordEmails;
+
+    await processInBatches(
+      emails,
+      ({ to, subject, text, html, tenantId }) =>
+        this.emailService.sendEmailWithLogo(
+          {
+            to,
+            subject,
+            text,
+            html,
+          },
+          { tenantId },
+        ),
+      { batchSize: EMAIL_BATCH_SIZE },
+    );
   }
 
   async notifyUserAboutWelcome(event: UserWelcomeEvent) {

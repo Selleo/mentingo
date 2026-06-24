@@ -1022,7 +1022,11 @@
       "updatedSelectedUsersSuccessfully": "Ausgewählte Benutzer erfolgreich aktualisiert",
       "deletedSelectedUsersSuccessfully": "Ausgewählte Benutzer wurden erfolgreich gelöscht",
       "archivedSelectedUsersSuccessfully": "Ausgewählte Benutzer erfolgreich archiviert",
-      "archiveSelectedUsersError": "Ausgewählte Benutzer konnten nicht archiviert werden"
+      "archiveSelectedUsersError": "Ausgewählte Benutzer konnten nicht archiviert werden",
+      "passwordResetEmailsSent": "Passwort-Zurücksetzen-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
+      "passwordResetEmailsError": "Passwort-Zurücksetzen-E-Mails konnten nicht gesendet werden",
+      "passwordCreationEmailsSent": "Passwort-Erstellungs-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
+      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden"
     },
     "field": {
       "description": "Beschreibung",
@@ -1418,6 +1422,8 @@
     "dropdown": {
       "roles": "Rollen",
       "groups": "Gruppen",
+      "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
+      "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
       "delete": "Löschen",
       "archive": "Archiv"
     },
@@ -1426,6 +1432,8 @@
         "delete": "Möchten Sie diese Konten löschen?",
         "role": "Rollen ändern",
         "group": "Gruppen ändern",
+        "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
+        "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
         "archive": "Benutzerkonten archivieren",
         "confirmation": "Sind Sie sicher, dass Sie fortfahren möchten?",
         "import": "Benutzer importieren",
@@ -1435,6 +1443,8 @@
         "delete": "Löschen",
         "role": "Speichern",
         "group": "Speichern",
+        "passwordReset": "Senden",
+        "passwordCreation": "Senden",
         "archive": "Archiv",
         "continue": "Bestätigen",
         "downloadSample": "Beispieldatei herunterladen"
@@ -1445,6 +1455,8 @@
         "confirmationForGroup_other": "Sie ändern die Gruppe für {{ count }} Benutzer in {{ group }}",
         "confirmationForRole_one": "Sie ändern die Rolle für einen Benutzer in {{ role }}.",
         "confirmationForRole_other": "Sie ändern die Rolle für {{ count }} Benutzer in {{ role }}",
+        "passwordReset": "Senden Sie Passwort-Zurücksetzen-E-Mails an ausgewählte Benutzer mit bestehendem Passwort. Benutzer ohne Passwort werden übersprungen.",
+        "passwordCreation": "Senden Sie Passwort-Erstellungs-E-Mails erneut an ausgewählte Benutzer ohne Passwort. Benutzer mit bestehendem Passwort werden übersprungen.",
         "archive": "Sind Sie sicher, dass Sie diese Konten archivieren möchten?",
         "import": "Laden Sie eine CSV- oder XLSX-Datei mit den folgenden Spalten hoch: Vorname, Nachname, E-Mail, Rolle (Administrator, Student oder Inhaltsersteller), Gruppen („Gruppe1, Gruppe2“), Sprache (EN oder Pl).",
         "noUsersImported": "Es wurden keine Benutzer importiert.",
@@ -1516,7 +1528,9 @@
       "userWithCreatedCoursesError": "Ein Benutzer, der Autor vorhandener Kurse ist, kann nicht gelöscht werden. Es stehen nur Anonymisierung und Archivierung zur Verfügung."
     },
     "button": {
-      "createUser": "Benutzer erstellen"
+      "createUser": "Benutzer erstellen",
+      "passwordResetEmail": "Passwort-Zurücksetzen-E-Mail senden",
+      "passwordCreationEmail": "Passwort-Erstellungs-E-Mail erneut senden"
     },
     "error": {
       "userNotFound": "Benutzer nicht gefunden"
@@ -3668,6 +3682,8 @@
       "start_course": "Gestartet",
       "group_assignment": "Zugewiesen",
       "users_import": "Benutzer importiert",
+      "send_password_reset_email": "Passwort-Zurücksetzen-E-Mail gesendet",
+      "resend_password_creation_email": "Passwort-Erstellungs-E-Mail erneut gesendet",
       "complete_lesson": "Abgeschlossen",
       "complete_course": "Abgeschlossen",
       "complete_chapter": "Abgeschlossen",

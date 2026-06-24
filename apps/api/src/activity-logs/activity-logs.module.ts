@@ -20,6 +20,7 @@ import { LiveTrainingActivityHandler } from "./handlers/live-training-activity.h
 import { NewsActivityHandler } from "./handlers/news-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 import { UserActivityHandler } from "./handlers/user-activity.handler";
+import { UserPasswordEmailsActivityHandler } from "./handlers/user-password-emails-activity.handler";
 import { UsersImportActivityHandler } from "./handlers/users-import-activity.handler";
 import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
@@ -37,6 +38,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     CategoryActivityHandler,
     SettingsActivityHandler,
     UserActivityHandler,
+    UserPasswordEmailsActivityHandler,
     UsersImportActivityHandler,
     EnvActivityHandler,
     AuthActivityHandler,

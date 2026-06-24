@@ -49,30 +49,35 @@ export const EditDropdown = ({ dropdownItems, disabled, triggerTestId }: EditDro
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent className="w-64 rounded bg-white p-2 text-black shadow-lg transition-all duration-200">
+      <DropdownMenuContent
+        className="w-80 rounded bg-white p-2 text-black shadow-lg transition-all duration-200"
+        align="end"
+      >
         {dropdownItems.map((item) => {
           return (
             <DropdownMenuItem key={item.translationKey}>
               <Button
                 data-testid={item.testId}
                 className={cn(
-                  "body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950",
+                  "body-sm w-full min-w-0 justify-start gap-3 text-neutral-950 hover:text-neutral-950",
                   { "text-error-700 hover:text-error-700": item.destructive },
                 )}
                 onClick={item.action}
                 variant="ghost"
               >
-                {item.iconName ? (
-                  <Icon
-                    name={item.iconName}
-                    className={cn("size-4 text-accent-foreground", {
-                      "text-error-700 hover:text-error-700": item.destructive,
-                    })}
-                  />
-                ) : (
-                  item.icon
-                )}
-                {t(item.translationKey)}
+                <span className="flex size-5 shrink-0 items-center justify-center [&>svg]:size-4 [&>svg]:shrink-0">
+                  {item.iconName ? (
+                    <Icon
+                      name={item.iconName}
+                      className={cn("size-4 shrink-0 text-accent-foreground", {
+                        "text-error-700 hover:text-error-700": item.destructive,
+                      })}
+                    />
+                  ) : (
+                    item.icon
+                  )}
+                </span>
+                <span className="min-w-0 truncate">{t(item.translationKey)}</span>
               </Button>
             </DropdownMenuItem>
           );
