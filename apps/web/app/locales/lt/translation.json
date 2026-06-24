@@ -1442,7 +1442,8 @@
         "role": "Išsaugoti",
         "group": "Išsaugoti",
         "archive": "Archyvas",
-        "continue": "Patvirtinti"
+        "continue": "Patvirtinti",
+        "downloadSample": "Atsisiųsti pavyzdinį failą"
       },
       "description": {
         "delete": "Ar tikrai norite ištrinti šias paskyras? Šis veiksmas yra negrįžtamas.",
@@ -1461,6 +1462,16 @@
       },
       "note": {
         "import": "Pastaba: esami vartotojai bus praleisti. Jei grupė nurodyta ir jos nėra, nauja grupė nebus sukurta. Kalbos laukas yra neprivalomas; jei nepateikta arba ji neteisinga, numatytoji kalba bus nustatyta į administratoriaus kalbą."
+      },
+      "sampleFile": {
+        "filename": "vartotoju-importo-pavyzdys.csv",
+        "row": {
+          "firstName": "Jonas",
+          "lastName": "Jonaitis",
+          "email": "jonas.jonaitis@example.com",
+          "groupOne": "grupe1",
+          "groupTwo": "grupe2"
+        }
       },
       "tabs": {
         "imported": "Importuota",

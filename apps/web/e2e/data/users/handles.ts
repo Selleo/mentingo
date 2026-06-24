@@ -80,6 +80,7 @@ export const USERS_IMPORT_MODAL_HANDLES = {
   ROOT: "users-import-modal-root",
   UPLOAD: "users-import-modal-upload",
   FILE_INPUT: "users-import-modal-file-input",
+  SAMPLE_DOWNLOAD: "users-import-modal-sample-download",
   SUBMIT: "users-import-modal-submit",
   RESULT: "users-import-modal-result",
   RESULT_IMPORTED_TAB: "users-import-modal-result-imported-tab",

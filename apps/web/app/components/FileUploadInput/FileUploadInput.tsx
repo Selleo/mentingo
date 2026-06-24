@@ -89,7 +89,7 @@ const FileUploadInput = ({
 
   if (!videoPreview && !file) {
     return (
-      <div {...getRootProps()} className="max-w-[440px]">
+      <div {...getRootProps()} className={cn("w-full max-w-[440px]", className)}>
         <EmptyStateUpload className={className} />
         <input {...getInputProps()} className="sr-only" data-testid={inputTestId} />
       </div>

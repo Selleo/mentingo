@@ -1436,7 +1436,8 @@
         "role": "Speichern",
         "group": "Speichern",
         "archive": "Archiv",
-        "continue": "Bestätigen"
+        "continue": "Bestätigen",
+        "downloadSample": "Beispieldatei herunterladen"
       },
       "description": {
         "delete": "Sind Sie sicher, dass Sie diese Konten löschen möchten? Diese Aktion ist irreversibel.",
@@ -1455,6 +1456,16 @@
       },
       "note": {
         "import": "Hinweis: Bestehende Benutzer werden übersprungen. Wenn eine Gruppe angegeben ist und nicht existiert, wird keine neue Gruppe erstellt. Das Sprachfeld ist optional; Falls nicht angegeben oder ungültig, wird die Standardsprache auf die Sprache des Administrators eingestellt."
+      },
+      "sampleFile": {
+        "filename": "beispiel-benutzerimport.csv",
+        "row": {
+          "firstName": "Max",
+          "lastName": "Mustermann",
+          "email": "max.mustermann@example.com",
+          "groupOne": "gruppe1",
+          "groupTwo": "gruppe2"
+        }
       },
       "tabs": {
         "imported": "Importiert",
