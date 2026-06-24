@@ -6,6 +6,7 @@ import {
   USER_PASSWORD_EMAIL_TYPES,
   UserPasswordEmailsEvent,
 } from "src/events/user/user-password-emails.event";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
@@ -13,10 +14,15 @@ import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types
 @Injectable()
 @EventsHandler(UserPasswordEmailsEvent)
 export class UserPasswordEmailsActivityHandler implements IEventHandler<UserPasswordEmailsEvent> {
-  constructor(private readonly activityLogsService: ActivityLogsService) {}
+  constructor(
+    private readonly activityLogsService: ActivityLogsService,
+    private readonly tenantRunner: TenantDbRunnerService,
+  ) {}
 
   async handle(event: UserPasswordEmailsEvent) {
     const { actor, tenantId, type, recipients, sentCount, skippedCount } = event.userPasswordEmails;
+
+    if (sentCount === 0) return;
 
     const operation = match(type)
       .with(
@@ -29,18 +35,20 @@ export class UserPasswordEmailsActivityHandler implements IEventHandler<UserPass
       )
       .exhaustive();
 
-    await this.activityLogsService.recordActivity({
-      actor,
-      tenantId,
-      operation,
-      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
-      resourceId: null,
-      context: {
-        sentCount: String(sentCount),
-        skippedCount: String(skippedCount),
-        recipientUserIds: JSON.stringify(recipients.map(({ userId }) => userId)),
-        recipientEmails: JSON.stringify(recipients.map(({ email }) => email)),
-      },
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.activityLogsService.recordActivity({
+        actor,
+        tenantId,
+        operation,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.USER,
+        resourceId: null,
+        context: {
+          sentCount: String(sentCount),
+          skippedCount: String(skippedCount),
+          recipientUserIds: JSON.stringify(recipients.map(({ userId }) => userId)),
+          recipientEmails: JSON.stringify(recipients.map(({ email }) => email)),
+        },
+      });
     });
   }
 }

@@ -58,6 +58,8 @@ export class UserPasswordEmailService {
       skippedCount: uniqueUserIds.length - preparedResetEmails.emails.length,
     };
 
+    if (!preparedResetEmails.emails.length) return result;
+
     await this.db.transaction(async (trx) => {
       await this.userPasswordEmailRepository.insertResetTokens(preparedResetEmails.tokenRows, trx);
 
@@ -93,6 +95,8 @@ export class UserPasswordEmailService {
       sentCount: preparedCreationEmails.emails.length,
       skippedCount: uniqueUserIds.length - preparedCreationEmails.emails.length,
     };
+
+    if (!preparedCreationEmails.emails.length) return result;
 
     await this.db.transaction(async (trx) => {
       await this.userPasswordEmailRepository.replaceCreateTokens(

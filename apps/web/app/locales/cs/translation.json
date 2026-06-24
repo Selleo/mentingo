@@ -3690,6 +3690,8 @@
       "start_course": "Spuštěno",
       "group_assignment": "Přiřazeno",
       "users_import": "Uživatelé importováni",
+      "send_password_reset_email": "E-mail pro reset hesla odeslán",
+      "resend_password_creation_email": "E-mail pro vytvoření hesla znovu odeslán",
       "complete_lesson": "Dokončeno",
       "complete_course": "Dokončeno",
       "complete_chapter": "Dokončeno",

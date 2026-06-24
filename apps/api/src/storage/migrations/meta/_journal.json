@@ -1072,6 +1072,13 @@
       "when": 1782200564873,
       "tag": "0152_tenant_scoped_user_email_unique",
       "breakpoints": true
+    },
+    {
+      "idx": 153,
+      "version": "7",
+      "when": 1782306226614,
+      "tag": "0153_add_password_email_activity_actions",
+      "breakpoints": true
     }
   ]
 }

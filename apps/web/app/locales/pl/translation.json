@@ -4416,6 +4416,8 @@
       "start_course": "Rozpoczęto",
       "group_assignment": "Przypisano",
       "users_import": "Zaimportowano użytkowników",
+      "send_password_reset_email": "Wysłano e-mail resetowania hasła",
+      "resend_password_creation_email": "Wysłano ponownie e-mail utworzenia hasła",
       "complete_lesson": "Ukończono",
       "complete_course": "Ukończono",
       "complete_chapter": "Ukończono",

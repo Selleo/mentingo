@@ -3691,6 +3691,8 @@
       "start_course": "Pradėta",
       "group_assignment": "Priskirta",
       "users_import": "Naudotojai importuoti",
+      "send_password_reset_email": "Slaptažodžio atkūrimo el. laiškas išsiųstas",
+      "resend_password_creation_email": "Slaptažodžio sukūrimo el. laiškas išsiųstas pakartotinai",
       "complete_lesson": "Užbaigta",
       "complete_course": "Užbaigta",
       "complete_chapter": "Užbaigta",

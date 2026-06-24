@@ -7,16 +7,22 @@ import {
   USER_PASSWORD_EMAIL_TYPES,
   UserPasswordEmailsEvent,
 } from "src/events/user/user-password-emails.event";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 describe("UserPasswordEmailsActivityHandler", () => {
   it("records password reset email activity with summary context", async () => {
     const recordActivity = jest.fn();
+    const runWithTenant = jest.fn((_: string, callback: () => Promise<void>) => callback());
     const module = await Test.createTestingModule({
       providers: [
         UserPasswordEmailsActivityHandler,
         {
           provide: ActivityLogsService,
           useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: { runWithTenant },
         },
       ],
     }).compile();
@@ -48,6 +54,7 @@ describe("UserPasswordEmailsActivityHandler", () => {
       }),
     );
 
+    expect(runWithTenant).toHaveBeenCalledWith(actor.tenantId, expect.any(Function));
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
       tenantId: actor.tenantId,
@@ -65,12 +72,66 @@ describe("UserPasswordEmailsActivityHandler", () => {
 
   it("records password creation email activity", async () => {
     const recordActivity = jest.fn();
+    const runWithTenant = jest.fn((_: string, callback: () => Promise<void>) => callback());
     const module = await Test.createTestingModule({
       providers: [
         UserPasswordEmailsActivityHandler,
         {
           provide: ActivityLogsService,
           useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: { runWithTenant },
+        },
+      ],
+    }).compile();
+    const handler = module.get(UserPasswordEmailsActivityHandler);
+
+    const actor = {
+      userId: "00000000-0000-0000-0000-000000000001",
+      email: "admin@example.com",
+      roleSlugs: ["admin"],
+      permissions: [],
+      tenantId: "00000000-0000-0000-0000-000000000010",
+    };
+
+    await handler.handle(
+      new UserPasswordEmailsEvent({
+        actor,
+        tenantId: actor.tenantId,
+        type: USER_PASSWORD_EMAIL_TYPES.CREATION,
+        emails: [],
+        recipients: [],
+        sentCount: 1,
+        skippedCount: 1,
+      }),
+    );
+
+    expect(recordActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: ACTIVITY_LOG_ACTION_TYPES.RESEND_PASSWORD_CREATION_EMAIL,
+        context: expect.objectContaining({
+          sentCount: "1",
+          skippedCount: "1",
+        }),
+      }),
+    );
+  });
+
+  it("skips activity logging when no emails were sent", async () => {
+    const recordActivity = jest.fn();
+    const runWithTenant = jest.fn((_: string, callback: () => Promise<void>) => callback());
+    const module = await Test.createTestingModule({
+      providers: [
+        UserPasswordEmailsActivityHandler,
+        {
+          provide: ActivityLogsService,
+          useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: { runWithTenant },
         },
       ],
     }).compile();
@@ -96,14 +157,7 @@ describe("UserPasswordEmailsActivityHandler", () => {
       }),
     );
 
-    expect(recordActivity).toHaveBeenCalledWith(
-      expect.objectContaining({
-        operation: ACTIVITY_LOG_ACTION_TYPES.RESEND_PASSWORD_CREATION_EMAIL,
-        context: expect.objectContaining({
-          sentCount: "0",
-          skippedCount: "1",
-        }),
-      }),
-    );
+    expect(runWithTenant).not.toHaveBeenCalled();
+    expect(recordActivity).not.toHaveBeenCalled();
   });
 });
