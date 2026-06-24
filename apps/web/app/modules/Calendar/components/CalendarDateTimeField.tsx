@@ -10,7 +10,10 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import { CalendarFormFieldLabel } from "./CalendarFormFieldLabel";
+import { CalendarTimeInput } from "./CalendarTimeInput";
 import { CalendarTimeSelect } from "./CalendarTimeSelect";
+
+type CalendarDateTimeFieldTimeInputVariant = "select" | "native";
 
 type CalendarDateTimeFieldProps = {
   label: string;
@@ -20,6 +23,7 @@ type CalendarDateTimeFieldProps = {
   portalledDatePicker?: boolean;
   hideTime?: boolean;
   timeStepMinutes?: number;
+  timeInputVariant?: CalendarDateTimeFieldTimeInputVariant;
   dateButtonTestId?: string;
   timeSelectTestId?: string;
   onDateChange: (date: string) => void;
@@ -41,6 +45,7 @@ export function CalendarDateTimeField({
   portalledDatePicker = true,
   hideTime = false,
   timeStepMinutes,
+  timeInputVariant = "select",
   dateButtonTestId,
   timeSelectTestId,
   onDateChange,
@@ -56,7 +61,8 @@ export function CalendarDateTimeField({
       <CalendarFormFieldLabel label={label} tooltip={tooltip} />
       <div
         className={cn("grid gap-2", {
-          "grid-cols-[1fr_8.5rem]": !hideTime,
+          "grid-cols-[1fr_8.5rem]": !hideTime && timeInputVariant === "select",
+          "grid-cols-[1fr_12rem]": !hideTime && timeInputVariant === "native",
         })}
       >
         <Popover>
@@ -99,14 +105,23 @@ export function CalendarDateTimeField({
             />
           </PopoverContent>
         </Popover>
-        {!hideTime && (
-          <CalendarTimeSelect
-            value={time}
-            stepMinutes={timeStepMinutes}
-            testId={timeSelectTestId}
-            onChange={onTimeChange}
-          />
-        )}
+        {!hideTime &&
+          (timeInputVariant === "native" ? (
+            <CalendarTimeInput
+              value={time}
+              stepMinutes={timeStepMinutes}
+              testId={timeSelectTestId}
+              onChange={onTimeChange}
+              disabled={!selectedDate}
+            />
+          ) : (
+            <CalendarTimeSelect
+              value={time}
+              stepMinutes={timeStepMinutes}
+              testId={timeSelectTestId}
+              onChange={onTimeChange}
+            />
+          ))}
       </div>
     </div>
   );
