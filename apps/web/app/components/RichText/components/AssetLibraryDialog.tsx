@@ -204,6 +204,7 @@ export const AssetLibraryDialog = ({
       file: { name: displayName },
       resourceType,
       displayMode,
+      videoProvider: asset.videoProvider,
     });
 
     resetDialog(false);

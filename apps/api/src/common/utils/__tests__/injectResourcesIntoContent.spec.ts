@@ -1,4 +1,4 @@
-import { VIDEO_AUTOPLAY } from "@repo/shared";
+import { VIDEO_AUTOPLAY, VIDEO_EMBED_PROVIDERS } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
@@ -7,6 +7,7 @@ import { injectResourcesIntoContent } from "../injectResourcesIntoContent";
 
 const resourceA = "11111111-1111-1111-1111-111111111111";
 const resourceB = "22222222-2222-2222-2222-222222222222";
+const resourceEntityA = "33333333-3333-3333-3333-333333333333";
 
 const getVideoAutoplayActions = (html: string) => {
   const $ = loadHtml(html);
@@ -85,5 +86,28 @@ describe("injectResourcesIntoContent", () => {
       `http://localhost:5173/api/lesson/lesson-resource/${resourceA}`,
       `http://localhost:5173/api/lesson/lesson-resource/${resourceB}`,
     ]);
+  });
+
+  it("injects video provider metadata over stale saved provider", () => {
+    const content = `<div data-node-type="video" data-source-type="internal" data-provider="unknown" data-src="http://localhost:5173/api/lesson/lesson-resource/${resourceEntityA}"></div>`;
+
+    const result = injectResourcesIntoContent(
+      content,
+      [
+        {
+          id: resourceA,
+          resourceEntityId: resourceEntityA,
+          fileUrl: "http://localhost:5173/api/lesson/lesson-resource/resourceA",
+          contentType: "video/mp4",
+          provider: VIDEO_EMBED_PROVIDERS.BUNNY,
+        },
+      ],
+      {
+        resourceIdRegex: createLessonResourceIdRegex(),
+        trackNodeTypes: ["video"],
+      },
+    );
+
+    expect(result.html).toContain('data-provider="bunny"');
   });
 });

@@ -1,10 +1,11 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, type SupportedLanguages } from "@repo/shared";
+import { ENTITY_TYPES, VIDEO_EMBED_PROVIDERS, type SupportedLanguages } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { parsePagination } from "src/common/pagination";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
 import { ResourceLibraryRepository } from "src/resource-library/resource-library.repository";
 import { DB } from "src/storage/db/db.providers";
 
@@ -55,7 +56,17 @@ export class ResourceLibraryService {
     });
 
     return {
-      data: rows,
+      data: rows.map((asset) => {
+        const videoProvider = getVideoProviderFromReference(asset.reference);
+
+        return {
+          ...asset,
+          videoProvider:
+            asset.type === "video" || videoProvider === VIDEO_EMBED_PROVIDERS.BUNNY
+              ? videoProvider
+              : undefined,
+        };
+      }),
       pagination: { totalItems, page, perPage },
       appliedFilters: {
         search: params.search,

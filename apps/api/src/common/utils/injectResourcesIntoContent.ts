@@ -1,4 +1,4 @@
-import { VIDEO_AUTOPLAY } from "@repo/shared";
+import { VIDEO_AUTOPLAY, type VideoProvider } from "@repo/shared";
 import { load as loadHtml } from "cheerio";
 
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "./annotateVideoAutoplayAndBlockIndexesInContent";
@@ -14,6 +14,7 @@ export type ContentResource = {
   title?: string;
   description?: string;
   fileName?: string;
+  provider?: VideoProvider;
   videoProgress?: {
     coveragePercent: number;
     isWatched: boolean;
@@ -51,7 +52,13 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
 
   const normalizedContent = annotateVideoAutoplayAndBlockIndexesInContent(content) ?? content;
   const $ = loadHtml(normalizedContent);
-  const resourceMap = new Map(resources.map((resource) => [resource.id, resource]));
+  const resourceMap = new Map<UUIDType, T>();
+  resources.forEach((resource) => {
+    resourceMap.set(resource.id, resource);
+    if (resource.resourceEntityId) {
+      resourceMap.set(resource.resourceEntityId, resource);
+    }
+  });
   const trackNodeTypes = new Set(options.trackNodeTypes ?? []);
   const convertImageAnchors = options.convertImageAnchors ?? true;
 
@@ -99,6 +106,9 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
 
       if (resource?.resourceEntityId && resource.contentType?.startsWith("video/")) {
         $(element).attr("data-source-type", "internal");
+        if (resource.provider) {
+          $(element).attr("data-provider", resource.provider);
+        }
         $(element).attr("data-resource-entity-id", resource.resourceEntityId);
         $(element).attr(
           "data-video-coverage-percent",

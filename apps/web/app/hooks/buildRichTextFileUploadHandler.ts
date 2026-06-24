@@ -115,7 +115,7 @@ const handleVideoUpload = async ({
       if (insertOnUpload && session.resourceId) {
         updateVideoUploadNodeById(editor, uploadId, {
           src: buildEntityResourceUrl(session.resourceId, entityType),
-          sourceType: session.provider === "s3" ? "external" : "internal",
+          sourceType: "internal",
           provider: session.provider,
           hasError: false,
           uploadStatus: null,

@@ -45,6 +45,9 @@ const isVideoProvider = (value: string | null | undefined): value is VideoProvid
   typeof value === "string" &&
   (Object.values(VIDEO_EMBED_PROVIDERS) as VideoProvider[]).includes(value as VideoProvider);
 
+const isResolvedVideoProvider = (value: string | null | undefined): value is VideoProvider =>
+  isVideoProvider(value) && value !== VIDEO_EMBED_PROVIDERS.UNKNOWN;
+
 export const extractUrlFromClipboard = (e: ClipboardEvent): string | null => {
   const text = e.clipboardData?.getData("text/plain")?.trim();
   if (text) return text;
@@ -108,7 +111,7 @@ export const normalizeVideoEmbedAttributes = (attrs: VideoEmbedAttrsInput): Vide
     sourceType === "internal" ? VIDEO_EMBED_PROVIDERS.SELF : detectVideoProviderFromUrl(src || "");
 
   const provider = match(attrs.provider)
-    .when(isVideoProvider, (value) => value)
+    .when(isResolvedVideoProvider, (value) => value)
     .otherwise(() => detectedProvider);
 
   const finalSrc = sourceType === "external" && src ? canonicalizeExternalUrl(src, provider) : src;
