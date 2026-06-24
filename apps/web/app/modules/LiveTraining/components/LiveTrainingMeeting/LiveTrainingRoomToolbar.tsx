@@ -245,7 +245,7 @@ export function LiveTrainingRoomToolbar({
 
   return (
     <TooltipProvider delayDuration={0}>
-      <div className="flex flex-wrap items-center justify-center gap-2 rounded-md bg-black/35 p-2 backdrop-blur-md">
+      <div className="flex max-w-full min-w-0 items-center justify-center gap-2 overflow-x-auto rounded-md bg-black/35 p-2 backdrop-blur-md">
         {canPublishMicrophone(credentials) && (
           <MeetingTrackToggleButton
             source={Track.Source.Microphone}

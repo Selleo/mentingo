@@ -583,6 +583,7 @@
       "camera": "Kamera",
       "screenShare": "Bildschirm teilen",
       "screen": "Bildschirm",
+      "presentOnStage": "Auf Bühne anzeigen",
       "leave": "Verlassen",
       "finish": "Finish session",
       "sessionEndedToast": "Your session {{trainingName}} has ended",

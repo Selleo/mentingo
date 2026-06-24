@@ -33,10 +33,15 @@ export type LiveTrainingRoomToolbarProps = {
 
 export type LiveTrainingParticipantGridProps = {
   liveTrainingId: string;
-  onTrackSelect: (trackRef: TrackReferenceOrPlaceholder, profilePictureUrl?: string | null) => void;
+  onTrackSelect: (
+    trackRef: TrackReferenceOrPlaceholder,
+    profilePictureUrl?: string | null,
+    layoutId?: string,
+  ) => void;
 };
 
 export type LiveTrainingFullscreenTrackOverlayProps = {
+  layoutId?: string;
   profilePictureUrl?: string | null;
   trackRef: TrackReferenceOrPlaceholder | null;
   onClose: () => void;
