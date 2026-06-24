@@ -4226,7 +4226,7 @@
       "actions": {
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
-        "impersonateAdmin": "Podszyj się pod admina"
+        "impersonateAdmin": "Wejdź w rolę administratora"
       }
     },
     "supportModePopover": {
