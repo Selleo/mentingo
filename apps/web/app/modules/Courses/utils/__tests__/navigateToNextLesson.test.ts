@@ -124,4 +124,32 @@ describe("navigateToNextLesson", () => {
       state: { chapterId: "chapter-1" },
     });
   });
+
+  it("navigates to the first lesson when requested after enrollment with stale blocked lesson data", () => {
+    const courseData = {
+      slug: "course-slug",
+      chapters: [
+        {
+          id: "chapter-1",
+          lessons: [
+            {
+              id: "first-paid-lesson",
+              status: "blocked",
+            },
+            {
+              id: "second-paid-lesson",
+              status: "blocked",
+            },
+          ],
+        },
+      ],
+    } as GetCourseResponse["data"];
+    const navigate = vi.fn() as unknown as NavigateFunction;
+
+    navigateToNextLesson(courseData, navigate, { openFirstLesson: true });
+
+    expect(navigate).toHaveBeenCalledWith("/course/course-slug/lesson/first-paid-lesson", {
+      state: { chapterId: "chapter-1" },
+    });
+  });
 });

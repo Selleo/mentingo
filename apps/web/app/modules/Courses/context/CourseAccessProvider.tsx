@@ -30,7 +30,7 @@ type CourseAccessProviderProps = PropsWithChildren<{
   forcePreviewMode?: boolean;
 }>;
 
-function resolveCourseExperienceState({
+export function resolveCourseExperienceState({
   course,
   forcePreviewMode,
   currentUserId,
