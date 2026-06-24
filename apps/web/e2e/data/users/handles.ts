@@ -8,6 +8,8 @@ export const USERS_PAGE_HANDLES = {
   BULK_EDIT_TRIGGER: "users-page-bulk-edit-trigger",
   BULK_EDIT_ROLE_ACTION: "users-page-bulk-edit-role-action",
   BULK_EDIT_GROUP_ACTION: "users-page-bulk-edit-group-action",
+  BULK_EDIT_PASSWORD_RESET_ACTION: "users-page-bulk-edit-password-reset-action",
+  BULK_EDIT_PASSWORD_CREATION_ACTION: "users-page-bulk-edit-password-creation-action",
   BULK_EDIT_ARCHIVE_ACTION: "users-page-bulk-edit-archive-action",
   BULK_EDIT_DELETE_ACTION: "users-page-bulk-edit-delete-action",
   SEARCH_INPUT: "users-page-search-input",
@@ -61,6 +63,8 @@ export const USER_PAGE_HANDLES = {
   GROUPS_SELECT: "user-page-groups-select",
   groupOption: (groupId: string) => `user-page-group-option-${groupId}`,
   ARCHIVED_CHECKBOX: "user-page-archived-checkbox",
+  PASSWORD_RESET_EMAIL_BUTTON: "user-page-password-reset-email-button",
+  PASSWORD_CREATION_EMAIL_BUTTON: "user-page-password-creation-email-button",
   SAVE_BUTTON: "user-page-save-button",
 } as const;
 

@@ -1028,7 +1028,11 @@
       "updatedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai atnaujinti",
       "deletedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai ištrinti",
       "archivedSelectedUsersSuccessfully": "Pasirinkti naudotojai sėkmingai suarchyvuoti",
-      "archiveSelectedUsersError": "Nepavyko suarchyvuoti pasirinktų naudotojų"
+      "archiveSelectedUsersError": "Nepavyko suarchyvuoti pasirinktų naudotojų",
+      "passwordResetEmailsSent": "Slaptažodžio atkūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
+      "passwordResetEmailsError": "Nepavyko išsiųsti slaptažodžio atkūrimo el. laiškų",
+      "passwordCreationEmailsSent": "Slaptažodžio sukūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
+      "passwordCreationEmailsError": "Nepavyko išsiųsti slaptažodžio sukūrimo el. laiškų"
     },
     "field": {
       "description": "Aprašymas",
@@ -1424,6 +1428,8 @@
     "dropdown": {
       "roles": "Vaidmenys",
       "groups": "Grupės",
+      "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
+      "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
       "delete": "Ištrinti",
       "archive": "Archyvas"
     },
@@ -1432,6 +1438,8 @@
         "delete": "Ar norite ištrinti šias paskyras?",
         "role": "Keisti vaidmenis",
         "group": "Keisti grupes",
+        "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
+        "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
         "archive": "Archyvuokite vartotojų paskyras",
         "confirmation": "Ar tikrai norite tęsti?",
         "import": "Importuoti vartotojus",
@@ -1441,6 +1449,8 @@
         "delete": "Ištrinti",
         "role": "Išsaugoti",
         "group": "Išsaugoti",
+        "passwordReset": "Siųsti",
+        "passwordCreation": "Siųsti",
         "archive": "Archyvas",
         "continue": "Patvirtinti",
         "downloadSample": "Atsisiųsti pavyzdinį failą"
@@ -1451,6 +1461,8 @@
         "confirmationForGroup_other": "Jūs pakeisite grupę į {{ group }} {{ count }} naudotojams",
         "confirmationForRole_one": "1 naudotojo vaidmenį pakeisite į {{ role }}.",
         "confirmationForRole_other": "{{ count }} naudotojų vaidmenį pakeisite į {{ role }}",
+        "passwordReset": "Siųskite slaptažodžio atkūrimo el. laiškus pasirinktiems naudotojams su esamais slaptažodžiais. Naudotojai be slaptažodžių bus praleisti.",
+        "passwordCreation": "Pakartotinai siųskite slaptažodžio sukūrimo el. laiškus pasirinktiems naudotojams be slaptažodžių. Naudotojai su esamais slaptažodžiais bus praleisti.",
         "archive": "Ar tikrai norite archyvuoti šias paskyras?",
         "import": "Įkelkite .csv arba .xlsx failą su šiais stulpeliais: vardas, pavardė, el. pašto adresas, vaidmuo (admin, student arba content_creator), grupės (\"group1,group2\"), kalba (en arba pl).",
         "noUsersImported": "Naudotojų nebuvo importuota.",
@@ -1522,7 +1534,9 @@
       "userWithCreatedCoursesError": "Negalima ištrinti vartotojo, kuris yra esamų kursų autorius. Galimas tik anonimiškumas ir archyvavimas."
     },
     "button": {
-      "createUser": "Sukurti vartotoją"
+      "createUser": "Sukurti vartotoją",
+      "passwordResetEmail": "Siųsti slaptažodžio atkūrimo el. laišką",
+      "passwordCreationEmail": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką"
     },
     "error": {
       "userNotFound": "Vartotojas nerastas"

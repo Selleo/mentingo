@@ -9,12 +9,25 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Import, KeyRound, Plus, Shield, UsersRound } from "lucide-react";
+import {
+  Archive,
+  Import,
+  KeyRound,
+  Mail,
+  MailPlus,
+  Plus,
+  Shield,
+  ShieldUser,
+  Trash2,
+  Users as UsersIcon,
+} from "lucide-react";
 import React, { useCallback, useMemo, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
+import { useBulkResendPasswordCreationEmails } from "~/api/mutations/admin/useBulkResendPasswordCreationEmails";
+import { useBulkSendPasswordResetEmails } from "~/api/mutations/admin/useBulkSendPasswordResetEmails";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
 import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
@@ -64,7 +77,21 @@ import type { Option } from "~/components/ui/multiselect";
 
 type TUser = GetUsersResponse["data"][number];
 
-type ModalTypes = "group" | "role" | "delete" | "archive" | null;
+const MailKey = ({ className }: { className?: string }) => (
+  <span className={cn("relative inline-flex size-4 shrink-0", className)}>
+    <Mail className="absolute inset-0 size-4" />
+    <KeyRound className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-background" />
+  </span>
+);
+
+type ModalTypes =
+  | "group"
+  | "role"
+  | "delete"
+  | "archive"
+  | "passwordReset"
+  | "passwordCreation"
+  | null;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 
@@ -106,6 +133,8 @@ const Users = () => {
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
   const { mutateAsync: archiveUsers } = useBulkArchiveUsers();
   const { mutateAsync: updateUsersRoles } = useBulkUpdateUsersRoles();
+  const { mutateAsync: sendPasswordResetEmails } = useBulkSendPasswordResetEmails();
+  const { mutateAsync: resendPasswordCreationEmails } = useBulkResendPasswordCreationEmails();
 
   const { t } = useTranslation();
 
@@ -132,7 +161,7 @@ const Users = () => {
   const dropdownItems: DropdownItems[] = [
     {
       iconName: undefined,
-      icon: <KeyRound className="size-4" />,
+      icon: <ShieldUser className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.roles",
       action: () => setShowEditModal("role"),
       destructive: false,
@@ -140,23 +169,39 @@ const Users = () => {
     },
     {
       iconName: undefined,
-      icon: <UsersRound className="size-4" />,
+      icon: <UsersIcon className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.groups",
       action: () => setShowEditModal("group"),
       destructive: false,
       testId: USERS_PAGE_HANDLES.BULK_EDIT_GROUP_ACTION,
     },
     {
-      iconName: "Archive",
-      icon: undefined,
+      iconName: undefined,
+      icon: <MailKey className="size-4 shrink-0" />,
+      translationKey: "adminUsersView.dropdown.passwordReset",
+      action: () => setShowEditModal("passwordReset"),
+      destructive: false,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_RESET_ACTION,
+    },
+    {
+      iconName: undefined,
+      icon: <MailPlus className="size-4 shrink-0" />,
+      translationKey: "adminUsersView.dropdown.passwordCreation",
+      action: () => setShowEditModal("passwordCreation"),
+      destructive: false,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_CREATION_ACTION,
+    },
+    {
+      iconName: undefined,
+      icon: <Archive className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.archive",
       action: () => setShowEditModal("archive"),
       destructive: true,
       testId: USERS_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
     },
     {
-      iconName: "TrashIcon",
-      icon: undefined,
+      iconName: undefined,
+      icon: <Trash2 className="size-4 shrink-0" />,
       translationKey: "adminUsersView.dropdown.delete",
       action: () => setShowEditModal("delete"),
       destructive: true,
@@ -448,6 +493,24 @@ const Users = () => {
     });
   }, [selectedUsers, selectedValue, table, updateUsersRoles]);
 
+  const handlePasswordResetEmails = useCallback(() => {
+    sendPasswordResetEmails({
+      userIds: selectedUsers.map(({ userId }) => userId),
+    }).then(() => {
+      table.resetRowSelection();
+      setShowEditModal(null);
+    });
+  }, [selectedUsers, sendPasswordResetEmails, table]);
+
+  const handlePasswordCreationEmails = useCallback(() => {
+    resendPasswordCreationEmails({
+      userIds: selectedUsers.map(({ userId }) => userId),
+    }).then(() => {
+      table.resetRowSelection();
+      setShowEditModal(null);
+    });
+  }, [resendPasswordCreationEmails, selectedUsers, table]);
+
   const handleRowClick = (userId: string) => {
     navigate(userId);
   };
@@ -457,6 +520,8 @@ const Users = () => {
     group: handleUsersGroups,
     delete: handleDeleteUsers,
     archive: handleArchiveUsers,
+    passwordReset: handlePasswordResetEmails,
+    passwordCreation: handlePasswordCreationEmails,
   };
 
   const { totalItems, perPage, page } = userData?.pagination || {};

@@ -14,6 +14,8 @@ export const ACTIVITY_LOG_ACTION_TYPES = {
   START_COURSE: "start_course",
   GROUP_ASSIGNMENT: "group_assignment",
   USERS_IMPORT: "users_import",
+  SEND_PASSWORD_RESET_EMAIL: "send_password_reset_email",
+  RESEND_PASSWORD_CREATION_EMAIL: "resend_password_creation_email",
   COMPLETE_LESSON: "complete_lesson",
   COMPLETE_COURSE: "complete_course",
   COMPLETE_CHAPTER: "complete_chapter",

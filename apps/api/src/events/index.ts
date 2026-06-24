@@ -34,6 +34,7 @@ export * from "./user/users-import.event";
 export * from "./user/user-short-inactivity.event";
 export * from "./user/user-long-inactivity.event";
 export * from "./user/user-password-reminder.event";
+export * from "./user/user-password-emails.event";
 export * from "./user/user-welcome.event";
 export * from "./announcement/create-announcement.event";
 export * from "./announcement/view-announcement.event";

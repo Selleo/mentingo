@@ -95,8 +95,15 @@ import {
   type UserResponse,
   userSchema,
 } from "./schemas/user.schema";
+import {
+  type BulkUserPasswordEmailBody,
+  type BulkUserPasswordEmailResponse,
+  bulkUserPasswordEmailResponseSchema,
+  bulkUserPasswordEmailSchema,
+} from "./schemas/userPasswordEmail.schema";
 import { sortUserFieldsOptions, SortUserFieldsOptions } from "./schemas/userQuery";
 import { UserImportService } from "./services/user-import.service";
+import { UserPasswordEmailService } from "./services/user-password-email.service";
 import { UserService } from "./user.service";
 
 import type { ArchiveUsersSchemaResponse } from "./schemas/archiveUsers.schema";
@@ -108,6 +115,7 @@ export class UserController {
   constructor(
     private readonly usersService: UserService,
     private readonly userImportService: UserImportService,
+    private readonly userPasswordEmailService: UserPasswordEmailService,
   ) {}
 
   @Get("all")
@@ -405,6 +413,42 @@ export class UserController {
     @CurrentUser() currentUser: CurrentUserType,
   ) {
     return this.usersService.updateUsersRoles(data, currentUser);
+  }
+
+  @Post("bulk/password-reset-email")
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: bulkUserPasswordEmailSchema }],
+    response: baseResponse(bulkUserPasswordEmailResponseSchema),
+  })
+  async sendBulkPasswordResetEmails(
+    @Body() data: BulkUserPasswordEmailBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkUserPasswordEmailResponse>> {
+    const result = await this.userPasswordEmailService.sendBulkPasswordResetEmails(
+      data.userIds,
+      currentUser,
+    );
+
+    return new BaseResponse(result);
+  }
+
+  @Post("bulk/password-creation-email")
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: bulkUserPasswordEmailSchema }],
+    response: baseResponse(bulkUserPasswordEmailResponseSchema),
+  })
+  async sendBulkPasswordCreationEmails(
+    @Body() data: BulkUserPasswordEmailBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkUserPasswordEmailResponse>> {
+    const result = await this.userPasswordEmailService.sendBulkPasswordCreationEmails(
+      data.userIds,
+      currentUser,
+    );
+
+    return new BaseResponse(result);
   }
 
   @Post()

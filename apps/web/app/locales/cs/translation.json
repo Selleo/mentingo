@@ -1028,7 +1028,11 @@
       "updatedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně aktualizováni",
       "deletedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně smazáni",
       "archivedSelectedUsersSuccessfully": "Vybraní uživatelé byli úspěšně archivováni",
-      "archiveSelectedUsersError": "Archivace vybraných uživatelů se nezdařila"
+      "archiveSelectedUsersError": "Archivace vybraných uživatelů se nezdařila",
+      "passwordResetEmailsSent": "E-maily pro reset hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
+      "passwordResetEmailsError": "Nepodařilo se odeslat e-maily pro reset hesla",
+      "passwordCreationEmailsSent": "E-maily pro vytvoření hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
+      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla"
     },
     "field": {
       "description": "Popis",
@@ -1424,6 +1428,8 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Skupiny",
+      "passwordReset": "Odeslat e-mail pro reset hesla",
+      "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
       "delete": "Vymazat",
       "archive": "Archiv"
     },
@@ -1432,6 +1438,8 @@
         "delete": "Chcete tyto účty smazat?",
         "role": "Upravte role",
         "group": "Upravte skupiny",
+        "passwordReset": "Odeslat e-mail pro reset hesla",
+        "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
         "archive": "Archivovat uživatelské účty",
         "confirmation": "Opravdu chcete pokračovat?",
         "import": "Importovat uživatele",
@@ -1441,6 +1449,8 @@
         "delete": "Vymazat",
         "role": "Uložit",
         "group": "Uložit",
+        "passwordReset": "Odeslat",
+        "passwordCreation": "Odeslat",
         "archive": "Archiv",
         "continue": "Potvrdit",
         "downloadSample": "Stáhnout ukázkový soubor"
@@ -1451,6 +1461,8 @@
         "confirmationForGroup_other": "Změníte skupinu na {{ group }} pro {{ count }} uživatelů",
         "confirmationForRole_one": "Změníte roli na {{ role }} pro 1 uživatele.",
         "confirmationForRole_other": "Změníte roli na {{ role }} pro {{ count }} uživatelů",
+        "passwordReset": "Odešlete e-maily pro reset hesla vybraným uživatelům s existujícím heslem. Uživatelé bez hesla budou přeskočeni.",
+        "passwordCreation": "Znovu odešlete e-maily pro vytvoření hesla vybraným uživatelům bez hesla. Uživatelé s existujícím heslem budou přeskočeni.",
         "archive": "Opravdu chcete tyto účty archivovat?",
         "import": "Nahrajte soubor .csv nebo .xlsx s následujícími sloupci: jméno, příjmení, email, role (admin, student nebo content_creator), skupiny (\"skupina1,skupina2\"), jazyk (en nebo pl).",
         "noUsersImported": "Nebyli importováni žádní uživatelé.",
@@ -1522,7 +1534,9 @@
       "userWithCreatedCoursesError": "Nelze smazat uživatele, který je autorem existujících kurzů. K dispozici je pouze anonymizace a archivace."
     },
     "button": {
-      "createUser": "Vytvořit uživatele"
+      "createUser": "Vytvořit uživatele",
+      "passwordResetEmail": "Odeslat e-mail pro reset hesla",
+      "passwordCreationEmail": "Znovu odeslat e-mail pro vytvoření hesla"
     },
     "error": {
       "userNotFound": "Uživatel nenalezen"

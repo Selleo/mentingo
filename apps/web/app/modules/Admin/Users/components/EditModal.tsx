@@ -127,8 +127,15 @@ export const EditModal = ({
     setSelectedGroups(updatedOptions);
   };
 
+  const isConfirmationOnlyAction = [
+    "delete",
+    "archive",
+    "passwordReset",
+    "passwordCreation",
+  ].includes(type);
+
   const handleSubmit = () =>
-    type === "delete" || type === "archive" ? onConfirm() : setShowConfirmationModal(true);
+    isConfirmationOnlyAction ? onConfirm() : setShowConfirmationModal(true);
 
   const confirmationName =
     type === "group"
@@ -139,6 +146,8 @@ export const EditModal = ({
     switch (type) {
       case "delete":
       case "archive":
+      case "passwordReset":
+      case "passwordCreation":
         return t(`adminUsersView.modal.description.${type}`);
 
       case "group":
@@ -214,14 +223,10 @@ export const EditModal = ({
             <DialogTitle>
               {t(`adminUsersView.modal.title.${type}`)} ({selectedUsers.length ?? 0})
             </DialogTitle>
-            {(type === "delete" || type === "archive") && (
-              <DialogDescription>{renderContent()}</DialogDescription>
-            )}
+            {isConfirmationOnlyAction && <DialogDescription>{renderContent()}</DialogDescription>}
           </DialogHeader>
           <div className="flex items-center justify-between gap-2">
-            <div className="w-full">
-              {type !== "delete" && type !== "archive" ? renderContent() : null}
-            </div>
+            <div className="w-full">{!isConfirmationOnlyAction ? renderContent() : null}</div>
             <DialogFooter className="z-50">
               <Button
                 data-testid={USER_BULK_EDIT_MODAL_HANDLES.SUBMIT_BUTTON}

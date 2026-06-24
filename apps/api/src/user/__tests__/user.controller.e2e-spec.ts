@@ -1,17 +1,20 @@
 import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { eq } from "drizzle-orm";
 import { omit } from "lodash";
 import request from "supertest";
 
 import { AuthService } from "src/auth/auth.service";
+import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { userDetails as userDetailsTable } from "src/storage/schema";
+import { createTokens, resetTokens, userDetails as userDetailsTable } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { cookieFor, truncateTables } from "../../../test/helpers/test-helpers";
 
+import type { EmailTestingAdapter } from "../../../test/helpers/test-email.adapter";
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
@@ -26,6 +29,7 @@ describe("UsersController (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
+  let emailAdapter: EmailTestingAdapter;
 
   beforeAll(async () => {
     const { app: testApp } = await createE2ETest();
@@ -36,6 +40,7 @@ describe("UsersController (e2e)", () => {
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
+    emailAdapter = app.get(EmailAdapter) as EmailTestingAdapter;
   });
 
   afterAll(async () => {
@@ -44,6 +49,7 @@ describe("UsersController (e2e)", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+    emailAdapter.clearEmails();
 
     testUser = await userFactory
       .withCredentials({ password: testPassword })
@@ -62,6 +68,20 @@ describe("UsersController (e2e)", () => {
       .expect(200);
 
     return response.headers["set-cookie"];
+  };
+
+  const waitForEmails = async (expectedCount: number) => {
+    const attempts = 20;
+
+    for (let attempt = 0; attempt < attempts; attempt += 1) {
+      const emails = emailAdapter.getAllEmails();
+
+      if (emails.length >= expectedCount) return emails;
+
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+
+    return emailAdapter.getAllEmails();
   };
 
   describe("GET /user/all", () => {
@@ -539,6 +559,126 @@ describe("UsersController (e2e)", () => {
         .set("Cookie", cookies)
         .send({ userIds: [regularUser.id], roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN] })
         .expect(403);
+    });
+  });
+
+  describe("POST /user/bulk/password-reset-email", () => {
+    it("sends reset emails only to selected active users with credentials", async () => {
+      const userWithPassword = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-reset-with-password@example.com",
+          tenantId: testUser.tenantId,
+        });
+      const userWithoutPassword = await userFactory.withUserSettings(db).create({
+        email: "bulk-reset-without-password@example.com",
+        tenantId: testUser.tenantId,
+      });
+      const archivedUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-reset-archived@example.com",
+          archived: true,
+          tenantId: testUser.tenantId,
+        });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/user/bulk/password-reset-email")
+        .set("Cookie", testCookies)
+        .send({ userIds: [userWithPassword.id, userWithoutPassword.id, archivedUser.id] })
+        .expect(201);
+
+      expect(response.body.data).toEqual({ sentCount: 1, skippedCount: 2 });
+      expect(await waitForEmails(1)).toHaveLength(1);
+      expect(emailAdapter.getLastEmail()?.to).toBe(userWithPassword.email);
+
+      const resetTokenRows = await db
+        .select({ userId: resetTokens.userId })
+        .from(resetTokens)
+        .where(eq(resetTokens.userId, userWithPassword.id));
+
+      expect(resetTokenRows).toHaveLength(1);
+    });
+
+    it("returns forbidden for non-admin users", async () => {
+      const regularUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-reset-regular@example.com",
+          tenantId: testUser.tenantId,
+        });
+
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: regularUser.email,
+          password: testPassword,
+        })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post("/api/user/bulk/password-reset-email")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .send({ userIds: [regularUser.id] })
+        .expect(403);
+    });
+  });
+
+  describe("POST /user/bulk/password-creation-email", () => {
+    it("replaces creation tokens and sends emails only to selected active users without credentials", async () => {
+      const userWithoutPassword = await userFactory.withUserSettings(db).create({
+        email: "bulk-create-without-password@example.com",
+        tenantId: testUser.tenantId,
+      });
+      const userWithPassword = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-create-with-password@example.com",
+          tenantId: testUser.tenantId,
+        });
+      const archivedUser = await userFactory.withUserSettings(db).create({
+        email: "bulk-create-archived@example.com",
+        archived: true,
+        tenantId: testUser.tenantId,
+      });
+
+      await db.insert(createTokens).values({
+        userId: userWithoutPassword.id,
+        tokenHash: "old-token-hash",
+        expiryDate: new Date(Date.now() + 60_000),
+        reminderCount: 2,
+        tenantId: testUser.tenantId,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/user/bulk/password-creation-email")
+        .set("Cookie", testCookies)
+        .send({ userIds: [userWithoutPassword.id, userWithPassword.id, archivedUser.id] })
+        .expect(201);
+
+      expect(response.body.data).toEqual({ sentCount: 1, skippedCount: 2 });
+      expect(await waitForEmails(1)).toHaveLength(1);
+      expect(emailAdapter.getLastEmail()?.to).toBe(userWithoutPassword.email);
+
+      const createTokenRows = await db
+        .select({
+          tokenHash: createTokens.tokenHash,
+          reminderCount: createTokens.reminderCount,
+        })
+        .from(createTokens)
+        .where(eq(createTokens.userId, userWithoutPassword.id));
+
+      expect(createTokenRows).toHaveLength(1);
+      expect(createTokenRows[0]).toEqual(
+        expect.objectContaining({
+          reminderCount: 0,
+        }),
+      );
+      expect(createTokenRows[0]?.tokenHash).not.toBe("old-token-hash");
     });
   });
 });

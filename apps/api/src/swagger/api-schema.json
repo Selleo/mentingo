@@ -2157,6 +2157,60 @@
         }
       }
     },
+    "/api/user/bulk/password-reset-email": {
+      "post": {
+        "operationId": "UserController_sendBulkPasswordResetEmails",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkPasswordResetEmailsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendBulkPasswordResetEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/bulk/password-creation-email": {
+      "post": {
+        "operationId": "UserController_sendBulkPasswordCreationEmails",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkPasswordCreationEmailsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendBulkPasswordCreationEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/import": {
       "post": {
         "operationId": "UserController_importUsers",
@@ -21485,6 +21539,82 @@
         "required": [
           "userIds",
           "roleSlugs"
+        ]
+      },
+      "SendBulkPasswordResetEmailsBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "SendBulkPasswordResetEmailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentCount": {
+                "type": "number"
+              },
+              "skippedCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sentCount",
+              "skippedCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SendBulkPasswordCreationEmailsBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "SendBulkPasswordCreationEmailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentCount": {
+                "type": "number"
+              },
+              "skippedCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sentCount",
+              "skippedCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "CreateUserBody": {
@@ -45084,6 +45214,14 @@
                     },
                     {
                       "const": "users_import",
+                      "type": "string"
+                    },
+                    {
+                      "const": "send_password_reset_email",
+                      "type": "string"
+                    },
+                    {
+                      "const": "resend_password_creation_email",
                       "type": "string"
                     },
                     {

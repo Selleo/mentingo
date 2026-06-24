@@ -1236,7 +1236,11 @@
       "updatedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zaktualizowani",
       "deletedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie usunięci",
       "archivedSelectedUsersSuccessfully": "Wybrani użytkownicy zostali pomyślnie zarchiwizowani",
-      "archiveSelectedUsersError": "Nie udało się zarchiwizować wybranych użytkowników"
+      "archiveSelectedUsersError": "Nie udało się zarchiwizować wybranych użytkowników",
+      "passwordResetEmailsSent": "Wysłano e-maile resetowania hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
+      "passwordResetEmailsError": "Nie udało się wysłać e-maili resetowania hasła",
+      "passwordCreationEmailsSent": "Wysłano e-maile utworzenia hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
+      "passwordCreationEmailsError": "Nie udało się wysłać e-maili utworzenia hasła"
     },
     "field": {
       "description": "Opis",
@@ -1698,6 +1702,8 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Grupy",
+      "passwordReset": "Wyślij e-mail resetowania hasła",
+      "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
       "delete": "Usuń",
       "archive": "Archiwizuj"
     },
@@ -1706,6 +1712,8 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
+        "passwordReset": "Wyślij e-mail resetowania hasła",
+        "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
         "archive": "Archiwizuj konta użytkowników",
         "confirmation": "Czy jesteś pewny, że chcesz kontynuować?",
         "import": "Importuj użytkowników",
@@ -1715,6 +1723,8 @@
         "delete": "Usuń",
         "role": "Zapisz",
         "group": "Zapisz",
+        "passwordReset": "Wyślij",
+        "passwordCreation": "Wyślij",
         "archive": "Archiwizuj",
         "continue": "Zatwierdź",
         "downloadSample": "Pobierz plik przykładowy"
@@ -1729,6 +1739,8 @@
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "passwordReset": "Wyślij e-maile resetowania hasła do wybranych użytkowników z istniejącymi hasłami. Użytkownicy bez hasła zostaną pominięci.",
+        "passwordCreation": "Wyślij ponownie e-maile utworzenia hasła do wybranych użytkowników bez hasła. Użytkownicy z istniejącym hasłem zostaną pominięci.",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
         "import": "Prześlij plik .csv lub .xlsx z kolumnami: firstName, lastName, email, role (admin, student lub content_creator), groups (\"group1,group2\"), language (en lub pl).",
         "noUsersImported": "Nie zaimportowano żadnych użytkowników.",
@@ -1800,7 +1812,9 @@
       "userWithCreatedCoursesError": "Nie można usunąć użytkownika, który jest autorem istniejących rozdziałów. Dostępne są tylko anonimizacja i archiwizacja."
     },
     "button": {
-      "createUser": "Utwórz użytkownika"
+      "createUser": "Utwórz użytkownika",
+      "passwordResetEmail": "Wyślij e-mail resetowania hasła",
+      "passwordCreationEmail": "Wyślij ponownie e-mail utworzenia hasła"
     },
     "error": {
       "userNotFound": "Użytkownik nie został znaleziony"

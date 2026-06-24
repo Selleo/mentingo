@@ -2,6 +2,7 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { InferSelectModel } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { DefaultEmailSettings } from "src/events/types";
 import type { users } from "src/storage/schema";
 import type {
   CreateUserBody,
@@ -140,3 +141,35 @@ export type UserImportSkippedRowResult = {
 };
 
 export type UserImportRowResolutionResult = UserImportValidRowResult | UserImportSkippedRowResult;
+
+export type UserPasswordEmailRecipient = {
+  id: UUIDType;
+  email: string;
+  firstName: string;
+  tenantId: UUIDType;
+  hasCredentials: boolean;
+  defaultEmailSettings: DefaultEmailSettings;
+};
+
+export type FindUserPasswordEmailRecipientsByIdsOptions = {
+  hasCredentials?: boolean;
+};
+
+export type UserPasswordEmailTokenInsert = {
+  userId: UUIDType;
+  tokenHash: string;
+  expiryDate: Date;
+};
+
+export type UserCreatePasswordTokenInsert = UserPasswordEmailTokenInsert & {
+  reminderCount: number;
+};
+
+export type PreparedUserPasswordEmail = {
+  userId: UUIDType;
+  to: string;
+  tenantId: UUIDType;
+  subject: string;
+  text: string;
+  html: string;
+};

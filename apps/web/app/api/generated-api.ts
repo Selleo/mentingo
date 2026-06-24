@@ -1453,6 +1453,28 @@ export interface BulkUpdateUsersRolesBody {
   roleSlugs: string[];
 }
 
+export interface SendBulkPasswordResetEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordResetEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+  };
+}
+
+export interface SendBulkPasswordCreationEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordCreationEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+  };
+}
+
 export interface CreateUserBody {
   /** @format email */
   email: string;
@@ -6048,6 +6070,8 @@ export interface GetActivityLogsResponse {
       | "start_course"
       | "group_assignment"
       | "users_import"
+      | "send_password_reset_email"
+      | "resend_password_creation_email"
       | "complete_lesson"
       | "complete_course"
       | "complete_chapter"
@@ -8587,6 +8611,44 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordResetEmails
+     * @request POST:/api/user/bulk/password-reset-email
+     */
+    userControllerSendBulkPasswordResetEmails: (
+      data: SendBulkPasswordResetEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordResetEmailsResponse, any>({
+        path: `/api/user/bulk/password-reset-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordCreationEmails
+     * @request POST:/api/user/bulk/password-creation-email
+     */
+    userControllerSendBulkPasswordCreationEmails: (
+      data: SendBulkPasswordCreationEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordCreationEmailsResponse, any>({
+        path: `/api/user/bulk/password-creation-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

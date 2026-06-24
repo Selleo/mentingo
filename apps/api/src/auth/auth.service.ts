@@ -10,11 +10,7 @@ import {
 } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import {
-  CreatePasswordReminderEmail,
-  MagicLinkEmail,
-  PasswordRecoveryEmail,
-} from "@repo/email-templates";
+import { CreatePasswordReminderEmail, MagicLinkEmail } from "@repo/email-templates";
 import {
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
@@ -52,11 +48,11 @@ import {
   credentials,
   formFieldAnswers,
   magicLinkTokens,
-  resetTokens,
   userOnboarding,
   tenants,
   users,
 } from "../storage/schema";
+import { UserPasswordEmailService } from "../user/services/user-password-email.service";
 import { UserService } from "../user/user.service";
 import { USER_CREATION_FLOW_TYPE } from "../user/user.types";
 
@@ -92,6 +88,7 @@ export class AuthService {
     private readonly supportModeService: SupportModeService,
     private readonly permissionsService: PermissionsService,
     private readonly sessionRevocationService: SessionRevocationService,
+    private readonly userPasswordEmailService: UserPasswordEmailService,
   ) {}
 
   public async register({
@@ -570,45 +567,7 @@ export class AuthService {
 
   public async forgotPassword(email: string) {
     try {
-      const user = await this.userService.getUserByEmail(email);
-
-      if (!user || user.archived) return;
-
-      const resetToken = nanoid(64);
-      const hashedResetToken = hashToken(resetToken);
-      const expiryDate = new Date();
-      expiryDate.setHours(expiryDate.getHours() + 1);
-
-      await this.db.insert(resetTokens).values({
-        userId: user.id,
-        tokenHash: hashedResetToken,
-        expiryDate,
-      });
-
-      const defaultEmailSettings = await this.emailService.getDefaultEmailProperties(
-        user.tenantId,
-        user.id,
-      );
-
-      const tenantOrigin = await this.resolveTenantOrigin(user.tenantId);
-
-      const emailTemplate = new PasswordRecoveryEmail({
-        name: user.firstName,
-        resetLink: buildCreateNewPasswordLink(tenantOrigin, {
-          resetToken,
-        }),
-        ...defaultEmailSettings,
-      });
-
-      await this.emailService.sendEmailWithLogo(
-        {
-          to: email,
-          subject: getEmailSubject("passwordRecoveryEmail", defaultEmailSettings.language),
-          text: emailTemplate.text,
-          html: emailTemplate.html,
-        },
-        { tenantId: user.tenantId },
-      );
+      await this.userPasswordEmailService.sendForgotPasswordEmail(email);
     } catch {
       return;
     }
