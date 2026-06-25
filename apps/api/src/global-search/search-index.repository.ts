@@ -35,11 +35,22 @@ import type {
   SearchDocumentWeight,
 } from "./global-search.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
+import type { AnyPgColumn } from "drizzle-orm/pg-core";
 import type { UUIDType } from "src/common";
 
 @Injectable()
 export class SearchIndexRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
+
+  private asLocalizedJsonbObject(fieldExpression: SQL | AnyPgColumn) {
+    return sql`
+      CASE
+        WHEN jsonb_typeof(${fieldExpression}) = 'object' THEN ${fieldExpression}
+        ELSE '{}'::jsonb
+      END
+    `;
+  }
 
   async replaceEntityDocuments(input: ReplaceSearchDocumentsInput) {
     const db = input.db ?? this.db;
@@ -317,7 +328,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${fieldExpression}) AS ${sql.raw(lateralAlias)}(lang, value)`,
+        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
+          fieldExpression,
+        )}) AS ${sql.raw(lateralAlias)}(lang, value)`,
         sql`true`,
       )
       .where(
@@ -355,7 +368,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${fieldExpression}) AS ${sql.raw(lateralAlias)}(lang, value)`,
+        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
+          fieldExpression,
+        )}) AS ${sql.raw(lateralAlias)}(lang, value)`,
         sql`true`,
       )
       .where(
@@ -395,7 +410,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${questionAnswerOptions.optionText}) AS option_text(lang, value)`,
+        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
+          questionAnswerOptions.optionText,
+        )}) AS option_text(lang, value)`,
         sql`true`,
       )
       .where(

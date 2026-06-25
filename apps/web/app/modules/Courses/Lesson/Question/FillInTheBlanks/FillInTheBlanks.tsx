@@ -4,6 +4,7 @@ import Viewer from "~/components/RichText/Viever";
 import { Card } from "~/components/ui/card";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
+import { getCorrectSentence } from "./correctSentence";
 import { FillInTheTextBlanks } from "./FillInTheTextBlanks";
 import { TextBlank } from "./TextBlank";
 
@@ -21,9 +22,10 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
     ({ isStudentAnswer, studentAnswer }) =>
       Boolean(studentAnswer) || typeof isStudentAnswer === "boolean",
   );
+  const correctSentence = getCorrectSentence(question);
   const showCorrectSentence =
     Boolean(isCompleted || hasSubmittedAnswer) &&
-    Boolean(question.solutionExplanation) &&
+    Boolean(correctSentence) &&
     !question.passQuestion &&
     !isQuizFeedbackRedacted;
 
@@ -60,7 +62,7 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
           <span className="body-base-md text-error-700">
             {t("studentLessonView.other.correctSentence")}
           </span>
-          <Viewer content={question.solutionExplanation ?? ""} />
+          <Viewer content={correctSentence ?? ""} />
         </div>
       )}
     </Card>

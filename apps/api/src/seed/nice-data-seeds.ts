@@ -119,7 +119,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
+                  "In CSS, <blank-answer-1> is used to style the layout, while <blank-answer-2> is used to change colors.",
                 solutionExplanation:
                   "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
                 options: [
@@ -382,7 +382,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "CSS is used to style [word], while JavaScript is used to add [word] to web pages.",
+                  "CSS is used to style <blank-answer-1>, while JavaScript is used to add <blank-answer-2> to web pages.",
                 solutionExplanation:
                   "<p>CSS is used to style <strong>HTML</strong>, while JavaScript is used to add <strong>interactivity</strong> to web pages.</p>",
                 options: [
@@ -428,7 +428,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
+                  "In CSS, <blank-answer-1> is used to style the layout, while <blank-answer-2> is used to change colors.",
                 solutionExplanation:
                   "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
                 options: [
@@ -449,7 +449,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In JavaScript, [word] are used to store data, while [word] are used to perform actions.",
+                  "In JavaScript, <blank-answer-1> are used to store data, while <blank-answer-2> are used to perform actions.",
                 solutionExplanation:
                   "<p>In JavaScript, <strong>variables</strong> are used to store data, while <strong>functions</strong> are used to perform actions.</p>",
                 options: [
@@ -543,7 +543,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "The CSS [word] property is used for creating flexible box layouts, while [word] is used for creating grid layouts.",
+                  "The CSS <blank-answer-1> property is used for creating flexible box layouts, while <blank-answer-2> is used for creating grid layouts.",
                 solutionExplanation:
                   "<p>The CSS <strong>flexbox</strong> property is used for creating flexible box layouts, while <strong>color properties</strong> are used for creating grid layouts.</p>",
                 options: [
@@ -574,7 +574,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "To center an element horizontally, you can use 'margin: [word] [word];'.",
+                  "To center an element horizontally, you can use 'margin: <blank-answer-1> <blank-answer-2>;'.",
                 solutionExplanation:
                   "<p>To center an element horizontally, you can use 'margin: <strong>0 auto</strong>;'.</p>",
                 options: [
@@ -626,7 +626,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In CSS, [word] is used to style the layout, while [word] is used to change colors.",
+                  "In CSS, <blank-answer-1> is used to style the layout, while <blank-answer-2> is used to change colors.",
                 solutionExplanation:
                   "<p>In CSS, <strong>flexbox</strong> is used to style the layout, while <strong>color properties</strong> are used to change colors.</p>",
                 options: [
@@ -657,7 +657,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "The [word] property is used to set the spacing between lines of text, and the [word] property is used to set the spacing outside an element.",
+                  "The <blank-answer-1> property is used to set the spacing between lines of text, and the <blank-answer-2> property is used to set the spacing outside an element.",
                 solutionExplanation:
                   "<p>In CSS, the <strong>line-height</strong> property is used to set the spacing between lines of text, while the <strong>margin</strong> property is used to set the spacing outside an element.</p>",
                 options: [
@@ -732,7 +732,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In Java, [word] are used to define the blueprint of objects, while [word] are instances.",
+                  "In Java, <blank-answer-1> are used to define the blueprint of objects, while <blank-answer-2> are instances.",
                 solutionExplanation:
                   "<p>In Java, <strong>classes</strong> are used to define the blueprint of objects, while <strong>objects</strong> are instances of these blueprints.</p>",
                 options: [
@@ -759,7 +759,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In Android dev, [word] are used to define the user interface, while [word] handle user interactions.",
+                  "In Android dev, <blank-answer-1> are used to define the user interface, while <blank-answer-2> handle user interactions.",
                 solutionExplanation:
                   "<p>In Android development, <strong>layouts</strong> are used to define the user interface, while <strong>activities</strong> handle user interactions and app logic.</p>",
                 options: [
@@ -929,7 +929,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In Kotlin, [word] are immutable variables, while [word] are mutable variables.",
+                  "In Kotlin, <blank-answer-1> are immutable variables, while <blank-answer-2> are mutable variables.",
                 solutionExplanation:
                   "<p>In Kotlin, <strong>val</strong> are immutable variables, while <strong>var</strong> are mutable variables.</p>",
                 options: [
@@ -985,7 +985,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In arithmetic, [word] is the result of addition, while [word] is the result of subtraction.",
+                  "In arithmetic, <blank-answer-1> is the result of addition, while <blank-answer-2> is the result of subtraction.",
                 solutionExplanation:
                   "<p>In arithmetic, <strong>sum</strong> is the result of addition, while <strong>difference</strong> is the result of subtraction.</p>",
                 options: [
@@ -1072,7 +1072,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In algebra, [word] represent unknown values, while [word] are mathematical phrases",
+                  "In algebra, <blank-answer-1> represent unknown values, while <blank-answer-2> are mathematical phrases",
                 solutionExplanation:
                   "<p>In algebra, <strong>variables</strong> represent unknown values, while <strong>expressions</strong> are mathematical phrases that combine numbers and variables.</p>",
                 options: [
@@ -1162,7 +1162,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "In algebra, [word] are used to represent unknowns, while [word] can be solved to find their values.",
+                  "In algebra, <blank-answer-1> are used to represent unknowns, while <blank-answer-2> can be solved to find their values.",
                 solutionExplanation:
                   "<p>In algebra, <strong>variables</strong> are used to represent unknowns, while <strong>equations</strong> can be solved to find their values.</p>",
                 options: [
@@ -1232,7 +1232,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "Fill in the blanks: 'She [word] to the store yesterday.'",
+                description: "Fill in the blanks: 'She <blank-answer-1> to the store yesterday.'",
                 solutionExplanation: "<p>She <strong>went</strong> to the store yesterday.</p>",
                 options: [
                   { optionText: "went", isCorrect: true, language: "en" },
@@ -1297,7 +1297,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
                 title: "Fill in the blanks with the correct word.",
-                description: "I [word] to the park every day.",
+                description: "I <blank-answer-1> to the park every day.",
                 solutionExplanation: "I <strong>go</strong> to the park every day.",
                 options: [
                   { optionText: "go", isCorrect: true, language: "en" },
@@ -1355,7 +1355,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "I love [word] (swimming/swim).",
+                description: "I love <blank-answer-1> (swimming/swim).",
                 solutionExplanation: "I love <strong>swimming</strong> (swimming/swim).",
                 options: [
                   {
@@ -1422,7 +1422,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "She [word] to the park every day.",
+                description: "She <blank-answer-1> to the park every day.",
                 solutionExplanation: "She <strong>went</strong> to the park every day.",
                 options: [
                   { optionText: "goes", isCorrect: true, language: "en" },
@@ -1616,7 +1616,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "The book was [word] by the author to explain complex [word] concepts.",
+                  "The book was <blank-answer-1> by the author to explain complex <blank-answer-2> concepts.",
                 solutionExplanation:
                   "The book was <strong>written</strong> by the author to explain complex <strong>grammatical</strong> concepts.",
                 options: [
@@ -1637,7 +1637,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "The [word] of the study focused on the effects of [word] in [word] language acquisition.",
+                  "The <blank-answer-1> of the study focused on the effects of <blank-answer-2> in <blank-answer-3> language acquisition.",
                 solutionExplanation:
                   "The <strong>focus</strong> of the study focused on the effects of <strong>context</strong> in <strong>second</strong> language acquisition.",
                 options: [
@@ -1801,7 +1801,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "The book [word] I borrowed yesterday was fascinating.",
+                description: "The book <blank-answer-1> I borrowed yesterday was fascinating.",
                 solutionExplanation:
                   "The book <strong>that</strong> I borrowed yesterday was fascinating.",
                 options: [
@@ -1868,7 +1868,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "The results [word] the hypothesis.",
+                description: "The results <blank-answer-1> the hypothesis.",
                 solutionExplanation: "The results <strong>support</strong> the hypothesis.",
                 options: [
                   {
@@ -1973,7 +1973,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill in the blanks with the correct word.",
                 description:
-                  "The break the ice expression is used to [word] a person who is not interested in a conversation.",
+                  "The break the ice expression is used to <blank-answer-1> a person who is not interested in a conversation.",
                 solutionExplanation:
                   "The break the ice expression is used to <strong>make</strong> a person feel better.",
                 options: [
@@ -2009,7 +2009,7 @@ export const niceCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
-                description: "She was [word] when she heard the good news.",
+                description: "She was <blank-answer-1> when she heard the good news.",
                 solutionExplanation:
                   "She was <strong>over the moon</strong> when she heard the good news.",
                 options: [
@@ -2194,7 +2194,7 @@ export const niceCourses: NiceCourseData[] = [
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_DND,
                 title: "Fill blanks with the correct word.",
                 description:
-                  "Complete the blanks: Artificial [word] refers to the ability of machines to mimic [word] intelligence.",
+                  "Complete the blanks: Artificial <blank-answer-1> refers to the ability of machines to mimic <blank-answer-2> intelligence.",
                 solutionExplanation:
                   "Complete the blanks: Artificial <strong>intelligence</strong> refers to the ability of machines to mimic <strong>human</strong> intelligence.",
                 options: [
