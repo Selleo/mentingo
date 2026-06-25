@@ -10,6 +10,7 @@ type ChapterCounterProps = {
   chapterProgress: GetCourseResponse["data"]["chapters"][number]["chapterProgress"];
   displayOrder: GetCourseResponse["data"]["chapters"][number]["displayOrder"];
   isPreviewMode?: boolean;
+  showConnector?: boolean;
 };
 
 const chapterCounterIcon = {
@@ -22,6 +23,7 @@ export const ChapterCounter = ({
   chapterProgress = CHAPTER_PROGRESS_STATUSES.NOT_STARTED,
   displayOrder,
   isPreviewMode = false,
+  showConnector = true,
 }: ChapterCounterProps) => {
   const chapterNumber = formatNumberToTwoDigits(displayOrder);
 
@@ -32,11 +34,12 @@ export const ChapterCounter = ({
   return (
     <div
       className={cn(
-        "sr-only after:block after:h-full after:w-0.5 md:not-sr-only md:flex md:flex-col md:items-center md:gap-y-1 md:pt-4",
+        "sr-only md:not-sr-only md:flex md:flex-col md:items-center md:gap-y-1 md:pt-4",
         {
-          "after:bg-primary-200": !isPreviewMode || !isChapterStarted,
-          "after:bg-secondary-200": !isPreviewMode && isChapterStarted,
-          "after:bg-success-200": !isPreviewMode && isChapterCompleted,
+          "after:block after:h-full after:w-0.5": showConnector,
+          "after:bg-primary-200": showConnector && (!isPreviewMode || !isChapterStarted),
+          "after:bg-secondary-200": showConnector && !isPreviewMode && isChapterStarted,
+          "after:bg-success-200": showConnector && !isPreviewMode && isChapterCompleted,
         },
       )}
     >
