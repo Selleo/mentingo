@@ -35,6 +35,7 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import { CertificateArchivedEmailEvent } from "src/events/certificate/certificate-archived-email.event";
 import { CertificateExpirationWarningEmailEvent } from "src/events/certificate/certificate-expiration-warning-email.event";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { S3Service } from "src/s3/s3.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -654,7 +655,9 @@ export class CertificatesService implements OnModuleDestroy {
     );
 
     const certificateSignatureUrl = certificate.certificateSignature
-      ? await this.fileService.getFileUrl(certificate.certificateSignature)
+      ? await this.fileService.getFileUrl(certificate.certificateSignature, {
+          quality: IMAGE_QUALITY.SM,
+        })
       : null;
 
     return {
@@ -1265,7 +1268,7 @@ export class CertificatesService implements OnModuleDestroy {
     return {
       ...rest,
       certificateSignatureUrl: certificateSignature
-        ? await this.fileService.getFileUrl(certificateSignature)
+        ? await this.fileService.getFileUrl(certificateSignature, { quality: IMAGE_QUALITY.SM })
         : null,
     };
   }

@@ -70,8 +70,6 @@ export const coursesFilterSchema = Type.Object({
   author: Type.Optional(Type.String()),
   /** Filter by course description only */
   description: Type.Optional(Type.String()),
-  /** Search across both title AND description fields simultaneously */
-  searchQuery: Type.Optional(Type.String()),
 });
 
 export type CoursesFilterSchema = Static<typeof coursesFilterSchema>;

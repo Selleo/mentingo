@@ -30,6 +30,7 @@ import {
 } from "src/events";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
@@ -66,6 +67,7 @@ import type {
 } from "../learning-path.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { SortEnrolledStudentsOptions } from "src/courses/schemas/courseQuery";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 
 @Injectable()
 export class LearningPathService {
@@ -1101,10 +1103,14 @@ export class LearningPathService {
   ): Promise<LearningPathDisplaySchema> {
     return {
       ...learningPath,
-      thumbnailReference: await this.resolveFileUrl(learningPath.thumbnailReference),
+      thumbnailReference: await this.resolveFileUrl(
+        learningPath.thumbnailReference,
+        IMAGE_QUALITY.SM,
+      ),
       settings: {
         certificateSignatureUrl: await this.resolveFileUrl(
           learningPath.settings?.certificateSignature,
+          IMAGE_QUALITY.SM,
         ),
         certificateFontColor: learningPath.settings?.certificateFontColor ?? null,
       },
@@ -1138,7 +1144,7 @@ export class LearningPathService {
     const resolvedCourseOptions = await Promise.all(
       courseOptions.map(async (courseOption) => ({
         ...courseOption,
-        imageUrl: await this.resolveFileUrl(courseOption.imageUrl),
+        imageUrl: await this.resolveFileUrl(courseOption.imageUrl, IMAGE_QUALITY.SM),
       })),
     );
 
@@ -1164,7 +1170,7 @@ export class LearningPathService {
         await Promise.all(
           group.courses.map(async (course) => ({
             ...course,
-            thumbnailUrl: await this.resolveFileUrl(course.thumbnailUrl),
+            thumbnailUrl: await this.resolveFileUrl(course.thumbnailUrl, IMAGE_QUALITY.SM),
           })),
         ),
       );
@@ -1173,11 +1179,11 @@ export class LearningPathService {
     return result;
   }
 
-  private async resolveFileUrl(reference: string | null) {
+  private async resolveFileUrl(reference: string | null, quality: ImageQuality = IMAGE_QUALITY.XL) {
     if (!reference) return null;
 
     try {
-      return await this.fileService.getFileUrl(reference);
+      return await this.fileService.getFileUrl(reference, { quality });
     } catch (error) {
       this.logger.error(`Failed to get signed URL for ${reference}:`, error);
       return reference;

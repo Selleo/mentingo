@@ -58,10 +58,8 @@ import { canUpdateCourseByAuthor } from "src/common/permissions/course-permissio
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
-import { getCourseTsVector } from "src/courses/utils/courses.utils";
 import { EnvService } from "src/env/services/env.service";
 import {
   CourseDueDateReminderEmailEvent,
@@ -72,6 +70,7 @@ import {
 import { UsersAssignedToCourseEvent } from "src/events/user/user-assigned-to-course.event";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
@@ -187,6 +186,7 @@ import type {
 } from "src/courses/types/course-due-date-reminder.types";
 import type { CourseTranslationType } from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   AdminLessonWithContentSchema,
   LessonForChapterSchema,
@@ -257,7 +257,6 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = this.getFiltersConditions(filters, false, language);
-    const orderConditions = this.getOrderConditions(filters);
 
     const canUpdateAnyCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE);
     const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
@@ -317,10 +316,7 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
       )
-      .orderBy(
-        ...orderConditions,
-        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-      );
+      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -331,7 +327,7 @@ export class CourseService {
         if (!item.thumbnailUrl) return item;
 
         try {
-          const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+          const signedUrl = await this.getSignedCourseThumbnailUrl(item.thumbnailUrl);
           const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
             item.authorAvatarUrl,
           );
@@ -384,8 +380,6 @@ export class CourseService {
       ];
       conditions.push(...this.getFiltersConditions(filters, false, language));
 
-      const orderConditions = this.getOrderConditions(filters);
-
       const queryDB = trx
         .select(this.getSelectField(language))
         .from(studentCourses)
@@ -422,10 +416,7 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(
-          ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-        );
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -446,7 +437,7 @@ export class CourseService {
           const trailerUrl = trailerUrls[item.id] ?? null;
           try {
             const signedUrl = item.thumbnailUrl
-              ? await this.fileService.getFileUrl(item.thumbnailUrl)
+              ? await this.getSignedCourseThumbnailUrl(item.thumbnailUrl)
               : item.thumbnailUrl;
 
             const authorAvatarSignedUrl = await this.userService.getUsersProfilePictureUrl(
@@ -658,11 +649,12 @@ export class CourseService {
 
   private async getSignedCourseThumbnailUrl(
     thumbnailReference: string | null,
+    quality: ImageQuality = IMAGE_QUALITY.XL,
   ): Promise<string | null> {
     if (!thumbnailReference) return thumbnailReference;
 
     try {
-      return await this.fileService.getFileUrl(thumbnailReference);
+      return await this.fileService.getFileUrl(thumbnailReference, { quality });
     } catch (error) {
       this.logger.error(`Failed to get signed URL for ${thumbnailReference}:`, error);
       return thumbnailReference;
@@ -833,7 +825,6 @@ export class CourseService {
       sort = CourseSortFields.title,
       perPage = DEFAULT_PAGE_SIZE,
       page = 1,
-      filters = {},
       language,
     } = query;
     const { sortOrder, sortedField } = getSortOptions(sort);
@@ -847,7 +838,6 @@ export class CourseService {
       )`;
 
       const conditions = await this.getAvailableCoursesConditions(trx, query, currentUserId);
-      const orderConditions = this.getOrderConditions(filters);
 
       const queryDB = trx
         .select({
@@ -924,10 +914,7 @@ export class CourseService {
           courses.originType,
           groupCourses.dueDate,
         )
-        .orderBy(
-          ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-        );
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -946,7 +933,7 @@ export class CourseService {
           try {
             const { authorAvatarUrl, ...itemWithoutReferences } = item;
 
-            const signedUrl = await this.fileService.getFileUrl(item.thumbnailUrl);
+            const signedUrl = await this.getSignedCourseThumbnailUrl(item.thumbnailUrl);
             const authorAvatarSignedUrl =
               await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
 
@@ -1148,7 +1135,7 @@ export class CourseService {
           try {
             const { authorAvatarUrl: authorAvatarReference, ...itemWithoutReferences } = course;
 
-            const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailUrl);
+            const thumbnailUrl = await this.getSignedCourseThumbnailUrl(course.thumbnailUrl);
             const authorAvatarUrl =
               await this.userService.getUsersProfilePictureUrl(authorAvatarReference);
             const trailerUrl = trailerUrls[course.id] ?? null;
@@ -1368,12 +1355,15 @@ export class CourseService {
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
-    const thumbnailUrl = await this.fileService.getFileUrl(course.thumbnailS3Key);
+    const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
+      course.thumbnailS3Key,
+      IMAGE_QUALITY.XL,
+    );
     const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
     return {
       ...course,
-      thumbnailUrl,
+      thumbnailUrl: thumbnailUrl ?? undefined,
       trailerUrl,
       chapters: courseChapterList,
       slug: currentSlug,
@@ -1515,7 +1505,7 @@ export class CourseService {
       .orderBy(chapters.displayOrder);
 
     const thumbnailS3SingedUrl = course.thumbnailS3Key
-      ? await this.fileService.getFileUrl(course.thumbnailS3Key)
+      ? await this.getSignedCourseThumbnailUrl(course.thumbnailS3Key, IMAGE_QUALITY.SM)
       : null;
     const trailerUrl = await this.getCourseTrailerUrl(course.id);
 
@@ -1573,7 +1563,6 @@ export class CourseService {
     excludeCourseId,
     title,
     description,
-    searchQuery,
     language,
   }: {
     currentUserId: UUIDType;
@@ -1582,7 +1571,6 @@ export class CourseService {
     excludeCourseId?: UUIDType;
     title?: string;
     description?: string;
-    searchQuery?: string;
     language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
@@ -1623,21 +1611,6 @@ export class CourseService {
           courses.description
         }) AS t(k, v) WHERE v ILIKE ${`%${description}%`})`,
       );
-    }
-
-    if (searchQuery) {
-      const searchCondition = or(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${
-          courses.title
-        }) AS t(k, v) WHERE v ILIKE ${`%${searchQuery}%`})`,
-      );
-
-      if (searchCondition) {
-        conditions.push(searchCondition);
-      }
     }
 
     const contentCreatorCourses = await this.db
@@ -1724,7 +1697,7 @@ export class CourseService {
         return {
           ...courseWithoutReferences,
           thumbnailUrl: course.thumbnailUrl
-            ? await this.fileService.getFileUrl(course.thumbnailUrl)
+            ? await this.getSignedCourseThumbnailUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
           slug: slugsMap.get(course.id) || course.id,
@@ -1905,7 +1878,9 @@ export class CourseService {
     }
 
     const certificateSignatureUrl = course.settings.certificateSignature
-      ? await this.fileService.getFileUrl(course.settings.certificateSignature)
+      ? await this.fileService.getFileUrl(course.settings.certificateSignature, {
+          quality: IMAGE_QUALITY.SM,
+        })
       : null;
 
     return {
@@ -3282,7 +3257,9 @@ export class CourseService {
       return lesson;
     }
 
-    const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference);
+    const signedUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReference, {
+      quality: IMAGE_QUALITY.XXS,
+    });
     return { ...lesson, avatarReferenceUrl: signedUrl };
   }
 
@@ -3295,7 +3272,9 @@ export class CourseService {
       lesson.questions.map(async (question) => {
         if (question.photoS3Key && !question.photoS3Key.startsWith("https://")) {
           try {
-            const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+            const signedUrl = await this.fileService.getFileUrl(question.photoS3Key, {
+              quality: IMAGE_QUALITY.MD,
+            });
             return { ...question, photoS3SingedUrl: signedUrl };
           } catch (error) {
             this.logger.error(
@@ -3379,21 +3358,6 @@ export class CourseService {
     };
   }
 
-  private getOrderConditions(filters: CoursesFilterSchema) {
-    const orderConditions = [];
-
-    if (filters.searchQuery) {
-      const searchTerm = filters.searchQuery?.trim();
-
-      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
-      const tsVector = getCourseTsVector();
-
-      orderConditions.push(sql`ts_rank(${tsVector}, ${tsQuery}) DESC`);
-    }
-
-    return orderConditions;
-  }
-
   private getFiltersConditions(
     filters: CoursesFilterSchema,
     publishedOnly = true,
@@ -3415,15 +3379,6 @@ export class CourseService {
           courses.description
         }) AS t(k, v) WHERE v ILIKE ${`%${filters.description}%`})`,
       );
-    }
-
-    if (filters.searchQuery) {
-      const searchTerm = filters.searchQuery?.trim();
-
-      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
-      const tsVector = getCourseTsVector();
-
-      conditions.push(sql`${tsVector} @@ ${tsQuery}`);
     }
 
     if (filters.category) {

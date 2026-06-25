@@ -12,7 +12,7 @@ import {
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { DEFAULT_TUS_CHUNK_SIZE } from "@repo/shared";
 
@@ -27,7 +27,7 @@ export class S3Service {
   private s3Client: S3Client;
   private readonly bucketName: string;
 
-  constructor(private configService: ConfigService) {
+  constructor(@Inject(ConfigService) private configService: ConfigService) {
     const config = this.loadS3Config();
 
     this.s3Client = new S3Client({

@@ -1,13 +1,13 @@
 import { Link } from "@remix-run/react";
 import { FileText } from "lucide-react";
 
-import type { GetLessonsResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const LessonEntry = ({
   item,
   onSelect,
 }: {
-  item: GetLessonsResponse["data"][number];
+  item: SearchResponse["data"]["lessons"][number];
   onSelect: () => void;
 }) => {
   return (

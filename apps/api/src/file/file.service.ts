@@ -110,7 +110,7 @@ export class FileService {
     private readonly notificationGateway: VideoUploadNotificationGateway,
   ) {}
 
-  async getFileUrl(fileKey: string): Promise<string> {
+  async getFileUrl(fileKey: string, options: { quality?: ImageQuality } = {}): Promise<string> {
     if (!fileKey) return "https://app.lms.localhost/app/assets/placeholders/card-placeholder.jpg";
     if (fileKey.startsWith("https://") || fileKey.startsWith("http://")) return fileKey;
     if (fileKey.startsWith("bunny-")) {
@@ -120,7 +120,7 @@ export class FileService {
     }
 
     if (isImageVariantReference(fileKey)) {
-      return this.getImageUrlByQuality(fileKey);
+      return this.getImageUrlByQuality(fileKey, options.quality);
     }
 
     return this.s3Service.getSignedUrl(fileKey);
@@ -128,7 +128,7 @@ export class FileService {
 
   async getImageUrlByQuality(
     reference: string,
-    quality: ImageQuality = IMAGE_QUALITY.HIGH,
+    quality: ImageQuality = IMAGE_QUALITY.XL,
   ): Promise<string> {
     if (!isImageVariantReference(reference)) return this.s3Service.getSignedUrl(reference);
 
@@ -520,7 +520,7 @@ export class FileService {
   }
 
   private getFileStorageKey(reference: string) {
-    return this.getFileStorageKeyByQuality(reference, IMAGE_QUALITY.HIGH);
+    return this.getFileStorageKeyByQuality(reference, IMAGE_QUALITY.XL);
   }
 
   private getFileStorageKeyByQuality(reference: string, quality: ImageQuality) {
@@ -867,6 +867,7 @@ export class FileService {
     entityType: EntityType,
     relationshipType: string | undefined,
     language: SupportedLanguages,
+    options?: { quality?: ImageQuality },
   ): Promise<LocalizedResourceForEntity[]>;
   async getResourcesForEntity(
     entityId: UUIDType,
@@ -878,6 +879,7 @@ export class FileService {
     entityType: EntityType,
     relationshipType?: string,
     language?: SupportedLanguages,
+    options: { quality?: ImageQuality } = {},
   ): Promise<ResourceForEntity[]> {
     const conditions = [
       eq(resourceEntity.entityId, entityId),
@@ -911,7 +913,7 @@ export class FileService {
     return Promise.all(
       results.map(async (resource) => {
         try {
-          const fileUrl = await this.getFileUrl(resource.reference);
+          const fileUrl = await this.getFileUrl(resource.reference, options);
           return { ...resource, fileUrl };
         } catch (error) {
           return { ...resource, fileUrl: resource.reference, fileUrlError: true };

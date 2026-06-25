@@ -13,6 +13,7 @@ import {
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { UserFirstLoginEvent } from "src/events/user/user-first-login.event";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 
@@ -270,7 +271,9 @@ export class StatisticsService {
 
     if (!nextLesson) return null;
 
-    const courseThumbnail = await this.fileService.getFileUrl(nextLesson.courseThumbnail);
+    const courseThumbnail = await this.fileService.getFileUrl(nextLesson.courseThumbnail, {
+      quality: IMAGE_QUALITY.SM,
+    });
 
     return { ...nextLesson, courseThumbnail };
   }

@@ -12,6 +12,7 @@ import { nanoid } from "nanoid";
 
 import { processInBatches } from "src/common/utils/processInBatches";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 
 import { SupportModeRepository } from "./support-mode.repository";
 
@@ -171,7 +172,7 @@ export class SupportModeService {
     return {
       ...user,
       profilePictureUrl: avatarReference
-        ? await this.fileService.getFileUrl(avatarReference)
+        ? await this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS })
         : null,
     };
   }

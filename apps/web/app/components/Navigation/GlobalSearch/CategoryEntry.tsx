@@ -1,12 +1,12 @@
 import { Link } from "@remix-run/react";
 
-import type { GetAllCategoriesResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const CategoryEntry = ({
   item,
   onSelect,
 }: {
-  item: GetAllCategoriesResponse["data"][number];
+  item: SearchResponse["data"]["categories"][number];
   onSelect: () => void;
 }) => {
   return (

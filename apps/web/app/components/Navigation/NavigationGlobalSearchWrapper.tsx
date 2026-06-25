@@ -141,6 +141,8 @@ export const NavigationGlobalSearchWrapper = ({
               value={searchParams}
               onChange={(e) => setSearchParams(e.target.value)}
               clearable
+              wrapperClassName="w-full max-w-none"
+              className="!max-w-none"
             />
             <Separator className="my-2" />
             {debouncedSearch.length < 3 && (

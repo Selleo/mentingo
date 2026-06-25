@@ -1,13 +1,13 @@
 import { Link, createSearchParams } from "@remix-run/react";
 import { HelpCircle } from "lucide-react";
 
-import type { GetAllQAResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const QAEntry = ({
   item,
   onSelect,
 }: {
-  item: GetAllQAResponse[number];
+  item: SearchResponse["data"]["qa"][number];
   onSelect: () => void;
 }) => {
   return (

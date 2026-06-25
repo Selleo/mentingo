@@ -1,12 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
+import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
 import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
-import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
-import { getCourseTsVector, getLessonTsVector } from "src/courses/utils/courses.utils";
-import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
@@ -440,69 +437,6 @@ export class LessonRepository {
       }
     }
 
-    if (filters.searchQuery) {
-      const searchTerm = filters.searchQuery.trim();
-
-      const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm)})`;
-      const unifiedVector = sql`${getLessonTsVector()} || ${getCourseTsVector()}`;
-      const matchedAttachments = this.getMatchedAttachmentsCte(tsQuery);
-
-      conditions.push(sql`${unifiedVector} @@ ${tsQuery}`);
-
-      return this.db
-        .with(matchedAttachments)
-        .select({
-          id: lessons.id,
-          title: this.localizationService.getLocalizedSqlField(lessons.title, language),
-          type: sql<LessonTypes>`${lessons.type}`,
-          description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-          displayOrder: sql<number>`${lessons.displayOrder}`,
-          lessonCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
-          courseId: courses.id,
-          courseTitle: this.localizationService.getLocalizedSqlField(courses.title, language),
-          chapterId: chapters.id,
-          chapterTitle: this.localizationService.getLocalizedSqlField(chapters.title, language),
-          chapterDisplayOrder: sql<number>`${chapters.displayOrder}`,
-          searchRank: sql<number>`ts_rank(${unifiedVector}, ${tsQuery})`,
-          matchedAttachmentFileName: matchedAttachments.fileName,
-        })
-        .from(lessons)
-        .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-        .innerJoin(courses, eq(courses.id, chapters.courseId))
-        .leftJoin(studentCourses, eq(studentCourses.courseId, courses.id))
-        .leftJoin(
-          studentLessonProgress,
-          and(
-            eq(studentLessonProgress.lessonId, lessons.id),
-            eq(studentLessonProgress.studentId, currentUser.userId),
-          ),
-        )
-        .leftJoin(
-          matchedAttachments,
-          and(eq(matchedAttachments.lessonId, lessons.id), eq(matchedAttachments.matchRank, 1)),
-        )
-        .where(and(...conditions))
-        .groupBy(
-          lessons.id,
-          courses.id,
-          chapters.id,
-          lessons.type,
-          lessons.displayOrder,
-          studentLessonProgress.completedAt,
-          courses.title,
-          chapters.title,
-          chapters.displayOrder,
-          lessons.description,
-          matchedAttachments.fileName,
-        )
-        .orderBy(
-          desc(sql`ts_rank(${unifiedVector}, ${tsQuery})`),
-          lessons.id,
-          chapters.displayOrder,
-          lessons.displayOrder,
-        );
-    }
-
     return this.db
       .select({
         id: lessons.id,
@@ -542,45 +476,6 @@ export class LessonRepository {
         lessons.description,
       )
       .orderBy(lessons.id, chapters.displayOrder, lessons.displayOrder);
-  }
-
-  private getMatchedAttachmentsCte(tsQuery: SQL) {
-    const attachmentVector = sql`
-      (
-        setweight(to_tsvector('english', COALESCE(${resources.metadata}->>'originalFilename', '')), 'D') ||
-        setweight(jsonb_to_tsvector('english', COALESCE(${resources.title}, '{}'::jsonb), '["string"]'), 'D') ||
-        setweight(to_tsvector('english', regexp_replace(${resources.reference}, '^.*/', '')), 'D')
-      )
-    `;
-
-    return this.db.$with("matched_lesson_attachments").as(
-      this.db
-        .select({
-          lessonId: resourceEntity.entityId,
-          fileName: sql<string | null>`
-            COALESCE(
-              NULLIF(${resources.metadata}->>'originalFilename', ''),
-              NULLIF(regexp_replace(${resources.reference}, '^.*/', ''), '')
-            )
-          `.as("fileName"),
-          matchRank: sql<number>`
-            ROW_NUMBER() OVER (
-              PARTITION BY ${resourceEntity.entityId}
-              ORDER BY ts_rank(${attachmentVector}, ${tsQuery}) DESC, ${resources.id}
-            )
-          `.as("matchRank"),
-        })
-        .from(resourceEntity)
-        .innerJoin(resources, eq(resources.id, resourceEntity.resourceId))
-        .where(
-          and(
-            eq(resourceEntity.entityType, ENTITY_TYPES.LESSON),
-            eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
-            eq(resources.archived, false),
-            sql`${attachmentVector} @@ ${tsQuery}`,
-          ),
-        ),
-    );
   }
 
   async getLessonProgress(lessonId: UUIDType, userId: UUIDType, conditions?: SQL[]) {

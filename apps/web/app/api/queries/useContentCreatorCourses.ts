@@ -12,8 +12,6 @@ type SearchParams = {
   title?: string;
   /** Filter by course description only */
   description?: string;
-  /** Search across both title AND description fields simultaneously */
-  searchQuery?: string;
 
   language?: SupportedLanguages;
 };
@@ -46,7 +44,6 @@ export const contentCreatorCoursesOptions = (
         ...(searchParams?.excludeCourseId && { excludeCourseId: searchParams.excludeCourseId }),
         ...(searchParams?.title && { title: searchParams.title }),
         ...(searchParams?.description && { description: searchParams.description }),
-        ...(searchParams?.searchQuery && { searchQuery: searchParams.searchQuery }),
         ...(searchParams?.language && { language: searchParams.language }),
       });
 

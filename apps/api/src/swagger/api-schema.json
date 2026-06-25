@@ -2883,14 +2883,6 @@
             }
           },
           {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -3070,14 +3062,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -3397,14 +3381,6 @@
             }
           },
           {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "category",
             "required": false,
             "in": "query",
@@ -3577,14 +3553,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -3867,14 +3835,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -6163,14 +6123,6 @@
           },
           {
             "name": "description",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "searchQuery",
             "required": false,
             "in": "query",
             "schema": {
@@ -13108,14 +13060,6 @@
                 }
               ]
             }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -13144,8 +13088,14 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQAResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -13551,14 +13501,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           },
           {
@@ -14241,14 +14183,6 @@
                   "type": "string"
                 }
               ]
-            }
-          },
-          {
-            "name": "searchQuery",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -45571,6 +45505,26 @@
           "title",
           "description",
           "language"
+        ]
+      },
+      "CreateQAResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "UpdateQABody": {

@@ -9,10 +9,10 @@ import { buildJsonbField, deleteJsonbField } from "src/common/helpers/sqlHelpers
 import { hasAnyPermission, hasPermission } from "src/common/permissions/permission.utils";
 import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/annotateVideoAutoplayAndBlockIndexesInContent";
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
-import { normalizeSearchTerm } from "src/common/utils/normalizeSearchTerm";
 import { CreateNewsEvent, DeleteNewsEvent, UpdateNewsEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES, RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
@@ -177,27 +177,12 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     page = 1,
     currentUser?: CurrentUserType,
-    searchQuery?: string,
   ) {
     await this.checkAccess(currentUser?.userId);
 
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
-
-    const isSearching = searchQuery && searchQuery.trim().length >= 3;
-    const searchTerm = isSearching ? searchQuery.trim() : null;
-    const newsTsVector = sql`(
-      setweight(jsonb_to_tsvector('english', ${news.title}, '["string"]'), 'A') ||
-      setweight(jsonb_to_tsvector('english', COALESCE(${news.summary}, '{}'::jsonb), '["string"]'), 'B') ||
-      setweight(jsonb_to_tsvector('english', COALESCE(${news.content}, '{}'::jsonb), '["string"]'), 'C')
-    )`;
-
-    const tsQuery = sql`to_tsquery('english', ${normalizeSearchTerm(searchTerm ?? "")})`;
-
-    if (isSearching && searchTerm) {
-      conditions.push(sql`${newsTsVector} @@ ${tsQuery}`);
-    }
 
     const newsList = await this.db
       .select({
@@ -212,11 +197,7 @@ export class NewsService {
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
       .where(and(...conditions))
-      .orderBy(
-        isSearching && searchTerm
-          ? sql`ts_rank(${newsTsVector}, ${tsQuery})`
-          : sql`${news.publishedAt} DESC`,
-      )
+      .orderBy(sql`${news.publishedAt} DESC`)
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
@@ -286,6 +267,7 @@ export class NewsService {
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
+      { quality: IMAGE_QUALITY.SM },
     );
 
     return cover ? this.mapResourceToNewsResource(cover) : undefined;
@@ -704,6 +686,7 @@ export class NewsService {
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       language,
+      { quality: IMAGE_QUALITY.MD },
     );
 
     const groupedResources: NewsResources = {
@@ -737,6 +720,7 @@ export class NewsService {
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
+      { quality: IMAGE_QUALITY.LG },
     );
 
     if (cover) groupedResources.coverImage = this.mapResourceToNewsResource(cover);

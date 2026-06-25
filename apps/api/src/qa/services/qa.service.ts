@@ -40,6 +40,8 @@ export class QAService {
     );
 
     await this.searchIndexService.refreshQA(qa.id);
+
+    return { id: qa.id };
   }
 
   async getQA(qaId: UUIDType, language: SupportedLanguages, userId: UUIDType) {
@@ -48,10 +50,10 @@ export class QAService {
     return this.qaRepository.getQA(qaId, language);
   }
 
-  async getAllQA(language: SupportedLanguages, currentUserId?: UUIDType, searchQuery?: string) {
+  async getAllQA(language: SupportedLanguages, currentUserId?: UUIDType) {
     await this.checkAccess(currentUserId);
 
-    return this.qaRepository.getAllQA(language, searchQuery);
+    return this.qaRepository.getAllQA(language);
   }
 
   async createLanguage(qaId: UUIDType, language: SupportedLanguages, currentUser: CurrentUserType) {

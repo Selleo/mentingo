@@ -29,6 +29,7 @@ import {
 import { QuizCompletedEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { getVideoProviderFromReference } from "src/file/utils/videoProvider";
@@ -136,6 +137,7 @@ export class LessonService {
         ENTITY_TYPES.LESSON,
         RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
         actualLanguage,
+        { quality: IMAGE_QUALITY.MD },
       );
       const videoResourceEntityIds = lessonResources
         .filter(
@@ -202,7 +204,9 @@ export class LessonService {
       let avatarUrl = undefined;
 
       if (lesson.aiMentor?.avatarReferenceUrl) {
-        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReferenceUrl);
+        avatarUrl = await this.fileService.getFileUrl(lesson.aiMentor.avatarReferenceUrl, {
+          quality: IMAGE_QUALITY.XXS,
+        });
       }
 
       return {
@@ -223,6 +227,7 @@ export class LessonService {
         ENTITY_TYPES.LESSON,
         RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
         actualLanguage,
+        { quality: IMAGE_QUALITY.MD },
       );
 
       const mappedResources = lessonResources.map((resource) => {
@@ -270,7 +275,9 @@ export class LessonService {
         if (!question.photoS3Key) return question;
 
         try {
-          const signedUrl = await this.fileService.getFileUrl(question.photoS3Key);
+          const signedUrl = await this.fileService.getFileUrl(question.photoS3Key, {
+            quality: IMAGE_QUALITY.MD,
+          });
           const questionResult = { ...question, photoS3Key: signedUrl };
 
           return questionResult;

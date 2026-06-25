@@ -28,6 +28,7 @@ import { MasterCourseService } from "src/courses/master-course.service";
 import { CreateLessonEvent, DeleteLessonEvent, UpdateLessonEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { CONTEXT_TTL, getContextKey } from "src/file/utils/resourceCacheKeys";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
@@ -1525,6 +1526,7 @@ export class AdminLessonService {
       ENTITY_TYPES.LESSON,
       RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       language,
+      { quality: IMAGE_QUALITY.MD },
     );
 
     const questions =

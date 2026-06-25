@@ -4,18 +4,20 @@ import { PERMISSIONS } from "@repo/shared";
 import { SegmentedRing } from "~/assets/svgs";
 import { usePermissions } from "~/hooks/usePermissions";
 
-import type { GetStudentCoursesResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const MyCourseEntry = ({
   item,
   onSelect,
 }: {
-  item: GetStudentCoursesResponse["data"][number];
+  item: SearchResponse["data"]["myCourses"][number];
   onSelect: () => void;
 }) => {
   const { hasAccess: canUpdateLearningProgress } = usePermissions({
     required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   });
+  const courseChapterCount = item.courseChapterCount ?? 0;
+  const completedChapterCount = item.completedChapterCount ?? 0;
 
   return (
     <Link
@@ -32,11 +34,11 @@ export const MyCourseEntry = ({
         <span className="line-clamp-1 flex-1">{item.title}</span>
         <span className="flex items-center gap-2 ps-3 text-neutral-600">
           <SegmentedRing
-            segments={item.courseChapterCount}
-            completed={item.completedChapterCount}
+            segments={courseChapterCount}
+            completed={completedChapterCount}
             size={16}
           />
-          <span className="text-md text-neutral-950">{`${item.completedChapterCount}/${item.courseChapterCount}`}</span>
+          <span className="text-md text-neutral-950">{`${completedChapterCount}/${courseChapterCount}`}</span>
         </span>
       </li>
     </Link>

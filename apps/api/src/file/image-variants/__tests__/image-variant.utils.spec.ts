@@ -13,13 +13,15 @@ describe("image variant utils", () => {
   });
 
   it("injects quality before the extension for variant references", () => {
-    expect(getImageVariantKey("tenant/course/variants/image.webp", IMAGE_QUALITY.MEDIUM)).toBe(
+    expect(getImageVariantKey("tenant/course/variants/image.webp", IMAGE_QUALITY.MD)).toBe(
       "tenant/course/variants/image-960w.webp",
     );
   });
 
   it("builds all concrete variant keys for a logical variant reference", () => {
     expect(getAllImageVariantKeys("tenant/course/variants/image.webp")).toEqual([
+      "tenant/course/variants/image-160w.webp",
+      "tenant/course/variants/image-320w.webp",
       "tenant/course/variants/image-640w.webp",
       "tenant/course/variants/image-960w.webp",
       "tenant/course/variants/image-1280w.webp",
@@ -28,7 +30,7 @@ describe("image variant utils", () => {
   });
 
   it("keeps legacy references unchanged", () => {
-    expect(getImageVariantKey("tenant/course/image.png", IMAGE_QUALITY.HIGH)).toBe(
+    expect(getImageVariantKey("tenant/course/image.png", IMAGE_QUALITY.XL)).toBe(
       "tenant/course/image.png",
     );
   });

@@ -17,6 +17,7 @@ import {
   StartLiveTrainingSessionEvent,
 } from "src/events";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -1045,7 +1046,7 @@ export class LiveTrainingSessionsService {
   private async getProfilePictureUrl(avatarReference: string | null) {
     if (!avatarReference) return null;
 
-    return this.fileService.getFileUrl(avatarReference);
+    return this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS });
   }
 
   private getWebhookRoomName(event: WebhookEvent) {

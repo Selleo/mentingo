@@ -1,13 +1,13 @@
 import { Link } from "@remix-run/react";
 import { upperFirst, toLower } from "lodash-es";
 
-import type { GetUsersResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const UserEntry = ({
   item,
   onSelect,
 }: {
-  item: GetUsersResponse["data"][number];
+  item: SearchResponse["data"]["users"][number];
   onSelect: () => void;
 }) => {
   const groupsText = item.groups

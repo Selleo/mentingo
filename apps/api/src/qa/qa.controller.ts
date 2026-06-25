@@ -10,10 +10,9 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
-import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDSchema, UUIDType } from "src/common";
+import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -24,6 +23,8 @@ import {
   type AllQAResponseBody,
   allQAResponseSchema,
   type CreateQABody,
+  type CreateQAResponseBody,
+  createQAResponseSchema,
   createQASchema,
   type QAResponseBody,
   QAResponseSchema,
@@ -57,27 +58,29 @@ export class QAController {
   @Public()
   @Get()
   @Validate({
-    request: [
-      { type: "query", name: "language", schema: supportedLanguagesSchema },
-      { type: "query", name: "searchQuery", schema: Type.Optional(Type.String()) },
-    ],
+    request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: allQAResponseSchema,
   })
   async getAllQA(
     @Query("language") language: SupportedLanguages,
-    @Query("searchQuery") searchQuery: string | undefined,
     @CurrentUser("userId") userId: UUIDType,
   ): Promise<AllQAResponseBody> {
-    return this.qaService.getAllQA(language, userId, searchQuery);
+    return this.qaService.getAllQA(language, userId);
   }
 
   @Post()
   @Validate({
     request: [{ type: "body", schema: createQASchema }],
+    response: baseResponse(createQAResponseSchema),
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  async createQA(@Body() data: CreateQABody, @CurrentUser() currentUser: CurrentUserType) {
-    return this.qaService.createQA(data, currentUser);
+  async createQA(
+    @Body() data: CreateQABody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CreateQAResponseBody>> {
+    const createdQA = await this.qaService.createQA(data, currentUser);
+
+    return new BaseResponse(createdQA);
   }
 
   @Post("create-language/:qaId")

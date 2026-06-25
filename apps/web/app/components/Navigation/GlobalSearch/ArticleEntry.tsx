@@ -2,13 +2,13 @@ import { Link } from "@remix-run/react";
 
 import { Icon } from "~/components/Icon";
 
-import type { GetArticlesResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const ArticleEntry = ({
   item,
   onSelect,
 }: {
-  item: GetArticlesResponse[number];
+  item: SearchResponse["data"]["articles"][number];
   onSelect: () => void;
 }) => {
   return (

@@ -3,13 +3,13 @@ import { PERMISSIONS } from "@repo/shared";
 
 import { usePermissions } from "../../../hooks/usePermissions";
 
-import type { GetAllCoursesResponse } from "~/api/generated-api";
+import type { SearchResponse } from "~/api/generated-api";
 
 export const CourseEntry = ({
   item,
   onSelect,
 }: {
-  item: GetAllCoursesResponse["data"][number];
+  item: SearchResponse["data"]["allCourses"][number];
   onSelect: () => void;
 }) => {
   const { hasAccess: canUpdateLearningProgress } = usePermissions({

@@ -19,6 +19,7 @@ import { CourseChatMessageCreatedEvent } from "src/events/course-chat/course-cha
 import { CourseChatReplyCreatedEvent } from "src/events/course-chat/course-chat-reply-created.event";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { FileService } from "src/file/file.service";
+import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
@@ -431,7 +432,7 @@ export class CourseChatService {
       uniqueAvatarReferences.map(
         async (avatarReference): Promise<[string, string]> => [
           avatarReference,
-          await this.fileService.getFileUrl(avatarReference),
+          await this.fileService.getFileUrl(avatarReference, { quality: IMAGE_QUALITY.XXS }),
         ],
       ),
     );
