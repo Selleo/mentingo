@@ -8895,7 +8895,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         description?: string;
-        searchQuery?: string;
         category?: string;
         author?: string;
         creationDateRange?: string[];
@@ -8939,7 +8938,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         description?: string;
-        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -9021,7 +9019,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         description?: string;
-        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -9067,7 +9064,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         description?: string;
-        searchQuery?: string;
         category?: string;
         author?: string;
         "creationDateRange[0]"?: string;
@@ -9141,7 +9137,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         excludeCourseId?: string;
         title?: string;
         description?: string;
-        searchQuery?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
       },
@@ -10196,7 +10191,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         title?: string;
         description?: string;
-        searchQuery?: string;
         lessonCompleted?: string;
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
@@ -13472,7 +13466,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>
@@ -13686,7 +13679,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        searchQuery?: string;
         /** @min 1 */
         page?: number;
       },
@@ -14009,7 +14001,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs";
-        searchQuery?: string;
       },
       params: RequestParams = {},
     ) =>

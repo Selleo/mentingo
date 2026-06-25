@@ -257,7 +257,6 @@ export class CourseService {
     const { sortOrder, sortedField } = getSortOptions(sort);
 
     const conditions = this.getFiltersConditions(filters, false, language);
-    const orderConditions = this.getOrderConditions();
 
     const canUpdateAnyCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE);
     const canUpdateOwnCourse = hasPermission(currentUserPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
@@ -317,10 +316,7 @@ export class CourseService {
         courses.availableLocales,
         courses.baseLanguage,
       )
-      .orderBy(
-        ...orderConditions,
-        sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-      );
+      .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
     const dynamicQuery = queryDB.$dynamic();
     const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -384,8 +380,6 @@ export class CourseService {
       ];
       conditions.push(...this.getFiltersConditions(filters, false, language));
 
-      const orderConditions = this.getOrderConditions();
-
       const queryDB = trx
         .select(this.getSelectField(language))
         .from(studentCourses)
@@ -422,10 +416,7 @@ export class CourseService {
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(
-          ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-        );
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -847,7 +838,6 @@ export class CourseService {
       )`;
 
       const conditions = await this.getAvailableCoursesConditions(trx, query, currentUserId);
-      const orderConditions = this.getOrderConditions();
 
       const queryDB = trx
         .select({
@@ -924,10 +914,7 @@ export class CourseService {
           courses.originType,
           groupCourses.dueDate,
         )
-        .orderBy(
-          ...orderConditions,
-          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
-        );
+        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);
@@ -3369,12 +3356,6 @@ export class CourseService {
         )`,
       dueDate: sql<string | null>`TO_CHAR(${groupCourses.dueDate}, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')`,
     };
-  }
-
-  private getOrderConditions() {
-    const orderConditions: SQL[] = [];
-
-    return orderConditions;
   }
 
   private getFiltersConditions(
