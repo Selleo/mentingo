@@ -1,5 +1,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -11,6 +13,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
+import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
@@ -133,9 +136,11 @@ export function AiMentorEvaluationDialog({
               <h3 className="text-sm font-semibold text-neutral-950">
                 {t("studentCourseView.lesson.aiMentorLesson.evaluation.feedbackTitle")}
               </h3>
-              <p className="max-h-60 overflow-y-auto whitespace-pre-line rounded-md border border-neutral-200 bg-white p-4 text-sm leading-relaxed text-neutral-700">
-                {evaluation.summary}
-              </p>
+              <div className="max-h-60 overflow-y-auto rounded-md border border-neutral-200 bg-white p-4 text-sm leading-relaxed text-neutral-700 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:space-y-1 [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-950 [&_ul]:my-2 [&_ul]:space-y-1">
+                <Markdown components={variants} remarkPlugins={[remarkGfm]}>
+                  {evaluation.summary}
+                </Markdown>
+              </div>
             </div>
           )}
         </div>
