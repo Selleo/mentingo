@@ -9,17 +9,12 @@ import {
   type SortingState,
   useReactTable,
 } from "@tanstack/react-table";
-import { isAxiosError } from "axios";
 import { format } from "date-fns";
-import { isEmpty } from "lodash-es";
-import { Trash } from "lucide-react";
 import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
-import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses";
 import { categoriesQueryOptions } from "~/api/queries";
-import { useCoursesSuspense, ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { useCoursesSuspense } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
 import { ButtonGroup } from "~/components/ButtonGroup/ButtonGroup";
 import { PageWrapper } from "~/components/PageWrapper/PageWrapper";
@@ -28,16 +23,6 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Checkbox } from "~/components/ui/checkbox";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogOverlay,
-  DialogPortal,
-  DialogTitle,
-  DialogTrigger,
-} from "~/components/ui/dialog";
-import {
   Table,
   TableBody,
   TableCell,
@@ -45,7 +30,6 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { useToast } from "~/components/ui/use-toast";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { formatPrice } from "~/lib/formatters/priceFormatter";
 import { cn } from "~/lib/utils";
@@ -61,7 +45,13 @@ import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
 
 import { COURSES_PAGE_HANDLES } from "../../../../e2e/data/courses/handles";
 
-import { getCourseBadgeVariant, getCourseStatus } from "./utils";
+import { CourseBulkActions } from "./components/CourseBulkActions";
+import {
+  getCourseBadgeIcon,
+  getCourseBadgeIconClasses,
+  getCourseBadgeVariant,
+  getCourseStatus,
+} from "./utils";
 
 import type { ClientLoaderFunctionArgs, MetaFunction } from "@remix-run/react";
 import type { CourseType } from "@repo/shared";
@@ -248,6 +238,8 @@ const Courses = () => {
       cell: ({ row }) => (
         <Badge
           variant={getCourseBadgeVariant(row.original.status as CourseStatus)}
+          icon={getCourseBadgeIcon(row.original.status as CourseStatus)}
+          iconClasses={getCourseBadgeIconClasses(row.original.status as CourseStatus)}
           className="w-max"
         >
           {getCourseStatus(row.original.status as CourseStatus, t)}
@@ -287,75 +279,10 @@ const Courses = () => {
     },
   });
 
-  const { toast } = useToast();
-
   const selectedCourses = table.getSelectedRowModel().rows.map((row) => row.original.id);
 
-  const { mutate: deleteCourse } = useDeleteCourse();
-  const { mutate: deleteManyCourses } = useDeleteManyCourses();
-  const handleDeleteCourses = () => {
-    if (selectedCourses.length === 1) {
-      deleteCourse(selectedCourses[0], {
-        onSuccess: () => {
-          setRowSelection({});
-          queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
-          toast({
-            title: t("adminCoursesView.toast.deleteCourseSuccessfully"),
-          });
-        },
-        onError: (error) => {
-          console.error("Error deleting courses:", error);
-
-          if (
-            isAxiosError(error) &&
-            error.response?.data.message === "You can't delete a published course"
-          ) {
-            return toast({
-              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
-            });
-          }
-          toast({
-            title: t("adminCoursesView.toast.deleteCourseFailed"),
-          });
-        },
-      });
-    } else {
-      deleteManyCourses(selectedCourses, {
-        onSuccess: () => {
-          setRowSelection({});
-          queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
-        },
-        onError: (error) => {
-          console.error("Error deleting courses:", error);
-          if (
-            isAxiosError(error) &&
-            error.response?.data.message === "You can't delete a published course"
-          ) {
-            return toast({
-              title: t("adminCoursesView.toast.deletePublishedCourseFailed"),
-            });
-          }
-
-          toast({
-            title: t("adminCoursesView.toast.deleteCourseFailed"),
-          });
-        },
-      });
-    }
-  };
-
-  const getDeleteModalTitle = () => {
-    if (selectedCourses.length === 1) {
-      return t("adminCoursesView.deleteModal.titleSingle");
-    }
-    return t("adminCoursesView.deleteModal.titleMultiple");
-  };
-
-  const getDeleteModalDescription = () => {
-    if (selectedCourses.length === 1) {
-      return t("adminCoursesView.deleteModal.descriptionSingle");
-    }
-    return t("adminCoursesView.deleteModal.descriptionMultiple", { count: selectedCourses.length });
+  const handleBulkActionComplete = () => {
+    setRowSelection({});
   };
 
   const handleRowClick = (courseId: string) => {
@@ -406,65 +333,10 @@ const Courses = () => {
             onChange={handleFilterChange}
             isLoading={false}
           />
-          <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
-            <p
-              className={cn("text-sm", {
-                "text-neutral-900": !isEmpty(selectedCourses),
-                "text-neutral-500": isEmpty(selectedCourses),
-              })}
-            >
-              {t("common.other.selected")} ({selectedCourses.length})
-            </p>
-
-            <Dialog>
-              <DialogTrigger disabled={isEmpty(selectedCourses)}>
-                <Button
-                  data-testid={COURSES_PAGE_HANDLES.DELETE_SELECTED_BUTTON}
-                  size="sm"
-                  className="flex items-center gap-x-2"
-                  variant="outline"
-                  disabled={isEmpty(selectedCourses)}
-                >
-                  <Trash className="size-3" />
-                  <span className="text-xs">{t("adminCoursesView.button.deleteSelected")}</span>
-                </Button>
-              </DialogTrigger>
-              <DialogPortal>
-                <DialogOverlay className="bg-primary-400 opacity-65" />
-                <DialogContent
-                  data-testid={COURSES_PAGE_HANDLES.DELETE_DIALOG}
-                  className="max-w-md"
-                >
-                  <DialogTitle className="text-xl font-semibold text-neutral-900">
-                    {getDeleteModalTitle()}
-                  </DialogTitle>
-                  <DialogDescription className="mt-2 text-sm text-neutral-600">
-                    {getDeleteModalDescription()}
-                  </DialogDescription>
-                  <div className="mt-6 flex justify-end gap-4">
-                    <DialogClose>
-                      <Button
-                        data-testid={COURSES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON}
-                        variant="ghost"
-                        className="text-primary-800"
-                      >
-                        {t("common.button.cancel")}
-                      </Button>
-                    </DialogClose>
-                    <DialogClose>
-                      <Button
-                        data-testid={COURSES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON}
-                        onClick={handleDeleteCourses}
-                        className="bg-error-500 text-white hover:bg-error-600"
-                      >
-                        {t("common.button.delete")}
-                      </Button>
-                    </DialogClose>
-                  </div>
-                </DialogContent>
-              </DialogPortal>
-            </Dialog>
-          </div>
+          <CourseBulkActions
+            selectedCourseIds={selectedCourses}
+            onBulkActionComplete={handleBulkActionComplete}
+          />
         </div>
         <Table data-testid={COURSES_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
           <TableHeader>

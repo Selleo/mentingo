@@ -1419,7 +1419,12 @@
     "button": {
       "uploadScorm": "Prześlij SCORM",
       "createNew": "Utwórz nowy",
-      "deleteSelected": "Usuń wybrane"
+      "deleteSelected": "Usuń wybrane",
+      "bulkEdit": "Edytuj wiele"
+    },
+    "dropdown": {
+      "changeStatus": "Zmień status",
+      "delete": "Usuń"
     },
     "deleteModal": {
       "titleSingle": "Usuń kurs",
@@ -1427,10 +1432,18 @@
       "descriptionSingle": "Czy na pewno chcesz usunąć ten kurs? Ta operacja nie może zostać cofnięta.",
       "descriptionMultiple": "Czy na pewno chcesz usunąć {{count}} kursów? Ta operacja nie może zostać cofnięta."
     },
+    "statusModal": {
+      "title": "Zmień status kursu",
+      "description": "Wybierz nowy status dla {{count}} wybranych kursów."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu",
-      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza."
+      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza.",
+      "bulkStatusUpdateSuccessfully": "Statusy kursów zostały zaktualizowane",
+      "bulkStatusUpdateFailed": "Nie udało się zaktualizować statusów kursów",
+      "bulkStatusUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
+      "noCoursesSelected": "Wybierz co najmniej jeden kurs."
     }
   },
   "adminCategoriesView": {
@@ -4407,6 +4420,7 @@
     "actions": {
       "create": "Utworzono",
       "update": "Zaktualizowano",
+      "bulk_course_status_update": "Zbiorowo zaktualizowano status kursów",
       "delete": "Usunięto",
       "login": "Zalogowano",
       "login_failed": "Nieudane logowanie",

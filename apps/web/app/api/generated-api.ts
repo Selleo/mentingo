@@ -2208,6 +2208,17 @@ export interface CreateCourseResponse {
   };
 }
 
+export interface BulkUpdateCourseStatusBody {
+  ids: string[];
+  status: "draft" | "published" | "private";
+}
+
+export interface BulkUpdateCourseStatusResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
@@ -6189,6 +6200,7 @@ export interface GetActivityLogsResponse {
     actionType:
       | "create"
       | "update"
+      | "bulk_course_status_update"
       | "delete"
       | "login"
       | "login_failed"
@@ -9335,6 +9347,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         path: `/api/course/beta-course-missing-translations`,
         method: "GET",
         query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerBulkUpdateCourseStatus
+     * @request PATCH:/api/course/bulk/status
+     */
+    courseControllerBulkUpdateCourseStatus: (
+      data: BulkUpdateCourseStatusBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BulkUpdateCourseStatusResponse, any>({
+        path: `/api/course/bulk/status`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),

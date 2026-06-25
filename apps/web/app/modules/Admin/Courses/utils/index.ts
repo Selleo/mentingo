@@ -3,6 +3,7 @@ import { COURSE_STATUSES, COURSE_TYPE } from "@repo/shared";
 import type { CourseType } from "@repo/shared";
 import type i18next from "i18next";
 import type { CourseStatus } from "~/api/queries/useCourses";
+import type { IconName } from "~/types/shared";
 
 export const getCourseStatus = (status: CourseStatus, t: typeof i18next.t) => {
   switch (status) {
@@ -27,6 +28,30 @@ export const getCourseBadgeVariant = (status: CourseStatus) => {
       return "secondary";
     default:
       return "draft";
+  }
+};
+
+export const getCourseBadgeIcon = (status: CourseStatus): IconName | undefined => {
+  switch (status) {
+    case COURSE_STATUSES.DRAFT:
+      return "Warning";
+    case COURSE_STATUSES.PUBLISHED:
+      return "Success";
+    case COURSE_STATUSES.PRIVATE:
+      return "Private";
+    default:
+      return undefined;
+  }
+};
+
+export const getCourseBadgeIconClasses = (status: CourseStatus): string | undefined => {
+  switch (status) {
+    case COURSE_STATUSES.DRAFT:
+    case COURSE_STATUSES.PUBLISHED:
+    case COURSE_STATUSES.PRIVATE:
+      return "size-4";
+    default:
+      return undefined;
   }
 };
 

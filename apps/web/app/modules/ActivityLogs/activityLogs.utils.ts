@@ -51,6 +51,12 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     iconClassName: "text-blue-700",
     ringClassName: "border-blue-600",
   },
+  bulk_course_status_update: {
+    icon: ArrowRightLeft,
+    badgeClassName: "border-cyan-200 bg-cyan-50 text-cyan-700",
+    iconClassName: "text-cyan-700",
+    ringClassName: "border-cyan-600",
+  },
   delete: {
     icon: Trash2,
     badgeClassName: "border-red-200 bg-red-50 text-red-700",

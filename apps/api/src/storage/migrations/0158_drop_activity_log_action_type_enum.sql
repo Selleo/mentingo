@@ -1,0 +1,1 @@
+ALTER TABLE "activity_logs" ALTER COLUMN "action_type" SET DATA TYPE text;

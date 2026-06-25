@@ -122,6 +122,12 @@ import {
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
+  bulkUpdateCourseStatusResponseSchema,
+  bulkUpdateCourseStatusSchema,
+  type BulkUpdateCourseStatusBody,
+  type BulkUpdateCourseStatusResponse,
+} from "./schemas/bulkUpdateCourseStatus.schema";
+import {
   courseLookupResponseSchema,
   type CourseLookupResponse,
 } from "./schemas/courseLookupResponse.schema";
@@ -501,6 +507,21 @@ export class CourseController {
       !!isPlaywrightTest,
     );
     return new BaseResponse({ id, message: "Course created successfully" });
+  }
+
+  @Patch("bulk/status")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [{ type: "body", schema: bulkUpdateCourseStatusSchema }],
+    response: bulkUpdateCourseStatusResponseSchema,
+  })
+  async bulkUpdateCourseStatus(
+    @Body() body: BulkUpdateCourseStatusBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkUpdateCourseStatusResponse>> {
+    await this.courseService.bulkUpdateCourseStatus(body, currentUser);
+
+    return new BaseResponse({ message: "adminCoursesView.toast.bulkStatusUpdateSuccessfully" });
   }
 
   @Patch(":id")

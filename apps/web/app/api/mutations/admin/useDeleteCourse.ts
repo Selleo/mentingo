@@ -1,21 +1,33 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { invalidateCourseListData } from "~/api/utils/invalidateCourseListData";
+import { useToast } from "~/components/ui/use-toast";
 
 export const useDeleteCourse = () => {
-  const queryClient = useQueryClient();
+  const { t } = useTranslation();
+  const { toast } = useToast();
 
   return useMutation({
     mutationFn: async (id: string) => await ApiClient.api.courseControllerDeleteCourse(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["course"] });
+    onSuccess: async () => {
+      await invalidateCourseListData();
+
+      toast({
+        description: t("adminCoursesView.toast.deleteCourseSuccessfully"),
+      });
     },
     onError: (error) => {
-      if (error instanceof Error) {
-        console.error("Error deleting course:", error.message);
-      } else {
-        console.error("An unexpected error occurred while deleting the course.");
-      }
+      toast({
+        description: getTranslatedApiErrorMessage(
+          error,
+          t,
+          t("adminCoursesView.toast.deleteCourseFailed"),
+        ),
+        variant: "destructive",
+      });
     },
   });
 };

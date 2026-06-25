@@ -1200,7 +1200,12 @@
     "button": {
       "uploadScorm": "Upload SCORM",
       "createNew": "Create new",
-      "deleteSelected": "Delete selected"
+      "deleteSelected": "Delete selected",
+      "bulkEdit": "Bulk edit"
+    },
+    "dropdown": {
+      "changeStatus": "Change status",
+      "delete": "Delete"
     },
     "deleteModal": {
       "titleSingle": "Delete course",
@@ -1208,10 +1213,18 @@
       "descriptionSingle": "Are you sure you want to delete this course? This action cannot be undone.",
       "descriptionMultiple": "Are you sure you want to delete {{count}} courses? This action cannot be undone."
     },
+    "statusModal": {
+      "title": "Change course status",
+      "description": "Choose the new status for {{count}} selected courses."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course",
-      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first."
+      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first.",
+      "bulkStatusUpdateSuccessfully": "Course statuses updated successfully",
+      "bulkStatusUpdateFailed": "Failed to update course statuses",
+      "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
+      "noCoursesSelected": "Select at least one course."
     }
   },
   "adminCategoriesView": {
@@ -4368,6 +4381,7 @@
     "actions": {
       "create": "Created",
       "update": "Updated",
+      "bulk_course_status_update": "Bulk course status updated",
       "delete": "Deleted",
       "login": "Logged in",
       "login_failed": "Login failed",

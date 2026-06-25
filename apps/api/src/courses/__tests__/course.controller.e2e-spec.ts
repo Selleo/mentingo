@@ -1309,6 +1309,166 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/bulk/status", () => {
+    it("updates statuses for selected courses", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const coursesToUpdate = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: "draft",
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: "draft",
+          thumbnailS3Key: null,
+        }),
+      ]);
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({
+          ids: coursesToUpdate.map((course) => course.id),
+          status: "private",
+        })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const updatedCourses = await db
+        .select({
+          id: courses.id,
+          status: courses.status,
+        })
+        .from(courses)
+        .where(
+          inArray(
+            courses.id,
+            coursesToUpdate.map((course) => course.id),
+          ),
+        );
+
+      expect(updatedCourses).toHaveLength(2);
+      expect(updatedCourses.every((course) => course.status === "private")).toBe(true);
+    });
+
+    it("allows a content creator to update only their own courses", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const cookies = await cookieFor(author, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        thumbnailS3Key: null,
+      });
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({
+          ids: [course.id],
+          status: "private",
+        })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const [updatedCourse] = await db.select().from(courses).where(eq(courses.id, course.id));
+
+      expect(updatedCourse.status).toBe("private");
+    });
+
+    it("rejects a content creator updating another author's course", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const otherAuthor = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const cookies = await cookieFor(author, app);
+      const category = await categoryFactory.create();
+      const ownCourse = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "draft",
+        thumbnailS3Key: null,
+      });
+      const otherCourse = await courseFactory.create({
+        authorId: otherAuthor.id,
+        categoryId: category.id,
+        status: "draft",
+        thumbnailS3Key: null,
+      });
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({
+          ids: [ownCourse.id, otherCourse.id],
+          status: "private",
+        })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      expect(response.body.message).toBe("adminCoursesView.toast.bulkStatusUpdateForbidden");
+
+      const selectedCourses = await db
+        .select({
+          id: courses.id,
+          status: courses.status,
+        })
+        .from(courses)
+        .where(inArray(courses.id, [ownCourse.id, otherCourse.id]));
+
+      expect(selectedCourses.every((course) => course.status === "draft")).toBe(true);
+    });
+
+    it("rejects an empty course selection", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({ ids: [], status: "private" })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(400);
+
+      expect(response.body.message).toBe("adminCoursesView.toast.noCoursesSelected");
+    });
+
+    it("rejects an invalid status", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        status: "draft",
+        thumbnailS3Key: null,
+      });
+
+      await request(app.getHttpServer())
+        .patch("/api/course/bulk/status")
+        .send({ ids: [course.id], status: "archived" })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(400);
+    });
+  });
+
   describe("GET /api/course/:courseId/students", () => {
     describe("when user is not logged in", () => {
       it("should return unauthorized", () => {

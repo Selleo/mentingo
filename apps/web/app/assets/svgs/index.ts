@@ -16,6 +16,7 @@ export { default as Lesson } from "./lesson.svg?react";
 export { default as Logout } from "./logout.svg?react";
 export { default as NotStartedRounded } from "./not-startet-rounded.svg?react";
 export { default as Phone } from "./phone.svg?react";
+export { default as Private } from "./private.svg?react";
 export { default as Plus } from "./plus.svg?react";
 export { default as PricingIllustration } from "./pricing-illustration.svg?react";
 export { default as QuizStar } from "./quiz-star.svg?react";

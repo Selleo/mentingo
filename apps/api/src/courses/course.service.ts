@@ -62,6 +62,7 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import {
+  BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
   UpdateCourseEvent,
@@ -127,6 +128,7 @@ import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-remin
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
+import { COURSE_BULK_STATUS_UPDATE_BATCH_SIZE } from "./course.constants";
 import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
 import { MasterCourseService } from "./master-course.service";
 import {
@@ -138,6 +140,7 @@ import {
   EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
 
+import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
   AllCoursesForContentCreatorResponse,
   AllCoursesResponse,
@@ -1955,7 +1958,9 @@ export class CourseService {
     const settings = sql`json_build_object(
       'lessonSequenceEnabled', ${isScormCourse ? false : LESSON_SEQUENCE_ENABLED}::boolean,
       'quizFeedbackEnabled', ${isScormCourse ? false : QUIZ_FEEDBACK_ENABLED}::boolean,
-      'videoCompletionTrackingEnabled', ${isScormCourse ? false : VIDEO_COMPLETION_TRACKING_ENABLED}::boolean,
+      'videoCompletionTrackingEnabled', ${
+        isScormCourse ? false : VIDEO_COMPLETION_TRACKING_ENABLED
+      }::boolean,
       'certificateSignature', NULL,
       'certificateFontColor', NULL,
       'certificateValidity', NULL
@@ -2195,6 +2200,105 @@ export class CourseService {
     );
 
     return updatedCourse;
+  }
+
+  async bulkUpdateCourseStatus(
+    body: BulkUpdateCourseStatusBody,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const ids = [...new Set(body.ids)];
+
+    if (!ids.length) throw new BadRequestException("adminCoursesView.toast.noCoursesSelected");
+
+    const canUpdateAnyCourse = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const selectedCourseConditions: SQL[] = [inArray(courses.id, ids)];
+
+    if (!canUpdateAnyCourse) {
+      selectedCourseConditions.push(eq(courses.authorId, currentUser.userId));
+    }
+
+    const selectedCourses = await this.db
+      .select({
+        id: courses.id,
+        status: courses.status,
+      })
+      .from(courses)
+      .where(and(...selectedCourseConditions));
+
+    if (selectedCourses.length !== ids.length) {
+      throw new ForbiddenException("adminCoursesView.toast.bulkStatusUpdateForbidden");
+    }
+
+    await processInBatches(
+      ids,
+      (courseId) =>
+        this.masterCourseService.assertCourseContentEditable(courseId, ["status"], ["status"]),
+      { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+    );
+
+    const coursesToUpdate = selectedCourses.filter((course) => course.status !== body.status);
+
+    if (!coursesToUpdate.length) return;
+
+    await this.db.transaction(async (trx) => {
+      const courseIdsToUpdate = coursesToUpdate.map((course) => course.id);
+
+      const snapshots = await processInBatches(
+        coursesToUpdate,
+        async (course) => ({
+          courseId: course.id,
+          previousSnapshot: await this.buildCourseActivitySnapshot(course.id, undefined, trx),
+        }),
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      await trx
+        .update(courses)
+        .set({ status: body.status })
+        .where(inArray(courses.id, courseIdsToUpdate));
+
+      const courseUpdateData = await processInBatches(
+        snapshots,
+        async (snapshot) => {
+          await this.searchIndexService.refreshCourse(snapshot.courseId, trx);
+
+          return {
+            ...snapshot,
+            updatedSnapshot: await this.buildCourseActivitySnapshot(
+              snapshot.courseId,
+              undefined,
+              trx,
+            ),
+          };
+        },
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      const courseUpdates = courseUpdateData
+        .filter(({ previousSnapshot, updatedSnapshot }) => {
+          return !this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot);
+        })
+        .map(({ courseId, previousSnapshot, updatedSnapshot }) => ({
+          courseId,
+          previousCourseData: previousSnapshot,
+          updatedCourseData: updatedSnapshot,
+        }));
+
+      if (!courseUpdates.length) return;
+
+      await this.outboxPublisher.publish(
+        new BulkUpdateCourseStatusEvent({
+          actor: currentUser,
+          tenantId: currentUser.tenantId,
+          status: body.status,
+          requestedCount: ids.length,
+          updatedCount: courseUpdates.length,
+          skippedCount: ids.length - courseUpdates.length,
+          updates: courseUpdates,
+        }),
+        trx,
+      );
+    });
   }
 
   async deleteCourseTrailer(courseId: UUIDType, currentUser: CurrentUserType) {
@@ -2998,7 +3102,7 @@ export class CourseService {
     }
 
     if (course.status === "published") {
-      throw new ForbiddenException("You can't delete a published course");
+      throw new ForbiddenException("adminCoursesView.toast.deletePublishedCourseFailed");
     }
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
@@ -3044,7 +3148,7 @@ export class CourseService {
     const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
 
     if (course.some((course) => course.status === "published")) {
-      throw new ForbiddenException("You can't delete a published course");
+      throw new ForbiddenException("adminCoursesView.toast.deletePublishedCourseFailed");
     }
 
     return this.db.transaction(async (trx) => {
