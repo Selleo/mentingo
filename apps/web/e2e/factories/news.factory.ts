@@ -6,10 +6,9 @@ import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetNewsResponse, GetNewsListResponse, UpdateNewsBody } from "~/api/generated-api";
+import type { GetNewsResponse, UpdateNewsBody } from "~/api/generated-api";
 
 export type NewsFactoryRecord = GetNewsResponse["data"];
-export type NewsFactoryListRecord = GetNewsListResponse["data"][number];
 export type NewsFactoryCreateInput = {
   language?: SupportedLanguages;
   title?: string;
@@ -73,19 +72,6 @@ export class NewsFactory {
   async getById(id: string, language: SupportedLanguages = "en"): Promise<NewsFactoryRecord> {
     const response = await this.apiClient.api.newsControllerGetNews(id, { language });
     return response.data.data;
-  }
-
-  async findByTitle(
-    title: string,
-    language: SupportedLanguages = "en",
-  ): Promise<NewsFactoryListRecord | null> {
-    const response = await this.apiClient.api.newsControllerGetNewsList({
-      language,
-      page: 1,
-      searchQuery: title,
-    });
-
-    return response.data.data.find((news) => news.title === title) ?? null;
   }
 
   async update(id: string, data: NewsFactoryUpdateInput): Promise<NewsFactoryRecord> {

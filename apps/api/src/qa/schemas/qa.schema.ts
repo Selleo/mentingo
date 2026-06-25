@@ -12,6 +12,10 @@ export const createQASchema = Type.Object({
   language: Type.Enum(SUPPORTED_LANGUAGES),
 });
 
+export const createQAResponseSchema = Type.Object({
+  id: UUIDSchema,
+});
+
 export const QAResponseSchema = Type.Object({
   id: UUIDSchema,
   title: Type.Union([Type.String(), Type.Null()]),
@@ -35,3 +39,4 @@ export type QAResponseBody = Static<typeof QAResponseSchema>;
 export type AllQAResponseBody = Static<typeof allQAResponseSchema>;
 
 export type CreateQABody = Static<typeof createQASchema>;
+export type CreateQAResponseBody = Static<typeof createQAResponseSchema>;

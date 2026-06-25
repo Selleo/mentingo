@@ -155,7 +155,7 @@ describe("QAController (e2e)", () => {
 
       const payload = { title: "Question", description: "Answer", language: "en" };
 
-      await request(app.getHttpServer())
+      const response = await request(app.getHttpServer())
         .post("/api/qa")
         .set("Cookie", cookie)
         .send(payload)
@@ -168,6 +168,7 @@ describe("QAController (e2e)", () => {
 
       expect(created).toBeDefined();
       expect(created.availableLocales).toContain("en");
+      expect(response.body.data.id).toBe(created.id);
     });
 
     it("returns 403 for non-admin users", async () => {

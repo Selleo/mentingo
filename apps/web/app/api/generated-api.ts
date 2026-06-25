@@ -6090,6 +6090,13 @@ export interface CreateQABody {
   language: "en" | "pl" | "de" | "lt" | "cs";
 }
 
+export interface CreateQAResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+  };
+}
+
 export interface UpdateQABody {
   title?: string;
   description?: string;
@@ -13484,11 +13491,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request POST:/api/qa
      */
     qaControllerCreateQa: (data: CreateQABody, params: RequestParams = {}) =>
-      this.request<void, any>({
+      this.request<CreateQAResponse, any>({
         path: `/api/qa`,
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
         ...params,
       }),
 

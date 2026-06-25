@@ -40,6 +40,8 @@ export class QAService {
     );
 
     await this.searchIndexService.refreshQA(qa.id);
+
+    return { id: qa.id };
   }
 
   async getQA(qaId: UUIDType, language: SupportedLanguages, userId: UUIDType) {

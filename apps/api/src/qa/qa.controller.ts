@@ -12,7 +12,7 @@ import {
 import { PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
-import { UUIDSchema, UUIDType } from "src/common";
+import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -23,6 +23,8 @@ import {
   type AllQAResponseBody,
   allQAResponseSchema,
   type CreateQABody,
+  type CreateQAResponseBody,
+  createQAResponseSchema,
   createQASchema,
   type QAResponseBody,
   QAResponseSchema,
@@ -69,10 +71,16 @@ export class QAController {
   @Post()
   @Validate({
     request: [{ type: "body", schema: createQASchema }],
+    response: baseResponse(createQAResponseSchema),
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  async createQA(@Body() data: CreateQABody, @CurrentUser() currentUser: CurrentUserType) {
-    return this.qaService.createQA(data, currentUser);
+  async createQA(
+    @Body() data: CreateQABody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<CreateQAResponseBody>> {
+    const createdQA = await this.qaService.createQA(data, currentUser);
+
+    return new BaseResponse(createdQA);
   }
 
   @Post("create-language/:qaId")

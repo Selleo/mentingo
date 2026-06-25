@@ -39,19 +39,13 @@ export class QAFactory {
     const defaults = createQADefaults();
     const title = input.title ?? defaults.title;
 
-    await this.apiClient.api.qaControllerCreateQa({
+    const response = await this.apiClient.api.qaControllerCreateQa({
       language,
       title,
       description: input.description ?? defaults.description,
     } satisfies CreateQABody);
 
-    const created = await this.findByTitle(title, language);
-
-    if (!created) {
-      throw new Error(`Failed to find created Q&A entry with title "${title}"`);
-    }
-
-    return this.getById(created.id, language);
+    return this.getById(response.data.data.id, language);
   }
 
   async getById(id: string, language: SupportedLanguages = "en"): Promise<QAFactoryRecord> {
@@ -68,10 +62,7 @@ export class QAFactory {
     title: string,
     language: SupportedLanguages = "en",
   ): Promise<QAFactoryListRecord | null> {
-    const response = await this.apiClient.api.qaControllerGetAllQa({
-      language,
-      searchQuery: title,
-    });
+    const response = await this.apiClient.api.qaControllerGetAllQa({ language });
 
     return response.data.find((qa) => qa.title === title) ?? null;
   }

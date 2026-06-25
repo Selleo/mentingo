@@ -13034,8 +13034,14 @@
           }
         },
         "responses": {
-          "201": {
-            "description": ""
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateQAResponse"
+                }
+              }
+            }
           }
         }
       }
@@ -45337,6 +45343,26 @@
           "title",
           "description",
           "language"
+        ]
+      },
+      "CreateQAResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ]
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "UpdateQABody": {
