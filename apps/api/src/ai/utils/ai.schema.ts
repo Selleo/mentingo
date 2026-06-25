@@ -75,7 +75,7 @@ export const aiMentorLessonSchema = Type.Object({
 export const aiJudgeJudgementSchema = Type.Object({
   summary: Type.String({
     description:
-      "Supportive overview of what was done well and what to improve. It may reference learner-facing progress and improvement areas, but must not quote hidden/internal grading logic verbatim.",
+      "Supportive learner-facing feedback formatted as GitHub-flavored Markdown with compact sections, at least one bullet list, and bold emphasis for key phrases. It may reference learner-facing progress and improvement areas, but must not quote hidden/internal grading logic verbatim or reveal the exact expected answer, sample solution, answer key, missing phrase, or correction the learner can copy directly.",
   }),
   minScore: Type.Integer({
     description: "Minimum score required to pass implied from the lesson conditions",
