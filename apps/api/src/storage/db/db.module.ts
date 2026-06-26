@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { TokenService } from "src/auth/token.service";
 import * as schema from "src/storage/schema";
 
+import { DatabaseMigrationService } from "./database-migration.service";
 import { createDbProxy, DB, DB_APP, DB_ADMIN } from "./db.providers";
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
 import { TenantResolverService } from "./tenant-resolver.service";
@@ -51,6 +52,7 @@ import type { DatabasePg } from "src/common";
       inject: [DB_APP],
       useFactory: (dbApp: DatabasePg) => createDbProxy(dbApp),
     },
+    DatabaseMigrationService,
     TenantDbRunnerService,
     TenantResolverService,
     TenantStateService,
@@ -58,6 +60,7 @@ import type { DatabasePg } from "src/common";
   ],
   exports: [
     DB,
+    DatabaseMigrationService,
     TenantDbRunnerService,
     TenantResolverService,
     TenantStateService,
