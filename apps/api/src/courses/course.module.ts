@@ -22,7 +22,11 @@ import { SettingsModule } from "src/settings/settings.module";
 import { StatisticsModule } from "src/statistics/statistics.module";
 import { StripeModule } from "src/stripe/stripe.module";
 import { UserModule } from "src/user/user.module";
+import { WebSocketModule } from "src/websocket";
 
+import { CourseDuplicationQueueService } from "./course-duplication.queue.service";
+import { CourseDuplicationService } from "./course-duplication.service";
+import { CourseDuplicationWorker } from "./course-duplication.worker";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
 import { CourseScormExportService } from "./course-scorm-export.service";
@@ -60,6 +64,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     AiModule,
     forwardRef(() => StripeModule),
     forwardRef(() => UserModule),
+    WebSocketModule,
   ],
   controllers: [CourseController],
   providers: [
@@ -69,6 +74,9 @@ import { MasterCourseWorker } from "./master-course.worker";
     CourseScormSnapshotRepository,
     CourseScormSnapshotService,
     CourseFeaturePolicyService,
+    CourseDuplicationQueueService,
+    CourseDuplicationService,
+    CourseDuplicationWorker,
     CourseSlugService,
     GroupCourseDueDateCalendarService,
     CourseHandler,

@@ -10,6 +10,7 @@ export const QUEUE_NAMES = {
   LEARNING_PATH_SYNC: "learning-path-sync",
   AUDIO: "audio",
   SCORM_IMPORT: "scorm-import",
+  COURSE_DUPLICATION: "course-duplication",
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
 } as const;
 
@@ -64,4 +65,11 @@ export interface LearningPathSyncJobData {
 export interface LumaCourseGenerationSyncJobData {
   courseId: UUIDType;
   currentUser: CurrentUserType;
+}
+
+export interface CourseDuplicationJobData {
+  tenantId: UUIDType;
+  sourceCourseId: UUIDType;
+  targetCourseId: UUIDType;
+  actor: CurrentUserType;
 }

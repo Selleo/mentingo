@@ -10,6 +10,7 @@ export * from "./constants/calendar";
 export * from "./constants/certificate";
 export * from "./constants/course";
 export * from "./constants/courseChat";
+export * from "./constants/courseDuplication";
 export * from "./constants/courseEnrollment";
 export * from "./constants/entityTypes";
 export * from "./constants/features";

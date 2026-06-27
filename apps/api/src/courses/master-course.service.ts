@@ -221,6 +221,148 @@ export class MasterCourseService {
     return this.queueService.getJobStatus(jobId);
   }
 
+  async duplicateCourseIntoExistingCourse(params: {
+    sourceCourseId: UUIDType;
+    targetCourseId: UUIDType;
+    actorId: UUIDType;
+    tenantId: UUIDType;
+  }): Promise<void> {
+    const sourceCourse = await this.masterCourseRepository.getCourseById(params.sourceCourseId);
+    if (!sourceCourse) throw new NotFoundException("courseDuplication.error.sourceCourseNotFound");
+
+    const targetCourse = await this.masterCourseRepository.findCourseByIdInTenant(
+      params.targetCourseId,
+    );
+    if (!targetCourse) throw new NotFoundException("courseDuplication.error.targetCourseNotFound");
+
+    const sourceSnapshot = await this.masterCourseSnapshotService.buildSourceSnapshot(sourceCourse);
+    if (!sourceSnapshot)
+      throw new NotFoundException("courseDuplication.error.sourceCategoryMissing");
+
+    const tenantHost = await this.masterCourseRepository.getTenantHost(params.tenantId);
+    if (!tenantHost) throw new NotFoundException("courseDuplication.error.tenantMissing");
+
+    const resourceCollection = this.buildSourceResourceCollection(sourceSnapshot);
+    await this.copySourceResourceReferences(resourceCollection, {
+      exportId: params.targetCourseId,
+      sourceTenantId: params.tenantId,
+      sourceTenantOrigin: this.toTenantOrigin(tenantHost),
+      targetTenantId: params.tenantId,
+    });
+
+    const sourceCourseSettings = normalizeJsonb<CoursesSettings>(sourceSnapshot.course.settings, {
+      lessonSequenceEnabled: LESSON_SEQUENCE_ENABLED,
+      quizFeedbackEnabled: QUIZ_FEEDBACK_ENABLED,
+      videoCompletionTrackingEnabled: VIDEO_COMPLETION_TRACKING_ENABLED,
+      certificateSignature: null,
+      certificateFontColor: null,
+      certificateValidity: null,
+    });
+
+    const copiedCourseSettings = this.applyCopiedCourseSettingsReferences(
+      sourceCourseSettings,
+      sourceSnapshot.course.id,
+      resourceCollection,
+    );
+    const duplicatedCourseValues = this.omitCopiedRowFields(sourceSnapshot.course, [
+      "id",
+      "shortId",
+      "createdAt",
+      "updatedAt",
+      "tenantId",
+    ] as const);
+
+    await this.masterCourseRepository.updateTargetCourse(params.targetCourseId, {
+      ...duplicatedCourseValues,
+      title: toJsonbBuildObject(targetCourse.title),
+      description: toJsonbBuildObject(sourceSnapshot.course.description),
+      thumbnailS3Key: this.getCopiedInternalReference(
+        resourceCollection,
+        "courses",
+        ENTITY_TYPES.COURSE,
+        sourceSnapshot.course.id,
+        "thumbnailS3Key",
+        sourceSnapshot.course.thumbnailS3Key,
+      ),
+      status: "draft",
+      hasCertificate: sourceSnapshot.course.hasCertificate,
+      priceInCents: 0,
+      currency: sourceSnapshot.course.currency,
+      chapterCount: sourceSnapshot.course.chapterCount,
+      courseType: sourceSnapshot.course.courseType,
+      authorId: params.actorId,
+      categoryId: sourceSnapshot.course.categoryId,
+      stripeProductId: null,
+      stripePriceId: null,
+      settings: toJsonbBuildObject(copiedCourseSettings),
+      baseLanguage: sourceSnapshot.course.baseLanguage,
+      availableLocales: sourceSnapshot.course.availableLocales,
+      originType: COURSE_ORIGIN_TYPES.REGULAR,
+      sourceCourseId: null,
+      sourceTenantId: null,
+    });
+
+    const chapterMap = await this.duplicateChapters({
+      sourceSnapshot,
+      targetCourseId: params.targetCourseId,
+      targetAuthorId: params.actorId,
+    });
+
+    const lessonMap = await this.duplicateLessons({
+      sourceSnapshot,
+      chapterMap,
+      resourceCollection,
+    });
+
+    const questionMap = await this.duplicateQuestions({
+      sourceSnapshot,
+      lessonMap,
+      targetAuthorId: params.actorId,
+      resourceCollection,
+    });
+
+    const optionMap = await this.duplicateOptions({ sourceSnapshot, questionMap });
+    const aiMentorMap = await this.syncAiMentors({
+      sourceSnapshot,
+      lessonMap,
+      resourceCollection,
+    });
+
+    await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, params.tenantId);
+    await this.syncScormPackages({
+      exportId: params.targetCourseId,
+      sourceSnapshot,
+      lessonMap,
+      targetCourseId: params.targetCourseId,
+      targetTenantId: params.tenantId,
+    });
+
+    await this.duplicateResources({
+      lessonMap,
+      targetCourseId: params.targetCourseId,
+      targetAuthorId: params.actorId,
+      resourceCollection,
+    });
+
+    await this.syncLessonResourceReferences({
+      sourceSnapshot,
+      lessonMap,
+      resourceCollection,
+      targetTenantHost: tenantHost,
+    });
+
+    await this.syncFillInTheBlanksQuestionReferences({
+      sourceSnapshot,
+      questionMap,
+      optionMap,
+    });
+
+    await this.masterCourseRepository.updateTargetCourseChapterCount(
+      params.targetCourseId,
+      sourceSnapshot.chapters.length,
+    );
+  }
+
   async assertCourseContentEditable(
     courseId: UUIDType,
     allowedFieldKeys: string[] = [],
@@ -715,6 +857,42 @@ export class MasterCourseService {
     return chapterMap;
   }
 
+  private async duplicateChapters(params: {
+    sourceSnapshot: SourceSnapshot;
+    targetCourseId: UUIDType;
+    targetAuthorId: UUIDType;
+  }) {
+    const chapterMap = new Map<UUIDType, UUIDType>();
+
+    for (const sourceChapter of params.sourceSnapshot.chapters) {
+      const syncedLessonCount = this.getSyncedLessonCountForChapter(
+        params.sourceSnapshot,
+        sourceChapter.id,
+      );
+
+      const duplicatedChapterValues = this.omitCopiedRowFields(sourceChapter, [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "courseId",
+        "authorId",
+        "tenantId",
+      ] as const);
+
+      const targetChapterId = await this.masterCourseRepository.createTargetChapter({
+        ...duplicatedChapterValues,
+        title: toJsonbBuildObject(sourceChapter.title),
+        courseId: params.targetCourseId,
+        authorId: params.targetAuthorId,
+        lessonCount: syncedLessonCount,
+      });
+
+      chapterMap.set(sourceChapter.id, targetChapterId);
+    }
+
+    return chapterMap;
+  }
+
   private async syncLessons(params: SyncLessonsParams) {
     const lessonMap = new Map<UUIDType, UUIDType>();
 
@@ -773,6 +951,48 @@ export class MasterCourseService {
       });
 
       lessonMap.set(sourceLesson.id, mappedId);
+    }
+
+    return lessonMap;
+  }
+
+  private async duplicateLessons(params: {
+    sourceSnapshot: SourceSnapshot;
+    chapterMap: Map<UUIDType, UUIDType>;
+    resourceCollection: MasterCourseResourceCollection;
+  }) {
+    const lessonMap = new Map<UUIDType, UUIDType>();
+
+    for (const sourceLesson of params.sourceSnapshot.lessons) {
+      if (!this.shouldSyncLesson(sourceLesson)) continue;
+
+      const mappedChapterId = params.chapterMap.get(sourceLesson.chapterId);
+      if (!mappedChapterId) continue;
+
+      const duplicatedLessonValues = this.omitCopiedRowFields(sourceLesson, [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "chapterId",
+        "tenantId",
+      ] as const);
+
+      const targetLessonId = await this.masterCourseRepository.createTargetLesson({
+        ...duplicatedLessonValues,
+        chapterId: mappedChapterId,
+        title: toJsonbBuildObject(sourceLesson.title),
+        description: toNullableJsonbBuildObject(sourceLesson.description),
+        fileS3Key: this.getCopiedInternalReference(
+          params.resourceCollection,
+          "lessons",
+          ENTITY_TYPES.LESSON,
+          sourceLesson.id,
+          "fileS3Key",
+          sourceLesson.fileS3Key,
+        ),
+      });
+
+      lessonMap.set(sourceLesson.id, targetLessonId);
     }
 
     return lessonMap;
@@ -846,6 +1066,50 @@ export class MasterCourseService {
     return questionMap;
   }
 
+  private async duplicateQuestions(params: {
+    sourceSnapshot: SourceSnapshot;
+    lessonMap: Map<UUIDType, UUIDType>;
+    targetAuthorId: UUIDType;
+    resourceCollection: MasterCourseResourceCollection;
+  }) {
+    const questionMap = new Map<UUIDType, UUIDType>();
+
+    for (const sourceQuestion of params.sourceSnapshot.questions) {
+      const mappedLessonId = params.lessonMap.get(sourceQuestion.lessonId);
+      if (!mappedLessonId) continue;
+
+      const duplicatedQuestionValues = this.omitCopiedRowFields(sourceQuestion, [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "lessonId",
+        "authorId",
+        "tenantId",
+      ] as const);
+
+      const targetQuestionId = await this.masterCourseRepository.createTargetQuestion({
+        ...duplicatedQuestionValues,
+        lessonId: mappedLessonId,
+        description: toNullableJsonbBuildObject(sourceQuestion.description),
+        title: toJsonbBuildObject(sourceQuestion.title),
+        solutionExplanation: toNullableJsonbBuildObject(sourceQuestion.solutionExplanation),
+        photoS3Key: this.getCopiedInternalReference(
+          params.resourceCollection,
+          "questions",
+          ENTITY_TYPES.QUESTION,
+          sourceQuestion.id,
+          "photoS3Key",
+          sourceQuestion.photoS3Key,
+        ),
+        authorId: params.targetAuthorId,
+      });
+
+      questionMap.set(sourceQuestion.id, targetQuestionId);
+    }
+
+    return questionMap;
+  }
+
   private async syncOptions(params: SyncOptionsParams) {
     const optionMap = new Map<UUIDType, UUIDType>();
 
@@ -881,6 +1145,50 @@ export class MasterCourseService {
     }
 
     return optionMap;
+  }
+
+  private async duplicateOptions(params: {
+    sourceSnapshot: SourceSnapshot;
+    questionMap: Map<UUIDType, UUIDType>;
+  }) {
+    const optionMap = new Map<UUIDType, UUIDType>();
+
+    for (const sourceOption of params.sourceSnapshot.options) {
+      const mappedQuestionId = params.questionMap.get(sourceOption.questionId);
+      if (!mappedQuestionId) continue;
+
+      const duplicatedOptionValues = this.omitCopiedRowFields(sourceOption, [
+        "id",
+        "createdAt",
+        "updatedAt",
+        "questionId",
+        "tenantId",
+      ] as const);
+
+      const targetOptionId = await this.masterCourseRepository.createTargetOption({
+        ...duplicatedOptionValues,
+        questionId: mappedQuestionId,
+        optionText: toJsonbBuildObject(sourceOption.optionText),
+        matchedWord: toNullableJsonbBuildObject(sourceOption.matchedWord),
+      });
+
+      optionMap.set(sourceOption.id, targetOptionId);
+    }
+
+    return optionMap;
+  }
+
+  private omitCopiedRowFields<T extends object, K extends keyof T>(
+    source: T,
+    keys: readonly K[],
+  ): Omit<T, K> {
+    const copied = { ...source };
+
+    for (const key of keys) {
+      delete (copied as Partial<T>)[key];
+    }
+
+    return copied as Omit<T, K>;
   }
 
   private async syncAiMentors(params: SyncAiMentorsParams) {
@@ -2018,6 +2326,66 @@ export class MasterCourseService {
           targetResourceId,
         );
       }
+
+      targetResourceIds.set(sourceResourceId, targetResourceId);
+    }
+
+    for (const resourceReference of externalReferences) {
+      const targetResourceId = targetResourceIds.get(resourceReference.source.resourceId);
+
+      const targetEntityId = this.getTargetResourceEntityId(resourceReference, {
+        lessonMap: params.lessonMap,
+        targetCourseId: params.targetCourseId,
+      });
+
+      if (!targetResourceId || !targetEntityId) continue;
+
+      resourceReference.target.resourceId = targetResourceId;
+      resourceReference.target.entityId = targetEntityId;
+
+      await this.masterCourseRepository.createResourceRelation({
+        resourceId: targetResourceId,
+        entityId: targetEntityId,
+        entityType: resourceReference.source.entityType,
+        relationshipType:
+          resourceReference.source.relationshipType || RESOURCE_RELATIONSHIP_TYPES.TRAILER,
+      });
+    }
+  }
+
+  private async duplicateResources(params: {
+    lessonMap: Map<UUIDType, UUIDType>;
+    targetCourseId: UUIDType;
+    targetAuthorId: UUIDType;
+    resourceCollection: MasterCourseResourceCollection;
+  }) {
+    const targetLessonIds = Array.from(params.lessonMap.values());
+
+    await this.masterCourseRepository.removeLessonResourceRelations(targetLessonIds);
+    await this.masterCourseRepository.removeCourseResourceRelations(params.targetCourseId);
+
+    const externalReferences = this.getExternalResourceReferences(params.resourceCollection);
+    const resourceBySourceId = new Map<UUIDType, MasterCourseExternalResourceReference>();
+
+    for (const resourceReference of externalReferences) {
+      if (!resourceBySourceId.has(resourceReference.source.resourceId)) {
+        resourceBySourceId.set(resourceReference.source.resourceId, resourceReference);
+      }
+    }
+
+    const targetResourceIds = new Map<UUIDType, UUIDType>();
+
+    for (const [sourceResourceId, resourceReference] of resourceBySourceId) {
+      const sourceResource = resourceReference.source.resource;
+      const targetResourceId = await this.masterCourseRepository.createResource({
+        title: toJsonbBuildObject(sourceResource.title),
+        description: toJsonbBuildObject(sourceResource.description),
+        reference: resourceReference.target.reference ?? resourceReference.source.reference,
+        contentType: sourceResource.contentType,
+        metadata: normalizeJsonb(sourceResource.metadata, {}),
+        uploadedBy: params.targetAuthorId,
+        archived: false,
+      });
 
       targetResourceIds.set(sourceResourceId, targetResourceId);
     }

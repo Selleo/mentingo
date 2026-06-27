@@ -4136,6 +4136,59 @@
         }
       }
     },
+    "/api/course/{courseId}/duplicate": {
+      "post": {
+        "operationId": "CourseController_duplicateCourse",
+        "parameters": [
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DuplicateCourseResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/course/duplication-jobs/{jobId}": {
+      "get": {
+        "operationId": "CourseController_getCourseDuplicationJobStatus",
+        "parameters": [
+          {
+            "name": "jobId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCourseDuplicationJobStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -25667,6 +25720,72 @@
             "required": [
               "id",
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DuplicateCourseResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "jobId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "courseId",
+              "jobId"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetCourseDuplicationJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string"
+              },
+              "attemptsMade": {
+                "type": "number"
+              },
+              "failedReason": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "state",
+              "attemptsMade",
+              "failedReason"
             ]
           }
         },
