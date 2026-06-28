@@ -66,7 +66,29 @@
 
 .mentingo-video-player--controls-hidden .mentingo-video-js .vjs-control-bar {
   opacity: 0 !important;
-  pointer-events: none;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.mentingo-video-player--controls-hidden .mentingo-video-js.vjs-user-active .vjs-control-bar,
+.mentingo-video-player--controls-hidden .mentingo-video-js.vjs-scrubbing .vjs-control-bar,
+.mentingo-video-player--controls-hidden .mentingo-video-js:focus-within .vjs-control-bar,
+.mentingo-video-player--controls-hidden
+  .mentingo-video-js:has(.vjs-control-bar:hover)
+  .vjs-control-bar,
+.mentingo-video-player--controls-hidden .mentingo-video-js:has(.vjs-slider-active) .vjs-control-bar,
+.mentingo-video-player--controls-hidden
+  .mentingo-video-js:has(.vjs-menu-button.vjs-hover)
+  .vjs-control-bar,
+.mentingo-video-player--controls-hidden
+  .mentingo-video-js:has(.vjs-menu.vjs-lock-showing)
+  .vjs-control-bar,
+.mentingo-video-player--controls-hidden
+  .mentingo-video-js:has(.mentingo-vjs-quality-selector__menu)
+  .vjs-control-bar {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 .mentingo-video-js .vjs-control-bar,

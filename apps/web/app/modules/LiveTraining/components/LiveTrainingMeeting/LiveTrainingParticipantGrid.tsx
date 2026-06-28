@@ -235,6 +235,7 @@ export function LiveTrainingParticipantGrid({
     : [];
   const participantGridStyle = {
     "--participant-grid-columns": getDesiredGridColumns(participantEntries.length),
+    "--participant-grid-mobile-columns": Math.min(2, Math.max(1, participantEntries.length)),
   } as CSSProperties;
 
   useEffect(() => {
@@ -345,7 +346,7 @@ export function LiveTrainingParticipantGrid({
     <div className="flex size-full min-h-0 min-w-0 overflow-x-hidden overflow-y-auto">
       <motion.div
         layout
-        className="flex min-h-full w-full min-w-0 flex-wrap items-center justify-center gap-3 [align-content:safe_center]"
+        className="grid min-h-full w-full min-w-0 items-center justify-center gap-3 [align-content:safe_center] [grid-template-columns:repeat(var(--participant-grid-mobile-columns),minmax(0,1fr))] lg:[grid-template-columns:repeat(var(--participant-grid-columns),minmax(0,1fr))]"
         style={participantGridStyle}
       >
         {participantEntries.map((entry) => (
@@ -353,12 +354,9 @@ export function LiveTrainingParticipantGrid({
             layout
             layoutId={getTrackEntryLayoutId(entry.key)}
             key={entry.key}
-            className={cn(
-              "aspect-[16/10] min-h-[11rem] min-w-0 flex-none basis-full min-[520px]:basis-[calc((100%_-_12px)_/_2)] lg:basis-[calc((100%_-_12px_*_(var(--participant-grid-columns)_-_1))_/_var(--participant-grid-columns))]",
-              {
-                "max-w-[min(100%,calc(160dvh_-_19.2rem))]": participantEntries.length === 1,
-              },
-            )}
+            className={cn("aspect-[16/10] min-h-0 w-full min-w-0 justify-self-center", {
+              "max-w-[min(100%,calc(160dvh_-_19.2rem))]": participantEntries.length === 1,
+            })}
             transition={layoutTransition}
           >
             <LiveTrainingParticipantTile

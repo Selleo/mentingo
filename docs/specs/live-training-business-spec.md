@@ -20,6 +20,7 @@ Administrators create sessions from the Live Training or Calendar workflow, trai
 - Create, edit, and delete standalone or course-linked live training events.
 - Configure delivery type, date, time, location, hosts, maximum participants, and viewer permissions.
 - Start, join, and end live training sessions through permission-controlled actions.
+- Keep online room participants arranged in a stable responsive grid, including balanced 2x2 layout for four participants.
 - Attach before-session and after-session materials.
 - Link sessions to course lessons so session completion can contribute to learning progress.
 - Restrict learner material visibility based on the session lifecycle.
@@ -38,6 +39,8 @@ Administrators create a live training item with title, schedule, delivery type, 
 
 When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
 
+In online rooms, participant tiles adapt to the available stage size so small group sessions remain easy to scan, including a balanced two-by-two arrangement when four camera tiles are visible.
+
 Materials are separated into before-session and after-session resources. Privileged users can manage and preview materials, while learners see resources according to their access and the session lifecycle. Live session state changes are pushed to open pages so learners and hosts see the current session state.
 
 ## Key Technical Context
@@ -47,6 +50,7 @@ Materials are separated into before-session and after-session resources. Privile
 - API endpoints live under `apps/api/src/live-training`.
 - Access is guarded by the Live Training feature flag plus permissions such as `PERMISSIONS.LIVE_TRAINING_READ`, create/update/delete, join, start, end, and statistics.
 - Live Training integrates with Calendar, course lessons, resource uploads, announcements/email, realtime session updates, and LiveKit online rooms.
+- Online room participant layout is handled by the LiveKit-based meeting components in `apps/web/app/modules/LiveTraining/components/LiveTrainingMeeting`.
 
 ## Test Evidence
 
