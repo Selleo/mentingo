@@ -122,6 +122,12 @@ import {
 import { ValidateMultipartPipe } from "src/utils/pipes/validateMultipartPipe";
 
 import {
+  bulkUpdateCourseCategoryResponseSchema,
+  bulkUpdateCourseCategorySchema,
+  type BulkUpdateCourseCategoryBody,
+  type BulkUpdateCourseCategoryResponse,
+} from "./schemas/bulkUpdateCourseCategory.schema";
+import {
   bulkUpdateCourseStatusResponseSchema,
   bulkUpdateCourseStatusSchema,
   type BulkUpdateCourseStatusBody,
@@ -522,6 +528,21 @@ export class CourseController {
     await this.courseService.bulkUpdateCourseStatus(body, currentUser);
 
     return new BaseResponse({ message: "adminCoursesView.toast.bulkStatusUpdateSuccessfully" });
+  }
+
+  @Patch("bulk/category")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [{ type: "body", schema: bulkUpdateCourseCategorySchema }],
+    response: bulkUpdateCourseCategoryResponseSchema,
+  })
+  async bulkUpdateCourseCategory(
+    @Body() body: BulkUpdateCourseCategoryBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkUpdateCourseCategoryResponse>> {
+    await this.courseService.bulkUpdateCourseCategory(body, currentUser);
+
+    return new BaseResponse({ message: "adminCoursesView.toast.bulkCategoryUpdateSuccessfully" });
   }
 
   @Patch(":id")

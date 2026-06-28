@@ -5,6 +5,7 @@ import type { QuestionType } from "src/questions/schema/question.types";
 export const ACTIVITY_LOG_ACTION_TYPES = {
   CREATE: "create",
   UPDATE: "update",
+  BULK_COURSE_CATEGORY_UPDATE: "bulk_course_category_update",
   BULK_COURSE_STATUS_UPDATE: "bulk_course_status_update",
   DELETE: "delete",
   LOGIN: "login",

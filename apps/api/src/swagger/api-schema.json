@@ -4163,6 +4163,33 @@
         }
       }
     },
+    "/api/course/bulk/category": {
+      "patch": {
+        "operationId": "CourseController_bulkUpdateCourseCategory",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkUpdateCourseCategoryBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkUpdateCourseCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -25863,6 +25890,45 @@
           "data"
         ]
       },
+      "BulkUpdateCourseCategoryBody": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          "categoryId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ids",
+          "categoryId"
+        ]
+      },
+      "BulkUpdateCourseCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "UpdateCourseBody": {
         "type": "object",
         "properties": {
@@ -45843,6 +45909,10 @@
                     },
                     {
                       "const": "update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "bulk_course_category_update",
                       "type": "string"
                     },
                     {

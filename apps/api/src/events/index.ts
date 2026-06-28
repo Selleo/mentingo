@@ -22,6 +22,7 @@ export * from "./user/user-chapter-finished.event";
 export * from "./user/user-course-finished.event";
 export * from "./user/user-assigned-to-course.event";
 export * from "./course/update-course.event";
+export * from "./course/bulk-update-course-category.event";
 export * from "./course/bulk-update-course-status.event";
 export * from "./course/create-course.event";
 export * from "./course/course-due-date-reminder-email.event";

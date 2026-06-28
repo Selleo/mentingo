@@ -1209,6 +1209,7 @@
       "bulkEdit": "Masinis redagavimas"
     },
     "dropdown": {
+      "changeCategory": "Keisti kategoriją",
       "changeStatus": "Keisti būseną",
       "delete": "Ištrinti"
     },
@@ -1222,10 +1223,18 @@
       "title": "Keisti kurso būseną",
       "description": "Pasirinkite naują būseną {{count}} pasirinktiems kursams."
     },
+    "categoryModal": {
+      "title": "Keisti kurso kategoriją",
+      "description": "Pasirinkite naują kategoriją {{count}} pasirinktiems kursams."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
       "deleteCourseFailed": "Nepavyko ištrinti kurso",
       "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
+      "bulkCategoryUpdateSuccessfully": "Kursų kategorijos sėkmingai atnaujintos",
+      "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
+      "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
+      "bulkCategoryUpdateCategoryNotFound": "Pasirinkta kategorija nerasta.",
       "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
       "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
       "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -3695,6 +3704,7 @@
     "actions": {
       "create": "Sukurta",
       "update": "Atnaujinta",
+      "bulk_course_category_update": "Masiniu būdu atnaujinta kursų kategorija",
       "bulk_course_status_update": "Masiniu būdu atnaujinta kursų būsena",
       "delete": "Ištrinta",
       "login": "Prisijungta",

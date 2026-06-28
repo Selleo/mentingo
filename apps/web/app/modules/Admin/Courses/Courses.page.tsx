@@ -335,6 +335,7 @@ const Courses = () => {
           />
           <CourseBulkActions
             selectedCourseIds={selectedCourses}
+            categories={categories ?? []}
             onBulkActionComplete={handleBulkActionComplete}
           />
         </div>

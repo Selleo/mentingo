@@ -1,9 +1,10 @@
 import { COURSE_STATUSES } from "@repo/shared";
 import { isEmpty } from "lodash-es";
-import { FilePenLine, Trash2 } from "lucide-react";
+import { FilePenLine, Tags, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useBulkUpdateCourseCategory } from "~/api/mutations/admin/useBulkUpdateCourseCategory";
 import { useBulkUpdateCourseStatus } from "~/api/mutations/admin/useBulkUpdateCourseStatus";
 import { useDeleteCourse } from "~/api/mutations/admin/useDeleteCourse";
 import { useDeleteManyCourses } from "~/api/mutations/admin/useDeleteManyCourses";
@@ -24,6 +25,13 @@ import {
 } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
 import { COURSES_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -34,12 +42,16 @@ import {
   getCourseStatus,
 } from "../utils";
 
+import type { GetAllCategoriesResponse } from "~/api/generated-api";
 import type { CourseStatus } from "~/api/queries/useCourses";
 
 enum BulkCourseAction {
+  ChangeCategory = "changeCategory",
   ChangeStatus = "changeStatus",
   Delete = "delete",
 }
+
+type CourseCategory = GetAllCategoriesResponse["data"][number];
 
 const COURSE_STATUS_OPTIONS = [
   COURSE_STATUSES.DRAFT,
@@ -49,29 +61,41 @@ const COURSE_STATUS_OPTIONS = [
 
 type CourseBulkActionsProps = {
   selectedCourseIds: string[];
+  categories: CourseCategory[];
   onBulkActionComplete: () => void;
 };
 
 export const CourseBulkActions = ({
   selectedCourseIds,
+  categories,
   onBulkActionComplete,
 }: CourseBulkActionsProps) => {
   const [selectedBulkAction, setSelectedBulkAction] = useState<BulkCourseAction | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<CourseStatus>(COURSE_STATUSES.DRAFT);
   const { t } = useTranslation();
   const { mutate: deleteCourse } = useDeleteCourse();
   const { mutate: deleteManyCourses } = useDeleteManyCourses();
+  const { mutateAsync: bulkUpdateCourseCategory, isPending: isBulkCategoryUpdatePending } =
+    useBulkUpdateCourseCategory();
   const { mutateAsync: bulkUpdateCourseStatus, isPending: isBulkStatusUpdatePending } =
     useBulkUpdateCourseStatus();
+  const isBulkActionPending = isBulkCategoryUpdatePending || isBulkStatusUpdatePending;
 
   const resetBulkActionState = () => {
     setSelectedBulkAction(null);
+    setSelectedCategoryId("");
     setSelectedStatus(COURSE_STATUSES.DRAFT);
   };
 
   const handleDeleteSuccess = () => {
     onBulkActionComplete();
     resetBulkActionState();
+  };
+
+  const handleOpenCategoryAction = () => {
+    setSelectedCategoryId(categories[0]?.id ?? "");
+    setSelectedBulkAction(BulkCourseAction.ChangeCategory);
   };
 
   const handleDeleteCourses = () => {
@@ -102,6 +126,18 @@ export const CourseBulkActions = ({
     resetBulkActionState();
   };
 
+  const handleBulkCategoryUpdate = async () => {
+    if (!selectedCategoryId) return;
+
+    await bulkUpdateCourseCategory({
+      ids: selectedCourseIds,
+      categoryId: selectedCategoryId,
+    });
+
+    onBulkActionComplete();
+    resetBulkActionState();
+  };
+
   const handleConfirmBulkAction = async () => {
     if (!selectedBulkAction) return;
 
@@ -110,10 +146,22 @@ export const CourseBulkActions = ({
       return;
     }
 
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      await handleBulkCategoryUpdate();
+      return;
+    }
+
     await handleBulkStatusUpdate();
   };
 
   const bulkDropdownItems: BulkEditDropdownItem[] = [
+    {
+      icon: <Tags className="size-4 shrink-0" />,
+      translationKey: "adminCoursesView.dropdown.changeCategory",
+      action: handleOpenCategoryAction,
+      destructive: false,
+      testId: COURSES_PAGE_HANDLES.BULK_EDIT_CATEGORY_ACTION,
+    },
     {
       icon: <FilePenLine className="size-4 shrink-0" />,
       translationKey: "adminCoursesView.dropdown.changeStatus",
@@ -153,7 +201,42 @@ export const CourseBulkActions = ({
       return getDeleteModalTitle();
     }
 
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      return t("adminCoursesView.categoryModal.title");
+    }
+
     return t("adminCoursesView.statusModal.title");
+  };
+
+  const getDialogTestId = () => {
+    if (selectedBulkAction === BulkCourseAction.Delete) return COURSES_PAGE_HANDLES.DELETE_DIALOG;
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      return COURSES_PAGE_HANDLES.CATEGORY_DIALOG;
+    }
+
+    return COURSES_PAGE_HANDLES.STATUS_DIALOG;
+  };
+
+  const getCancelButtonTestId = () => {
+    if (selectedBulkAction === BulkCourseAction.Delete) {
+      return COURSES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON;
+    }
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      return COURSES_PAGE_HANDLES.CATEGORY_DIALOG_CANCEL_BUTTON;
+    }
+
+    return COURSES_PAGE_HANDLES.STATUS_DIALOG_CANCEL_BUTTON;
+  };
+
+  const getConfirmButtonTestId = () => {
+    if (selectedBulkAction === BulkCourseAction.Delete) {
+      return COURSES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON;
+    }
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      return COURSES_PAGE_HANDLES.CATEGORY_DIALOG_CONFIRM_BUTTON;
+    }
+
+    return COURSES_PAGE_HANDLES.STATUS_DIALOG_CONFIRM_BUTTON;
   };
 
   const getBulkActionModalDescription = () => {
@@ -163,10 +246,20 @@ export const CourseBulkActions = ({
       return getDeleteModalDescription();
     }
 
+    if (selectedBulkAction === BulkCourseAction.ChangeCategory) {
+      return t("adminCoursesView.categoryModal.description", {
+        count: selectedCourseIds.length,
+      });
+    }
+
     return t("adminCoursesView.statusModal.description", {
       count: selectedCourseIds.length,
     });
   };
+
+  const isConfirmDisabled =
+    isBulkActionPending ||
+    (selectedBulkAction === BulkCourseAction.ChangeCategory && !selectedCategoryId);
 
   return (
     <div className="ml-auto flex items-center gap-x-2 px-4 py-2">
@@ -195,11 +288,7 @@ export const CourseBulkActions = ({
         <DialogPortal>
           <DialogOverlay className="bg-primary-400 opacity-65" />
           <DialogContent
-            data-testid={
-              selectedBulkAction === BulkCourseAction.Delete
-                ? COURSES_PAGE_HANDLES.DELETE_DIALOG
-                : COURSES_PAGE_HANDLES.STATUS_DIALOG
-            }
+            data-testid={getDialogTestId()}
             className="max-w-lg gap-0 overflow-hidden p-0"
           >
             <div className="px-6 pb-4 pt-6">
@@ -210,6 +299,29 @@ export const CourseBulkActions = ({
                 {getBulkActionModalDescription()}
               </DialogDescription>
             </div>
+            {selectedBulkAction === BulkCourseAction.ChangeCategory && (
+              <div className="border-y border-neutral-100 bg-neutral-50/70 px-6 py-5">
+                <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
+                  <SelectTrigger
+                    data-testid={COURSES_PAGE_HANDLES.CATEGORY_SELECT}
+                    className="bg-white"
+                  >
+                    <SelectValue placeholder={t("selectCategory")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((category) => (
+                      <SelectItem
+                        key={category.id}
+                        data-testid={COURSES_PAGE_HANDLES.categoryOption(category.id)}
+                        value={category.id}
+                      >
+                        {category.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             {selectedBulkAction === BulkCourseAction.ChangeStatus && (
               <div className="border-y border-neutral-100 bg-neutral-50/70 px-6 py-5">
                 <RadioGroup
@@ -258,11 +370,7 @@ export const CourseBulkActions = ({
             <div className="flex justify-end gap-3 px-6 py-5">
               <DialogClose>
                 <Button
-                  data-testid={
-                    selectedBulkAction === BulkCourseAction.Delete
-                      ? COURSES_PAGE_HANDLES.DELETE_DIALOG_CANCEL_BUTTON
-                      : COURSES_PAGE_HANDLES.STATUS_DIALOG_CANCEL_BUTTON
-                  }
+                  data-testid={getCancelButtonTestId()}
                   variant="ghost"
                   className="text-primary-800"
                 >
@@ -270,17 +378,13 @@ export const CourseBulkActions = ({
                 </Button>
               </DialogClose>
               <Button
-                data-testid={
-                  selectedBulkAction === BulkCourseAction.Delete
-                    ? COURSES_PAGE_HANDLES.DELETE_DIALOG_CONFIRM_BUTTON
-                    : COURSES_PAGE_HANDLES.STATUS_DIALOG_CONFIRM_BUTTON
-                }
+                data-testid={getConfirmButtonTestId()}
                 onClick={handleConfirmBulkAction}
                 className={cn({
                   "bg-error-500 text-white hover:bg-error-600":
                     selectedBulkAction === BulkCourseAction.Delete,
                 })}
-                disabled={isBulkStatusUpdatePending}
+                disabled={isConfirmDisabled}
               >
                 {selectedBulkAction === BulkCourseAction.Delete
                   ? t("common.button.delete")

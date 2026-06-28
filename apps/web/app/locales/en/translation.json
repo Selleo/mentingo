@@ -1204,6 +1204,7 @@
       "bulkEdit": "Bulk edit"
     },
     "dropdown": {
+      "changeCategory": "Change category",
       "changeStatus": "Change status",
       "delete": "Delete"
     },
@@ -1217,10 +1218,18 @@
       "title": "Change course status",
       "description": "Choose the new status for {{count}} selected courses."
     },
+    "categoryModal": {
+      "title": "Change course category",
+      "description": "Choose the new category for {{count}} selected courses."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course",
       "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first.",
+      "bulkCategoryUpdateSuccessfully": "Course categories updated successfully",
+      "bulkCategoryUpdateFailed": "Failed to update course categories",
+      "bulkCategoryUpdateForbidden": "You do not have permission to update one or more selected courses.",
+      "bulkCategoryUpdateCategoryNotFound": "Selected category was not found.",
       "bulkStatusUpdateSuccessfully": "Course statuses updated successfully",
       "bulkStatusUpdateFailed": "Failed to update course statuses",
       "bulkStatusUpdateForbidden": "You do not have permission to update one or more selected courses.",
@@ -4381,6 +4390,7 @@
     "actions": {
       "create": "Created",
       "update": "Updated",
+      "bulk_course_category_update": "Bulk course category updated",
       "bulk_course_status_update": "Bulk course status updated",
       "delete": "Deleted",
       "login": "Logged in",

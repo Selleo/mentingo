@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
+  BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
   UserCourseFinishedEvent,
   CourseStartedEvent,
@@ -19,6 +20,7 @@ type CourseEventType =
   | CourseStartedEvent
   | UserCourseFinishedEvent
   | CreateCourseEvent
+  | BulkUpdateCourseCategoryEvent
   | BulkUpdateCourseStatusEvent
   | UpdateCourseEvent
   | EnrollCourseEvent;
@@ -27,6 +29,7 @@ const CourseActivityEvents = [
   CourseStartedEvent,
   UserCourseFinishedEvent,
   CreateCourseEvent,
+  BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
@@ -46,6 +49,9 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     if (event instanceof UserCourseFinishedEvent) return await this.handleUserCourseFinished(event);
 
     if (event instanceof CreateCourseEvent) return await this.handleCreateCourse(event);
+
+    if (event instanceof BulkUpdateCourseCategoryEvent)
+      return await this.handleBulkUpdateCourseCategory(event);
 
     if (event instanceof BulkUpdateCourseStatusEvent)
       return await this.handleBulkUpdateCourseStatus(event);
@@ -102,6 +108,48 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
       before: metadata.before,
       after: metadata.after,
       context: metadata.context ?? null,
+    });
+  }
+
+  private async handleBulkUpdateCourseCategory(event: BulkUpdateCourseCategoryEvent) {
+    const { actor, tenantId, categoryId, requestedCount, updatedCount, skippedCount, updates } =
+      event.bulkUpdateCourseCategoryData;
+
+    if (updatedCount === 0) return;
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.activityLogsService.recordActivity({
+        actor,
+        tenantId,
+        operation: ACTIVITY_LOG_ACTION_TYPES.BULK_COURSE_CATEGORY_UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        resourceId: null,
+        changedFields: ["categoryId"],
+        before: {
+          courseCategories: JSON.stringify(
+            updates.map(({ courseId, previousCourseData }) => ({
+              courseId,
+              categoryId: previousCourseData?.categoryId ?? null,
+            })),
+          ),
+        },
+        after: {
+          categoryId,
+          courseCategories: JSON.stringify(
+            updates.map(({ courseId, updatedCourseData }) => ({
+              courseId,
+              categoryId: updatedCourseData?.categoryId ?? null,
+            })),
+          ),
+        },
+        context: {
+          categoryId,
+          requestedCount: String(requestedCount),
+          updatedCount: String(updatedCount),
+          skippedCount: String(skippedCount),
+          courseIds: JSON.stringify(updates.map(({ courseId }) => courseId)),
+        },
+      });
     });
   }
 

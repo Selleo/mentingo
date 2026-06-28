@@ -1423,6 +1423,7 @@
       "bulkEdit": "Edytuj wiele"
     },
     "dropdown": {
+      "changeCategory": "Zmień kategorię",
       "changeStatus": "Zmień status",
       "delete": "Usuń"
     },
@@ -1436,10 +1437,18 @@
       "title": "Zmień status kursu",
       "description": "Wybierz nowy status dla {{count}} wybranych kursów."
     },
+    "categoryModal": {
+      "title": "Zmień kategorię kursu",
+      "description": "Wybierz nową kategorię dla {{count}} wybranych kursów."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu",
       "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza.",
+      "bulkCategoryUpdateSuccessfully": "Kategorie kursów zostały zaktualizowane",
+      "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
+      "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
+      "bulkCategoryUpdateCategoryNotFound": "Nie znaleziono wybranej kategorii.",
       "bulkStatusUpdateSuccessfully": "Statusy kursów zostały zaktualizowane",
       "bulkStatusUpdateFailed": "Nie udało się zaktualizować statusów kursów",
       "bulkStatusUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
@@ -4420,6 +4429,7 @@
     "actions": {
       "create": "Utworzono",
       "update": "Zaktualizowano",
+      "bulk_course_category_update": "Zbiorowo zaktualizowano kategorię kursów",
       "bulk_course_status_update": "Zbiorowo zaktualizowano status kursów",
       "delete": "Usunięto",
       "login": "Zalogowano",

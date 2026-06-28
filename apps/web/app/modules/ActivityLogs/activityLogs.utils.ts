@@ -13,6 +13,7 @@ import {
   Play,
   RotateCcw,
   ShieldAlert,
+  Tags,
   Trash2,
   type LucideIcon,
   Users2,
@@ -50,6 +51,12 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     badgeClassName: "border-blue-200 bg-blue-50 text-blue-700",
     iconClassName: "text-blue-700",
     ringClassName: "border-blue-600",
+  },
+  bulk_course_category_update: {
+    icon: Tags,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
   },
   bulk_course_status_update: {
     icon: ArrowRightLeft,

@@ -1203,6 +1203,7 @@
       "bulkEdit": "Massenbearbeitung"
     },
     "dropdown": {
+      "changeCategory": "Kategorie ändern",
       "changeStatus": "Status ändern",
       "delete": "Löschen"
     },
@@ -1216,10 +1217,18 @@
       "title": "Kursstatus ändern",
       "description": "Wählen Sie den neuen Status für {{count}} ausgewählte Kurse."
     },
+    "categoryModal": {
+      "title": "Kurskategorie ändern",
+      "description": "Wählen Sie die neue Kategorie für {{count}} ausgewählte Kurse."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
       "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
       "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
+      "bulkCategoryUpdateSuccessfully": "Kurskategorien wurden erfolgreich aktualisiert",
+      "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
+      "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
+      "bulkCategoryUpdateCategoryNotFound": "Die ausgewählte Kategorie wurde nicht gefunden.",
       "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
       "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
       "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -3686,6 +3695,7 @@
     "actions": {
       "create": "Erstellt",
       "update": "Aktualisiert",
+      "bulk_course_category_update": "Kurskategorie gesammelt aktualisiert",
       "bulk_course_status_update": "Kursstatus gesammelt aktualisiert",
       "delete": "Gelöscht",
       "login": "Angemeldet",

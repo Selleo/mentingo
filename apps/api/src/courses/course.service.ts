@@ -62,6 +62,7 @@ import { processInBatches } from "src/common/utils/processInBatches";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import {
+  BulkUpdateCourseCategoryEvent,
   BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
@@ -140,6 +141,7 @@ import {
   EnrolledStudentSortFields,
 } from "./schemas/courseQuery";
 
+import type { BulkUpdateCourseCategoryBody } from "./schemas/bulkUpdateCourseCategory.schema";
 import type { BulkUpdateCourseStatusBody } from "./schemas/bulkUpdateCourseStatus.schema";
 import type {
   AllCoursesForContentCreatorResponse,
@@ -2291,6 +2293,120 @@ export class CourseService {
           actor: currentUser,
           tenantId: currentUser.tenantId,
           status: body.status,
+          requestedCount: ids.length,
+          updatedCount: courseUpdates.length,
+          skippedCount: ids.length - courseUpdates.length,
+          updates: courseUpdates,
+        }),
+        trx,
+      );
+    });
+  }
+
+  async bulkUpdateCourseCategory(
+    body: BulkUpdateCourseCategoryBody,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const ids = [...new Set(body.ids)];
+
+    if (!ids.length) throw new BadRequestException("adminCoursesView.toast.noCoursesSelected");
+
+    const [targetCategory] = await this.db
+      .select({ id: categories.id })
+      .from(categories)
+      .where(eq(categories.id, body.categoryId));
+
+    if (!targetCategory) {
+      throw new NotFoundException("adminCoursesView.toast.bulkCategoryUpdateCategoryNotFound");
+    }
+
+    const canUpdateAnyCourse = hasPermission(currentUser.permissions, PERMISSIONS.COURSE_UPDATE);
+    const selectedCourseConditions: SQL[] = [inArray(courses.id, ids)];
+
+    if (!canUpdateAnyCourse) {
+      selectedCourseConditions.push(eq(courses.authorId, currentUser.userId));
+    }
+
+    const selectedCourses = await this.db
+      .select({
+        id: courses.id,
+        categoryId: courses.categoryId,
+      })
+      .from(courses)
+      .where(and(...selectedCourseConditions));
+
+    if (selectedCourses.length !== ids.length) {
+      throw new ForbiddenException("adminCoursesView.toast.bulkCategoryUpdateForbidden");
+    }
+
+    await processInBatches(
+      ids,
+      (courseId) =>
+        this.masterCourseService.assertCourseContentEditable(
+          courseId,
+          ["categoryId"],
+          ["categoryId"],
+        ),
+      { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+    );
+
+    const coursesToUpdate = selectedCourses.filter(
+      (course) => course.categoryId !== body.categoryId,
+    );
+
+    if (!coursesToUpdate.length) return;
+
+    await this.db.transaction(async (trx) => {
+      const courseIdsToUpdate = coursesToUpdate.map((course) => course.id);
+
+      const snapshots = await processInBatches(
+        coursesToUpdate,
+        async (course) => ({
+          courseId: course.id,
+          previousSnapshot: await this.buildCourseActivitySnapshot(course.id, undefined, trx),
+        }),
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      await trx
+        .update(courses)
+        .set({ categoryId: body.categoryId })
+        .where(inArray(courses.id, courseIdsToUpdate));
+
+      const courseUpdateData = await processInBatches(
+        snapshots,
+        async (snapshot) => {
+          await this.searchIndexService.refreshCourse(snapshot.courseId, trx);
+
+          return {
+            ...snapshot,
+            updatedSnapshot: await this.buildCourseActivitySnapshot(
+              snapshot.courseId,
+              undefined,
+              trx,
+            ),
+          };
+        },
+        { batchSize: COURSE_BULK_STATUS_UPDATE_BATCH_SIZE },
+      );
+
+      const courseUpdates = courseUpdateData
+        .filter(({ previousSnapshot, updatedSnapshot }) => {
+          return !this.areCourseSnapshotsEqual(previousSnapshot, updatedSnapshot);
+        })
+        .map(({ courseId, previousSnapshot, updatedSnapshot }) => ({
+          courseId,
+          previousCourseData: previousSnapshot,
+          updatedCourseData: updatedSnapshot,
+        }));
+
+      if (!courseUpdates.length) return;
+
+      await this.outboxPublisher.publish(
+        new BulkUpdateCourseCategoryEvent({
+          actor: currentUser,
+          tenantId: currentUser.tenantId,
+          categoryId: body.categoryId,
           requestedCount: ids.length,
           updatedCount: courseUpdates.length,
           skippedCount: ids.length - courseUpdates.length,

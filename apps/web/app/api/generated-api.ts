@@ -2219,6 +2219,18 @@ export interface BulkUpdateCourseStatusResponse {
   };
 }
 
+export interface BulkUpdateCourseCategoryBody {
+  ids: string[];
+  /** @format uuid */
+  categoryId: string;
+}
+
+export interface BulkUpdateCourseCategoryResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
@@ -6200,6 +6212,7 @@ export interface GetActivityLogsResponse {
     actionType:
       | "create"
       | "update"
+      | "bulk_course_category_update"
       | "bulk_course_status_update"
       | "delete"
       | "login"
@@ -9363,6 +9376,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<BulkUpdateCourseStatusResponse, any>({
         path: `/api/course/bulk/status`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerBulkUpdateCourseCategory
+     * @request PATCH:/api/course/bulk/category
+     */
+    courseControllerBulkUpdateCourseCategory: (
+      data: BulkUpdateCourseCategoryBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<BulkUpdateCourseCategoryResponse, any>({
+        path: `/api/course/bulk/category`,
         method: "PATCH",
         body: data,
         type: ContentType.Json,
