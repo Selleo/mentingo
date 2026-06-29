@@ -138,6 +138,17 @@
       "entityNotFound": "Entität nicht gefunden"
     }
   },
+  "adminCourseDuplication": {
+    "duplicate": "Kurs duplizieren",
+    "duplicateFailed": "Die Kursduplizierung konnte nicht gestartet werden.",
+    "processing": "Die Kursduplizierung läuft. Sie können weiterarbeiten, während sie abgeschlossen wird.",
+    "completed": "Die Kursduplizierung ist abgeschlossen.",
+    "failed": "Die Kursduplizierung ist fehlgeschlagen.",
+    "processingTitle": "Kursduplizierung läuft",
+    "processingDescription": "Die Bearbeitung von Lehrplan und Einstellungen ist deaktiviert, bis die kopierten Inhalte bereit sind.",
+    "failedTitle": "Kursduplizierung fehlgeschlagen",
+    "failedDescription": "Der Platzhalterkurs ist weiterhin verfügbar, aber die Bearbeitung von Lehrplan und Einstellungen bleibt für diesen Duplizierungsauftrag deaktiviert."
+  },
   "adminScorm": {
     "header": "Laden Sie SCORM hoch",
     "subHeader": "Laden Sie Ihre SCORM-ZIP-Datei hoch.",

@@ -9,24 +9,29 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { Building } from "lucide-react";
+import { Building, Copy } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDismissGeneratedCourseSync } from "~/api/mutations/admin/useDismissGeneratedCourseSync";
+import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useSyncGeneratedCourse } from "~/api/mutations/admin/useSyncGeneratedCourse";
 import { useCurrentUserSuspense } from "~/api/queries";
-import { useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { COURSE_QUERY_KEY, useBetaCourseById } from "~/api/queries/admin/useBetaCourse";
+import { useCourseDuplicationJobStatus } from "~/api/queries/admin/useCourseDuplicationJobStatus";
 import { useCourseGenerationDraft } from "~/api/queries/admin/useCourseGenerationDraft";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
+import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
+import { queryClient } from "~/api/queryClient";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -109,11 +114,19 @@ const EditCourse = () => {
     useSyncGeneratedCourse();
   const { mutateAsync: dismissGeneratedCourseSync, isPending: isDismissSyncPending } =
     useDismissGeneratedCourseSync();
+  const { mutateAsync: duplicateCourse, isPending: isDuplicateCoursePending } =
+    useDuplicateCourse();
 
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+  const duplicationJobId = searchParams.get("duplicationJobId");
+  const { data: duplicationJobStatus } = useCourseDuplicationJobStatus(duplicationJobId);
+  const duplicationJobState = duplicationJobStatus?.state;
+  const isDuplicationCompleted = duplicationJobState === "completed";
+  const isDuplicationFailed = duplicationJobState === "failed";
+  const isDuplicationLocked = Boolean(duplicationJobId) && !isDuplicationCompleted;
 
   if (!id) throw new Error("Course ID not found");
 
@@ -265,6 +278,15 @@ const EditCourse = () => {
     await dismissGeneratedCourseSync({ integrationId: course.id });
   }, [course?.id, dismissGeneratedCourseSync]);
 
+  const handleDuplicateCourse = useCallback(async () => {
+    if (!course?.id) return;
+
+    const response = await duplicateCourse(course.id);
+    navigate(
+      `/admin/beta-courses/${response.data.courseId}?duplicationJobId=${response.data.jobId}`,
+    );
+  }, [course?.id, duplicateCourse, navigate]);
+
   useCourseGenerationSyncSocket({
     courseId: course?.id ?? "",
     enabled: Boolean(course?.id && showCourseGenerationButton),
@@ -321,6 +343,23 @@ const EditCourse = () => {
   }, [activeTab, course, rawSelectedTab, setSearchParams]);
 
   useEffect(() => {
+    if (!duplicationJobId || !isDuplicationCompleted || !course?.id) return;
+
+    void queryClient.invalidateQueries({ queryKey: ALL_COURSES_QUERY_KEY });
+    void queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
+    void queryClient.invalidateQueries({ queryKey: ["course"] });
+
+    setSearchParams(
+      (prevParams) => {
+        const nextParams = new URLSearchParams(prevParams);
+        nextParams.delete("duplicationJobId");
+        return nextParams;
+      },
+      { replace: true },
+    );
+  }, [course?.id, duplicationJobId, isDuplicationCompleted, setSearchParams]);
+
+  useEffect(() => {
     if (error) {
       navigate(isAxiosError(error) && error.response?.status === 404 ? "/courses" : "/");
     }
@@ -340,6 +379,17 @@ const EditCourse = () => {
     { title: t("adminCourseView.breadcrumbs.courses"), href: "/admin/courses" },
     { title: course?.title || "", href: `/admin/beta-courses/${id}` },
   ];
+  const duplicationNotice = isDuplicationFailed
+    ? {
+        variant: "destructive" as const,
+        title: t("adminCourseDuplication.failedTitle"),
+        description: t("adminCourseDuplication.failedDescription"),
+      }
+    : {
+        variant: "default" as const,
+        title: t("adminCourseDuplication.processingTitle"),
+        description: t("adminCourseDuplication.processingDescription"),
+      };
 
   return (
     <PageWrapper breadcrumbs={breadcrumbs} className="relative">
@@ -493,6 +543,17 @@ const EditCourse = () => {
               )}
 
               <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                disabled={!course?.id || isDuplicateCoursePending || isDuplicationLocked}
+                onClick={() => void handleDuplicateCourse()}
+              >
+                <Copy className="size-4" />
+                {t("adminCourseDuplication.duplicate")}
+              </Button>
+
+              <Button
                 asChild
                 className="border border-neutral-200 bg-transparent text-accent-foreground"
               >
@@ -519,8 +580,14 @@ const EditCourse = () => {
             ))}
           </TabsList>
         </div>
+        {isDuplicationLocked && (
+          <Alert variant={duplicationNotice.variant}>
+            <AlertTitle>{duplicationNotice.title}</AlertTitle>
+            <AlertDescription>{duplicationNotice.description}</AlertDescription>
+          </Alert>
+        )}
         <TabsContent value={EDIT_COURSE_TABS.SETTINGS}>
-          {isExportedCourse ? (
+          {isDuplicationLocked ? null : isExportedCourse ? (
             <SharedCourseReadonlyNotice
               title={sharedCourseNotice.title}
               description={sharedCourseNotice.description}
@@ -544,7 +611,7 @@ const EditCourse = () => {
         </TabsContent>
         {canEditCurriculum && (
           <TabsContent value={EDIT_COURSE_TABS.CURRICULUM} className="h-full">
-            {isExportedCourse ? (
+            {isDuplicationLocked ? null : isExportedCourse ? (
               <SharedCourseReadonlyNotice
                 title={sharedCourseNotice.title}
                 description={sharedCourseNotice.description}
@@ -554,7 +621,7 @@ const EditCourse = () => {
                 <CourseLessons
                   showCourseGenerationButton={showCourseGenerationButton}
                   isCourseGenerationDisabled={isCourseGenerationDisabled}
-                  isCourseGenerationLocked={isCourseGenerationLocked}
+                  isCourseGenerationLocked={isCourseGenerationLocked || isDuplicationLocked}
                   draft={draft}
                   isCourseGenerated={isCourseGenerated}
                   shouldClearCourseGenerationRuntime={shouldClearCourseGenerationRuntime}

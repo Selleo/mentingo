@@ -139,6 +139,17 @@
       "entityNotFound": "Nie znaleziono encji"
     }
   },
+  "adminCourseDuplication": {
+    "duplicate": "Duplikuj kurs",
+    "duplicateFailed": "Nie udało się rozpocząć duplikowania kursu.",
+    "processing": "Trwa duplikowanie kursu. Możesz kontynuować pracę, gdy proces się zakończy.",
+    "completed": "Duplikowanie kursu zakończone.",
+    "failed": "Duplikowanie kursu nie powiodło się.",
+    "processingTitle": "Trwa duplikowanie kursu",
+    "processingDescription": "Edycja programu i ustawień jest wyłączona do czasu przygotowania skopiowanych treści.",
+    "failedTitle": "Duplikowanie kursu nie powiodło się",
+    "failedDescription": "Kurs zastępczy jest nadal dostępny, ale edycja programu i ustawień pozostaje wyłączona dla tego zadania duplikowania."
+  },
   "adminScorm": {
     "header": "Prześlij SCORM",
     "subHeader": "Prześlij swój plik SCORM w formacie .zip.",
