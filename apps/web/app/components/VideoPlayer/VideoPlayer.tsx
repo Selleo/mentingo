@@ -5,6 +5,7 @@ import {
   type VideoProvider,
   VIDEO_EMBED_PROVIDERS,
 } from "@repo/shared";
+import { clamp } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { match } from "ts-pattern";
@@ -65,6 +66,17 @@ const HLS_MIME_TYPE = "application/vnd.apple.mpegurl";
 const MP4_MIME_TYPE = "video/mp4";
 const KEYBOARD_SEEK_SECONDS = 5;
 const KEYBOARD_VOLUME_STEP = 0.1;
+const KEYBOARD_SHORTCUT_KEYS = [
+  " ",
+  "enter",
+  "arrowleft",
+  "arrowright",
+  "arrowup",
+  "arrowdown",
+  "m",
+  "f",
+  "0",
+];
 const KEYBOARD_SHORTCUT_IGNORED_TARGET_SELECTOR = [
   "a",
   "button",
@@ -87,8 +99,6 @@ const PLAYER_CONTROLS_TARGET_SELECTOR = [
   ".vjs-menu",
   ".mentingo-vjs-quality-selector",
 ].join(",");
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
 const isKeyboardShortcutIgnoredTarget = (
   target: EventTarget | null,
@@ -336,55 +346,39 @@ export const VideoPlayer = ({
       const currentPlayer = playerRef.current;
       if (!currentPlayer || currentPlayer.isDisposed()) return;
 
-      if (
-        event.key !== " " &&
-        event.key !== "Enter" &&
-        event.key !== "ArrowLeft" &&
-        event.key !== "ArrowRight" &&
-        event.key !== "ArrowUp" &&
-        event.key !== "ArrowDown" &&
-        event.key.toLowerCase() !== "m" &&
-        event.key.toLowerCase() !== "f" &&
-        event.key !== "0"
-      ) {
-        return;
-      }
+      const keyboardShortcutKey = event.key.toLowerCase();
+
+      if (!KEYBOARD_SHORTCUT_KEYS.includes(keyboardShortcutKey)) return;
 
       event.preventDefault();
       event.stopPropagation();
       showControls();
 
-      switch (event.key) {
+      switch (keyboardShortcutKey) {
         case " ":
-        case "Enter":
+        case "enter":
           togglePlay(currentPlayer);
           return;
-        case "ArrowLeft":
+        case "arrowleft":
           seekBy(currentPlayer, -KEYBOARD_SEEK_SECONDS);
           return;
-        case "ArrowRight":
+        case "arrowright":
           seekBy(currentPlayer, KEYBOARD_SEEK_SECONDS);
           return;
-        case "ArrowUp":
+        case "arrowup":
           setVolumeBy(currentPlayer, KEYBOARD_VOLUME_STEP);
           return;
-        case "ArrowDown":
+        case "arrowdown":
           setVolumeBy(currentPlayer, -KEYBOARD_VOLUME_STEP);
           return;
         case "0":
           currentPlayer.currentTime(0);
           return;
-        default:
-          break;
-      }
-
-      if (event.key.toLowerCase() === "m") {
-        currentPlayer.muted(!currentPlayer.muted());
-        return;
-      }
-
-      if (event.key.toLowerCase() === "f") {
-        toggleFullscreen(currentPlayer);
+        case "m":
+          currentPlayer.muted(!currentPlayer.muted());
+          return;
+        case "f":
+          toggleFullscreen(currentPlayer);
       }
     },
     [seekBy, setVolumeBy, showControls, toggleFullscreen, togglePlay],
