@@ -4,6 +4,7 @@ import { UUIDSchema } from "src/common";
 import { enrolledCourseGroupsPayload } from "src/courses/schemas/course.schema";
 import { createCoursesEnrollmentSchema } from "src/courses/schemas/createCoursesEnrollment";
 import { INTEGRATION_TRAINING_RESULTS_SCOPES } from "src/integration/integration.types";
+import { createTenantSchema, tenantResponseSchema } from "src/super-admin/schemas/tenant.schema";
 
 import type { createUserSchema } from "src/user/schemas/createUser.schema";
 import type { updateUserSchema } from "src/user/schemas/updateUser.schema";
@@ -27,6 +28,9 @@ export const integrationTenantSchema = Type.Object({
 });
 
 export const integrationTenantsSchema = Type.Array(integrationTenantSchema);
+
+export const integrationCreateTenantSchema = createTenantSchema;
+export const integrationTenantLifecycleResponseSchema = tenantResponseSchema;
 
 export const integrationTrainingResultsScopeSchema = Type.Union([
   Type.Literal(INTEGRATION_TRAINING_RESULTS_SCOPES.TENANT),
@@ -94,6 +98,10 @@ export const unenrollGroupsPayloadSchema = Type.Object({
 
 export type IntegrationCreateUserBody = Static<typeof createUserSchema>;
 export type IntegrationUpdateUserBody = Static<typeof updateUserSchema>;
+export type IntegrationCreateTenantBody = Static<typeof integrationCreateTenantSchema>;
+export type IntegrationTenantLifecycleResponse = Static<
+  typeof integrationTenantLifecycleResponseSchema
+>;
 export type SetUserGroupsBody = Static<typeof setUserGroupsSchema>;
 export type IntegrationTenant = Static<typeof integrationTenantSchema>;
 export type EnrollUsersPayload = Static<typeof enrollUsersPayloadSchema>;

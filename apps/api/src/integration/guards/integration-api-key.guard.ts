@@ -55,6 +55,8 @@ export class IntegrationApiKeyGuard implements CanActivate {
     req.user = user;
     req.integrationTenantValidated = true;
     req.integrationApiKeyId = keyId;
+    req.integrationKeyTenantId = keyTenantId;
+    req.integrationKeyTenantIsManaging = keyTenantIsManaging;
 
     await this.integrationService.markKeyAsUsed(keyId);
 

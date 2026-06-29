@@ -40,15 +40,21 @@ import {
 } from "src/group/group.schema";
 import { GroupService } from "src/group/group.service";
 import { GroupSortFieldsOptions, GroupsFilterSchema } from "src/group/group.types";
+import { IntegrationKeyTenant } from "src/integration/decorators/integration-key-tenant.decorator";
 import { IntegrationTenantOptional } from "src/integration/decorators/tenant-optional.decorator";
 import { IntegrationApiKeyGuard } from "src/integration/guards/integration-api-key.guard";
 import { IntegrationService } from "src/integration/integration.service";
+import { IntegrationKeyTenantContext } from "src/integration/integration.types";
 import {
+  integrationCreateTenantSchema,
   integrationDeleteUserResponseSchema,
   integrationMessageResponseSchema,
+  integrationTenantLifecycleResponseSchema,
   integrationTenantsSchema,
   integrationTrainingResultsSchema,
   integrationTrainingResultsScopeSchema,
+  type IntegrationCreateTenantBody,
+  type IntegrationTenantLifecycleResponse,
   setUserGroupsSchema,
   unenrollGroupsPayloadSchema,
   type IntegrationTrainingResult,
@@ -122,6 +128,68 @@ export class IntegrationController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<IntegrationTenant[]>> {
     return new BaseResponse(await this.integrationService.getTenantsForActor(currentUser));
+  }
+
+  @Post("tenants")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Create tenant via integration API",
+    description:
+      "Creates a new tenant and invites its initial admin user.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Tenant ID is not required because the integration API key owner is used.",
+      },
+    ],
+  })
+  @Validate({
+    request: [{ type: "body", schema: integrationCreateTenantSchema }],
+    response: baseResponse(integrationTenantLifecycleResponseSchema),
+  })
+  async createTenant(
+    @Body() body: IntegrationCreateTenantBody,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationTenantLifecycleResponse>> {
+    return new BaseResponse(
+      await this.integrationService.createTenantForIntegration(body, currentUser, keyTenant),
+    );
+  }
+
+  @Post("tenants/:tenantId/deactivate")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Deactivate tenant via integration API",
+    description:
+      "Marks the target tenant as inactive.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Tenant ID is not required because the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [{ type: "param", name: "tenantId", schema: UUIDSchema }],
+    response: baseResponse(integrationTenantLifecycleResponseSchema),
+  })
+  async deactivateTenant(
+    @Param("tenantId") tenantId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationTenantLifecycleResponse>> {
+    return new BaseResponse(
+      await this.integrationService.deactivateTenantForIntegration(
+        tenantId,
+        currentUser,
+        keyTenant,
+      ),
+    );
   }
 
   @Get("users")
