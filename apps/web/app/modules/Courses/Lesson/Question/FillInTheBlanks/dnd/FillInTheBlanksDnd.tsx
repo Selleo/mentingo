@@ -22,6 +22,8 @@ import Viewer from "~/components/RichText/Viever";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 
+import { getCorrectSentence } from "../correctSentence";
+
 import { DndBlank } from "./DndBlank";
 import { DraggableWord } from "./DraggableWord";
 import { SentenceBuilder } from "./SentenceBuilder";
@@ -157,7 +159,12 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
   const [previewBlankId, setPreviewBlankId] = useState<string | null>(null);
   const wordsBeforeDragRef = useRef<DndWord[] | null>(null);
 
-  const solutionExplanation = question.solutionExplanation;
+  const correctSentence = getCorrectSentence(question);
+  const showCorrectSentence =
+    Boolean(isCompleted) &&
+    Boolean(correctSentence) &&
+    !question.passQuestion &&
+    !isQuizFeedbackRedacted;
   const blankMinWidth = useMemo(() => {
     const longestAnswerLength = getLongestAnswerLength(question.options);
     const minLength = Math.max(longestAnswerLength, 8);
@@ -437,12 +444,12 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
           }}
         />
         <WordBank words={renderedWordBankWords} />
-        {solutionExplanation && !question.passQuestion && !isQuizFeedbackRedacted && (
+        {showCorrectSentence && (
           <div className="mt-4">
             <span className="body-base-md text-error-700">
               {t("studentLessonView.other.correctSentence")}
             </span>
-            <Viewer content={solutionExplanation} />
+            <Viewer content={correctSentence ?? ""} />
           </div>
         )}
       </DndContext>

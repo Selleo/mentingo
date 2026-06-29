@@ -34,8 +34,7 @@ import { StripeService } from "src/stripe/stripe.service";
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
 
-const BLANK_ANSWER_MARKER_PREFIX = "<blank-answer-";
-const LEGACY_BLANK_MARKER = "[word]";
+const BLANK_ANSWER_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
 
 type SeedQuestionData = NonNullable<
   NonNullable<NiceCourseData["chapters"][number]["lessons"][number]["questions"]>[number]
@@ -47,15 +46,14 @@ const isFillInTheBlanksQuestion = (questionType: SeedQuestionData["type"]) =>
   questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_DND ||
   questionType === QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT;
 
-const replaceLegacyBlankMarkers = (description: string | undefined, answerIds: UUIDType[]) => {
-  if (!description || description.includes(BLANK_ANSWER_MARKER_PREFIX)) return description;
+const replaceSeedBlankMarkers = (description: string | undefined, answerIds: UUIDType[]) => {
+  if (!description) return description;
 
-  let answerIndex = 0;
-  return description.replaceAll(LEGACY_BLANK_MARKER, () => {
-    const answerId = answerIds[answerIndex];
-    answerIndex += 1;
+  return description.replace(BLANK_ANSWER_MARKER_REGEX, (marker, markerAnswerId: string) => {
+    if (!/^\d+$/.test(markerAnswerId)) return marker;
 
-    return answerId ? `<blank-answer-${answerId}>` : LEGACY_BLANK_MARKER;
+    const answerId = answerIds[Number(markerAnswerId) - 1];
+    return answerId ? `<blank-answer-${answerId}>` : marker;
   });
 };
 
@@ -235,7 +233,7 @@ export async function createNiceCourses(
               .filter(({ isCorrect }) => isCorrect)
               .map(({ id }) => id);
             const description = isFillInTheBlanksQuestion(questionData.type)
-              ? replaceLegacyBlankMarkers(
+              ? replaceSeedBlankMarkers(
                   normalizeOptionalString(questionData.description),
                   correctFillBlankAnswerIds,
                 )

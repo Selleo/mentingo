@@ -139,7 +139,7 @@ export const e2eCourses: NiceCourseData[] = [
               {
                 type: QUESTION_TYPE.FILL_IN_THE_BLANKS_TEXT,
                 title: "Complete the Definition",
-                description: "E2E testing is used to test the [word] of an application.",
+                description: "E2E testing is used to test the <blank-answer-1> of an application.",
                 solutionExplanation:
                   "E2E testing is used to test the <strong>workflow</strong> of an application.",
                 options: [
