@@ -1216,7 +1216,13 @@
     "button": {
       "uploadScorm": "Nahrajte SCORM",
       "createNew": "Vytvořit nový",
-      "deleteSelected": "Smazat vybrané"
+      "deleteSelected": "Smazat vybrané",
+      "bulkEdit": "Hromadná úprava"
+    },
+    "dropdown": {
+      "changeCategory": "Změnit kategorii",
+      "changeStatus": "Změnit stav",
+      "delete": "Smazat"
     },
     "deleteModal": {
       "titleSingle": "Smazat kurz",
@@ -1224,10 +1230,26 @@
       "descriptionSingle": "Opravdu chcete tento kurz smazat? Tuto akci nelze vrátit zpět.",
       "descriptionMultiple": "Opravdu chcete smazat {{count}} kurzy? Tuto akci nelze vrátit zpět."
     },
+    "statusModal": {
+      "title": "Změnit stav kurzu",
+      "description": "Vyberte nový stav pro {{count}} vybraných kurzů."
+    },
+    "categoryModal": {
+      "title": "Změnit kategorii kurzu",
+      "description": "Vyberte novou kategorii pro {{count}} vybraných kurzů."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
       "deleteCourseFailed": "Kurz se nepodařilo smazat",
-      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept."
+      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept.",
+      "bulkCategoryUpdateSuccessfully": "Kategorie kurzů byly úspěšně aktualizovány",
+      "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
+      "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
+      "bulkCategoryUpdateCategoryNotFound": "Vybraná kategorie nebyla nalezena.",
+      "bulkStatusUpdateSuccessfully": "Stavy kurzů byly úspěšně aktualizovány",
+      "bulkStatusUpdateFailed": "Nepodařilo se aktualizovat stavy kurzů",
+      "bulkStatusUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
+      "noCoursesSelected": "Vyberte alespoň jeden kurz."
     }
   },
   "adminCategoriesView": {
@@ -3692,6 +3714,8 @@
     "actions": {
       "create": "Vytvořeno",
       "update": "Aktualizováno",
+      "bulk_course_category_update": "Hromadně aktualizována kategorie kurzů",
+      "bulk_course_status_update": "Hromadně aktualizován stav kurzů",
       "delete": "Smazáno",
       "login": "Přihlášeno",
       "login_failed": "Neúspěšné přihlášení",

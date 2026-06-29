@@ -19,7 +19,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Choose supported course types where the tenant configuration allows them.
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
-- Change course status, including draft and published states.
+- Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.
 - Add, edit, delete, and generate course language variants.
@@ -40,17 +40,17 @@ Administrators start in the admin course list and open a course edit screen or c
 
 The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
 
-Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. Language operations respect supported-language and base-language rules.
+Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Language operations respect supported-language and base-language rules.
 
 ## Key Technical Context
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
 - Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
-- Course create, update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
+- Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 
 ## Test Evidence
 
-- Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
-- Source-level API evidence covers permission checks and service paths for course creation, updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
+- Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
+- Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.

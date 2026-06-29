@@ -6,29 +6,32 @@ import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorM
 import { invalidateCourseListData } from "~/api/utils/invalidateCourseListData";
 import { useToast } from "~/components/ui/use-toast";
 
-export const useDeleteManyCourses = () => {
-  const { t } = useTranslation();
+import type { BulkUpdateCourseCategoryBody } from "~/api/generated-api";
+
+export function useBulkUpdateCourseCategory() {
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (ids: string[]) =>
-      await ApiClient.api.courseControllerDeleteManyCourses({ ids }),
-    onSuccess: async () => {
+    mutationFn: async (data: BulkUpdateCourseCategoryBody) => {
+      const response = await ApiClient.api.courseControllerBulkUpdateCourseCategory(data);
+
+      return response.data;
+    },
+    onSuccess: async (data) => {
       await invalidateCourseListData();
 
-      toast({
-        description: t("adminCoursesView.toast.deleteCourseSuccessfully"),
-      });
+      toast({ description: t(data.data.message) });
     },
     onError: (error) => {
       toast({
         description: getTranslatedApiErrorMessage(
           error,
           t,
-          t("adminCoursesView.toast.deleteCourseFailed"),
+          t("adminCoursesView.toast.bulkCategoryUpdateFailed"),
         ),
         variant: "destructive",
       });
     },
   });
-};
+}

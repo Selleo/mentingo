@@ -68,7 +68,12 @@ import {
   COURSE_LANGUAGE_DIALOG_HANDLES,
   EDIT_COURSE_PAGE_HANDLES,
 } from "../../../../e2e/data/courses/handles";
-import { getCourseBadgeVariant, getCourseTypeLabel } from "../Courses/utils";
+import {
+  getCourseBadgeIcon,
+  getCourseBadgeIconClasses,
+  getCourseBadgeVariant,
+  getCourseTypeLabel,
+} from "../Courses/utils";
 
 import { useCourseGenerationSyncSocket } from "./components/course-generation/hooks/useCourseGenerationSyncSocket";
 import { CourseSharingTabContent } from "./components/CourseSharingTabContent";
@@ -411,7 +416,8 @@ const EditCourse = () => {
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
                   className="ml-2"
-                  icon="Success"
+                  icon={getCourseBadgeIcon(course?.status)}
+                  iconClasses={getCourseBadgeIconClasses(course?.status)}
                 >
                   {t("common.other.published")}
                 </Badge>
@@ -421,7 +427,8 @@ const EditCourse = () => {
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
                   className="ml-2"
-                  icon="Warning"
+                  icon={getCourseBadgeIcon(course?.status)}
+                  iconClasses={getCourseBadgeIconClasses(course?.status)}
                 >
                   {t("common.other.draft")}
                 </Badge>
@@ -431,6 +438,8 @@ const EditCourse = () => {
                   variant={getCourseBadgeVariant(course?.status)}
                   fontWeight="bold"
                   className="ml-2"
+                  icon={getCourseBadgeIcon(course?.status)}
+                  iconClasses={getCourseBadgeIconClasses(course?.status)}
                 >
                   {t("common.other.private")}
                 </Badge>

@@ -1216,7 +1216,13 @@
     "button": {
       "uploadScorm": "Įkelti SCORM",
       "createNew": "Sukurti naują",
-      "deleteSelected": "Ištrinti pasirinktus"
+      "deleteSelected": "Ištrinti pasirinktus",
+      "bulkEdit": "Masinis redagavimas"
+    },
+    "dropdown": {
+      "changeCategory": "Keisti kategoriją",
+      "changeStatus": "Keisti būseną",
+      "delete": "Ištrinti"
     },
     "deleteModal": {
       "titleSingle": "Ištrinti kursą",
@@ -1224,10 +1230,26 @@
       "descriptionSingle": "Ar tikrai norite ištrinti šį kursą? Šio veiksmo anuliuoti negalima.",
       "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} kursus? Šio veiksmo anuliuoti negalima."
     },
+    "statusModal": {
+      "title": "Keisti kurso būseną",
+      "description": "Pasirinkite naują būseną {{count}} pasirinktiems kursams."
+    },
+    "categoryModal": {
+      "title": "Keisti kurso kategoriją",
+      "description": "Pasirinkite naują kategoriją {{count}} pasirinktiems kursams."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
       "deleteCourseFailed": "Nepavyko ištrinti kurso",
-      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį."
+      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
+      "bulkCategoryUpdateSuccessfully": "Kursų kategorijos sėkmingai atnaujintos",
+      "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
+      "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
+      "bulkCategoryUpdateCategoryNotFound": "Pasirinkta kategorija nerasta.",
+      "bulkStatusUpdateSuccessfully": "Kursų būsenos sėkmingai atnaujintos",
+      "bulkStatusUpdateFailed": "Nepavyko atnaujinti kursų būsenų",
+      "bulkStatusUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
+      "noCoursesSelected": "Pasirinkite bent vieną kursą."
     }
   },
   "adminCategoriesView": {
@@ -3693,6 +3715,8 @@
     "actions": {
       "create": "Sukurta",
       "update": "Atnaujinta",
+      "bulk_course_category_update": "Masiniu būdu atnaujinta kursų kategorija",
+      "bulk_course_status_update": "Masiniu būdu atnaujinta kursų būsena",
       "delete": "Ištrinta",
       "login": "Prisijungta",
       "login_failed": "Prisijungti nepavyko",

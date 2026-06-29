@@ -1210,7 +1210,13 @@
     "button": {
       "uploadScorm": "Laden Sie SCORM hoch",
       "createNew": "Neu erstellen",
-      "deleteSelected": "Ausgewählte löschen"
+      "deleteSelected": "Ausgewählte löschen",
+      "bulkEdit": "Massenbearbeitung"
+    },
+    "dropdown": {
+      "changeCategory": "Kategorie ändern",
+      "changeStatus": "Status ändern",
+      "delete": "Löschen"
     },
     "deleteModal": {
       "titleSingle": "Kurs löschen",
@@ -1218,10 +1224,26 @@
       "descriptionSingle": "Möchten Sie diesen Kurs wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.",
       "descriptionMultiple": "Sind Sie sicher, dass Sie {{count}} Kurse löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden."
     },
+    "statusModal": {
+      "title": "Kursstatus ändern",
+      "description": "Wählen Sie den neuen Status für {{count}} ausgewählte Kurse."
+    },
+    "categoryModal": {
+      "title": "Kurskategorie ändern",
+      "description": "Wählen Sie die neue Kategorie für {{count}} ausgewählte Kurse."
+    },
     "toast": {
       "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
       "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
-      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“."
+      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
+      "bulkCategoryUpdateSuccessfully": "Kurskategorien wurden erfolgreich aktualisiert",
+      "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
+      "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
+      "bulkCategoryUpdateCategoryNotFound": "Die ausgewählte Kategorie wurde nicht gefunden.",
+      "bulkStatusUpdateSuccessfully": "Kursstatus wurden erfolgreich aktualisiert",
+      "bulkStatusUpdateFailed": "Kursstatus konnten nicht aktualisiert werden",
+      "bulkStatusUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
+      "noCoursesSelected": "Wählen Sie mindestens einen Kurs aus."
     }
   },
   "adminCategoriesView": {
@@ -3684,6 +3706,8 @@
     "actions": {
       "create": "Erstellt",
       "update": "Aktualisiert",
+      "bulk_course_category_update": "Kurskategorie gesammelt aktualisiert",
+      "bulk_course_status_update": "Kursstatus gesammelt aktualisiert",
       "delete": "Gelöscht",
       "login": "Angemeldet",
       "login_failed": "Anmeldung fehlgeschlagen",

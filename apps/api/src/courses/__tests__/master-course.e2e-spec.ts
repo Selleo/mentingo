@@ -672,6 +672,64 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
+  it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
+    const { sourceCourseId, sourceCookie, targetCourseId } = await setupAndExport();
+    const categoryTitle = `Bulk synced category ${faker.string.nanoid(8)}`;
+
+    const sourceCategoryId = await runAsTenant(sourceTenantId, async () => {
+      const category = await categoryFactory.create({ title: categoryTitle });
+
+      await db
+        .update(categories)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            en: categoryTitle,
+            pl: "Zbiorczo synchronizowana kategoria",
+          }),
+          baseLanguage: "en",
+          availableLocales: ["en", "pl"],
+        })
+        .where(eq(categories.id, category.id));
+
+      return category.id;
+    });
+
+    await withTenantHost(
+      request(app.getHttpServer())
+        .patch("/api/course/bulk/category")
+        .set("Cookie", sourceCookie)
+        .send({
+          ids: [sourceCourseId],
+          categoryId: sourceCategoryId,
+        }),
+      SOURCE_HOST,
+    ).expect(200);
+
+    await waitFor(
+      async () =>
+        runAsTenant(targetTenantId, async () => {
+          const [targetCourse] = await db
+            .select({
+              categoryTitle: categories.title,
+              categoryBaseLanguage: categories.baseLanguage,
+              categoryAvailableLocales: categories.availableLocales,
+            })
+            .from(courses)
+            .innerJoin(categories, eq(categories.id, courses.categoryId))
+            .where(eq(courses.id, targetCourseId))
+            .limit(1);
+
+          return targetCourse;
+        }),
+      (targetCourse) =>
+        targetCourse?.categoryTitle?.en === categoryTitle &&
+        targetCourse.categoryTitle.pl === "Zbiorczo synchronizowana kategoria" &&
+        targetCourse.categoryBaseLanguage === "en" &&
+        targetCourse.categoryAvailableLocales.includes("pl"),
+      20000,
+    );
+  });
+
   it("returns already-linked and keeps single export link when exporting same course twice", async () => {
     const { sourceCourseId, sourceCookie } = await setupAndExport();
 

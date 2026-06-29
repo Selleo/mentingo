@@ -2,12 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import {
+  BulkUpdateCourseCategoryEvent,
+  BulkUpdateCourseStatusEvent,
   UserCourseFinishedEvent,
   CourseStartedEvent,
   CreateCourseEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
 } from "src/events";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
@@ -17,6 +20,8 @@ type CourseEventType =
   | CourseStartedEvent
   | UserCourseFinishedEvent
   | CreateCourseEvent
+  | BulkUpdateCourseCategoryEvent
+  | BulkUpdateCourseStatusEvent
   | UpdateCourseEvent
   | EnrollCourseEvent;
 
@@ -24,6 +29,8 @@ const CourseActivityEvents = [
   CourseStartedEvent,
   UserCourseFinishedEvent,
   CreateCourseEvent,
+  BulkUpdateCourseCategoryEvent,
+  BulkUpdateCourseStatusEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
 ] as const;
@@ -31,7 +38,10 @@ const CourseActivityEvents = [
 @Injectable()
 @EventsHandler(...CourseActivityEvents)
 export class CourseActivityHandler implements IEventHandler<CourseEventType> {
-  constructor(private readonly activityLogsService: ActivityLogsService) {}
+  constructor(
+    private readonly activityLogsService: ActivityLogsService,
+    private readonly tenantRunner: TenantDbRunnerService,
+  ) {}
 
   async handle(event: CourseEventType) {
     if (event instanceof CourseStartedEvent) return await this.handleCourseStarted(event);
@@ -39,6 +49,12 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     if (event instanceof UserCourseFinishedEvent) return await this.handleUserCourseFinished(event);
 
     if (event instanceof CreateCourseEvent) return await this.handleCreateCourse(event);
+
+    if (event instanceof BulkUpdateCourseCategoryEvent)
+      return await this.handleBulkUpdateCourseCategory(event);
+
+    if (event instanceof BulkUpdateCourseStatusEvent)
+      return await this.handleBulkUpdateCourseStatus(event);
 
     if (event instanceof UpdateCourseEvent) return await this.handleUpdateCourse(event);
 
@@ -92,6 +108,90 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
       before: metadata.before,
       after: metadata.after,
       context: metadata.context ?? null,
+    });
+  }
+
+  private async handleBulkUpdateCourseCategory(event: BulkUpdateCourseCategoryEvent) {
+    const { actor, tenantId, categoryId, requestedCount, updatedCount, skippedCount, updates } =
+      event.bulkUpdateCourseCategoryData;
+
+    if (updatedCount === 0) return;
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.activityLogsService.recordActivity({
+        actor,
+        tenantId,
+        operation: ACTIVITY_LOG_ACTION_TYPES.BULK_COURSE_CATEGORY_UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        resourceId: null,
+        changedFields: ["categoryId"],
+        before: {
+          courseCategories: JSON.stringify(
+            updates.map(({ courseId, previousCourseData }) => ({
+              courseId,
+              categoryId: previousCourseData?.categoryId ?? null,
+            })),
+          ),
+        },
+        after: {
+          categoryId,
+          courseCategories: JSON.stringify(
+            updates.map(({ courseId, updatedCourseData }) => ({
+              courseId,
+              categoryId: updatedCourseData?.categoryId ?? null,
+            })),
+          ),
+        },
+        context: {
+          categoryId,
+          requestedCount: String(requestedCount),
+          updatedCount: String(updatedCount),
+          skippedCount: String(skippedCount),
+          courseIds: JSON.stringify(updates.map(({ courseId }) => courseId)),
+        },
+      });
+    });
+  }
+
+  private async handleBulkUpdateCourseStatus(event: BulkUpdateCourseStatusEvent) {
+    const { actor, tenantId, status, requestedCount, updatedCount, skippedCount, updates } =
+      event.bulkUpdateCourseStatusData;
+
+    if (updatedCount === 0) return;
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.activityLogsService.recordActivity({
+        actor,
+        tenantId,
+        operation: ACTIVITY_LOG_ACTION_TYPES.BULK_COURSE_STATUS_UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        resourceId: null,
+        changedFields: ["status"],
+        before: {
+          courseStatuses: JSON.stringify(
+            updates.map(({ courseId, previousCourseData }) => ({
+              courseId,
+              status: previousCourseData?.status ?? null,
+            })),
+          ),
+        },
+        after: {
+          status,
+          courseStatuses: JSON.stringify(
+            updates.map(({ courseId, updatedCourseData }) => ({
+              courseId,
+              status: updatedCourseData?.status ?? null,
+            })),
+          ),
+        },
+        context: {
+          status,
+          requestedCount: String(requestedCount),
+          updatedCount: String(updatedCount),
+          skippedCount: String(skippedCount),
+          courseIds: JSON.stringify(updates.map(({ courseId }) => courseId)),
+        },
+      });
     });
   }
 

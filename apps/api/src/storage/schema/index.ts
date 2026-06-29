@@ -47,7 +47,6 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
-import { ACTIVITY_LOG_ACTION_TYPES } from "src/activity-logs/types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
 import {
   DEFAULT_LEARNING_PATH_SETTINGS,
@@ -105,7 +104,7 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
 } from "@repo/shared";
-import type { ActivityLogMetadata } from "src/activity-logs/types";
+import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -1769,11 +1768,6 @@ export const userOnboarding = pgTable(
   })),
 );
 
-export const activityLogsActionTypeEnum = pgEnum(
-  "activity_log_action_type",
-  Object.values(ACTIVITY_LOG_ACTION_TYPES) as [string, ...string[]],
-);
-
 export const activityLogs = pgTable(
   "activity_logs",
   {
@@ -1784,7 +1778,7 @@ export const activityLogs = pgTable(
       .notNull(),
     actorEmail: text("actor_email").notNull(),
     actorRole: text("actor_role").notNull(),
-    actionType: activityLogsActionTypeEnum("action_type").notNull(),
+    actionType: text("action_type").$type<ActivityLogActionType>().notNull(),
     resourceType: text("resource_type"),
     resourceId: uuid("resource_id"),
     metadata: jsonb("metadata").$type<ActivityLogMetadata>().notNull(),

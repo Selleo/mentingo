@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { MasterCourseService } from "src/courses/master-course.service";
 import {
+  BulkUpdateCourseCategoryEvent,
   CreateChapterEvent,
   CreateLessonEvent,
   DeleteChapterEvent,
@@ -18,6 +19,7 @@ import { chapters, lessons } from "src/storage/schema";
 import type { IEventHandler } from "@nestjs/cqrs";
 
 type SyncEvents =
+  | BulkUpdateCourseCategoryEvent
   | UpdateCourseEvent
   | CreateChapterEvent
   | UpdateChapterEvent
@@ -27,6 +29,7 @@ type SyncEvents =
   | DeleteLessonEvent;
 
 @EventsHandler(
+  BulkUpdateCourseCategoryEvent,
   UpdateCourseEvent,
   CreateChapterEvent,
   UpdateChapterEvent,
@@ -42,9 +45,26 @@ export class MasterCourseSyncHandler implements IEventHandler<SyncEvents> {
   ) {}
 
   async handle(event: SyncEvents) {
+    if (event instanceof BulkUpdateCourseCategoryEvent) {
+      await this.queueBulkCourseCategorySync(event);
+      return;
+    }
+
     const courseId = await this.resolveCourseId(event);
     if (!courseId) return;
     await this.masterCourseService.queueSyncForSourceCourse(courseId, event.constructor.name);
+  }
+
+  private async queueBulkCourseCategorySync(event: BulkUpdateCourseCategoryEvent): Promise<void> {
+    const courseIds = [
+      ...new Set(event.bulkUpdateCourseCategoryData.updates.map(({ courseId }) => courseId)),
+    ];
+
+    await Promise.all(
+      courseIds.map((courseId) =>
+        this.masterCourseService.queueSyncForSourceCourse(courseId, event.constructor.name),
+      ),
+    );
   }
 
   private async resolveCourseId(event: SyncEvents): Promise<string | null> {
