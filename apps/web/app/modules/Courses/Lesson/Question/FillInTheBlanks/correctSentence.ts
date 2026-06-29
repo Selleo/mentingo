@@ -1,17 +1,11 @@
+import { escape } from "lodash-es";
+
 import {
   normalizeBlankAnswerLineBreaks,
   splitByBlankAnswerMarkers,
 } from "~/utils/blankAnswerMarkers";
 
 import type { QuizQuestion, QuizQuestionOption } from "../types";
-
-const escapeHtml = (value: string) =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
 
 const findOptionForBlank = (
   options: QuizQuestionOption[],
@@ -54,7 +48,7 @@ export const getCorrectSentence = (question: QuizQuestion) => {
       if (!option?.optionText) return part.text;
 
       replacedBlankCount += 1;
-      return `${part.text}<strong>${escapeHtml(option.optionText)}</strong>`;
+      return `${part.text}<strong>${escape(option.optionText)}</strong>`;
     })
     .join("");
 
