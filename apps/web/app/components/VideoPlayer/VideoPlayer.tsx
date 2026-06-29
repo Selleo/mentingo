@@ -5,6 +5,7 @@ import {
   type VideoProvider,
   VIDEO_EMBED_PROVIDERS,
 } from "@repo/shared";
+import { clamp } from "lodash-es";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { match } from "ts-pattern";
@@ -32,12 +33,14 @@ import { useVideoCoverageTracker } from "./useVideoCoverageTracker";
 
 import type { VideoAspectRatio } from "./aspectRatio";
 import type { VideoCoverageTrackingOptions } from "./videoCoverage.types";
+import type { KeyboardEvent } from "react";
 
 interface VideoPlayerProps {
   url: string;
   onAspectRatioChange?: (aspectRatio: VideoAspectRatio) => void;
   onEnded?: () => void;
   autoPlay?: boolean;
+  focusOnMount?: boolean;
   fill?: boolean;
   className?: string;
   provider: VideoProvider;
@@ -48,10 +51,85 @@ type VideoJSType = ReturnType<typeof videojs>;
 type VideoJsPlayerWithQualityLevels = VideoJSType & {
   qualityLevels?: () => HlsQualityLevelList;
 };
+type VideoJsPlayerWithFullscreenSetter = VideoJSType & {
+  isFullscreen: {
+    (): boolean;
+    (isFullscreen: boolean): void;
+  };
+};
+type VideoJsPlayerWithUserActivity = VideoJSType & {
+  userActive?: (isActive: boolean) => void;
+};
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
 const HLS_MIME_TYPE = "application/vnd.apple.mpegurl";
 const MP4_MIME_TYPE = "video/mp4";
+const KEYBOARD_SEEK_SECONDS = 5;
+const KEYBOARD_VOLUME_STEP = 0.1;
+const KEYBOARD_SHORTCUT_KEYS = [
+  " ",
+  "enter",
+  "arrowleft",
+  "arrowright",
+  "arrowup",
+  "arrowdown",
+  "m",
+  "f",
+  "0",
+];
+const KEYBOARD_SHORTCUT_IGNORED_TARGET_SELECTOR = [
+  "a",
+  "button",
+  "input",
+  "select",
+  "textarea",
+  "[contenteditable='true']",
+  "[role='button']",
+  "[role='menu']",
+  "[role='menuitem']",
+  "[role='option']",
+  "[tabindex]:not([data-video-player-shortcuts])",
+  ".vjs-control",
+  ".vjs-menu",
+  ".mentingo-vjs-quality-selector",
+].join(",");
+const PLAYER_CONTROLS_TARGET_SELECTOR = [
+  ".vjs-control-bar",
+  ".vjs-control",
+  ".vjs-menu",
+  ".mentingo-vjs-quality-selector",
+].join(",");
+
+const isKeyboardShortcutIgnoredTarget = (
+  target: EventTarget | null,
+  currentTarget: HTMLElement,
+) => {
+  if (!(target instanceof HTMLElement)) return false;
+  if (target === currentTarget) return false;
+
+  return Boolean(target.closest(KEYBOARD_SHORTCUT_IGNORED_TARGET_SELECTOR));
+};
+
+const isPlayerControlsTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement && Boolean(target.closest(PLAYER_CONTROLS_TARGET_SELECTOR));
+
+const getFiniteNumber = (value: number | undefined) =>
+  typeof value === "number" && Number.isFinite(value) ? value : null;
+
+const syncVideoJsFullscreenState = (player: VideoJSType, isFullscreen: boolean) => {
+  (player as VideoJsPlayerWithFullscreenSetter).isFullscreen(isFullscreen);
+};
+
+const setVideoJsUserActive = (player: VideoJSType | null, isActive: boolean) => {
+  (player as VideoJsPlayerWithUserActivity | null)?.userActive?.(isActive);
+};
+
+const eventPathIncludesElement = (event: Event, element: Element | null | undefined) => {
+  if (!element) return false;
+
+  const path = event.composedPath();
+  return path.includes(element);
+};
 
 const enableCustomControls = (player: VideoJSType) => {
   player.controls(true);
@@ -96,6 +174,7 @@ export const VideoPlayer = ({
   onAspectRatioChange,
   onEnded,
   autoPlay = false,
+  focusOnMount = false,
   fill = true,
   className,
   coverageTracking,
@@ -116,6 +195,7 @@ export const VideoPlayer = ({
   const onAspectRatioChangeRef = useRef(onAspectRatioChange);
   const onEndedRef = useRef(onEnded);
   const controlsVisibilityTimeoutRef = useRef<number | null>(null);
+  const controlsInteractionActiveRef = useRef(false);
   const coverage = useVideoCoverageTracker(
     player,
     coverageTracking ?? {
@@ -139,12 +219,14 @@ export const VideoPlayer = ({
   }, []);
 
   const showControls = useCallback(() => {
+    setVideoJsUserActive(playerRef.current, true);
     setControlsVisible(true);
     clearControlsVisibilityTimer();
   }, [clearControlsVisibilityTimer]);
 
   const hideControls = useCallback(() => {
     clearControlsVisibilityTimer();
+    setVideoJsUserActive(playerRef.current, false);
     setControlsVisible(false);
   }, [clearControlsVisibilityTimer]);
 
@@ -188,9 +270,138 @@ export const VideoPlayer = ({
     [setHlsSelection],
   );
 
+  const togglePlay = useCallback((player: VideoJSType) => {
+    if (player.paused()) {
+      void player.play()?.catch(() => undefined);
+      return;
+    }
+
+    player.pause();
+  }, []);
+
+  const seekBy = useCallback((player: VideoJSType, secondsDelta: number) => {
+    const currentTime = getFiniteNumber(player.currentTime()) ?? 0;
+    const duration = getFiniteNumber(player.duration());
+    const maxTime = duration ?? Number.MAX_SAFE_INTEGER;
+
+    player.currentTime(clamp(currentTime + secondsDelta, 0, maxTime));
+  }, []);
+
+  const setVolumeBy = useCallback((player: VideoJSType, volumeDelta: number) => {
+    const currentVolume = getFiniteNumber(player.volume()) ?? 0;
+    const nextVolume = clamp(currentVolume + volumeDelta, 0, 1);
+
+    player.volume(nextVolume);
+
+    if (nextVolume > 0 && player.muted()) {
+      player.muted(false);
+    }
+  }, []);
+
+  const toggleFullscreen = useCallback((player: VideoJSType) => {
+    const container = containerRef.current;
+    const playerElement = player.el();
+    const fullscreenElement = document.fullscreenElement;
+    const isFullscreen =
+      fullscreenElement === container ||
+      fullscreenElement === playerElement ||
+      player.isFullscreen();
+
+    if (isFullscreen) {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        void document.exitFullscreen().catch(() => {
+          void player.exitFullscreen()?.catch(() => undefined);
+        });
+        return;
+      }
+
+      void player.exitFullscreen()?.catch(() => undefined);
+      return;
+    }
+
+    if (container?.requestFullscreen) {
+      void container.requestFullscreen().catch(() => {
+        void player.requestFullscreen()?.catch(() => undefined);
+      });
+      return;
+    }
+
+    void player.requestFullscreen()?.catch(() => undefined);
+  }, []);
+
+  const runKeyboardShortcut = useCallback(
+    (
+      event: Pick<
+        KeyboardEvent<HTMLDivElement> | globalThis.KeyboardEvent,
+        "key" | "target" | "preventDefault" | "stopPropagation"
+      >,
+      currentTarget: HTMLElement,
+    ) => {
+      if (isPlayerControlsTarget(event.target)) {
+        showControls();
+      }
+
+      if (isKeyboardShortcutIgnoredTarget(event.target, currentTarget)) return;
+
+      const currentPlayer = playerRef.current;
+      if (!currentPlayer || currentPlayer.isDisposed()) return;
+
+      const keyboardShortcutKey = event.key.toLowerCase();
+
+      if (!KEYBOARD_SHORTCUT_KEYS.includes(keyboardShortcutKey)) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      showControls();
+
+      switch (keyboardShortcutKey) {
+        case " ":
+        case "enter":
+          togglePlay(currentPlayer);
+          return;
+        case "arrowleft":
+          seekBy(currentPlayer, -KEYBOARD_SEEK_SECONDS);
+          return;
+        case "arrowright":
+          seekBy(currentPlayer, KEYBOARD_SEEK_SECONDS);
+          return;
+        case "arrowup":
+          setVolumeBy(currentPlayer, KEYBOARD_VOLUME_STEP);
+          return;
+        case "arrowdown":
+          setVolumeBy(currentPlayer, -KEYBOARD_VOLUME_STEP);
+          return;
+        case "0":
+          currentPlayer.currentTime(0);
+          return;
+        case "m":
+          currentPlayer.muted(!currentPlayer.muted());
+          return;
+        case "f":
+          toggleFullscreen(currentPlayer);
+      }
+    },
+    [seekBy, setVolumeBy, showControls, toggleFullscreen, togglePlay],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      runKeyboardShortcut(event, event.currentTarget);
+    },
+    [runKeyboardShortcut],
+  );
+
   useEffect(() => {
     qualityControlHost?.classList.toggle("vjs-hidden", hlsQualityOptions.length === 0);
   }, [hlsQualityOptions.length, qualityControlHost]);
+
+  useEffect(() => {
+    if (!focusOnMount) return;
+
+    window.requestAnimationFrame(() => {
+      containerRef.current?.focus({ preventScroll: true });
+    });
+  }, [focusOnMount, url]);
 
   const resolvedProvider = useMemo(
     () => (provider === VIDEO_EMBED_PROVIDERS.UNKNOWN ? detectVideoProviderFromUrl(url) : provider),
@@ -225,6 +436,8 @@ export const VideoPlayer = ({
 
     const videoElement = document.createElement("video-js");
     videoElement.classList.add("mentingo-video-js");
+    videoElement.setAttribute("data-video-player-shortcuts", "");
+    videoElement.setAttribute("tabindex", "0");
     videoRef.current?.appendChild(videoElement);
 
     const player = (playerRef.current = videojs(videoElement, options));
@@ -363,24 +576,148 @@ export const VideoPlayer = ({
     if (!container) return;
 
     const handleShowControls = () => showControls();
-    const handleHideControls = () => hideControls();
+    const handleHideControls = () => {
+      if (controlsInteractionActiveRef.current) {
+        showControls();
+        return;
+      }
 
-    container.addEventListener("mouseenter", handleShowControls);
-    container.addEventListener("mousemove", handleShowControls);
-    container.addEventListener("pointerdown", handleShowControls);
-    container.addEventListener("pointerleave", handleHideControls);
-    container.addEventListener("touchstart", handleShowControls, { passive: true });
-    container.addEventListener("mouseleave", handleHideControls);
+      hideControls();
+    };
+    const handleControlsInteractionStart = (event: Event) => {
+      if (!isPlayerControlsTarget(event.target)) return;
+
+      controlsInteractionActiveRef.current = true;
+      showControls();
+    };
+    const handleControlsInteraction = (event: Event) => {
+      if (!isPlayerControlsTarget(event.target)) return;
+
+      showControls();
+    };
+    const handleControlsInteractionEnd = () => {
+      controlsInteractionActiveRef.current = false;
+    };
+    const targets = new Set<HTMLElement>([container]);
+    const playerElement = player?.el() as HTMLElement | undefined;
+
+    if (playerElement) {
+      targets.add(playerElement);
+    }
+
+    targets.forEach((target) => {
+      target.addEventListener("mouseenter", handleShowControls);
+      target.addEventListener("mousemove", handleShowControls);
+      target.addEventListener("pointerdown", handleShowControls);
+      target.addEventListener("pointerdown", handleControlsInteractionStart, true);
+      target.addEventListener("pointermove", handleControlsInteraction, true);
+      target.addEventListener("click", handleControlsInteraction, true);
+      target.addEventListener("focusin", handleControlsInteraction, true);
+      target.addEventListener("keydown", handleControlsInteraction, true);
+      target.addEventListener("pointerleave", handleHideControls);
+      target.addEventListener("touchstart", handleShowControls, { passive: true });
+      target.addEventListener("mouseleave", handleHideControls);
+    });
+    document.addEventListener("pointerup", handleControlsInteractionEnd);
+    document.addEventListener("pointercancel", handleControlsInteractionEnd);
 
     return () => {
-      container.removeEventListener("mouseenter", handleShowControls);
-      container.removeEventListener("mousemove", handleShowControls);
-      container.removeEventListener("pointerdown", handleShowControls);
-      container.removeEventListener("pointerleave", handleHideControls);
-      container.removeEventListener("touchstart", handleShowControls);
-      container.removeEventListener("mouseleave", handleHideControls);
+      targets.forEach((target) => {
+        target.removeEventListener("mouseenter", handleShowControls);
+        target.removeEventListener("mousemove", handleShowControls);
+        target.removeEventListener("pointerdown", handleShowControls);
+        target.removeEventListener("pointerdown", handleControlsInteractionStart, true);
+        target.removeEventListener("pointermove", handleControlsInteraction, true);
+        target.removeEventListener("click", handleControlsInteraction, true);
+        target.removeEventListener("focusin", handleControlsInteraction, true);
+        target.removeEventListener("keydown", handleControlsInteraction, true);
+        target.removeEventListener("pointerleave", handleHideControls);
+        target.removeEventListener("touchstart", handleShowControls);
+        target.removeEventListener("mouseleave", handleHideControls);
+      });
+      document.removeEventListener("pointerup", handleControlsInteractionEnd);
+      document.removeEventListener("pointercancel", handleControlsInteractionEnd);
     };
-  }, [hideControls, showControls]);
+  }, [hideControls, player, showControls]);
+
+  useEffect(() => {
+    if (!player) return;
+
+    const playerElement = player.el() as HTMLElement;
+    const handlePlayerKeyDown = (event: Event) => {
+      runKeyboardShortcut(event as globalThis.KeyboardEvent, playerElement);
+    };
+
+    playerElement.setAttribute("data-video-player-shortcuts", "");
+    playerElement.setAttribute("tabindex", "0");
+    playerElement.addEventListener("keydown", handlePlayerKeyDown);
+
+    return () => {
+      playerElement.removeEventListener("keydown", handlePlayerKeyDown);
+    };
+  }, [player, runKeyboardShortcut]);
+
+  useEffect(() => {
+    if (!player) return;
+
+    const getEventScope = (event: Event) => {
+      const container = containerRef.current;
+      const playerElement = player.el();
+
+      if (eventPathIncludesElement(event, container)) return "container";
+      if (eventPathIncludesElement(event, playerElement)) return "player";
+
+      return null;
+    };
+    const handleDocumentPlayerInteraction = (event: Event) => {
+      const scope = getEventScope(event);
+
+      if (!scope) return;
+
+      showControls();
+    };
+
+    document.addEventListener("pointermove", handleDocumentPlayerInteraction, true);
+    document.addEventListener("pointerdown", handleDocumentPlayerInteraction, true);
+    document.addEventListener("click", handleDocumentPlayerInteraction, true);
+    document.addEventListener("keydown", handleDocumentPlayerInteraction, true);
+
+    return () => {
+      document.removeEventListener("pointermove", handleDocumentPlayerInteraction, true);
+      document.removeEventListener("pointerdown", handleDocumentPlayerInteraction, true);
+      document.removeEventListener("click", handleDocumentPlayerInteraction, true);
+      document.removeEventListener("keydown", handleDocumentPlayerInteraction, true);
+    };
+  }, [player, showControls]);
+
+  useEffect(() => {
+    if (!player) return;
+
+    const syncFullscreenState = () => {
+      window.requestAnimationFrame(() => {
+        const container = containerRef.current;
+        const fullscreenElement = document.fullscreenElement;
+        const isFullscreen =
+          fullscreenElement === container ||
+          (!!fullscreenElement && fullscreenElement === player.el());
+
+        syncVideoJsFullscreenState(player, isFullscreen);
+
+        if (!isFullscreen) return;
+
+        showControls();
+        if (fullscreenElement instanceof HTMLElement) {
+          fullscreenElement.focus({ preventScroll: true });
+        }
+      });
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+    };
+  }, [player, showControls]);
 
   useEffect(() => {
     return () => {
@@ -437,6 +774,11 @@ export const VideoPlayer = ({
     <div
       ref={containerRef}
       data-vjs-player
+      data-video-player-shortcuts
+      role="button"
+      aria-label="Video player"
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
       className={cn(
         "relative w-full overflow-hidden bg-black",
         !controlsVisible && "mentingo-video-player--controls-hidden",

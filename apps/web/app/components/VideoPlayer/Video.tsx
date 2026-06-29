@@ -88,6 +88,7 @@ export function Video({ src, url, provider, index = null, onEnded, coverageTrack
               provider={resolvedProvider ?? VIDEO_EMBED_PROVIDERS.UNKNOWN}
               url={resolvedUrl}
               autoPlay
+              focusOnMount
               onAspectRatioChange={setAspectRatio}
               onEnded={handleEnded}
               coverageTracking={coverageTracking}

@@ -19,6 +19,7 @@ The main workflow starts when a learner opens a course and chooses to start or c
 
 - Start or continue a course from the course overview.
 - Render content, quiz, AI mentor, embed, SCORM, and live training lessons.
+- Control lesson videos with focused keyboard shortcuts for play, seeking, volume, mute, restart, and fullscreen.
 - Navigate to previous and next lessons from the learner lesson page.
 - Enforce lesson sequencing when ordered completion is enabled.
 - Keep later lessons locked after unmet requirements, such as a failed required quiz.
@@ -38,6 +39,8 @@ The lesson page loads the selected course and lesson in the active content langu
 
 Each lesson type has its own completion behavior. Content and embed lessons can complete when opened or when required video content finishes. Quiz lessons depend on quiz submission and passing rules. AI mentor, SCORM, and live training lessons use their own lesson-specific state. When sequence mode is enabled, Mentingo blocks access to later lessons until earlier lessons are complete.
 
+For content videos, opening the video focuses the player so learners can use familiar playback shortcuts while the player is active, without those shortcuts taking over the rest of the lesson page.
+
 While the learner studies, the page also runs the learning-time tracker. Completion events update lesson, chapter, and course progress and can trigger downstream completion behavior such as certificates or reporting updates.
 
 ## Key Technical Context
@@ -45,6 +48,7 @@ While the learner studies, the page also runs the learning-time tracker. Complet
 - Learner lesson UI lives in `apps/web/app/modules/Courses/Lesson`.
 - The route is `/course/:courseId/lesson/:lessonId`.
 - Lesson rendering is centralized in `LessonContentRenderer`.
+- Rich-text lesson videos use the shared `VideoPlayer` component for playback controls and focused keyboard shortcuts.
 - Lesson access and progress updates use `PERMISSIONS.LEARNING_PROGRESS_UPDATE` and `PERMISSIONS.LEARNING_MODE_USE`.
 - Progress updates are handled through `apps/api/src/studentLessonProgress`.
 - Learning-time tracking uses `apps/web/app/hooks/useLearningTimeTracker.ts` and `apps/api/src/learning-time`.
