@@ -138,6 +138,17 @@
       "entityNotFound": "Prostředek nebyl nalezen"
     }
   },
+  "adminCourseDuplication": {
+    "duplicate": "Duplicate course",
+    "duplicateFailed": "Course duplication could not be started.",
+    "processing": "Course duplication is in progress. You can keep working while it finishes.",
+    "completed": "Course duplication is complete.",
+    "failed": "Course duplication failed.",
+    "processingTitle": "Course duplication in progress",
+    "processingDescription": "Curriculum and settings editing are disabled until the copied content is ready.",
+    "failedTitle": "Course duplication failed",
+    "failedDescription": "The placeholder course is still available, but curriculum and settings editing remain disabled for this duplication job."
+  },
   "adminScorm": {
     "header": "Nahrajte SCORM",
     "subHeader": "Nahrajte svůj soubor .zip SCORM.",

@@ -10,9 +10,11 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { format } from "date-fns";
+import { Copy } from "lucide-react";
 import React, { startTransition, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
 import { categoriesQueryOptions } from "~/api/queries";
 import { useCoursesSuspense } from "~/api/queries/useCourses";
 import { queryClient } from "~/api/queryClient";
@@ -139,6 +141,16 @@ const Courses = () => {
     });
   };
 
+  const { mutateAsync: duplicateCourse, isPending: isDuplicateCoursePending } =
+    useDuplicateCourse();
+
+  const handleDuplicateCourse = async (courseId: string) => {
+    const {
+      data: { courseId: newCourseId, jobId },
+    } = await duplicateCourse(courseId);
+    navigate(`/admin/beta-courses/${newCourseId}?duplicationJobId=${jobId}`);
+  };
+
   const columns: ColumnDef<TCourse>[] = [
     {
       id: "select",
@@ -262,6 +274,26 @@ const Courses = () => {
         <SortButton<TCourse> column={column}>{t("adminCoursesView.field.createdAt")}</SortButton>
       ),
       cell: ({ row }) => row.original.createdAt && format(new Date(row.original.createdAt), "PPpp"),
+    },
+    {
+      id: "actions",
+      header: "",
+      cell: ({ row }) => (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          aria-label={t("adminCourseDuplication.duplicate")}
+          disabled={isDuplicateCoursePending}
+          onClick={(event) => {
+            event.stopPropagation();
+            void handleDuplicateCourse(row.original.id);
+          }}
+        >
+          <Copy className="size-4" />
+        </Button>
+      ),
+      enableSorting: false,
     },
   ];
 

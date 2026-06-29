@@ -11,7 +11,13 @@ import { categories, courses, users } from "../../src/storage/schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type CourseTest = Omit<InferSelectModel<typeof courses>, "tenantId">;
+export type CourseTest = Omit<
+  InferSelectModel<typeof courses>,
+  "description" | "tenantId" | "title"
+> & {
+  description: string;
+  title: string;
+};
 
 const ensureCategory = async (db: DatabasePg, categoryId?: UUIDType): Promise<UUIDType> => {
   if (categoryId) return categoryId;
@@ -62,15 +68,15 @@ export const createCourseFactory = (db: DatabasePg) => {
         .insert(courses)
         .values({
           ...course,
-          title: buildJsonbField("en", course.title as string),
-          description: buildJsonbField("en", course.description as string),
+          title: buildJsonbField("en", course.title),
+          description: buildJsonbField("en", course.description),
           categoryId,
           authorId,
         })
         .returning({
           ...getTableColumns(courses),
-          title: sql`courses.title->>'en'`,
-          description: sql`courses.description->>'en'`,
+          title: sql<string>`courses.title->>'en'`,
+          description: sql<string>`courses.description->>'en'`,
         });
 
       return inserted;

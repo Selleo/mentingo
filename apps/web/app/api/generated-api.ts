@@ -2231,6 +2231,24 @@ export interface BulkUpdateCourseCategoryResponse {
   };
 }
 
+export interface DuplicateCourseResponse {
+  data: {
+    /** @format uuid */
+    courseId: string;
+    jobId: string;
+  };
+}
+
+export interface GetCourseDuplicationJobStatusResponse {
+  data: {
+    id: string;
+    name: string;
+    state: string;
+    attemptsMade: number;
+    failedReason: string | null;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
@@ -9398,6 +9416,34 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "PATCH",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerDuplicateCourse
+     * @request POST:/api/course/{courseId}/duplicate
+     */
+    courseControllerDuplicateCourse: (courseId: string, params: RequestParams = {}) =>
+      this.request<DuplicateCourseResponse, any>({
+        path: `/api/course/${courseId}/duplicate`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerGetCourseDuplicationJobStatus
+     * @request GET:/api/course/duplication-jobs/{jobId}
+     */
+    courseControllerGetCourseDuplicationJobStatus: (jobId: string, params: RequestParams = {}) =>
+      this.request<GetCourseDuplicationJobStatusResponse, any>({
+        path: `/api/course/duplication-jobs/${jobId}`,
+        method: "GET",
         format: "json",
         ...params,
       }),

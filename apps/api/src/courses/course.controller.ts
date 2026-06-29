@@ -44,6 +44,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { ManagingTenantAdminGuard } from "src/common/guards/managing-tenant-admin.guard";
 import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
+import { CourseDuplicationService } from "src/courses/course-duplication.service";
 import { CourseScormExportService } from "src/courses/course-scorm-export.service";
 import { CourseService } from "src/courses/course.service";
 import { MasterCourseService } from "src/courses/master-course.service";
@@ -134,6 +135,12 @@ import {
   type BulkUpdateCourseStatusResponse,
 } from "./schemas/bulkUpdateCourseStatus.schema";
 import {
+  courseDuplicationJobStatusResponseSchema,
+  duplicateCourseResponseSchema,
+  type CourseDuplicationJobStatusResponse,
+  type DuplicateCourseResponse,
+} from "./schemas/courseDuplication.schema";
+import {
   courseLookupResponseSchema,
   type CourseLookupResponse,
 } from "./schemas/courseLookupResponse.schema";
@@ -173,6 +180,7 @@ export class CourseController {
     private readonly courseScormExportService: CourseScormExportService,
     private readonly learningTimeService: LearningTimeService,
     private readonly masterCourseService: MasterCourseService,
+    private readonly courseDuplicationService: CourseDuplicationService,
   ) {}
 
   @Get("all")
@@ -543,6 +551,35 @@ export class CourseController {
     await this.courseService.bulkUpdateCourseCategory(body, currentUser);
 
     return new BaseResponse({ message: "adminCoursesView.toast.bulkCategoryUpdateSuccessfully" });
+  }
+
+  @Post(":courseId/duplicate")
+  @RequirePermission(PERMISSIONS.COURSE_CREATE)
+  @Validate({
+    request: [{ type: "param", name: "courseId", schema: UUIDSchema }],
+    response: baseResponse(duplicateCourseResponseSchema),
+  })
+  async duplicateCourse(
+    @Param("courseId") courseId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<DuplicateCourseResponse>> {
+    const data = await this.courseDuplicationService.duplicateCourse(courseId, currentUser);
+    return new BaseResponse(data);
+  }
+
+  @Get("duplication-jobs/:jobId")
+  @RequirePermission(PERMISSIONS.COURSE_CREATE)
+  @Validate({
+    request: [{ type: "param", name: "jobId", schema: Type.String() }],
+    response: baseResponse(courseDuplicationJobStatusResponseSchema),
+  })
+  async getCourseDuplicationJobStatus(
+    @Param("jobId") jobId: string,
+  ): Promise<BaseResponse<CourseDuplicationJobStatusResponse>> {
+    const status = await this.courseDuplicationService.getJobStatus(jobId);
+    if (!status) throw new NotFoundException("courseDuplication.error.jobNotFound");
+
+    return new BaseResponse(status);
   }
 
   @Patch(":id")
