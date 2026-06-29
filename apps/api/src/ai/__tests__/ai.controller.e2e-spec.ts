@@ -1,9 +1,12 @@
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { eq } from "drizzle-orm";
 import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
+import { aiMentorLessons, chapters, courses, lessons } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -47,6 +50,85 @@ describe("AiController (e2e)", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  describe("AI mentor lesson localization", () => {
+    const getCourseIdForAiMentorLesson = async (lessonId: UUIDType) => {
+      const [lesson] = await db
+        .select({ chapterId: lessons.chapterId })
+        .from(lessons)
+        .where(eq(lessons.id, lessonId));
+      const [chapter] = await db
+        .select({ courseId: chapters.courseId })
+        .from(chapters)
+        .where(eq(chapters.id, lesson.chapterId));
+
+      return chapter.courseId;
+    };
+
+    const addPolishAiMentorScenario = async (aiMentorLessonId: UUIDType) => {
+      await db
+        .update(aiMentorLessons)
+        .set({
+          aiMentorInstructions: setJsonbField(
+            aiMentorLessons.aiMentorInstructions,
+            SUPPORTED_LANGUAGES.PL,
+            "Polish mentor instructions",
+          ),
+          completionConditions: setJsonbField(
+            aiMentorLessons.completionConditions,
+            SUPPORTED_LANGUAGES.PL,
+            "Polish completion conditions",
+          ),
+        })
+        .where(eq(aiMentorLessons.id, aiMentorLessonId));
+    };
+
+    it("resolves prompt instructions and completion conditions in the thread language", async () => {
+      const threadOwner = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const aiMentorLesson = await aiMentorLessonFactory.create({
+        aiMentorInstructions: "English mentor instructions",
+        completionConditions: "English completion conditions",
+      });
+      const courseId = await getCourseIdForAiMentorLesson(aiMentorLesson.lessonId);
+
+      await db
+        .update(courses)
+        .set({
+          availableLocales: [
+            SUPPORTED_LANGUAGES.EN,
+            SUPPORTED_LANGUAGES.PL,
+            SUPPORTED_LANGUAGES.DE,
+          ],
+          baseLanguage: SUPPORTED_LANGUAGES.EN,
+        })
+        .where(eq(courses.id, courseId));
+      await addPolishAiMentorScenario(aiMentorLesson.id);
+
+      const thread = await aiRepository.createThread({
+        userId: threadOwner.id,
+        aiMentorLessonId: aiMentorLesson.id,
+        status: THREAD_STATUS.ACTIVE,
+        userLanguage: SUPPORTED_LANGUAGES.PL,
+      });
+
+      const polishLesson = await aiRepository.findMentorLessonByThreadId(
+        thread.id,
+        SUPPORTED_LANGUAGES.PL,
+      );
+      const fallbackLesson = await aiRepository.findMentorLessonByThreadId(
+        thread.id,
+        SUPPORTED_LANGUAGES.DE,
+      );
+
+      expect(polishLesson.instructions).toBe("Polish mentor instructions");
+      expect(polishLesson.conditions).toBe("Polish completion conditions");
+      expect(fallbackLesson.instructions).toBe("English mentor instructions");
+      expect(fallbackLesson.conditions).toBe("English completion conditions");
+    });
   });
 
   describe("GET /api/ai/thread", () => {

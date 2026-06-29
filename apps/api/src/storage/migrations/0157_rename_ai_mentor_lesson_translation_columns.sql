@@ -1,0 +1,2 @@
+ALTER TABLE "ai_mentor_lessons" RENAME COLUMN "ai_mentor_instructions_translations" TO "ai_mentor_instructions";--> statement-breakpoint
+ALTER TABLE "ai_mentor_lessons" RENAME COLUMN "completion_conditions_translations" TO "completion_conditions";

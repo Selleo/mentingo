@@ -1079,6 +1079,34 @@
       "when": 1782306226614,
       "tag": "0153_add_password_email_activity_actions",
       "breakpoints": true
+    },
+    {
+      "idx": 154,
+      "version": "7",
+      "when": 1782719103867,
+      "tag": "0154_add_ai_mentor_lesson_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 155,
+      "version": "7",
+      "when": 1782719113159,
+      "tag": "0155_backfill_ai_mentor_lesson_translation_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 156,
+      "version": "7",
+      "when": 1782719158040,
+      "tag": "0156_drop_ai_mentor_lesson_text_columns",
+      "breakpoints": true
+    },
+    {
+      "idx": 157,
+      "version": "7",
+      "when": 1782719204356,
+      "tag": "0157_rename_ai_mentor_lesson_translation_columns",
+      "breakpoints": true
     }
   ]
 }

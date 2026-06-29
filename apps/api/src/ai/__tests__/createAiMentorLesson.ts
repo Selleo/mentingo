@@ -11,7 +11,13 @@ import { createChapterFactory } from "../../../test/factory/chapter.factory";
 import type { InferSelectModel } from "drizzle-orm";
 import type { DatabasePg, UUIDType } from "src/common";
 
-export type AiMentorLessonTest = Omit<InferSelectModel<typeof aiMentorLessons>, "tenantId">;
+export type AiMentorLessonTest = Omit<
+  InferSelectModel<typeof aiMentorLessons>,
+  "tenantId" | "aiMentorInstructions" | "completionConditions"
+> & {
+  aiMentorInstructions: string;
+  completionConditions: string;
+};
 
 const ensureChapter = async (db: DatabasePg, chapterId?: UUIDType) => {
   if (chapterId) return chapterId;
@@ -41,8 +47,8 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         .insert(aiMentorLessons)
         .values({
           lessonId: lesson.id,
-          aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
-          completionConditions: aiMentorLesson.completionConditions,
+          aiMentorInstructions: buildJsonbField("en", aiMentorLesson.aiMentorInstructions),
+          completionConditions: buildJsonbField("en", aiMentorLesson.completionConditions),
           type: aiMentorLesson.type,
           voiceMode: aiMentorLesson.voiceMode,
           ttsPreset: aiMentorLesson.ttsPreset,
@@ -50,7 +56,11 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         })
         .returning();
 
-      return createdAiMentorLesson;
+      return {
+        ...createdAiMentorLesson,
+        aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
+        completionConditions: aiMentorLesson.completionConditions,
+      };
     });
 
     return {

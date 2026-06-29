@@ -1,0 +1,2 @@
+ALTER TABLE "ai_mentor_lessons" ADD COLUMN "ai_mentor_instructions_translations" jsonb DEFAULT '{}'::jsonb NOT NULL;--> statement-breakpoint
+ALTER TABLE "ai_mentor_lessons" ADD COLUMN "completion_conditions_translations" jsonb DEFAULT '{}'::jsonb NOT NULL;

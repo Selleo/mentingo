@@ -780,8 +780,14 @@ export const aiMentorLessons = pgTable(
     lessonId: uuid("lesson_id")
       .references(() => lessons.id, { onDelete: "cascade" })
       .notNull(),
-    aiMentorInstructions: text("ai_mentor_instructions").notNull(),
-    completionConditions: text("completion_conditions").notNull(),
+    aiMentorInstructions: jsonb("ai_mentor_instructions")
+      .$type<LocalizedText>()
+      .default({})
+      .notNull(),
+    completionConditions: jsonb("completion_conditions")
+      .$type<LocalizedText>()
+      .default({})
+      .notNull(),
     name: text("name").notNull().default("AI Mentor"),
     avatarReference: varchar("avatar_reference", { length: 500 }),
     type: text("type").notNull().default("mentor"),

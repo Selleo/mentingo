@@ -219,8 +219,8 @@ export async function createNiceCourses(
             .insert(aiMentorLessons)
             .values({
               lessonId: lesson.id,
-              aiMentorInstructions: lessonData.aiMentorInstructions,
-              completionConditions: lessonData.completionConditions,
+              aiMentorInstructions: buildJsonbField("en", lessonData.aiMentorInstructions),
+              completionConditions: buildJsonbField("en", lessonData.completionConditions),
               tenantId,
             })
             .returning();
