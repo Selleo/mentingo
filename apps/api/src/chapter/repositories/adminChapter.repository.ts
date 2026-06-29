@@ -187,19 +187,25 @@ export class AdminChapterRepository {
         aiMentor: sql<AiMentorBody>`
         (
           SELECT json_build_object(
-            'id', aml.id,
-            'lessonId', aml.lesson_id,
-            'aiMentorInstructions', aml.ai_mentor_instructions,
-            'completionConditions', aml.completion_conditions,
-            'type', aml.type,
-            'name', aml.name,
-            'avatarReference', aml.avatar_reference,
-            'voiceMode', aml.voice_mode,
-            'ttsPreset', aml.tts_preset,
-            'customTtsReference', COALESCE(aml.custom_tts_reference->>${language}::text, '')
+            'id', ${aiMentorLessons.id},
+            'lessonId', ${aiMentorLessons.lessonId},
+            'aiMentorInstructions', ${this.localizationService.getLocalizedSqlField(
+              aiMentorLessons.aiMentorInstructions,
+              language,
+            )},
+            'completionConditions', ${this.localizationService.getLocalizedSqlField(
+              aiMentorLessons.completionConditions,
+              language,
+            )},
+            'type', ${aiMentorLessons.type},
+            'name', ${aiMentorLessons.name},
+            'avatarReference', ${aiMentorLessons.avatarReference},
+            'voiceMode', ${aiMentorLessons.voiceMode},
+            'ttsPreset', ${aiMentorLessons.ttsPreset},
+            'customTtsReference', COALESCE(${aiMentorLessons.customTtsReference}->>${language}::text, '')
           )
-          FROM ${aiMentorLessons} aml
-          WHERE lessons.id = aml.lesson_id 
+          FROM ${aiMentorLessons}
+          WHERE lessons.id = ${aiMentorLessons.lessonId} 
           LIMIT 1
         )
       `,

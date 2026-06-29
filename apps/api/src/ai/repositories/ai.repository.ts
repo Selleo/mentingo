@@ -223,8 +223,14 @@ export class AiRepository {
     const [lesson] = await this.db
       .select({
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
-        instructions: aiMentorLessons.aiMentorInstructions,
-        conditions: aiMentorLessons.completionConditions,
+        instructions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.aiMentorInstructions,
+          language,
+        ),
+        conditions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.completionConditions,
+          language,
+        ),
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
         name: aiMentorLessons.name,
       })

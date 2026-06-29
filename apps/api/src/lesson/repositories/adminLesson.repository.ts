@@ -53,8 +53,14 @@ export class AdminLessonRepository {
         courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
-        aiMentorCompletionConditions: aiMentorLessons.completionConditions,
+        aiMentorInstructions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.aiMentorInstructions,
+          language,
+        ),
+        aiMentorCompletionConditions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.completionConditions,
+          language,
+        ),
         aiMentorName: aiMentorLessons.name,
         aiMentorAvatarReference: aiMentorLessons.avatarReference,
         aiMentorType: aiMentorLessons.type,
@@ -329,8 +335,16 @@ export class AdminLessonRepository {
     return dbInstance
       .update(aiMentorLessons)
       .set({
-        aiMentorInstructions: data.aiMentorInstructions,
-        completionConditions: data.completionConditions,
+        aiMentorInstructions: setJsonbField(
+          aiMentorLessons.aiMentorInstructions,
+          data.language,
+          data.aiMentorInstructions,
+        ),
+        completionConditions: setJsonbField(
+          aiMentorLessons.completionConditions,
+          data.language,
+          data.completionConditions,
+        ),
         type: data.type,
         name: data.name,
         voiceMode: data.voiceMode,
@@ -359,12 +373,14 @@ export class AdminLessonRepository {
         ? undefined
         : buildJsonbField(data.language, data.customTtsReference, true);
 
+    const { language, aiMentorInstructions, completionConditions } = data;
+
     return dbInstance
       .insert(aiMentorLessons)
       .values({
         lessonId: data.lessonId,
-        aiMentorInstructions: data.aiMentorInstructions,
-        completionConditions: data.completionConditions,
+        aiMentorInstructions: buildJsonbField(language, aiMentorInstructions),
+        completionConditions: buildJsonbField(language, completionConditions),
         type: data.type,
         name: data.name,
         voiceMode: data.voiceMode,

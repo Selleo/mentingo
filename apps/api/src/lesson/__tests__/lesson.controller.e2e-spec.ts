@@ -1,4 +1,10 @@
-import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  AI_MENTOR_TYPE,
+  COURSE_ENROLLMENT,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { and, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -46,6 +52,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     const mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
+      getResourcesForEntity: jest.fn().mockResolvedValue([]),
     };
 
     const mockCacheManager = {
@@ -99,6 +106,145 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  describe("AI mentor lesson translations", () => {
+    const createAiMentorLessonSetup = async (
+      availableLocales: SupportedLanguages[] = [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+    ) => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales,
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: admin.id });
+
+      const createResponse = await request(app.getHttpServer())
+        .post("/api/lesson/beta-create-lesson/ai")
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Negotiation practice",
+          description: "<p>Practice a sales call.</p>",
+          chapterId: chapter.id,
+          aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+          completionConditions: "<p>The learner handles objections in English.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "AI Mentor",
+        })
+        .expect(201);
+
+      const lessonId = createResponse.body.data.id;
+
+      return { adminCookies, courseId: course.id, lessonId };
+    };
+
+    const getAiMentorFromCourse = async (
+      courseId: UUIDType,
+      lessonId: UUIDType,
+      language: SupportedLanguages,
+      cookies: Awaited<ReturnType<typeof cookieFor>>,
+    ) => {
+      const response = await request(app.getHttpServer())
+        .get("/api/course/beta-course-by-id")
+        .query({ id: courseId, language })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const lessonsList = response.body.data.chapters.flatMap(
+        (chapter: { lessons: Array<{ id: UUIDType; aiMentor: unknown }> }) => chapter.lessons,
+      );
+
+      return lessonsList.find((lesson: { id: UUIDType }) => lesson.id === lessonId)?.aiMentor;
+    };
+
+    it("updates only the selected language and returns localized AI mentor scenario fields", async () => {
+      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Polish negotiation practice",
+          description: "<p>Practice a Polish sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+          completionConditions: "<p>The learner handles objections in Polish.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "AI Mentor",
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      const englishAiMentor = await getAiMentorFromCourse(
+        courseId,
+        lessonId,
+        SUPPORTED_LANGUAGES.EN,
+        adminCookies,
+      );
+      const polishAiMentor = await getAiMentorFromCourse(
+        courseId,
+        lessonId,
+        SUPPORTED_LANGUAGES.PL,
+        adminCookies,
+      );
+
+      expect(englishAiMentor).toMatchObject({
+        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+        completionConditions: "<p>The learner handles objections in English.</p>",
+      });
+      expect(polishAiMentor).toMatchObject({
+        aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+        completionConditions: "<p>The learner handles objections in Polish.</p>",
+      });
+    });
+
+    it("falls back to base-language AI mentor scenario fields", async () => {
+      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup([
+        SUPPORTED_LANGUAGES.EN,
+        SUPPORTED_LANGUAGES.DE,
+      ]);
+
+      const aiMentor = await getAiMentorFromCourse(
+        courseId,
+        lessonId,
+        SUPPORTED_LANGUAGES.DE,
+        adminCookies,
+      );
+
+      expect(aiMentor).toMatchObject({
+        aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
+        completionConditions: "<p>The learner handles objections in English.</p>",
+      });
+    });
+
+    it("rejects AI mentor scenario updates for unavailable languages", async () => {
+      const { adminCookies, lessonId } = await createAiMentorLessonSetup();
+
+      const response = await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "German negotiation practice",
+          description: "<p>Practice a German sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a German scenario.</p>",
+          completionConditions: "<p>The learner handles objections in German.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "AI Mentor",
+          language: SUPPORTED_LANGUAGES.DE,
+        })
+        .expect(400);
+
+      expect(response.body.message).toBe("adminCourseView.toast.languageNotSupported");
+    });
   });
 
   const createQuizLesson = async (courseId: UUIDType, chapterId: UUIDType, authorId: UUIDType) => {

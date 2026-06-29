@@ -218,8 +218,14 @@ export class LumaGeneratedCourseImportService {
 
     await data.trx.insert(aiMentorLessons).values({
       lessonId: lesson.id,
-      aiMentorInstructions: this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
-      completionConditions: this.sanitizeText(aiMentor?.completionConditions ?? ""),
+      aiMentorInstructions: buildJsonbField(
+        data.language,
+        this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
+      ),
+      completionConditions: buildJsonbField(
+        data.language,
+        this.sanitizeText(aiMentor?.completionConditions ?? ""),
+      ),
       type: this.mapAiMentorType(aiMentor?.type),
       name: this.sanitizeText(aiMentor?.name ?? "AI Mentor"),
       voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
