@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 
-import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  COURSE_ENROLLMENT,
+  SUPPORTED_LANGUAGES,
+  SYSTEM_ROLE_SLUGS,
+  TENANT_STATUSES,
+} from "@repo/shared";
 import { and, eq, isNull } from "drizzle-orm";
 import request from "supertest";
 
@@ -18,6 +23,7 @@ import {
   studentCourses,
   studentLessonProgress,
   tenants,
+  users,
 } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
@@ -403,6 +409,124 @@ describe("IntegrationController (e2e)", () => {
         .set("X-API-Key", apiKey)
         .set("X-Tenant-Id", otherTenantId)
         .expect(200);
+    });
+  });
+
+  describe("integration tenant lifecycle endpoints", () => {
+    const createApiKey = async ({ isManaging }: { isManaging: boolean }) => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const cookies = await cookieFor(admin, app);
+
+      await dbAdmin.update(tenants).set({ isManaging }).where(eq(tenants.id, admin.tenantId));
+
+      const rotateResponse = await request(app.getHttpServer())
+        .post("/api/integration/key")
+        .set("Cookie", cookies)
+        .expect(201);
+
+      return {
+        admin,
+        apiKey: rotateResponse.body.data.key as string,
+      };
+    };
+
+    it("allows managing tenant integration key to create tenant", async () => {
+      const { apiKey } = await createApiKey({ isManaging: true });
+      const host = uniqueTenantHost("integration-created-tenant");
+      const adminEmail = `integration-created-${randomUUID()}@example.com`;
+
+      const response = await request(app.getHttpServer())
+        .post("/api/integration/tenants")
+        .set("X-API-Key", apiKey)
+        .send({
+          name: "Integration Created Tenant",
+          host,
+          adminEmail,
+          adminFirstName: "Integration",
+          adminLastName: "Admin",
+          adminLanguage: SUPPORTED_LANGUAGES.EN,
+        })
+        .expect(201);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: expect.any(String),
+          name: "Integration Created Tenant",
+          host,
+          status: TENANT_STATUSES.ACTIVE,
+          isManaging: false,
+        }),
+      );
+
+      const [createdAdmin] = await dbAdmin
+        .select({ id: users.id, tenantId: users.tenantId, email: users.email })
+        .from(users)
+        .where(
+          and(eq(users.tenantId, response.body.data.id as string), eq(users.email, adminEmail)),
+        )
+        .limit(1);
+
+      expect(createdAdmin).toEqual(
+        expect.objectContaining({
+          tenantId: response.body.data.id,
+          email: adminEmail,
+        }),
+      );
+    });
+
+    it("allows managing tenant integration key to deactivate tenant", async () => {
+      const { apiKey } = await createApiKey({ isManaging: true });
+
+      const [{ id: tenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Integration Deactivated Tenant",
+          host: uniqueTenantHost("integration-deactivated-tenant"),
+          status: TENANT_STATUSES.ACTIVE,
+        })
+        .returning({ id: tenants.id });
+
+      const response = await request(app.getHttpServer())
+        .post(`/api/integration/tenants/${tenantId}/deactivate`)
+        .set("X-API-Key", apiKey)
+        .expect(201);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: tenantId,
+          status: TENANT_STATUSES.INACTIVE,
+        }),
+      );
+
+      const [tenant] = await dbAdmin
+        .select({ status: tenants.status })
+        .from(tenants)
+        .where(eq(tenants.id, tenantId))
+        .limit(1);
+
+      expect(tenant.status).toBe(TENANT_STATUSES.INACTIVE);
+    });
+
+    it("rejects tenant creation for non-managing tenant integration key", async () => {
+      const { apiKey } = await createApiKey({ isManaging: false });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/integration/tenants")
+        .set("X-API-Key", apiKey)
+        .send({
+          name: "Rejected Integration Tenant",
+          host: uniqueTenantHost("rejected-integration-tenant"),
+          adminEmail: `rejected-integration-${randomUUID()}@example.com`,
+          adminFirstName: "Rejected",
+          adminLastName: "Admin",
+          adminLanguage: SUPPORTED_LANGUAGES.EN,
+        })
+        .expect(403);
+
+      expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
     });
   });
 

@@ -35,6 +35,13 @@ export type IntegrationRequest = Request & {
   user?: CurrentUserType;
   integrationTenantValidated?: boolean;
   integrationApiKeyId?: string;
+  integrationKeyTenantId?: string;
+  integrationKeyTenantIsManaging?: boolean;
+};
+
+export type IntegrationKeyTenantContext = {
+  tenantId: string;
+  isManaging: boolean;
 };
 
 export type CurrentAdminKeyData = {

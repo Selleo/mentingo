@@ -45,6 +45,10 @@ export type CreateTenantRecord = {
   status: TenantStatus;
 };
 
+export type CreateTenantOptions = {
+  actorLookupTenantId?: string;
+};
+
 export type UpdateTenantRecord = {
   name?: string;
   host?: string;

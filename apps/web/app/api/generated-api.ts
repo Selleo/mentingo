@@ -5886,6 +5886,47 @@ export interface GetTenantsResponse {
   }[];
 }
 
+export interface CreateTenantBody {
+  /** @minLength 1 */
+  name: string;
+  /** @minLength 1 */
+  host: string;
+  status?: "active" | "inactive";
+  /** @format email */
+  adminEmail: string;
+  /** @minLength 1 */
+  adminFirstName: string;
+  /** @minLength 1 */
+  adminLastName: string;
+  adminLanguage?: "en" | "pl" | "de" | "lt" | "cs";
+}
+
+export interface CreateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface DeactivateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export interface GetTrainingResultsResponse {
   data: {
     scope: "tenant" | "student" | "course";
@@ -6048,6 +6089,92 @@ export interface RotateKeyResponse {
       updatedAt: string;
       lastUsedAt: string | null;
     };
+  };
+}
+
+export interface FindAllTenantsResponse {
+  data: ({
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } & {
+    isCurrentTenant: boolean;
+  })[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface FindTenantByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateTenantByIdBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantByIdResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface FindSupportUsersResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format email */
+    email: string;
+    firstName: string;
+    lastName: string;
+    label: string;
+    profilePictureUrl: string | null;
+  }[];
+  pagination: {
+    totalItems: number;
+    page: number;
+    perPage: number;
+  };
+  appliedFilters?: object;
+}
+
+export interface CreateSupportSessionBody {
+  /** @format uuid */
+  targetUserId: string;
+}
+
+export interface CreateSupportSessionResponse {
+  data: {
+    redirectUrl: string;
+    expiresAt: string;
   };
 }
 
@@ -6705,120 +6832,6 @@ export interface GenerateArticlePreviewBody {
 export interface GenerateArticlePreviewResponse {
   data: {
     parsedContent: string;
-  };
-}
-
-export interface FindAllTenantsResponse {
-  data: ({
-    /** @format uuid */
-    id: string;
-    name: string;
-    host: string;
-    status: "active" | "inactive";
-    isManaging: boolean;
-    createdAt: string;
-    updatedAt: string;
-  } & {
-    isCurrentTenant: boolean;
-  })[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface FindTenantByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    host: string;
-    status: "active" | "inactive";
-    isManaging: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface CreateTenantBody {
-  /** @minLength 1 */
-  name: string;
-  /** @minLength 1 */
-  host: string;
-  status?: "active" | "inactive";
-  /** @format email */
-  adminEmail: string;
-  /** @minLength 1 */
-  adminFirstName: string;
-  /** @minLength 1 */
-  adminLastName: string;
-  adminLanguage?: "en" | "pl" | "de" | "lt" | "cs";
-}
-
-export interface CreateTenantResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    host: string;
-    status: "active" | "inactive";
-    isManaging: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface UpdateTenantByIdBody {
-  /** @minLength 1 */
-  name?: string;
-  /** @minLength 1 */
-  host?: string;
-  status?: "active" | "inactive";
-}
-
-export interface UpdateTenantByIdResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    name: string;
-    host: string;
-    status: "active" | "inactive";
-    isManaging: boolean;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
-
-export interface FindSupportUsersResponse {
-  data: {
-    /** @format uuid */
-    id: string;
-    /** @format email */
-    email: string;
-    firstName: string;
-    lastName: string;
-    label: string;
-    profilePictureUrl: string | null;
-  }[];
-  pagination: {
-    totalItems: number;
-    page: number;
-    perPage: number;
-  };
-  appliedFilters?: object;
-}
-
-export interface CreateSupportSessionBody {
-  /** @format uuid */
-  targetUserId: string;
-}
-
-export interface CreateSupportSessionResponse {
-  data: {
-    redirectUrl: string;
-    expiresAt: string;
   };
 }
 
@@ -13133,6 +13146,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Creates a new tenant and invites its initial admin user. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerCreateTenant
+     * @summary Create tenant via integration API
+     * @request POST:/api/integration/tenants
+     */
+    integrationControllerCreateTenant: (data: CreateTenantBody, params: RequestParams = {}) =>
+      this.request<CreateTenantResponse, void>({
+        path: `/api/integration/tenants`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Marks the target tenant as inactive. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerDeactivateTenant
+     * @summary Deactivate tenant via integration API
+     * @request POST:/api/integration/tenants/{tenantId}/deactivate
+     */
+    integrationControllerDeactivateTenant: (tenantId: string, params: RequestParams = {}) =>
+      this.request<DeactivateTenantResponse, void>({
+        path: `/api/integration/tenants/${tenantId}/deactivate`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Returns users from the tenant selected by X-Tenant-Id. Supports keyword search, role filtering, archived filtering ('true' or 'false'), group filtering, sorting, and pagination so integrations can sync user directories in batches.
      *
      * @tags Integration
@@ -13437,6 +13484,125 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<RotateKeyResponse, void>({
         path: `/api/integration/key`,
         method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerFindAllTenants
+     * @request GET:/api/super-admin/tenants
+     */
+    tenantsControllerFindAllTenants: (
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FindAllTenantsResponse, any>({
+        path: `/api/super-admin/tenants`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerCreateTenant
+     * @request POST:/api/super-admin/tenants
+     */
+    tenantsControllerCreateTenant: (data: CreateTenantBody, params: RequestParams = {}) =>
+      this.request<CreateTenantResponse, any>({
+        path: `/api/super-admin/tenants`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerFindTenantById
+     * @request GET:/api/super-admin/tenants/{id}
+     */
+    tenantsControllerFindTenantById: (id: string, params: RequestParams = {}) =>
+      this.request<FindTenantByIdResponse, any>({
+        path: `/api/super-admin/tenants/${id}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerUpdateTenantById
+     * @request PATCH:/api/super-admin/tenants/{id}
+     */
+    tenantsControllerUpdateTenantById: (
+      id: string,
+      data: UpdateTenantByIdBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantByIdResponse, any>({
+        path: `/api/super-admin/tenants/${id}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerFindSupportUsers
+     * @request GET:/api/super-admin/tenants/{id}/support-users
+     */
+    tenantsControllerFindSupportUsers: (
+      id: string,
+      query?: {
+        /** @min 1 */
+        page?: number;
+        /** @min 1 */
+        perPage?: number;
+        search?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<FindSupportUsersResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-users`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerCreateSupportSession
+     * @request POST:/api/super-admin/tenants/{id}/support-session
+     */
+    tenantsControllerCreateSupportSession: (
+      id: string,
+      data: CreateSupportSessionBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<CreateSupportSessionResponse, any>({
+        path: `/api/super-admin/tenants/${id}/support-session`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
         format: "json",
         ...params,
       }),
@@ -14190,125 +14356,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<void, any>({
         path: `/api/analytics/active-users`,
         method: "GET",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerFindAllTenants
-     * @request GET:/api/super-admin/tenants
-     */
-    tenantsControllerFindAllTenants: (
-      query?: {
-        /** @min 1 */
-        page?: number;
-        /** @min 1 */
-        perPage?: number;
-        search?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FindAllTenantsResponse, any>({
-        path: `/api/super-admin/tenants`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerCreateTenant
-     * @request POST:/api/super-admin/tenants
-     */
-    tenantsControllerCreateTenant: (data: CreateTenantBody, params: RequestParams = {}) =>
-      this.request<CreateTenantResponse, any>({
-        path: `/api/super-admin/tenants`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerFindTenantById
-     * @request GET:/api/super-admin/tenants/{id}
-     */
-    tenantsControllerFindTenantById: (id: string, params: RequestParams = {}) =>
-      this.request<FindTenantByIdResponse, any>({
-        path: `/api/super-admin/tenants/${id}`,
-        method: "GET",
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerUpdateTenantById
-     * @request PATCH:/api/super-admin/tenants/{id}
-     */
-    tenantsControllerUpdateTenantById: (
-      id: string,
-      data: UpdateTenantByIdBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<UpdateTenantByIdResponse, any>({
-        path: `/api/super-admin/tenants/${id}`,
-        method: "PATCH",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerFindSupportUsers
-     * @request GET:/api/super-admin/tenants/{id}/support-users
-     */
-    tenantsControllerFindSupportUsers: (
-      id: string,
-      query?: {
-        /** @min 1 */
-        page?: number;
-        /** @min 1 */
-        perPage?: number;
-        search?: string;
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<FindSupportUsersResponse, any>({
-        path: `/api/super-admin/tenants/${id}/support-users`,
-        method: "GET",
-        query: query,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name TenantsControllerCreateSupportSession
-     * @request POST:/api/super-admin/tenants/{id}/support-session
-     */
-    tenantsControllerCreateSupportSession: (
-      id: string,
-      data: CreateSupportSessionBody,
-      params: RequestParams = {},
-    ) =>
-      this.request<CreateSupportSessionResponse, any>({
-        path: `/api/super-admin/tenants/${id}/support-session`,
-        method: "POST",
-        body: data,
-        type: ContentType.Json,
-        format: "json",
         ...params,
       }),
 

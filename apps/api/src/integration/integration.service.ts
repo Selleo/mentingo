@@ -7,20 +7,27 @@ import {
   InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
+import { hasPermission } from "src/common/permissions/permission.utils";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantsService } from "src/super-admin/tenants.service";
 
 import { IntegrationRepository } from "./integration.repository";
 
 import type {
   CurrentAdminKeyData,
+  IntegrationKeyTenantContext,
   IntegrationTrainingResultsData,
   IntegrationTrainingResultsQuery,
   RotateAdminKeyData,
 } from "./integration.types";
+import type {
+  IntegrationCreateTenantBody,
+  IntegrationTenantLifecycleResponse,
+} from "./schemas/integration.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -30,6 +37,7 @@ export class IntegrationService {
   constructor(
     private readonly integrationRepository: IntegrationRepository,
     private readonly permissionsService: PermissionsService,
+    private readonly tenantsService: TenantsService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {
     if (!process.env.MASTER_KEY) throw new Error("MASTER_KEY is required for integration API keys");
@@ -136,6 +144,32 @@ export class IntegrationService {
     return this.integrationRepository.getAllTenants();
   }
 
+  async createTenantForIntegration(
+    input: IntegrationCreateTenantBody,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationTenantLifecycleResponse> {
+    this.assertCanManageTenants(actor, keyTenant);
+
+    const keyTenantActor = { ...actor, tenantId: keyTenant.tenantId };
+
+    return this.tenantsService.createTenant(input, keyTenantActor, {
+      actorLookupTenantId: keyTenant.tenantId,
+    });
+  }
+
+  async deactivateTenantForIntegration(
+    tenantId: string,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationTenantLifecycleResponse> {
+    this.assertCanManageTenants(actor, keyTenant);
+
+    return this.tenantsService.updateTenantById(tenantId, {
+      status: TENANT_STATUSES.INACTIVE,
+    });
+  }
+
   async getTrainingResults(
     actor: CurrentUserType,
     query: IntegrationTrainingResultsQuery,
@@ -165,5 +199,15 @@ export class IntegrationService {
     if (expected.length !== provided.length) return false;
 
     return timingSafeEqual(expected, provided);
+  }
+
+  private assertCanManageTenants(actor: CurrentUserType, keyTenant: IntegrationKeyTenantContext) {
+    if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE)) {
+      throw new ForbiddenException("auth.error.missingPermission");
+    }
+
+    if (!keyTenant.isManaging) {
+      throw new ForbiddenException("superAdminTenants.error.managingTenantRequired");
+    }
   }
 }

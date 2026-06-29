@@ -20,6 +20,7 @@ import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-obje
 import { TenantsRepository } from "./tenants.repository";
 
 import type {
+  CreateTenantOptions,
   CreateTenantBody,
   ListTenantsQuery,
   TenantsListItemResponse,
@@ -63,7 +64,11 @@ export class TenantsService {
     };
   }
 
-  async createTenant(input: CreateTenantBody, actor: CurrentUserType) {
+  async createTenant(
+    input: CreateTenantBody,
+    actor: CurrentUserType,
+    options: CreateTenantOptions = {},
+  ) {
     const host = this.normalizeHost(input.host);
 
     const existing = await this.tenantsRepository.findIdByHost(host);
@@ -78,7 +83,7 @@ export class TenantsService {
 
     const { adminFirstName, adminLastName } = input;
 
-    const inviter = await this.userService.getUserById(actor.userId);
+    const inviter = await this.getTenantCreator(actor.userId, options);
     const invitedByUserName = `${inviter.firstName} ${inviter.lastName}`.trim();
 
     await this.tenantRunner.runWithTenant(createdTenant.id, async () => {
@@ -95,21 +100,20 @@ export class TenantsService {
         });
       }
 
-      await this.userService.createUser(
-        {
-          email: input.adminEmail,
-          firstName: adminFirstName,
-          lastName: adminLastName,
-          roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-          language: input.adminLanguage,
-        },
-        undefined,
-        {
-          flowType: USER_CREATION_FLOW_TYPE.INVITE,
-          invitedByUserName,
-          origin: createdTenant.host,
-        },
-      );
+      const adminUser = {
+        email: input.adminEmail,
+        firstName: adminFirstName,
+        lastName: adminLastName,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+        language: input.adminLanguage,
+        tenantId: createdTenant.id,
+      };
+
+      await this.userService.createUser(adminUser, this.db, {
+        flowType: USER_CREATION_FLOW_TYPE.INVITE,
+        invitedByUserName,
+        origin: createdTenant.host,
+      });
     });
 
     await invalidateCorsCache();
@@ -153,5 +157,15 @@ export class TenantsService {
     } catch {
       throw new BadRequestException("superAdminTenants.error.invalidHost");
     }
+  }
+
+  private async getTenantCreator(userId: string, options: CreateTenantOptions) {
+    if (options.actorLookupTenantId) {
+      return this.tenantRunner.runWithTenant(options.actorLookupTenantId, () =>
+        this.userService.getUserById(userId),
+      );
+    }
+
+    return this.userService.getUserById(userId);
   }
 }
