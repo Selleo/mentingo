@@ -25,6 +25,7 @@ import { UserModule } from "src/user/user.module";
 import { WebSocketModule } from "src/websocket";
 
 import { CourseDuplicationQueueService } from "./course-duplication.queue.service";
+import { CourseDuplicationRepository } from "./course-duplication.repository";
 import { CourseDuplicationService } from "./course-duplication.service";
 import { CourseDuplicationWorker } from "./course-duplication.worker";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
@@ -75,6 +76,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     CourseScormSnapshotService,
     CourseFeaturePolicyService,
     CourseDuplicationQueueService,
+    CourseDuplicationRepository,
     CourseDuplicationService,
     CourseDuplicationWorker,
     CourseSlugService,
