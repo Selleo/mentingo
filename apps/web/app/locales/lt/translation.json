@@ -3137,7 +3137,8 @@
     "roles": {
       "admin": "Administratorius",
       "student": "Studentas",
-      "content_creator": "Turinio kūrėjas"
+      "content_creator": "Turinio kūrėjas",
+      "trainer": "Treneris"
     },
     "switch": {
       "enabled": "Įjungta",
