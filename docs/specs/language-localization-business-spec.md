@@ -19,7 +19,7 @@ The main workflow is simple for learners: choose a preferred interface language 
 
 - Switch and persist the user interface language.
 - Apply the selected language to navigation, page text, and the browser document language.
-- Support English, Polish, German, Lithuanian, and Czech.
+- Support English, Polish, German, Lithuanian, Czech, and Spanish.
 - Use browser or stored language for unauthenticated visitor experiences.
 - Add and remove translated versions of authored content.
 - Resolve localized content with fallback behavior when the requested language is unavailable.

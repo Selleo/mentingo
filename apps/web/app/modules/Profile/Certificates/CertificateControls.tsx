@@ -5,18 +5,27 @@ import { useTranslation } from "react-i18next";
 
 import { Linkedin } from "~/assets/svgs";
 import { ColorPickerField } from "~/components/ColorPickerField";
-import RectangularSwitch from "~/components/RectangularSwitch";
+import { Icon } from "~/components/Icon";
+import { languageOptions } from "~/components/LanguageSelector/languageOptions";
 import { Button } from "~/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
 import { applyUniformCertificateColor } from "./certificateTheme";
 
 import type { CertificateColorTheme } from "./certificateTheme";
+import type { SupportedLanguages } from "@repo/shared";
 
 interface CertificateControlsProps {
   onClose?: () => void;
-  languageToggled: boolean;
-  setLanguageToggled: (languageToggled: boolean) => void;
+  selectedLanguage: SupportedLanguages;
+  setSelectedLanguage: (language: SupportedLanguages) => void;
   downloadCertificatePdf: () => Promise<void>;
   isPreparingDownload: boolean;
   onShareToLinkedIn?: () => Promise<void>;
@@ -35,8 +44,8 @@ const buttonClasses =
 
 const CertificateControls = ({
   onClose,
-  languageToggled,
-  setLanguageToggled,
+  selectedLanguage,
+  setSelectedLanguage,
   downloadCertificatePdf,
   isPreparingDownload,
   onShareToLinkedIn,
@@ -72,13 +81,27 @@ const CertificateControls = ({
 
   return (
     <div className="flex flex-wrap items-center justify-end gap-3">
-      <RectangularSwitch
-        switchLabel={t("studentCertificateView.controls.languageToggle")}
-        onLabel="PL"
-        offLabel="EN"
-        toggled={languageToggled}
-        setToggled={setLanguageToggled}
-      />
+      <Select
+        value={selectedLanguage}
+        onValueChange={(value) => setSelectedLanguage(value as SupportedLanguages)}
+      >
+        <SelectTrigger
+          className="h-[42px] w-[152px]"
+          aria-label={t("studentCertificateView.controls.languageToggle")}
+        >
+          <SelectValue placeholder={t("changeUserLanguageView.field.language")} />
+        </SelectTrigger>
+        <SelectContent>
+          {languageOptions.map((item) => (
+            <SelectItem key={item.key} value={item.key} className="w-full">
+              <div className="flex w-full min-w-0 items-center gap-2 whitespace-nowrap">
+                <Icon name={item.iconName} className="size-4 shrink-0" />
+                <span className="truncate font-semibold">{t(item.translationKey)}</span>
+              </div>
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       {showColorPicker && (
         <PopoverPrimitive.Root open={isColorPickerOpen} onOpenChange={handleColorPickerOpenChange}>

@@ -11,9 +11,10 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       de: "bald",
       lt: "netrukus",
       cs: "brzy",
+      es: "pronto",
     };
 
-    return labels[language] ?? labels.en;
+    return labels[language];
   }
 
   if (normalizedDaysBeforeDueDate === 1) {
@@ -23,9 +24,10 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       de: "morgen",
       lt: "rytoj",
       cs: "zítra",
+      es: "mañana",
     };
 
-    return labels[language] ?? labels.en;
+    return labels[language];
   }
 
   if (normalizedDaysBeforeDueDate === 0) {
@@ -35,9 +37,10 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       de: "heute",
       lt: "šiandien",
       cs: "dnes",
+      es: "hoy",
     };
 
-    return labels[language] ?? labels.en;
+    return labels[language];
   }
 
   const labels: Record<SupportedLanguages, string> = {
@@ -46,9 +49,10 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
     de: `in ${daysBeforeDueDate} Tagen`,
     lt: `po ${daysBeforeDueDate} dienų`,
     cs: `za ${daysBeforeDueDate} dní`,
+    es: `en ${normalizedDaysBeforeDueDate} días`,
   };
 
-  return labels[language] ?? labels.en;
+  return labels[language];
 };
 
 export const getCourseDueDateReminderEmailTranslations = (
@@ -85,7 +89,12 @@ export const getCourseDueDateReminderEmailTranslations = (
       paragraphs: [`Termín dokončení kurzu "${courseName}" vyprší ${daysLabel}.`],
       buttonText: "OTEVŘÍT KURZ",
     },
+    es: {
+      heading: "Se acerca la fecha límite del curso",
+      paragraphs: [`La fecha límite para completar el curso "${courseName}" es ${daysLabel}.`],
+      buttonText: "ABRIR CURSO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

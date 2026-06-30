@@ -43,7 +43,15 @@ export const getWelcomeEmailTranslations = (language: SupportedLanguages) => {
       ],
       buttonText: "PROHLÉDNOUT KURZY",
     },
+    es: {
+      heading: "Bienvenido",
+      paragraphs: [
+        "Nos alegra tenerte aquí 🙂",
+        "Tu cuenta se ha creado correctamente. Revisa los cursos disponibles.",
+      ],
+      buttonText: "VER CURSOS",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

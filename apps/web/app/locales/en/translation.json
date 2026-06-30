@@ -42,7 +42,8 @@
       "pl": "Polish",
       "de": "German",
       "lt": "Lithuanian",
-      "cs": "Czech"
+      "cs": "Czech",
+      "es": "Spanish"
     },
     "lessonTypes": {
       "content": "Content",
@@ -802,7 +803,8 @@
       "polish": "Polish",
       "german": "German",
       "czech": "Czech",
-      "lithuanian": "Lithuanian"
+      "lithuanian": "Lithuanian",
+      "spanish": "Spanish"
     }
   },
   "resetOnboarding": {

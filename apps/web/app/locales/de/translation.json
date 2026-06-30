@@ -42,7 +42,8 @@
       "pl": "Polnisch",
       "de": "Deutsch",
       "lt": "Litauisch",
-      "cs": "Tschechisch"
+      "cs": "Tschechisch",
+      "es": "Spanisch"
     },
     "lessonTypes": {
       "content": "Inhalt",
@@ -801,7 +802,8 @@
       "polish": "Polieren",
       "german": "Deutsch",
       "czech": "Tschechisch",
-      "lithuanian": "Litauisch"
+      "lithuanian": "Litauisch",
+      "spanish": "Spanisch"
     }
   },
   "resetOnboarding": {

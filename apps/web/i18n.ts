@@ -5,6 +5,7 @@ import { initReactI18next } from "react-i18next";
 import csTranslations from "app/locales/cs/translation.json";
 import deTranslations from "app/locales/de/translation.json";
 import enTranslations from "app/locales/en/translation.json";
+import esTranslations from "app/locales/es/translation.json";
 import ltTranslations from "app/locales/lt/translation.json";
 import plTranslations from "app/locales/pl/translation.json";
 
@@ -32,6 +33,9 @@ i18n.use(initReactI18next).init({
     },
     cs: {
       translation: csTranslations,
+    },
+    es: {
+      translation: esTranslations,
     },
   },
 });

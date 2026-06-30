@@ -33,7 +33,12 @@ export const getAnnouncementEmailTranslations = (
       paragraphs: [content],
       buttonText: "Otevřít oznámení",
     },
+    es: {
+      heading: title,
+      paragraphs: [content],
+      buttonText: "Abrir notificaciones",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

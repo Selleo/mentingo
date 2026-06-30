@@ -46,7 +46,15 @@ export const getPasswordRecoveryEmailTranslations = (
       ],
       buttonText: "RESETOVAT HESLO",
     },
+    es: {
+      heading: "Recuperación de contraseña",
+      paragraphs: [
+        `Hola ${name}, has solicitado restablecer tu contraseña 🔑`,
+        "Puedes restablecer tu contraseña usando el botón de abajo.",
+      ],
+      buttonText: "RESTABLECER CONTRASEÑA",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

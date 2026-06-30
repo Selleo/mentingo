@@ -1,6 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "@remix-run/react";
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ENTITY_TYPES } from "@repo/shared";
+import {
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ENTITY_TYPES,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -59,7 +63,7 @@ type NewsFormValues = {
 };
 
 type UpdateNewsPayload = {
-  language: "en" | "pl";
+  language: SupportedLanguages;
   title?: string;
   summary?: string;
   content?: string;

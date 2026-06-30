@@ -38,7 +38,14 @@ export const getMagicLinkEmailTranslations = (language: SupportedLanguages) => {
       ],
       buttonText: "OTEVŘÍT PŘIHLAŠOVACÍ ODKAZ",
     },
+    es: {
+      heading: "Enlace de inicio de sesión",
+      paragraphs: [
+        "Has recibido un enlace de inicio de sesión para tu cuenta. Haz clic en el botón de abajo para abrirlo.",
+      ],
+      buttonText: "ABRIR ENLACE DE INICIO DE SESIÓN",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

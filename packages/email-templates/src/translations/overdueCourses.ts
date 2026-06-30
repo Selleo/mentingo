@@ -85,9 +85,18 @@ export const getOverdueCoursesEmailTranslations = (
       dueDateLabel: "Termín",
       studentsLabel: "Studenti",
     },
+    es: {
+      heading: "Estudiantes con cursos vencidos",
+      intro: "Algunos estudiantes no completaron sus cursos a tiempo:",
+      buttonText: "VER CURSOS",
+      courseLabel: "Curso",
+      groupLabel: "Grupo",
+      dueDateLabel: "Fecha límite",
+      studentsLabel: "Estudiantes",
+    },
   };
 
-  const selectedLabels = labels[language] ?? labels.en;
+  const selectedLabels = labels[language];
 
   return {
     heading: selectedLabels.heading,

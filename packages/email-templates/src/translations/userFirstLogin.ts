@@ -43,7 +43,15 @@ export const getUserFirstLoginEmailTranslations = (language: SupportedLanguages,
       ],
       buttonText: "MOJE KURZY",
     },
+    es: {
+      heading: "Bienvenido",
+      paragraphs: [
+        "Nos alegra tenerte aquí 🙂",
+        `Tu primer inicio de sesión se ha completado correctamente. ${name}, revisa tus cursos asignados.`,
+      ],
+      buttonText: "MIS CURSOS",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

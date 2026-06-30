@@ -15,8 +15,10 @@ import {
   CERTIFICATE_VALIDITY_TYPES,
   CERTIFICATE_VALIDITY_UNITS,
   PERMISSIONS,
+  SUPPORTED_LANGUAGES,
   SHARE_IMAGE_HEIGHT,
   SHARE_IMAGE_WIDTH,
+  isSupportedLanguage,
 } from "@repo/shared";
 import { addDays, addMonths, addYears, format } from "date-fns";
 import { escape } from "lodash";
@@ -784,21 +786,29 @@ export class CertificatesService implements OnModuleDestroy {
         pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
       },
       de: {
-        openLabel: "Platvorm öffnen",
-        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
-        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+        openLabel: "Plattform öffnen",
+        pageTitle: `Kursabschlusszertifikat für "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} hat "${context.certificate.courseTitle}" abgeschlossen und ein Zertifikat erhalten.`,
       },
       lt: {
         openLabel: "Atidaryti platformą",
-        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
-        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+        pageTitle: `Kurso baigimo sertifikatas už "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} baigė "${context.certificate.courseTitle}" ir gavo sertifikatą.`,
       },
       cs: {
         openLabel: "Otevřít platformu",
-        pageTitle: `Course completion certificate for "${context.certificate.courseTitle}"`,
-        pageDescription: `${context.certificate.fullName} completed "${context.certificate.courseTitle}" and earned a certificate.`,
+        pageTitle: `Certifikát o dokončení kurzu "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} dokončil/a "${context.certificate.courseTitle}" a získal/a certifikát.`,
       },
-    } as const;
+      es: {
+        openLabel: "Abrir plataforma",
+        pageTitle: `Certificado de finalización del curso "${context.certificate.courseTitle}"`,
+        pageDescription: `${context.certificate.fullName} completó "${context.certificate.courseTitle}" y obtuvo un certificado.`,
+      },
+    } as const satisfies Record<
+      SupportedLanguages,
+      { openLabel: string; pageTitle: string; pageDescription: string }
+    >;
 
     const localizedContent = translations[context.language];
 
@@ -912,7 +922,7 @@ export class CertificatesService implements OnModuleDestroy {
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
-    return language === "pl" ? "pl" : "en";
+    return language && isSupportedLanguage(language) ? language : SUPPORTED_LANGUAGES.EN;
   }
 
   private buildPdfFilename(courseTitle?: string | null): string {
@@ -965,8 +975,9 @@ export class CertificatesService implements OnModuleDestroy {
   private scheduleCertificateImagePrewarm(certificateId: UUIDType): void {
     setTimeout(() => {
       void Promise.all([
-        this.getPublicShareImage(certificateId, "en"),
-        this.getPublicShareImage(certificateId, "pl"),
+        ...Object.values(SUPPORTED_LANGUAGES).map((language) =>
+          this.getPublicShareImage(certificateId, language),
+        ),
       ]).catch((error) => {
         this.logger.warn(`Certificate image prewarm failed for ${certificateId}: ${error}`);
       });

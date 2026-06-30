@@ -4,6 +4,7 @@ export const baseArticleTitle = {
   de: "Unbenannter Artikel",
   lt: "Nenurodytas straipsnis",
   cs: "Nezařazený článek",
+  es: "Artículo sin título",
 };
 
 export const baseArticleSectionTitle = {
@@ -12,4 +13,5 @@ export const baseArticleSectionTitle = {
   de: "Unbenannter Abschnitt",
   lt: "Nenurodyta sekcija",
   cs: "Nezařazená sekce",
+  es: "Sección sin título",
 };

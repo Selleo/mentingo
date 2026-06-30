@@ -9,12 +9,11 @@ import {
   type SupportedLanguages,
 } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { Building, Copy } from "lucide-react";
+import { Building } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDismissGeneratedCourseSync } from "~/api/mutations/admin/useDismissGeneratedCourseSync";
-import { useDuplicateCourse } from "~/api/mutations/admin/useDuplicateCourse";
 import { useExportMasterCourse } from "~/api/mutations/admin/useExportMasterCourse";
 import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useSyncGeneratedCourse } from "~/api/mutations/admin/useSyncGeneratedCourse";
@@ -120,9 +119,6 @@ const EditCourse = () => {
     useSyncGeneratedCourse();
   const { mutateAsync: dismissGeneratedCourseSync, isPending: isDismissSyncPending } =
     useDismissGeneratedCourseSync();
-  const { mutateAsync: duplicateCourse, isPending: isDuplicateCoursePending } =
-    useDuplicateCourse();
-
   const { mutateAsync: exportMasterCourse, isPending: isExportPending } = useExportMasterCourse();
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -284,15 +280,6 @@ const EditCourse = () => {
     if (!course?.id) return;
     await dismissGeneratedCourseSync({ integrationId: course.id });
   }, [course?.id, dismissGeneratedCourseSync]);
-
-  const handleDuplicateCourse = useCallback(async () => {
-    if (!course?.id) return;
-
-    const response = await duplicateCourse(course.id);
-    navigate(
-      `/admin/beta-courses/${response.data.courseId}?duplicationJobId=${response.data.jobId}`,
-    );
-  }, [course?.id, duplicateCourse, navigate]);
 
   useCourseGenerationSyncSocket({
     courseId: course?.id ?? "",
@@ -552,17 +539,6 @@ const EditCourse = () => {
                   <Separator orientation="vertical" className="h-10" decorative />
                 </>
               )}
-
-              <Button
-                type="button"
-                variant="outline"
-                className="gap-2"
-                disabled={!course?.id || isDuplicateCoursePending || isDuplicationLocked}
-                onClick={() => void handleDuplicateCourse()}
-              >
-                <Copy className="size-4" />
-                {t("adminCourseDuplication.duplicate")}
-              </Button>
 
               <Button
                 asChild

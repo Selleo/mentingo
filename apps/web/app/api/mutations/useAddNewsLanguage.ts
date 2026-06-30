@@ -5,11 +5,12 @@ import { NEWS_QUERY_KEY } from "../queries/useNews";
 import { NEWS_LIST_QUERY_KEY } from "../queries/useNewsList";
 
 import type { AddNewLanguageBody } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 
 type AddNewsLanguageOptions = {
   id: string;
   data: AddNewLanguageBody;
-  language?: "en" | "pl";
+  language?: SupportedLanguages;
 };
 
 export function useAddNewsLanguage() {

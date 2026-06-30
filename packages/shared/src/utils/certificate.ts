@@ -1,4 +1,4 @@
-import { SupportedLanguages } from "../constants/languages";
+import type { SupportedLanguages } from "../constants/languages";
 
 export interface CertificateRenderTheme {
   titleColor: string;
@@ -111,7 +111,20 @@ const certificateTranslations = {
     expiryDate: "Platí do",
     signature: "Podpis",
   },
-} as const;
+  es: {
+    certificate: "CERTIFICADO",
+    courseCompletion: "DE FINALIZACIÓN DEL CURSO",
+    certifyThat: "SE CERTIFICA QUE",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "ha completado correctamente el curso",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ha completado correctamente la ruta de desarrollo",
+    },
+    confirmation: "confirmando así su participación en todo el programa formativo.",
+    date: "Fecha",
+    expiryDate: "Caduca",
+    signature: "Firma",
+  },
+};
 
 export function buildCertificateMarkup(options: BuildCertificateMarkupOptions): string {
   const {

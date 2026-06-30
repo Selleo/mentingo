@@ -7,8 +7,10 @@ import {
 } from "@nestjs/common";
 import {
   CERTIFICATE_KIND,
+  SUPPORTED_LANGUAGES,
   buildCertificateHtmlDocument as buildSharedCertificateHtmlDocument,
   buildCertificateMarkup,
+  isSupportedLanguage,
 } from "@repo/shared";
 import { format } from "date-fns";
 import { escape } from "lodash";
@@ -394,12 +396,38 @@ export class LearningPathCertificateService {
 
   private getSharePageContent(context: any, embeddedImageSrc: string) {
     const title = context.certificate.pathTitle ?? "";
-    const pageTitle = `Learning path completion certificate for "${title}"`;
-    const pageDescription = `${context.certificate.fullName} completed "${title}" and earned a certificate.`;
+    const translations = {
+      pl: {
+        pageTitle: `Certyfikat ukończenia ścieżki rozwoju "${title}"`,
+        pageDescription: `${context.certificate.fullName} ukończył/a ścieżkę rozwoju "${title}" i otrzymał/a certyfikat.`,
+      },
+      en: {
+        pageTitle: `Learning path completion certificate for "${title}"`,
+        pageDescription: `${context.certificate.fullName} completed "${title}" and earned a certificate.`,
+      },
+      de: {
+        pageTitle: `Zertifikat über den Abschluss des Entwicklungspfads "${title}"`,
+        pageDescription: `${context.certificate.fullName} hat "${title}" abgeschlossen und ein Zertifikat erhalten.`,
+      },
+      lt: {
+        pageTitle: `Tobulėjimo kelio baigimo sertifikatas už "${title}"`,
+        pageDescription: `${context.certificate.fullName} baigė "${title}" ir gavo sertifikatą.`,
+      },
+      cs: {
+        pageTitle: `Certifikát o dokončení rozvojové cesty "${title}"`,
+        pageDescription: `${context.certificate.fullName} dokončil/a "${title}" a získal/a certifikát.`,
+      },
+      es: {
+        pageTitle: `Certificado de finalización de la ruta de desarrollo "${title}"`,
+        pageDescription: `${context.certificate.fullName} completó "${title}" y obtuvo un certificado.`,
+      },
+    } as const satisfies Record<SupportedLanguages, { pageTitle: string; pageDescription: string }>;
+
+    const localizedContent = translations[context.language as SupportedLanguages];
 
     return {
-      pageTitle: escape(pageTitle),
-      pageDescription: escape(pageDescription),
+      pageTitle: escape(localizedContent.pageTitle),
+      pageDescription: escape(localizedContent.pageDescription),
       siteName: escape(context.certificate.tenantName),
       courseTitle: escape(title),
       shareUrl: escape(context.shareUrl),
@@ -589,7 +617,7 @@ export class LearningPathCertificateService {
   }
 
   private normalizeLanguage(language?: string): SupportedLanguages {
-    return language === "pl" ? "pl" : "en";
+    return language && isSupportedLanguage(language) ? language : SUPPORTED_LANGUAGES.EN;
   }
 
   private buildPdfFilename(courseTitle?: string | null) {
