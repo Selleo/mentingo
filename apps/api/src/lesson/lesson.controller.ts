@@ -34,6 +34,7 @@ import { Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, UUIDSchema, type UUIDType } from "src/common";
+import { Public } from "src/common/decorators/public.decorator";
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -118,7 +119,7 @@ export class LessonController {
   }
 
   @Get(":id")
-  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Public()
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -130,12 +131,12 @@ export class LessonController {
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @Query("studentId") studentId: UUIDType,
-    @CurrentUser() currentUser: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | null,
   ): Promise<BaseResponse<LessonShow>> {
     return new BaseResponse(
       await this.lessonService.getLessonById(
         id,
-        studentId || currentUser.userId,
+        studentId || currentUser?.userId,
         currentUser,
         language,
       ),

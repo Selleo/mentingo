@@ -31,10 +31,14 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const { t } = useTranslation();
   const { id: courseSlug } = useParams();
   const {
-    course: { enrolled },
+    course: { enrolled, priceInCents },
     isCourseStudentModeActive,
     isPreviewMode,
   } = useCourseAccessProvider();
+  const isPaidCourse = priceInCents !== 0;
+  const freemiumBadgeCopyKey = isPaidCourse ? "free" : "public";
+  const freemiumBadgeIcon = isPaidCourse ? "FreeRight" : "Eye";
+  const freemiumBadgeClassName = isPaidCourse ? undefined : "bg-primary-600 text-white";
   const lessonText = formatWithPlural(
     chapter.lessonCount ?? 0,
     t("courseChapterView.other.lesson"),
@@ -118,9 +122,9 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                   )}
                 </div>
                 {chapter.isFreemium && (
-                  <CardBadge variant="successFilled">
-                    <Icon name="FreeRight" className="w-4" />
-                    {t("courseChapterView.other.free")}
+                  <CardBadge variant="successFilled" className={freemiumBadgeClassName}>
+                    <Icon name={freemiumBadgeIcon} className="w-4" />
+                    {t(`courseChapterView.other.${freemiumBadgeCopyKey}`)}
                   </CardBadge>
                 )}
               </div>

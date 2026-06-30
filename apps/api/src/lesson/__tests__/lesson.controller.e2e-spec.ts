@@ -5,13 +5,13 @@ import {
   SYSTEM_ROLE_SLUGS,
   type SupportedLanguages,
 } from "@repo/shared";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { FileService } from "src/file/file.service";
-import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -21,6 +21,7 @@ import {
   questions,
   questionAnswerOptions,
   courseStudentMode,
+  settings,
   studentCourses,
   studentLessonProgress,
   studentQuestionAnswers,
@@ -106,6 +107,128 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   beforeEach(async () => {
     await settingsFactory.create({ userId: null });
+  });
+
+  const setPublicCourseAccess = async (enabled: boolean) => {
+    await db
+      .update(settings)
+      .set({
+        settings: sql`
+          jsonb_set(
+            ${settings.settings},
+            '{unregisteredUserCoursesAccessibility}',
+            to_jsonb(${enabled}),
+            true
+          )
+        `,
+      })
+      .where(isNull(settings.userId));
+  };
+
+  const createLessonForPublicAccess = async ({
+    isFreemium,
+    lessonType,
+  }: {
+    isFreemium: boolean;
+    lessonType: LessonTypes;
+  }) => {
+    const category = await categoryFactory.create();
+    const author = await userFactory.create();
+    const course = await courseFactory.create({
+      authorId: author.id,
+      categoryId: category.id,
+      priceInCents: 0,
+      chapterCount: 1,
+    });
+    const chapter = await chapterFactory.create({
+      courseId: course.id,
+      authorId: author.id,
+      isFreemium,
+      lessonCount: 1,
+    });
+    const [lesson] = await db
+      .insert(lessons)
+      .values({
+        id: crypto.randomUUID(),
+        chapterId: chapter.id,
+        type: lessonType,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Public onboarding lesson"),
+        description: buildJsonbField(SUPPORTED_LANGUAGES.EN, "<p>Open content</p>"),
+        thresholdScore: lessonType === LESSON_TYPES.QUIZ ? 0 : null,
+        displayOrder: 1,
+      })
+      .returning();
+
+    return lesson;
+  };
+
+  describe("public lesson access", () => {
+    it("allows guests to view a content lesson in a public chapter", async () => {
+      await setPublicCourseAccess(true);
+      const lesson = await createLessonForPublicAccess({
+        isFreemium: true,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        id: lesson.id,
+        type: LESSON_TYPES.CONTENT,
+        title: "Public onboarding lesson",
+        description: expect.stringContaining("Open content"),
+        lessonCompleted: false,
+        nextLessonId: null,
+      });
+    });
+
+    it("rejects guest lesson access when visitor course access is disabled", async () => {
+      await setPublicCourseAccess(false);
+      const lesson = await createLessonForPublicAccess({
+        isFreemium: true,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(401);
+
+      expect(response.body.message).toBe("common.toast.lessonAccessDenied");
+    });
+
+    it("rejects guest lesson access when the chapter is not public", async () => {
+      await setPublicCourseAccess(true);
+      const lesson = await createLessonForPublicAccess({
+        isFreemium: false,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(401);
+
+      expect(response.body.message).toBe("common.toast.lessonAccessDenied");
+    });
+
+    it("rejects guest lesson access for non-content lessons", async () => {
+      await setPublicCourseAccess(true);
+      const lesson = await createLessonForPublicAccess({
+        isFreemium: true,
+        lessonType: LESSON_TYPES.QUIZ,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .expect(401);
+
+      expect(response.body.message).toBe("common.toast.lessonAccessDenied");
+    });
   });
 
   describe("AI mentor lesson translations", () => {

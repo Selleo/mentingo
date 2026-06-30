@@ -26,6 +26,7 @@ import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTransla
 import { useMasterCourseExportCandidates } from "~/api/queries/admin/useMasterCourseExportCandidates";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import { ALL_COURSES_QUERY_KEY } from "~/api/queries/useCourses";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { useStripeConfigured } from "~/api/queries/useStripeConfigured";
 import { queryClient } from "~/api/queryClient";
@@ -142,6 +143,7 @@ const EditCourse = () => {
     dataUpdatedAt,
     error,
   } = useBetaCourseById(id, courseLanguage);
+  const { data: globalSettings } = useGlobalSettings();
   const courseType = course?.courseType ?? COURSE_TYPE.DEFAULT;
   const courseTabs = useEditCourseTabs({ courseType });
   const canEditCurriculum = isCourseFeatureEnabledForCourseType(
@@ -638,6 +640,10 @@ const EditCourse = () => {
                   canRefetchChapterList={!!canRefetchChapterList}
                   language={courseLanguage}
                   baseLanguage={course?.baseLanguage ?? courseLanguage}
+                  coursePriceInCents={course?.priceInCents}
+                  unregisteredUserCoursesAccessibility={Boolean(
+                    globalSettings?.unregisteredUserCoursesAccessibility,
+                  )}
                 />
               </LeaveModalProvider>
             )}

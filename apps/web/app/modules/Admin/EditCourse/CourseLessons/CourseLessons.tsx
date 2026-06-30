@@ -49,6 +49,8 @@ interface CourseLessonsProps {
   shouldClearCourseGenerationRuntime: boolean;
   isCourseGenerationLocked: boolean;
   draft?: GetCourseGenerationDraftResponse;
+  coursePriceInCents?: number;
+  unregisteredUserCoursesAccessibility: boolean;
 }
 
 const CourseLessons = ({
@@ -62,6 +64,8 @@ const CourseLessons = ({
   isCourseGenerated,
   shouldClearCourseGenerationRuntime,
   isCourseGenerationLocked,
+  coursePriceInCents,
+  unregisteredUserCoursesAccessibility,
 }: CourseLessonsProps) => {
   const [contentTypeToDisplay, setContentTypeToDisplay] = useState<string>(ContentTypes.EMPTY);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
@@ -301,6 +305,8 @@ const CourseLessons = ({
               language={language}
               baseLanguage={baseLanguage}
               isCourseGenerationLocked={isCurriculumLocked}
+              coursePriceInCents={coursePriceInCents}
+              unregisteredUserCoursesAccessibility={unregisteredUserCoursesAccessibility}
             />
           )}
         </div>

@@ -2034,9 +2034,16 @@
         "field": {
           "title": "Titul"
         },
+        "errors": {
+          "freemiumRequiresContentLessons": "Pouze kapitoly s obsahovými lekcemi mohou být zdarma nebo veřejné.",
+          "publicRequiresCourseAccess": "V nastavení platformy povolte přístup ke kurzům pro návštěvníky, aby kapitoly bezplatného kurzu mohly být veřejné."
+        },
         "other": {
           "freemium": "Volná kapitola",
-          "freemiumToolTip": "Studenti mají přístup ke kapitolám freemium, aniž by se do kurzu zapsali."
+          "freemiumToolTip": "Studenti mají přístup ke kapitolám freemium, aniž by se do kurzu zapsali.",
+          "public": "Veřejné",
+          "publicToolTip": "Tato kapitola bude dostupná všem.",
+          "freemiumDisabledLockedTooltip": "Tento přepínač je deaktivovaný během generování kurzu."
         }
       },
       "lesson": {
@@ -2518,7 +2525,8 @@
       "lessons": "Lekce",
       "quiz": "Kvíz",
       "quizzes": "Kvízy",
-      "free": "Uvolnit"
+      "free": "Uvolnit",
+      "public": "Veřejné"
     }
   },
   "forgotPasswordView": {

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT, PERMISSIONS } from "@repo/shared";
-import { and, desc, eq, getTableColumns, type SQL, sql } from "drizzle-orm";
+import { COURSE_ENROLLMENT, LESSON_TYPES, PERMISSIONS } from "@repo/shared";
+import { and, desc, eq, getTableColumns, isNull, type SQL, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { hasPermission } from "src/common/permissions/permission.utils";
@@ -21,13 +21,14 @@ import {
   resources,
   coursesSettingsHelpers,
   liveLessons,
+  settings,
 } from "src/storage/schema";
 
-import type { LessonTypes } from "../lesson.type";
 import type { SupportedLanguages } from "@repo/shared";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { AdminQuestionBody, LessonsFilters } from "src/lesson/lesson.schema";
+import type { LessonTypes } from "src/lesson/lesson.type";
 import type * as schema from "src/storage/schema";
 
 export type EnrolledLessonWithSearch = {
@@ -231,6 +232,53 @@ export class LessonRepository {
     return lesson;
   }
 
+  async getPublicContentLessonDetails(id: UUIDType, language?: SupportedLanguages) {
+    const [lesson] = await this.db
+      .select({
+        id: lessons.id,
+        type: sql<LessonTypes>`${lessons.type}`,
+        title: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+        fileUrl: lessons.fileS3Key,
+        fileType: lessons.fileType,
+        thresholdScore: sql<number | null>`${lessons.thresholdScore}`,
+        attemptsLimit: sql<number | null>`${lessons.attemptsLimit}`,
+        quizCooldownInHours: sql<number | null>`${lessons.quizCooldownInHours}`,
+        displayOrder: sql<number>`${lessons.displayOrder}`,
+        lessonCompleted: sql<boolean>`FALSE`,
+        quizScore: sql<number | null>`NULL`,
+        updatedAt: sql<string | null>`NULL`,
+        isQuizPassed: sql<boolean | null>`NULL`,
+        attempts: sql<number | null>`NULL`,
+        quizFeedbackEnabled: coursesSettingsHelpers.select("quizFeedbackEnabled"),
+        videoCompletionTrackingEnabled: coursesSettingsHelpers.select(
+          "videoCompletionTrackingEnabled",
+        ),
+        aiMentorDetails: sql<null>`NULL`,
+        aiMentor: sql<null>`NULL`,
+        isExternal: sql<boolean>`${lessons.isExternal}`,
+        liveTrainingId: sql<UUIDType | null>`NULL`,
+        isFreemium: sql<boolean>`${chapters.isFreemium}`,
+        isEnrolled: sql<boolean>`FALSE`,
+        studentCourses: sql<string | null>`NULL`,
+        nextLessonId: sql<string | null>`NULL`,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(settings, and(isNull(settings.userId), eq(settings.tenantId, chapters.tenantId)))
+      .where(
+        and(
+          eq(lessons.id, id),
+          eq(lessons.type, LESSON_TYPES.CONTENT),
+          eq(chapters.isFreemium, true),
+          sql`COALESCE((${settings.settings}->>'unregisteredUserCoursesAccessibility')::boolean, false)`,
+        ),
+      );
+
+    return lesson;
+  }
+
   async getLessonsByChapterId(chapterId: UUIDType, language: SupportedLanguages) {
     return this.db
       .select({
@@ -417,14 +465,14 @@ export class LessonRepository {
 
     if (filters.title) {
       conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v) 
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.title}) AS t(k, v)
            WHERE v ILIKE ${`%${filters.title}%`})`,
       );
     }
 
     if (filters.description) {
       conditions.push(
-        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.description}) AS t(k, v) 
+        sql`EXISTS (SELECT 1 FROM jsonb_each_text(${lessons.description}) AS t(k, v)
              WHERE v ILIKE ${`%${filters.description}%`})`,
       );
     }

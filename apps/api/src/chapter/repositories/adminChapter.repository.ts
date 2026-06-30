@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
-import { and, eq, getTableColumns, gte, lte, sql } from "drizzle-orm";
+import { LESSON_TYPES, SCORM_PACKAGE_ENTITY_TYPE, SCORM_PACKAGE_STATUS } from "@repo/shared";
+import { and, eq, getTableColumns, gte, isNull, lte, sql } from "drizzle-orm";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
@@ -15,6 +15,7 @@ import {
   questionAnswerOptions,
   questions,
   scormPackages,
+  settings,
 } from "src/storage/schema";
 
 import type { UpdateChapterBody } from "../schemas/chapter.schema";
@@ -268,6 +269,29 @@ export class AdminChapterRepository {
 
   async updateFreemiumStatus(chapterId: UUIDType, isFreemium: boolean) {
     return this.db.update(chapters).set({ isFreemium }).where(eq(chapters.id, chapterId));
+  }
+
+  async getFreemiumStatusEligibility(chapterId: UUIDType) {
+    const [eligibility] = await this.db
+      .select({
+        chapterId: chapters.id,
+        priceInCents: courses.priceInCents,
+        lessonCount: sql<number>`COUNT(${lessons.id})::INTEGER`,
+        nonContentLessonCount: sql<number>`
+          COUNT(${lessons.id}) FILTER (WHERE ${lessons.type} <> ${LESSON_TYPES.CONTENT})::INTEGER
+        `,
+        unregisteredUserCoursesAccessibility: sql<boolean>`
+          COALESCE((${settings.settings}->>'unregisteredUserCoursesAccessibility')::BOOLEAN, FALSE)
+        `,
+      })
+      .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .leftJoin(settings, and(eq(settings.tenantId, chapters.tenantId), isNull(settings.userId)))
+      .where(eq(chapters.id, chapterId))
+      .groupBy(chapters.id, courses.id, settings.settings);
+
+    return eligibility;
   }
 
   async updateChapter(id: UUIDType, body: UpdateChapterBody) {

@@ -32,9 +32,31 @@ import { LessonCardList } from "~/modules/Admin/EditCourse/CourseLessons/compone
 import { CURRICULUM_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 import { ContentTypes } from "../../EditCourse.types";
 
+import {
+  CHAPTER_FREEMIUM_DISABLED_REASON,
+  getChapterFreemiumAccessState,
+  type ChapterFreemiumDisabledReason,
+} from "./chapterFreemiumAccess.utils";
+
 import type { Chapter, Lesson } from "../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 import type React from "react";
+
+const getDisabledFreemiumTooltipKey = (reason: ChapterFreemiumDisabledReason | null) => {
+  if (reason === CHAPTER_FREEMIUM_DISABLED_REASON.COURSE_LOCKED) {
+    return "adminCourseView.curriculum.chapter.other.freemiumDisabledLockedTooltip";
+  }
+
+  if (reason === CHAPTER_FREEMIUM_DISABLED_REASON.REQUIRES_CONTENT_LESSONS) {
+    return "adminCourseView.curriculum.chapter.errors.freemiumRequiresContentLessons";
+  }
+
+  if (reason === CHAPTER_FREEMIUM_DISABLED_REASON.PUBLIC_REQUIRES_COURSE_ACCESS) {
+    return "adminCourseView.curriculum.chapter.errors.publicRequiresCourseAccess";
+  }
+
+  return null;
+};
 
 interface ChapterCardProps {
   chapter: Chapter;
@@ -50,6 +72,8 @@ interface ChapterCardProps {
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
   isCourseGenerationLocked: boolean;
+  coursePriceInCents?: number;
+  unregisteredUserCoursesAccessibility: boolean;
 }
 
 const ChapterCard = ({
@@ -66,6 +90,8 @@ const ChapterCard = ({
   language,
   baseLanguage,
   isCourseGenerationLocked,
+  coursePriceInCents,
+  unregisteredUserCoursesAccessibility,
 }: ChapterCardProps) => {
   const { id: courseId } = useParams();
 
@@ -76,6 +102,28 @@ const ChapterCard = ({
   const { t } = useTranslation();
 
   const isBaseLanguage = language === baseLanguage;
+  const {
+    isPaidCourse,
+    isDisabled: isFreemiumSwitchDisabled,
+    disabledReason,
+  } = getChapterFreemiumAccessState({
+    chapter,
+    coursePriceInCents,
+    isCourseGenerationLocked,
+    unregisteredUserCoursesAccessibility,
+  });
+
+  const freemiumCopyKey = isPaidCourse ? "freemium" : "public";
+
+  const freemiumSwitchLabel = t(`adminCourseView.curriculum.chapter.other.${freemiumCopyKey}`);
+  const freemiumInfoTooltip = t(
+    `adminCourseView.curriculum.chapter.other.${freemiumCopyKey}ToolTip`,
+  );
+
+  const disabledFreemiumTooltip = useMemo(() => {
+    const tooltipKey = getDisabledFreemiumTooltipKey(disabledReason);
+    return tooltipKey ? t(tooltipKey) : null;
+  }, [disabledReason, t]);
 
   const addLessonLogic = useCallback(() => {
     if (isCourseGenerationLocked) return;
@@ -159,7 +207,7 @@ const ChapterCard = ({
     async (event: React.MouseEvent) => {
       event.stopPropagation();
       event.preventDefault();
-      if (isCourseGenerationLocked) return;
+      if (isFreemiumSwitchDisabled) return;
 
       const currentOpenState = openItem;
 
@@ -186,7 +234,7 @@ const ChapterCard = ({
       openItem,
       setOpenItem,
       language,
-      isCourseGenerationLocked,
+      isFreemiumSwitchDisabled,
     ],
   );
 
@@ -281,27 +329,45 @@ const ChapterCard = ({
               </div>
 
               <div className="flex items-center gap-x-2">
-                <Switch.Root
-                  data-testid={CURRICULUM_HANDLES.chapterFreemiumSwitch(chapter.id)}
-                  className={cn("relative h-6 w-11 rounded-full transition-colors", {
-                    "bg-primary-500": chapter.isFree,
-                    "bg-gray-200": !chapter.isFree,
-                  })}
-                  id="freemiumToggle"
-                  onClick={onSwitchClick}
-                  checked={chapter.isFree}
-                  disabled={isCourseGenerationLocked}
-                >
-                  <Switch.Thumb
-                    className={cn(
-                      "block size-4 translate-x-1 transform rounded-full bg-white transition-transform",
-                      chapter.isFree ? "translate-x-6" : "",
+                <TooltipProvider delayDuration={0}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="inline-flex">
+                        <Switch.Root
+                          data-testid={CURRICULUM_HANDLES.chapterFreemiumSwitch(chapter.id)}
+                          className={cn("relative h-6 w-11 rounded-full transition-colors", {
+                            "bg-primary-500": chapter.isFree,
+                            "bg-gray-200": !chapter.isFree,
+                            "cursor-not-allowed opacity-60": isFreemiumSwitchDisabled,
+                            "cursor-pointer": !isFreemiumSwitchDisabled,
+                          })}
+                          id="freemiumToggle"
+                          onClick={onSwitchClick}
+                          checked={chapter.isFree}
+                          disabled={isFreemiumSwitchDisabled}
+                        >
+                          <Switch.Thumb
+                            className={cn(
+                              "block size-4 translate-x-1 transform rounded-full bg-white transition-transform",
+                              chapter.isFree ? "translate-x-6" : "",
+                            )}
+                          />
+                        </Switch.Root>
+                      </span>
+                    </TooltipTrigger>
+                    {disabledFreemiumTooltip && (
+                      <TooltipContent
+                        side="top"
+                        align="center"
+                        className="max-w-72 rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                      >
+                        {disabledFreemiumTooltip}
+                        <TooltipArrow className="fill-black" />
+                      </TooltipContent>
                     )}
-                  />
-                </Switch.Root>
-                <span className="body-sm-md text-neutral-950">
-                  {t("adminCourseView.curriculum.chapter.other.freemium")}
-                </span>
+                  </Tooltip>
+                </TooltipProvider>
+                <span className="body-sm-md text-neutral-950">{freemiumSwitchLabel}</span>
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -314,7 +380,7 @@ const ChapterCard = ({
                       align="center"
                       className="rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                     >
-                      {t("adminCourseView.curriculum.chapter.other.freemiumToolTip")}
+                      {freemiumInfoTooltip}
                       <TooltipArrow className="fill-black" />
                     </TooltipContent>
                   </Tooltip>
@@ -340,6 +406,8 @@ type ChaptersListProps = {
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
   isCourseGenerationLocked: boolean;
+  coursePriceInCents?: number;
+  unregisteredUserCoursesAccessibility: boolean;
 };
 
 function getChapterWithLatestLesson(chapters: Chapter[]): string | null {
@@ -377,6 +445,8 @@ const ChaptersList = ({
   baseLanguage,
   language,
   isCourseGenerationLocked,
+  coursePriceInCents,
+  unregisteredUserCoursesAccessibility,
 }: ChaptersListProps) => {
   const { id: courseId } = useParams();
   const [openItem, setOpenItem] = useState<string | undefined>(undefined);
@@ -461,6 +531,8 @@ const ChaptersList = ({
               language={language}
               baseLanguage={baseLanguage}
               isCourseGenerationLocked={isCourseGenerationLocked}
+              coursePriceInCents={coursePriceInCents}
+              unregisteredUserCoursesAccessibility={unregisteredUserCoursesAccessibility}
               dragTrigger={
                 <SortableList.DragHandle>
                   <Icon

@@ -2034,9 +2034,16 @@
         "field": {
           "title": "Pavadinimas"
         },
+        "errors": {
+          "freemiumRequiresContentLessons": "Tik skyriai su turinio pamokomis gali būti nemokami arba vieši.",
+          "publicRequiresCourseAccess": "Platformos nustatymuose įjunkite kursų prieigą lankytojams, kad nemokamo kurso skyriai galėtų būti vieši."
+        },
         "other": {
           "freemium": "Nemokamas skyrius",
-          "freemiumToolTip": "Studentai gali pasiekti nemokamus skyrius neužsiregistravę kurse."
+          "freemiumToolTip": "Studentai gali pasiekti nemokamus skyrius neužsiregistravę kurse.",
+          "public": "Viešas",
+          "publicToolTip": "Šis skyrius bus pasiekiamas visiems.",
+          "freemiumDisabledLockedTooltip": "Šis jungiklis išjungtas, kol generuojamas kursas."
         }
       },
       "lesson": {
@@ -2518,7 +2525,8 @@
       "lessons": "Pamokos",
       "quiz": "Viktorina",
       "quizzes": "Viktorinos",
-      "free": "Nemokama"
+      "free": "Nemokama",
+      "public": "Viešas"
     }
   },
   "forgotPasswordView": {

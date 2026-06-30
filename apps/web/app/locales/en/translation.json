@@ -2089,9 +2089,16 @@
         "field": {
           "title": "Title"
         },
+        "errors": {
+          "freemiumRequiresContentLessons": "Only chapters with content lessons can be made free or public.",
+          "publicRequiresCourseAccess": "Enable course access for visitors in platform settings to make free-course chapters public."
+        },
         "other": {
           "freemium": "Free chapter",
-          "freemiumToolTip": "Students can access freemium chapters without enrolling in the course."
+          "freemiumToolTip": "Students can access freemium chapters without enrolling in the course.",
+          "public": "Public",
+          "publicToolTip": "This chapter will be available to everyone.",
+          "freemiumDisabledLockedTooltip": "This switch is disabled while course generation is in progress."
         }
       },
       "lesson": {
@@ -2573,7 +2580,8 @@
       "lessons": "Lessons",
       "quiz": "Quiz",
       "quizzes": "Quizzes",
-      "free": "Free"
+      "free": "Free",
+      "public": "Public"
     }
   },
   "forgotPasswordView": {

@@ -4,11 +4,12 @@ import { ApiClient } from "../api-client";
 
 export type LessonSequenceParams = {
   courseId?: string;
+  enabled?: boolean;
 };
 
 export const getLessonSequenceQueryKey = (searchParams: LessonSequenceParams) => [
   "lessons-sequence",
-  searchParams,
+  { courseId: searchParams.courseId },
 ];
 
 export const lessonSequenceQueryOptions = (searchParams: LessonSequenceParams) => ({
@@ -19,7 +20,7 @@ export const lessonSequenceQueryOptions = (searchParams: LessonSequenceParams) =
     );
     return response.data;
   },
-  enabled: !!searchParams.courseId,
+  enabled: !!searchParams.courseId && searchParams.enabled !== false,
 });
 
 export function useLessonSequence(searchParams: LessonSequenceParams) {

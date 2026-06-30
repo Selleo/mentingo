@@ -1,9 +1,5 @@
-import { Outlet, redirect } from "@remix-run/react";
-
-import { currentUserQueryOptions } from "~/api/queries/useCurrentUser";
-import { queryClient } from "~/api/queryClient";
-import { RouteGuard } from "~/Guards/RouteGuard";
-import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
+import { useCurrentUser } from "~/api/queries";
+import { Dashboard } from "~/modules/Dashboard/Dashboard";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { ParentRouteData } from "~/modules/layout";
@@ -17,28 +13,8 @@ export const meta: MetaFunction = ({ matches }) => {
   return [{ title }];
 };
 
-export const clientLoader = async ({ request }: { request: Request }) => {
-  try {
-    const user = await queryClient.ensureQueryData(currentUserQueryOptions);
-
-    if (!user) {
-      saveEntryToNavigationHistory(request);
-
-      throw redirect("/auth/login");
-    }
-  } catch (error) {
-    throw redirect("/auth/login");
-  }
-
-  return null;
-};
-
 export default function LessonLayout() {
-  return (
-    <main className="relative flex-1 overflow-y-auto bg-primary-50">
-      <RouteGuard>
-        <Outlet />
-      </RouteGuard>
-    </main>
-  );
+  const { data: user } = useCurrentUser();
+
+  return <Dashboard isAuthenticated={Boolean(user)} />;
 }

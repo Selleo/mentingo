@@ -91,13 +91,22 @@ export class LessonService {
 
   async getLessonById(
     id: UUIDType,
-    userId: UUIDType,
-    currentUser: CurrentUserType,
+    userId: UUIDType | null | undefined,
+    currentUser: CurrentUserType | null,
     language?: SupportedLanguages,
   ): Promise<LessonShow> {
+    if (!currentUser || !hasAnyPermission(currentUser.permissions, [PERMISSIONS.COURSE_READ])) {
+      return this.getPublicLessonById(id, language);
+    }
+
+    const effectiveUserId = userId ?? currentUser.userId;
     const isStudent = this.isLearnerOnly(currentUser.permissions);
 
-    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(id, userId, isStudent);
+    const hasLessonAccess = await this.lessonRepository.getHasLessonAccess(
+      id,
+      effectiveUserId,
+      isStudent,
+    );
 
     if (!hasLessonAccess) throw new UnauthorizedException("common.toast.lessonAccessDenied");
 
@@ -107,12 +116,16 @@ export class LessonService {
       language,
     );
 
-    const basicInfo = await this.lessonRepository.getLessonProgress(id, userId, [
+    const basicInfo = await this.lessonRepository.getLessonProgress(id, effectiveUserId, [
       isNotNull(studentLessonProgress.isQuizPassed),
       isNotNull(studentLessonProgress.completedAt),
     ]);
 
-    const lesson = await this.lessonRepository.getLessonDetails(id, userId, actualLanguage);
+    const lesson = await this.lessonRepository.getLessonDetails(
+      id,
+      effectiveUserId,
+      actualLanguage,
+    );
 
     if (!lesson) throw new NotFoundException("common.toast.notFound");
 
@@ -126,71 +139,13 @@ export class LessonService {
     ) {
       await this.studentLessonProgressService.markLessonAsStarted(
         lesson.id,
-        userId,
+        effectiveUserId,
         currentUser.permissions,
       );
     }
 
     if (lesson.type === LESSON_TYPES.CONTENT) {
-      const lessonResources = await this.fileService.getResourcesForEntity(
-        id,
-        ENTITY_TYPES.LESSON,
-        RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
-        actualLanguage,
-        { quality: IMAGE_QUALITY.MD },
-      );
-      const videoResourceEntityIds = lessonResources
-        .filter(
-          (resource) => resource.contentType?.startsWith("video/") && resource.resourceEntityId,
-        )
-        .map((resource) => resource.resourceEntityId);
-      const videoProgressRows = await this.lessonVideoProgressService.getProgressForResources({
-        lessonId: id,
-        studentId: userId,
-        resourceEntityIds: videoResourceEntityIds,
-      });
-      const videoProgressByResourceEntityId = new Map(
-        videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
-      );
-
-      const mappedResources = lessonResources.map((resource) => ({
-        id: resource.id,
-        resourceEntityId: resource.resourceEntityId,
-        fileUrl: resource.fileUrl,
-        fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
-        contentType: resource.contentType,
-        title: typeof resource.title === "string" ? resource.title : undefined,
-        description: typeof resource.description === "string" ? resource.description : undefined,
-        provider: resource.contentType?.startsWith("video/")
-          ? getVideoProviderFromReference(resource.reference)
-          : undefined,
-        videoProgress: resource.resourceEntityId
-          ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
-          : undefined,
-      }));
-
-      const {
-        html: updatedDescription,
-        contentCount,
-        hasAutoplayTrigger,
-        videos,
-      } = injectResourcesIntoContent(lesson.description, mappedResources, {
-        resourceIdRegex: createLessonResourceIdRegex(),
-        trackNodeTypes: ["video", "image", "presentation", "downloadable-file"],
-        convertImageAnchors: false,
-      });
-
-      const hasVideo = this.hasOnlyVideo(contentCount);
-
-      return {
-        ...lesson,
-        description: updatedDescription ?? lesson.description,
-        hasOnlyVideo: hasVideo,
-        hasVideo: contentCount.video > 0,
-        hasTrackedVideo: videoResourceEntityIds.length > 0,
-        hasAutoplayTrigger,
-        videos,
-      };
+      return this.getContentLessonWithResources(lesson, id, actualLanguage, effectiveUserId);
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR) {
@@ -198,7 +153,7 @@ export class LessonService {
         lessonId: id,
         status: THREAD_STATUS.ACTIVE,
         userLanguage: actualLanguage,
-        userId,
+        userId: effectiveUserId,
       });
 
       let avatarUrl = undefined;
@@ -264,7 +219,7 @@ export class LessonService {
     const questionList = await this.questionRepository.getQuestionsForLesson(
       lesson.id,
       lesson.lessonCompleted,
-      userId,
+      effectiveUserId,
       basicInfo?.languageAnswered ?? actualLanguage,
     );
 
@@ -325,6 +280,23 @@ export class LessonService {
     };
 
     return { ...lesson, quizDetails, isQuizFeedbackRedacted };
+  }
+
+  private async getPublicLessonById(
+    id: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<LessonShow> {
+    const { language: actualLanguage } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LESSON,
+      id,
+      language,
+    );
+
+    const lesson = await this.lessonRepository.getPublicContentLessonDetails(id, actualLanguage);
+
+    if (!lesson) throw new UnauthorizedException("common.toast.lessonAccessDenied");
+
+    return this.getContentLessonWithResources(lesson, id, actualLanguage);
   }
 
   async evaluationQuiz(
@@ -672,6 +644,77 @@ export class LessonService {
 
   private hasOnlyVideo(contentCount: Record<string, number>) {
     return contentCount.video === 1 && Object.keys(contentCount).length === 1;
+  }
+
+  private async getContentLessonWithResources(
+    lesson: LessonShow,
+    id: UUIDType,
+    actualLanguage: SupportedLanguages,
+    userId?: UUIDType | null,
+  ): Promise<LessonShow> {
+    const lessonResources = await this.fileService.getResourcesForEntity(
+      id,
+      ENTITY_TYPES.LESSON,
+      RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      actualLanguage,
+      { quality: IMAGE_QUALITY.MD },
+    );
+
+    const videoResourceEntityIds = lessonResources
+      .filter((resource) => resource.contentType?.startsWith("video/") && resource.resourceEntityId)
+      .map((resource) => resource.resourceEntityId);
+
+    const videoProgressRows =
+      userId && videoResourceEntityIds.length > 0
+        ? await this.lessonVideoProgressService.getProgressForResources({
+            lessonId: id,
+            studentId: userId,
+            resourceEntityIds: videoResourceEntityIds,
+          })
+        : [];
+
+    const videoProgressByResourceEntityId = new Map(
+      videoProgressRows.map((progress) => [progress.resourceEntityId, progress]),
+    );
+
+    const mappedResources = lessonResources.map((resource) => ({
+      id: resource.id,
+      resourceEntityId: resource.resourceEntityId,
+      fileUrl: resource.fileUrl,
+      fileUrlError: Boolean((resource as ResourceWithUrlError).fileUrlError),
+      contentType: resource.contentType,
+      title: typeof resource.title === "string" ? resource.title : undefined,
+      description: typeof resource.description === "string" ? resource.description : undefined,
+      provider: resource.contentType?.startsWith("video/")
+        ? getVideoProviderFromReference(resource.reference)
+        : undefined,
+      videoProgress: resource.resourceEntityId
+        ? videoProgressByResourceEntityId.get(resource.resourceEntityId)
+        : undefined,
+    }));
+
+    const {
+      html: updatedDescription,
+      contentCount,
+      hasAutoplayTrigger,
+      videos,
+    } = injectResourcesIntoContent(lesson.description, mappedResources, {
+      resourceIdRegex: createLessonResourceIdRegex(),
+      trackNodeTypes: ["video", "image", "presentation", "downloadable-file"],
+      convertImageAnchors: false,
+    });
+
+    const hasVideo = this.hasOnlyVideo(contentCount);
+
+    return {
+      ...lesson,
+      description: updatedDescription ?? lesson.description,
+      hasOnlyVideo: hasVideo,
+      hasVideo: contentCount.video > 0,
+      hasTrackedVideo: videoResourceEntityIds.length > 0,
+      hasAutoplayTrigger,
+      videos,
+    };
   }
 
   private isLearnerOnly(permissions: PermissionKey[]) {

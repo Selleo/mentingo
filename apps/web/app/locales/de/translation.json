@@ -2028,9 +2028,16 @@
         "field": {
           "title": "Titel"
         },
+        "errors": {
+          "freemiumRequiresContentLessons": "Nur Kapitel mit Inhaltslektionen können kostenlos oder öffentlich gemacht werden.",
+          "publicRequiresCourseAccess": "Aktivieren Sie den Kurszugriff für Besucher in den Plattformeinstellungen, um Kapitel kostenloser Kurse öffentlich zu machen."
+        },
         "other": {
           "freemium": "Kostenloses Kapitel",
-          "freemiumToolTip": "Studierende können auf Freemium-Kapitel zugreifen, ohne sich für den Kurs anzumelden."
+          "freemiumToolTip": "Studierende können auf Freemium-Kapitel zugreifen, ohne sich für den Kurs anzumelden.",
+          "public": "Öffentlich",
+          "publicToolTip": "Dieses Kapitel ist für alle verfügbar.",
+          "freemiumDisabledLockedTooltip": "Dieser Schalter ist deaktiviert, während der Kurs generiert wird."
         }
       },
       "lesson": {
@@ -2512,7 +2519,8 @@
       "lessons": "Unterricht",
       "quiz": "Quiz",
       "quizzes": "Quiz",
-      "free": "Frei"
+      "free": "Frei",
+      "public": "Öffentlich"
     }
   },
   "forgotPasswordView": {
