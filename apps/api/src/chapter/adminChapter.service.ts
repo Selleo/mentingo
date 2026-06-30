@@ -107,6 +107,10 @@ export class AdminChapterService {
 
     await this.adminLessonService.validateAccess(ENTITY_TYPES.CHAPTER, currentUser, chapterId);
 
+    if (isFreemium) {
+      await this.assertFreemiumStatusCanBeEnabled(chapterId);
+    }
+
     return await this.adminChapterRepository.updateFreemiumStatus(chapterId, isFreemium);
   }
 
@@ -276,5 +280,23 @@ export class AdminChapterService {
     updatedSnapshot: ChapterActivityLogSnapshot | null,
   ) {
     return isEqual(previousSnapshot, updatedSnapshot);
+  }
+
+  private async assertFreemiumStatusCanBeEnabled(chapterId: UUIDType) {
+    const eligibility = await this.adminChapterRepository.getFreemiumStatusEligibility(chapterId);
+
+    if (!eligibility) throw new NotFoundException("adminCourseView.errors.notFound.chapter");
+
+    if (eligibility.priceInCents === 0 && !eligibility.unregisteredUserCoursesAccessibility) {
+      throw new BadRequestException(
+        "adminCourseView.curriculum.chapter.errors.publicRequiresCourseAccess",
+      );
+    }
+
+    if (eligibility.lessonCount === 0 || eligibility.nonContentLessonCount > 0) {
+      throw new BadRequestException(
+        "adminCourseView.curriculum.chapter.errors.freemiumRequiresContentLessons",
+      );
+    }
   }
 }

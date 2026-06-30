@@ -1114,6 +1114,13 @@
       "when": 1782742112226,
       "tag": "0158_drop_activity_log_action_type_enum",
       "breakpoints": true
+    },
+    {
+      "idx": 159,
+      "version": "7",
+      "when": 1782810155245,
+      "tag": "0159_normalize_chapter_freemium_access",
+      "breakpoints": true
     }
   ]
 }

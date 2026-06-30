@@ -2,7 +2,7 @@ import { PERMISSIONS } from "@repo/shared";
 import { createContext, useContext, useMemo } from "react";
 
 import { useCurrentUser } from "~/api/queries";
-import { usePermissions } from "~/hooks/usePermissions";
+import { hasPermission } from "~/common/permissions/permission.utils";
 
 import type { PropsWithChildren } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -49,7 +49,9 @@ export function resolveCourseExperienceState({
   const canLearnByLearningMode = canUseLearningMode && isCourseStudentModeActive;
 
   const isPreviewMode =
-    forcePreviewMode || (canUseLearningMode && !canLearnByLearningMode && !canLearnByEnrollment);
+    forcePreviewMode ||
+    !currentUserId ||
+    (canUseLearningMode && !canLearnByLearningMode && !canLearnByEnrollment);
 
   const isEffectiveStudentExperience =
     !isPreviewMode && (canLearnByEnrollment || canLearnByLearningMode || canUpdateLearningProgress);
@@ -68,12 +70,13 @@ export function CourseAccessProvider({
   children,
 }: CourseAccessProviderProps) {
   const { data: currentUser } = useCurrentUser();
-  const { hasAccess: canUseLearningMode } = usePermissions({
-    required: PERMISSIONS.LEARNING_MODE_USE,
-  });
-  const { hasAccess: canUpdateLearningProgress } = usePermissions({
-    required: PERMISSIONS.LEARNING_PROGRESS_UPDATE,
-  });
+
+  const permissions = currentUser?.permissions ?? [];
+  const canUseLearningMode = hasPermission(permissions, PERMISSIONS.LEARNING_MODE_USE);
+  const canUpdateLearningProgress = hasPermission(
+    permissions,
+    PERMISSIONS.LEARNING_PROGRESS_UPDATE,
+  );
 
   const value = useMemo(() => {
     return resolveCourseExperienceState({

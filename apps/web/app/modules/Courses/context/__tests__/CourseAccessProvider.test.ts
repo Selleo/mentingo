@@ -15,6 +15,20 @@ const createCourse = (
   }) as GetCourseResponse["data"];
 
 describe("resolveCourseExperienceState", () => {
+  it("uses preview mode for visitors without a user session", () => {
+    const state = resolveCourseExperienceState({
+      course: createCourse(),
+      forcePreviewMode: false,
+      currentUserId: undefined,
+      canUseLearningMode: false,
+      canUpdateLearningProgress: false,
+      activeLearningModeCourseIds: [],
+    });
+
+    expect(state.isPreviewMode).toBe(true);
+    expect(state.isEffectiveStudentExperience).toBe(false);
+  });
+
   it("uses preview mode for learning-mode users who are not actively learning the course", () => {
     const state = resolveCourseExperienceState({
       course: createCourse(),

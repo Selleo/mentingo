@@ -2312,9 +2312,16 @@
         "field": {
           "title": "Tytuł"
         },
+        "errors": {
+          "freemiumRequiresContentLessons": "Tylko rozdziały z lekcjami z treścią mogą być darmowe lub publiczne.",
+          "publicRequiresCourseAccess": "Włącz dostęp do kursów dla odwiedzających w ustawieniach platformy, aby rozdziały darmowego kursu mogły być publiczne."
+        },
         "other": {
           "freemium": "Darmowy rozdział",
-          "freemiumToolTip": "Studenci mogą uzyskać dostęp do rozdziałów freemium bez zapisywania się na kurs."
+          "freemiumToolTip": "Studenci mogą uzyskać dostęp do rozdziałów freemium bez zapisywania się na kurs.",
+          "public": "Publiczny",
+          "publicToolTip": "Ten rozdział będzie dostępny dla wszystkich.",
+          "freemiumDisabledLockedTooltip": "Ten przełącznik jest wyłączony podczas generowania kursu."
         }
       },
       "lesson": {
@@ -2808,7 +2815,8 @@
       "lessons": "Lekcje",
       "quiz": "Quiz",
       "quizzes": "Quizy",
-      "free": "Darmowy"
+      "free": "Darmowy",
+      "public": "Publiczny"
     }
   },
   "forgotPasswordView": {
