@@ -34,6 +34,8 @@ import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  chapters,
+  courses,
   formFields,
   forms,
   permissionUserRoles,
@@ -676,6 +678,18 @@ export class SettingsService {
       })
       .where(isNull(settings.userId))
       .returning({ settings: sql<GlobalSettingsJSONContentSchema>`${settings.settings}` });
+
+    if (current) {
+      await this.db
+        .update(chapters)
+        .set({ isFreemium: false, updatedAt: new Date().toISOString() })
+        .where(
+          inArray(
+            chapters.courseId,
+            this.db.select({ id: courses.id }).from(courses).where(eq(courses.priceInCents, 0)),
+          ),
+        );
+    }
 
     const updatedRecord = await this.getGlobalSettingsRecord();
 

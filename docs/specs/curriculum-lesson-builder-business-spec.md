@@ -44,7 +44,7 @@ When the selected language is the course base language, creators can change the 
 
 Some lesson types depend on broader platform configuration or course type. The UI shows the available options for the current course, and the API protects curriculum mutations with course update permissions.
 
-Only chapters made entirely from content lessons can be opened as free or public chapters. In paid courses this keeps the existing free-preview behavior. In free courses the same switch and course chapter badge are labeled Public, and access only changes when the organization has enabled course access for visitors. When visitor course access is enabled, an unregistered or logged-out visitor can open the content lesson page for a free/public chapter with the public navigation visible at the top, while non-content lessons and non-public chapters still require normal course access.
+Only chapters made entirely from content lessons can be opened as free or public chapters. In paid courses this keeps the existing free-preview behavior. In free courses the same switch and course chapter badge are labeled Public, and access only changes when the organization has enabled course access for visitors. When visitor course access is enabled, an unregistered or logged-out visitor can open content lessons in a free/public chapter with the public navigation visible at the top; unavailable lessons remain visible but greyed out. When admins turn visitor course access off, public chapter toggles on free courses are switched off so the course view and admin curriculum state stay aligned.
 
 ## Key Technical Context
 

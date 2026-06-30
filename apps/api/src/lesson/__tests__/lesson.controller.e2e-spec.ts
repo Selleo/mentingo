@@ -1,6 +1,9 @@
+import { Readable } from "stream";
+
 import {
   AI_MENTOR_TYPE,
   COURSE_ENROLLMENT,
+  ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
   SYSTEM_ROLE_SLUGS,
   type SupportedLanguages,
@@ -10,7 +13,9 @@ import request from "supertest";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
+import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -21,6 +26,8 @@ import {
   questions,
   questionAnswerOptions,
   courseStudentMode,
+  resources,
+  resourceEntity,
   settings,
   studentCourses,
   studentLessonProgress,
@@ -54,6 +61,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
+      getFileDeliveryWithPreview: jest.fn().mockResolvedValue({
+        type: FILE_DELIVERY_TYPE.STREAM,
+        stream: Readable.from(["public video"]),
+        contentType: "video/mp4",
+        contentLength: "public video".length,
+      }),
     };
 
     const mockCacheManager = {
@@ -88,6 +101,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
   afterEach(async () => {
     await truncateTables(baseDb, [
+      "resource_entity",
+      "resources",
       "quiz_attempts",
       "course_student_mode",
       "courses",
@@ -183,6 +198,36 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         lessonCompleted: false,
         nextLessonId: null,
       });
+    });
+
+    it("allows guests to stream resources from public content lessons", async () => {
+      await setPublicCourseAccess(true);
+      const lesson = await createLessonForPublicAccess({
+        isFreemium: true,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+      const [resource] = await db
+        .insert(resources)
+        .values({
+          id: crypto.randomUUID(),
+          reference: "public-video.mp4",
+          contentType: "video/mp4",
+        })
+        .returning();
+      await db.insert(resourceEntity).values({
+        id: crypto.randomUUID(),
+        resourceId: resource.id,
+        entityId: lesson.id,
+        entityType: ENTITY_TYPES.LESSON,
+        relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/lesson-resource/${resource.id}`)
+        .expect(200);
+
+      expect(response.body.toString()).toBe("public video");
+      expect(response.headers["content-type"]).toContain("video/mp4");
     });
 
     it("rejects guest lesson access when visitor course access is disabled", async () => {

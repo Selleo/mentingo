@@ -545,7 +545,7 @@ export class LessonController {
   }
 
   @Get("lesson-image/:resourceId")
-  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Public()
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -555,7 +555,7 @@ export class LessonController {
   async getLessonImage(
     @Param("resourceId") resourceId: UUIDType,
     @Query("preview") preview: FilePreviewQuery,
-    @CurrentUser() currentUser: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | null,
     @Req() req: Request,
     @Res() res: Response,
   ) {
@@ -563,7 +563,7 @@ export class LessonController {
   }
 
   @Get("lesson-resource/:resourceId")
-  @RequirePermission(PERMISSIONS.COURSE_READ)
+  @Public()
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -573,7 +573,7 @@ export class LessonController {
   async getLessonResource(
     @Param("resourceId") resourceId: UUIDType,
     @Query("preview") preview: FilePreviewQuery,
-    @CurrentUser() currentUser: CurrentUserType,
+    @CurrentUser() currentUser: CurrentUserType | null,
     @Req() req: Request,
     @Res() res: Response,
   ) {

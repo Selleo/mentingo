@@ -3,6 +3,7 @@ import { find } from "lodash-es";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
 import { CardBadge } from "~/components/CardBadge";
 import { Icon } from "~/components/Icon";
 import {
@@ -30,12 +31,14 @@ type CourseChapterProps = {
 export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const { t } = useTranslation();
   const { id: courseSlug } = useParams();
+  const { data: currentUser } = useCurrentUser();
   const {
     course: { enrolled, priceInCents },
     isCourseStudentModeActive,
     isPreviewMode,
   } = useCourseAccessProvider();
   const isPaidCourse = priceInCents !== 0;
+  const isPublicVisitor = !currentUser;
   const freemiumBadgeCopyKey = isPaidCourse ? "free" : "public";
   const freemiumBadgeIcon = isPaidCourse ? "FreeRight" : "Eye";
   const freemiumBadgeClassName = isPaidCourse ? undefined : "bg-primary-600 text-white";
@@ -54,6 +57,13 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   const lessons = useMemo(() => chapter?.lessons || [], [chapter?.lessons]);
 
   const navigate = useNavigate();
+
+  const hasPublicVisitorLessonAccess = (lesson: Lesson) =>
+    Boolean(isPublicVisitor && chapter.isFreemium && lesson.type === "content");
+
+  const hasPlayableChapterAccess = isPublicVisitor
+    ? lessons.some(hasPublicVisitorLessonAccess)
+    : chapter.isFreemium && hasAccessToChapter;
 
   const chapterProgressSegments = Array.from({ length: chapter.lessonCount }).map((_, index) => {
     const isCompletedSegment =
@@ -74,17 +84,23 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
   });
 
   const playChapter = (chapter: CourseChapterProps["chapter"]) => {
+    const accessibleLessons = isPublicVisitor
+      ? chapter.lessons.filter(hasPublicVisitorLessonAccess)
+      : chapter.lessons;
+
+    if (!accessibleLessons.length) return;
+
     const firstNotStartedLesson = find(
-      chapter.lessons,
+      accessibleLessons,
       (lesson) => lesson.status === "not_started",
     )?.id;
 
     const firstInProgressLesson = find(
-      chapter.lessons,
+      accessibleLessons,
       (lesson) => lesson.status === "in_progress",
     )?.id;
 
-    const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? chapter.lessons[0].id;
+    const lessonToPlay = firstInProgressLesson ?? firstNotStartedLesson ?? accessibleLessons[0].id;
 
     return navigate(`lesson/${lessonToPlay}`);
   };
@@ -134,21 +150,40 @@ export const CourseChapter = ({ chapter }: CourseChapterProps) => {
                 {lessons?.map((lesson: Lesson) => {
                   if (!lesson) return null;
 
+                  const publicVisitorLessonAccess = hasPublicVisitorLessonAccess(lesson);
+                  const lessonWithPublicAccess = {
+                    ...lesson,
+                    hasAccess: isPublicVisitor
+                      ? publicVisitorLessonAccess
+                      : Boolean(lesson.hasAccess),
+                  };
+
                   const hasCourseLearningAccess =
-                    chapter.isFreemium || enrolled || isCourseStudentModeActive;
+                    publicVisitorLessonAccess ||
+                    (!isPublicVisitor &&
+                      (chapter.isFreemium || enrolled || isCourseStudentModeActive));
 
                   const canOpenLesson =
-                    isPreviewMode || (hasCourseLearningAccess && lesson.hasAccess);
+                    (isPreviewMode && !isPublicVisitor) ||
+                    (hasCourseLearningAccess && lessonWithPublicAccess.hasAccess);
 
                   return canOpenLesson ? (
                     <Link to={`/course/${courseSlug}/lesson/${lesson.id}`}>
-                      <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                      <CourseChapterLesson
+                        key={lesson.id}
+                        lesson={lessonWithPublicAccess}
+                        allowPreviewAccess={!isPublicVisitor}
+                      />
                     </Link>
                   ) : (
-                    <CourseChapterLesson key={lesson.id} lesson={lesson} />
+                    <CourseChapterLesson
+                      key={lesson.id}
+                      lesson={lessonWithPublicAccess}
+                      allowPreviewAccess={!isPublicVisitor}
+                    />
                   );
                 })}
-                {chapter.isFreemium && hasAccessToChapter && (
+                {hasPlayableChapterAccess && (
                   <Button
                     variant="primary"
                     className="mt-4 gap-2"

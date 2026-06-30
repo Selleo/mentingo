@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { ApiClient } from "~/api/api-client";
 import { globalSettingsQueryOptions } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
+import { invalidateCourseCurriculumData } from "~/api/utils/invalidateCourseCurriculumData";
+import { invalidateCourseListData } from "~/api/utils/invalidateCourseListData";
 import { useToast } from "~/components/ui/use-toast";
 
 export function useUnregisteredUserCoursesAccessibility() {
@@ -17,8 +19,12 @@ export function useUnregisteredUserCoursesAccessibility() {
         await ApiClient.api.settingsControllerUpdateUnregisteredUserCoursesAccessibility();
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries(globalSettingsQueryOptions);
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries(globalSettingsQueryOptions),
+        invalidateCourseCurriculumData(),
+        invalidateCourseListData(),
+      ]);
       toast({
         variant: "default",
         description: t("adminPreferences.toast.coursesVisibilityPreferenceChangeSuccess"),

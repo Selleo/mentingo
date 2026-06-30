@@ -21,13 +21,18 @@ const progressBadge = {
 
 type CourseChapterLessonProps = {
   lesson: Lesson;
+  allowPreviewAccess?: boolean;
 };
 
-export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
+export const CourseChapterLesson = ({
+  lesson,
+  allowPreviewAccess = true,
+}: CourseChapterLessonProps) => {
   const { t } = useTranslation();
   const { isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
 
-  const hasAccess = isPreviewMode || lesson.hasAccess;
+  const hasPreviewAccess = allowPreviewAccess && isPreviewMode;
+  const hasAccess = hasPreviewAccess || lesson.hasAccess;
 
   const shouldIgnoreEnrollmentBlockedStatus =
     isCourseStudentModeActive &&
@@ -38,15 +43,15 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
     ? LESSON_PROGRESS_STATUSES.NOT_STARTED
     : lesson.status;
 
-  const badgeProgress: ProgressStatus = match({ isPreviewMode, hasAccess })
-    .with({ isPreviewMode: true }, () => LESSON_PROGRESS_STATUSES.NOT_STARTED)
+  const badgeProgress: ProgressStatus = match({ hasPreviewAccess, hasAccess })
+    .with({ hasPreviewAccess: true }, () => LESSON_PROGRESS_STATUSES.NOT_STARTED)
     .with({ hasAccess: true }, () => effectiveStatus)
     .otherwise(() => LESSON_PROGRESS_STATUSES.BLOCKED);
 
   const lessonElement = (
     <div
       className={cn("flex w-full gap-x-2 p-2", {
-        "opacity-30": !hasAccess && !isPreviewMode,
+        "opacity-30": !hasAccess,
       })}
     >
       <LessonTypeIcon type={lesson.type} className="size-6 text-accent-foreground" />
@@ -70,7 +75,7 @@ export const CourseChapterLesson = ({ lesson }: CourseChapterLessonProps) => {
     </div>
   );
 
-  if (!hasAccess && !isPreviewMode) {
+  if (!hasAccess) {
     return <button className="w-full flex cursor-not-allowed">{lessonElement}</button>;
   }
 

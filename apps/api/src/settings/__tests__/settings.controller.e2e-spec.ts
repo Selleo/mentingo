@@ -1,10 +1,12 @@
-import { isNull, sql } from "drizzle-orm";
+import { eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { settings } from "src/storage/schema";
+import { chapters, settings } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
+import { createChapterFactory } from "../../../test/factory/chapter.factory";
+import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
 import { createUserFactory, type UserWithCredentials } from "../../../test/factory/user.factory";
 import { truncateTables, cookieFor } from "../../../test/helpers/test-helpers";
@@ -19,6 +21,8 @@ describe("SettingsController (e2e)", () => {
   let baseDb: DatabasePg;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
+  let courseFactory: ReturnType<typeof createCourseFactory>;
+  let chapterFactory: ReturnType<typeof createChapterFactory>;
   const testPassword = "Password123@@";
 
   beforeAll(async () => {
@@ -28,6 +32,8 @@ describe("SettingsController (e2e)", () => {
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
+    courseFactory = createCourseFactory(db);
+    chapterFactory = createChapterFactory(db);
   });
 
   afterAll(async () => {
@@ -307,7 +313,7 @@ describe("SettingsController (e2e)", () => {
       });
 
       afterEach(async () => {
-        await truncateTables(db, ["settings"]);
+        await truncateTables(baseDb, ["courses", "chapters", "users", "categories", "settings"]);
       });
 
       it("should toggle the global unregistered user courses accessibility setting (as Admin)", async () => {
@@ -331,6 +337,60 @@ describe("SettingsController (e2e)", () => {
           .expect(200);
 
         expect(toggleResponse.body.data.unregisteredUserCoursesAccessibility).toBe(initialValue);
+      });
+
+      it("should disable public chapter toggles for free courses when visitor course access is disabled", async () => {
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                ${settings.settings},
+                '{unregisteredUserCoursesAccessibility}',
+                'true'::jsonb,
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        const freeCourse = await courseFactory.create({
+          authorId: adminUser.id,
+          priceInCents: 0,
+          chapterCount: 1,
+        });
+        const paidCourse = await courseFactory.create({
+          authorId: adminUser.id,
+          priceInCents: 1200,
+          chapterCount: 1,
+        });
+        const publicChapter = await chapterFactory.create({
+          authorId: adminUser.id,
+          courseId: freeCourse.id,
+          isFreemium: true,
+        });
+        const paidFreemiumChapter = await chapterFactory.create({
+          authorId: adminUser.id,
+          courseId: paidCourse.id,
+          isFreemium: true,
+        });
+
+        await request(app.getHttpServer())
+          .patch("/api/settings/admin/unregistered-user-courses-accessibility")
+          .set("Cookie", adminCookies)
+          .expect(200);
+
+        const [updatedPublicChapter] = await db
+          .select({ isFreemium: chapters.isFreemium })
+          .from(chapters)
+          .where(eq(chapters.id, publicChapter.id));
+        const [updatedPaidFreemiumChapter] = await db
+          .select({ isFreemium: chapters.isFreemium })
+          .from(chapters)
+          .where(eq(chapters.id, paidFreemiumChapter.id));
+
+        expect(updatedPublicChapter.isFreemium).toBe(false);
+        expect(updatedPaidFreemiumChapter.isFreemium).toBe(true);
       });
 
       it("should return 403 if user is not an admin", async () => {

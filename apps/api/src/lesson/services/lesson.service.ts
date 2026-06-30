@@ -564,17 +564,36 @@ export class LessonService {
   async getLessonResource(
     req: Request,
     res: Response,
-    currentUser: CurrentUserType,
+    currentUser: CurrentUserType | null,
     resourceId: UUIDType,
     preview?: FilePreviewFormat,
   ) {
-    const isStudent = this.isLearnerOnly(currentUser.permissions);
-
     const lessonResource = await this.lessonRepository.getResource(resourceId);
 
     if (!lessonResource) {
       throw new NotFoundException("common.toast.notFound");
     }
+
+    if (!currentUser) {
+      if (!lessonResource.entityId || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
+        throw new NotFoundException("common.toast.notFound");
+      }
+
+      const hasPublicLessonAccess = await this.lessonRepository.getHasPublicContentLessonAccess(
+        lessonResource.entityId,
+      );
+
+      if (!hasPublicLessonAccess) {
+        throw new ForbiddenException("common.toast.lessonAccessDenied");
+      }
+
+      return this.streamResource(req, res, lessonResource.reference, {
+        contentType: lessonResource.contentType,
+        preview,
+      });
+    }
+
+    const isStudent = this.isLearnerOnly(currentUser.permissions);
 
     if (!lessonResource.entityId || lessonResource.entityType !== ENTITY_TYPE.LESSON) {
       if (
