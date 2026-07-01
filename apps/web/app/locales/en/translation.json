@@ -4381,10 +4381,22 @@
   "activityLogsView": {
     "filters": {
       "placeholder": {
+        "search": "Search activity...",
         "searchByEmail": "Search by email...",
+        "action": "All actions",
+        "resource": "All resources",
         "from": "From date",
         "to": "To date"
-      }
+      },
+      "search": {
+        "action": "Search actions...",
+        "resource": "Search resources..."
+      },
+      "empty": {
+        "action": "No actions found.",
+        "resource": "No resources found."
+      },
+      "selectedActions": "{{count}} actions"
     },
     "description": "Timeline of changes across the platform, grouped as a simple expandable feed.",
     "breadcrumbs": {
@@ -4425,9 +4437,9 @@
       "users_import": "Users imported",
       "send_password_reset_email": "Password reset email sent",
       "resend_password_creation_email": "Password creation email resent",
-      "complete_lesson": "Completed",
-      "complete_course": "Completed",
-      "complete_chapter": "Completed",
+      "complete_lesson": "Lesson completed",
+      "complete_course": "Course completed",
+      "complete_chapter": "Chapter completed",
       "expire_certificate": "Certificate expired",
       "reset_certificate": "Certificate reset",
       "view_announcement": "Viewed"
@@ -4438,9 +4450,15 @@
       "lesson": "Lesson",
       "question": "Question",
       "news": "News",
+      "article": "Article",
       "articles": "Article",
+      "articleSection": "Article section",
       "user": "User",
+      "group": "Group",
       "category": "Category",
+      "settings": "Settings",
+      "integration": "Integration",
+      "qa": "Q&A",
       "announcement": "Announcement",
       "live_training": "Live Training",
       "global_settings": "Settings"

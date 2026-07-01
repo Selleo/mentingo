@@ -1,11 +1,22 @@
+import {
+  ACTIVITY_LOG_ACTION_TYPES,
+  ACTIVITY_LOG_RESOURCE_ACTION_TYPES,
+  ACTIVITY_LOG_RESOURCE_TYPES,
+  type ActivityLogActionType,
+  type ActivityLogResourceType,
+} from "@repo/shared";
 import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { parseISO } from "date-fns";
+import { enUS, pl } from "date-fns/locale";
+import { debounce } from "lodash-es";
+import { Search } from "lucide-react";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useActivityLogsQuerySuspense } from "~/api/queries/admin/useActivityLogs";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Pagination } from "~/components/Pagination/Pagination";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -16,26 +27,34 @@ import {
 } from "~/components/ui/table";
 import { getActivityLogsColumns } from "~/modules/ActivityLogs/activityLogs.columns";
 import { ActivityLogAccordionRow } from "~/modules/ActivityLogs/components/ActivityLogAccordionRow";
-import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
+import { ActivityLogActionMultiSelect } from "~/modules/ActivityLogs/components/ActivityLogActionMultiSelect";
+import { ActivityLogDateFilter } from "~/modules/ActivityLogs/components/ActivityLogDateFilter";
+import { ActivityLogSingleSelect } from "~/modules/ActivityLogs/components/ActivityLogSingleSelect";
 import { setPageTitle } from "~/utils/setPageTitle";
 
 import type { MetaFunction } from "@remix-run/react";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 
+type ActivityLogsSearchState = {
+  keyword?: string;
+  actionTypes?: ActivityLogActionType[];
+  resourceType?: ActivityLogResourceType;
+  from?: string;
+  to?: string;
+  page?: number;
+  perPage?: (typeof ITEMS_PER_PAGE_OPTIONS)[number];
+};
+
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.activityLogs");
 
 export default function ActivityLogsPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [isPending, startTransition] = useTransition();
 
-  const [searchParams, setSearchParams] = useState<{
-    email?: string;
-    from?: string;
-    to?: string;
-    page?: number;
-    perPage?: (typeof ITEMS_PER_PAGE_OPTIONS)[number];
-  }>({
-    email: undefined,
+  const [searchParams, setSearchParams] = useState<ActivityLogsSearchState>({
+    keyword: undefined,
+    actionTypes: undefined,
+    resourceType: undefined,
     from: undefined,
     to: undefined,
     page: 1,
@@ -43,19 +62,54 @@ export default function ActivityLogsPage() {
   });
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
-  const handleFilterChange = useCallback(
-    (name: "page" | "perPage" | "email" | "from" | "to", value: number | string | undefined) => {
+  const calendarLocale = i18n.language.startsWith("pl") ? pl : enUS;
+
+  const updateSearchParams = useCallback(
+    (updates: Partial<ActivityLogsSearchState>, resetPage = true) => {
       setExpandedRowId(null);
 
       startTransition(() => {
         setSearchParams((prev) => ({
           ...prev,
-          ...(name !== "page" ? { page: 1 } : {}),
-          [name]: value,
+          ...(resetPage ? { page: 1 } : {}),
+          ...updates,
         }));
       });
     },
     [startTransition],
+  );
+
+  const handleResourceChange = useCallback(
+    (resourceType: ActivityLogResourceType | undefined) => {
+      setExpandedRowId(null);
+
+      startTransition(() => {
+        setSearchParams((prev) => {
+          const allowedActions = resourceType
+            ? new Set<ActivityLogActionType>(ACTIVITY_LOG_RESOURCE_ACTION_TYPES[resourceType])
+            : undefined;
+          const actionTypes = allowedActions
+            ? prev.actionTypes?.filter((actionType) => allowedActions.has(actionType))
+            : prev.actionTypes;
+
+          return {
+            ...prev,
+            page: 1,
+            resourceType,
+            actionTypes: actionTypes?.length ? actionTypes : undefined,
+          };
+        });
+      });
+    },
+    [startTransition],
+  );
+
+  const debouncedKeywordChange = useMemo(
+    () =>
+      debounce((keyword: string) => {
+        updateSearchParams({ keyword: keyword || undefined });
+      }, 300),
+    [updateSearchParams],
   );
 
   const handleRowToggle = useCallback((rowId: string) => {
@@ -82,7 +136,9 @@ export default function ActivityLogsPage() {
     () => ({
       page: searchParams.page,
       perPage: searchParams.perPage,
-      ...(searchParams.email ? { email: searchParams.email } : {}),
+      ...(searchParams.keyword ? { keyword: searchParams.keyword } : {}),
+      ...(searchParams.actionTypes?.length ? { actionTypes: searchParams.actionTypes } : {}),
+      ...(searchParams.resourceType ? { resourceType: searchParams.resourceType } : {}),
       ...(searchParams.from ? { from: searchParams.from } : {}),
       ...(searchParams.to ? { to: searchParams.to } : {}),
     }),
@@ -109,36 +165,30 @@ export default function ActivityLogsPage() {
       }),
     [expandedRowId, handleRowToggle, t],
   );
-  const filters = useMemo(
-    () => [
-      {
-        name: "email",
-        type: "text" as const,
-        placeholder: t("activityLogsView.filters.placeholder.searchByEmail"),
-      },
-      {
-        name: "from",
-        type: "date" as const,
-        placeholder: t("activityLogsView.filters.placeholder.from"),
-        maxDate: toDate,
-      },
-      {
-        name: "to",
-        type: "date" as const,
-        placeholder: t("activityLogsView.filters.placeholder.to"),
-        minDate: fromDate,
-      },
-    ],
-    [fromDate, t, toDate],
+  const actionOptions = useMemo(
+    () =>
+      Object.values(ACTIVITY_LOG_ACTION_TYPES).map((actionType) => ({
+        value: actionType,
+        label: t(`activityLogsView.actions.${actionType}`, { defaultValue: actionType }),
+      })),
+    [t],
   );
+  const scopedActionOptions = useMemo(() => {
+    if (!searchParams.resourceType) return actionOptions;
 
-  const filterValues = useMemo(
-    () => ({
-      email: searchParams.email,
-      from: searchParams.from,
-      to: searchParams.to,
-    }),
-    [searchParams.email, searchParams.from, searchParams.to],
+    const allowedActions = new Set<ActivityLogActionType>(
+      ACTIVITY_LOG_RESOURCE_ACTION_TYPES[searchParams.resourceType],
+    );
+
+    return actionOptions.filter((option) => allowedActions.has(option.value));
+  }, [actionOptions, searchParams.resourceType]);
+  const resourceOptions = useMemo(
+    () =>
+      Object.values(ACTIVITY_LOG_RESOURCE_TYPES).map((resourceType) => ({
+        value: resourceType,
+        label: t(`activityLogsView.entity.${resourceType}`, { defaultValue: resourceType }),
+      })),
+    [t],
   );
 
   const table = useReactTable({
@@ -157,15 +207,55 @@ export default function ActivityLogsPage() {
         </div>
 
         <div>
-          <div className="flex items-center justify-between gap-2">
-            <SearchFilter
-              filters={filters}
-              values={filterValues}
-              onChange={(key, value) => {
-                handleFilterChange(key as "email" | "from" | "to", value as string | undefined);
-              }}
-              isLoading={isPending}
+          <div className="flex grow flex-wrap items-center gap-2 py-6">
+            <div className="relative max-w-2xl flex-grow">
+              <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform text-neutral-800" />
+              <Input
+                type="text"
+                placeholder={t("activityLogsView.filters.placeholder.search")}
+                className="w-full max-w-[320px] border border-neutral-300 py-2 pl-8 pr-4 md:max-w-none"
+                defaultValue={searchParams.keyword}
+                onChange={(event) => debouncedKeywordChange(event.target.value)}
+              />
+            </div>
+            <ActivityLogSingleSelect
+              value={searchParams.resourceType}
+              options={resourceOptions}
+              placeholder={t("activityLogsView.filters.placeholder.resource")}
+              searchPlaceholder={t("activityLogsView.filters.search.resource")}
+              emptyLabel={t("activityLogsView.filters.empty.resource")}
+              allLabel={t("activityLogsView.filters.placeholder.resource")}
+              onChange={handleResourceChange}
             />
+            <ActivityLogActionMultiSelect
+              values={searchParams.actionTypes ?? []}
+              options={scopedActionOptions}
+              placeholder={t("activityLogsView.filters.placeholder.action")}
+              selectedCountLabel={t("activityLogsView.filters.selectedActions", {
+                count: searchParams.actionTypes?.length ?? 0,
+              })}
+              searchPlaceholder={t("activityLogsView.filters.search.action")}
+              emptyLabel={t("activityLogsView.filters.empty.action")}
+              allLabel={t("activityLogsView.filters.placeholder.action")}
+              onChange={(actionTypes) =>
+                updateSearchParams({ actionTypes: actionTypes.length ? actionTypes : undefined })
+              }
+            />
+            <ActivityLogDateFilter
+              value={searchParams.from}
+              placeholder={t("activityLogsView.filters.placeholder.from")}
+              calendarLocale={calendarLocale}
+              maxDate={toDate}
+              onChange={(from) => updateSearchParams({ from })}
+            />
+            <ActivityLogDateFilter
+              value={searchParams.to}
+              placeholder={t("activityLogsView.filters.placeholder.to")}
+              calendarLocale={calendarLocale}
+              minDate={fromDate}
+              onChange={(to) => updateSearchParams({ to })}
+            />
+            {isPending && <span className="sr-only">{t("activityLogsView.table.loading")}</span>}
           </div>
           <Table className="border bg-neutral-50">
             <TableHeader>
@@ -214,13 +304,12 @@ export default function ActivityLogsPage() {
               totalItems={totalItems}
               itemsPerPage={pageSize as (typeof ITEMS_PER_PAGE_OPTIONS)[number]}
               currentPage={currentPage ?? searchParams.page ?? 1}
-              onPageChange={(newPage) => handleFilterChange("page", newPage)}
+              onPageChange={(newPage) => updateSearchParams({ page: newPage }, false)}
               onItemsPerPageChange={(newPerPage) => {
-                handleFilterChange("page", 1);
-                handleFilterChange(
-                  "perPage",
-                  Number(newPerPage) as (typeof ITEMS_PER_PAGE_OPTIONS)[number],
-                );
+                updateSearchParams({
+                  page: 1,
+                  perPage: Number(newPerPage) as (typeof ITEMS_PER_PAGE_OPTIONS)[number],
+                });
               }}
             />
           )}

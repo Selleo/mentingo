@@ -4380,10 +4380,22 @@
   "activityLogsView": {
     "filters": {
       "placeholder": {
+        "search": "Buscar actividad...",
         "searchByEmail": "Buscar por correo electrónico...",
+        "action": "Todas las acciones",
+        "resource": "Todos los recursos",
         "from": "Desde la fecha",
         "to": "Hasta la fecha"
-      }
+      },
+      "search": {
+        "action": "Buscar acciones...",
+        "resource": "Buscar recursos..."
+      },
+      "empty": {
+        "action": "No se encontraron acciones.",
+        "resource": "No se encontraron recursos."
+      },
+      "selectedActions": "{{count}} acciones"
     },
     "description": "Cronología de los cambios en la plataforma, agrupados como un simple feed ampliable.",
     "breadcrumbs": {
@@ -4424,9 +4436,9 @@
       "users_import": "Usuarios importados",
       "send_password_reset_email": "Correo electrónico de restablecimiento de contraseña enviado",
       "resend_password_creation_email": "Correo electrónico de creación de contraseña reenviado",
-      "complete_lesson": "Completado",
-      "complete_course": "Completado",
-      "complete_chapter": "Completado",
+      "complete_lesson": "Lección completada",
+      "complete_course": "Curso completado",
+      "complete_chapter": "Capítulo completado",
       "expire_certificate": "Certificado caducado",
       "reset_certificate": "Restablecimiento del certificado",
       "view_announcement": "Visto"
@@ -4437,9 +4449,15 @@
       "lesson": "Lección",
       "question": "Pregunta",
       "news": "Noticias",
+      "article": "Artículo",
       "articles": "Artículo",
+      "articleSection": "Sección del artículo",
       "user": "Usuario",
+      "group": "Grupo",
       "category": "Categoría",
+      "settings": "Configuración",
+      "integration": "Integración",
+      "qa": "Preguntas y respuestas",
       "announcement": "Anuncio",
       "live_training": "Formación en vivo",
       "global_settings": "Configuración"

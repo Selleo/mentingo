@@ -28,6 +28,8 @@ export type ActorType = {
 export type GetActivityLogsQuery = {
   keyword?: string;
   email?: string;
+  actionTypes?: ActivityLogActionType[];
+  resourceType?: ActivityLogResourceType;
   from?: string;
   to?: string;
   page?: number;

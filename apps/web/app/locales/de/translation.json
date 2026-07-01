@@ -3686,10 +3686,22 @@
   "activityLogsView": {
     "filters": {
       "placeholder": {
+        "search": "Aktivitäten suchen...",
         "searchByEmail": "Suche nach E-Mail...",
+        "action": "Alle Aktionen",
+        "resource": "Alle Ressourcen",
         "from": "Ab Datum",
         "to": "Bis Datum"
-      }
+      },
+      "search": {
+        "action": "Aktionen suchen...",
+        "resource": "Ressourcen suchen..."
+      },
+      "empty": {
+        "action": "Keine Aktionen gefunden.",
+        "resource": "Keine Ressourcen gefunden."
+      },
+      "selectedActions": "{{count}} Aktionen"
     },
     "description": "Zeitachse der Änderungen auf der Plattform als einfacher aufklappbarer Feed.",
     "breadcrumbs": {
@@ -3730,9 +3742,9 @@
       "users_import": "Benutzer importiert",
       "send_password_reset_email": "Passwort-Zurücksetzen-E-Mail gesendet",
       "resend_password_creation_email": "Passwort-Erstellungs-E-Mail erneut gesendet",
-      "complete_lesson": "Abgeschlossen",
-      "complete_course": "Abgeschlossen",
-      "complete_chapter": "Abgeschlossen",
+      "complete_lesson": "Lektion abgeschlossen",
+      "complete_course": "Kurs abgeschlossen",
+      "complete_chapter": "Kapitel abgeschlossen",
       "expire_certificate": "Zertifikat abgelaufen",
       "reset_certificate": "Zertifikat zurückgesetzt",
       "view_announcement": "Angezeigt"
@@ -3743,9 +3755,15 @@
       "lesson": "Lektion",
       "question": "Frage",
       "news": "Neuigkeiten",
+      "article": "Artikel",
       "articles": "Artikel",
+      "articleSection": "Artikelabschnitt",
       "user": "Benutzer",
+      "group": "Gruppe",
       "category": "Kategorie",
+      "settings": "Einstellungen",
+      "integration": "Integration",
+      "qa": "Q&A",
       "announcement": "Ankündigung",
       "live_training": "Live-Schulung",
       "global_settings": "Einstellungen"

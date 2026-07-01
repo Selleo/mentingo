@@ -2,11 +2,14 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
 
+import type { ActivityLogActionType, ActivityLogResourceType } from "@repo/shared";
 import type { GetActivityLogsResponse } from "~/api/generated-api";
 
 export type ActivityLogsSearchParams = {
   keyword?: string;
   email?: string;
+  actionTypes?: ActivityLogActionType[];
+  resourceType?: ActivityLogResourceType;
   from?: string;
   to?: string;
   page?: number;
@@ -30,6 +33,8 @@ export const activityLogsQueryOptions = (
       ...(searchParams?.perPage && { perPage: searchParams.perPage }),
       ...(searchParams?.keyword && { keyword: searchParams.keyword }),
       ...(searchParams?.email && { email: searchParams.email }),
+      ...(searchParams?.actionTypes?.length && { actionTypes: searchParams.actionTypes }),
+      ...(searchParams?.resourceType && { resourceType: searchParams.resourceType }),
       ...(searchParams?.from && { from: searchParams.from }),
       ...(searchParams?.to && { to: searchParams.to }),
     });

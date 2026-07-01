@@ -13556,11 +13556,84 @@
             }
           },
           {
+            "name": "keyword",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "email",
             "required": false,
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                }
+              ]
             }
           },
           {
@@ -13577,6 +13650,194 @@
             "in": "query",
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "name": "actionTypes",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "anyOf": [
+                    {
+                      "const": "create",
+                      "type": "string"
+                    },
+                    {
+                      "const": "update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "bulk_course_category_update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "bulk_course_status_update",
+                      "type": "string"
+                    },
+                    {
+                      "const": "delete",
+                      "type": "string"
+                    },
+                    {
+                      "const": "login",
+                      "type": "string"
+                    },
+                    {
+                      "const": "login_failed",
+                      "type": "string"
+                    },
+                    {
+                      "const": "logout",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enroll_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "unenroll_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "group_assignment",
+                      "type": "string"
+                    },
+                    {
+                      "const": "users_import",
+                      "type": "string"
+                    },
+                    {
+                      "const": "send_password_reset_email",
+                      "type": "string"
+                    },
+                    {
+                      "const": "resend_password_creation_email",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_lesson",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_chapter",
+                      "type": "string"
+                    },
+                    {
+                      "const": "expire_certificate",
+                      "type": "string"
+                    },
+                    {
+                      "const": "reset_certificate",
+                      "type": "string"
+                    },
+                    {
+                      "const": "view_announcement",
+                      "type": "string"
+                    }
+                  ]
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "const": "create",
+                        "type": "string"
+                      },
+                      {
+                        "const": "update",
+                        "type": "string"
+                      },
+                      {
+                        "const": "bulk_course_category_update",
+                        "type": "string"
+                      },
+                      {
+                        "const": "bulk_course_status_update",
+                        "type": "string"
+                      },
+                      {
+                        "const": "delete",
+                        "type": "string"
+                      },
+                      {
+                        "const": "login",
+                        "type": "string"
+                      },
+                      {
+                        "const": "login_failed",
+                        "type": "string"
+                      },
+                      {
+                        "const": "logout",
+                        "type": "string"
+                      },
+                      {
+                        "const": "enroll_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "unenroll_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "start_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "group_assignment",
+                        "type": "string"
+                      },
+                      {
+                        "const": "users_import",
+                        "type": "string"
+                      },
+                      {
+                        "const": "send_password_reset_email",
+                        "type": "string"
+                      },
+                      {
+                        "const": "resend_password_creation_email",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_lesson",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_course",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_chapter",
+                        "type": "string"
+                      },
+                      {
+                        "const": "expire_certificate",
+                        "type": "string"
+                      },
+                      {
+                        "const": "reset_certificate",
+                        "type": "string"
+                      },
+                      {
+                        "const": "view_announcement",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                }
+              ]
             }
           }
         ],
