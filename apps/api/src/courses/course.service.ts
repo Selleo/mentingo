@@ -417,11 +417,15 @@ export class CourseService {
           coursesSummaryStats.freePurchasedCount,
           coursesSummaryStats.paidPurchasedCount,
           studentCourses.finishedChapterCount,
+          studentCourses.completedAt,
           courses.availableLocales,
           courses.baseLanguage,
           groupCourses.dueDate,
         )
-        .orderBy(sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)));
+        .orderBy(
+          sql`CASE WHEN ${studentCourses.completedAt} IS NULL THEN 0 ELSE 1 END`,
+          sortOrder(this.getColumnToSortBy(sortedField as CourseSortField, language)),
+        );
 
       const dynamicQuery = queryDB.$dynamic();
       const paginatedQuery = addPagination(dynamicQuery, page, perPage);

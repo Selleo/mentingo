@@ -1259,6 +1259,58 @@ describe("CourseController (e2e)", () => {
         expect(response.body.data[1].title).toBe("A Course");
       });
 
+      it("places completed courses after in-progress courses", async () => {
+        const student = await userFactory
+          .withCredentials({ password })
+          .withUserSettings(db)
+          .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+        const cookies = await cookieFor(student, app);
+        const category = await categoryFactory.create();
+        const contentCreator = await userFactory.create({
+          role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+        });
+
+        const completedCourse = await courseFactory.create({
+          title: "A Completed Course",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+        const inProgressCourse = await courseFactory.create({
+          title: "Z In Progress Course",
+          authorId: contentCreator.id,
+          categoryId: category.id,
+          status: "published",
+          thumbnailS3Key: null,
+        });
+
+        await db.insert(studentCourses).values([
+          {
+            studentId: student.id,
+            courseId: completedCourse.id,
+            progress: "completed",
+            completedAt: new Date().toISOString(),
+            finishedChapterCount: 1,
+          },
+          {
+            studentId: student.id,
+            courseId: inProgressCourse.id,
+            finishedChapterCount: 0,
+          },
+        ]);
+
+        const response = await request(app.getHttpServer())
+          .get("/api/course/get-student-courses")
+          .set("Cookie", cookies)
+          .expect(200);
+
+        expect(response.body.data.map((course: CourseTest) => course.title)).toEqual([
+          "Z In Progress Course",
+          "A Completed Course",
+        ]);
+      });
+
       it("paginates results", async () => {
         const student = await userFactory
           .withCredentials({ password })
