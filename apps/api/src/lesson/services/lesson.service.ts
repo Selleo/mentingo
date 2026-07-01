@@ -579,9 +579,8 @@ export class LessonService {
         throw new NotFoundException("common.toast.notFound");
       }
 
-      const hasPublicLessonAccess = await this.lessonRepository.getHasPublicContentLessonAccess(
-        lessonResource.entityId,
-      );
+      const hasPublicLessonAccess =
+        await this.lessonRepository.getHasPublicContentResourceAccess(resourceId);
 
       if (!hasPublicLessonAccess) {
         throw new ForbiddenException("common.toast.lessonAccessDenied");

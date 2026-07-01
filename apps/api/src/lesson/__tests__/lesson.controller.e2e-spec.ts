@@ -61,12 +61,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
       getResourcesForEntity: jest.fn().mockResolvedValue([]),
-      getFileDeliveryWithPreview: jest.fn().mockResolvedValue({
+      getFileDeliveryWithPreview: jest.fn().mockImplementation(async () => ({
         type: FILE_DELIVERY_TYPE.STREAM,
         stream: Readable.from(["public video"]),
         contentType: "video/mp4",
         contentLength: "public video".length,
-      }),
+      })),
     };
 
     const mockCacheManager = {
@@ -221,6 +221,49 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         entityType: ENTITY_TYPES.LESSON,
         relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
       });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/lesson-resource/${resource.id}`)
+        .expect(200);
+
+      expect(response.body.toString()).toBe("public video");
+      expect(response.headers["content-type"]).toContain("video/mp4");
+    });
+
+    it("allows guests to stream reused resources attached to a public content lesson", async () => {
+      await setPublicCourseAccess(true);
+      const privateLesson = await createLessonForPublicAccess({
+        isFreemium: false,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+      const publicLesson = await createLessonForPublicAccess({
+        isFreemium: true,
+        lessonType: LESSON_TYPES.CONTENT,
+      });
+      const [resource] = await db
+        .insert(resources)
+        .values({
+          id: crypto.randomUUID(),
+          reference: "reused-public-video.mp4",
+          contentType: "video/mp4",
+        })
+        .returning();
+      await db.insert(resourceEntity).values([
+        {
+          id: crypto.randomUUID(),
+          resourceId: resource.id,
+          entityId: privateLesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        },
+        {
+          id: crypto.randomUUID(),
+          resourceId: resource.id,
+          entityId: publicLesson.id,
+          entityType: ENTITY_TYPES.LESSON,
+          relationshipType: RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT,
+        },
+      ]);
 
       const response = await request(app.getHttpServer())
         .get(`/api/lesson/lesson-resource/${resource.id}`)
