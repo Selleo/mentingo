@@ -3695,10 +3695,22 @@
   "activityLogsView": {
     "filters": {
       "placeholder": {
+        "search": "Ieškoti veiklos...",
         "searchByEmail": "Ieškoti pagal el. paštą...",
+        "action": "Visi veiksmai",
+        "resource": "Visi ištekliai",
         "from": "Nuo datos",
         "to": "Iki datos"
-      }
+      },
+      "search": {
+        "action": "Ieškoti veiksmų...",
+        "resource": "Ieškoti išteklių..."
+      },
+      "empty": {
+        "action": "Veiksmų nerasta.",
+        "resource": "Išteklių nerasta."
+      },
+      "selectedActions": "{{count}} veiksmai"
     },
     "description": "Platformos pakeitimų laiko juosta paprasto išskleidžiamo srauto pavidalu.",
     "breadcrumbs": {
@@ -3739,9 +3751,9 @@
       "users_import": "Naudotojai importuoti",
       "send_password_reset_email": "Slaptažodžio atkūrimo el. laiškas išsiųstas",
       "resend_password_creation_email": "Slaptažodžio sukūrimo el. laiškas išsiųstas pakartotinai",
-      "complete_lesson": "Užbaigta",
-      "complete_course": "Užbaigta",
-      "complete_chapter": "Užbaigta",
+      "complete_lesson": "Pamoka užbaigta",
+      "complete_course": "Kursas užbaigtas",
+      "complete_chapter": "Skyrius užbaigtas",
       "expire_certificate": "Sertifikatas nebegalioja",
       "reset_certificate": "Sertifikatas nustatytas iš naujo",
       "view_announcement": "Peržiūrėta"
@@ -3752,9 +3764,15 @@
       "lesson": "Pamoka",
       "question": "Klausimas",
       "news": "Naujienos",
+      "article": "Straipsnis",
       "articles": "Straipsniai",
+      "articleSection": "Straipsnio skyrius",
       "user": "Vartotojas",
+      "group": "Grupė",
       "category": "Kategorija",
+      "settings": "Nustatymai",
+      "integration": "Integracija",
+      "qa": "Klausimai ir atsakymai",
       "announcement": "Pranešimas",
       "live_training": "Tiesioginiai mokymai",
       "global_settings": "Nustatymai"

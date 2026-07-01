@@ -8,7 +8,7 @@ import { activityLogs } from "src/storage/schema";
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory } from "../../../test/factory/user.factory";
 import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers";
-import { ACTIVITY_LOG_ACTION_TYPES } from "../types";
+import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
@@ -139,5 +139,219 @@ describe("ActivityLogsController (e2e)", () => {
     );
 
     expect(returnedDates.every((date: string) => date === toDate)).toBe(true);
+  });
+
+  it("filters activity logs by multiple action types and resource type", async () => {
+    const admin = await userFactory
+      .withCredentials({ password })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+    const [matchingLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+          after: { title: "Live training created" },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [secondMatchingLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+          after: { title: "Live training updated" },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [wrongResourceLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+          after: { title: "Course created" },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const response = await request(app.getHttpServer())
+      .get("/api/activity-logs")
+      .query({
+        actionTypes: [ACTIVITY_LOG_ACTION_TYPES.CREATE, ACTIVITY_LOG_ACTION_TYPES.UPDATE],
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+      })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+
+    const returnedIds = response.body.data.map((log: { id: string }) => log.id);
+
+    expect(returnedIds).toContain(matchingLog.id);
+    expect(returnedIds).toContain(secondMatchingLog.id);
+    expect(returnedIds).not.toContain(wrongResourceLog.id);
+  });
+
+  it("searches activity logs by keyword across actor email, resource id, and metadata", async () => {
+    const admin = await userFactory
+      .withCredentials({ password })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+    const resourceId = "11111111-1111-4111-8111-111111111111";
+    const metadataKeyword = "metadata-course-keyword";
+
+    const [resourceIdLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: "resource-search@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        resourceId,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE, after: { title: "Resource ID" } },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [metadataLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: "metadata-search@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+          context: { courseId: metadataKeyword },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [emailLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: "keyword-actor@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE, after: { title: "Email" } },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [excludedLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: "excluded@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE, after: { title: "Other" } },
+      })
+      .returning({ id: activityLogs.id });
+
+    const resourceIdResponse = await request(app.getHttpServer())
+      .get(`/api/activity-logs?keyword=${resourceId}`)
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+    const metadataResponse = await request(app.getHttpServer())
+      .get(`/api/activity-logs?keyword=${metadataKeyword}`)
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+    const emailResponse = await request(app.getHttpServer())
+      .get("/api/activity-logs?keyword=KEYWORD-ACTOR")
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+
+    const resourceIds = resourceIdResponse.body.data.map((log: { id: string }) => log.id);
+    const metadataIds = metadataResponse.body.data.map((log: { id: string }) => log.id);
+    const emailIds = emailResponse.body.data.map((log: { id: string }) => log.id);
+
+    expect(resourceIds).toContain(resourceIdLog.id);
+    expect(resourceIds).not.toContain(excludedLog.id);
+    expect(metadataIds).toContain(metadataLog.id);
+    expect(metadataIds).not.toContain(excludedLog.id);
+    expect(emailIds).toContain(emailLog.id);
+    expect(emailIds).not.toContain(excludedLog.id);
+  });
+
+  it("applies all active filters to pagination totals", async () => {
+    const admin = await userFactory
+      .withCredentials({ password })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+    await db.insert(activityLogs).values([
+      {
+        actorId: admin.id,
+        actorEmail: "filtered-total@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Alpha" } },
+      },
+      {
+        actorId: admin.id,
+        actorEmail: "filtered-total@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Beta" } },
+      },
+      {
+        actorId: admin.id,
+        actorEmail: "filtered-total@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.CREATE, after: { title: "Gamma" } },
+      },
+      {
+        actorId: admin.id,
+        actorEmail: "filtered-total@example.com",
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+        metadata: { operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE, after: { title: "Delta" } },
+      },
+    ]);
+
+    const response = await request(app.getHttpServer())
+      .get("/api/activity-logs")
+      .query({
+        page: 1,
+        perPage: 2,
+        keyword: "filtered-total",
+        actionTypes: [ACTIVITY_LOG_ACTION_TYPES.CREATE],
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LIVE_TRAINING,
+      })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+
+    expect(response.body.data).toHaveLength(2);
+    expect(response.body.pagination).toEqual({
+      totalItems: 3,
+      page: 1,
+      perPage: 2,
+    });
   });
 });

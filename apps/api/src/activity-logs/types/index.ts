@@ -1,53 +1,14 @@
+import type { ActivityLogActionType } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
 
-export const ACTIVITY_LOG_ACTION_TYPES = {
-  CREATE: "create",
-  UPDATE: "update",
-  BULK_COURSE_CATEGORY_UPDATE: "bulk_course_category_update",
-  BULK_COURSE_STATUS_UPDATE: "bulk_course_status_update",
-  DELETE: "delete",
-  LOGIN: "login",
-  LOGIN_FAILED: "login_failed",
-  LOGOUT: "logout",
-  ENROLL_COURSE: "enroll_course",
-  UNENROLL_COURSE: "unenroll_course",
-  START_COURSE: "start_course",
-  GROUP_ASSIGNMENT: "group_assignment",
-  USERS_IMPORT: "users_import",
-  SEND_PASSWORD_RESET_EMAIL: "send_password_reset_email",
-  RESEND_PASSWORD_CREATION_EMAIL: "resend_password_creation_email",
-  COMPLETE_LESSON: "complete_lesson",
-  COMPLETE_COURSE: "complete_course",
-  COMPLETE_CHAPTER: "complete_chapter",
-  EXPIRE_CERTIFICATE: "expire_certificate",
-  RESET_CERTIFICATE: "reset_certificate",
-  VIEW_ANNOUNCEMENT: "view_announcement",
-} as const;
-
-export type ActivityLogActionType =
-  (typeof ACTIVITY_LOG_ACTION_TYPES)[keyof typeof ACTIVITY_LOG_ACTION_TYPES];
-
-export const ACTIVITY_LOG_RESOURCE_TYPES = {
-  USER: "user",
-  COURSE: "course",
-  CHAPTER: "chapter",
-  LESSON: "lesson",
-  ANNOUNCEMENT: "announcement",
-  GROUP: "group",
-  SETTINGS: "settings",
-  INTEGRATION: "integration",
-  CATEGORY: "category",
-  QA: "qa",
-  NEWS: "news",
-  ARTICLE: "article",
-  ARTICLE_SECTION: "articleSection",
-  LIVE_TRAINING: "live_training",
-} as const;
-
-export type ActivityLogResourceType =
-  (typeof ACTIVITY_LOG_RESOURCE_TYPES)[keyof typeof ACTIVITY_LOG_RESOURCE_TYPES];
+export {
+  ACTIVITY_LOG_ACTION_TYPES,
+  ACTIVITY_LOG_RESOURCE_TYPES,
+  type ActivityLogActionType,
+  type ActivityLogResourceType,
+} from "@repo/shared";
 
 export type ActivityLogMetadata = {
   operation: ActivityLogActionType;

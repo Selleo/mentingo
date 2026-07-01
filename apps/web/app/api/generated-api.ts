@@ -13734,9 +13734,72 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         page?: number;
         /** @min 1 */
         perPage?: number;
+        keyword?: string;
         email?: string;
+        resourceType?:
+          | "user"
+          | "course"
+          | "chapter"
+          | "lesson"
+          | "announcement"
+          | "group"
+          | "settings"
+          | "integration"
+          | "category"
+          | "qa"
+          | "news"
+          | "article"
+          | "articleSection"
+          | "live_training";
         from?: string;
         to?: string;
+        actionTypes?:
+          | (
+              | "create"
+              | "update"
+              | "bulk_course_category_update"
+              | "bulk_course_status_update"
+              | "delete"
+              | "login"
+              | "login_failed"
+              | "logout"
+              | "enroll_course"
+              | "unenroll_course"
+              | "start_course"
+              | "group_assignment"
+              | "users_import"
+              | "send_password_reset_email"
+              | "resend_password_creation_email"
+              | "complete_lesson"
+              | "complete_course"
+              | "complete_chapter"
+              | "expire_certificate"
+              | "reset_certificate"
+              | "view_announcement"
+            )
+          | (
+              | "create"
+              | "update"
+              | "bulk_course_category_update"
+              | "bulk_course_status_update"
+              | "delete"
+              | "login"
+              | "login_failed"
+              | "logout"
+              | "enroll_course"
+              | "unenroll_course"
+              | "start_course"
+              | "group_assignment"
+              | "users_import"
+              | "send_password_reset_email"
+              | "resend_password_creation_email"
+              | "complete_lesson"
+              | "complete_course"
+              | "complete_chapter"
+              | "expire_certificate"
+              | "reset_certificate"
+              | "view_announcement"
+            )[];
       },
       params: RequestParams = {},
     ) =>

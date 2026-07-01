@@ -4420,10 +4420,22 @@
   "activityLogsView": {
     "filters": {
       "placeholder": {
+        "search": "Szukaj aktywności...",
         "searchByEmail": "Szukaj według e-mail...",
+        "action": "Wszystkie akcje",
+        "resource": "Wszystkie zasoby",
         "from": "Od daty",
         "to": "Do daty"
-      }
+      },
+      "search": {
+        "action": "Szukaj akcji...",
+        "resource": "Szukaj zasobów..."
+      },
+      "empty": {
+        "action": "Nie znaleziono akcji.",
+        "resource": "Nie znaleziono zasobów."
+      },
+      "selectedActions": "{{count}} akcje"
     },
     "description": "Oś czasu zmian w platformie w formie prostego, rozwijanego strumienia.",
     "breadcrumbs": {
@@ -4464,9 +4476,9 @@
       "users_import": "Zaimportowano użytkowników",
       "send_password_reset_email": "Wysłano e-mail resetowania hasła",
       "resend_password_creation_email": "Wysłano ponownie e-mail utworzenia hasła",
-      "complete_lesson": "Ukończono",
-      "complete_course": "Ukończono",
-      "complete_chapter": "Ukończono",
+      "complete_lesson": "Ukończono lekcję",
+      "complete_course": "Ukończono kurs",
+      "complete_chapter": "Ukończono rozdział",
       "expire_certificate": "Certyfikat wygasł",
       "reset_certificate": "Certyfikat zresetowany",
       "view_announcement": "Wyświetlono"
@@ -4477,9 +4489,15 @@
       "lesson": "Lekcja",
       "question": "Pytanie",
       "news": "Aktualności",
+      "article": "Artykuł",
       "articles": "Artykuły",
+      "articleSection": "Sekcja artykułu",
       "user": "Użytkownik",
+      "group": "Grupa",
       "category": "Kategoria",
+      "settings": "Ustawienia",
+      "integration": "Integracja",
+      "qa": "Q&A",
       "announcement": "Ogłoszenie",
       "live_training": "Szkolenie na żywo",
       "global_settings": "Ustawienia"

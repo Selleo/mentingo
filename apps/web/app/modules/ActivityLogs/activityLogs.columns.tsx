@@ -89,6 +89,20 @@ export const getActivityLogsColumns = (
     ),
   },
   {
+    id: "resource",
+    header: t("activityLogsView.table.resource"),
+    cell: ({ row }) => {
+      const resourceLabel = getActivityLogEntityLabel(t, row.original.resourceType);
+
+      return (
+        <ActivityLogBadge
+          label={resourceLabel}
+          className="border-neutral-200 bg-neutral-50 text-neutral-700"
+        />
+      );
+    },
+  },
+  {
     id: "action",
     header: t("activityLogsView.table.action"),
     cell: ({ row }) => {
@@ -104,20 +118,6 @@ export const getActivityLogsColumns = (
           label={actionLabel}
           className={badgeClassName}
           iconClassName={iconClassName}
-        />
-      );
-    },
-  },
-  {
-    id: "resource",
-    header: t("activityLogsView.table.resource"),
-    cell: ({ row }) => {
-      const resourceLabel = getActivityLogEntityLabel(t, row.original.resourceType);
-
-      return (
-        <ActivityLogBadge
-          label={resourceLabel}
-          className="border-neutral-200 bg-neutral-50 text-neutral-700"
         />
       );
     },

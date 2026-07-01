@@ -1,6 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { endOfDay, startOfDay } from "date-fns";
-import { count, desc, getTableColumns, and, like, gte, lte } from "drizzle-orm";
+import {
+  count,
+  desc,
+  getTableColumns,
+  and,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  sql,
+} from "drizzle-orm";
 
 import { DatabasePg, type Pagination } from "src/common";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
@@ -76,6 +88,8 @@ export class ActivityLogsService {
   async getActivityLogs({
     keyword,
     email,
+    actionTypes,
+    resourceType,
     from,
     to,
     page = 1,
@@ -88,7 +102,15 @@ export class ActivityLogsService {
 
     if (email) {
       const pattern = `%${email.replace(/%/g, "\\%").replace(/_/g, "\\_")}%`;
-      conditions.push(like(activityLogs.actorEmail, pattern));
+      conditions.push(ilike(activityLogs.actorEmail, pattern));
+    }
+
+    if (actionTypes?.length) {
+      conditions.push(inArray(activityLogs.actionType, actionTypes));
+    }
+
+    if (resourceType) {
+      conditions.push(eq(activityLogs.resourceType, resourceType));
     }
 
     if (from)
@@ -98,7 +120,16 @@ export class ActivityLogsService {
 
     if (keyword) {
       const pattern = `%${keyword.replace(/%/g, "\\%").replace(/_/g, "\\_")}%`;
-      conditions.push(like(activityLogs.actorEmail, pattern));
+      const keywordCondition = or(
+        ilike(activityLogs.actorEmail, pattern),
+        ilike(activityLogs.actorRole, pattern),
+        sql`${activityLogs.resourceId}::text ILIKE ${pattern}`,
+        sql`${activityLogs.metadata}::text ILIKE ${pattern}`,
+      );
+
+      if (keywordCondition) {
+        conditions.push(keywordCondition);
+      }
     }
 
     const query = this.db
