@@ -3137,7 +3137,8 @@
     "roles": {
       "admin": "Správce",
       "student": "Student",
-      "content_creator": "Tvůrce obsahu"
+      "content_creator": "Tvůrce obsahu",
+      "trainer": "Trenér"
     },
     "switch": {
       "enabled": "Povoleno",

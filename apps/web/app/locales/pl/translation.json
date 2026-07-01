@@ -3471,7 +3471,8 @@
     "roles": {
       "admin": "Administrator",
       "student": "Student",
-      "content_creator": "Twórca treści"
+      "content_creator": "Twórca treści",
+      "trainer": "Trener"
     },
     "switch": {
       "enabled": "Włączone",

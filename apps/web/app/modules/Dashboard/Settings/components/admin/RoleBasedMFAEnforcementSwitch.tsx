@@ -1,3 +1,4 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,7 +13,6 @@ import {
   CardTitle,
 } from "~/components/ui/card";
 import { Switch } from "~/components/ui/switch";
-import { USER_ROLE, type UserRole } from "~/config/userRoles";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 
@@ -21,16 +21,27 @@ import type { GetPublicGlobalSettingsResponse } from "~/api/generated-api";
 interface MFAEnforcementSwitchProps {
   MFAEnforcedRoles: GetPublicGlobalSettingsResponse["data"]["MFAEnforcedRoles"];
 }
-const USER_ROLE_VALUES = [USER_ROLE.admin, USER_ROLE.student, USER_ROLE.contentCreator] as const;
+
+const MFA_ENFORCEMENT_ROLE_VALUES = [
+  SYSTEM_ROLE_SLUGS.ADMIN,
+  SYSTEM_ROLE_SLUGS.STUDENT,
+  SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+  SYSTEM_ROLE_SLUGS.TRAINER,
+] as const;
+
+type MFAEnforcementRole = (typeof MFA_ENFORCEMENT_ROLE_VALUES)[number];
 
 export default function RoleBasedMFAEnforcementSwitch({
   MFAEnforcedRoles,
 }: MFAEnforcementSwitchProps) {
   const { t } = useTranslation();
 
-  const [roleStates, setRoleStates] = useState<Record<UserRole, boolean>>(() => {
-    const initialState: Record<UserRole, boolean> = {} as Record<UserRole, boolean>;
-    USER_ROLE_VALUES.forEach((role) => {
+  const [roleStates, setRoleStates] = useState<Record<MFAEnforcementRole, boolean>>(() => {
+    const initialState: Record<MFAEnforcementRole, boolean> = {} as Record<
+      MFAEnforcementRole,
+      boolean
+    >;
+    MFA_ENFORCEMENT_ROLE_VALUES.forEach((role) => {
       initialState[role] = MFAEnforcedRoles.includes(role);
     });
     return initialState;
@@ -38,7 +49,7 @@ export default function RoleBasedMFAEnforcementSwitch({
 
   const { mutate: updateMFAEnforcedRoles, isPending } = useUpdateMFAEnforcedRoles();
 
-  const toggleRoleSwitch = (role: UserRole) => {
+  const toggleRoleSwitch = (role: MFAEnforcementRole) => {
     setRoleStates((prev) => ({
       ...prev,
       [role]: !prev[role],
@@ -46,7 +57,7 @@ export default function RoleBasedMFAEnforcementSwitch({
   };
 
   const hasChanges = () => {
-    return USER_ROLE_VALUES.some((role) => {
+    return MFA_ENFORCEMENT_ROLE_VALUES.some((role) => {
       const wasEnforced = MFAEnforcedRoles.includes(role);
       const isEnforced = roleStates[role];
       return wasEnforced !== isEnforced;
@@ -55,11 +66,14 @@ export default function RoleBasedMFAEnforcementSwitch({
 
   const saveMFAEnforcement = () => {
     if (hasChanges()) {
-      const updateData = {
-        admin: roleStates[USER_ROLE.admin],
-        student: roleStates[USER_ROLE.student],
-        content_creator: roleStates[USER_ROLE.contentCreator],
-      };
+      const updateData = MFA_ENFORCEMENT_ROLE_VALUES.reduce<Record<string, boolean>>(
+        (roles, role) => {
+          roles[role] = roleStates[role];
+          return roles;
+        },
+        {},
+      );
+
       updateMFAEnforcedRoles(updateData);
     }
   };
@@ -75,7 +89,7 @@ export default function RoleBasedMFAEnforcementSwitch({
       <CardContent className="body-sm-md">
         <div className="mb-4">{t("MFAEnforcementView.description")}</div>
         <div className="space-y-2">
-          {USER_ROLE_VALUES.map((role) => (
+          {MFA_ENFORCEMENT_ROLE_VALUES.map((role) => (
             <div key={role} className="flex items-center justify-between">
               <p>{t(`MFAEnforcementView.roles.${role}`)}</p>
               <div className="group inline-flex items-center gap-2">

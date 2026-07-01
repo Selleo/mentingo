@@ -3190,7 +3190,8 @@
     "roles": {
       "admin": "Administrator",
       "student": "Student",
-      "content_creator": "Content Creator"
+      "content_creator": "Content Creator",
+      "trainer": "Trainer"
     },
     "switch": {
       "enabled": "Enabled",

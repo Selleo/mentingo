@@ -1,3 +1,5 @@
+import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+
 import { USER_ROLE } from "~/config/userRoles";
 
 import { SETTINGS_PAGE_HANDLES } from "../../data/settings/handles";
@@ -156,6 +158,7 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
       admin: !originalRoles.has(USER_ROLE.admin),
       student: !originalRoles.has(USER_ROLE.student),
       content_creator: !originalRoles.has(USER_ROLE.contentCreator),
+      trainer: !originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
     };
 
     cleanup.add(async () => {
@@ -163,6 +166,7 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
         admin: originalRoles.has(USER_ROLE.admin),
         student: originalRoles.has(USER_ROLE.student),
         content_creator: originalRoles.has(USER_ROLE.contentCreator),
+        trainer: originalRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
       });
     });
 
@@ -173,6 +177,7 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
     await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.admin)).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.student)).click();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(USER_ROLE.contentCreator)).click();
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.mfaRoleSwitch(SYSTEM_ROLE_SLUGS.TRAINER)).click();
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE)).toBeEnabled();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.MFA_ENFORCEMENT_SAVE).click();
 
@@ -184,6 +189,7 @@ test("admin can enable or disable MFA enforcement per role and save only when ch
           admin: currentRoles.has(USER_ROLE.admin),
           student: currentRoles.has(USER_ROLE.student),
           content_creator: currentRoles.has(USER_ROLE.contentCreator),
+          trainer: currentRoles.has(SYSTEM_ROLE_SLUGS.TRAINER),
         };
       })
       .toEqual(targetRoles);
