@@ -1,6 +1,70 @@
+<a name="v4.14.0"></a>
+
+## [v4.14.0] - 01.07.2026
+
+### Features:
+
+- allow bulk status and category updates for courses ([#1681](https://github.com/Selleo/mentingo/issues/1681))
+
+- allow admins to duplicate course ([#1686](https://github.com/Selleo/mentingo/issues/1686))
+
+- add keyboard shortcuts for easier video playback control ([#1687](https://github.com/Selleo/mentingo/issues/1687))
+
+- add translation support for AI mentor instructions and completion conditions ([#1689](https://github.com/Selleo/mentingo/issues/1689))
+
+- allow admins to resend password setup and reset emails to users ([#1675](https://github.com/Selleo/mentingo/issues/1675))
+
+- save video progress so learners can resume where they left off ([#1670](https://github.com/Selleo/mentingo/issues/1670))
+
+- allow video lessons to be completed based on watched frame coverage ([#1633](https://github.com/Selleo/mentingo/issues/1633))
+
+### Bug Fixes:
+
+- video playback access for unregistered users ([#1711](https://github.com/Selleo/mentingo/issues/1711))
+
+- display the correct sentence in fill-in-the-blank exercises ([#1682](https://github.com/Selleo/mentingo/issues/1682))
+
+- correct hero preview redirect ([#1673](https://github.com/Selleo/mentingo/issues/1673))
+
+### Chores:
+
+- expand activity log filters for easier searching ([#1709](https://github.com/Selleo/mentingo/issues/1709))
+
+- add Spanish language support ([#1706](https://github.com/Selleo/mentingo/issues/1706))
+
+- add trainer role to MFA enforcement settings ([#1700](https://github.com/Selleo/mentingo/issues/1700))
+
+- improve the ordering of completed courses ([#1701](https://github.com/Selleo/mentingo/issues/1701))
+
+- improve public chapter access for free courses ([#1699](https://github.com/Selleo/mentingo/issues/1699))
+
+- extend integration API with tenant creation and deactivation endpoints ([#1690](https://github.com/Selleo/mentingo/issues/1690))
+
+- improve AI mentor feedback quality and clarity ([#1680](https://github.com/Selleo/mentingo/issues/1680))
+
+- use optimized image variants across the platform ([#1676](https://github.com/Selleo/mentingo/issues/1676))
+
+- improve video playback quality with resolution controls ([#1674](https://github.com/Selleo/mentingo/issues/1674))
+
+- add a native time input option to calendar date and time fields ([#1664](https://github.com/Selleo/mentingo/issues/1664))
+
+- add a sample user import file ([#1672](https://github.com/Selleo/mentingo/issues/1672))
+
+- improve live training session interface ([#1668](https://github.com/Selleo/mentingo/issues/1668))
+
+- allow users to have separate accounts with the same email across tenants ([#1665](https://github.com/Selleo/mentingo/issues/1665))
+
+### Documentation:
+
+- update deployment documentation with Docker log retention guidelines ([#1679](https://github.com/Selleo/mentingo/issues/1679))
+
+- add business document specifications ([#1625](https://github.com/Selleo/mentingo/issues/1625))
+
+- add setup guide for LiveKit integration ([#1659](https://github.com/Selleo/mentingo/issues/1659))
+
 <a name="v4.13.0"></a>
 
-## [v4.13.0] - 22.06.2026
+## [v4.13.0] - 23.06.2026
 
 ### Features:
 
@@ -31,6 +95,10 @@
 - hide AI mentor results when AI services are not configured ([#1656](https://github.com/Selleo/mentingo/issues/1656))
 
 - display certificate expiry dates for clearer certificate validity ([#1631](https://github.com/Selleo/mentingo/issues/1631))
+
+### Documentation:
+
+- update changelog for version v4.13.0
 
 <a name="v4.12.1"></a>
 
@@ -2936,7 +3004,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.13.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.14.0...HEAD
+[v4.14.0]: https://github.com/Selleo/mentingo/compare/v4.13.0...v4.14.0
 [v4.13.0]: https://github.com/Selleo/mentingo/compare/v4.12.1...v4.13.0
 [v4.12.1]: https://github.com/Selleo/mentingo/compare/v4.12.0...v4.12.1
 [v4.12.0]: https://github.com/Selleo/mentingo/compare/v4.11.0...v4.12.0
