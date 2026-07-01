@@ -1,9 +1,11 @@
+import { SUPPORTED_LANGUAGES, type SupportedLanguages } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
 
 import { useCreateCertificateShareLink } from "~/api/mutations/useCreateCertificateShareLink";
 import { useCreateLearningPathCertificateShareLink } from "~/api/mutations/useCreateLearningPathCertificateShareLink";
 import { cn } from "~/lib/utils";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
@@ -53,6 +55,7 @@ const CertificatePreview = ({
   onColorPickerOpenChange,
   certificateKind = CERTIFICATE_KIND.COURSE,
 }: CertificatePreviewProps) => {
+  const currentLanguage = useLanguageStore((state) => state.language);
   const { downloadCertificatePdf, isPreparingDownload } = useCertificatePDF(certificateKind);
   const { mutateAsync: createCertificateShareLink, isPending: isPreparingShare } =
     useCreateCertificateShareLink();
@@ -60,7 +63,9 @@ const CertificatePreview = ({
     mutateAsync: createLearningPathCertificateShareLink,
     isPending: isPreparingLearningPathShare,
   } = useCreateLearningPathCertificateShareLink();
-  const [toggled, setToggled] = useState<boolean>(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguages>(
+    currentLanguage || SUPPORTED_LANGUAGES.EN,
+  );
   const [colorTheme, setColorTheme] = useState<CertificateColorTheme>(
     getCertificateColorTheme(initialColor),
   );
@@ -68,8 +73,6 @@ const CertificatePreview = ({
   useEffect(() => {
     setColorTheme(getCertificateColorTheme(initialColor));
   }, [initialColor]);
-
-  const lang = toggled ? "pl" : "en";
 
   const handleShareToLinkedIn = async () => {
     if (!certificateId || isPreparingShare || isPreparingLearningPathShare) return;
@@ -80,19 +83,19 @@ const CertificatePreview = ({
       .exhaustive();
     const { linkedinShareUrl } = await createShareLink({
       certificateId,
-      language: lang,
+      language: selectedLanguage,
     });
 
     window.open(linkedinShareUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownloadCertificate = async () => {
-    await downloadCertificatePdf({ certificateId, lang });
+    await downloadCertificatePdf({ certificateId, lang: selectedLanguage });
   };
 
   return (
-    <div className="flex w-[min(1120px,95vw)] justify-center">
-      <div className="w-full">
+    <div className="flex max-h-[90vh] w-[min(1120px,95vw)] justify-center overflow-y-auto">
+      <div className="w-full pr-1">
         <div
           className={cn("mx-auto w-full bg-white", {
             "rounded-t-lg": !minimalFrame,
@@ -113,8 +116,8 @@ const CertificatePreview = ({
 
             <CertificateControls
               onClose={onClose}
-              languageToggled={toggled}
-              setLanguageToggled={setToggled}
+              selectedLanguage={selectedLanguage}
+              setSelectedLanguage={setSelectedLanguage}
               downloadCertificatePdf={handleDownloadCertificate}
               isPreparingDownload={isPreparingDownload}
               onShareToLinkedIn={handleShareToLinkedIn}
@@ -138,7 +141,7 @@ const CertificatePreview = ({
             platformLogo={platformLogo}
             backgroundImageUrl={certificateBackgroundImageUrl}
             signatureImageUrl={certificateSignatureUrl}
-            lang={lang}
+            lang={selectedLanguage}
             colorTheme={colorTheme}
             certificateKind={certificateKind}
           />

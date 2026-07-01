@@ -43,7 +43,15 @@ export const getCreatePasswordReminderEmailTranslations = (language: SupportedLa
       ],
       buttonText: "VYTVOŘIT HESLO",
     },
+    es: {
+      heading: "Recordatorio",
+      paragraphs: [
+        "Este es un recordatorio amistoso de que tu cuenta aún no está completamente configurada. 🔒",
+        "Para completar la configuración de tu cuenta, crea tu contraseña haciendo clic en el botón de abajo. Si ya has creado tu contraseña, ignora este recordatorio.",
+      ],
+      buttonText: "CREAR CONTRASEÑA",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

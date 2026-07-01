@@ -47,7 +47,15 @@ export const getUserFinishedChapterEmailTranslations = (
       ],
       buttonText: "DALŠÍ KAPITOLA",
     },
+    es: {
+      heading: "Capítulo completado",
+      paragraphs: [
+        "Progreso actualizado 🧩",
+        `Has terminado ${chapterName} en ${courseName}. Los siguientes materiales están listos.`,
+      ],
+      buttonText: "SIGUIENTE CAPÍTULO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

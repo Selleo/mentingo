@@ -56,4 +56,13 @@ export const REPORT_HEADERS: Record<SupportedLanguages, ReportHeaders> = {
     progressPercentage: "Progres (%)",
     quizResults: "Výsledky z posledních pokusů (%)",
   },
+  es: {
+    studentName: "Nombre",
+    groupName: "Grupos",
+    courseName: "Nombre del curso",
+    lessonCount: "Número de lecciones",
+    completedLessons: "Lecciones completadas",
+    progressPercentage: "Progreso (%)",
+    quizResults: "Resultados del último intento de cuestionario (%)",
+  },
 };

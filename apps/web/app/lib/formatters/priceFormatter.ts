@@ -92,6 +92,7 @@ export function getCurrencySymbol(language: string): CurrencyCode {
   const languageCurrencyMap: Record<string, CurrencyCode> = {
     pl: "PLN",
     en: "USD",
+    es: "EUR",
   };
 
   return languageCurrencyMap[loweCaseLanguage];

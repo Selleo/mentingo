@@ -47,7 +47,15 @@ export const getCertificateExpirationWarningEmailTranslations = (
       ],
       buttonText: "OTEVŘÍT KURZ",
     },
+    es: {
+      heading: "El certificado caduca pronto",
+      paragraphs: [
+        `Tu certificado del curso ${courseName} caduca el ${expiresAt}.`,
+        "Después de la caducidad, el progreso del curso se restablecerá. Completa el curso de nuevo para recibir un certificado nuevo.",
+      ],
+      buttonText: "ABRIR CURSO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

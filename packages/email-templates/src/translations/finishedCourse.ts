@@ -41,7 +41,12 @@ export const getFinishedCourseEmailTranslations = (
       ],
       buttonText: "ZOBRAZIT POKROK",
     },
+    es: {
+      heading: "Usuario completó el curso",
+      paragraphs: ["¡Hola! 🧑‍💻", `${userName} completó ${courseName}. Revisa su progreso.`],
+      buttonText: "VER PROGRESO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

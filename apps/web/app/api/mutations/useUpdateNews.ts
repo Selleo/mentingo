@@ -6,11 +6,12 @@ import { NEWS_LIST_QUERY_KEY } from "../queries/useNewsList";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
 
 import type { UpdateNewsBody } from "../generated-api";
+import type { SupportedLanguages } from "@repo/shared";
 
 type UpdateNewsOptions = {
   id: string;
   data: UpdateNewsBody;
-  language?: "en" | "pl";
+  language?: SupportedLanguages;
 };
 
 export function useUpdateNews() {

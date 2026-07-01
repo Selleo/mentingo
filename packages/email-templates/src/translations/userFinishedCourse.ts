@@ -47,7 +47,15 @@ export const getUserFinishedCourseEmailTranslations = (
       ],
       buttonText: hasCertificate ? "STÁHNOUT CERTIFIKÁT" : "POKRAČOVAT VE STUDIU",
     },
+    es: {
+      heading: "Curso completado",
+      paragraphs: [
+        "¡Enhorabuena! 🏁",
+        `Has completado ${courseName}. ${hasCertificate ? "Tu certificado está listo para descargar; revisa también los siguientes pasos recomendados." : ""}`,
+      ],
+      buttonText: hasCertificate ? "DESCARGAR CERTIFICADO" : "CONTINUAR APRENDIENDO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

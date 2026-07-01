@@ -61,7 +61,17 @@ export const getCertificateExpiredEmailTranslations = (
       ],
       buttonText: "OTEVŘÍT KURZ",
     },
+    es: {
+      heading: isManualReset ? "Certificado restablecido" : "Certificado caducado",
+      paragraphs: [
+        isManualReset
+          ? `Un administrador ha restablecido tu certificado del curso ${courseName}.`
+          : `Tu certificado del curso ${courseName} ha caducado.`,
+        "El certificado se ha archivado y el progreso del curso se ha restablecido. Completa el curso de nuevo para recibir un certificado nuevo.",
+      ],
+      buttonText: "ABRIR CURSO",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

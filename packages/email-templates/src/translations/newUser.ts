@@ -31,7 +31,12 @@ export const getNewUserEmailTranslations = (language: SupportedLanguages, userNa
       paragraphs: ["Ahoj! 🧑‍💻", `${userName} se připojil(a). Zkontroluj profil a přiřaď kurzy.`],
       buttonText: "OTEVŘÍT PROFIL",
     },
+    es: {
+      heading: "Nuevo perfil de usuario",
+      paragraphs: ["¡Hola! 🧑‍💻", `${userName} se ha unido. Revisa el perfil y asigna cursos.`],
+      buttonText: "ABRIR PERFIL",
+    },
   };
 
-  return emailContent[language] ?? emailContent.en;
+  return emailContent[language];
 };

@@ -17,7 +17,7 @@ The feature also gives course managers controlled ways to handle certificate val
 
 - List active certificates for a learner profile.
 - Open certificate previews for completed courses and learning paths.
-- Switch certificate preview language between supported certificate languages.
+- Switch certificate preview language between all supported platform languages.
 - Download certificate PDFs with generated filenames.
 - Share certificates externally through LinkedIn/public share links.
 - Configure whether a course issues certificates.
@@ -35,7 +35,7 @@ For administrators, the reset and validity tools reduce operational risk. When a
 
 ## How It Works
 
-Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
+Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
 
 Course certificate settings are managed from the admin course settings workflow. Administrators can enable certificate issuance, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates.
 
@@ -49,6 +49,7 @@ Certificate reset actions archive matching active certificates, reset the releva
 - Core permissions include `PERMISSIONS.CERTIFICATE_READ`, `PERMISSIONS.CERTIFICATE_RENDER`, and `PERMISSIONS.CERTIFICATE_SHARE`.
 - Course certificate validity and reset operations require `PERMISSIONS.COURSE_UPDATE` or `PERMISSIONS.COURSE_UPDATE_OWN`.
 - Public share endpoints intentionally allow external certificate page and image access for share workflows.
+- Certificate PDFs, previews, share pages, and share images use the shared supported-language list, so new platform languages become available to certificates through the same contract.
 
 ## Test Evidence
 

@@ -154,6 +154,7 @@ export class LiveTrainingAnnouncementsService {
           de: `Die Live-Schulung ${linkedTitle} beginnt am ${formattedStart}.`,
           lt: `Tiesioginiai mokymai ${linkedTitle} prasidės ${formattedStart}.`,
           cs: `Živé školení ${linkedTitle} začne ${formattedStart}.`,
+          es: `La formación en vivo ${linkedTitle} comienza el ${formattedStart}.`,
         });
       case ANNOUNCEMENT_EMAIL_TEMPLATES.LIVE_TRAINING_STARTED:
         return this.translate(language, {
@@ -162,6 +163,7 @@ export class LiveTrainingAnnouncementsService {
           de: `Die Live-Schulung ${linkedTitle} ist jetzt aktiv.`,
           lt: `Tiesioginiai mokymai ${linkedTitle} dabar vyksta.`,
           cs: `Živé školení ${linkedTitle} nyní probíhá.`,
+          es: `La formación en vivo ${linkedTitle} está activa ahora.`,
         });
       default:
         return this.translate(language, {
@@ -170,6 +172,7 @@ export class LiveTrainingAnnouncementsService {
           de: `Die Live-Schulung ${linkedTitle} wurde beendet.`,
           lt: `Tiesioginiai mokymai ${linkedTitle} baigėsi.`,
           cs: `Živé školení ${linkedTitle} skončilo.`,
+          es: `La formación en vivo ${linkedTitle} ha finalizado.`,
         });
     }
   }

@@ -8,6 +8,7 @@ import { defaultCertificateColorTheme } from "./certificateTheme";
 
 import type { CertificateKind } from "./certificateKind";
 import type { CertificateColorTheme } from "./certificateTheme";
+import type { SupportedLanguages } from "@repo/shared";
 
 interface CertificateContentProps {
   studentName?: string;
@@ -19,7 +20,7 @@ interface CertificateContentProps {
   backgroundImageUrl?: string | null;
   platformLogo?: string | null;
   signatureImageUrl?: string | null;
-  lang?: "pl" | "en";
+  lang?: SupportedLanguages;
   colorTheme?: CertificateColorTheme;
   certificateKind?: CertificateKind;
 }
@@ -49,7 +50,66 @@ const translations = {
     expiryDate: "Expires",
     signature: "Signature",
   },
-};
+  de: {
+    certificate: "ZERTIFIKAT",
+    certifyThat: "HIERMIT WIRD BESTÄTIGT, DASS",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "hat den Kurs erfolgreich abgeschlossen",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "hat den Entwicklungspfad erfolgreich abgeschlossen",
+    },
+    confirmation: "und bestätigt damit die Teilnahme am gesamten Schulungsprogramm.",
+    date: "Datum",
+    expiryDate: "Läuft ab",
+    signature: "Unterschrift",
+  },
+  lt: {
+    certificate: "SERTIFIKATAS",
+    certifyThat: "ŠIUO PATVIRTINAMA, KAD",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "sėkmingai baigė kursą",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "sėkmingai baigė tobulėjimo kelią",
+    },
+    confirmation: "taip patvirtindamas dalyvavimą visoje mokymo programoje.",
+    date: "Data",
+    expiryDate: "Galioja iki",
+    signature: "Parašas",
+  },
+  cs: {
+    certificate: "CERTIFIKÁT",
+    certifyThat: "TÍMTO SE POTVRZUJE, ŽE",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "úspěšně absolvoval/a kurz",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "úspěšně dokončil/a rozvojovou cestu",
+    },
+    confirmation: "čímž potvrzuje účast na celém školicím programu.",
+    date: "Datum",
+    expiryDate: "Platí do",
+    signature: "Podpis",
+  },
+  es: {
+    certificate: "CERTIFICADO",
+    certifyThat: "SE CERTIFICA QUE",
+    successfulCompletion: {
+      [CERTIFICATE_KIND.COURSE]: "ha completado correctamente el curso",
+      [CERTIFICATE_KIND.LEARNING_PATH]: "ha completado correctamente la ruta de desarrollo",
+    },
+    confirmation: "confirmando así su participación en todo el programa formativo.",
+    date: "Fecha",
+    expiryDate: "Caduca",
+    signature: "Firma",
+  },
+} satisfies Record<
+  SupportedLanguages,
+  {
+    certificate: string;
+    certifyThat: string;
+    successfulCompletion: Record<CertificateKind, string>;
+    confirmation: string;
+    date: string;
+    expiryDate: string;
+    signature: string;
+  }
+>;
 const hrClasses = "mx-auto mb-3 w-full";
 const textClasses = "text-[18px] uppercase text-gray-800";
 const text2Classes = "text-[18px] text-gray-600";
