@@ -299,6 +299,29 @@ export class LessonRepository {
     return Boolean(lessonAccess);
   }
 
+  async getHasPublicContentResourceAccess(resourceId: UUIDType) {
+    const [resourceAccess] = await this.db
+      .select({ id: resources.id })
+      .from(resources)
+      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
+      .innerJoin(lessons, eq(lessons.id, resourceEntity.entityId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .leftJoin(settings, and(isNull(settings.userId), eq(settings.tenantId, chapters.tenantId)))
+      .where(
+        and(
+          eq(resources.id, resourceId),
+          eq(resources.archived, false),
+          eq(resourceEntity.entityType, ENTITY_TYPE.LESSON),
+          eq(lessons.type, LESSON_TYPES.CONTENT),
+          eq(chapters.isFreemium, true),
+          sql`COALESCE((${settings.settings}->>'unregisteredUserCoursesAccessibility')::boolean, false)`,
+        ),
+      )
+      .limit(1);
+
+    return Boolean(resourceAccess);
+  }
+
   async getLessonsByChapterId(chapterId: UUIDType, language: SupportedLanguages) {
     return this.db
       .select({

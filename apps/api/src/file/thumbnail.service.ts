@@ -75,18 +75,13 @@ export class ThumbnailService {
     if (!resourceId) throw new BadRequestException("Invalid sourceUrl");
 
     const [resource] = await this.db
-      .select({
-        ...getTableColumns(resources),
-        entityType: resourceEntity.entityType,
-        entityId: resourceEntity.entityId,
-      })
+      .select({ ...getTableColumns(resources) })
       .from(resources)
-      .innerJoin(resourceEntity, eq(resourceEntity.resourceId, resources.id))
       .where(eq(resources.id, resourceId));
 
     if (!resource) throw new BadRequestException("common.toast.notFound");
 
-    await this.validateThumbnailAccess(resource, currentUser);
+    await this.validateThumbnailAccessForResource(resource.id, currentUser);
 
     if (resource.reference.startsWith("bunny-")) {
       const videoId = resource.reference.replace("bunny-", "");
@@ -150,6 +145,34 @@ export class ThumbnailService {
       default:
         return;
     }
+  }
+
+  private async validateThumbnailAccessForResource(
+    resourceId: UUIDType,
+    currentUser: CurrentUserType | null,
+  ) {
+    const resourceLinks = await this.db
+      .select({
+        entityType: resourceEntity.entityType,
+        entityId: resourceEntity.entityId,
+      })
+      .from(resourceEntity)
+      .where(eq(resourceEntity.resourceId, resourceId));
+
+    if (!resourceLinks.length) throw new BadRequestException("common.toast.notFound");
+
+    let accessError: unknown;
+
+    for (const resourceLink of resourceLinks) {
+      try {
+        await this.validateThumbnailAccess(resourceLink, currentUser);
+        return;
+      } catch (error) {
+        accessError = error;
+      }
+    }
+
+    throw accessError;
   }
 
   private async getGlobalSettingsFlags() {
@@ -277,7 +300,7 @@ export class ThumbnailService {
         studentCourses,
         and(
           eq(studentCourses.courseId, chapters.courseId),
-          eq(studentCourses.studentId, currentUserId ?? ""),
+          currentUserId ? eq(studentCourses.studentId, currentUserId) : sql`FALSE`,
         ),
       )
       .where(eq(lessons.id, resourceEntityId));
