@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { SYSTEM_ROLE_PERMISSIONS, SYSTEM_ROLE_SLUGS, SYSTEM_RULE_SET_SLUGS } from "@repo/shared";
 import { and, eq } from "drizzle-orm";
 
@@ -12,13 +12,11 @@ import {
   permissionRuleSets,
 } from "src/storage/schema";
 
-import type { OnApplicationBootstrap } from "@nestjs/common";
 import type { SystemRoleSlug } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 @Injectable()
-export class PermissionsBackfillService implements OnApplicationBootstrap {
-  private readonly logger = new Logger(PermissionsBackfillService.name);
+export class PermissionsBackfillService {
   private readonly systemRoleDisplayName: Record<SystemRoleSlug, string> = {
     [SYSTEM_ROLE_SLUGS.ADMIN]: "Admin",
     [SYSTEM_ROLE_SLUGS.CONTENT_CREATOR]: "Content Creator",
@@ -30,21 +28,6 @@ export class PermissionsBackfillService implements OnApplicationBootstrap {
     private readonly tenantDbRunner: TenantDbRunnerService,
     @Inject(DB) private readonly db: DatabasePg,
   ) {}
-
-  async onApplicationBootstrap() {
-    // Skip bootstrap backfill only for build verification, where the app starts without Postgres.
-    if (process.env.JEST_WORKER_ID || process.env.BUILD_VERIFICATION === "true") return;
-
-    const { insertedCount, tenantCount } = await this.backfillMissingPermissionsForAllTenants();
-
-    if (insertedCount > 0) {
-      this.logger.warn(
-        `Backfilled ${insertedCount} missing permission rows across ${tenantCount} tenants`,
-      );
-    } else {
-      this.logger.warn(`Permission backfill found no missing rows across ${tenantCount} tenants`);
-    }
-  }
 
   async backfillMissingPermissionsForAllTenants() {
     let tenantCount = 0;
