@@ -9,7 +9,11 @@ export class TokenService {
   private isProduction: boolean;
 
   constructor() {
-    this.isProduction = process.env.NODE_ENV === "production";
+    // COOKIE_SECURE overrides NODE_ENV-based default, e.g. for HTTP-only
+    // deployments behind a load balancer without TLS (AWS Marketplace one-click).
+    this.isProduction = process.env.COOKIE_SECURE
+      ? process.env.COOKIE_SECURE === "true"
+      : process.env.NODE_ENV === "production";
   }
 
   setTokenCookies(

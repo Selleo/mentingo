@@ -17,12 +17,17 @@ export class OutboxRepository {
 
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
-  async claimNext(): Promise<OutboxEnvelope | null> {
+  async claimNext(tenantId: string): Promise<OutboxEnvelope | null> {
+    // Explicit tenant filter — RLS alone is not enough, because Postgres
+    // skips RLS for the table owner (e.g. when the app connects with the
+    // RDS master user), which would let one tenant's loop claim another
+    // tenant's events.
     const [claimResult] = await this.db.execute(sql`
       WITH candidates AS (
         SELECT id
         FROM outbox_events
         WHERE status IN (${OUTBOX_STATUSES.PENDING}, ${OUTBOX_STATUSES.FAILED})
+          AND tenant_id = ${tenantId}
         ORDER BY created_at ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED

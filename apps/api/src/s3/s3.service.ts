@@ -30,12 +30,19 @@ export class S3Service {
   constructor(@Inject(ConfigService) private configService: ConfigService) {
     const config = this.loadS3Config();
 
+    // Static credentials only when explicitly configured (e.g. MinIO / local).
+    // Otherwise omit them so the SDK default provider chain is used — on ECS
+    // that resolves the task role; passing empty strings would break signing.
+    const hasStaticCredentials = Boolean(config.accessKeyId && config.secretAccessKey);
+
     this.s3Client = new S3Client({
       region: config.region,
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
+      ...(hasStaticCredentials && {
+        credentials: {
+          accessKeyId: config.accessKeyId,
+          secretAccessKey: config.secretAccessKey,
+        },
+      }),
       forcePathStyle: true,
       ...(config.endpoint && { endpoint: config.endpoint }),
     });
@@ -156,9 +163,9 @@ export class S3Service {
 
   isConfigured(): boolean {
     const config = this.loadS3Config();
-    return Boolean(
-      config.region && config.accessKeyId && config.secretAccessKey && config.bucketName,
-    );
+    // Access keys are optional — without them the SDK falls back to the
+    // default provider chain (ECS task role, instance profile, env, ...).
+    return Boolean(config.region && config.bucketName);
   }
 
   async getSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {

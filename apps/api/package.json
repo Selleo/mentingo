@@ -30,7 +30,7 @@
     "db:generate": "drizzle-kit generate --config ./drizzle.migrator.config.ts",
     "db:seed": "tsx ./src/seed/seed.ts",
     "db:seed-staging": "node dist/src/seed/seed.js",
-    "db:seed-prod": "tsx ./src/seed/seed-prod.ts",
+    "db:seed-prod": "node dist/src/seed/seed-prod.js",
     "db:seed-e2e": "tsx ./src/seed/e2e-seed.ts",
     "db:seed-bulk": "tsx ./src/seed/bulk-users-seed.ts",
     "db:truncate-tables": "tsx ./src/seed/truncateTables.ts"

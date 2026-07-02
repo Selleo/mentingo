@@ -26,10 +26,14 @@ export class SmtpAdapter extends EmailAdapter {
       throw new Error("Missing SMTP configuration");
     }
 
+    const portNumber = Number(port);
+
     return {
       host,
-      port,
-      secure: true,
+      port: portNumber,
+      // Implicit TLS only on 465; 587/25 negotiate STARTTLS automatically.
+      // secure:true on a STARTTLS port fails the TLS handshake.
+      secure: portNumber === 465,
       auth: {
         user,
         pass,

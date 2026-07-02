@@ -2,7 +2,7 @@ import { faker } from "@faker-js/faker";
 import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
-import { and, count, eq, sql } from "drizzle-orm";
+import { and, count, eq, isNull, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { flatMap, sampleSize } from "lodash";
 import postgres from "postgres";
@@ -151,6 +151,16 @@ async function insertUserDetails(userId: UUIDType, tenantId: UUIDType) {
 }
 
 export async function insertGlobalSettings(database: DatabasePg, tenantId: UUIDType) {
+  const [existingGlobalSettings] = await database
+    .select({
+      id: settings.id,
+      settings: sql<GlobalSettingsJSONContentSchema>`settings.settings`,
+    })
+    .from(settings)
+    .where(and(eq(settings.tenantId, tenantId), isNull(settings.userId)));
+
+  if (existingGlobalSettings) return existingGlobalSettings;
+
   const [createdGlobalSettings] = await database
     .insert(settings)
     .values({

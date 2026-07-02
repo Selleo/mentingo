@@ -121,7 +121,9 @@ export class TenantResolverService {
       this.getFirstHeaderValue(req.headers["x-forwarded-proto"]) ??
       (req.protocol as string | undefined) ??
       "http";
-    return `${protocol}://${host}`.replace(/\/$/, "");
+    // Hostnames are case-insensitive — normalize so the exact-match tenant
+    // lookup works regardless of the casing the client (or infra) uses.
+    return `${protocol}://${host}`.replace(/\/$/, "").toLowerCase();
   }
 
   private safeParseOrigin(value?: string): string | null {

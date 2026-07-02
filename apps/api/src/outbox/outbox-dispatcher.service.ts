@@ -26,11 +26,11 @@ export class OutboxDispatcherService {
 
     try {
       await this.tenantRunner.runForEachTenant(async (tenantId) => {
-        let event = await this.outboxRepository.claimNext();
+        let event = await this.outboxRepository.claimNext(tenantId);
 
         while (event) {
           await this.processSingleEvent(event, tenantId);
-          event = await this.outboxRepository.claimNext();
+          event = await this.outboxRepository.claimNext(tenantId);
         }
       });
     } finally {

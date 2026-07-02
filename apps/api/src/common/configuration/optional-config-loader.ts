@@ -5,12 +5,9 @@ import googleConfig from "./google";
 import microsoftConfig from "./microsoft";
 import slackConfig from "./slack";
 
-const hasAwsConfig = hasRequiredEnvsConfig([
-  "AWS_BUCKET_NAME",
-  "AWS_REGION",
-  "AWS_ACCESS_KEY_ID",
-  "AWS_SECRET_ACCESS_KEY",
-]);
+// Access keys intentionally not required — on AWS the SDK default provider
+// chain (ECS task role / instance profile) supplies credentials.
+const hasAwsConfig = hasRequiredEnvsConfig(["AWS_BUCKET_NAME", "AWS_REGION"]);
 
 export const hasGoogleConfig = hasRequiredEnvsConfig([
   "GOOGLE_CLIENT_ID",

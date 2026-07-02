@@ -1,3 +1,5 @@
+import { randomBytes } from "crypto";
+
 import { faker } from "@faker-js/faker";
 import { SYSTEM_ROLE_SLUGS, type SystemRoleSlug } from "@repo/shared";
 import * as dotenv from "dotenv";
@@ -13,7 +15,6 @@ import {
   assignSystemRoleToUser,
   ensureSeedTenant,
   seedSystemRolesForTenant,
-  seedTruncateAllTables,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
 
@@ -83,10 +84,20 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
   return (await db.insert(credentials).values(credentialData).returning())[0];
 }
 
+async function finishSeed(tenantId: UUIDType) {
+  const globalSettings = await insertGlobalSettings(db, tenantId);
+  console.log("Inserted global settings:", globalSettings);
+
+  console.log("Seeding completed successfully");
+}
+
+function generateRandomPassword() {
+  // 24 hex chars (~96 bits of entropy) — random per instance, never hardcoded
+  return randomBytes(12).toString("hex");
+}
+
 export async function seedProduction() {
   await seedUserRoleGrantSql(db);
-
-  await seedTruncateAllTables(db);
 
   try {
     const tenant = await ensureSeedTenant(db, {
@@ -98,12 +109,17 @@ export async function seedProduction() {
     const tenantId = tenant.id;
     await seedSystemRolesForTenant(db, tenantId);
 
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@example.com";
+    const adminPassword = process.env.ADMIN_PASSWORD || generateRandomPassword();
+
+    const [existingAdmin] = await db.select().from(users).where(eq(users.email, adminEmail));
+
     const adminUser = await createOrFindUser(
-      "admin@example.com",
-      "password",
+      adminEmail,
+      adminPassword,
       {
         id: faker.string.uuid(),
-        email: "admin@example.com",
+        email: adminEmail,
         firstName: faker.person.firstName(),
         lastName: "Admin",
         createdAt: new Date().toISOString(),
@@ -112,9 +128,24 @@ export async function seedProduction() {
       },
       SYSTEM_ROLE_SLUGS.ADMIN,
     );
-    console.log("Created or found admin user:", adminUser);
+    console.log("Created or found admin user:", adminUser.email);
+
+    if (!existingAdmin && !process.env.ADMIN_PASSWORD) {
+      // Printed once on first boot only — change after first login
+      console.log("=====================================================");
+      console.log(`Generated admin password for ${adminEmail}: ${adminPassword}`);
+      console.log("Change this password immediately after first login.");
+      console.log("=====================================================");
+    }
+
     const adminSettings = await insertUserSettings(db, adminUser.id, tenantId, true);
     console.log("Inserted admin user settings:", adminSettings);
+
+    if (process.env.SEED_DEMO_USERS !== "true") {
+      console.log("Skipping demo users (set SEED_DEMO_USERS=true to seed them)");
+      await finishSeed(tenantId);
+      return;
+    }
 
     const studentUser = await createOrFindUser(
       "user@example.com",
@@ -175,10 +206,7 @@ export async function seedProduction() {
     const trainerSettings = await insertUserSettings(db, trainerUser.id, tenantId, false);
     console.log("Inserted trainer user settings:", trainerSettings);
 
-    const globalSettings = await insertGlobalSettings(db, tenantId);
-    console.log("Inserted global settings:", globalSettings);
-
-    console.log("Seeding completed successfully");
+    await finishSeed(tenantId);
   } catch (error) {
     console.error("Seeding failed:", error);
   } finally {

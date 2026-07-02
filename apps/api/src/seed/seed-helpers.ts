@@ -297,7 +297,10 @@ export async function ensureSeedTenant(
   db: DatabasePg,
   options?: { name?: string; host?: string; isManaging?: boolean },
 ) {
-  const host = options?.host ?? "seed.local";
+  // Lowercase — hostnames are case-insensitive and the tenant resolver
+  // normalizes request origins to lowercase before the exact-match lookup.
+  // Infra-provided values (e.g. CloudFormation ALB DNS names) can be mixed-case.
+  const host = (options?.host ?? "seed.local").toLowerCase();
   const name = options?.name ?? "Seed Tenant";
   const isManaging = options?.isManaging ?? false;
 

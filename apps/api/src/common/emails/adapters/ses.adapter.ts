@@ -22,16 +22,15 @@ export class AWSSESAdapter extends EmailAdapter {
     const accessKeyId = this.configService.get<string>("aws.AWS_ACCESS_KEY_ID");
     const secretAccessKey = this.configService.get<string>("aws.AWS_SECRET_ACCESS_KEY");
 
-    if (!region || !accessKeyId || !secretAccessKey) {
+    if (!region) {
       throw new Error("Missing AWS configuration");
     }
 
+    // Static credentials only when explicitly configured; otherwise the SDK
+    // default provider chain applies (ECS task role, instance profile, ...).
     return {
       region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
+      ...(accessKeyId && secretAccessKey && { credentials: { accessKeyId, secretAccessKey } }),
     };
   }
 

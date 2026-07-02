@@ -61,7 +61,7 @@ export class TenantsRepository {
     const [tenant] = await this.dbBase
       .select({ id: tenants.id })
       .from(tenants)
-      .where(eq(tenants.host, host))
+      .where(eq(tenants.host, host.toLowerCase()))
       .limit(1);
 
     return tenant ?? null;
@@ -72,7 +72,9 @@ export class TenantsRepository {
       .insert(tenants)
       .values({
         name: input.name,
-        host: input.host,
+        // Lowercase — hostnames are case-insensitive and the tenant resolver
+        // compares lowercased request origins against this column.
+        host: input.host.toLowerCase(),
         status: input.status,
       })
       .returning();
@@ -82,7 +84,10 @@ export class TenantsRepository {
   async update(id: string, updates: UpdateTenantRecord): Promise<Tenant | null> {
     const [tenant] = await this.dbBase
       .update(tenants)
-      .set(updates)
+      .set({
+        ...updates,
+        ...(updates.host && { host: updates.host.toLowerCase() }),
+      })
       .where(eq(tenants.id, id))
       .returning();
 
