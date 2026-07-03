@@ -4,6 +4,8 @@ import Viewer from "~/components/RichText/Viever";
 import { Card } from "~/components/ui/card";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 
+import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
+
 import { getCorrectSentence } from "./correctSentence";
 import { FillInTheTextBlanks } from "./FillInTheTextBlanks";
 import { TextBlank } from "./TextBlank";
@@ -58,7 +60,7 @@ export const FillInTheBlanks = ({ question, isCompleted }: FillInTheBlanksProps)
         }}
       />
       {showCorrectSentence && (
-        <div>
+        <div data-testid={LEARNING_HANDLES.FILL_IN_THE_BLANKS_CORRECT_SENTENCE}>
           <span className="body-base-md text-error-700">
             {t("studentLessonView.other.correctSentence")}
           </span>

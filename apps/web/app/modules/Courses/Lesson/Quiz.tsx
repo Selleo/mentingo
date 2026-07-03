@@ -86,9 +86,9 @@ export const Quiz = ({ lesson, userId }: QuizProps) => {
 
   const retakeQuiz = useRetakeQuiz({
     lessonId: lesson.id,
-    handleOnSuccess: () => {
+    handleOnSuccess: async () => {
       setIsRetakingQuiz(true);
-      queryClient.invalidateQueries({ queryKey: ["lesson", lesson.id] });
+      await queryClient.invalidateQueries(lessonQueryOptions(lesson.id, language, userId));
       methods.reset(getEmptyQuizAnswers(questions ?? []));
     },
   });

@@ -425,3 +425,39 @@ export const createAllRenderedQuestionTypesQuizCourse = async (
       return { quizLesson, textBlankAnswer, dndBlankAnswer, dndBlankAnswerId };
     },
   });
+
+export const createTextGapFillQuizCourse = async (
+  input: Omit<
+    CreatePublishedLearningCourseInput<{
+      quizLesson: CurriculumCourseLessonRecord;
+      textBlankAnswer: string;
+      wrongTextBlankAnswer: string;
+    }>,
+    "buildLessons"
+  >,
+) =>
+  createPublishedLearningCourse({
+    ...input,
+    categoryTitle: (prefix) => `Learning Text Gap Fill Category ${prefix}`,
+    buildLessons: async ({ courseId, chapterId, curriculumFactory, prefix }) => {
+      const textBlankAnswer = `${prefix}-correct-gap`;
+      const wrongTextBlankAnswer = `${prefix}-wrong-gap`;
+      const quizLesson = await curriculumFactory.createQuizLesson(courseId, {
+        chapterId,
+        title: `${prefix}-quiz-lesson`,
+        displayOrder: 1,
+        thresholdScore: 0,
+        questions: [
+          {
+            type: "fill_in_the_blanks_text",
+            title: `${prefix}-fill-text`,
+            description: "Type the [word] answer.",
+            displayOrder: 1,
+            options: [{ optionText: textBlankAnswer, displayOrder: 1, isCorrect: true }],
+          },
+        ],
+      });
+
+      return { quizLesson, textBlankAnswer, wrongTextBlankAnswer };
+    },
+  });
