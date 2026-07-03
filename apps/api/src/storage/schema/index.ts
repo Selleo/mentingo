@@ -67,6 +67,7 @@ import {
 } from "./utils";
 
 import type {
+  CourseStatus,
   CourseType,
   CourseOriginType,
   FormType,
@@ -303,7 +304,7 @@ export const courses = pgTable(
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     description: jsonb("description").$type<LocalizedText>().default({}).notNull(),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
-    status: coursesStatusEnum("status").notNull().default("draft"),
+    status: coursesStatusEnum("status").$type<CourseStatus>().notNull().default("draft"),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),
     currency: varchar("currency").notNull().default("usd"),

@@ -1457,7 +1457,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu",
-      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza.",
+      "deleteProtectedCourseFailed": "Nie można usunąć opublikowanego ani prywatnego kursu. Najpierw zmień jego status na Wersja Robocza.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kursów zostały zaktualizowane",
       "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
       "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
