@@ -41,6 +41,7 @@ import {
   createNiceCourses,
   ensureSeedTenant,
   getTenantEmailSuffix,
+  refreshSeedSearchDocuments,
   seedSystemRolesForTenant,
   seedTruncateAllTables,
   seedUserRoleGrantSql,
@@ -411,6 +412,7 @@ async function seed() {
       console.log("✨✨✨Created nice courses✨✨✨");
       await createNiceCourses([createdAdmin.id], db, e2eCourses, tenantId);
       console.log("🧪 Created e2e courses");
+      await refreshSeedSearchDocuments(db, tenantId);
 
       console.log("Selected random courses for student from createdCourses");
       await createStudentCourses(createdCourses, createdStudentIds, tenantId);

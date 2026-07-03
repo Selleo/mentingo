@@ -69,6 +69,7 @@ export type LocalizedRecord = unknown;
 
 export type MatchRow = {
   entityId: UUIDType;
+  languages: SupportedLanguages[];
   rank: number;
 };
 

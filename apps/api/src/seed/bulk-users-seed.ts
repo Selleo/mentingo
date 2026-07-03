@@ -36,6 +36,7 @@ import {
   createNiceCourses,
   ensureSeedTenant,
   getTenantEmailSuffix,
+  refreshSeedSearchDocuments,
   seedSystemRolesForTenant,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
@@ -367,6 +368,7 @@ export async function seedBulkUsers(options: {
         const creatorIds = createdContentCreators.map((cc) => cc.id);
         const createdCourses = await createNiceCourses(creatorIds, db, niceCourses, tenantId);
         console.log(`✨ Created ${createdCourses.length} courses`);
+        await refreshSeedSearchDocuments(db, tenantId);
 
         if (enrollStudents && createdStudents.length > 0) {
           const studentIds = createdStudents.map((s) => s.id);
