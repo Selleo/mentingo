@@ -1040,7 +1040,9 @@
       "passwordResetEmailsSent": "Correos electrónicos de restablecimiento de contraseña enviados: {{sentCount}}. Omitido: {{skippedCount}}.",
       "passwordResetEmailsError": "No se pudieron enviar correos electrónicos para restablecer la contraseña",
       "passwordCreationEmailsSent": "Correos electrónicos de creación de contraseña enviados: {{sentCount}}. Omitido: {{skippedCount}}.",
-      "passwordCreationEmailsError": "No se pudieron enviar correos electrónicos de creación de contraseña"
+      "passwordCreationEmailsError": "No se pudieron enviar correos electrónicos de creación de contraseña",
+      "passwordEmailsSent": "Correos electrónicos de contraseña enviados: {{sentCount}}. Restablecimiento: {{passwordResetSentCount}}. Creación: {{passwordCreationSentCount}}. Omitidos: {{skippedCount}}.",
+      "passwordEmailsError": "No se pudieron enviar correos electrónicos de contraseña"
     },
     "field": {
       "description": "Descripción",
@@ -1518,6 +1520,7 @@
     "dropdown": {
       "roles": "Roles",
       "groups": "Grupos",
+      "passwordEmail": "Enviar correo electrónico de contraseña",
       "passwordReset": "Enviar correo electrónico para restablecer contraseña",
       "passwordCreation": "Reenviar correo electrónico de creación de contraseña",
       "delete": "Eliminar",
@@ -1528,6 +1531,7 @@
         "delete": "¿Quieres eliminar estas cuentas?",
         "role": "Modificar roles",
         "group": "Modificar grupos",
+        "passwordEmail": "Enviar correo electrónico de contraseña",
         "passwordReset": "Enviar correo electrónico para restablecer contraseña",
         "passwordCreation": "Reenviar correo electrónico de creación de contraseña",
         "archive": "Archivar cuentas de usuario",
@@ -1539,6 +1543,7 @@
         "delete": "Eliminar",
         "role": "Guardar",
         "group": "Guardar",
+        "passwordEmail": "Enviar",
         "passwordReset": "Enviar",
         "passwordCreation": "Enviar",
         "archive": "Archivar",
@@ -1551,6 +1556,7 @@
         "confirmationForGroup_other": "Cambiará el grupo a {{ group }} para los usuarios de {{ count }}",
         "confirmationForRole_one": "Cambiará el rol a {{ role }} para 1 usuario.",
         "confirmationForRole_other": "Cambiará el rol a {{ role }} para los usuarios de {{ count }}",
+        "passwordEmail": "Envíe correos electrónicos de contraseña a los usuarios seleccionados. Los usuarios con contraseña existente recibirán correos de restablecimiento y los usuarios sin contraseña recibirán correos de creación de contraseña.",
         "passwordReset": "Envíe correos electrónicos de restablecimiento de contraseña a usuarios seleccionados con contraseñas existentes. Se omitirán los usuarios sin contraseñas.",
         "passwordCreation": "Reenviar correos electrónicos de creación de contraseñas a usuarios seleccionados sin contraseñas. Se omitirán los usuarios con contraseñas existentes.",
         "archive": "¿Está seguro de que desea archivar estas cuentas?",
@@ -1625,6 +1631,7 @@
     },
     "button": {
       "createUser": "Crear usuario",
+      "passwordEmail": "Enviar correo electrónico de contraseña",
       "passwordResetEmail": "Enviar correo electrónico para restablecer contraseña",
       "passwordCreationEmail": "Reenviar correo electrónico de creación de contraseña"
     },

@@ -68,9 +68,16 @@ test("admin can browse, filter, sort, paginate, select, and open user details", 
       "checked",
     );
 
+    await page.getByTestId(USERS_PAGE_HANDLES.BULK_EDIT_TRIGGER).click();
+    await expect(
+      page.getByTestId(USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_EMAIL_ACTION),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+
     await openUserDetailsFromListFlow(page, users[10].id);
 
     await expect(page).toHaveURL(new RegExp(`/admin/users/${users[10].id}$`));
     await expect(page.getByTestId(USER_PAGE_HANDLES.PAGE)).toBeVisible();
+    await expect(page.getByTestId(USER_PAGE_HANDLES.PASSWORD_EMAIL_BUTTON)).toBeVisible();
   });
 });

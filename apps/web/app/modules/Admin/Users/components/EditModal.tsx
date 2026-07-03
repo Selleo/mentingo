@@ -127,12 +127,7 @@ export const EditModal = ({
     setSelectedGroups(updatedOptions);
   };
 
-  const isConfirmationOnlyAction = [
-    "delete",
-    "archive",
-    "passwordReset",
-    "passwordCreation",
-  ].includes(type);
+  const isConfirmationOnlyAction = ["delete", "archive", "passwordEmail"].includes(type);
 
   const handleSubmit = () =>
     isConfirmationOnlyAction ? onConfirm() : setShowConfirmationModal(true);
@@ -146,8 +141,7 @@ export const EditModal = ({
     switch (type) {
       case "delete":
       case "archive":
-      case "passwordReset":
-      case "passwordCreation":
+      case "passwordEmail":
         return t(`adminUsersView.modal.description.${type}`);
 
       case "group":
