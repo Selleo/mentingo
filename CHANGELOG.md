@@ -1,3 +1,17 @@
+<a name="v4.14.1"></a>
+
+## [v4.14.1] - 06.07.2026
+
+### Bug Fixes:
+
+- video completion tracking for multilingual courses and for disabled tracking ([#1733](https://github.com/Selleo/mentingo/issues/1733))
+
+- correct fill-in-the-blank behavior when quiz feedback is hidden ([#1726](https://github.com/Selleo/mentingo/issues/1726))
+
+### Chores:
+
+- add a migration to backfill existing video lesson progress data ([#1734](https://github.com/Selleo/mentingo/issues/1734))
+
 <a name="v4.14.0"></a>
 
 ## [v4.14.0] - 01.07.2026
@@ -55,6 +69,8 @@
 - allow users to have separate accounts with the same email across tenants ([#1665](https://github.com/Selleo/mentingo/issues/1665))
 
 ### Documentation:
+
+- update changelog for version v4.14.0
 
 - update deployment documentation with Docker log retention guidelines ([#1679](https://github.com/Selleo/mentingo/issues/1679))
 
@@ -3004,7 +3020,8 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.14.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.14.1...HEAD
+[v4.14.1]: https://github.com/Selleo/mentingo/compare/v4.14.0...v4.14.1
 [v4.14.0]: https://github.com/Selleo/mentingo/compare/v4.13.0...v4.14.0
 [v4.13.0]: https://github.com/Selleo/mentingo/compare/v4.12.1...v4.13.0
 [v4.12.1]: https://github.com/Selleo/mentingo/compare/v4.12.0...v4.12.1
