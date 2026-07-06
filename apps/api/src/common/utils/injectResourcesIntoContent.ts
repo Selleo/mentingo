@@ -41,14 +41,17 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
   contentCount: Record<string, number>;
   hasAutoplayTrigger: boolean;
   videos?: string[];
+  internalVideoResourceEntityIds: UUIDType[];
 } => {
   const contentCount: Record<string, number> = {};
   const videos: string[] = [];
+  const internalVideoResourceEntityIds: UUIDType[] = [];
   let hasAutoplayTrigger = false;
 
   const increment = (key: string) => (contentCount[key] = (contentCount[key] ?? 0) + 1);
 
-  if (!content) return { html: content, contentCount, hasAutoplayTrigger };
+  if (!content)
+    return { html: content, contentCount, hasAutoplayTrigger, internalVideoResourceEntityIds };
 
   const normalizedContent = annotateVideoAutoplayAndBlockIndexesInContent(content) ?? content;
   const $ = loadHtml(normalizedContent);
@@ -105,6 +108,13 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
       }
 
       if (resource?.resourceEntityId && resource.contentType?.startsWith("video/")) {
+        if (
+          !resource.fileUrlError &&
+          !internalVideoResourceEntityIds.includes(resource.resourceEntityId)
+        ) {
+          internalVideoResourceEntityIds.push(resource.resourceEntityId);
+        }
+
         $(element).attr("data-source-type", "internal");
         if (resource.provider) {
           $(element).attr("data-provider", resource.provider);
@@ -173,5 +183,6 @@ export const injectResourcesIntoContent = <T extends ContentResource>(
     contentCount,
     hasAutoplayTrigger,
     videos,
+    internalVideoResourceEntityIds,
   };
 };
