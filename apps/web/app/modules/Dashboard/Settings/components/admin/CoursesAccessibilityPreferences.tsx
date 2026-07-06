@@ -4,9 +4,13 @@ import { useToggleCourseDiscussions } from "~/api/mutations/admin/useToggleCours
 import { useToggleLiveTraining } from "~/api/mutations/admin/useToggleLiveTraining";
 import { useToggleModernCourseList } from "~/api/mutations/admin/useToggleModernCourseList";
 import { useUnregisteredUserCoursesAccessibility } from "~/api/mutations/admin/useUnregisteredUserCoursesAccessibility";
+import { Label } from "~/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 
 import { SETTINGS_PAGE_HANDLES } from "../../../../../../e2e/data/settings/handles";
 import { SettingItem } from "../SettingItem";
+
+import { CourseListLayoutPreview } from "./CourseListLayoutPreview";
 
 import type { GlobalSettings } from "../../types";
 
@@ -42,14 +46,43 @@ export default function CoursesAccessibilityPreferences({
         onCheckedChange={handleCoursesAccessibilityChange}
         testId={SETTINGS_PAGE_HANDLES.COURSES_VISIBILITY_SWITCH}
       />
-      <SettingItem
-        id="modernCourseList"
-        label={t("adminPreferences.field.modernCourseList")}
-        description={t("adminPreferences.field.modernCourseListDescription")}
-        checked={globalSettings.modernCourseListEnabled}
-        onCheckedChange={toggleModernCourseList}
-        testId={SETTINGS_PAGE_HANDLES.MODERN_COURSE_LIST_SWITCH}
-      />
+      <div className="space-y-3">
+        <div className="space-y-0.5">
+          <p className="body-base-md">{t("adminPreferences.field.courseListLayout")}</p>
+          <p className="body-sm-md text-muted-foreground">
+            {t("adminPreferences.field.courseListLayoutDescription")}
+          </p>
+        </div>
+        <RadioGroup
+          value={globalSettings.modernCourseListEnabled ? "modern" : "classic"}
+          onValueChange={(val) => {
+            const current = globalSettings.modernCourseListEnabled ? "modern" : "classic";
+            if (val !== current) toggleModernCourseList();
+          }}
+          className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:justify-center"
+        >
+          {(["classic", "modern"] as const).map((layout) => (
+            <Label key={layout} htmlFor={layout} className="w-full cursor-pointer sm:flex-1">
+              <RadioGroupItem value={layout} id={layout} className="sr-only" />
+              <div
+                className={`border-2 rounded-lg p-3 transition-colors ${
+                  (globalSettings.modernCourseListEnabled ? "modern" : "classic") === layout
+                    ? "border-primary bg-primary/5"
+                    : "border-neutral-200 hover:border-neutral-300"
+                }`}
+              >
+                <p className="text-base font-bold capitalize mb-1">{layout}</p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {layout === "classic"
+                    ? t("adminPreferences.field.courseListLayoutClassicDescription")
+                    : t("adminPreferences.field.courseListLayoutModernDescription")}
+                </p>
+                <CourseListLayoutPreview type={layout} />
+              </div>
+            </Label>
+          ))}
+        </RadioGroup>
+      </div>
       <SettingItem
         id="courseDiscussions"
         label={t("adminPreferences.field.courseDiscussions")}
