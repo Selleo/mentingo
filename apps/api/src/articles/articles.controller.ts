@@ -23,6 +23,7 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   PERMISSIONS,
+  ENTITY_TYPES,
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -37,6 +38,7 @@ import {
 } from "src/articles/schemas/previewArticle.schema";
 import { BaseResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
+import { RequireEntityType } from "src/common/decorators/require-entity-type.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -83,6 +85,7 @@ export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post("section")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "body", schema: createArticleSectionSchema }],
     response: baseResponse(createArticleSectionResponseSchema),
@@ -101,6 +104,7 @@ export class ArticlesController {
   }
 
   @Get("section/:id")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -120,6 +124,7 @@ export class ArticlesController {
   }
 
   @Patch("section/:id")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -144,6 +149,7 @@ export class ArticlesController {
 
   @ApiOperation({ summary: "Add a new language to an article section" })
   @Post("section/:id/language")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -167,6 +173,7 @@ export class ArticlesController {
   }
 
   @Delete("section/:id/language")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -183,6 +190,7 @@ export class ArticlesController {
   }
 
   @Delete("section/:id")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
@@ -208,6 +216,7 @@ export class ArticlesController {
 
   @Public()
   @Get("toc")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -227,6 +236,7 @@ export class ArticlesController {
 
   @Public()
   @Get("articles-resource/:resourceId")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -245,6 +255,7 @@ export class ArticlesController {
 
   @Public()
   @Get(":id")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -266,6 +277,7 @@ export class ArticlesController {
 
   @Public()
   @Get()
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
@@ -278,6 +290,7 @@ export class ArticlesController {
   }
 
   @Post("article")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "body", schema: createArticleSchema }],
     response: baseResponse(createArticleResponseSchema),
@@ -295,6 +308,7 @@ export class ArticlesController {
   @Patch(":id")
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -350,6 +364,7 @@ export class ArticlesController {
   }
 
   @Delete(":id/language")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -366,6 +381,7 @@ export class ArticlesController {
   }
 
   @Delete(":id")
+  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })

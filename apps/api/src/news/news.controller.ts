@@ -23,6 +23,7 @@ import {
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
   PERMISSIONS,
+  ENTITY_TYPES,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
 } from "@repo/shared";
@@ -32,6 +33,7 @@ import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
+import { RequireEntityType } from "src/common/decorators/require-entity-type.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -63,6 +65,7 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Get("drafts")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -82,6 +85,7 @@ export class NewsController {
   }
 
   @Post("preview")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
@@ -104,6 +108,7 @@ export class NewsController {
 
   @Public()
   @Get("news-resource/:resourceId")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -122,6 +127,7 @@ export class NewsController {
 
   @Public()
   @Get(":id")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -141,6 +147,7 @@ export class NewsController {
 
   @Public()
   @Get()
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -159,6 +166,7 @@ export class NewsController {
   }
 
   @Post()
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
@@ -176,6 +184,7 @@ export class NewsController {
   @Patch(":id")
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -203,6 +212,7 @@ export class NewsController {
 
   @ApiOperation({ summary: "Add a new language to a news item" })
   @Post(":id")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -226,6 +236,7 @@ export class NewsController {
   }
 
   @Delete(":id/language")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -245,6 +256,7 @@ export class NewsController {
   }
 
   @Delete(":id")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
@@ -257,6 +269,7 @@ export class NewsController {
   }
 
   @Post(":id/upload")
+  @RequireEntityType(ENTITY_TYPES.NEWS)
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({

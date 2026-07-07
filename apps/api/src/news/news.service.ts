@@ -55,7 +55,7 @@ export class NewsService {
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const { language } = createNewsBody;
 
@@ -96,7 +96,7 @@ export class NewsService {
     currentUser?: CurrentUserType,
     coverFile?: Express.Multer.File,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const { language, ...updateNewsData } = updateNewsBody;
 
@@ -178,8 +178,7 @@ export class NewsService {
     page = 1,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
+    // await this.checkAccess(currentUser?.userId);
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
@@ -278,7 +277,7 @@ export class NewsService {
     language: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const existingNews = await this.validateNewsExists(newsId, language);
 
@@ -329,7 +328,7 @@ export class NewsService {
   }
 
   async deleteNews(newsId: UUIDType, currentUser?: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const existingNews = await this.validateNewsExists(newsId, undefined, false);
 
@@ -371,7 +370,7 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
       PERMISSIONS.NEWS_MANAGE,
@@ -434,7 +433,7 @@ export class NewsService {
     currentUser?: CurrentUserType,
     preview?: FilePreviewFormat,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const [resource] = await this.db
       .select({
@@ -561,7 +560,7 @@ export class NewsService {
     createNewsBody: CreateNews,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const { language } = createNewsBody;
 
@@ -613,7 +612,7 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const fileTitle = {
       [language]: title,

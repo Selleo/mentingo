@@ -31,9 +31,7 @@ export class FeaturesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user as CurrentUserType | undefined;
-
     if (!user) return false;
-
     const globalSettings = await this.settingsService.getGlobalSettingsByTenantId(user.tenantId);
     const disabledFeature = [...new Set(requiredFeatures)].find(
       (feature) => !this.isFeatureEnabled(globalSettings, feature),

@@ -81,7 +81,7 @@ export class ArticlesService {
     createArticleSectionBody: CreateArticleSection,
     currentUser: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const { language } = createArticleSectionBody;
 
@@ -131,7 +131,7 @@ export class ArticlesService {
     updateArticleSectionBody: UpdateArticleSection,
     currentUser: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const { language, title } = updateArticleSectionBody;
 
@@ -170,7 +170,7 @@ export class ArticlesService {
     body: CreateArticleSection,
     currentUser: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const { language } = body;
 
@@ -214,7 +214,7 @@ export class ArticlesService {
     language: SupportedLanguages,
     currentUser: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const existingSection = await this.validateArticleSectionExists(sectionId, language);
 
@@ -256,7 +256,7 @@ export class ArticlesService {
   }
 
   async deleteArticleSection(sectionId: UUIDType, currentUser: CurrentUserType) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const existingSection = await this.validateArticleSectionExists(sectionId, undefined, false);
 
@@ -281,7 +281,7 @@ export class ArticlesService {
   }
 
   async createArticle(createArticleBody: CreateArticle, currentUser: CurrentUserType) {
-    await this.checkAccess(currentUser.userId);
+    // await this.checkAccess(currentUser.userId);
 
     const { language, sectionId } = createArticleBody;
 
@@ -321,7 +321,7 @@ export class ArticlesService {
     currentUser?: CurrentUserType,
     coverFile?: Express.Multer.File,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     await this.checkEditAccess(articleId, currentUser);
 
@@ -378,7 +378,7 @@ export class ArticlesService {
   }
 
   async getArticles(requestedLanguage: SupportedLanguages, currentUser?: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
@@ -442,7 +442,7 @@ export class ArticlesService {
   }
 
   async deleteArticle(articleId: UUIDType, currentUser?: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
     await this.checkEditAccess(articleId, currentUser);
 
     const existingArticle = await this.validateArticleExists(articleId, undefined, false);
@@ -480,7 +480,7 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
       PERMISSIONS.ARTICLE_MANAGE,
@@ -539,7 +539,7 @@ export class ArticlesService {
     currentUser?: CurrentUserType,
     preview?: FilePreviewFormat,
   ) {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const resource = await this.articlesRepository.getResource(resourceId);
 
@@ -609,7 +609,7 @@ export class ArticlesService {
     isDraftMode = false,
     currentUser?: CurrentUserType,
   ): Promise<GetArticleTocResponse> {
-    await this.checkAccess(currentUser?.userId);
+    // await this.checkAccess(currentUser?.userId);
 
     const conditions = this.articlesRepository.getVisibleArticleConditions(
       requestedLanguage,
