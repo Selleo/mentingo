@@ -2289,7 +2289,7 @@
           "fillInTheBlanksText": "Gap filling (text)",
           "briefResponse": "Short answer",
           "detailedResponse": "Free text",
-          "scale1_5": "Scale 1 to 5",
+          "scale_1_5": "Scale 1 to 5",
           "selectQuestionType": "Select question type",
           "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
           "quizLessonDescription": "A set of questions to check knowledge.",
@@ -2753,7 +2753,8 @@
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
-      "openInNewTab": "Open in new tab"
+      "openInNewTab": "Open in new tab",
+      "scale_1_5": "Scale question (1-5)"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
