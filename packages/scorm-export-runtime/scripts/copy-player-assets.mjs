@@ -46,9 +46,15 @@ copyRequiredFile(
 });
 
 copyRequiredFile(packagePath("video.js", "dist/video.min.js"), join(playerDistRoot, "video-js.js"));
-copyRequiredFile(packagePath("video.js", "dist/video-js.min.css"), join(playerDistRoot, "video-js.css"));
+copyRequiredFile(
+  packagePath("video.js", "dist/video-js.min.css"),
+  join(playerDistRoot, "video-js.css"),
+);
 copyRequiredFile(
   packagePath("videojs-youtube", "dist/Youtube.min.js"),
   join(playerDistRoot, "videojs-youtube.js"),
 );
-copyRequiredFile(packagePath("@vimeo/player", "dist/player.min.js"), join(playerDistRoot, "vimeo-player.js"));
+copyRequiredFile(
+  packagePath("@vimeo/player", "dist/player.min.js"),
+  join(playerDistRoot, "vimeo-player.js"),
+);

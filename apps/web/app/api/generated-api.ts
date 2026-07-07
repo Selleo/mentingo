@@ -12403,6 +12403,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseChatControllerGetCourseChatUsers: (courseId: string, params: RequestParams = {}) =>
       this.request<GetCourseChatUsersResponse, any>({
         path: `/api/course-chat/${courseId}/users`,
+
         method: "GET",
         format: "json",
         ...params,

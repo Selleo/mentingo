@@ -12,7 +12,7 @@ services:
     ports:
       - 5432:5432
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -23,7 +23,7 @@ services:
     ports:
       - 6379:6379
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -48,7 +48,7 @@ services:
     ports:
       - 5433:5432
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 3s
       timeout: 3s
       retries: 10
@@ -162,10 +162,7 @@ services:
     env_file: ./apps/api/.env
     volumes:
       - ./create-minio-bucket.sh:/create-minio-bucket.sh
-    entrypoint: [ "/bin/sh", "/create-minio-bucket.sh" ]
-
-
-
+    entrypoint: ["/bin/sh", "/create-minio-bucket.sh"]
 
 volumes:
   lms-db-data:

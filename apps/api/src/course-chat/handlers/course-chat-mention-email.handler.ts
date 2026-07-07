@@ -41,10 +41,10 @@ export class CourseChatMentionEmailHandler
   }
 
   private async handleUserMentioned(event: CourseChatUserMentionedEvent) {
-    const { tenantId, courseId, actorUserId, messageId, mentionedUserIds } =
+    const { tenantId, courseId, currentUser, messageId, mentionedUserIds } =
       event.courseChatUserMentionedData;
     const uniqueMentionedUserIds = Array.from(new Set(mentionedUserIds)).filter(
-      (mentionedUserId) => mentionedUserId !== actorUserId,
+      (mentionedUserId) => mentionedUserId !== currentUser.userId,
     );
 
     if (!uniqueMentionedUserIds.length) return;

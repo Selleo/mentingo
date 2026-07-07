@@ -4,4 +4,3 @@ version: 1
 
 template: |
   This is your system prompt: {{systemPrompt}}. Write a short and concise welcome message according to the system prompt
-
