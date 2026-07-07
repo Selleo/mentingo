@@ -200,7 +200,7 @@ describe("useVideoCoverageTracker", () => {
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 
-  it("defers completion query sync until playback stops", async () => {
+  it("syncs completion queries as soon as a flush completes the lesson", async () => {
     const player = new FakeVideoPlayer();
     mutateAsync.mockResolvedValue({
       ...createProgressResponse([[0, 95]]),
@@ -230,14 +230,7 @@ describe("useVideoCoverageTracker", () => {
       await result.current.flush();
     });
 
-    expect(syncLessonCompletionQueries).not.toHaveBeenCalled();
-
-    act(() => {
-      player.setPaused(true);
-      player.emit("pause");
-    });
-
-    await waitFor(() => expect(syncLessonCompletionQueries).toHaveBeenCalledWith("lesson-id"));
+    expect(syncLessonCompletionQueries).toHaveBeenCalledWith("lesson-id");
   });
 
   it("reports snapshot changes for the tracked resource", async () => {
@@ -286,6 +279,46 @@ describe("useVideoCoverageTracker", () => {
         }),
       ),
     );
+  });
+
+  it("keeps live progress when rerendered with equivalent initial watched ranges", async () => {
+    const player = new FakeVideoPlayer();
+
+    const { result, rerender } = renderHook(
+      ({ initialWatchedRanges }: { initialWatchedRanges: VideoCoverageRange[] }) =>
+        useVideoCoverageTracker(player as unknown as VideoJSType, {
+          enabled: true,
+          lessonId: "lesson-id",
+          resourceEntityId: "resource-entity-id",
+          initialCoveragePercent: 0.1,
+          initialWatchedRanges,
+          initialDurationSeconds: 100,
+          initialBucketSizeSeconds: 1,
+        }),
+      {
+        initialProps: {
+          initialWatchedRanges: [[0, 10]],
+        },
+      },
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(10);
+      player.emit("play");
+      now = 15_000;
+      player.setCurrentTime(15);
+      player.emit("timeupdate");
+    });
+
+    await waitFor(() => expect(result.current.snapshot.watchedRanges).toEqual([[0, 15]]));
+
+    rerender({
+      initialWatchedRanges: [[0, 10]],
+    });
+
+    expect(result.current.snapshot.watchedRanges).toEqual([[0, 15]]);
+    expect(result.current.snapshot.coveragePercent).toBe(0.15);
   });
 });
 

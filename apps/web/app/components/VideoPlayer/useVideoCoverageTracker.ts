@@ -49,6 +49,9 @@ const getInitialSnapshot = ({
   bucketSizeSeconds: initialBucketSizeSeconds ?? DEFAULT_BUCKET_SIZE_SECONDS,
 });
 
+const getVideoCoverageRangesSignature = (ranges: VideoCoverageRange[] | undefined) =>
+  JSON.stringify(mergeVideoCoverageRanges(ranges ?? []));
+
 export const getVideoResumeTimeSeconds = ({
   watchedRanges,
   durationSeconds,
@@ -97,6 +100,7 @@ export const useVideoCoverageTracker = (
     initialWatchedRanges,
     initialBucketSizeSeconds,
   } = options;
+  const initialWatchedRangesSignature = getVideoCoverageRangesSignature(initialWatchedRanges);
   const onSnapshotChange = options.onSnapshotChange;
 
   const enabled = Boolean(
@@ -118,17 +122,7 @@ export const useVideoCoverageTracker = (
   }, [enabled, onSnapshotChange, resourceEntityId, snapshot]);
 
   useEffect(() => {
-    setSnapshot(
-      getInitialSnapshot({
-        ...optionsRef.current,
-        resourceEntityId,
-        initialCoveragePercent,
-        initialDurationSeconds,
-        initialIsWatched,
-        initialWatchedRanges,
-        initialBucketSizeSeconds,
-      }),
-    );
+    setSnapshot(getInitialSnapshot(optionsRef.current));
     pendingRangesRef.current = [];
     activeWatchSecondsDeltaRef.current = 0;
     previousSampleRef.current = null;
@@ -138,7 +132,7 @@ export const useVideoCoverageTracker = (
     initialCoveragePercent,
     initialDurationSeconds,
     initialIsWatched,
-    initialWatchedRanges,
+    initialWatchedRangesSignature,
     initialBucketSizeSeconds,
   ]);
 
@@ -258,7 +252,11 @@ export const useVideoCoverageTracker = (
           pendingLessonCompletionSyncRef.current = true;
         }
 
-        if (shouldSyncCompletionAfterFlush || completionSyncRequestedRef.current) {
+        if (
+          progress.lessonCompleted ||
+          shouldSyncCompletionAfterFlush ||
+          completionSyncRequestedRef.current
+        ) {
           completionSyncRequestedRef.current = false;
           await syncPendingLessonCompletion();
         }
