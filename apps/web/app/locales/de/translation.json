@@ -1039,7 +1039,9 @@
       "passwordResetEmailsSent": "Passwort-Zurücksetzen-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
       "passwordResetEmailsError": "Passwort-Zurücksetzen-E-Mails konnten nicht gesendet werden",
       "passwordCreationEmailsSent": "Passwort-Erstellungs-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden"
+      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden",
+      "passwordEmailsSent": "Passwort-E-Mails gesendet: {{sentCount}}. Zurücksetzen: {{passwordResetSentCount}}. Erstellung: {{passwordCreationSentCount}}. Übersprungen: {{skippedCount}}.",
+      "passwordEmailsError": "Passwort-E-Mails konnten nicht gesendet werden"
     },
     "field": {
       "description": "Beschreibung",
@@ -1457,6 +1459,7 @@
     "dropdown": {
       "roles": "Rollen",
       "groups": "Gruppen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
       "delete": "Löschen",
@@ -1467,6 +1470,7 @@
         "delete": "Möchten Sie diese Konten löschen?",
         "role": "Rollen ändern",
         "group": "Gruppen ändern",
+        "passwordEmail": "Passwort-E-Mail senden",
         "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
         "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
         "archive": "Benutzerkonten archivieren",
@@ -1478,6 +1482,7 @@
         "delete": "Löschen",
         "role": "Speichern",
         "group": "Speichern",
+        "passwordEmail": "Senden",
         "passwordReset": "Senden",
         "passwordCreation": "Senden",
         "archive": "Archiv",
@@ -1490,6 +1495,7 @@
         "confirmationForGroup_other": "Sie ändern die Gruppe für {{ count }} Benutzer in {{ group }}",
         "confirmationForRole_one": "Sie ändern die Rolle für einen Benutzer in {{ role }}.",
         "confirmationForRole_other": "Sie ändern die Rolle für {{ count }} Benutzer in {{ role }}",
+        "passwordEmail": "Senden Sie Passwort-E-Mails an ausgewählte Benutzer. Benutzer mit bestehendem Passwort erhalten eine Passwort-Zurücksetzen-E-Mail, Benutzer ohne Passwort erhalten eine Passwort-Erstellungs-E-Mail.",
         "passwordReset": "Senden Sie Passwort-Zurücksetzen-E-Mails an ausgewählte Benutzer mit bestehendem Passwort. Benutzer ohne Passwort werden übersprungen.",
         "passwordCreation": "Senden Sie Passwort-Erstellungs-E-Mails erneut an ausgewählte Benutzer ohne Passwort. Benutzer mit bestehendem Passwort werden übersprungen.",
         "archive": "Sind Sie sicher, dass Sie diese Konten archivieren möchten?",
@@ -1564,6 +1570,7 @@
     },
     "button": {
       "createUser": "Benutzer erstellen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordResetEmail": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreationEmail": "Passwort-Erstellungs-E-Mail erneut senden"
     },

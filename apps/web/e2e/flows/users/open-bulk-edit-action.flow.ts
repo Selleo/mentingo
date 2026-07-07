@@ -4,11 +4,12 @@ import { USER_BULK_EDIT_MODAL_HANDLES, USERS_PAGE_HANDLES } from "../../data/use
 
 import type { Page } from "@playwright/test";
 
-type BulkEditAction = "role" | "group" | "archive" | "delete";
+type BulkEditAction = "role" | "group" | "passwordEmail" | "archive" | "delete";
 
 const actionHandleMap: Record<BulkEditAction, string> = {
   role: USERS_PAGE_HANDLES.BULK_EDIT_ROLE_ACTION,
   group: USERS_PAGE_HANDLES.BULK_EDIT_GROUP_ACTION,
+  passwordEmail: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_EMAIL_ACTION,
   archive: USERS_PAGE_HANDLES.BULK_EDIT_ARCHIVE_ACTION,
   delete: USERS_PAGE_HANDLES.BULK_EDIT_DELETE_ACTION,
 };

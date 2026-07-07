@@ -1470,6 +1470,19 @@ export interface SendBulkPasswordResetEmailsResponse {
   };
 }
 
+export interface SendBulkPasswordEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+    passwordResetSentCount: number;
+    passwordCreationSentCount: number;
+  };
+}
+
 export interface SendBulkPasswordCreationEmailsBody {
   userIds: string[];
 }
@@ -8696,6 +8709,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<SendBulkPasswordResetEmailsResponse, any>({
         path: `/api/user/bulk/password-reset-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordEmails
+     * @request POST:/api/user/bulk/password-email
+     */
+    userControllerSendBulkPasswordEmails: (
+      data: SendBulkPasswordEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordEmailsResponse, any>({
+        path: `/api/user/bulk/password-email`,
         method: "POST",
         body: data,
         type: ContentType.Json,

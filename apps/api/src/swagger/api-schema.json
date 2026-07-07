@@ -2200,6 +2200,33 @@
         }
       }
     },
+    "/api/user/bulk/password-email": {
+      "post": {
+        "operationId": "UserController_sendBulkPasswordEmails",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkPasswordEmailsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendBulkPasswordEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/user/bulk/password-creation-email": {
       "post": {
         "operationId": "UserController_sendBulkPasswordCreationEmails",
@@ -22412,6 +22439,52 @@
             "required": [
               "sentCount",
               "skippedCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SendBulkPasswordEmailsBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "SendBulkPasswordEmailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentCount": {
+                "type": "number"
+              },
+              "skippedCount": {
+                "type": "number"
+              },
+              "passwordResetSentCount": {
+                "type": "number"
+              },
+              "passwordCreationSentCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sentCount",
+              "skippedCount",
+              "passwordResetSentCount",
+              "passwordCreationSentCount"
             ]
           }
         },
