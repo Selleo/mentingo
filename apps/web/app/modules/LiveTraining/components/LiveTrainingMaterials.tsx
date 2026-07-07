@@ -1,5 +1,14 @@
-import { LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES, LIVE_TRAINING_STATUSES } from "@repo/shared";
-import { Download, Folder, Loader2, Plus, Trash2 } from "lucide-react";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
+  LIVE_TRAINING_STATUSES,
+} from "@repo/shared";
+import { Download, Folder, Loader2, Lock, Plus, Trash2 } from "lucide-react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,9 +17,8 @@ import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOp
 import { useUploadLiveTrainingResource } from "~/api/mutations/live-training/useUploadLiveTrainingResource";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
 import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
@@ -24,6 +32,7 @@ import type {
 type LiveTrainingMaterialsProps = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
+  className?: string;
 };
 
 type LiveTrainingMaterial = LiveTrainingDetails["materials"]["before"][number];
@@ -52,6 +61,7 @@ type MaterialsSectionProps = {
   ) => void;
   onOpen: (material: LiveTrainingMaterial) => void;
   onRemove: (resourceId: string) => void;
+  isLocked?: boolean;
 };
 
 function MaterialCard({
@@ -138,30 +148,38 @@ function AddMaterialTile({
   onFilesSelected: (files: FileList | null) => void;
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const accept = [
+    ALLOWED_PDF_FILE_TYPES,
+    ALLOWED_EXCEL_FILE_TYPES,
+    ALLOWED_WORD_FILE_TYPES,
+    ALLOWED_VIDEO_FILE_TYPES,
+    ALLOWED_LESSON_IMAGE_FILE_TYPES,
+    ALLOWED_PRESENTATION_FILE_TYPES,
+  ].toString();
 
   return (
-    <>
+    <button
+      type="button"
+      className="relative flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-visible:border-primary-500 focus-visible:bg-primary-50 focus-visible:text-primary-700 focus-visible:outline-none"
+      disabled={isUploading}
+      onClick={() => inputRef.current?.click()}
+    >
       <input
         ref={inputRef}
         data-testid={inputTestId}
         type="file"
+        accept={accept}
         multiple
-        className="sr-only"
+        className="absolute size-full opacity-0 cursor-pointer"
+        tabIndex={0}
         onChange={(event) => {
           onFilesSelected(event.target.files);
           event.target.value = "";
         }}
       />
-      <button
-        type="button"
-        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-visible:border-primary-500 focus-visible:bg-primary-50 focus-visible:text-primary-700 focus-visible:outline-none"
-        disabled={isUploading}
-        onClick={() => inputRef.current?.click()}
-      >
-        {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
-        <span>{title}</span>
-      </button>
-    </>
+      {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
+      <span>{title}</span>
+    </button>
   );
 }
 
@@ -177,10 +195,11 @@ function MaterialsSection({
   onUpload,
   onOpen,
   onRemove,
+  isLocked,
 }: MaterialsSectionProps) {
   const { t } = useTranslation();
-
-  if (!canEditMaterials && materials.length === 0) return null;
+  const isSectionLocked = !canEditMaterials && isLocked;
+  const isEmpty = !canEditMaterials && materials.length === 0;
 
   return (
     <section className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
@@ -192,33 +211,53 @@ function MaterialsSection({
       </div>
 
       <div className="max-h-[22rem] overflow-y-auto pr-1">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
-          {materials.map((material) => (
-            <MaterialCard
-              key={material.resourceId}
-              material={material}
-              testId={materialCardTestId(material.resourceId)}
-              isRemoving={isRemoving}
-              canEditMaterials={canEditMaterials}
-              onOpen={() => onOpen(material)}
-              onRemove={() => onRemove(material.resourceId)}
-            />
-          ))}
-          {canEditMaterials && (
-            <AddMaterialTile
-              title={t("liveTrainingView.files.addFile")}
-              isUploading={isUploading}
-              inputTestId={fileInputTestId}
-              onFilesSelected={(files) => onUpload(files, relationshipType)}
-            />
-          )}
-        </div>
+        {isSectionLocked ? (
+          <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+              <Lock className="size-5" />
+            </span>
+            <p className="text-sm text-neutral-950">{t("liveTrainingView.files.afterLocked")}</p>
+          </div>
+        ) : isEmpty ? (
+          <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+              <Folder className="size-5" />
+            </span>
+            <p className="text-sm text-neutral-950">{t("liveTrainingView.files.empty")}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
+            {materials.map((material) => (
+              <MaterialCard
+                key={material.resourceId}
+                material={material}
+                testId={materialCardTestId(material.resourceId)}
+                isRemoving={isRemoving}
+                canEditMaterials={canEditMaterials}
+                onOpen={() => onOpen(material)}
+                onRemove={() => onRemove(material.resourceId)}
+              />
+            ))}
+            {canEditMaterials && (
+              <AddMaterialTile
+                title={t("liveTrainingView.files.addFile")}
+                isUploading={isUploading}
+                inputTestId={fileInputTestId}
+                onFilesSelected={(files) => onUpload(files, relationshipType)}
+              />
+            )}
+          </div>
+        )}
       </div>
     </section>
   );
 }
 
-export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMaterialsProps) {
+export function LiveTrainingMaterials({
+  liveTraining,
+  actions,
+  className,
+}: LiveTrainingMaterialsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const { mutateAsync: uploadResource, isPending: isUploading } = useUploadLiveTrainingResource();
@@ -257,60 +296,34 @@ export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMat
   };
 
   return (
-    <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE} className="grid gap-4">
-      <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-        <TabsTrigger
-          value={LIVE_TRAINING_FILE_TABS.BEFORE}
-          data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_TAB}
-        >
-          {t("liveTrainingView.files.beforeHeading")}
-        </TabsTrigger>
-        <TabsTrigger
-          value={LIVE_TRAINING_FILE_TABS.AFTER}
-          disabled={isAfterTabLocked}
-          data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_TAB}
-        >
-          {t("liveTrainingView.files.afterHeading")}
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent
-        value={LIVE_TRAINING_FILE_TABS.BEFORE}
-        data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_PANEL}
-      >
-        <MaterialsSection
-          title={t("liveTrainingView.files.beforeHeading")}
-          materials={liveTraining.materials.before}
-          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
-          fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
-          materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
-          canEditMaterials={actions.canEditMaterials}
-          isUploading={isUploading}
-          isRemoving={isRemoving}
-          onUpload={handleUpload}
-          onOpen={handleOpen}
-          onRemove={handleRemove}
-        />
-      </TabsContent>
-
-      <TabsContent
-        value={LIVE_TRAINING_FILE_TABS.AFTER}
-        data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_PANEL}
-      >
-        <MaterialsSection
-          title={t("liveTrainingView.files.afterHeading")}
-          materials={liveTraining.materials.after}
-          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
-          fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
-          materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
-          canEditMaterials={actions.canEditMaterials}
-          isUploading={isUploading}
-          isRemoving={isRemoving}
-          onUpload={handleUpload}
-          onOpen={handleOpen}
-          onRemove={handleRemove}
-        />
-      </TabsContent>
-    </Tabs>
+    <div className={cn("grid items-start gap-4", className)}>
+      <MaterialsSection
+        title={t("liveTrainingView.files.beforeHeading")}
+        materials={liveTraining.materials.before}
+        relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
+        fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
+        materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
+        canEditMaterials={actions.canEditMaterials}
+        isUploading={isUploading}
+        isRemoving={isRemoving}
+        onUpload={handleUpload}
+        onOpen={handleOpen}
+        onRemove={handleRemove}
+      />
+      <MaterialsSection
+        title={t("liveTrainingView.files.afterHeading")}
+        materials={liveTraining.materials.after}
+        relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
+        fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
+        materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
+        canEditMaterials={actions.canEditMaterials}
+        isUploading={isUploading}
+        isRemoving={isRemoving}
+        onUpload={handleUpload}
+        onOpen={handleOpen}
+        onRemove={handleRemove}
+        isLocked={isAfterTabLocked}
+      />
+    </div>
   );
 }

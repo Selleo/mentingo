@@ -486,95 +486,95 @@
   },
   "liveTrainingView": {
     "title": "Živé školení",
-    "description": "This page will contain the full Živé školení workspace.",
+    "description": "Tato stránka bude obsahovat celý pracovní prostor pro živé školení.",
     "errors": {
-      "idRequired": "Živé školení id is required."
+      "idRequired": "ID živého školení je vyžadováno."
     },
     "status": {
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "ended": "Ended",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
+      "scheduled": "Naplánováno",
+      "active": "Aktivní",
+      "ended": "Ukončeno",
+      "cancelled": "Zrušeno",
+      "expired": "Vypršelo"
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "In-person"
+      "offline": "Osobně"
     },
     "visibility": {
-      "all": "All users",
-      "linked_courses": "Linked courses"
+      "all": "Všichni uživatelé",
+      "linked_courses": "Propojené kurzy"
     },
     "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "start": "Start session",
-      "join": "Join session",
-      "finish": "Finish session"
+      "edit": "Upravit",
+      "delete": "Smazat",
+      "start": "Zahájit relaci",
+      "join": "Připojit se k relaci",
+      "finish": "Ukončit relaci"
     },
     "stage": {
-      "preview": "Session preview",
-      "activeTitle": "Live session is active",
-      "waitingTitle": "Session is waiting",
-      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
-      "activeBadge": "Active",
-      "waitingBadge": "Waiting",
-      "participants": "Participants",
-      "viewerMic": "Viewer microphone",
-      "viewerCamera": "Viewer camera",
-      "scheduleTooltip": "Planned training time",
-      "timezoneTooltip": "Training timezone",
-      "maxParticipantsTooltip": "Maximum participants",
-      "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "preview": "Náhled relace",
+      "activeTitle": "Živá relace je aktivní",
+      "waitingTitle": "Relace čeká",
+      "runtimeDeferred": "Doba trvání schůzky bude připojena v pozdějším kroku. Mediální zařízení se z tohoto náhledu nespouštějí.",
+      "activeBadge": "Aktivní",
+      "waitingBadge": "Čeká",
+      "participants": "Účastníci",
+      "viewerMic": "Mikrofon diváka",
+      "viewerCamera": "Kamera diváka",
+      "scheduleTooltip": "Plánovaný čas školení",
+      "timezoneTooltip": "Časové pásmo školení",
+      "maxParticipantsTooltip": "Maximum účastníků",
+      "locationTooltip": "Místo školení",
+      "offlineTitle": "Osobní školení",
+      "locationMissing": "Místo nebylo nastaveno"
     },
     "sidebar": {
-      "lifecycle": "Session lifecycle",
-      "status": "Status",
-      "participants": "Participants",
-      "peak": "Peak",
-      "people": "People",
-      "author": "Author",
-      "host": "Host",
-      "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
-      "trainer": "Trainer",
-      "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
-      "unknownUser": "Unknown user",
-      "details": "Training details",
-      "maxParticipants": "Max participants",
-      "visibility": "Visibility",
-      "courses": "Linked courses",
-      "location": "Location",
-      "addHost": "Add",
-      "addHostHint": "Add host",
-      "removeHost": "Remove host {{name}}",
-      "addTrainer": "Add",
-      "addTrainerHint": "Add trainer",
-      "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people",
-      "noUserResults": "No users found",
-      "loadingUsers": "Loading users",
-      "loadMoreUsers": "Load more"
+      "lifecycle": "Životní cyklus relace",
+      "status": "Stav",
+      "participants": "Účastníci",
+      "peak": "Vrchol",
+      "people": "Lidé",
+      "author": "Autor",
+      "host": "Hostitel",
+      "hosts": "Hostitelé",
+      "noHosts": "Nejsou přiřazeni žádní hostitelé",
+      "trainer": "Školitel",
+      "trainers": "Školitelé",
+      "noTrainers": "Nejsou přiřazeni žádní školitelé",
+      "unknownUser": "Neznámý uživatel",
+      "details": "Podrobnosti o školení",
+      "maxParticipants": "Max. účastníků",
+      "visibility": "Viditelnost",
+      "courses": "Propojené kurzy",
+      "location": "Místo",
+      "addHost": "Přidat",
+      "addHostHint": "Přidat hostitele",
+      "removeHost": "Odebrat hostitele {{name}}",
+      "addTrainer": "Přidat",
+      "addTrainerHint": "Přidat školitele",
+      "removeTrainer": "Odebrat školitele {{name}}",
+      "searchPeople": "Hledat lidi",
+      "noUserResults": "Nebyli nalezeni žádní uživatelé",
+      "loadingUsers": "Načítání uživatelů",
+      "loadMoreUsers": "Načíst další"
     },
     "tabs": {
-      "overview": "Overview",
-      "files": "Files",
-      "sessions": "Sessions",
-      "settings": "Settings"
+      "overview": "Přehled",
+      "files": "Soubory",
+      "sessions": "Relace",
+      "settings": "Nastavení"
     },
     "files": {
-      "title": "Živé školení files",
-      "description": "Materials are split by when students should use them.",
-      "beforeHeading": "Before training",
-      "beforeDescription": "Materials available before the training starts.",
-      "afterHeading": "After training",
-      "afterDescription": "Materials available after the training is finished.",
-      "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Přidat soubor",
+      "title": "Soubory živého školení",
+      "description": "Materiály jsou rozděleny podle toho, kdy by je měli studenti použít.",
+      "beforeHeading": "Před školením",
+      "beforeDescription": "Materiály dostupné před začátkem školení.",
+      "afterHeading": "Po školení",
+      "afterDescription": "Materiály dostupné po dokončení školení.",
+      "empty": "Zatím nejsou připojeny žádné soubory.",
+      "afterLocked": "Materiály budou odemčeny po skončení školení.",
+      "addFile": "Nahrajte soubor nebo jej přetáhněte sem",
       "download": "Stáhnout",
       "removeFile": "Odebrat {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -584,108 +584,102 @@
       }
     },
     "meeting": {
-      "previewLabel": "Live session",
-      "waitingTitle": "Session je připravena k připojení",
-      "activeTitle": "Session je aktivní",
-      "inSession": "V session",
-      "roomTitle": "Live místnost",
+      "previewLabel": "Živá relace",
+      "waitingTitle": "Relace je připravena k připojení",
+      "activeTitle": "Relace je aktivní",
+      "inSession": "V relaci",
+      "roomTitle": "Živá místnost",
       "participants_one": "{{count}} účastník",
-      "participants_few": "{{count}} účastníci",
-      "participants_many": "{{count}} účastníků",
       "participants_other": "{{count}} účastníků",
       "microphone": "Mikrofon",
       "camera": "Kamera",
       "screenShare": "Sdílet obrazovku",
       "screen": "Obrazovka",
-      "presentOnStage": "Zobrazit na scéně",
-      "leave": "Odejít",
-      "finish": "Finish session",
-      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "presentOnStage": "Prezentovat na pódiu",
+      "leave": "Opustit",
+      "finish": "Ukončit relaci",
+      "sessionEndedToast": "Vaše relace {{trainingName}} skončila",
       "finishDialog": {
-        "title": "Finish session?",
-        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
-        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
-        "cancel": "Cancel",
-        "confirmEnd": "Finish session",
-        "confirmLeave": "Leave session"
+        "title": "Ukončit relaci?",
+        "lastHostDescription": "Jste jediný hostitel v této místnosti. Pokud odejdete, relace skončí pro všechny.",
+        "otherHostsDescription": "V této místnosti jsou stále další hostitelé. Můžete odejít a relace bude pokračovat.",
+        "cancel": "Zrušit",
+        "confirmEnd": "Ukončit relaci",
+        "confirmLeave": "Opustit relaci"
       },
-      "empty": "Čeká se na účastníky.",
+      "empty": "Čeká se na účastníky",
       "materials": "Materiály",
       "beforeMaterials": "Před",
       "afterMaterials": "Po",
       "noMaterials": "Žádné soubory"
     },
     "sessions": {
-      "title": "Sessions",
-      "description": "Each started session is stored separately with its attendance.",
-      "empty": "No sessions have been started yet.",
-      "activeParticipants_one": "{{count}} active participant",
-      "activeParticipants_few": "{{count}} active participants",
-      "activeParticipants_many": "{{count}} active participants",
-      "activeParticipants_other": "{{count}} active participants",
-      "uniqueParticipants_one": "{{count}} unique participant",
-      "uniqueParticipants_few": "{{count}} unique participants",
-      "uniqueParticipants_many": "{{count}} unique participants",
-      "uniqueParticipants_other": "{{count}} unique participants",
-      "peakParticipants": "Peak {{count}}",
-      "startedBy": "Started by",
-      "endedBy": "Ended by",
-      "notEnded": "Not ended",
+      "title": "Relace",
+      "description": "Každá zahájená relace je uložena samostatně se svou docházkou.",
+      "empty": "Zatím nebyly zahájeny žádné relace.",
+      "activeParticipants_one": "{{count}} aktivní účastník",
+      "activeParticipants_other": "{{count}} aktivních účastníků",
+      "uniqueParticipants_one": "{{count}} unikátní účastník",
+      "uniqueParticipants_other": "{{count}} unikátních účastníků",
+      "peakParticipants": "Vrchol {{count}}",
+      "startedBy": "Zahájil(a)",
+      "endedBy": "Ukončil(a)",
+      "notEnded": "Neukončeno",
       "notAvailable": "N/A",
-      "endReason": "End reason",
-      "noEndReason": "No end reason",
+      "endReason": "Důvod ukončení",
+      "noEndReason": "Žádný důvod ukončení",
       "status": {
-        "waiting": "Waiting",
-        "active": "Active",
-        "ended": "Ended",
-        "failed": "Failed"
+        "waiting": "Čeká",
+        "active": "Aktivní",
+        "ended": "Ukončeno",
+        "failed": "Selhalo"
       },
       "roles": {
-        "host": "Host",
-        "co_trainer": "Co-trainer",
-        "moderator": "Moderator",
-        "observer": "Observer",
+        "host": "Hostitel",
+        "co_trainer": "Spoluškolitel",
+        "moderator": "Moderátor",
+        "observer": "Pozorovatel",
         "admin": "Admin"
       },
       "attendance": {
-        "empty": "No attendance has been recorded for this session yet.",
-        "user": "User",
+        "empty": "Pro tuto relaci zatím nebyla zaznamenána žádná docházka.",
+        "user": "Uživatel",
         "role": "Role",
-        "totalTime": "Time attended",
-        "firstJoinedAt": "First joined",
-        "lastLeftAt": "Last left",
-        "joinCount": "Joins"
+        "totalTime": "Čas účasti",
+        "firstJoinedAt": "Poprvé připojen(a)",
+        "lastLeftAt": "Naposledy odešel(la)",
+        "joinCount": "Připojení"
       },
       "toast": {
-        "started": "Session byla spuštěna.",
-        "ended": "Session byla ukončena."
+        "started": "Relace byla zahájena.",
+        "ended": "Relace byla ukončena."
       }
     },
     "attendance": {
-      "title": "Attendance",
-      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+      "title": "Docházka",
+      "description": "Docházka a intervaly účastníků budou implementovány za běhu."
     },
     "settings": {
-      "title": "Settings",
-      "description": "Less frequently used session settings will live here."
+      "title": "Nastavení",
+      "description": "Zde najdete méně často používaná nastavení relace."
     },
     "boolean": {
-      "yes": "Yes",
-      "no": "No"
+      "yes": "Ano",
+      "no": "Ne"
     },
     "deleteDialog": {
-      "title": "Smazat Živé školení?",
-      "description": "Živé školení bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
-      "assignedToLessonsDescription": "Tento Živé školení je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Živé školení.",
-      "assignedToLessonsDescription_plural": "Tento Živé školení je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Živé školení.",
+      "title": "Smazat živé školení?",
+      "description": "Tímto zrušíte živé školení a odstraníte ho z kalendáře. Tuto akci nelze vrátit zpět.",
+      "assignedToLessonsDescription": "Toto živé školení je propojeno s {{count}} lekcí. Před smazáním živého školení nejprve smažte související lekci.",
+      "assignedToLessonsDescription_plural": "Toto živé školení je propojeno s {{count}} lekcemi. Před smazáním živého školení nejprve smažte související lekce.",
       "toast": {
-        "success": "Živé školení byl smazán."
+        "success": "Živé školení bylo úspěšně smazáno."
       }
     },
     "edit": {
       "saveChanges": "Uložit změny",
       "toast": {
-        "success": "Živé školení byl aktualizován."
+        "success": "Živé školení bylo úspěšně aktualizováno."
       }
     }
   },
@@ -3333,7 +3327,7 @@
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
+      "invalidFileType": "Neplatný typ souboru.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
       "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}."
     },
