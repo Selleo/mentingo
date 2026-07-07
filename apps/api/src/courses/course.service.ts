@@ -97,6 +97,7 @@ import {
   coursesSummaryStats,
   groups,
   groupUsers,
+  aiMentorLessons,
   lessonLearningTime,
   lessons,
   questionAnswerOptions,
@@ -5020,6 +5021,24 @@ export class CourseService {
           idColumn: lessons.id,
         };
 
+        if (lesson.type === LESSON_TYPES.AI_MENTOR) {
+          yield {
+            id: lesson.id,
+            hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
+            baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
+            field: aiMentorLessons.aiMentorInstructions,
+            idColumn: aiMentorLessons.lessonId,
+          };
+
+          yield {
+            id: lesson.id,
+            hasValue: Boolean(lesson.aiMentor?.completionConditions?.length),
+            baseValue: baseLesson?.aiMentor?.completionConditions,
+            field: aiMentorLessons.completionConditions,
+            idColumn: aiMentorLessons.lessonId,
+          };
+        }
+
         if (lesson.type !== LESSON_TYPES.QUIZ || !lesson.questions?.length) continue;
 
         const baseQuestionMap = new Map(
@@ -5399,6 +5418,21 @@ export class CourseService {
             questionTitle: base?.questionTitle,
             questionDescription: base?.questionDescription,
             questionOptions: base?.questionOptions,
+          },
+        };
+      }
+
+      if (entry.field.table === aiMentorLessons) {
+        const base = lessonById.get(entry.id as UUIDType);
+        if (base) getOrCreateLessonGroup(base.chapterId, base.lessonId).fields.push(entry);
+        return {
+          data: entry,
+          metadata,
+          context: {
+            courseTitle,
+            chapterTitle: base ? chapterById.get(base.chapterId)?.chapterTitle : undefined,
+            lessonTitle: base?.lessonTitle,
+            lessonDescription: base?.lessonDescription,
           },
         };
       }
