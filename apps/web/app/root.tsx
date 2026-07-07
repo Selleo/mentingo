@@ -26,6 +26,8 @@ export const links: LinksFunction = () => {
     { rel: "shortcut icon", href: "/app-signet.svg", type: "image/svg+xml" },
     { rel: "apple-touch-icon", href: "/app-signet.svg" },
     { rel: "stylesheet", href: css },
+    { rel: "manifest", href: "/manifest.webmanifest" },
+    { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
   ];
 };
 

@@ -4,6 +4,7 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig, loadEnv } from "vite";
 import { cjsInterop } from "vite-plugin-cjs-interop";
+import { VitePWA } from "vite-plugin-pwa";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -64,6 +65,89 @@ export default defineConfig(({ mode }) => {
           assets: "./build/client/**",
         },
         telemetry: false,
+      }),
+      VitePWA({
+        registerType: "autoUpdate",
+
+        // automatycznie dodaje service worker
+        injectRegister: "auto",
+
+        includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+
+        manifest: {
+          name: "Moja aplikacja",
+          short_name: "App",
+          description: "Aplikacja Remix PWA",
+
+          theme_color: "#0f172a",
+          background_color: "#ffffff",
+
+          display: "standalone",
+
+          orientation: "portrait",
+
+          start_url: "/",
+
+          scope: "/",
+
+          icons: [
+            {
+              src: "/heart-192.png",
+              sizes: "192x192",
+              type: "image/png",
+            },
+            {
+              src: "/heart-512.png",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "maskable",
+            },
+          ],
+        },
+
+        workbox: {
+          cleanupOutdatedCaches: true,
+
+          clientsClaim: true,
+
+          skipWaiting: true,
+
+          navigateFallback: null,
+
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|webp|woff2?)$/,
+
+              handler: "CacheFirst",
+
+              options: {
+                cacheName: "assets-cache",
+
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 60 * 60 * 24 * 30,
+                },
+              },
+            },
+
+            {
+              urlPattern: /^https?:\/\/.*\/api\/.*/,
+
+              handler: "NetworkFirst",
+
+              options: {
+                cacheName: "api-cache",
+
+                networkTimeoutSeconds: 3,
+
+                expiration: {
+                  maxEntries: 50,
+                  maxAgeSeconds: 60 * 60 * 24,
+                },
+              },
+            },
+          ],
+        },
       }),
     ],
     ssr: {
