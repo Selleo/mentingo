@@ -7,6 +7,7 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { ThrottlerModule } from "@nestjs/throttler";
 
 import { ActivityLogsModule } from "src/activity-logs/activity-logs.module";
+import { AppStartupService } from "src/app-startup.service";
 import { EnvModule } from "src/env/env.module";
 import { LearningPathModule } from "src/learning-path/learning-path.module";
 import { LearningTimeModule } from "src/learning-time";
@@ -216,6 +217,7 @@ import type { RedisClient } from "src/redis";
     },
     GoogleStrategy,
     MicrosoftStrategy,
+    AppStartupService,
     ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
   ],
 })
