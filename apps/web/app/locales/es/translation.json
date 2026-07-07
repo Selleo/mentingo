@@ -1238,7 +1238,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Curso eliminado exitosamente",
       "deleteCourseFailed": "No se pudo eliminar el curso",
-      "deletePublishedCourseFailed": "No se puede eliminar un curso publicado. Primero establezca su estado en Borrador.",
+      "deleteProtectedCourseFailed": "No se puede eliminar un curso publicado o privado. Primero establezca su estado en Borrador.",
       "bulkCategoryUpdateSuccessfully": "Categorías de cursos actualizadas exitosamente",
       "bulkCategoryUpdateFailed": "No se pudieron actualizar las categorías del curso",
       "bulkCategoryUpdateForbidden": "No tienes permiso para actualizar uno o más cursos seleccionados.",

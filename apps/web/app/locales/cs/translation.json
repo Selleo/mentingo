@@ -1243,7 +1243,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
       "deleteCourseFailed": "Kurz se nepodařilo smazat",
-      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept.",
+      "deleteProtectedCourseFailed": "Publikovaný ani soukromý kurz nelze smazat. Nejprve nastavte jeho stav na Koncept.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kurzů byly úspěšně aktualizovány",
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",

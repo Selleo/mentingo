@@ -1238,7 +1238,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course",
-      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first.",
+      "deleteProtectedCourseFailed": "Cannot delete a published or private course. Please set its status to Draft first.",
       "bulkCategoryUpdateSuccessfully": "Course categories updated successfully",
       "bulkCategoryUpdateFailed": "Failed to update course categories",
       "bulkCategoryUpdateForbidden": "You do not have permission to update one or more selected courses.",

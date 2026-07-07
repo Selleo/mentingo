@@ -1243,7 +1243,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
       "deleteCourseFailed": "Nepavyko ištrinti kurso",
-      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
+      "deleteProtectedCourseFailed": "Negalima ištrinti paskelbto ar privataus kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
       "bulkCategoryUpdateSuccessfully": "Kursų kategorijos sėkmingai atnaujintos",
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",

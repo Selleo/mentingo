@@ -1237,7 +1237,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
       "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
-      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
+      "deleteProtectedCourseFailed": "Ein veröffentlichter oder privater Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
       "bulkCategoryUpdateSuccessfully": "Kurskategorien wurden erfolgreich aktualisiert",
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
