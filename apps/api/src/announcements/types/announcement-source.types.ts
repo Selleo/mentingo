@@ -51,6 +51,7 @@ export type CreateAnnouncementRecordInput = {
   emailTemplate: AnnouncementEmailTemplate;
   sourceType: AnnouncementSourceType;
   sourceId: UUIDType | null;
+  usersToNotify: UUIDType[] | null;
 };
 
 export type AnnouncementSourceLookup = {

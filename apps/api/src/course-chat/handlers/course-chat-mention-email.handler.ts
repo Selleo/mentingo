@@ -1,7 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
+import { ANNOUNCEMENT_STATUSES } from "@repo/shared";
 
+import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
@@ -29,6 +31,7 @@ export class CourseChatMentionEmailHandler
 {
   constructor(
     private readonly courseChatRepository: CourseChatRepository,
+    private readonly announcementRepository: AnnouncementsRepository,
     private readonly emailService: EmailService,
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
@@ -48,6 +51,23 @@ export class CourseChatMentionEmailHandler
     );
 
     if (!uniqueMentionedUserIds.length) return;
+
+    await this.announcementRepository.createAnnouncement({
+      groupId: null,
+      title: { en: "User mentioned you" },
+      content: { en: "You have been mentioned" },
+      baseLanguage: "en",
+      availableLocales: ["en"],
+      authorId: currentUser.userId,
+      status: ANNOUNCEMENT_STATUSES.PUBLISHED,
+      scheduledAt: null,
+      publishedAt: null,
+      sendEmail: false,
+      emailTemplate: "default",
+      sourceType: "manual",
+      sourceId: null,
+      usersToNotify: uniqueMentionedUserIds,
+    });
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
       const [message, recipients, tenantOrigin] = await Promise.all([

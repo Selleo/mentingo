@@ -143,7 +143,14 @@ export class AnnouncementsRepository {
         announcementId: announcement.id,
       });
     }
-
+    if (input.usersToNotify) {
+      await this.db.insert(userAnnouncements).values(
+        input.usersToNotify!.map((userId) => ({
+          userId,
+          announcementId: announcement.id,
+        })),
+      );
+    }
     return this.getAnnouncementSnapshot(announcement.id, input.baseLanguage);
   }
 
