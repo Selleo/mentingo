@@ -85,13 +85,7 @@ const MailKey = ({ className }: { className?: string }) => (
 );
 
 type ModalTypes =
-  | "group"
-  | "role"
-  | "delete"
-  | "archive"
-  | "passwordReset"
-  | "passwordCreation"
-  | null;
+  "group" | "role" | "delete" | "archive" | "passwordReset" | "passwordCreation" | null;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 

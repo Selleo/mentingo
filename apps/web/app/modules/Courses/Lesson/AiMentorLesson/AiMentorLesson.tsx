@@ -53,9 +53,9 @@ const taskDescriptionViewerClassName =
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
   Boolean(
     evaluation &&
-      (typeof evaluation.passed === "boolean" ||
-        evaluation.score != null ||
-        evaluation.summary?.trim().length),
+    (typeof evaluation.passed === "boolean" ||
+      evaluation.score != null ||
+      evaluation.summary?.trim().length),
   );
 
 interface AiMentorLessonProps {

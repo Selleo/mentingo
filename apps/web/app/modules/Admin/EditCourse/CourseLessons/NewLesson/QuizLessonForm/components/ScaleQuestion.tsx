@@ -7,11 +7,8 @@ import { Accordion, AccordionItem } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import DeleteConfirmationModal from "~/modules/Admin/components/DeleteConfirmationModal";
 import { DeleteContentType } from "~/modules/Admin/EditCourse/EditCourse.types";
-
-import { QUIZ_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
 
 import type { QuestionOption } from "../QuizLessonForm.types";
 import type { QuizLessonFormValues } from "../validators/quizLessonFormSchema";
@@ -28,36 +25,6 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
   const errors = form.formState.errors;
   const { t } = useTranslation();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-
-  const handleAddOption = useCallback(() => {
-    if (isStructureLocked) return;
-
-    const currentOptions: QuestionOption[] =
-      form.getValues(`questions.${questionIndex}.options`) || [];
-
-    const newOption: QuestionOption = {
-      sortableId: crypto.randomUUID(),
-      optionText: "",
-      isCorrect: false,
-      displayOrder: currentOptions.length + 1,
-    };
-
-    form.setValue(`questions.${questionIndex}.options`, [...currentOptions, newOption], {
-      shouldDirty: true,
-    });
-  }, [form, questionIndex, isStructureLocked]);
-
-  const handleRemoveOption = useCallback(
-    (optionIndex: number) => {
-      if (isStructureLocked) return;
-
-      const currentOptions: QuestionOption[] =
-        form.getValues(`questions.${questionIndex}.options`) || [];
-      const updatedOptions = currentOptions.filter((_, index) => index !== optionIndex);
-      form.setValue(`questions.${questionIndex}.options`, updatedOptions, { shouldDirty: true });
-    },
-    [form, questionIndex, isStructureLocked],
-  );
 
   const handleRemoveQuestion = useCallback(() => {
     if (isStructureLocked) return;
@@ -127,7 +94,7 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
                           name={`questions.${questionIndex}.options.${index}.optionText`}
                           value={item.optionText}
                           onChange={(e) => handleOptionChange(index, "optionText", e.target.value)}
-                          placeholder={`${t("adminCourseView.curriculum.lesson.placeholder.option")} ${index + 1}`}
+                          placeholder={`${index + 1}`}
                           required
                           className="flex-1"
                         />
@@ -159,30 +126,6 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
                               </SelectContent>
                             </Select>
                           </div> */}
-                        <div className="flex items-center">
-                          <TooltipProvider delayDuration={0}>
-                            <Tooltip>
-                              {!isStructureLocked && (
-                                <TooltipTrigger asChild>
-                                  <div className="group">
-                                    <Icon
-                                      name="TrashIcon"
-                                      className="ml-3 size-7 cursor-pointer rounded-lg bg-error-50 p-1 text-error-500 group-hover:bg-error-600 group-hover:text-white"
-                                      onClick={() => handleRemoveOption(index)}
-                                    />
-                                  </div>
-                                </TooltipTrigger>
-                              )}
-                              <TooltipContent
-                                side="top"
-                                align="center"
-                                className="ml-4 rounded bg-black text-sm text-white shadow-md"
-                              >
-                                {t("common.button.delete")}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        </div>
                       </div>
                     </div>
                   </SortableList.Item>
@@ -197,14 +140,6 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
           )}
           {!isStructureLocked && (
             <div className="ml-14 mt-4 flex gap-2">
-              <Button
-                type="button"
-                data-testid={QUIZ_LESSON_FORM_HANDLES.addOptionButton(questionIndex)}
-                className="bg-primary-700"
-                onClick={handleAddOption}
-              >
-                {t("adminCourseView.curriculum.lesson.button.addOption")}
-              </Button>
               <Button
                 type="button"
                 className="bg-color-white border border-neutral-300 text-error-700"

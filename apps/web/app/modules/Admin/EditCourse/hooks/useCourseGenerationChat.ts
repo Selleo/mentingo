@@ -69,13 +69,11 @@ export function useCourseGenerationChat({
 
   useEffect(() => {
     setMessages(
-      (courseGenerationMessages ?? []).map(
-        (message): Message => ({
-          id: message.id,
-          role: message.role as Message["role"],
-          content: message.content,
-        }),
-      ),
+      (courseGenerationMessages ?? []).map((message): Message => ({
+        id: message.id,
+        role: message.role as Message["role"],
+        content: message.content,
+      })),
     );
   }, [courseGenerationMessages, setMessages]);
 
