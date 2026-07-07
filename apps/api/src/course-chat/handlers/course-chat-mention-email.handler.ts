@@ -16,9 +16,11 @@ import {
   getCourseChatMentionEmailParagraphs,
 } from "src/course-chat/course-chat-email.translations";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
+import { CourseService } from "src/courses/course.service";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { UserService } from "src/user/user.service";
 
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
 
@@ -33,6 +35,8 @@ export class CourseChatMentionEmailHandler
     private readonly courseChatRepository: CourseChatRepository,
     private readonly announcementRepository: AnnouncementsRepository,
     private readonly emailService: EmailService,
+    private readonly userService: UserService,
+    private readonly courseService: CourseService,
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
@@ -49,25 +53,7 @@ export class CourseChatMentionEmailHandler
     const uniqueMentionedUserIds = Array.from(new Set(mentionedUserIds)).filter(
       (mentionedUserId) => mentionedUserId !== currentUser.userId,
     );
-
     if (!uniqueMentionedUserIds.length) return;
-
-    await this.announcementRepository.createAnnouncement({
-      groupId: null,
-      title: { en: "User mentioned you" },
-      content: { en: "You have been mentioned" },
-      baseLanguage: "en",
-      availableLocales: ["en"],
-      authorId: currentUser.userId,
-      status: ANNOUNCEMENT_STATUSES.PUBLISHED,
-      scheduledAt: null,
-      publishedAt: null,
-      sendEmail: false,
-      emailTemplate: "default",
-      sourceType: "manual",
-      sourceId: null,
-      usersToNotify: uniqueMentionedUserIds,
-    });
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
       const [message, recipients, tenantOrigin] = await Promise.all([
@@ -75,6 +61,30 @@ export class CourseChatMentionEmailHandler
         this.courseChatRepository.getMentionEmailRecipients(courseId, uniqueMentionedUserIds),
         resolveTenantOrigin(this.dbAdmin, tenantId),
       ]);
+
+      console.log("Before");
+      console.log(uniqueMentionedUserIds);
+      const mentioningUser = await this.userService.getUserById(currentUser.userId);
+      console.log(mentioningUser);
+      const mentioningUserFullName = mentioningUser.firstName + " " + mentioningUser.lastName;
+      const courseName = await this.courseService.getCourseEmailData(courseId);
+
+      await this.announcementRepository.createAnnouncement({
+        groupId: null,
+        title: { en: ` ${mentioningUserFullName} mentioned you ` },
+        content: { en: `In the ${courseName.courseName}` },
+        baseLanguage: "en",
+        availableLocales: ["en"],
+        authorId: currentUser.userId,
+        status: ANNOUNCEMENT_STATUSES.PUBLISHED,
+        scheduledAt: null,
+        publishedAt: null,
+        sendEmail: false,
+        emailTemplate: "default",
+        sourceType: "manual",
+        sourceId: null,
+        usersToNotify: uniqueMentionedUserIds,
+      });
 
       if (!message || !recipients.length) return;
 

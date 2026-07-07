@@ -144,13 +144,18 @@ export class AnnouncementsRepository {
       });
     }
     if (input.usersToNotify) {
-      await this.db.insert(userAnnouncements).values(
-        input.usersToNotify!.map((userId) => ({
-          userId,
-          announcementId: announcement.id,
-        })),
-      );
+      const res = await this.db
+        .insert(userAnnouncements)
+        .values(
+          input.usersToNotify!.map((userId) => ({
+            userId,
+            announcementId: announcement.id,
+          })),
+        )
+        .returning();
+      console.log(res);
     }
+
     return this.getAnnouncementSnapshot(announcement.id, input.baseLanguage);
   }
 
