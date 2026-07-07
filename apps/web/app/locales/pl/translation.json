@@ -3034,6 +3034,10 @@
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
     },
     "videoProgress": {
+      "label": "Postęp wideo",
+      "completedSummary": "Ukończono {{completed}} z {{total}}",
+      "overviewAriaLabel": "Postęp wideo w lekcji",
+      "segmentAriaLabel": "Postęp wideo {{index}}: obejrzano {{progress}}%",
       "errors": {
         "resourceNotFound": "Nie udało się zapisać postępu wideo dla tej lekcji.",
         "unsupportedLessonType": "Postęp wideo jest dostępny tylko dla lekcji z treścią.",

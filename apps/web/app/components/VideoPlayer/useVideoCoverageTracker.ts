@@ -97,6 +97,7 @@ export const useVideoCoverageTracker = (
     initialWatchedRanges,
     initialBucketSizeSeconds,
   } = options;
+  const onSnapshotChange = options.onSnapshotChange;
 
   const enabled = Boolean(
     options.enabled && options.lessonId && options.resourceEntityId && player,
@@ -109,6 +110,12 @@ export const useVideoCoverageTracker = (
   useEffect(() => {
     snapshotDurationSecondsRef.current = snapshot.durationSeconds;
   }, [snapshot.durationSeconds]);
+
+  useEffect(() => {
+    if (!enabled || !resourceEntityId) return;
+
+    onSnapshotChange?.({ resourceEntityId, snapshot });
+  }, [enabled, onSnapshotChange, resourceEntityId, snapshot]);
 
   useEffect(() => {
     setSnapshot(

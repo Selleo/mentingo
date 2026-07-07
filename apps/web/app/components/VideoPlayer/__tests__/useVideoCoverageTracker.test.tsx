@@ -239,6 +239,54 @@ describe("useVideoCoverageTracker", () => {
 
     await waitFor(() => expect(syncLessonCompletionQueries).toHaveBeenCalledWith("lesson-id"));
   });
+
+  it("reports snapshot changes for the tracked resource", async () => {
+    const player = new FakeVideoPlayer();
+    const onSnapshotChange = vi.fn();
+
+    renderHook(() =>
+      useVideoCoverageTracker(player as unknown as VideoJSType, {
+        enabled: true,
+        lessonId: "lesson-id",
+        resourceEntityId: "resource-entity-id",
+        initialBucketSizeSeconds: 1,
+        onSnapshotChange,
+      }),
+    );
+
+    await waitFor(() =>
+      expect(onSnapshotChange).toHaveBeenCalledWith(
+        expect.objectContaining({
+          resourceEntityId: "resource-entity-id",
+          snapshot: expect.objectContaining({
+            coveragePercent: 0,
+            watchedRanges: [],
+          }),
+        }),
+      ),
+    );
+
+    act(() => {
+      player.setPaused(false);
+      player.setCurrentTime(0);
+      player.emit("play");
+      now = 5_000;
+      player.setCurrentTime(4.6);
+      player.emit("timeupdate");
+    });
+
+    await waitFor(() =>
+      expect(onSnapshotChange).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          resourceEntityId: "resource-entity-id",
+          snapshot: expect.objectContaining({
+            coveragePercent: 0.05,
+            watchedRanges: [[0, 5]],
+          }),
+        }),
+      ),
+    );
+  });
 });
 
 describe("getVideoResumeTimeSeconds", () => {

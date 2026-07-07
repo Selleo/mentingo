@@ -2,6 +2,19 @@ import type { SupportedLanguages, VideoCoverageRange } from "@repo/shared";
 
 export type { VideoCoverageRange };
 
+export type VideoCoverageSnapshot = {
+  coveragePercent: number;
+  watchedRanges: VideoCoverageRange[];
+  isWatched: boolean;
+  durationSeconds: number | null;
+  bucketSizeSeconds: number;
+};
+
+export type VideoCoverageSnapshotChange = {
+  resourceEntityId: string;
+  snapshot: VideoCoverageSnapshot;
+};
+
 export type VideoCoverageTrackingOptions = {
   enabled: boolean;
   showCoverageMarkers?: boolean;
@@ -14,12 +27,5 @@ export type VideoCoverageTrackingOptions = {
   initialDurationSeconds?: number | null;
   initialBucketSizeSeconds?: number | null;
   flushIntervalMs?: number;
-};
-
-export type VideoCoverageSnapshot = {
-  coveragePercent: number;
-  watchedRanges: VideoCoverageRange[];
-  isWatched: boolean;
-  durationSeconds: number | null;
-  bucketSizeSeconds: number;
+  onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
 };

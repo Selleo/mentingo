@@ -2735,6 +2735,10 @@
       "body": "Bitte warten Sie einen Moment. Sobald es fertig ist, wird es hier angezeigt."
     },
     "videoProgress": {
+      "label": "Video-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Video-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Video {{index}}: {{progress}} % angesehen",
       "errors": {
         "resourceNotFound": "Der Videofortschritt konnte für diese Lektion nicht gespeichert werden.",
         "unsupportedLessonType": "Videofortschritt ist nur für Inhaltslektionen verfügbar.",

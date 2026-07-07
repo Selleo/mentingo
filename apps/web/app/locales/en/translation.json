@@ -2796,6 +2796,10 @@
       "body": "Please wait a moment. It will appear here once it is ready."
     },
     "videoProgress": {
+      "label": "Video progress",
+      "completedSummary": "{{completed}} of {{total}} completed",
+      "overviewAriaLabel": "Lesson video progress",
+      "segmentAriaLabel": "Video {{index}} progress: {{progress}}% watched",
       "errors": {
         "resourceNotFound": "Video progress could not be saved for this lesson.",
         "unsupportedLessonType": "Video progress is only available for content lessons.",

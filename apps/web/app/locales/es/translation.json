@@ -2796,6 +2796,10 @@
       "body": "Espere un momento. Aparecerá aquí una vez que esté listo."
     },
     "videoProgress": {
+      "label": "Progreso del video",
+      "completedSummary": "{{completed}} de {{total}} completados",
+      "overviewAriaLabel": "Progreso de los videos de la lección",
+      "segmentAriaLabel": "Progreso del video {{index}}: {{progress}}% visto",
       "errors": {
         "resourceNotFound": "No se pudo guardar el progreso del video para esta lección.",
         "unsupportedLessonType": "El progreso del video solo está disponible para lecciones de contenido.",
