@@ -179,7 +179,7 @@ export const AssetLibraryDialog = ({
       });
     },
     fallbackUploadErrorMessage: t("common.toast.somethingWentWrong"),
-    insertOnUpload: false,
+    insertOnUpload: true,
   });
 
   const handleInsert = async (asset: ResourceLibraryAsset) => {
@@ -211,11 +211,8 @@ export const AssetLibraryDialog = ({
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
-    if (uploadInputRef.current) uploadInputRef.current.value = "";
+    const files = event.target.files;
+    const uploadPromises: Promise<void>[] = [];
 
     if (!canUploadToLibrary) {
       toast({
@@ -225,7 +222,21 @@ export const AssetLibraryDialog = ({
       return;
     }
 
-    await handleUploadToLibrary(file);
+    for (const file of files ?? []) {
+      if (!file) continue;
+
+      uploadPromises.push(handleUploadToLibrary(file));
+    }
+
+    try {
+      await Promise.all(uploadPromises);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      if (uploadInputRef.current) {
+        uploadInputRef.current.value = "";
+      }
+    }
   };
 
   const handleDelete = async () => {
@@ -286,6 +297,7 @@ export const AssetLibraryDialog = ({
                   ref={uploadInputRef}
                   type="file"
                   className="hidden"
+                  multiple
                   accept={acceptedFileTypes.join(",")}
                   onChange={(event) => void handleUpload(event)}
                 />
