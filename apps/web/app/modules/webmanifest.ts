@@ -1,11 +1,21 @@
-import { isAxiosError } from "axios";
 import { Agent } from "https";
+import { env } from "process";
+
+import { isAxiosError } from "axios";
 
 import { ApiClient } from "~/api/api-client";
 
-async function getGlobalSettings() {
+import type { LoaderFunctionArgs } from "@remix-run/node";
+
+async function getGlobalSettings(request: Request, baseURL: string) {
+  const httpsAgent =
+    env.NODE_ENV === "development" ? new Agent({ rejectUnauthorized: false }) : undefined;
+
   try {
-    const response = await ApiClient.api.settingsControllerGetPublicGlobalSettings();
+    const response = await ApiClient.api.settingsControllerGetPublicGlobalSettings({
+      baseURL,
+      httpsAgent,
+    });
     return response.data;
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 401) {
@@ -13,34 +23,53 @@ async function getGlobalSettings() {
     }
     throw error;
   }
-
-  return "hello nigga";
 }
 
-export async function loader() {
-  const response = await getGlobalSettings();
+const getImageType = (url: string) => {
+  const extension = url.split(".").pop()?.toLowerCase();
+
+  switch (extension) {
+    case "svg":
+      return "image/svg+xml";
+    case "png":
+      return "image/png";
+    case "jpg":
+    case "jpeg":
+      return "image/jpeg";
+    case "webp":
+      return "image/webp";
+    case "avif":
+      return "image/avif";
+    default:
+      return undefined;
+  }
+};
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const baseURL = new URL(request.url).origin;
+  const response = await getGlobalSettings(request, baseURL);
 
   if (!response) {
     throw new Response("Settings not found", {
       status: 404,
     });
   }
-  return new Response(
-    JSON.stringify({
-      test: response,
-    }),
-  );
 
   const { primaryColor, contrastColor, platformSimpleLogoS3Key, companyInformation } =
     response.data;
 
+  const imageURL = platformSimpleLogoS3Key
+    ? `${baseURL}${platformSimpleLogoS3Key}`
+    : `${baseURL}/app.svg`;
+  const imageType = getImageType(imageURL);
+  const imageSize = platformSimpleLogoS3Key ? null : "any";
+
   return new Response(
     JSON.stringify({
-      name: companyInformation?.companyName,
-      short_name: companyInformation?.companyShortName,
+      name: companyInformation?.companyName || "Mentingo",
 
-      theme_color: primaryColor,
-      background_color: contrastColor,
+      theme_color: primaryColor || "#3f58b6",
+      background_color: contrastColor || "#fcfcfc",
 
       display: "standalone",
 
@@ -52,14 +81,14 @@ export async function loader() {
 
       icons: [
         {
-          src: "/heart-192.png",
-          sizes: "192x192",
-          type: "image/png",
+          src: imageURL,
+          sizes: imageSize ?? "192x192",
+          type: imageType,
         },
         {
-          src: "/heart-512.png",
-          sizes: "512x512",
-          type: "image/png",
+          src: imageURL,
+          sizes: imageSize ?? "512x512",
+          type: imageType,
           purpose: "maskable",
         },
       ],
