@@ -2,6 +2,7 @@ import { useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { Clock, GraduationCap, Info, Play, Settings, Upload, X } from "lucide-react";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
@@ -30,6 +31,7 @@ type CourseHeroProps = {
 };
 
 export default function CourseOverview({ course, language }: CourseHeroProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: currentUser } = useCurrentUser();
   const { hasAccess: canManageUsers } = usePermissions({
@@ -262,7 +264,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               <Settings className="size-4 text-primary-700" />
 
               <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
-                Course settings
+                {t("modernCourseView.overview.courseSettings")}
               </span>
             </button>
 
@@ -274,7 +276,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               <Upload className="size-4 text-primary-700" />
 
               <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
-                Edit media
+                {t("modernCourseView.overview.editMedia")}
               </span>
             </button>
           </>
@@ -392,7 +394,9 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                 >
                   <GraduationCap className="size-4" />
 
-                  <span className="text-sm font-semibold">Enter learning mode</span>
+                  <span className="text-sm font-semibold">
+                    {t("modernCourseView.learningMode.enter")}
+                  </span>
                 </button>
               ) : (
                 <button
@@ -402,7 +406,9 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                 >
                   <Play className="size-4" fill="currentColor" />
 
-                  <span className="text-sm font-semibold">Continue learning</span>
+                  <span className="text-sm font-semibold">
+                    {t("modernCourseView.overview.continueLearning")}
+                  </span>
                 </button>
               )}
 
@@ -413,7 +419,9 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               >
                 <Info className="size-4" />
 
-                <span className="text-sm font-semibold">Course details</span>
+                <span className="text-sm font-semibold">
+                  {t("modernCourseView.overview.courseDetails")}
+                </span>
               </button>
             </div>
           </div>
@@ -425,7 +433,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
           <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-6">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
-                Edit Course Media
+                {t("modernCourseView.media.title")}
               </h3>
               <button type="button" onClick={closeMediaModal}>
                 <X className="w-5 h-5 md:w-6 md:h-6 text-[#676767]" />
@@ -435,25 +443,27 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             {/* Current Hero Image Preview with Position Adjustment */}
             <div className="mb-6">
               <p className="mb-3 block text-sm font-semibold text-[#363636]">
-                Current Hero Image - Adjust Position
+                {t("modernCourseView.media.currentImage")}
               </p>
               <div className="relative aspect-[21/9] rounded-xl overflow-hidden border-2 border-[#e5e5e5] mb-4">
                 <img
                   src={imagePreviewUrl}
-                  alt="Course hero preview"
+                  alt={t("modernCourseView.media.previewAlt")}
                   className="w-full h-full object-cover"
                   style={{ objectPosition: `center ${heroImagePositionDraft}%` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent pointer-events-none" />
                 <div className="absolute bottom-4 left-4 text-white text-sm font-semibold">
-                  Preview with current position
+                  {t("modernCourseView.media.previewPosition")}
                 </div>
               </div>
 
               {/* Position Slider */}
               <div className="bg-[#f9fafb] rounded-xl p-4 border border-[#e5e5e5]">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-semibold text-[#363636]">Vertical Position</p>
+                  <p className="text-sm font-semibold text-[#363636]">
+                    {t("modernCourseView.media.verticalPosition")}
+                  </p>
                   {/* <span className="text-sm text-[#676767]">{heroImagePosition}%</span> */}
                 </div>
                 <input
@@ -475,7 +485,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               {/* Hero Image Upload */}
               <div>
                 <p className="mb-3 block text-sm font-semibold text-[#363636]">
-                  Upload New Hero Image
+                  {t("modernCourseView.media.uploadImage")}
                 </p>
                 <input
                   ref={imageInputRef}
@@ -492,28 +502,38 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                   <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mb-3">
                     <Upload className="w-8 h-8 text-[#3f58b6]" />
                   </div>
-                  <p className="text-sm font-semibold text-[#363636] mb-1">Drop hero image here</p>
-                  <p className="text-xs text-[#676767] mb-3">or click to browse</p>
-                  <p className="text-xs text-[#676767]">PNG, JPG up to 10MB</p>
-                  <p className="text-xs text-[#676767]">Recommended: 1920x820px (21:9)</p>
+                  <p className="text-sm font-semibold text-[#363636] mb-1">
+                    {t("modernCourseView.media.dropImage")}
+                  </p>
+                  <p className="text-xs text-[#676767] mb-3">
+                    {t("modernCourseView.media.browse")}
+                  </p>
+                  <p className="text-xs text-[#676767]">{t("modernCourseView.media.imageLimit")}</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.media.imageRecommendation")}
+                  </p>
                 </button>
               </div>
 
               {/* Trailer Video Upload */}
               <div>
                 <p className="mb-3 block text-sm font-semibold text-[#363636]">
-                  Course Trailer (Optional)
+                  {t("modernCourseView.media.trailer")}
                 </p>
                 <div className="border-2 border-dashed border-[#e5e5e5] rounded-xl p-6 md:p-8 text-center hover:border-[#3f58b6] transition-colors cursor-pointer bg-gray-50 hover:bg-gray-100 h-40 md:h-48 flex flex-col items-center justify-center">
                   <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mb-3">
                     <Play className="w-8 h-8 text-purple-600" />
                   </div>
                   <p className="text-sm font-semibold text-[#363636] mb-1">
-                    Drop trailer video here
+                    {t("modernCourseView.media.dropVideo")}
                   </p>
-                  <p className="text-xs text-[#676767] mb-3">or click to browse</p>
-                  <p className="text-xs text-[#676767]">MP4, MOV up to 50MB</p>
-                  <p className="text-xs text-[#676767]">Recommended: 30-90 seconds</p>
+                  <p className="text-xs text-[#676767] mb-3">
+                    {t("modernCourseView.media.browse")}
+                  </p>
+                  <p className="text-xs text-[#676767]">{t("modernCourseView.media.videoLimit")}</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.media.videoRecommendation")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -525,7 +545,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                 disabled={isUpdatingCourse || isUploadingImage}
                 className="px-6 py-2 bg-gray-200 text-[#363636] rounded-lg font-semibold hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                {t("modernCourseView.common.cancel")}
               </button>
               <button
                 type="button"
@@ -534,7 +554,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                 className="px-6 py-2 bg-[#3f58b6] text-white rounded-lg font-semibold hover:bg-[#324a95] transition-colors flex items-center gap-2"
               >
                 <Upload className="w-4 h-4" />
-                Upload Media
+                {t("modernCourseView.media.save")}
               </button>
             </div>
           </div>
@@ -545,7 +565,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <button
             type="button"
-            aria-label="Close course description"
+            aria-label={t("modernCourseView.overview.closeDetails")}
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowDescriptionModal(false)}
           />
@@ -554,7 +574,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               {/* Header */}
               <div className="flex items-center justify-between mb-4 md:mb-6">
                 <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
-                  About This Course
+                  {t("modernCourseView.overview.aboutCourse")}
                 </h3>
                 <button
                   onClick={() => setShowDescriptionModal(false)}
@@ -580,13 +600,15 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
 
               {/* Description */}
               <div className="mb-6">
-                <h5 className="font-bold text-[#363636] mb-3">Description</h5>
+                <h5 className="font-bold text-[#363636] mb-3">
+                  {t("modernCourseView.overview.description")}
+                </h5>
                 {isAdminExperience ? (
                   <textarea
                     value={courseDescription}
                     onChange={(e) => setCourseDescription(e.target.value)}
                     className="w-full p-3 border-2 border-[#e5e5e5] rounded-lg text-[#363636] leading-relaxed focus:outline-none focus:border-[#3f58b6] min-h-[120px]"
-                    placeholder="Enter course description..."
+                    placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
                     onBlur={() => void handleDescriptionChange()}
                   />
                 ) : (
@@ -596,7 +618,9 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
 
               {/* What You'll Learn */}
               <div className="mb-6">
-                <h5 className="font-bold text-[#363636] mb-3">What You&apos;ll Learn</h5>
+                <h5 className="font-bold text-[#363636] mb-3">
+                  {t("modernCourseView.overview.whatYouWillLearn")}
+                </h5>
                 <div className="space-y-2"></div>
               </div>
 
@@ -606,7 +630,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                   onClick={() => setShowDescriptionModal(false)}
                   className="px-6 py-2 bg-[#3f58b6] text-white rounded-lg font-semibold hover:bg-[#324a95] transition-colors"
                 >
-                  Close
+                  {t("modernCourseView.common.close")}
                 </button>
               </div>
             </div>
@@ -618,7 +642,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
           {/* Overlay */}
           <button
             type="button"
-            aria-label="Close course settings"
+            aria-label={t("modernCourseView.overview.closeSettings")}
             className="fixed inset-0 bg-black/50 z-40 transition-opacity"
             onClick={() => setShowSettingsDrawer(false)}
           />
@@ -630,7 +654,9 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               <div className="flex items-center justify-between p-4 md:p-6 border-b border-[#e5e5e5]">
                 <div className="flex items-center gap-3">
                   <Settings className="w-6 h-6 text-[#3f58b6]" />
-                  <h2 className="font-gothic text-2xl font-bold text-[#363636]">Course Settings</h2>
+                  <h2 className="font-gothic text-2xl font-bold text-[#363636]">
+                    {t("modernCourseView.overview.courseSettings")}
+                  </h2>
                 </div>
                 <button
                   onClick={() => setShowSettingsDrawer(false)}
@@ -649,31 +675,33 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
                     <h3 className="text-lg font-semibold text-[#363636] mb-2">
                       Settings Coming Soon
                     </h3>
-                    <p className="text-sm text-[#676767]">Here you&apos;ll be able to configure:</p>
+                    <p className="text-sm text-[#676767]">
+                      {t("modernCourseView.overview.settingsIntro")}
+                    </p>
                     <ul className="mt-4 space-y-2 text-sm text-[#676767] text-left">
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Course status (Draft/Published)</span>
+                        <span>{t("modernCourseView.overview.settingsStatus")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Pricing & payment options</span>
+                        <span>{t("modernCourseView.overview.settingsPricing")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Assigned students & groups</span>
+                        <span>{t("modernCourseView.overview.settingsAssignments")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Enforce sequential completion</span>
+                        <span>{t("modernCourseView.overview.settingsSequential")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Course visibility settings</span>
+                        <span>{t("modernCourseView.overview.settingsVisibility")}</span>
                       </li>
                       <li className="flex items-start gap-2">
                         <span className="text-[#3f58b6] font-bold">•</span>
-                        <span>Access permissions</span>
+                        <span>{t("modernCourseView.overview.settingsPermissions")}</span>
                       </li>
                     </ul>
                   </div>

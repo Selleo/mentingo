@@ -213,7 +213,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
             <Clock className="w-6 h-6 text-[#26b183]" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">Your Progress</p>
+            <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">
+              {t("modernCourseView.stats.yourProgress")}
+            </p>
 
             {/* Time remaining - always in one line */}
             <div className="mb-1.5">
@@ -221,7 +223,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 <span className="text-xl font-bold text-[#363636] whitespace-nowrap">
                   {isAdminExperience ? 0 : formatDuration(timeLeftSeconds)}
                 </span>
-                <span className="text-sm text-[#676767] whitespace-nowrap">remaining</span>
+                <span className="text-sm text-[#676767] whitespace-nowrap">
+                  {t("modernCourseView.stats.remaining")}
+                </span>
               </div>
             </div>
           </div>
@@ -233,9 +237,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 onClick={() => toggleLearningMode({ enabled: false })}
                 className="text-[#3f58b6] underline hover:text-[#324a95] transition-colors"
               >
-                Enter learning mode
+                {t("modernCourseView.learningMode.enter")}
               </button>{" "}
-              to track your progress.
+              {t("modernCourseView.stats.trackProgress")}
             </p>
           </div>
         )}
@@ -258,15 +262,21 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
               <Calendar className="w-6 h-6 text-[#D4705D]" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">Deadline</p>
+              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">
+                {t("modernCourseView.stats.deadline")}
+              </p>
               {isAdminExperience ? (
                 <p className="text-xl font-bold text-[#363636]">
-                  {hasDeadline ? "Enabled" : "Disabled"}
+                  {hasDeadline
+                    ? t("modernCourseView.common.enabled")
+                    : t("modernCourseView.common.disabled")}
                 </p>
               ) : (
                 <>
-                  <p className="text-xl font-bold text-[#363636]">9 days left</p>
-                  <p className="text-xs text-[#676767]">March 15, 2026</p>
+                  <p className="text-xl font-bold text-[#363636]">
+                    {t("modernCourseView.stats.daysLeft", { count: 9 })}
+                  </p>
+                  <p className="text-xs text-[#676767]">{course.dueDate}</p>
                 </>
               )}
             </div>
@@ -291,9 +301,15 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
               <Award className="w-6 h-6 text-[#26b183]" />
             </div>
             <div className="flex-1">
-              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">Certificate</p>
+              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">
+                {t("modernCourseView.stats.certificate")}
+              </p>
               <p className="text-xl font-bold text-[#363636]">
-                {isAdminExperience ? (hasCertificate ? "Enabled" : "Disabled") : "Upon completion"}
+                {isAdminExperience
+                  ? hasCertificate
+                    ? t("modernCourseView.common.enabled")
+                    : t("modernCourseView.common.disabled")
+                  : t("modernCourseView.stats.uponCompletion")}
               </p>
             </div>
           </div>
@@ -325,7 +341,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
               className="w-12 h-12 rounded-full object-cover flex-shrink-0"
             />
             <div className="flex-1">
-              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">About Author</p>
+              <p className="text-xs text-[#676767] uppercase tracking-wider mb-0.5">
+                {t("modernCourseView.stats.aboutAuthor")}
+              </p>
               <p className="text-lg font-bold text-[#363636]">
                 {author?.firstName + " " + author?.lastName}
               </p>
@@ -339,14 +357,14 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <button
             type="button"
-            aria-label="Close certificate settings"
+            aria-label={t("modernCourseView.certificate.close")}
             className="absolute inset-0 bg-black/50"
             onClick={closeCertificateModal}
           />
           <div className="relative bg-white rounded-2xl shadow-2xl p-4 md:p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
-                Certificate Settings
+                {t("modernCourseView.certificate.title")}
               </h3>
               <button type="button" onClick={closeCertificateModal}>
                 <X className="w-5 h-5 md:w-6 md:h-6 text-[#676767]" />
@@ -360,22 +378,24 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                   className="mb-4 font-gothic text-2xl font-bold md:text-4xl"
                   style={{ color: certificateColor }}
                 >
-                  Certificate of Completion
+                  {t("modernCourseView.certificate.previewTitle")}
                 </h2>
                 <p className="text-base md:text-lg text-[#676767] mb-4 md:mb-6">
-                  This certifies that
+                  {t("modernCourseView.certificate.certifies")}
                 </p>
                 <p className="text-xl md:text-3xl font-bold text-[#363636] mb-4 md:mb-6">
                   Ellis Admin
                 </p>
                 <p className="text-base md:text-lg text-[#676767] mb-2">
-                  has successfully completed
+                  {t("modernCourseView.certificate.completed")}
                 </p>
                 <p className="text-lg md:text-2xl font-bold text-[#363636] mb-6 md:mb-8">
                   {course?.title}
                 </p>
                 <div className="border-t-2 border-[#e5e5e5] pt-6">
-                  <p className="text-sm text-[#676767]">Signature placeholder</p>
+                  <p className="text-sm text-[#676767]">
+                    {t("modernCourseView.certificate.signaturePlaceholder")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -385,9 +405,11 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
               {/* Enable Certificate Toggle */}
               <div className="flex items-center justify-between p-4 bg-[#f9fafb] rounded-xl border border-[#e5e5e5]">
                 <div>
-                  <p className="font-semibold text-[#363636]">Enable Certificate</p>
+                  <p className="font-semibold text-[#363636]">
+                    {t("modernCourseView.certificate.enable")}
+                  </p>
                   <p className="text-sm text-[#676767]">
-                    Students will receive a certificate upon course completion
+                    {t("modernCourseView.certificate.enableDescription")}
                   </p>
                 </div>
                 <button
@@ -414,7 +436,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                       htmlFor="certificate-font-color"
                       className="block text-sm font-semibold text-[#363636] mb-2"
                     >
-                      Font Color
+                      {t("modernCourseView.certificate.fontColor")}
                     </label>
                     <div className="flex items-center gap-3">
                       <input
@@ -435,12 +457,16 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
 
                   <div>
                     <p className="block text-sm font-semibold text-[#363636] mb-2">
-                      Upload Signature
+                      {t("modernCourseView.certificate.uploadSignature")}
                     </p>
                     <div className="border-2 border-dashed border-[#e5e5e5] rounded-xl p-6 text-center hover:border-[#3f58b6] transition-colors cursor-pointer">
                       <Upload className="w-8 h-8 text-[#676767] mx-auto mb-2" />
-                      <p className="text-sm text-[#676767]">Click to upload signature image</p>
-                      <p className="text-xs text-[#676767] mt-1">PNG, JPG up to 2MB</p>
+                      <p className="text-sm text-[#676767]">
+                        {t("modernCourseView.certificate.uploadSignatureHint")}
+                      </p>
+                      <p className="text-xs text-[#676767] mt-1">
+                        {t("modernCourseView.certificate.signatureLimit")}
+                      </p>
                     </div>
                   </div>
                 </>
@@ -454,7 +480,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 disabled={isUpdatingCertificate}
                 className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-[#363636] rounded-lg font-semibold hover:bg-gray-300 transition-colors order-2 sm:order-1"
               >
-                Cancel
+                {t("modernCourseView.common.cancel")}
               </button>
               <button
                 type="button"
@@ -463,7 +489,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 className="w-full sm:w-auto px-6 py-2 bg-[#3f58b6] text-white rounded-lg font-semibold hover:bg-[#324a95] transition-colors flex items-center justify-center gap-2 order-1 sm:order-2"
               >
                 <Check className="w-4 h-4" />
-                Save Certificate
+                {t("modernCourseView.certificate.save")}
               </button>
             </div>
           </div>
@@ -475,14 +501,14 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <button
             type="button"
-            aria-label="Close deadline settings"
+            aria-label={t("modernCourseView.deadline.close")}
             className="absolute inset-0 bg-black/50"
             onClick={closeDeadlineModal}
           />
           <div className="relative bg-white rounded-2xl shadow-2xl p-4 md:p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
-                Deadline Settings
+                {t("modernCourseView.deadline.title")}
               </h3>
               <button type="button" onClick={closeDeadlineModal}>
                 <X className="w-5 h-5 md:w-6 md:h-6 text-[#676767]" />
@@ -493,9 +519,11 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
               {/* Enable Deadline Toggle */}
               <div className="flex items-center justify-between p-4 bg-[#f9fafb] rounded-xl border border-[#e5e5e5]">
                 <div>
-                  <p className="font-semibold text-[#363636]">Enable Deadlines</p>
+                  <p className="font-semibold text-[#363636]">
+                    {t("modernCourseView.deadline.enable")}
+                  </p>
                   <p className="text-sm text-[#676767]">
-                    Set specific deadlines for different groups
+                    {t("modernCourseView.deadline.enableDescription")}
                   </p>
                 </div>
                 <button
@@ -530,7 +558,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                   >
                     <div className="flex-1">
                       <p className="font-semibold text-[#363636]">{group.name}</p>
-                      <p className="text-sm text-[#676767]">Current deadline: {group.deadline}</p>
+                      <p className="text-sm text-[#676767]">
+                        {t("modernCourseView.deadline.current", { deadline: group.deadline })}
+                      </p>
                     </div>
                     <input
                       type="date"
@@ -553,7 +583,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 disabled={isUpdatingDeadlines}
                 className="w-full sm:w-auto px-6 py-2 bg-gray-200 text-[#363636] rounded-lg font-semibold hover:bg-gray-300 transition-colors order-2 sm:order-1"
               >
-                Cancel
+                {t("modernCourseView.common.cancel")}
               </button>
               <button
                 type="button"
@@ -565,7 +595,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 }
                 className="w-full sm:w-auto px-6 py-2 bg-[#3f58b6] text-white rounded-lg font-semibold hover:bg-[#324a95] transition-colors order-1 sm:order-2"
               >
-                Save Changes
+                {t("modernCourseView.common.saveChanges")}
               </button>
             </div>
           </div>
@@ -577,7 +607,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
           <button
             type="button"
-            aria-label="Close author settings"
+            aria-label={t("modernCourseView.author.close")}
             className="absolute inset-0 bg-black/50"
             onClick={closeAuthorModal}
           />
@@ -596,7 +626,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                   alt={
                     author?.firstName && author?.lastName
                       ? author?.firstName + " " + author?.lastName
-                      : "author picture"
+                      : t("modernCourseView.author.pictureAlt")
                   }
                   className="w-full h-auto object-cover rounded-xl shadow-lg"
                 />
@@ -615,9 +645,11 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                   <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-[#363636] text-sm">Show Author Section</p>
+                        <p className="font-semibold text-[#363636] text-sm">
+                          {t("modernCourseView.author.showSection")}
+                        </p>
                         <p className="text-xs text-[#676767]">
-                          Display author information on course page
+                          {t("modernCourseView.author.showSectionDescription")}
                         </p>
                       </div>
                       <button
@@ -651,7 +683,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                 {/* Other Courses */}
                 <div>
                   <h4 className="mb-4 font-gothic text-xl font-bold text-[#363636]">
-                    Other Courses
+                    {t("modernCourseView.author.otherCourses")}
                   </h4>
                   <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                     {otherCourses.map((course) => (
@@ -689,7 +721,9 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                     disabled={isUpdatingAuthorSection}
                     className="w-full rounded-lg bg-gray-200 px-6 py-2 font-semibold text-[#363636] transition-colors hover:bg-gray-300 sm:w-auto"
                   >
-                    {isAdminExperience ? "Cancel" : "Close"}
+                    {isAdminExperience
+                      ? t("modernCourseView.common.cancel")
+                      : t("modernCourseView.common.close")}
                   </button>
                   {isAdminExperience && (
                     <button
@@ -698,7 +732,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                       disabled={isUpdatingAuthorSection}
                       className="ml-3 w-full rounded-lg bg-[#3f58b6] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#324a95] disabled:opacity-50 sm:w-auto"
                     >
-                      Save changes
+                      {t("modernCourseView.common.saveChanges")}
                     </button>
                   )}
                 </div>

@@ -19,6 +19,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Choose supported course types where the tenant configuration allows them.
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
+- Review and edit the modern course overview in the user's interface language, including media, deadlines, certificates, author details, curriculum, and statistics.
 - Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.
@@ -42,6 +43,8 @@ The edit experience adapts to course type, tenant configuration, integrations, a
 
 Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Private and published courses must be moved back to draft before deletion is allowed. Language operations respect supported-language and base-language rules.
 
+The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, curriculum labels, lesson statuses, and summary statistics.
+
 ## Key Technical Context
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
@@ -49,6 +52,7 @@ Course mutations are permission-gated. Full course administrators can manage cou
 - Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
+- Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
 
 ## Test Evidence
 
