@@ -66,6 +66,8 @@ export const ScaleQuestionOptionsList = ({
 
     const newIndex = parseInt(e.target.value, 10);
     setCurrentIndex(newIndex);
+
+    updateFormValue(newIndex);
   };
 
   return (
