@@ -68,78 +68,39 @@ export default defineConfig(({ mode }) => {
       }),
       VitePWA({
         registerType: "autoUpdate",
-
-        // automatycznie dodaje service worker
         injectRegister: "auto",
-
         includeAssets: ["favicon.ico", "apple-touch-icon.png"],
 
-        manifest: {
-          name: "Moja aplikacja",
-          short_name: "App",
-          description: "Aplikacja Remix PWA",
+        manifest: false,
 
-          theme_color: "#0f172a",
-          background_color: "#ffffff",
-
-          display: "standalone",
-
-          orientation: "portrait",
-
-          start_url: "/",
-
-          scope: "/",
-
-          icons: [
-            {
-              src: "/heart-192.png",
-              sizes: "192x192",
-              type: "image/png",
-            },
-            {
-              src: "/heart-512.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "maskable",
-            },
-          ],
+        devOptions: {
+          enabled: true,
+          type: "module",
         },
 
         workbox: {
           cleanupOutdatedCaches: true,
-
           clientsClaim: true,
-
           skipWaiting: true,
-
           navigateFallback: null,
-
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/.*\.(?:png|jpg|jpeg|svg|webp|woff2?)$/,
-
               handler: "CacheFirst",
-
               options: {
                 cacheName: "assets-cache",
-
                 expiration: {
                   maxEntries: 100,
                   maxAgeSeconds: 60 * 60 * 24 * 30,
                 },
               },
             },
-
             {
               urlPattern: /^https?:\/\/.*\/api\/.*/,
-
               handler: "NetworkFirst",
-
               options: {
                 cacheName: "api-cache",
-
                 networkTimeoutSeconds: 3,
-
                 expiration: {
                   maxEntries: 50,
                   maxAgeSeconds: 60 * 60 * 24,
