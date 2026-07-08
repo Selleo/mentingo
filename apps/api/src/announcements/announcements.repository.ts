@@ -65,6 +65,7 @@ export class AnnouncementsRepository {
   async getAllAnnouncements(
     language: SupportedLanguages | undefined,
     pagination: AnnouncementPagination,
+    currentUserId: UUIDType,
     status?: AnnouncementStatus,
   ) {
     const conditions = [isNull(announcements.deletedAt)];
@@ -76,12 +77,14 @@ export class AnnouncementsRepository {
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
+          isRead: userAnnouncements.isRead,
+          readAt: userAnnouncements.readAt,
         })
         .from(announcements)
-        .where(and(...conditions))
+        .innerJoin(userAnnouncements, eq(userAnnouncements.announcementId, announcements.id))
+        .where(and(...conditions, eq(userAnnouncements.userId, currentUserId)))
         .orderBy(desc(announcements.createdAt))
         .$dynamic();
-
       const announcementsData = await addPagination(
         announcementsQuery,
         pagination.page,

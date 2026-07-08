@@ -65,8 +65,10 @@ export class AnnouncementsController {
     @Query("status") status?: AnnouncementStatus,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
+    @CurrentUser("userId") currentUserId?: UUIDType,
   ): Promise<PaginatedResponse<AllAnnouncements>> {
     const announcements = await this.announcementsService.getAllAnnouncements(
+      currentUserId!,
       language,
       {
         page,
