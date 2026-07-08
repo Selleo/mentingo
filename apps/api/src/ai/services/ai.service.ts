@@ -7,8 +7,14 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
-import { PERMISSIONS, hasPermission } from "@repo/shared";
-import { experimental_transcribe, generateObject, jsonSchema, type Message, streamText } from "ai";
+import { PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
+import {
+  experimental_transcribe,
+  generateObject,
+  jsonSchema,
+  type ModelMessage,
+  streamText,
+} from "ai";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
 
@@ -38,6 +44,7 @@ import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
+import type { AiStreamMessageInput } from "src/ai/ai-chat.types";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -103,7 +110,7 @@ export class AiService {
   }
 
   async streamMessage(
-    data: StreamChatBody,
+    data: AiStreamMessageInput,
     model: OpenAIModels,
     currentUser: CurrentUserType,
     isVoiceMentor: boolean = false,
@@ -143,8 +150,8 @@ export class AiService {
           messages: prompt.map((m) => ({
             content: m.content,
             role: this.mapRole(m.role),
-          })) as Omit<Message, "id">[],
-          maxTokens: MAX_TOKENS,
+          })) as ModelMessage[],
+          maxOutputTokens: MAX_TOKENS,
           ...generationConfig,
           experimental_telemetry: { isEnabled: true },
           onFinish: async (event) => {
@@ -186,6 +193,24 @@ export class AiService {
       },
       { name: "Conversation", asType: "generation", endOnExit: false },
     )();
+  }
+
+  async streamChatMessage(data: StreamChatBody, model: OpenAIModels, currentUser: CurrentUserType) {
+    const content = getUiMessageText(data.message).trim();
+
+    if (!content) {
+      throw new BadRequestException("common.validation.messageRequired");
+    }
+
+    return this.streamMessage(
+      {
+        threadId: data.threadId,
+        content,
+        id: data.id,
+      },
+      model,
+      currentUser,
+    );
   }
 
   async sendWelcomeMessage(threadId: UUIDType, systemPrompt: string) {
@@ -450,7 +475,6 @@ export class AiService {
             const { object } = await generateObject({
               ...baseConfig,
               experimental_telemetry: { isEnabled: true },
-              output: "object",
               messages: [
                 {
                   role: "user",

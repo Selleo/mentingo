@@ -21,7 +21,7 @@ export class ChatService {
           const { text } = await generateText({
             model: provider(model),
             prompt: prompt,
-            maxTokens: MAX_TOKENS,
+            maxOutputTokens: MAX_TOKENS,
             experimental_telemetry: { isEnabled: true },
           });
 
@@ -45,8 +45,8 @@ export class ChatService {
         const provider = await this.promptService.getOpenAI();
         try {
           const result = await generateObject({
-            model: provider(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
-            schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
+            model: provider(OPENAI_MODELS.BASIC),
+            schema: jsonSchema(() => ({ ...aiJudgeJudgementSchema, additionalProperties: false })),
             temperature: 0.5,
             topK: 10,
             topP: 0.9,

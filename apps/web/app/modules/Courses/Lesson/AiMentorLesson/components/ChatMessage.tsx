@@ -1,3 +1,4 @@
+import { getUiMessageText } from "@repo/shared";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import Markdown from "react-markdown";
@@ -12,13 +13,15 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 
+import type { UIMessage } from "@ai-sdk/react";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 import "katex/dist/katex.min.css";
 
 interface ChatMessageProps {
   id: string;
   role: "assistant" | "user" | "data" | "system";
-  content: string;
+  content?: string;
+  parts?: UIMessage["parts"];
   user?: { name?: string; email?: string };
   name?: string;
   email?: string;
@@ -35,6 +38,7 @@ const ChatMessage = ({
   id,
   role,
   content,
+  parts,
   user,
   name,
   userName,
@@ -49,6 +53,7 @@ const ChatMessage = ({
   const { data: currentUser } = useCurrentUserSuspense();
 
   const isAssistant = role === "assistant";
+  const textContent = content ?? getUiMessageText({ parts });
 
   const previewDisplayName =
     `${previewUser?.firstName ?? ""} ${previewUser?.lastName ?? ""}`.trim();
@@ -131,10 +136,10 @@ const ChatMessage = ({
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
             >
-              {content}
+              {textContent}
             </Markdown>
           ) : (
-            content
+            textContent
           )}
         </div>
       </div>

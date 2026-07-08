@@ -61,7 +61,7 @@ export class LumaCourseGenerationSyncService {
     try {
       const luma = await this.lumaService.getLumaClient();
       this.logger.log(`Fetching Luma generated course bundle: courseId=${data.courseId}`);
-      const bundle = await luma.getGeneratedCourseBundle({ integrationId: data.courseId });
+      const bundle = await luma.courses.getGeneratedCourseBundle({ integrationId: data.courseId });
       this.logger.log(
         `Fetched Luma generated course bundle: courseId=${data.courseId}, chapters=${bundle.course.chapters.length}, assets=${bundle.assets.length}`,
       );

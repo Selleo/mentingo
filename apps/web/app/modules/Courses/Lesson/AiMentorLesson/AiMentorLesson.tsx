@@ -1,5 +1,7 @@
-import { type Message, useChat } from "@ai-sdk/react";
+import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
+import { createTextUiMessage, getUiMessageText, toUiMessageRole } from "@repo/shared";
+import { DefaultChatTransport } from "ai";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -89,52 +91,66 @@ const AiMentorLesson = ({
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [latestEvaluation, setLatestEvaluation] = useState<AiMentorEvaluation | null>(null);
+  const [input, setInput] = useState("");
 
-  const { messages, input, setMessages, handleInputChange, handleSubmit, status, setInput } =
-    useChat({
-      api: chatUrl,
-      body: {
-        threadId: lesson.threadId ?? "",
-      },
-      fetch: async (url, options) => {
-        const body = JSON.parse(options?.body as string);
-        return fetch(url, {
-          ...options,
-          body: JSON.stringify({
-            content: body.messages[body.messages.length - 1]?.content || "",
-            threadId: lesson.threadId ?? "",
-          }),
-          credentials: "include",
-        });
-      },
-      onFinish: async () => {
-        if (!lesson.threadId) return;
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport<UIMessage>({
+        api: chatUrl,
+        credentials: "include",
+        prepareSendMessagesRequest: ({ messages }) => {
+          const message = messages[messages.length - 1];
 
-        await queryClient.invalidateQueries({
-          queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
-        });
-        await queryClient.invalidateQueries({
-          queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
-        });
-      },
-    });
+          return {
+            body: {
+              threadId: lesson.threadId ?? "",
+              message,
+            },
+            credentials: "include",
+          };
+        },
+      }),
+    [lesson.threadId],
+  );
+
+  const { messages, setMessages, sendMessage, status } = useChat({
+    transport,
+    onFinish: async () => {
+      if (!lesson.threadId) return;
+
+      await queryClient.invalidateQueries({
+        queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
+      });
+    },
+  });
 
   useEffect(() => {
-    setMessages((currentThreadMessages?.data as Message[]) || []);
+    setMessages(
+      currentThreadMessages?.data.map((message) =>
+        createTextUiMessage<UIMessage>({
+          id: message.id,
+          role: toUiMessageRole<UIMessage["role"]>(message.role),
+          content: message.content,
+        }),
+      ) ?? [],
+    );
   }, [currentThreadMessages, setMessages]);
 
   const appendVoiceMessage = useCallback(
-    (role: Message["role"], content: string) => {
+    (role: UIMessage["role"], content: string) => {
       const nextContent = content.trim();
       if (!nextContent) {
         return;
       }
 
-      const nextMessage: Message = {
+      const nextMessage = createTextUiMessage<UIMessage>({
         id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
         role,
         content: nextContent,
-      };
+      });
 
       setMessages((prev) => [...prev, nextMessage]);
     },
@@ -150,6 +166,21 @@ const AiMentorLesson = ({
       queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
     });
   }, [lesson.threadId]);
+
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(event.target.value);
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(() => {
+    const message = input.trim();
+    if (!message || !lesson.threadId) return;
+
+    setInput("");
+    void sendMessage({ text: message });
+  }, [input, lesson.threadId, sendMessage]);
 
   const handleVoiceMentorTranscription = useCallback(
     (text: string) => {
@@ -192,7 +223,7 @@ const AiMentorLesson = ({
   );
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
-    lastMessage?.role === "assistant" && String(lastMessage.content ?? "").trim().length > 0;
+    lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
   const showChatLoader = (isProcessing && !hasStreamingAssistantText) || isJudgePending;
   const persistedEvaluation = useMemo<AiMentorEvaluation | null>(() => {
     if (!lesson.aiMentorDetails) return null;
@@ -325,15 +356,17 @@ const AiMentorLesson = ({
           className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
         >
           {!lessonLoading &&
-            messages.map((messages, idx) => (
+            messages.map((message, idx) => (
               <ChatMessage
                 key={idx}
                 aiName={lesson.aiMentor?.name || ""}
                 avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
                 previewUser={previewUser}
-                testId={LEARNING_HANDLES.aiMentorMessage(messages.id)}
-                contentTestId={LEARNING_HANDLES.aiMentorMessageRole(messages.role)}
-                {...messages}
+                testId={LEARNING_HANDLES.aiMentorMessage(message.id)}
+                contentTestId={LEARNING_HANDLES.aiMentorMessageRole(message.role)}
+                id={message.id}
+                role={message.role}
+                parts={message.parts}
               />
             ))}
 

@@ -62,11 +62,7 @@ export function CourseGenerationChatRuntime({
   }, [currentMessageKey, isProcessing, onProcessingStateChange]);
 
   const chat = {
-    messages: generationChat.messages.map((message) => ({
-      id: message.id,
-      role: String(message.role),
-      content: message.content,
-    })),
+    messages: generationChat.messages,
     streamData: generationChat.data,
     input: generationChat.input,
     onInputChange: generationChat.setInput,

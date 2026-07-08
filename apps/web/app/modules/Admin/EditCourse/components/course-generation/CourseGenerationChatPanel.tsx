@@ -1,4 +1,4 @@
-import { COURSE_GENERATION_MESSAGE_KEY } from "@repo/shared";
+import { COURSE_GENERATION_MESSAGE_KEY, getUiMessageText } from "@repo/shared";
 import { type Dispatch, type SetStateAction, useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,25 +7,18 @@ import { useCourseGenerationFiles } from "~/api/queries/admin/useCourseGeneratio
 import { Icon } from "~/components/Icon";
 import { CourseGenerationComposer } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationComposer";
 import { CourseGenerationAiTypingMessage } from "~/modules/Admin/EditCourse/components/course-generation/CourseGenerationMessages";
-import {
-  getCurrentMessageKey,
-  getMessageText,
-} from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
+import { getCurrentMessageKey } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
 import { hasCourseGenerationPreviewEvents } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationCourseCache.utils";
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 
 import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 
-type CourseGenerationMessage = {
-  id: string;
-  role: string;
-  content: unknown;
-};
+import type { CourseGenerationUIMessage } from "~/modules/Admin/EditCourse/hooks/useCourseGenerationChat.types";
 
 type CourseGenerationChatPanelProps = {
   courseId: string;
-  messages: CourseGenerationMessage[];
+  messages: CourseGenerationUIMessage[];
   streamData: unknown;
   input: string;
   onInputChange: (value: string) => void;
@@ -84,7 +77,8 @@ export function CourseGenerationChatPanel({
         .map((message) => ({
           id: message.id,
           role: message.role,
-          text: getMessageText(message.content).trim(),
+          parts: message.parts,
+          text: getUiMessageText(message).trim(),
         }))
         .filter((message) => message.text.length > 0)
         .map((message) => (
@@ -92,7 +86,7 @@ export function CourseGenerationChatPanel({
             key={message.id}
             id={message.id}
             role={message.role as "user" | "assistant"}
-            content={message.text}
+            parts={message.parts}
             aiName={t("adminCourseView.common.aiCourseCreation")}
             messageMaxWidthClass="max-w-[80%]"
             contentTestId={COURSE_GENERATION_HANDLES.messageRole(message.role)}
@@ -103,7 +97,7 @@ export function CourseGenerationChatPanel({
 
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
-    lastMessage?.role === "assistant" && getMessageText(lastMessage.content).trim().length > 0;
+    lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
   const showTypingLoader = isProcessing && !hasStreamingAssistantText;
   const showThinkingLabel =
     Boolean(currentMessageKey) && isProcessing && !hasStreamingAssistantText;

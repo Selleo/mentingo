@@ -1,3 +1,4 @@
+import { getUiMessageText } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +14,7 @@ import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
-import type { Message } from "@ai-sdk/react";
+import type { UIMessage } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 interface LessonFormProps {
@@ -28,7 +29,7 @@ interface LessonFormProps {
   input: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   setInput: Dispatch<SetStateAction<string>>;
-  messages: Message[];
+  messages: UIMessage[];
   hasTaskDescription: boolean;
   onOpenTaskDescription: () => void;
 }
@@ -142,7 +143,7 @@ export const LessonForm = ({
     }
 
     hasTriggeredWelcomeRef.current = true;
-    void triggerWelcomeMessageRef.current(messages[0].content);
+    void triggerWelcomeMessageRef.current(getUiMessageText(messages[0]));
   }, [isVoiceMentorAudioStarted, isVoiceMentorMode, messages]);
 
   const startVoiceMode = async () => {

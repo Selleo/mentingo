@@ -59,7 +59,7 @@ export class LumaService {
 
   async getDraft(data: CreateDraftOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
-    const draft = await luma.getDraft(data).catch((error) => {
+    const draft = await luma.courses.getDraft(data).catch((error) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         return undefined;
       }
@@ -76,7 +76,7 @@ export class LumaService {
 
       data.courseLanguage = language;
 
-      const { draftId } = await this.withLumaErrorHandling(() => luma.createDraft(data));
+      const { draftId } = await this.withLumaErrorHandling(() => luma.courses.createDraft(data));
 
       return this.withCoreSyncStatus({
         integrationId: data.integrationId,
@@ -91,18 +91,18 @@ export class LumaService {
   async chatWithCourseAgent(
     data: ChatOptions,
     currentUser: CurrentUserType,
-  ): Promise<Awaited<ReturnType<LumaClient["chat"]>>> {
+  ): Promise<Awaited<ReturnType<LumaClient["courses"]["chat"]>>> {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
       ensureCourseHasNoChapters: true,
     });
 
-    return this.withLumaErrorHandling(() => luma.chat(data));
+    return this.withLumaErrorHandling(() => luma.courses.chat(data));
   }
 
   async getCourseGenerationMessages(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
-    return this.withLumaErrorHandling(() => luma.getDraftMessages(data));
+    return this.withLumaErrorHandling(() => luma.courses.getDraftMessages(data));
   }
 
   async ingestCourseGenerationFiles(
@@ -122,7 +122,7 @@ export class LumaService {
 
       responses.push(
         await this.withLumaErrorHandling(() =>
-          luma.ingestDraftFile({
+          luma.courses.ingestFile({
             integrationId: data.integrationId,
             file: lumaFile,
           }),
@@ -141,13 +141,13 @@ export class LumaService {
       ensureCourseHasNoChapters: true,
     });
 
-    return this.withLumaErrorHandling(() => luma.deleteIngestedDocument(data));
+    return this.withLumaErrorHandling(() => luma.courses.deleteIngestedDocument(data));
   }
 
   async getCourseGenerationFiles(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
-    return this.withLumaErrorHandling(() => luma.getDraftFiles(data));
+    return this.withLumaErrorHandling(() => luma.courses.getDraftFiles(data));
   }
 
   hasCourseGeneratedEvent(chunk: Buffer, pendingFrame = "") {

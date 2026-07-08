@@ -3239,7 +3239,7 @@ export class CourseService {
       if (isLumaConfigured) {
         await this.lumaService
           .getLumaClient()
-          .then((luma) => luma && luma.deleteDraft({ integrationId: id }))
+          .then((luma) => luma && luma.courses.deleteDraft({ integrationId: id }))
           .catch((error) => console.error(error));
       }
 

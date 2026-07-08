@@ -112,7 +112,14 @@ export const responseJudgeSchema = Type.Object({
 
 export const streamChatSchema = Type.Object({
   threadId: UUIDSchema,
-  content: Type.String({ minLength: 1 }),
+  message: Type.Object(
+    {
+      id: Type.String(),
+      role: Type.String(),
+      parts: Type.Array(Type.Any()),
+    },
+    { additionalProperties: true },
+  ),
   id: Type.Optional(UUIDSchema),
 });
 

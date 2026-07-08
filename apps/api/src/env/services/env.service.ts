@@ -181,7 +181,7 @@ export class EnvService {
       apiKey: lumaKey,
       baseURL: lumaBaseUrl,
     });
-    const configuration = await luma.getConfiguration().catch(() => null);
+    const configuration = await luma.configuration.get().catch(() => null);
 
     return {
       enabled: true,
