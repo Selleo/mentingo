@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useCurrentUser } from "~/api/queries";
@@ -26,6 +27,7 @@ import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 import { useCourseAccessProvider } from "../context/CourseAccessProvider";
 
+import type { TFunction } from "i18next";
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseHeroProps = {
@@ -34,14 +36,14 @@ type CourseHeroProps = {
 
 type CourseLesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
 
-function getLessonStatus(status: string) {
+function getLessonStatus(status: string, t: TFunction) {
   switch (status) {
     case "completed":
       return (
         <div className="relative group/status">
           <CheckCircle2 className="w-5 h-5 text-[#26b183]" />
           <div className="absolute right-0 bottom-full mb-2 px-2 py-1 bg-[#363636] text-white text-xs rounded opacity-0 group-hover/status:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-            Completed
+            {t("modernCourseView.contents.status.completed")}
           </div>
         </div>
       );
@@ -50,7 +52,7 @@ function getLessonStatus(status: string) {
         <div className="relative group/status">
           <Circle className="w-4 h-4 fill-current text-[#D4705D]" />
           <div className="absolute right-0 bottom-full mb-2 px-2 py-1 bg-[#363636] text-white text-xs rounded opacity-0 group-hover/status:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-            In progress
+            {t("modernCourseView.contents.status.inProgress")}
           </div>
         </div>
       );
@@ -59,7 +61,7 @@ function getLessonStatus(status: string) {
         <div className="relative group/status">
           <Minus className="w-5 h-5 text-[#676767]" />
           <div className="absolute right-0 bottom-full mb-2 px-2 py-1 bg-[#363636] text-white text-xs rounded opacity-0 group-hover/status:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-            Not started
+            {t("modernCourseView.contents.status.notStarted")}
           </div>
         </div>
       );
@@ -68,25 +70,25 @@ function getLessonStatus(status: string) {
   }
 }
 
-function getLessonIcon(type: string) {
+function getLessonIcon(type: string, t: TFunction) {
   const iconMap = {
     video: {
       icon: <MonitorPlay className="w-4 h-4 text-[#3f58b6]" />,
-      label: "Treść",
+      label: t("modernCourseView.contents.lessonTypes.content"),
     },
     quiz: {
       icon: <HelpCircle className="w-4 h-4 text-[#3f58b6]" />,
-      label: "Quiz",
+      label: t("modernCourseView.contents.lessonTypes.quiz"),
     },
     "ai-mentor": {
       icon: <Sparkles className="w-4 h-4 text-[#3f58b6]" />,
-      label: "AI Mentor",
+      label: t("modernCourseView.contents.lessonTypes.aiMentor"),
     },
   };
 
   const { icon, label } = iconMap[type as keyof typeof iconMap] || {
     icon: <Play className="w-4 h-4 text-[#3f58b6]" />,
-    label: "Lekcja",
+    label: t("modernCourseView.contents.lessonTypes.lesson"),
   };
 
   return (
@@ -100,6 +102,7 @@ function getLessonIcon(type: string) {
 }
 
 export function TableOfContent({ course }: CourseHeroProps) {
+  const { t } = useTranslation();
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"toc" | "statistics">("toc");
   const [expandedChapters, setExpandedChapters] = useState<number[]>([]);
@@ -158,7 +161,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
                 activeTab === "toc" ? "text-[#3f58b6]" : "text-[#676767] hover:text-[#363636]"
               }`}
             >
-              Table of Contents
+              {t("modernCourseView.contents.title")}
               {activeTab === "toc" && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3f58b6]" />
               )}
@@ -171,7 +174,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
                   : "text-[#676767] hover:text-[#363636]"
               }`}
             >
-              Statistics
+              {t("modernCourseView.contents.statistics")}
               {activeTab === "statistics" && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#3f58b6]" />
               )}
@@ -179,7 +182,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
           </div>
           <button className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#3f58b6] text-white rounded-lg hover:bg-[#324a95] transition-colors mb-3 whitespace-nowrap">
             <Edit2 className="w-4 h-4" />
-            <span className="text-sm font-semibold">Edit Content</span>
+            <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
           </button>
         </div>
       )}
@@ -188,7 +191,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
       {!isAdminExperience && !isMobile && (
         <div className="mb-4 md:mb-6">
           <h2 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
-            Table of Contents
+            {t("modernCourseView.contents.title")}
           </h2>
         </div>
       )}
@@ -220,11 +223,11 @@ export function TableOfContent({ course }: CourseHeroProps) {
                         <div className="flex items-center gap-3">
                           <ChevronDown className="w-5 h-5 md:w-4 md:h-4 text-[#26b183] flex-shrink-0" />
                           <h3 className="font-semibold text-base md:text-sm text-[#26b183] leading-tight">
-                            {
-                              course.chapters.filter((ch) => ch.chapterProgress === "completed")
-                                .length
-                            }{" "}
-                            completed chapters
+                            {t("modernCourseView.contents.completedChapters", {
+                              count: course.chapters.filter(
+                                (chapter) => chapter.chapterProgress === "completed",
+                              ).length,
+                            })}
                           </h3>
                         </div>
                       </button>
@@ -269,7 +272,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                             <div className="flex items-center gap-3 text-xs text-[#676767] ml-7">
                               <span className="flex items-center gap-1">
                                 <BookOpen className="w-3.5 h-3.5" />
-                                {chapter.lessonCount} lessons
+                                {t("modernCourseView.contents.lessons", {
+                                  count: chapter.lessonCount,
+                                })}
                               </span>
                             </div>
                           </button>
@@ -281,14 +286,14 @@ export function TableOfContent({ course }: CourseHeroProps) {
                                 <div key={lesson.id}>
                                   <div className="flex items-center gap-3 py-4 md:py-3 hover:bg-green-50/30 transition-all cursor-pointer group/lesson">
                                     <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                                      {getLessonIcon(lesson.type)}
+                                      {getLessonIcon(lesson.type, t)}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <p className="text-base md:text-sm font-medium text-[#363636] group-hover/lesson:text-[#3f58b6] transition-colors leading-relaxed">
                                         {lesson.title}
                                       </p>
                                     </div>
-                                    {!isAdminExperience && getLessonStatus(lesson.status)}
+                                    {!isAdminExperience && getLessonStatus(lesson.status, t)}
                                   </div>
                                   {lessonIndex < chapter.lessons.length - 1 && (
                                     <div className="border-t border-[#e5e5e5] ml-12 md:ml-11" />
@@ -409,7 +414,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                             <div className="flex items-center gap-3 text-xs text-[#676767]">
                               <span className="flex items-center gap-1">
                                 <BookOpen className="w-3.5 h-3.5" />
-                                {chapter.lessonCount} lessons
+                                {t("modernCourseView.contents.lessons", {
+                                  count: chapter.lessonCount,
+                                })}
                               </span>
                             </div>
 
@@ -452,14 +459,14 @@ export function TableOfContent({ course }: CourseHeroProps) {
                                   }`}
                                 >
                                   <div className="w-10 h-10 md:w-8 md:h-8 rounded-lg flex items-center justify-center flex-shrink-0">
-                                    {getLessonIcon(lesson.type)}
+                                    {getLessonIcon(lesson.type, t)}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-base md:text-sm font-medium text-[#363636] group-hover/lesson:text-[#3f58b6] transition-colors leading-relaxed">
                                       {lesson.title}
                                     </p>
                                   </div>
-                                  {!isAdminExperience && getLessonStatus(lesson.status)}
+                                  {!isAdminExperience && getLessonStatus(lesson.status, t)}
                                 </div>
                                 {lessonIndex < chapter.lessons.length - 1 && (
                                   <div className="border-t border-[#e5e5e5] ml-12 md:ml-11" />
@@ -485,10 +492,11 @@ export function TableOfContent({ course }: CourseHeroProps) {
                     className="w-full bg-gray-50 hover:bg-gray-100 text-[#3f58b6] font-semibold py-4 px-6 rounded-xl border-2 border-dashed border-gray-300 hover:border-[#3f58b6] transition-all flex items-center justify-center gap-2"
                   >
                     <ChevronDown className="w-5 h-5" />
-                    Show all chapters (
-                    {course.chapters.filter((ch) => ch.chapterProgress !== "completed").length -
-                      2}{" "}
-                    more)
+                    {t("modernCourseView.contents.showAllChapters", {
+                      count:
+                        course.chapters.filter((chapter) => chapter.chapterProgress !== "completed")
+                          .length - 2,
+                    })}
                   </button>
                 </div>
               )}
@@ -501,9 +509,11 @@ export function TableOfContent({ course }: CourseHeroProps) {
         <div className="space-y-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h3 className="font-gothic text-xl font-bold text-[#363636]">Course Statistics</h3>
+              <h3 className="font-gothic text-xl font-bold text-[#363636]">
+                {t("modernCourseView.contents.courseStatistics")}
+              </h3>
               <p className="text-sm text-[#676767] mt-1">
-                Overview of student progress and engagement
+                {t("modernCourseView.contents.statisticsDescription")}
               </p>
             </div>
           </div>
@@ -521,7 +531,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                       ? "—"
                       : (courseStatistics?.enrolledCount ?? 0).toLocaleString()}
                   </p>
-                  <p className="text-xs text-[#676767]">Total Students</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.contents.totalStudents")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -537,7 +549,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                       ? "—"
                       : `${Math.round(courseStatistics?.completionPercentage ?? 0)}%`}
                   </p>
-                  <p className="text-xs text-[#676767]">Completion Rate</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.contents.completionRate")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -553,7 +567,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                       ? "—"
                       : formatDuration(courseStatistics?.averageSeconds ?? 0)}
                   </p>
-                  <p className="text-xs text-[#676767]">Avg. Time Spent</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.contents.averageTime")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -565,7 +581,9 @@ export function TableOfContent({ course }: CourseHeroProps) {
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-[#363636]">4.7</p>
-                  <p className="text-xs text-[#676767]">Avg. Rating</p>
+                  <p className="text-xs text-[#676767]">
+                    {t("modernCourseView.contents.averageRating")}
+                  </p>
                 </div>
               </div>
             </div>
@@ -578,11 +596,10 @@ export function TableOfContent({ course }: CourseHeroProps) {
                 <BarChart2 className="w-8 h-8 text-gray-400" />
               </div>
               <h4 className="text-lg font-semibold text-[#363636] mb-2">
-                Detailed Statistics Coming Soon
+                {t("modernCourseView.contents.detailedStatisticsSoon")}
               </h4>
               <p className="text-sm text-[#676767] max-w-md mx-auto">
-                This section will display comprehensive analytics including student progress over
-                time, chapter completion rates, engagement metrics, and more.
+                {t("modernCourseView.contents.detailedStatisticsDescription")}
               </p>
             </div>
           </div>

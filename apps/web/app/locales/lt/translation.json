@@ -4436,5 +4436,124 @@
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }
+  },
+  "modernCourseView": {
+    "common": {
+      "cancel": "Atšaukti",
+      "close": "Uždaryti",
+      "saveChanges": "Išsaugoti pakeitimus",
+      "enabled": "Įjungta",
+      "disabled": "Išjungta"
+    },
+    "learningMode": {
+      "title": "Šį kursą mokotės mokymosi režimu",
+      "description": "Jūsų mokymosi pažanga stebima. Baigtos pamokos įtraukiamos į asmeninę pažangą ir kurso statistiką.",
+      "enter": "Įjungti mokymosi režimą",
+      "exit": "Išjungti mokymosi režimą"
+    },
+    "overview": {
+      "courseSettings": "Kurso nustatymai",
+      "editMedia": "Redaguoti mediją",
+      "continueLearning": "Tęsti mokymąsi",
+      "courseDetails": "Kurso informacija",
+      "closeDetails": "Uždaryti kurso informaciją",
+      "aboutCourse": "Apie šį kursą",
+      "description": "Aprašymas",
+      "descriptionPlaceholder": "Įveskite kurso aprašymą...",
+      "whatYouWillLearn": "Ko išmoksite",
+      "closeSettings": "Uždaryti kurso nustatymus",
+      "settingsIntro": "Čia galėsite konfigūruoti:",
+      "settingsStatus": "Kurso būsena (Juodraštis/Paskelbtas)",
+      "settingsPricing": "Kainos ir mokėjimo parinktys",
+      "settingsAssignments": "Priskirti dalyviai ir grupės",
+      "settingsSequential": "Reikalauti nuoseklaus užbaigimo",
+      "settingsVisibility": "Kurso matomumo nustatymai",
+      "settingsPermissions": "Prieigos teisės"
+    },
+    "media": {
+      "title": "Redaguoti kurso mediją",
+      "currentImage": "Dabartinis pagrindinis vaizdas – koreguokite padėtį",
+      "previewAlt": "Kurso pagrindinio vaizdo peržiūra",
+      "previewPosition": "Peržiūra su dabartine padėtimi",
+      "verticalPosition": "Vertikali padėtis",
+      "uploadImage": "Įkelti naują pagrindinį vaizdą",
+      "dropImage": "Nuvilkite pagrindinį vaizdą čia",
+      "browse": "arba spustelėkite ir pasirinkite",
+      "imageLimit": "PNG, JPG iki 10 MB",
+      "imageRecommendation": "Rekomenduojama: 1920x820 px (21:9)",
+      "trailer": "Kurso anonsas (nebūtina)",
+      "dropVideo": "Nuvilkite anonsą čia",
+      "videoLimit": "MP4, MOV iki 50 MB",
+      "videoRecommendation": "Rekomenduojama: 30–90 sekundžių",
+      "save": "Įkelti mediją"
+    },
+    "stats": {
+      "yourProgress": "Jūsų pažanga",
+      "remaining": "liko",
+      "trackProgress": "kad galėtumėte stebėti pažangą.",
+      "deadline": "Terminas",
+      "daysLeft_one": "Liko {{count}} diena",
+      "daysLeft_few": "Liko {{count}} dienos",
+      "daysLeft_other": "Liko {{count}} dienų",
+      "certificate": "Sertifikatas",
+      "uponCompletion": "Baigus kursą",
+      "aboutAuthor": "Apie autorių"
+    },
+    "certificate": {
+      "close": "Uždaryti sertifikato nustatymus",
+      "title": "Sertifikato nustatymai",
+      "previewTitle": "Baigimo sertifikatas",
+      "certifies": "Patvirtinama, kad",
+      "completed": "sėkmingai baigė",
+      "signaturePlaceholder": "Parašo vieta",
+      "enable": "Įjungti sertifikatą",
+      "enableDescription": "Baigę kursą dalyviai gaus sertifikatą",
+      "fontColor": "Šrifto spalva",
+      "uploadSignature": "Įkelti parašą",
+      "uploadSignatureHint": "Spustelėkite, kad įkeltumėte parašo vaizdą",
+      "signatureLimit": "PNG, JPG iki 2 MB",
+      "save": "Išsaugoti sertifikatą"
+    },
+    "deadline": {
+      "close": "Uždaryti terminų nustatymus",
+      "title": "Terminų nustatymai",
+      "enable": "Įjungti terminus",
+      "enableDescription": "Nustatykite atskirus terminus skirtingoms grupėms",
+      "current": "Dabartinis terminas: {{deadline}}"
+    },
+    "author": {
+      "close": "Uždaryti autoriaus nustatymus",
+      "pictureAlt": "Autoriaus nuotrauka",
+      "showSection": "Rodyti autoriaus skiltį",
+      "showSectionDescription": "Rodyti autoriaus informaciją kurso puslapyje",
+      "otherCourses": "Kiti kursai"
+    },
+    "contents": {
+      "title": "Turinys",
+      "statistics": "Statistika",
+      "edit": "Redaguoti turinį",
+      "completedChapters_one": "Baigtas {{count}} skyrius",
+      "completedChapters_few": "Baigti {{count}} skyriai",
+      "completedChapters_other": "Baigta {{count}} skyrių",
+      "lessons_one": "{{count}} pamoka",
+      "lessons_few": "{{count}} pamokos",
+      "lessons_other": "{{count}} pamokų",
+      "showAllChapters": "Rodyti visus skyrius (dar {{count}})",
+      "courseStatistics": "Kurso statistika",
+      "statisticsDescription": "Dalyvių pažangos ir įsitraukimo apžvalga",
+      "totalStudents": "Iš viso dalyvių",
+      "completionRate": "Baigimo rodiklis",
+      "averageTime": "Vid. mokymosi laikas",
+      "averageRating": "Vid. įvertinimas",
+      "detailedStatisticsSoon": "Išsami statistika jau netrukus",
+      "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
+      "status": { "completed": "Baigta", "inProgress": "Vykdoma", "notStarted": "Nepradėta" },
+      "lessonTypes": {
+        "content": "Turinys",
+        "quiz": "Testas",
+        "aiMentor": "DI mentorius",
+        "lesson": "Pamoka"
+      }
+    }
   }
 }
