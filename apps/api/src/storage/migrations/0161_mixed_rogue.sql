@@ -1,0 +1,1 @@
+ALTER TABLE "courses" ADD COLUMN "show_author_section" boolean DEFAULT true NOT NULL;

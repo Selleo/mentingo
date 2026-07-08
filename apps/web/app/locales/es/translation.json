@@ -1802,6 +1802,7 @@
     "deadline": "Fecha límite",
     "selectDate": "Seleccionar fecha",
     "deadlineRequired": "Se requiere fecha límite para el curso obligatorio.",
+    "deadlineNoAssignedGroups": "Asigna al menos un grupo para configurar las fechas límite.",
     "common": {
       "settings": "Configuración",
       "curriculum": "Plan de estudios",

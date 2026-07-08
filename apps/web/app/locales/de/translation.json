@@ -1741,6 +1741,7 @@
     "deadline": "Frist",
     "selectDate": "Datum auswählen",
     "deadlineRequired": "Für den Pflichtkurs ist eine Frist erforderlich",
+    "deadlineNoAssignedGroups": "Weise mindestens eine Gruppe zu, um Fristen zu konfigurieren.",
     "common": {
       "settings": "Einstellungen",
       "curriculum": "Lehrplan",

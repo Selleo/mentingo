@@ -1802,6 +1802,7 @@
     "deadline": "Deadline",
     "selectDate": "Select date",
     "deadlineRequired": "Deadline is required for mandatory course",
+    "deadlineNoAssignedGroups": "Assign at least one group to configure deadlines.",
     "common": {
       "settings": "Settings",
       "curriculum": "Curriculum",

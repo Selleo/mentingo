@@ -43,6 +43,13 @@ export const allChapterSchema = Type.Array(chapterSchema);
 
 export const showChapterSchema = Type.Object({
   ...chapterSchema.properties,
+
+  estimatedDurationSeconds: Type.Optional(
+    Type.Number({
+      minimum: 0,
+    }),
+  ),
+
   quizCount: Type.Optional(Type.Number()),
   lessons: lessonForChapterSchema,
 });

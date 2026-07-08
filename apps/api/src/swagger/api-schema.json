@@ -25537,6 +25537,10 @@
                                 "contentType"
                               ]
                             }
+                          },
+                          "estimatedDurationSeconds": {
+                            "minimum": 0,
+                            "type": "number"
                           }
                         },
                         "required": [
@@ -25591,6 +25595,10 @@
                       "type": "number"
                     },
                     "displayOrder": {
+                      "type": "number"
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
                       "type": "number"
                     }
                   },
@@ -25680,6 +25688,16 @@
               },
               "thumbnailUrl": {
                 "type": "string"
+              },
+              "thumbnailPositionY": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
+                "type": "number"
+              },
+              "showAuthorSection": {
+                "type": "boolean"
               },
               "trailerUrl": {
                 "anyOf": [
@@ -25799,6 +25817,7 @@
               "isContentReadonly",
               "courseType",
               "priceInCents",
+              "thumbnailPositionY",
               "title",
               "slug",
               "stripeProductId",
@@ -26605,6 +26624,11 @@
               "thumbnailS3Key": {
                 "type": "string"
               },
+              "thumbnailPositionY": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -26863,6 +26887,14 @@
           },
           "thumbnailS3Key": {
             "type": "string"
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "showAuthorSection": {
+            "type": "boolean"
           },
           "status": {
             "anyOf": [
@@ -28956,6 +28988,10 @@
                           "contentType"
                         ]
                       }
+                    },
+                    "estimatedDurationSeconds": {
+                      "minimum": 0,
+                      "type": "number"
                     }
                   },
                   "required": [
@@ -29010,6 +29046,10 @@
                 "type": "number"
               },
               "displayOrder": {
+                "type": "number"
+              },
+              "estimatedDurationSeconds": {
+                "minimum": 0,
                 "type": "number"
               }
             },

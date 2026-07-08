@@ -2026,6 +2026,8 @@ export interface GetCourseResponse {
           fileName?: string;
           allowFullscreen?: boolean;
         }[];
+        /** @min 0 */
+        estimatedDurationSeconds?: number;
       }[];
       completedLessonCount?: number;
       chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2036,6 +2038,8 @@ export interface GetCourseResponse {
       updatedAt?: string;
       quizCount?: number;
       displayOrder: number;
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedChapterCount?: number;
     courseChapterCount: number;
@@ -2052,6 +2056,10 @@ export interface GetCourseResponse {
     courseType: "default" | "scorm";
     priceInCents: number;
     thumbnailUrl?: string;
+    thumbnailPositionY: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
+    showAuthorSection?: boolean;
     trailerUrl?: string | null;
     title: string;
     slug: string;
@@ -2194,6 +2202,11 @@ export type CreateCourseBody = {
   description: string;
   status?: "draft" | "published" | "private";
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -2259,6 +2272,12 @@ export interface UpdateCourseBody {
   title?: string;
   description?: string;
   thumbnailS3Key?: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY?: number;
+  showAuthorSection?: boolean;
   status?: "draft" | "published" | "private";
   priceInCents?: number;
   currency?: string;
@@ -2747,6 +2766,8 @@ export interface GetChapterWithLessonResponse {
         fileName?: string;
         allowFullscreen?: boolean;
       }[];
+      /** @min 0 */
+      estimatedDurationSeconds?: number;
     }[];
     completedLessonCount?: number;
     chapterProgress?: "not_started" | "in_progress" | "completed" | "blocked";
@@ -2757,6 +2778,8 @@ export interface GetChapterWithLessonResponse {
     updatedAt?: string;
     quizCount?: number;
     displayOrder: number;
+    /** @min 0 */
+    estimatedDurationSeconds?: number;
   };
 }
 

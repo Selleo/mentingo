@@ -303,9 +303,11 @@ export const courses = pgTable(
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     description: jsonb("description").$type<LocalizedText>().default({}).notNull(),
     thumbnailS3Key: varchar("thumbnail_s3_key", { length: 500 }),
+    thumbnailPositionY: integer("thumbnail_position_y").notNull().default(50),
     status: coursesStatusEnum("status").notNull().default("draft"),
     hasCertificate: boolean("has_certificate").notNull().default(false),
     priceInCents: integer("price_in_cents").notNull().default(0),
+    showAuthorSection: boolean("show_author_section").notNull().default(true),
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
     courseType: courseTypeEnum("course_type")

@@ -1,5 +1,11 @@
 import type { UUIDType } from "src/common";
 
+export type CourseDurationHierarchy = {
+  totalSeconds: number;
+  byChapterId: Record<UUIDType, number>;
+  byLessonId: Record<UUIDType, number>;
+};
+
 export type CourseDurationSummary = {
   totalMinutes: number;
   formatted: string;

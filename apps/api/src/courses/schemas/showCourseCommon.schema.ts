@@ -26,6 +26,13 @@ export const commonShowCourseSchema = Type.Object({
   courseType: Type.Enum(COURSE_TYPE),
   priceInCents: Type.Number(),
   thumbnailUrl: Type.Optional(Type.String()),
+  thumbnailPositionY: Type.Number(),
+  estimatedDurationSeconds: Type.Optional(
+    Type.Number({
+      minimum: 0,
+    }),
+  ),
+  showAuthorSection: Type.Optional(Type.Boolean()),
   trailerUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   title: Type.String(),
   slug: Type.String(),

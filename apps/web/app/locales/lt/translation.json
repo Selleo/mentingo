@@ -1747,6 +1747,7 @@
     "deadline": "Terminas",
     "selectDate": "Pasirinkite datą",
     "deadlineRequired": "Privalomiesiems kursams reikalingas terminas",
+    "deadlineNoAssignedGroups": "Priskirkite bent vieną grupę, kad galėtumėte nustatyti terminus.",
     "common": {
       "settings": "Nustatymai",
       "curriculum": "Mokymosi programa",
