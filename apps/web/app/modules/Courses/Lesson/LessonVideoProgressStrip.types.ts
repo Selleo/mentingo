@@ -1,4 +1,5 @@
 import type { VideoCoverageRange } from "@repo/shared";
+import type { StoreApi } from "zustand/vanilla";
 import type { VideoCoverageSnapshot } from "~/components/VideoPlayer/videoCoverage.types";
 
 export type LessonVideoProgressSnapshotChange = {
@@ -22,9 +23,10 @@ export type LessonVideoProgressStripProps = {
   store: LessonVideoProgressStore;
 };
 
-export type LessonVideoProgressStore = {
-  getSnapshot: () => LessonVideoProgressSegment[];
+export type LessonVideoProgressStoreState = {
+  segments: LessonVideoProgressSegment[];
   publishSnapshot: (change: LessonVideoProgressSnapshotChange) => void;
   reset: (segments: LessonVideoProgressSegment[]) => void;
-  subscribe: (listener: () => void) => () => void;
 };
+
+export type LessonVideoProgressStore = StoreApi<LessonVideoProgressStoreState>;

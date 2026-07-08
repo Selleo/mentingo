@@ -74,7 +74,7 @@ export const LessonContent = ({
       showCoverageMarkers: videoProgressPersistenceEnabled && videoCompletionTrackingEnabled,
       lessonId: lesson.id,
       language,
-      onSnapshotChange: videoProgressStore.publishSnapshot,
+      onSnapshotChange: videoProgressStore.getState().publishSnapshot,
     }),
     [
       language,

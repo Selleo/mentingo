@@ -1,4 +1,6 @@
 import { mergeVideoCoverageRanges, type VideoCoverageRange } from "@repo/shared";
+import { clamp } from "lodash-es";
+import { createStore } from "zustand/vanilla";
 
 import { getVideoEmbedAttrsFromElement } from "~/components/RichText/extensions/utils/video";
 
@@ -6,6 +8,7 @@ import type {
   LessonVideoProgressSegment,
   LessonVideoProgressSnapshotChange,
   LessonVideoProgressStore,
+  LessonVideoProgressStoreState,
 } from "./LessonVideoProgressStrip.types";
 
 export const VIDEO_COMPLETION_COVERAGE_THRESHOLD = 0.9;
@@ -13,7 +16,7 @@ export const VIDEO_COMPLETION_COVERAGE_THRESHOLD = 0.9;
 export const clampVideoProgress = (value: number | null | undefined) => {
   if (typeof value !== "number" || !Number.isFinite(value)) return 0;
 
-  return Math.max(0, Math.min(1, value));
+  return clamp(value, 0, 1);
 };
 
 export const parseLessonVideoProgressSegments = (
@@ -90,8 +93,8 @@ export const getLessonVideoProgressRangeStyle = ({
   end: number;
   durationSeconds: number;
 }) => {
-  const left = Math.max(0, Math.min(100, (start / durationSeconds) * 100));
-  const width = Math.max(0, Math.min(100 - left, ((end - start) / durationSeconds) * 100));
+  const left = clamp((start / durationSeconds) * 100, 0, 100);
+  const width = clamp(((end - start) / durationSeconds) * 100, 0, 100 - left);
 
   return {
     left: `${left}%`,
@@ -100,13 +103,7 @@ export const getLessonVideoProgressRangeStyle = ({
 };
 
 export const createLessonVideoProgressStore = (): LessonVideoProgressStore => {
-  let segments: LessonVideoProgressSegment[] = [];
   const progressChangesByResourceId = new Map<string, LessonVideoProgressSnapshotChange>();
-  const listeners = new Set<() => void>();
-
-  const emit = () => {
-    listeners.forEach((listener) => listener());
-  };
 
   const applyStoredProgressChanges = (nextSegments: LessonVideoProgressSegment[]) => {
     return Array.from(progressChangesByResourceId.values()).reduce(
@@ -116,23 +113,16 @@ export const createLessonVideoProgressStore = (): LessonVideoProgressStore => {
     );
   };
 
-  return {
-    getSnapshot: () => segments,
+  return createStore<LessonVideoProgressStoreState>((set) => ({
+    segments: [],
     publishSnapshot: (change) => {
       progressChangesByResourceId.set(change.resourceEntityId, change);
-      segments = applyLessonVideoProgressSnapshotChange(segments, change);
-      emit();
+      set((state) => ({
+        segments: applyLessonVideoProgressSnapshotChange(state.segments, change),
+      }));
     },
     reset: (nextSegments) => {
-      segments = applyStoredProgressChanges(nextSegments);
-      emit();
+      set({ segments: applyStoredProgressChanges(nextSegments) });
     },
-    subscribe: (listener) => {
-      listeners.add(listener);
-
-      return () => {
-        listeners.delete(listener);
-      };
-    },
-  };
+  }));
 };

@@ -1,5 +1,6 @@
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useStore } from "zustand";
 
 import { cn } from "~/lib/utils";
 
@@ -20,16 +21,17 @@ export const LessonVideoProgressStrip = ({
   store,
 }: LessonVideoProgressStripProps) => {
   const { t } = useTranslation();
-  const segments = useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot);
+  const segments = useStore(store, (state) => state.segments);
+  const resetLessonVideoProgress = useStore(store, (state) => state.reset);
 
   useEffect(() => {
     if (!enabled) {
-      store.reset([]);
+      resetLessonVideoProgress([]);
       return;
     }
 
-    store.reset(parseLessonVideoProgressSegments(description));
-  }, [description, enabled, lessonId, store]);
+    resetLessonVideoProgress(parseLessonVideoProgressSegments(description));
+  }, [description, enabled, lessonId, resetLessonVideoProgress]);
 
   if (!enabled || segments.length === 0) return null;
 

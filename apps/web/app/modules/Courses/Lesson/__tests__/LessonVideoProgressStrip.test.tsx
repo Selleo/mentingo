@@ -102,7 +102,7 @@ describe("LessonVideoProgressStrip", () => {
     await waitFor(() => expect(screen.getAllByRole("progressbar")).toHaveLength(3));
 
     act(() => {
-      store.publishSnapshot({
+      store.getState().publishSnapshot({
         resourceEntityId: "resource-one",
         snapshot: {
           coveragePercent: 0.95,
@@ -126,7 +126,7 @@ describe("LessonVideoProgressStrip", () => {
   it("keeps a video update that arrives before the strip parses lesson content", async () => {
     const store = createLessonVideoProgressStore();
 
-    store.publishSnapshot({
+    store.getState().publishSnapshot({
       resourceEntityId: "resource-one",
       snapshot: {
         coveragePercent: 0.95,
