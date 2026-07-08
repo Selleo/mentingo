@@ -4,6 +4,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
+import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
 import {
   chapters,
@@ -26,10 +27,14 @@ import type {
   LessonVideoProgressRow,
   MergeLessonVideoProgressRangesParams,
 } from "../lesson-video-progress.types";
+import type { SupportedLanguages } from "@repo/shared";
 
 @Injectable()
 export class LessonVideoProgressRepository {
-  constructor(@Inject(DB) private readonly db: DatabasePg) {}
+  constructor(
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly localizationService: LocalizationService,
+  ) {}
 
   async getLessonVideoContext(
     params: LessonVideoIdentity,
@@ -98,6 +103,23 @@ export class LessonVideoProgressRepository {
       .returning();
 
     return this.mapProgressRow(row);
+  }
+
+  async getLocalizedLessonDescription(
+    lessonId: string,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [row] = await dbInstance
+      .select({
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(eq(lessons.id, lessonId));
+
+    return row?.description ?? null;
   }
 
   async mergeWatchedRanges(
@@ -179,6 +201,9 @@ export class LessonVideoProgressRepository {
           eq(resourceEntity.relationshipType, RESOURCE_RELATIONSHIP_TYPES.ATTACHMENT),
           eq(resources.archived, false),
           sql<boolean>`${resources.contentType} LIKE 'video/%'`,
+          params.resourceEntityIds?.length
+            ? inArray(resourceEntity.id, params.resourceEntityIds)
+            : undefined,
         ),
       );
 

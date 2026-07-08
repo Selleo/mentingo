@@ -14,7 +14,6 @@ import {
   Import,
   KeyRound,
   Mail,
-  MailPlus,
   Plus,
   Shield,
   ShieldUser,
@@ -26,8 +25,7 @@ import { useTranslation } from "react-i18next";
 
 import { useBulkArchiveUsers } from "~/api/mutations/admin/useBulkArchiveUsers";
 import { useBulkDeleteUsers } from "~/api/mutations/admin/useBulkDeleteUsers";
-import { useBulkResendPasswordCreationEmails } from "~/api/mutations/admin/useBulkResendPasswordCreationEmails";
-import { useBulkSendPasswordResetEmails } from "~/api/mutations/admin/useBulkSendPasswordResetEmails";
+import { useBulkSendPasswordEmails } from "~/api/mutations/admin/useBulkSendPasswordEmails";
 import { useBulkUpdateUsersGroups } from "~/api/mutations/admin/useBulkUpdateUsersGroups";
 import { useBulkUpdateUsersRoles } from "~/api/mutations/admin/useBulkUpdateUsersRoles";
 import { useGroupsQuerySuspense } from "~/api/queries/admin/useGroups";
@@ -84,8 +82,7 @@ const MailKey = ({ className }: { className?: string }) => (
   </span>
 );
 
-type ModalTypes =
-  "group" | "role" | "delete" | "archive" | "passwordReset" | "passwordCreation" | null;
+type ModalTypes = "group" | "role" | "delete" | "archive" | "passwordEmail" | null;
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.users");
 
@@ -127,8 +124,7 @@ const Users = () => {
   const { mutateAsync: updateUsersGroups } = useBulkUpdateUsersGroups();
   const { mutateAsync: archiveUsers } = useBulkArchiveUsers();
   const { mutateAsync: updateUsersRoles } = useBulkUpdateUsersRoles();
-  const { mutateAsync: sendPasswordResetEmails } = useBulkSendPasswordResetEmails();
-  const { mutateAsync: resendPasswordCreationEmails } = useBulkResendPasswordCreationEmails();
+  const { mutateAsync: sendPasswordEmails } = useBulkSendPasswordEmails();
 
   const { t } = useTranslation();
 
@@ -172,18 +168,10 @@ const Users = () => {
     {
       iconName: undefined,
       icon: <MailKey className="size-4 shrink-0" />,
-      translationKey: "adminUsersView.dropdown.passwordReset",
-      action: () => setShowEditModal("passwordReset"),
+      translationKey: "adminUsersView.dropdown.passwordEmail",
+      action: () => setShowEditModal("passwordEmail"),
       destructive: false,
-      testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_RESET_ACTION,
-    },
-    {
-      iconName: undefined,
-      icon: <MailPlus className="size-4 shrink-0" />,
-      translationKey: "adminUsersView.dropdown.passwordCreation",
-      action: () => setShowEditModal("passwordCreation"),
-      destructive: false,
-      testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_CREATION_ACTION,
+      testId: USERS_PAGE_HANDLES.BULK_EDIT_PASSWORD_EMAIL_ACTION,
     },
     {
       iconName: undefined,
@@ -487,23 +475,14 @@ const Users = () => {
     });
   }, [selectedUsers, selectedValue, table, updateUsersRoles]);
 
-  const handlePasswordResetEmails = useCallback(() => {
-    sendPasswordResetEmails({
+  const handlePasswordEmails = useCallback(() => {
+    sendPasswordEmails({
       userIds: selectedUsers.map(({ userId }) => userId),
     }).then(() => {
       table.resetRowSelection();
       setShowEditModal(null);
     });
-  }, [selectedUsers, sendPasswordResetEmails, table]);
-
-  const handlePasswordCreationEmails = useCallback(() => {
-    resendPasswordCreationEmails({
-      userIds: selectedUsers.map(({ userId }) => userId),
-    }).then(() => {
-      table.resetRowSelection();
-      setShowEditModal(null);
-    });
-  }, [resendPasswordCreationEmails, selectedUsers, table]);
+  }, [selectedUsers, sendPasswordEmails, table]);
 
   const handleRowClick = (userId: string) => {
     navigate(userId);
@@ -514,8 +493,7 @@ const Users = () => {
     group: handleUsersGroups,
     delete: handleDeleteUsers,
     archive: handleArchiveUsers,
-    passwordReset: handlePasswordResetEmails,
-    passwordCreation: handlePasswordCreationEmails,
+    passwordEmail: handlePasswordEmails,
   };
 
   const { totalItems, perPage, page } = userData?.pagination || {};

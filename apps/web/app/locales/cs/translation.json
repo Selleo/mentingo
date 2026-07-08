@@ -1045,7 +1045,9 @@
       "passwordResetEmailsSent": "E-maily pro reset hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
       "passwordResetEmailsError": "Nepodařilo se odeslat e-maily pro reset hesla",
       "passwordCreationEmailsSent": "E-maily pro vytvoření hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla"
+      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla",
+      "passwordEmailsSent": "E-maily k heslu odeslány: {{sentCount}}. Reset: {{passwordResetSentCount}}. Vytvoření: {{passwordCreationSentCount}}. Přeskočeno: {{skippedCount}}.",
+      "passwordEmailsError": "Nepodařilo se odeslat e-maily k heslu"
     },
     "field": {
       "description": "Popis",
@@ -1243,7 +1245,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
       "deleteCourseFailed": "Kurz se nepodařilo smazat",
-      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept.",
+      "deleteProtectedCourseFailed": "Publikovaný ani soukromý kurz nelze smazat. Nejprve nastavte jeho stav na Koncept.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kurzů byly úspěšně aktualizovány",
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
@@ -1463,6 +1465,7 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Skupiny",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordReset": "Odeslat e-mail pro reset hesla",
       "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
       "delete": "Vymazat",
@@ -1473,6 +1476,7 @@
         "delete": "Chcete tyto účty smazat?",
         "role": "Upravte role",
         "group": "Upravte skupiny",
+        "passwordEmail": "Odeslat e-mail k heslu",
         "passwordReset": "Odeslat e-mail pro reset hesla",
         "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
         "archive": "Archivovat uživatelské účty",
@@ -1484,6 +1488,7 @@
         "delete": "Vymazat",
         "role": "Uložit",
         "group": "Uložit",
+        "passwordEmail": "Odeslat",
         "passwordReset": "Odeslat",
         "passwordCreation": "Odeslat",
         "archive": "Archiv",
@@ -1496,6 +1501,7 @@
         "confirmationForGroup_other": "Změníte skupinu na {{ group }} pro {{ count }} uživatelů",
         "confirmationForRole_one": "Změníte roli na {{ role }} pro 1 uživatele.",
         "confirmationForRole_other": "Změníte roli na {{ role }} pro {{ count }} uživatelů",
+        "passwordEmail": "Odešlete e-maily k heslu vybraným uživatelům. Uživatelé s existujícím heslem dostanou e-mail pro reset hesla a uživatelé bez hesla dostanou e-mail pro vytvoření hesla.",
         "passwordReset": "Odešlete e-maily pro reset hesla vybraným uživatelům s existujícím heslem. Uživatelé bez hesla budou přeskočeni.",
         "passwordCreation": "Znovu odešlete e-maily pro vytvoření hesla vybraným uživatelům bez hesla. Uživatelé s existujícím heslem budou přeskočeni.",
         "archive": "Opravdu chcete tyto účty archivovat?",
@@ -1570,6 +1576,7 @@
     },
     "button": {
       "createUser": "Vytvořit uživatele",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordResetEmail": "Odeslat e-mail pro reset hesla",
       "passwordCreationEmail": "Znovu odeslat e-mail pro vytvoření hesla"
     },

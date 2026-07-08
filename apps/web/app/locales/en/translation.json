@@ -1040,7 +1040,9 @@
       "passwordResetEmailsSent": "Password reset emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
       "passwordResetEmailsError": "Failed to send password reset emails",
       "passwordCreationEmailsSent": "Password creation emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Failed to send password creation emails"
+      "passwordCreationEmailsError": "Failed to send password creation emails",
+      "passwordEmailsSent": "Password emails sent: {{sentCount}}. Reset: {{passwordResetSentCount}}. Creation: {{passwordCreationSentCount}}. Skipped: {{skippedCount}}.",
+      "passwordEmailsError": "Failed to send password emails"
     },
     "field": {
       "description": "Description",
@@ -1238,7 +1240,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course",
-      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first.",
+      "deleteProtectedCourseFailed": "Cannot delete a published or private course. Please set its status to Draft first.",
       "bulkCategoryUpdateSuccessfully": "Course categories updated successfully",
       "bulkCategoryUpdateFailed": "Failed to update course categories",
       "bulkCategoryUpdateForbidden": "You do not have permission to update one or more selected courses.",
@@ -1518,6 +1520,7 @@
     "dropdown": {
       "roles": "Roles",
       "groups": "Groups",
+      "passwordEmail": "Send password email",
       "passwordReset": "Send password reset email",
       "passwordCreation": "Resend password creation email",
       "delete": "Delete",
@@ -1528,6 +1531,7 @@
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
+        "passwordEmail": "Send password email",
         "passwordReset": "Send password reset email",
         "passwordCreation": "Resend password creation email",
         "archive": "Archive user accounts",
@@ -1539,6 +1543,7 @@
         "delete": "Delete",
         "role": "Save",
         "group": "Save",
+        "passwordEmail": "Send",
         "passwordReset": "Send",
         "passwordCreation": "Send",
         "archive": "Archive",
@@ -1551,6 +1556,7 @@
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "passwordEmail": "Send password emails to selected users. Users with existing passwords will receive password reset emails, and users without passwords will receive password creation emails.",
         "passwordReset": "Send password reset emails to selected users with existing passwords. Users without passwords will be skipped.",
         "passwordCreation": "Resend password creation emails to selected users without passwords. Users with existing passwords will be skipped.",
         "archive": "Are you sure you want to archive these accounts?",
@@ -1625,6 +1631,7 @@
     },
     "button": {
       "createUser": "Create user",
+      "passwordEmail": "Send password email",
       "passwordResetEmail": "Send password reset email",
       "passwordCreationEmail": "Resend password creation email"
     },

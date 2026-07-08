@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { COURSE_STATUSES, type CourseStatus } from "@repo/shared";
+
 import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -19,6 +21,10 @@ export type CourseFactoryCreateInput = Partial<CreateCourseBody> & {
 export type CourseFactoryUpdateInput = UpdateCourseBody;
 
 const createCourseTitle = () => `${TEST_DATA.course.titlePrefix} ${randomUUID().slice(0, 8)}`;
+const PROTECTED_COURSE_DELETE_STATUSES: CourseStatus[] = [
+  COURSE_STATUSES.PUBLISHED,
+  COURSE_STATUSES.PRIVATE,
+];
 
 export class CourseFactory {
   constructor(private readonly apiClient: FixtureApiClient) {}
@@ -127,6 +133,8 @@ export class CourseFactory {
     const existingCourse = await this.safeGetById(id);
     if (!existingCourse) return;
 
+    await this.prepareCourseForDeletion(existingCourse);
+
     await this.apiClient.api.courseControllerDeleteCourse(id);
   }
 
@@ -140,7 +148,20 @@ export class CourseFactory {
 
     if (existingIds.length === 0) return;
 
+    await Promise.all(
+      existingCourses.map((course) => course && this.prepareCourseForDeletion(course)),
+    );
+
     await this.apiClient.api.courseControllerDeleteManyCourses({ ids: existingIds });
+  }
+
+  private async prepareCourseForDeletion(course: CourseFactoryRecord) {
+    if (!PROTECTED_COURSE_DELETE_STATUSES.includes(course.status)) return;
+
+    await this.update(course.id, {
+      status: COURSE_STATUSES.DRAFT,
+      language: course.baseLanguage,
+    });
   }
 
   private async safeGetById(id: string): Promise<CourseFactoryRecord | null> {

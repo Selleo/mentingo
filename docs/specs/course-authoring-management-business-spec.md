@@ -25,14 +25,14 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Add, edit, delete, and generate course language variants.
 - Manage course enrollment for users and groups from the course edit area.
 - Transfer course ownership to another eligible user.
-- Delete draft courses individually or in bulk.
+- Delete draft courses individually or in bulk while protecting private and published courses.
 - Export supported courses as SCORM packages or master-course exports when permissions and configuration allow it.
 
 ## End-User Value
 
 The feature gives L&D teams governance over the training library. Teams can prepare courses before learners see them, publish only when content is ready, keep accountability through ownership, and maintain multilingual versions for different learner populations.
 
-Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
+Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, private and published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
 
 ## How It Works
 
@@ -40,7 +40,7 @@ Administrators start in the admin course list and open a course edit screen or c
 
 The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
 
-Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Language operations respect supported-language and base-language rules.
+Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Private and published courses must be moved back to draft before deletion is allowed. Language operations respect supported-language and base-language rules.
 
 ## Key Technical Context
 
@@ -53,4 +53,5 @@ Course mutations are permission-gated. Full course administrators can manage cou
 ## Test Evidence
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
+- API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.

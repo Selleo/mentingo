@@ -1045,7 +1045,9 @@
       "passwordResetEmailsSent": "Slaptažodžio atkūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
       "passwordResetEmailsError": "Nepavyko išsiųsti slaptažodžio atkūrimo el. laiškų",
       "passwordCreationEmailsSent": "Slaptažodžio sukūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nepavyko išsiųsti slaptažodžio sukūrimo el. laiškų"
+      "passwordCreationEmailsError": "Nepavyko išsiųsti slaptažodžio sukūrimo el. laiškų",
+      "passwordEmailsSent": "Slaptažodžio el. laiškai išsiųsti: {{sentCount}}. Atkūrimas: {{passwordResetSentCount}}. Sukūrimas: {{passwordCreationSentCount}}. Praleista: {{skippedCount}}.",
+      "passwordEmailsError": "Nepavyko išsiųsti slaptažodžio el. laiškų"
     },
     "field": {
       "description": "Aprašymas",
@@ -1243,7 +1245,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
       "deleteCourseFailed": "Nepavyko ištrinti kurso",
-      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
+      "deleteProtectedCourseFailed": "Negalima ištrinti paskelbto ar privataus kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
       "bulkCategoryUpdateSuccessfully": "Kursų kategorijos sėkmingai atnaujintos",
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -1463,6 +1465,7 @@
     "dropdown": {
       "roles": "Vaidmenys",
       "groups": "Grupės",
+      "passwordEmail": "Siųsti slaptažodžio el. laišką",
       "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
       "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
       "delete": "Ištrinti",
@@ -1473,6 +1476,7 @@
         "delete": "Ar norite ištrinti šias paskyras?",
         "role": "Keisti vaidmenis",
         "group": "Keisti grupes",
+        "passwordEmail": "Siųsti slaptažodžio el. laišką",
         "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
         "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
         "archive": "Archyvuokite vartotojų paskyras",
@@ -1484,6 +1488,7 @@
         "delete": "Ištrinti",
         "role": "Išsaugoti",
         "group": "Išsaugoti",
+        "passwordEmail": "Siųsti",
         "passwordReset": "Siųsti",
         "passwordCreation": "Siųsti",
         "archive": "Archyvas",
@@ -1496,6 +1501,7 @@
         "confirmationForGroup_other": "Jūs pakeisite grupę į {{ group }} {{ count }} naudotojams",
         "confirmationForRole_one": "1 naudotojo vaidmenį pakeisite į {{ role }}.",
         "confirmationForRole_other": "{{ count }} naudotojų vaidmenį pakeisite į {{ role }}",
+        "passwordEmail": "Siųskite slaptažodžio el. laiškus pasirinktiems naudotojams. Naudotojai su esamais slaptažodžiais gaus slaptažodžio atkūrimo el. laiškus, o naudotojai be slaptažodžių gaus slaptažodžio sukūrimo el. laiškus.",
         "passwordReset": "Siųskite slaptažodžio atkūrimo el. laiškus pasirinktiems naudotojams su esamais slaptažodžiais. Naudotojai be slaptažodžių bus praleisti.",
         "passwordCreation": "Pakartotinai siųskite slaptažodžio sukūrimo el. laiškus pasirinktiems naudotojams be slaptažodžių. Naudotojai su esamais slaptažodžiais bus praleisti.",
         "archive": "Ar tikrai norite archyvuoti šias paskyras?",
@@ -1570,6 +1576,7 @@
     },
     "button": {
       "createUser": "Sukurti vartotoją",
+      "passwordEmail": "Siųsti slaptažodžio el. laišką",
       "passwordResetEmail": "Siųsti slaptažodžio atkūrimo el. laišką",
       "passwordCreationEmail": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką"
     },

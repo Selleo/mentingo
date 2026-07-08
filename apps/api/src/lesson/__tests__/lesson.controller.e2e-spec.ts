@@ -799,7 +799,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       }
     });
 
-    it("should show full quiz feedback for admin regardless of quizFeedbackEnabled", async () => {
+    it("should redact quiz feedback for admin when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
       const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const admin = await userFactory
@@ -821,6 +821,78 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
 
       const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(admin.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
+      expect(response.body.data.quizDetails).toBeDefined();
+      expect(response.body.data.thresholdScore).toBe(70);
+
+      if (response.body.data.quizDetails.questions) {
+        for (const question of response.body.data.quizDetails.questions) {
+          expect(question.passQuestion === false || question.passQuestion === null).toBe(true);
+          if (question.options && question.options.length > 0) {
+            for (const option of question.options as Array<{ isCorrect: boolean | null }>) {
+              expect(option.isCorrect === false || option.isCorrect === null).toBe(true);
+            }
+          }
+        }
+      }
+    });
+
+    it("should show full quiz feedback for admin when quizFeedbackEnabled is true", async () => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: {
+          lessonSequenceEnabled: false,
+          quizFeedbackEnabled: true,
+        },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(admin.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
 
       const response = await request(app.getHttpServer())
         .get(`/api/lesson/${lesson.id}?language=en`)
@@ -830,6 +902,67 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       expect(response.body.data.isQuizFeedbackRedacted).toBe(false);
       expect(response.body.data.quizDetails).toBeDefined();
       expect(response.body.data.thresholdScore).toBe(70);
+      expect(
+        response.body.data.quizDetails.questions.some(
+          (question: { options?: Array<{ isCorrect: boolean | null }> }) =>
+            question.options?.some((option) => option.isCorrect === true),
+        ),
+      ).toBe(true);
+    });
+
+    it("should redact quiz feedback for the course author when quizFeedbackEnabled is false", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create();
+      const cookies = await cookieFor(author, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        settings: {
+          lessonSequenceEnabled: false,
+          quizFeedbackEnabled: false,
+        },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: author.id });
+
+      const { lesson } = await createQuizLesson(course.id, chapter.id, author.id);
+      await enableStudentMode(author.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(author.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
+      expect(response.body.data.quizDetails).toBeDefined();
+
+      if (response.body.data.quizDetails.questions) {
+        for (const question of response.body.data.quizDetails.questions) {
+          expect(question.passQuestion === false || question.passQuestion === null).toBe(true);
+          if (question.options && question.options.length > 0) {
+            for (const option of question.options as Array<{ isCorrect: boolean | null }>) {
+              expect(option.isCorrect === false || option.isCorrect === null).toBe(true);
+            }
+          }
+        }
+      }
     });
   });
 

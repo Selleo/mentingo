@@ -17,6 +17,8 @@ const RESOURCE_ENTITY_ID = "00000000-0000-0000-0000-000000000003";
 const COURSE_ID = "00000000-0000-0000-0000-000000000004";
 const CHAPTER_ID = "00000000-0000-0000-0000-000000000005";
 const SECOND_RESOURCE_ENTITY_ID = "00000000-0000-0000-0000-000000000006";
+const RESOURCE_ID = "00000000-0000-0000-0000-000000000007";
+const SECOND_RESOURCE_ID = "00000000-0000-0000-0000-000000000008";
 
 const currentUser = {
   userId: STUDENT_ID,
@@ -58,6 +60,27 @@ const body = (overrides: Partial<UpsertLessonVideoProgress> = {}): UpsertLessonV
   ...overrides,
 });
 
+const lessonDescription = (...resourceEntityIds: string[]) =>
+  resourceEntityIds
+    .map((resourceEntityId) => {
+      return `<div data-node-type="video" data-src="/api/lesson/lesson-resource/${resourceEntityId}"></div>`;
+    })
+    .join("");
+
+const videoResource = ({
+  id = RESOURCE_ID,
+  resourceEntityId = RESOURCE_ENTITY_ID,
+}: {
+  id?: string;
+  resourceEntityId?: string;
+} = {}) => ({
+  id,
+  resourceEntityId,
+  fileUrl: `/api/lesson/lesson-resource/${resourceEntityId}`,
+  fileUrlError: false,
+  contentType: "video/mp4",
+});
+
 const createService = () => {
   const trx = { transaction: "trx" };
   const repository = {
@@ -65,8 +88,14 @@ const createService = () => {
     ensureProgressRow: jest.fn().mockResolvedValue(progressRow()),
     mergeWatchedRanges: jest.fn().mockResolvedValue(progressRow({ watchedRanges: [[0, 10]] })),
     markWatched: jest.fn(),
+    getLocalizedLessonDescription: jest
+      .fn()
+      .mockResolvedValue(lessonDescription(RESOURCE_ENTITY_ID)),
     getRequiredVideoProgressForLesson: jest.fn().mockResolvedValue([]),
     getProgressForResourceIds: jest.fn(),
+  };
+  const fileService = {
+    getResourcesForEntity: jest.fn().mockResolvedValue([videoResource()]),
   };
   const watchSessionService = {
     getAllowedNewBucketCount: jest.fn().mockResolvedValue(100),
@@ -86,6 +115,7 @@ const createService = () => {
     repository as never,
     watchSessionService as never,
     studentLessonProgressService as never,
+    fileService as never,
     db as never,
   );
 
@@ -94,6 +124,7 @@ const createService = () => {
     repository,
     watchSessionService,
     studentLessonProgressService,
+    fileService,
     db,
     trx,
   };
@@ -179,7 +210,7 @@ describe("LessonVideoProgressService", () => {
   });
 
   it("marks the video watched at the fixed threshold without completing a multi-video lesson early", async () => {
-    const { service, repository, studentLessonProgressService } = createService();
+    const { service, repository, fileService, studentLessonProgressService } = createService();
     const thresholdProgress = progressRow({
       watchedRanges: [[0, 90]],
       coveredBucketCount: 90,
@@ -193,6 +224,13 @@ describe("LessonVideoProgressService", () => {
 
     repository.mergeWatchedRanges.mockResolvedValue(thresholdProgress);
     repository.markWatched.mockResolvedValue(watchedProgress);
+    repository.getLocalizedLessonDescription.mockResolvedValue(
+      lessonDescription(RESOURCE_ENTITY_ID, SECOND_RESOURCE_ENTITY_ID),
+    );
+    fileService.getResourcesForEntity.mockResolvedValue([
+      videoResource(),
+      videoResource({ id: SECOND_RESOURCE_ID, resourceEntityId: SECOND_RESOURCE_ENTITY_ID }),
+    ]);
     repository.getRequiredVideoProgressForLesson.mockResolvedValue([
       watchedProgress,
       progressRow({
@@ -213,6 +251,14 @@ describe("LessonVideoProgressService", () => {
       },
       expect.anything(),
     );
+    expect(repository.getRequiredVideoProgressForLesson).toHaveBeenCalledWith(
+      {
+        lessonId: LESSON_ID,
+        studentId: STUDENT_ID,
+        resourceEntityIds: [RESOURCE_ENTITY_ID, SECOND_RESOURCE_ENTITY_ID],
+      },
+      expect.anything(),
+    );
     expect(studentLessonProgressService.markLessonAsCompleted).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       isWatched: true,
@@ -221,7 +267,7 @@ describe("LessonVideoProgressService", () => {
   });
 
   it("stores progress without watched or lesson completion side effects when tracking is disabled", async () => {
-    const { service, repository, studentLessonProgressService } = createService();
+    const { service, repository, fileService, studentLessonProgressService } = createService();
     const thresholdProgress = progressRow({
       watchedRanges: [[0, 90]],
       coveredBucketCount: 90,
@@ -238,6 +284,8 @@ describe("LessonVideoProgressService", () => {
 
     expect(repository.mergeWatchedRanges).toHaveBeenCalled();
     expect(repository.markWatched).not.toHaveBeenCalled();
+    expect(repository.getLocalizedLessonDescription).not.toHaveBeenCalled();
+    expect(fileService.getResourcesForEntity).not.toHaveBeenCalled();
     expect(repository.getRequiredVideoProgressForLesson).not.toHaveBeenCalled();
     expect(studentLessonProgressService.markLessonAsCompleted).not.toHaveBeenCalled();
     expect(result).toMatchObject({
@@ -249,7 +297,7 @@ describe("LessonVideoProgressService", () => {
   });
 
   it("completes the lesson when every required video is watched", async () => {
-    const { service, repository, studentLessonProgressService, trx } = createService();
+    const { service, repository, fileService, studentLessonProgressService, trx } = createService();
     const watchedProgress = progressRow({
       watchedRanges: [[0, 90]],
       coveredBucketCount: 90,
@@ -259,6 +307,13 @@ describe("LessonVideoProgressService", () => {
     });
 
     repository.mergeWatchedRanges.mockResolvedValue(watchedProgress);
+    repository.getLocalizedLessonDescription.mockResolvedValue(
+      lessonDescription(RESOURCE_ENTITY_ID, SECOND_RESOURCE_ENTITY_ID),
+    );
+    fileService.getResourcesForEntity.mockResolvedValue([
+      videoResource(),
+      videoResource({ id: SECOND_RESOURCE_ID, resourceEntityId: SECOND_RESOURCE_ENTITY_ID }),
+    ]);
     repository.getRequiredVideoProgressForLesson.mockResolvedValue([
       watchedProgress,
       progressRow({
@@ -273,6 +328,14 @@ describe("LessonVideoProgressService", () => {
 
     const result = await service.upsertProgress(body({ watchedRanges: [[0, 90]] }), currentUser);
 
+    expect(repository.getRequiredVideoProgressForLesson).toHaveBeenCalledWith(
+      {
+        lessonId: LESSON_ID,
+        studentId: STUDENT_ID,
+        resourceEntityIds: [RESOURCE_ENTITY_ID, SECOND_RESOURCE_ENTITY_ID],
+      },
+      trx,
+    );
     expect(studentLessonProgressService.markLessonAsCompleted).toHaveBeenCalledWith({
       id: LESSON_ID,
       studentId: STUDENT_ID,
@@ -281,6 +344,40 @@ describe("LessonVideoProgressService", () => {
       dbInstance: trx,
       language: SUPPORTED_LANGUAGES.PL,
     });
+    expect(result.lessonCompleted).toBe(true);
+  });
+
+  it("ignores attached videos that are not referenced in the lesson content", async () => {
+    const { service, repository, fileService, studentLessonProgressService } = createService();
+    const watchedProgress = progressRow({
+      watchedRanges: [[0, 90]],
+      coveredBucketCount: 90,
+      coveragePercent: VIDEO_COMPLETION_COVERAGE_THRESHOLD,
+      isWatched: true,
+      watchedAt: "2026-06-16T13:00:00.000Z",
+    });
+
+    repository.mergeWatchedRanges.mockResolvedValue(watchedProgress);
+    repository.getLocalizedLessonDescription.mockResolvedValue(
+      lessonDescription(RESOURCE_ENTITY_ID),
+    );
+    fileService.getResourcesForEntity.mockResolvedValue([
+      videoResource(),
+      videoResource({ id: SECOND_RESOURCE_ID, resourceEntityId: SECOND_RESOURCE_ENTITY_ID }),
+    ]);
+    repository.getRequiredVideoProgressForLesson.mockResolvedValue([watchedProgress]);
+
+    const result = await service.upsertProgress(body({ watchedRanges: [[0, 90]] }), currentUser);
+
+    expect(repository.getRequiredVideoProgressForLesson).toHaveBeenCalledWith(
+      {
+        lessonId: LESSON_ID,
+        studentId: STUDENT_ID,
+        resourceEntityIds: [RESOURCE_ENTITY_ID],
+      },
+      expect.anything(),
+    );
+    expect(studentLessonProgressService.markLessonAsCompleted).toHaveBeenCalled();
     expect(result.lessonCompleted).toBe(true);
   });
 

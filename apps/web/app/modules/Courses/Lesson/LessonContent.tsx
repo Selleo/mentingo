@@ -63,6 +63,8 @@ export const LessonContent = ({
     lesson.hasTrackedVideo && isEffectiveStudentExperience && !isPreviewMode,
   );
   const videoCompletionTrackingEnabled = Boolean(lesson.videoCompletionTrackingEnabled);
+  const shouldUseCoverageCompletion =
+    videoProgressPersistenceEnabled && videoCompletionTrackingEnabled;
   const videoCoverageTracking = useMemo(
     () => ({
       enabled: videoProgressPersistenceEnabled,
@@ -199,7 +201,7 @@ export const LessonContent = ({
         return;
       }
 
-      if (lesson.hasTrackedVideo) return;
+      if (shouldUseCoverageCompletion) return;
 
       const videosCount = lesson.videos?.length ?? 0;
       if (videosCount === 0) return;
@@ -215,10 +217,10 @@ export const LessonContent = ({
       language,
       lesson.id,
       lesson.lessonCompleted,
-      lesson.hasTrackedVideo,
       lesson.type,
       lesson.videos,
       markLessonAsCompleted,
+      shouldUseCoverageCompletion,
     ],
   );
 

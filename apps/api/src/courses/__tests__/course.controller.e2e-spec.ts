@@ -5,6 +5,7 @@ import {
   COURSE_ENROLLMENT,
   COURSE_FEATURE,
   COURSE_FEATURE_ERROR_TRANSLATION_KEY,
+  COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
@@ -1693,6 +1694,138 @@ describe("CourseController (e2e)", () => {
         .expect(400);
 
       expect(response.body.message).toBe("adminCoursesView.toast.noCoursesSelected");
+    });
+  });
+
+  describe("DELETE /api/course/deleteCourse/:id", () => {
+    it("deletes a draft course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/deleteCourse/${course.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const deletedCourse = await db.select().from(courses).where(eq(courses.id, course.id));
+
+      expect(deletedCourse).toHaveLength(0);
+    });
+
+    it.each([COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE])(
+      "rejects deleting a %s course",
+      async (status) => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .withAdminRole()
+          .create();
+        const cookies = await cookieFor(admin, app);
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status,
+          thumbnailS3Key: null,
+        });
+
+        const response = await request(app.getHttpServer())
+          .delete(`/api/course/deleteCourse/${course.id}`)
+          .set("Cookie", cookies)
+          .expect(403);
+
+        expect(response.body.message).toBe("adminCoursesView.toast.deleteProtectedCourseFailed");
+
+        const [existingCourse] = await db.select().from(courses).where(eq(courses.id, course.id));
+
+        expect(existingCourse.id).toBe(course.id);
+      },
+    );
+  });
+
+  describe("DELETE /api/course/deleteManyCourses", () => {
+    it("deletes draft courses", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const draftCourses = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      const courseIds = draftCourses.map((course) => course.id);
+
+      await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: courseIds })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const deletedCourses = await db.select().from(courses).where(inArray(courses.id, courseIds));
+
+      expect(deletedCourses).toHaveLength(0);
+    });
+
+    it("rejects deleting a selection that includes a private course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const draftCourse = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+      const privateCourse = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.PRIVATE,
+        thumbnailS3Key: null,
+      });
+      const courseIds = [draftCourse.id, privateCourse.id];
+
+      const response = await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: courseIds })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      expect(response.body.message).toBe("adminCoursesView.toast.deleteProtectedCourseFailed");
+
+      const remainingCourses = await db
+        .select()
+        .from(courses)
+        .where(inArray(courses.id, courseIds));
+
+      expect(remainingCourses).toHaveLength(2);
     });
   });
 

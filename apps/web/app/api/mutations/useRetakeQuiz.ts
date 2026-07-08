@@ -8,7 +8,7 @@ import { getTranslatedApiErrorMessage } from "../utils/getTranslatedApiErrorMess
 
 type RetakeQuizProps = {
   lessonId: string;
-  handleOnSuccess: () => void;
+  handleOnSuccess: () => Promise<void> | void;
 };
 
 export function useRetakeQuiz({ lessonId, handleOnSuccess }: RetakeQuizProps) {
@@ -20,8 +20,8 @@ export function useRetakeQuiz({ lessonId, handleOnSuccess }: RetakeQuizProps) {
       const response = await ApiClient.api.lessonControllerDeleteStudentQuizAnswers({ lessonId });
       return response.data;
     },
-    onSuccess: () => {
-      handleOnSuccess();
+    onSuccess: async () => {
+      await handleOnSuccess();
     },
     onError: (error) => {
       toast({
