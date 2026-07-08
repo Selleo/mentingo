@@ -22,6 +22,9 @@ import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserService } from "src/user/user.service";
 
+import { GetLocalizedUserMentionContentAnnouncement } from "../chat-mention-localizations/chat-mention-content-localization";
+import { GetLocalizedUserMentionTitleAnnouncement } from "../chat-mention-localizations/chat-mention-title-localization";
+
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
 
 const CourseChatMentionEmailEvents = [CourseChatUserMentionedEvent] as const;
@@ -62,19 +65,16 @@ export class CourseChatMentionEmailHandler
         resolveTenantOrigin(this.dbAdmin, tenantId),
       ]);
 
-      console.log("Before");
-      console.log(uniqueMentionedUserIds);
       const mentioningUser = await this.userService.getUserById(currentUser.userId);
-      console.log(mentioningUser);
       const mentioningUserFullName = mentioningUser.firstName + " " + mentioningUser.lastName;
-      const courseName = await this.courseService.getCourseEmailData(courseId);
+      const courseData = await this.courseService.getCourseEmailData(courseId);
 
       await this.announcementRepository.createAnnouncement({
         groupId: null,
-        title: { en: ` ${mentioningUserFullName} mentioned you ` },
-        content: { en: `In the ${courseName.courseName}` },
+        title: GetLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
+        content: GetLocalizedUserMentionContentAnnouncement(courseData.courseName),
         baseLanguage: "en",
-        availableLocales: ["en"],
+        availableLocales: ["en", "pl", "de", "lt", "cs", "es"],
         authorId: currentUser.userId,
         status: ANNOUNCEMENT_STATUSES.PUBLISHED,
         scheduledAt: null,
