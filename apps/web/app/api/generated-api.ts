@@ -2657,7 +2657,12 @@ export interface GetCourseOwnershipResponse {
 export interface ChatWithCourseGenerationAgentBody {
   /** @format uuid */
   integrationId: string;
-  message: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
 }
 
 export type GetCourseGenerationMessagesResponse = {
@@ -3992,8 +3997,12 @@ export interface GetThreadMessagesResponse {
 export interface StreamChatBody {
   /** @format uuid */
   threadId: string;
-  /** @minLength 1 */
-  content: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
   /** @format uuid */
   id?: string;
 }
@@ -4774,6 +4783,7 @@ export interface GetLumaConfiguredResponse {
     enabled: boolean;
     courseGenerationEnabled: boolean;
     voiceMentorEnabled: boolean;
+    voiceTtsProvider: "cartesia" | "openaiCompatible";
   };
 }
 
@@ -4793,6 +4803,10 @@ export interface GetIsConfigSetupResponse {
     notConfigured: {
       service: string;
       missingKeys: string[];
+    }[];
+    aiCapabilities: {
+      key: "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
+      status: "enabled" | "disabled";
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;

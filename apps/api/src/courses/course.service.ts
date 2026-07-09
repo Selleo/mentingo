@@ -4850,19 +4850,25 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
     }
 
-    return this.db.transaction(async (trx) => {
-      const translations = await this.aiService.generateMissingTranslations(
-        withContext,
-        language,
-        courseId,
-      );
+    this.logger.debug(
+      `Generating missing course translations courseId=${courseId} language=${language} count=${missingData.length}`,
+    );
+    const translations = await this.aiService.generateMissingTranslations(
+      withContext,
+      language,
+      courseId,
+    );
+    this.logger.debug(
+      `Generated missing course translations courseId=${courseId} language=${language} chunks=${translations.length}`,
+    );
 
-      const flat = translations.flat(1);
+    const flat = translations.flat(1);
 
-      if (missingData.length !== flat.length) {
-        throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
-      }
+    if (missingData.length !== flat.length) {
+      throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
+    }
 
+    await this.db.transaction(async (trx) => {
       for (let i = 0; i < flat.length; i++) {
         const translatedValue = flat[i];
         const currData = missingData[i];
@@ -4879,6 +4885,10 @@ export class CourseService {
           .where(eq(currData.idColumn, currData.id));
       }
     });
+
+    this.logger.debug(
+      `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,
+    );
   }
 
   async getCourseOwnership(courseId: UUIDType) {

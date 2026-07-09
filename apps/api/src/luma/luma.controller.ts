@@ -21,10 +21,10 @@ import {
   LUMA_FILE_INGESTION_MAX_SIZE_BYTES,
   SupportedLanguages,
 } from "@repo/shared";
-import { pipeUIMessageStreamToResponse } from "ai";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
@@ -69,7 +69,8 @@ export class LumaController {
     @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const stream = this.lumaCourseGenerationStreamService.createChatStream(data, currentUser);
+    const stream = await this.lumaCourseGenerationStreamService.createChatStream(data, currentUser);
+    const { pipeUIMessageStreamToResponse } = await loadAiSdk();
 
     return pipeUIMessageStreamToResponse({
       response: res,

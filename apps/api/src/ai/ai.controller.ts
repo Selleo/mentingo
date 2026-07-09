@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Param, Post, Query, Res } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { pipeUIMessageStreamToResponse, toUIMessageStream } from "ai";
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import {
   type ResponseJudgeBody,
   responseJudgeSchema,
@@ -66,11 +66,16 @@ export class AiController {
     @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const response = await this.aiService.streamChatMessage(data, OPENAI_MODELS.BASIC, currentUser);
+    const stream = await this.aiService.createChatMessageUiStream(
+      data,
+      OPENAI_MODELS.BASIC,
+      currentUser,
+    );
+    const { pipeUIMessageStreamToResponse } = await loadAiSdk();
 
     return pipeUIMessageStreamToResponse({
       response: res,
-      stream: toUIMessageStream({ stream: response.stream }),
+      stream,
     });
   }
 

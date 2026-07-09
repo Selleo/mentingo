@@ -899,6 +899,19 @@
       "noPartiallyConfigured": "No partially configured services.",
       "allConfigured": "All environment keys are configured correctly.",
       "dismissWarning": "Dismiss",
+      "aiCapabilities": {
+        "title": "AI Capabilities",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Course Generation",
+          "assetGeneration": "Asset Generation"
+        },
+        "status": {
+          "enabled": "Enabled",
+          "disabled": "Disabled"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe Payment",
         "bunny": "Bunny CDN",
@@ -2322,7 +2335,8 @@
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
-          "voiceConfigFishAudioTooltip": "Voice mode uses Cartesia. To use a custom voice, open Cartesia, find the voice you want, and copy its voice ID here.",
+          "voiceConfigCartesiaTooltip": "Voice audio uses Cartesia. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a Cartesia voice ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Voice audio uses an OpenAI-compatible text-to-speech endpoint. Male and Female use OpenAI voice presets. Choose Custom to enter another voice value supported by that endpoint.",
           "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
           "charactersLeft": "characters left",
@@ -3405,6 +3419,12 @@
     "toast": {
       "success": "Login background image changed successfully",
       "error": "Error changing login background image"
+    }
+  },
+  "ingestion": {
+    "error": {
+      "jobFailed": "File processing failed. Please try another file or upload it again.",
+      "noExtractableText": "No readable text could be extracted from this file."
     }
   },
   "files": {

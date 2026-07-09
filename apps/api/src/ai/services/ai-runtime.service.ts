@@ -1,20 +1,27 @@
-import { createOpenAI } from "@ai-sdk/openai";
 import {
   AiCapability,
   AiCapabilityProvider,
   createLumaClient,
   type AiRuntimeConfiguration,
+  type GenerateTranslationsOptions,
+  type GenerateTranslationsResponse,
+  type MentorChatOptions,
+  type MentorJudgeOptions,
+  type MentorJudgeResponse,
+  type TranscribeDictationOptions,
+  type TranscribeDictationResponse,
 } from "@japro/luma-sdk";
 import { Injectable, Logger } from "@nestjs/common";
-import { embedMany } from "ai";
 
 import { LUMA_CONFIGURATION_CACHE_TTL_MS } from "src/ai/ai-runtime.constants";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
+import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 import { EnvService } from "src/env/services/env.service";
 import { dbAls } from "src/storage/db/db-als.store";
 
 import type { OpenAIProvider } from "@ai-sdk/openai";
+import type { AiMentorChatStreamResult, AiStreamTextResult } from "src/ai/ai-chat.types";
 import type { AiRuntimeSource } from "src/ai/ai-runtime.types";
 
 @Injectable()
@@ -31,6 +38,8 @@ export class AiRuntimeService {
   constructor(private readonly envService: EnvService) {}
 
   async getAISdkOpenAI(): Promise<OpenAIProvider> {
+    const { createOpenAI } = await loadOpenAiSdk();
+
     return createOpenAI({
       apiKey: await this.envService
         .getEnv("OPENAI_API_KEY")
@@ -70,6 +79,124 @@ export class AiRuntimeService {
     return this.createCoreEmbeddings(contents);
   }
 
+  async streamMentorChat(
+    input: MentorChatOptions,
+    createCoreStream: () => Promise<AiStreamTextResult>,
+  ): Promise<AiMentorChatStreamResult> {
+    const source = await this.resolveSource(AiCapability.AiMentorChat);
+
+    if (source === AI_RUNTIME_SOURCES.LUMA) {
+      try {
+        const luma = await this.getLumaClient();
+        const response = await luma.mentor.streamChat(input);
+
+        return {
+          source: AI_RUNTIME_SOURCES.LUMA,
+          textStream: this.readLumaTextStream(response.data as unknown as AsyncIterable<Buffer>),
+        };
+      } catch (error) {
+        this.logger.warn(
+          `Luma mentor chat failed; falling back to core mentor chat: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    const coreStream = await createCoreStream();
+
+    return {
+      source: AI_RUNTIME_SOURCES.CORE,
+      textStream: coreStream.textStream,
+      coreStream,
+    };
+  }
+
+  async generateMentorChat(
+    input: MentorChatOptions,
+    generateCoreMessage: () => Promise<string>,
+  ): Promise<string> {
+    if ((await this.resolveSource(AiCapability.AiMentorChat)) === AI_RUNTIME_SOURCES.LUMA) {
+      try {
+        const luma = await this.getLumaClient();
+        const { message } = await luma.mentor.generateChat(input);
+        return message;
+      } catch (error) {
+        this.logger.warn(
+          `Luma mentor generation failed; falling back to core mentor generation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return generateCoreMessage();
+  }
+
+  async judgeMentor(
+    input: MentorJudgeOptions,
+    judgeCore: () => Promise<MentorJudgeResponse>,
+  ): Promise<MentorJudgeResponse> {
+    if ((await this.resolveSource(AiCapability.AiMentorJudge)) === AI_RUNTIME_SOURCES.LUMA) {
+      try {
+        const luma = await this.getLumaClient();
+        return await luma.mentor.judge(input);
+      } catch (error) {
+        this.logger.warn(
+          `Luma mentor judge failed; falling back to core mentor judge: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return judgeCore();
+  }
+
+  async generateTranslations(
+    input: GenerateTranslationsOptions,
+    generateCoreTranslations: () => Promise<GenerateTranslationsResponse>,
+  ): Promise<GenerateTranslationsResponse> {
+    if (
+      (await this.resolveSource(AiCapability.TranslationGeneration)) === AI_RUNTIME_SOURCES.LUMA
+    ) {
+      try {
+        const luma = await this.getLumaClient();
+        return await luma.ai.generateTranslations(input);
+      } catch (error) {
+        this.logger.warn(
+          `Luma translation generation failed; falling back to core translation generation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return generateCoreTranslations();
+  }
+
+  async transcribeDictation(
+    input: TranscribeDictationOptions,
+    transcribeCore: () => Promise<TranscribeDictationResponse | undefined>,
+  ): Promise<TranscribeDictationResponse | undefined> {
+    if (
+      (await this.resolveSource(AiCapability.DictationTranscription)) === AI_RUNTIME_SOURCES.LUMA
+    ) {
+      try {
+        const luma = await this.getLumaClient();
+        return await luma.ai.transcribeDictation(input);
+      } catch (error) {
+        this.logger.warn(
+          `Luma dictation transcription failed; falling back to core transcription: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return transcribeCore();
+  }
+
   async resolveSource(capability: AiCapability): Promise<AiRuntimeSource> {
     const configuration = await this.getLumaConfiguration();
     const capabilityStatus = configuration?.capabilities?.[capability];
@@ -83,12 +210,23 @@ export class AiRuntimeService {
 
   private async createCoreEmbeddings(contents: string[]): Promise<number[][]> {
     const provider = await this.getAISdkOpenAI();
+    const { embedMany } = await loadAiSdk();
+
     const { embeddings } = await embedMany({
       model: provider.embeddingModel(OPENAI_MODELS.EMBEDDING),
       values: contents,
     });
 
     return embeddings;
+  }
+
+  private async *readLumaTextStream(stream: AsyncIterable<Buffer>): AsyncIterable<string> {
+    for await (const chunk of stream) {
+      const text = chunk.toString("utf8");
+      if (text) {
+        yield text;
+      }
+    }
   }
 
   private async getLumaConfiguration(): Promise<AiRuntimeConfiguration | null> {

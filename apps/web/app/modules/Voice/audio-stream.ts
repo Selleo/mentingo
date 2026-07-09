@@ -27,7 +27,7 @@ const VAD_CONFIG = {
   positiveSpeechThreshold: 0.42,
   negativeSpeechThreshold: 0.24,
   minSpeechMs: 120,
-  redemptionMs: 1400,
+  redemptionMs: 700,
   preSpeechPadMs: 220,
 } as const;
 const POST_REDEMPTION_EMPTY_AUDIO_MS = VAD_CONFIG.redemptionMs;

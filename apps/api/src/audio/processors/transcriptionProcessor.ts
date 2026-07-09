@@ -12,6 +12,7 @@ import {
 } from "src/audio/constants/audio.constants";
 import { pcm16leToWav } from "src/audio/utils/pcm-to-wav.util";
 import { REDIS_CLIENT, RedisClient } from "src/redis";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { AudioProcessor, StopAudioMessage } from "../types/audio.types";
 
@@ -23,6 +24,7 @@ export class TranscriptionProcessor implements AudioProcessor {
   constructor(
     @Inject(REDIS_CLIENT) private readonly redisClient: RedisClient,
     private readonly aiService: AiService,
+    private readonly tenantDbRunner: TenantDbRunnerService,
   ) {}
 
   async run(payload: StopAudioMessage) {
@@ -45,7 +47,11 @@ export class TranscriptionProcessor implements AudioProcessor {
       format === "pcm_s16le" ? pcm16leToWav({ pcm: audio, sampleRate, channels }) : audio;
 
     try {
-      const transcription = await this.aiService.transcribe(payload.clientId, transcriptionInput);
+      const transcription = payload.tenantId
+        ? await this.tenantDbRunner.runWithTenant(payload.tenantId, () =>
+            this.aiService.transcribe(payload.clientId, transcriptionInput),
+          )
+        : await this.aiService.transcribe(payload.clientId, transcriptionInput);
       await this.redisClient.setEx(
         getAudioTranscriptKey(payload.clientId),
         AUDIO_EXPIRE,

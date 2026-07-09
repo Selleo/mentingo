@@ -1,6 +1,11 @@
 import crypto from "crypto";
 
-import { createLumaClient } from "@japro/luma-sdk";
+import {
+  AiCapability,
+  AiCapabilityProvider,
+  createLumaClient,
+  type PublicConfigurationResponse,
+} from "@japro/luma-sdk";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
@@ -174,19 +179,18 @@ export class EnvService {
         enabled: false,
         courseGenerationEnabled: false,
         voiceMentorEnabled: false,
+        voiceTtsProvider: "cartesia",
       };
     }
 
-    const luma = createLumaClient({
-      apiKey: lumaKey,
-      baseURL: lumaBaseUrl,
-    });
-    const configuration = await luma.configuration.get().catch(() => null);
+    const configuration = await this.getPublicLumaConfiguration(lumaKey, lumaBaseUrl);
+    const voiceTtsProvider = this.getVoiceTtsProvider(configuration);
 
     return {
       enabled: true,
       courseGenerationEnabled: Boolean(configuration?.courseGeneration),
       voiceMentorEnabled: Boolean(configuration?.voiceMentor),
+      voiceTtsProvider,
     };
   }
 
@@ -233,6 +237,14 @@ export class EnvService {
     );
 
     const envMap = new Map(envValues.map(({ key, value }) => [key, value]));
+    const lumaConfiguration = await this.getPublicLumaConfiguration(
+      envMap.get("LUMA_API_KEY"),
+      process.env.LUMA_BASE_URL,
+    );
+    const aiMentorEnabled = Boolean(
+      envMap.get("OPENAI_API_KEY")?.trim() ||
+        this.isCapabilityEnabled(lumaConfiguration, AiCapability.AiMentorChat),
+    );
 
     const fullyConfigured: string[] = [];
     const partiallyConfigured: Array<{ service: string; missingKeys: string[] }> = [];
@@ -257,7 +269,60 @@ export class EnvService {
       hasIssues:
         partiallyConfigured.length > 0 ||
         notConfigured.some(({ service }) => service === "livekit"),
+      aiCapabilities: [
+        {
+          key: "aiMentor",
+          status: this.toCapabilityStatus(aiMentorEnabled),
+        },
+        {
+          key: "voiceMentor",
+          status: this.toCapabilityStatus(Boolean(lumaConfiguration?.voiceMentor)),
+        },
+        {
+          key: "courseGeneration",
+          status: this.toCapabilityStatus(Boolean(lumaConfiguration?.courseGeneration)),
+        },
+        {
+          key: "assetGeneration",
+          status: this.toCapabilityStatus(
+            this.isCapabilityEnabled(lumaConfiguration, AiCapability.CourseGenerationVisualAssets),
+          ),
+        },
+      ],
       isWarningDismissed: await this.envRepository.getIsEnvConfigWarningDismissed(userId),
     };
+  }
+
+  private async getPublicLumaConfiguration(
+    apiKey?: string,
+    baseURL?: string,
+  ): Promise<PublicConfigurationResponse | null> {
+    if (!apiKey || !baseURL) {
+      return null;
+    }
+
+    const luma = createLumaClient({ apiKey, baseURL });
+    return luma.configuration.get().catch(() => null);
+  }
+
+  private isCapabilityEnabled(
+    configuration: PublicConfigurationResponse | null,
+    capability: AiCapability,
+  ) {
+    return Boolean(configuration?.capabilities?.[capability]?.enabled);
+  }
+
+  private toCapabilityStatus(isEnabled: boolean) {
+    return isEnabled ? "enabled" : "disabled";
+  }
+
+  private getVoiceTtsProvider(configuration: PublicConfigurationResponse | null) {
+    const voiceTextToSpeech = configuration?.capabilities?.[AiCapability.VoiceTextToSpeech];
+
+    if (voiceTextToSpeech?.enabled && voiceTextToSpeech.provider === AiCapabilityProvider.Luma) {
+      return "openaiCompatible";
+    }
+
+    return "cartesia";
   }
 }

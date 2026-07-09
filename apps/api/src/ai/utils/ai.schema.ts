@@ -123,9 +123,12 @@ export const streamChatSchema = Type.Object({
   id: Type.Optional(UUIDSchema),
 });
 
-export const generateTranslationSchema = Type.Object({
-  translations: Type.Array(Type.String()),
-});
+export const generateTranslationSchema = Type.Object(
+  {
+    translations: Type.Array(Type.String()),
+  },
+  { additionalProperties: false },
+);
 
 export type GenerateTranslationBody = Static<typeof generateTranslationSchema>;
 export type StreamChatBody = Static<typeof streamChatSchema>;

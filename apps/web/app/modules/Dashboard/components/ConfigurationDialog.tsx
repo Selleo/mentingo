@@ -45,6 +45,36 @@ export function EnvSetupDialog({ data, isOpen, onOpenChange }: EnvSetupDialogPro
           <Card className="w-full">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 h6">
+                <Info className="size-5 text-blue-500" />
+                {t("environmentConfigurationView.dialog.aiCapabilities.title")}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {data.aiCapabilities.map((capability) => (
+                  <div
+                    key={capability.key}
+                    className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <p className="body-sm font-semibold">
+                      {t(
+                        `environmentConfigurationView.dialog.aiCapabilities.names.${capability.key}`,
+                      )}
+                    </p>
+                    <Badge variant="outline" className="body-sm px-2 py-1 border border-blue-500">
+                      {t(
+                        `environmentConfigurationView.dialog.aiCapabilities.status.${capability.status}`,
+                      )}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="w-full">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 h6">
                 <CheckCircle2 className="size-5 text-success-500" />
                 {t("environmentConfigurationView.dialog.fullyConfigured")}
               </CardTitle>

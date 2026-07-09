@@ -41,9 +41,13 @@ Move Mentingo chat consumers to AI SDK v7 while keeping Luma/mentingo-ai as the 
 
 - [x] Inventory AI runtime call sites and assign each flow to `core`, `luma`, or fallback-capable routing.
 - [x] Add an API-side Luma runtime configuration resolver with a short cache so chat/embed requests do not call Luma configuration every time.
-- [ ] Route AI mentor chat through a helper that chooses Luma when configured and core otherwise.
+- [x] Route AI mentor chat through a helper that chooses Luma when configured and core otherwise.
+- [x] Route AI mentor welcome/summary text generation through a helper that chooses Luma when configured and core otherwise.
+- [x] Route AI mentor judge through a helper that chooses Luma when configured and core otherwise.
 - [x] Route AI mentor/RAG embeddings through a helper that chooses Luma when configured and core otherwise.
-- [ ] Decide whether voice mentor chat/audio uses the same chat routing or remains core-only for this migration.
+- [x] Route missing-translation generation through a helper that chooses Luma when configured and core otherwise.
+- [x] Route dictation transcription through a helper that chooses Luma when configured and core otherwise.
+- [x] Route voice-mode AI mentor chat through the same mentor chat helper and pass `voiceSessionId` to Luma.
 - [ ] Keep course generation on the existing Luma course-generation endpoint; only add explicit core fallback if product needs it later.
 - [ ] Add focused tests or service-level coverage for `core`, `luma`, and fallback cases.
 - [ ] Run focused API and web validation after routing changes.
@@ -51,20 +55,29 @@ Move Mentingo chat consumers to AI SDK v7 while keeping Luma/mentingo-ai as the 
 ## Fallback Routing Inventory
 
 - AI mentor chat: fallback-capable routing. Use Luma when `aiMentorChat` is enabled for Luma/custom runtime, otherwise use core.
-- AI mentor chat streaming: use Luma `mentor.streamChat` for normal turns. `mentor.generateChat` is reserved for welcome-message style non-stream generation only.
+- AI mentor chat streaming: use Luma `mentor.streamChat` for normal turns. Voice-mode mentor chat passes `voiceSessionId` through the same request so Luma can bind the text response to the active voice session directly.
+- AI mentor welcome message: fallback-capable routing. Use Luma `mentor.generateChat` when `aiMentorChat` is enabled for Luma, otherwise use core.
+- AI mentor summary generation: fallback-capable routing. Use Luma `mentor.generateChat` when `aiMentorChat` is enabled for Luma, otherwise use core.
+- AI mentor judge: fallback-capable routing. Use Luma `mentor.judge` when `aiMentorJudge` is enabled for Luma, otherwise use core.
 - AI mentor RAG embeddings: fallback-capable routing. Use Luma when `aiMentorRagEmbeddings` is enabled for Luma/custom runtime, otherwise use core.
 - Ingestion embeddings: fallback-capable routing if this uses the same mentor/RAG embedding capability; otherwise keep core until product separates the capability.
-- Voice mentor chat: decide separately because it may need voice session semantics and stream event handling.
-- Dictation transcription and TTS: out of scope for the first fallback pass unless the voice flow is migrated together.
+- Missing translations: fallback-capable routing. Use Luma `ai.generateTranslations` when `translationGeneration` is enabled for Luma, otherwise use core.
+- Dictation transcription: fallback-capable routing. Use Luma `ai.transcribeDictation` when `dictationTranscription` is enabled for Luma, otherwise use core.
+- Voice mentor chat: uses the same mentor chat routing as text chat and passes `voiceSessionId` to Luma.
+- Voice mentor transcription and TTS: decide separately because they use voice-session semantics rather than the existing dictation endpoint.
 - Course generation: stays on the existing Luma course-generation endpoint for now.
 
 ## Fallback Routing Status
 
 - Done: `AiRuntimeService` caches Luma runtime configuration for 60 seconds.
 - Done: `AiRuntimeService` resolves runtime source as `core` or `luma` from Luma capability status.
+- Done: AI mentor chat, including voice-mode chat, uses Luma when `aiMentorChat` resolves to Luma, with core fallback.
+- Done: AI mentor welcome/summary generation uses Luma when `aiMentorChat` resolves to Luma, with core fallback.
+- Done: AI mentor judge uses Luma when `aiMentorJudge` resolves to Luma, with core fallback.
 - Done: AI mentor RAG embeddings and ingestion embeddings use Luma embeddings when `aiMentorRagEmbeddings` resolves to Luma, with core fallback on missing config or Luma failure.
-- Remaining: AI mentor chat routing still uses core.
-- Remaining: Voice mentor routing decision is still open.
+- Done: missing-translation generation uses Luma when `translationGeneration` resolves to Luma, with core fallback.
+- Done: dictation transcription uses Luma when `dictationTranscription` resolves to Luma, with core fallback.
+- Remaining: Voice mentor transcription and TTS are still separate socket/audio flows and remain out of scope for this fallback pass.
 
 ## Deployment Note
 

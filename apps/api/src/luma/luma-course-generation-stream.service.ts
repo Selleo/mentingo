@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { getUiMessageText } from "@repo/shared";
-import { createUIMessageStream } from "ai";
 
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { LumaCourseGenerationSyncService } from "src/luma/luma-course-generation-sync.service";
 import { LumaService } from "src/luma/luma.service";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
@@ -14,36 +15,54 @@ import type {
 
 @Injectable()
 export class LumaCourseGenerationStreamService {
+  private readonly logger = new Logger(LumaCourseGenerationStreamService.name);
+
   constructor(
     private readonly lumaService: LumaService,
     private readonly lumaCourseGenerationSyncService: LumaCourseGenerationSyncService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
   ) {}
 
-  createChatStream(data: CourseGenerationChatBody, currentUser: CurrentUserType) {
+  async createChatStream(data: CourseGenerationChatBody, currentUser: CurrentUserType) {
     const message = getUiMessageText(data.message).trim();
 
     if (!message) {
       throw new BadRequestException("common.validation.messageRequired");
     }
 
+    const { createUIMessageStream } = await loadAiSdk();
+
     return createUIMessageStream<CourseGenerationUIMessage>({
       execute: async ({ writer }) => {
-        const lumaResponse = await this.lumaService.chatWithCourseAgent(
-          {
-            integrationId: data.integrationId,
-            message,
-          },
-          currentUser,
-        );
+        await this.tenantDbRunnerService.runWithTenant(currentUser.tenantId, async () => {
+          this.logger.debug(
+            `course generation stream start integrationId=${data.integrationId} messageLength=${message.length}`,
+          );
+          const lumaResponse = await this.lumaService.chatWithCourseAgent(
+            {
+              integrationId: data.integrationId,
+              message,
+            },
+            currentUser,
+          );
+          this.logger.debug(
+            `course generation Luma response received integrationId=${data.integrationId}`,
+          );
 
-        await this.pipeLegacyFrames({
-          stream: lumaResponse.data as AsyncIterable<Buffer>,
-          integrationId: data.integrationId,
-          currentUser,
-          writer,
+          await this.pipeLegacyFrames({
+            stream: lumaResponse.data as AsyncIterable<Buffer>,
+            integrationId: data.integrationId,
+            currentUser,
+            writer,
+          });
         });
       },
-      onError: () => "courseGeneration.errors.streamFailed",
+      onError: (error) => {
+        this.logger.error(
+          `course generation stream failed integrationId=${data.integrationId}: ${this.errorMessage(error)}`,
+        );
+        return "courseGeneration.errors.streamFailed";
+      },
     });
   }
 
@@ -63,11 +82,17 @@ export class LumaCourseGenerationStreamService {
     let pendingFrame = "";
     const textPartId = "course-generation-text";
     let hasStartedText = false;
+    let chunkCount = 0;
+    let byteCount = 0;
+    let textFrameCount = 0;
+    let dataFrameCount = 0;
+    let ignoredFrameCount = 0;
 
     const enqueueGeneratedCourseBundleSync = async () => {
       if (syncEnqueued) return;
 
       syncEnqueued = true;
+      this.logger.debug(`course generation enqueue sync integrationId=${integrationId}`);
       await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
         integrationId,
         currentUser,
@@ -77,19 +102,50 @@ export class LumaCourseGenerationStreamService {
     const writeLegacyFrame = (frame: string) => {
       const textChunks = this.toTextChunks(frame, textPartId, hasStartedText);
       if (textChunks.length) {
+        textFrameCount += 1;
         hasStartedText = true;
         for (const textChunk of textChunks) {
+          if (textChunk.type === "text-delta") {
+            this.logger.debug(
+              `course generation text frame integrationId=${integrationId} deltaLength=${
+                textChunk.delta?.length ?? 0
+              } delta=${this.preview(textChunk.delta)}`,
+            );
+          }
           writer.write(textChunk);
         }
         return;
       }
 
-      for (const dataChunk of this.toDataChunks(frame)) {
+      const dataChunks = this.toDataChunks(frame);
+      if (dataChunks.length) {
+        dataFrameCount += 1;
+        this.logger.debug(
+          `course generation data frame integrationId=${integrationId} events=${dataChunks.length}`,
+        );
+      } else {
+        ignoredFrameCount += 1;
+        this.logger.debug(
+          `course generation ignored frame integrationId=${integrationId} frame=${this.preview(frame)}`,
+        );
+      }
+
+      for (const dataChunk of dataChunks) {
         writer.write(dataChunk);
       }
     };
 
     for await (const chunk of stream) {
+      chunkCount += 1;
+      byteCount += chunk.byteLength;
+      if (chunkCount === 1) {
+        this.logger.debug(
+          `course generation first bytes integrationId=${integrationId} bytes=${chunk.byteLength} preview=${this.preview(
+            chunk.toString("utf8"),
+          )}`,
+        );
+      }
+
       const courseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
         chunk,
         pendingCourseGeneratedFrame,
@@ -130,6 +186,10 @@ export class LumaCourseGenerationStreamService {
         id: textPartId,
       });
     }
+
+    this.logger.debug(
+      `course generation stream complete integrationId=${integrationId} chunks=${chunkCount} bytes=${byteCount} textFrames=${textFrameCount} dataFrames=${dataFrameCount} ignoredFrames=${ignoredFrameCount} syncEnqueued=${syncEnqueued}`,
+    );
   }
 
   private toTextChunks(
@@ -200,5 +260,14 @@ export class LumaCourseGenerationStreamService {
     } catch {
       return [];
     }
+  }
+
+  private preview(value: string | undefined): string {
+    if (!value) return "";
+    return JSON.stringify(value.replace(/\s+/g, " ").slice(0, 160));
+  }
+
+  private errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
   }
 }

@@ -4,22 +4,18 @@ import {
   ForbiddenException,
   Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from "@nestjs/common";
 import { trace } from "@opentelemetry/api";
 import { PERMISSIONS, getUiMessageText, hasPermission } from "@repo/shared";
-import {
-  experimental_transcribe,
-  generateObject,
-  jsonSchema,
-  type ModelMessage,
-  streamText,
-} from "ai";
 import { eq } from "drizzle-orm";
 import _ from "lodash";
 
+import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
 import { MessageService } from "src/ai/services/message.service";
@@ -27,6 +23,7 @@ import { PromptService } from "src/ai/services/prompt.service";
 import { SummaryService } from "src/ai/services/summary.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { TokenService } from "src/ai/services/token.service";
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { generateTranslationSchema } from "src/ai/utils/ai.schema";
 import {
   MESSAGE_ROLE,
@@ -43,8 +40,16 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 
+import type { PublicAiMessage } from "@japro/luma-sdk";
 import type { PermissionKey, SupportedLanguages } from "@repo/shared";
-import type { AiStreamMessageInput } from "src/ai/ai-chat.types";
+import type { ModelMessage } from "ai";
+import type {
+  AiStreamMessageInput,
+  AiMentorChatStreamResult,
+  AiStreamTextResult,
+  AiTranscriptionResult,
+  AiUiMessageStream,
+} from "src/ai/ai-chat.types";
 import type {
   CreateThreadBody,
   GenerateTranslationBody,
@@ -58,6 +63,8 @@ import type { CourseTranslationType } from "src/courses/types/course.types";
 
 @Injectable()
 export class AiService {
+  private readonly logger = new Logger(AiService.name);
+
   constructor(
     private readonly chatService: ChatService,
     private readonly tokenService: TokenService,
@@ -67,6 +74,7 @@ export class AiService {
     private readonly promptService: PromptService,
     private readonly summaryService: SummaryService,
     private readonly judgeService: JudgeService,
+    private readonly aiRuntimeService: AiRuntimeService,
     private readonly permissionsService: PermissionsService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly tenantRunner: TenantDbRunnerService,
@@ -114,7 +122,7 @@ export class AiService {
     model: OpenAIModels,
     currentUser: CurrentUserType,
     isVoiceMentor: boolean = false,
-  ) {
+  ): Promise<AiMentorChatStreamResult> {
     return observe(
       async () => {
         updateActiveTrace({
@@ -132,7 +140,6 @@ export class AiService {
           data.id,
         );
 
-        const provider = await this.promptService.getOpenAI();
         const generationConfig = isVoiceMentor
           ? {
               temperature: 0.2,
@@ -145,57 +152,86 @@ export class AiService {
               topP: 0.8,
             };
 
-        return streamText({
-          model: provider(model),
-          messages: prompt.map((m) => ({
-            content: m.content,
-            role: this.mapRole(m.role),
-          })) as ModelMessage[],
-          maxOutputTokens: MAX_TOKENS,
-          ...generationConfig,
-          experimental_telemetry: { isEnabled: true },
-          onFinish: async (event) => {
-            const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
+        const createCoreStream = async (persistOnFinish = true) => {
+          return await this.streamCoreMentorChat({
+            data,
+            model,
+            currentUser,
+            isVoiceMentor,
+            prompt,
+            generationConfig,
+            persistOnFinish,
+          });
+        };
 
-            const mentorTokenCount = this.tokenService.countTokens(model, mentorContent);
-            const userTokenCount = this.tokenService.countTokens(model, data.content);
-
-            if (!currentUser.tenantId) throw new Error("Missing tenant context in onFinish");
-
-            await this.tenantRunner.runWithTenant(currentUser.tenantId, async () => {
-              await this.messageService.createMessages(
-                { ...data, role: MESSAGE_ROLE.USER, tokenCount: userTokenCount },
-                {
-                  threadId: data.threadId,
-                  content: mentorContent,
-                  role: MESSAGE_ROLE.MENTOR,
-                  tokenCount: mentorTokenCount,
-                },
-              );
-            });
-
-            updateActiveObservation({
-              input: { message: data.content },
-              output: { message: mentorContent },
-            });
-
-            trace.getActiveSpan()?.end();
+        const stream = await this.aiRuntimeService.streamMentorChat(
+          {
+            messages: this.toPublicAiMessages(prompt),
+            temperature: generationConfig.temperature,
+            voiceSessionId: data.voiceSessionId,
           },
-          onError: ({ error }) => {
-            updateActiveObservation({
-              level: "ERROR",
-              statusMessage: (error as Error).message ?? "An error occurred during streaming",
-            });
+          createCoreStream,
+        );
 
-            trace.getActiveSpan()?.end();
-          },
-        });
+        if (stream.source === AI_RUNTIME_SOURCES.CORE) return stream;
+
+        return {
+          ...stream,
+          textStream: this.persistLumaMentorChatStream({
+            stream: this.fallbackLumaMentorChatStream({
+              stream: stream.textStream,
+              createCoreStream: () => createCoreStream(false),
+              threadId: data.threadId,
+            }),
+            data,
+            model,
+            currentUser,
+            isVoiceMentor,
+          }),
+        };
       },
       { name: "Conversation", asType: "generation", endOnExit: false },
     )();
   }
 
-  async streamChatMessage(data: StreamChatBody, model: OpenAIModels, currentUser: CurrentUserType) {
+  async createChatMessageUiStream(
+    data: StreamChatBody,
+    model: OpenAIModels,
+    currentUser: CurrentUserType,
+  ): Promise<AiUiMessageStream> {
+    const response = await this.streamChatMessage(data, model, currentUser);
+
+    if (response.source === AI_RUNTIME_SOURCES.CORE && response.coreStream) {
+      const { toUIMessageStream } = await loadAiSdk();
+
+      return toUIMessageStream({
+        stream: response.coreStream.stream,
+        onError: (error) => {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.error(`chat core UI stream failed threadId=${data.threadId}: ${message}`);
+          return "common.errors.unexpected";
+        },
+      });
+    }
+
+    const { createUIMessageStream } = await loadAiSdk();
+    return createUIMessageStream({
+      execute: async ({ writer }) => {
+        await this.pipeTextStreamToUiMessageWriter(response.textStream, writer);
+      },
+      onError: (error) => {
+        const message = error instanceof Error ? error.message : String(error);
+        this.logger.error(`chat UI stream failed threadId=${data.threadId}: ${message}`);
+        return "common.errors.unexpected";
+      },
+    });
+  }
+
+  async streamChatMessage(
+    data: StreamChatBody,
+    model: OpenAIModels,
+    currentUser: CurrentUserType,
+  ): Promise<AiMentorChatStreamResult> {
     const content = getUiMessageText(data.message).trim();
 
     if (!content) {
@@ -220,7 +256,12 @@ export class AiService {
 
     const content = await observe(
       async () => {
-        return this.chatService.generatePrompt(welcomeMessagePrompt, OPENAI_MODELS.BASIC);
+        return this.aiRuntimeService.generateMentorChat(
+          {
+            messages: [{ role: MESSAGE_ROLE.USER, content: welcomeMessagePrompt }],
+          },
+          () => this.chatService.generatePrompt(welcomeMessagePrompt, OPENAI_MODELS.BASIC),
+        );
       },
       { name: "Start Conversation", asType: "generation" },
     )();
@@ -368,20 +409,27 @@ export class AiService {
     });
   }
 
-  async transcribe(clientId: string, audio: Buffer) {
-    const openai = await this.promptService.getOpenAI();
-
-    const whisper = openai.transcriptionModel?.(OPENAI_MODELS.TRANSCRIBE);
-    if (!whisper) return;
-
+  async transcribe(clientId: string, audio: Buffer): Promise<AiTranscriptionResult | undefined> {
     return observe(
       async () => {
         updateActiveTrace({ sessionId: `transcription-${clientId}` });
 
-        const transcription = await experimental_transcribe({
-          model: whisper,
-          audio,
-        });
+        const transcription = await this.aiRuntimeService.transcribeDictation(
+          {
+            file: new File([audio], `${clientId}.webm`),
+          },
+          async () => {
+            const openai = await this.promptService.getOpenAI();
+            const whisper = openai.transcriptionModel?.(OPENAI_MODELS.TRANSCRIBE);
+            if (!whisper) return;
+            const { experimental_transcribe } = await loadAiSdk();
+
+            return await experimental_transcribe({
+              model: whisper,
+              audio,
+            });
+          },
+        );
 
         updateActiveObservation(
           {
@@ -420,7 +468,6 @@ export class AiService {
       async () => {
         updateActiveTrace({ sessionId: `generate-missing-translations-${courseId}` });
 
-        const openai = await this.promptService.getOpenAI();
         const prompt = await this.promptService.loadPrompt("translationPrompt", { language });
 
         const translateChunk = async (
@@ -460,29 +507,42 @@ export class AiService {
             })
             .join("\n\n");
 
+          const { jsonSchema } = await loadAiSdk();
           const schema = jsonSchema(generateTranslationSchema);
 
-          const baseConfig = {
-            model: openai(OPENAI_MODELS.BASIC),
-            schema,
-            system: prompt,
-            temperature: 0,
-            topP: 0.9,
-            topK: 10,
-          };
+          const userContent = `Return exactly ${chunk.length} translated strings as an array, same order. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`;
 
           const run = async () => {
-            const { object } = await generateObject({
-              ...baseConfig,
-              experimental_telemetry: { isEnabled: true },
-              messages: [
-                {
-                  role: "user",
-                  content: `Return exactly ${chunk.length} translated strings as an array, same order. Each ITEM provides context; only translate the TEXT TO TRANSLATE.\n\n${formatted}`,
-                },
-              ],
-            });
-            return object as GenerateTranslationBody;
+            return await this.aiRuntimeService.generateTranslations(
+              {
+                messages: [
+                  { role: MESSAGE_ROLE.SYSTEM, content: prompt },
+                  { role: MESSAGE_ROLE.USER, content: userContent },
+                ],
+                temperature: 0,
+              },
+              async () => {
+                const openai = await this.promptService.getOpenAI();
+                const { generateObject } = await loadAiSdk();
+                const { object } = await generateObject({
+                  model: openai(OPENAI_MODELS.BASIC),
+                  schema,
+                  system: prompt,
+                  temperature: 0,
+                  topP: 0.9,
+                  topK: 10,
+                  experimental_telemetry: { isEnabled: true },
+                  messages: [
+                    {
+                      role: "user",
+                      content: userContent,
+                    },
+                  ],
+                });
+
+                return object as GenerateTranslationBody;
+              },
+            );
           };
 
           const { translations } = await run();
@@ -496,6 +556,267 @@ export class AiService {
       },
       { name: "translation-generator", asType: "generation" },
     )();
+  }
+
+  private async streamCoreMentorChat({
+    data,
+    model,
+    currentUser,
+    isVoiceMentor,
+    prompt,
+    generationConfig,
+    persistOnFinish,
+  }: {
+    data: AiStreamMessageInput;
+    model: OpenAIModels;
+    currentUser: CurrentUserType;
+    isVoiceMentor: boolean;
+    prompt: Array<{ role: MessageRole; content: string }>;
+    generationConfig: {
+      temperature: number;
+      topK: number;
+      topP: number;
+    };
+    persistOnFinish: boolean;
+  }): Promise<AiStreamTextResult> {
+    const provider = await this.promptService.getOpenAI();
+    const { streamText } = await loadAiSdk();
+    const { instructions, messages } = this.toCorePrompt(prompt);
+
+    return streamText({
+      model: provider(model),
+      instructions,
+      messages,
+      maxOutputTokens: MAX_TOKENS,
+      ...generationConfig,
+      experimental_telemetry: { isEnabled: true },
+      onFinish: async (event) => {
+        const mentorContent = isVoiceMentor ? stripVoiceControlTags(event.text) : event.text;
+
+        if (persistOnFinish) {
+          await this.persistMentorChatMessages({
+            data,
+            model,
+            currentUser,
+            mentorContent,
+          });
+        }
+
+        trace.getActiveSpan()?.end();
+      },
+      onError: ({ error }) => {
+        this.updateActiveObservationIfSpan({
+          level: "ERROR",
+          statusMessage: (error as Error).message ?? "An error occurred during streaming",
+        });
+
+        trace.getActiveSpan()?.end();
+      },
+    });
+  }
+
+  private async *fallbackLumaMentorChatStream({
+    stream,
+    createCoreStream,
+    threadId,
+  }: {
+    stream: AsyncIterable<string>;
+    createCoreStream: () => Promise<AiStreamTextResult>;
+    threadId: UUIDType;
+  }): AsyncIterable<string> {
+    let hasLumaOutput = false;
+
+    try {
+      for await (const delta of stream) {
+        hasLumaOutput = true;
+        yield delta;
+      }
+    } catch (error) {
+      if (hasLumaOutput) {
+        throw error;
+      }
+
+      this.logger.warn(
+        `Luma mentor chat stream failed before output; falling back to core mentor chat threadId=${threadId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+
+      const coreStream = await createCoreStream();
+      for await (const delta of coreStream.textStream) {
+        yield delta;
+      }
+    }
+  }
+
+  private async *persistLumaMentorChatStream({
+    stream,
+    data,
+    model,
+    currentUser,
+    isVoiceMentor,
+  }: {
+    stream: AsyncIterable<string>;
+    data: AiStreamMessageInput;
+    model: OpenAIModels;
+    currentUser: CurrentUserType;
+    isVoiceMentor: boolean;
+  }): AsyncIterable<string> {
+    let mentorContent = "";
+
+    try {
+      for await (const delta of stream) {
+        mentorContent += delta;
+        yield delta;
+      }
+
+      const persistedContent = isVoiceMentor ? stripVoiceControlTags(mentorContent) : mentorContent;
+      await this.persistMentorChatMessages({
+        data,
+        model,
+        currentUser,
+        mentorContent: persistedContent,
+      });
+
+      trace.getActiveSpan()?.end();
+    } catch (error) {
+      this.updateActiveObservationIfSpan({
+        level: "ERROR",
+        statusMessage: (error as Error).message ?? "An error occurred during streaming",
+      });
+      trace.getActiveSpan()?.end();
+      throw error;
+    }
+  }
+
+  private async persistMentorChatMessages({
+    data,
+    model,
+    currentUser,
+    mentorContent,
+  }: {
+    data: AiStreamMessageInput;
+    model: OpenAIModels;
+    currentUser: CurrentUserType;
+    mentorContent: string;
+  }) {
+    const mentorTokenCount = this.tokenService.countTokens(model, mentorContent);
+    const userTokenCount = this.tokenService.countTokens(model, data.content);
+
+    if (!currentUser.tenantId) throw new Error("Missing tenant context in onFinish");
+
+    await this.tenantRunner.runWithTenant(currentUser.tenantId, async () => {
+      await this.messageService.createMessages(
+        { ...data, role: MESSAGE_ROLE.USER, tokenCount: userTokenCount },
+        {
+          threadId: data.threadId,
+          content: mentorContent,
+          role: MESSAGE_ROLE.MENTOR,
+          tokenCount: mentorTokenCount,
+        },
+      );
+    });
+
+    this.updateActiveObservationIfSpan({
+      input: { message: data.content },
+      output: { message: mentorContent },
+    });
+  }
+
+  private updateActiveObservationIfSpan(data: unknown, options?: unknown) {
+    if (!trace.getActiveSpan()) return;
+    if (options === undefined) {
+      (updateActiveObservation as (data: unknown) => void)(data);
+      return;
+    }
+    (updateActiveObservation as (data: unknown, options: unknown) => void)(data, options);
+  }
+
+  private toPublicAiMessages(
+    prompt: Array<{ role: MessageRole; content: string }>,
+  ): PublicAiMessage[] {
+    return prompt.map((message) => ({
+      role: this.mapPublicAiRole(message.role),
+      content: message.content,
+    }));
+  }
+
+  private mapPublicAiRole(role: MessageRole): PublicAiMessage["role"] {
+    const mappedRole = this.mapRole(role);
+
+    if (mappedRole === MESSAGE_ROLE.USER || mappedRole === MESSAGE_ROLE.MENTOR) {
+      return mappedRole;
+    }
+
+    return MESSAGE_ROLE.SYSTEM;
+  }
+
+  private toCorePrompt(prompt: Array<{ role: MessageRole; content: string }>): {
+    instructions?: string;
+    messages: ModelMessage[];
+  } {
+    const instructionParts: string[] = [];
+    const messages: ModelMessage[] = [];
+
+    for (const message of prompt) {
+      const role = this.mapRole(message.role);
+
+      if (role === MESSAGE_ROLE.SYSTEM || role === MESSAGE_ROLE.TOOL) {
+        instructionParts.push(message.content);
+        continue;
+      }
+
+      if (role === MESSAGE_ROLE.USER) {
+        messages.push({
+          content: message.content,
+          role: MESSAGE_ROLE.USER,
+        });
+        continue;
+      }
+
+      messages.push({
+        content: message.content,
+        role: MESSAGE_ROLE.MENTOR,
+      });
+    }
+
+    return {
+      instructions: instructionParts.length ? instructionParts.join("\n\n") : undefined,
+      messages,
+    };
+  }
+
+  private async pipeTextStreamToUiMessageWriter(
+    stream: AsyncIterable<string>,
+    writer: { write: (chunk: { type: string; id?: string; delta?: string }) => void },
+  ) {
+    const textPartId = "mentor-text";
+    let hasStartedText = false;
+
+    for await (const delta of stream) {
+      if (!delta) continue;
+
+      if (!hasStartedText) {
+        writer.write({
+          type: "text-start",
+          id: textPartId,
+        });
+        hasStartedText = true;
+      }
+
+      writer.write({
+        type: "text-delta",
+        id: textPartId,
+        delta,
+      });
+    }
+
+    if (hasStartedText) {
+      writer.write({
+        type: "text-end",
+        id: textPartId,
+      });
+    }
   }
 
   private mapRole(role: MessageRole) {

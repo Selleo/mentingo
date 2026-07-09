@@ -1,4 +1,5 @@
 import {
+  AiCapability,
   createLumaSocket,
   LUMA_AUDIO_ACTIONS,
   LUMA_AUDIO_FORMATS,
@@ -19,7 +20,9 @@ import {
   VOICE_SOCKET_EVENT,
 } from "@repo/shared";
 
+import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
@@ -55,6 +58,11 @@ type VoiceMentorSocketHandlers = {
   audioOutputComplete: () => void;
 };
 
+const OPENAI_COMPATIBLE_VOICE_PRESETS: Record<AiMentorTTSPreset, string> = {
+  [AI_MENTOR_TTS_PRESET.MALE]: "onyx",
+  [AI_MENTOR_TTS_PRESET.FEMALE]: "nova",
+};
+
 @Injectable()
 export class ExternalAudioService {
   private readonly logger = new Logger(ExternalAudioService.name);
@@ -65,6 +73,7 @@ export class ExternalAudioService {
     private readonly envService: EnvService,
     private readonly aiRepository: AiRepository,
     private readonly aiService: AiService,
+    private readonly aiRuntimeService: AiRuntimeService,
     private readonly threadService: ThreadService,
     private readonly localizationService: LocalizationService,
     private readonly sessionStore: ExternalAudioSessionStore,
@@ -188,7 +197,7 @@ export class ExternalAudioService {
       payload.lessonId,
       lessonLanguage,
     );
-    const voiceStartConfig = this.resolveVoiceStartConfig(voiceConfig);
+    const voiceStartConfig = await this.resolveVoiceStartConfig(voiceConfig);
 
     const socket = createLumaSocket({
       apiKey,
@@ -306,14 +315,16 @@ export class ExternalAudioService {
       jobId: payload.jobId,
     });
 
+    let shouldForwardMentorText = true;
     try {
       await this.tenantDbRunner.runWithTenant(session.currentUser.tenantId, async () => {
         const stream = await this.aiService.streamMessage(
-          { threadId: session.threadId, content: text },
+          { threadId: session.threadId, content: text, voiceSessionId: sessionId },
           OPENAI_MODELS.BASIC,
           session.currentUser,
           true,
         );
+        shouldForwardMentorText = stream.source === AI_RUNTIME_SOURCES.CORE;
 
         let responseText = "";
         let pendingDeltaChunk = "";
@@ -328,19 +339,23 @@ export class ExternalAudioService {
             continue;
           }
 
-          seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
+          if (shouldForwardMentorText) {
+            seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
+          }
           pendingDeltaChunk = "";
         }
 
-        if (pendingDeltaChunk.length > 0) {
+        if (shouldForwardMentorText && pendingDeltaChunk.length > 0) {
           seq = this.sendMentorTextDeltaChunk(session, payload.jobId, pendingDeltaChunk, seq);
         }
 
-        session.socket.sendMentorTextEnd({
-          type: "mentor.text.end",
-          jobId: payload.jobId,
-          reason: "complete",
-        });
+        if (shouldForwardMentorText) {
+          session.socket.sendMentorTextEnd({
+            type: "mentor.text.end",
+            jobId: payload.jobId,
+            reason: "complete",
+          });
+        }
 
         this.emitMentorResponseCompleted(sessionId, {
           text: stripVoiceControlTags(responseText.trim()),
@@ -351,11 +366,13 @@ export class ExternalAudioService {
     } catch (error) {
       this.logger.error("Failed to stream mentor response", error);
 
-      session.socket.sendMentorTextEnd({
-        type: "mentor.text.end",
-        jobId: payload.jobId,
-        reason: "error",
-      });
+      if (shouldForwardMentorText) {
+        session.socket.sendMentorTextEnd({
+          type: "mentor.text.end",
+          jobId: payload.jobId,
+          reason: "error",
+        });
+      }
       this.emitMentorResponseCompleted(sessionId, {
         text: "",
         jobId: payload.jobId,
@@ -454,11 +471,11 @@ export class ExternalAudioService {
     };
   }
 
-  private resolveVoiceStartConfig(voiceConfig?: {
+  private async resolveVoiceStartConfig(voiceConfig?: {
     voiceMode: string;
     ttsPreset: string;
     customTtsReference: string | null;
-  }): { preset?: AiMentorTTSPreset; customTtsReference?: string } {
+  }): Promise<{ preset?: AiMentorTTSPreset; customTtsReference?: string }> {
     const customTtsReference = voiceConfig?.customTtsReference?.trim() || null;
     const ttsPreset =
       voiceConfig?.ttsPreset === AI_MENTOR_TTS_PRESET.FEMALE
@@ -467,6 +484,13 @@ export class ExternalAudioService {
 
     if (voiceConfig?.voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && customTtsReference) {
       return { customTtsReference };
+    }
+
+    const voiceTtsSource = await this.aiRuntimeService.resolveSource(
+      AiCapability.VoiceTextToSpeech,
+    );
+    if (voiceTtsSource === AI_RUNTIME_SOURCES.LUMA) {
+      return { customTtsReference: OPENAI_COMPATIBLE_VOICE_PRESETS[ttsPreset] };
     }
 
     return { preset: ttsPreset };

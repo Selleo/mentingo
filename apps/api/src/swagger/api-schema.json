@@ -28452,7 +28452,25 @@
             "type": "string"
           },
           "message": {
-            "type": "string"
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           }
         },
         "required": [
@@ -35712,9 +35730,26 @@
             "format": "uuid",
             "type": "string"
           },
-          "content": {
-            "minLength": 1,
-            "type": "string"
+          "message": {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           },
           "id": {
             "format": "uuid",
@@ -35723,7 +35758,7 @@
         },
         "required": [
           "threadId",
-          "content"
+          "message"
         ]
       },
       "JudgeThreadResponse": {
@@ -40166,12 +40201,25 @@
               },
               "voiceMentorEnabled": {
                 "type": "boolean"
+              },
+              "voiceTtsProvider": {
+                "anyOf": [
+                  {
+                    "const": "cartesia",
+                    "type": "string"
+                  },
+                  {
+                    "const": "openaiCompatible",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "enabled",
               "courseGenerationEnabled",
-              "voiceMentorEnabled"
+              "voiceMentorEnabled",
+              "voiceTtsProvider"
             ]
           }
         },
@@ -40252,6 +40300,50 @@
                   ]
                 }
               },
+              "aiCapabilities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "anyOf": [
+                        {
+                          "const": "aiMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "voiceMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "courseGeneration",
+                          "type": "string"
+                        },
+                        {
+                          "const": "assetGeneration",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "enabled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "disabled",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "status"
+                  ]
+                }
+              },
               "hasIssues": {
                 "type": "boolean"
               },
@@ -40263,6 +40355,7 @@
               "fullyConfigured",
               "partiallyConfigured",
               "notConfigured",
+              "aiCapabilities",
               "hasIssues",
               "isWarningDismissed"
             ]
