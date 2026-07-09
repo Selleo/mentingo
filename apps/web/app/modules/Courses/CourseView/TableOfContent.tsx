@@ -25,7 +25,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
   const { t } = useTranslation();
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<TableOfContentTab>("toc");
-  const [expandedChapters, setExpandedChapters] = useState<number[]>([]);
+  const [expandedChapters, setExpandedChapters] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showAllChapters, setShowAllChapters] = useState(false);
 
@@ -46,7 +46,7 @@ export function TableOfContent({ course }: CourseHeroProps) {
     query: {},
   });
 
-  const toggleChapter = (id: number) => {
+  const toggleChapter = (id: string) => {
     setExpandedChapters((prev) =>
       prev.includes(id) ? prev.filter((chapterId) => chapterId !== id) : [...prev, id],
     );

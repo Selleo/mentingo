@@ -19,7 +19,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
     );
   }
 
-  if (status === "in-progress") {
+  if (status === "in_progress") {
     return (
       <div className="relative group/status">
         <Circle className="h-4 w-4 fill-current text-[#D4705D]" />
@@ -30,7 +30,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
     );
   }
 
-  if (status === "not-started") {
+  if (status === "not_started") {
     return (
       <div className="relative group/status">
         <Minus className="h-5 w-5 text-[#676767]" />
