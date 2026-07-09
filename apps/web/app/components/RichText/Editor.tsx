@@ -67,14 +67,34 @@ const Editor = ({
   );
 
   const handleDrop = useCallback(
-    (event: DragEvent) => {
+    async (event: DragEvent) => {
       const activeEditor = editorRef.current;
       const files = Array.from(event.dataTransfer?.files ?? []);
+      console.log("handleDrop", { files, allowFiles, onUpload, activeEditor });
       if (!files.length) return false;
       if (!allowFiles || !onUpload) return false;
 
       event.preventDefault();
-      void Promise.allSettled(files.map((file) => onUpload(file, activeEditor)));
+
+      for (const file of files) {
+        const coordinates = activeEditor?.view.posAtCoords({
+          left: event.clientX,
+          top: event.clientY,
+        });
+
+        console.log("handleDrop coordinates", { coordinates });
+        if (coordinates) {
+          activeEditor?.commands.setTextSelection(coordinates.pos);
+        } else {
+          activeEditor?.commands.setTextSelection(0);
+        }
+
+        activeEditor?.commands.focus();
+
+        await onUpload(file, activeEditor);
+
+        activeEditor?.commands.focus();
+      }
       return true;
     },
     [allowFiles, onUpload],

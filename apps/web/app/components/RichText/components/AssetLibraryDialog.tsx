@@ -179,7 +179,7 @@ export const AssetLibraryDialog = ({
       });
     },
     fallbackUploadErrorMessage: t("common.toast.somethingWentWrong"),
-    insertOnUpload: true,
+    insertOnUpload: false,
   });
 
   const handleInsert = async (asset: ResourceLibraryAsset) => {
@@ -212,7 +212,6 @@ export const AssetLibraryDialog = ({
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    const uploadPromises: Promise<void>[] = [];
 
     if (!canUploadToLibrary) {
       toast({
@@ -225,17 +224,11 @@ export const AssetLibraryDialog = ({
     for (const file of files ?? []) {
       if (!file) continue;
 
-      uploadPromises.push(handleUploadToLibrary(file));
+      await handleUploadToLibrary(file);
     }
 
-    try {
-      await Promise.all(uploadPromises);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      if (uploadInputRef.current) {
-        uploadInputRef.current.value = "";
-      }
+    if (uploadInputRef.current) {
+      uploadInputRef.current.value = "";
     }
   };
 
