@@ -9,7 +9,7 @@ import { queryClient } from "~/api/queryClient";
 import { PageWrapper } from "~/components/PageWrapper";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
 import { CourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
-import CourseOverview from "~/modules/Courses/CourseView/CourseOverview";
+import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOverview";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 

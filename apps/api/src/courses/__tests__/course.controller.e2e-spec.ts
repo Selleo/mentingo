@@ -2786,6 +2786,100 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].priceInCents).toBe(1999);
       expect(response.body.data[0].currency).toBe("usd");
     });
+
+    it("returns enrolled participant count matching course statistics", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const students = await Promise.all([
+        userFactory.withUserSettings(db).create({ role: SYSTEM_ROLE_SLUGS.STUDENT }),
+        userFactory.withUserSettings(db).create({ role: SYSTEM_ROLE_SLUGS.STUDENT }),
+      ]);
+      const category = await categoryFactory.create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+      });
+
+      await db.insert(coursesSummaryStats).values({
+        courseId: course.id,
+        authorId: contentCreator.id,
+        freePurchasedCount: 99,
+        paidPurchasedCount: 99,
+      });
+
+      await db.insert(studentCourses).values(
+        students.map((student) => ({
+          studentId: student.id,
+          courseId: course.id,
+          finishedChapterCount: 0,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        })),
+      );
+
+      const contentCreatorCoursesResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+      const statisticsResponse = await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(
+        statisticsResponse.body.data.enrolledCount,
+      );
+      expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(2);
+    });
+
+    it("returns real duration estimate for content creator courses instead of a fixed 30 minute block", async () => {
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const cookies = await cookieFor(student, app);
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        courseId: course.id,
+        authorId: contentCreator.id,
+        lessonCount: 1,
+      });
+
+      await db.insert(lessons).values({
+        chapterId: chapter.id,
+        type: LESSON_TYPES.CONTENT,
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short content lesson"),
+        description: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short readable lesson content."),
+        displayOrder: 1,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 1,
+          estimatedDurationFormatted: "1 min",
+        }),
+      );
+    });
   });
 
   describe("POST /api/course/:courseId/enroll-courses", () => {
