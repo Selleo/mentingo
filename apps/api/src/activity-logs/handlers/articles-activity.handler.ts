@@ -247,7 +247,7 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
       updated: null,
       context: this.buildLanguageContext(
         articleUpdateData.language,
-        articleUpdateData.updatedArticleData,
+        undefined,
         articleUpdateData.action,
       ),
     });
@@ -258,7 +258,7 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
       resourceId: articleUpdateData.articleId,
       changedFields: metadata.changedFields,
-      before: metadata.before,
+      before: null,
       context: metadata.context ?? null,
     });
   }

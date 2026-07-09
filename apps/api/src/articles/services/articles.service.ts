@@ -433,7 +433,6 @@ export class ArticlesService {
           articleId,
           actor: currentUser,
           previousArticleData: previousSnapshot,
-          updatedArticleData: updatedSnapshot,
           language,
           action: "remove_language",
         }),

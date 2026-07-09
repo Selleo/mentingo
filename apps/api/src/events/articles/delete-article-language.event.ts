@@ -7,7 +7,6 @@ type DeleteLanguageData = {
   articleId: UUIDType;
   actor: ActorUserType;
   previousArticleData: ArticleActivityLogSnapshot;
-  updatedArticleData: ArticleActivityLogSnapshot;
   language?: SupportedLanguages;
   action?: "remove_language";
 };
