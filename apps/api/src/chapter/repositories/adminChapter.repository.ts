@@ -190,14 +190,28 @@ export class AdminChapterRepository {
           SELECT json_build_object(
             'id', ${aiMentorLessons.id},
             'lessonId', ${aiMentorLessons.lessonId},
-            'aiMentorInstructions', ${this.localizationService.getLocalizedSqlField(
-              aiMentorLessons.aiMentorInstructions,
-              language,
-            )},
-            'completionConditions', ${this.localizationService.getLocalizedSqlField(
-              aiMentorLessons.completionConditions,
-              language,
-            )},
+            'aiMentorInstructions', COALESCE(
+              NULLIF(
+                ${this.localizationService.getLocalizedSqlField(
+                  aiMentorLessons.aiMentorInstructions,
+                  language,
+                )},
+                ''
+              ),
+              ${aiMentorLessons.aiMentorInstructions}::jsonb ->> (${courses.baseLanguage})::text,
+              ''
+            ),
+            'completionConditions', COALESCE(
+              NULLIF(
+                ${this.localizationService.getLocalizedSqlField(
+                  aiMentorLessons.completionConditions,
+                  language,
+                )},
+                ''
+              ),
+              ${aiMentorLessons.completionConditions}::jsonb ->> (${courses.baseLanguage})::text,
+              ''
+            ),
             'type', ${aiMentorLessons.type},
             'name', ${aiMentorLessons.name},
             'avatarReference', ${aiMentorLessons.avatarReference},

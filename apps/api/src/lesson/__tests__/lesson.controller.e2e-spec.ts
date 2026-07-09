@@ -21,6 +21,7 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   lessons,
+  aiMentorLessons,
   chapters,
   quizAttempts,
   questions,
@@ -422,6 +423,24 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         SUPPORTED_LANGUAGES.EN,
         SUPPORTED_LANGUAGES.DE,
       ]);
+
+      await db
+        .update(aiMentorLessons)
+        .set({
+          aiMentorInstructions: sql`jsonb_set(
+            ${aiMentorLessons.aiMentorInstructions},
+            ARRAY[${SUPPORTED_LANGUAGES.DE}]::text[],
+            to_jsonb(''::text),
+            true
+          )`,
+          completionConditions: sql`jsonb_set(
+            ${aiMentorLessons.completionConditions},
+            ARRAY[${SUPPORTED_LANGUAGES.DE}]::text[],
+            to_jsonb(''::text),
+            true
+          )`,
+        })
+        .where(eq(aiMentorLessons.lessonId, lessonId));
 
       const aiMentor = await getAiMentorFromCourse(
         courseId,
