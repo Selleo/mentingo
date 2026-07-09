@@ -3,6 +3,7 @@ import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
 import { CreateArticleLanguageEvent } from "src/events/articles/create-article-language.event";
 import { CreateArticleEvent } from "src/events/articles/create-articles.event";
+import { CreateSectionLanguageEvent } from "src/events/articles/create-section-language.event";
 import { CreateArticleSectionEvent } from "src/events/articles/create-section.event";
 import { DeleteArticleLanguageEvent } from "src/events/articles/delete-article-language.event";
 import { DeleteArticleEvent } from "src/events/articles/delete-articles.event";
@@ -22,7 +23,8 @@ type ArticleEventType =
   | UpdateArticleSectionEvent
   | DeleteArticleSectionEvent
   | CreateArticleLanguageEvent
-  | DeleteArticleLanguageEvent;
+  | DeleteArticleLanguageEvent
+  | CreateSectionLanguageEvent;
 
 const ArticleActivityEvents = [
   CreateArticleEvent,
@@ -33,6 +35,7 @@ const ArticleActivityEvents = [
   DeleteArticleSectionEvent,
   CreateArticleLanguageEvent,
   DeleteArticleLanguageEvent,
+  CreateSectionLanguageEvent,
 ] as const;
 
 @Injectable()
@@ -48,6 +51,8 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
       return await this.handleCreateArticleLanguage(event);
     if (event instanceof UpdateArticleEvent) return await this.handleUpdateArticle(event);
     if (event instanceof DeleteArticleEvent) return await this.handleDeleteArticle(event);
+    if (event instanceof CreateSectionLanguageEvent)
+      return await this.handleCreateSectionLanguageEvent(event);
     if (event instanceof CreateArticleSectionEvent)
       return await this.handleCreateArticleSection(event);
     if (event instanceof UpdateArticleSectionEvent)
@@ -166,6 +171,31 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
       resourceId: articleSectionUpdateData.articleSectionId,
       changedFields: metadata.changedFields,
       before: metadata.before,
+      after: metadata.after,
+      context: metadata.context ?? null,
+    });
+  }
+
+  private async handleCreateSectionLanguageEvent(event: CreateSectionLanguageEvent) {
+    const { articleSectionUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: null,
+      updated: articleSectionUpdateData.updatedArticleSectionData,
+      schema: "create",
+      context: this.buildLanguageContext(
+        articleSectionUpdateData.language,
+        articleSectionUpdateData.updatedArticleSectionData,
+        articleSectionUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleSectionUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE_SECTION,
+      resourceId: articleSectionUpdateData.articleSectionId,
+      before: null,
       after: metadata.after,
       context: metadata.context ?? null,
     });
