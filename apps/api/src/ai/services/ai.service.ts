@@ -178,11 +178,7 @@ export class AiService {
         return {
           ...stream,
           textStream: this.persistLumaMentorChatStream({
-            stream: this.fallbackLumaMentorChatStream({
-              stream: stream.textStream,
-              createCoreStream: () => createCoreStream(false),
-              threadId: data.threadId,
-            }),
+            stream: stream.textStream,
             data,
             model,
             currentUser,
@@ -613,40 +609,6 @@ export class AiService {
         trace.getActiveSpan()?.end();
       },
     });
-  }
-
-  private async *fallbackLumaMentorChatStream({
-    stream,
-    createCoreStream,
-    threadId,
-  }: {
-    stream: AsyncIterable<string>;
-    createCoreStream: () => Promise<AiStreamTextResult>;
-    threadId: UUIDType;
-  }): AsyncIterable<string> {
-    let hasLumaOutput = false;
-
-    try {
-      for await (const delta of stream) {
-        hasLumaOutput = true;
-        yield delta;
-      }
-    } catch (error) {
-      if (hasLumaOutput) {
-        throw error;
-      }
-
-      this.logger.warn(
-        `Luma mentor chat stream failed before output; falling back to core mentor chat threadId=${threadId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      );
-
-      const coreStream = await createCoreStream();
-      for await (const delta of coreStream.textStream) {
-        yield delta;
-      }
-    }
   }
 
   private async *persistLumaMentorChatStream({
