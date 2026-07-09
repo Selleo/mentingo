@@ -9,6 +9,8 @@ export const LEARNING_HANDLES = {
   QUIZ_PASSING_THRESHOLD: "learning-quiz-passing-threshold",
   QUIZ_SUBMIT_BUTTON: "learning-quiz-submit-button",
   QUIZ_RETAKE_BUTTON: "learning-quiz-retake-button",
+  FILL_IN_THE_BLANKS_CORRECT_SENTENCE: "learning-fill-in-the-blanks-correct-sentence",
+  FILL_IN_THE_BLANKS_DND_CORRECT_SENTENCE: "learning-fill-in-the-blanks-dnd-correct-sentence",
   AI_MENTOR_TASK_DESCRIPTION: "learning-ai-mentor-task-description",
   AI_MENTOR_MESSAGES: "learning-ai-mentor-messages",
   AI_MENTOR_MESSAGE: "learning-ai-mentor-message",
