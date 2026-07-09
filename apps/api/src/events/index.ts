@@ -67,6 +67,7 @@ export * from "./articles/create-articles.event";
 export * from "./articles/create-article-language.event";
 export * from "./articles/delete-article-language.event";
 export * from "./articles/create-section-language.event";
+export * from "./articles/delete-section-language.event";
 export * from "./articles/update-articles.event";
 export * from "./articles/delete-articles.event";
 export * from "./articles/create-section.event";

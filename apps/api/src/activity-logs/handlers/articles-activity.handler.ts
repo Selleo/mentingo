@@ -7,6 +7,7 @@ import { CreateSectionLanguageEvent } from "src/events/articles/create-section-l
 import { CreateArticleSectionEvent } from "src/events/articles/create-section.event";
 import { DeleteArticleLanguageEvent } from "src/events/articles/delete-article-language.event";
 import { DeleteArticleEvent } from "src/events/articles/delete-articles.event";
+import { DeleteSectionLanguageEvent } from "src/events/articles/delete-section-language.event";
 import { DeleteArticleSectionEvent } from "src/events/articles/delete-section.event";
 import { UpdateArticleEvent } from "src/events/articles/update-articles.event";
 import { UpdateArticleSectionEvent } from "src/events/articles/update-section.event";
@@ -24,7 +25,8 @@ type ArticleEventType =
   | DeleteArticleSectionEvent
   | CreateArticleLanguageEvent
   | DeleteArticleLanguageEvent
-  | CreateSectionLanguageEvent;
+  | CreateSectionLanguageEvent
+  | DeleteSectionLanguageEvent;
 
 const ArticleActivityEvents = [
   CreateArticleEvent,
@@ -36,6 +38,7 @@ const ArticleActivityEvents = [
   CreateArticleLanguageEvent,
   DeleteArticleLanguageEvent,
   CreateSectionLanguageEvent,
+  DeleteSectionLanguageEvent,
 ] as const;
 
 @Injectable()
@@ -53,6 +56,8 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
     if (event instanceof DeleteArticleEvent) return await this.handleDeleteArticle(event);
     if (event instanceof CreateSectionLanguageEvent)
       return await this.handleCreateSectionLanguageEvent(event);
+    if (event instanceof DeleteSectionLanguageEvent)
+      return await this.handleDeleteSectionLanguageEvent(event);
     if (event instanceof CreateArticleSectionEvent)
       return await this.handleCreateArticleSection(event);
     if (event instanceof UpdateArticleSectionEvent)
@@ -198,6 +203,22 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
       before: null,
       after: metadata.after,
       context: metadata.context ?? null,
+    });
+  }
+
+  private async handleDeleteSectionLanguageEvent(event: DeleteSectionLanguageEvent) {
+    const { articleSectionUpdateData } = event;
+
+    await this.activityLogsService.recordActivity({
+      actor: articleSectionUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE_SECTION,
+      resourceId: articleSectionUpdateData.articleSectionId,
+      context: this.buildLanguageContext(
+        articleSectionUpdateData.language,
+        undefined,
+        articleSectionUpdateData.action,
+      ),
     });
   }
 
