@@ -27,7 +27,7 @@ export class AnnouncementsService {
   ) {}
 
   async getAllAnnouncements(
-    currentUserId: UUIDType,
+    currentUser: CurrentUserType,
     language?: SupportedLanguages,
     paginationQuery: AnnouncementPaginationQuery = {},
     status?: AnnouncementStatus,
@@ -42,7 +42,7 @@ export class AnnouncementsService {
         page,
         perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
       },
-      currentUserId,
+      currentUser,
       status,
     );
   }

@@ -53,6 +53,7 @@ import type { Announcement, AnnouncementFilters } from "./types/announcement.typ
 import type { AnnouncementPagination } from "./types/announcementPagination.types";
 import type { AnnouncementStatus, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class AnnouncementsRepository {
@@ -66,13 +67,15 @@ export class AnnouncementsRepository {
   async getAllAnnouncements(
     language: SupportedLanguages | undefined,
     pagination: AnnouncementPagination,
-    currentUserId: UUIDType,
+    currentUser: CurrentUserType,
     status?: AnnouncementStatus,
   ) {
-    const conditions = [
-      isNull(announcements.deletedAt),
-      ne(announcements.authorId, currentUserId), // <-- To odfiltruje ogłoszenia stworzone przez tego admina
-    ];
+    const conditions = [isNull(announcements.deletedAt)];
+
+    const isAdmin = currentUser.roleSlugs.includes("admin"); // lub SYSTEM_ROLE_SLUGS.ADMIN, jeśli masz do niego dostęp w tym pliku
+    if (isAdmin) {
+      conditions.push(ne(announcements.authorId, currentUser.userId));
+    }
 
     if (status) conditions.push(eq(announcements.status, status));
 
@@ -89,7 +92,7 @@ export class AnnouncementsRepository {
           userAnnouncements,
           and(
             eq(userAnnouncements.announcementId, announcements.id),
-            eq(userAnnouncements.userId, currentUserId),
+            eq(userAnnouncements.userId, currentUser.userId),
           ),
         )
         .where(and(...conditions))
