@@ -111,7 +111,9 @@ describe("AnnouncementsController (e2e)", () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
       const adminCookies = await cookieFor(admin, app);
 
-      const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const student = await userFactory
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const studentCookies = await cookieFor(student, app);
 
       await request(app.getHttpServer())
