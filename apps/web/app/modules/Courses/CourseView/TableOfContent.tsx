@@ -1,3 +1,4 @@
+import { useNavigate } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import {
   BarChart2,
@@ -102,6 +103,8 @@ function getLessonIcon(type: string, t: TFunction) {
 }
 
 export function TableOfContent({ course }: CourseHeroProps) {
+  const navigate = useNavigate();
+
   const { t } = useTranslation();
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<"toc" | "statistics">("toc");
@@ -180,7 +183,11 @@ export function TableOfContent({ course }: CourseHeroProps) {
               )}
             </button>
           </div>
-          <button className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#3f58b6] text-white rounded-lg hover:bg-[#324a95] transition-colors mb-3 whitespace-nowrap">
+          <button
+            type="button"
+            onClick={() => navigate(`/admin/beta-courses/${course.id}`)}
+            className="flex items-center gap-2 px-3 md:px-4 py-2 bg-[#3f58b6] text-white rounded-lg hover:bg-[#324a95] transition-colors mb-3 whitespace-nowrap"
+          >
             <Edit2 className="w-4 h-4" />
             <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
           </button>
