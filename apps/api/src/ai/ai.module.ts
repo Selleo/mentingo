@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { AiController } from "src/ai/ai.controller";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { RagRepository } from "src/ai/repositories/rag.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { JudgeService } from "src/ai/services/judge.service";
@@ -21,6 +22,7 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
   controllers: [AiController],
   providers: [
     ChatService,
+    AiRuntimeService,
     AiService,
     AiRepository,
     TokenService,
@@ -32,6 +34,6 @@ import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLe
     RagService,
     RagRepository,
   ],
-  exports: [AiService, AiRepository, ThreadService],
+  exports: [AiService, AiRuntimeService, AiRepository, ThreadService],
 })
 export class AiModule {}

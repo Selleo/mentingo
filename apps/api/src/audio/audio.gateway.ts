@@ -84,7 +84,7 @@ export class AudioGateway implements OnGatewayInit, OnGatewayDisconnect, Realtim
   @UseGuards(WsJwtGuard)
   @SubscribeMessage(VOICE_SOCKET_EVENT.STOP_AUDIO)
   async stopAudio(@ConnectedSocket() client: AuthenticatedSocket) {
-    return await this.audioService.stopAudio(client.id);
+    return await this.audioService.stopAudio(client.id, client.data.user.tenantId);
   }
 
   @UseGuards(WsJwtGuard)

@@ -13,6 +13,7 @@ import { CourseGenerationChatPanel } from "~/modules/Admin/EditCourse/components
 import { COURSE_GENERATION_HANDLES } from "../../../../../../e2e/data/curriculum/handles";
 
 import type { GetCourseGenerationDraftResponse } from "~/api/generated-api";
+import type { CourseGenerationUIMessage } from "~/modules/Admin/EditCourse/hooks/useCourseGenerationChat.types";
 
 const MIN_DRAWER_HEIGHT = 220;
 const MAX_DRAWER_HEIGHT_RATIO = 0.9;
@@ -22,7 +23,7 @@ const HEIGHT_PER_MESSAGE = 72;
 type CourseGenerationDrawerProps = {
   draft?: GetCourseGenerationDraftResponse;
   chat: {
-    messages: Array<{ id: string; role: string; content: unknown }>;
+    messages: CourseGenerationUIMessage[];
     streamData: unknown;
     input: string;
     setInput: Dispatch<SetStateAction<string>>;

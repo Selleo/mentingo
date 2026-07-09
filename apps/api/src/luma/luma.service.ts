@@ -5,6 +5,7 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
+  Logger,
   ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -33,6 +34,8 @@ import type { LumaClient } from "src/luma/luma.types";
 
 @Injectable()
 export class LumaService {
+  private readonly logger = new Logger(LumaService.name);
+
   constructor(
     private readonly envService: EnvService,
     private readonly adminLessonService: AdminLessonService,
@@ -41,6 +44,7 @@ export class LumaService {
   ) {}
 
   async getLumaClient() {
+    this.logger.debug("creating Luma client");
     const apiKey = await this.envService
       .getEnv("LUMA_API_KEY")
       .then((r) => r.value)
@@ -51,6 +55,8 @@ export class LumaService {
       throw new BadRequestException("adminCourseView.toast.lumaNotConfigured");
     }
 
+    this.logger.debug(`Luma client configured baseURL=${this.safeUrl(baseURL)}`);
+
     return createLumaClient({
       apiKey,
       baseURL,
@@ -59,7 +65,7 @@ export class LumaService {
 
   async getDraft(data: CreateDraftOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
-    const draft = await luma.getDraft(data).catch((error) => {
+    const draft = await luma.courses.getDraft(data).catch((error) => {
       if (isAxiosError(error) && error.response?.status === 404) {
         return undefined;
       }
@@ -76,7 +82,7 @@ export class LumaService {
 
       data.courseLanguage = language;
 
-      const { draftId } = await this.withLumaErrorHandling(() => luma.createDraft(data));
+      const { draftId } = await this.withLumaErrorHandling(() => luma.courses.createDraft(data));
 
       return this.withCoreSyncStatus({
         integrationId: data.integrationId,
@@ -91,18 +97,27 @@ export class LumaService {
   async chatWithCourseAgent(
     data: ChatOptions,
     currentUser: CurrentUserType,
-  ): Promise<Awaited<ReturnType<LumaClient["chat"]>>> {
+  ): Promise<Awaited<ReturnType<LumaClient["courses"]["chat"]>>> {
+    this.logger.debug(`course generation chat preparing integrationId=${data.integrationId}`);
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
-      ensureCourseHasNoChapters: true,
+      ensureCourseHasNoChapters: false,
     });
+    this.logger.debug(
+      `course generation chat calling Luma SDK integrationId=${data.integrationId}`,
+    );
 
-    return this.withLumaErrorHandling(() => luma.chat(data));
+    const response = await this.withLumaErrorHandling(() => luma.courses.chat(data));
+    this.logger.debug(
+      `course generation chat Luma SDK returned integrationId=${data.integrationId}`,
+    );
+
+    return response;
   }
 
   async getCourseGenerationMessages(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
-    return this.withLumaErrorHandling(() => luma.getDraftMessages(data));
+    return this.withLumaErrorHandling(() => luma.courses.getDraftMessages(data));
   }
 
   async ingestCourseGenerationFiles(
@@ -122,7 +137,7 @@ export class LumaService {
 
       responses.push(
         await this.withLumaErrorHandling(() =>
-          luma.ingestDraftFile({
+          luma.courses.ingestFile({
             integrationId: data.integrationId,
             file: lumaFile,
           }),
@@ -141,13 +156,13 @@ export class LumaService {
       ensureCourseHasNoChapters: true,
     });
 
-    return this.withLumaErrorHandling(() => luma.deleteIngestedDocument(data));
+    return this.withLumaErrorHandling(() => luma.courses.deleteIngestedDocument(data));
   }
 
   async getCourseGenerationFiles(data: IntegrationIdOptions, currentUser: CurrentUserType) {
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser);
 
-    return this.withLumaErrorHandling(() => luma.getDraftFiles(data));
+    return this.withLumaErrorHandling(() => luma.courses.getDraftFiles(data));
   }
 
   hasCourseGeneratedEvent(chunk: Buffer, pendingFrame = "") {
@@ -222,13 +237,17 @@ export class LumaService {
   }
 
   private async validateCourseHasChapters(integrationId: UUIDType) {
+    this.logger.debug(`validating course has no chapters integrationId=${integrationId}`);
     if (await this.adminLessonService.courseHasChapters(integrationId)) {
       throw new ConflictException("adminCourseView.toast.courseHasChapters");
     }
+    this.logger.debug(`course has no chapters integrationId=${integrationId}`);
   }
 
   private async validateCourseAccess(integrationId: string, currentUser: CurrentUserType) {
+    this.logger.debug(`validating course access integrationId=${integrationId}`);
     await this.adminLessonService.validateAccess(ENTITY_TYPE.COURSE, currentUser, integrationId);
+    this.logger.debug(`course access valid integrationId=${integrationId}`);
   }
 
   private async getAuthorizedLumaClient(
@@ -236,13 +255,17 @@ export class LumaService {
     currentUser: CurrentUserType,
     options?: { ensureCourseHasNoChapters?: boolean },
   ) {
+    this.logger.debug(`authorizing Luma client integrationId=${integrationId}`);
     await this.validateCourseAccess(integrationId, currentUser);
 
     if (options?.ensureCourseHasNoChapters) {
       await this.validateCourseHasChapters(integrationId);
     }
 
-    return this.getLumaClient();
+    const client = await this.getLumaClient();
+    this.logger.debug(`authorized Luma client ready integrationId=${integrationId}`);
+
+    return client;
   }
 
   private async withLumaErrorHandling<T>(cb: () => Promise<T>): Promise<T> {
@@ -301,5 +324,14 @@ export class LumaService {
     }
 
     throw new ServiceUnavailableException("adminCourseView.toast.lumaServiceUnavailable");
+  }
+
+  private safeUrl(value: string): string {
+    try {
+      const url = new URL(value);
+      return `${url.origin}${url.pathname}`;
+    } catch {
+      return value;
+    }
   }
 }
