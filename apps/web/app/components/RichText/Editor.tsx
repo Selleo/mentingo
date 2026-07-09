@@ -70,7 +70,6 @@ const Editor = ({
     async (event: DragEvent) => {
       const activeEditor = editorRef.current;
       const files = Array.from(event.dataTransfer?.files ?? []);
-      console.log("handleDrop", { files, allowFiles, onUpload, activeEditor });
       if (!files.length) return false;
       if (!allowFiles || !onUpload) return false;
 
@@ -82,7 +81,6 @@ const Editor = ({
           top: event.clientY,
         });
 
-        console.log("handleDrop coordinates", { coordinates });
         if (coordinates) {
           activeEditor?.commands.setTextSelection(coordinates.pos);
         } else {
