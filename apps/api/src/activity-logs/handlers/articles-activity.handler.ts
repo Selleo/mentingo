@@ -4,6 +4,7 @@ import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { CreateArticleLanguageEvent } from "src/events/articles/create-article-language.event";
 import { CreateArticleEvent } from "src/events/articles/create-articles.event";
 import { CreateArticleSectionEvent } from "src/events/articles/create-section.event";
+import { DeleteArticleLanguageEvent } from "src/events/articles/delete-article-language.event";
 import { DeleteArticleEvent } from "src/events/articles/delete-articles.event";
 import { DeleteArticleSectionEvent } from "src/events/articles/delete-section.event";
 import { UpdateArticleEvent } from "src/events/articles/update-articles.event";
@@ -20,7 +21,8 @@ type ArticleEventType =
   | CreateArticleSectionEvent
   | UpdateArticleSectionEvent
   | DeleteArticleSectionEvent
-  | CreateArticleLanguageEvent;
+  | CreateArticleLanguageEvent
+  | DeleteArticleLanguageEvent;
 
 const ArticleActivityEvents = [
   CreateArticleEvent,
@@ -30,6 +32,7 @@ const ArticleActivityEvents = [
   UpdateArticleSectionEvent,
   DeleteArticleSectionEvent,
   CreateArticleLanguageEvent,
+  DeleteArticleLanguageEvent,
 ] as const;
 
 @Injectable()
@@ -39,6 +42,8 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
 
   async handle(event: ArticleEventType) {
     if (event instanceof CreateArticleEvent) return await this.handleCreateArticle(event);
+    if (event instanceof DeleteArticleLanguageEvent)
+      return await this.handleDeleteArticleLanguage(event);
     if (event instanceof CreateArticleLanguageEvent)
       return await this.handleCreateArticleLanguage(event);
     if (event instanceof UpdateArticleEvent) return await this.handleUpdateArticle(event);
@@ -225,11 +230,35 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
 
     await this.activityLogsService.recordActivity({
       actor: articleUpdateData.actor,
-      operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+      operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
       resourceId: articleUpdateData.articleId,
       changedFields: metadata.changedFields,
       after: metadata.after,
+      context: metadata.context ?? null,
+    });
+  }
+
+  private async handleDeleteArticleLanguage(event: DeleteArticleLanguageEvent) {
+    const { articleUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: articleUpdateData.previousArticleData,
+      updated: null,
+      context: this.buildLanguageContext(
+        articleUpdateData.language,
+        articleUpdateData.updatedArticleData,
+        articleUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
+      resourceId: articleUpdateData.articleId,
+      changedFields: metadata.changedFields,
+      before: metadata.before,
       context: metadata.context ?? null,
     });
   }

@@ -20,6 +20,7 @@ import {
   CreateArticleLanguageEvent,
   CreateArticleSectionEvent,
   DeleteArticleEvent,
+  DeleteArticleLanguageEvent,
   DeleteArticleSectionEvent,
   UpdateArticleEvent,
   UpdateArticleSectionEvent,
@@ -428,7 +429,7 @@ export class ArticlesService {
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleEvent({
+        new DeleteArticleLanguageEvent({
           articleId,
           actor: currentUser,
           previousArticleData: previousSnapshot,
