@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useFormContext } from "react-hook-form";
 
 import type { QuizQuestionOption } from "../types";
@@ -36,21 +36,24 @@ export const ScaleQuestionOptionsList = ({
 
   const isDisabled = isCompleted || isPreviewMode;
 
-  const updateFormValue = (selectedIndex: number) => {
-    const selectedOption = visibleOptions[selectedIndex];
-    if (!selectedOption) return;
+  const updateFormValue = useCallback(
+    (selectedIndex: number) => {
+      const selectedOption = visibleOptions[selectedIndex];
+      if (!selectedOption) return;
 
-    const updatedAnswers = visibleOptions.reduce<Record<string, string | null>>((acc, option) => {
-      if (option.id === selectedOption.id) {
-        acc[option.id] = option.id;
-      } else {
-        acc[option.id] = null;
-      }
-      return acc;
-    }, {});
+      const updatedAnswers = visibleOptions.reduce<Record<string, string | null>>((acc, option) => {
+        if (option.id === selectedOption.id) {
+          acc[option.id] = option.id;
+        } else {
+          acc[option.id] = null;
+        }
+        return acc;
+      }, {});
 
-    setValue(`${optionFieldId}.${questionId}`, updatedAnswers, { shouldDirty: true });
-  };
+      setValue(`${optionFieldId}.${questionId}`, updatedAnswers, { shouldDirty: true });
+    },
+    [visibleOptions, setValue, optionFieldId, questionId],
+  );
 
   useEffect(() => {
     if (!isDisabled) {
@@ -59,7 +62,7 @@ export const ScaleQuestionOptionsList = ({
         updateFormValue(studentAnswerIndex !== -1 ? studentAnswerIndex : 0);
       }
     }
-  }, [questionId, studentAnswerIndex, isDisabled]);
+  }, [questionId, studentAnswerIndex, isDisabled, getValues, updateFormValue, optionFieldId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (isDisabled) return;
