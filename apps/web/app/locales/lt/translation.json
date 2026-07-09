@@ -2741,6 +2741,10 @@
       "body": "Šiek tiek palaukite. Jis pasirodys čia, kai bus paruoštas."
     },
     "videoProgress": {
+      "label": "Vaizdo įrašų eiga",
+      "completedSummary": "Užbaigta {{completed}} iš {{total}}",
+      "overviewAriaLabel": "Pamokos vaizdo įrašų eiga",
+      "segmentAriaLabel": "{{index}} vaizdo įrašo eiga: peržiūrėta {{progress}}%",
       "errors": {
         "resourceNotFound": "Nepavyko išsaugoti šios pamokos vaizdo įrašo pažangos.",
         "unsupportedLessonType": "Vaizdo įrašo pažanga pasiekiama tik turinio pamokoms.",

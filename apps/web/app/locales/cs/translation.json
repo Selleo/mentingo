@@ -2741,6 +2741,10 @@
       "body": "Počkejte prosím chvíli. Jakmile bude připraven, objeví se zde."
     },
     "videoProgress": {
+      "label": "Průběh videa",
+      "completedSummary": "Dokončeno {{completed}} z {{total}}",
+      "overviewAriaLabel": "Průběh videí v lekci",
+      "segmentAriaLabel": "Průběh videa {{index}}: zhlédnuto {{progress}} %",
       "errors": {
         "resourceNotFound": "Postup videa pro tuto lekci se nepodařilo uložit.",
         "unsupportedLessonType": "Postup videa je dostupný pouze pro obsahové lekce.",
