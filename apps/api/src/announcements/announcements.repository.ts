@@ -22,6 +22,7 @@ import {
   inArray,
   type SQL,
   lte,
+  ne,
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -68,7 +69,10 @@ export class AnnouncementsRepository {
     currentUserId: UUIDType,
     status?: AnnouncementStatus,
   ) {
-    const conditions = [isNull(announcements.deletedAt)];
+    const conditions = [
+      isNull(announcements.deletedAt),
+      ne(announcements.authorId, currentUserId), // <-- To odfiltruje ogłoszenia stworzone przez tego admina
+    ];
 
     if (status) conditions.push(eq(announcements.status, status));
 
@@ -81,10 +85,17 @@ export class AnnouncementsRepository {
           readAt: userAnnouncements.readAt,
         })
         .from(announcements)
-        .innerJoin(userAnnouncements, eq(userAnnouncements.announcementId, announcements.id))
-        .where(and(...conditions, eq(userAnnouncements.userId, currentUserId)))
+        .leftJoin(
+          userAnnouncements,
+          and(
+            eq(userAnnouncements.announcementId, announcements.id),
+            eq(userAnnouncements.userId, currentUserId),
+          ),
+        )
+        .where(and(...conditions))
         .orderBy(desc(announcements.createdAt))
         .$dynamic();
+
       const announcementsData = await addPagination(
         announcementsQuery,
         pagination.page,
