@@ -19,7 +19,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Choose supported course types where the tenant configuration allows them.
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
-- Review and edit the modern course overview in the user's interface language, including media, deadlines, certificates, author details, curriculum, and statistics.
+- Review and edit the modern course overview in the user's interface language, including media, deadlines, certificates, author details, related author courses, curriculum, and statistics.
 - Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.
@@ -43,7 +43,7 @@ The edit experience adapts to course type, tenant configuration, integrations, a
 
 Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Language operations respect supported-language and base-language rules.
 
-The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, curriculum labels, lesson statuses, and summary statistics.
+The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, related author courses, curriculum labels, lesson statuses, and summary statistics. The author modal can also show other published courses by the same author with practical catalog context such as enrolled learner count and estimated course duration.
 
 ## Key Technical Context
 
