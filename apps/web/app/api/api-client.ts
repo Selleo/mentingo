@@ -58,7 +58,9 @@ ApiClient.instance.interceptors.request.use((config) => {
     config.url?.includes("/register");
 
   const isPublicSettingsEndpoint =
-    config.url?.includes("/settings/global") || config.url?.includes("/settings/registration-form");
+    config.url?.includes("/settings/global") ||
+    config.url?.includes("/settings/platform-simple-logo/pwa-icons") ||
+    config.url?.includes("/settings/registration-form");
 
   if (!isAuthEndpoint && !isPublicSettingsEndpoint && !useAuthStore.getState().isLoggedIn) {
     config.signal = requestManager.controller.signal;

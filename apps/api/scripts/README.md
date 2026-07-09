@@ -26,6 +26,9 @@ Backfills stored image references to the image variant format. The script is ide
 original image references are converted to new variant references, and existing variant references
 are repaired when one of the expected sizes is missing.
 
+For `settings.platformSimpleLogoS3Key`, the script also creates or repairs PWA icon variants
+(`192w` and `512w`) using square cover cropping.
+
 > **Note:** Legacy original S3 objects are kept for rollback. Unsupported formats, remote URLs, and
 > Bunny video references are skipped.
 

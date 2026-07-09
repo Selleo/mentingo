@@ -8,10 +8,14 @@ import { eq, isNotNull, isNull, sql } from "drizzle-orm";
 
 import database from "src/common/configuration/database";
 import s3Config from "src/common/configuration/s3";
-import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
+import {
+  IMAGE_VARIANT_CONTENT_TYPE,
+  IMAGE_VARIANT_DEFINITIONS,
+  PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+} from "src/file/image-variants/image-variant.constants";
 import { ImageVariantService } from "src/file/image-variants/image-variant.service";
 import {
-  getAllImageVariantKeys,
+  getImageVariantKey,
   isImageVariantReference,
   isSupportedImageVariantMimeType,
 } from "src/file/image-variants/image-variant.utils";
@@ -38,7 +42,11 @@ import {
 } from "./migrateImageVariants.helpers";
 
 import type { DatabasePg, UUIDType } from "src/common";
-import type { ImageVariantMetadata } from "src/file/image-variants/image-variant.types";
+import type {
+  ImageVariantCreationOptions,
+  ImageVariantDefinition,
+  ImageVariantMetadata,
+} from "src/file/image-variants/image-variant.types";
 
 dotenv.config({ path: ".env" });
 
@@ -71,12 +79,22 @@ type ReferenceCandidate = {
   tenantId: UUIDType | null;
   reference: string | null;
   contentType?: string | null;
+  imageVariantOptions?: ImageVariantCreationOptions;
+  requiredVariantDefinitions?: readonly ImageVariantDefinition[];
   update: (params: {
     db: DatabasePg;
     reference: string;
     contentType: string;
     metadata: ImageVariantMetadata;
   }) => Promise<void>;
+};
+
+type SettingsImageField = {
+  label: string;
+  fieldName: string;
+  reference: string | null;
+  imageVariantOptions?: ImageVariantCreationOptions;
+  requiredVariantDefinitions?: readonly ImageVariantDefinition[];
 };
 
 const createInitialStats = (): MigrationStats => ({
@@ -96,6 +114,16 @@ const withImageVariantMetadata = (metadata: ImageVariantMetadata) =>
   sql`jsonb_set(coalesce(${resources.metadata}, '{}'::jsonb), '{imageVariants}', ${JSON.stringify(
     metadata,
   )}::jsonb, true)`;
+
+const PLATFORM_SIMPLE_LOGO_VARIANT_DEFINITIONS = [
+  ...IMAGE_VARIANT_DEFINITIONS,
+  ...PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+] as const;
+
+const PLATFORM_SIMPLE_LOGO_IMAGE_VARIANT_OPTIONS = {
+  variantDefinitions: PLATFORM_SIMPLE_LOGO_VARIANT_DEFINITIONS,
+  resizeMode: "cover-square",
+} as const satisfies ImageVariantCreationOptions;
 
 async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCandidate[]> {
   const [
@@ -282,7 +310,7 @@ async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCand
       },
     ]),
     ...globalSettingsRows.flatMap((row): ReferenceCandidate[] => {
-      const settingsFields: { label: string; fieldName: string; reference: string | null }[] = [
+      const settingsFields: SettingsImageField[] = [
         {
           label: "settings.certificateBackgroundImage",
           fieldName: "certificateBackgroundImage",
@@ -297,6 +325,8 @@ async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCand
           label: "settings.platformSimpleLogoS3Key",
           fieldName: "platformSimpleLogoS3Key",
           reference: row.platformSimpleLogoS3Key,
+          imageVariantOptions: PLATFORM_SIMPLE_LOGO_IMAGE_VARIANT_OPTIONS,
+          requiredVariantDefinitions: PLATFORM_SIMPLE_LOGO_VARIANT_DEFINITIONS,
         },
         {
           label: "settings.loginBackgroundImageS3Key",
@@ -305,31 +335,55 @@ async function collectReferenceCandidates(db: DatabasePg): Promise<ReferenceCand
         },
       ];
 
-      return settingsFields.map(({ label, fieldName, reference }) => ({
-        label,
-        id: row.id,
-        tenantId: row.tenantId,
-        reference,
-        update: async ({ db, reference: nextReference }) => {
-          await db
-            .update(settings)
-            .set({ settings: updateJsonbTextField(fieldName, nextReference) })
-            .where(eq(settings.id, row.id));
-        },
-      }));
+      return settingsFields.map(
+        ({
+          label,
+          fieldName,
+          reference,
+          imageVariantOptions,
+          requiredVariantDefinitions,
+        }): ReferenceCandidate => ({
+          label,
+          id: row.id,
+          tenantId: row.tenantId,
+          reference,
+          imageVariantOptions,
+          requiredVariantDefinitions,
+          update: async ({ db, reference: nextReference }) => {
+            await db
+              .update(settings)
+              .set({ settings: updateJsonbTextField(fieldName, nextReference) })
+              .where(eq(settings.id, row.id));
+          },
+        }),
+      );
     }),
   ];
 }
 
-async function getExistingVariantKeys(s3Service: S3Service, reference: string) {
+async function getExistingVariantKeys(
+  s3Service: S3Service,
+  reference: string,
+  variantDefinitions: readonly ImageVariantDefinition[] = IMAGE_VARIANT_DEFINITIONS,
+) {
   const entries = await Promise.all(
-    getAllImageVariantKeys(reference).map(
-      async (key) => [key, await s3Service.getFileExists(key)] as const,
-    ),
+    variantDefinitions.map(async ({ quality }) => {
+      const key = getImageVariantKey(reference, quality);
+      return [key, await s3Service.getFileExists(key)] as const;
+    }),
   );
 
   return new Set(entries.filter(([, exists]) => exists).map(([key]) => key));
 }
+
+const hasRequiredVariantKeys = (
+  reference: string,
+  existingKeys: ReadonlySet<string>,
+  variantDefinitions: readonly ImageVariantDefinition[] = IMAGE_VARIANT_DEFINITIONS,
+) =>
+  variantDefinitions.every(({ quality }) =>
+    existingKeys.has(getImageVariantKey(reference, quality)),
+  );
 
 async function resolveContentType(params: {
   candidate: ReferenceCandidate;
@@ -347,9 +401,18 @@ async function repairExistingVariantReference(params: {
   imageVariantService: ImageVariantService;
   stats: MigrationStats;
 }) {
-  const existingKeys = await getExistingVariantKeys(params.s3Service, params.candidate.reference!);
+  const requiredVariantDefinitions =
+    params.candidate.requiredVariantDefinitions ?? IMAGE_VARIANT_DEFINITIONS;
+  const existingKeys = await getExistingVariantKeys(
+    params.s3Service,
+    params.candidate.reference!,
+    requiredVariantDefinitions,
+  );
 
-  if (hasAllVariantKeys(params.candidate.reference!, existingKeys)) {
+  if (
+    hasAllVariantKeys(params.candidate.reference!, existingKeys) &&
+    hasRequiredVariantKeys(params.candidate.reference!, existingKeys, requiredVariantDefinitions)
+  ) {
     params.stats.alreadyComplete += 1;
     return;
   }
@@ -366,6 +429,7 @@ async function repairExistingVariantReference(params: {
     buffer,
     referenceKey: params.candidate.reference!,
     mimeType: IMAGE_VARIANT_CONTENT_TYPE,
+    options: params.candidate.imageVariantOptions,
   });
 
   if (!result) {
@@ -421,6 +485,7 @@ async function migrateOriginalReference(params: {
     resource: getResourceFolderFromReference(reference, params.candidate.tenantId!),
     mimeType: contentType,
     tenantId: params.candidate.tenantId!,
+    options: params.candidate.imageVariantOptions,
   });
 
   if (!result) {

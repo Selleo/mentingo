@@ -4,7 +4,7 @@ import { BunnyStreamService } from "src/bunny/bunnyStream.service";
 import { S3Service } from "src/s3/s3.service";
 
 import { FileService } from "../file.service";
-import { IMAGE_QUALITY } from "../image-variants/image-variant.constants";
+import { IMAGE_QUALITY, PWA_ICON_IMAGE_QUALITY } from "../image-variants/image-variant.constants";
 import { ImageVariantService } from "../image-variants/image-variant.service";
 import { BunnyVideoProvider } from "../providers/bunny-video.provider";
 import { S3VideoProvider } from "../providers/s3-video.provider";
@@ -94,6 +94,17 @@ describe("FileService image variant references", () => {
     );
   });
 
+  it("streams a requested PWA concrete variant", async () => {
+    await service.getFileDelivery(variantReference, undefined, {
+      quality: PWA_ICON_IMAGE_QUALITY.ICON_192,
+    });
+
+    expect(s3Service.getFileStream).toHaveBeenCalledWith(
+      "tenant/course/variants/image-192w.webp",
+      undefined,
+    );
+  });
+
   it("reads the high quality concrete variant buffer", async () => {
     await service.getRawFileBuffer(variantReference);
 
@@ -103,9 +114,11 @@ describe("FileService image variant references", () => {
   it("deletes all concrete variants for a logical variant reference", async () => {
     await service.deleteFile(variantReference);
 
-    expect(s3Service.deleteFile).toHaveBeenCalledTimes(6);
+    expect(s3Service.deleteFile).toHaveBeenCalledTimes(8);
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-160w.webp");
+    expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-192w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-320w.webp");
+    expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-512w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-640w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-960w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-1280w.webp");

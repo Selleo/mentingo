@@ -47,7 +47,10 @@ import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
 import { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
-import { platformSimpleLogoResponseSchema } from "./schemas/platform-simple-logo.schema";
+import {
+  platformSimpleLogoPwaIconsResponseSchema,
+  platformSimpleLogoResponseSchema,
+} from "./schemas/platform-simple-logo.schema";
 import {
   localizedRegistrationFormResponseSchema,
   registrationFormResponseSchema,
@@ -378,6 +381,15 @@ export class SettingsController {
   async getPlatformSimpleLogo() {
     const url = await this.settingsService.getPlatformSimpleLogoUrl();
     return new BaseResponse({ url });
+  }
+
+  @Get("platform-simple-logo/pwa-icons")
+  @Public()
+  @Validate({
+    response: baseResponse(platformSimpleLogoPwaIconsResponseSchema),
+  })
+  async getPlatformSimpleLogoPwaIcons() {
+    return new BaseResponse(await this.settingsService.getPlatformSimpleLogoPwaIconUrls());
   }
 
   @Get("platform-simple-logo/image")

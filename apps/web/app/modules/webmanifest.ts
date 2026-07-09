@@ -25,48 +25,49 @@ async function getGlobalSettings(request: Request, baseURL: string) {
   }
 }
 
-const getImageType = (url: string) => {
-  const extension = url.split(".").pop()?.toLowerCase();
+async function getPlatformSimpleLogoPwaIcons(baseURL: string) {
+  const httpsAgent =
+    env.NODE_ENV === "development" ? new Agent({ rejectUnauthorized: false }) : undefined;
 
-  switch (extension) {
-    case "svg":
-      return "image/svg+xml";
-    case "png":
-      return "image/png";
-    case "jpg":
-    case "jpeg":
-      return "image/jpeg";
-    case "webp":
-      return "image/webp";
-    case "avif":
-      return "image/avif";
-    default:
-      return undefined;
+  try {
+    const response = await ApiClient.api.settingsControllerGetPlatformSimpleLogoPwaIcons({
+      baseURL,
+      httpsAgent,
+    });
+
+    return response.data.data;
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 401) {
+      return null;
+    }
+    throw error;
   }
-};
+}
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const baseURL = new URL(request.url).origin;
-  const response = await getGlobalSettings(request, baseURL);
+  const globalSettings = await getGlobalSettings(request, baseURL);
 
-  if (!response) {
+  if (!globalSettings) {
     throw new Response("Settings not found", {
       status: 404,
     });
   }
 
   const { primaryColor, contrastColor, platformSimpleLogoS3Key, companyInformation } =
-    response.data;
+    globalSettings.data;
 
-  const imageURL = platformSimpleLogoS3Key
-    ? `${baseURL}${platformSimpleLogoS3Key}`
-    : `${baseURL}/app.svg`;
-  const imageType = getImageType(imageURL);
-  const imageSize = platformSimpleLogoS3Key ? null : "any";
+  const defaultIcon = `${baseURL}/app.svg`;
+  const pwaIcons = platformSimpleLogoS3Key ? await getPlatformSimpleLogoPwaIcons(baseURL) : null;
+
+  const icon192Url = pwaIcons?.icon192Url;
+  const icon512Url = pwaIcons?.icon512Url;
+  const icon192Type = pwaIcons?.icon192Type;
+  const icon512Type = pwaIcons?.icon512Type;
 
   return new Response(
     JSON.stringify({
-      name: companyInformation?.companyName || "Mentingo",
+      name: companyInformation?.companyName || companyInformation?.companyShortName || "Mentingo",
 
       theme_color: primaryColor || "#3f58b6",
       background_color: contrastColor || "#fcfcfc",
@@ -79,19 +80,26 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
       scope: "/",
 
-      icons: [
-        {
-          src: imageURL,
-          sizes: imageSize ?? "192x192",
-          type: imageType,
-        },
-        {
-          src: imageURL,
-          sizes: imageSize ?? "512x512",
-          type: imageType,
-          purpose: "maskable",
-        },
-      ],
+      icons: pwaIcons
+        ? [
+            {
+              src: icon192Url,
+              sizes: "192x192",
+              type: icon192Type,
+            },
+            {
+              src: icon512Url,
+              sizes: "512x512",
+              type: icon512Type,
+            },
+          ]
+        : [
+            {
+              src: defaultIcon,
+              sizes: "any",
+              type: "image/svg+xml",
+            },
+          ],
     }),
     {
       headers: {

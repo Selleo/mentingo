@@ -1131,6 +1131,15 @@ export interface GetPlatformSimpleLogoResponse {
   };
 }
 
+export interface GetPlatformSimpleLogoPwaIconsResponse {
+  data: {
+    icon192Url: string | null;
+    icon192Type: string | null;
+    icon512Url: string | null;
+    icon512Type: string | null;
+  };
+}
+
 export interface GetLoginBackgroundResponse {
   data: {
     url: string | null;
@@ -7988,6 +7997,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPlatformSimpleLogo: (params: RequestParams = {}) =>
       this.request<GetPlatformSimpleLogoResponse, any>({
         path: `/api/settings/platform-simple-logo`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPlatformSimpleLogoPwaIcons
+     * @request GET:/api/settings/platform-simple-logo/pwa-icons
+     */
+    settingsControllerGetPlatformSimpleLogoPwaIcons: (params: RequestParams = {}) =>
+      this.request<GetPlatformSimpleLogoPwaIconsResponse, any>({
+        path: `/api/settings/platform-simple-logo/pwa-icons`,
         method: "GET",
         format: "json",
         ...params,

@@ -1,6 +1,8 @@
 import { eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { FileService } from "src/file/file.service";
+import { PWA_ICON_IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
 
@@ -19,6 +21,7 @@ describe("SettingsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let fileService: FileService;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -30,6 +33,7 @@ describe("SettingsController (e2e)", () => {
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    fileService = app.get(FileService);
     userFactory = createUserFactory(db);
     globalSettingsFactory = createSettingsFactory(db, null);
     courseFactory = createCourseFactory(db);
@@ -292,6 +296,54 @@ describe("SettingsController (e2e)", () => {
             certificateBackgroundKey,
           )}`,
         );
+      });
+
+      it("should return public S3 URLs for platform simple logo PWA icons", async () => {
+        const simpleLogoKey = "platform-simple-logos/variants/simple.webp";
+        const getImageUrlByQualitySpy = jest
+          .spyOn(fileService, "getImageUrlByQuality")
+          .mockImplementation(async (_reference, quality) => `https://s3.local/${quality}.webp`);
+        const getFileContentTypeSpy = jest
+          .spyOn(fileService, "getFileContentType")
+          .mockResolvedValue("image/webp");
+
+        await db
+          .update(settings)
+          .set({
+            settings: sql`
+              jsonb_set(
+                settings.settings,
+                '{platformSimpleLogoS3Key}',
+                to_jsonb(${simpleLogoKey}::text),
+                true
+              )
+            `,
+          })
+          .where(isNull(settings.userId));
+
+        try {
+          const response = await request(app.getHttpServer())
+            .get("/api/settings/platform-simple-logo/pwa-icons")
+            .expect(200);
+
+          expect(response.body.data).toEqual({
+            icon192Url: "https://s3.local/192w.webp",
+            icon192Type: "image/webp",
+            icon512Url: "https://s3.local/512w.webp",
+            icon512Type: "image/webp",
+          });
+          expect(getImageUrlByQualitySpy).toHaveBeenCalledWith(
+            simpleLogoKey,
+            PWA_ICON_IMAGE_QUALITY.ICON_192,
+          );
+          expect(getImageUrlByQualitySpy).toHaveBeenCalledWith(
+            simpleLogoKey,
+            PWA_ICON_IMAGE_QUALITY.ICON_512,
+          );
+        } finally {
+          getImageUrlByQualitySpy.mockRestore();
+          getFileContentTypeSpy.mockRestore();
+        }
       });
     });
 

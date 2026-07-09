@@ -1109,6 +1109,23 @@
         }
       }
     },
+    "/api/settings/platform-simple-logo/pwa-icons": {
+      "get": {
+        "operationId": "SettingsController_getPlatformSimpleLogoPwaIcons",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPlatformSimpleLogoPwaIconsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/platform-simple-logo/image": {
       "get": {
         "operationId": "SettingsController_getPlatformSimpleLogoImage",
@@ -20955,6 +20972,65 @@
             },
             "required": [
               "url"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetPlatformSimpleLogoPwaIconsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "icon192Url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "icon192Type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "icon512Url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "icon512Type": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "icon192Url",
+              "icon192Type",
+              "icon512Url",
+              "icon512Type"
             ]
           }
         },

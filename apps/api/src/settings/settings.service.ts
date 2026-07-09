@@ -27,7 +27,13 @@ import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
+import {
+  IMAGE_QUALITY,
+  IMAGE_VARIANT_DEFINITIONS,
+  PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+  PWA_ICON_IMAGE_QUALITY,
+} from "src/file/image-variants/image-variant.constants";
+import { isImageQuality } from "src/file/image-variants/image-variant.utils";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
@@ -89,6 +95,7 @@ import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type {
   CreateSettingsForUsersGroup,
@@ -1065,7 +1072,10 @@ export class SettingsService {
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-simple-logos";
-      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId);
+      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId, {
+        variantDefinitions: [...IMAGE_VARIANT_DEFINITIONS, ...PWA_ICON_IMAGE_VARIANT_DEFINITIONS],
+        resizeMode: "cover-square",
+      });
       newValue = fileKey;
     }
 
@@ -1098,6 +1108,38 @@ export class SettingsService {
       SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
       globalSettings.settings.platformSimpleLogoS3Key,
     );
+  }
+
+  public async getPlatformSimpleLogoPwaIconUrls(): Promise<{
+    icon192Url: string | null;
+    icon192Type: string | null;
+    icon512Url: string | null;
+    icon512Type: string | null;
+  }> {
+    const globalSettings = await this.getGlobalSettingsRecord();
+    const key = globalSettings.settings.platformSimpleLogoS3Key;
+
+    if (!key) {
+      return {
+        icon192Url: null,
+        icon192Type: null,
+        icon512Url: null,
+        icon512Type: null,
+      };
+    }
+
+    const [icon192Url, icon512Url, contentType] = await Promise.all([
+      this.fileService.getImageUrlByQuality(key, PWA_ICON_IMAGE_QUALITY.ICON_192),
+      this.fileService.getImageUrlByQuality(key, PWA_ICON_IMAGE_QUALITY.ICON_512),
+      this.fileService.getFileContentType(key),
+    ]);
+
+    return {
+      icon192Url,
+      icon192Type: contentType,
+      icon512Url,
+      icon512Type: contentType,
+    };
   }
 
   public async uploadLoginBackgroundImage(
@@ -1157,7 +1199,9 @@ export class SettingsService {
 
     if (!key) throw new NotFoundException("Settings image not found");
 
-    const file = await this.fileService.getFileDelivery(key, req.headers.range);
+    const file = await this.fileService.getFileDelivery(key, req.headers.range, {
+      quality: this.getRequestedImageQuality(req),
+    });
 
     res.setHeader("Cache-Control", STATIC_SETTINGS_IMAGE_CACHE_CONTROL);
 
@@ -2011,6 +2055,15 @@ export class SettingsService {
       default:
         return null;
     }
+  }
+
+  private getRequestedImageQuality(req: Request): ImageQuality | undefined {
+    const quality = req.query.quality;
+
+    if (typeof quality !== "string") return undefined;
+    if (!isImageQuality(quality)) return undefined;
+
+    return quality;
   }
 
   private isRevalidationHit(
