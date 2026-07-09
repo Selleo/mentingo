@@ -287,10 +287,12 @@ describe("AnnouncementsController (e2e)", () => {
         .expect(201);
     });
 
-    it("rejects announcement without base language translation", async () => {
+    it("returns announcement in requested language", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
-
       const adminCookies = await cookieFor(admin, app);
+
+      const student = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const studentCookies = await cookieFor(student, app);
 
       await request(app.getHttpServer())
         .post("/api/announcements")
@@ -300,13 +302,31 @@ describe("AnnouncementsController (e2e)", () => {
           groupId: null,
           translations: [
             {
+              language: SUPPORTED_LANGUAGES.EN,
+              title: "English title",
+              content: "English content",
+            },
+            {
               language: SUPPORTED_LANGUAGES.PL,
               title: "Polski tytul",
               content: "Polska tresc",
             },
           ],
         })
-        .expect(400);
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements")
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", studentCookies)
+        .expect(200);
+
+      expect(response.body.data[0].title).toBe("Polski tytul");
+      expect(response.body.data[0].content).toBe("Polska tresc");
+      expect(response.body.data[0].baseLanguage).toBe(SUPPORTED_LANGUAGES.EN);
+      expect(response.body.data[0].availableLocales).toEqual(
+        expect.arrayContaining([SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL]),
+      );
     });
 
     it("rejects announcement with duplicate translation languages", async () => {
