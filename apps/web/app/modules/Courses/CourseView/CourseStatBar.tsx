@@ -705,6 +705,10 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
                             <span>{course.enrolledParticipantCount}</span>
                           </div>
                           <div className="flex items-center gap-1">
+                            <Award className="w-3 h-3 text-[#FFB800]" />
+                            <span>4.8</span>
+                          </div>
+                          <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>{course.estimatedDurationFormatted ?? "—"}</span>
                           </div>

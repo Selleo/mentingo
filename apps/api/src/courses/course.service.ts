@@ -861,7 +861,7 @@ export class CourseService {
     const estimates: DurationEstimatesByCourse = {};
 
     for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = totalSeconds > 0 ? Math.ceil(Math.ceil(totalSeconds / 60) / 30) * 30 : 0;
+      const totalMinutes = totalSeconds > 0 ? Math.ceil(totalSeconds / 60) : 0;
       estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
     }
 
@@ -869,10 +869,10 @@ export class CourseService {
   }
 
   private formatMinutes(minutes: number): string {
-    if (minutes < 60) return `${minutes}m`;
+    if (minutes < 60) return `${minutes} min`;
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    return mins === 0 ? `${hours}h` : `${hours}h ${mins}m`;
+    return mins === 0 ? `${hours} h` : `${hours} h ${mins} min`;
   }
 
   private async getAvailableCoursesConditions(
@@ -1710,6 +1710,9 @@ export class CourseService {
       );
     }
 
+    const enrolledStudentCourses = alias(studentCourses, "enrolled_student_courses");
+    const enrolledUsers = alias(users, "enrolled_users");
+
     const contentCreatorCourses = await this.db
       .select({
         id: courses.id,
@@ -1726,7 +1729,7 @@ export class CourseService {
           categories,
         ),
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN true ELSE false END`,
-        enrolledParticipantCount: sql<number>`0`,
+        enrolledParticipantCount: sql<number>`COUNT(DISTINCT CASE WHEN ${enrolledUsers.id} IS NOT NULL THEN ${enrolledStudentCourses.studentId} END)::int`,
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`0`,
         priceInCents: courses.priceInCents,
@@ -1749,6 +1752,20 @@ export class CourseService {
       )
       .leftJoin(categories, eq(courses.categoryId, categories.id))
       .leftJoin(users, eq(courses.authorId, users.id))
+      .leftJoin(
+        enrolledStudentCourses,
+        and(
+          eq(enrolledStudentCourses.courseId, courses.id),
+          eq(enrolledStudentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+        ),
+      )
+      .leftJoin(
+        enrolledUsers,
+        and(
+          eq(enrolledUsers.id, enrolledStudentCourses.studentId),
+          isNull(enrolledUsers.deletedAt),
+        ),
+      )
       .leftJoin(
         groupCourses,
         and(
@@ -1783,10 +1800,12 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
+    const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language);
 
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
         const { authorAvatarUrl, ...courseWithoutReferences } = course;
+        const duration = durationEstimates[course.id];
 
         const authorAvatarSignedUrl =
           await this.userService.getUsersProfilePictureUrl(authorAvatarUrl);
@@ -1797,6 +1816,8 @@ export class CourseService {
             ? await this.getSignedCourseThumbnailUrl(course.thumbnailUrl)
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
+          estimatedDurationMinutes: duration?.totalMinutes ?? 0,
+          estimatedDurationFormatted: duration?.formatted ?? null,
           slug: slugsMap.get(course.id) || course.id,
         };
       }),

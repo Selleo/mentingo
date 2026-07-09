@@ -259,7 +259,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             <button
               type="button"
               onClick={() => setShowSettingsDrawer(true)}
-              className="absolute left-2 top-2 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-white md:left-4 md:top-4 md:px-4 md:py-2"
+              className="absolute left-2 top-2 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 shadow-lg backdrop-blur-sm transition bg-white hover:bg-gray-200 md:left-4 md:top-4 md:px-4 md:py-2"
             >
               <Settings className="size-4 text-primary-700" />
 
@@ -271,7 +271,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             <button
               type="button"
               onClick={openMediaModal}
-              className="absolute right-2 top-2 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5 opacity-0 shadow-lg backdrop-blur-sm transition hover:bg-white group-hover:opacity-100 md:right-4 md:top-4 md:px-4 md:py-2"
+              className="absolute right-2 top-2 flex items-center gap-2 rounded-lg bg-white/90 px-3 py-1.5  shadow-lg backdrop-blur-sm transition bg-white hover:bg-gray-200  md:right-4 md:top-4 md:px-4 md:py-2"
             >
               <Upload className="size-4 text-primary-700" />
 
