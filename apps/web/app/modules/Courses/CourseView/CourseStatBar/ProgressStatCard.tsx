@@ -18,11 +18,11 @@ export default function ProgressStatCard({
 
   return (
     <div
-      className={`relative rounded-2xl border-l-4 border-[#26b183] bg-white p-4 shadow-lg group ${
+      className={`group relative flex h-full items-center rounded-2xl border-l-4 border-[#26b183] bg-white p-4 shadow-lg ${
         isAdminExperience ? "opacity-50" : ""
       }`}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex w-full items-center gap-4">
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-green-50">
           <Clock className="h-6 w-6 text-[#26b183]" />
         </div>

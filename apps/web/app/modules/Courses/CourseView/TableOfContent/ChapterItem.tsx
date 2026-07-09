@@ -66,6 +66,9 @@ const getChapterCircleStyle = ({
   return "border-[#e5e5e5] bg-white";
 };
 
+const getCompletedLessonCount = (chapter: Chapter) =>
+  chapter.lessons.filter((lesson) => lesson.status === "completed").length;
+
 export default function ChapterItem({
   chapter,
   chapterNumber,
@@ -77,6 +80,8 @@ export default function ChapterItem({
   const isCompleted = !isAdminExperience && chapter.chapterProgress === "completed";
   const isCurrent = !isAdminExperience && chapter.chapterProgress === "in_progress";
   const chapterStyle = getChapterStyle({ isCompleted, isCurrent });
+  const completedLessonCount = getCompletedLessonCount(chapter);
+  const lessonCount = chapter.lessons.length || chapter.lessonCount;
 
   return (
     <div className="relative">
@@ -149,16 +154,16 @@ export default function ChapterItem({
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 text-xs font-semibold text-[#3f58b6]">
                     <span>
-                      {chapter.progress}/{chapter.total}
+                      {completedLessonCount}/{lessonCount}
                     </span>
                   </div>
                   <div className="flex w-32 gap-0.5">
-                    {Array.from({ length: chapter.total }).map((_, idx) => (
+                    {Array.from({ length: lessonCount }).map((_, idx) => (
                       <div
                         key={idx}
                         className={cn(
                           "h-2 flex-1 rounded-full transition-all",
-                          idx < chapter.progress ? "bg-[#3f58b6]" : "bg-[#e1eaf8]",
+                          idx < completedLessonCount ? "bg-[#3f58b6]" : "bg-[#e1eaf8]",
                         )}
                       />
                     ))}

@@ -8,12 +8,12 @@ import type { GetCourseResponse } from "~/api/generated-api";
 type ChapterListProps = {
   completedExpanded: boolean;
   course: GetCourseResponse["data"];
-  expandedChapters: number[];
+  expandedChapters: string[];
   isAdminExperience: boolean;
   isMobile: boolean;
   onExpandCompleted: () => void;
   onShowAllChapters: () => void;
-  onToggleChapter: (id: number) => void;
+  onToggleChapter: (id: string) => void;
   showAllChapters: boolean;
 };
 

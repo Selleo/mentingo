@@ -9,7 +9,7 @@ export default function LessonTypeIcon({ type }: LessonTypeIconProps) {
   const { t } = useTranslation();
 
   const iconMap = {
-    video: {
+    content: {
       icon: <MonitorPlay className="h-4 w-4 text-[#3f58b6]" />,
       label: t("modernCourseView.contents.lessonTypes.content"),
     },
@@ -17,7 +17,7 @@ export default function LessonTypeIcon({ type }: LessonTypeIconProps) {
       icon: <HelpCircle className="h-4 w-4 text-[#3f58b6]" />,
       label: t("modernCourseView.contents.lessonTypes.quiz"),
     },
-    "ai-mentor": {
+    ai_mentor: {
       icon: <Sparkles className="h-4 w-4 text-[#3f58b6]" />,
       label: t("modernCourseView.contents.lessonTypes.aiMentor"),
     },
