@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -110,10 +110,7 @@ describe("AnnouncementsController (e2e)", () => {
     it("returns announcement in requested language", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
       const adminCookies = await cookieFor(admin, app);
-
-      const student = await userFactory
-        .withAdminSettings(db)
-        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
       const studentCookies = await cookieFor(student, app);
 
       await request(app.getHttpServer())
