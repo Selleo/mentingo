@@ -1070,7 +1070,20 @@ export class ArticlesService {
     previousSnapshot: ArticleSectionActivityLogSnapshot | null,
     updatedSnapshot: ArticleSectionActivityLogSnapshot | null,
   ) {
-    return isEqual(previousSnapshot, updatedSnapshot);
+    return isEqual(
+      this.getComparableSectionSnapshot(previousSnapshot),
+      this.getComparableSectionSnapshot(updatedSnapshot),
+    );
+  }
+
+  private getComparableSectionSnapshot(snapshot: ArticleSectionActivityLogSnapshot | null) {
+    if (!snapshot) return null;
+
+    return {
+      title: snapshot.title ?? null,
+      baseLanguage: snapshot.baseLanguage ?? null,
+      availableLocales: snapshot.availableLocales ?? [],
+    };
   }
 
   private extractTitleByLanguage(titleField: unknown, language: SupportedLanguages) {
