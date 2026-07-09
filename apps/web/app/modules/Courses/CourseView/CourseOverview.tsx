@@ -429,8 +429,14 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
       </div>
 
       {isMediaModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            aria-label={t("modernCourseView.common.close")}
+            className="absolute inset-0 bg-black/50"
+            onClick={closeMediaModal}
+          />
+          <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-6">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
                 {t("modernCourseView.media.title")}
