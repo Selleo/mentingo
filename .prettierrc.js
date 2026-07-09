@@ -12,7 +12,7 @@ module.exports = {
   bracketSameLine: false,
   arrowParens: "always",
   quoteProps: "as-needed",
-  endOfLine: "auto",
+  endOfLine: "lf",
   overrides: [
     {
       files: ["apps/web/**/*.{ts,tsx,js,jsx}"],
