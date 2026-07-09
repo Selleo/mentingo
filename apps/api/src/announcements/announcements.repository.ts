@@ -147,7 +147,7 @@ export class AnnouncementsRepository {
       });
     }
     if (input.usersToNotify) {
-      const res = await this.db
+      await this.db
         .insert(userAnnouncements)
         .values(
           input.usersToNotify!.map((userId) => ({
@@ -156,7 +156,6 @@ export class AnnouncementsRepository {
           })),
         )
         .returning();
-      console.log(res);
     }
 
     return this.getAnnouncementSnapshot(announcement.id, input.baseLanguage);
