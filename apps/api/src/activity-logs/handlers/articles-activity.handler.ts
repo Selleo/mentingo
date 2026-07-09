@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
+import { CreateArticleLanguageEvent } from "src/events/articles/create-article-language.event";
 import { CreateArticleEvent } from "src/events/articles/create-articles.event";
 import { CreateArticleSectionEvent } from "src/events/articles/create-section.event";
 import { DeleteArticleEvent } from "src/events/articles/delete-articles.event";
@@ -18,7 +19,8 @@ type ArticleEventType =
   | DeleteArticleEvent
   | CreateArticleSectionEvent
   | UpdateArticleSectionEvent
-  | DeleteArticleSectionEvent;
+  | DeleteArticleSectionEvent
+  | CreateArticleLanguageEvent;
 
 const ArticleActivityEvents = [
   CreateArticleEvent,
@@ -27,6 +29,7 @@ const ArticleActivityEvents = [
   CreateArticleSectionEvent,
   UpdateArticleSectionEvent,
   DeleteArticleSectionEvent,
+  CreateArticleLanguageEvent,
 ] as const;
 
 @Injectable()
@@ -36,6 +39,8 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
 
   async handle(event: ArticleEventType) {
     if (event instanceof CreateArticleEvent) return await this.handleCreateArticle(event);
+    if (event instanceof CreateArticleLanguageEvent)
+      return await this.handleCreateArticleLanguage(event);
     if (event instanceof UpdateArticleEvent) return await this.handleUpdateArticle(event);
     if (event instanceof DeleteArticleEvent) return await this.handleDeleteArticle(event);
     if (event instanceof CreateArticleSectionEvent)
@@ -203,5 +208,29 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
     if (title) context.title = title;
 
     return Object.keys(context).length ? context : null;
+  }
+
+  private async handleCreateArticleLanguage(event: CreateArticleLanguageEvent) {
+    const { articleUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: articleUpdateData.previousArticleData,
+      updated: articleUpdateData.updatedArticleData,
+      context: this.buildLanguageContext(
+        articleUpdateData.language,
+        articleUpdateData.updatedArticleData,
+        articleUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
+      resourceId: articleUpdateData.articleId,
+      changedFields: metadata.changedFields,
+      after: metadata.after,
+      context: metadata.context ?? null,
+    });
   }
 }

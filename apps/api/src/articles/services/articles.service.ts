@@ -17,6 +17,7 @@ import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   CreateArticleEvent,
+  CreateArticleLanguageEvent,
   CreateArticleSectionEvent,
   DeleteArticleEvent,
   DeleteArticleSectionEvent,
@@ -688,7 +689,7 @@ export class ArticlesService {
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleEvent({
+        new CreateArticleLanguageEvent({
           articleId,
           actor: currentUser,
           previousArticleData: previousSnapshot,

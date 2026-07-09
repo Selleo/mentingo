@@ -64,6 +64,7 @@ export * from "./qa/create-qa.event";
 export * from "./qa/update-qa.event";
 export * from "./qa/delete-qa.event";
 export * from "./articles/create-articles.event";
+export * from "./articles/create-article-language.event";
 export * from "./articles/update-articles.event";
 export * from "./articles/delete-articles.event";
 export * from "./articles/create-section.event";
