@@ -1,5 +1,5 @@
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   UnauthorizedException,
   type CanActivate,
@@ -61,7 +61,7 @@ export class EntityTypesGuard implements CanActivate {
       return !this.isUnregisteredAccessAllowed(globalSettings, entityType);
     });
     if (disabledEntityTypes) {
-      throw new ForbiddenException("common.toast.noAccess");
+      throw new BadRequestException("common.toast.noAccess");
     }
 
     return true;
