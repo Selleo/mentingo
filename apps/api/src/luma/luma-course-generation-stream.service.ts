@@ -9,6 +9,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   CourseGenerationChatBody,
+  CourseGenerationLegacyFramePipeOptions,
   CourseGenerationUIMessage,
   CourseGenerationUIMessageChunk,
 } from "src/luma/luma.types";
@@ -35,18 +36,12 @@ export class LumaCourseGenerationStreamService {
     return createUIMessageStream<CourseGenerationUIMessage>({
       execute: async ({ writer }) => {
         await this.tenantDbRunnerService.runWithTenant(currentUser.tenantId, async () => {
-          this.logger.debug(
-            `course generation stream start integrationId=${data.integrationId} messageLength=${message.length}`,
-          );
           const lumaResponse = await this.lumaService.chatWithCourseAgent(
             {
               integrationId: data.integrationId,
               message,
             },
             currentUser,
-          );
-          this.logger.debug(
-            `course generation Luma response received integrationId=${data.integrationId}`,
           );
 
           await this.pipeLegacyFrames({
@@ -71,28 +66,17 @@ export class LumaCourseGenerationStreamService {
     integrationId,
     currentUser,
     writer,
-  }: {
-    stream: AsyncIterable<Buffer>;
-    integrationId: string;
-    currentUser: CurrentUserType;
-    writer: { write: (chunk: CourseGenerationUIMessageChunk) => void };
-  }) {
+  }: CourseGenerationLegacyFramePipeOptions) {
     let syncEnqueued = false;
     let pendingCourseGeneratedFrame = "";
     let pendingFrame = "";
     const textPartId = "course-generation-text";
     let hasStartedText = false;
-    let chunkCount = 0;
-    let byteCount = 0;
-    let textFrameCount = 0;
-    let dataFrameCount = 0;
-    let ignoredFrameCount = 0;
 
     const enqueueGeneratedCourseBundleSync = async () => {
       if (syncEnqueued) return;
 
       syncEnqueued = true;
-      this.logger.debug(`course generation enqueue sync integrationId=${integrationId}`);
       await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
         integrationId,
         currentUser,
@@ -102,33 +86,14 @@ export class LumaCourseGenerationStreamService {
     const writeLegacyFrame = (frame: string) => {
       const textChunks = this.toTextChunks(frame, textPartId, hasStartedText);
       if (textChunks.length) {
-        textFrameCount += 1;
         hasStartedText = true;
         for (const textChunk of textChunks) {
-          if (textChunk.type === "text-delta") {
-            this.logger.debug(
-              `course generation text frame integrationId=${integrationId} deltaLength=${
-                textChunk.delta?.length ?? 0
-              } delta=${this.preview(textChunk.delta)}`,
-            );
-          }
           writer.write(textChunk);
         }
         return;
       }
 
       const dataChunks = this.toDataChunks(frame);
-      if (dataChunks.length) {
-        dataFrameCount += 1;
-        this.logger.debug(
-          `course generation data frame integrationId=${integrationId} events=${dataChunks.length}`,
-        );
-      } else {
-        ignoredFrameCount += 1;
-        this.logger.debug(
-          `course generation ignored frame integrationId=${integrationId} frame=${this.preview(frame)}`,
-        );
-      }
 
       for (const dataChunk of dataChunks) {
         writer.write(dataChunk);
@@ -136,16 +101,6 @@ export class LumaCourseGenerationStreamService {
     };
 
     for await (const chunk of stream) {
-      chunkCount += 1;
-      byteCount += chunk.byteLength;
-      if (chunkCount === 1) {
-        this.logger.debug(
-          `course generation first bytes integrationId=${integrationId} bytes=${chunk.byteLength} preview=${this.preview(
-            chunk.toString("utf8"),
-          )}`,
-        );
-      }
-
       const courseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
         chunk,
         pendingCourseGeneratedFrame,
@@ -186,10 +141,6 @@ export class LumaCourseGenerationStreamService {
         id: textPartId,
       });
     }
-
-    this.logger.debug(
-      `course generation stream complete integrationId=${integrationId} chunks=${chunkCount} bytes=${byteCount} textFrames=${textFrameCount} dataFrames=${dataFrameCount} ignoredFrames=${ignoredFrameCount} syncEnqueued=${syncEnqueued}`,
-    );
   }
 
   private toTextChunks(
@@ -260,11 +211,6 @@ export class LumaCourseGenerationStreamService {
     } catch {
       return [];
     }
-  }
-
-  private preview(value: string | undefined): string {
-    if (!value) return "";
-    return JSON.stringify(value.replace(/\s+/g, " ").slice(0, 160));
   }
 
   private errorMessage(error: unknown): string {

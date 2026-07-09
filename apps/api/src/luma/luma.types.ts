@@ -7,6 +7,7 @@ import type { CourseGenerationSyncStatus } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
 import type { InferUIMessageChunk, UIMessage } from "ai";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   LUMA_GENERATED_COURSE_AI_MENTOR_TYPES,
   LUMA_GENERATED_COURSE_QUESTION_TYPES,
@@ -26,6 +27,13 @@ export type CourseGenerationUIMessage = UIMessage<
 >;
 
 export type CourseGenerationUIMessageChunk = InferUIMessageChunk<CourseGenerationUIMessage>;
+
+export type CourseGenerationLegacyFramePipeOptions = {
+  stream: AsyncIterable<Buffer>;
+  integrationId: string;
+  currentUser: CurrentUserType;
+  writer: { write: (chunk: CourseGenerationUIMessageChunk) => void };
+};
 
 export type LumaGeneratedCourseAiMentorType =
   (typeof LUMA_GENERATED_COURSE_AI_MENTOR_TYPES)[keyof typeof LUMA_GENERATED_COURSE_AI_MENTOR_TYPES];

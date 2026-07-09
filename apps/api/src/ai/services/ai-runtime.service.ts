@@ -116,7 +116,9 @@ export class AiRuntimeService {
     input: MentorChatOptions,
     generateCoreMessage: () => Promise<string>,
   ): Promise<string> {
-    if ((await this.resolveSource(AiCapability.AiMentorChat)) === AI_RUNTIME_SOURCES.LUMA) {
+    const source = await this.resolveSource(AiCapability.AiMentorChat);
+
+    if (source === AI_RUNTIME_SOURCES.LUMA) {
       try {
         const luma = await this.getLumaClient();
         const { message } = await luma.mentor.generateChat(input);
@@ -137,7 +139,9 @@ export class AiRuntimeService {
     input: MentorJudgeOptions,
     judgeCore: () => Promise<MentorJudgeResponse>,
   ): Promise<MentorJudgeResponse> {
-    if ((await this.resolveSource(AiCapability.AiMentorJudge)) === AI_RUNTIME_SOURCES.LUMA) {
+    const source = await this.resolveSource(AiCapability.AiMentorJudge);
+
+    if (source === AI_RUNTIME_SOURCES.LUMA) {
       try {
         const luma = await this.getLumaClient();
         return await luma.mentor.judge(input);
@@ -179,9 +183,9 @@ export class AiRuntimeService {
     input: TranscribeDictationOptions,
     transcribeCore: () => Promise<TranscribeDictationResponse | undefined>,
   ): Promise<TranscribeDictationResponse | undefined> {
-    if (
-      (await this.resolveSource(AiCapability.DictationTranscription)) === AI_RUNTIME_SOURCES.LUMA
-    ) {
+    const source = await this.resolveSource(AiCapability.DictationTranscription);
+
+    if (source === AI_RUNTIME_SOURCES.LUMA) {
       try {
         const luma = await this.getLumaClient();
         return await luma.ai.transcribeDictation(input);

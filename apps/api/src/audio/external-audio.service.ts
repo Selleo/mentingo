@@ -1,5 +1,4 @@
 import {
-  AiCapability,
   createLumaSocket,
   LUMA_AUDIO_ACTIONS,
   LUMA_AUDIO_FORMATS,
@@ -22,7 +21,6 @@ import {
 
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
-import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
 import { OPENAI_MODELS, THREAD_STATUS } from "src/ai/utils/ai.type";
@@ -58,11 +56,6 @@ type VoiceMentorSocketHandlers = {
   audioOutputComplete: () => void;
 };
 
-const OPENAI_COMPATIBLE_VOICE_PRESETS: Record<AiMentorTTSPreset, string> = {
-  [AI_MENTOR_TTS_PRESET.MALE]: "onyx",
-  [AI_MENTOR_TTS_PRESET.FEMALE]: "nova",
-};
-
 @Injectable()
 export class ExternalAudioService {
   private readonly logger = new Logger(ExternalAudioService.name);
@@ -73,7 +66,6 @@ export class ExternalAudioService {
     private readonly envService: EnvService,
     private readonly aiRepository: AiRepository,
     private readonly aiService: AiService,
-    private readonly aiRuntimeService: AiRuntimeService,
     private readonly threadService: ThreadService,
     private readonly localizationService: LocalizationService,
     private readonly sessionStore: ExternalAudioSessionStore,
@@ -197,7 +189,7 @@ export class ExternalAudioService {
       payload.lessonId,
       lessonLanguage,
     );
-    const voiceStartConfig = await this.resolveVoiceStartConfig(voiceConfig);
+    const voiceStartConfig = this.resolveVoiceStartConfig(voiceConfig);
 
     const socket = createLumaSocket({
       apiKey,
@@ -471,11 +463,11 @@ export class ExternalAudioService {
     };
   }
 
-  private async resolveVoiceStartConfig(voiceConfig?: {
+  private resolveVoiceStartConfig(voiceConfig?: {
     voiceMode: string;
     ttsPreset: string;
     customTtsReference: string | null;
-  }): Promise<{ preset?: AiMentorTTSPreset; customTtsReference?: string }> {
+  }): { preset?: AiMentorTTSPreset; customTtsReference?: string } {
     const customTtsReference = voiceConfig?.customTtsReference?.trim() || null;
     const ttsPreset =
       voiceConfig?.ttsPreset === AI_MENTOR_TTS_PRESET.FEMALE
@@ -484,13 +476,6 @@ export class ExternalAudioService {
 
     if (voiceConfig?.voiceMode === AI_MENTOR_VOICE_MODE.CUSTOM && customTtsReference) {
       return { customTtsReference };
-    }
-
-    const voiceTtsSource = await this.aiRuntimeService.resolveSource(
-      AiCapability.VoiceTextToSpeech,
-    );
-    if (voiceTtsSource === AI_RUNTIME_SOURCES.LUMA) {
-      return { customTtsReference: OPENAI_COMPATIBLE_VOICE_PRESETS[ttsPreset] };
     }
 
     return { preset: ttsPreset };
