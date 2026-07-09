@@ -114,11 +114,9 @@ describe("FileService image variant references", () => {
   it("deletes all concrete variants for a logical variant reference", async () => {
     await service.deleteFile(variantReference);
 
-    expect(s3Service.deleteFile).toHaveBeenCalledTimes(8);
+    expect(s3Service.deleteFile).toHaveBeenCalledTimes(6);
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-160w.webp");
-    expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-192w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-320w.webp");
-    expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-512w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-640w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-960w.webp");
     expect(s3Service.deleteFile).toHaveBeenCalledWith("tenant/course/variants/image-1280w.webp");

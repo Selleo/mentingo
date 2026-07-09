@@ -5,8 +5,8 @@ import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 
 import {
   ALL_IMAGE_QUALITY_VALUES,
-  ALL_IMAGE_VARIANT_DEFINITIONS,
   IMAGE_QUALITY,
+  IMAGE_VARIANT_DEFINITIONS,
   IMAGE_VARIANT_CONTENT_TYPE,
   SUPPORTED_IMAGE_VARIANT_MIME_TYPE_SET,
 } from "./image-variant.constants";
@@ -38,7 +38,7 @@ export const getImageVariantKey = (reference: string, quality: ImageQuality) => 
 };
 
 export const getAllImageVariantKeys = (reference: string) =>
-  ALL_IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
+  IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
 
 export const getDefaultImageQuality = (): ImageQuality => IMAGE_QUALITY.XL;
 
