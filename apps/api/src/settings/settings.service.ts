@@ -1115,8 +1115,8 @@ export class SettingsService {
     const globalSettings = await this.getGlobalSettingsRecord();
     const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
     const companyName =
-      parsedSettings.companyInformation?.companyName ||
       parsedSettings.companyInformation?.companyShortName ||
+      parsedSettings.companyInformation?.companyName ||
       "Mentingo";
     const shortName = parsedSettings.companyInformation?.companyShortName || companyName;
     const simpleLogoUrl = this.buildSettingsImageUrl(
@@ -1140,8 +1140,8 @@ export class SettingsService {
       : [{ src: "/app-signet.svg", sizes: "any", type: "image/svg+xml" }];
 
     return {
-      name: companyName,
-      short_name: shortName,
+      name: `${companyName} LMS`,
+      short_name: `${shortName} LMS`,
       theme_color: parsedSettings.primaryColor || "#3f58b6",
       background_color: parsedSettings.contrastColor || "#fcfcfc",
       display: "standalone",
