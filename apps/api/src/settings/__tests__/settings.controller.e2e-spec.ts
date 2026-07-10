@@ -295,6 +295,60 @@ describe("SettingsController (e2e)", () => {
       });
     });
 
+    describe("GET /api/settings/manifest.webmanifest", () => {
+      it("should return a tenant-specific public PWA manifest", async () => {
+        const simpleLogoKey = "platform-simple-logos/variants/simple.webp";
+
+        await db
+          .update(settings)
+          .set({
+            settings: sql`${settings.settings} || ${JSON.stringify({
+              companyInformation: {
+                companyName: "Acme Learning",
+                companyShortName: "Acme",
+              },
+              primaryColor: "#123456",
+              contrastColor: "#fefefe",
+              platformSimpleLogoS3Key: simpleLogoKey,
+            })}::jsonb`,
+          })
+          .where(isNull(settings.userId));
+
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/manifest.webmanifest")
+          .expect("Content-Type", /application\/manifest\+json/)
+          .expect("Cache-Control", "no-store")
+          .expect(200);
+
+        expect(response.body).toEqual({
+          name: "Acme Learning",
+          short_name: "Acme",
+          theme_color: "#123456",
+          background_color: "#fefefe",
+          display: "standalone",
+          orientation: "portrait",
+          start_url: "/",
+          scope: "/",
+          icons: [
+            {
+              src: `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(
+                simpleLogoKey,
+              )}&quality=192w`,
+              sizes: "192x192",
+              type: "image/webp",
+            },
+            {
+              src: `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(
+                simpleLogoKey,
+              )}&quality=512w`,
+              sizes: "512x512",
+              type: "image/webp",
+            },
+          ],
+        });
+      });
+    });
+
     describe("PATCH /api/settings/admin/unregistered-user-courses-accessibility", () => {
       let adminUser: UserWithCredentials;
       let adminCookies: string;

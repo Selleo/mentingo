@@ -652,6 +652,23 @@
         }
       }
     },
+    "/api/settings/manifest.webmanifest": {
+      "get": {
+        "operationId": "SettingsController_getPwaManifest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPwaManifestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/registration-form": {
       "get": {
         "operationId": "SettingsController_getPublicRegistrationForm",
@@ -17503,6 +17520,72 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetPwaManifestResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "short_name": {
+            "type": "string"
+          },
+          "theme_color": {
+            "type": "string"
+          },
+          "background_color": {
+            "type": "string"
+          },
+          "display": {
+            "const": "standalone",
+            "type": "string"
+          },
+          "orientation": {
+            "const": "portrait",
+            "type": "string"
+          },
+          "start_url": {
+            "const": "/",
+            "type": "string"
+          },
+          "scope": {
+            "const": "/",
+            "type": "string"
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "sizes": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "sizes",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "short_name",
+          "theme_color",
+          "background_color",
+          "display",
+          "orientation",
+          "start_url",
+          "scope",
+          "icons"
         ]
       },
       "GetPublicRegistrationFormResponse": {
