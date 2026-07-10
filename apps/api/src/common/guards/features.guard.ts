@@ -8,15 +8,13 @@ import {
 import { Reflector } from "@nestjs/core";
 import { FEATURE_SETTINGS_KEYS, FEATURE_UNREGISTERED_ACCESS_KEYS } from "@repo/shared";
 
-import {
-  REQUIRED_FEATURES_KEY,
-  type FeatureMetadata,
-} from "src/common/decorators/require-feature.decorator";
+import { REQUIRED_FEATURES_KEY } from "src/common/decorators/require-feature.decorator";
 import { SettingsService } from "src/settings/settings.service";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { TenantResolverService } from "src/storage/db/tenant-resolver.service";
 
 import type { FeatureKey, UnregisteredAccessFeatureKey } from "@repo/shared";
+import type { RequireFeatureConfig } from "src/common/decorators/require-feature.decorator";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { GlobalSettingsJSONContentSchema } from "src/settings/schemas/settings.schema";
 
@@ -30,13 +28,11 @@ export class FeaturesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredFeatures = this.reflector.getAllAndMerge<FeatureMetadata[]>(
+    const requiredFeatures = this.reflector.getAllAndOverride<RequireFeatureConfig>(
       REQUIRED_FEATURES_KEY,
       [context.getClass(), context.getHandler()],
     );
-
-    if (!requiredFeatures.length) return true;
-
+    if (!requiredFeatures) return true;
     const request = context.switchToHttp().getRequest();
     const user = request.user as CurrentUserType | undefined;
 
@@ -44,7 +40,6 @@ export class FeaturesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
     if (!isPublic && !user) return false;
 
     const tenantId = await this.tenantResolver.resolveTenantId(request);
@@ -55,7 +50,8 @@ export class FeaturesGuard implements CanActivate {
       this.settingsService.getGlobalSettings(),
     );
 
-    const disabledFeature = requiredFeatures.find(({ feature, allowUnregisteredUser }) => {
+    const { features, allowUnregisteredUser } = requiredFeatures;
+    const disabledFeature = features.find((feature) => {
       const isEnabled = this.isFeatureEnabled(globalSettings, feature);
 
       if (!isEnabled) return true;

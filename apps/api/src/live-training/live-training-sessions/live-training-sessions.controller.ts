@@ -27,7 +27,7 @@ import {
 const languageQuerySchema = Type.Optional(Type.Enum(SUPPORTED_LANGUAGES));
 
 @UseGuards(FeaturesGuard, PermissionsGuard)
-@RequireFeature(FEATURES.LIVE_TRAINING)
+@RequireFeature({ features: [FEATURES.LIVE_TRAINING] })
 @Controller("live-training/:liveTrainingId/sessions")
 export class LiveTrainingSessionsController {
   constructor(private readonly liveTrainingSessionsService: LiveTrainingSessionsService) {}

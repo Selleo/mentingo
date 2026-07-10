@@ -48,7 +48,7 @@ export class QAController {
     response: QAResponseSchema,
   })
   @RequirePermission(PERMISSIONS.QA_READ_PUBLIC)
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -63,7 +63,7 @@ export class QAController {
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: allQAResponseSchema,
   })
-  @RequireFeature(FEATURES.QA, { allowUnregisteredUser: true })
+  @RequireFeature({ features: [FEATURES.QA], allowUnregisteredUser: true })
   async getAllQA(
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
@@ -77,7 +77,7 @@ export class QAController {
     response: baseResponse(createQAResponseSchema),
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   async createQA(
     @Body() data: CreateQABody,
     @CurrentUser() currentUser: CurrentUserType,
@@ -88,7 +88,7 @@ export class QAController {
   }
 
   @Post("create-language/:qaId")
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   @Validate({
     request: [
       { type: "param", name: "qaId", schema: UUIDSchema },
@@ -113,7 +113,7 @@ export class QAController {
     ],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   async updateQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -128,7 +128,7 @@ export class QAController {
     request: [{ type: "param", name: "qaId", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   async deleteQA(@Param("qaId") qaId: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
     return this.qaService.deleteQA(qaId, currentUser);
   }
@@ -141,7 +141,7 @@ export class QAController {
     ],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
-  @RequireFeature(FEATURES.QA)
+  @RequireFeature({ features: [FEATURES.QA] })
   async deleteLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,

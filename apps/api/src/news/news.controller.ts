@@ -65,7 +65,7 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Get("drafts")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -85,7 +85,7 @@ export class NewsController {
   }
 
   @Post("preview")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
@@ -108,7 +108,7 @@ export class NewsController {
 
   @Public()
   @Get("news-resource/:resourceId")
-  @RequireFeature(FEATURES.NEWS, { allowUnregisteredUser: true })
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -127,7 +127,7 @@ export class NewsController {
 
   @Public()
   @Get(":id")
-  @RequireFeature(FEATURES.NEWS, { allowUnregisteredUser: true })
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -146,7 +146,7 @@ export class NewsController {
 
   @Public()
   @Get()
-  @RequireFeature(FEATURES.NEWS, { allowUnregisteredUser: true })
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -165,7 +165,7 @@ export class NewsController {
   }
 
   @Post()
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
@@ -183,7 +183,7 @@ export class NewsController {
   @Patch(":id")
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -211,7 +211,7 @@ export class NewsController {
 
   @ApiOperation({ summary: "Add a new language to a news item" })
   @Post(":id")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -235,7 +235,7 @@ export class NewsController {
   }
 
   @Delete(":id/language")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -255,7 +255,7 @@ export class NewsController {
   }
 
   @Delete(":id")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
@@ -268,7 +268,7 @@ export class NewsController {
   }
 
   @Post(":id/upload")
-  @RequireFeature(FEATURES.NEWS)
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({
