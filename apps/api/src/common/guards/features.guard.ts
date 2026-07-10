@@ -1,5 +1,5 @@
 import {
-  ForbiddenException,
+  BadRequestException,
   Injectable,
   UnauthorizedException,
   type CanActivate,
@@ -66,7 +66,7 @@ export class FeaturesGuard implements CanActivate {
     });
 
     if (disabledFeature) {
-      throw new ForbiddenException("features.error.disabled");
+      throw new BadRequestException("common.toast.noAccess");
     }
 
     return true;
