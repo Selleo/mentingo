@@ -899,6 +899,19 @@
       "noPartiallyConfigured": "No hay servicios parcialmente configurados.",
       "allConfigured": "Todas las claves de entorno están configuradas correctamente.",
       "dismissWarning": "Descartar",
+      "aiCapabilities": {
+        "title": "Capacidades de IA",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generación de cursos",
+          "assetGeneration": "Generación de recursos"
+        },
+        "status": {
+          "enabled": "Activado",
+          "disabled": "Desactivado"
+        }
+      },
       "serviceNames": {
         "stripe": "Pago de Stripe",
         "bunny": "Bunny CDN",
@@ -2322,7 +2335,8 @@
           "aiRoleplayTypeTooltip": "Simula un personaje y una situación realistas, sin romper el personaje.\nEjemplo: \"Esta es la segunda vez que tu servicio falla. ¿Qué vas a hacer al respecto?\"",
           "completionConditionsTooltip": "Enumere lo que el estudiante debe lograr para aprobar esta lección. Proporcione puntos claros y mensurables. La IA utilizará esta lista para comprobar el progreso. También puede definir un umbral de aprobación (por ejemplo, porcentaje o número mínimo de puntos a cubrir). Si no se proporciona ningún umbral, se deben cumplir todas las condiciones para aprobar la lección.",
           "passThresholdTooltip": "Establezca el porcentaje mínimo (1-100%) requerido para aprobar. Déjelo vacío si no hay umbral.",
-          "voiceConfigFishAudioTooltip": "El modo de voz utiliza Cartesia. Para usar una voz personalizada, abra Cartesia, busque la voz que desee y copie su ID de voz aquí.",
+          "voiceConfigCartesiaTooltip": "El audio de voz usa Cartesia. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de Cartesia.",
+          "voiceConfigOpenAiCompatibleTooltip": "El audio de voz usa un endpoint de texto a voz compatible con OpenAI. Male y Female usan presets de voces de OpenAI. Elija Custom para introducir otro valor de voz compatible con ese endpoint.",
           "aiMentorPersonaTooltip": "Esto define la personalidad de la lección. Puede seleccionar un nombre y un avatar para el mentor de IA. La persona se identificará con este nombre y el avatar seleccionado se mostrará durante las lecciones.",
           "suggestedExamples": "Ejemplos sugeridos",
           "charactersLeft": "Caracteres restantes",
@@ -2797,6 +2811,10 @@
       "body": "Espere un momento. Aparecerá aquí una vez que esté listo."
     },
     "videoProgress": {
+      "label": "Progreso del video",
+      "completedSummary": "{{completed}} de {{total}} completados",
+      "overviewAriaLabel": "Progreso de los videos de la lección",
+      "segmentAriaLabel": "Progreso del video {{index}}: {{progress}}% visto",
       "errors": {
         "resourceNotFound": "No se pudo guardar el progreso del video para esta lección.",
         "unsupportedLessonType": "El progreso del video solo está disponible para lecciones de contenido.",
@@ -3405,6 +3423,12 @@
     "toast": {
       "success": "La imagen de fondo de inicio de sesión se cambió correctamente",
       "error": "Error al cambiar la imagen de fondo de inicio de sesión"
+    }
+  },
+  "ingestion": {
+    "error": {
+      "jobFailed": "El procesamiento del archivo falló. Intente con otro archivo o vuelva a subirlo.",
+      "noExtractableText": "No se pudo extraer texto legible de este archivo."
     }
   },
   "files": {

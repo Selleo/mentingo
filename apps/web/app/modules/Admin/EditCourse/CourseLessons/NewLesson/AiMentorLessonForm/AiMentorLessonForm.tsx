@@ -110,6 +110,10 @@ const AiMentorLessonForm = ({
   const selectedVoiceMode = form.watch("voiceMode");
   const { data: lumaConfigured } = useLumaConfigured();
   const canConfigureVoiceMentor = Boolean(lumaConfigured?.voiceMentorEnabled);
+  const voiceConfigTooltipKey =
+    lumaConfigured?.voiceTtsProvider === "openaiCompatible"
+      ? "adminCourseView.curriculum.lesson.other.voiceConfigOpenAiCompatibleTooltip"
+      : "adminCourseView.curriculum.lesson.other.voiceConfigCartesiaTooltip";
 
   const objectUrlRef = useRef<string | null>(null);
 
@@ -450,7 +454,7 @@ const AiMentorLessonForm = ({
                           align="center"
                           className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
                         >
-                          {t("adminCourseView.curriculum.lesson.other.voiceConfigFishAudioTooltip")}
+                          {t(voiceConfigTooltipKey)}
                           <TooltipArrow className="fill-black" />
                         </TooltipContent>
                       </Tooltip>

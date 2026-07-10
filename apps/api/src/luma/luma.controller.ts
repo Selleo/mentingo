@@ -1,4 +1,4 @@
-import { ChatOptions, IntegrationIdOptions } from "@japro/luma-sdk";
+import { IntegrationIdOptions } from "@japro/luma-sdk";
 import {
   Body,
   Controller,
@@ -24,14 +24,17 @@ import {
 import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 import { getBaseFileTypePipe } from "src/file/utils/baseFileTypePipe";
 import { buildFileTypeRegex } from "src/file/utils/fileTypeRegex";
+import { LumaCourseGenerationStreamService } from "src/luma/luma-course-generation-stream.service";
 import { LumaCourseGenerationSyncService } from "src/luma/luma-course-generation-sync.service";
 import { LumaService } from "src/luma/luma.service";
+import { CourseGenerationChatBody } from "src/luma/luma.types";
 import {
   chatOptionsSchema,
   courseGenerationDraftSchema,
@@ -53,6 +56,7 @@ export class LumaController {
   constructor(
     private readonly lumaService: LumaService,
     private readonly lumaCourseGenerationSyncService: LumaCourseGenerationSyncService,
+    private readonly lumaCourseGenerationStreamService: LumaCourseGenerationStreamService,
   ) {}
 
   @Post("course-generation/chat")
@@ -61,55 +65,21 @@ export class LumaController {
     request: [{ type: "body", schema: chatOptionsSchema }],
   })
   async chatWithCourseGenerationAgent(
-    @Body() data: ChatOptions,
+    @Body() data: CourseGenerationChatBody,
     @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    res.setHeader("Content-Type", "text/plain; charset=utf-8");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-    res.setHeader("X-Vercel-AI-Data-Stream", "v1");
+    const stream = await this.lumaCourseGenerationStreamService.createChatStream(data, currentUser);
+    const { pipeUIMessageStreamToResponse } = await loadAiSdk();
 
-    const response = await this.lumaService.chatWithCourseAgent(data, currentUser);
-    let syncEnqueued = false;
-    let pendingCourseGeneratedFrame = "";
-
-    try {
-      for await (const chunk of response.data as AsyncIterable<Buffer>) {
-        res.write(chunk);
-
-        const courseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
-          chunk,
-          pendingCourseGeneratedFrame,
-        );
-        pendingCourseGeneratedFrame = courseGeneratedDetection.pendingFrame;
-
-        if (!syncEnqueued && courseGeneratedDetection.hasCourseGeneratedEvent) {
-          syncEnqueued = true;
-          await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
-            data.integrationId,
-            currentUser,
-          );
-        }
-      }
-
-      const finalCourseGeneratedDetection = this.lumaService.hasCourseGeneratedEvent(
-        Buffer.from("\n"),
-        pendingCourseGeneratedFrame,
-      );
-
-      if (!syncEnqueued && finalCourseGeneratedDetection.hasCourseGeneratedEvent) {
-        await this.lumaCourseGenerationSyncService.enqueueGeneratedCourseBundleSync(
-          data.integrationId,
-          currentUser,
-        );
-      }
-
-      res.end();
-    } catch (err) {
-      res.write(`event: error\ndata: ${JSON.stringify(err)}\n\n`);
-      res.end();
-    }
+    return pipeUIMessageStreamToResponse({
+      response: res,
+      stream,
+      headers: {
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
   }
 
   @Get("course-generation/messages")

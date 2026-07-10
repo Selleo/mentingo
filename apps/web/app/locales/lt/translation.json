@@ -904,6 +904,19 @@
       "noPartiallyConfigured": "Nėra iš dalies sukonfigūruotų paslaugų.",
       "allConfigured": "Visi aplinkos raktai sukonfigūruoti teisingai.",
       "dismissWarning": "Atsisakyti",
+      "aiCapabilities": {
+        "title": "AI galimybės",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Kursų generavimas",
+          "assetGeneration": "Assetų generavimas"
+        },
+        "status": {
+          "enabled": "Įjungta",
+          "disabled": "Išjungta"
+        }
+      },
       "serviceNames": {
         "stripe": "Mokėjimas juostelėmis",
         "bunny": "Bunny CDN",
@@ -2267,7 +2280,8 @@
           "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
           "completionConditionsTooltip": "Išvardykite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką. Pateikite aiškius ir išmatuojamus taškus. AI naudos šį sąrašą pažangai patikrinti. Taip pat galite nustatyti išlaikymo slenkstį (pvz., procentą arba minimalų taškų skaičių). Jei slenkstis nenurodytas, turi būti įvykdytos visos sąlygos, norint išlaikyti pamoką.",
           "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
-          "voiceConfigFishAudioTooltip": "Balso režimas naudoja „Cartesia“. Norėdami naudoti pasirinktinį balsą, atidarykite „Cartesia“, raskite norimą balsą ir nukopijuokite jo balso ID čia.",
+          "voiceConfigCartesiaTooltip": "Balso garsas naudoja Cartesia. Pasirinkite Male arba Female, kad būtų naudojamas sukonfigūruotas balsų susiejimas, arba pasirinkite Custom ir įveskite Cartesia balso ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Balso garsas naudoja su OpenAI suderinamą teksto į kalbą endpointą. Male ir Female naudoja OpenAI balso presetus. Pasirinkite Custom, jei norite įvesti kitą šio endpointo palaikomą balso reikšmę.",
           "aiMentorPersonaTooltip": "Tai apibrėžia pamokos asmenybę. Galite pasirinkti AI mentoriaus vardą ir pseudoportretą. Asmuo atpažins save šiuo vardu, o pasirinktas avataras bus rodomas pamokų metu.",
           "suggestedExamples": "Siūlomi pavyzdžiai",
           "charactersLeft": "liko simbolių",
@@ -2742,6 +2756,10 @@
       "body": "Šiek tiek palaukite. Jis pasirodys čia, kai bus paruoštas."
     },
     "videoProgress": {
+      "label": "Vaizdo įrašų eiga",
+      "completedSummary": "Užbaigta {{completed}} iš {{total}}",
+      "overviewAriaLabel": "Pamokos vaizdo įrašų eiga",
+      "segmentAriaLabel": "{{index}} vaizdo įrašo eiga: peržiūrėta {{progress}}%",
       "errors": {
         "resourceNotFound": "Nepavyko išsaugoti šios pamokos vaizdo įrašo pažangos.",
         "unsupportedLessonType": "Vaizdo įrašo pažanga pasiekiama tik turinio pamokoms.",
@@ -3334,6 +3352,12 @@
     "toast": {
       "success": "Prisijungimo fono vaizdas sėkmingai pakeistas",
       "error": "Klaida keičiant prisijungimo fono paveikslėlį"
+    }
+  },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Failo apdoroti nepavyko. Pabandykite kitą failą arba įkelkite jį dar kartą.",
+      "noExtractableText": "Iš šio failo nepavyko išgauti skaitomo teksto."
     }
   },
   "files": {

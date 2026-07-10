@@ -1,0 +1,1 @@
+export const LUMA_CONFIGURATION_CACHE_TTL_MS = 60_000;

@@ -1,9 +1,9 @@
 import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
-import { generateObject, generateText, jsonSchema } from "ai";
 
 import { MAX_TOKENS } from "src/ai/ai.constants";
 import { PromptService } from "src/ai/services/prompt.service";
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { type AiJudgeJudgementBody, aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS, type OpenAIModels } from "src/ai/utils/ai.type";
 import { evaluateAiJudgeResult } from "src/ai/utils/judgeEvaluation";
@@ -18,10 +18,11 @@ export class ChatService {
         const provider = await this.promptService.getOpenAI();
 
         try {
+          const { generateText } = await loadAiSdk();
           const { text } = await generateText({
             model: provider(model),
             prompt: prompt,
-            maxTokens: MAX_TOKENS,
+            maxOutputTokens: MAX_TOKENS,
             experimental_telemetry: { isEnabled: true },
           });
 
@@ -44,9 +45,10 @@ export class ChatService {
         await this.promptService.isNotEmpty(prompt);
         const provider = await this.promptService.getOpenAI();
         try {
+          const { generateObject, jsonSchema } = await loadAiSdk();
           const result = await generateObject({
-            model: provider(OPENAI_MODELS.BASIC, { structuredOutputs: true }),
-            schema: jsonSchema({ ...aiJudgeJudgementSchema, additionalProperties: false }),
+            model: provider(OPENAI_MODELS.BASIC),
+            schema: jsonSchema(() => ({ ...aiJudgeJudgementSchema, additionalProperties: false })),
             temperature: 0.5,
             topK: 10,
             topP: 0.9,

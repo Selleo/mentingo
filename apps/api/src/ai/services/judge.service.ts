@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { MessageService } from "src/ai/services/message.service";
 import { PromptService } from "src/ai/services/prompt.service";
@@ -23,6 +24,7 @@ export class JudgeService {
     private readonly threadService: ThreadService,
     private readonly messageService: MessageService,
     private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
   ) {}
 
   async runJudge(data: ThreadOwnershipBody, viewer: JudgeViewer) {
@@ -59,7 +61,16 @@ export class JudgeService {
       lessonInstructions: mentorLesson.instructions,
       lessonConditions: mentorLesson.conditions,
     });
-    const judged = await this.chatService.judge(system, content);
+    const judged = await this.aiRuntimeService.judgeMentor(
+      {
+        messages: [
+          { role: MESSAGE_ROLE.SYSTEM, content: system },
+          { role: MESSAGE_ROLE.USER, content },
+        ],
+        temperature: 0.5,
+      },
+      () => this.chatService.judge(system, content),
+    );
 
     const { status } = await this.aiRepository.updateThread(data.threadId, {
       status: THREAD_STATUS.COMPLETED,

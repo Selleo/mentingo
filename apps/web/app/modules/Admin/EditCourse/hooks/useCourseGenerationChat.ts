@@ -1,11 +1,14 @@
 import { useChat } from "@ai-sdk/react";
-import { useCallback, useEffect, useRef } from "react";
+import { createTextUiMessage, toUiMessageRole } from "@repo/shared";
+import { DefaultChatTransport } from "ai";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useCourseGenerationMessages } from "~/api/queries/admin/useCourseGenerationMessages";
 import { hasCourseGeneratedFlag } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationChat.utils";
 import { invalidateCourseGenerationSyncQueries } from "~/modules/Admin/EditCourse/components/course-generation/utils/courseGenerationSync.utils";
 
-import type { Message } from "@ai-sdk/react";
+import type { Dispatch, SetStateAction } from "react";
+import type { CourseGenerationUIMessage } from "~/modules/Admin/EditCourse/hooks/useCourseGenerationChat.types";
 
 type UseCourseGenerationChatOptions = {
   courseId: string;
@@ -13,16 +16,36 @@ type UseCourseGenerationChatOptions = {
   onInvalidate?: () => void;
 };
 
+type CourseGenerationChatStatus = "submitted" | "streaming" | "ready" | "error";
+
+type CourseGenerationChatResult = {
+  messages: CourseGenerationUIMessage[];
+  input: string;
+  setInput: Dispatch<SetStateAction<string>>;
+  setMessages: (messages: CourseGenerationUIMessage[]) => void;
+  status: CourseGenerationChatStatus;
+  data: unknown[];
+  handleSubmit: () => Promise<void>;
+};
+
 const apiUrl = import.meta.env.VITE_API_URL;
 const chatUrl = apiUrl
   ? `${apiUrl}/api/luma/course-generation/chat`
   : "/api/luma/course-generation/chat";
 
+const getCourseGenerationStreamData = (messages: CourseGenerationUIMessage[]) =>
+  messages.flatMap((message) =>
+    message.parts.flatMap((part) =>
+      part.type === "data-courseGenerationEvent" ? [part.data] : [],
+    ),
+  );
+
 export function useCourseGenerationChat({
   courseId,
   draftId,
   onInvalidate,
-}: UseCourseGenerationChatOptions) {
+}: UseCourseGenerationChatOptions): CourseGenerationChatResult {
+  const [input, setInput] = useState("");
   const onInvalidateRef = useRef(onInvalidate);
 
   useEffect(() => {
@@ -42,44 +65,70 @@ export function useCourseGenerationChat({
     onInvalidateRef.current?.();
   }, [courseId]);
 
-  const chat = useChat({
-    api: chatUrl,
-    body: {
-      integrationId: courseId,
-    },
-    fetch: async (url, options) => {
-      const body = JSON.parse((options?.body as string) ?? "{}");
-
-      return fetch(url, {
-        ...options,
-        body: JSON.stringify({
-          integrationId: courseId,
-          message: body.messages?.[body.messages.length - 1]?.content || "",
-        }),
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport<CourseGenerationUIMessage>({
+        api: chatUrl,
         credentials: "include",
-      });
+        prepareSendMessagesRequest: ({ messages }) => {
+          const message = messages[messages.length - 1];
+
+          return {
+            body: {
+              integrationId: courseId,
+              message,
+            },
+            credentials: "include",
+          };
+        },
+      }),
+    [courseId],
+  );
+
+  const { messages, setMessages, status, sendMessage } = useChat<CourseGenerationUIMessage>({
+    transport,
+    onFinish: () => {
+      void invalidateGenerationQueries();
     },
-    onFinish: invalidateGenerationQueries,
     onError: () => {
       void invalidateGenerationQueries();
     },
   });
 
-  const { data, setMessages } = chat;
-
   useEffect(() => {
     setMessages(
-      (courseGenerationMessages ?? []).map((message): Message => ({
-        id: message.id,
-        role: message.role as Message["role"],
-        content: message.content,
-      })),
+      (courseGenerationMessages ?? []).map((message) =>
+        createTextUiMessage<CourseGenerationUIMessage>({
+          id: message.id,
+          role: toUiMessageRole<CourseGenerationUIMessage["role"]>(message.role),
+          content: message.content,
+        }),
+      ),
     );
   }, [courseGenerationMessages, setMessages]);
+
+  const data = useMemo(() => getCourseGenerationStreamData(messages), [messages]);
 
   useEffect(() => {
     if (!hasCourseGeneratedFlag(data)) return;
     void invalidateGenerationQueries();
   }, [data, invalidateGenerationQueries]);
-  return chat;
+
+  const handleSubmit = useCallback(async () => {
+    const message = input.trim();
+    if (!message || !courseId) return;
+
+    setInput("");
+    await sendMessage({ text: message });
+  }, [courseId, input, sendMessage]);
+
+  return {
+    messages,
+    input,
+    setInput,
+    setMessages,
+    status,
+    data,
+    handleSubmit,
+  };
 }
