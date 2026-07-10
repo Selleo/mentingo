@@ -9,12 +9,12 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { PERMISSIONS, ENTITY_TYPES, SupportedLanguages } from "@repo/shared";
+import { PERMISSIONS, SupportedLanguages, FEATURES } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { RequireEntityType } from "src/common/decorators/require-entity-type.decorator";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
@@ -48,7 +48,7 @@ export class QAController {
     response: QAResponseSchema,
   })
   @RequirePermission(PERMISSIONS.QA_READ_PUBLIC)
-  @RequireEntityType(ENTITY_TYPES.QA)
+  @RequireFeature(FEATURES.QA)
   async getQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -59,11 +59,11 @@ export class QAController {
 
   @Public()
   @Get()
-  @RequireEntityType(ENTITY_TYPES.QA)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: allQAResponseSchema,
   })
+  @RequireFeature(FEATURES.QA, { allowUnregisteredUser: true })
   async getAllQA(
     @Query("language") language: SupportedLanguages,
     @CurrentUser("userId") userId: UUIDType,
@@ -72,12 +72,12 @@ export class QAController {
   }
 
   @Post()
-  @RequireEntityType(ENTITY_TYPES.QA)
   @Validate({
     request: [{ type: "body", schema: createQASchema }],
     response: baseResponse(createQAResponseSchema),
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
+  @RequireFeature(FEATURES.QA)
   async createQA(
     @Body() data: CreateQABody,
     @CurrentUser() currentUser: CurrentUserType,
@@ -88,7 +88,7 @@ export class QAController {
   }
 
   @Post("create-language/:qaId")
-  @RequireEntityType(ENTITY_TYPES.QA)
+  @RequireFeature(FEATURES.QA)
   @Validate({
     request: [
       { type: "param", name: "qaId", schema: UUIDSchema },
@@ -105,7 +105,6 @@ export class QAController {
   }
 
   @Patch(":qaId")
-  @RequireEntityType(ENTITY_TYPES.QA)
   @Validate({
     request: [
       { type: "param", name: "qaId", schema: UUIDSchema },
@@ -114,6 +113,7 @@ export class QAController {
     ],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
+  @RequireFeature(FEATURES.QA)
   async updateQA(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -124,17 +124,16 @@ export class QAController {
   }
 
   @Delete(":qaId")
-  @RequireEntityType(ENTITY_TYPES.QA)
   @Validate({
     request: [{ type: "param", name: "qaId", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
+  @RequireFeature(FEATURES.QA)
   async deleteQA(@Param("qaId") qaId: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
     return this.qaService.deleteQA(qaId, currentUser);
   }
 
   @Delete("language/:qaId")
-  @RequireEntityType(ENTITY_TYPES.QA)
   @Validate({
     request: [
       { type: "param", name: "qaId", schema: UUIDSchema },
@@ -142,6 +141,7 @@ export class QAController {
     ],
   })
   @RequirePermission(PERMISSIONS.QA_MANAGE)
+  @RequireFeature(FEATURES.QA)
   async deleteLanguage(
     @Param("qaId") qaId: UUIDType,
     @Query("language") language: SupportedLanguages,

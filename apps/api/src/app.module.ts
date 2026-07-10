@@ -40,7 +40,6 @@ import redisConfig from "./common/configuration/redis";
 import s3Config from "./common/configuration/s3";
 import stripeConfig from "./common/configuration/stripe";
 import { EmailModule } from "./common/emails/emails.module";
-import { EntityTypesGuard } from "./common/guards/entity-types.guard";
 import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
@@ -214,10 +213,6 @@ import type { RedisClient } from "src/redis";
     {
       provide: APP_GUARD,
       useClass: PermissionsGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: EntityTypesGuard,
     },
     GoogleStrategy,
     MicrosoftStrategy,

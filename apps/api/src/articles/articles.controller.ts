@@ -22,8 +22,8 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  FEATURES,
   PERMISSIONS,
-  ENTITY_TYPES,
   SupportedLanguages,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
@@ -38,7 +38,7 @@ import {
 } from "src/articles/schemas/previewArticle.schema";
 import { BaseResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
-import { RequireEntityType } from "src/common/decorators/require-entity-type.decorator";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -85,12 +85,12 @@ export class ArticlesController {
   constructor(private readonly articlesService: ArticlesService) {}
 
   @Post("section")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "body", schema: createArticleSectionSchema }],
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async createArticleSection(
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
@@ -104,7 +104,6 @@ export class ArticlesController {
   }
 
   @Get("section/:id")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -113,6 +112,7 @@ export class ArticlesController {
     response: baseResponse(getArticleSectionDetailsResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -124,7 +124,6 @@ export class ArticlesController {
   }
 
   @Patch("section/:id")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -133,6 +132,7 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async updateArticleSection(
     @Param("id") id: UUIDType,
     @Body() updateArticleSectionBody: UpdateArticleSection,
@@ -149,7 +149,6 @@ export class ArticlesController {
 
   @ApiOperation({ summary: "Add a new language to an article section" })
   @Post("section/:id/language")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -158,6 +157,7 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async addNewLanguageToSection(
     @Param("id") id: UUIDType,
     @Body() createLanguageBody: CreateArticleSection,
@@ -173,7 +173,6 @@ export class ArticlesController {
   }
 
   @Delete("section/:id/language")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -181,6 +180,7 @@ export class ArticlesController {
     ],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async deleteArticleSectionLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -190,11 +190,11 @@ export class ArticlesController {
   }
 
   @Delete("section/:id")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async deleteArticleSection(
     @Param("id") id: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
@@ -216,7 +216,6 @@ export class ArticlesController {
 
   @Public()
   @Get("toc")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -224,6 +223,7 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleSectionResponseSchema),
   })
+  @RequireFeature(FEATURES.ARTICLES, { allowUnregisteredUser: true })
   async getArticleToc(
     @Query("language") language: SupportedLanguages,
     @Query("isDraftMode") isDraftMode?: boolean,
@@ -236,13 +236,13 @@ export class ArticlesController {
 
   @Public()
   @Get("articles-resource/:resourceId")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
       { type: "query", name: "preview", schema: filePreviewQuerySchema },
     ],
   })
+  @RequireFeature(FEATURES.ARTICLES, { allowUnregisteredUser: true })
   async getArticleResource(
     @Param("resourceId") resourceId: UUIDType,
     @Query("preview") preview: FilePreviewQuery,
@@ -255,7 +255,6 @@ export class ArticlesController {
 
   @Public()
   @Get(":id")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -264,6 +263,7 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleResponseSchema),
   })
+  @RequireFeature(FEATURES.ARTICLES, { allowUnregisteredUser: true })
   async getArticle(
     @Param("id") id: string,
     @Query("language") language: SupportedLanguages,
@@ -277,11 +277,11 @@ export class ArticlesController {
 
   @Public()
   @Get()
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
   })
+  @RequireFeature(FEATURES.ARTICLES, { allowUnregisteredUser: true })
   async getArticles(
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser?: CurrentUserType,
@@ -290,12 +290,12 @@ export class ArticlesController {
   }
 
   @Post("article")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "body", schema: createArticleSchema }],
     response: baseResponse(createArticleResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async createArticle(
     @Body() createArticleBody: CreateArticle,
     @CurrentUser() currentUser: CurrentUserType,
@@ -308,7 +308,6 @@ export class ArticlesController {
   @Patch(":id")
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -317,6 +316,7 @@ export class ArticlesController {
     response: baseResponse(createArticleResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
@@ -364,7 +364,6 @@ export class ArticlesController {
   }
 
   @Delete(":id/language")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -372,6 +371,7 @@ export class ArticlesController {
     ],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async deleteArticleLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -381,11 +381,11 @@ export class ArticlesController {
   }
 
   @Delete(":id")
-  @RequireEntityType(ENTITY_TYPES.ARTICLES)
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature(FEATURES.ARTICLES)
   async deleteArticle(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     await this.articlesService.deleteArticle(id, currentUser);
   }

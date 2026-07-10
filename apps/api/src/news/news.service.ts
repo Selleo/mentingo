@@ -369,7 +369,6 @@ export class NewsService {
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
     });
-
     const [existingNews] = await this.db
       .select({
         ...getTableColumns(news),
