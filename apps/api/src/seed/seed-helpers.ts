@@ -5,8 +5,9 @@ import {
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
   SUPPORTED_LANGUAGES,
-  type SupportedLanguages,
+  isSupportedLanguage,
   type SystemRoleSlug,
+  type LocalizedText,
 } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
@@ -35,7 +36,7 @@ import { StripeService } from "src/stripe/stripe.service";
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
 
-const CATEGORY_TRANSLATIONS: Record<string, Partial<Record<string, string>>> = {
+const CATEGORY_TRANSLATIONS: Record<string, LocalizedText> = {
   "Data Science": {
     pl: "Nauka o danych",
     de: "Datenwissenschaft",
@@ -166,7 +167,7 @@ export async function createNiceCourses(
           .values({
             title: buildJsonbFieldWithMultipleEntries(categoryTranslations),
             baseLanguage: SUPPORTED_LANGUAGES.EN,
-            availableLocales: Object.keys(categoryTranslations) as SupportedLanguages[],
+            availableLocales: Object.keys(categoryTranslations).filter(isSupportedLanguage),
             tenantId,
           })
           .returning();
