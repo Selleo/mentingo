@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { passwordStatusQueryOptions } from "../queries";
+import { currentUserQueryOptions, passwordStatusQueryOptions } from "../queries";
 import { useCurrentUserSuspense } from "../queries/useCurrentUser";
 import { queryClient } from "../queryClient";
 
@@ -33,6 +33,7 @@ export function useChangePassword() {
     },
     onSuccess: async (_data, options) => {
       await queryClient.invalidateQueries(passwordStatusQueryOptions);
+      await queryClient.invalidateQueries(currentUserQueryOptions);
 
       toast({
         variant: "default",

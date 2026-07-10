@@ -7,7 +7,12 @@ import { AuthService } from "src/auth/auth.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, resetTokens, userDetails as userDetailsTable } from "src/storage/schema";
+import {
+  createTokens,
+  credentials,
+  resetTokens,
+  userDetails as userDetailsTable,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -220,6 +225,50 @@ describe("UsersController (e2e)", () => {
   });
 
   describe("PATCH /user/change-password?id=:id", () => {
+    it("should require a password change before allowing other protected actions", async () => {
+      await db
+        .update(credentials)
+        .set({ requiresPasswordChange: true })
+        .where(eq(credentials.userId, testUser.id));
+
+      await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/global")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/company-information")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/platform-simple-logo")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", testCookies)
+        .expect(403);
+
+      const newPassword = "newPassword123@";
+      await request(app.getHttpServer())
+        .patch(`/api/user/change-password?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ oldPassword: testPassword, newPassword, confirmPassword: newPassword })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", testCookies)
+        .expect(200);
+    });
+
     it("should change password when old password is correct", async () => {
       const newPassword = "newPassword123@";
 

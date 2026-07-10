@@ -34,6 +34,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -339,6 +340,7 @@ export class UserController {
   }
 
   @Patch("change-password")
+  @AllowPasswordChangeRequired()
   @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: nullResponse(),

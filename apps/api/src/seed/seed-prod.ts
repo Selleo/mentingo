@@ -76,6 +76,7 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
     id: faker.string.uuid(),
     userId,
     password: await hashPassword(password),
+    requiresPasswordChange: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     tenantId,

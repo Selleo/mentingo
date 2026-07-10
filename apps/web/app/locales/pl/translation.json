@@ -1210,6 +1210,11 @@
       "passwordCreatedSuccessfully": "Hasło zostało utworzone pomyślnie"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Zmień hasło",
+    "subHeader": "Ze względów bezpieczeństwa musisz ustawić nowe hasło, aby kontynuować.",
+    "submit": "Zmień hasło"
+  },
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",

@@ -519,7 +519,7 @@ export class UserService {
     const hashedNewPassword = await hashPassword(newPassword);
     await this.db
       .update(credentials)
-      .set({ password: hashedNewPassword })
+      .set({ password: hashedNewPassword, requiresPasswordChange: false })
       .where(eq(credentials.userId, id));
   }
 
@@ -552,7 +552,7 @@ export class UserService {
     const hashedNewPassword = await hashPassword(newPassword);
     await this.db
       .update(credentials)
-      .set({ password: hashedNewPassword })
+      .set({ password: hashedNewPassword, requiresPasswordChange: false })
       .where(eq(credentials.userId, id));
   }
 

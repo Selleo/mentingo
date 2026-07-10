@@ -4,7 +4,7 @@ import { match } from "ts-pattern";
 
 import { useCurrentUser } from "~/api/queries/useCurrentUser";
 import { useNavigationHistoryStore } from "~/lib/stores/navigationHistory";
-import { LOGIN_REDIRECT_URL } from "~/modules/Auth/constants";
+import { LOGIN_REDIRECT_URL, REQUIRED_PASSWORD_CHANGE_URL } from "~/modules/Auth/constants";
 import { resolvePostAuthRedirectPath } from "~/modules/Auth/utils/resolvePostAuthRedirectPath";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
@@ -25,6 +25,7 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
 
   const shouldVerifyMFA = Boolean(currentUser?.shouldVerifyMFA);
   const isMFAComplete = !shouldVerifyMFA || hasVerifiedMFA;
+  const requiresPasswordChange = Boolean(currentUser?.requiresPasswordChange);
   const redirectPath = useMemo(() => {
     mergeNavigationHistory();
 
@@ -51,7 +52,11 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
         return <Navigate to="/auth/mfa" />;
       }
 
-      if (!shouldVerifyMFA) {
+      if (requiresPasswordChange && location.pathname !== REQUIRED_PASSWORD_CHANGE_URL) {
+        return <Navigate to={REQUIRED_PASSWORD_CHANGE_URL} />;
+      }
+
+      if (!shouldVerifyMFA && !requiresPasswordChange) {
         return <Navigate to={redirectPath || LOGIN_REDIRECT_URL} />;
       }
 
@@ -60,6 +65,10 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
     .with("public", () => {
       if (shouldVerifyMFA && !hasVerifiedMFA) {
         return <Navigate to="/auth/mfa" />;
+      }
+
+      if (requiresPasswordChange) {
+        return <Navigate to={REQUIRED_PASSWORD_CHANGE_URL} />;
       }
 
       return children;
@@ -71,6 +80,10 @@ export const MFAGuard = ({ children, mode }: MFAGuardProps) => {
 
       if (!isMFAComplete) {
         return <Navigate to="/auth/mfa" />;
+      }
+
+      if (requiresPasswordChange) {
+        return <Navigate to={REQUIRED_PASSWORD_CHANGE_URL} />;
       }
 
       return children;

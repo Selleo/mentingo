@@ -992,6 +992,11 @@
       "passwordCreatedSuccessfully": "Slaptažodis sukurtas sėkmingai"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Pakeiskite slaptažodį",
+    "subHeader": "Saugumo sumetimais prieš tęsdami turite nustatyti naują slaptažodį.",
+    "submit": "Pakeisti slaptažodį"
+  },
   "passwordValidationDisplay": {
     "title": "Slaptažodžio reikalavimai",
     "header": "Jūsų slaptažodyje turi būti:",

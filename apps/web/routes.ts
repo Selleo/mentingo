@@ -12,6 +12,7 @@ export const routes: (
         route("password-recovery", "modules/Auth/PasswordRecovery.page.tsx");
         route("magic-link", "modules/Auth/MagicLink.page.tsx");
         route("mfa", "modules/Auth/MFA.page.tsx");
+        route("change-password", "modules/Auth/ForcedPasswordChange.page.tsx");
       });
       route("tenant-inactive", "modules/Errors/TenantInactive.page.tsx");
       route("", "modules/Navigation/NavigationWrapper.tsx", () => {

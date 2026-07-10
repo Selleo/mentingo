@@ -16059,6 +16059,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16121,6 +16124,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -16201,6 +16205,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16263,6 +16270,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -16653,6 +16661,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16762,6 +16773,7 @@
               "roleSlugs",
               "permissions",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin",
               "isSupportMode",
@@ -16931,6 +16943,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16993,6 +17008,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17182,6 +17198,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -17244,6 +17263,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]

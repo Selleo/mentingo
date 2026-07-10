@@ -271,6 +271,7 @@ export class AuthService {
         accessToken,
         refreshToken,
         shouldVerifyMFA: true,
+        requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
         isManagingTenantAdmin,
       };
@@ -282,6 +283,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       shouldVerifyMFA: false,
+      requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
       isManagingTenantAdmin,
     };
@@ -297,7 +299,10 @@ export class AuthService {
     const user = await this.userService.getUserById(userId);
     if (!user) throw new UnauthorizedException("User not found");
 
-    const onboardingStatus = await this.getOnboardingStatus(userId);
+    const [onboardingStatus, requiresPasswordChange] = await Promise.all([
+      this.getOnboardingStatus(userId),
+      this.getRequiresPasswordChange(userId),
+    ]);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
     const userSettings = await this.settingsService.getUserSettings(userId);
     const { roleSlugs, permissions } = await this.permissionsService.getUserAccess(userId);
@@ -309,6 +314,7 @@ export class AuthService {
       return {
         ...user,
         shouldVerifyMFA: true,
+        requiresPasswordChange,
         onboardingStatus,
         isManagingTenantAdmin,
         isSupportMode: false,
@@ -321,6 +327,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange,
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: false,
@@ -356,6 +363,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange: false,
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: true,
@@ -436,6 +444,7 @@ export class AuthService {
         firstName: users.firstName,
         lastName: users.lastName,
         password: credentials.password,
+        requiresPasswordChange: credentials.requiresPasswordChange,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         archived: users.archived,
@@ -617,6 +626,16 @@ export class AuthService {
 
     await this.userService.resetPassword(resetToken.userId, newPassword);
     await this.resetPasswordService.deleteToken(resetToken.id);
+  }
+
+  private async getRequiresPasswordChange(userId: UUIDType): Promise<boolean> {
+    const [credential] = await this.db
+      .select({ requiresPasswordChange: credentials.requiresPasswordChange })
+      .from(credentials)
+      .where(eq(credentials.userId, userId))
+      .limit(1);
+
+    return credential?.requiresPasswordChange ?? false;
   }
 
   private async fetchExpiredTokens() {
@@ -946,6 +965,7 @@ export class AuthService {
     );
 
     const isManagingTenantAdmin = await this.isManagingTenantAdmin(user.tenantId, permissions);
+    const requiresPasswordChange = await this.getRequiresPasswordChange(userId);
 
     if (this.isMfaRoleEnforced(MFAEnforcedRoles, roleSlugs) || userSettings.isMFAEnabled) {
       this.tokenService.setTemporaryTokenCookies(response, accessToken, refreshToken);
@@ -953,6 +973,7 @@ export class AuthService {
       return {
         ...user,
         shouldVerifyMFA: true,
+        requiresPasswordChange,
         onboardingStatus,
         isManagingTenantAdmin,
       };
@@ -963,6 +984,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange,
       onboardingStatus,
       isManagingTenantAdmin,
     };

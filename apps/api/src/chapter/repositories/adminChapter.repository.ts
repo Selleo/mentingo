@@ -203,7 +203,9 @@ export class AdminChapterRepository {
             'avatarReference', ${aiMentorLessons.avatarReference},
             'voiceMode', ${aiMentorLessons.voiceMode},
             'ttsPreset', ${aiMentorLessons.ttsPreset},
-            'customTtsReference', COALESCE(${aiMentorLessons.customTtsReference}->>${language}::text, '')
+            'customTtsReference', COALESCE(${
+              aiMentorLessons.customTtsReference
+            }->>${language}::text, '')
           )
           FROM ${aiMentorLessons}
           WHERE lessons.id = ${aiMentorLessons.lessonId} 

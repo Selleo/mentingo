@@ -986,6 +986,11 @@
       "passwordCreatedSuccessfully": "Passwort erfolgreich erstellt"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Passwort ändern",
+    "subHeader": "Aus Sicherheitsgründen müssen Sie ein neues Passwort festlegen, bevor Sie fortfahren.",
+    "submit": "Passwort ändern"
+  },
   "passwordValidationDisplay": {
     "title": "Passwortanforderungen",
     "header": "Ihr Passwort muss Folgendes enthalten:",

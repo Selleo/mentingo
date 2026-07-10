@@ -992,6 +992,11 @@
       "passwordCreatedSuccessfully": "Heslo bylo úspěšně vytvořeno"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Změňte heslo",
+    "subHeader": "Z bezpečnostních důvodů musíte před pokračováním nastavit nové heslo.",
+    "submit": "Změnit heslo"
+  },
   "passwordValidationDisplay": {
     "title": "Požadavky na heslo",
     "header": "Vaše heslo musí obsahovat:",
