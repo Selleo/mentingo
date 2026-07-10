@@ -123,6 +123,7 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(testUser, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        requiresPasswordChange: false,
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         groups: [],
       });
