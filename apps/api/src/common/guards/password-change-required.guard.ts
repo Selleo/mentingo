@@ -10,7 +10,8 @@ import { and, eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { ALLOW_PASSWORD_CHANGE_REQUIRED_KEY } from "src/common/decorators/allow-password-change-required.decorator";
-import { DB_ADMIN } from "src/storage/db/db.providers";
+import { DB } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { credentials } from "src/storage/schema";
 
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -19,7 +20,8 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 export class PasswordChangeRequiredGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
+    private readonly tenantDbRunner: TenantDbRunnerService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,16 +41,18 @@ export class PasswordChangeRequiredGuard implements CanActivate {
 
     if (!currentUser || currentUser.isSupportMode) return true;
 
-    const [credential] = await this.dbAdmin
-      .select({ requiresPasswordChange: credentials.requiresPasswordChange })
-      .from(credentials)
-      .where(
-        and(
-          eq(credentials.userId, currentUser.userId),
-          eq(credentials.tenantId, currentUser.tenantId),
-        ),
-      )
-      .limit(1);
+    const [credential] = await this.tenantDbRunner.runWithTenant(currentUser.tenantId, () =>
+      this.db
+        .select({ requiresPasswordChange: credentials.requiresPasswordChange })
+        .from(credentials)
+        .where(
+          and(
+            eq(credentials.userId, currentUser.userId),
+            eq(credentials.tenantId, currentUser.tenantId),
+          ),
+        )
+        .limit(1),
+    );
 
     if (!credential?.requiresPasswordChange) return true;
 

@@ -4324,6 +4324,7 @@
     "error": {
       "unauthenticated": "Usuario no autenticado",
       "invalidEmailOrPassword": "Correo electrónico o contraseña no válidos",
+      "invalidRefreshToken": "Token de actualización no válido",
       "adminRoleRequired": "Se requiere rol de administrador",
       "missingPermission": "No tienes permiso para acceder a este recurso.",
       "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión."

@@ -4386,6 +4386,7 @@
     "error": {
       "unauthenticated": "Uživatel není ověřen",
       "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
+      "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
       "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."

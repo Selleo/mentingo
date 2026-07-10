@@ -29,11 +29,16 @@ const connectionString = process.env.MIGRATOR_DATABASE_URL || process.env.DATABA
 const sql = postgres(connectionString);
 const db = drizzle(sql) as DatabasePg;
 
+type SeedProductionOptions = {
+  shouldRequirePasswordChange?: boolean;
+};
+
 async function createOrFindUser(
   email: string,
   password: string,
   userData: any,
   roleSlug: SystemRoleSlug,
+  shouldRequirePasswordChange: boolean,
 ) {
   const [existingUser] = await db.select().from(users).where(eq(users.email, email));
 
@@ -48,7 +53,7 @@ async function createOrFindUser(
   }
 
   const [newUser] = await db.insert(users).values(userData).returning();
-  await insertCredential(newUser.id, userData.tenantId, password);
+  await insertCredential(newUser.id, userData.tenantId, password, shouldRequirePasswordChange);
   await insertOnboardingData(newUser.id, userData.tenantId);
 
   if (roleSlug === SYSTEM_ROLE_SLUGS.ADMIN || roleSlug === SYSTEM_ROLE_SLUGS.CONTENT_CREATOR) {
@@ -71,12 +76,17 @@ async function insertUserDetailsIfMissing(userId: UUIDType, tenantId: UUIDType, 
     .onConflictDoNothing({ target: userDetails.userId });
 }
 
-async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: string) {
+async function insertCredential(
+  userId: UUIDType,
+  tenantId: UUIDType,
+  password: string,
+  shouldRequirePasswordChange: boolean,
+) {
   const credentialData = {
     id: faker.string.uuid(),
     userId,
     password: await hashPassword(password),
-    requiresPasswordChange: true,
+    requiresPasswordChange: shouldRequirePasswordChange,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     tenantId,
@@ -84,7 +94,9 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
   return (await db.insert(credentials).values(credentialData).returning())[0];
 }
 
-export async function seedProduction() {
+export async function seedProduction({
+  shouldRequirePasswordChange = true,
+}: SeedProductionOptions = {}) {
   await seedUserRoleGrantSql(db);
 
   await seedTruncateAllTables(db);
@@ -112,6 +124,7 @@ export async function seedProduction() {
         tenantId,
       },
       SYSTEM_ROLE_SLUGS.ADMIN,
+      shouldRequirePasswordChange,
     );
     console.log("Created or found admin user:", adminUser);
     const adminSettings = await insertUserSettings(db, adminUser.id, tenantId, true);
@@ -130,6 +143,7 @@ export async function seedProduction() {
         tenantId,
       },
       SYSTEM_ROLE_SLUGS.STUDENT,
+      shouldRequirePasswordChange,
     );
     console.log("Created or found student user:", studentUser);
     const studentSettings = await insertUserSettings(db, studentUser.id, tenantId, false);
@@ -148,6 +162,7 @@ export async function seedProduction() {
         tenantId,
       },
       SYSTEM_ROLE_SLUGS.CONTENT_CREATOR,
+      shouldRequirePasswordChange,
     );
     console.log("Created or found content creator user:", contentCreatorUser);
     const contentCreatorSettings = await insertUserSettings(
@@ -171,6 +186,7 @@ export async function seedProduction() {
         tenantId,
       },
       SYSTEM_ROLE_SLUGS.TRAINER,
+      shouldRequirePasswordChange,
     );
     console.log("Created or found trainer user:", trainerUser);
     const trainerSettings = await insertUserSettings(db, trainerUser.id, tenantId, false);

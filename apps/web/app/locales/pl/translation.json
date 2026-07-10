@@ -4364,6 +4364,7 @@
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
+      "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
       "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
