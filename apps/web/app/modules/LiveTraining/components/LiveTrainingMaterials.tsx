@@ -9,7 +9,6 @@ import {
   LIVE_TRAINING_STATUSES,
 } from "@repo/shared";
 import { Download, Folder, Loader2, Lock, Plus, Trash2 } from "lucide-react";
-import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTrainingResource } from "~/api/mutations/live-training/useDeleteLiveTrainingResource";
@@ -23,7 +22,6 @@ import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
 import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
 
-import type { LiveTrainingResourceRelationshipType } from "@repo/shared";
 import type {
   LiveTrainingDetails,
   LiveTrainingUiActions,
@@ -49,20 +47,25 @@ type MaterialCardProps = {
 type MaterialsSectionProps = {
   title: string;
   materials: LiveTrainingMaterial[];
-  relationshipType: LiveTrainingResourceRelationshipType;
   fileInputTestId: string;
   materialCardTestId: (resourceId: string) => string;
   canEditMaterials: boolean;
   isUploading: boolean;
   isRemoving: boolean;
-  onUpload: (
-    files: FileList | null,
-    relationshipType: LiveTrainingResourceRelationshipType,
-  ) => void;
+  onUpload: (files: FileList | null) => void;
   onOpen: (material: LiveTrainingMaterial) => void;
   onRemove: (resourceId: string) => void;
   isLocked?: boolean;
 };
+
+const ACCEPTED_FILE_TYPES = [
+  ...ALLOWED_PDF_FILE_TYPES,
+  ...ALLOWED_EXCEL_FILE_TYPES,
+  ...ALLOWED_WORD_FILE_TYPES,
+  ...ALLOWED_VIDEO_FILE_TYPES,
+  ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ...ALLOWED_PRESENTATION_FILE_TYPES,
+].join(",");
 
 function MaterialCard({
   material,
@@ -120,7 +123,7 @@ function MaterialCard({
           type="button"
           variant="ghost"
           size="xs"
-          className="absolute right-2 top-2 size-7 bg-white/90 opacity-100 shadow-sm sm:opacity-0 sm:group-hover/material:opacity-100"
+          className="absolute right-2 top-2 size-7 bg-white/90 opacity-100 shadow-sm sm:opacity-0 sm:focus:opacity-100 sm:group-hover/material:opacity-100"
           disabled={isRemoving}
           aria-label={t("liveTrainingView.files.removeFile", { title: material.title })}
           onClick={onRemove}
@@ -147,28 +150,13 @@ function AddMaterialTile({
   inputTestId: string;
   onFilesSelected: (files: FileList | null) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-  const accept = [
-    ALLOWED_PDF_FILE_TYPES,
-    ALLOWED_EXCEL_FILE_TYPES,
-    ALLOWED_WORD_FILE_TYPES,
-    ALLOWED_VIDEO_FILE_TYPES,
-    ALLOWED_LESSON_IMAGE_FILE_TYPES,
-    ALLOWED_PRESENTATION_FILE_TYPES,
-  ].toString();
-
   return (
-    <button
-      type="button"
-      className="relative flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-visible:border-primary-500 focus-visible:bg-primary-50 focus-visible:text-primary-700 focus-visible:outline-none"
-      disabled={isUploading}
-      onClick={() => inputRef.current?.click()}
-    >
+    <label className="relative flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-within:border-primary-500 focus-within:bg-primary-50 focus-within:text-primary-700 focus-within:outline-none">
       <input
-        ref={inputRef}
         data-testid={inputTestId}
         type="file"
-        accept={accept}
+        accept={ACCEPTED_FILE_TYPES}
+        disabled={isUploading}
         multiple
         className="absolute size-full opacity-0 cursor-pointer"
         tabIndex={0}
@@ -179,14 +167,13 @@ function AddMaterialTile({
       />
       {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
       <span>{title}</span>
-    </button>
+    </label>
   );
 }
 
 function MaterialsSection({
   title,
   materials,
-  relationshipType,
   fileInputTestId,
   materialCardTestId,
   canEditMaterials,
@@ -243,7 +230,7 @@ function MaterialsSection({
                 title={t("liveTrainingView.files.addFile")}
                 isUploading={isUploading}
                 inputTestId={fileInputTestId}
-                onFilesSelected={(files) => onUpload(files, relationshipType)}
+                onFilesSelected={(files) => onUpload(files)}
               />
             )}
           </div>
@@ -260,23 +247,36 @@ export function LiveTrainingMaterials({
 }: LiveTrainingMaterialsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const { mutateAsync: uploadResource, isPending: isUploading } = useUploadLiveTrainingResource();
+  const { mutateAsync: uploadBeforeResource, isPending: isUploadingBefore } =
+    useUploadLiveTrainingResource();
+  const { mutateAsync: uploadAfterResource, isPending: isUploadingAfter } =
+    useUploadLiveTrainingResource();
   const { mutate: openResource } = useOpenLiveTrainingResource();
   const { mutate: deleteResource, isPending: isRemoving } = useDeleteLiveTrainingResource();
   const isAfterTabLocked =
     !actions.canViewAllMaterials && liveTraining.status !== LIVE_TRAINING_STATUSES.ENDED;
 
-  const handleUpload = async (
-    files: FileList | null,
-    relationshipType: LiveTrainingResourceRelationshipType,
-  ) => {
+  const handleBeforeUpload = async (files: FileList | null) => {
     if (!files?.length) return;
 
     for (const file of Array.from(files)) {
-      await uploadResource({
+      await uploadBeforeResource({
         liveTrainingId: liveTraining.id,
         file,
-        relationshipType,
+        relationshipType: LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
+        language,
+      });
+    }
+  };
+
+  const handleAfterUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
+
+    for (const file of Array.from(files)) {
+      await uploadAfterResource({
+        liveTrainingId: liveTraining.id,
+        file,
+        relationshipType: LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
         language,
       });
     }
@@ -300,26 +300,24 @@ export function LiveTrainingMaterials({
       <MaterialsSection
         title={t("liveTrainingView.files.beforeHeading")}
         materials={liveTraining.materials.before}
-        relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
         fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
         materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
         canEditMaterials={actions.canEditMaterials}
-        isUploading={isUploading}
+        isUploading={isUploadingBefore}
         isRemoving={isRemoving}
-        onUpload={handleUpload}
+        onUpload={handleBeforeUpload}
         onOpen={handleOpen}
         onRemove={handleRemove}
       />
       <MaterialsSection
         title={t("liveTrainingView.files.afterHeading")}
         materials={liveTraining.materials.after}
-        relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
         fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
         materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
         canEditMaterials={actions.canEditMaterials}
-        isUploading={isUploading}
+        isUploading={isUploadingAfter}
         isRemoving={isRemoving}
-        onUpload={handleUpload}
+        onUpload={handleAfterUpload}
         onOpen={handleOpen}
         onRemove={handleRemove}
         isLocked={isAfterTabLocked}
