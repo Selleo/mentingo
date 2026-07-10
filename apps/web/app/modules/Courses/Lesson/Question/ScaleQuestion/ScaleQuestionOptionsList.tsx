@@ -82,13 +82,17 @@ export const ScaleQuestionOptionsList = ({
           max={totalSteps - 1}
           step="1"
           value={currentIndex}
-          disabled={isDisabled}
+          aria-disabled={isDisabled}
           onChange={handleChange}
           className={`
-            w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer 
-            accent-blue-600 focus:outline-none transition-all
-            ${isDisabled ? "opacity-60 cursor-not-allowed accent-gray-500" : "hover:bg-gray-300"}
-          `}
+    w-full h-3 appearance-none rounded-lg
+    bg-gray-200
+    accent-blue-600
+    disabled:accent-blue-600
+    disabled:bg-gray-200
+    disabled:opacity-60
+    ${isDisabled ? "cursor-not-allowed" : "cursor-pointer hover:bg-gray-300"}
+  `}
           style={{ WebkitAppearance: "none" }}
         />
       </div>
@@ -104,7 +108,7 @@ export const ScaleQuestionOptionsList = ({
               <span
                 className={`
                 text-center transition-all duration-150 select-none 
-                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-gray-500"}
+                ${isSelected ? "text-blue-600 font-bold scale-105" : "text-gray-500 opacity-60"}
               `}
               >
                 {option.optionText}

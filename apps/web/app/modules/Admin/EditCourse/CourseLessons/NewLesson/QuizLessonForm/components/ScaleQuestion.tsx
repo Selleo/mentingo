@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { Icon } from "~/components/Icon";
 import { SortableList } from "~/components/SortableList";
 import { Accordion, AccordionItem } from "~/components/ui/accordion";
 import { Button } from "~/components/ui/button";
@@ -83,11 +82,6 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
                 renderItem={(item, index: number) => (
                   <SortableList.Item id={item.sortableId}>
                     <div className="mt-2 flex items-center space-x-2 rounded-xl border border-neutral-200 p-2 pr-3">
-                      {!isStructureLocked && (
-                        <SortableList.DragHandle>
-                          <Icon name="DragAndDropIcon" className="ml-4 mr-3 cursor-move" />
-                        </SortableList.DragHandle>
-                      )}
                       <div className="flex w-full items-center gap-2">
                         <Input
                           type="text"
@@ -98,34 +92,6 @@ const ScaleQuestion = ({ form, questionIndex, isStructureLocked = false }: Scale
                           required
                           className="flex-1"
                         />
-                        {/* This code is currently commented out temporarily */}
-                        {/* <div className="w-[10%]">
-                            <Select
-                              name={`questions.${questionIndex}.options.${index}.scaleAnswer`}
-                              value={form
-                                .getValues(
-                                  `questions.${questionIndex}.options.${index}.scaleAnswer`,
-                                )
-                                ?.toString()}
-                              onValueChange={(value) =>
-                                handleOptionChange(index, "scaleAnswer", Number(value))
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue
-                                  className="text-left body-base-md"
-                                  placeholder={`Scale`}
-                                />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {[1, 2, 3, 4, 5].map((option) => (
-                                  <SelectItem key={option} value={option.toString()}>
-                                    {option}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div> */}
                       </div>
                     </div>
                   </SortableList.Item>
