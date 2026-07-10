@@ -1,4 +1,4 @@
-import { eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -19,6 +19,7 @@ describe("SettingsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let defaultTenantId: string;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -26,8 +27,9 @@ describe("SettingsController (e2e)", () => {
   const testPassword = "Password123@@";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, defaultTenantId: testTenantId } = await createE2ETest();
     app = testApp;
+    defaultTenantId = testTenantId;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -299,7 +301,7 @@ describe("SettingsController (e2e)", () => {
       it("should return a tenant-specific public PWA manifest", async () => {
         const simpleLogoKey = "platform-simple-logos/variants/simple.webp";
 
-        await db
+        await baseDb
           .update(settings)
           .set({
             settings: sql`${settings.settings} || ${JSON.stringify({
@@ -312,7 +314,7 @@ describe("SettingsController (e2e)", () => {
               platformSimpleLogoS3Key: simpleLogoKey,
             })}::jsonb`,
           })
-          .where(isNull(settings.userId));
+          .where(and(eq(settings.tenantId, defaultTenantId), isNull(settings.userId)));
 
         const response = await request(app.getHttpServer())
           .get("/api/settings/manifest.webmanifest")
@@ -321,8 +323,8 @@ describe("SettingsController (e2e)", () => {
           .expect(200);
 
         expect(response.body).toEqual({
-          name: "Acme Learning",
-          short_name: "Acme",
+          name: "Acme LMS",
+          short_name: "Acme LMS",
           theme_color: "#123456",
           background_color: "#fefefe",
           display: "standalone",
