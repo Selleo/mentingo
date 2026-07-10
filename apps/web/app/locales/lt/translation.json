@@ -3042,8 +3042,15 @@
       "modernCourseListDescription": "Įgalinkite naują kursų sąrašo dizainą su herojų ir geriausių kursų skiltimis",
       "courseListLayout": "Kursų sąrašo išdėstymas",
       "courseListLayoutDescription": "Kaip kursai rodomi visiems platformos naudotojams",
+      "courseListLayoutClassic": "Klasikinis",
+      "courseListLayoutModern": "Modernus",
       "courseListLayoutClassicDescription": "Tradicinis kursų tinklelio išdėstymas",
       "courseListLayoutModernDescription": "Herojų sekcija su išskirtiniais kursais",
+      "courseListLayoutPreview": {
+        "continueLearning": "Tęsti mokymąsi",
+        "topCourses": "5 populiariausi kursai",
+        "availableCourses": "Prieinami kursai"
+      },
       "courseDiscussions": "Įjungti kursų diskusijas",
       "courseDiscussionsDescription": "Leiskite užsiregistravusiems naudotojams peržiūrėti kursų diskusijas ir jose dalyvauti",
       "calendar": "Įjungti kalendorių",
