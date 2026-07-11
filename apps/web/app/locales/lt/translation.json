@@ -4499,6 +4499,7 @@
       "descriptionPlaceholder": "Įveskite kurso aprašymą...",
       "whatYouWillLearn": "Ko išmoksite",
       "closeSettings": "Uždaryti kurso nustatymus",
+      "settingsComingSoon": "Nustatymai netrukus",
       "settingsIntro": "Čia galėsite konfigūruoti:",
       "settingsStatus": "Kurso būsena (Juodraštis/Paskelbtas)",
       "settingsPricing": "Kainos ir mokėjimo parinktys",
@@ -4584,7 +4585,12 @@
       "averageRating": "Vid. įvertinimas",
       "detailedStatisticsSoon": "Išsami statistika jau netrukus",
       "detailedStatisticsDescription": "Šioje skiltyje bus rodoma išsami pažangos, skyrių baigimo, įsitraukimo ir kitų duomenų analizė.",
-      "status": { "completed": "Baigta", "inProgress": "Vykdoma", "notStarted": "Nepradėta" },
+      "status": {
+        "started": "Pradėta",
+        "completed": "Baigta",
+        "inProgress": "Vykdoma",
+        "notStarted": "Nepradėta"
+      },
       "lessonTypes": {
         "content": "Turinys",
         "quiz": "Testas",

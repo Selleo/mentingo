@@ -1,6 +1,10 @@
 import { Award, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { cn } from "~/lib/utils";
+
+import { DEFAULT_AUTHOR_MODAL_IMAGE, getAuthorName } from "./author.utils";
+
 type Author = {
   description?: string | null;
   firstName?: string | null;
@@ -27,14 +31,6 @@ type AuthorModalProps = {
   showAuthorSectionDraft: boolean;
 };
 
-const AUTHOR_IMAGE =
-  "https://images.unsplash.com/photo-1616065297556-f05bc00c9a3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjB3b21hbiUyMGZ1bGwlMjBib2R5JTIwcG9ydHJhaXQlMjBidXNpbmVzc3xlbnwxfHx8fDE3NzM4MjA4MTV8MA&ixlib=rb-4.1.0&q=80&w=1080";
-
-const getAuthorName = (author?: Author) => {
-  if (!author?.firstName && !author?.lastName) return "";
-  return `${author.firstName ?? ""} ${author.lastName ?? ""}`.trim();
-};
-
 export default function AuthorModal({
   author,
   isAdminExperience,
@@ -58,16 +54,16 @@ export default function AuthorModal({
       />
       <div className="relative mx-4 max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="flex flex-col md:flex-row">
-          <div className="relative flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] to-[#e8eef5] p-6 md:w-2/5 md:rounded-l-2xl md:p-8">
+          <div className="relative flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 p-6 md:w-2/5 md:rounded-l-2xl md:p-8">
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-colors hover:bg-gray-100 md:right-4 md:top-4 md:hidden"
+              className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-colors hover:bg-neutral-100 md:right-4 md:top-4 md:hidden"
             >
-              <X className="h-5 w-5 text-[#676767]" />
+              <X className="h-5 w-5 text-neutral-800" />
             </button>
             <img
-              src={AUTHOR_IMAGE}
+              src={DEFAULT_AUTHOR_MODAL_IMAGE}
               alt={authorName || t("modernCourseView.author.pictureAlt")}
               className="h-auto w-full rounded-xl object-cover shadow-lg"
             />
@@ -77,18 +73,18 @@ export default function AuthorModal({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-full bg-gray-100 transition-colors hover:bg-gray-200 md:block"
+              className="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-full bg-neutral-100 transition-colors hover:bg-neutral-200 md:block"
             >
-              <X className="mx-auto mt-2.5 h-5 w-5 text-[#676767]" />
+              <X className="mx-auto mt-2.5 h-5 w-5 text-neutral-800" />
             </button>
             {isAdminExperience && (
-              <div className="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-4">
+              <div className="mb-6 rounded-xl border border-primary-200 bg-primary-50 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-semibold text-[#363636]">
+                    <p className="text-sm font-semibold text-neutral-950">
                       {t("modernCourseView.author.showSection")}
                     </p>
-                    <p className="text-xs text-[#676767]">
+                    <p className="text-xs text-neutral-800">
                       {t("modernCourseView.author.showSectionDescription")}
                     </p>
                   </div>
@@ -96,15 +92,17 @@ export default function AuthorModal({
                     type="button"
                     role="switch"
                     aria-checked={showAuthorSectionDraft}
-                    className={`relative h-7 w-14 rounded-full transition-colors ${
-                      showAuthorSectionDraft ? "bg-[#26b183]" : "bg-gray-300"
-                    }`}
+                    className={cn("relative h-7 w-14 rounded-full transition-colors", {
+                      "bg-success-500": showAuthorSectionDraft,
+                      "bg-neutral-300": !showAuthorSectionDraft,
+                    })}
                     onClick={onToggleShowAuthorSection}
                   >
                     <div
-                      className={`absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white transition-transform ${
-                        showAuthorSectionDraft ? "translate-x-7" : "translate-x-0"
-                      }`}
+                      className={cn(
+                        "absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white transition-transform",
+                        showAuthorSectionDraft ? "translate-x-7" : "translate-x-0",
+                      )}
                     />
                   </button>
                 </div>
@@ -112,36 +110,36 @@ export default function AuthorModal({
             )}
 
             <div className="mb-8">
-              <h3 className="mb-2 font-gothic text-3xl font-bold text-[#363636]">{authorName}</h3>
-              <p className="mb-4 text-lg text-[#3f58b6]">{author?.jobTitle}</p>
-              <p className="leading-relaxed text-[#676767]">{author?.description}</p>
+              <h3 className="mb-2 font-gothic text-3xl font-bold text-neutral-950">{authorName}</h3>
+              <p className="mb-4 text-lg text-primary-700">{author?.jobTitle}</p>
+              <p className="leading-relaxed text-neutral-800">{author?.description}</p>
             </div>
 
             <div>
-              <h4 className="mb-4 font-gothic text-xl font-bold text-[#363636]">
+              <h4 className="mb-4 font-gothic text-xl font-bold text-neutral-950">
                 {t("modernCourseView.author.otherCourses")}
               </h4>
               <div className="max-h-[400px] space-y-3 overflow-y-auto pr-2">
                 {otherCourses.map((course) => (
                   <div
                     key={course.id}
-                    className="cursor-pointer rounded-xl border border-[#e5e5e5] bg-[#f9fafb] p-4 transition-all hover:border-[#3f58b6] hover:shadow-md group"
+                    className="group cursor-pointer rounded-xl border border-neutral-200 bg-neutral-50 p-4 transition-all hover:border-primary-700 hover:shadow-md"
                   >
                     <div className="mb-2">
-                      <h5 className="mb-1 font-bold leading-snug text-[#363636] transition-colors group-hover:text-[#3f58b6]">
+                      <h5 className="mb-1 font-bold leading-snug text-neutral-950 transition-colors group-hover:text-primary-700">
                         {course.title}
                       </h5>
-                      <span className="inline-block rounded bg-blue-100 px-2 py-1 text-xs font-semibold text-[#3f58b6]">
+                      <span className="inline-block rounded bg-primary-100 px-2 py-1 text-xs font-semibold text-primary-700">
                         {course.category}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-xs text-[#676767]">
+                    <div className="flex items-center gap-4 text-xs text-neutral-800">
                       <div className="flex items-center gap-1">
                         <Users className="h-3 w-3" />
                         <span>{course.enrolledParticipantCount}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Award className="h-3 w-3 text-[#FFB800]" />
+                        <Award className="h-3 w-3 text-warning-500" />
                         <span>4.8</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -159,7 +157,7 @@ export default function AuthorModal({
                 type="button"
                 onClick={onClose}
                 disabled={isSaving}
-                className="w-full rounded-lg bg-gray-200 px-6 py-2 font-semibold text-[#363636] transition-colors hover:bg-gray-300 sm:w-auto"
+                className="w-full rounded-lg bg-neutral-200 px-6 py-2 font-semibold text-neutral-950 transition-colors hover:bg-neutral-300 sm:w-auto"
               >
                 {isAdminExperience
                   ? t("modernCourseView.common.cancel")
@@ -170,7 +168,7 @@ export default function AuthorModal({
                   type="button"
                   onClick={() => void onSave()}
                   disabled={isSaving}
-                  className="ml-3 w-full rounded-lg bg-[#3f58b6] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#324a95] disabled:opacity-50 sm:w-auto"
+                  className="ml-3 w-full rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800 disabled:opacity-50 sm:w-auto"
                 >
                   {t("modernCourseView.common.saveChanges")}
                 </button>

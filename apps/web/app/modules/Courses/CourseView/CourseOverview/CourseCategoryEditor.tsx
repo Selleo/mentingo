@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
-import { formatDuration } from "~/modules/Courses/utils/formatDuration";
+import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
 type CategoryOption = {
   id: string;
@@ -21,7 +21,6 @@ type CourseCategoryEditorProps = {
   categoryId: string;
   categoryTitle: string;
   disabled: boolean;
-  dueDate?: string | null;
   durationSeconds?: number;
   isEditing: boolean;
   onChange: (categoryId: string) => Promise<void>;
@@ -35,7 +34,6 @@ export default function CourseCategoryEditor({
   categoryId,
   categoryTitle,
   disabled,
-  dueDate,
   durationSeconds,
   isEditing,
   onChange,
@@ -100,14 +98,8 @@ export default function CourseCategoryEditor({
 
       <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
         <Clock className="size-3.5" />
-        {formatDuration(durationSeconds)}
+        {formatDurationToHalfHour(durationSeconds)}
       </span>
-
-      {dueDate && (
-        <span className="rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
-          {dueDate}
-        </span>
-      )}
     </div>
   );
 }

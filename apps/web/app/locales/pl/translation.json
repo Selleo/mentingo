@@ -4611,6 +4611,7 @@
       "descriptionPlaceholder": "Wprowadź opis kursu...",
       "whatYouWillLearn": "Czego się nauczysz",
       "closeSettings": "Zamknij ustawienia kursu",
+      "settingsComingSoon": "Ustawienia wkrótce",
       "settingsIntro": "Tutaj możesz skonfigurować:",
       "settingsStatus": "Status kursu (wersja robocza/opublikowany)",
       "settingsPricing": "Ceny i opcje płatności",
@@ -4697,6 +4698,7 @@
       "detailedStatisticsSoon": "Szczegółowe statystyki już wkrótce",
       "detailedStatisticsDescription": "Ta sekcja będzie zawierać szczegółowe analizy postępów uczestników, ukończenia rozdziałów, zaangażowania i innych danych.",
       "status": {
+        "started": "Rozpoczęto",
         "completed": "Ukończono",
         "inProgress": "W toku",
         "notStarted": "Nie rozpoczęto"

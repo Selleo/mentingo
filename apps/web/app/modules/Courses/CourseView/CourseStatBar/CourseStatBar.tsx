@@ -1,34 +1,31 @@
-import { PERMISSIONS } from "@repo/shared";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
-import { useCurrentUser } from "~/api/queries";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
-import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 
-import { useCourseAccessProvider } from "../context/CourseAccessProvider";
+import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
-import AuthorModal from "./CourseStatBar/AuthorModal";
-import AuthorStatCard from "./CourseStatBar/AuthorStatCard";
-import CertificateModal from "./CourseStatBar/CertificateModal";
-import CertificateStatCard from "./CourseStatBar/CertificateStatCard";
-import DeadlineModal, { type GroupDeadline } from "./CourseStatBar/DeadlineModal";
-import DeadlineStatCard from "./CourseStatBar/DeadlineStatCard";
-import ProgressStatCard from "./CourseStatBar/ProgressStatCard";
+import AuthorModal from "./AuthorModal";
+import AuthorStatCard from "./AuthorStatCard";
+import CertificateModal from "./CertificateModal";
+import CertificateStatCard from "./CertificateStatCard";
+import DeadlineModal, { type GroupDeadline } from "./DeadlineModal";
+import DeadlineStatCard from "./DeadlineStatCard";
+import ProgressStatCard from "./ProgressStatCard";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseHeroProps = {
-  course: GetCourseResponse["data"];
   language: SupportedLanguages;
 };
+
+const DEFAULT_CERTIFICATE_COLOR = "#3f58b6";
 
 const getGridClassName = ({
   hasAuthor,
@@ -55,7 +52,9 @@ const getGridClassName = ({
   return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
 };
 
-export function CourseStatBar({ course, language }: CourseHeroProps) {
+export function CourseStatBar({ language }: CourseHeroProps) {
+  const { course, isAdminExperience } = useCourseAccessProvider();
+
   const hasCertificate = Boolean(course.hasCertificate);
   const hasAuthor = Boolean(course.authorId);
   const showAuthorSection = course.showAuthorSection ?? true;
@@ -67,7 +66,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
   const [deadlineEnabledDraft, setDeadlineEnabledDraft] = useState(Boolean(course.dueDate));
   const [groupDeadlines, setGroupDeadlines] = useState<GroupDeadline[]>([]);
   const [certificateEnabledDraft, setCertificateEnabledDraft] = useState(hasCertificate);
-  const [certificateColor, setCertificateColor] = useState("#3f58b6");
+  const [certificateColor, setCertificateColor] = useState(DEFAULT_CERTIFICATE_COLOR);
 
   const { mutate: updateHasCertificate, isPending: isUpdatingCertificate } =
     useUpdateHasCertificate();
@@ -76,19 +75,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
     course.id,
   );
   const { data: author } = useUserDetails(course.authorId);
-  const { data: currentUser } = useCurrentUser();
-
-  const { hasAccess: canManageUsers } = usePermissions({
-    required: PERMISSIONS.USER_MANAGE,
-  });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-  });
-
-  const { isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode } = useToggleCourseStudentMode(course.id);
-  const canEditCourse = canManageUsers || (canManageCourses && course.authorId === currentUser?.id);
-  const isAdminExperience = canEditCourse && !isCourseStudentModeActive;
 
   const { data: otherCourses = [] } = useContentCreatorCourses(
     course.authorId,
@@ -163,6 +150,22 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
     setShowDeadlineModal(false);
   };
 
+  const enterLearningMode = () => {
+    toggleLearningMode({ enabled: true });
+  };
+
+  const toggleCertificateDraft = () => {
+    setCertificateEnabledDraft((enabled) => !enabled);
+  };
+
+  const toggleDeadlineDraft = () => {
+    setDeadlineEnabledDraft((enabled) => !enabled);
+  };
+
+  const toggleShowAuthorSectionDraft = () => {
+    setShowAuthorSectionDraft((visible) => !visible);
+  };
+
   const saveCertificate = () => {
     updateHasCertificate(
       {
@@ -207,10 +210,14 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
     setShowAuthorModal(false);
   };
 
-  const timeLeftSeconds = course.chapters
-    .flatMap((chapter) => chapter.lessons)
-    .filter((lesson) => lesson.status !== "completed")
-    .reduce((total, lesson) => total + (lesson.estimatedDurationSeconds ?? 0), 0);
+  const timeLeftSeconds = useMemo(
+    () =>
+      course.chapters
+        .flatMap((chapter) => chapter.lessons)
+        .filter((lesson) => lesson.status !== "completed")
+        .reduce((total, lesson) => total + (lesson.estimatedDurationSeconds ?? 0), 0),
+    [course.chapters],
+  );
 
   return (
     <div
@@ -227,7 +234,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
     >
       <ProgressStatCard
         isAdminExperience={isAdminExperience}
-        onEnterLearningMode={() => toggleLearningMode({ enabled: false })}
+        onEnterLearningMode={enterLearningMode}
         timeLeftSeconds={timeLeftSeconds}
       />
 
@@ -266,7 +273,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
           onCertificateColorChange={setCertificateColor}
           onClose={closeCertificateModal}
           onSave={saveCertificate}
-          onToggleCertificate={() => setCertificateEnabledDraft((enabled) => !enabled)}
+          onToggleCertificate={toggleCertificateDraft}
         />
       )}
 
@@ -278,7 +285,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
           onChangeGroupDeadlines={setGroupDeadlines}
           onClose={closeDeadlineModal}
           onSave={saveDeadlines}
-          onToggleDeadline={() => setDeadlineEnabledDraft((enabled) => !enabled)}
+          onToggleDeadline={toggleDeadlineDraft}
         />
       )}
 
@@ -289,7 +296,7 @@ export function CourseStatBar({ course, language }: CourseHeroProps) {
           isSaving={isUpdatingAuthorSection}
           onClose={closeAuthorModal}
           onSave={saveAuthorSection}
-          onToggleShowAuthorSection={() => setShowAuthorSectionDraft((visible) => !visible)}
+          onToggleShowAuthorSection={toggleShowAuthorSectionDraft}
           otherCourses={otherCourses}
           showAuthorSectionDraft={showAuthorSectionDraft}
         />

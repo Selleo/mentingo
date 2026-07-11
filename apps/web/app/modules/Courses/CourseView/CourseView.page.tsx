@@ -13,9 +13,9 @@ import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOv
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
-import { CourseStatBar } from "./CourseStatBar";
-import { LearningModeBannerNew } from "./LearningModeBannerNew";
-import { TableOfContent } from "./TableOfContent";
+import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
+import { LearningModeBannerNew } from "./LearningModeBanner";
+import { TableOfContent } from "./TableOfContent/TableOfContent";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -112,9 +112,9 @@ export default function CourseViewPage() {
         <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBannerNew />}>
           <div className="flex w-full max-w-full flex-col">
             <div className="flex flex-col gap-y-6 overflow-hidden">
-              <CourseOverview course={course} language={language} />
-              <CourseStatBar course={course} language={language} />
-              <TableOfContent course={course} />
+              <CourseOverview language={language} />
+              <CourseStatBar language={language} />
+              <TableOfContent />
             </div>
           </div>
         </PageWrapper>

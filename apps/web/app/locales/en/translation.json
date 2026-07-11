@@ -4572,6 +4572,7 @@
       "descriptionPlaceholder": "Enter course description...",
       "whatYouWillLearn": "What you'll learn",
       "closeSettings": "Close course settings",
+      "settingsComingSoon": "Settings coming soon",
       "settingsIntro": "Here you'll be able to configure:",
       "settingsStatus": "Course status (Draft/Published)",
       "settingsPricing": "Pricing & payment options",
@@ -4655,6 +4656,7 @@
       "detailedStatisticsSoon": "Detailed statistics coming soon",
       "detailedStatisticsDescription": "This section will display comprehensive analytics including student progress over time, chapter completion rates, engagement metrics, and more.",
       "status": {
+        "started": "Started",
         "completed": "Completed",
         "inProgress": "In progress",
         "notStarted": "Not started"

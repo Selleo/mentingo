@@ -27,24 +27,24 @@ const getChapterStyle = ({
 }) => {
   if (isCompleted) {
     return {
-      bg: "bg-green-50/50 hover:bg-green-50",
-      icon: "text-[#26b183]",
-      title: "text-[#26b183]",
+      bg: "bg-success-50/50 hover:bg-success-50",
+      icon: "text-success-500",
+      title: "text-success-500",
     };
   }
 
   if (isCurrent) {
     return {
-      bg: "bg-blue-50/50 hover:bg-blue-50",
-      icon: "text-[#3f58b6]",
-      title: "text-[#3f58b6]",
+      bg: "bg-primary-50/50 hover:bg-primary-50",
+      icon: "text-primary-700",
+      title: "text-primary-700",
     };
   }
 
   return {
-    bg: "bg-gray-50/50 hover:bg-gray-50",
-    icon: "text-[#676767]",
-    title: "text-[#676767]",
+    bg: "bg-neutral-50/50 hover:bg-neutral-50",
+    icon: "text-neutral-800",
+    title: "text-neutral-800",
   };
 };
 
@@ -56,14 +56,14 @@ const getChapterCircleStyle = ({
   isCurrent: boolean;
 }) => {
   if (isCompleted) {
-    return "border-[#26b183] bg-[#26b183]";
+    return "border-success-500 bg-success-500";
   }
 
   if (isCurrent) {
-    return "border-[#3f58b6] bg-[#3f58b6]";
+    return "border-primary-700 bg-primary-700";
   }
 
-  return "border-[#e5e5e5] bg-white";
+  return "border-neutral-200 bg-white";
 };
 
 const getCompletedLessonCount = (chapter: Chapter) =>
@@ -100,7 +100,7 @@ export default function ChapterItem({
             <span
               className={cn(
                 "text-base font-bold md:text-sm",
-                isAdminExperience ? "text-[#676767]" : "text-[#b0b0b0]",
+                isAdminExperience ? "text-neutral-800" : "text-neutral-400",
               )}
             >
               {chapterNumber}
@@ -135,13 +135,13 @@ export default function ChapterItem({
               >
                 {chapter.title}
               </h3>
-              <span className="flex-shrink-0 whitespace-nowrap text-sm text-[#676767] md:text-xs">
+              <span className="flex-shrink-0 whitespace-nowrap text-sm text-neutral-800 md:text-xs">
                 {formatDuration(chapter.estimatedDurationSeconds)}
               </span>
             </div>
 
             <div className="ml-7 flex items-center justify-between">
-              <div className="flex items-center gap-3 text-xs text-[#676767]">
+              <div className="flex items-center gap-3 text-xs text-neutral-800">
                 <span className="flex items-center gap-1">
                   <BookOpen className="h-3.5 w-3.5" />
                   {t("modernCourseView.contents.lessons", {
@@ -152,7 +152,7 @@ export default function ChapterItem({
 
               {isCurrent && (
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center gap-1 text-xs font-semibold text-[#3f58b6]">
+                  <div className="flex items-center gap-1 text-xs font-semibold text-primary-700">
                     <span>
                       {completedLessonCount}/{lessonCount}
                     </span>
@@ -163,7 +163,7 @@ export default function ChapterItem({
                         key={idx}
                         className={cn(
                           "h-2 flex-1 rounded-full transition-all",
-                          idx < completedLessonCount ? "bg-[#3f58b6]" : "bg-[#e1eaf8]",
+                          idx < completedLessonCount ? "bg-primary-700" : "bg-primary-100",
                         )}
                       />
                     ))}

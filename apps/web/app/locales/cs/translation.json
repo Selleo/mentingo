@@ -4498,6 +4498,7 @@
       "descriptionPlaceholder": "Zadejte popis kurzu...",
       "whatYouWillLearn": "Co se naučíte",
       "closeSettings": "Zavřít nastavení kurzu",
+      "settingsComingSoon": "Nastavení již brzy",
       "settingsIntro": "Zde můžete nastavit:",
       "settingsStatus": "Stav kurzu (Koncept/Publikováno)",
       "settingsPricing": "Ceny a možnosti platby",
@@ -4583,7 +4584,12 @@
       "averageRating": "Prům. hodnocení",
       "detailedStatisticsSoon": "Podrobné statistiky již brzy",
       "detailedStatisticsDescription": "Tato sekce zobrazí podrobnou analýzu pokroku, dokončení kapitol, zapojení a další údaje.",
-      "status": { "completed": "Dokončeno", "inProgress": "Probíhá", "notStarted": "Nezahájeno" },
+      "status": {
+        "started": "Zahájeno",
+        "completed": "Dokončeno",
+        "inProgress": "Probíhá",
+        "notStarted": "Nezahájeno"
+      },
       "lessonTypes": {
         "content": "Obsah",
         "quiz": "Kvíz",

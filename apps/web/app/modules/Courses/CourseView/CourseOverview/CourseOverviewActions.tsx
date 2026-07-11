@@ -1,8 +1,9 @@
 import { GraduationCap, Info, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+
 type CourseOverviewActionsProps = {
-  isAdminExperience: boolean;
   isTogglingLearningMode: boolean;
   onContinueLearning: () => void;
   onOpenDetails: () => void;
@@ -10,13 +11,13 @@ type CourseOverviewActionsProps = {
 };
 
 export default function CourseOverviewActions({
-  isAdminExperience,
   isTogglingLearningMode,
   onContinueLearning,
   onOpenDetails,
   onToggleLearningMode,
 }: CourseOverviewActionsProps) {
   const { t } = useTranslation();
+  const { isAdminExperience } = useCourseAccessProvider();
 
   return (
     <div className="hidden flex-wrap items-center gap-3 md:flex">
