@@ -4453,6 +4453,7 @@
       "descriptionPlaceholder": "Kursbeschreibung eingeben...",
       "whatYouWillLearn": "Das wirst du lernen",
       "closeSettings": "Kurseinstellungen schließen",
+      "settingsComingSoon": "Einstellungen bald verfügbar",
       "settingsIntro": "Hier kannst du Folgendes konfigurieren:",
       "settingsStatus": "Kursstatus (Entwurf/Veröffentlicht)",
       "settingsPricing": "Preise und Zahlungsoptionen",
@@ -4536,6 +4537,7 @@
       "detailedStatisticsSoon": "Detaillierte Statistiken folgen bald",
       "detailedStatisticsDescription": "Dieser Bereich zeigt künftig umfassende Analysen zu Fortschritt, Kapitelabschlüssen, Beteiligung und mehr.",
       "status": {
+        "started": "Begonnen",
         "completed": "Abgeschlossen",
         "inProgress": "In Bearbeitung",
         "notStarted": "Nicht begonnen"

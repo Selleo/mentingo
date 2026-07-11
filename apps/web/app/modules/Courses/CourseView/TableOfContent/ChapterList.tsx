@@ -1,15 +1,13 @@
 import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import ChapterItem from "./ChapterItem";
+import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
-import type { GetCourseResponse } from "~/api/generated-api";
+import ChapterItem from "./ChapterItem";
 
 type ChapterListProps = {
   completedExpanded: boolean;
-  course: GetCourseResponse["data"];
   expandedChapters: string[];
-  isAdminExperience: boolean;
   isMobile: boolean;
   onExpandCompleted: () => void;
   onShowAllChapters: () => void;
@@ -19,9 +17,8 @@ type ChapterListProps = {
 
 export default function ChapterList({
   completedExpanded,
-  course,
   expandedChapters,
-  isAdminExperience,
+
   isMobile,
   onExpandCompleted,
   onShowAllChapters,
@@ -29,6 +26,8 @@ export default function ChapterList({
   showAllChapters,
 }: ChapterListProps) {
   const { t } = useTranslation();
+  const { course, isAdminExperience } = useCourseAccessProvider();
+
   const completedChapters = course.chapters.filter(
     (chapter) => chapter.chapterProgress === "completed",
   );
@@ -46,13 +45,13 @@ export default function ChapterList({
 
   return (
     <div className="relative">
-      <div className="absolute bottom-2 left-[24px] top-2 hidden w-0.5 bg-[#e5e5e5] md:left-[20px] md:block" />
+      <div className="absolute bottom-2 left-[24px] top-2 hidden w-0.5 bg-neutral-200 md:left-[20px] md:block" />
 
       <div className="space-y-4">
         {!isAdminExperience && completedChapters.length > 0 && !completedExpanded && (
           <div className="relative">
             <div className="flex gap-4">
-              <div className="relative z-10 hidden h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-[#26b183] bg-[#26b183] md:flex md:h-10 md:w-10">
+              <div className="relative z-10 hidden h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-success-500 bg-success-500 md:flex md:h-10 md:w-10">
                 <Check className="h-6 w-6 text-white md:h-5 md:w-5" />
               </div>
 
@@ -60,11 +59,11 @@ export default function ChapterList({
                 <button
                   type="button"
                   onClick={onExpandCompleted}
-                  className="group w-full cursor-pointer rounded-xl bg-green-50/50 p-5 text-left transition-all hover:bg-green-50 active:bg-green-50 md:p-4"
+                  className="group w-full cursor-pointer rounded-xl bg-success-50/50 p-5 text-left transition-all hover:bg-success-50 active:bg-success-50 md:p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <ChevronDown className="h-5 w-5 flex-shrink-0 text-[#26b183] md:h-4 md:w-4" />
-                    <h3 className="text-base font-semibold leading-tight text-[#26b183] md:text-sm">
+                    <ChevronDown className="h-5 w-5 flex-shrink-0 text-success-500 md:h-4 md:w-4" />
+                    <h3 className="text-base font-semibold leading-tight text-success-500 md:text-sm">
                       {t("modernCourseView.contents.completedChapters", {
                         count: completedChapters.length,
                       })}
@@ -109,7 +108,7 @@ export default function ChapterList({
               <button
                 type="button"
                 onClick={onShowAllChapters}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-4 font-semibold text-[#3f58b6] transition-all hover:border-[#3f58b6] hover:bg-gray-100"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-6 py-4 font-semibold text-primary-700 transition-all hover:border-primary-700 hover:bg-neutral-100"
               >
                 <ChevronDown className="h-5 w-5" />
                 {t("modernCourseView.contents.showAllChapters", {

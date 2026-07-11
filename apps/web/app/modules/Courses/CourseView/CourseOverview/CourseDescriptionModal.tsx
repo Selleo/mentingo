@@ -3,27 +3,22 @@ import { useTranslation } from "react-i18next";
 
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
-import type { GetCourseResponse } from "~/api/generated-api";
+import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseDescriptionModalProps = {
-  course: GetCourseResponse["data"];
   courseDescription: string;
-  courseTitle: string;
-  isAdminExperience: boolean;
   onChangeDescription: (description: string) => void;
   onClose: () => void;
   onSaveDescription: () => Promise<void>;
 };
 
 export default function CourseDescriptionModal({
-  course,
   courseDescription,
-  courseTitle,
-  isAdminExperience,
   onChangeDescription,
   onClose,
   onSaveDescription,
 }: CourseDescriptionModalProps) {
+  const { course, isAdminExperience } = useCourseAccessProvider();
   const { t } = useTranslation();
 
   return (
@@ -37,22 +32,22 @@ export default function CourseDescriptionModal({
       <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
         <div className="p-4 md:p-6 lg:p-8">
           <div className="mb-4 flex items-center justify-between md:mb-6">
-            <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
+            <h3 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
               {t("modernCourseView.overview.aboutCourse")}
             </h3>
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-gray-100"
+              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
             >
-              <X className="h-5 w-5 text-[#676767]" />
+              <X className="h-5 w-5 text-neutral-800" />
             </button>
           </div>
 
           <div className="mb-6">
-            <h4 className="mb-2 text-xl font-bold text-[#363636]">{courseTitle}</h4>
-            <div className="flex items-center gap-2 text-sm text-[#676767]">
-              <span className="rounded-full bg-blue-50 px-3 py-1 font-semibold text-[#3f58b6]">
+            <h4 className="mb-2 text-xl font-bold text-neutral-950">{course.title}</h4>
+            <div className="flex items-center gap-2 text-sm text-neutral-800">
+              <span className="rounded-full bg-primary-50 px-3 py-1 font-semibold text-primary-700">
                 {course.category}
               </span>
               <span className="flex items-center gap-1">
@@ -63,24 +58,24 @@ export default function CourseDescriptionModal({
           </div>
 
           <div className="mb-6">
-            <h5 className="mb-3 font-bold text-[#363636]">
+            <h5 className="mb-3 font-bold text-neutral-950">
               {t("modernCourseView.overview.description")}
             </h5>
             {isAdminExperience ? (
               <textarea
                 value={courseDescription}
                 onChange={(event) => onChangeDescription(event.target.value)}
-                className="min-h-[120px] w-full rounded-lg border-2 border-[#e5e5e5] p-3 leading-relaxed text-[#363636] focus:border-[#3f58b6] focus:outline-none"
+                className="min-h-[120px] w-full rounded-lg border-2 border-neutral-200 p-3 leading-relaxed text-neutral-950 focus:border-primary-700 focus:outline-none"
                 placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
                 onBlur={() => void onSaveDescription()}
               />
             ) : (
-              <p className="leading-relaxed text-[#676767]">{course.description}</p>
+              <p className="leading-relaxed text-neutral-800">{course.description}</p>
             )}
           </div>
 
           <div className="mb-6">
-            <h5 className="mb-3 font-bold text-[#363636]">
+            <h5 className="mb-3 font-bold text-neutral-950">
               {t("modernCourseView.overview.whatYouWillLearn")}
             </h5>
             <div className="space-y-2" />
@@ -90,7 +85,7 @@ export default function CourseDescriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg bg-[#3f58b6] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#324a95]"
+              className="rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800"
             >
               {t("modernCourseView.common.close")}
             </button>

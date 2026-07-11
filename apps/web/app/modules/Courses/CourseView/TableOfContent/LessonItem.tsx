@@ -23,14 +23,14 @@ const getLessonHoverStyle = ({
   isCurrent: boolean;
 }) => {
   if (isCompleted) {
-    return "hover:bg-green-50/30";
+    return "hover:bg-success-50/30";
   }
 
   if (isCurrent) {
-    return "hover:bg-blue-50/30";
+    return "hover:bg-primary-50/30";
   }
 
-  return "hover:bg-gray-50/30";
+  return "hover:bg-neutral-50/30";
 };
 
 export default function LessonItem({
@@ -52,13 +52,13 @@ export default function LessonItem({
           <LessonTypeIcon type={lesson.type} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-base font-medium leading-relaxed text-[#363636] transition-colors group-hover/lesson:text-[#3f58b6] md:text-sm">
+          <p className="text-base font-medium leading-relaxed text-neutral-950 transition-colors group-hover/lesson:text-primary-700 md:text-sm">
             {lesson.title}
           </p>
         </div>
         {!isAdminExperience && <LessonStatusIcon status={lesson.status} />}
       </div>
-      {!isLast && <div className="ml-12 border-t border-[#e5e5e5] md:ml-11" />}
+      {!isLast && <div className="ml-12 border-t border-neutral-200 md:ml-11" />}
     </div>
   );
 }

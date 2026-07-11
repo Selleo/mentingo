@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, count, eq, sql } from "drizzle-orm";
@@ -14,6 +14,7 @@ import {
   DEFAULT_STUDENT_SETTINGS,
 } from "src/settings/constants/settings.constants";
 import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
 import hashPassword from "../common/helpers/hashPassword";
 import {
@@ -22,10 +23,12 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   credentials,
+  lessonLearningTime,
   lessons,
   questions,
   quizAttempts,
   settings,
+  studentChapterProgress,
   studentCourses,
   studentLessonProgress,
   userDetails,
@@ -192,20 +195,54 @@ export async function insertUserSettings(
 }
 
 async function createStudentCourses(courses: any[], studentIds: UUIDType[], tenantId: UUIDType) {
+  const getStudentCourseProgress = (course: any) => {
+    const progressSeed = faker.number.int({ min: 1, max: 100 });
+
+    if (progressSeed <= 20) {
+      return {
+        completedAt: null,
+        finishedChapterCount: 0,
+        progress: PROGRESS_STATUSES.NOT_STARTED,
+      };
+    }
+
+    if (progressSeed <= 80) {
+      return {
+        completedAt: null,
+        finishedChapterCount: faker.number.int({
+          min: 0,
+          max: Math.max((course.chapterCount ?? 1) - 1, 0),
+        }),
+        progress: PROGRESS_STATUSES.IN_PROGRESS,
+      };
+    }
+
+    return {
+      completedAt: faker.date.recent({ days: 90 }).toISOString(),
+      finishedChapterCount: course.chapterCount ?? 0,
+      progress: PROGRESS_STATUSES.COMPLETED,
+    };
+  };
+
   const studentsCoursesList = studentIds.flatMap((studentId) => {
     const courseCount = Math.floor(courses.length * 0.5);
     const selectedCourses = sampleSize(courses, courseCount);
 
     return selectedCourses.map((course) => {
+      const courseProgress = getStudentCourseProgress(course);
+
       return {
         id: faker.string.uuid(),
         studentId: studentId,
         courseId: course.id,
+        completedAt: courseProgress.completedAt,
+        finishedChapterCount: courseProgress.finishedChapterCount,
         numberOfAssignments: faker.number.int({ min: 0, max: 10 }),
         numberOfFinishedAssignments: faker.number.int({ min: 0, max: 10 }),
-        state: "not_started",
+        progress: courseProgress.progress,
         archived: false,
         enrolledByGroupId: null,
+        status: COURSE_ENROLLMENT.ENROLLED,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
         tenantId,
@@ -221,30 +258,165 @@ async function createLessonProgress(userId: UUIDType, tenantId: UUIDType) {
     .select({
       lessonId: sql<UUIDType>`${lessons.id}`,
       chapterId: sql<UUIDType>`${chapters.id}`,
+      courseId: sql<UUIDType>`${courses.id}`,
       createdAt: sql<string>`${courses.createdAt}`,
       lessonType: sql<string>`${lessons.type}`,
+      courseProgress: sql<string>`${studentCourses.progress}`,
     })
     .from(studentCourses)
-    .leftJoin(courses, eq(studentCourses.courseId, courses.id))
-    .leftJoin(chapters, eq(courses.id, chapters.courseId))
-    .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+    .innerJoin(courses, eq(studentCourses.courseId, courses.id))
+    .innerJoin(chapters, eq(courses.id, chapters.courseId))
+    .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
     .where(eq(studentCourses.studentId, userId));
 
   const lessonProgressList = courseLessonsList.map((courseLesson) => {
+    const isCompleted =
+      courseLesson.courseProgress === PROGRESS_STATUSES.COMPLETED ||
+      (courseLesson.courseProgress === PROGRESS_STATUSES.IN_PROGRESS &&
+        faker.datatype.boolean({ probability: 0.45 }));
+    const isStarted =
+      isCompleted ||
+      (courseLesson.courseProgress === PROGRESS_STATUSES.IN_PROGRESS &&
+        faker.datatype.boolean({ probability: 0.75 }));
+    const completedAt = isCompleted
+      ? faker.date.between({ from: courseLesson.createdAt, to: new Date() }).toISOString()
+      : null;
+
     return {
       studentId: userId,
       lessonId: courseLesson.lessonId,
       chapterId: courseLesson.chapterId,
       createdAt: courseLesson.createdAt,
       updatedAt: courseLesson.createdAt,
+      completedAt,
+      isStarted,
       quizScore: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 0 : null,
       attempts: courseLesson.lessonType === LESSON_TYPES.QUIZ ? 1 : null,
-      isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? false : null,
+      isQuizPassed: courseLesson.lessonType === LESSON_TYPES.QUIZ ? isCompleted : null,
       tenantId,
     };
   });
 
-  return db.insert(studentLessonProgress).values(lessonProgressList).returning();
+  if (lessonProgressList.length === 0) return [];
+
+  const createdLessonProgress = await db
+    .insert(studentLessonProgress)
+    .values(lessonProgressList)
+    .returning();
+
+  await createStudentChapterProgress(userId, tenantId);
+
+  return createdLessonProgress;
+}
+
+async function createStudentChapterProgress(userId: UUIDType, tenantId: UUIDType) {
+  const chapterProgressList = await db
+    .select({
+      chapterId: chapters.id,
+      courseId: chapters.courseId,
+      lessonCount: chapters.lessonCount,
+      completedLessonCount: sql<number>`COUNT(${studentLessonProgress.completedAt})::INTEGER`,
+      firstProgressAt: sql<string>`MIN(${studentLessonProgress.createdAt})`,
+      completedAt: sql<string | null>`
+        CASE
+          WHEN COUNT(${studentLessonProgress.completedAt}) = ${chapters.lessonCount}
+          THEN MAX(${studentLessonProgress.completedAt})
+          ELSE NULL
+        END
+      `,
+    })
+    .from(studentLessonProgress)
+    .innerJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))
+    .where(and(eq(studentLessonProgress.studentId, userId), eq(chapters.tenantId, tenantId)))
+    .groupBy(chapters.id, chapters.courseId, chapters.lessonCount);
+
+  if (chapterProgressList.length === 0) return [];
+
+  return db
+    .insert(studentChapterProgress)
+    .values(
+      chapterProgressList.map((chapterProgress) => ({
+        studentId: userId,
+        courseId: chapterProgress.courseId,
+        chapterId: chapterProgress.chapterId,
+        completedLessonCount: chapterProgress.completedLessonCount,
+        completedAt: chapterProgress.completedAt,
+        createdAt: chapterProgress.firstProgressAt,
+        updatedAt: chapterProgress.firstProgressAt,
+        tenantId,
+      })),
+    )
+    .onConflictDoUpdate({
+      target: [
+        studentChapterProgress.studentId,
+        studentChapterProgress.courseId,
+        studentChapterProgress.chapterId,
+      ],
+      set: {
+        completedLessonCount: sql`excluded.completed_lesson_count`,
+        completedAt: sql`excluded.completed_at`,
+        updatedAt: sql`excluded.updated_at`,
+      },
+    });
+}
+
+const getLessonLearningTimeSeconds = (lessonType: string, isCompleted: boolean) => {
+  if (lessonType === LESSON_TYPES.QUIZ) {
+    return faker.number.int({ min: isCompleted ? 240 : 90, max: isCompleted ? 720 : 360 });
+  }
+
+  if (lessonType === LESSON_TYPES.AI_MENTOR) {
+    return faker.number.int({ min: isCompleted ? 480 : 180, max: isCompleted ? 1500 : 780 });
+  }
+
+  return faker.number.int({ min: isCompleted ? 360 : 120, max: isCompleted ? 1800 : 900 });
+};
+
+async function createLearningTimeForStudent(userId: UUIDType, tenantId: UUIDType) {
+  const startedLessons = await db
+    .select({
+      lessonId: lessons.id,
+      courseId: chapters.courseId,
+      lessonType: lessons.type,
+      isCompleted: sql<boolean>`${studentLessonProgress.completedAt} IS NOT NULL`,
+      createdAt: studentLessonProgress.createdAt,
+    })
+    .from(studentLessonProgress)
+    .innerJoin(lessons, eq(lessons.id, studentLessonProgress.lessonId))
+    .innerJoin(chapters, eq(chapters.id, studentLessonProgress.chapterId))
+    .where(
+      and(
+        eq(studentLessonProgress.studentId, userId),
+        eq(studentLessonProgress.isStarted, true),
+        eq(studentLessonProgress.tenantId, tenantId),
+      ),
+    );
+
+  const learningTimeList = startedLessons.map((lessonProgress) => ({
+    userId,
+    lessonId: lessonProgress.lessonId,
+    courseId: lessonProgress.courseId,
+    totalSeconds: getLessonLearningTimeSeconds(
+      lessonProgress.lessonType,
+      lessonProgress.isCompleted,
+    ),
+    createdAt: lessonProgress.createdAt,
+    updatedAt: lessonProgress.createdAt,
+    tenantId,
+  }));
+
+  if (learningTimeList.length === 0) return [];
+
+  return db
+    .insert(lessonLearningTime)
+    .values(learningTimeList)
+    .onConflictDoUpdate({
+      target: [lessonLearningTime.userId, lessonLearningTime.lessonId],
+      set: {
+        totalSeconds: sql`excluded.total_seconds`,
+        updatedAt: sql`excluded.updated_at`,
+      },
+    });
 }
 
 async function createCoursesSummaryStats(courses: any[] = [], tenantId: UUIDType) {
@@ -419,9 +591,10 @@ async function seed() {
       await Promise.all(
         createdStudentIds.map(async (studentId) => {
           await createLessonProgress(studentId, tenantId);
+          await createLearningTimeForStudent(studentId, tenantId);
         }),
       );
-      console.log("Created student lesson progress");
+      console.log("Created student lesson progress and learning time");
 
       await createCoursesSummaryStats(createdCourses, tenantId);
 

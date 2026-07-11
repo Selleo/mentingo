@@ -36,19 +36,19 @@ export default function CourseMediaModal({
       />
       <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-6">
         <div className="mb-4 flex items-center justify-between md:mb-6">
-          <h3 className="font-gothic text-xl font-bold text-[#363636] md:text-2xl">
+          <h3 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
             {t("modernCourseView.media.title")}
           </h3>
           <button type="button" onClick={onClose}>
-            <X className="h-5 w-5 text-[#676767] md:h-6 md:w-6" />
+            <X className="h-5 w-5 text-neutral-800 md:h-6 md:w-6" />
           </button>
         </div>
 
         <div className="mb-6">
-          <p className="mb-3 block text-sm font-semibold text-[#363636]">
+          <p className="mb-3 block text-sm font-semibold text-neutral-950">
             {t("modernCourseView.media.currentImage")}
           </p>
-          <div className="relative mb-4 aspect-[21/9] overflow-hidden rounded-xl border-2 border-[#e5e5e5]">
+          <div className="relative mb-4 aspect-[21/9] overflow-hidden rounded-xl border-2 border-neutral-200">
             <img
               src={imagePreviewUrl}
               alt={t("modernCourseView.media.previewAlt")}
@@ -61,8 +61,8 @@ export default function CourseMediaModal({
             </div>
           </div>
 
-          <div className="rounded-xl border border-[#e5e5e5] bg-[#f9fafb] p-4">
-            <p className="mb-2 text-sm font-semibold text-[#363636]">
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+            <p className="mb-2 text-sm font-semibold text-neutral-950">
               {t("modernCourseView.media.verticalPosition")}
             </p>
             <input
@@ -74,7 +74,7 @@ export default function CourseMediaModal({
               onChange={(event) => onPositionChange(Number(event.target.value))}
               className="w-full cursor-pointer accent-primary-600"
             />
-            <div className="mt-1 flex justify-between text-xs text-[#676767]">
+            <div className="mt-1 flex justify-between text-xs text-neutral-800">
               <span>{heroImagePositionDraft}%</span>
             </div>
           </div>
@@ -82,7 +82,7 @@ export default function CourseMediaModal({
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           <div>
-            <p className="mb-3 block text-sm font-semibold text-[#363636]">
+            <p className="mb-3 block text-sm font-semibold text-neutral-950">
               {t("modernCourseView.media.uploadImage")}
             </p>
             <input
@@ -95,36 +95,36 @@ export default function CourseMediaModal({
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
-              className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#e5e5e5] bg-gray-50 p-6 text-center transition-colors hover:border-[#3f58b6] hover:bg-gray-100 md:h-48 md:p-8"
+              className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8"
             >
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50">
-                <Upload className="h-8 w-8 text-[#3f58b6]" />
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
+                <Upload className="h-8 w-8 text-primary-700" />
               </div>
-              <p className="mb-1 text-sm font-semibold text-[#363636]">
+              <p className="mb-1 text-sm font-semibold text-neutral-950">
                 {t("modernCourseView.media.dropImage")}
               </p>
-              <p className="mb-3 text-xs text-[#676767]">{t("modernCourseView.media.browse")}</p>
-              <p className="text-xs text-[#676767]">{t("modernCourseView.media.imageLimit")}</p>
-              <p className="text-xs text-[#676767]">
+              <p className="mb-3 text-xs text-neutral-800">{t("modernCourseView.media.browse")}</p>
+              <p className="text-xs text-neutral-800">{t("modernCourseView.media.imageLimit")}</p>
+              <p className="text-xs text-neutral-800">
                 {t("modernCourseView.media.imageRecommendation")}
               </p>
             </button>
           </div>
 
           <div>
-            <p className="mb-3 block text-sm font-semibold text-[#363636]">
+            <p className="mb-3 block text-sm font-semibold text-neutral-950">
               {t("modernCourseView.media.trailer")}
             </p>
-            <div className="flex h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-[#e5e5e5] bg-gray-50 p-6 text-center transition-colors hover:border-[#3f58b6] hover:bg-gray-100 md:h-48 md:p-8">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-purple-50">
-                <Play className="h-8 w-8 text-purple-600" />
+            <div className="flex h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-amethyst-50">
+                <Play className="h-8 w-8 text-amethyst-600" />
               </div>
-              <p className="mb-1 text-sm font-semibold text-[#363636]">
+              <p className="mb-1 text-sm font-semibold text-neutral-950">
                 {t("modernCourseView.media.dropVideo")}
               </p>
-              <p className="mb-3 text-xs text-[#676767]">{t("modernCourseView.media.browse")}</p>
-              <p className="text-xs text-[#676767]">{t("modernCourseView.media.videoLimit")}</p>
-              <p className="text-xs text-[#676767]">
+              <p className="mb-3 text-xs text-neutral-800">{t("modernCourseView.media.browse")}</p>
+              <p className="text-xs text-neutral-800">{t("modernCourseView.media.videoLimit")}</p>
+              <p className="text-xs text-neutral-800">
                 {t("modernCourseView.media.videoRecommendation")}
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function CourseMediaModal({
             type="button"
             onClick={onClose}
             disabled={isSaving}
-            className="rounded-lg bg-gray-200 px-6 py-2 font-semibold text-[#363636] transition-colors hover:bg-gray-300"
+            className="rounded-lg bg-neutral-200 px-6 py-2 font-semibold text-neutral-950 transition-colors hover:bg-neutral-300"
           >
             {t("modernCourseView.common.cancel")}
           </button>
@@ -144,7 +144,7 @@ export default function CourseMediaModal({
             type="button"
             onClick={() => void onSave()}
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-lg bg-[#3f58b6] px-6 py-2 font-semibold text-white transition-colors hover:bg-[#324a95]"
+            className="flex items-center gap-2 rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800"
           >
             <Upload className="h-4 w-4" />
             {t("modernCourseView.media.save")}

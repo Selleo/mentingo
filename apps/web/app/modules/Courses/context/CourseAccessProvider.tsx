@@ -2,7 +2,7 @@ import { PERMISSIONS } from "@repo/shared";
 import { createContext, useContext, useMemo } from "react";
 
 import { useCurrentUser } from "~/api/queries";
-import { hasPermission } from "~/common/permissions/permission.utils";
+import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
 
 import type { PropsWithChildren } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -12,6 +12,8 @@ type CourseExperienceContextValue = {
   isCourseStudentModeActive: boolean;
   isPreviewMode: boolean;
   isEffectiveStudentExperience: boolean;
+  canEditCourse: boolean;
+  isAdminExperience: boolean;
 };
 
 type CourseExperienceResolverParams = {
@@ -20,6 +22,8 @@ type CourseExperienceResolverParams = {
   currentUserId?: string;
   canUseLearningMode: boolean;
   canUpdateLearningProgress: boolean;
+  canManageUsers?: boolean;
+  canManageCourses?: boolean;
   activeLearningModeCourseIds: string[];
 };
 
@@ -36,12 +40,15 @@ export function resolveCourseExperienceState({
   currentUserId,
   canUseLearningMode,
   canUpdateLearningProgress,
+  canManageUsers = false,
+  canManageCourses = false,
   activeLearningModeCourseIds,
 }: CourseExperienceResolverParams): CourseExperienceContextValue {
   const isCourseStudentModeActive =
     !forcePreviewMode && canUseLearningMode && activeLearningModeCourseIds.includes(course.id);
 
   const isCourseAuthor = currentUserId === course.authorId;
+  const canEditCourse = canManageUsers || (canManageCourses && isCourseAuthor);
 
   const canLearnByEnrollment =
     canUpdateLearningProgress && !isCourseAuthor && Boolean(course.enrolled);
@@ -55,12 +62,15 @@ export function resolveCourseExperienceState({
 
   const isEffectiveStudentExperience =
     !isPreviewMode && (canLearnByEnrollment || canLearnByLearningMode || canUpdateLearningProgress);
+  const isAdminExperience = canEditCourse && !isCourseStudentModeActive;
 
   return {
     course,
     isCourseStudentModeActive,
     isPreviewMode,
     isEffectiveStudentExperience,
+    canEditCourse,
+    isAdminExperience,
   };
 }
 
@@ -77,6 +87,11 @@ export function CourseAccessProvider({
     permissions,
     PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   );
+  const canManageUsers = hasPermission(permissions, PERMISSIONS.USER_MANAGE);
+  const canManageCourses = hasAnyPermission(permissions, [
+    PERMISSIONS.COURSE_UPDATE,
+    PERMISSIONS.COURSE_UPDATE_OWN,
+  ]);
 
   const value = useMemo(() => {
     return resolveCourseExperienceState({
@@ -85,6 +100,8 @@ export function CourseAccessProvider({
       currentUserId: currentUser?.id,
       canUseLearningMode,
       canUpdateLearningProgress,
+      canManageUsers,
+      canManageCourses,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
     });
   }, [
@@ -94,6 +111,8 @@ export function CourseAccessProvider({
     forcePreviewMode,
     canUseLearningMode,
     canUpdateLearningProgress,
+    canManageUsers,
+    canManageCourses,
   ]);
 
   return (

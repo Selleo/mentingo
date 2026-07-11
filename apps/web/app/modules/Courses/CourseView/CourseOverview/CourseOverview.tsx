@@ -1,5 +1,4 @@
 import { useNavigate } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,9 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
-import { useCategories, useCurrentUser } from "~/api/queries";
+import { useCategories } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
-import { usePermissions } from "~/hooks/usePermissions";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
@@ -22,24 +20,17 @@ import CourseSettingsDrawer from "./CourseSettingsDrawer";
 import CourseTitleEditor from "./CourseTitleEditor";
 
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetCourseResponse } from "~/api/generated-api";
 
 type CourseHeroProps = {
-  course: GetCourseResponse["data"];
   language: SupportedLanguages;
 };
 
-export default function CourseOverview({ course, language }: CourseHeroProps) {
+export default function CourseOverview({ language }: CourseHeroProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { data: currentUser } = useCurrentUser();
-  const { hasAccess: canManageUsers } = usePermissions({
-    required: PERMISSIONS.USER_MANAGE,
-  });
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-  });
-  const { isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
+  const { course, isAdminExperience, isCourseStudentModeActive, isPreviewMode } =
+    useCourseAccessProvider();
+
   const { data: categories = [] } = useCategories({
     language,
     archived: false,
@@ -65,8 +56,6 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
 
-  const canEditCourse = canManageUsers || (canManageCourses && course.authorId === currentUser?.id);
-  const isAdminExperience = canEditCourse && !isCourseStudentModeActive;
   const selectedCategoryTitle =
     categories.find((category) => category.id === selectedCategoryId)?.title ?? course.category;
 
@@ -162,6 +151,10 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
     navigateToNextLesson(course, navigate, { openFirstLesson: isPreviewMode });
   };
 
+  const handleOpenDescriptionModal = () => {
+    setShowDescriptionModal(true);
+  };
+
   const handleCancelTitleEdit = () => {
     setCourseTitle(course.title);
     setIsEditingTitle(false);
@@ -246,7 +239,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             <button
               type="button"
               onClick={() => setShowSettingsDrawer(true)}
-              className="absolute left-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-gray-200 md:left-4 md:top-4 md:px-4 md:py-2"
+              className="absolute left-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-neutral-200 md:left-4 md:top-4 md:px-4 md:py-2"
             >
               <Settings className="size-4 text-primary-700" />
 
@@ -258,7 +251,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             <button
               type="button"
               onClick={openMediaModal}
-              className="absolute right-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-gray-200 md:right-4 md:top-4 md:px-4 md:py-2"
+              className="absolute right-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-neutral-200 md:right-4 md:top-4 md:px-4 md:py-2"
             >
               <Upload className="size-4 text-primary-700" />
 
@@ -277,7 +270,6 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
               categories={categories}
               canEdit={isAdminExperience}
               disabled={isUpdatingCourse}
-              dueDate={course.dueDate}
               durationSeconds={course.estimatedDurationSeconds}
               isEditing={isEditingCategory}
               onChange={handleCategoryChange}
@@ -297,11 +289,10 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
             />
 
             <CourseOverviewActions
-              isAdminExperience={isAdminExperience}
               isTogglingLearningMode={isTogglingLearningMode}
               onToggleLearningMode={handleToggleLearningMode}
               onContinueLearning={handleContinueLearning}
-              onOpenDetails={() => setShowDescriptionModal(true)}
+              onOpenDetails={handleOpenDescriptionModal}
             />
           </div>
         </div>
@@ -322,10 +313,7 @@ export default function CourseOverview({ course, language }: CourseHeroProps) {
 
       {showDescriptionModal && (
         <CourseDescriptionModal
-          course={course}
-          courseTitle={courseTitle}
           courseDescription={courseDescription}
-          isAdminExperience={isAdminExperience}
           onChangeDescription={setCourseDescription}
           onSaveDescription={handleDescriptionChange}
           onClose={() => setShowDescriptionModal(false)}
