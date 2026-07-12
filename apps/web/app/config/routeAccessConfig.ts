@@ -93,6 +93,7 @@ export const routeAccessConfig = createRouteConfig({
 
   // Client part
   "": PUBLIC,
+  dashboard: {},
   progress: LEARNING_PROGRESS_ACCESS,
   notifications: {
     allOf: [PERMISSIONS.ANNOUNCEMENT_READ],

@@ -57,6 +57,11 @@ export const getNavigationConfig = (
       testId: NAVIGATION_HANDLES.COURSES_GROUP,
       items: [
         {
+          label: t("navigationSideBar.dashboard"),
+          path: "dashboard",
+          iconName: "Dashboard",
+        },
+        {
           label: t("navigationSideBar.courses"),
           path: "courses",
           iconName: "Course",
