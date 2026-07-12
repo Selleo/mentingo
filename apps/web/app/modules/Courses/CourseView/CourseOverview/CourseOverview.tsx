@@ -18,6 +18,7 @@ import CourseMediaModal from "./CourseMediaModal";
 import CourseOverviewActions from "./CourseOverviewActions";
 import CourseSettingsDrawer from "./CourseSettingsDrawer";
 import CourseTitleEditor from "./CourseTitleEditor";
+import CourseWhatYouWillLearn from "./CourseWhatYouWillLearn";
 
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -263,7 +264,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
         )}
 
         <div className="absolute inset-x-0 bottom-0 z-10 p-6 lg:p-8">
-          <div className="max-w-[65%]">
+          <div className="lg:max-w-[62%]">
             <CourseCategoryEditor
               categoryId={selectedCategoryId}
               categoryTitle={selectedCategoryTitle}
@@ -296,6 +297,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
             />
           </div>
         </div>
+        <CourseWhatYouWillLearn courseOutcomes={course.learningOutcomes} language={language} />
       </CourseHeroImage>
 
       {isMediaModalOpen && (

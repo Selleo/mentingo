@@ -1776,6 +1776,7 @@ export interface GetAllCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1814,6 +1815,7 @@ export interface GetStudentCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1880,6 +1882,7 @@ export interface GetAvailableCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1940,6 +1943,7 @@ export interface GetTopCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -1976,6 +1980,7 @@ export interface GetContentCreatorCoursesResponse {
     lessonCount?: number;
     estimatedDurationMinutes?: number;
     estimatedDurationFormatted?: string | null;
+    learningOutcomes?: string[];
     enrolledParticipantCount: number;
     priceInCents: number;
     currency: string;
@@ -2059,6 +2064,7 @@ export interface GetCourseResponse {
     thumbnailPositionY: number;
     /** @min 0 */
     estimatedDurationSeconds?: number;
+    learningOutcomes?: string[];
     showAuthorSection?: boolean;
     trailerUrl?: string | null;
     title: string;
@@ -2207,6 +2213,7 @@ export type CreateCourseBody = {
    * @max 100
    */
   thumbnailPositionY?: number;
+  learningOutcomes?: string[];
   priceInCents?: number;
   currency?: string;
   /** @format uuid */
@@ -2277,6 +2284,7 @@ export interface UpdateCourseBody {
    * @max 100
    */
   thumbnailPositionY?: number;
+  learningOutcomes?: string[];
   showAuthorSection?: boolean;
   status?: "draft" | "published" | "private";
   priceInCents?: number;

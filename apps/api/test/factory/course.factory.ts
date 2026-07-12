@@ -93,6 +93,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       description: faker.commerce.productDescription(),
       thumbnailS3Key: faker.system.directoryPath(),
       thumbnailPositionY: 50,
+      learningOutcomes: {},
       showAuthorSection: true,
       status: "published",
       hasCertificate: false,

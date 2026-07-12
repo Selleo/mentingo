@@ -24154,6 +24154,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -24362,6 +24368,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -24692,6 +24704,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -25060,6 +25078,12 @@
                     }
                   ]
                 },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
                 "enrolledParticipantCount": {
                   "type": "number"
                 },
@@ -25264,6 +25288,12 @@
                       "type": "null"
                     }
                   ]
+                },
+                "learningOutcomes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 },
                 "enrolledParticipantCount": {
                   "type": "number"
@@ -25695,6 +25725,12 @@
               "estimatedDurationSeconds": {
                 "minimum": 0,
                 "type": "number"
+              },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               },
               "showAuthorSection": {
                 "type": "boolean"
@@ -26629,6 +26665,12 @@
                 "maximum": 100,
                 "type": "integer"
               },
+              "learningOutcomes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
               "priceInCents": {
                 "type": "integer"
               },
@@ -26892,6 +26934,12 @@
             "minimum": 0,
             "maximum": 100,
             "type": "integer"
+          },
+          "learningOutcomes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "showAuthorSection": {
             "type": "boolean"

@@ -52,7 +52,13 @@ import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
-import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  buildJsonbField,
+  buildJsonbStringArrayField,
+  deleteJsonbField,
+  setJsonbField,
+  setJsonbStringArrayField,
+} from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
@@ -659,6 +665,20 @@ export class CourseService {
     return trailers[courseId] ?? null;
   }
 
+  private getLocalizedLearningOutcomes(language: SupportedLanguages) {
+    return sql<string[]>`
+      ARRAY(
+        SELECT jsonb_array_elements_text(
+          CASE
+            WHEN jsonb_typeof(${courses.learningOutcomes}->${language}) = 'array'
+              THEN ${courses.learningOutcomes}->${language}
+            ELSE '[]'::jsonb
+          END
+        )
+      )
+    `;
+  }
+
   private async getSignedCourseThumbnailUrl(
     thumbnailReference: string | null,
     quality: ImageQuality = IMAGE_QUALITY.XL,
@@ -1131,6 +1151,7 @@ export class CourseService {
           ...getTableColumns(courses),
           title: this.localizationService.getLocalizedSqlField(courses.title, language),
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
+          learningOutcomes: this.getLocalizedLearningOutcomes(language),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
@@ -1273,6 +1294,7 @@ export class CourseService {
         showAuthorSection: courses.showAuthorSection,
         thumbnailPositionY: courses.thumbnailPositionY,
         description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        learningOutcomes: this.getLocalizedLearningOutcomes(language),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
@@ -2085,6 +2107,10 @@ export class CourseService {
         description: buildJsonbField(createCourseBody.language, createCourseBody.description),
         baseLanguage: createCourseBody.language,
         availableLocales: [createCourseBody.language],
+        learningOutcomes: buildJsonbStringArrayField(
+          createCourseBody.language,
+          createCourseBody.learningOutcomes ?? [],
+        ),
         thumbnailS3Key: createCourseBody.thumbnailS3Key,
         status: createCourseBody.status,
         priceInCents: createCourseBody.priceInCents,
@@ -2198,10 +2224,16 @@ export class CourseService {
           }
         }
 
-        const { priceInCents, currency, title, description, language, ...rest } = updateCourseBody;
+        const { priceInCents, currency, title, description, learningOutcomes, language, ...rest } =
+          updateCourseBody;
 
         const updateData = {
           ...rest,
+          learningOutcomes: setJsonbStringArrayField(
+            courses.learningOutcomes,
+            language,
+            learningOutcomes,
+          ),
           title: setJsonbField(courses.title, language, title),
           description: setJsonbField(courses.description, language, description),
           ...(isStripeConfigured ? { priceInCents, currency } : {}),
@@ -4609,6 +4641,7 @@ export class CourseService {
         .set({
           title: deleteJsonbField(courses.title, language),
           description: deleteJsonbField(courses.description, language),
+          learningOutcomes: deleteJsonbField(courses.learningOutcomes, language),
           availableLocales: sql`ARRAY_REMOVE(${courses.availableLocales}, ${language})`,
         })
         .where(eq(courses.id, courseId));

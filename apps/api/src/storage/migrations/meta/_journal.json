@@ -1135,6 +1135,13 @@
       "when": 1783508332747,
       "tag": "0161_mixed_rogue",
       "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1783796433584,
+      "tag": "0162_careful_guardian",
+      "breakpoints": true
     }
   ]
 }
