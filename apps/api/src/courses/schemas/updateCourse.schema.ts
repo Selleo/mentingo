@@ -13,6 +13,7 @@ export const updateCourseSchema = Type.Partial(
       minimum: 0,
       maximum: 100,
     }),
+    learningOutcomes: Type.Optional(Type.Array(Type.String())),
     showAuthorSection: Type.Boolean(),
     status: coursesStatusOptions,
     priceInCents: Type.Integer(),

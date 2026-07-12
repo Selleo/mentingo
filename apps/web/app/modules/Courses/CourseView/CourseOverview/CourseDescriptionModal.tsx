@@ -1,4 +1,4 @@
-import { Clock, X } from "lucide-react";
+import { Check, Clock, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
@@ -74,12 +74,25 @@ export default function CourseDescriptionModal({
             )}
           </div>
 
-          <div className="mb-6">
-            <h5 className="mb-3 font-bold text-neutral-950">
-              {t("modernCourseView.overview.whatYouWillLearn")}
-            </h5>
-            <div className="space-y-2" />
-          </div>
+          {course.learningOutcomes && course.learningOutcomes.length > 0 && (
+            <div className="mb-6">
+              <h5 className="mb-4 text-lg font-bold text-neutral-950">
+                {t("modernCourseView.overview.whatYouWillLearn")}
+              </h5>
+              <ul className="space-y-3">
+                {course.learningOutcomes.map((outcome) => (
+                  <li key={outcome} className="flex items-start gap-3">
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-success-500 text-success-500">
+                      <Check className="size-3" strokeWidth={3} />
+                    </span>
+                    <span className="text-lg font-medium leading-relaxed text-neutral-800">
+                      {outcome}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className="flex justify-end">
             <button

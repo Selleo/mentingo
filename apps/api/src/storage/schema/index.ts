@@ -312,6 +312,10 @@ export const courses = pgTable(
     showAuthorSection: boolean("show_author_section").notNull().default(true),
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
+    learningOutcomes: jsonb("learning_outcomes")
+      .$type<Partial<Record<SupportedLanguages, string[]>>>()
+      .default({})
+      .notNull(),
     courseType: courseTypeEnum("course_type")
       .$type<CourseType>()
       .notNull()

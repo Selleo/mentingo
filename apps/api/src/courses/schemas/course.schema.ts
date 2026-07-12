@@ -22,6 +22,7 @@ export const courseSchema = Type.Object({
   estimatedDurationMinutes: Type.Optional(Type.Number()),
   estimatedDurationFormatted: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   // completedChapterCount: Type.Number(),
+  learningOutcomes: Type.Optional(Type.Array(Type.String())),
   enrolledParticipantCount: Type.Number(),
   priceInCents: Type.Number(),
   currency: Type.String(),

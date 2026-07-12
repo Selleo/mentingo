@@ -15,6 +15,7 @@ export const baseCourseSchema = Type.Object({
       maximum: 100,
     }),
   ),
+  learningOutcomes: Type.Optional(Type.Array(Type.String())),
   priceInCents: Type.Optional(Type.Integer()),
   currency: Type.Optional(Type.String()),
   categoryId: Type.String({ format: "uuid" }),

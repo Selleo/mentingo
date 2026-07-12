@@ -32,6 +32,7 @@ export const commonShowCourseSchema = Type.Object({
       minimum: 0,
     }),
   ),
+  learningOutcomes: Type.Optional(Type.Array(Type.String())),
   showAuthorSection: Type.Optional(Type.Boolean()),
   trailerUrl: Type.Optional(Type.Union([Type.String(), Type.Null()])),
   title: Type.String(),
