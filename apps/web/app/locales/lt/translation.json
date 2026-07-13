@@ -3767,7 +3767,12 @@
       "complete_chapter": "Skyrius užbaigtas",
       "expire_certificate": "Sertifikatas nebegalioja",
       "reset_certificate": "Sertifikatas nustatytas iš naujo",
-      "view_announcement": "Peržiūrėta"
+      "view_announcement": "Peržiūrėta",
+      "enroll_learning_path": "Prisijungta prie mokymosi kelio",
+      "start_learning_path": "Mokymosi kelias pradėtas",
+      "complete_learning_path": "Mokymosi kelias užbaigtas",
+      "play_scorm": "SCORM paleistas",
+      "complete_scorm": "SCORM užbaigtas"
     },
     "entity": {
       "course": "Kursas",
@@ -3786,6 +3791,8 @@
       "qa": "Klausimai ir atsakymai",
       "announcement": "Pranešimas",
       "live_training": "Tiesioginiai mokymai",
+      "learning_path": "Mokymosi kelias",
+      "scorm": "SCORM",
       "global_settings": "Nustatymai"
     },
     "table": {

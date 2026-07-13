@@ -3766,7 +3766,12 @@
       "complete_chapter": "Kapitola dokončena",
       "expire_certificate": "Certifikát vypršel",
       "reset_certificate": "Certifikát resetován",
-      "view_announcement": "Zobrazeno"
+      "view_announcement": "Zobrazeno",
+      "enroll_learning_path": "Zapsán do vzdělávací cesty",
+      "start_learning_path": "Vzdělávací cesta zahájena",
+      "complete_learning_path": "Vzdělávací cesta dokončena",
+      "play_scorm": "SCORM spuštěn",
+      "complete_scorm": "SCORM dokončen"
     },
     "entity": {
       "course": "Kurz",
@@ -3785,6 +3790,8 @@
       "qa": "Q&A",
       "announcement": "Oznámení",
       "live_training": "Živé školení",
+      "learning_path": "Vzdělávací cesta",
+      "scorm": "SCORM",
       "global_settings": "Nastavení"
     },
     "table": {

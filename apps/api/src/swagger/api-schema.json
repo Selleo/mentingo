@@ -13659,6 +13659,14 @@
                 {
                   "const": "live_training",
                   "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
                 }
               ]
             }
@@ -13770,6 +13778,26 @@
                     {
                       "const": "view_announcement",
                       "type": "string"
+                    },
+                    {
+                      "const": "enroll_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "play_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_scorm",
+                      "type": "string"
                     }
                   ]
                 },
@@ -13859,6 +13887,26 @@
                       },
                       {
                         "const": "view_announcement",
+                        "type": "string"
+                      },
+                      {
+                        "const": "enroll_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "start_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "play_scorm",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_scorm",
                         "type": "string"
                       }
                     ]
@@ -47257,6 +47305,26 @@
                     },
                     {
                       "const": "view_announcement",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enroll_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "play_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_scorm",
                       "type": "string"
                     }
                   ]

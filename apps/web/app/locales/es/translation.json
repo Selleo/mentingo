@@ -4452,7 +4452,12 @@
       "complete_chapter": "Capítulo completado",
       "expire_certificate": "Certificado caducado",
       "reset_certificate": "Restablecimiento del certificado",
-      "view_announcement": "Visto"
+      "view_announcement": "Visto",
+      "enroll_learning_path": "Inscrito en ruta de aprendizaje",
+      "start_learning_path": "Ruta de aprendizaje iniciada",
+      "complete_learning_path": "Ruta de aprendizaje completada",
+      "play_scorm": "SCORM reproducido",
+      "complete_scorm": "SCORM completado"
     },
     "entity": {
       "course": "Curso",
@@ -4471,6 +4476,8 @@
       "qa": "Preguntas y respuestas",
       "announcement": "Anuncio",
       "live_training": "Formación en vivo",
+      "learning_path": "Ruta de aprendizaje",
+      "scorm": "SCORM",
       "global_settings": "Configuración"
     },
     "table": {

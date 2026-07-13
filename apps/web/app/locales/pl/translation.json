@@ -4492,7 +4492,12 @@
       "complete_chapter": "Ukończono rozdział",
       "expire_certificate": "Certyfikat wygasł",
       "reset_certificate": "Certyfikat zresetowany",
-      "view_announcement": "Wyświetlono"
+      "view_announcement": "Wyświetlono",
+      "enroll_learning_path": "Zapisano do ścieżki",
+      "start_learning_path": "Rozpoczęto ścieżkę",
+      "complete_learning_path": "Ukończono ścieżkę",
+      "play_scorm": "Uruchomiono SCORM",
+      "complete_scorm": "Ukończono SCORM"
     },
     "entity": {
       "course": "Kurs",
@@ -4511,6 +4516,8 @@
       "qa": "Q&A",
       "announcement": "Ogłoszenie",
       "live_training": "Szkolenie na żywo",
+      "learning_path": "Ścieżka nauki",
+      "scorm": "SCORM",
       "global_settings": "Ustawienia"
     },
     "table": {
