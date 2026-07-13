@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
 import {
+  ANNOUNCEMENT_AUDIENCES,
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
-import { eq, and, not } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import {
@@ -26,7 +27,6 @@ type AnnouncementInsert = InferInsertModel<typeof announcements>;
 
 type AnnouncementWithAssoc = Announcement & {
   groupId?: string;
-  isEveryone?: boolean;
 };
 
 class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
@@ -35,7 +35,9 @@ class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
   }
 
   withEveryone() {
-    return this.associations({ isEveryone: true } as Partial<AnnouncementWithAssoc>);
+    return this.associations({
+      audience: ANNOUNCEMENT_AUDIENCES.ALL_USERS,
+    } as Partial<AnnouncementWithAssoc>);
   }
 }
 
@@ -53,19 +55,25 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
 
       if (groupId) {
         await createUserAnnouncementsForGroup(db, groupId, inserted.id, tenantId);
+
         return inserted;
       }
 
-      await createUserAnnouncementsForAll(db, inserted.authorId, inserted.id, tenantId);
+      await createUserAnnouncementsForAll(db, inserted.id, tenantId);
+
       return inserted;
     });
 
     return {
       id: faker.string.uuid(),
-      title: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.sentence(3) },
-      content: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph() },
+      title: {
+        [SUPPORTED_LANGUAGES.EN]: faker.lorem.sentence(3),
+      },
+      content: {
+        [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph(),
+      },
       authorId: faker.string.uuid(),
-      isEveryone: true,
+      audience: ANNOUNCEMENT_AUDIENCES.ALL_USERS,
       status: ANNOUNCEMENT_STATUSES.PUBLISHED,
       scheduledAt: null,
       publishedAt: new Date().toISOString(),
@@ -88,10 +96,16 @@ async function createUserAnnouncementsForGroup(
   announcementId: string,
   tenantId: UUIDType,
 ) {
-  await db.insert(groupAnnouncements).values({ groupId, announcementId, tenantId });
+  await db.insert(groupAnnouncements).values({
+    groupId,
+    announcementId,
+    tenantId,
+  });
 
   const usersRelatedToGroup = await db
-    .select({ userId: groupUsers.userId })
+    .select({
+      userId: groupUsers.userId,
+    })
     .from(groupUsers)
     .leftJoin(users, eq(groupUsers.userId, users.id))
     .where(
@@ -105,22 +119,22 @@ async function createUserAnnouncementsForGroup(
     tenantId,
   }));
 
-  if (userAnnouncementsToInsert.length)
+  if (userAnnouncementsToInsert.length) {
     await db.insert(userAnnouncements).values(userAnnouncementsToInsert);
+  }
 }
 
 async function createUserAnnouncementsForAll(
   db: DatabasePg,
-  authorId: string,
   announcementId: string,
   tenantId: UUIDType,
 ) {
   const allUserIds = await db
-    .select({ id: users.id })
+    .select({
+      id: users.id,
+    })
     .from(users)
-    .where(
-      and(not(eq(users.id, authorId)), userLacksPermissionCondition(users.id, users.tenantId)),
-    );
+    .where(userLacksPermissionCondition(users.id, users.tenantId));
 
   const userAnnouncementsToInsert = allUserIds.map((u) => ({
     userId: u.id,
@@ -129,6 +143,7 @@ async function createUserAnnouncementsForAll(
     tenantId,
   }));
 
-  if (userAnnouncementsToInsert.length)
+  if (userAnnouncementsToInsert.length) {
     await db.insert(userAnnouncements).values(userAnnouncementsToInsert);
+  }
 }
