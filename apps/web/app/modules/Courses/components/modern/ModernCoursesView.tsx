@@ -261,7 +261,7 @@ const ModernCoursesView = () => {
         </div>
       );
     }
-
+    console.log(heroCourse);
     return (
       <>
         <HeroBanner

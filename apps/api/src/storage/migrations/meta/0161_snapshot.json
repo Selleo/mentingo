@@ -1,6 +1,8 @@
 {
-  "id": "51473765-3cec-469b-a0ac-a0ccb4880ca1",
-  "prevId": "3af3c3d2-9e7c-4ee9-9f32-049cf70906ac",
+
+  "id": "0b0bf7f5-91ce-47e8-8c51-4574934b67b5",
+  "prevId": "77c6ae0e-ef67-4abe-b4e7-34a034f44e67",
+
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2810,6 +2812,13 @@
           "primaryKey": false,
           "notNull": false
         },
+        "thumbnail_position_y": {
+          "name": "thumbnail_position_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
         "status": {
           "name": "status",
           "type": "status",
@@ -2831,6 +2840,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "show_author_section": {
+          "name": "show_author_section",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "currency": {
           "name": "currency",

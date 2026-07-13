@@ -1772,6 +1772,7 @@
     "deadline": "Lhůta",
     "selectDate": "Vyberte datum",
     "deadlineRequired": "U povinného kurzu je nutný termín",
+    "deadlineNoAssignedGroups": "Přiřaďte alespoň jednu skupinu, abyste mohli nastavit termíny.",
     "common": {
       "settings": "Nastavení",
       "curriculum": "Osnovy",

@@ -9,6 +9,11 @@ export const updateCourseSchema = Type.Partial(
     title: Type.String(),
     description: Type.String(),
     thumbnailS3Key: Type.String(),
+    thumbnailPositionY: Type.Integer({
+      minimum: 0,
+      maximum: 100,
+    }),
+    showAuthorSection: Type.Boolean(),
     status: coursesStatusOptions,
     priceInCents: Type.Integer(),
     currency: Type.String(),

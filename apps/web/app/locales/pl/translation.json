@@ -2047,6 +2047,7 @@
     "deadline": "Termin wykonania",
     "selectDate": "Wybierz datę",
     "deadlineRequired": "Termin wykonania jest wymagany dla obowiązkowego kursu",
+    "deadlineNoAssignedGroups": "Przypisz co najmniej jedną grupę, aby skonfigurować terminy.",
     "common": {
       "settings": "Ustawienia",
       "curriculum": "Program nauczania",

@@ -193,7 +193,10 @@ import type {
   CourseDueDateReminderRecipient,
 } from "src/courses/types/course-due-date-reminder.types";
 import type { CourseTranslationType } from "src/courses/types/course.types";
-import type { DurationEstimatesByCourse } from "src/courses/types/duration";
+import type {
+  CourseDurationHierarchy,
+  DurationEstimatesByCourse,
+} from "src/courses/types/duration";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   AdminLessonWithContentSchema,
@@ -710,6 +713,73 @@ export class CourseService {
       .otherwise(() => readingSeconds);
   }
 
+  private async computeCourseDurationHierarchy(
+    courseId: UUIDType,
+    language: SupportedLanguages | undefined,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<CourseDurationHierarchy> {
+    const courseLessonIds = dbInstance
+      .select({
+        id: lessons.id,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .where(eq(chapters.courseId, courseId));
+
+    const questionCounts = dbInstance
+      .select({
+        lessonId: questions.lessonId,
+        questionCount: count(questions.id).as("questionCount"),
+      })
+      .from(questions)
+      .where(inArray(questions.lessonId, courseLessonIds))
+      .groupBy(questions.lessonId)
+      .as("question_counts");
+
+    const lessonRows = await dbInstance
+      .select({
+        id: lessons.id,
+        chapterId: lessons.chapterId,
+        type: lessons.type,
+
+        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
+
+        questionCount: sql<number>`
+        COALESCE(${questionCounts.questionCount}, 0)
+      `,
+      })
+      .from(lessons)
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
+      .where(eq(chapters.courseId, courseId));
+
+    const result: CourseDurationHierarchy = {
+      totalSeconds: 0,
+      byChapterId: {},
+      byLessonId: {},
+    };
+
+    for (const lesson of lessonRows) {
+      const estimatedSeconds = this.lessonSeconds({
+        descriptionHtml: typeof lesson.description === "string" ? lesson.description : null,
+
+        quizQuestionCount: Number(lesson.questionCount) || 0,
+
+        lessonType: lesson.type,
+      });
+
+      result.byLessonId[lesson.id] = estimatedSeconds;
+
+      result.byChapterId[lesson.chapterId] =
+        (result.byChapterId[lesson.chapterId] ?? 0) + estimatedSeconds;
+
+      result.totalSeconds += estimatedSeconds;
+    }
+
+    return result;
+  }
+
   private countEmbeddedResourcesFromHtml(content: string): {
     video: number;
     image: number;
@@ -1203,6 +1273,8 @@ export class CourseService {
           language,
           categories,
         ),
+        showAuthorSection: courses.showAuthorSection,
+        thumbnailPositionY: courses.thumbnailPositionY,
         description: this.localizationService.getLocalizedSqlField(courses.description, language),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
@@ -1367,6 +1439,17 @@ export class CourseService {
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
+    const durationHierarchy = await this.computeCourseDurationHierarchy(id, language);
+
+    const chaptersWithDuration = courseChapterList.map((chapter) => ({
+      ...chapter,
+      estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
+      lessons: chapter.lessons.map((lesson) => ({
+        ...lesson,
+        estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
+      })),
+    }));
+
     const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
       course.thumbnailS3Key,
       IMAGE_QUALITY.XL,
@@ -1376,8 +1459,10 @@ export class CourseService {
     return {
       ...course,
       thumbnailUrl: thumbnailUrl ?? undefined,
+      estimatedDurationSeconds: durationHierarchy.totalSeconds,
+
       trailerUrl,
-      chapters: courseChapterList,
+      chapters: chaptersWithDuration,
       slug: currentSlug,
     };
   }
