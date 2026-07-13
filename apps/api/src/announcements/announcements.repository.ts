@@ -129,9 +129,9 @@ export class AnnouncementsRepository {
         availableLocales: input.availableLocales,
         authorId: input.authorId,
         audience:
-          input.groupId === null
-            ? ANNOUNCEMENT_AUDIENCES.ALL_USERS
-            : ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+          input.groupId !== null || input.usersToNotify !== null
+            ? ANNOUNCEMENT_AUDIENCES.SELECTED_USERS
+            : ANNOUNCEMENT_AUDIENCES.ALL_USERS,
         status: input.status,
         scheduledAt: input.scheduledAt,
         publishedAt: input.publishedAt,
