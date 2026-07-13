@@ -7,6 +7,8 @@ import { useCreateLearningPathCertificateShareLink } from "~/api/mutations/useCr
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { CERTIFICATE_PREVIEW_HANDLES } from "../../../../e2e/data/certificates/handles";
+
 import CertificateContent from "./CertificateContent";
 import CertificateControls from "./CertificateControls";
 import { CERTIFICATE_KIND } from "./certificateKind";
@@ -94,7 +96,10 @@ const CertificatePreview = ({
   };
 
   return (
-    <div className="flex max-h-[90vh] w-[min(1120px,95vw)] justify-center overflow-y-auto">
+    <div
+      className="flex max-h-[90vh] w-[min(1120px,95vw)] justify-center overflow-y-auto"
+      data-testid={CERTIFICATE_PREVIEW_HANDLES.MODAL}
+    >
       <div className="w-full pr-1">
         <div
           className={cn("mx-auto w-full bg-white", {

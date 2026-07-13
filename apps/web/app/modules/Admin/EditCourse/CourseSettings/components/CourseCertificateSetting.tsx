@@ -204,6 +204,7 @@ const CourseCertificateSetting = ({
               className="ml-auto"
               disabled={isCertificateControlsDisabled}
               onClick={() => setIsPreviewOpen(true)}
+              data-testid={COURSE_SETTINGS_HANDLES.CERTIFICATE_PREVIEW_BUTTON}
             >
               <Icon name="Eye" className="mr-2 size-4" />
               {t("adminCourseView.settings.other.certificatePreviewButton")}

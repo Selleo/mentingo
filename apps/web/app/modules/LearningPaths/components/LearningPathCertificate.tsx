@@ -12,6 +12,8 @@ import { CERTIFICATE_KIND } from "~/modules/Profile/Certificates/certificateKind
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
+import { LEARNING_PATH_CERTIFICATE_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 type LearningPathCertificateProps = {
   learningPathId: string;
   title: string;
@@ -64,13 +66,19 @@ export function LearningPathCertificate({
           "flex items-center gap-3 rounded-lg border border-success-200 bg-success-50 p-3 md:px-4",
           className,
         )}
+        data-testid={LEARNING_PATH_CERTIFICATE_HANDLES.BANNER}
       >
         <div className="grid aspect-square size-8 place-items-center rounded-full bg-success-50">
           <Icon name="InputRoundedMarkerSuccess" className="size-4" />
         </div>
         <p className="body-sm-md grow">{t("learningPathsView.certificate.pathCompleted")}</p>
         <div>
-          <Button variant="ghost" size="sm" onClick={() => setCertificatePreviewOpen(true)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCertificatePreviewOpen(true)}
+            data-testid={LEARNING_PATH_CERTIFICATE_HANDLES.VIEW_BUTTON}
+          >
             <Icon name="Eye" className="mr-2 size-4" />
             {t("studentCourseView.certificate.button.viewCertificate")}
           </Button>

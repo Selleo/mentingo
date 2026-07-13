@@ -16,6 +16,7 @@ type ActivityLogDateFilterProps = {
   minDate?: Date;
   maxDate?: Date;
   onChange: (value: string | undefined) => void;
+  triggerTestId?: string;
 };
 
 export function ActivityLogDateFilter({
@@ -25,6 +26,7 @@ export function ActivityLogDateFilter({
   minDate,
   maxDate,
   onChange,
+  triggerTestId,
 }: ActivityLogDateFilterProps) {
   const selectedDate = value ? parseISO(value) : undefined;
   const hasValidDate = Boolean(selectedDate && !Number.isNaN(selectedDate.getTime()));
@@ -39,6 +41,7 @@ export function ActivityLogDateFilter({
             "w-full max-w-[320px] flex items-center gap-3 bg-white font-normal border-neutral-300 shadow-sm sm:w-[180px]",
             hasValidDate ? "text-neutral-900 hover:text-neutral-900" : "text-neutral-500",
           )}
+          data-testid={triggerTestId}
         >
           <CalendarDays className="size-4 shrink-0 text-neutral-500" aria-hidden="true" />
           <span className="grow truncate text-left">

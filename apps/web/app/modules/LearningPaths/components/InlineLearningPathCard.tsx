@@ -11,6 +11,8 @@ import { Badge } from "~/components/ui/badge";
 import { courseLanguages } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/LearningPathLanguageSelector";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import { LearningPathCardActions } from "./LearningPathCardActions";
 import { LearningPathCertificate } from "./LearningPathCertificate";
 import { LearningPathCoursesSection } from "./LearningPathCoursesSection";
@@ -180,7 +182,10 @@ export function InlineLearningPathCard({
   };
 
   return (
-    <article className="flex flex-col rounded-xl border border-primary-100 bg-white shadow-sm md:flex-row">
+    <article
+      className="flex flex-col rounded-xl border border-primary-100 bg-white shadow-sm md:flex-row"
+      data-testid={LEARNING_PATH_CARD_HANDLES.card(learningPath.id)}
+    >
       <div className="p-5 md:pr-0">
         <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-neutral-100 md:w-[260px] md:max-w-[260px] md:rounded-tl-xl">
           <img
@@ -223,6 +228,8 @@ export function InlineLearningPathCard({
                 className="w-full text-lg font-bold leading-6 text-primary-950"
                 inputClassName="text-lg font-bold leading-6"
                 onSave={(title) => handleTextUpdate({ title })}
+                triggerTestId={LEARNING_PATH_CARD_HANDLES.TITLE_EDIT_TRIGGER}
+                inputTestId={LEARNING_PATH_CARD_HANDLES.TITLE_EDIT_INPUT}
               />
             </div>
             <LearningPathEditableText
@@ -232,6 +239,8 @@ export function InlineLearningPathCard({
               className="mt-1 line-clamp-2 text-sm leading-6 text-neutral-600"
               inputClassName="!mt-1 text-sm leading-6"
               onSave={(description) => handleTextUpdate({ description })}
+              triggerTestId={LEARNING_PATH_CARD_HANDLES.DESCRIPTION_EDIT_TRIGGER}
+              inputTestId={LEARNING_PATH_CARD_HANDLES.DESCRIPTION_EDIT_INPUT}
             />
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <LearningPathStatusBadge status={displayLearningPath.status} />

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { useHandleKeyboardShortcut } from "~/hooks/useHandleKeyboardShortcut";
 
+import { GLOBAL_SEARCH_HANDLES } from "../../../e2e/data/navigation/handles";
 import { useGlobalSettings } from "../../api/queries/useGlobalSettings";
 import {
   GlobalSearchMac,
@@ -117,6 +118,7 @@ export const NavigationGlobalSearchWrapper = ({
             "hidden h-[42px] w-full items-center justify-start rounded-lg border border-neutral-300 bg-white py-2 px-0 pl-8 pr-8 text-neutral-800 transition-colors hover:border-primary-500 hover:text-primary-500",
             "2xl:flex",
           )}
+          data-testid={GLOBAL_SEARCH_HANDLES.TRIGGER}
         >
           <Search className="absolute left-2 top-1/2 size-5 -translate-y-1/2 transform transition-colors" />
           <span className="body-base inline-block w-full text-start text-current transition-colors">
@@ -135,6 +137,7 @@ export const NavigationGlobalSearchWrapper = ({
           noCloseButton
           style={{ padding: 0, overflow: "hidden" }}
           onKeyDown={handleKeyDown}
+          data-testid={GLOBAL_SEARCH_HANDLES.DIALOG}
         >
           <div className="flex flex-col gap-1 p-3">
             <SearchInput
@@ -143,6 +146,7 @@ export const NavigationGlobalSearchWrapper = ({
               clearable
               wrapperClassName="w-full max-w-none"
               className="!max-w-none"
+              data-testid={GLOBAL_SEARCH_HANDLES.INPUT}
             />
             <Separator className="my-2" />
             {debouncedSearch.length < 3 && (

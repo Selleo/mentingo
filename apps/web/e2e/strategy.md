@@ -384,8 +384,15 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - MFA-related settings
   - default currency
   - feature toggles
-- Certificates
+- Certificates -- DONE
   - view/download/share link/share render
+  - language switch
+  - admin preview/customization
+  - admin reset
+- Activity Logs -- DONE
+  - timeline list for a triggering action
+  - resource type / action type filters
+  - role access (admin-only)
 - Onboarding -- SKIP
   - progression/completion/reset
 - Support Mode -- DONE
@@ -416,6 +423,7 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - delete many
   - transfer ownership
   - language add/remove
+  - duplicate course (async job + curriculum copy verification)
 - Curriculum -- DONE
   - generate missing translations
   - chapter create/update/delete/reorder/freemium
@@ -465,6 +473,19 @@ Based on `playwright-strategy/03-capability-coverage.md`:
   - voice entry points
   - AI chat/thread entry points
   - AI course generation availability check
+- Learning Paths -- DONE
+  - feature-flag settings gate
+  - admin create/edit/add course/remove course/publish/reorder courses
+  - admin delete
+  - student self-enroll
+  - admin user/group enroll and unenroll
+  - sequence locking
+  - certificate customization and completion certificate
+  - content-creator restrictions
+- Global Search -- DONE
+  - student finds a published course and navigates to it
+  - short/unmatched queries show no results or empty state
+  - permission-gated sections
 
 ### Skipped For Now
 

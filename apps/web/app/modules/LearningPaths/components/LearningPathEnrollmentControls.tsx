@@ -11,6 +11,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { SearchFilter } from "~/modules/common/SearchFilter/SearchFilter";
 
+import { LEARNING_PATH_ENROLLED_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type {
   FilterConfig,
   FilterValue,
@@ -67,7 +69,13 @@ export function LearningPathEnrollmentControls({
       <div className="flex flex-wrap items-center gap-2">
         <DropdownMenu onOpenChange={setIsUserDropdownOpen}>
           <DropdownMenuTrigger asChild>
-            <Button type="button" variant="outline" className="gap-2" disabled={isPending}>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2"
+              disabled={isPending}
+              data-testid={LEARNING_PATH_ENROLLED_HANDLES.USER_ACTIONS_TRIGGER}
+            >
               <User className="size-4" />
               {t("learningPathsView.enrollment.enroll")}
               <Icon
@@ -84,6 +92,7 @@ export function LearningPathEnrollmentControls({
                 variant="ghost"
                 disabled={!selectedNotEnrolledCount || isPending}
                 onClick={onOpenUserEnroll}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.USER_ENROLL_SELECTED_ACTION}
               >
                 <Icon name="Plus" className="size-4 text-accent-foreground" />
                 {t("learningPathsView.enrollment.enrollSelected")}
@@ -97,6 +106,7 @@ export function LearningPathEnrollmentControls({
                 variant="ghost"
                 disabled={!selectedEnrolledCount || isPending}
                 onClick={onOpenUserUnenroll}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.USER_UNENROLL_SELECTED_ACTION}
               >
                 <Minus className="size-4 text-error-700" />
                 {t("learningPathsView.enrollment.unenrollSelected")}
@@ -113,6 +123,7 @@ export function LearningPathEnrollmentControls({
               variant="outline"
               className="gap-2"
               disabled={!hasGroups || isPending}
+              data-testid={LEARNING_PATH_ENROLLED_HANDLES.GROUP_ACTIONS_TRIGGER}
             >
               <Users className="size-4" />
               {t("learningPathsView.enrollment.enrollGroups")}
@@ -129,6 +140,7 @@ export function LearningPathEnrollmentControls({
                 className="body-sm w-full justify-start gap-2 text-neutral-950 hover:text-neutral-950"
                 variant="ghost"
                 onClick={onOpenGroupEnroll}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.GROUP_ENROLL_ACTION}
               >
                 <Icon name="Plus" className="size-4 text-accent-foreground" />
                 {t("learningPathsView.enrollment.enrollGroups")}
@@ -140,6 +152,7 @@ export function LearningPathEnrollmentControls({
                 className="body-sm w-full justify-start gap-2 text-error-700 hover:text-error-700"
                 variant="ghost"
                 onClick={onOpenGroupUnenroll}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.GROUP_UNENROLL_ACTION}
               >
                 <Minus className="size-4 text-error-700" />
                 {t("learningPathsView.enrollment.unenrollGroups")}

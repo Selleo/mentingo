@@ -46,6 +46,7 @@ export const COURSES_PAGE_HANDLES = {
   row: (courseId: string) => `courses-page-table-row-${courseId}`,
   rowCheckbox: (courseId: string) => `courses-page-table-checkbox-${courseId}`,
   rowTypeBadge: (courseId: string) => `courses-page-table-type-badge-${courseId}`,
+  rowDuplicateButton: (courseId: string) => `courses-page-table-duplicate-button-${courseId}`,
 } as const;
 
 export const CREATE_COURSE_PAGE_HANDLES = {
@@ -109,6 +110,16 @@ export const COURSE_SETTINGS_HANDLES = {
   QUIZ_FEEDBACK_SWITCH: "course-settings-quiz-feedback-switch",
   VIDEO_COMPLETION_TRACKING_SWITCH: "course-settings-video-completion-tracking-switch",
   CERTIFICATE_SWITCH: "course-settings-certificate-switch",
+  CERTIFICATE_PREVIEW_BUTTON: "course-settings-certificate-preview-button",
+  CERTIFICATE_RESET_BUTTON: "course-settings-certificate-reset-button",
+} as const;
+
+export const CERTIFICATE_RESET_DIALOG_HANDLES = {
+  DIALOG: "certificate-reset-dialog",
+  scopeOption: (scope: string) => `certificate-reset-scope-${scope}`,
+  SEND_EMAIL_CHECKBOX: "certificate-reset-send-email-checkbox",
+  CANCEL_BUTTON: "certificate-reset-cancel-button",
+  SUBMIT_BUTTON: "certificate-reset-submit-button",
 } as const;
 
 export const COURSE_STATUS_HANDLES = {

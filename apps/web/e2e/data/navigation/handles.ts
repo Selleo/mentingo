@@ -24,3 +24,11 @@ export const NAVIGATION_HANDLES = {
   SETTINGS_LINK: "navigation-settings-link",
   ACTIVITY_LOGS_LINK: "navigation-activity-logs-link",
 };
+
+export const GLOBAL_SEARCH_HANDLES = {
+  TRIGGER: "global-search-trigger",
+  DIALOG: "global-search-dialog",
+  INPUT: "global-search-input",
+  EMPTY_STATE: "global-search-empty-state",
+  resultItem: (resultType: string, id: string) => `global-search-result-${resultType}-${id}`,
+} as const;

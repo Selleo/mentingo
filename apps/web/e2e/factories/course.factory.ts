@@ -7,6 +7,7 @@ import type {
   CreateCourseBody,
   GetAllCoursesResponse,
   GetBetaCourseByIdResponse,
+  GetCourseDuplicationJobStatusResponse,
   UpdateCourseBody,
   UpdateCourseSettingsBody,
 } from "~/api/generated-api";
@@ -121,6 +122,20 @@ export class CourseFactory {
 
   async deleteLanguage(id: string, language: CreateCourseBody["language"]) {
     await this.apiClient.api.courseControllerDeleteLanguage(id, { language });
+  }
+
+  async duplicate(id: string): Promise<{ newCourseId: string; jobId: string }> {
+    const response = await this.apiClient.api.courseControllerDuplicateCourse(id);
+
+    return { newCourseId: response.data.data.courseId, jobId: response.data.data.jobId };
+  }
+
+  async getDuplicationJobStatus(
+    jobId: string,
+  ): Promise<GetCourseDuplicationJobStatusResponse["data"]> {
+    const response = await this.apiClient.api.courseControllerGetCourseDuplicationJobStatus(jobId);
+
+    return response.data.data;
   }
 
   async delete(id: string) {

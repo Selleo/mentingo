@@ -3,6 +3,8 @@ import { flexRender, type Row } from "@tanstack/react-table";
 import { TableCell, TableRow } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
+import { ACTIVITY_LOGS_HANDLES } from "../../../../e2e/data/activity-logs/handles";
+
 import { ActivityLogMetadata } from "./ActivityLogMetadata";
 
 import type { ActivityLogItem } from "../activityLogs.utils";
@@ -24,6 +26,7 @@ export const ActivityLogAccordionRow = ({
         key={row.id}
         data-state={isExpanded ? "open" : undefined}
         className={cn("hover:bg-neutral-100", isExpanded && "bg-neutral-50")}
+        data-testid={ACTIVITY_LOGS_HANDLES.row(row.id)}
       >
         {row.getVisibleCells().map((cell, index) => (
           <TableCell key={cell.id} className={index === columnsLength - 1 ? "text-right" : ""}>

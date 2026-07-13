@@ -28,6 +28,11 @@ import { LearningPathExportsSection } from "~/modules/LearningPaths/components/L
 import { CERTIFICATE_KIND } from "~/modules/Profile/Certificates/certificateKind";
 import CertificatePreview from "~/modules/Profile/Certificates/CertificatePreview";
 
+import {
+  LEARNING_PATH_CARD_HANDLES,
+  LEARNING_PATH_SETTINGS_DRAWER_HANDLES,
+} from "../../../../e2e/data/learning-paths/handles";
+
 import type { GetLearningPathsResponse, UpdateLearningPathBody } from "~/api/generated-api";
 
 type LearningPathListItem = GetLearningPathsResponse["data"][number];
@@ -133,11 +138,15 @@ export function LearningPathSettingsDrawer({
           size="icon"
           disabled={isPending}
           aria-label={t("adminLearningPathsView.detailsSettings.title")}
+          data-testid={LEARNING_PATH_CARD_HANDLES.SETTINGS_TRIGGER}
         >
           <Settings className="size-4" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bottom-0 left-auto right-0 top-0 mt-0 h-full w-full max-w-[520px] overflow-hidden rounded-none border-l border-primary-100 bg-white p-0 shadow-xl [&>div:first-child]:hidden">
+      <DrawerContent
+        className="bottom-0 left-auto right-0 top-0 mt-0 h-full w-full max-w-[520px] overflow-hidden rounded-none border-l border-primary-100 bg-white p-0 shadow-xl [&>div:first-child]:hidden"
+        data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.DRAWER}
+      >
         <div className="flex h-full flex-col">
           <div className="flex items-start justify-between gap-4 border-b border-primary-100 px-6 py-6">
             <div>
@@ -155,6 +164,7 @@ export function LearningPathSettingsDrawer({
                 size="icon"
                 aria-label={t("common.button.close")}
                 className="shrink-0 text-neutral-500 hover:text-neutral-900"
+                data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.CLOSE_BUTTON}
               >
                 <X className="size-5" />
               </Button>
@@ -173,12 +183,21 @@ export function LearningPathSettingsDrawer({
                       onStatusChange(value as UpdateLearningPathBody["status"])
                     }
                   >
-                    <SelectTrigger className="body-sm-md h-10 rounded-lg border-primary-100">
+                    <SelectTrigger
+                      className="body-sm-md h-10 rounded-lg border-primary-100"
+                      data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.STATUS_SELECT}
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(LEARNING_PATH_STATUSES).map((statusValue) => (
-                        <SelectItem key={statusValue} value={statusValue}>
+                        <SelectItem
+                          key={statusValue}
+                          value={statusValue}
+                          data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.statusOption(
+                            statusValue,
+                          )}
+                        >
                           {t(`learningPathsView.status.${statusValue}`)}
                         </SelectItem>
                       ))}
@@ -202,6 +221,7 @@ export function LearningPathSettingsDrawer({
                     checked={sequenceEnabled}
                     onCheckedChange={onSequenceEnabledChange}
                     disabled={isPending}
+                    data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.SEQUENCE_SWITCH}
                   />
                 </div>
                 <div className="flex items-start justify-between gap-6">
@@ -217,6 +237,7 @@ export function LearningPathSettingsDrawer({
                     checked={includesCertificate}
                     onCheckedChange={onCertificateChange}
                     disabled={isPending}
+                    data-testid={LEARNING_PATH_SETTINGS_DRAWER_HANDLES.CERTIFICATE_SWITCH}
                   />
                 </div>
                 {includesCertificate && (
@@ -276,6 +297,9 @@ export function LearningPathSettingsDrawer({
                         className="w-fit gap-2"
                         disabled={isPending}
                         onClick={() => setIsPreviewOpen(true)}
+                        data-testid={
+                          LEARNING_PATH_SETTINGS_DRAWER_HANDLES.CERTIFICATE_PREVIEW_BUTTON
+                        }
                       >
                         <Eye className="size-4" />
                         {t("adminCourseView.settings.other.certificatePreviewButton")}

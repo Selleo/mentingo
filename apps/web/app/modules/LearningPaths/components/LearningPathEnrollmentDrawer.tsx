@@ -25,6 +25,11 @@ import { LearningPathEnrollmentControls } from "~/modules/LearningPaths/componen
 import { LearningPathEnrollmentDrawerDialogs } from "~/modules/LearningPaths/components/LearningPathEnrollmentDrawerDialogs";
 import { LearningPathEnrollmentTable } from "~/modules/LearningPaths/components/LearningPathEnrollmentTable";
 
+import {
+  LEARNING_PATH_CARD_HANDLES,
+  LEARNING_PATH_ENROLLED_HANDLES,
+} from "../../../../e2e/data/learning-paths/handles";
+
 import { LEARNING_PATH_GROUP_ACTIONS } from "./learningPathEnrollment.types";
 
 import type { LearningPathGroupAction } from "./learningPathEnrollment.types";
@@ -87,6 +92,7 @@ export function LearningPathEnrollmentDrawer({
         type: "text",
         name: "keyword",
         placeholder: t("learningPathsView.enrollment.filters.placeholder.searchByKeyword"),
+        testId: LEARNING_PATH_ENROLLED_HANDLES.SEARCH_INPUT,
       },
       {
         type: "multiselect",
@@ -94,6 +100,8 @@ export function LearningPathEnrollmentDrawer({
         placeholder: t("adminUsersView.filters.placeholder.groups"),
         options: groupOptions,
         disabled: !hasGroups,
+        testId: LEARNING_PATH_ENROLLED_HANDLES.GROUPS_FILTER,
+        optionTestId: (option) => LEARNING_PATH_ENROLLED_HANDLES.groupFilterOption(option.value),
       },
     ],
     [groupOptions, hasGroups, t],
@@ -186,11 +194,15 @@ export function LearningPathEnrollmentDrawer({
           size="icon"
           disabled={isPending}
           aria-label={t("learningPathsView.enrollment.manage")}
+          data-testid={LEARNING_PATH_CARD_HANDLES.ENROLLMENT_TRIGGER}
         >
           <UserPlus className="size-4" />
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="bottom-0 left-auto right-0 top-0 mt-0 h-full w-full max-w-[960px] rounded-none border-l border-primary-100 bg-white p-0 shadow-xl [&>div:first-child]:hidden">
+      <DrawerContent
+        className="bottom-0 left-auto right-0 top-0 mt-0 h-full w-full max-w-[960px] rounded-none border-l border-primary-100 bg-white p-0 shadow-xl [&>div:first-child]:hidden"
+        data-testid={LEARNING_PATH_ENROLLED_HANDLES.DRAWER}
+      >
         <div className="flex items-start justify-between gap-4 border-b border-primary-100 px-6 py-6">
           <div>
             <DrawerTitle className="body-base-md text-primary-950">

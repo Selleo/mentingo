@@ -11,6 +11,8 @@ import {
 } from "~/components/ui/dialog";
 import MultipleSelector, { type Option } from "~/components/ui/multiselect";
 
+import { LEARNING_PATH_ENROLLED_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import { LEARNING_PATH_GROUP_ACTIONS } from "./learningPathEnrollment.types";
 
 import type { LearningPathGroupAction } from "./learningPathEnrollment.types";
@@ -59,7 +61,7 @@ export function LearningPathEnrollmentDrawerDialogs({
       <Dialog open={isEnrollUsersDialogOpen} onOpenChange={onEnrollUsersOpenChange}>
         <DialogPortal>
           <DialogOverlay className="bg-primary-400 opacity-65" />
-          <DialogContent>
+          <DialogContent data-testid={LEARNING_PATH_ENROLLED_HANDLES.ENROLL_USERS_DIALOG}>
             <DialogTitle>{t("learningPathsView.enrollment.confirmation.title")}</DialogTitle>
             <DialogDescription>
               {t("learningPathsView.enrollment.confirmation.description")}
@@ -69,6 +71,7 @@ export function LearningPathEnrollmentDrawerDialogs({
                 type="button"
                 disabled={!selectedNotEnrolledCount || isPending}
                 onClick={onConfirmEnrollUsers}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.ENROLL_USERS_CONFIRM_BUTTON}
               >
                 {t("common.button.save")}
               </Button>
@@ -80,7 +83,7 @@ export function LearningPathEnrollmentDrawerDialogs({
       <Dialog open={isUnenrollUsersDialogOpen} onOpenChange={onUnenrollUsersOpenChange}>
         <DialogPortal>
           <DialogOverlay className="bg-primary-400 opacity-65" />
-          <DialogContent>
+          <DialogContent data-testid={LEARNING_PATH_ENROLLED_HANDLES.UNENROLL_USERS_DIALOG}>
             <DialogTitle>
               {t("learningPathsView.enrollment.unenrollConfirmation.title")}
             </DialogTitle>
@@ -92,6 +95,7 @@ export function LearningPathEnrollmentDrawerDialogs({
                 type="button"
                 disabled={!selectedEnrolledCount || isPending}
                 onClick={onConfirmUnenrollUsers}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.UNENROLL_USERS_CONFIRM_BUTTON}
               >
                 {t("common.button.save")}
               </Button>
@@ -108,7 +112,7 @@ export function LearningPathEnrollmentDrawerDialogs({
       >
         <DialogPortal>
           <DialogOverlay className="bg-primary-400 opacity-65" />
-          <DialogContent>
+          <DialogContent data-testid={LEARNING_PATH_ENROLLED_HANDLES.GROUP_ACTION_DIALOG}>
             <DialogTitle>
               {groupAction === LEARNING_PATH_GROUP_ACTIONS.UNENROLL
                 ? t("learningPathsView.enrollment.unenrollGroups")
@@ -132,6 +136,10 @@ export function LearningPathEnrollmentDrawerDialogs({
                 className="min-h-10 bg-white"
                 maxSelectedVisible={3}
                 disabled={!hasGroups || isPending}
+                testId={LEARNING_PATH_ENROLLED_HANDLES.GROUP_ACTION_SELECT}
+                getOptionTestId={(option) =>
+                  LEARNING_PATH_ENROLLED_HANDLES.groupActionOption(option.value)
+                }
               />
             </div>
             <div className="mt-6 flex justify-end">
@@ -139,6 +147,7 @@ export function LearningPathEnrollmentDrawerDialogs({
                 type="button"
                 disabled={!hasGroups || !selectedGroups.length || isPending}
                 onClick={onConfirmGroupAction}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.GROUP_ACTION_CONFIRM_BUTTON}
               >
                 {t("common.button.save")}
               </Button>

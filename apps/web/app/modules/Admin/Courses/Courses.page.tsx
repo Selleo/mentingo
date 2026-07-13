@@ -289,6 +289,7 @@ const Courses = () => {
             event.stopPropagation();
             void handleDuplicateCourse(row.original.id);
           }}
+          data-testid={COURSES_PAGE_HANDLES.rowDuplicateButton(row.original.id)}
         >
           <Copy className="size-4" />
         </Button>

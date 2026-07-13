@@ -42,6 +42,16 @@ const FORBIDDEN_ROUTE_REDIRECT_CASES: ForbiddenRouteRedirectCase[] = [
   {
     role: USER_ROLE.student,
     title: "student",
+    path: "/admin/activity-logs",
+  },
+  {
+    role: USER_ROLE.contentCreator,
+    title: "content creator",
+    path: "/admin/activity-logs",
+  },
+  {
+    role: USER_ROLE.student,
+    title: "student",
     path: "/super-admin/tenants",
   },
   {

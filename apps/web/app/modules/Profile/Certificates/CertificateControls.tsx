@@ -17,6 +17,8 @@ import {
 } from "~/components/ui/select";
 import { cn } from "~/lib/utils";
 
+import { CERTIFICATE_PREVIEW_HANDLES } from "../../../../e2e/data/certificates/handles";
+
 import { applyUniformCertificateColor } from "./certificateTheme";
 
 import type { CertificateColorTheme } from "./certificateTheme";
@@ -88,6 +90,7 @@ const CertificateControls = ({
         <SelectTrigger
           className="h-[42px] w-[152px]"
           aria-label={t("studentCertificateView.controls.languageToggle")}
+          data-testid={CERTIFICATE_PREVIEW_HANDLES.LANGUAGE_SELECT}
         >
           <SelectValue placeholder={t("changeUserLanguageView.field.language")} />
         </SelectTrigger>
@@ -109,6 +112,7 @@ const CertificateControls = ({
             <Button
               size="sm"
               className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50"
+              data-testid={CERTIFICATE_PREVIEW_HANDLES.COLOR_PICKER_TRIGGER}
             >
               <Palette className="size-4" />
               <span className="block mr-3">{t("studentCertificateView.controls.fontColor")}</span>
@@ -128,7 +132,11 @@ const CertificateControls = ({
               "data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
             )}
           >
-            <ColorPickerField color={colorTheme.titleColor} onChange={updateAllColors} />
+            <ColorPickerField
+              color={colorTheme.titleColor}
+              onChange={updateAllColors}
+              inputTestId={CERTIFICATE_PREVIEW_HANDLES.COLOR_INPUT}
+            />
           </PopoverPrimitive.Content>
         </PopoverPrimitive.Root>
       )}
@@ -139,6 +147,7 @@ const CertificateControls = ({
           onClick={handleDownload}
           disabled={isPreparingDownload}
           aria-label={t("studentCertificateView.button.download")}
+          data-testid={CERTIFICATE_PREVIEW_HANDLES.DOWNLOAD_BUTTON}
         >
           {isPreparingDownload ? (
             <Loader2 className="size-5 animate-spin" />
@@ -153,6 +162,7 @@ const CertificateControls = ({
           onClick={() => void onShareToLinkedIn?.()}
           disabled={isPreparingShare}
           aria-label={t("studentCertificateView.button.shareLinkedIn")}
+          data-testid={CERTIFICATE_PREVIEW_HANDLES.SHARE_LINKEDIN_BUTTON}
         >
           {isPreparingShare ? (
             <Loader2 className="size-5 animate-spin" />
@@ -162,7 +172,11 @@ const CertificateControls = ({
         </button>
       )}
       {onClose && (
-        <button className={buttonClasses} onClick={onClose}>
+        <button
+          className={buttonClasses}
+          onClick={onClose}
+          data-testid={CERTIFICATE_PREVIEW_HANDLES.CLOSE_BUTTON}
+        >
           <X className="size-5" />
         </button>
       )}

@@ -11,6 +11,8 @@ import { useDebounce } from "~/hooks/useDebounce";
 import { usePaginationReducer } from "~/hooks/usePaginationReducer";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
 import { CertificateResetDialog } from "./CertificateResetDialog";
 
 import type { CertificateResetGroup } from "./CertificateResetDialog.types";
@@ -166,6 +168,7 @@ export function CertificateResetSection({ courseId, disabled }: CertificateReset
           size="sm"
           disabled={disabled}
           onClick={() => setIsResetDialogOpen(true)}
+          data-testid={COURSE_SETTINGS_HANDLES.CERTIFICATE_RESET_BUTTON}
         >
           <RotateCcw className="mr-2 size-4" />
           {t("adminCourseView.settings.button.resetCertificates")}

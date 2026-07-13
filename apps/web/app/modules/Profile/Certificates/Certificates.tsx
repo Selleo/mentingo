@@ -8,6 +8,8 @@ import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { formatCertificateDate } from "~/utils/formatCertificateDate";
 
+import { CERTIFICATES_HANDLES } from "../../../../e2e/data/certificates/handles";
+
 import { default as CertificateComponent } from "./Certificate";
 
 interface CertificatesProps {
@@ -58,9 +60,12 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
 
   if (!certificates || certificates.length === 0) {
     return (
-      <div id="certificates" className={containerClasses}>
+      <div id="certificates" className={containerClasses} data-testid={CERTIFICATES_HANDLES.ROOT}>
         <h5 className="h5">{t("studentCertificateView.header")}</h5>
-        <p className={cn(textClasses, "text-gray-600")}>
+        <p
+          className={cn(textClasses, "text-gray-600")}
+          data-testid={CERTIFICATES_HANDLES.EMPTY_STATE}
+        >
           {t("studentCertificateView.informations.noCertificates")}
         </p>
       </div>
@@ -68,7 +73,7 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
   }
 
   return (
-    <div id="certificates" className={containerClasses}>
+    <div id="certificates" className={containerClasses} data-testid={CERTIFICATES_HANDLES.ROOT}>
       <h5 className="h5">{t("studentCertificateView.header")}</h5>
       <div className="flex flex-col gap-4 sm:grid sm:grid-cols-3">
         {certificates.map((certificate) => {
@@ -79,7 +84,11 @@ const Certificates = ({ onOpenCertificatePreview }: CertificatesProps) => {
           const formattedExpiryDate = formatCertificateDate(certificate.expiresAt);
 
           return (
-            <div key={certificate.id} className="w-full">
+            <div
+              key={certificate.id}
+              className="w-full"
+              data-testid={CERTIFICATES_HANDLES.card(certificate.id)}
+            >
               <CertificateComponent
                 courseName={certificate.courseTitle || ""}
                 courseExpiryDate={formattedExpiryDate || undefined}

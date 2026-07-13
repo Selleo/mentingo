@@ -5,6 +5,8 @@ import { NoData } from "~/assets/svgs";
 import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
 
+import { GLOBAL_SEARCH_HANDLES } from "../../../../e2e/data/navigation/handles";
+
 import type { SearchResponse } from "~/api/generated-api";
 
 type GlobalSearchData = SearchResponse["data"];
@@ -140,7 +142,10 @@ export const GlobalSearchContent = ({
             );
             if (sectionsWithItems.length === 0) {
               return (
-                <div className="flex flex-col px-6 py-[50px]">
+                <div
+                  className="flex flex-col px-6 py-[50px]"
+                  data-testid={GLOBAL_SEARCH_HANDLES.EMPTY_STATE}
+                >
                   <NoData className="mx-auto" />
                   <span className="pt-4 text-center body-sm-md text-neutral-950">
                     {t("globalSearch.notFound")}
@@ -168,6 +173,10 @@ export const GlobalSearchContent = ({
                           key={`${section.resultType}-${index}`}
                           data-search-index={currentIndex}
                           className={cn(isActive && "rounded-lg bg-primary-100")}
+                          data-testid={GLOBAL_SEARCH_HANDLES.resultItem(
+                            section.resultType,
+                            (item as { id: string }).id,
+                          )}
                         >
                           <section.Component item={item as never} onSelect={onSelect} />
                         </li>

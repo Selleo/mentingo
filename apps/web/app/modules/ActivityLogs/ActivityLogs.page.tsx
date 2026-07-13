@@ -32,6 +32,8 @@ import { ActivityLogDateFilter } from "~/modules/ActivityLogs/components/Activit
 import { ActivityLogSingleSelect } from "~/modules/ActivityLogs/components/ActivityLogSingleSelect";
 import { setPageTitle } from "~/utils/setPageTitle";
 
+import { ACTIVITY_LOGS_HANDLES } from "../../../e2e/data/activity-logs/handles";
+
 import type { MetaFunction } from "@remix-run/react";
 import type { ITEMS_PER_PAGE_OPTIONS } from "~/components/Pagination/Pagination";
 
@@ -199,7 +201,11 @@ export default function ActivityLogsPage() {
   });
 
   return (
-    <PageWrapper breadcrumbs={breadcrumbs} className="bg-neutral-50/50">
+    <PageWrapper
+      breadcrumbs={breadcrumbs}
+      className="bg-neutral-50/50"
+      data-testid={ACTIVITY_LOGS_HANDLES.PAGE}
+    >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
           <h1 className="h4">{t("navigationSideBar.activityLogs")}</h1>
@@ -216,6 +222,7 @@ export default function ActivityLogsPage() {
                 className="w-full max-w-[320px] border border-neutral-300 py-2 pl-8 pr-4 md:max-w-none"
                 defaultValue={searchParams.keyword}
                 onChange={(event) => debouncedKeywordChange(event.target.value)}
+                data-testid={ACTIVITY_LOGS_HANDLES.SEARCH_INPUT}
               />
             </div>
             <ActivityLogSingleSelect
@@ -226,6 +233,8 @@ export default function ActivityLogsPage() {
               emptyLabel={t("activityLogsView.filters.empty.resource")}
               allLabel={t("activityLogsView.filters.placeholder.resource")}
               onChange={handleResourceChange}
+              triggerTestId={ACTIVITY_LOGS_HANDLES.RESOURCE_FILTER}
+              getOptionTestId={ACTIVITY_LOGS_HANDLES.resourceFilterOption}
             />
             <ActivityLogActionMultiSelect
               values={searchParams.actionTypes ?? []}
@@ -240,6 +249,8 @@ export default function ActivityLogsPage() {
               onChange={(actionTypes) =>
                 updateSearchParams({ actionTypes: actionTypes.length ? actionTypes : undefined })
               }
+              triggerTestId={ACTIVITY_LOGS_HANDLES.ACTION_FILTER}
+              getOptionTestId={ACTIVITY_LOGS_HANDLES.actionFilterOption}
             />
             <ActivityLogDateFilter
               value={searchParams.from}
@@ -247,6 +258,7 @@ export default function ActivityLogsPage() {
               calendarLocale={calendarLocale}
               maxDate={toDate}
               onChange={(from) => updateSearchParams({ from })}
+              triggerTestId={ACTIVITY_LOGS_HANDLES.FROM_DATE_FILTER}
             />
             <ActivityLogDateFilter
               value={searchParams.to}
@@ -254,6 +266,7 @@ export default function ActivityLogsPage() {
               calendarLocale={calendarLocale}
               minDate={fromDate}
               onChange={(to) => updateSearchParams({ to })}
+              triggerTestId={ACTIVITY_LOGS_HANDLES.TO_DATE_FILTER}
             />
             {isPending && <span className="sr-only">{t("activityLogsView.table.loading")}</span>}
           </div>

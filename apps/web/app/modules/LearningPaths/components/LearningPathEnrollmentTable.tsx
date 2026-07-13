@@ -14,6 +14,8 @@ import {
 } from "~/components/ui/table";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 
+import { LEARNING_PATH_ENROLLED_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
 
 type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
@@ -47,6 +49,7 @@ export function LearningPathEnrollmentTable({
               onCheckedChange={(checked) => onToggleAllRows(Boolean(checked))}
               aria-label={t("learningPathsView.enrollment.table.selectAll")}
               disabled={isPending}
+              data-testid={LEARNING_PATH_ENROLLED_HANDLES.SELECT_ALL_CHECKBOX}
             />
           </TableHead>
           <TableHead>{t("learningPathsView.enrollment.table.name")}</TableHead>
@@ -58,13 +61,14 @@ export function LearningPathEnrollmentTable({
       </TableHeader>
       <TableBody>
         {users.map((user) => (
-          <TableRow key={user.id}>
+          <TableRow key={user.id} data-testid={LEARNING_PATH_ENROLLED_HANDLES.row(user.id)}>
             <TableCell>
               <Checkbox
                 checked={Boolean(selectedRows[user.id])}
                 onCheckedChange={(checked) => onToggleRow(user.id, Boolean(checked))}
                 aria-label={t("learningPathsView.enrollment.table.select")}
                 disabled={isPending}
+                data-testid={LEARNING_PATH_ENROLLED_HANDLES.rowCheckbox(user.id)}
               />
             </TableCell>
             <TableCell>
@@ -85,14 +89,22 @@ export function LearningPathEnrollmentTable({
             </TableCell>
             <TableCell>
               {user.enrolledAt ? (
-                <Badge variant="success" className="w-max gap-1">
+                <Badge
+                  variant="success"
+                  className="w-max gap-1"
+                  data-testid={LEARNING_PATH_ENROLLED_HANDLES.statusBadge(user.id)}
+                >
                   <CheckCircle2 className="size-3.5" />
                   {user.isEnrolledByGroup
                     ? t("learningPathsView.enrollment.statuses.enrolledByGroup")
                     : t("learningPathsView.enrollment.statuses.individuallyEnrolled")}
                 </Badge>
               ) : (
-                <Badge variant="default" className="w-max">
+                <Badge
+                  variant="default"
+                  className="w-max"
+                  data-testid={LEARNING_PATH_ENROLLED_HANDLES.statusBadge(user.id)}
+                >
                   {t("learningPathsView.enrollment.statuses.notEnrolled")}
                 </Badge>
               )}

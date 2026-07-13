@@ -26,6 +26,8 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
+import { CERTIFICATE_RESET_DIALOG_HANDLES } from "../../../../../../e2e/data/courses/handles";
+
 import type {
   CertificateResetGroup,
   CertificateResetScope,
@@ -102,7 +104,7 @@ export function CertificateResetDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl" data-testid={CERTIFICATE_RESET_DIALOG_HANDLES.DIALOG}>
         <div className="space-y-5">
           <DialogHeader>
             <DialogTitle>{t("adminCourseView.settings.other.resetCertificates")}</DialogTitle>
@@ -126,6 +128,7 @@ export function CertificateResetDialog({
                   className={`flex items-center gap-2 rounded-md border p-3 text-sm transition-colors ${getScopeOptionClassName(
                     { isDisabled, isSelected },
                   )}`}
+                  data-testid={CERTIFICATE_RESET_DIALOG_HANDLES.scopeOption(scope)}
                 >
                   <RadioGroupItem value={scope} disabled={isDisabled} />
                   <span>{t(`adminCourseView.settings.other.resetScope.${scope}`)}</span>
@@ -229,12 +232,18 @@ export function CertificateResetDialog({
             <Checkbox
               checked={sendResetEmail}
               onCheckedChange={(value) => onSendResetEmailChange(Boolean(value))}
+              data-testid={CERTIFICATE_RESET_DIALOG_HANDLES.SEND_EMAIL_CHECKBOX}
             />
             <span>{t("adminCourseView.settings.other.sendResetEmail")}</span>
           </Label>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              data-testid={CERTIFICATE_RESET_DIALOG_HANDLES.CANCEL_BUTTON}
+            >
               {t("common.button.cancel")}
             </Button>
             <Button
@@ -242,6 +251,7 @@ export function CertificateResetDialog({
               variant="destructive"
               disabled={!canSubmitReset || isResettingCertificates}
               onClick={onSubmit}
+              data-testid={CERTIFICATE_RESET_DIALOG_HANDLES.SUBMIT_BUTTON}
             >
               {t("adminCourseView.settings.button.resetCertificates")}
             </Button>

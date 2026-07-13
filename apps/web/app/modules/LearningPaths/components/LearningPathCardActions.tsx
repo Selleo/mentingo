@@ -16,6 +16,8 @@ import {
 import { LearningPathEnrollmentDrawer } from "~/modules/LearningPaths/components/LearningPathEnrollmentDrawer";
 import { LearningPathSettingsDrawer } from "~/modules/LearningPaths/components/LearningPathSettingsDrawer";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type { FormEvent } from "react";
 import type { GetLearningPathsResponse, UpdateLearningPathBody } from "~/api/generated-api";
 import type { Option } from "~/components/ui/multiselect";
@@ -137,6 +139,7 @@ export function LearningPathCardActions({
                   disabled={isPending}
                   className="border-error-200 text-error-600 hover:border-error-400 hover:text-error-700"
                   aria-label={t("common.button.delete")}
+                  data-testid={LEARNING_PATH_CARD_HANDLES.DELETE_TRIGGER}
                 >
                   <Trash className="size-4 text-current" />
                 </Button>
@@ -152,12 +155,21 @@ export function LearningPathCardActions({
                   </DialogDescription>
                   <form onSubmit={submitDelete} className="mt-6 flex justify-end gap-4">
                     <DialogClose asChild>
-                      <Button variant="ghost" type="button" className="text-primary-800">
+                      <Button
+                        variant="ghost"
+                        type="button"
+                        className="text-primary-800"
+                        data-testid={LEARNING_PATH_CARD_HANDLES.DELETE_CANCEL_BUTTON}
+                      >
                         {t("common.button.cancel")}
                       </Button>
                     </DialogClose>
                     <DialogClose asChild>
-                      <Button type="submit" className="bg-error-500 text-white hover:bg-error-600">
+                      <Button
+                        type="submit"
+                        className="bg-error-500 text-white hover:bg-error-600"
+                        data-testid={LEARNING_PATH_CARD_HANDLES.DELETE_CONFIRM_BUTTON}
+                      >
                         {t("common.button.delete")}
                       </Button>
                     </DialogClose>
@@ -170,7 +182,11 @@ export function LearningPathCardActions({
       ) : (
         <>
           {isEnrolled && (
-            <Badge variant="success" className="gap-1.5">
+            <Badge
+              variant="success"
+              className="gap-1.5"
+              data-testid={LEARNING_PATH_CARD_HANDLES.ENROLLED_BADGE}
+            >
               <CheckCircle2 className="size-3.5" />
               {t("learningPathsView.enrollment.enrolled")}
             </Badge>
@@ -184,6 +200,7 @@ export function LearningPathCardActions({
               onClick={() => {
                 void onEnrollCurrentUser?.();
               }}
+              data-testid={LEARNING_PATH_CARD_HANDLES.SELF_ENROLL_BUTTON}
             >
               <UserPlus className="size-4" />
               {t("learningPathsView.enrollment.enroll")}

@@ -28,6 +28,8 @@ type ActivityLogActionMultiSelectProps = {
   emptyLabel: string;
   allLabel: string;
   onChange: (values: ActivityLogActionType[]) => void;
+  triggerTestId?: string;
+  getOptionTestId?: (value: ActivityLogActionType | "all") => string;
 };
 
 export function ActivityLogActionMultiSelect({
@@ -39,6 +41,8 @@ export function ActivityLogActionMultiSelect({
   emptyLabel,
   allLabel,
   onChange,
+  triggerTestId,
+  getOptionTestId,
 }: ActivityLogActionMultiSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedValues = useMemo(() => new Set(values), [values]);
@@ -63,6 +67,7 @@ export function ActivityLogActionMultiSelect({
             "w-full max-w-[320px] justify-between border-neutral-300 bg-white font-normal shadow-sm sm:w-[220px]",
             values.length ? "text-neutral-900" : "text-neutral-500",
           )}
+          data-testid={triggerTestId}
         >
           <span className="truncate">{triggerLabel}</span>
           <ChevronDown className="ms-2 size-4 shrink-0 text-neutral-500" aria-hidden="true" />
@@ -77,7 +82,11 @@ export function ActivityLogActionMultiSelect({
           <CommandList>
             <CommandEmpty>{emptyLabel}</CommandEmpty>
             <CommandGroup>
-              <CommandItem value={allLabel} onSelect={() => onChange([])}>
+              <CommandItem
+                value={allLabel}
+                onSelect={() => onChange([])}
+                data-testid={getOptionTestId?.("all")}
+              >
                 <span className="min-w-0 flex-1 truncate">{allLabel}</span>
                 {values.length === 0 && (
                   <Check className="size-4 text-primary-700" aria-hidden="true" />
@@ -92,6 +101,7 @@ export function ActivityLogActionMultiSelect({
                     value={option.label}
                     keywords={[option.value]}
                     onSelect={() => handleToggle(option.value)}
+                    data-testid={getOptionTestId?.(option.value)}
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {isSelected && <Check className="size-4 text-primary-700" aria-hidden="true" />}

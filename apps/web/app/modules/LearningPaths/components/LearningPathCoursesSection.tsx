@@ -20,6 +20,8 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import MultipleSelector from "~/components/ui/multiselect";
 
+import { LEARNING_PATH_CARD_HANDLES } from "../../../../e2e/data/learning-paths/handles";
+
 import type {
   LearningPathCourseOption,
   LearningPathCoursePreview,
@@ -156,11 +158,15 @@ export function LearningPathCoursesSection({
     );
 
     return (
-      <div className="flex items-center gap-2 py-1.5">
+      <div
+        className="flex items-center gap-2 py-1.5"
+        data-testid={LEARNING_PATH_CARD_HANDLES.courseRow(course.courseId)}
+      >
         {sortable && canManage && (
           <SortableList.DragHandle
             className="inline-flex size-8 shrink-0 cursor-grab items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 active:cursor-grabbing"
             aria-label={t("adminLearningPathsView.courses.drag")}
+            data-testid={LEARNING_PATH_CARD_HANDLES.courseDragHandle(course.courseId)}
           >
             <GripVertical className="size-4" />
           </SortableList.DragHandle>
@@ -184,6 +190,7 @@ export function LearningPathCoursesSection({
             disabled={isPending}
             onClick={() => onRemoveCourse(course.courseId)}
             aria-label={t("adminLearningPathsView.courses.delete")}
+            data-testid={LEARNING_PATH_CARD_HANDLES.removeCourseButton(course.courseId)}
           >
             <X className="size-4 text-neutral-500" />
           </Button>
@@ -258,16 +265,26 @@ export function LearningPathCoursesSection({
                 placeholder={t("adminLearningPathsView.courses.select")}
                 className="min-h-10 flex-1"
                 maxSelectedVisible={2}
+                testId={LEARNING_PATH_CARD_HANDLES.ADD_COURSES_SELECT}
+                getOptionTestId={(option) =>
+                  LEARNING_PATH_CARD_HANDLES.addCoursesOption(option.value)
+                }
               />
               <div className="flex gap-2">
                 <Button
                   type="button"
                   disabled={!selectedCourses.length || isPending}
                   onClick={handleAddSelectedCourses}
+                  data-testid={LEARNING_PATH_CARD_HANDLES.ADD_COURSES_CONFIRM_BUTTON}
                 >
                   {t("adminLearningPathsView.courses.add")}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => setIsAddingCourses(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setIsAddingCourses(false)}
+                  data-testid={LEARNING_PATH_CARD_HANDLES.ADD_COURSES_CANCEL_BUTTON}
+                >
                   {t("common.button.cancel")}
                 </Button>
               </div>
@@ -279,6 +296,7 @@ export function LearningPathCoursesSection({
               className="text-primary-700 w-full flex gap-2 items-center justify-start"
               disabled={!availableCourseOptions.length}
               onClick={() => setIsAddingCourses(true)}
+              data-testid={LEARNING_PATH_CARD_HANDLES.ADD_COURSES_TRIGGER}
             >
               <Plus className="size-4" />
               {t("adminLearningPathsView.courses.add")}

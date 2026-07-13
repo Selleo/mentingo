@@ -6,6 +6,10 @@ export const TEST_DATA = {
     titlePrefix: "E2E Course",
     descriptionPrefix: "E2E course description",
   },
+  learningPath: {
+    titlePrefix: "E2E Learning Path",
+    descriptionPrefix: "E2E learning path description",
+  },
   user: {
     firstNamePrefix: "E2E User",
     lastNamePrefix: "Test",

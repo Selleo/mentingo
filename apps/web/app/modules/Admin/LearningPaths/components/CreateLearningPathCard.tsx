@@ -11,6 +11,8 @@ import { Form, FormControl, FormField, FormItem } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { LearningPathLanguageSelector } from "~/modules/Admin/LearningPaths/LearningPathLanguageSelector";
 
+import { ADMIN_LEARNING_PATHS_HANDLES } from "../../../../../e2e/data/learning-paths/handles";
+
 import type { CreateLearningPathBody } from "~/api/generated-api";
 
 type CreateLearningPathCardProps = {
@@ -132,6 +134,7 @@ export function CreateLearningPathCard({
                         value={field.value ?? ""}
                         placeholder={t("adminLearningPathsView.form.titlePlaceholder")}
                         className="h-9 text-sm"
+                        data-testid={ADMIN_LEARNING_PATHS_HANDLES.CREATE_TITLE_INPUT}
                       />
                     </FormControl>
                   </FormItem>
@@ -148,6 +151,7 @@ export function CreateLearningPathCard({
                         value={field.value ?? ""}
                         placeholder={t("adminLearningPathsView.form.descriptionPlaceholder")}
                         className="!mt-2 h-9 text-sm"
+                        data-testid={ADMIN_LEARNING_PATHS_HANDLES.CREATE_DESCRIPTION_INPUT}
                       />
                     </FormControl>
                   </FormItem>
@@ -165,10 +169,19 @@ export function CreateLearningPathCard({
           </div>
 
           <div className="mt-7 flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              data-testid={ADMIN_LEARNING_PATHS_HANDLES.CREATE_CANCEL_BUTTON}
+            >
               {t("common.button.cancel")}
             </Button>
-            <Button type="submit" disabled={!title.trim() || !description.trim() || isPending}>
+            <Button
+              type="submit"
+              disabled={!title.trim() || !description.trim() || isPending}
+              data-testid={ADMIN_LEARNING_PATHS_HANDLES.CREATE_SUBMIT_BUTTON}
+            >
               {t("common.button.create")}
             </Button>
           </div>

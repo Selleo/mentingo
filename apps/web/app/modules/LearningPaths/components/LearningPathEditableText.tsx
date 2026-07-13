@@ -14,6 +14,8 @@ type EditableTextProps = {
   inputClassName?: string;
   onEditingChange?: (isEditing: boolean) => void;
   onSave: (value: string) => Promise<void>;
+  triggerTestId?: string;
+  inputTestId?: string;
 };
 
 export type LearningPathEditableTextProps = EditableTextProps;
@@ -26,6 +28,8 @@ export const LearningPathEditableText = ({
   inputClassName,
   onEditingChange,
   onSave,
+  triggerTestId,
+  inputTestId,
 }: EditableTextProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [draftValue, setDraftValue] = useState(value);
@@ -64,6 +68,7 @@ export const LearningPathEditableText = ({
           className,
         )}
         onClick={() => setIsEditing(true)}
+        data-testid={triggerTestId}
       >
         <span className="inline-flex max-w-full align-top">
           <span className="min-w-0 truncate">{value || fallback}</span>
@@ -90,5 +95,5 @@ export const LearningPathEditableText = ({
     },
   };
 
-  return <Input {...sharedProps} />;
+  return <Input {...sharedProps} data-testid={inputTestId} />;
 };

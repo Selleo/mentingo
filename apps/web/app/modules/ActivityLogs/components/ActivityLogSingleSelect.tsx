@@ -25,6 +25,8 @@ type ActivityLogSingleSelectProps<TValue extends string> = {
   emptyLabel: string;
   allLabel: string;
   onChange: (value: TValue | undefined) => void;
+  triggerTestId?: string;
+  getOptionTestId?: (value: TValue | "all") => string;
 };
 
 export function ActivityLogSingleSelect<TValue extends string>({
@@ -35,6 +37,8 @@ export function ActivityLogSingleSelect<TValue extends string>({
   emptyLabel,
   allLabel,
   onChange,
+  triggerTestId,
+  getOptionTestId,
 }: ActivityLogSingleSelectProps<TValue>) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedLabel = getSelectedOptionLabel(options, value);
@@ -49,6 +53,7 @@ export function ActivityLogSingleSelect<TValue extends string>({
             "w-full max-w-[320px] justify-between border-neutral-300 bg-white font-normal shadow-sm sm:w-[190px]",
             selectedLabel ? "text-neutral-900" : "text-neutral-500",
           )}
+          data-testid={triggerTestId}
         >
           <span className="truncate">{selectedLabel ?? placeholder}</span>
           <ChevronDown className="ms-2 size-4 shrink-0 text-neutral-500" aria-hidden="true" />
@@ -69,6 +74,7 @@ export function ActivityLogSingleSelect<TValue extends string>({
                   onChange(undefined);
                   setIsOpen(false);
                 }}
+                data-testid={getOptionTestId?.("all")}
               >
                 <span className="min-w-0 flex-1 truncate">{allLabel}</span>
                 {!value && <Check className="size-4 text-primary-700" aria-hidden="true" />}
@@ -85,6 +91,7 @@ export function ActivityLogSingleSelect<TValue extends string>({
                       onChange(option.value);
                       setIsOpen(false);
                     }}
+                    data-testid={getOptionTestId?.(option.value)}
                   >
                     <span className="min-w-0 flex-1 truncate">{option.label}</span>
                     {isSelected && <Check className="size-4 text-primary-700" aria-hidden="true" />}
