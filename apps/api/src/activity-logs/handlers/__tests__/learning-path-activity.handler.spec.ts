@@ -55,6 +55,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
@@ -84,6 +85,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
@@ -108,6 +110,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
@@ -125,6 +128,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
@@ -143,6 +147,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.START_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
@@ -160,6 +165,7 @@ describe("LearningPathActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,

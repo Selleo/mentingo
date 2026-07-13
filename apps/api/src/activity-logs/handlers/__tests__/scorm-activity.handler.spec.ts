@@ -54,6 +54,7 @@ describe("ScormActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormId,
@@ -83,6 +84,7 @@ describe("ScormActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormId,
@@ -107,6 +109,7 @@ describe("ScormActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormId,
@@ -124,6 +127,7 @@ describe("ScormActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.PLAY_SCORM,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormId,
@@ -142,6 +146,7 @@ describe("ScormActivityHandler", () => {
 
     expect(recordActivity).toHaveBeenCalledWith({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_SCORM,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormId,
