@@ -53,7 +53,7 @@ const getGridClassName = ({
 };
 
 export function CourseStatBar({ language }: CourseHeroProps) {
-  const { course, isAdminExperience } = useCourseAccessProvider();
+  const { course, canEditCourse, isAdminExperience } = useCourseAccessProvider();
 
   const hasCertificate = Boolean(course.hasCertificate);
   const hasAuthor = Boolean(course.authorId);
@@ -87,13 +87,13 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     true,
   );
 
-  const { data: enrolledGroups } = useGroupsByCourseQuery(
-    isAdminExperience ? course.id : "",
-    language,
-  );
-  const hasDeadline = isAdminExperience
-    ? enrolledGroups?.some((group) => Boolean(group.isMandatory && group.dueDate))
-    : Boolean(course.dueDate);
+  const { data: enrolledGroups } = useGroupsByCourseQuery(canEditCourse ? course.id : "", language);
+  const groupDeadlineDueDate = enrolledGroups
+    ?.filter((group) => group.isMandatory && group.dueDate)
+    .map((group) => group.dueDate)
+    .sort()[0];
+  const deadlineDueDate = groupDeadlineDueDate ?? course.dueDate;
+  const hasDeadline = Boolean(deadlineDueDate);
 
   const resetDeadlineDraft = useCallback(() => {
     const groups = enrolledGroups ?? [];
@@ -233,6 +233,8 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       )}
     >
       <ProgressStatCard
+        completedChapterCount={course.completedChapterCount ?? 0}
+        courseChapterCount={course.courseChapterCount}
         isAdminExperience={isAdminExperience}
         onEnterLearningMode={enterLearningMode}
         timeLeftSeconds={timeLeftSeconds}
@@ -240,7 +242,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
 
       {(isAdminExperience || hasDeadline) && (
         <DeadlineStatCard
-          dueDate={course.dueDate}
+          dueDate={deadlineDueDate}
           hasDeadline={hasDeadline}
           isAdminExperience={isAdminExperience}
           onOpen={openDeadlineModal}

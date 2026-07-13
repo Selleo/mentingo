@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { COURSE_ENROLLMENT, SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { format, subMonths } from "date-fns";
+import { addDays, format, subMonths } from "date-fns";
 import * as dotenv from "dotenv";
 import { and, count, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
@@ -23,6 +23,9 @@ import {
   coursesSummaryStats,
   courseStudentsStats,
   credentials,
+  groupCourses,
+  groups,
+  groupUsers,
   lessonLearningTime,
   lessons,
   questions,
@@ -253,6 +256,96 @@ async function createStudentCourses(courses: any[], studentIds: UUIDType[], tena
   });
 
   return db.insert(studentCourses).values(studentsCoursesList).returning();
+}
+
+async function createDeadlineGroups(
+  courseList: any[],
+  studentIds: UUIDType[],
+  enrolledByUserId: UUIDType,
+  tenantId: UUIDType,
+) {
+  const courseIds = courseList.slice(0, 4).map((course) => course.id);
+
+  if (courseIds.length === 0 || studentIds.length === 0) return [];
+
+  const deadlineGroupsData = [
+    {
+      name: "Frontend Academy",
+      characteristic: "Students assigned to frontend-oriented courses with deadlines.",
+      studentIds,
+      courseIds: courseIds.slice(0, 2),
+      dueDateOffsetDays: 14,
+    },
+    {
+      name: "Data Team",
+      characteristic: "Students assigned to data-oriented courses with deadlines.",
+      studentIds,
+      courseIds: courseIds.slice(2),
+      dueDateOffsetDays: 30,
+    },
+  ].filter((groupData) => groupData.courseIds.length > 0);
+
+  const createdGroups = await db
+    .insert(groups)
+    .values(
+      deadlineGroupsData.map((groupData) => ({
+        name: sql`json_build_object('en', ${groupData.name}::text)`,
+        characteristic: sql`json_build_object('en', ${groupData.characteristic}::text)`,
+        tenantId,
+      })),
+    )
+    .returning();
+
+  await db.insert(groupUsers).values(
+    createdGroups.flatMap((group, index) =>
+      deadlineGroupsData[index].studentIds.map((studentId) => ({
+        userId: studentId,
+        groupId: group.id,
+        tenantId,
+      })),
+    ),
+  );
+
+  const groupCourseValues = createdGroups.flatMap((group, index) => {
+    const groupData = deadlineGroupsData[index];
+    const dueDate = addDays(new Date(), groupData.dueDateOffsetDays);
+
+    return groupData.courseIds.map((courseId) => ({
+      groupId: group.id,
+      courseId,
+      enrolledBy: enrolledByUserId,
+      isMandatory: true,
+      dueDate,
+      tenantId,
+    }));
+  });
+
+  await db.insert(groupCourses).values(groupCourseValues);
+
+  await db
+    .insert(studentCourses)
+    .values(
+      groupCourseValues.flatMap((groupCourse) =>
+        studentIds.map((studentId) => ({
+          studentId,
+          courseId: groupCourse.courseId,
+          enrolledByGroupId: groupCourse.groupId,
+          status: COURSE_ENROLLMENT.ENROLLED,
+          archived: false,
+          tenantId,
+        })),
+      ),
+    )
+    .onConflictDoUpdate({
+      target: [studentCourses.studentId, studentCourses.courseId],
+      set: {
+        enrolledByGroupId: sql`EXCLUDED.enrolled_by_group_id`,
+        status: sql`EXCLUDED.status`,
+        updatedAt: sql`CURRENT_TIMESTAMP`,
+      },
+    });
+
+  return createdGroups;
 }
 
 async function createLessonProgress(userId: UUIDType, tenantId: UUIDType) {
@@ -590,6 +683,9 @@ async function seed() {
       console.log("Selected random courses for student from createdCourses");
       await createStudentCourses(createdCourses, createdStudentIds, tenantId);
       console.log("Created student courses");
+
+      await createDeadlineGroups(createdCourses, createdStudentIds, createdAdmin.id, tenantId);
+      console.log("Created deadline groups and group course enrollments");
 
       await Promise.all(
         createdStudentIds.map(async (studentId) => {

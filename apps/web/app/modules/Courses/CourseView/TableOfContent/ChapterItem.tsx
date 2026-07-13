@@ -66,8 +66,10 @@ const getChapterCircleStyle = ({
   return "border-neutral-200 bg-white";
 };
 
-const getCompletedLessonCount = (chapter: Chapter) =>
-  chapter.lessons.filter((lesson) => lesson.status === "completed").length;
+const getActiveLessonProgressCount = (chapter: Chapter) =>
+  chapter.lessons.filter(
+    (lesson) => lesson.status === "completed" || lesson.status === "in_progress",
+  ).length;
 
 export default function ChapterItem({
   chapter,
@@ -80,8 +82,11 @@ export default function ChapterItem({
   const isCompleted = !isAdminExperience && chapter.chapterProgress === "completed";
   const isCurrent = !isAdminExperience && chapter.chapterProgress === "in_progress";
   const chapterStyle = getChapterStyle({ isCompleted, isCurrent });
-  const completedLessonCount = getCompletedLessonCount(chapter);
+  const activeLessonProgressCount = getActiveLessonProgressCount(chapter);
   const lessonCount = chapter.lessons.length || chapter.lessonCount;
+  const progressLessonCount = isCompleted ? lessonCount : activeLessonProgressCount;
+  const shouldShowActiveProgress =
+    !isAdminExperience && lessonCount > 0 && (isCurrent || isExpanded);
 
   return (
     <div className="relative">
@@ -150,11 +155,11 @@ export default function ChapterItem({
                 </span>
               </div>
 
-              {isCurrent && (
+              {shouldShowActiveProgress && (
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 text-xs font-semibold text-primary-700">
                     <span>
-                      {completedLessonCount}/{lessonCount}
+                      {progressLessonCount}/{lessonCount}
                     </span>
                   </div>
                   <div className="flex w-32 gap-0.5">
@@ -163,7 +168,7 @@ export default function ChapterItem({
                         key={idx}
                         className={cn(
                           "h-2 flex-1 rounded-full transition-all",
-                          idx < completedLessonCount ? "bg-primary-700" : "bg-primary-100",
+                          idx < progressLessonCount ? "bg-primary-700" : "bg-primary-100",
                         )}
                       />
                     ))}

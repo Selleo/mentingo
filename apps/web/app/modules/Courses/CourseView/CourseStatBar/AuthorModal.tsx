@@ -2,8 +2,7 @@ import { Award, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
-
-import { DEFAULT_AUTHOR_MODAL_IMAGE, getAuthorName } from "./author.utils";
+import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
 type Author = {
   description?: string | null;
@@ -16,6 +15,7 @@ type OtherCourse = {
   category: string;
   enrolledParticipantCount: number;
   estimatedDurationFormatted?: string | null;
+  estimatedDurationMinutes?: number | null;
   id: string;
   title: string;
 };
@@ -42,7 +42,7 @@ export default function AuthorModal({
   showAuthorSectionDraft,
 }: AuthorModalProps) {
   const { t } = useTranslation();
-  const authorName = getAuthorName(author);
+  const authorFullName = author?.firstName + " " + author?.lastName;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -63,8 +63,10 @@ export default function AuthorModal({
               <X className="h-5 w-5 text-neutral-800" />
             </button>
             <img
-              src={DEFAULT_AUTHOR_MODAL_IMAGE}
-              alt={authorName || t("modernCourseView.author.pictureAlt")}
+              src={
+                "https://plus.unsplash.com/premium_vector-1721991052634-15ade548d2df?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              }
+              alt={authorFullName || t("modernCourseView.author.pictureAlt")}
               className="h-auto w-full rounded-xl object-cover shadow-lg"
             />
           </div>
@@ -110,7 +112,9 @@ export default function AuthorModal({
             )}
 
             <div className="mb-8">
-              <h3 className="mb-2 font-gothic text-3xl font-bold text-neutral-950">{authorName}</h3>
+              <h3 className="mb-2 font-gothic text-3xl font-bold text-neutral-950">
+                {authorFullName}
+              </h3>
               <p className="mb-4 text-lg text-primary-700">{author?.jobTitle}</p>
               <p className="leading-relaxed text-neutral-800">{author?.description}</p>
             </div>
@@ -144,7 +148,11 @@ export default function AuthorModal({
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span>{course.estimatedDurationFormatted ?? "—"}</span>
+                        <span>
+                          {course.estimatedDurationMinutes != null
+                            ? formatDurationToHalfHour(course.estimatedDurationMinutes * 60)
+                            : (course.estimatedDurationFormatted ?? "—")}
+                        </span>
                       </div>
                     </div>
                   </div>

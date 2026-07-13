@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Calendar, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
@@ -99,19 +99,22 @@ export default function DeadlineModal({
                     {t("modernCourseView.deadline.current", { deadline: group.deadline })}
                   </p>
                 </div>
-                <input
-                  type="date"
-                  value={group.deadline}
-                  onChange={(event) => {
-                    const updated = groupDeadlines.map((currentGroup) =>
-                      currentGroup.id === group.id
-                        ? { ...currentGroup, deadline: event.target.value }
-                        : currentGroup,
-                    );
-                    onChangeGroupDeadlines(updated);
-                  }}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm sm:w-auto"
-                />
+                <div className="relative w-full sm:w-48">
+                  <input
+                    type="date"
+                    value={group.deadline}
+                    onChange={(event) => {
+                      const updated = groupDeadlines.map((currentGroup) =>
+                        currentGroup.id === group.id
+                          ? { ...currentGroup, deadline: event.target.value }
+                          : currentGroup,
+                      );
+                      onChangeGroupDeadlines(updated);
+                    }}
+                    className="w-full rounded-lg border border-neutral-200 px-3 py-2 pr-10 text-sm [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
+                  />
+                  <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-800" />
+                </div>
               </div>
             ))}
         </div>

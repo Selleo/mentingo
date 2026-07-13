@@ -17,6 +17,10 @@ export default function DeadlineStatCard({
   onOpen,
 }: DeadlineStatCardProps) {
   const { t } = useTranslation();
+  const daysLeft = dueDate
+    ? Math.max(0, Math.ceil((new Date(dueDate).getTime() - Date.now()) / 86_400_000))
+    : 0;
+  const formattedDueDate = dueDate ? new Date(dueDate).toLocaleDateString() : null;
 
   return (
     <button
@@ -53,10 +57,13 @@ export default function DeadlineStatCard({
           ) : (
             <>
               <p className="text-xl font-bold text-neutral-950">
-                {t("modernCourseView.stats.daysLeft", { count: 9 })}
+                {t("modernCourseView.stats.daysLeft", { count: daysLeft })}
               </p>
-              <p className="text-xs text-neutral-800">{dueDate}</p>
+              <p className="text-xs text-neutral-800">{formattedDueDate}</p>
             </>
+          )}
+          {isAdminExperience && formattedDueDate && (
+            <p className="text-xs text-neutral-800">{formattedDueDate}</p>
           )}
         </div>
       </div>

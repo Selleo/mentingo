@@ -5,17 +5,23 @@ import { cn } from "~/lib/utils";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 type ProgressStatCardProps = {
+  completedChapterCount: number;
+  courseChapterCount: number;
   isAdminExperience: boolean;
   onEnterLearningMode: () => void;
   timeLeftSeconds: number;
 };
 
 export default function ProgressStatCard({
+  completedChapterCount,
+  courseChapterCount,
   isAdminExperience,
   onEnterLearningMode,
   timeLeftSeconds,
 }: ProgressStatCardProps) {
   const { t } = useTranslation();
+  const progressPercentage =
+    courseChapterCount > 0 ? Math.round((completedChapterCount / courseChapterCount) * 100) : 0;
 
   return (
     <div className="group relative flex h-full items-center overflow-hidden rounded-2xl border-l-4 border-success-500 bg-white p-4 shadow-lg">
@@ -42,6 +48,25 @@ export default function ProgressStatCard({
               </span>
             </div>
           </div>
+
+          {!isAdminExperience && (
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-xs font-medium text-neutral-800">
+                  {completedChapterCount} / {courseChapterCount} chapters
+                </span>
+                <span className="text-xs font-semibold text-success-500">
+                  {progressPercentage}%
+                </span>
+              </div>
+              <div className="h-1.5 rounded-full bg-primary-100">
+                <div
+                  className="h-1.5 rounded-full bg-success-500 transition-all"
+                  style={{ width: `${progressPercentage}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {isAdminExperience && (
