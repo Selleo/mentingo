@@ -23,6 +23,7 @@ import {
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { AnnouncementsService } from "./announcements.service";
@@ -67,8 +68,18 @@ export class AnnouncementsController {
     @Query("perPage") perPage?: number,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AllAnnouncements>> {
+    if (!currentUser) {
+      return new PaginatedResponse({
+        data: [],
+        pagination: {
+          page: 1,
+          perPage: DEFAULT_PAGE_SIZE,
+          totalItems: 0,
+        },
+      });
+    }
     const announcements = await this.announcementsService.getAllAnnouncements(
-      currentUser!,
+      currentUser,
       language,
       {
         page,

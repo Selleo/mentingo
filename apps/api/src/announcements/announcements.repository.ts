@@ -72,16 +72,33 @@ export class AnnouncementsRepository {
   ) {
     const conditions = [isNull(announcements.deletedAt)];
 
-    if (status) conditions.push(eq(announcements.status, status));
+    if (status) {
+      conditions.push(eq(announcements.status, status));
+    }
 
     return this.db.transaction(async (trx) => {
+      const visibilityCondition = or(
+        eq(announcements.audience, ANNOUNCEMENT_AUDIENCES.ALL_USERS),
+        and(
+          eq(announcements.audience, ANNOUNCEMENT_AUDIENCES.SELECTED_USERS),
+          isNotNull(userAnnouncements.id),
+        ),
+      );
+
       const announcementsQuery = trx
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
         })
         .from(announcements)
-        .where(and(...conditions))
+        .leftJoin(
+          userAnnouncements,
+          and(
+            eq(userAnnouncements.announcementId, announcements.id),
+            eq(userAnnouncements.userId, currentUser.userId),
+          ),
+        )
+        .where(and(...conditions, visibilityCondition))
         .orderBy(desc(announcements.createdAt))
         .$dynamic();
 
@@ -92,13 +109,25 @@ export class AnnouncementsRepository {
       );
 
       const [{ totalItems }] = await trx
-        .select({ totalItems: count() })
+        .select({
+          totalItems: count(),
+        })
         .from(announcements)
-        .where(and(...conditions));
+        .leftJoin(
+          userAnnouncements,
+          and(
+            eq(userAnnouncements.announcementId, announcements.id),
+            eq(userAnnouncements.userId, currentUser.userId),
+          ),
+        )
+        .where(and(...conditions, visibilityCondition));
 
       return {
         data: announcementsData,
-        pagination: { ...pagination, totalItems },
+        pagination: {
+          ...pagination,
+          totalItems,
+        },
       };
     });
   }
