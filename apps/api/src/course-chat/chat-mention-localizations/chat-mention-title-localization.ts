@@ -1,6 +1,6 @@
 import type { SupportedLanguages } from "@repo/shared/";
 
-export function GetLocalizedUserMentionTitleAnnouncement(mentioningUserFullName: string) {
+export function getLocalizedUserMentionTitleAnnouncement(mentioningUserFullName: string) {
   const title: Record<SupportedLanguages, string> = {
     en: `${mentioningUserFullName} mentioned you`,
     pl: `${mentioningUserFullName} wspomniał o Tobie`,

@@ -1,6 +1,6 @@
 import type { SupportedLanguages } from "node_modules/@repo/shared/dist/index.cjs";
 
-export function GetLocalizedUserMentionContentAnnouncement(courseName: string) {
+export function getLocalizedUserMentionContentAnnouncement(courseName: string) {
   const content: Record<SupportedLanguages, string> = {
     en: `In the course "${courseName}"`,
     pl: `W kursie "${courseName}"`,

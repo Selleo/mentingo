@@ -28,7 +28,7 @@ import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { UserService } from "src/user/user.service";
 
 import { GetLocalizedUserMentionContentAnnouncement } from "../chat-mention-localizations/chat-mention-content-localization";
-import { GetLocalizedUserMentionTitleAnnouncement } from "../chat-mention-localizations/chat-mention-title-localization";
+import { getLocalizedUserMentionTitleAnnouncement } from "../chat-mention-localizations/chat-mention-title-localization";
 
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
 
@@ -76,7 +76,7 @@ export class CourseChatMentionEmailHandler
 
       await this.announcementRepository.createAnnouncement({
         groupId: null,
-        title: GetLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
+        title: getLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
         content: GetLocalizedUserMentionContentAnnouncement(courseData.courseName),
         baseLanguage: SUPPORTED_LANGUAGES.EN,
         availableLocales: [...Object.values(SUPPORTED_LANGUAGES)],
