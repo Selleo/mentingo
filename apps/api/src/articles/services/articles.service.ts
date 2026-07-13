@@ -17,9 +17,13 @@ import { annotateVideoAutoplayAndBlockIndexesInContent } from "src/common/utils/
 import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import {
   CreateArticleEvent,
+  CreateArticleLanguageEvent,
   CreateArticleSectionEvent,
+  CreateSectionLanguageEvent,
   DeleteArticleEvent,
+  DeleteArticleLanguageEvent,
   DeleteArticleSectionEvent,
+  DeleteSectionLanguageEvent,
   UpdateArticleEvent,
   UpdateArticleSectionEvent,
 } from "src/events";
@@ -195,7 +199,7 @@ export class ArticlesService {
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleSectionEvent({
+        new CreateSectionLanguageEvent({
           articleSectionId: sectionId,
           actor: currentUser,
           previousArticleSectionData: previousSnapshot,
@@ -241,10 +245,9 @@ export class ArticlesService {
 
     if (!this.areSectionSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleSectionEvent({
+        new DeleteSectionLanguageEvent({
           articleSectionId: sectionId,
           actor: currentUser,
-          previousArticleSectionData: previousSnapshot,
           updatedArticleSectionData: updatedSnapshot,
           language,
           action: "remove_language",
@@ -427,11 +430,10 @@ export class ArticlesService {
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleEvent({
+        new DeleteArticleLanguageEvent({
           articleId,
           actor: currentUser,
           previousArticleData: previousSnapshot,
-          updatedArticleData: updatedSnapshot,
           language,
           action: "remove_language",
         }),
@@ -688,7 +690,7 @@ export class ArticlesService {
 
     if (!this.areArticleSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
-        new UpdateArticleEvent({
+        new CreateArticleLanguageEvent({
           articleId,
           actor: currentUser,
           previousArticleData: previousSnapshot,
@@ -1068,7 +1070,20 @@ export class ArticlesService {
     previousSnapshot: ArticleSectionActivityLogSnapshot | null,
     updatedSnapshot: ArticleSectionActivityLogSnapshot | null,
   ) {
-    return isEqual(previousSnapshot, updatedSnapshot);
+    return isEqual(
+      this.getComparableSectionSnapshot(previousSnapshot),
+      this.getComparableSectionSnapshot(updatedSnapshot),
+    );
+  }
+
+  private getComparableSectionSnapshot(snapshot: ArticleSectionActivityLogSnapshot | null) {
+    if (!snapshot) return null;
+
+    return {
+      title: snapshot.title ?? null,
+      baseLanguage: snapshot.baseLanguage ?? null,
+      availableLocales: snapshot.availableLocales ?? [],
+    };
   }
 
   private extractTitleByLanguage(titleField: unknown, language: SupportedLanguages) {
