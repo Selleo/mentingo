@@ -1,7 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
-import { ANNOUNCEMENT_STATUSES } from "@repo/shared";
+import {
+  ANNOUNCEMENT_EMAIL_TEMPLATES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 
 import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { DatabasePg } from "src/common";
@@ -73,15 +78,15 @@ export class CourseChatMentionEmailHandler
         groupId: null,
         title: GetLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
         content: GetLocalizedUserMentionContentAnnouncement(courseData.courseName),
-        baseLanguage: "en",
-        availableLocales: ["en", "pl", "de", "lt", "cs", "es"],
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [...Object.values(SUPPORTED_LANGUAGES)],
         authorId: currentUser.userId,
         status: ANNOUNCEMENT_STATUSES.PUBLISHED,
         scheduledAt: null,
         publishedAt: null,
         sendEmail: false,
-        emailTemplate: "default",
-        sourceType: "manual",
+        emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
         sourceId: null,
         usersToNotify: uniqueMentionedUserIds,
       });
