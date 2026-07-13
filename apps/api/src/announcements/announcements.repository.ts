@@ -22,7 +22,6 @@ import {
   inArray,
   type SQL,
   lte,
-  ne,
 } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -72,11 +71,6 @@ export class AnnouncementsRepository {
   ) {
     const conditions = [isNull(announcements.deletedAt)];
 
-    const isAdmin = currentUser.roleSlugs.includes("admin"); // lub SYSTEM_ROLE_SLUGS.ADMIN, jeśli masz do niego dostęp w tym pliku
-    if (isAdmin) {
-      conditions.push(ne(announcements.authorId, currentUser.userId));
-    }
-
     if (status) conditions.push(eq(announcements.status, status));
 
     return this.db.transaction(async (trx) => {
@@ -84,17 +78,8 @@ export class AnnouncementsRepository {
         .select({
           ...getTableColumns(announcements),
           ...this.getLocalizedAnnouncementFields(language),
-          isRead: userAnnouncements.isRead,
-          readAt: userAnnouncements.readAt,
         })
         .from(announcements)
-        .leftJoin(
-          userAnnouncements,
-          and(
-            eq(userAnnouncements.announcementId, announcements.id),
-            eq(userAnnouncements.userId, currentUser.userId),
-          ),
-        )
         .where(and(...conditions))
         .orderBy(desc(announcements.createdAt))
         .$dynamic();
@@ -116,7 +101,6 @@ export class AnnouncementsRepository {
       };
     });
   }
-
   async getUnreadAnnouncementsCount(userId: UUIDType) {
     return await this.db
       .select({
