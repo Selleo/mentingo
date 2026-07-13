@@ -27,6 +27,10 @@ import {
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
+  CreateLearningPathEvent,
+  UpdateLearningPathEvent,
+  DeleteLearningPathEvent,
+  EnrollLearningPathEvent,
 } from "src/events";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -347,6 +351,15 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.CREATE_FAILED);
     }
 
+    await this.outboxPublisher.publish(
+      new CreateLearningPathEvent({
+        learningPathId: createdLearningPath.id,
+        actor: currentUser,
+        createdLearningPath: createdLearningPath as any,
+      }),
+      this.db,
+    );
+
     await this.searchIndexService.refreshLearningPath(createdLearningPath.id);
 
     return this.ensureLocalizedLearningPathExists(createdLearningPath.id, body.language);
@@ -561,6 +574,16 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
     }
 
+    await this.outboxPublisher.publish(
+      new UpdateLearningPathEvent({
+        learningPathId,
+        actor: currentUser,
+        previousLearningPathData: existingLearningPath as any,
+        updatedLearningPathData: updatedLearningPath as any,
+      }),
+      this.db,
+    );
+
     await this.learningPathExportService.queueSyncForSourceLearningPath(
       learningPathId,
       "update-learning-path",
@@ -625,6 +648,14 @@ export class LearningPathService {
     if (!deletedLearningPath) {
       throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
     }
+
+    await this.outboxPublisher.publish(
+      new DeleteLearningPathEvent({
+        learningPathId,
+        actor: currentUser,
+      }),
+      this.db,
+    );
 
     await this.searchIndexService.deleteEntityDocuments({
       entityType: SEARCH_ENTITY_TYPES.LEARNING_PATH,
@@ -721,11 +752,7 @@ export class LearningPathService {
 
     const uniqueStudentIds = Array.from(new Set(body.studentIds));
 
-    return this.enrollStudentIdsToLearningPath(
-      learningPathId,
-      uniqueStudentIds,
-      currentUser.tenantId,
-    );
+    return this.enrollStudentIdsToLearningPath(learningPathId, uniqueStudentIds, currentUser);
   }
 
   async enrollCurrentUserToLearningPath(learningPathId: UUIDType, currentUser: CurrentUserType) {
@@ -737,17 +764,13 @@ export class LearningPathService {
       throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
     }
 
-    return this.enrollStudentIdsToLearningPath(
-      learningPathId,
-      [currentUser.userId],
-      currentUser.tenantId,
-    );
+    return this.enrollStudentIdsToLearningPath(learningPathId, [currentUser.userId], currentUser);
   }
 
   private async enrollStudentIdsToLearningPath(
     learningPathId: UUIDType,
     studentIds: UUIDType[],
-    tenantId: UUIDType,
+    currentUser: CurrentUserType,
   ) {
     if (studentIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.STUDENT_IDS_EMPTY);
@@ -771,7 +794,7 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         LEARNING_PATH_ENROLLMENT_TYPES.DIRECT,
-        tenantId,
+        currentUser.tenantId,
         trx,
       );
 
@@ -779,11 +802,24 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         courseIds,
-        tenantId,
+        currentUser.tenantId,
         trx,
       );
 
-      await this.publishLearningPathCourseSyncEvent(learningPathId, tenantId, trx);
+      await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+
+      await Promise.all(
+        newStudentIds.map((userId) =>
+          this.outboxPublisher.publish(
+            new EnrollLearningPathEvent({
+              learningPathId,
+              actor: currentUser,
+              userId,
+            }),
+            trx,
+          ),
+        ),
+      );
 
       return {
         learningPathId,

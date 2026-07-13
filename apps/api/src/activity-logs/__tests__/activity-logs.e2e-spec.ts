@@ -9,6 +9,7 @@ import { AdminChapterService } from "src/chapter/adminChapter.service";
 import { CourseService } from "src/courses/course.service";
 import { EnvService } from "src/env/services/env.service";
 import { GroupService } from "src/group/group.service";
+import { LearningPathService } from "src/learning-path/services/learning-path.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
@@ -47,6 +48,7 @@ describe("Activity Logs E2E", () => {
   let courseService: CourseService;
   let envService: EnvService;
   let groupService: GroupService;
+  let learningPathService: LearningPathService;
   let authService: AuthService;
   let authController: AuthController;
   let db: DatabasePg;
@@ -74,6 +76,7 @@ describe("Activity Logs E2E", () => {
     courseService = app.get(CourseService);
     envService = app.get(EnvService);
     groupService = app.get(GroupService);
+    learningPathService = app.get(LearningPathService);
     authService = app.get(AuthService);
     authController = app.get(AuthController);
 
@@ -741,6 +744,160 @@ describe("Activity Logs E2E", () => {
       expect(logoutLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.LOGOUT);
       expect(logoutLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.USER);
       expect(logoutLog.actorId).toBe(user.id);
+    });
+  });
+
+  describe("Learning Path activity logs", () => {
+    const createLearningPath = async () =>
+      learningPathService.createLearningPath(
+        {
+          title: "Initial Learning Path",
+          description: "Learning path description",
+          status: "draft",
+          language: SUPPORTED_LANGUAGES.EN,
+          sequenceEnabled: false,
+          includesCertificate: false,
+        },
+        currentAdminUser,
+      );
+
+    it("should record CREATE activity log when learning path is created", async () => {
+      const learningPath = await createLearningPath();
+
+      const [createLog] = await waitForLogs({ resourceId: learningPath.id });
+      const metadata = parseMetadata(createLog.metadata);
+
+      expect(createLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
+      expect(createLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
+      expect(createLog.resourceId).toBe(learningPath.id);
+      expect(metadata.after?.id).toBe(learningPath.id);
+    });
+
+    it("should record UPDATE activity log when learning path is updated", async () => {
+      const learningPath = await createLearningPath();
+
+      await learningPathService.updateLearningPath(
+        learningPath.id,
+        {
+          title: "Updated Learning Path",
+          language: SUPPORTED_LANGUAGES.EN,
+        },
+        currentAdminUser,
+      );
+
+      const logsAfterUpdate = await waitForLogs({ resourceId: learningPath.id }, 2);
+      const updateLog = logsAfterUpdate[logsAfterUpdate.length - 1];
+      const metadata = parseMetadata(updateLog.metadata);
+      const changedFields = getChangedFields(metadata);
+
+      expect(updateLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.UPDATE);
+      expect(updateLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
+      expect(changedFields).toEqual(expect.arrayContaining(["title"]));
+    });
+
+    it("should record DELETE activity log when learning path is deleted", async () => {
+      const learningPath = await createLearningPath();
+
+      await learningPathService.deleteLearningPath(learningPath.id, currentAdminUser);
+
+      const logsAfterDelete = await waitForLogs({ resourceId: learningPath.id }, 2);
+      const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
+      expect(deleteLog.resourceId).toBe(learningPath.id);
+    });
+
+    it("should record ENROLL_LEARNING_PATH activity log when admin enrolls a student", async () => {
+      const student = await userFactory.withUserSettings(db).create();
+      const learningPath = await createLearningPath();
+
+      await learningPathService.enrollUsersToLearningPath(
+        learningPath.id,
+        { studentIds: [student.id] },
+        currentAdminUser,
+      );
+
+      const logsAfterEnroll = await waitForLogs({ resourceId: learningPath.id }, 2);
+      const enrollLog = logsAfterEnroll[logsAfterEnroll.length - 1];
+      const metadata = parseMetadata(enrollLog.metadata);
+
+      expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH);
+      expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
+      expect(enrollLog.resourceId).toBe(learningPath.id);
+      expect(metadata.context?.enrolledUserId).toBe(student.id);
+    });
+
+    it("should record ENROLL_LEARNING_PATH without enrolledUserId when student self-enrolls", async () => {
+      const publishedLearningPath = await learningPathService.createLearningPath(
+        {
+          title: "Published Learning Path",
+          description: "Published",
+          status: "published",
+          language: SUPPORTED_LANGUAGES.EN,
+          sequenceEnabled: false,
+          includesCertificate: false,
+        },
+        currentAdminUser,
+      );
+
+      const student = await userFactory.withUserSettings(db).create();
+      const currentStudentUser: CurrentUserType = {
+        userId: student.id,
+        email: student.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.STUDENT],
+        permissions: Object.values(PERMISSIONS),
+        tenantId: student.tenantId,
+      };
+
+      await learningPathService.enrollCurrentUserToLearningPath(
+        publishedLearningPath.id,
+        currentStudentUser,
+      );
+
+      const logsAfterEnroll = await waitForLogs({ resourceId: publishedLearningPath.id }, 2);
+      const enrollLog = logsAfterEnroll[logsAfterEnroll.length - 1];
+      const metadata = parseMetadata(enrollLog.metadata);
+
+      expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH);
+      expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
+      expect(enrollLog.actorId).toBe(student.id);
+      expect(metadata.context).toBeNull();
+    });
+  });
+
+  describe("SCORM activity logs", () => {
+    const createScormCourse = async () => {
+      const category = await categoryFactory.create();
+
+      return courseService.createCourse(
+        {
+          title: "SCORM Course",
+          description: "SCORM course description",
+          status: "draft",
+          categoryId: category.id,
+          language: SUPPORTED_LANGUAGES.EN,
+          hasCertificate: false,
+          isScorm: true,
+        },
+        currentAdminUser,
+        true,
+      );
+    };
+
+    it("should record DELETE activity log when SCORM course is deleted", async () => {
+      const course = await createScormCourse();
+
+      await courseService.deleteCourse(course.id, currentAdminUser);
+
+      const scormLogs = await waitForLogs({
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
+      });
+      const deleteLog = scormLogs[0];
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.SCORM);
+      expect(deleteLog.actorId).toBe(currentAdminUser.userId);
     });
   });
 });

@@ -1,0 +1,12 @@
+import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
+
+export type EnrollLearningPathData = {
+  learningPathId: UUIDType;
+  userId: UUIDType;
+  actor: ActorUserType;
+};
+
+export class EnrollLearningPathEvent {
+  constructor(public readonly enrollmentData: EnrollLearningPathData) {}
+}

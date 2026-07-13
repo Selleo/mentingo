@@ -66,6 +66,7 @@ import {
   BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
+  DeleteScormEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
 } from "src/events";
@@ -111,6 +112,7 @@ import {
   tenants,
   users,
   courseStudentsStats,
+  scormPackages,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 import { UserService } from "src/user/user.service";
@@ -3230,7 +3232,17 @@ export class CourseService {
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
 
-    return this.db.transaction(async (trx) => {
+    const scormPackageToDelete =
+      course.courseType === COURSE_TYPE.SCORM
+        ? await this.db
+            .select({ id: scormPackages.id })
+            .from(scormPackages)
+            .where(eq(scormPackages.entityId, id))
+            .limit(1)
+            .then(([row]) => row ?? null)
+        : null;
+
+    await this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
@@ -3254,9 +3266,19 @@ export class CourseService {
         entityId: id,
         db: trx,
       });
-
-      return null;
     });
+
+    if (scormPackageToDelete) {
+      await this.outboxPublisher.publish(
+        new DeleteScormEvent({
+          scormId: scormPackageToDelete.id,
+          actor: currentUser,
+        }),
+        this.db,
+      );
+    }
+
+    return null;
   }
 
   async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUserType) {

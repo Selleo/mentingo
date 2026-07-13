@@ -1,12 +1,15 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_PROGRESS_STATUSES,
+  type LearningPathProgressStatus,
 } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
+import { CompleteLearningPathEvent, StartLearningPathEvent } from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 
 import { LearningPathRepository } from "../learning-path.repository";
@@ -15,16 +18,20 @@ import { LearningPathCertificateService } from "./learning-path-certificate.serv
 
 import type { LearningPathCourseLink } from "../learning-path.types";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 const PATH_LINK_ENROLLMENT_TIME_TOLERANCE_MS = 1000;
 
 @Injectable()
 export class LearningPathCourseSyncService {
+  private readonly logger = new Logger(LearningPathCourseSyncService.name);
+
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
     private readonly courseService: CourseService,
     private readonly learningPathCertificateService: LearningPathCertificateService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async syncLearningPathEnrollments(learningPathId: string) {
@@ -377,11 +384,29 @@ export class LearningPathCourseSyncService {
       (row) => row.completedAt != null,
     );
 
+    const newProgress = this.resolveLearningPathProgress(
+      progressState.courses.length,
+      completedCourses.length,
+    );
+
+    const enrollment = await this.learningPathRepository.getStudentLearningPathEnrollment(
+      learningPathId,
+      studentId,
+    );
+    const previousProgress = enrollment?.progress ?? LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
+
     await this.learningPathRepository.updateStudentLearningPathProgress(
       learningPathId,
       studentId,
-      this.resolveLearningPathProgress(progressState.courses.length, completedCourses.length),
+      newProgress,
       this.resolveLearningPathCompletedAt(progressState.courses.length, completedCourses),
+    );
+
+    await this.publishProgressTransitionEvents(
+      previousProgress,
+      newProgress,
+      learningPathId,
+      studentId,
     );
 
     if (
@@ -401,6 +426,56 @@ export class LearningPathCourseSyncService {
           learningPathId,
         );
       }
+    }
+  }
+
+  private async publishProgressTransitionEvents(
+    previousProgress: LearningPathProgressStatus,
+    newProgress: LearningPathProgressStatus,
+    learningPathId: string,
+    studentId: string,
+  ) {
+    if (previousProgress === newProgress) return;
+
+    const isStarted =
+      previousProgress === LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED &&
+      newProgress === LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+
+    const isCompleted = newProgress === LEARNING_PATH_PROGRESS_STATUSES.COMPLETED;
+
+    if (!isStarted && !isCompleted) return;
+
+    let actor: ActorUserType | null = null;
+
+    try {
+      actor = await this.learningPathRepository.getStudentActorInfo(studentId);
+    } catch (error) {
+      this.logger.warn(
+        `Failed to get actor info for student ${studentId} on learning path ${learningPathId}: ${error}`,
+      );
+      return;
+    }
+
+    if (!actor) return;
+
+    if (isStarted) {
+      await this.outboxPublisher.publish(
+        new StartLearningPathEvent({
+          learningPathId,
+          userId: studentId,
+          actor,
+        }),
+      );
+    }
+
+    if (isCompleted) {
+      await this.outboxPublisher.publish(
+        new CompleteLearningPathEvent({
+          learningPathId,
+          userId: studentId,
+          actor,
+        }),
+      );
     }
   }
 
