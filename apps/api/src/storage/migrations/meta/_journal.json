@@ -1125,8 +1125,22 @@
     {
       "idx": 160,
       "version": "7",
-      "when": 1783929521191,
-      "tag": "0160_good_zarek",
+      "when": 1783341472909,
+      "tag": "0160_backfill_lesson_completion_from_localized_video_progress",
+      "breakpoints": true
+    },
+    {
+      "idx": 161,
+      "version": "7",
+      "when": 1783673985611,
+      "tag": "0161_add_require_password_change_field",
+      "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1783939889869,
+      "tag": "0162_replace_is_everyone_with_audience_in_announcements",
       "breakpoints": true
     }
   ]

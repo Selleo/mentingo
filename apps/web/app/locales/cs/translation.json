@@ -904,6 +904,19 @@
       "noPartiallyConfigured": "Žádné částečně nakonfigurované služby.",
       "allConfigured": "Všechny klíče prostředí jsou správně nakonfigurovány.",
       "dismissWarning": "Propustit",
+      "aiCapabilities": {
+        "title": "AI možnosti",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generování kurzů",
+          "assetGeneration": "Generování assetů"
+        },
+        "status": {
+          "enabled": "Povoleno",
+          "disabled": "Zakázáno"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe Payment",
         "bunny": "Králíček CDN",
@@ -979,6 +992,11 @@
       "passwordCreatedSuccessfully": "Heslo bylo úspěšně vytvořeno"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Změňte heslo",
+    "subHeader": "Z bezpečnostních důvodů musíte před pokračováním nastavit nové heslo.",
+    "submit": "Změnit heslo"
+  },
   "passwordValidationDisplay": {
     "title": "Požadavky na heslo",
     "header": "Vaše heslo musí obsahovat:",
@@ -1045,7 +1063,9 @@
       "passwordResetEmailsSent": "E-maily pro reset hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
       "passwordResetEmailsError": "Nepodařilo se odeslat e-maily pro reset hesla",
       "passwordCreationEmailsSent": "E-maily pro vytvoření hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla"
+      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla",
+      "passwordEmailsSent": "E-maily k heslu odeslány: {{sentCount}}. Reset: {{passwordResetSentCount}}. Vytvoření: {{passwordCreationSentCount}}. Přeskočeno: {{skippedCount}}.",
+      "passwordEmailsError": "Nepodařilo se odeslat e-maily k heslu"
     },
     "field": {
       "description": "Popis",
@@ -1243,7 +1263,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
       "deleteCourseFailed": "Kurz se nepodařilo smazat",
-      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept.",
+      "deleteProtectedCourseFailed": "Publikovaný ani soukromý kurz nelze smazat. Nejprve nastavte jeho stav na Koncept.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kurzů byly úspěšně aktualizovány",
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
@@ -1463,6 +1483,7 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Skupiny",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordReset": "Odeslat e-mail pro reset hesla",
       "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
       "delete": "Vymazat",
@@ -1473,6 +1494,7 @@
         "delete": "Chcete tyto účty smazat?",
         "role": "Upravte role",
         "group": "Upravte skupiny",
+        "passwordEmail": "Odeslat e-mail k heslu",
         "passwordReset": "Odeslat e-mail pro reset hesla",
         "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
         "archive": "Archivovat uživatelské účty",
@@ -1484,6 +1506,7 @@
         "delete": "Vymazat",
         "role": "Uložit",
         "group": "Uložit",
+        "passwordEmail": "Odeslat",
         "passwordReset": "Odeslat",
         "passwordCreation": "Odeslat",
         "archive": "Archiv",
@@ -1496,6 +1519,7 @@
         "confirmationForGroup_other": "Změníte skupinu na {{ group }} pro {{ count }} uživatelů",
         "confirmationForRole_one": "Změníte roli na {{ role }} pro 1 uživatele.",
         "confirmationForRole_other": "Změníte roli na {{ role }} pro {{ count }} uživatelů",
+        "passwordEmail": "Odešlete e-maily k heslu vybraným uživatelům. Uživatelé s existujícím heslem dostanou e-mail pro reset hesla a uživatelé bez hesla dostanou e-mail pro vytvoření hesla.",
         "passwordReset": "Odešlete e-maily pro reset hesla vybraným uživatelům s existujícím heslem. Uživatelé bez hesla budou přeskočeni.",
         "passwordCreation": "Znovu odešlete e-maily pro vytvoření hesla vybraným uživatelům bez hesla. Uživatelé s existujícím heslem budou přeskočeni.",
         "archive": "Opravdu chcete tyto účty archivovat?",
@@ -1570,6 +1594,7 @@
     },
     "button": {
       "createUser": "Vytvořit uživatele",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordResetEmail": "Odeslat e-mail pro reset hesla",
       "passwordCreationEmail": "Znovu odeslat e-mail pro vytvoření hesla"
     },
@@ -2260,7 +2285,8 @@
           "aiRoleplayTypeTooltip": "Simuluje realistickou postavu a situaci – bez porušení charakteru.\nPříklad: \"Toto je podruhé, co vaše služba selhala. Co s tím hodláte dělat?\"",
           "completionConditionsTooltip": "Uveďte, čeho musí student dosáhnout, aby tuto lekci absolvoval. Poskytněte jasné a měřitelné body. Umělá inteligence použije tento seznam ke kontrole pokroku. Můžete také definovat práh pro úspěšné zvládnutí (např. procento nebo minimální počet bodů k pokrytí). Pokud není uveden žádný práh, musí být splněny všechny podmínky pro úspěšné absolvování lekce.",
           "passThresholdTooltip": "Nastavte minimální procento (1–100 %), které je potřeba k úspěšnému zvládnutí. Nechte prázdné, pokud není nastaven žádný práh.",
-          "voiceConfigFishAudioTooltip": "Hlasový režim používá Cartesia. Pro vlastní hlas otevřete Cartesia, najděte požadovaný hlas a zkopírujte sem jeho voice ID.",
+          "voiceConfigCartesiaTooltip": "Hlasový výstup používá Cartesia. Vyberte Male nebo Female pro použití nakonfigurovaného mapování hlasů, nebo vyberte Custom a zadejte Cartesia voice ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Hlasový výstup používá OpenAI kompatibilní endpoint pro převod textu na řeč. Male a Female používají presety hlasů OpenAI. Vyberte Custom, pokud chcete zadat jinou hodnotu hlasu podporovanou tímto endpointem.",
           "aiMentorPersonaTooltip": "To definuje osobnost lekce. Můžete si vybrat jméno a avatar pro AI Mentora. Osoba se identifikuje tímto jménem a vybraný avatar se bude zobrazovat během lekcí.",
           "suggestedExamples": "Doporučené příklady",
           "charactersLeft": "zbývajících znaků",
@@ -2734,6 +2760,10 @@
       "body": "Počkejte prosím chvíli. Jakmile bude připraven, objeví se zde."
     },
     "videoProgress": {
+      "label": "Průběh videa",
+      "completedSummary": "Dokončeno {{completed}} z {{total}}",
+      "overviewAriaLabel": "Průběh videí v lekci",
+      "segmentAriaLabel": "Průběh videa {{index}}: zhlédnuto {{progress}} %",
       "errors": {
         "resourceNotFound": "Postup videa pro tuto lekci se nepodařilo uložit.",
         "unsupportedLessonType": "Postup videa je dostupný pouze pro obsahové lekce.",
@@ -3326,6 +3356,12 @@
     "toast": {
       "success": "Obrázek na pozadí přihlášení byl úspěšně změněn",
       "error": "Chyba při změně obrázku na pozadí přihlášení"
+    }
+  },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Zpracování souboru se nezdařilo. Zkuste jiný soubor nebo jej nahrajte znovu.",
+      "noExtractableText": "Z tohoto souboru se nepodařilo extrahovat čitelný text."
     }
   },
   "files": {
@@ -4350,6 +4386,7 @@
     "error": {
       "unauthenticated": "Uživatel není ověřen",
       "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
+      "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
       "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."

@@ -36,6 +36,7 @@ import {
   createNiceCourses,
   ensureSeedTenant,
   getTenantEmailSuffix,
+  refreshSeedSearchDocuments,
   seedSystemRolesForTenant,
   seedUserRoleGrantSql,
 } from "./seed-helpers";
@@ -126,6 +127,7 @@ async function insertCredential(userId: UUIDType, tenantId: UUIDType, password: 
     id: faker.string.uuid(),
     userId,
     password: await hashPassword(password),
+    requiresPasswordChange: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     tenantId,
@@ -367,6 +369,7 @@ export async function seedBulkUsers(options: {
         const creatorIds = createdContentCreators.map((cc) => cc.id);
         const createdCourses = await createNiceCourses(creatorIds, db, niceCourses, tenantId);
         console.log(`✨ Created ${createdCourses.length} courses`);
+        await refreshSeedSearchDocuments(db, tenantId);
 
         if (enrollStudents && createdStudents.length > 0) {
           const studentIds = createdStudents.map((s) => s.id);

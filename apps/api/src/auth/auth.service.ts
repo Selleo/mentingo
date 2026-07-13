@@ -227,11 +227,11 @@ export class AuthService {
     const user = await this.validateUser(data.email, data.password);
 
     if (!user) {
-      throw new UnauthorizedException("Invalid email or password");
+      throw new UnauthorizedException("auth.error.invalidEmailOrPassword");
     }
 
     if (user.archived) {
-      throw new UnauthorizedException("Your account has been archived");
+      throw new UnauthorizedException("user.error.archived");
     }
 
     const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
@@ -271,6 +271,7 @@ export class AuthService {
         accessToken,
         refreshToken,
         shouldVerifyMFA: true,
+        requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
         isManagingTenantAdmin,
       };
@@ -282,6 +283,7 @@ export class AuthService {
       accessToken,
       refreshToken,
       shouldVerifyMFA: false,
+      requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
       isManagingTenantAdmin,
     };
@@ -295,7 +297,6 @@ export class AuthService {
     const { userId, tenantId } = currentUser;
 
     const user = await this.userService.getUserById(userId);
-    if (!user) throw new UnauthorizedException("User not found");
 
     const onboardingStatus = await this.getOnboardingStatus(userId);
     const { MFAEnforcedRoles } = await this.settingsService.getGlobalSettings();
@@ -309,6 +310,7 @@ export class AuthService {
       return {
         ...user,
         shouldVerifyMFA: true,
+        requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
         isManagingTenantAdmin,
         isSupportMode: false,
@@ -321,6 +323,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: false,
@@ -356,6 +359,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange: false,
       onboardingStatus,
       isManagingTenantAdmin,
       isSupportMode: true,
@@ -389,9 +393,6 @@ export class AuthService {
       }
 
       const user = await this.userService.getUserById(payload.userId);
-      if (!user) {
-        throw new UnauthorizedException("User not found");
-      }
 
       const isRevoked = await this.sessionRevocationService.isUserRevoked(user.id);
 
@@ -415,7 +416,7 @@ export class AuthService {
 
       return tokens;
     } catch (error) {
-      throw new ForbiddenException("Invalid refresh token");
+      throw new ForbiddenException("auth.error.invalidRefreshToken");
     }
   }
 
@@ -436,6 +437,7 @@ export class AuthService {
         firstName: users.firstName,
         lastName: users.lastName,
         password: credentials.password,
+        requiresPasswordChange: credentials.requiresPasswordChange,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
         archived: users.archived,
@@ -592,7 +594,7 @@ export class AuthService {
       .from(users)
       .where(eq(users.id, createToken.userId));
 
-    if (!existingUser) throw new NotFoundException("User not found");
+    if (!existingUser) throw new NotFoundException("adminUserView.error.userNotFound");
 
     const hashedPassword = await hashPassword(password);
 
@@ -747,11 +749,11 @@ export class AuthService {
       .where(and(eq(users.email, userCallback.email), isNull(users.deletedAt)));
 
     if (user?.archived) {
-      throw new UnauthorizedException("Your account has been archived");
+      throw new UnauthorizedException("user.error.archived");
     }
 
     if (!user && inviteOnlyRegistration) {
-      throw new UnauthorizedException("Registration is invite-only.");
+      throw new UnauthorizedException("inviteOnlyRegistrationView.toast.registerRedirect");
     }
 
     if (!user && !inviteOnlyRegistration) {
@@ -800,10 +802,6 @@ export class AuthService {
 
   async generateMFASecret(userId: string) {
     const user = await this.userService.getUserById(userId);
-
-    if (!user) {
-      throw new UnauthorizedException("User not found");
-    }
 
     const secret = authenticator.generateSecret();
 
@@ -953,6 +951,7 @@ export class AuthService {
       return {
         ...user,
         shouldVerifyMFA: true,
+        requiresPasswordChange: user.requiresPasswordChange ?? false,
         onboardingStatus,
         isManagingTenantAdmin,
       };
@@ -963,6 +962,7 @@ export class AuthService {
     return {
       ...user,
       shouldVerifyMFA: false,
+      requiresPasswordChange: user.requiresPasswordChange ?? false,
       onboardingStatus,
       isManagingTenantAdmin,
     };

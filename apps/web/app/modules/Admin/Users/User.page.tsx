@@ -1,14 +1,13 @@
 import { useParams } from "@remix-run/react";
 import { PERMISSIONS, SYSTEM_ROLE_PERMISSIONS } from "@repo/shared";
 import { startCase } from "lodash-es";
-import { KeyRound, Mail, UserCircle2 } from "lucide-react";
+import { KeyRound, UserCircle2 } from "lucide-react";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useAdminUpdateUser } from "~/api/mutations/admin/useAdminUpdateUser";
-import { useBulkResendPasswordCreationEmails } from "~/api/mutations/admin/useBulkResendPasswordCreationEmails";
-import { useBulkSendPasswordResetEmails } from "~/api/mutations/admin/useBulkSendPasswordResetEmails";
+import { useBulkSendPasswordEmails } from "~/api/mutations/admin/useBulkSendPasswordEmails";
 import { userQueryOptions, useUserById } from "~/api/queries/admin/useUserById";
 import { ENROLLED_USERS_QUERY_KEY } from "~/api/queries/admin/useUsersEnrolled";
 import { queryClient } from "~/api/queryClient";
@@ -51,10 +50,8 @@ const User = () => {
 
   const { data: user, isLoading } = useUserById(id, language);
   const { mutateAsync: updateUser } = useAdminUpdateUser();
-  const { mutateAsync: sendPasswordResetEmail, isPending: isSendingPasswordResetEmail } =
-    useBulkSendPasswordResetEmails();
-  const { mutateAsync: resendPasswordCreationEmail, isPending: isResendingPasswordCreationEmail } =
-    useBulkResendPasswordCreationEmails();
+  const { mutateAsync: sendPasswordEmail, isPending: isSendingPasswordEmail } =
+    useBulkSendPasswordEmails();
 
   const {
     control,
@@ -104,12 +101,8 @@ const User = () => {
     });
   };
 
-  const handleSendPasswordResetEmail = () => {
-    sendPasswordResetEmail({ userIds: [id] });
-  };
-
-  const handleResendPasswordCreationEmail = () => {
-    resendPasswordCreationEmail({ userIds: [id] });
+  const handleSendPasswordEmail = () => {
+    sendPasswordEmail({ userIds: [id] });
   };
 
   const breadcrumbs = [
@@ -153,26 +146,15 @@ const User = () => {
             </TabsList>
             <div className="flex flex-wrap items-center justify-end gap-2">
               <Button
-                data-testid={USER_PAGE_HANDLES.PASSWORD_RESET_EMAIL_BUTTON}
+                data-testid={USER_PAGE_HANDLES.PASSWORD_EMAIL_BUTTON}
                 type="button"
                 variant="outline"
                 className="h-10 gap-2"
-                onClick={handleSendPasswordResetEmail}
-                disabled={isSendingPasswordResetEmail}
+                onClick={handleSendPasswordEmail}
+                disabled={isSendingPasswordEmail}
               >
                 <KeyRound className="size-4 shrink-0" />
-                {t("adminUserView.button.passwordResetEmail")}
-              </Button>
-              <Button
-                data-testid={USER_PAGE_HANDLES.PASSWORD_CREATION_EMAIL_BUTTON}
-                type="button"
-                variant="outline"
-                className="h-10 gap-2"
-                onClick={handleResendPasswordCreationEmail}
-                disabled={isResendingPasswordCreationEmail}
-              >
-                <Mail className="size-4 shrink-0" />
-                {t("adminUserView.button.passwordCreationEmail")}
+                {t("adminUserView.button.passwordEmail")}
               </Button>
             </div>
           </div>

@@ -55,6 +55,7 @@ export type MergeLessonVideoProgressRangesParams = EnsureLessonVideoProgressRowP
 export type GetRequiredVideoProgressForLessonParams = {
   lessonId: UUIDType;
   studentId: UUIDType;
+  resourceEntityIds?: UUIDType[];
 };
 
 export type GetProgressForResourceIdsParams = GetRequiredVideoProgressForLessonParams & {

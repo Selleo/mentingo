@@ -126,6 +126,7 @@ export interface RegisterResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -165,6 +166,7 @@ export interface LoginResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -278,6 +280,7 @@ export interface CurrentUserResponse {
       | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -341,6 +344,7 @@ export interface CreatePasswordResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -402,6 +406,7 @@ export interface HandleMagicLinkResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -1467,6 +1472,19 @@ export interface SendBulkPasswordResetEmailsResponse {
   data: {
     sentCount: number;
     skippedCount: number;
+  };
+}
+
+export interface SendBulkPasswordEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+    passwordResetSentCount: number;
+    passwordCreationSentCount: number;
   };
 }
 
@@ -2644,7 +2662,12 @@ export interface GetCourseOwnershipResponse {
 export interface ChatWithCourseGenerationAgentBody {
   /** @format uuid */
   integrationId: string;
-  message: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
 }
 
 export type GetCourseGenerationMessagesResponse = {
@@ -3979,8 +4002,12 @@ export interface GetThreadMessagesResponse {
 export interface StreamChatBody {
   /** @format uuid */
   threadId: string;
-  /** @minLength 1 */
-  content: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
   /** @format uuid */
   id?: string;
 }
@@ -4761,6 +4788,7 @@ export interface GetLumaConfiguredResponse {
     enabled: boolean;
     courseGenerationEnabled: boolean;
     voiceMentorEnabled: boolean;
+    voiceTtsProvider: "cartesia" | "openaiCompatible";
   };
 }
 
@@ -4780,6 +4808,10 @@ export interface GetIsConfigSetupResponse {
     notConfigured: {
       service: string;
       missingKeys: string[];
+    }[];
+    aiCapabilities: {
+      key: "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
+      status: "enabled" | "disabled";
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;
@@ -8696,6 +8728,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<SendBulkPasswordResetEmailsResponse, any>({
         path: `/api/user/bulk/password-reset-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordEmails
+     * @request POST:/api/user/bulk/password-email
+     */
+    userControllerSendBulkPasswordEmails: (
+      data: SendBulkPasswordEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordEmailsResponse, any>({
+        path: `/api/user/bulk/password-email`,
         method: "POST",
         body: data,
         type: ContentType.Json,

@@ -22,6 +22,7 @@ import Viewer from "~/components/RichText/Viever";
 import { useQuizContext } from "~/modules/Courses/components/QuizContextProvider";
 import { getBlankAnswerIds, getBlankCount } from "~/utils/blankAnswerMarkers";
 
+import { LEARNING_HANDLES } from "../../../../../../../e2e/data/learning/handles";
 import { getCorrectSentence } from "../correctSentence";
 
 import { DndBlank } from "./DndBlank";
@@ -445,7 +446,10 @@ export const FillInTheBlanksDnd: FC<FillInTheBlanksDndProps> = ({ question, isCo
         />
         <WordBank words={renderedWordBankWords} />
         {showCorrectSentence && (
-          <div className="mt-4">
+          <div
+            className="mt-4"
+            data-testid={LEARNING_HANDLES.FILL_IN_THE_BLANKS_DND_CORRECT_SENTENCE}
+          >
             <span className="body-base-md text-error-700">
               {t("studentLessonView.other.correctSentence")}
             </span>

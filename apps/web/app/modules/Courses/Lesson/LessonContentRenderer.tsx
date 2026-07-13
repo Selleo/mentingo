@@ -12,6 +12,7 @@ import { ScormLesson } from "./ScormLesson/ScormLesson";
 
 import type { SupportedLanguages } from "@repo/shared";
 import type { CurrentUserResponse, GetLessonByIdResponse } from "~/api/generated-api";
+import type { VideoCoverageSnapshotChange } from "~/components/VideoPlayer/videoCoverage.types";
 import type { LessonPreviewUser } from "~/modules/Courses/Lesson/types";
 
 type LessonContentRendererProps = {
@@ -26,6 +27,7 @@ type LessonContentRendererProps = {
     showCoverageMarkers?: boolean;
     lessonId: string;
     language: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
   };
 };
 

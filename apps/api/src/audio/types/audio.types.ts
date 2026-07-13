@@ -8,6 +8,7 @@ export interface AudioProcessor<T = unknown, R = unknown> {
 
 export type StopAudioMessage = {
   clientId: string;
+  tenantId?: string;
 };
 
 export type StartAudioBody = {

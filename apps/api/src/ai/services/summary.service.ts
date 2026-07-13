@@ -3,6 +3,7 @@ import { Injectable } from "@nestjs/common";
 
 import { THRESHOLD } from "src/ai/ai.constants";
 import { AiRepository } from "src/ai/repositories/ai.repository";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { ChatService } from "src/ai/services/chat.service";
 import { MessageService } from "src/ai/services/message.service";
 import { PromptService } from "src/ai/services/prompt.service";
@@ -19,6 +20,7 @@ export class SummaryService {
     private readonly tokenService: TokenService,
     private readonly messageService: MessageService,
     private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
   ) {}
 
   async summarizeThreadOnTokenThreshold(threadId: UUIDType) {
@@ -68,7 +70,12 @@ export class SummaryService {
       language: userLanguage,
     });
 
-    const summarized = await this.chatService.generatePrompt(summaryPrompt, OPENAI_MODELS.BASIC);
+    const summarized = await this.aiRuntimeService.generateMentorChat(
+      {
+        messages: [{ role: MESSAGE_ROLE.USER, content: summaryPrompt }],
+      },
+      () => this.chatService.generatePrompt(summaryPrompt, OPENAI_MODELS.BASIC),
+    );
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, summarized);
 
     await this.aiRepository.archiveMessages(threadId);

@@ -7,7 +7,12 @@ import { AuthService } from "src/auth/auth.service";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { GroupService } from "src/group/group.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { createTokens, resetTokens, userDetails as userDetailsTable } from "src/storage/schema";
+import {
+  createTokens,
+  credentials,
+  resetTokens,
+  userDetails as userDetailsTable,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -118,6 +123,7 @@ describe("UsersController (e2e)", () => {
       expect(response.body.data).toStrictEqual({
         ...omit(testUser, "credentials", "avatarReference"),
         profilePictureUrl: null,
+        requiresPasswordChange: false,
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         groups: [],
       });
@@ -220,6 +226,50 @@ describe("UsersController (e2e)", () => {
   });
 
   describe("PATCH /user/change-password?id=:id", () => {
+    it("should require a password change before allowing other protected actions", async () => {
+      await db
+        .update(credentials)
+        .set({ requiresPasswordChange: true })
+        .where(eq(credentials.userId, testUser.id));
+
+      await request(app.getHttpServer())
+        .get("/api/settings")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/global")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/company-information")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/settings/platform-simple-logo")
+        .set("Cookie", testCookies)
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", testCookies)
+        .expect(403);
+
+      const newPassword = "newPassword123@";
+      await request(app.getHttpServer())
+        .patch(`/api/user/change-password?id=${testUser.id}`)
+        .set("Cookie", testCookies)
+        .send({ oldPassword: testPassword, newPassword, confirmPassword: newPassword })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .get("/api/user/password-status")
+        .set("Cookie", testCookies)
+        .expect(200);
+    });
+
     it("should change password when old password is correct", async () => {
       const newPassword = "newPassword123@";
 
@@ -621,6 +671,103 @@ describe("UsersController (e2e)", () => {
 
       await request(app.getHttpServer())
         .post("/api/user/bulk/password-reset-email")
+        .set("Cookie", loginResponse.headers["set-cookie"])
+        .send({ userIds: [regularUser.id] })
+        .expect(403);
+    });
+  });
+
+  describe("POST /user/bulk/password-email", () => {
+    it("sends reset emails to users with credentials and creation emails to users without credentials", async () => {
+      const userWithPassword = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-password-email-with-password@example.com",
+          tenantId: testUser.tenantId,
+        });
+      const userWithoutPassword = await userFactory.withUserSettings(db).create({
+        email: "bulk-password-email-without-password@example.com",
+        tenantId: testUser.tenantId,
+      });
+      const archivedUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-password-email-archived@example.com",
+          archived: true,
+          tenantId: testUser.tenantId,
+        });
+
+      await db.insert(createTokens).values({
+        userId: userWithoutPassword.id,
+        tokenHash: "old-combined-token-hash",
+        expiryDate: new Date(Date.now() + 60_000),
+        reminderCount: 2,
+        tenantId: testUser.tenantId,
+      });
+
+      const response = await request(app.getHttpServer())
+        .post("/api/user/bulk/password-email")
+        .set("Cookie", testCookies)
+        .send({ userIds: [userWithPassword.id, userWithoutPassword.id, archivedUser.id] })
+        .expect(201);
+
+      expect(response.body.data).toEqual({
+        sentCount: 2,
+        skippedCount: 1,
+        passwordResetSentCount: 1,
+        passwordCreationSentCount: 1,
+      });
+
+      const sentEmails = await waitForEmails(2);
+      expect(sentEmails.map(({ to }) => to)).toEqual(
+        expect.arrayContaining([userWithPassword.email, userWithoutPassword.email]),
+      );
+
+      const resetTokenRows = await db
+        .select({ userId: resetTokens.userId })
+        .from(resetTokens)
+        .where(eq(resetTokens.userId, userWithPassword.id));
+
+      expect(resetTokenRows).toHaveLength(1);
+
+      const createTokenRows = await db
+        .select({
+          tokenHash: createTokens.tokenHash,
+          reminderCount: createTokens.reminderCount,
+        })
+        .from(createTokens)
+        .where(eq(createTokens.userId, userWithoutPassword.id));
+
+      expect(createTokenRows).toHaveLength(1);
+      expect(createTokenRows[0]).toEqual(
+        expect.objectContaining({
+          reminderCount: 0,
+        }),
+      );
+      expect(createTokenRows[0]?.tokenHash).not.toBe("old-combined-token-hash");
+    });
+
+    it("returns forbidden for non-admin users", async () => {
+      const regularUser = await userFactory
+        .withCredentials({ password: testPassword })
+        .withUserSettings(db)
+        .create({
+          email: "bulk-password-email-regular@example.com",
+          tenantId: testUser.tenantId,
+        });
+
+      const loginResponse = await request(app.getHttpServer())
+        .post("/api/auth/login")
+        .send({
+          email: regularUser.email,
+          password: testPassword,
+        })
+        .expect(201);
+
+      await request(app.getHttpServer())
+        .post("/api/user/bulk/password-email")
         .set("Cookie", loginResponse.headers["set-cookie"])
         .send({ userIds: [regularUser.id] })
         .expect(403);

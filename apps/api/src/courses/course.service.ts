@@ -12,8 +12,8 @@ import {
 import { OverdueCoursesEmail } from "@repo/email-templates";
 import {
   COURSE_FEATURE,
-  COURSE_TYPE,
   COURSE_ENROLLMENT,
+  COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
   type LocalizedText,
@@ -129,7 +129,10 @@ import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-remin
 import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
-import { COURSE_BULK_STATUS_UPDATE_BATCH_SIZE } from "./course.constants";
+import {
+  COURSE_BULK_STATUS_UPDATE_BATCH_SIZE,
+  PROTECTED_COURSE_DELETE_STATUSES,
+} from "./course.constants";
 import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
 import { MasterCourseService } from "./master-course.service";
 import {
@@ -3221,8 +3224,8 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete this course");
     }
 
-    if (course.status === "published") {
-      throw new ForbiddenException("adminCoursesView.toast.deletePublishedCourseFailed");
+    if (PROTECTED_COURSE_DELETE_STATUSES.includes(course.status)) {
+      throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
@@ -3236,7 +3239,7 @@ export class CourseService {
       if (isLumaConfigured) {
         await this.lumaService
           .getLumaClient()
-          .then((luma) => luma && luma.deleteDraft({ integrationId: id }))
+          .then((luma) => luma && luma.courses.deleteDraft({ integrationId: id }))
           .catch((error) => console.error(error));
       }
 
@@ -3267,8 +3270,8 @@ export class CourseService {
 
     const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
 
-    if (course.some((course) => course.status === "published")) {
-      throw new ForbiddenException("adminCoursesView.toast.deletePublishedCourseFailed");
+    if (course.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))) {
+      throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
 
     return this.db.transaction(async (trx) => {
@@ -4847,19 +4850,25 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
     }
 
-    return this.db.transaction(async (trx) => {
-      const translations = await this.aiService.generateMissingTranslations(
-        withContext,
-        language,
-        courseId,
-      );
+    this.logger.debug(
+      `Generating missing course translations courseId=${courseId} language=${language} count=${missingData.length}`,
+    );
+    const translations = await this.aiService.generateMissingTranslations(
+      withContext,
+      language,
+      courseId,
+    );
+    this.logger.debug(
+      `Generated missing course translations courseId=${courseId} language=${language} chunks=${translations.length}`,
+    );
 
-      const flat = translations.flat(1);
+    const flat = translations.flat(1);
 
-      if (missingData.length !== flat.length) {
-        throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
-      }
+    if (missingData.length !== flat.length) {
+      throw new BadRequestException(`adminCourseView.toast.mismatchContentLength`);
+    }
 
+    await this.db.transaction(async (trx) => {
       for (let i = 0; i < flat.length; i++) {
         const translatedValue = flat[i];
         const currData = missingData[i];
@@ -4876,6 +4885,10 @@ export class CourseService {
           .where(eq(currData.idColumn, currData.id));
       }
     });
+
+    this.logger.debug(
+      `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,
+    );
   }
 
   async getCourseOwnership(courseId: UUIDType) {

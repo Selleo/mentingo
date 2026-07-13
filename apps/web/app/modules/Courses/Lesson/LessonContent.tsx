@@ -17,6 +17,8 @@ import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/Language
 import { LEARNING_HANDLES } from "../../../../e2e/data/learning/handles";
 
 import { LessonContentRenderer } from "./LessonContentRenderer";
+import { LessonVideoProgressStrip } from "./LessonVideoProgressStrip";
+import { createLessonVideoProgressStore } from "./LessonVideoProgressStrip.utils";
 import { isNextBlocked, isPreviousBlocked } from "./utils";
 
 import type { GetCourseResponse, GetLessonByIdResponse } from "~/api/generated-api";
@@ -63,14 +65,24 @@ export const LessonContent = ({
     lesson.hasTrackedVideo && isEffectiveStudentExperience && !isPreviewMode,
   );
   const videoCompletionTrackingEnabled = Boolean(lesson.videoCompletionTrackingEnabled);
+  const shouldUseCoverageCompletion =
+    videoProgressPersistenceEnabled && videoCompletionTrackingEnabled;
+  const videoProgressStore = useMemo(() => createLessonVideoProgressStore(), []);
   const videoCoverageTracking = useMemo(
     () => ({
       enabled: videoProgressPersistenceEnabled,
       showCoverageMarkers: videoProgressPersistenceEnabled && videoCompletionTrackingEnabled,
       lessonId: lesson.id,
       language,
+      onSnapshotChange: videoProgressStore.getState().publishSnapshot,
     }),
-    [language, lesson.id, videoCompletionTrackingEnabled, videoProgressPersistenceEnabled],
+    [
+      language,
+      lesson.id,
+      videoCompletionTrackingEnabled,
+      videoProgressPersistenceEnabled,
+      videoProgressStore,
+    ],
   );
 
   const currentChapterIndex = course.chapters.findIndex((chapter) =>
@@ -199,7 +211,7 @@ export const LessonContent = ({
         return;
       }
 
-      if (lesson.hasTrackedVideo) return;
+      if (shouldUseCoverageCompletion) return;
 
       const videosCount = lesson.videos?.length ?? 0;
       if (videosCount === 0) return;
@@ -215,10 +227,10 @@ export const LessonContent = ({
       language,
       lesson.id,
       lesson.lessonCompleted,
-      lesson.hasTrackedVideo,
       lesson.type,
       lesson.videos,
       markLessonAsCompleted,
+      shouldUseCoverageCompletion,
     ],
   );
 
@@ -283,6 +295,13 @@ export const LessonContent = ({
               </div>
             )}
           </div>
+
+          <LessonVideoProgressStrip
+            lessonId={lesson.id}
+            description={lesson.description}
+            enabled={shouldUseCoverageCompletion}
+            store={videoProgressStore}
+          />
 
           <LessonContentRenderer
             lesson={lesson}

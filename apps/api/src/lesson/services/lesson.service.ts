@@ -223,7 +223,7 @@ export class LessonService {
       basicInfo?.languageAnswered ?? actualLanguage,
     );
 
-    const isQuizFeedbackRedacted = isStudent && !lesson.quizFeedbackEnabled;
+    const isQuizFeedbackRedacted = !lesson.quizFeedbackEnabled;
 
     const questionListWithUrls: QuestionBody[] = await Promise.all(
       questionList.map(async (question) => {

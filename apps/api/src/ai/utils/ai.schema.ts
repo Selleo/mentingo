@@ -112,13 +112,23 @@ export const responseJudgeSchema = Type.Object({
 
 export const streamChatSchema = Type.Object({
   threadId: UUIDSchema,
-  content: Type.String({ minLength: 1 }),
+  message: Type.Object(
+    {
+      id: Type.String(),
+      role: Type.String(),
+      parts: Type.Array(Type.Any()),
+    },
+    { additionalProperties: true },
+  ),
   id: Type.Optional(UUIDSchema),
 });
 
-export const generateTranslationSchema = Type.Object({
-  translations: Type.Array(Type.String()),
-});
+export const generateTranslationSchema = Type.Object(
+  {
+    translations: Type.Array(Type.String()),
+  },
+  { additionalProperties: false },
+);
 
 export type GenerateTranslationBody = Static<typeof generateTranslationSchema>;
 export type StreamChatBody = Static<typeof streamChatSchema>;

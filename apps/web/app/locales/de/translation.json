@@ -898,6 +898,19 @@
       "noPartiallyConfigured": "Keine teilweise konfigurierten Dienste.",
       "allConfigured": "Alle Umgebungsschlüssel sind korrekt konfiguriert.",
       "dismissWarning": "Zurückweisen",
+      "aiCapabilities": {
+        "title": "AI-Funktionen",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Kursgenerierung",
+          "assetGeneration": "Asset-Generierung"
+        },
+        "status": {
+          "enabled": "Aktiviert",
+          "disabled": "Deaktiviert"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe-Zahlung",
         "bunny": "Bunny CDN",
@@ -973,6 +986,11 @@
       "passwordCreatedSuccessfully": "Passwort erfolgreich erstellt"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Passwort ändern",
+    "subHeader": "Aus Sicherheitsgründen müssen Sie ein neues Passwort festlegen, bevor Sie fortfahren.",
+    "submit": "Passwort ändern"
+  },
   "passwordValidationDisplay": {
     "title": "Passwortanforderungen",
     "header": "Ihr Passwort muss Folgendes enthalten:",
@@ -1039,7 +1057,9 @@
       "passwordResetEmailsSent": "Passwort-Zurücksetzen-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
       "passwordResetEmailsError": "Passwort-Zurücksetzen-E-Mails konnten nicht gesendet werden",
       "passwordCreationEmailsSent": "Passwort-Erstellungs-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden"
+      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden",
+      "passwordEmailsSent": "Passwort-E-Mails gesendet: {{sentCount}}. Zurücksetzen: {{passwordResetSentCount}}. Erstellung: {{passwordCreationSentCount}}. Übersprungen: {{skippedCount}}.",
+      "passwordEmailsError": "Passwort-E-Mails konnten nicht gesendet werden"
     },
     "field": {
       "description": "Beschreibung",
@@ -1237,7 +1257,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
       "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
-      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
+      "deleteProtectedCourseFailed": "Ein veröffentlichter oder privater Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
       "bulkCategoryUpdateSuccessfully": "Kurskategorien wurden erfolgreich aktualisiert",
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -1457,6 +1477,7 @@
     "dropdown": {
       "roles": "Rollen",
       "groups": "Gruppen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
       "delete": "Löschen",
@@ -1467,6 +1488,7 @@
         "delete": "Möchten Sie diese Konten löschen?",
         "role": "Rollen ändern",
         "group": "Gruppen ändern",
+        "passwordEmail": "Passwort-E-Mail senden",
         "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
         "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
         "archive": "Benutzerkonten archivieren",
@@ -1478,6 +1500,7 @@
         "delete": "Löschen",
         "role": "Speichern",
         "group": "Speichern",
+        "passwordEmail": "Senden",
         "passwordReset": "Senden",
         "passwordCreation": "Senden",
         "archive": "Archiv",
@@ -1490,6 +1513,7 @@
         "confirmationForGroup_other": "Sie ändern die Gruppe für {{ count }} Benutzer in {{ group }}",
         "confirmationForRole_one": "Sie ändern die Rolle für einen Benutzer in {{ role }}.",
         "confirmationForRole_other": "Sie ändern die Rolle für {{ count }} Benutzer in {{ role }}",
+        "passwordEmail": "Senden Sie Passwort-E-Mails an ausgewählte Benutzer. Benutzer mit bestehendem Passwort erhalten eine Passwort-Zurücksetzen-E-Mail, Benutzer ohne Passwort erhalten eine Passwort-Erstellungs-E-Mail.",
         "passwordReset": "Senden Sie Passwort-Zurücksetzen-E-Mails an ausgewählte Benutzer mit bestehendem Passwort. Benutzer ohne Passwort werden übersprungen.",
         "passwordCreation": "Senden Sie Passwort-Erstellungs-E-Mails erneut an ausgewählte Benutzer ohne Passwort. Benutzer mit bestehendem Passwort werden übersprungen.",
         "archive": "Sind Sie sicher, dass Sie diese Konten archivieren möchten?",
@@ -1564,6 +1588,7 @@
     },
     "button": {
       "createUser": "Benutzer erstellen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordResetEmail": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreationEmail": "Passwort-Erstellungs-E-Mail erneut senden"
     },
@@ -2254,7 +2279,8 @@
           "aiRoleplayTypeTooltip": "Simuliert einen realistischen Charakter und eine realistische Situation – ohne den Charakter zu zerstören.\nBeispiel: „Dies ist das zweite Mal, dass Ihr Dienst ausgefallen ist. Was werden Sie dagegen tun?“",
           "completionConditionsTooltip": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen. Geben Sie klare und messbare Punkte an. Die KI wird diese Liste verwenden, um den Fortschritt zu überprüfen. Sie können auch einen Schwellenwert für das Bestehen festlegen (z. B. einen Prozentsatz oder eine Mindestpunktzahl). Wenn keine Schwelle angegeben ist, müssen alle Bedingungen erfüllt sein, um die Lektion zu bestehen.",
           "passThresholdTooltip": "Legen Sie den Mindestprozentsatz (1-100 %) fest, der zum Bestehen erforderlich ist. Für keine Schwelle leer lassen.",
-          "voiceConfigFishAudioTooltip": "Der Sprachmodus verwendet Cartesia. Um eine benutzerdefinierte Stimme zu verwenden, öffnen Sie Cartesia, suchen Sie die gewünschte Stimme und kopieren Sie deren Stimmen-ID hierher.",
+          "voiceConfigCartesiaTooltip": "Die Sprachausgabe verwendet Cartesia. Wählen Sie Male oder Female, um die konfigurierte Stimmenzuordnung zu verwenden, oder wählen Sie Custom und geben Sie eine Cartesia-Voice-ID ein.",
+          "voiceConfigOpenAiCompatibleTooltip": "Die Sprachausgabe verwendet einen OpenAI-kompatiblen Text-to-Speech-Endpunkt. Male und Female verwenden OpenAI-Stimm-Presets. Wählen Sie Custom, um einen anderen von diesem Endpunkt unterstützten Stimmwert einzugeben.",
           "aiMentorPersonaTooltip": "Dies definiert die Persona der Lektion. Sie können einen Namen und einen Avatar für den KI-Mentor auswählen. Mit diesem Namen identifiziert sich die Persona und der ausgewählte Avatar wird im Unterricht angezeigt.",
           "suggestedExamples": "Empfohlene Beispiele",
           "charactersLeft": "Zeichen übrig",
@@ -2728,6 +2754,10 @@
       "body": "Bitte warten Sie einen Moment. Sobald es fertig ist, wird es hier angezeigt."
     },
     "videoProgress": {
+      "label": "Video-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Video-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Video {{index}}: {{progress}} % angesehen",
       "errors": {
         "resourceNotFound": "Der Videofortschritt konnte für diese Lektion nicht gespeichert werden.",
         "unsupportedLessonType": "Videofortschritt ist nur für Inhaltslektionen verfügbar.",
@@ -3318,6 +3348,12 @@
     "toast": {
       "success": "Das Hintergrundbild für die Anmeldung wurde erfolgreich geändert",
       "error": "Beim Ändern des Login-Hintergrundbilds ist ein Fehler aufgetreten"
+    }
+  },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Die Dateiverarbeitung ist fehlgeschlagen. Versuchen Sie es mit einer anderen Datei oder laden Sie sie erneut hoch.",
+      "noExtractableText": "Aus dieser Datei konnte kein lesbarer Text extrahiert werden."
     }
   },
   "files": {
@@ -4342,6 +4378,7 @@
     "error": {
       "unauthenticated": "Benutzer nicht authentifiziert",
       "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+      "invalidRefreshToken": "Ungültiges Aktualisierungstoken",
       "adminRoleRequired": "Administratorrolle erforderlich",
       "missingPermission": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
       "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung."
