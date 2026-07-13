@@ -47,6 +47,7 @@ import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseChatModule } from "./course-chat/course-chat.module";
 import { CourseModule } from "./courses/course.module";
+import { DashboardModule } from "./dashboard/dashboard.module";
 import { EventsModule } from "./events/events.module";
 import { FileModule } from "./file/files.module";
 import { GlobalSearchModule } from "./global-search/global-search.module";
@@ -142,6 +143,7 @@ import type { RedisClient } from "src/redis";
     CategoryModule,
     ConditionalModule.registerWhen(ScheduleModule.forRoot(), (env) => !env.JEST_WORKER_ID),
     CourseModule,
+    DashboardModule,
     CourseChatModule,
     LearningPathModule,
     GroupModule,

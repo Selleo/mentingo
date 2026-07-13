@@ -10470,6 +10470,48 @@
         }
       }
     },
+    "/api/dashboard/layout": {
+      "get": {
+        "operationId": "DashboardController_getLayout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLayoutResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "DashboardController_replaceLayout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceLayoutBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceLayoutResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course-chat/{courseId}/messages": {
       "get": {
         "operationId": "CourseChatController_getMessages",
@@ -41891,6 +41933,282 @@
             "required": [
               "message"
             ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetLayoutResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "widgetId": {
+                  "anyOf": [
+                    {
+                      "const": "training-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "deadline-risks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "incomplete-courses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "event-calendar",
+                      "type": "string"
+                    },
+                    {
+                      "const": "continue-learning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "required-course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificates",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai-mentor-practice",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "order": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "size": {
+                  "anyOf": [
+                    {
+                      "const": "small",
+                      "type": "string"
+                    },
+                    {
+                      "const": "medium",
+                      "type": "string"
+                    },
+                    {
+                      "const": "large",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "settings": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                }
+              },
+              "required": [
+                "widgetId",
+                "order",
+                "enabled",
+                "size",
+                "settings"
+              ]
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceLayoutBody": {
+        "type": "object",
+        "properties": {
+          "widgets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "widgetId": {
+                  "anyOf": [
+                    {
+                      "const": "training-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "deadline-risks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "incomplete-courses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "event-calendar",
+                      "type": "string"
+                    },
+                    {
+                      "const": "continue-learning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "required-course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificates",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai-mentor-practice",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "order": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "size": {
+                  "anyOf": [
+                    {
+                      "const": "small",
+                      "type": "string"
+                    },
+                    {
+                      "const": "medium",
+                      "type": "string"
+                    },
+                    {
+                      "const": "large",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "settings": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                }
+              },
+              "required": [
+                "widgetId",
+                "order",
+                "enabled",
+                "size",
+                "settings"
+              ]
+            }
+          }
+        },
+        "required": [
+          "widgets"
+        ]
+      },
+      "ReplaceLayoutResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "widgetId": {
+                  "anyOf": [
+                    {
+                      "const": "training-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "deadline-risks",
+                      "type": "string"
+                    },
+                    {
+                      "const": "incomplete-courses",
+                      "type": "string"
+                    },
+                    {
+                      "const": "event-calendar",
+                      "type": "string"
+                    },
+                    {
+                      "const": "continue-learning",
+                      "type": "string"
+                    },
+                    {
+                      "const": "required-course",
+                      "type": "string"
+                    },
+                    {
+                      "const": "course-completion",
+                      "type": "string"
+                    },
+                    {
+                      "const": "certificates",
+                      "type": "string"
+                    },
+                    {
+                      "const": "ai-mentor-practice",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "order": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "enabled": {
+                  "type": "boolean"
+                },
+                "size": {
+                  "anyOf": [
+                    {
+                      "const": "small",
+                      "type": "string"
+                    },
+                    {
+                      "const": "medium",
+                      "type": "string"
+                    },
+                    {
+                      "const": "large",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "settings": {
+                  "type": "object",
+                  "patternProperties": {
+                    "^(.*)$": {}
+                  }
+                }
+              },
+              "required": [
+                "widgetId",
+                "order",
+                "enabled",
+                "size",
+                "settings"
+              ]
+            }
           }
         },
         "required": [

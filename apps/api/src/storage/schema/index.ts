@@ -104,6 +104,8 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  DashboardWidgetId,
+  DashboardWidgetSize,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -2480,4 +2482,43 @@ export const learningPathEntityMap = pgTable(
       table.sourceEntityId,
     ),
   }),
+);
+
+export const dashboardLayouts = pgTable(
+  "dashboard_layouts",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    version: integer("version").notNull().default(1),
+  },
+  withTenantIdIndex("dashboard_layouts", (table) => ({
+    tenantUserUnique: unique().on(table.tenantId, table.userId),
+  })),
+);
+
+export const dashboardLayoutWidgets = pgTable(
+  "dashboard_layout_widgets",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    dashboardLayoutId: uuid("dashboard_layout_id")
+      .notNull()
+      .references(() => dashboardLayouts.id, {
+        onDelete: "cascade",
+      }),
+
+    widgetId: text("widget_id").$type<DashboardWidgetId>().notNull(),
+    order: integer("order").notNull(),
+    enabled: boolean("enabled").notNull().default(true),
+    size: text("size").$type<DashboardWidgetSize>().notNull(),
+    settings: jsonb("settings").$type<Record<string, unknown>>().notNull().default({}),
+  },
+  withTenantIdIndex("dashboard_layout_widgets", (table) => ({
+    layoutWidgetUnique: unique().on(table.dashboardLayoutId, table.widgetId),
+  })),
 );

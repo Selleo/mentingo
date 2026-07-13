@@ -5093,6 +5093,66 @@ export interface DeleteManyCategoriesResponse {
   };
 }
 
+export interface GetLayoutResponse {
+  data: {
+    widgetId:
+      | "training-completion"
+      | "deadline-risks"
+      | "incomplete-courses"
+      | "event-calendar"
+      | "continue-learning"
+      | "required-course"
+      | "course-completion"
+      | "certificates"
+      | "ai-mentor-practice";
+    /** @min 1 */
+    order: number;
+    enabled: boolean;
+    size: "small" | "medium" | "large";
+    settings: object;
+  }[];
+}
+
+export interface ReplaceLayoutBody {
+  widgets: {
+    widgetId:
+      | "training-completion"
+      | "deadline-risks"
+      | "incomplete-courses"
+      | "event-calendar"
+      | "continue-learning"
+      | "required-course"
+      | "course-completion"
+      | "certificates"
+      | "ai-mentor-practice";
+    /** @min 1 */
+    order: number;
+    enabled: boolean;
+    size: "small" | "medium" | "large";
+    settings: object;
+  }[];
+}
+
+export interface ReplaceLayoutResponse {
+  data: {
+    widgetId:
+      | "training-completion"
+      | "deadline-risks"
+      | "incomplete-courses"
+      | "event-calendar"
+      | "continue-learning"
+      | "required-course"
+      | "course-completion"
+      | "certificates"
+      | "ai-mentor-practice";
+    /** @min 1 */
+    order: number;
+    enabled: boolean;
+    size: "small" | "medium" | "large";
+    settings: object;
+  }[];
+}
+
 export interface GetMessagesResponse {
   data: {
     /** @format uuid */
@@ -12390,6 +12450,36 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<DeleteManyCategoriesResponse, any>({
         path: `/api/category/deleteManyCategories`,
         method: "DELETE",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DashboardControllerGetLayout
+     * @request GET:/api/dashboard/layout
+     */
+    dashboardControllerGetLayout: (params: RequestParams = {}) =>
+      this.request<GetLayoutResponse, any>({
+        path: `/api/dashboard/layout`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name DashboardControllerReplaceLayout
+     * @request PUT:/api/dashboard/layout
+     */
+    dashboardControllerReplaceLayout: (data: ReplaceLayoutBody, params: RequestParams = {}) =>
+      this.request<ReplaceLayoutResponse, any>({
+        path: `/api/dashboard/layout`,
+        method: "PUT",
         body: data,
         type: ContentType.Json,
         format: "json",

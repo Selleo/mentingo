@@ -1,18 +1,35 @@
+import { useDashboardLayout } from "~/api/queries/useDashboardLayout";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
 
-import { DASHBOARD_WIDGET_IDS, type DashboardWidgetLayout } from "./dashboard.types";
 import DashboardGrid from "./DashboardGrid";
 import { EmptyDashboard } from "./EmptyDashboard";
 
 export default function DashboardPage() {
-  const widgets: DashboardWidgetLayout[] = [
-    {
-      widgetId: DASHBOARD_WIDGET_IDS.CONTINUE_LEARNING,
-      order: 1,
-      enabled: true,
-    },
-  ];
+  const { data: widgets = [], isLoading, isError } = useDashboardLayout();
+  console.log(widgets);
+  const visibleWidgets = widgets.filter((widget) => widget.enabled);
+
+  if (isLoading) {
+    return (
+      <PageWrapper>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <Skeleton className="h-56 rounded-lg" />
+          <Skeleton className="h-56 rounded-lg" />
+          <Skeleton className="h-56 rounded-lg" />
+        </div>
+      </PageWrapper>
+    );
+  }
+
+  if (isError) {
+    return (
+      <PageWrapper>
+        <p className="text-destructive">Nie udało się pobrać dashboardu.</p>
+      </PageWrapper>
+    );
+  }
 
   return (
     <PageWrapper>
@@ -27,7 +44,7 @@ export default function DashboardPage() {
           <Button>Dostosuj dashboard</Button>
         </header>
 
-        {widgets.length === 0 ? <EmptyDashboard /> : <DashboardGrid widgets={widgets} />}
+        {visibleWidgets.length ? <DashboardGrid widgets={visibleWidgets} /> : <EmptyDashboard />}
       </div>
     </PageWrapper>
   );

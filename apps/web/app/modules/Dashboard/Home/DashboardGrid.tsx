@@ -1,4 +1,5 @@
 import { DASHBOARD_WIDGET_IDS } from "./dashboard.types";
+import TrainingCompletionWidget from "./widgets/admin/TrainingCompletionWidget";
 import ContinueLearningWIdget from "./widgets/student/ContinueLearningWidget";
 
 import type { DashboardWidgetLayout, DashboardWidgetId } from "./dashboard.types";
@@ -9,6 +10,7 @@ type DashboardGridProps = {
 };
 
 const WIDGET_COMPONENTS: Partial<Record<DashboardWidgetId, ComponentType>> = {
+  [DASHBOARD_WIDGET_IDS.TRAINING_COMPLETION]: TrainingCompletionWidget,
   [DASHBOARD_WIDGET_IDS.CONTINUE_LEARNING]: ContinueLearningWIdget,
 };
 
