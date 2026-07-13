@@ -1,3 +1,4 @@
+export * from "./constants/AnnouncementAudience";
 export * from "./constants/accessGuard";
 export * from "./constants/activityLogs";
 export * from "./constants/aiMentorAvatar";
@@ -39,6 +40,7 @@ export * from "./constants/videoAutoplayActions";
 export * from "./constants/videoProviders";
 export * from "./constants/voiceAction";
 export * from "./constants/voiceModeState";
+export * from "./types/Announcement";
 export * from "./types/audioTypes";
 export * from "./types/localization";
 export * from "./types/onboarding";

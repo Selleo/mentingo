@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  ANNOUNCEMENT_AUDIENCES,
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_ENROLLMENT,
@@ -127,7 +128,10 @@ export class AnnouncementsRepository {
         baseLanguage: input.baseLanguage,
         availableLocales: input.availableLocales,
         authorId: input.authorId,
-        isEveryone: input.groupId === null,
+        audience:
+          input.groupId === null
+            ? ANNOUNCEMENT_AUDIENCES.ALL_USERS
+            : ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
         status: input.status,
         scheduledAt: input.scheduledAt,
         publishedAt: input.publishedAt,

@@ -65,7 +65,7 @@ export class AnnouncementsService {
 
     if (!readAnnouncements) throw new BadRequestException("announcements.toast.markAsReadFailed");
 
-    const audience = announcement.isEveryone ? "everyone" : "group";
+    const audience = announcement.audience;
 
     await this.outboxPublisher.publish(
       new ViewAnnouncementEvent({

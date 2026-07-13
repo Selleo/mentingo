@@ -39134,8 +39134,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -39288,7 +39288,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -39374,8 +39374,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -39531,7 +39531,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -39713,8 +39713,8 @@
               "authorId": {
                 "type": "string"
               },
-              "isEveryone": {
-                "type": "boolean"
+              "audience": {
+                "type": "string"
               },
               "status": {
                 "type": "string"
@@ -39867,7 +39867,7 @@
               "createdAt",
               "updatedAt",
               "authorId",
-              "isEveryone",
+              "audience",
               "status",
               "scheduledAt",
               "publishedAt",

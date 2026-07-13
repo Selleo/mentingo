@@ -26,6 +26,7 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  ANNOUNCEMENT_AUDIENCES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -103,6 +104,7 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  AnnouncementAudience,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
@@ -1526,7 +1528,10 @@ export const announcements = pgTable(
     authorId: uuid("author_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    isEveryone: boolean("is_everyone").notNull().default(false),
+    audience: text("audience")
+      .$type<AnnouncementAudience>()
+      .notNull()
+      .default(ANNOUNCEMENT_AUDIENCES.ALL_USERS),
     status: text("status")
       .$type<AnnouncementStatus>()
       .notNull()
