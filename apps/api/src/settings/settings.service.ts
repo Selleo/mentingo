@@ -29,6 +29,7 @@ import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.
 import { FileService } from "src/file/file.service";
 import {
   IMAGE_QUALITY,
+  IMAGE_RESIZE_MODES,
   IMAGE_VARIANT_DEFINITIONS,
   PWA_ICON_IMAGE_QUALITY,
   PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
@@ -1075,7 +1076,7 @@ export class SettingsService {
       const resource = "platform-simple-logos";
       const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId, {
         variantDefinitions: [...IMAGE_VARIANT_DEFINITIONS, ...PWA_ICON_IMAGE_VARIANT_DEFINITIONS],
-        resizeMode: "cover-square",
+        resizeMode: IMAGE_RESIZE_MODES.COVER_SQUARE,
       });
       newValue = fileKey;
     }
@@ -1125,18 +1126,13 @@ export class SettingsService {
     );
 
     const icons = simpleLogoUrl
-      ? [
-          {
-            src: `${simpleLogoUrl}&quality=${PWA_ICON_IMAGE_QUALITY.ICON_192}`,
-            sizes: "192x192",
+      ? ([192, 512] as const).map((size) => {
+          return {
+            src: `${simpleLogoUrl}&quality=${PWA_ICON_IMAGE_QUALITY[`ICON_${size}`]}`,
+            sizes: `${size}x${size}`,
             type: "image/webp",
-          },
-          {
-            src: `${simpleLogoUrl}&quality=${PWA_ICON_IMAGE_QUALITY.ICON_512}`,
-            sizes: "512x512",
-            type: "image/webp",
-          },
-        ]
+          };
+        })
       : [{ src: "/app-signet.svg", sizes: "any", type: "image/svg+xml" }];
 
     return {

@@ -4,7 +4,7 @@ import type {
   SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
 } from "./image-variant.constants";
 
-export type ImageResizeMode = (typeof IMAGE_RESIZE_MODES)[number];
+export type ImageResizeMode = IMAGE_RESIZE_MODES;
 
 export type ImageQuality = (typeof ALL_IMAGE_QUALITY_VALUES)[number];
 

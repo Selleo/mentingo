@@ -3,7 +3,11 @@ import sharp from "sharp";
 
 import { S3Service } from "src/s3/s3.service";
 
-import { IMAGE_VARIANT_DEFINITIONS, IMAGE_VARIANT_CONTENT_TYPE } from "./image-variant.constants";
+import {
+  IMAGE_VARIANT_DEFINITIONS,
+  IMAGE_VARIANT_CONTENT_TYPE,
+  IMAGE_RESIZE_MODES,
+} from "./image-variant.constants";
 import {
   buildImageVariantReferenceKey,
   getImageVariantKey,
@@ -48,7 +52,7 @@ export class ImageVariantService {
 
       const referenceKey = buildImageVariantReferenceKey(params.resource, params.tenantId);
       const variantDefinitions = params.options?.variantDefinitions ?? IMAGE_VARIANT_DEFINITIONS;
-      const resizeMode = params.options?.resizeMode ?? "contain";
+      const resizeMode = params.options?.resizeMode ?? IMAGE_RESIZE_MODES.CONTAIN;
 
       const variantsWithBuffers = Object.fromEntries(
         await Promise.all(
@@ -105,7 +109,7 @@ export class ImageVariantService {
       }
 
       const variantDefinitions = params.options?.variantDefinitions ?? IMAGE_VARIANT_DEFINITIONS;
-      const resizeMode = params.options?.resizeMode ?? "contain";
+      const resizeMode = params.options?.resizeMode ?? IMAGE_RESIZE_MODES.CONTAIN;
 
       const variantsWithBuffers = Object.fromEntries(
         await Promise.all(
@@ -145,7 +149,7 @@ export class ImageVariantService {
   }
 
   private resizeToWebp(buffer: Buffer, width: ImageVariantWidth, resizeMode: ImageResizeMode) {
-    if (resizeMode === "cover-square") {
+    if (resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE) {
       return sharp(buffer)
         .rotate()
         .resize({ width, height: width, fit: "cover", position: "center" })
@@ -196,7 +200,7 @@ export class ImageVariantService {
   ): Promise<ImageVariantBufferDetails> {
     const { quality, width } = definition;
     const height =
-      resizeMode === "cover-square"
+      resizeMode === IMAGE_RESIZE_MODES.COVER_SQUARE
         ? width
         : this.calculateHeight(sourceMetadata.width, sourceMetadata.height, width);
 

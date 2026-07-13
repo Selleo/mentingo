@@ -9,6 +9,7 @@ import {
   IMAGE_VARIANT_DEFINITIONS,
   IMAGE_VARIANT_CONTENT_TYPE,
   PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+  IMAGE_RESIZE_MODES,
 } from "../image-variant.constants";
 import { ImageVariantService } from "../image-variant.service";
 
@@ -128,7 +129,7 @@ describe("ImageVariantService", () => {
       tenantId: "00000000-0000-0000-0000-000000000001",
       options: {
         variantDefinitions: PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
-        resizeMode: "cover-square",
+        resizeMode: IMAGE_RESIZE_MODES.COVER_SQUARE,
       },
     });
 

@@ -1,6 +1,9 @@
 export const IMAGE_VARIANT_CONTENT_TYPE = "image/webp";
 
-export const IMAGE_RESIZE_MODES = ["contain", "cover-square"] as const;
+export enum IMAGE_RESIZE_MODES {
+  CONTAIN = "contain",
+  COVER_SQUARE = "cover-square",
+}
 
 export const IMAGE_QUALITY = {
   XXS: "160w",
