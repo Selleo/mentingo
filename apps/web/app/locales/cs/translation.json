@@ -2877,6 +2877,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Hlasové uživatelské rozhraní",
+          "options": "Možnosti",
           "exit": "Ukončete hlasový režim",
           "mute": "Ztlumit",
           "unmute": "Zapnout mikrofon",

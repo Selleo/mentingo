@@ -2878,6 +2878,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Sprach-Benutzeroberfläche",
+          "options": "Optionen",
           "exit": "Sprachmodus verlassen",
           "mute": "Stummschalten",
           "unmute": "Stummschaltung aufheben",

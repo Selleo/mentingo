@@ -108,6 +108,7 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeVisible({
         timeout: 90_000,
       });
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION)).toBeVisible();
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
 
       await expect
@@ -123,6 +124,18 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
           { timeout: 90_000 },
         )
         .toBe("completed");
+
+      await page.reload();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeVisible();
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION)).toBeVisible();
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION).click();
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
 
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON).click();
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL)).toBeVisible();

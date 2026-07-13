@@ -65,6 +65,7 @@ interface AiMentorLessonProps {
   lessonLoading: boolean;
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
+  autoOpenTaskDescription?: boolean;
 }
 
 const AiMentorLesson = ({
@@ -72,6 +73,7 @@ const AiMentorLesson = ({
   lessonLoading,
   previewUser,
   hideControls = false,
+  autoOpenTaskDescription = true,
 }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
@@ -92,6 +94,7 @@ const AiMentorLesson = ({
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [latestEvaluation, setLatestEvaluation] = useState<AiMentorEvaluation | null>(null);
   const [input, setInput] = useState("");
+  const taskDialogLessonIdRef = useRef<string | null>(null);
 
   const transport = useMemo(
     () =>
@@ -196,12 +199,12 @@ const AiMentorLesson = ({
     [appendVoiceMessage],
   );
 
-  const handleJudge = async () => {
+  const handleJudge = useCallback(async () => {
     if (!lesson.threadId) return;
     const response = await judgeLesson({ threadId: lesson.threadId });
     setLatestEvaluation(response.data);
     setShowEvaluationDialog(true);
-  };
+  }, [judgeLesson, lesson.threadId]);
 
   const handleRetakeLesson = async () => {
     if (!lesson.threadId) return;
@@ -221,6 +224,7 @@ const AiMentorLesson = ({
   const hasTaskDescription = Boolean(
     lesson.description && stripHtmlTags(lesson.description).trim().length,
   );
+  const isLessonCompleted = lesson.lessonCompleted === true;
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
     lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
@@ -234,6 +238,8 @@ const AiMentorLesson = ({
   }, [lesson.aiMentorDetails]);
   const evaluation = latestEvaluation ?? persistedEvaluation;
   const shouldShowEvaluation = hasEvaluationData(evaluation);
+  const shouldAutoOpenTaskDescription =
+    !isLessonCompleted && !shouldShowEvaluation && hasTaskDescription;
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -242,6 +248,24 @@ const AiMentorLesson = ({
 
     container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!shouldAutoOpenTaskDescription) setShowTaskDialog(false);
+  }, [shouldAutoOpenTaskDescription]);
+
+  useEffect(() => {
+    if (
+      !autoOpenTaskDescription ||
+      lessonLoading ||
+      !shouldAutoOpenTaskDescription ||
+      taskDialogLessonIdRef.current === lesson.id
+    ) {
+      return;
+    }
+
+    taskDialogLessonIdRef.current = lesson.id;
+    setShowTaskDialog(true);
+  }, [autoOpenTaskDescription, lesson.id, lessonLoading, shouldAutoOpenTaskDescription]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -266,9 +290,12 @@ const AiMentorLesson = ({
             onOpenChange={setShowEvaluationDialog}
           />
         )}
-        {!lessonLoading && hasTaskDescription && (
+        {hasTaskDescription && !lessonLoading && (
           <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-            <DialogContent className="flex max-h-[82vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+            <DialogContent
+              data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG}
+              className="!bottom-0 !left-0 !right-0 !top-auto flex max-h-[85dvh] w-full !max-w-none flex-col gap-0 overflow-hidden rounded-t-xl border-x-0 border-b-0 p-0 !translate-x-0 !translate-y-0 data-[state=closed]:!slide-out-to-bottom data-[state=open]:!slide-in-from-bottom data-[state=closed]:!slide-out-to-left-0 data-[state=open]:!slide-in-from-left-0 data-[state=closed]:sm:!slide-out-to-top-[48%] data-[state=open]:sm:!slide-in-from-top-[48%] data-[state=closed]:sm:!slide-out-to-left-1/2 data-[state=open]:sm:!slide-in-from-left-1/2 sm:!bottom-auto sm:!left-1/2 sm:!right-auto sm:!top-1/2 sm:max-h-[82vh] sm:!max-w-2xl sm:rounded-lg sm:border sm:!translate-x-[-50%] sm:!translate-y-[-50%]"
+            >
               <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
                 <DialogTitle className="text-lg font-semibold text-neutral-950">
                   {t("studentCourseView.lesson.aiMentorLesson.taskButton")}
@@ -390,12 +417,14 @@ const AiMentorLesson = ({
             onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
             onAudioInterrupted={invalidateCurrentThreadMessages}
             onAudioOutputCompleted={invalidateCurrentThreadMessages}
+            onJudge={handleJudge}
+            isJudgePending={isJudgePending}
             handleInputChange={handleInputChange}
             messages={messages}
             input={input}
             setInput={setInput}
             hasTaskDescription={hasTaskDescription}
-            onOpenTaskDescription={() => setShowTaskDialog(true)}
+            taskDescription={lesson.description ?? ""}
           />
         )}
 
@@ -409,7 +438,7 @@ const AiMentorLesson = ({
                   variant="primary"
                   size="lg"
                   className="max-w-fit gap-2"
-                  onClick={handleJudge}
+                  onClick={() => void handleJudge()}
                 >
                   {t("studentCourseView.lesson.aiMentorLesson.check")}
                   <Icon name="ArrowRight" className="size-5" />
