@@ -3,6 +3,7 @@ import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
@@ -304,7 +305,7 @@ describe("SettingsController (e2e)", () => {
         await baseDb
           .update(settings)
           .set({
-            settings: sql`${settings.settings} || ${JSON.stringify({
+            settings: sql`${settings.settings} || ${settingsToJSONBuildObject({
               companyInformation: {
                 companyName: "Acme Learning",
                 companyShortName: "Acme",
