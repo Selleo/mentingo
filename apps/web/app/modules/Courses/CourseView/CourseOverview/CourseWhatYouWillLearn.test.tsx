@@ -1,0 +1,102 @@
+import { screen, waitFor } from "@testing-library/react";
+import { userEvent } from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { renderWith } from "~/utils/testUtils";
+
+import CourseWhatYouWillLearn from "./CourseWhatYouWillLearn";
+
+import type { GetCourseResponse } from "~/api/generated-api";
+
+const updateCourse = vi.fn();
+let mockedCourse: GetCourseResponse["data"];
+let mockedIsAdminExperience = false;
+
+vi.mock("../../context/CourseAccessProvider", () => ({
+  useCourseAccessProvider: () => ({
+    course: mockedCourse,
+    isAdminExperience: mockedIsAdminExperience,
+  }),
+}));
+
+vi.mock("~/api/mutations/admin/useUpdateCourse", () => ({
+  useUpdateCourse: () => ({
+    mutateAsync: updateCourse,
+    isPending: false,
+  }),
+}));
+
+const createCourse = (
+  overrides: Partial<GetCourseResponse["data"]> = {},
+): GetCourseResponse["data"] =>
+  ({
+    id: "course-1",
+    learningOutcomes: [],
+    ...overrides,
+  }) as GetCourseResponse["data"];
+
+describe("CourseWhatYouWillLearn", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockedCourse = createCourse();
+    mockedIsAdminExperience = false;
+  });
+
+  it("does not render for students when the course has no learning outcomes", () => {
+    const { container } = renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={[]} language="en" />,
+    );
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("renders read-only learning outcomes for students", () => {
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={["Clean data", "Build dashboards"]} language="en" />,
+    );
+
+    expect(screen.getByText("What you'll learn")).toBeInTheDocument();
+    expect(screen.getByText("Clean data")).toBeInTheDocument();
+    expect(screen.getByText("Build dashboards")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Add learning outcome" })).not.toBeInTheDocument();
+  });
+
+  it("lets admins add a learning outcome and saves it for the current language", async () => {
+    const user = userEvent.setup();
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse();
+
+    renderWith().render(<CourseWhatYouWillLearn courseOutcomes={[]} language="pl" />);
+
+    await user.click(screen.getByRole("button", { name: "Add learning outcome" }));
+
+    const input = screen.getByPlaceholderText("Add a learning outcome...");
+    await user.type(input, "  Nowy efekt nauki  ");
+    await user.tab();
+
+    await waitFor(() => {
+      expect(updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          language: "pl",
+          learningOutcomes: ["Nowy efekt nauki"],
+        },
+      });
+    });
+  });
+
+  it("does not save when the normalized outcomes did not change", async () => {
+    const user = userEvent.setup();
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse({ learningOutcomes: ["Existing outcome"] });
+
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={["Existing outcome"]} language="en" />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Existing outcome" }));
+    await user.tab();
+
+    expect(updateCourse).not.toHaveBeenCalled();
+  });
+});

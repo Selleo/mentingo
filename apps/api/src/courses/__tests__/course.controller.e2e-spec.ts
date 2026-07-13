@@ -13,7 +13,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
@@ -2562,6 +2562,190 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].enrolledParticipantCount).toBe(2);
       expect(response.body.data[0].priceInCents).toBe(2999);
       expect(response.body.data[0].currency).toBe("usd");
+    });
+  });
+
+  describe("GET /api/course", () => {
+    it("returns modern course overview fields with localized outcomes, duration hierarchy, and deadline", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create();
+      const group = await groupFactory.withMembers([student.id]).create();
+      const dueDate = new Date("2026-08-12T00:00:00.000Z");
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        thumbnailPositionY: 72,
+        showAuthorSection: false,
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Overview chapter",
+        displayOrder: 1,
+        lessonCount: 1,
+      });
+
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.EMBED,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Embedded lesson"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+          displayOrder: 1,
+        })
+        .returning();
+
+      await db.insert(groupCourses).values({
+        groupId: group.id,
+        courseId: course.id,
+        isMandatory: true,
+        dueDate,
+      });
+
+      await db.insert(studentCourses).values({
+        studentId: student.id,
+        courseId: course.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+        finishedChapterCount: 0,
+        enrolledByGroupId: group.id,
+      });
+
+      await db
+        .update(courses)
+        .set({
+          learningOutcomes: sql`jsonb_build_object(
+            ${SUPPORTED_LANGUAGES.EN}::text,
+            to_jsonb(ARRAY[${"Clean data"}, ${"Build reports"}]::text[])
+          )`,
+        })
+        .where(eq(courses.id, course.id));
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", await cookieFor(student, app))
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          thumbnailPositionY: 72,
+          showAuthorSection: false,
+          learningOutcomes: ["Clean data", "Build reports"],
+          estimatedDurationSeconds: 180,
+          dueDate: "2026-08-12T00:00:00Z",
+          enrolled: true,
+          completedChapterCount: 0,
+        }),
+      );
+      expect(response.body.data.chapters[0]).toEqual(
+        expect.objectContaining({
+          id: chapter.id,
+          estimatedDurationSeconds: 180,
+        }),
+      );
+      expect(response.body.data.chapters[0].lessons[0]).toEqual(
+        expect.objectContaining({
+          id: lesson.id,
+          estimatedDurationSeconds: 180,
+        }),
+      );
+    });
+
+    it("returns localized learning outcomes for requested language", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+      });
+
+      await db
+        .update(courses)
+        .set({
+          learningOutcomes: sql`jsonb_build_object(
+            ${SUPPORTED_LANGUAGES.EN}::text,
+            to_jsonb(ARRAY[${"English outcome"}]::text[]),
+            ${SUPPORTED_LANGUAGES.PL}::text,
+            to_jsonb(ARRAY[${"Polski efekt"}]::text[])
+          )`,
+        })
+        .where(eq(courses.id, course.id));
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
+    });
+  });
+
+  describe("PATCH /api/course/:id", () => {
+    it("updates modern course overview metadata for selected language", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: "published",
+        thumbnailS3Key: null,
+        thumbnailPositionY: 50,
+        showAuthorSection: true,
+        learningOutcomes: {
+          en: ["Old outcome"],
+        },
+      });
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}`)
+        .send({
+          language: SUPPORTED_LANGUAGES.EN,
+          thumbnailPositionY: 35,
+          showAuthorSection: false,
+          learningOutcomes: ["Updated outcome", "Second updated outcome"],
+        })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          thumbnailPositionY: 35,
+          showAuthorSection: false,
+          learningOutcomes: ["Updated outcome", "Second updated outcome"],
+        }),
+      );
     });
   });
 
