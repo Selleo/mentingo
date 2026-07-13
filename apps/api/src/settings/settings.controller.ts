@@ -35,6 +35,7 @@ import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
+import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -94,6 +95,7 @@ export class SettingsController {
 
   @Public()
   @Get("global")
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
@@ -112,6 +114,7 @@ export class SettingsController {
   }
 
   @Get()
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(userSettingsJSONContentSchema),
   })
@@ -372,6 +375,7 @@ export class SettingsController {
 
   @Get("platform-simple-logo")
   @Public()
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(platformSimpleLogoResponseSchema),
   })
@@ -484,6 +488,7 @@ export class SettingsController {
   }
 
   @Get("company-information")
+  @AllowPasswordChangeRequired()
   @Public()
   @Validate({
     response: baseResponse(companyInformationJSONSchema),

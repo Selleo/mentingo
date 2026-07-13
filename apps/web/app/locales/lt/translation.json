@@ -992,6 +992,11 @@
       "passwordCreatedSuccessfully": "Slaptažodis sukurtas sėkmingai"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Pakeiskite slaptažodį",
+    "subHeader": "Saugumo sumetimais prieš tęsdami turite nustatyti naują slaptažodį.",
+    "submit": "Pakeisti slaptažodį"
+  },
   "passwordValidationDisplay": {
     "title": "Slaptažodžio reikalavimai",
     "header": "Jūsų slaptažodyje turi būti:",
@@ -4382,6 +4387,7 @@
     "error": {
       "unauthenticated": "Vartotojas neatpažintas",
       "invalidEmailOrPassword": "Neteisingas el. pašto adresas arba slaptažodis",
+      "invalidRefreshToken": "Netinkamas atnaujinimo prieigos raktas",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
       "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
       "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."

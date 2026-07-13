@@ -277,9 +277,11 @@ export class LumaGeneratedCourseImportService {
       const questionOptions = question.options ?? [];
 
       this.logger.log(
-        `Importing generated quiz question: lessonId=${lesson.id}, questionType=${question.type}, mappedType=${questionType}, optionCount=${questionOptions.length}, questionKeys=${this.getObjectKeysForLog(
-          question,
-        )}`,
+        `Importing generated quiz question: lessonId=${lesson.id}, questionType=${
+          question.type
+        }, mappedType=${questionType}, optionCount=${
+          questionOptions.length
+        }, questionKeys=${this.getObjectKeysForLog(question)}`,
       );
 
       const [createdQuestion] = await data.trx
@@ -338,7 +340,9 @@ export class LumaGeneratedCourseImportService {
 
       if (!optionText) {
         this.logger.warn(
-          `Generated quiz option has empty text: questionId=${data.questionId}, optionIndex=${option.optionIndex}, optionKeys=${this.getObjectKeysForLog(option)}`,
+          `Generated quiz option has empty text: questionId=${data.questionId}, optionIndex=${
+            option.optionIndex
+          }, optionKeys=${this.getObjectKeysForLog(option)}`,
         );
       }
 

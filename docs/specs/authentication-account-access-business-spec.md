@@ -21,6 +21,7 @@ The main workflow begins on the auth pages. A visitor signs in, registers, follo
 - Let visitors register new accounts when SSO enforcement and invite-only registration do not block self-registration.
 - Let invited users create a password from an email link.
 - Let users request password recovery emails and set a new password from a reset link.
+- Require users with a temporary password to replace it before they can use the platform.
 - Let users request and consume magic-link emails for passwordless login.
 - Require MFA verification when a user's settings or role policy require it.
 - Support Google, Microsoft, and Slack OAuth entry points when configured.
@@ -40,6 +41,8 @@ For registration, Mentingo checks tenant settings first. If SSO is enforced or r
 
 For recovery and passwordless flows, Mentingo sends tenant-aware email links. Reset and magic-link tokens are stored as hashes, expire, and are consumed when used. OAuth callbacks create normal Mentingo sessions after provider authentication succeeds. Logout clears cookies and records the user activity through events.
 
+When an organization provides an account with a temporary password, Mentingo takes the user to a dedicated password-change screen after sign-in and MFA. The rest of the platform remains unavailable until the user saves a compliant replacement password or logs out. A password reset also fulfils this requirement, so users can recover safely without administrator intervention.
+
 ## Key Technical Context
 
 - Frontend auth pages live in `apps/web/app/modules/Auth` under `/auth/*`.
@@ -48,11 +51,14 @@ For recovery and passwordless flows, Mentingo sends tenant-aware email links. Re
 - Session handling uses access and refresh token cookies through the auth/token service flow.
 - Tenant settings influence SSO enforcement, invite-only registration, MFA-enforced roles, login assets, and registration form requirements.
 - User password status and password changes are covered through user endpoints in `apps/api/src/user`.
+- Password credentials can require a change; API enforcement blocks normal authenticated operations and the frontend uses the MFA guard pattern to keep the user on `/auth/change-password` until completion.
 
 ## Test Evidence
 
 Web E2E tests cover sign-in/sign-out, auth-page navigation, invalid credentials, public registration validation, invite password creation, password recovery, magic-link login, and MFA setup/verification.
 
 Backend E2E tests cover registration validation, duplicate accounts, language behavior, registration checkbox answers, login cookies, invalid credentials, login rate limiting, logout cookie clearing, refresh tokens, current-user data, password reset, create-password flows, magic-link token hashing and consumption, and MFA issuer behavior.
+
+Password-change enforcement is covered by API E2E assertions that a flagged user cannot use normal protected endpoints, can change their own password, and regains access after the change.
 
 OAuth provider callbacks and support-mode auth are visible in source, but the cited E2E coverage is strongest for password, invite, recovery, magic-link, session, and MFA flows.

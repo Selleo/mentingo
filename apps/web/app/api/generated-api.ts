@@ -126,6 +126,7 @@ export interface RegisterResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -165,6 +166,7 @@ export interface LoginResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -278,6 +280,7 @@ export interface CurrentUserResponse {
       | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -341,6 +344,7 @@ export interface CreatePasswordResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -402,6 +406,7 @@ export interface HandleMagicLinkResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;

@@ -43,6 +43,7 @@ import stripeConfig from "./common/configuration/stripe";
 import { EmailModule } from "./common/emails/emails.module";
 import { FeaturesGuard } from "./common/guards/features.guard";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
+import { PasswordChangeRequiredGuard } from "./common/guards/password-change-required.guard";
 import { PermissionsGuard } from "./common/guards/permissions.guard";
 import { StagingGuard } from "./common/guards/staging.guard";
 import { CourseChatModule } from "./course-chat/course-chat.module";
@@ -198,6 +199,10 @@ import type { RedisClient } from "src/redis";
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PasswordChangeRequiredGuard,
     },
     {
       provide: APP_GUARD,

@@ -200,6 +200,7 @@ export const credentials = pgTable(
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
     password: text("password").notNull(),
+    requiresPasswordChange: boolean("requires_password_change").notNull().default(false),
     tenantId,
   },
   withTenantIdIndex("credentials"),

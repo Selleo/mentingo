@@ -1210,6 +1210,11 @@
       "passwordCreatedSuccessfully": "Hasło zostało utworzone pomyślnie"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Zmień hasło",
+    "subHeader": "Ze względów bezpieczeństwa musisz ustawić nowe hasło, aby kontynuować.",
+    "submit": "Zmień hasło"
+  },
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
@@ -4359,6 +4364,7 @@
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
+      "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
       "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."

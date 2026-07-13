@@ -24,6 +24,7 @@ export const currentUserResponseSchema = Type.Composite([
       Type.Union(Object.values(PERMISSIONS).map((permission) => Type.Literal(permission))),
     ),
     shouldVerifyMFA: Type.Boolean(),
+    requiresPasswordChange: Type.Boolean(),
     onboardingStatus: userOnboardingStatusSchema,
     isManagingTenantAdmin: Type.Boolean(),
     isSupportMode: Type.Boolean(),

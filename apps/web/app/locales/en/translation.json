@@ -987,6 +987,11 @@
       "passwordCreatedSuccessfully": "Password created successfully"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Change your password",
+    "subHeader": "For security, you must set a new password before continuing.",
+    "submit": "Change password"
+  },
   "passwordValidationDisplay": {
     "title": "Password requirements",
     "header": "Your password must contain:",
@@ -4320,6 +4325,7 @@
     "error": {
       "unauthenticated": "User not authenticated",
       "invalidEmailOrPassword": "Invalid email or password",
+      "invalidRefreshToken": "Invalid refresh token",
       "adminRoleRequired": "Admin role required",
       "missingPermission": "You do not have permission to access this resource",
       "sessionRevoked": "Your session was revoked. Please refresh your session."

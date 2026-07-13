@@ -54,7 +54,9 @@ export class LumaCourseGenerationStreamService {
       },
       onError: (error) => {
         this.logger.error(
-          `course generation stream failed integrationId=${data.integrationId}: ${this.errorMessage(error)}`,
+          `course generation stream failed integrationId=${data.integrationId}: ${this.errorMessage(
+            error,
+          )}`,
         );
         return "courseGeneration.errors.streamFailed";
       },

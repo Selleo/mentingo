@@ -987,6 +987,11 @@
       "passwordCreatedSuccessfully": "Contraseña creada exitosamente"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Cambia tu contraseña",
+    "subHeader": "Por seguridad, debes establecer una contraseña nueva antes de continuar.",
+    "submit": "Cambiar contraseña"
+  },
   "passwordValidationDisplay": {
     "title": "Requisitos de contraseña",
     "header": "Su contraseña debe contener:",
@@ -4319,6 +4324,7 @@
     "error": {
       "unauthenticated": "Usuario no autenticado",
       "invalidEmailOrPassword": "Correo electrónico o contraseña no válidos",
+      "invalidRefreshToken": "Token de actualización no válido",
       "adminRoleRequired": "Se requiere rol de administrador",
       "missingPermission": "No tienes permiso para acceder a este recurso.",
       "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión."

@@ -992,6 +992,11 @@
       "passwordCreatedSuccessfully": "Heslo bylo úspěšně vytvořeno"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Změňte heslo",
+    "subHeader": "Z bezpečnostních důvodů musíte před pokračováním nastavit nové heslo.",
+    "submit": "Změnit heslo"
+  },
   "passwordValidationDisplay": {
     "title": "Požadavky na heslo",
     "header": "Vaše heslo musí obsahovat:",
@@ -4381,6 +4386,7 @@
     "error": {
       "unauthenticated": "Uživatel není ověřen",
       "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
+      "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
       "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."

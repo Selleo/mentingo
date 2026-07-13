@@ -13,7 +13,7 @@ const db = drizzle(sql) as DatabasePg;
 export async function seedE2E() {
   await seedUserRoleGrantSql(db);
 
-  return seedProduction();
+  return seedProduction({ shouldRequirePasswordChange: false });
 }
 
 if (require.main === module) {
