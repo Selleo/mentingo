@@ -1,15 +1,50 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import { useUpdateDashboardLayout } from "~/api/mutations/useUpdateDashboardLayout";
 import { useDashboardLayout } from "~/api/queries/useDashboardLayout";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 
+import { isImplementedDashboardWidget } from "./dashboard.types";
+import { setDashboardWidgetEnabled } from "./dashboard.utils";
 import DashboardGrid from "./DashboardGrid";
+import { DashboardWidgetPicker } from "./DashboardWidgetPicker";
 import { EmptyDashboard } from "./EmptyDashboard";
 
+import type { DashboardWidgetLayout, DashboardWidgetId } from "./dashboard.types";
+
 export default function DashboardPage() {
+  const { t } = useTranslation();
   const { data: widgets = [], isLoading, isError } = useDashboardLayout();
-  console.log(widgets);
-  const visibleWidgets = widgets.filter((widget) => widget.enabled);
+  const { mutateAsync: updateDashboardLayout, isPending: isSaving } = useUpdateDashboardLayout();
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftWidgets, setDraftWidgets] = useState<DashboardWidgetLayout[]>([]);
+  const layoutWidgets = isEditing ? draftWidgets : widgets;
+  const visibleWidgets = layoutWidgets.filter(
+    (widget) => widget.enabled && isImplementedDashboardWidget(widget.widgetId),
+  );
+
+  const handleCancelEditing = () => {
+    setDraftWidgets(widgets);
+    setIsEditing(false);
+  };
+
+  const handleSaveLayout = async () => {
+    try {
+      await updateDashboardLayout(draftWidgets);
+      setIsEditing(false);
+    } catch {
+      // The mutation hook keeps customization open and displays the translated API error.
+    }
+  };
+
+  const handleWidgetEnabledChange = (widgetId: DashboardWidgetId, enabled: boolean) => {
+    setDraftWidgets((currentWidgets) =>
+      setDashboardWidgetEnabled(currentWidgets, widgetId, enabled),
+    );
+  };
 
   if (isLoading) {
     return (
@@ -41,10 +76,49 @@ export default function DashboardPage() {
             <p className="text-neutral-700">Najważniejsze informacje w jednym miejscu</p>
           </div>
 
-          <Button>Dostosuj dashboard</Button>
+          {isEditing ? (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" disabled={isSaving} onClick={handleCancelEditing}>
+                {t("common.button.cancel")}
+              </Button>
+
+              <Button
+                disabled={isSaving}
+                onClick={() => {
+                  void handleSaveLayout();
+                }}
+              >
+                {t(isSaving ? "common.button.saving" : "common.button.save")}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => {
+                setDraftWidgets(widgets);
+                setIsEditing(true);
+              }}
+            >
+              {t("dashboardView.customize")}
+            </Button>
+          )}
         </header>
 
-        {visibleWidgets.length ? <DashboardGrid widgets={visibleWidgets} /> : <EmptyDashboard />}
+        {isEditing ? (
+          <DashboardWidgetPicker
+            widgets={draftWidgets}
+            onWidgetEnabledChange={handleWidgetEnabledChange}
+          />
+        ) : null}
+
+        {visibleWidgets.length ? (
+          <DashboardGrid
+            widgets={layoutWidgets}
+            isEditing={isEditing}
+            onReorder={setDraftWidgets}
+          />
+        ) : (
+          <EmptyDashboard />
+        )}
       </div>
     </PageWrapper>
   );

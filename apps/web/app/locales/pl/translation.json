@@ -89,6 +89,24 @@
     "enterFullscreen": "Pełny ekran",
     "exitFullscreen": "Wyjdź z pełnego ekranu"
   },
+  "dashboardView": {
+    "customize": "Dostosuj dashboard",
+    "dragHandle": "Przeciągnij, aby zmienić kolejność kafelka",
+    "widgetPicker": {
+      "title": "Wybierz kafelki dashboardu",
+      "description": "Zaznacz kafelki, które chcesz widzieć na swoim dashboardzie."
+    },
+    "widgets": {
+      "trainingCompletion": "Realizacja szkoleń",
+      "deadlineRisks": "Ryzyka terminów",
+      "incompleteCourses": "Nieukończone kursy",
+      "eventCalendar": "Kalendarz wydarzeń",
+      "continueLearning": "Kontynuuj naukę"
+    },
+    "toast": {
+      "layoutUpdated": "Układ dashboardu został zaktualizowany"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Kolejność lekcji została pomyślnie zaktualizowana",
     "sequenceUpdateFailed": "Nie udało się zaktualizować kolejności lekcji",

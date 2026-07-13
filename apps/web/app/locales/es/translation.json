@@ -88,6 +88,24 @@
     "enterFullscreen": "Pantalla completa",
     "exitFullscreen": "Salir de pantalla completa"
   },
+  "dashboardView": {
+    "customize": "Personalizar panel",
+    "dragHandle": "Arrastra para reordenar el widget",
+    "widgetPicker": {
+      "title": "Elegir widgets del panel",
+      "description": "Selecciona los widgets que quieres ver en tu panel."
+    },
+    "widgets": {
+      "trainingCompletion": "Finalización de la formación",
+      "deadlineRisks": "Riesgos de plazos",
+      "incompleteCourses": "Cursos incompletos",
+      "eventCalendar": "Calendario de eventos",
+      "continueLearning": "Continuar aprendiendo"
+    },
+    "toast": {
+      "layoutUpdated": "Diseño del panel actualizado"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Secuencia de lecciones actualizada correctamente",
     "sequenceUpdateFailed": "No se pudo actualizar la secuencia de la lección",

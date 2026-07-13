@@ -88,6 +88,24 @@
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen"
   },
+  "dashboardView": {
+    "customize": "Customize dashboard",
+    "dragHandle": "Drag to reorder widget",
+    "widgetPicker": {
+      "title": "Choose dashboard widgets",
+      "description": "Select the widgets you want to see on your dashboard."
+    },
+    "widgets": {
+      "trainingCompletion": "Training completion",
+      "deadlineRisks": "Deadline risks",
+      "incompleteCourses": "Incomplete courses",
+      "eventCalendar": "Event calendar",
+      "continueLearning": "Continue learning"
+    },
+    "toast": {
+      "layoutUpdated": "Dashboard layout updated"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lesson sequence updated successfully",
     "sequenceUpdateFailed": "Failed to update lesson sequence",

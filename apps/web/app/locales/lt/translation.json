@@ -88,6 +88,24 @@
     "enterFullscreen": "Visas ekranas",
     "exitFullscreen": "Išeikite per visą ekraną"
   },
+  "dashboardView": {
+    "customize": "Tinkinti prietaisų skydelį",
+    "dragHandle": "Vilkite, kad pakeistumėte valdiklio vietą",
+    "widgetPicker": {
+      "title": "Pasirinkite prietaisų skydelio valdiklius",
+      "description": "Pasirinkite valdiklius, kuriuos norite matyti prietaisų skydelyje."
+    },
+    "widgets": {
+      "trainingCompletion": "Mokymų užbaigimas",
+      "deadlineRisks": "Terminų rizikos",
+      "incompleteCourses": "Nebaigti kursai",
+      "eventCalendar": "Renginių kalendorius",
+      "continueLearning": "Tęsti mokymąsi"
+    },
+    "toast": {
+      "layoutUpdated": "Prietaisų skydelio išdėstymas atnaujintas"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Pamokų seka sėkmingai atnaujinta",
     "sequenceUpdateFailed": "Nepavyko atnaujinti pamokų sekos",

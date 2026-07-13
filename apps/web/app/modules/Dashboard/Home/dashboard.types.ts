@@ -12,8 +12,20 @@ export const DASHBOARD_WIDGET_IDS = {
 
 export type DashboardWidgetId = (typeof DASHBOARD_WIDGET_IDS)[keyof typeof DASHBOARD_WIDGET_IDS];
 
-export type DashboardWidgetLayout = {
-  widgetId: DashboardWidgetId;
-  order: number;
-  enabled: boolean;
-};
+export const IMPLEMENTED_DASHBOARD_WIDGET_IDS = [
+  DASHBOARD_WIDGET_IDS.TRAINING_COMPLETION,
+  DASHBOARD_WIDGET_IDS.DEADLINE_RISKS,
+  DASHBOARD_WIDGET_IDS.INCOMPLETE_COURSES,
+  DASHBOARD_WIDGET_IDS.EVENT_CALENDAR,
+  DASHBOARD_WIDGET_IDS.CONTINUE_LEARNING,
+] satisfies DashboardWidgetId[];
+
+export function isImplementedDashboardWidget(
+  widgetId: DashboardWidgetId,
+): widgetId is (typeof IMPLEMENTED_DASHBOARD_WIDGET_IDS)[number] {
+  return IMPLEMENTED_DASHBOARD_WIDGET_IDS.some(
+    (implementedWidgetId) => implementedWidgetId === widgetId,
+  );
+}
+
+export type DashboardWidgetLayout = import("~/api/generated-api").GetLayoutResponse["data"][number];

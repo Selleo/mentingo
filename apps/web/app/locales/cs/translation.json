@@ -88,6 +88,24 @@
     "enterFullscreen": "Celá obrazovka",
     "exitFullscreen": "Ukončete celou obrazovku"
   },
+  "dashboardView": {
+    "customize": "Přizpůsobit dashboard",
+    "dragHandle": "Přetažením změňte pořadí widgetu",
+    "widgetPicker": {
+      "title": "Vyberte widgety dashboardu",
+      "description": "Vyberte widgety, které chcete zobrazit na dashboardu."
+    },
+    "widgets": {
+      "trainingCompletion": "Dokončení školení",
+      "deadlineRisks": "Rizika termínů",
+      "incompleteCourses": "Nedokončené kurzy",
+      "eventCalendar": "Kalendář událostí",
+      "continueLearning": "Pokračovat ve vzdělávání"
+    },
+    "toast": {
+      "layoutUpdated": "Rozložení dashboardu bylo aktualizováno"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Pořadí lekcí bylo úspěšně aktualizováno",
     "sequenceUpdateFailed": "Pořadí lekcí se nepodařilo aktualizovat",

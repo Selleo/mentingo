@@ -88,6 +88,24 @@
     "enterFullscreen": "Vollbild",
     "exitFullscreen": "Beenden Sie den Vollbildmodus"
   },
+  "dashboardView": {
+    "customize": "Dashboard anpassen",
+    "dragHandle": "Ziehen, um das Widget neu anzuordnen",
+    "widgetPicker": {
+      "title": "Dashboard-Widgets auswählen",
+      "description": "Wählen Sie die Widgets aus, die auf Ihrem Dashboard angezeigt werden sollen."
+    },
+    "widgets": {
+      "trainingCompletion": "Schulungsabschluss",
+      "deadlineRisks": "Terminrisiken",
+      "incompleteCourses": "Unvollständige Kurse",
+      "eventCalendar": "Veranstaltungskalender",
+      "continueLearning": "Weiterlernen"
+    },
+    "toast": {
+      "layoutUpdated": "Dashboard-Layout aktualisiert"
+    }
+  },
   "lessons": {
     "sequenceUpdatedSuccessfully": "Lektionssequenz erfolgreich aktualisiert",
     "sequenceUpdateFailed": "Die Unterrichtssequenz konnte nicht aktualisiert werden",
