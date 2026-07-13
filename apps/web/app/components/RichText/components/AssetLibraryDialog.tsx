@@ -213,6 +213,8 @@ export const AssetLibraryDialog = ({
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
 
+    if (!files?.length) return;
+
     if (!canUploadToLibrary) {
       toast({
         description: t("richText.assetLibrary.disabledUntilSaved"),
@@ -221,11 +223,7 @@ export const AssetLibraryDialog = ({
       return;
     }
 
-    for (const file of files ?? []) {
-      if (!file) continue;
-
-      await handleUploadToLibrary(file);
-    }
+    await Promise.allSettled(Array.from(files).map((file) => handleUploadToLibrary(file)));
 
     if (uploadInputRef.current) {
       uploadInputRef.current.value = "";
