@@ -10,6 +10,7 @@ import {
 } from "@repo/shared";
 import { Download, Folder, Loader2, Lock, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { P, match } from "ts-pattern";
 
 import { useDeleteLiveTrainingResource } from "~/api/mutations/live-training/useDeleteLiveTrainingResource";
 import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOpenLiveTrainingResource";
@@ -198,43 +199,46 @@ function MaterialsSection({
       </div>
 
       <div className="max-h-[22rem] overflow-y-auto pr-1">
-        {isSectionLocked ? (
-          <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-              <Lock className="size-5" />
-            </span>
-            <p className="text-sm text-neutral-950">{t("liveTrainingView.files.afterLocked")}</p>
-          </div>
-        ) : isEmpty ? (
-          <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
-              <Folder className="size-5" />
-            </span>
-            <p className="text-sm text-neutral-950">{t("liveTrainingView.files.empty")}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
-            {materials.map((material) => (
-              <MaterialCard
-                key={material.resourceId}
-                material={material}
-                testId={materialCardTestId(material.resourceId)}
-                isRemoving={isRemoving}
-                canEditMaterials={canEditMaterials}
-                onOpen={() => onOpen(material)}
-                onRemove={() => onRemove(material.resourceId)}
-              />
-            ))}
-            {canEditMaterials && (
-              <AddMaterialTile
-                title={t("liveTrainingView.files.addFile")}
-                isUploading={isUploading}
-                inputTestId={fileInputTestId}
-                onFilesSelected={(files) => onUpload(files)}
-              />
-            )}
-          </div>
-        )}
+        {match([isSectionLocked, isEmpty] as const)
+          .with([true, P._], () => (
+            <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+                <Lock className="size-5" />
+              </span>
+              <p className="text-sm text-neutral-950">{t("liveTrainingView.files.afterLocked")}</p>
+            </div>
+          ))
+          .with([false, true], () => (
+            <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+                <Folder className="size-5" />
+              </span>
+              <p className="text-sm text-neutral-950">{t("liveTrainingView.files.empty")}</p>
+            </div>
+          ))
+          .otherwise(() => (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
+              {materials.map((material) => (
+                <MaterialCard
+                  key={material.resourceId}
+                  material={material}
+                  testId={materialCardTestId(material.resourceId)}
+                  isRemoving={isRemoving}
+                  canEditMaterials={canEditMaterials}
+                  onOpen={() => onOpen(material)}
+                  onRemove={() => onRemove(material.resourceId)}
+                />
+              ))}
+              {canEditMaterials && (
+                <AddMaterialTile
+                  title={t("liveTrainingView.files.addFile")}
+                  isUploading={isUploading}
+                  inputTestId={fileInputTestId}
+                  onFilesSelected={(files) => onUpload(files)}
+                />
+              )}
+            </div>
+          ))}
       </div>
     </section>
   );
