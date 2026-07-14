@@ -472,6 +472,22 @@ export interface GetPublicGlobalSettingsResponse {
   };
 }
 
+export interface GetPwaManifestResponse {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  display: "standalone";
+  orientation: "portrait";
+  start_url: "/";
+  scope: "/";
+  icons: {
+    src: string;
+    sizes: string;
+    type: string;
+  }[];
+}
+
 export interface GetPublicRegistrationFormResponse {
   data: {
     fields: {
@@ -5993,6 +6009,27 @@ export interface CreateTenantResponse {
   };
 }
 
+export interface UpdateTenantBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export interface DeactivateTenantResponse {
   data: {
     /** @format uuid */
@@ -7693,6 +7730,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
       this.request<GetPublicGlobalSettingsResponse, any>({
         path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPwaManifest
+     * @request GET:/api/settings/manifest.webmanifest
+     */
+    settingsControllerGetPwaManifest: (params: RequestParams = {}) =>
+      this.request<GetPwaManifestResponse, any>({
+        path: `/api/settings/manifest.webmanifest`,
         method: "GET",
         format: "json",
         ...params,
@@ -13323,6 +13374,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreateTenantResponse, void>({
         path: `/api/integration/tenants`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Updates the target tenant's name, host, or status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateTenant
+     * @summary Update tenant via integration API
+     * @request PATCH:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerUpdateTenant: (
+      tenantId: string,
+      data: UpdateTenantBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantResponse, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

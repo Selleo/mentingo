@@ -103,6 +103,72 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}": {
+      "patch": {
+        "operationId": "IntegrationController_updateTenant",
+        "summary": "Update tenant via integration API",
+        "description": "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTenantResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/deactivate": {
       "post": {
         "operationId": "IntegrationController_deactivateTenant",
@@ -1255,6 +1321,85 @@
         ]
       },
       "CreateTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateTenantBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "host": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "active",
+                "type": "string"
+              },
+              {
+                "const": "inactive",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateTenantResponse": {
         "type": "object",
         "properties": {
           "data": {
