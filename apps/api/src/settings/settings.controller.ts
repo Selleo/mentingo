@@ -13,6 +13,7 @@ import {
   Req,
   Res,
   Query,
+  Header,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -49,6 +50,7 @@ import { CompanyInformaitonJSONSchema } from "./schemas/company-information.sche
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import { platformSimpleLogoResponseSchema } from "./schemas/platform-simple-logo.schema";
+import { pwaManifestSchema, type PwaManifest } from "./schemas/pwa-manifest.schema";
 import {
   localizedRegistrationFormResponseSchema,
   registrationFormResponseSchema,
@@ -101,6 +103,15 @@ export class SettingsController {
   })
   async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getPublicGlobalSettings());
+  }
+
+  @Public()
+  @Get("manifest.webmanifest")
+  @Header("Content-Type", "application/manifest+json")
+  @Header("Cache-Control", "no-store")
+  @Validate({ response: pwaManifestSchema })
+  async getPwaManifest(): Promise<PwaManifest> {
+    return this.settingsService.getPwaManifest();
   }
 
   @Public()

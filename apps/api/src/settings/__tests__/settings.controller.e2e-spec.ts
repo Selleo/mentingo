@@ -1,8 +1,9 @@
-import { eq, isNull, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import { chapters, settings } from "src/storage/schema";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
@@ -19,6 +20,7 @@ describe("SettingsController (e2e)", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let defaultTenantId: string;
   let userFactory: ReturnType<typeof createUserFactory>;
   let globalSettingsFactory: ReturnType<typeof createSettingsFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -26,8 +28,9 @@ describe("SettingsController (e2e)", () => {
   const testPassword = "Password123@@";
 
   beforeAll(async () => {
-    const { app: testApp } = await createE2ETest();
+    const { app: testApp, defaultTenantId: testTenantId } = await createE2ETest();
     app = testApp;
+    defaultTenantId = testTenantId;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     userFactory = createUserFactory(db);
@@ -292,6 +295,60 @@ describe("SettingsController (e2e)", () => {
             certificateBackgroundKey,
           )}`,
         );
+      });
+    });
+
+    describe("GET /api/settings/manifest.webmanifest", () => {
+      it("should return a tenant-specific public PWA manifest", async () => {
+        const simpleLogoKey = "platform-simple-logos/variants/simple.webp";
+
+        await baseDb
+          .update(settings)
+          .set({
+            settings: sql`${settings.settings} || ${settingsToJSONBuildObject({
+              companyInformation: {
+                companyName: "Acme Learning",
+                companyShortName: "Acme",
+              },
+              primaryColor: "#123456",
+              contrastColor: "#fefefe",
+              platformSimpleLogoS3Key: simpleLogoKey,
+            })}::jsonb`,
+          })
+          .where(and(eq(settings.tenantId, defaultTenantId), isNull(settings.userId)));
+
+        const response = await request(app.getHttpServer())
+          .get("/api/settings/manifest.webmanifest")
+          .expect("Content-Type", /application\/manifest\+json/)
+          .expect("Cache-Control", "no-store")
+          .expect(200);
+
+        expect(response.body).toEqual({
+          name: "Acme LMS",
+          short_name: "Acme LMS",
+          theme_color: "#123456",
+          background_color: "#fefefe",
+          display: "standalone",
+          orientation: "portrait",
+          start_url: "/",
+          scope: "/",
+          icons: [
+            {
+              src: `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(
+                simpleLogoKey,
+              )}&quality=192w`,
+              sizes: "192x192",
+              type: "image/webp",
+            },
+            {
+              src: `/api/settings/platform-simple-logo/image?v=${encodeURIComponent(
+                simpleLogoKey,
+              )}&quality=512w`,
+              sizes: "512x512",
+              type: "image/webp",
+            },
+          ],
+        });
       });
     });
 
