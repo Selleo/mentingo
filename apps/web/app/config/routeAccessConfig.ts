@@ -135,6 +135,9 @@ export const routeAccessConfig = createRouteConfig({
   },
   "admin/courses/:id": COURSE_EDIT_ACCESS,
   "admin/beta-courses/:id": COURSE_EDIT_ACCESS,
+  "admin/automation": {
+    anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
+  },
   "admin/development-paths": LEARNING_PATH_ADMIN_ACCESS,
   "admin/development-paths/new": {
     allOf: [PERMISSIONS.LEARNING_PATH_CREATE],
