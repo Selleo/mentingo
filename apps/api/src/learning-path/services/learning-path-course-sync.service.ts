@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import {
   COURSE_ENROLLMENT,
   LEARNING_PATH_ENROLLMENT_TYPES,
@@ -24,8 +24,6 @@ const PATH_LINK_ENROLLMENT_TIME_TOLERANCE_MS = 1000;
 
 @Injectable()
 export class LearningPathCourseSyncService {
-  private readonly logger = new Logger(LearningPathCourseSyncService.name);
-
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     private readonly learningPathRepository: LearningPathRepository,
@@ -492,9 +490,7 @@ export class LearningPathCourseSyncService {
     try {
       actor = await this.learningPathRepository.getStudentActorInfo(studentId);
     } catch (error) {
-      this.logger.warn(
-        `Failed to get actor info for student ${studentId} on learning path ${learningPathId}: ${error}`,
-      );
+      console.error(`Failed to fetch actor info for student ${studentId}:`, error);
       return;
     }
 
