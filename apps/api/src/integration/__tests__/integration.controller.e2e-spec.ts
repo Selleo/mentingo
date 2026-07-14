@@ -569,7 +569,7 @@ describe("IntegrationController (e2e)", () => {
           adminLastName: "Admin",
           adminLanguage: SUPPORTED_LANGUAGES.EN,
         })
-        .expect(403);
+        .expect(404);
 
       expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
     });
@@ -581,7 +581,7 @@ describe("IntegrationController (e2e)", () => {
         .patch(`/api/integration/tenants/${admin.tenantId}`)
         .set("X-API-Key", apiKey)
         .send({ name: "Rejected Integration Tenant Update" })
-        .expect(403);
+        .expect(404);
 
       expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
     });
