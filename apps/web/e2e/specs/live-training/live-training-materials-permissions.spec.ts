@@ -51,7 +51,6 @@ test("Live Training materials and session data are permission-gated", async ({
     await expect(
       page.getByTestId(LIVE_TRAINING_HANDLES.beforeFileCard(beforeResourceId)),
     ).toBeVisible();
-    await page.getByTestId(LIVE_TRAINING_HANDLES.AFTER_FILES_TAB).click();
     await expect(
       page.getByTestId(LIVE_TRAINING_HANDLES.afterFileCard(afterResourceId)),
     ).toBeVisible();
@@ -65,7 +64,7 @@ test("Live Training materials and session data are permission-gated", async ({
     await expect(
       page.getByTestId(LIVE_TRAINING_HANDLES.beforeFileCard(beforeResourceId)),
     ).toBeVisible();
-    await expect(page.getByTestId(LIVE_TRAINING_HANDLES.AFTER_FILES_TAB)).toBeDisabled();
+    await expect(page.getByTestId(LIVE_TRAINING_HANDLES.AFTER_FILES_LOCKED_MESSAGE)).toBeVisible();
     await expect(
       page.getByTestId(LIVE_TRAINING_HANDLES.afterFileCard(afterResourceId)),
     ).toHaveCount(0);
@@ -79,9 +78,9 @@ test("Live Training materials and session data are permission-gated", async ({
   await withWorkerPage(USER_ROLE.student, async ({ page }) => {
     await openLiveTrainingFlow(page, liveTrainingId);
     await page.getByTestId(LIVE_TRAINING_HANDLES.FILES_TAB).click();
-    await page.getByTestId(LIVE_TRAINING_HANDLES.AFTER_FILES_TAB).click();
     await expect(
       page.getByTestId(LIVE_TRAINING_HANDLES.afterFileCard(afterResourceId)),
     ).toBeVisible();
+    await expect(page.getByTestId(LIVE_TRAINING_HANDLES.AFTER_FILES_LOCKED_MESSAGE)).toHaveCount(0);
   });
 });
