@@ -14,7 +14,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { activityLogs } from "src/storage/schema";
+import { activityLogs, scormPackages } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -870,7 +870,7 @@ describe("Activity Logs E2E", () => {
     const createScormCourse = async () => {
       const category = await categoryFactory.create();
 
-      return courseService.createCourse(
+      const course = await courseService.createCourse(
         {
           title: "SCORM Course",
           description: "SCORM course description",
@@ -883,6 +883,18 @@ describe("Activity Logs E2E", () => {
         currentAdminUser,
         true,
       );
+
+      await db.insert(scormPackages).values({
+        entityId: course.id,
+        entityType: "course",
+        tenantId: currentAdminUser.tenantId,
+        standard: "SCORM 1.2",
+        originalFileReference: "mock/path/to/file.zip",
+        extractedFilesReference: "mock/path/to/extracted/",
+        manifestEntryPoint: "imsmanifest.xml",
+      } as any);
+
+      return course;
     };
 
     it("should record DELETE activity log when SCORM course is deleted", async () => {
