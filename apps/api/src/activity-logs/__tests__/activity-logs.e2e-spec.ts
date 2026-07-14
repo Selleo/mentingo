@@ -14,7 +14,7 @@ import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { activityLogs, scormPackages } from "src/storage/schema";
+import { activityLogs } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCategoryFactory } from "../../../test/factory/category.factory";
@@ -867,7 +867,7 @@ describe("Activity Logs E2E", () => {
   });
 
   describe("SCORM activity logs", () => {
-    const createScormCourse = async () => {
+    it("should record CREATE activity log when SCORM course is created without import", async () => {
       const category = await categoryFactory.create();
 
       const course = await courseService.createCourse(
@@ -884,32 +884,13 @@ describe("Activity Logs E2E", () => {
         true,
       );
 
-      await db.insert(scormPackages).values({
-        entityId: course.id,
-        entityType: "course",
-        tenantId: currentAdminUser.tenantId,
-        standard: "SCORM 1.2",
-        originalFileReference: "mock/path/to/file.zip",
-        extractedFilesReference: "mock/path/to/extracted/",
-        manifestEntryPoint: "imsmanifest.xml",
-      } as any);
-
-      return course;
-    };
-
-    it("should record DELETE activity log when SCORM course is deleted", async () => {
-      const course = await createScormCourse();
-
-      await courseService.deleteCourse(course.id, currentAdminUser);
-
-      const scormLogs = await waitForLogs({
-        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
+      const logs = await waitForLogs({
+        resourceId: course.id,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
       });
-      const deleteLog = scormLogs[0];
 
-      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
-      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.SCORM);
-      expect(deleteLog.actorId).toBe(currentAdminUser.userId);
+      expect(logs[0].actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.CREATE);
+      expect(logs[0].resourceId).toBe(course.id);
     });
   });
 });

@@ -46,7 +46,7 @@ describe("ScormActivityHandler", () => {
       actor,
       createdScorm: {
         id: scormId,
-        standard: "SCORM 1.2",
+        standard: "scorm_1_2",
       },
     });
 
@@ -60,7 +60,7 @@ describe("ScormActivityHandler", () => {
       resourceId: scormId,
       after: {
         id: scormId,
-        standard: "SCORM 1.2",
+        standard: "scorm_1_2",
       },
       context: null,
     });
