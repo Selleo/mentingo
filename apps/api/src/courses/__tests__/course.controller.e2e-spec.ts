@@ -2679,14 +2679,13 @@ describe("CourseController (e2e)", () => {
     });
 
     it("returns localized learning outcomes for requested language", async () => {
-      const admin = await userFactory
+      const author = await userFactory
         .withCredentials({ password })
-        .withAdminSettings(db)
-        .withAdminRole()
-        .create();
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
-        authorId: admin.id,
+        authorId: author.id,
         categoryId: category.id,
         status: "published",
         thumbnailS3Key: null,
@@ -2708,7 +2707,7 @@ describe("CourseController (e2e)", () => {
       const response = await request(app.getHttpServer())
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
-        .set("Cookie", await cookieFor(admin, app))
+        .set("Cookie", await cookieFor(author, app))
         .expect(200);
 
       expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
@@ -2717,14 +2716,13 @@ describe("CourseController (e2e)", () => {
 
   describe("PATCH /api/course/:id", () => {
     it("updates modern course overview metadata for selected language", async () => {
-      const admin = await userFactory
+      const author = await userFactory
         .withCredentials({ password })
-        .withAdminSettings(db)
-        .withAdminRole()
-        .create();
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
       const course = await courseFactory.create({
-        authorId: admin.id,
+        authorId: author.id,
         categoryId: category.id,
         status: "published",
         thumbnailS3Key: null,
@@ -2734,14 +2732,7 @@ describe("CourseController (e2e)", () => {
           en: ["Old outcome"],
         },
       });
-      const accessToken = app.get(JwtService).sign({
-        userId: admin.id,
-        email: admin.email,
-        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
-        permissions: Object.values(PERMISSIONS),
-        tenantId: admin.tenantId,
-      });
-      const cookies = `access_token=${accessToken}`;
+      const cookies = await cookieFor(author, app);
 
       await request(app.getHttpServer())
         .patch(`/api/course/${course.id}`)
