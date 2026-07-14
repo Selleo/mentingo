@@ -1,6 +1,6 @@
 {
-  "id": "5d765c26-93d6-4553-8f99-1dc24d37e240",
-  "prevId": "51473765-3cec-469b-a0ac-a0ccb4880ca1",
+  "id": "c67c6de6-eca3-47e3-a2e3-a62957b2b4be",
+  "prevId": "c549b8a6-a67e-4510-ab43-d255ed17d6bf",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -754,13 +754,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'all_users'"
-        },
-        "is_everyone": {
-          "name": "is_everyone",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "status": {
           "name": "status",

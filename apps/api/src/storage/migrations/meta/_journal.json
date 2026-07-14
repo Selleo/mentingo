@@ -1139,8 +1139,22 @@
     {
       "idx": 162,
       "version": "7",
-      "when": 1783939889869,
-      "tag": "0162_replace_is_everyone_with_audience_in_announcements",
+      "when": 1784019493330,
+      "tag": "0162_add_audience_in_announcements",
+      "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1784019585580,
+      "tag": "0163_map_is_everyone_to_audience_field",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1784019767045,
+      "tag": "0164_remove_is_everyone_field_in_announcements",
       "breakpoints": true
     }
   ]
