@@ -53,8 +53,10 @@ import {
   integrationTenantsSchema,
   integrationTrainingResultsSchema,
   integrationTrainingResultsScopeSchema,
+  integrationUpdateTenantSchema,
   type IntegrationCreateTenantBody,
   type IntegrationTenantLifecycleResponse,
+  type IntegrationUpdateTenantBody,
   setUserGroupsSchema,
   unenrollGroupsPayloadSchema,
   type IntegrationTrainingResult,
@@ -156,6 +158,44 @@ export class IntegrationController {
   ): Promise<BaseResponse<IntegrationTenantLifecycleResponse>> {
     return new BaseResponse(
       await this.integrationService.createTenantForIntegration(body, currentUser, keyTenant),
+    );
+  }
+
+  @Patch("tenants/:tenantId")
+  @RequirePermission(PERMISSIONS.INTEGRATION_API_USE)
+  @IntegrationTenantOptional()
+  @ApiEndpointDocs({
+    summary: "Update tenant via integration API",
+    description:
+      "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+    headers: [
+      {
+        ...API_HEADERS.X_TENANT_ID,
+        required: false,
+        description: "Tenant ID is not required because the target tenant is in the path.",
+      },
+    ],
+  })
+  @Validate({
+    request: [
+      { type: "param", name: "tenantId", schema: UUIDSchema },
+      { type: "body", schema: integrationUpdateTenantSchema },
+    ],
+    response: baseResponse(integrationTenantLifecycleResponseSchema),
+  })
+  async updateTenant(
+    @Param("tenantId") tenantId: UUIDType,
+    @Body() body: IntegrationUpdateTenantBody,
+    @CurrentUser() currentUser: CurrentUserType,
+    @IntegrationKeyTenant() keyTenant: IntegrationKeyTenantContext,
+  ): Promise<BaseResponse<IntegrationTenantLifecycleResponse>> {
+    return new BaseResponse(
+      await this.integrationService.updateTenantForIntegration(
+        tenantId,
+        body,
+        currentUser,
+        keyTenant,
+      ),
     );
   }
 
