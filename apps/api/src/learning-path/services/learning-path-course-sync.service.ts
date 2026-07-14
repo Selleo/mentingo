@@ -78,6 +78,43 @@ export class LearningPathCourseSyncService {
     }
   }
 
+  async syncStudentLearningPathsForStartedCourse(
+    studentId: string,
+    courseId: string,
+    actor: ActorUserType,
+  ) {
+    const pathIds = await this.learningPathRepository.getLearningPathIdsForStudentCourse(
+      studentId,
+      courseId,
+    );
+
+    for (const { learningPathId } of pathIds) {
+      const enrollment = await this.learningPathRepository.getStudentLearningPathEnrollment(
+        learningPathId,
+        studentId,
+      );
+
+      if (!enrollment || enrollment.progress !== LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED) {
+        continue;
+      }
+
+      await this.learningPathRepository.updateStudentLearningPathProgress(
+        learningPathId,
+        studentId,
+        LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS,
+        null,
+      );
+
+      await this.outboxPublisher.publish(
+        new StartLearningPathEvent({
+          learningPathId,
+          userId: studentId,
+          actor,
+        }),
+      );
+    }
+  }
+
   async syncLearningPathEnrollmentsForGroupMember(
     groupId: string,
     studentId: string,
@@ -384,9 +421,14 @@ export class LearningPathCourseSyncService {
       (row) => row.completedAt != null,
     );
 
+    const hasStartedCourses = progressState.studentCourseProgressRows.some(
+      (row) => row.progress === "in_progress" || row.completedAt != null,
+    );
+
     const newProgress = this.resolveLearningPathProgress(
       progressState.courses.length,
       completedCourses.length,
+      hasStartedCourses,
     );
 
     const enrollment = await this.learningPathRepository.getStudentLearningPathEnrollment(
@@ -479,8 +521,12 @@ export class LearningPathCourseSyncService {
     }
   }
 
-  private resolveLearningPathProgress(totalCourses: number, completedCourses: number) {
-    if (totalCourses === 0 || completedCourses === 0) {
+  private resolveLearningPathProgress(
+    totalCourses: number,
+    completedCourses: number,
+    hasStartedCourses = false,
+  ) {
+    if (totalCourses === 0) {
       return LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
     }
 
@@ -488,7 +534,11 @@ export class LearningPathCourseSyncService {
       return LEARNING_PATH_PROGRESS_STATUSES.COMPLETED;
     }
 
-    return LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+    if (completedCourses > 0 || hasStartedCourses) {
+      return LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+    }
+
+    return LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
   }
 
   private resolveLearningPathCompletedAt(

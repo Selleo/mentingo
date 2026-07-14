@@ -151,6 +151,7 @@ describe("LearningPathActivityHandler", () => {
       operation: ACTIVITY_LOG_ACTION_TYPES.START_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
+      context: { learningPathId },
     });
   });
 
@@ -169,6 +170,7 @@ describe("LearningPathActivityHandler", () => {
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
+      context: { learningPathId },
     });
   });
 });

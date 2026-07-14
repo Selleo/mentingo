@@ -121,6 +121,12 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
       operation: ACTIVITY_LOG_ACTION_TYPES.START_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.startData.learningPathId,
+      context: {
+        learningPathId: event.startData.learningPathId,
+        ...(event.startData.userId !== event.startData.actor.userId
+          ? { startedByUserId: event.startData.userId }
+          : {}),
+      },
     });
   }
 
@@ -131,6 +137,12 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.completeData.learningPathId,
+      context: {
+        learningPathId: event.completeData.learningPathId,
+        ...(event.completeData.userId !== event.completeData.actor.userId
+          ? { completedByUserId: event.completeData.userId }
+          : {}),
+      },
     });
   }
 }
