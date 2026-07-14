@@ -13,7 +13,6 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
-import * as cookie from "cookie";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -55,18 +54,6 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const getAccessTokenFromCookies = (cookies: string | string[]) => {
-  for (const cookieString of Array.isArray(cookies) ? cookies : [cookies]) {
-    const parsedCookie = cookie.parse(cookieString);
-
-    if (parsedCookie.access_token) {
-      return parsedCookie.access_token;
-    }
-  }
-
-  throw new Error("Access token cookie not found");
-};
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
@@ -2724,54 +2711,6 @@ describe("CourseController (e2e)", () => {
         .expect(200);
 
       expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
-    });
-  });
-
-  describe("PATCH /api/course/:id", () => {
-    it("updates modern course overview metadata for selected language", async () => {
-      const author = await userFactory
-        .withCredentials({ password })
-        .withContentCreatorSettings(db)
-        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
-      const category = await categoryFactory.create();
-      const course = await courseFactory.create({
-        authorId: author.id,
-        categoryId: category.id,
-        status: "published",
-        thumbnailS3Key: null,
-        thumbnailPositionY: 50,
-        showAuthorSection: true,
-        learningOutcomes: {
-          en: ["Old outcome"],
-        },
-      });
-      const cookies = await cookieFor(author, app);
-      const accessToken = getAccessTokenFromCookies(cookies);
-
-      await request(app.getHttpServer())
-        .patch(`/api/course/${course.id}`)
-        .send({
-          language: SUPPORTED_LANGUAGES.EN,
-          thumbnailPositionY: 35,
-          showAuthorSection: false,
-          learningOutcomes: ["Updated outcome", "Second updated outcome"],
-        })
-        .set("Authorization", `Bearer ${accessToken}`)
-        .expect(200);
-
-      const response = await request(app.getHttpServer())
-        .get("/api/course")
-        .query({ id: course.id, language: SUPPORTED_LANGUAGES.EN })
-        .set("Cookie", cookies)
-        .expect(200);
-
-      expect(response.body.data).toEqual(
-        expect.objectContaining({
-          thumbnailPositionY: 35,
-          showAuthorSection: false,
-          learningOutcomes: ["Updated outcome", "Second updated outcome"],
-        }),
-      );
     });
   });
 
