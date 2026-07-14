@@ -1,6 +1,6 @@
 {
-  "id": "891c10dd-7ef0-4642-bf07-51c50b24a2d3",
-  "prevId": "0b0bf7f5-91ce-47e8-8c51-4574934b67b5",
+  "id": "802d384c-09aa-4106-90ce-1026d7c3f3b0",
+  "prevId": "51473765-3cec-469b-a0ac-a0ccb4880ca1",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -2810,13 +2810,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "thumbnail_position_y": {
-          "name": "thumbnail_position_y",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 50
-        },
         "status": {
           "name": "status",
           "type": "status",
@@ -2824,6 +2817,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'draft'"
+        },
+        "thumbnail_position_y": {
+          "name": "thumbnail_position_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
         },
         "has_certificate": {
           "name": "has_certificate",
@@ -3329,6 +3329,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "requires_password_change": {
+          "name": "requires_password_change",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         },
         "tenant_id": {
           "name": "tenant_id",

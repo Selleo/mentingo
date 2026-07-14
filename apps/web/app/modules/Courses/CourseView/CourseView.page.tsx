@@ -105,7 +105,7 @@ export default function CourseViewPage() {
     },
     { title: course.title, href: `/course/${id}` },
   ];
-  console.log(course);
+
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <CourseAccessProvider course={course}>

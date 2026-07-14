@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { cn } from "~/lib/utils";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
+import { DEFAULT_AUTHOR_MODAL_IMAGE, getAuthorName } from "./author.utils";
+
 type Author = {
   description?: string | null;
   firstName?: string | null;
@@ -42,7 +44,7 @@ export default function AuthorModal({
   showAuthorSectionDraft,
 }: AuthorModalProps) {
   const { t } = useTranslation();
-  const authorFullName = author?.firstName + " " + author?.lastName;
+  const authorFullName = getAuthorName(author);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -63,9 +65,7 @@ export default function AuthorModal({
               <X className="h-5 w-5 text-neutral-800" />
             </button>
             <img
-              src={
-                "https://plus.unsplash.com/premium_vector-1721991052634-15ade548d2df?q=80&w=1160&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              }
+              src={DEFAULT_AUTHOR_MODAL_IMAGE}
               alt={authorFullName || t("modernCourseView.author.pictureAlt")}
               className="h-auto w-full rounded-xl object-cover shadow-lg"
             />

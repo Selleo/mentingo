@@ -2011,11 +2011,18 @@ describe("CourseController (e2e)", () => {
             .create();
           const cookies = await cookieFor(admin, app);
 
-          const students = await Promise.all(
-            Array.from({ length: 2 }, (_, _i) =>
-              userFactory.withCredentials({ password }).create(),
-            ),
-          );
+          const students = await Promise.all([
+            userFactory.withCredentials({ password }).create({
+              email: "filtered.last-name@example.com",
+              firstName: "Filtered",
+              lastName: "LastName",
+            }),
+            userFactory.withCredentials({ password }).create({
+              email: "unrelated.student@example.com",
+              firstName: "Unrelated",
+              lastName: "Student",
+            }),
+          ]);
 
           const course = await courseFactory.create({
             authorId: admin.id,
@@ -2062,11 +2069,18 @@ describe("CourseController (e2e)", () => {
             .create();
           const cookies = await cookieFor(admin, app);
 
-          const students = await Promise.all(
-            Array.from({ length: 2 }, (_, _i) =>
-              userFactory.withCredentials({ password }).create(),
-            ),
-          );
+          const students = await Promise.all([
+            userFactory.withCredentials({ password }).create({
+              email: "target.last-name@example.com",
+              firstName: "Target",
+              lastName: "UniqueLastName",
+            }),
+            userFactory.withCredentials({ password }).create({
+              email: "different.student@example.com",
+              firstName: "Different",
+              lastName: "Student",
+            }),
+          ]);
 
           const course = await courseFactory.create({
             authorId: admin.id,
@@ -2720,7 +2734,14 @@ describe("CourseController (e2e)", () => {
           en: ["Old outcome"],
         },
       });
-      const cookies = await cookieFor(admin, app);
+      const accessToken = app.get(JwtService).sign({
+        userId: admin.id,
+        email: admin.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+        permissions: Object.values(PERMISSIONS),
+        tenantId: admin.tenantId,
+      });
+      const cookies = `access_token=${accessToken}`;
 
       await request(app.getHttpServer())
         .patch(`/api/course/${course.id}`)
