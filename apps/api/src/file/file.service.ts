@@ -82,7 +82,10 @@ import type {
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type {
+  ImageQuality,
+  ImageVariantCreationOptions,
+} from "src/file/image-variants/image-variant.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
@@ -196,6 +199,7 @@ export class FileService {
     file: Express.Multer.File,
     resource: string,
     tenantId?: UUIDType,
+    imageVariantOptions?: ImageVariantCreationOptions,
   ): Promise<UploadFileResult> {
     if (file.size === 0) {
       throw new BadRequestException("files.toast.fileEmpty");
@@ -227,6 +231,7 @@ export class FileService {
       resource,
       mimeType: file.mimetype,
       tenantId,
+      options: imageVariantOptions,
     });
 
     if (imageVariantResult) {
@@ -497,9 +502,9 @@ export class FileService {
     }
   }
 
-  async getFileStream(fileKey: string, range?: string) {
+  async getFileStream(fileKey: string, range?: string, quality?: ImageQuality) {
     try {
-      return await this.s3Service.getFileStream(this.getFileStorageKey(fileKey), range);
+      return await this.s3Service.getFileStream(this.getFileStorageKey(fileKey, quality), range);
     } catch (error) {
       this.logFileOperationFailure("retrieve", fileKey, error);
       throw new BadRequestException("Failed to retrieve file");
@@ -519,8 +524,8 @@ export class FileService {
     return this.s3Service.listFileKeysByPrefix(prefix);
   }
 
-  private getFileStorageKey(reference: string) {
-    return this.getFileStorageKeyByQuality(reference, IMAGE_QUALITY.XL);
+  private getFileStorageKey(reference: string, quality: ImageQuality = IMAGE_QUALITY.XL) {
+    return this.getFileStorageKeyByQuality(reference, quality);
   }
 
   private getFileStorageKeyByQuality(reference: string, quality: ImageQuality) {
@@ -529,7 +534,11 @@ export class FileService {
     return getImageVariantKey(reference, quality);
   }
 
-  async getFileDelivery(fileKey: string, range?: string): Promise<FileDeliveryResult> {
+  async getFileDelivery(
+    fileKey: string,
+    range?: string,
+    options: { quality?: ImageQuality } = {},
+  ): Promise<FileDeliveryResult> {
     if (!fileKey) {
       throw new BadRequestException("Failed to retrieve file");
     }
@@ -544,7 +553,7 @@ export class FileService {
       }
     }
 
-    const stream = await this.getFileStream(fileKey, range);
+    const stream = await this.getFileStream(fileKey, range, options.quality);
     return { type: FILE_DELIVERY_TYPE.STREAM, ...stream };
   }
 

@@ -11,6 +11,8 @@ import {
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -20,6 +22,7 @@ import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiMentorLessons,
   lessons,
   chapters,
   quizAttempts,
@@ -49,6 +52,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let aiRepository: AiRepository;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -88,6 +92,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    aiRepository = app.get(AiRepository);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -354,7 +359,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       const lessonId = createResponse.body.data.id;
 
-      return { adminCookies, courseId: course.id, lessonId };
+      return { admin, adminCookies, courseId: course.id, lessonId };
     };
 
     const getAiMentorFromCourse = async (
@@ -417,20 +422,31 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       });
     });
 
-    it("falls back to base-language AI mentor scenario fields", async () => {
-      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup([
+    it("falls back to base-language AI mentor scenario fields on the learner endpoint", async () => {
+      const { admin, adminCookies, lessonId } = await createAiMentorLessonSetup([
         SUPPORTED_LANGUAGES.EN,
         SUPPORTED_LANGUAGES.DE,
       ]);
 
-      const aiMentor = await getAiMentorFromCourse(
-        courseId,
-        lessonId,
-        SUPPORTED_LANGUAGES.DE,
-        adminCookies,
-      );
+      const [aiMentorLesson] = await db
+        .select({ id: aiMentorLessons.id })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
 
-      expect(aiMentor).toMatchObject({
+      await aiRepository.createThread({
+        userId: admin.id,
+        aiMentorLessonId: aiMentorLesson.id,
+        status: THREAD_STATUS.ACTIVE,
+        userLanguage: SUPPORTED_LANGUAGES.DE,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}`)
+        .query({ language: SUPPORTED_LANGUAGES.DE })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
         completionConditions: "<p>The learner handles objections in English.</p>",
       });

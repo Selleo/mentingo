@@ -173,6 +173,14 @@ export class LessonRepository {
             ELSE NULL
           END
         `,
+        aiMentorInstructions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.aiMentorInstructions,
+          language,
+        ),
+        completionConditions: this.localizationService.getLocalizedSqlField(
+          aiMentorLessons.completionConditions,
+          language,
+        ),
         isExternal: sql<boolean>`${lessons.isExternal}`,
         liveTrainingId: sql<UUIDType | null>`
           (

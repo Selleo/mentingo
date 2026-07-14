@@ -9,7 +9,7 @@ import { openNewLessonFormFlow } from "../../flows/curriculum/open-new-lesson-fo
 
 import { createCurriculumCourse } from "./curriculum-test-helpers";
 
-test("scale and match words question types are unavailable", async ({
+test("match words question types is unavailable", async ({
   cleanup,
   factories,
   withReadonlyPage,
@@ -35,9 +35,6 @@ test("scale and match words question types are unavailable", async ({
     await fillQuizLessonTitleFlow(page, `disabled-questions-lesson-${Date.now()}`);
     await page.getByTestId(QUIZ_LESSON_FORM_HANDLES.ADD_QUESTION_BUTTON).click();
 
-    await expect(
-      page.getByTestId(QUIZ_LESSON_FORM_HANDLES.questionTypeOption(QuestionType.SCALE_1_5)),
-    ).toHaveCount(0);
     await expect(
       page.getByTestId(QUIZ_LESSON_FORM_HANDLES.questionTypeOption(QuestionType.MATCH_WORDS)),
     ).toHaveCount(0);

@@ -484,97 +484,98 @@
       "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
+
   "liveTrainingView": {
     "title": "Live-Schulung",
-    "description": "This page will contain the full Live-Schulung workspace.",
+    "description": "Diese Seite wird den vollständigen Arbeitsbereich für Live-Schulungen enthalten.",
     "errors": {
-      "idRequired": "Live-Schulung id is required."
+      "idRequired": "Live-Schulungs-ID ist erforderlich."
     },
     "status": {
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "ended": "Ended",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
+      "scheduled": "Geplant",
+      "active": "Aktiv",
+      "ended": "Beendet",
+      "cancelled": "Abgesagt",
+      "expired": "Abgelaufen"
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "In-person"
+      "offline": "Präsenz"
     },
     "visibility": {
-      "all": "All users",
-      "linked_courses": "Linked courses"
+      "all": "Alle Benutzer",
+      "linked_courses": "Verknüpfte Kurse"
     },
     "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "start": "Start session",
-      "join": "Join session",
-      "finish": "Finish session"
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "start": "Sitzung starten",
+      "join": "Sitzung beitreten",
+      "finish": "Sitzung beenden"
     },
     "stage": {
-      "preview": "Session preview",
-      "activeTitle": "Live session is active",
-      "waitingTitle": "Session is waiting",
-      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
-      "activeBadge": "Active",
-      "waitingBadge": "Waiting",
-      "participants": "Participants",
-      "viewerMic": "Viewer microphone",
-      "viewerCamera": "Viewer camera",
-      "scheduleTooltip": "Planned training time",
-      "timezoneTooltip": "Training timezone",
-      "maxParticipantsTooltip": "Maximum participants",
-      "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "preview": "Sitzungsvorschau",
+      "activeTitle": "Live-Sitzung ist aktiv",
+      "waitingTitle": "Sitzung wartet",
+      "runtimeDeferred": "Die Meeting-Laufzeit wird in einem späteren Schritt verbunden. Mediengeräte werden aus dieser Vorschau nicht gestartet.",
+      "activeBadge": "Aktiv",
+      "waitingBadge": "Wartend",
+      "participants": "Teilnehmer",
+      "viewerMic": "Zuschauermikrofon",
+      "viewerCamera": "Zuschauerkamera",
+      "scheduleTooltip": "Geplante Schulungszeit",
+      "timezoneTooltip": "Schulungszeitzone",
+      "maxParticipantsTooltip": "Maximale Teilnehmerzahl",
+      "locationTooltip": "Schulungsort",
+      "offlineTitle": "Präsenzschulung",
+      "locationMissing": "Ort wurde nicht festgelegt"
     },
     "sidebar": {
-      "lifecycle": "Session lifecycle",
+      "lifecycle": "Sitzungslebenszyklus",
       "status": "Status",
-      "participants": "Participants",
-      "peak": "Peak",
-      "people": "People",
-      "author": "Author",
+      "participants": "Teilnehmer",
+      "peak": "Höchststand",
+      "people": "Personen",
+      "author": "Autor",
       "host": "Host",
       "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
+      "noHosts": "Keine Hosts zugewiesen",
       "trainer": "Trainer",
-      "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
-      "unknownUser": "Unknown user",
-      "details": "Training details",
-      "maxParticipants": "Max participants",
-      "visibility": "Visibility",
-      "courses": "Linked courses",
-      "location": "Location",
-      "addHost": "Add",
-      "addHostHint": "Add host",
-      "removeHost": "Remove host {{name}}",
-      "addTrainer": "Add",
-      "addTrainerHint": "Add trainer",
-      "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people",
-      "noUserResults": "No users found",
-      "loadingUsers": "Loading users",
-      "loadMoreUsers": "Load more"
+      "trainers": "Trainer",
+      "noTrainers": "Keine Trainer zugewiesen",
+      "unknownUser": "Unbekannter Benutzer",
+      "details": "Schulungsdetails",
+      "maxParticipants": "Max. Teilnehmer",
+      "visibility": "Sichtbarkeit",
+      "courses": "Verknüpfte Kurse",
+      "location": "Ort",
+      "addHost": "Hinzufügen",
+      "addHostHint": "Host hinzufügen",
+      "removeHost": "Host {{name}} entfernen",
+      "addTrainer": "Hinzufügen",
+      "addTrainerHint": "Trainer hinzufügen",
+      "removeTrainer": "Trainer {{name}} entfernen",
+      "searchPeople": "Personen suchen",
+      "noUserResults": "Keine Benutzer gefunden",
+      "loadingUsers": "Benutzer werden geladen",
+      "loadMoreUsers": "Mehr laden"
     },
     "tabs": {
-      "overview": "Overview",
-      "files": "Files",
-      "sessions": "Sessions",
-      "settings": "Settings"
+      "overview": "Übersicht",
+      "files": "Dateien",
+      "sessions": "Sitzungen",
+      "settings": "Einstellungen"
     },
     "files": {
-      "title": "Live-Schulung files",
-      "description": "Materials are split by when students should use them.",
-      "beforeHeading": "Before training",
-      "beforeDescription": "Materials available before the training starts.",
-      "afterHeading": "After training",
-      "afterDescription": "Materials available after the training is finished.",
-      "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Datei hinzufügen",
+      "title": "Live-Schulungsdateien",
+      "description": "Materialien sind danach unterteilt, wann Teilnehmer sie verwenden sollen.",
+      "beforeHeading": "Vor der Schulung",
+      "beforeDescription": "Materialien, die vor Beginn der Schulung verfügbar sind.",
+      "afterHeading": "Nach der Schulung",
+      "afterDescription": "Materialien, die nach Abschluss der Schulung verfügbar sind.",
+      "empty": "Noch keine Dateien angehängt.",
+      "afterLocked": "Die Materialien werden nach Ende der Schulung freigeschaltet.",
+      "addFile": "Datei hochladen oder hierher ziehen",
       "download": "Herunterladen",
       "removeFile": "{{title}} entfernen",
       "sizeInMb": "{{size}} MB",
@@ -585,70 +586,70 @@
     },
     "meeting": {
       "previewLabel": "Live-Sitzung",
-      "waitingTitle": "Die Sitzung ist bereit zum Beitreten",
-      "activeTitle": "Die Sitzung ist aktiv",
-      "inSession": "In der Sitzung",
+      "waitingTitle": "Sitzung ist bereit zum Beitritt",
+      "activeTitle": "Sitzung ist aktiv",
+      "inSession": "In Sitzung",
       "roomTitle": "Live-Raum",
       "participants_one": "{{count}} Teilnehmer",
       "participants_other": "{{count}} Teilnehmer",
       "microphone": "Mikrofon",
       "camera": "Kamera",
-      "screenShare": "Bildschirm teilen",
+      "screenShare": "Bildschirm freigeben",
       "screen": "Bildschirm",
-      "presentOnStage": "Auf Bühne anzeigen",
+      "presentOnStage": "Auf der Bühne präsentieren",
       "leave": "Verlassen",
-      "finish": "Finish session",
-      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finish": "Sitzung beenden",
+      "sessionEndedToast": "Ihre Sitzung {{trainingName}} ist beendet",
       "finishDialog": {
-        "title": "Finish session?",
-        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
-        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
-        "cancel": "Cancel",
-        "confirmEnd": "Finish session",
-        "confirmLeave": "Leave session"
+        "title": "Sitzung beenden?",
+        "lastHostDescription": "Sie sind der einzige Host in diesem Raum. Wenn Sie ihn verlassen, wird die Sitzung für alle beendet.",
+        "otherHostsDescription": "Andere Hosts sind noch in diesem Raum. Sie können ihn verlassen und die Sitzung wird fortgesetzt.",
+        "cancel": "Abbrechen",
+        "confirmEnd": "Sitzung beenden",
+        "confirmLeave": "Sitzung verlassen"
       },
-      "empty": "Warten auf Teilnehmer.",
+      "empty": "Warten auf Teilnehmer",
       "materials": "Materialien",
       "beforeMaterials": "Vorher",
       "afterMaterials": "Nachher",
       "noMaterials": "Keine Dateien"
     },
     "sessions": {
-      "title": "Sessions",
-      "description": "Each started session is stored separately with its attendance.",
-      "empty": "No sessions have been started yet.",
-      "activeParticipants_one": "{{count}} active participant",
-      "activeParticipants_other": "{{count}} active participants",
-      "uniqueParticipants_one": "{{count}} unique participant",
-      "uniqueParticipants_other": "{{count}} unique participants",
-      "peakParticipants": "Peak {{count}}",
-      "startedBy": "Started by",
-      "endedBy": "Ended by",
-      "notEnded": "Not ended",
-      "notAvailable": "N/A",
-      "endReason": "End reason",
-      "noEndReason": "No end reason",
+      "title": "Sitzungen",
+      "description": "Jede begonnene Sitzung wird separat mit ihrer Anwesenheit gespeichert.",
+      "empty": "Es wurden noch keine Sitzungen gestartet.",
+      "activeParticipants_one": "{{count}} aktiver Teilnehmer",
+      "activeParticipants_other": "{{count}} aktive Teilnehmer",
+      "uniqueParticipants_one": "{{count}} eindeutiger Teilnehmer",
+      "uniqueParticipants_other": "{{count}} eindeutige Teilnehmer",
+      "peakParticipants": "Höchststand {{count}}",
+      "startedBy": "Gestartet von",
+      "endedBy": "Beendet von",
+      "notEnded": "Nicht beendet",
+      "notAvailable": "N/V",
+      "endReason": "Beendigungsgrund",
+      "noEndReason": "Kein Beendigungsgrund",
       "status": {
-        "waiting": "Waiting",
-        "active": "Active",
-        "ended": "Ended",
-        "failed": "Failed"
+        "waiting": "Wartend",
+        "active": "Aktiv",
+        "ended": "Beendet",
+        "failed": "Fehlgeschlagen"
       },
       "roles": {
         "host": "Host",
-        "co_trainer": "Co-trainer",
+        "co_trainer": "Co-Trainer",
         "moderator": "Moderator",
-        "observer": "Observer",
+        "observer": "Beobachter",
         "admin": "Admin"
       },
       "attendance": {
-        "empty": "No attendance has been recorded for this session yet.",
-        "user": "User",
-        "role": "Role",
-        "totalTime": "Time attended",
-        "firstJoinedAt": "First joined",
-        "lastLeftAt": "Last left",
-        "joinCount": "Joins"
+        "empty": "Für diese Sitzung wurde noch keine Anwesenheit erfasst.",
+        "user": "Benutzer",
+        "role": "Rolle",
+        "totalTime": "Anwesenheitszeit",
+        "firstJoinedAt": "Zuerst beigetreten",
+        "lastLeftAt": "Zuletzt verlassen",
+        "joinCount": "Beitritte"
       },
       "toast": {
         "started": "Sitzung wurde gestartet.",
@@ -656,30 +657,30 @@
       }
     },
     "attendance": {
-      "title": "Attendance",
-      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+      "title": "Anwesenheit",
+      "description": "Anwesenheits- und Teilnehmerintervalle werden in der Laufzeit implementiert."
     },
     "settings": {
-      "title": "Settings",
-      "description": "Less frequently used session settings will live here."
+      "title": "Einstellungen",
+      "description": "Weniger häufig verwendete Sitzungseinstellungen finden Sie hier."
     },
     "boolean": {
-      "yes": "Yes",
-      "no": "No"
+      "yes": "Ja",
+      "no": "Nein"
     },
     "deleteDialog": {
       "title": "Live-Schulung löschen?",
-      "description": "Das Live-Schulung wird abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
-      "assignedToLessonsDescription": "Dieses Live-Schulung ist mit {{count}} Lektion verknüpft. Lösche zuerst die zugehörige Lektion, bevor du das Live-Schulung löschst.",
-      "assignedToLessonsDescription_plural": "Dieses Live-Schulung ist mit {{count}} Lektionen verknüpft. Lösche zuerst die zugehörigen Lektionen, bevor du das Live-Schulung löschst.",
+      "description": "Dadurch wird die Live-Schulung abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "assignedToLessonsDescription": "Diese Live-Schulung ist mit {{count}} Lektion verknüpft. Löschen Sie zuerst die zugehörige Lektion, bevor Sie die Live-Schulung löschen.",
+      "assignedToLessonsDescription_plural": "Diese Live-Schulung ist mit {{count}} Lektionen verknüpft. Löschen Sie zuerst die zugehörigen Lektionen, bevor Sie die Live-Schulung löschen.",
       "toast": {
-        "success": "Live-Schulung wurde gelöscht."
+        "success": "Live-Schulung erfolgreich gelöscht."
       }
     },
     "edit": {
       "saveChanges": "Änderungen speichern",
       "toast": {
-        "success": "Live-Schulung wurde aktualisiert."
+        "success": "Live-Schulung erfolgreich aktualisiert."
       }
     }
   },
@@ -2718,7 +2719,8 @@
       "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
-      "openInNewTab": "In neuem Tab öffnen"
+      "openInNewTab": "In neuem Tab öffnen",
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -2876,6 +2878,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Sprach-Benutzeroberfläche",
+          "options": "Optionen",
           "exit": "Sprachmodus verlassen",
           "mute": "Stummschalten",
           "unmute": "Stummschaltung aufheben",
@@ -3361,7 +3364,7 @@
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "fileEmpty": "Datei-Upload fehlgeschlagen – die Datei ist leer",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
-      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
+      "invalidFileType": "Ungültiger Dateityp.",
       "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",
       "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch."
     },

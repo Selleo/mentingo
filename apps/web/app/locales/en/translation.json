@@ -574,8 +574,8 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Add file",
+      "afterLocked": "The materials will be unlocked after the training concludes.",
+      "addFile": "Upload a file or drag and drop here",
       "download": "Download",
       "removeFile": "Remove {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -2314,7 +2314,7 @@
           "fillInTheBlanksText": "Gap filling (text)",
           "briefResponse": "Short answer",
           "detailedResponse": "Free text",
-          "scale1_5": "Scale 1 to 5",
+          "scale_1_5": "Scale 1 to 5",
           "selectQuestionType": "Select question type",
           "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
           "quizLessonDescription": "A set of questions to check knowledge.",
@@ -2779,7 +2779,8 @@
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
-      "openInNewTab": "Open in new tab"
+      "openInNewTab": "Open in new tab",
+      "scale_1_5": "Scale question (1-5)"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -2937,6 +2938,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Voice UI",
+          "options": "Options",
           "exit": "Exit voice mode",
           "mute": "Mute",
           "unmute": "Unmute",
@@ -3441,7 +3443,7 @@
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
+      "invalidFileType": "Invalid file type.",
       "missingTenantContext": "Missing tenant context for file upload",
       "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}."
     },

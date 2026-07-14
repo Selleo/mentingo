@@ -1,8 +1,5 @@
 export type SuggestionType =
-  | "scenarioSimulation"
-  | "problemSolving"
-  | "creativeTask"
-  | "knowledgeSharing";
+  "scenarioSimulation" | "problemSolving" | "creativeTask" | "knowledgeSharing";
 
 export type SuggestionsButton = {
   onClick: SuggestionType;

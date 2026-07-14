@@ -182,6 +182,16 @@ const QuizLessonForm = ({
           ];
         }
 
+        if (type === QuestionType.SCALE_1_5) {
+          return [
+            { sortableId: crypto.randomUUID(), optionText: "1", isCorrect: false, displayOrder: 1 },
+            { sortableId: crypto.randomUUID(), optionText: "2", isCorrect: false, displayOrder: 2 },
+            { sortableId: crypto.randomUUID(), optionText: "3", isCorrect: false, displayOrder: 3 },
+            { sortableId: crypto.randomUUID(), optionText: "4", isCorrect: false, displayOrder: 4 },
+            { sortableId: crypto.randomUUID(), optionText: "5", isCorrect: false, displayOrder: 5 },
+          ];
+        }
+
         if (singleChoiceTypes.includes(type)) {
           return [
             { sortableId: crypto.randomUUID(), optionText: "", isCorrect: false, displayOrder: 1 },
