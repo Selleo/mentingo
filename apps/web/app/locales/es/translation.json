@@ -2314,7 +2314,7 @@
           "fillInTheBlanksText": "Relleno de huecos (texto)",
           "briefResponse": "Respuesta corta",
           "detailedResponse": "Texto libre",
-          "scale1_5": "Escala del 1 al 5",
+          "scale_1_5": "Escala del 1 al 5",
           "selectQuestionType": "Seleccionar tipo de pregunta",
           "contentLessonDescription": "Texto con multimedia (imágenes, vídeos, presentaciones).",
           "quizLessonDescription": "Un conjunto de preguntas para comprobar conocimientos.",
@@ -2779,7 +2779,8 @@
       "passingThreshold": "Umbral de aprobación: {{threshold}}% ({{correct}} de preguntas {{questionsNumber}})",
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
-      "openInNewTab": "Abrir en nueva pestaña"
+      "openInNewTab": "Abrir en nueva pestaña",
+      "scale_1_5": "Escala del 1 al 5"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",

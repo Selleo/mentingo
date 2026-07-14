@@ -2259,7 +2259,7 @@
           "fillInTheBlanksText": "Doplňování mezer (text)",
           "briefResponse": "Krátká odpověď",
           "detailedResponse": "Volný text",
-          "scale1_5": "Stupnice 1 až 5",
+          "scale_1_5": "Stupnice 1 až 5",
           "selectQuestionType": "Vyberte typ otázky",
           "contentLessonDescription": "Text s multimédii (obrázky, videa, prezentace).",
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
@@ -2724,7 +2724,8 @@
       "passingThreshold": "Hranice pro splnění: {{threshold}}% ({{correct}} z {{questionsNumber}} otázek)",
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
-      "openInNewTab": "Otevřít na nové kartě"
+      "openInNewTab": "Otevřít na nové kartě",
+      "scale_1_5": "Otázka typu škála (1–5)"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",

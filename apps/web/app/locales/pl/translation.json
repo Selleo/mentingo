@@ -2543,7 +2543,7 @@
           "fillInTheBlanksText": "Uzupełnij luki (text)",
           "briefResponse": "Krótka odpowiedź",
           "detailedResponse": "Odpowiedź rozwinięta",
-          "scale1_5": "Skala 1 do 5",
+          "scale_1_5": "Skala 1 do 5",
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "taskDescriptionTooltip": "Krótko opisz, co uczestnik powinien zrobić podczas rozmowy z AI mentorem.",
@@ -3017,7 +3017,8 @@
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
-      "openInNewTab": "Otwórz w nowej karcie"
+      "openInNewTab": "Otwórz w nowej karcie",
+      "scale_1_5": "Pytanie typu skala (1-5)"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",

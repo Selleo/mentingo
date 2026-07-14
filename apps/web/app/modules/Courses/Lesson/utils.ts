@@ -31,6 +31,7 @@ export const getUserAnswers = (questions: Questions): QuizForm => {
     fillInTheBlanksDnd: prepareOptionAnswers(groupedQuestions.fill_in_the_blanks_dnd),
     briefResponses: prepareOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareOpenAnswers(groupedQuestions.detailed_response),
+    scaleQuestions: prepareOptionAnswers(groupedQuestions.scale_1_5),
   } as const;
 };
 
@@ -51,6 +52,7 @@ export const getEmptyQuizAnswers = (questions: Questions): QuizForm => {
     fillInTheBlanksDnd: prepareEmptyOptionAnswers(groupedQuestions.fill_in_the_blanks_dnd),
     briefResponses: prepareEmptyOpenAnswers(groupedQuestions.brief_response),
     detailedResponses: prepareEmptyOpenAnswers(groupedQuestions.detailed_response),
+    scaleQuestions: prepareEmptyOptionAnswers(groupedQuestions.scale_1_5),
   };
 };
 

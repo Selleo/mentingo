@@ -2718,7 +2718,8 @@
       "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
-      "openInNewTab": "In neuem Tab öffnen"
+      "openInNewTab": "In neuem Tab öffnen",
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",

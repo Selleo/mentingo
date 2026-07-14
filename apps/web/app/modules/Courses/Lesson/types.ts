@@ -32,6 +32,11 @@ export type QuizForm = {
       [key: string]: string | null;
     };
   };
+  scaleQuestions: {
+    [key: string]: {
+      [key: string]: string | null;
+    };
+  };
 };
 
 export type LessonPreviewUser = {

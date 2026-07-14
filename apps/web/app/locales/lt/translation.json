@@ -2259,7 +2259,7 @@
           "fillInTheBlanksText": "Spragų užpildymas (tekstas)",
           "briefResponse": "Trumpas atsakymas",
           "detailedResponse": "Laisvas tekstas",
-          "scale1_5": "Skalė nuo 1 iki 5",
+          "scale_1_5": "Skalė nuo 1 iki 5",
           "selectQuestionType": "Pasirinkite klausimo tipą",
           "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
@@ -2724,7 +2724,8 @@
       "passingThreshold": "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
-      "openInNewTab": "Atidaryti naujame skirtuke"
+      "openInNewTab": "Atidaryti naujame skirtuke",
+      "scale_1_5": "Domanda di tipo scala (1–5)"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
