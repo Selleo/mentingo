@@ -31,7 +31,9 @@ interface LessonFormProps {
   setInput: Dispatch<SetStateAction<string>>;
   messages: UIMessage[];
   hasTaskDescription: boolean;
-  onOpenTaskDescription: () => void;
+  taskDescription: string;
+  onJudge: () => Promise<void>;
+  isJudgePending: boolean;
 }
 
 export const LessonForm = ({
@@ -48,12 +50,15 @@ export const LessonForm = ({
   setInput,
   messages,
   hasTaskDescription,
-  onOpenTaskDescription,
+  taskDescription,
+  onJudge,
+  isJudgePending,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isVoiceMentorAudioStarted, setIsVoiceMentorAudioStarted] = useState(false);
+  const [isVoiceJudgePending, setIsVoiceJudgePending] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const [mentorVoiceLevel, setMentorVoiceLevel] = useState(0);
   const [latestTranscript, setLatestTranscript] = useState("");
@@ -223,6 +228,24 @@ export const LessonForm = ({
     }
   };
 
+  const judgeVoiceMentorLesson = async () => {
+    if (isVoiceJudgePending) return;
+
+    setIsVoiceJudgePending(true);
+
+    try {
+      const canceled = await cancelVoiceMentor();
+      if (!canceled) return;
+
+      voiceModeUI.onMicCaptureStopped();
+      setVoiceLevel(0);
+      setMentorVoiceLevel(0);
+      await onJudge();
+    } finally {
+      setIsVoiceJudgePending(false);
+    }
+  };
+
   return (
     <div className="relative mt-3 w-full">
       <form
@@ -300,7 +323,9 @@ export const LessonForm = ({
         mentorName={mentorName}
         mentorAvatarUrl={mentorAvatarUrl}
         hasTaskDescription={hasTaskDescription}
-        onOpenTaskDescription={onOpenTaskDescription}
+        taskDescription={taskDescription}
+        onJudge={() => void judgeVoiceMentorLesson()}
+        isJudgePending={isJudgePending || isVoiceJudgePending}
         isMicMuted={isVoiceMentorMuted}
         onMicMutedChange={(muted) => void setVoiceMentorMuted(muted)}
         onExit={() => void closeVoiceOverlay()}

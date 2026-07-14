@@ -3176,6 +3176,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Interfejs głosowy",
+          "options": "Opcje",
           "exit": "Zamknij tryb głosowy",
           "mute": "Wycisz",
           "unmute": "Włącz mikrofon",

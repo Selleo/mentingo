@@ -2938,6 +2938,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Voice UI",
+          "options": "Options",
           "exit": "Exit voice mode",
           "mute": "Mute",
           "unmute": "Unmute",

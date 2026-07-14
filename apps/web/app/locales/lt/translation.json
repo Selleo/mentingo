@@ -2877,6 +2877,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Balso vartotojo sąsaja",
+          "options": "Parinktys",
           "exit": "Išeikite iš balso režimo",
           "mute": "Nutildyti",
           "unmute": "Įjungti mikrofoną",

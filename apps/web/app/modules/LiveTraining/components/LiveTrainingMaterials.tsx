@@ -57,6 +57,7 @@ type MaterialsSectionProps = {
   onOpen: (material: LiveTrainingMaterial) => void;
   onRemove: (resourceId: string) => void;
   isLocked?: boolean;
+  lockedMessageTestId?: string;
 };
 
 const ACCEPTED_FILE_TYPES = [
@@ -184,6 +185,7 @@ function MaterialsSection({
   onOpen,
   onRemove,
   isLocked,
+  lockedMessageTestId,
 }: MaterialsSectionProps) {
   const { t } = useTranslation();
   const isSectionLocked = !canEditMaterials && isLocked;
@@ -205,7 +207,9 @@ function MaterialsSection({
               <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
                 <Lock className="size-5" />
               </span>
-              <p className="text-sm text-neutral-950">{t("liveTrainingView.files.afterLocked")}</p>
+              <p data-testid={lockedMessageTestId} className="text-sm text-neutral-950">
+                {t("liveTrainingView.files.afterLocked")}
+              </p>
             </div>
           ))
           .with([false, true], () => (
@@ -325,6 +329,7 @@ export function LiveTrainingMaterials({
         onOpen={handleOpen}
         onRemove={handleRemove}
         isLocked={isAfterTabLocked}
+        lockedMessageTestId={LIVE_TRAINING_HANDLES.AFTER_FILES_LOCKED_MESSAGE}
       />
     </div>
   );
