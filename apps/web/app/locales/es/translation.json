@@ -487,20 +487,20 @@
   },
   "liveTrainingView": {
     "title": "Formación en vivo",
-    "description": "Esta página contendrá el espacio de trabajo completo de formación en vivo.",
+    "description": "Esta página contendrá el espacio de trabajo completo de la formación en vivo.",
     "errors": {
-      "idRequired": "El ID de la formación en vivo es obligatorio."
+      "idRequired": "Se requiere el ID de la formación en vivo."
     },
     "status": {
-      "scheduled": "Programado",
-      "active": "Activo",
-      "ended": "Terminado",
-      "cancelled": "Cancelado",
-      "expired": "Caducado"
+      "scheduled": "Programada",
+      "active": "Activa",
+      "ended": "Finalizada",
+      "cancelled": "Cancelada",
+      "expired": "Caducada"
     },
     "deliveryType": {
-      "online": "En línea",
-      "offline": "En persona"
+      "online": "Online",
+      "offline": "Presencial"
     },
     "visibility": {
       "all": "Todos los usuarios",
@@ -515,46 +515,46 @@
     },
     "stage": {
       "preview": "Vista previa de la sesión",
-      "activeTitle": "La sesión en vivo está activa.",
-      "waitingTitle": "La sesión está esperando",
-      "runtimeDeferred": "El tiempo de ejecución de la reunión se conectará en un segmento posterior. Los dispositivos multimedia no se inician desde esta vista previa.",
-      "activeBadge": "Activo",
+      "activeTitle": "La sesión en vivo está activa",
+      "waitingTitle": "La sesión está en espera",
+      "runtimeDeferred": "El tiempo de ejecución de la reunión se conectará más adelante. Los dispositivos multimedia no se inician desde esta vista previa.",
+      "activeBadge": "Activa",
       "waitingBadge": "En espera",
       "participants": "Participantes",
-      "viewerMic": "Micrófono del visor",
-      "viewerCamera": "Cámara del visor",
-      "scheduleTooltip": "Tiempo de entrenamiento planificado",
-      "timezoneTooltip": "Zona horaria de entrenamiento",
-      "maxParticipantsTooltip": "Participantes máximos",
-      "locationTooltip": "Lugar de entrenamiento",
-      "offlineTitle": "Entrenamiento presencial",
-      "locationMissing": "La ubicación no ha sido establecida."
+      "viewerMic": "Micrófono del espectador",
+      "viewerCamera": "Cámara del espectador",
+      "scheduleTooltip": "Hora prevista de la formación",
+      "timezoneTooltip": "Zona horaria de la formación",
+      "maxParticipantsTooltip": "Máximo de participantes",
+      "locationTooltip": "Lugar de la formación",
+      "offlineTitle": "Formación presencial",
+      "locationMissing": "No se ha establecido la ubicación"
     },
     "sidebar": {
       "lifecycle": "Ciclo de vida de la sesión",
       "status": "Estado",
       "participants": "Participantes",
-      "peak": "Pico",
+      "peak": "Pico máximo",
       "people": "Personas",
       "author": "Autor",
       "host": "Anfitrión",
       "hosts": "Anfitriones",
-      "noHosts": "No hay hosts asignados",
+      "noHosts": "No hay anfitriones asignados",
       "trainer": "Formador",
       "trainers": "Formadores",
-      "noTrainers": "No hay entrenadores asignados",
+      "noTrainers": "No hay formadores asignados",
       "unknownUser": "Usuario desconocido",
-      "details": "Detalles del entrenamiento",
-      "maxParticipants": "Máximo de participantes",
+      "details": "Detalles de la formación",
+      "maxParticipants": "Participantes máx.",
       "visibility": "Visibilidad",
       "courses": "Cursos vinculados",
       "location": "Ubicación",
       "addHost": "Añadir",
-      "addHostHint": "Agregar anfitrión",
-      "removeHost": "Eliminar el host {{name}}",
+      "addHostHint": "Añadir anfitrión",
+      "removeHost": "Eliminar anfitrión {{name}}",
       "addTrainer": "Añadir",
-      "addTrainerHint": "Agregar entrenador",
-      "removeTrainer": "Quitar entrenador {{name}}",
+      "addTrainerHint": "Añadir formador",
+      "removeTrainer": "Eliminar formador {{name}}",
       "searchPeople": "Buscar personas",
       "noUserResults": "No se encontraron usuarios",
       "loadingUsers": "Cargando usuarios",
@@ -564,30 +564,30 @@
       "overview": "Resumen",
       "files": "Archivos",
       "sessions": "Sesiones",
-      "settings": "Configuración"
+      "settings": "Ajustes"
     },
     "files": {
-      "title": "Archivos de formación en vivo",
-      "description": "Los materiales se dividen según cuándo los estudiantes deben usarlos.",
-      "beforeHeading": "Antes del entrenamiento",
-      "beforeDescription": "Materiales disponibles antes de que comience la capacitación.",
-      "afterHeading": "Después del entrenamiento",
+      "title": "Archivos de la formación en vivo",
+      "description": "Los materiales se dividen según cuándo deben usarlos los estudiantes.",
+      "beforeHeading": "Antes de la formación",
+      "beforeDescription": "Materiales disponibles antes de que comience la formación.",
+      "afterHeading": "Después de la formación",
       "afterDescription": "Materiales disponibles una vez finalizada la formación.",
       "empty": "Aún no hay archivos adjuntos.",
-      "afterLocked": "Los archivos posteriores a la sesión se desbloquean cuando finaliza la capacitación.",
-      "addFile": "Agregar archivo",
+      "afterLocked": "Los materiales se desbloquearán al finalizar la formación.",
+      "addFile": "Sube un archivo o arrástralo y suéltalo aquí",
       "download": "Descargar",
       "removeFile": "Eliminar {{title}}",
       "sizeInMb": "{{size}} MB",
       "toast": {
-        "uploaded": "Se ha agregado el archivo.",
-        "removed": "El archivo ha sido eliminado."
+        "uploaded": "Se ha añadido el archivo.",
+        "removed": "Se ha eliminado el archivo."
       }
     },
     "meeting": {
       "previewLabel": "Sesión en vivo",
       "waitingTitle": "La sesión está lista para unirse",
-      "activeTitle": "La sesión está activa.",
+      "activeTitle": "La sesión está activa",
       "inSession": "En sesión",
       "roomTitle": "Sala en vivo",
       "participants_one": "{{count}} participante",
@@ -596,19 +596,19 @@
       "camera": "Cámara",
       "screenShare": "Compartir pantalla",
       "screen": "Pantalla",
-      "presentOnStage": "Presente en el escenario",
+      "presentOnStage": "Presentar en el escenario",
       "leave": "Salir",
       "finish": "Finalizar sesión",
-      "sessionEndedToast": "Tu sesión {{trainingName}} ha finalizado",
+      "sessionEndedToast": "Su sesión {{trainingName}} ha finalizado",
       "finishDialog": {
-        "title": "¿Terminar sesión?",
-        "lastHostDescription": "Eres el único anfitrión en esta sala. Al salir finalizará la sesión para todos.",
-        "otherHostsDescription": "Otros anfitriones todavía están en esta sala. Puedes salir y la sesión continuará.",
+        "title": "¿Finalizar la sesión?",
+        "lastHostDescription": "Eres el único anfitrión en esta sala. Si sales, la sesión finalizará para todos.",
+        "otherHostsDescription": "Aún hay otros anfitriones en esta sala. Puedes salir y la sesión continuará.",
         "cancel": "Cancelar",
         "confirmEnd": "Finalizar sesión",
         "confirmLeave": "Salir de la sesión"
       },
-      "empty": "Esperando a los participantes",
+      "empty": "Esperando participantes",
       "materials": "Materiales",
       "beforeMaterials": "Antes",
       "afterMaterials": "Después",
@@ -616,71 +616,71 @@
     },
     "sessions": {
       "title": "Sesiones",
-      "description": "Cada sesión iniciada se almacena por separado con su asistencia.",
-      "empty": "Aún no se han iniciado sesiones.",
+      "description": "Cada sesión iniciada se guarda por separado con su asistencia.",
+      "empty": "Aún no se ha iniciado ninguna sesión.",
       "activeParticipants_one": "{{count}} participante activo",
       "activeParticipants_other": "{{count}} participantes activos",
       "uniqueParticipants_one": "{{count}} participante único",
       "uniqueParticipants_other": "{{count}} participantes únicos",
-      "peakParticipants": "Pico {{count}}",
-      "startedBy": "Iniciado por",
-      "endedBy": "Terminado por",
-      "notEnded": "No terminado",
+      "peakParticipants": "Pico máximo {{count}}",
+      "startedBy": "Iniciada por",
+      "endedBy": "Finalizada por",
+      "notEnded": "No finalizada",
       "notAvailable": "N/D",
-      "endReason": "Razón final",
-      "noEndReason": "No hay razón final",
+      "endReason": "Motivo de finalización",
+      "noEndReason": "Sin motivo de finalización",
       "status": {
         "waiting": "En espera",
-        "active": "Activo",
-        "ended": "Terminado",
-        "failed": "Fallido"
+        "active": "Activa",
+        "ended": "Finalizada",
+        "failed": "Fallida"
       },
       "roles": {
         "host": "Anfitrión",
-        "co_trainer": "Coformador",
+        "co_trainer": "Co-formador",
         "moderator": "Moderador",
         "observer": "Observador",
-        "admin": "Administrador"
+        "admin": "Admin"
       },
       "attendance": {
-        "empty": "Aún no se ha registrado asistencia a esta sesión.",
+        "empty": "Aún no se ha registrado ninguna asistencia para esta sesión.",
         "user": "Usuario",
         "role": "Rol",
         "totalTime": "Tiempo de asistencia",
-        "firstJoinedAt": "Se unió por primera vez",
+        "firstJoinedAt": "Primera unión",
         "lastLeftAt": "Última salida",
-        "joinCount": "Se une"
+        "joinCount": "Uniones"
       },
       "toast": {
-        "started": "Se ha iniciado la sesión.",
+        "started": "La sesión ha comenzado.",
         "ended": "La sesión ha finalizado."
       }
     },
     "attendance": {
       "title": "Asistencia",
-      "description": "Los intervalos de asistencia y participantes se implementarán en el segmento de tiempo de ejecución."
+      "description": "La asistencia y los intervalos de los participantes se implementarán en el entorno de ejecución."
     },
     "settings": {
-      "title": "Configuración",
-      "description": "Las configuraciones de sesión utilizadas con menos frecuencia vivirán aquí."
+      "title": "Ajustes",
+      "description": "Los ajustes de sesión menos frecuentes se encontrarán aquí."
     },
     "boolean": {
       "yes": "Sí",
       "no": "No"
     },
     "deleteDialog": {
-      "title": "¿Eliminar formación en vivo?",
+      "title": "¿Eliminar la formación en vivo?",
       "description": "Esto cancelará la formación en vivo y la eliminará del calendario. Esta acción no se puede deshacer.",
-      "assignedToLessonsDescription": "Esta formación en vivo está vinculada a {{count}} lección. Elimina primero la lección relacionada antes de eliminar la formación en vivo.",
-      "assignedToLessonsDescription_plural": "Esta formación en vivo está vinculada a {{count}} lecciones. Elimina primero las lecciones relacionadas antes de eliminar la formación en vivo.",
+      "assignedToLessonsDescription": "Esta formación en vivo está vinculada a {{count}} lección. Elimina la lección relacionada primero antes de eliminar la formación en vivo.",
+      "assignedToLessonsDescription_plural": "Esta formación en vivo está vinculada a {{count}} lecciones. Elimina las lecciones relacionadas primero antes de eliminar la formación en vivo.",
       "toast": {
-        "success": "La formación en vivo se eliminó correctamente."
+        "success": "Formación en vivo eliminada con éxito."
       }
     },
     "edit": {
       "saveChanges": "Guardar cambios",
       "toast": {
-        "success": "La formación en vivo se actualizó correctamente."
+        "success": "Formación en vivo actualizada con éxito."
       }
     }
   },
@@ -3441,7 +3441,7 @@
       "invalidData": "Error al cargar el archivo: datos de archivo no válidos",
       "fileEmpty": "Error al cargar el archivo: el archivo está vacío",
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
-      "invalidFileType": "Tipo de archivo no válido. Cargue un archivo PNG o SVG.",
+      "invalidFileType": "Tipo de archivo no válido.",
       "missingTenantContext": "Falta contexto de inquilino para la carga de archivos",
       "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}."
     },
