@@ -404,7 +404,9 @@ export const chapters = pgTable(
     lessonCount: integer("lesson_count").notNull().default(0),
     tenantId,
   },
-  withTenantIdIndex("chapters"),
+  withTenantIdIndex("chapters", (table) => ({
+    courseIdIdx: index("chapters_tenant_id_course_id_idx").on(table.tenantId, table.courseId),
+  })),
 );
 
 export const lessons = pgTable(
@@ -427,7 +429,13 @@ export const lessons = pgTable(
     isExternal: boolean("is_external").default(false),
     tenantId,
   },
-  withTenantIdIndex("lessons"),
+  withTenantIdIndex("lessons", (table) => ({
+    chapterTypeIdx: index("lessons_tenant_id_chapter_id_type_idx").on(
+      table.tenantId,
+      table.chapterId,
+      table.type,
+    ),
+  })),
 );
 
 export const calendarEvents = pgTable(
@@ -1165,6 +1173,12 @@ export const studentCourses = pgTable(
   },
   withTenantIdIndex("student_courses", (table) => ({
     unq: unique().on(table.studentId, table.courseId),
+    courseStatusStudentIdx: index("student_courses_tenant_id_course_status_student_idx").on(
+      table.tenantId,
+      table.courseId,
+      table.status,
+      table.studentId,
+    ),
   })),
 );
 
@@ -1215,6 +1229,9 @@ export const studentLessonProgress = pgTable(
   },
   withTenantIdIndex("student_lesson_progress", (table) => ({
     unq: unique().on(table.studentId, table.lessonId, table.chapterId),
+    completedQuizScoreIdx: index("student_lesson_progress_completed_quiz_score_idx")
+      .on(table.tenantId, table.lessonId, table.studentId)
+      .where(sql`${table.completedAt} IS NOT NULL AND ${table.quizScore} IS NOT NULL`),
   })),
 );
 

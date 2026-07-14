@@ -308,6 +308,212 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("GET /api/course/:courseId/statistics/average-quiz-score", () => {
+    const createAverageQuizScoreFixture = async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const firstStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const secondStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const unenrolledStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const deletedStudent = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.STUDENT,
+        deletedAt: new Date().toISOString(),
+      });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        title: "Average quiz score course",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Average quiz score chapter",
+        displayOrder: 1,
+        lessonCount: 2,
+      });
+      const [firstQuiz, secondQuiz] = await db
+        .insert(lessons)
+        .values([
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "First quiz"),
+            description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+            thresholdScore: 0,
+            displayOrder: 1,
+          },
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Second quiz"),
+            description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+            thresholdScore: 0,
+            displayOrder: 2,
+          },
+        ])
+        .returning();
+      const completedAt = new Date().toISOString();
+
+      await db.insert(studentCourses).values([
+        {
+          studentId: firstStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+        {
+          studentId: secondStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+        {
+          studentId: unenrolledStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+        },
+        {
+          studentId: deletedStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+      ]);
+      await db.insert(studentLessonProgress).values([
+        {
+          studentId: firstStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 80,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: secondStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 100,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: firstStudent.id,
+          chapterId: chapter.id,
+          lessonId: secondQuiz.id,
+          quizScore: 50,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: unenrolledStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 20,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: deletedStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 40,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+      ]);
+
+      return {
+        admin,
+        course,
+        firstQuiz,
+        secondQuiz,
+        firstStudent,
+        secondStudent,
+      };
+    };
+
+    it("returns averages for active enrolled students only", async () => {
+      const { admin, course, firstQuiz, secondQuiz } = await createAverageQuizScoreFixture();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([
+            {
+              quizId: firstQuiz.id,
+              name: "First quiz",
+              averageScore: 90,
+              finishedCount: 2,
+              lessonOrder: 1,
+            },
+            {
+              quizId: secondQuiz.id,
+              name: "Second quiz",
+              averageScore: 50,
+              finishedCount: 1,
+              lessonOrder: 2,
+            },
+          ]);
+        });
+    });
+
+    it("filters averages by group membership", async () => {
+      const { admin, course, firstQuiz, secondQuiz, firstStudent } =
+        await createAverageQuizScoreFixture();
+      const group = await groupFactory.withMembers([firstStudent.id]).create();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, groupId: group.id })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([
+            {
+              quizId: firstQuiz.id,
+              name: "First quiz",
+              averageScore: 80,
+              finishedCount: 1,
+              lessonOrder: 1,
+            },
+            {
+              quizId: secondQuiz.id,
+              name: "Second quiz",
+              averageScore: 50,
+              finishedCount: 1,
+              lessonOrder: 2,
+            },
+          ]);
+        });
+    });
+
+    it("returns an empty list for an empty group filter", async () => {
+      const { admin, course } = await createAverageQuizScoreFixture();
+      const emptyGroup = await groupFactory.withMembers([]).create();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, groupId: emptyGroup.id })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([]);
+        });
+    });
+  });
+
   describe("POST /api/course/:courseId/scorm-export", () => {
     it("exports a SCORM zip and rewrites reused lesson assets to the packaged file", async () => {
       const category = await categoryFactory.create();

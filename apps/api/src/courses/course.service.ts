@@ -3819,55 +3819,78 @@ export class CourseService {
     query: CourseStatisticsQueryBody,
     language: SupportedLanguages,
   ): Promise<CourseAverageQuizScoresResponse> {
-    const conditions = await this.getStatisticsConditions(query);
+    const groupStudentIds = query.groupId ? await this.getUserIdsByGroup(query.groupId) : [];
+
+    if (query.groupId && groupStudentIds.length === 0) {
+      return { averageScoresPerQuiz: [] };
+    }
+
+    const conditions = [
+      eq(chapters.courseId, courseId),
+      eq(lessons.type, LESSON_TYPES.QUIZ),
+      isNotNull(studentLessonProgress.completedAt),
+      isNotNull(studentLessonProgress.quizScore),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      isNull(users.deletedAt),
+    ];
+
+    if (groupStudentIds.length) {
+      conditions.push(inArray(studentLessonProgress.studentId, groupStudentIds));
+    }
+
+    const quizAverages = this.db
+      .select({
+        quizId: sql<UUIDType>`${lessons.id}`.as("quiz_id"),
+        quizName: this.localizationService
+          .getLocalizedSqlField(lessons.title, language, courses)
+          .as("quiz_name"),
+        lessonOrder: sql<number>`${lessons.displayOrder}`.as("lesson_order"),
+        averageScore: sql<number>`ROUND(AVG(${studentLessonProgress.quizScore}), 0)`.as(
+          "average_score",
+        ),
+        finishedCount: countDistinct(studentLessonProgress.studentId).as("finished_count"),
+      })
+      .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .innerJoin(studentLessonProgress, eq(studentLessonProgress.lessonId, lessons.id))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, studentLessonProgress.studentId),
+          eq(studentCourses.courseId, chapters.courseId),
+        ),
+      )
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(and(...conditions))
+      .groupBy(
+        lessons.id,
+        lessons.title,
+        lessons.displayOrder,
+        courses.availableLocales,
+        courses.baseLanguage,
+      )
+      .as("quiz_averages");
 
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
-        (
-          SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
-          FROM (
-            SELECT
-              ${lessons.id} AS quiz_id,
-              ${this.localizationService.getLocalizedSqlField(
-                lessons.title,
-                language,
-                courses,
-              )} AS quiz_name,
-              ${lessons.displayOrder} AS lesson_order,
-              ROUND(AVG(${studentLessonProgress.quizScore}), 0) AS average_score,
-              COUNT(DISTINCT ${studentLessonProgress.studentId}) AS finished_count
-            FROM ${lessons}
-            JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
-            JOIN ${chapters} ON ${lessons.chapterId} = ${chapters.id}
-            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${
-              studentCourses.studentId
-            } AND ${studentCourses.courseId} = ${chapters.courseId}
-            JOIN ${users} AS active_users ON active_users.id = ${
-              studentCourses.studentId
-            } AND active_users.deleted_at IS NULL
-            JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
-            WHERE ${chapters.courseId} = ${courseId}
-              AND ${lessons.type} = 'quiz'
-              AND ${studentLessonProgress.completedAt} IS NOT NULL
-              AND ${studentLessonProgress.quizScore} IS NOT NULL
-              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
-              AND ${conditions.length ? sql`${and(...conditions)}` : true}
-            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${
-              courses.availableLocales
-            }, ${courses.baseLanguage}
-          ) AS subquery
-        ),
-        '[]'::jsonb
-      )`,
+          jsonb_agg(
+            jsonb_build_object(
+              'quizId', ${quizAverages.quizId},
+              'name', ${quizAverages.quizName},
+              'averageScore', ${quizAverages.averageScore},
+              'finishedCount', ${quizAverages.finishedCount},
+              'lessonOrder', ${quizAverages.lessonOrder}
+            )
+            ORDER BY ${quizAverages.lessonOrder}
+          ),
+          '[]'::jsonb
+        )`,
       })
-      .from(studentLessonProgress)
-      .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
-      .leftJoin(courses, eq(chapters.courseId, courses.id))
-      .leftJoin(studentCourses, eq(courses.id, studentCourses.courseId))
-      .where(and(eq(courses.id, courseId)));
+      .from(quizAverages);
 
-    return averageScorePerQuiz;
+    return averageScorePerQuiz ?? { averageScoresPerQuiz: [] };
   }
 
   private async getStatisticsConditions(
