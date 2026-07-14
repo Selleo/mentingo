@@ -13,6 +13,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
+import * as cookie from "cookie";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -54,6 +55,18 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getAccessTokenFromCookies = (cookies: string | string[]) => {
+  for (const cookieString of Array.isArray(cookies) ? cookies : [cookies]) {
+    const parsedCookie = cookie.parse(cookieString);
+
+    if (parsedCookie.access_token) {
+      return parsedCookie.access_token;
+    }
+  }
+
+  throw new Error("Access token cookie not found");
+};
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
@@ -2733,6 +2746,7 @@ describe("CourseController (e2e)", () => {
         },
       });
       const cookies = await cookieFor(author, app);
+      const accessToken = getAccessTokenFromCookies(cookies);
 
       await request(app.getHttpServer())
         .patch(`/api/course/${course.id}`)
@@ -2742,7 +2756,7 @@ describe("CourseController (e2e)", () => {
           showAuthorSection: false,
           learningOutcomes: ["Updated outcome", "Second updated outcome"],
         })
-        .set("Cookie", cookies)
+        .set("Authorization", `Bearer ${accessToken}`)
         .expect(200);
 
       const response = await request(app.getHttpServer())
