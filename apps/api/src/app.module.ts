@@ -25,6 +25,7 @@ import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { SlackStrategy } from "./auth/strategy/slack.strategy";
+import { AutomationsModule } from "./automations/automations.module";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
 import { CalendarModule } from "./calendar/calendar.module";
@@ -185,6 +186,7 @@ import type { RedisClient } from "src/redis";
     LumaModule,
     LiveTrainingModule,
     CalendarModule,
+    AutomationsModule,
   ],
   controllers: [],
   providers: [

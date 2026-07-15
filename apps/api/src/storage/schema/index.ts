@@ -48,6 +48,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { primaryKey } from "drizzle-orm/pg-core";
 
+import { AutomationStatus } from "src/announcements/types/automations.types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
 import {
   DEFAULT_LEARNING_PATH_SETTINGS,
@@ -2484,8 +2485,10 @@ export const learningPathEntityMap = pgTable(
     ),
   }),
 );
-const automationStatus = pgEnum("automation_status", ["enabled", "disabled", "archived", "draft"]);
-
+const automationStatus = pgEnum(
+  "automation_status",
+  Object.values(AutomationStatus) as [string, ...string[]],
+);
 export const automations = pgTable("automations", {
   ...id,
   ...timestamps,
