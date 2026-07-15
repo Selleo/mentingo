@@ -1,10 +1,10 @@
 import { faker } from "@faker-js/faker";
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import { AI_MENTOR_TTS_PRESET, AI_MENTOR_VOICE_MODE, DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
 import { Factory } from "fishery";
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
-import { aiMentorLessons, lessons } from "src/storage/schema";
+import { aiJudgeConfigurations, aiMentorLessons, lessons } from "src/storage/schema";
 
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
 
@@ -16,7 +16,7 @@ export type AiMentorLessonTest = Omit<
   "tenantId" | "aiMentorInstructions" | "completionConditions"
 > & {
   aiMentorInstructions: string;
-  completionConditions: string;
+  taskGoal: string;
 };
 
 const ensureChapter = async (db: DatabasePg, chapterId?: UUIDType) => {
@@ -48,7 +48,6 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         .values({
           lessonId: lesson.id,
           aiMentorInstructions: buildJsonbField("en", aiMentorLesson.aiMentorInstructions),
-          completionConditions: buildJsonbField("en", aiMentorLesson.completionConditions),
           type: aiMentorLesson.type,
           voiceMode: aiMentorLesson.voiceMode,
           ttsPreset: aiMentorLesson.ttsPreset,
@@ -56,10 +55,16 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         })
         .returning();
 
+      await db.insert(aiJudgeConfigurations).values({
+        aiMentorLessonId: createdAiMentorLesson.id,
+        taskGoal: buildJsonbField("en", aiMentorLesson.taskGoal),
+        passingThresholdPercent: 0,
+      });
+
       return {
         ...createdAiMentorLesson,
         aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
-        completionConditions: aiMentorLesson.completionConditions,
+        taskGoal: aiMentorLesson.taskGoal,
       };
     });
 
@@ -69,8 +74,8 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
       updatedAt: new Date().toISOString(),
       lessonId: faker.string.uuid(),
       aiMentorInstructions: faker.commerce.productDescription(),
-      completionConditions: faker.commerce.productDescription(),
-      type: AI_MENTOR_TYPE.MENTOR,
+      taskGoal: faker.commerce.productDescription(),
+      type: DEFAULT_AI_MENTOR_TYPE,
       name: "AI Mentor",
       avatarReference: null,
       voiceMode: AI_MENTOR_VOICE_MODE.PRESET,

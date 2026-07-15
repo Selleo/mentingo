@@ -2900,7 +2900,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3192,7 +3192,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3266,7 +3266,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3347,7 +3347,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3483,7 +3483,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3612,7 +3612,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3686,7 +3686,7 @@ describe("CourseController (e2e)", () => {
       await db.insert(lessons).values({
         chapterId: chapter.id,
         type: LESSON_TYPES.QUIZ,
-        title: "Quiz",
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
         thresholdScore: 0,
       });
 

@@ -2,6 +2,7 @@ import { Type } from "@sinclair/typebox";
 
 import { chapterSchema } from "src/chapter/schemas/chapter.schema";
 import { baseCourseSchema } from "src/courses/schemas/createCourse.schema";
+import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
 import { adminOptionSchema, adminQuestionSchema, lessonSchema } from "src/lesson/lesson.schema";
 
 import type { Static } from "@sinclair/typebox";
@@ -59,7 +60,7 @@ const niceCourseData = Type.Intersect([
               Type.Partial(
                 Type.Object({
                   aiMentorInstructions: Type.String(),
-                  completionConditions: Type.String(),
+                  aiJudgeConfiguration: aiJudgeConfigurationInputSchema,
                 }),
               ),
             ]),

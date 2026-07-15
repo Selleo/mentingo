@@ -7,10 +7,13 @@ import {
 } from "@repo/shared";
 import { capitalize } from "lodash-es";
 import { Camera, Minus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useReplaceAiJudgeConfiguration } from "~/api/mutations/admin/useReplaceAiJudgeConfiguration";
+import { useUpdateAiJudgeConfigurationTranslation } from "~/api/mutations/admin/useUpdateAiJudgeConfigurationTranslation";
 import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
+import { useAiJudgeConfiguration } from "~/api/queries/admin/useAiJudgeConfiguration";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { queryClient } from "~/api/queryClient";
@@ -56,9 +59,17 @@ import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../e2e/data/cur
 import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
+import {
+  hasMissingAiJudgeConfigurationTranslations,
+  mapAiJudgeConfigurationDraftToBaseInput,
+  mapAiJudgeConfigurationDraftToTranslationInput,
+  mapAiJudgeConfigurationResponseToDraft,
+} from "./ai-judge/aiJudgeConfiguration.mappers";
+import { AiJudgeConfigurationCard } from "./ai-judge/AiJudgeConfigurationCard";
 import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
 import UpdateAiAvatarModal from "./UpdateAiAvatarModal";
 
+import type { AiJudgeConfigurationDraft } from "./ai-judge/aiJudgeConfiguration.types";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -68,6 +79,7 @@ type AiMentorLessonProps = {
   lessonToEdit: Lesson | null;
   setSelectedLesson: (selectedLesson: Lesson | null) => void;
   language: SupportedLanguages;
+  baseLanguage: SupportedLanguages;
 };
 
 const AiMentorLessonForm = ({
@@ -76,7 +88,20 @@ const AiMentorLessonForm = ({
   lessonToEdit,
   setSelectedLesson,
   language,
+  baseLanguage,
 }: AiMentorLessonProps) => {
+  const { mutateAsync: replaceAiJudgeConfiguration, isPending: isReplacingAiJudgeConfiguration } =
+    useReplaceAiJudgeConfiguration();
+  const saveStagedAiJudgeConfiguration = async (configuration: AiJudgeConfigurationDraft) => {
+    if (!lessonToEdit) return;
+
+    await replaceAiJudgeConfiguration({
+      lessonId: lessonToEdit.id,
+      language: baseLanguage,
+      data: mapAiJudgeConfigurationDraftToBaseInput(configuration),
+    });
+  };
+
   const {
     form,
     onSubmit,
@@ -91,6 +116,8 @@ const AiMentorLessonForm = ({
     lessonToEdit,
     setContentTypeToDisplay,
     language,
+    baseLanguage,
+    onSaveStagedAiJudgeConfiguration: saveStagedAiJudgeConfiguration,
   });
 
   const { t } = useTranslation();
@@ -101,6 +128,14 @@ const AiMentorLessonForm = ({
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
+  const {
+    mutateAsync: updateAiJudgeConfigurationTranslation,
+    isPending: isUpdatingAiJudgeConfigurationTranslation,
+  } = useUpdateAiJudgeConfigurationTranslation();
+  const lessonId = lessonToEdit?.id ?? "";
+  const { data: savedAiJudgeConfiguration, isLoading: isAiJudgeConfigurationLoading } =
+    useAiJudgeConfiguration(lessonId, language);
+  const { data: baseAiJudgeConfiguration } = useAiJudgeConfiguration(lessonId, baseLanguage);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     lessonToEdit?.avatarReferenceUrl ?? null,
@@ -116,6 +151,62 @@ const AiMentorLessonForm = ({
       : "adminCourseView.curriculum.lesson.other.voiceConfigCartesiaTooltip";
 
   const objectUrlRef = useRef<string | null>(null);
+  const stagedAiJudgeConfiguration = form.watch("aiJudgeConfiguration");
+  const persistedAiJudgeConfiguration = useMemo(
+    () =>
+      savedAiJudgeConfiguration
+        ? mapAiJudgeConfigurationResponseToDraft(savedAiJudgeConfiguration)
+        : undefined,
+    [savedAiJudgeConfiguration],
+  );
+  const aiJudgeConfiguration = stagedAiJudgeConfiguration ?? persistedAiJudgeConfiguration;
+  const isAiJudgeConfigurationDirty = Boolean(form.formState.dirtyFields.aiJudgeConfiguration);
+
+  useEffect(() => {
+    if (!lessonToEdit || !persistedAiJudgeConfiguration || isAiJudgeConfigurationDirty) return;
+
+    form.setValue("aiJudgeConfiguration", persistedAiJudgeConfiguration, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [form, isAiJudgeConfigurationDirty, lessonToEdit, persistedAiJudgeConfiguration]);
+
+  const hasMissingAiJudgeTranslations =
+    language !== baseLanguage &&
+    hasMissingAiJudgeConfigurationTranslations(baseAiJudgeConfiguration, savedAiJudgeConfiguration);
+  const hasMissingTranslations = Boolean(
+    lessonToEdit &&
+      language !== baseLanguage &&
+      (!lessonToEdit.title.trim() ||
+        !lessonToEdit.aiMentor?.aiMentorInstructions.trim() ||
+        hasMissingAiJudgeTranslations),
+  );
+
+  const handleAiJudgeBaseConfigurationSave = async (
+    configuration: NonNullable<typeof aiJudgeConfiguration>,
+  ) => {
+    if (lessonToEdit) {
+      await saveStagedAiJudgeConfiguration(configuration);
+      return;
+    }
+
+    form.setValue("aiJudgeConfiguration", configuration, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleAiJudgeTranslationSave = async (
+    configuration: NonNullable<typeof aiJudgeConfiguration>,
+  ) => {
+    if (!lessonToEdit) return;
+
+    await updateAiJudgeConfigurationTranslation({
+      lessonId: lessonToEdit.id,
+      language,
+      data: mapAiJudgeConfigurationDraftToTranslationInput(configuration),
+    });
+  };
 
   useEffect(() => {
     setAvatarPreview(lessonToEdit?.avatarReferenceUrl ?? null);
@@ -199,7 +290,7 @@ const AiMentorLessonForm = ({
           data-testid={AI_MENTOR_LESSON_FORM_HANDLES.ROOT}
           className="relative flex flex-col gap-y-6 rounded-lg bg-white p-8"
         >
-          {lessonToEdit && !lessonToEdit.title.trim() && <MissingTranslationsAlert />}
+          {hasMissingTranslations && <MissingTranslationsAlert />}
           <div className="flex flex-col gap-y-1">
             {!lessonToEdit && (
               <Breadcrumb
@@ -553,59 +644,29 @@ const AiMentorLessonForm = ({
               ) : null}
 
               <div className="mb-4">
-                <div className="mb-2 grid gap-3 lg:grid-cols-2">
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="aiMentorInstructions" className="block">
-                      <span className="mr-1 text-red-500">*</span>
-                      {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
-                          <Icon
-                            name="Info"
-                            className="h-auto w-6 cursor-default text-neutral-800"
-                          />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        align="center"
-                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                      >
-                        {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
-                        <TooltipArrow className="fill-black" />
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Label htmlFor="completionConditions" className="block">
-                      <span className="mr-1 text-red-500">*</span>
-                      {t("adminCourseView.curriculum.lesson.field.completionConditions")}
-                    </Label>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span>
-                          <Icon
-                            name="Info"
-                            className="h-auto w-6 cursor-default text-neutral-800"
-                          />
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent
-                        side="top"
-                        align="center"
-                        className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                      >
-                        {t("adminCourseView.curriculum.lesson.other.completionConditionsTooltip")}
-                        <TooltipArrow className="fill-black" />
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
+                <div className="mb-2 flex items-center gap-2">
+                  <Label htmlFor="aiMentorInstructions" className="block">
+                    <span className="mr-1 text-red-500">*</span>
+                    {t("adminCourseView.curriculum.lesson.field.aiMentorInstructions")}
+                  </Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Icon name="Info" className="h-auto w-6 cursor-default text-neutral-800" />
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      align="center"
+                      className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                    >
+                      {t("adminCourseView.curriculum.lesson.other.aiMentorInstructionsTooltip")}
+                      <TooltipArrow className="fill-black" />
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
 
-                <div className="grid overflow-hidden rounded-lg border border-neutral-300 bg-white lg:grid-cols-2">
+                <div className="overflow-hidden rounded-lg border border-neutral-300 bg-white">
                   <FormField
                     control={form.control}
                     name="aiMentorInstructions"
@@ -632,35 +693,27 @@ const AiMentorLessonForm = ({
                       </FormItem>
                     )}
                   />
-
-                  <FormField
-                    control={form.control}
-                    name="completionConditions"
-                    render={({ field }) => (
-                      <FormItem className="flex min-h-0 flex-1 flex-col border-t border-neutral-200 lg:border-l lg:border-t-0">
-                        <FormControl>
-                          <div
-                            data-testid={AI_MENTOR_LESSON_FORM_HANDLES.COMPLETION_CONDITIONS_INPUT}
-                            className="h-[22rem] min-h-0"
-                          >
-                            <BaseEditor
-                              parentClassName="flex h-full min-h-0 flex-col rounded-none border-0 border-t border-neutral-100"
-                              contentClassName="min-h-0 flex-1 overflow-y-auto"
-                              editorClassName="!min-h-0"
-                              content={field.value}
-                              placeholder={t(
-                                "adminCourseView.curriculum.lesson.placeholder.completionConditions",
-                              )}
-                              {...field}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
               </div>
+              <AiJudgeConfigurationCard
+                value={aiJudgeConfiguration}
+                onSaveBaseConfiguration={handleAiJudgeBaseConfigurationSave}
+                onSaveTranslation={handleAiJudgeTranslationSave}
+                language={language}
+                baseLanguage={baseLanguage}
+                isPersisted={Boolean(lessonToEdit)}
+                isLoading={Boolean(lessonToEdit) && isAiJudgeConfigurationLoading}
+                isSaving={
+                  isReplacingAiJudgeConfiguration || isUpdatingAiJudgeConfigurationTranslation
+                }
+                error={
+                  form.formState.errors.aiJudgeConfiguration
+                    ? t(
+                        "adminCourseView.curriculum.lesson.aiJudge.validation.configurationRequired",
+                      )
+                    : undefined
+                }
+              />
               <div className="mb-6 rounded-lg bg-neutral-50 p-4">
                 <h3 className="mb-3 text-sm font-semibold text-neutral-900">
                   {t("adminCourseView.curriculum.lesson.other.suggestedExamples")}

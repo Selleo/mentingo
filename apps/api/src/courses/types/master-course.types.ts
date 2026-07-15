@@ -4,6 +4,10 @@ import type { InferInsertModel, InferSelectModel, SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { ResourceRelationshipType } from "src/file/file.constants";
 import type {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorLessons,
   categories,
   chapters,
@@ -180,6 +184,15 @@ export type QuestionAnswerOptionJsonbUpdate = Partial<
 export type AiMentorLessonSelect = InferSelectModel<typeof aiMentorLessons>;
 export type AiMentorLessonInsert = InferInsertModel<typeof aiMentorLessons>;
 
+export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
+export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
+export type AiJudgeCriterionSelect = InferSelectModel<typeof aiJudgeCriteria>;
+export type AiJudgeCriterionInsert = InferInsertModel<typeof aiJudgeCriteria>;
+export type AiJudgeScoreGuidanceSelect = InferSelectModel<typeof aiJudgeScoreGuidance>;
+export type AiJudgeScoreGuidanceInsert = InferInsertModel<typeof aiJudgeScoreGuidance>;
+export type AiJudgeBlockingErrorSelect = InferSelectModel<typeof aiJudgeBlockingErrors>;
+export type AiJudgeBlockingErrorInsert = InferInsertModel<typeof aiJudgeBlockingErrors>;
+
 export type DocumentSelect = InferSelectModel<typeof documents>;
 export type DocumentInsert = InferInsertModel<typeof documents>;
 
@@ -212,6 +225,10 @@ export type SourceSnapshot = {
   questions: Array<QuestionSelect>;
   options: Array<QuestionAnswerOptionSelect>;
   aiMentors: Array<AiMentorLessonSelect>;
+  aiJudgeConfigurations: Array<AiJudgeConfigurationSelect>;
+  aiJudgeCriteria: Array<AiJudgeCriterionSelect>;
+  aiJudgeScoreGuidance: Array<AiJudgeScoreGuidanceSelect>;
+  aiJudgeBlockingErrors: Array<AiJudgeBlockingErrorSelect>;
   aiMentorDocumentLinks: Array<DocumentToAiMentorLessonSelect>;
   aiMentorDocuments: Array<DocumentSelect>;
   aiMentorDocChunks: Array<DocChunkSelect>;

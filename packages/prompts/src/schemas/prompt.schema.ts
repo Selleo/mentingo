@@ -2,9 +2,8 @@ import { Type } from "@sinclair/typebox";
 
 export const judgePromptSchema = Type.Object({
   language: Type.String(),
-  lessonInstructions: Type.String(),
   lessonTitle: Type.String(),
-  lessonConditions: Type.String(),
+  assessmentConfiguration: Type.String(),
 });
 
 export const aiPromptSchema = Type.Object({

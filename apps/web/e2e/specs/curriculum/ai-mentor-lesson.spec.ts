@@ -44,7 +44,6 @@ test("admin can create and preview an AI mentor lesson", async ({
       name: "Ada",
       description: formattedDescriptionText,
       instructions: "Ask concise questions.",
-      completionConditions: "Learner answers two questions.",
     });
     const descriptionEditor = page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT)

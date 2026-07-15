@@ -15,6 +15,10 @@ import { userHasAnyPermissionsCondition } from "src/common/permissions/permissio
 import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorLessons,
   categories,
   chapters,
@@ -37,6 +41,10 @@ import {
 } from "src/storage/schema";
 
 import type {
+  AiJudgeBlockingErrorInsert,
+  AiJudgeConfigurationInsert,
+  AiJudgeCriterionInsert,
+  AiJudgeScoreGuidanceInsert,
   AiMentorLessonInsert,
   CategoryJsonbInsert,
   CategoryJsonbUpdate,
@@ -375,6 +383,37 @@ export class MasterCourseRepository {
       .where(inArray(aiMentorLessons.lessonId, lessonIds));
   }
 
+  async getSourceAiJudgeConfigurations(aiMentorLessonIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiJudgeConfigurations)
+      .where(inArray(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessonIds));
+  }
+
+  async getSourceAiJudgeCriteria(configurationIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiJudgeCriteria)
+      .where(inArray(aiJudgeCriteria.configurationId, configurationIds))
+      .orderBy(asc(aiJudgeCriteria.createdAt));
+  }
+
+  async getSourceAiJudgeScoreGuidance(criterionIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiJudgeScoreGuidance)
+      .where(inArray(aiJudgeScoreGuidance.criterionId, criterionIds))
+      .orderBy(asc(aiJudgeScoreGuidance.createdAt));
+  }
+
+  async getSourceAiJudgeBlockingErrors(configurationIds: UUIDType[]) {
+    return this.db
+      .select()
+      .from(aiJudgeBlockingErrors)
+      .where(inArray(aiJudgeBlockingErrors.configurationId, configurationIds))
+      .orderBy(asc(aiJudgeBlockingErrors.createdAt));
+  }
+
   async getSourceAiMentorDocumentLinks(aiMentorIds: UUIDType[]) {
     if (!aiMentorIds.length) return [];
 
@@ -634,6 +673,74 @@ export class MasterCourseRepository {
 
   async updateAiMentor(aiMentorId: UUIDType, values: Partial<AiMentorLessonInsert>) {
     await this.db.update(aiMentorLessons).set(values).where(eq(aiMentorLessons.id, aiMentorId));
+  }
+
+  async findAiJudgeConfigurationByAiMentorLessonId(
+    aiMentorLessonId: UUIDType,
+    dbInstance: DatabasePg,
+  ) {
+    const [configuration] = await dbInstance
+      .select({ id: aiJudgeConfigurations.id })
+      .from(aiJudgeConfigurations)
+      .where(eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessonId))
+      .limit(1);
+
+    return configuration;
+  }
+
+  async createAiJudgeConfiguration(
+    values: AiJudgeConfigurationInsert,
+    dbInstance: DatabasePg,
+  ): Promise<UUIDType> {
+    const [configuration] = await dbInstance
+      .insert(aiJudgeConfigurations)
+      .values(values)
+      .returning({ id: aiJudgeConfigurations.id });
+
+    return configuration.id;
+  }
+
+  async updateAiJudgeConfiguration(
+    configurationId: UUIDType,
+    values: Partial<AiJudgeConfigurationInsert>,
+    dbInstance: DatabasePg,
+  ) {
+    await dbInstance
+      .update(aiJudgeConfigurations)
+      .set(values)
+      .where(eq(aiJudgeConfigurations.id, configurationId));
+  }
+
+  async deleteAiJudgeCriteria(configurationId: UUIDType, dbInstance: DatabasePg) {
+    await dbInstance
+      .delete(aiJudgeCriteria)
+      .where(eq(aiJudgeCriteria.configurationId, configurationId));
+  }
+
+  async deleteAiJudgeBlockingErrors(configurationId: UUIDType, dbInstance: DatabasePg) {
+    await dbInstance
+      .delete(aiJudgeBlockingErrors)
+      .where(eq(aiJudgeBlockingErrors.configurationId, configurationId));
+  }
+
+  async createAiJudgeCriterion(
+    values: AiJudgeCriterionInsert,
+    dbInstance: DatabasePg,
+  ): Promise<UUIDType> {
+    const [criterion] = await dbInstance
+      .insert(aiJudgeCriteria)
+      .values(values)
+      .returning({ id: aiJudgeCriteria.id });
+
+    return criterion.id;
+  }
+
+  async createAiJudgeScoreGuidance(values: AiJudgeScoreGuidanceInsert, dbInstance: DatabasePg) {
+    await dbInstance.insert(aiJudgeScoreGuidance).values(values);
+  }
+
+  async createAiJudgeBlockingError(values: AiJudgeBlockingErrorInsert, dbInstance: DatabasePg) {
+    await dbInstance.insert(aiJudgeBlockingErrors).values(values);
   }
 
   async removeAiMentorDocumentLinks(aiMentorLessonIds: UUIDType[]) {

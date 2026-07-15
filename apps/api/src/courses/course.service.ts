@@ -16,7 +16,6 @@ import {
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
-  type LocalizedText,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -76,10 +75,12 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
+import { AiJudgeConfigurationTranslationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-translation.service";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { AiMentorLessonTranslationService } from "src/lesson/services/aiMentorLessonTranslation.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { LumaService } from "src/luma/luma.service";
@@ -193,7 +194,10 @@ import type {
   CourseDueDateReminderDays,
   CourseDueDateReminderRecipient,
 } from "src/courses/types/course-due-date-reminder.types";
-import type { CourseTranslationType } from "src/courses/types/course.types";
+import type {
+  ContextualCourseTranslationType,
+  CourseTranslationType,
+} from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
@@ -237,6 +241,8 @@ export class CourseService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
+    private readonly aiMentorLessonTranslationService: AiMentorLessonTranslationService,
+    private readonly aiJudgeConfigurationTranslationService: AiJudgeConfigurationTranslationService,
     private readonly learningTimeRepository: LearningTimeRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
@@ -1559,14 +1565,24 @@ export class CourseService {
       currentUser,
     );
 
-    return (
+    const hasMissingCourseFields =
       this.collectMissingTranslationFields(
         id,
         courseInRequestedLanguage,
         courseInBaseLanguage,
         true,
-      ).length > 0
-    );
+      ).length > 0;
+
+    if (hasMissingCourseFields) return true;
+
+    const missingJudgeFields =
+      await this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        id,
+        language,
+        courseInRequestedLanguage.baseLanguage,
+      );
+
+    return missingJudgeFields.length > 0;
   }
 
   async getContentCreatorCourses({
@@ -2611,9 +2627,9 @@ export class CourseService {
     const [course] = await this.db
       .select({
         authorId: courses.authorId,
-        title: sql<LocalizedText>`${courses.title}`,
-        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        title: courses.title,
+        baseLanguage: courses.baseLanguage,
+        availableLocales: courses.availableLocales,
       })
       .from(courses)
       .where(eq(courses.id, courseId));
@@ -4841,11 +4857,29 @@ export class CourseService {
 
     const courseInBaseLanguage = await this.getBetaCourseById(courseId, baseLanguage, currentUser);
 
-    const { flat: missingData, withContext } = this.collectMissingTranslationFieldsWithContext(
+    const courseTranslations = this.collectMissingTranslationFieldsWithContext(
       courseId,
       courseInRequestedLanguage,
       courseInBaseLanguage,
     );
+    const [mentorTranslations, judgeTranslations] = await Promise.all([
+      this.aiMentorLessonTranslationService.getMissingTranslations(
+        courseId,
+        language,
+        baseLanguage,
+      ),
+      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        courseId,
+        language,
+        baseLanguage,
+      ),
+    ]);
+    const generatedTranslations = [...mentorTranslations, ...judgeTranslations];
+    const missingData = [
+      ...courseTranslations.flat,
+      ...generatedTranslations.map(({ data }) => data),
+    ];
+    const withContext = [...courseTranslations.withContext, ...generatedTranslations];
 
     if (!missingData.length) {
       throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
@@ -5171,20 +5205,7 @@ export class CourseService {
         }>;
       }>;
     };
-    withContext: Array<{
-      data: CourseTranslationType;
-      metadata: string;
-      context: {
-        courseTitle?: string;
-        chapterTitle?: string;
-        lessonTitle?: string;
-        lessonDescription?: string;
-        questionTitle?: string;
-        questionDescription?: string;
-        questionOptions?: string;
-        optionText?: string;
-      };
-    }>;
+    withContext: ContextualCourseTranslationType[];
   } {
     const flat = this.collectMissingTranslationFields(courseId, course, baseCourse);
     const grouped = {

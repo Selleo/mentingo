@@ -9,6 +9,27 @@ export type CourseTranslationType = {
   idColumn: AnyPgColumn;
 };
 
+export type CourseTranslationContext = {
+  courseTitle?: string;
+  chapterTitle?: string;
+  lessonTitle?: string;
+  lessonDescription?: string;
+  questionTitle?: string;
+  questionDescription?: string;
+  questionOptions?: string;
+  optionText?: string;
+  aiJudgeTaskGoal?: string;
+  aiJudgeCriterionTitle?: string;
+  aiJudgeExpectedBehavior?: string;
+  aiJudgeScore?: string;
+};
+
+export type ContextualCourseTranslationType = {
+  data: CourseTranslationType;
+  metadata: string;
+  context: CourseTranslationContext;
+};
+
 export type CreateChapterForCourseData = {
   courseId: UUIDType;
   authorId: UUIDType;

@@ -1135,6 +1135,27 @@
       "when": 1783673985611,
       "tag": "0161_add_require_password_change_field",
       "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1784109199035,
+      "tag": "0162_add_ai_judge_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1784109252645,
+      "tag": "0163_backfill_ai_judge_task_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1784109254568,
+      "tag": "0164_enable_ai_judge_rls",
+      "breakpoints": true
     }
   ]
 }

@@ -75,23 +75,18 @@ describe("AiController (e2e)", () => {
             SUPPORTED_LANGUAGES.PL,
             "Polish mentor instructions",
           ),
-          completionConditions: setJsonbField(
-            aiMentorLessons.completionConditions,
-            SUPPORTED_LANGUAGES.PL,
-            "Polish completion conditions",
-          ),
         })
         .where(eq(aiMentorLessons.id, aiMentorLessonId));
     };
 
-    it("resolves prompt instructions and completion conditions in the thread language", async () => {
+    it("resolves prompt instructions in the thread language", async () => {
       const threadOwner = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const aiMentorLesson = await aiMentorLessonFactory.create({
         aiMentorInstructions: "English mentor instructions",
-        completionConditions: "English completion conditions",
+        taskGoal: "English task goal",
       });
       const courseId = await getCourseIdForAiMentorLesson(aiMentorLesson.lessonId);
 
@@ -125,9 +120,7 @@ describe("AiController (e2e)", () => {
       );
 
       expect(polishLesson.instructions).toBe("Polish mentor instructions");
-      expect(polishLesson.conditions).toBe("Polish completion conditions");
       expect(fallbackLesson.instructions).toBe("English mentor instructions");
-      expect(fallbackLesson.conditions).toBe("English completion conditions");
     });
   });
 

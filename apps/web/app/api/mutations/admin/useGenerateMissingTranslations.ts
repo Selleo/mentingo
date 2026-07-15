@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
+import { AI_JUDGE_CONFIGURATION_QUERY_KEY } from "~/api/queries/admin/useAiJudgeConfiguration";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { COURSE_TRANSLATIONS_QUERY_KEY } from "~/api/queries/admin/useHasMissingTranslations";
 import { queryClient } from "~/api/queryClient";
@@ -13,6 +14,23 @@ import type { SupportedLanguages } from "@repo/shared";
 type GenerateTranslationsOptions = {
   courseId: string;
   language: SupportedLanguages;
+};
+
+export const invalidateGeneratedTranslationQueries = async ({
+  courseId,
+  language,
+}: GenerateTranslationsOptions) => {
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: [COURSE_QUERY_KEY, { id: courseId, language }],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId, language }],
+    }),
+    queryClient.invalidateQueries({
+      queryKey: AI_JUDGE_CONFIGURATION_QUERY_KEY,
+    }),
+  ]);
 };
 
 export default function useGenerateMissingTranslations() {
@@ -30,15 +48,7 @@ export default function useGenerateMissingTranslations() {
       return response.data;
     },
     onSuccess: async (_, variables) => {
-      const { courseId, language } = variables;
-
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY, { id: courseId, language }],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId, language }],
-      });
+      await invalidateGeneratedTranslationQueries(variables);
 
       toast({
         description: t("adminCourseView.toast.translationsGeneratedSuccessfully"),

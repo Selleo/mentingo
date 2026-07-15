@@ -54,7 +54,9 @@
       "live_training": "Živé školení"
     },
     "error": {
-      "somethingWentWrong": "Jejda! Něco se pokazilo."
+      "somethingWentWrong": "Jejda! Něco se pokazilo.",
+      "threadMustBeActive": "Vlákno musí být aktivní.",
+      "aiJudgeConfigurationMissing": "Konfigurace AI Judge chybí."
     },
     "loader": {
       "textSequence": {
@@ -2218,6 +2220,80 @@
           "customTTSReference": "Zadejte vlastní referenční ID TTS...",
           "aiMentorTypes": "Učitel"
         },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Nakonfigurováno",
+          "emptyDescription": "Určete, jak bude odpověď studenta hodnocena a kdy bude lekce splněna.",
+          "baseLanguageRequired": "Před překladem vytvořte strukturu hodnocení v základním jazyce kurzu.",
+          "structureLockedTooltip": "Strukturu hodnocení lze měnit pouze v základním jazyce kurzu.",
+          "summary": "{{criteria}} kritéria · celkem {{score}} bodů · {{threshold}} % pro splnění · {{blockingErrors}} blokující chyby",
+          "configureWithAi": "Nastavit pomocí AI",
+          "configureManually": "Nastavit ručně",
+          "editAssessment": "Upravit hodnocení",
+          "dialogTitle": "Nastavit AI Judge",
+          "dialogDescription": "Nastavte měřitelná kritéria, přesné pokyny k bodování a chyby, které vždy znamenají nesplnění.",
+          "translationModeTitle": "Režim překladu",
+          "translationModeDescription": "Zde můžete překládat text hodnocení. Body, práh a struktura se spravují v základním jazyce kurzu.",
+          "taskGoal": "Cíl úkolu",
+          "taskGoalPlaceholder": "Popište měřitelný výsledek, kterého má student dosáhnout...",
+          "passingThreshold": "Práh pro splnění",
+          "criteria": "Kritéria hodnocení",
+          "addFirstCriterion": "Přidat první kritérium",
+          "criterionNumber": "Kritérium {{number}}",
+          "untitledCriterion": "Kritérium bez názvu",
+          "complete": "Dokončeno",
+          "needsDetails": "Chybí podrobnosti",
+          "criterionDescription": "Popište jedno pozorovatelné chování studenta.",
+          "criterionTitle": "Název kritéria",
+          "criterionTitlePlaceholder": "např. Zjišťuje potřeby klienta",
+          "expectedBehavior": "Očekávané chování",
+          "expectedBehaviorPlaceholder": "Vysvětlete, co má student říci nebo udělat...",
+          "maxScore": "Maximální počet bodů",
+          "score": "Body",
+          "scoringGuidance": "Pokyny k bodování",
+          "advancedScoring": "Pokročilé pokyny k bodování",
+          "scoreLevelsCount": "Úrovně bodů: {{count}}",
+          "scoreBadge": "{{score}} b.",
+          "itemsCount": "Přidáno: {{count}}",
+          "scoringSummary": "Bodování",
+          "pointsRequired": "Pro splnění je třeba {{required}} z {{total}} bodů",
+          "scoringGuidanceDescription": "Volitelně popište, jak vypadá výkon pro konkrétní počet bodů.",
+          "scoreDescription": "Co získá tento počet bodů",
+          "scoreDescriptionPlaceholder": "Popište pozorovatelnou úroveň výkonu...",
+          "acceptedExample": "Přijatelný příklad",
+          "examplePlaceholder": "Přidejte jeden příklad odpovědi...",
+          "addCriterion": "Přidat kritérium",
+          "removeCriterion": "Odebrat kritérium",
+          "addScoreGuidance": "Přidat pokyn k bodování",
+          "removeScoreGuidance": "Odebrat pokyn k bodování",
+          "noScoringGuidance": "Nebyly přidány pokyny pro konkrétní body.",
+          "blockingErrors": "Blokující chyby",
+          "blockingErrorsDescription": "Pokud nastane některá z nich, student neuspěje bez ohledu na počet bodů.",
+          "blockingErrorNumber": "Blokující chyba {{number}}",
+          "blockingErrorPlaceholder": "Popište chybu, která vždy znamená nesplnění...",
+          "addBlockingError": "Přidat blokující chybu",
+          "removeBlockingError": "Odebrat blokující chybu",
+          "noBlockingErrors": "Nejsou nastaveny žádné blokující chyby.",
+          "applyConfiguration": "Použít konfiguraci",
+          "saveConfiguration": "Uložit konfiguraci",
+          "saveTranslation": "Uložit překlad",
+          "configurationSavedSuccessfully": "Konfigurace AI Judge byla uložena.",
+          "translationSavedSuccessfully": "Překlad AI Judge byl uložen.",
+          "validation": {
+            "configurationRequired": "Před uložením této lekce nakonfigurujte AI Judge",
+            "taskGoalRequired": "Cíl úkolu je povinný",
+            "thresholdRange": "Práh pro splnění musí být mezi 1 a 100",
+            "titleRequired": "Název kritéria je povinný",
+            "expectedBehaviorRequired": "Očekávané chování je povinné",
+            "maxScoreRange": "Maximální počet bodů musí být mezi 1 a 5",
+            "scoreRange": "Počet bodů nesmí být záporný",
+            "scoreExceedsMaximum": "Počet bodů nesmí překročit maximum kritéria",
+            "scoreMustBeUnique": "Každý počet bodů v pokynech musí být v kritériu jedinečný",
+            "guidanceRequired": "Popis pokynu k bodování je povinný",
+            "completeGuidanceRequired": "Přidejte pokyny k bodování pro toto kritérium",
+            "blockingErrorRequired": "Popis blokující chyby je povinný"
+          }
+        },
         "courseGenerationComposer": {
           "placeholders": {
             "topic": "Zásady práva na pracovišti pro softwarové týmy včetně smluv, duševního vlastnictví a dodržování předpisů.",
@@ -2311,6 +2387,44 @@
               "problemSolving": "<ul><li>Student uznává příspěvek zaměstnance.</li><li>Student upřímně vysvětlí rozpočtovou situaci.</li><li>Student navrhne nefinanční alternativu (např. další výhody, možnost rozvoje).</li><li>Student souhlasí s tím, že se k tématu vrátí později.</li><li>Student zachovává uctivý a vstřícný tón</strong><strong>3li. Musí být splněno 5 podmínek.",
               "creativeTask": "<ul><li>Student předloží originální nápad.</li><li>Student vysvětlí, kdo je cílová skupina.</li><li>Student popíše, jak by služba mohla poskytnout hodnotu zákazníkům.</li><li>Student identifikuje potenciální výzvy.</li></ul><em>(Není definován žádný práh – musí být splněny všechny podmínky.)</em>",
               "knowledgeSharing": "<ul><li>Student se aktivně zapojuje do konverzace (klade otázky nebo sdílí úvahy).</li><li>Student umí vyjmenovat alespoň jednu techniku ​​řízení času zmíněnou v dialogu.</li><li>Student vyjádří, jak by mohl ve své práci použít jednu techniku.</li></ul><em>(Není definován žádný práh – všechny podmínky jsou doporučeny, ale nejsou povinné pro absolvování.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Přidělte 0 bodů, pokud student neposkytne jasný a pozorovatelný důkaz tohoto chování, vyhne se mu nebo jedná v rozporu s ním: {{expectedBehavior}} Samotná absence přesného příkladu nestačí; posuzujte význam celé odpovědi.",
+              "notMetExample": "Odpověď neobsahuje žádné tvrzení ani jednání, které prokazuje: {{expectedBehavior}}",
+              "metDescription": "Přidělte 1 bod, pokud student toto chování jasně prokáže relevantním způsobem odpovídajícím kontextu: {{expectedBehavior}} Rovnocenné formulace jsou platné; přijatý příklad není nutné opakovat doslovně."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Jaký rozpočtový rozsah jste pro tento projekt vyčlenili?",
+                "1": "Zmínil jste cíl tří měsíců. Je toto datum spuštění pevné?",
+                "2": "Jaký dopad by mělo zpožděné spuštění na vaše podnikání?",
+                "3": "Zdá se, že největšími obavami jsou jistota dodání a jasná komunikace – chápu to správně?",
+                "4": "Vzhledem k tříměsíčnímu termínu a omezenému rozpočtu navrhuji postupné MVP s týdenními kontrolami pokroku."
+              },
+              "problemSolving": {
+                "0": "Vaše nedávná práce měla skutečný přínos a chápu, proč otevíráte otázku odměňování.",
+                "1": "V současném cyklu není rozpočet na zvýšení platů a chci o tom mluvit otevřeně.",
+                "2": "Zvýšení nyní nemohu schválit, ale můžeme probrat rozpočet na rozvoj a další dny volna.",
+                "3": "Za tři měsíce rozpočet znovu prověříme a tento rozhovor naplánujeme už dnes.",
+                "4": "Chápu, že je to zklamání, a oceňuji, že o tom se mnou mluvíte otevřeně."
+              },
+              "creativeTask": {
+                "0": "Navrhuji předplatitelskou službu, která zákazníkům poskytne měsíční kontroly přístupnosti jejich digitálních produktů.",
+                "1": "Služba je určena malým týmům elektronického obchodu bez interního specialisty na přístupnost.",
+                "2": "Snížila by riziko nesouladu a pomohla zákazníkům zvýšit konverzi odstraněním překážek použitelnosti.",
+                "3": "Hlavními riziky jsou dostupnost odborníků a nekonzistentní zákaznická data, proto bychom začali omezeným pilotním projektem."
+              },
+              "knowledgeSharing": {
+                "0": "Která z těchto technik funguje nejlépe, když se priority během dne mění?",
+                "1": "Jednou z technik, o kterých jsme mluvili, je blokování času.",
+                "2": "Každé ráno si vyhradím dva bloky soustředěné práce na úkoly s vysokou prioritou a na konci týdne je vyhodnotím."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Student se zaváže k termínu dodání, ceně nebo rozsahu, který odporuje omezením uvedeným klientem.",
+              "problemSolving": "Student používá vůči zaměstnanci neuctivý, výhružný nebo diskriminační jazyk.",
+              "creativeTask": "Student navrhne službu, která je zjevně nezákonná, diskriminační nebo škodlivá.",
+              "knowledgeSharing": "Student prezentuje smyšlenou nebo nebezpečnou radu jako ověřenou techniku řízení času."
             }
           },
           "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
@@ -2873,6 +2987,13 @@
           "thresholdLabel": "Hranice pro splnění",
           "thresholdValue": "Vyžadováno {{requiredScore}}/{{maxScore}} ({{threshold}}%)",
           "feedbackTitle": "Co zlepšit",
+          "criticalErrorsTitle": "Co zabránilo splnění",
+          "criteriaTitle": "Hodnocení podle kritérií",
+          "criterionScore": "{{score}}/{{maxScore}} b.",
+          "noFeedbackTitle": "Podrobná zpětná vazba není k dispozici",
+          "noFeedbackDescription": "Toto hodnocení neobsahuje bodovaná kritéria a ve vašem pokusu nebyly zjištěny žádné kritické chyby.",
+          "loadingTitle": "Kontrolujeme váš pokus",
+          "loadingDescription": "Porovnáváme konverzaci s kritérii lekce. Může to chvíli trvat.",
           "openDetails": "Otevřít podrobnosti hodnocení"
         },
         "voiceOverlay": {
@@ -4435,7 +4556,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu."
+      "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu.",
+      "invalidAiJudgeConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci hodnocení. Zkuste kurz vygenerovat znovu."
     }
   },
   "liveTraining": {

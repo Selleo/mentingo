@@ -325,6 +325,7 @@ export class MasterCourseService {
       resourceCollection,
     });
 
+    await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
     await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, params.tenantId);
     await this.syncScormPackages({
       exportId: params.targetCourseId,
@@ -635,6 +636,7 @@ export class MasterCourseService {
         lessonMap,
         resourceCollection,
       });
+      await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
       await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, exportLink.targetTenantId);
       await this.syncScormPackages({
         exportId: exportLink.id,
@@ -1243,6 +1245,104 @@ export class MasterCourseService {
     }
 
     return aiMentorMap;
+  }
+
+  private async syncAiJudgeConfigurations(
+    sourceSnapshot: SourceSnapshot,
+    aiMentorMap: Map<UUIDType, UUIDType>,
+  ) {
+    const criteriaByConfiguration = groupBy(
+      sourceSnapshot.aiJudgeCriteria,
+      ({ configurationId }) => configurationId,
+    );
+    const guidanceByCriterion = groupBy(
+      sourceSnapshot.aiJudgeScoreGuidance,
+      ({ criterionId }) => criterionId,
+    );
+    const blockingErrorsByConfiguration = groupBy(
+      sourceSnapshot.aiJudgeBlockingErrors,
+      ({ configurationId }) => configurationId,
+    );
+
+    for (const sourceConfiguration of sourceSnapshot.aiJudgeConfigurations) {
+      const targetAiMentorLessonId = aiMentorMap.get(sourceConfiguration.aiMentorLessonId);
+      if (!targetAiMentorLessonId) continue;
+
+      await this.db.transaction(async (transaction) => {
+        const existingConfiguration =
+          await this.masterCourseRepository.findAiJudgeConfigurationByAiMentorLessonId(
+            targetAiMentorLessonId,
+            transaction,
+          );
+
+        let targetConfigurationId: UUIDType;
+        if (existingConfiguration) {
+          targetConfigurationId = existingConfiguration.id;
+          await this.masterCourseRepository.updateAiJudgeConfiguration(
+            targetConfigurationId,
+            {
+              taskGoal: sourceConfiguration.taskGoal,
+              passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
+            },
+            transaction,
+          );
+        } else {
+          targetConfigurationId = await this.masterCourseRepository.createAiJudgeConfiguration(
+            {
+              aiMentorLessonId: targetAiMentorLessonId,
+              taskGoal: sourceConfiguration.taskGoal,
+              passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
+            },
+            transaction,
+          );
+        }
+
+        await this.masterCourseRepository.deleteAiJudgeCriteria(targetConfigurationId, transaction);
+        await this.masterCourseRepository.deleteAiJudgeBlockingErrors(
+          targetConfigurationId,
+          transaction,
+        );
+
+        for (const sourceCriterion of criteriaByConfiguration[sourceConfiguration.id] ?? []) {
+          const targetCriterionId = await this.masterCourseRepository.createAiJudgeCriterion(
+            {
+              configurationId: targetConfigurationId,
+              maxScore: sourceCriterion.maxScore,
+              title: sourceCriterion.title,
+              expectedBehavior: sourceCriterion.expectedBehavior,
+              createdAt: sourceCriterion.createdAt,
+              updatedAt: sourceCriterion.updatedAt,
+            },
+            transaction,
+          );
+
+          for (const sourceGuidance of guidanceByCriterion[sourceCriterion.id] ?? [])
+            await this.masterCourseRepository.createAiJudgeScoreGuidance(
+              {
+                criterionId: targetCriterionId,
+                score: sourceGuidance.score,
+                description: sourceGuidance.description,
+                example: sourceGuidance.example,
+                createdAt: sourceGuidance.createdAt,
+                updatedAt: sourceGuidance.updatedAt,
+              },
+              transaction,
+            );
+        }
+
+        for (const sourceBlockingError of blockingErrorsByConfiguration[sourceConfiguration.id] ??
+          [])
+          await this.masterCourseRepository.createAiJudgeBlockingError(
+            {
+              configurationId: targetConfigurationId,
+              description: sourceBlockingError.description,
+              createdAt: sourceBlockingError.createdAt,
+              updatedAt: sourceBlockingError.updatedAt,
+            },
+            transaction,
+          );
+      });
+    }
   }
 
   private async syncAiMentorContexts(
