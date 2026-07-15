@@ -46,6 +46,7 @@ import {
   varchar,
   vector,
 } from "drizzle-orm/pg-core";
+import { primaryKey } from "drizzle-orm/pg-core";
 
 import { coursesSettingsSchema } from "src/courses/types/settings";
 import {
@@ -105,6 +106,7 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
 } from "@repo/shared";
+import type { UUID } from "crypto";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
@@ -2482,3 +2484,78 @@ export const learningPathEntityMap = pgTable(
     ),
   }),
 );
+const automationStatus = pgEnum("automation_status", ["enabled", "disabled", "archived", "draft"]);
+
+export const automations = pgTable("automations", {
+  ...id,
+  ...timestamps,
+  tenantId,
+  name: varchar("name", { length: 50 }).notNull(),
+  description: varchar("description", { length: 300 }),
+  lastRun: timestamp("last_run", { mode: "date" }),
+  status: automationStatus("status").notNull(),
+});
+
+export const automationsAutomationSteps = pgTable(
+  "automations_automation_steps",
+  {
+    automationId: uuid("automation_id")
+      .references(() => automations.id)
+      .notNull(),
+    automationStepId: uuid("automation_step_id")
+      .references(() => automationSteps.id)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.automationId, table.automationStepId],
+    }),
+  }),
+);
+type ChildStep = {
+  id: UUID;
+};
+export const automationSteps = pgTable("automation_steps", {
+  ...id,
+  childrenSteps: jsonb("children_steps").$type<ChildStep[]>().default([]),
+});
+
+export const automationStepsAutomationActions = pgTable(
+  "automation_steps_automation_actions",
+  {
+    automationStepId: uuid("automation_step_id")
+      .references(() => automationSteps.id)
+      .notNull(),
+    automationActionId: uuid("automation_action_id")
+      .references(() => automationActions.id)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.automationStepId, table.automationActionId] }),
+  }),
+);
+
+export const automationStepsAutomationCondition = pgTable(
+  "automation_steps_automation_condition",
+  {
+    automationStepId: uuid("automation_step_id")
+      .references(() => automationSteps.id)
+      .notNull(),
+    automationConditionId: uuid("automation_condition_id")
+      .references(() => automationConditions.id)
+      .notNull(),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.automationStepId, table.automationConditionId] }),
+  }),
+);
+
+export const automationActions = pgTable("automation_actions", {
+  ...id,
+  actionName: varchar("action_name", { length: 50 }),
+});
+
+export const automationConditions = pgTable("automation_conditions", {
+  ...id,
+  conditionName: varchar("condition_name", { length: 50 }),
+});
