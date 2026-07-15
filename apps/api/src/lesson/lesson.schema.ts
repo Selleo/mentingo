@@ -82,6 +82,7 @@ export const aiMentorLessonSchema = Type.Object({
   aiMentorInstructions: Type.String(),
   completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
+  name: Type.String(),
   avatarReference: Type.Union([Type.String(), Type.Null()]),
   voiceMode: Type.Enum(AI_MENTOR_VOICE_MODE),
   ttsPreset: Type.Enum(AI_MENTOR_TTS_PRESET),

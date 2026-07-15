@@ -1135,6 +1135,34 @@
       "when": 1783673985611,
       "tag": "0161_add_require_password_change_field",
       "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1784116081637,
+      "tag": "0162_add_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1784116087533,
+      "tag": "0163_backfill_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1784116117967,
+      "tag": "0164_drop_ai_mentor_name_text_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1784116135815,
+      "tag": "0165_rename_ai_mentor_name_translation_column",
+      "breakpoints": true
     }
   ]
 }

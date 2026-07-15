@@ -26451,6 +26451,9 @@
                                       }
                                     ]
                                   },
+                                  "name": {
+                                    "type": "string"
+                                  },
                                   "avatarReference": {
                                     "anyOf": [
                                       {
@@ -26502,6 +26505,7 @@
                                   "aiMentorInstructions",
                                   "completionConditions",
                                   "type",
+                                  "name",
                                   "avatarReference",
                                   "voiceMode",
                                   "ttsPreset",
@@ -29625,6 +29629,9 @@
                                 }
                               ]
                             },
+                            "name": {
+                              "type": "string"
+                            },
                             "avatarReference": {
                               "anyOf": [
                                 {
@@ -29676,6 +29683,7 @@
                             "aiMentorInstructions",
                             "completionConditions",
                             "type",
+                            "name",
                             "avatarReference",
                             "voiceMode",
                             "ttsPreset",
@@ -30132,6 +30140,9 @@
                                     }
                                   ]
                                 },
+                                "name": {
+                                  "type": "string"
+                                },
                                 "avatarReference": {
                                   "anyOf": [
                                     {
@@ -30183,6 +30194,7 @@
                                 "aiMentorInstructions",
                                 "completionConditions",
                                 "type",
+                                "name",
                                 "avatarReference",
                                 "voiceMode",
                                 "ttsPreset",
@@ -32100,6 +32112,9 @@
                           }
                         ]
                       },
+                      "name": {
+                        "type": "string"
+                      },
                       "avatarReference": {
                         "anyOf": [
                           {
@@ -32151,6 +32166,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
+                      "name",
                       "avatarReference",
                       "voiceMode",
                       "ttsPreset",
@@ -32931,6 +32947,9 @@
                           }
                         ]
                       },
+                      "name": {
+                        "type": "string"
+                      },
                       "avatarReference": {
                         "anyOf": [
                           {
@@ -32982,6 +33001,7 @@
                       "aiMentorInstructions",
                       "completionConditions",
                       "type",
+                      "name",
                       "avatarReference",
                       "voiceMode",
                       "ttsPreset",
@@ -33413,6 +33433,9 @@
                               }
                             ]
                           },
+                          "name": {
+                            "type": "string"
+                          },
                           "avatarReference": {
                             "anyOf": [
                               {
@@ -33464,6 +33487,7 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
+                          "name",
                           "avatarReference",
                           "voiceMode",
                           "ttsPreset",
@@ -34607,6 +34631,9 @@
                               }
                             ]
                           },
+                          "name": {
+                            "type": "string"
+                          },
                           "avatarReference": {
                             "anyOf": [
                               {
@@ -34658,6 +34685,7 @@
                           "aiMentorInstructions",
                           "completionConditions",
                           "type",
+                          "name",
                           "avatarReference",
                           "voiceMode",
                           "ttsPreset",

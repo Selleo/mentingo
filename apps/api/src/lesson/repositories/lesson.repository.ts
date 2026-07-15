@@ -165,10 +165,13 @@ export class LessonRepository {
         `,
         aiMentor: sql<{ name: string; avatarReferenceUrl: string } | null>`
           CASE
-            WHEN ai_mentor_lessons.name IS NOT NULL THEN
+            WHEN ${aiMentorLessons.name} IS NOT NULL THEN
               json_build_object(
-                'name', ai_mentor_lessons.name,
-                'avatarReferenceUrl', ai_mentor_lessons.avatar_reference
+                'name', ${this.localizationService.getLocalizedSqlField(
+                  aiMentorLessons.name,
+                  language,
+                )},
+                'avatarReferenceUrl', ${aiMentorLessons.avatarReference}
               )
             ELSE NULL
           END

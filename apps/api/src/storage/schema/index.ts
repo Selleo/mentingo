@@ -789,7 +789,7 @@ export const aiMentorLessons = pgTable(
       .$type<LocalizedText>()
       .default({})
       .notNull(),
-    name: text("name").notNull().default("AI Mentor"),
+    name: jsonb("name").$type<LocalizedText>().default({}).notNull(),
     avatarReference: varchar("avatar_reference", { length: 500 }),
     type: text("type").notNull().default("mentor"),
     voiceMode: text("voice_mode").notNull().default("preset"),

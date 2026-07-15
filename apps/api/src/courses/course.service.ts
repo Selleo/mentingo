@@ -5037,6 +5037,14 @@ export class CourseService {
         if (lesson.type === LESSON_TYPES.AI_MENTOR) {
           yield {
             id: lesson.id,
+            hasValue: Boolean(lesson.aiMentor?.name?.length),
+            baseValue: baseLesson?.aiMentor?.name,
+            field: aiMentorLessons.name,
+            idColumn: aiMentorLessons.lessonId,
+          };
+
+          yield {
+            id: lesson.id,
             hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
             baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
             field: aiMentorLessons.aiMentorInstructions,

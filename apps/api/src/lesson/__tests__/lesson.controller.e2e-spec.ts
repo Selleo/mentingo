@@ -13,7 +13,7 @@ import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -23,8 +23,9 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   aiMentorLessons,
-  lessons,
   chapters,
+  courses,
+  lessons,
   quizAttempts,
   questions,
   questionAnswerOptions,
@@ -359,7 +360,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       const lessonId = createResponse.body.data.id;
 
-      return { admin, adminCookies, courseId: course.id, lessonId };
+      return { admin, adminCookies, chapterId: chapter.id, courseId: course.id, lessonId };
     };
 
     const getAiMentorFromCourse = async (
@@ -394,7 +395,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
           completionConditions: "<p>The learner handles objections in Polish.</p>",
           type: AI_MENTOR_TYPE.MENTOR,
-          name: "AI Mentor",
+          name: "Mentor PL",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
@@ -413,10 +414,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       );
 
       expect(englishAiMentor).toMatchObject({
+        name: "AI Mentor",
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
         completionConditions: "<p>The learner handles objections in English.</p>",
       });
       expect(polishAiMentor).toMatchObject({
+        name: "Mentor PL",
         aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
         completionConditions: "<p>The learner handles objections in Polish.</p>",
       });
@@ -447,9 +450,67 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .expect(200);
 
       expect(response.body.data).toMatchObject({
+        aiMentor: { name: "AI Mentor" },
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
         completionConditions: "<p>The learner handles objections in English.</p>",
       });
+    });
+
+    it("reports a missing translation when only the AI mentor name is untranslated", async () => {
+      const { adminCookies, chapterId, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      await db
+        .update(courses)
+        .set({
+          title: setJsonbField(courses.title, SUPPORTED_LANGUAGES.PL, "Polish course"),
+          description: setJsonbField(
+            courses.description,
+            SUPPORTED_LANGUAGES.PL,
+            "Polish course description",
+          ),
+        })
+        .where(eq(courses.id, courseId));
+      await db
+        .update(chapters)
+        .set({ title: setJsonbField(chapters.title, SUPPORTED_LANGUAGES.PL, "Polish chapter") })
+        .where(eq(chapters.id, chapterId));
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Polish negotiation practice",
+          description: "<p>Practice a Polish sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+          completionConditions: "<p>The learner handles objections in Polish.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      const missingResponse = await request(app.getHttpServer())
+        .get("/api/course/beta-course-missing-translations")
+        .query({ id: courseId, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(missingResponse.body.data.hasMissingTranslations).toBe(true);
+
+      await db
+        .update(aiMentorLessons)
+        .set({
+          name: setJsonbField(aiMentorLessons.name, SUPPORTED_LANGUAGES.PL, "Mentor PL"),
+        })
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      const completeResponse = await request(app.getHttpServer())
+        .get("/api/course/beta-course-missing-translations")
+        .query({ id: courseId, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(completeResponse.body.data.hasMissingTranslations).toBe(false);
     });
 
     it("rejects AI mentor scenario updates for unavailable languages", async () => {

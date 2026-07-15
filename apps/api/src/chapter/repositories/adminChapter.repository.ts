@@ -199,7 +199,7 @@ export class AdminChapterRepository {
               language,
             )},
             'type', ${aiMentorLessons.type},
-            'name', ${aiMentorLessons.name},
+            'name', ${this.localizationService.getFieldByLanguage(aiMentorLessons.name, language)},
             'avatarReference', ${aiMentorLessons.avatarReference},
             'voiceMode', ${aiMentorLessons.voiceMode},
             'ttsPreset', ${aiMentorLessons.ttsPreset},
@@ -208,7 +208,7 @@ export class AdminChapterRepository {
             }->>${language}::text, '')
           )
           FROM ${aiMentorLessons}
-          WHERE lessons.id = ${aiMentorLessons.lessonId} 
+          WHERE lessons.id = ${aiMentorLessons.lessonId}
           LIMIT 1
         )
       `,

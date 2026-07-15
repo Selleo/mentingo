@@ -232,7 +232,7 @@ export class AiRepository {
           language,
         ),
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
-        name: aiMentorLessons.name,
+        name: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))

@@ -13,10 +13,11 @@ import type { DatabasePg, UUIDType } from "src/common";
 
 export type AiMentorLessonTest = Omit<
   InferSelectModel<typeof aiMentorLessons>,
-  "tenantId" | "aiMentorInstructions" | "completionConditions"
+  "tenantId" | "aiMentorInstructions" | "completionConditions" | "name"
 > & {
   aiMentorInstructions: string;
   completionConditions: string;
+  name: string;
 };
 
 const ensureChapter = async (db: DatabasePg, chapterId?: UUIDType) => {
@@ -49,6 +50,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
           lessonId: lesson.id,
           aiMentorInstructions: buildJsonbField("en", aiMentorLesson.aiMentorInstructions),
           completionConditions: buildJsonbField("en", aiMentorLesson.completionConditions),
+          name: buildJsonbField("en", aiMentorLesson.name),
           type: aiMentorLesson.type,
           voiceMode: aiMentorLesson.voiceMode,
           ttsPreset: aiMentorLesson.ttsPreset,
@@ -60,6 +62,7 @@ export const createAiMentorLessonFactory = (db: DatabasePg) => {
         ...createdAiMentorLesson,
         aiMentorInstructions: aiMentorLesson.aiMentorInstructions,
         completionConditions: aiMentorLesson.completionConditions,
+        name: aiMentorLesson.name,
       };
     });
 

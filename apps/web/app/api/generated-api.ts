@@ -2173,6 +2173,7 @@ export interface GetBetaCourseByIdResponse {
           aiMentorInstructions: string;
           completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
+          name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
           ttsPreset: "male" | "female";
@@ -2857,6 +2858,7 @@ export type BetaCreateChapterBody = {
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -2943,6 +2945,7 @@ export type UpdateChapterBody = ({
       aiMentorInstructions: string;
       completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -3265,6 +3268,7 @@ export type BetaCreateLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3457,6 +3461,7 @@ export type BetaCreateAiMentorLessonBody = {
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3537,6 +3542,7 @@ export type BetaUpdateAiMentorLessonBody = ({
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3741,6 +3747,7 @@ export type BetaUpdateLessonBody = ({
     aiMentorInstructions: string;
     completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";

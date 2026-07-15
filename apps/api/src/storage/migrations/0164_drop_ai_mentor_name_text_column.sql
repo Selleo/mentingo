@@ -1,0 +1,1 @@
+ALTER TABLE "ai_mentor_lessons" DROP COLUMN IF EXISTS "name";
