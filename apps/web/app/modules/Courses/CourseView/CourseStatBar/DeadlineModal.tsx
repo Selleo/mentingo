@@ -1,6 +1,7 @@
-import { Calendar, X } from "lucide-react";
+import { Calendar, Check, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 export type GroupDeadline = {
@@ -119,26 +120,26 @@ export default function DeadlineModal({
             ))}
         </div>
         <div className="mt-6 flex flex-col justify-end gap-3 sm:flex-row">
-          <button
-            type="button"
+          <Button
+            variant="outline"
             onClick={onClose}
             disabled={isSaving}
-            className="order-2 w-full rounded-lg bg-neutral-200 px-6 py-2 font-semibold text-neutral-950 transition-colors hover:bg-neutral-300 sm:order-1 sm:w-auto"
+            className="order-2 w-full sm:order-1 sm:w-auto"
           >
             {t("modernCourseView.common.cancel")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={onSave}
             disabled={
               isSaving ||
               groupDeadlines.length === 0 ||
               (deadlineEnabledDraft && groupDeadlines.some((group) => !group.deadline))
             }
-            className="order-1 w-full rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800 sm:order-2 sm:w-auto"
+            className="order-1 flex  items-center justify-center gap-2 sm:order-2"
           >
+            <Check className="size-4" />
             {t("modernCourseView.common.saveChanges")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

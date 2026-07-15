@@ -32,7 +32,7 @@ export default function AuthorStatCard({
       type="button"
       onClick={onOpen}
       className={cn(
-        "cursor-pointer rounded-2xl border-l-4 border-primary-700 bg-white p-4 text-left shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl",
+        "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg transition-all hover:shadow-xl",
         {
           "hover:outline hover:outline-2 hover:outline-dashed hover:outline-primary-700/40":
             isAdminExperience,
@@ -40,6 +40,7 @@ export default function AuthorStatCard({
         },
       )}
     >
+      <div className="absolute inset-y-0 left-0 w-1 bg-primary-700" aria-hidden="true" />
       <div className="flex items-center gap-4">
         <img
           src={author?.profilePictureUrl ?? DEFAULT_AUTHOR_STAT_IMAGE}

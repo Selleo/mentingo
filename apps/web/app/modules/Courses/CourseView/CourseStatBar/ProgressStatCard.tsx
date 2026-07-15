@@ -24,10 +24,11 @@ export default function ProgressStatCard({
     courseChapterCount > 0 ? Math.round((completedChapterCount / courseChapterCount) * 100) : 0;
 
   return (
-    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl border-l-4 border-success-500 bg-white p-4 shadow-lg">
+    <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 shadow-lg">
+      <div className="absolute inset-y-0 left-0 w-1 bg-success-500" aria-hidden="true" />
       <div
         className={cn("flex w-full items-center gap-4 transition-all duration-200", {
-          "opacity-45 group-hover:scale-[0.98] group-hover:blur-[2px]": isAdminExperience,
+          "opacity-45 group-hover:blur-[2px]": isAdminExperience,
         })}
       >
         <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">

@@ -8,6 +8,7 @@ import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
 import { useCategories } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
+import { Button } from "~/components/ui/button";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
@@ -226,29 +227,29 @@ export default function CourseOverview({ language }: CourseHeroProps) {
       >
         {isAdminExperience && (
           <>
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={() => setShowSettingsDrawer(true)}
-              className="absolute left-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-neutral-200 md:left-4 md:top-4 md:px-4 md:py-2"
+              className="absolute left-2 top-2 flex items-center gap-2  shadow-lg backdrop-blur-sm transition md:left-4 md:top-4 "
             >
               <Settings className="size-4 text-primary-700" />
 
               <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
                 {t("modernCourseView.overview.courseSettings")}
               </span>
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="outline"
               onClick={openMediaModal}
-              className="absolute right-2 top-2 flex items-center gap-2 rounded-lg bg-white px-3 py-1.5 shadow-lg backdrop-blur-sm transition hover:bg-neutral-200 md:right-4 md:top-4 md:px-4 md:py-2"
+              className="absolute right-2 top-2 flex items-center gap-2  shadow-lg backdrop-blur-sm transition  md:right-4 md:top-4 "
             >
               <Upload className="size-4 text-primary-700" />
 
               <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
                 {t("modernCourseView.overview.editMedia")}
               </span>
-            </button>
+            </Button>
           </>
         )}
 

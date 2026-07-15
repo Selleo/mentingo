@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 type CourseTitleEditorProps = {
   canEdit: boolean;
   disabled: boolean;
@@ -7,6 +9,11 @@ type CourseTitleEditorProps = {
   onEdit: () => void;
   onSave: () => Promise<void>;
   title: string;
+};
+
+const resizeTextareaToContent = (textarea: HTMLTextAreaElement) => {
+  textarea.style.height = "auto";
+  textarea.style.height = `${textarea.scrollHeight}px`;
 };
 
 export default function CourseTitleEditor({
@@ -19,24 +26,51 @@ export default function CourseTitleEditor({
   onSave,
   title,
 }: CourseTitleEditorProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!isEditing) return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const titleEnd = textarea.value.length;
+    textarea.focus();
+    textarea.setSelectionRange(titleEnd, titleEnd);
+  }, [isEditing]);
+
+  useEffect(() => {
+    if (!isEditing || !textareaRef.current) return;
+
+    resizeTextareaToContent(textareaRef.current);
+  }, [isEditing, title]);
+
   if (isEditing) {
     return (
       <textarea
+        ref={textareaRef}
         value={title}
         disabled={disabled}
         onChange={(event) => {
+          resizeTextareaToContent(event.currentTarget);
           onChange(event.target.value);
         }}
         onBlur={() => {
-          void onSave();
+          onSave();
         }}
         onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            event.currentTarget.blur();
+            return;
+          }
+
           if (event.key === "Escape") {
             onCancel();
           }
         }}
-        className="mb-4 w-full resize-none rounded-lg border-2 border-primary-700 bg-white/95 px-2 py-1 text-2xl font-bold leading-tight text-neutral-950 md:text-3xl lg:text-4xl"
-        rows={2}
+        className="mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-3 text-2xl font-bold leading-tight text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] backdrop-blur-lg md:text-3xl lg:text-4xl"
+        rows={1}
       />
     );
   }
@@ -47,12 +81,12 @@ export default function CourseTitleEditor({
         <button
           type="button"
           onClick={onEdit}
-          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:border-white focus-visible:bg-primary-700"
+          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:border-white focus-visible:bg-primary-700"
         >
           {title}
         </button>
       ) : (
-        title
+        <span className="[text-shadow:0_8px_24px_rgba(0,0,0,0.95)]">{title}</span>
       )}
     </h1>
   );

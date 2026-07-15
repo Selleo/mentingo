@@ -31,15 +31,13 @@ export default function DeadlineStatCard({
           onOpen();
         }
       }}
-      className={cn(
-        "rounded-2xl border-l-4 border-secondary-500 bg-white p-4 text-left shadow-lg",
-        {
-          "cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl hover:outline hover:outline-2 hover:outline-dashed hover:outline-secondary-500/40":
-            isAdminExperience,
-          "opacity-50": isAdminExperience && !hasDeadline,
-        },
-      )}
+      className={cn("relative overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg", {
+        "cursor-pointer transition-all hover:shadow-xl hover:outline hover:outline-2 hover:outline-dashed hover:outline-secondary-500/40":
+          isAdminExperience,
+        "opacity-50": isAdminExperience && !hasDeadline,
+      })}
     >
+      <div className="absolute inset-y-0 left-0 w-1 bg-secondary-500" aria-hidden="true" />
       <div className="flex items-start gap-4">
         <div className="mt-3 flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
           <Calendar className="size-6 text-secondary-500" />

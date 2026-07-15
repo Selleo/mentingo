@@ -1,6 +1,7 @@
 import { Edit2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 export type TableOfContentTab = "toc" | "statistics";
@@ -50,14 +51,10 @@ export default function TableOfContentTabs({
           )}
         </button>
       </div>
-      <button
-        type="button"
-        onClick={onEditContent}
-        className="mb-3 flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary-700 px-3 py-2 text-white transition-colors hover:bg-primary-800 md:px-4"
-      >
+      <Button variant="primary" onClick={onEditContent} className="mb-3 flex items-center gap-2 ">
         <Edit2 className="size-4" />
         <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
-      </button>
+      </Button>
     </div>
   );
 }

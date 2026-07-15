@@ -1,6 +1,7 @@
-import { Award, Clock, Users, X } from "lucide-react";
+import { Award, Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
@@ -161,25 +162,20 @@ export default function AuthorModal({
             </div>
 
             <div className="mt-8 flex justify-end">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isSaving}
-                className="w-full rounded-lg bg-neutral-200 px-6 py-2 font-semibold text-neutral-950 transition-colors hover:bg-neutral-300 sm:w-auto"
-              >
+              <Button variant="outline" onClick={onClose} disabled={isSaving}>
                 {isAdminExperience
                   ? t("modernCourseView.common.cancel")
                   : t("modernCourseView.common.close")}
-              </button>
+              </Button>
               {isAdminExperience && (
-                <button
-                  type="button"
+                <Button
                   onClick={() => void onSave()}
                   disabled={isSaving}
-                  className="ml-3 w-full rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800 disabled:opacity-50 sm:w-auto"
+                  className="order-1 flex  items-center justify-center gap-2 sm:order-2 ml-3"
                 >
+                  <Check className="size-4" />
                   {t("modernCourseView.common.saveChanges")}
-                </button>
+                </Button>
               )}
             </div>
           </div>

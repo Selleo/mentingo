@@ -2,6 +2,8 @@ import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { Play, Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
+
 import type { ChangeEvent, RefObject } from "react";
 
 type CourseMediaModalProps = {
@@ -133,23 +135,17 @@ export default function CourseMediaModal({
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSaving}
-            className="rounded-lg bg-neutral-200 px-6 py-2 font-semibold text-neutral-950 transition-colors hover:bg-neutral-300"
-          >
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>
             {t("modernCourseView.common.cancel")}
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
             onClick={() => void onSave()}
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800"
+            className="flex items-center gap-2"
           >
             <Upload className="size-4" />
             {t("modernCourseView.media.save")}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

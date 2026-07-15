@@ -99,7 +99,7 @@ export default function CourseWhatYouWillLearn({
 
   return (
     <aside className="absolute bottom-8 right-8 z-10 hidden w-[30%] max-w-[520px] rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
-      <h3 className="mb-4 flex items-center gap-3 font-gothic text-2xl font-bold text-white">
+      <h3 className="mb-4 flex items-center gap-3 font-gothic text-2xl font-bold text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.95)]">
         <span className="flex items-center justify-center rounded-full text-success-500">
           <CheckCircle2 className="size-8" />
         </span>
@@ -119,7 +119,7 @@ export default function CourseWhatYouWillLearn({
 
       <div className="space-y-1.5">
         {outcomesDraft.length === 0 && (
-          <p className="text-base font-medium leading-relaxed text-neutral-200">
+          <p className="text-base font-medium leading-relaxed text-neutral-200 [text-shadow:0_8px_24px_rgba(0,0,0,0.95)]">
             {t("modernCourseView.overview.noLearningOutcomes")}
           </p>
         )}
@@ -146,7 +146,7 @@ export default function CourseWhatYouWillLearn({
                   }
                 }}
                 disabled={isPending}
-                className="flex-1 rounded-lg border-2 border-primary-700 bg-white/95 px-3 py-2 text-base font-medium text-neutral-950 outline-none disabled:opacity-50"
+                className="flex-1 rounded-lg border-2 border-whte bg-transparent px-3 py-2 text-base font-medium text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] outline-none backdrop-blur-lg disabled:opacity-50"
                 placeholder={t("modernCourseView.overview.learningOutcomePlaceholder")}
               />
             ) : (
@@ -159,7 +159,7 @@ export default function CourseWhatYouWillLearn({
                   }
                 }}
                 className={cn(
-                  "min-h-7 flex-1 rounded-lg border-2 border-dashed border-transparent px-2 py-0.5 text-left text-base font-medium leading-6 text-white transition-all",
+                  "min-h-7 flex-1 rounded-lg border-2 border-dashed border-transparent px-2 py-0.5 text-left text-base font-medium leading-6 text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] transition-all",
                   {
                     "cursor-pointer group-hover/outcome:border-white  group-hover/outcome:bg-opacity-10 hover:border-white  hover:bg-opacity-10 hover:text-white focus-visible:border-white focus-visible:bg-white focus-visible:bg-opacity-10 focus-visible:outline-none":
                       isAdminExperience,
