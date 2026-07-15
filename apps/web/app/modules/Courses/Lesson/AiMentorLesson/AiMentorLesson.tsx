@@ -54,7 +54,13 @@ const taskDescriptionViewerClassName =
   "max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800";
 
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
-  Boolean(evaluation && (typeof evaluation.passed === "boolean" || evaluation.score != null));
+  Boolean(
+    evaluation &&
+      (typeof evaluation.passed === "boolean" ||
+        evaluation.score != null ||
+        evaluation.criteria?.length ||
+        evaluation.blockingErrors?.length),
+  );
 
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
@@ -333,6 +339,7 @@ const AiMentorLesson = ({
               <TooltipTrigger asChild>
                 <span className="min-w-0">
                   <Button
+                    data-testid={LEARNING_HANDLES.AI_MENTOR_RESULT_BUTTON}
                     type="button"
                     variant="outline"
                     className={cn(

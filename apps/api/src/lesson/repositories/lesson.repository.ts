@@ -8,6 +8,8 @@ import { hasPermission } from "src/common/permissions/permission.utils";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import {
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
   aiMentorLessons,
   aiMentorJudgementBlockingErrors,
   aiMentorJudgementCriteria,
@@ -123,6 +125,11 @@ export class LessonRepository {
   }
 
   async getLessonDetails(id: UUIDType, userId: UUIDType, language?: SupportedLanguages) {
+    const localizedCriterionTitle = this.localizationService.getLocalizedSqlField(
+      aiJudgeCriteria.title,
+      language,
+    );
+
     const [lesson] = await this.db
       .select({
         id: lessons.id,
@@ -145,18 +152,44 @@ export class LessonRepository {
           "videoCompletionTrackingEnabled",
         ),
         aiMentorDetails: sql<AiMentorEvaluationDetails | null>`
-          json_build_object(
-            'minScore', ${aiMentorStudentLessonProgress.minScore},
-            'maxScore', ${aiMentorStudentLessonProgress.maxScore},
-            'score', ${aiMentorStudentLessonProgress.score},
-            'percentage', ${aiMentorStudentLessonProgress.percentage},
-            'passed', ${aiMentorStudentLessonProgress.passed},
+          CASE
+            WHEN ${aiMentorJudgements.id} IS NULL
+              AND ${aiMentorStudentLessonProgress.id} IS NULL
+            THEN NULL
+            ELSE json_build_object(
+            'minScore', COALESCE(
+              ${aiMentorStudentLessonProgress.minScore},
+              CEIL(
+                ${aiMentorJudgements.maxScore}
+                * ${aiJudgeConfigurations.passingThresholdPercent}
+                / 100.0
+              )::integer
+            ),
+            'maxScore', COALESCE(
+              ${aiMentorStudentLessonProgress.maxScore},
+              ${aiMentorJudgements.maxScore}
+            ),
+            'score', COALESCE(
+              ${aiMentorStudentLessonProgress.score},
+              ${aiMentorJudgements.earnedPoints}
+            ),
+            'percentage', COALESCE(
+              ${aiMentorStudentLessonProgress.percentage},
+              ${aiMentorJudgements.percentage}
+            ),
+            'passed', COALESCE(
+              ${aiMentorStudentLessonProgress.passed},
+              ${aiMentorJudgements.passed}
+            ),
             'criteria', COALESCE(
               (
                 SELECT jsonb_agg(
                   jsonb_build_object(
                     'criterionId', ${aiMentorJudgementCriteria.criterionId},
-                    'title', ${aiMentorJudgementCriteria.criterionTitle},
+                    'title', COALESCE(
+                      NULLIF(${aiMentorJudgementCriteria.criterionTitle}, ''),
+                      ${localizedCriterionTitle}
+                    ),
                     'awardedScore', ${aiMentorJudgementCriteria.awardedPoints},
                     'maxScore', ${aiMentorJudgementCriteria.maxScoreAtJudgement},
                     'status', ${aiMentorJudgementCriteria.status},
@@ -165,6 +198,8 @@ export class LessonRepository {
                   ORDER BY ${aiMentorJudgementCriteria.createdAt}
                 )
                 FROM ${aiMentorJudgementCriteria}
+                LEFT JOIN ${aiJudgeCriteria}
+                  ON ${aiJudgeCriteria.id} = ${aiMentorJudgementCriteria.criterionId}
                 WHERE ${aiMentorJudgementCriteria.judgementId} = ${aiMentorJudgements.id}
               ),
               '[]'::jsonb
@@ -184,13 +219,15 @@ export class LessonRepository {
               ),
               '[]'::jsonb
             ),
-            'requiredScore',
+            'requiredScore', COALESCE(
               CASE
                 WHEN ${aiMentorStudentLessonProgress.maxScore} > 0
                 THEN CAST(${aiMentorStudentLessonProgress.minScore} AS FLOAT) / CAST(${aiMentorStudentLessonProgress.maxScore} AS FLOAT) * 100
-                ELSE 0
-              END
+              END,
+              ${aiJudgeConfigurations.passingThresholdPercent}
+            )
           )
+          END
         `,
         aiMentor: sql<{ name: string; avatarReferenceUrl: string } | null>`
           CASE
@@ -204,10 +241,6 @@ export class LessonRepository {
         `,
         aiMentorInstructions: this.localizationService.getLocalizedSqlField(
           aiMentorLessons.aiMentorInstructions,
-          language,
-        ),
-        completionConditions: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.completionConditions,
           language,
         ),
         isExternal: sql<boolean>`${lessons.isExternal}`,
@@ -252,6 +285,10 @@ export class LessonRepository {
         ),
       )
       .leftJoin(aiMentorJudgements, eq(aiMentorJudgements.threadId, aiMentorThreads.id))
+      .leftJoin(
+        aiJudgeConfigurations,
+        eq(aiJudgeConfigurations.id, aiMentorJudgements.configurationId),
+      )
       .leftJoin(chapters, eq(chapters.id, lessons.chapterId))
       .leftJoin(
         studentCourses,

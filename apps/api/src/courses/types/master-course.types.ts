@@ -186,12 +186,37 @@ export type AiMentorLessonInsert = InferInsertModel<typeof aiMentorLessons>;
 
 export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
 export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
+export type AiJudgeConfigurationJsonbInsert = Omit<AiJudgeConfigurationInsert, "taskGoal"> & {
+  taskGoal: SQL<unknown>;
+};
+export type AiJudgeConfigurationJsonbUpdate = Partial<
+  Omit<AiJudgeConfigurationInsert, "taskGoal">
+> & {
+  taskGoal?: SQL<unknown>;
+};
 export type AiJudgeCriterionSelect = InferSelectModel<typeof aiJudgeCriteria>;
 export type AiJudgeCriterionInsert = InferInsertModel<typeof aiJudgeCriteria>;
+export type AiJudgeCriterionJsonbInsert = Omit<
+  AiJudgeCriterionInsert,
+  "title" | "expectedBehavior"
+> & {
+  title: SQL<unknown>;
+  expectedBehavior: SQL<unknown>;
+};
 export type AiJudgeScoreGuidanceSelect = InferSelectModel<typeof aiJudgeScoreGuidance>;
 export type AiJudgeScoreGuidanceInsert = InferInsertModel<typeof aiJudgeScoreGuidance>;
+export type AiJudgeScoreGuidanceJsonbInsert = Omit<
+  AiJudgeScoreGuidanceInsert,
+  "description" | "example"
+> & {
+  description: SQL<unknown>;
+  example?: SQL<unknown> | null;
+};
 export type AiJudgeBlockingErrorSelect = InferSelectModel<typeof aiJudgeBlockingErrors>;
 export type AiJudgeBlockingErrorInsert = InferInsertModel<typeof aiJudgeBlockingErrors>;
+export type AiJudgeBlockingErrorJsonbInsert = Omit<AiJudgeBlockingErrorInsert, "description"> & {
+  description: SQL<unknown>;
+};
 
 export type DocumentSelect = InferSelectModel<typeof documents>;
 export type DocumentInsert = InferInsertModel<typeof documents>;

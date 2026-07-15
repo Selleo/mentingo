@@ -140,6 +140,10 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
       ).toBeVisible();
       await page.keyboard.press("Escape");
 
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_BUTTON).click();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON)).toBeVisible();
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
+
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON).click();
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL)).toBeVisible();
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_CONFIRM_BUTTON).click();

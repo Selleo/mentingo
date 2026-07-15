@@ -786,10 +786,6 @@ export const aiMentorLessons = pgTable(
       .$type<LocalizedText>()
       .default({})
       .notNull(),
-    completionConditions: jsonb("completion_conditions")
-      .$type<LocalizedText>()
-      .default({})
-      .notNull(),
     name: text("name").notNull().default("AI Mentor"),
     avatarReference: varchar("avatar_reference", { length: 500 }),
     type: text("type").notNull().default("roleplay"),

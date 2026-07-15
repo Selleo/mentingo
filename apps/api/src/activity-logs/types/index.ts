@@ -100,7 +100,6 @@ export type LessonActivityLogSnapshot = {
   questions?: LessonActivityLogQuestion[];
   aiMentor?: {
     aiMentorInstructions?: string | null;
-    completionConditions?: string | null;
     name?: string | null;
     avatarReference?: string | null;
     type?: string | null;

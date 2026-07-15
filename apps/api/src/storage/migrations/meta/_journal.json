@@ -1156,6 +1156,13 @@
       "when": 1784109254568,
       "tag": "0164_enable_ai_judge_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1784110370014,
+      "tag": "0165_drop_ai_mentor_completion_conditions",
+      "breakpoints": true
     }
   ]
 }

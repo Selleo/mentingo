@@ -67,15 +67,18 @@ export function AiMentorEvaluationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="mobileDrawer" className="sm:!max-w-xl">
-        <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
+      <DialogContent
+        variant="mobileDrawer"
+        className="!flex h-[85dvh] !flex-col sm:h-auto sm:!max-w-xl"
+      >
+        <DialogHeader className="shrink-0 border-b border-neutral-100 px-6 py-4 text-left">
           <DialogTitle className="text-lg font-semibold text-neutral-950">
             {t("studentCourseView.lesson.aiMentorLesson.resultButton")}
           </DialogTitle>
           <DialogDescription className="sr-only">{statusDescription}</DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-6 py-5 [-webkit-overflow-scrolling:touch]">
           <div className="grid gap-5">
             <DialogHeader
               className={cn(
@@ -209,7 +212,7 @@ export function AiMentorEvaluationDialog({
           </div>
         </div>
 
-        <DialogFooter className="border-t border-neutral-100 px-6 py-4">
+        <DialogFooter className="shrink-0 border-t border-neutral-100 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
           <Button
             data-testid={LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON}
             type="button"

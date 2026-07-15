@@ -1219,7 +1219,6 @@ export class MasterCourseService {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
           aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
-          completionConditions: sourceAiMentor.completionConditions,
           name: sourceAiMentor.name,
           avatarReference,
           type: sourceAiMentor.type,
@@ -1233,7 +1232,6 @@ export class MasterCourseService {
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
         aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
-        completionConditions: sourceAiMentor.completionConditions,
         name: sourceAiMentor.name,
         avatarReference,
         type: sourceAiMentor.type,
@@ -1281,7 +1279,7 @@ export class MasterCourseService {
           await this.masterCourseRepository.updateAiJudgeConfiguration(
             targetConfigurationId,
             {
-              taskGoal: sourceConfiguration.taskGoal,
+              taskGoal: toJsonbBuildObject(sourceConfiguration.taskGoal),
               passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
             },
             transaction,
@@ -1290,7 +1288,7 @@ export class MasterCourseService {
           targetConfigurationId = await this.masterCourseRepository.createAiJudgeConfiguration(
             {
               aiMentorLessonId: targetAiMentorLessonId,
-              taskGoal: sourceConfiguration.taskGoal,
+              taskGoal: toJsonbBuildObject(sourceConfiguration.taskGoal),
               passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
             },
             transaction,
@@ -1308,8 +1306,8 @@ export class MasterCourseService {
             {
               configurationId: targetConfigurationId,
               maxScore: sourceCriterion.maxScore,
-              title: sourceCriterion.title,
-              expectedBehavior: sourceCriterion.expectedBehavior,
+              title: toJsonbBuildObject(sourceCriterion.title),
+              expectedBehavior: toJsonbBuildObject(sourceCriterion.expectedBehavior),
               createdAt: sourceCriterion.createdAt,
               updatedAt: sourceCriterion.updatedAt,
             },
@@ -1321,8 +1319,8 @@ export class MasterCourseService {
               {
                 criterionId: targetCriterionId,
                 score: sourceGuidance.score,
-                description: sourceGuidance.description,
-                example: sourceGuidance.example,
+                description: toJsonbBuildObject(sourceGuidance.description),
+                example: toNullableJsonbBuildObject(sourceGuidance.example),
                 createdAt: sourceGuidance.createdAt,
                 updatedAt: sourceGuidance.updatedAt,
               },
@@ -1335,7 +1333,7 @@ export class MasterCourseService {
           await this.masterCourseRepository.createAiJudgeBlockingError(
             {
               configurationId: targetConfigurationId,
-              description: sourceBlockingError.description,
+              description: toJsonbBuildObject(sourceBlockingError.description),
               createdAt: sourceBlockingError.createdAt,
               updatedAt: sourceBlockingError.updatedAt,
             },

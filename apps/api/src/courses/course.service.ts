@@ -5076,14 +5076,6 @@ export class CourseService {
             field: aiMentorLessons.aiMentorInstructions,
             idColumn: aiMentorLessons.lessonId,
           };
-
-          yield {
-            id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.completionConditions?.length),
-            baseValue: baseLesson?.aiMentor?.completionConditions,
-            field: aiMentorLessons.completionConditions,
-            idColumn: aiMentorLessons.lessonId,
-          };
         }
 
         if (lesson.type !== LESSON_TYPES.QUIZ || !lesson.questions?.length) continue;

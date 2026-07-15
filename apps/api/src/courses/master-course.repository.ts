@@ -41,10 +41,11 @@ import {
 } from "src/storage/schema";
 
 import type {
-  AiJudgeBlockingErrorInsert,
-  AiJudgeConfigurationInsert,
-  AiJudgeCriterionInsert,
-  AiJudgeScoreGuidanceInsert,
+  AiJudgeBlockingErrorJsonbInsert,
+  AiJudgeConfigurationJsonbInsert,
+  AiJudgeConfigurationJsonbUpdate,
+  AiJudgeCriterionJsonbInsert,
+  AiJudgeScoreGuidanceJsonbInsert,
   AiMentorLessonInsert,
   CategoryJsonbInsert,
   CategoryJsonbUpdate,
@@ -689,7 +690,7 @@ export class MasterCourseRepository {
   }
 
   async createAiJudgeConfiguration(
-    values: AiJudgeConfigurationInsert,
+    values: AiJudgeConfigurationJsonbInsert,
     dbInstance: DatabasePg,
   ): Promise<UUIDType> {
     const [configuration] = await dbInstance
@@ -702,7 +703,7 @@ export class MasterCourseRepository {
 
   async updateAiJudgeConfiguration(
     configurationId: UUIDType,
-    values: Partial<AiJudgeConfigurationInsert>,
+    values: AiJudgeConfigurationJsonbUpdate,
     dbInstance: DatabasePg,
   ) {
     await dbInstance
@@ -724,7 +725,7 @@ export class MasterCourseRepository {
   }
 
   async createAiJudgeCriterion(
-    values: AiJudgeCriterionInsert,
+    values: AiJudgeCriterionJsonbInsert,
     dbInstance: DatabasePg,
   ): Promise<UUIDType> {
     const [criterion] = await dbInstance
@@ -735,11 +736,17 @@ export class MasterCourseRepository {
     return criterion.id;
   }
 
-  async createAiJudgeScoreGuidance(values: AiJudgeScoreGuidanceInsert, dbInstance: DatabasePg) {
+  async createAiJudgeScoreGuidance(
+    values: AiJudgeScoreGuidanceJsonbInsert,
+    dbInstance: DatabasePg,
+  ) {
     await dbInstance.insert(aiJudgeScoreGuidance).values(values);
   }
 
-  async createAiJudgeBlockingError(values: AiJudgeBlockingErrorInsert, dbInstance: DatabasePg) {
+  async createAiJudgeBlockingError(
+    values: AiJudgeBlockingErrorJsonbInsert,
+    dbInstance: DatabasePg,
+  ) {
     await dbInstance.insert(aiJudgeBlockingErrors).values(values);
   }
 

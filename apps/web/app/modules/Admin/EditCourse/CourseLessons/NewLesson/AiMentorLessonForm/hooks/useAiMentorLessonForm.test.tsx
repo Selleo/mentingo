@@ -80,7 +80,6 @@ describe("useAiMentorLessonForm suggestions", () => {
       id: "ai-mentor-id",
       lessonId: "lesson-id",
       aiMentorInstructions: "Existing instructions",
-      completionConditions: "",
       type: AI_MENTOR_TYPE.ROLEPLAY,
       name: "Customer",
       voiceMode: AI_MENTOR_VOICE_MODE.PRESET,

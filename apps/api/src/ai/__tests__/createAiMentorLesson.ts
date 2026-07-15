@@ -13,7 +13,7 @@ import type { DatabasePg, UUIDType } from "src/common";
 
 export type AiMentorLessonTest = Omit<
   InferSelectModel<typeof aiMentorLessons>,
-  "tenantId" | "aiMentorInstructions" | "completionConditions"
+  "tenantId" | "aiMentorInstructions"
 > & {
   aiMentorInstructions: string;
   taskGoal: string;
