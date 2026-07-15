@@ -40,7 +40,7 @@ describe("AuthorModal", () => {
     expect(screen.getByText("Frontend")).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
     expect(screen.getByText("4.8")).toBeInTheDocument();
-    expect(screen.getByText("1h 30min")).toBeInTheDocument();
+    expect(screen.getByText("1 h 30 min")).toBeInTheDocument();
   });
 
   it("lets admins toggle and save author section visibility", async () => {
