@@ -672,6 +672,54 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
+  it("preserves the target course status when source updates are synced", async () => {
+    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const updatedTitle = "Updated Master Source Course";
+
+    await runAsTenant(targetTenantId, () =>
+      db.update(courses).set({ status: "published" }).where(eq(courses.id, targetCourseId)),
+    );
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .update(courses)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            en: updatedTitle,
+            pl: "Kurs zrodlowy master",
+          }),
+        })
+        .where(eq(courses.id, sourceCourseId)),
+    );
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId))
+      .limit(1);
+
+    expect(exportLink).toBeDefined();
+    await masterCourseService.processSyncJob({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+      triggerEventType: "UpdateCourseEvent",
+    });
+
+    const syncedTargetCourse = await runAsTenant(targetTenantId, async () => {
+      const [targetCourse] = await db
+        .select({ title: courses.title, status: courses.status })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId))
+        .limit(1);
+
+      return targetCourse;
+    });
+
+    expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.status).toBe("published");
+  });
+
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
     const { sourceCourseId, sourceCookie, targetCourseId } = await setupAndExport();
     const categoryTitle = `Bulk synced category ${faker.string.nanoid(8)}`;

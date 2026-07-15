@@ -800,7 +800,6 @@ export class MasterCourseService {
         "thumbnailS3Key",
         course.thumbnailS3Key,
       ),
-      status: "draft",
       hasCertificate: course.hasCertificate,
       priceInCents: 0,
       currency: course.currency,
