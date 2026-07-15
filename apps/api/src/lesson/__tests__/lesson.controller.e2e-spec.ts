@@ -513,6 +513,48 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       expect(completeResponse.body.data.hasMissingTranslations).toBe(false);
     });
 
+    it("removes localized AI mentor fields when deleting a course language", async () => {
+      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Polish negotiation practice",
+          description: "<p>Practice a Polish sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+          completionConditions: "<p>The learner handles objections in Polish.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "Mentor PL",
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/language/${courseId}`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      const [aiMentorLesson] = await db
+        .select({
+          name: aiMentorLessons.name,
+          aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
+          completionConditions: aiMentorLessons.completionConditions,
+        })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      expect(aiMentorLesson.name).toEqual({ en: "AI Mentor" });
+      expect(aiMentorLesson.aiMentorInstructions).toEqual({
+        en: "<p>Lead the learner through an English scenario.</p>",
+      });
+      expect(aiMentorLesson.completionConditions).toEqual({
+        en: "<p>The learner handles objections in English.</p>",
+      });
+    });
+
     it("rejects AI mentor scenario updates for unavailable languages", async () => {
       const { adminCookies, lessonId } = await createAiMentorLessonSetup();
 

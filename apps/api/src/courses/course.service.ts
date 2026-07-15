@@ -4481,6 +4481,15 @@ export class CourseService {
             description: deleteJsonbField(lessons.description, language),
           })
           .where(inArray(lessons.id, lessonIds));
+
+        await trx
+          .update(aiMentorLessons)
+          .set({
+            name: deleteJsonbField(aiMentorLessons.name, language),
+            aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
+            completionConditions: deleteJsonbField(aiMentorLessons.completionConditions, language),
+          })
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
       }
 
       if (questionIds.length) {
