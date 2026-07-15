@@ -107,8 +107,8 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
 } from "@repo/shared";
-import type { UUID } from "crypto";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
+import type { UUIDType } from "src/common";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -2517,7 +2517,7 @@ export const automationsAutomationSteps = pgTable(
 );
 
 type ChildStep = {
-  id: UUID;
+  id: UUIDType;
 };
 
 export const automationSteps = pgTable("automation_steps", {
