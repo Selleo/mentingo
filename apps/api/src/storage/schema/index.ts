@@ -2522,7 +2522,7 @@ type ChildStep = {
 
 export const automationSteps = pgTable("automation_steps", {
   ...id,
-  childrenSteps: jsonb("children_steps").$type<ChildStep[]>().default([]),
+  childrenSteps: jsonb("children_steps").$type<ChildStep[]>().default([]).notNull(),
 });
 
 export const automationStepsAutomationActions = pgTable(
@@ -2540,8 +2540,8 @@ export const automationStepsAutomationActions = pgTable(
   }),
 );
 
-export const automationStepsAutomationCondition = pgTable(
-  "automation_steps_automation_condition",
+export const automationStepsAutomationConditions = pgTable(
+  "automation_steps_automation_conditions",
   {
     automationStepId: uuid("automation_step_id")
       .references(() => automationSteps.id)
@@ -2557,10 +2557,10 @@ export const automationStepsAutomationCondition = pgTable(
 
 export const automationActions = pgTable("automation_actions", {
   ...id,
-  actionName: varchar("action_name", { length: 50 }),
+  name: varchar("name", { length: 50 }).notNull(),
 });
 
 export const automationConditions = pgTable("automation_conditions", {
   ...id,
-  conditionName: varchar("condition_name", { length: 50 }),
+  name: varchar("name", { length: 50 }).notNull(),
 });
