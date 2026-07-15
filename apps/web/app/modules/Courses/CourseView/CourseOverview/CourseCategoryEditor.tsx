@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import {
   Select,
@@ -40,6 +41,8 @@ export default function CourseCategoryEditor({
   onClose,
   onEdit,
 }: CourseCategoryEditorProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="mb-3 flex flex-wrap items-center gap-3">
       {canEdit && isEditing ? (
@@ -98,7 +101,7 @@ export default function CourseCategoryEditor({
 
       <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
         <Clock className="size-3.5" />
-        {formatDurationToHalfHour(durationSeconds)}
+        {formatDurationToHalfHour(durationSeconds, t)}
       </span>
     </div>
   );

@@ -4604,6 +4604,13 @@
     "stats": {
       "yourProgress": "Tu progreso",
       "remaining": "restante",
+      "chapterProgress_one": "{{completed}} / {{total}} capítulo",
+      "chapterProgress_other": "{{completed}} / {{total}} capítulos",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
       "trackProgress": "para registrar tu progreso.",
       "deadline": "Fecha límite",
       "daysLeft_one": "Queda {{count}} día",

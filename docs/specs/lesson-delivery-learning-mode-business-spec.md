@@ -26,6 +26,7 @@ The main workflow starts when a learner opens a course and chooses to start or c
 - Keep later lessons locked after unmet requirements, such as a failed required quiz.
 - Mark lessons complete automatically or after lesson-specific completion criteria.
 - Update chapter and course progress as lessons are completed.
+- Present chapter progress in the learner's interface language with correct singular and plural forms.
 - Track active lesson time while the learner studies.
 
 ## End-User Value
@@ -42,7 +43,7 @@ Each lesson type has its own completion behavior. Content and embed lessons can 
 
 For content videos, opening the video focuses the player so learners can use familiar playback shortcuts while the player is active, without those shortcuts taking over the rest of the lesson page. When video completion tracking is enabled, the lesson also shows a segmented progress strip with one part per video, helping learners spot which parts they have watched and which parts they still missed. A video segment turns green after the learner has watched enough of that video to satisfy the completion threshold.
 
-While the learner studies, the page also runs the learning-time tracker. Completion events update lesson, chapter, and course progress and can trigger downstream completion behavior such as certificates or reporting updates.
+While the learner studies, the page also runs the learning-time tracker. Completion events update lesson, chapter, and course progress and can trigger downstream completion behavior such as certificates or reporting updates. The course progress card shows completed and total chapter counts in the interface language.
 
 ## Key Technical Context
 

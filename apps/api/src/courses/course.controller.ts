@@ -99,6 +99,10 @@ import {
 } from "src/courses/schemas/showCourseCommon.schema";
 import { UpdateCourseBody, updateCourseSchema } from "src/courses/schemas/updateCourse.schema";
 import {
+  updateCourseMediaSchema,
+  type UpdateCourseMediaBody,
+} from "src/courses/schemas/updateCourseMedia.schema";
+import {
   updateCourseSettingsSchema,
   type UpdateCourseSettings,
 } from "src/courses/schemas/updateCourseSettings.schema";
@@ -582,8 +586,39 @@ export class CourseController {
     return new BaseResponse(status);
   }
 
-  @Patch(":id")
+  @Patch(":id/media")
   @UseInterceptors(FileInterceptor("image"))
+  @ApiConsumes("multipart/form-data")
+  @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
+  @Validate({
+    request: [
+      { type: "param", name: "id", schema: UUIDSchema },
+      {
+        type: "body",
+        schema: updateCourseMediaSchema,
+        pipes: [new ValidateMultipartPipe(updateCourseMediaSchema)],
+      },
+    ],
+    response: baseResponse(Type.Object({ message: Type.String() })),
+  })
+  async updateCourseMedia(
+    @Param("id") id: UUIDType,
+    @Body() updateCourseMediaBody: UpdateCourseMediaBody,
+    @UploadedFile(
+      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
+        fileIsRequired: false,
+        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+      }),
+    )
+    image: Express.Multer.File | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<{ message: string }>> {
+    await this.courseService.updateCourseMedia(id, updateCourseMediaBody, currentUser, image);
+
+    return new BaseResponse({ message: "Course updated successfully" });
+  }
+
+  @Patch(":id")
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
@@ -595,25 +630,12 @@ export class CourseController {
   async updateCourse(
     @Param("id") id: UUIDType,
     @Body() updateCourseBody: UpdateCourseBody,
-    @UploadedFile(
-      getBaseFileTypePipe(buildFileTypeRegex(ALLOWED_LESSON_IMAGE_FILE_TYPES)).build({
-        fileIsRequired: false,
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-      }),
-    )
-    image: Express.Multer.File,
     @CurrentUser() currentUser: CurrentUserType,
     @Req() request: Request,
   ): Promise<BaseResponse<{ message: string }>> {
     const isPlaywrightTest = request.headers["x-playwright-test"];
 
-    await this.courseService.updateCourse(
-      id,
-      updateCourseBody,
-      currentUser,
-      !!isPlaywrightTest,
-      image,
-    );
+    await this.courseService.updateCourse(id, updateCourseBody, currentUser, !!isPlaywrightTest);
 
     return new BaseResponse({ message: "Course updated successfully" });
   }

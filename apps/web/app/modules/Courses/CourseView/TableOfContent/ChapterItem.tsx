@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { cn } from "~/lib/utils";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
+import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
+
 import LessonItem from "./LessonItem";
 
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -68,7 +70,9 @@ const getChapterCircleStyle = ({
 
 const getActiveLessonProgressCount = (chapter: Chapter) =>
   chapter.lessons.filter(
-    (lesson) => lesson.status === "completed" || lesson.status === "in_progress",
+    (lesson) =>
+      lesson.status === CHAPTER_PROGRESS_STATUSES.COMPLETED ||
+      lesson.status === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS,
   ).length;
 
 export default function ChapterItem({
@@ -79,8 +83,10 @@ export default function ChapterItem({
   onToggle,
 }: ChapterItemProps) {
   const { t } = useTranslation();
-  const isCompleted = !isAdminExperience && chapter.chapterProgress === "completed";
-  const isCurrent = !isAdminExperience && chapter.chapterProgress === "in_progress";
+  const isCompleted =
+    !isAdminExperience && chapter.chapterProgress === CHAPTER_PROGRESS_STATUSES.COMPLETED;
+  const isCurrent =
+    !isAdminExperience && chapter.chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS;
   const chapterStyle = getChapterStyle({ isCompleted, isCurrent });
   const activeLessonProgressCount = getActiveLessonProgressCount(chapter);
   const lessonCount = chapter.lessons.length || chapter.lessonCount;
@@ -93,12 +99,12 @@ export default function ChapterItem({
       <div className="flex gap-4">
         <div
           className={cn(
-            "relative z-10 hidden h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 md:flex md:h-10 md:w-10",
+            "relative z-10 hidden size-12 flex-shrink-0 items-center justify-center rounded-full border-2 md:flex md:size-10",
             getChapterCircleStyle({ isCompleted, isCurrent }),
           )}
         >
           {isCompleted ? (
-            <Check className="h-6 w-6 text-white md:h-5 md:w-5" />
+            <Check className="size-6text-white md:size-5" />
           ) : isCurrent ? (
             <span className="text-base font-bold text-white md:text-sm">{chapterNumber}</span>
           ) : (
@@ -124,13 +130,9 @@ export default function ChapterItem({
           >
             <div className="mb-2 flex items-center gap-3">
               {isExpanded ? (
-                <ChevronUp
-                  className={cn("h-5 w-5 flex-shrink-0 md:h-4 md:w-4", chapterStyle.icon)}
-                />
+                <ChevronUp className={cn("size-5 flex-shrink-0 md:size-4", chapterStyle.icon)} />
               ) : (
-                <ChevronDown
-                  className={cn("h-5 w-5 flex-shrink-0 md:h-4 md:w-4", chapterStyle.icon)}
-                />
+                <ChevronDown className={cn("size-5flex-shrink-0 md:size-4", chapterStyle.icon)} />
               )}
               <h3
                 className={cn(
@@ -141,14 +143,14 @@ export default function ChapterItem({
                 {chapter.title}
               </h3>
               <span className="flex-shrink-0 whitespace-nowrap text-sm text-neutral-800 md:text-xs">
-                {formatDuration(chapter.estimatedDurationSeconds)}
+                {formatDuration(chapter.estimatedDurationSeconds, t)}
               </span>
             </div>
 
             <div className="ml-7 flex items-center justify-between">
               <div className="flex items-center gap-3 text-xs text-neutral-800">
                 <span className="flex items-center gap-1">
-                  <BookOpen className="h-3.5 w-3.5" />
+                  <BookOpen className="size-3.5" />
                   {t("modernCourseView.contents.lessons", {
                     count: chapter.lessonCount,
                   })}

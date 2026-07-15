@@ -44,7 +44,7 @@ export default function DeadlineModal({
             {t("modernCourseView.deadline.title")}
           </h3>
           <button type="button" onClick={onClose}>
-            <X className="h-5 w-5 text-neutral-800 md:h-6 md:w-6" />
+            <X className="size-5 text-neutral-800 md:size-6" />
           </button>
         </div>
 
@@ -72,7 +72,7 @@ export default function DeadlineModal({
             >
               <div
                 className={cn(
-                  "absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition-transform",
+                  "absolute left-1 top-1 size-6 rounded-full bg-white transition-transform",
                   {
                     "translate-x-6": deadlineEnabledDraft,
                   },
@@ -113,7 +113,7 @@ export default function DeadlineModal({
                     }}
                     className="w-full rounded-lg border border-neutral-200 px-3 py-2 pr-10 text-sm [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0"
                   />
-                  <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-800" />
+                  <Calendar className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-neutral-800" />
                 </div>
               </div>
             ))}

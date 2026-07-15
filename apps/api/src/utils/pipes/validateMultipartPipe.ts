@@ -175,7 +175,10 @@ export class ValidateMultipartPipe<T extends TObject> implements PipeTransform {
   private shouldParseNumber(schema: TSchema | undefined, value: string) {
     const schemaType = (schema as { type?: string } | undefined)?.type;
 
-    return (schemaType === "number" || schemaType === undefined) && this.isNumericString(value);
+    return (
+      (schemaType === "number" || schemaType === "integer" || schemaType === undefined) &&
+      this.isNumericString(value)
+    );
   }
 
   private shouldParseBoolean(schema: TSchema | undefined, value: string) {

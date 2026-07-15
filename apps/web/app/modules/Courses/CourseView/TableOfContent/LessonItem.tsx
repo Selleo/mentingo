@@ -48,7 +48,7 @@ export default function LessonItem({
           getLessonHoverStyle({ isCompleted, isCurrent }),
         )}
       >
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg md:h-8 md:w-8">
+        <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg md:size-8">
           <LessonTypeIcon type={lesson.type} />
         </div>
         <div className="min-w-0 flex-1">

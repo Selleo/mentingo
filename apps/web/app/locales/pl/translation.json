@@ -4644,6 +4644,15 @@
     "stats": {
       "yourProgress": "Twój postęp",
       "remaining": "pozostało",
+      "chapterProgress_one": "{{completed}} / {{total}} rozdział",
+      "chapterProgress_few": "{{completed}} / {{total}} rozdziały",
+      "chapterProgress_many": "{{completed}} / {{total}} rozdziałów",
+      "chapterProgress_other": "{{completed}} / {{total}} rozdziału",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} godz.",
+        "hoursAndMinutes": "{{hours}} godz. {{minutes}} min"
+      },
       "trackProgress": "aby śledzić swoje postępy.",
       "deadline": "Termin",
       "daysLeft_one": "Pozostał {{count}} dzień",

@@ -1,6 +1,7 @@
 import { Check, Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { useCurrentUser } from "~/api/queries";
 import { cn } from "~/lib/utils";
 
 type CertificateModalProps = {
@@ -25,6 +26,8 @@ export default function CertificateModal({
   onToggleCertificate,
 }: CertificateModalProps) {
   const { t } = useTranslation();
+  const { data: currentUser } = useCurrentUser();
+  const currentUserName = [currentUser?.firstName, currentUser?.lastName].filter(Boolean).join(" ");
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -40,7 +43,7 @@ export default function CertificateModal({
             {t("modernCourseView.certificate.title")}
           </h3>
           <button type="button" onClick={onClose}>
-            <X className="h-5 w-5 text-neutral-800 md:h-6 md:w-6" />
+            <X className="h-5 text-neutral-800 md:size-6" />
           </button>
         </div>
 
@@ -56,7 +59,7 @@ export default function CertificateModal({
               {t("modernCourseView.certificate.certifies")}
             </p>
             <p className="mb-4 text-xl font-bold text-neutral-950 md:mb-6 md:text-3xl">
-              Ellis Admin
+              {currentUserName || "—"}
             </p>
             <p className="mb-2 text-base text-neutral-800 md:text-lg">
               {t("modernCourseView.certificate.completed")}
@@ -94,7 +97,7 @@ export default function CertificateModal({
             >
               <div
                 className={cn(
-                  "absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition-transform",
+                  "absolute left-1 top-1 size-6 rounded-full bg-white transition-transform",
                   {
                     "translate-x-6": certificateEnabledDraft,
                   },
@@ -134,7 +137,7 @@ export default function CertificateModal({
                   {t("modernCourseView.certificate.uploadSignature")}
                 </p>
                 <div className="cursor-pointer rounded-xl border-2 border-dashed border-neutral-200 p-6 text-center transition-colors hover:border-primary-700">
-                  <Upload className="mx-auto mb-2 h-8 w-8 text-neutral-800" />
+                  <Upload className="mx-auto mb-2 size-8 text-neutral-800" />
                   <p className="text-sm text-neutral-800">
                     {t("modernCourseView.certificate.uploadSignatureHint")}
                   </p>
@@ -162,7 +165,7 @@ export default function CertificateModal({
             disabled={isSaving}
             className="order-1 flex w-full items-center justify-center gap-2 rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800 sm:order-2 sm:w-auto"
           >
-            <Check className="h-4 w-4" />
+            <Check className="size-4" />
             {t("modernCourseView.certificate.save")}
           </button>
         </div>

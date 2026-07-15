@@ -186,6 +186,7 @@ import type { CreateCoursesEnrollment } from "./schemas/createCoursesEnrollment"
 import type { StudentCourseSelect } from "./schemas/enrolledStudent.schema";
 import type { CommonShowBetaCourse, CommonShowCourse } from "./schemas/showCourseCommon.schema";
 import type { UpdateCourseBody } from "./schemas/updateCourse.schema";
+import type { UpdateCourseMediaBody } from "./schemas/updateCourseMedia.schema";
 import type { UpdateCourseSettings } from "./schemas/updateCourseSettings.schema";
 import type { CoursesSettings } from "./types/settings";
 import type { SQL } from "drizzle-orm";
@@ -882,17 +883,10 @@ export class CourseService {
 
     for (const [courseId, totalSeconds] of secondsByCourse) {
       const totalMinutes = totalSeconds > 0 ? Math.ceil(totalSeconds / 60) : 0;
-      estimates[courseId] = { totalMinutes, formatted: this.formatMinutes(totalMinutes) };
+      estimates[courseId] = { totalMinutes };
     }
 
     return estimates;
-  }
-
-  private formatMinutes(minutes: number): string {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins === 0 ? `${hours} h` : `${hours} h ${mins} min`;
   }
 
   private async getAvailableCoursesConditions(
@@ -1068,7 +1062,6 @@ export class CourseService {
         return {
           ...item,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
-          estimatedDurationFormatted: duration?.formatted ?? null,
         };
       });
 
@@ -1262,7 +1255,6 @@ export class CourseService {
           ...course,
           slug: slugsMap.get(course.id) || course.id,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
-          estimatedDurationFormatted: duration?.formatted ?? null,
         };
       });
 
@@ -1839,7 +1831,6 @@ export class CourseService {
             : course.thumbnailUrl,
           authorAvatarUrl: authorAvatarSignedUrl,
           estimatedDurationMinutes: duration?.totalMinutes ?? 0,
-          estimatedDurationFormatted: duration?.formatted ?? null,
           slug: slugsMap.get(course.id) || course.id,
         };
       }),
@@ -2156,12 +2147,73 @@ export class CourseService {
     );
   }
 
+  async updateCourseMedia(
+    id: UUIDType,
+    { thumbnailPositionY, language }: UpdateCourseMediaBody,
+    currentUser: CurrentUserType,
+    image?: Express.Multer.File,
+  ) {
+    await this.masterCourseService.assertCourseContentEditable(id);
+
+    const [existingCourse] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, id));
+
+    if (!existingCourse) throw new NotFoundException("Course not found");
+
+    if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
+      throw new ForbiddenException("You don't have permission to update course");
+    }
+
+    const previousCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
+    let thumbnailS3Key: string | undefined;
+
+    if (image) {
+      try {
+        const uploadResult = await this.fileService.uploadFile(
+          image,
+          "course",
+          currentUser.tenantId,
+        );
+        thumbnailS3Key = uploadResult.fileKey;
+      } catch {
+        throw new ConflictException("Failed to upload course image");
+      }
+    }
+
+    const [updatedCourse] = await this.db
+      .update(courses)
+      .set({
+        thumbnailPositionY,
+        ...(thumbnailS3Key && { thumbnailS3Key }),
+      })
+      .where(eq(courses.id, id))
+      .returning();
+
+    if (!updatedCourse) throw new ConflictException("Failed to update course media");
+
+    const updatedCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
+
+    if (!this.areCourseSnapshotsEqual(previousCourseSnapshot, updatedCourseSnapshot)) {
+      await this.outboxPublisher.publish(
+        new UpdateCourseEvent({
+          courseId: id,
+          actor: currentUser,
+          previousCourseData: previousCourseSnapshot,
+          updatedCourseData: updatedCourseSnapshot,
+        }),
+      );
+    }
+
+    return updatedCourse;
+  }
+
   async updateCourse(
     id: UUIDType,
     updateCourseBody: UpdateCourseBody,
     currentUser: CurrentUserType,
     isPlaywrightTest: boolean,
-    image?: Express.Multer.File,
   ) {
     const attemptedFieldKeys = Object.entries(updateCourseBody)
       .filter(([, value]) => value !== undefined)
@@ -2215,18 +2267,6 @@ export class CourseService {
           }
         }
 
-        // TODO: to remove and start use file service
-        let imageKey = undefined;
-        if (image) {
-          try {
-            const fileExtension = image.originalname.split(".").pop();
-            const resource = `courses/${crypto.randomUUID()}.${fileExtension}`;
-            imageKey = await this.fileService.uploadFile(image, resource, currentUser.tenantId);
-          } catch (error) {
-            throw new ConflictException("Failed to upload course image");
-          }
-        }
-
         const { priceInCents, currency, title, description, learningOutcomes, language, ...rest } =
           updateCourseBody;
 
@@ -2240,7 +2280,6 @@ export class CourseService {
           title: setJsonbField(courses.title, language, title),
           description: setJsonbField(courses.description, language, description),
           ...(isStripeConfigured ? { priceInCents, currency } : {}),
-          ...(imageKey && { imageUrl: imageKey.fileUrl }),
         };
 
         const [updatedCourse] = await trx

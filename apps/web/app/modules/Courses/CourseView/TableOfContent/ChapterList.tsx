@@ -2,6 +2,7 @@ import { Check, ChevronDown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
 import ChapterItem from "./ChapterItem";
 
@@ -29,13 +30,18 @@ export default function ChapterList({
   const { course, isAdminExperience } = useCourseAccessProvider();
 
   const completedChapters = course.chapters.filter(
-    (chapter) => chapter.chapterProgress === "completed",
+    (chapter) => chapter.chapterProgress === CHAPTER_PROGRESS_STATUSES.COMPLETED,
   );
   const activeChapters = course.chapters
-    .filter((chapter) => isAdminExperience || chapter.chapterProgress !== "completed")
+    .filter(
+      (chapter) =>
+        isAdminExperience || chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
+    )
     .filter((chapter, _idx, chapters) => {
       if (isMobile && !isAdminExperience && !showAllChapters) {
-        const currentIndex = chapters.findIndex((item) => item.chapterProgress === "in_progress");
+        const currentIndex = chapters.findIndex(
+          (item) => item.chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS,
+        );
         const chapterIndex = chapters.indexOf(chapter);
         return chapterIndex >= currentIndex && chapterIndex <= currentIndex + 1;
       }
@@ -51,8 +57,8 @@ export default function ChapterList({
         {!isAdminExperience && completedChapters.length > 0 && !completedExpanded && (
           <div className="relative">
             <div className="flex gap-4">
-              <div className="relative z-10 hidden h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-success-500 bg-success-500 md:flex md:h-10 md:w-10">
-                <Check className="h-6 w-6 text-white md:h-5 md:w-5" />
+              <div className="relative z-10 hidden size-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-success-500 bg-success-500 md:flex md:size-10">
+                <Check className="size-6 text-white md:size-5" />
               </div>
 
               <div className="flex-1 pb-2">
@@ -62,7 +68,7 @@ export default function ChapterList({
                   className="group w-full cursor-pointer rounded-xl bg-success-50/50 p-5 text-left transition-all hover:bg-success-50 active:bg-success-50 md:p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <ChevronDown className="h-5 w-5 flex-shrink-0 text-success-500 md:h-4 md:w-4" />
+                    <ChevronDown className="size-5 flex-shrink-0 text-success-500 md:size-4 " />
                     <h3 className="text-base font-semibold leading-tight text-success-500 md:text-sm">
                       {t("modernCourseView.contents.completedChapters", {
                         count: completedChapters.length,
@@ -102,19 +108,21 @@ export default function ChapterList({
         {isMobile &&
           !isAdminExperience &&
           !showAllChapters &&
-          course.chapters.filter((chapter) => chapter.chapterProgress !== "completed").length >
-            2 && (
+          course.chapters.filter(
+            (chapter) => chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
+          ).length > 2 && (
             <div className="relative mt-6">
               <button
                 type="button"
                 onClick={onShowAllChapters}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-6 py-4 font-semibold text-primary-700 transition-all hover:border-primary-700 hover:bg-neutral-100"
               >
-                <ChevronDown className="h-5 w-5" />
+                <ChevronDown className="size-5" />
                 {t("modernCourseView.contents.showAllChapters", {
                   count:
-                    course.chapters.filter((chapter) => chapter.chapterProgress !== "completed")
-                      .length - 2,
+                    course.chapters.filter(
+                      (chapter) => chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
+                    ).length - 2,
                 })}
               </button>
             </div>

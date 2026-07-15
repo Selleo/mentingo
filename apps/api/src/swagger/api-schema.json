@@ -4354,6 +4354,43 @@
         }
       }
     },
+    "/api/course/{id}/media": {
+      "patch": {
+        "operationId": "CourseController_updateCourseMedia",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCourseMediaBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCourseMediaResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/course/{id}": {
       "patch": {
         "operationId": "CourseController_updateCourse",
@@ -27004,6 +27041,73 @@
               "state",
               "attemptsMade",
               "failedReason"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateCourseMediaBody": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "default": "en",
+            "anyOf": [
+              {
+                "const": "en",
+                "type": "string"
+              },
+              {
+                "const": "pl",
+                "type": "string"
+              },
+              {
+                "const": "de",
+                "type": "string"
+              },
+              {
+                "const": "lt",
+                "type": "string"
+              },
+              {
+                "const": "cs",
+                "type": "string"
+              },
+              {
+                "const": "es",
+                "type": "string"
+              }
+            ]
+          },
+          "thumbnailPositionY": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "image": {
+            "format": "binary",
+            "description": "Course thumbnail image",
+            "type": "string"
+          }
+        },
+        "required": [
+          "language",
+          "thumbnailPositionY"
+        ]
+      },
+      "UpdateCourseMediaResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message"
             ]
           }
         },

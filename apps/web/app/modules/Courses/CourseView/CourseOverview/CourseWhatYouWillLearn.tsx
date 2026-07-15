@@ -112,7 +112,7 @@ export default function CourseWhatYouWillLearn({
             aria-label={t("modernCourseView.overview.addLearningOutcome")}
             className="ml-auto rounded-lg p-1 transition-all hover:bg-white/20 disabled:opacity-50"
           >
-            <Plus className="h-4 w-4 text-white" />
+            <Plus className="size-4 text-white" />
           </button>
         )}
       </h3>
@@ -179,7 +179,7 @@ export default function CourseWhatYouWillLearn({
                 aria-label={t("modernCourseView.overview.removeLearningOutcome")}
                 className="rounded p-1 opacity-0 transition-all hover:bg-white/20 group-hover/outcome:opacity-100 disabled:opacity-50"
               >
-                <Trash2 className="h-4 w-4 text-white" />
+                <Trash2 className="size-4 text-white" />
               </button>
             )}
           </div>

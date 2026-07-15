@@ -4531,6 +4531,14 @@
     "stats": {
       "yourProgress": "Váš pokrok",
       "remaining": "zbývá",
+      "chapterProgress_one": "{{completed}} / {{total}} kapitola",
+      "chapterProgress_few": "{{completed}} / {{total}} kapitoly",
+      "chapterProgress_other": "{{completed}} / {{total}} kapitol",
+      "duration": {
+        "minutes": "{{minutes}} min",
+        "hours": "{{hours}} h",
+        "hoursAndMinutes": "{{hours}} h {{minutes}} min"
+      },
       "trackProgress": "pro sledování vašeho pokroku.",
       "deadline": "Termín",
       "daysLeft_one": "Zbývá {{count}} den",

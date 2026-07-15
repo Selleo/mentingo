@@ -11,7 +11,11 @@ export type CourseDurationSummary = {
   formatted: string;
 };
 
-export type DurationEstimatesByCourse = Record<UUIDType, CourseDurationSummary>;
+export type CourseDurationMinutes = {
+  totalMinutes: number;
+};
+
+export type DurationEstimatesByCourse = Record<UUIDType, CourseDurationMinutes>;
 
 export type DurationHeuristics = {
   wordsPerMinute: number;

@@ -4532,6 +4532,14 @@
     "stats": {
       "yourProgress": "Jūsų pažanga",
       "remaining": "liko",
+      "chapterProgress_one": "{{completed}} / {{total}} skyrius",
+      "chapterProgress_few": "{{completed}} / {{total}} skyriai",
+      "chapterProgress_other": "{{completed}} / {{total}} skyrių",
+      "duration": {
+        "minutes": "{{minutes}} min.",
+        "hours": "{{hours}} val.",
+        "hoursAndMinutes": "{{hours}} val. {{minutes}} min."
+      },
       "trackProgress": "kad galėtumėte stebėti pažangą.",
       "deadline": "Terminas",
       "daysLeft_one": "Liko {{count}} diena",

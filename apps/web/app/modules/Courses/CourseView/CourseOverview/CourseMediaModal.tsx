@@ -1,3 +1,4 @@
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
 import { Play, Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -40,7 +41,7 @@ export default function CourseMediaModal({
             {t("modernCourseView.media.title")}
           </h3>
           <button type="button" onClick={onClose}>
-            <X className="h-5 w-5 text-neutral-800 md:h-6 md:w-6" />
+            <X className="size-5 text-neutral-800 md:size-6" />
           </button>
         </div>
 
@@ -52,7 +53,7 @@ export default function CourseMediaModal({
             <img
               src={imagePreviewUrl}
               alt={t("modernCourseView.media.previewAlt")}
-              className="h-full w-full object-cover"
+              className="size-full object-cover"
               style={{ objectPosition: `center ${heroImagePositionDraft}%` }}
             />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
@@ -88,7 +89,7 @@ export default function CourseMediaModal({
             <input
               ref={imageInputRef}
               type="file"
-              accept="image/png,image/jpeg,image/webp"
+              accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
               onChange={onImageSelection}
               className="sr-only"
             />
@@ -97,8 +98,8 @@ export default function CourseMediaModal({
               onClick={() => imageInputRef.current?.click()}
               className="flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8"
             >
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-primary-50">
-                <Upload className="h-8 w-8 text-primary-700" />
+              <div className="mb-3 flex size-16 items-center justify-center rounded-full bg-primary-50">
+                <Upload className="size-8 text-primary-700" />
               </div>
               <p className="mb-1 text-sm font-semibold text-neutral-950">
                 {t("modernCourseView.media.dropImage")}
@@ -116,8 +117,8 @@ export default function CourseMediaModal({
               {t("modernCourseView.media.trailer")}
             </p>
             <div className="flex h-40 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8">
-              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-amethyst-50">
-                <Play className="h-8 w-8 text-amethyst-600" />
+              <div className="mb-3 flex size-16 items-center justify-center rounded-full bg-amethyst-50">
+                <Play className="size-8 text-amethyst-600" />
               </div>
               <p className="mb-1 text-sm font-semibold text-neutral-950">
                 {t("modernCourseView.media.dropVideo")}
@@ -146,7 +147,7 @@ export default function CourseMediaModal({
             disabled={isSaving}
             className="flex items-center gap-2 rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800"
           >
-            <Upload className="h-4 w-4" />
+            <Upload className="size-4" />
             {t("modernCourseView.media.save")}
           </button>
         </div>

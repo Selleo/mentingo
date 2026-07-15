@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
-import { useUploadFile } from "~/api/mutations/admin/useUploadFile";
+import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
 import { useCategories } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
@@ -39,7 +39,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
     useToggleCourseStudentMode(course.id);
   const { mutateAsync: updateCourse, isPending: isUpdatingCourse } = useUpdateCourse();
-  const { mutateAsync: uploadFile, isPending: isUploadingImage } = useUploadFile();
+  const { mutateAsync: updateCourseMedia, isPending: isUpdatingMedia } = useUpdateCourseMedia();
 
   const savedImagePosition = course.thumbnailPositionY ?? 50;
   const imageUrl = course.thumbnailUrl ?? CardPlaceholder;
@@ -120,23 +120,12 @@ export default function CourseOverview({ language }: CourseHeroProps) {
   };
 
   const saveMediaSettings = async () => {
-    let thumbnailS3Key: string | undefined;
-
-    if (selectedImageFile) {
-      const uploadResult = await uploadFile({
-        file: selectedImageFile,
-        resource: "course",
-      });
-
-      thumbnailS3Key = uploadResult.fileKey;
-    }
-
-    await updateCourse({
+    await updateCourseMedia({
       courseId: course.id,
       data: {
         language,
         thumbnailPositionY: heroImagePositionDraft,
-        ...(thumbnailS3Key ? { thumbnailS3Key } : {}),
+        ...(selectedImageFile ? { image: selectedImageFile } : {}),
       },
     });
 
@@ -305,7 +294,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
           imagePreviewUrl={imagePreviewUrl}
           heroImagePositionDraft={heroImagePositionDraft}
           imageInputRef={imageInputRef}
-          isSaving={isUpdatingCourse || isUploadingImage}
+          isSaving={isUpdatingMedia}
           onClose={closeMediaModal}
           onSave={saveMediaSettings}
           onPositionChange={setHeroImagePositionDraft}

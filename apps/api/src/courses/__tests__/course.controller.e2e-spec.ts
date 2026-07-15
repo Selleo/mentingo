@@ -20,6 +20,7 @@ import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
+import { FileGuard } from "src/file/guards/file.guard";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
@@ -54,6 +55,13 @@ import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
 const sleep = async (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const validPngBuffer = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
+  0xde, 0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
+  0x00, 0x03, 0x01, 0x01, 0x00, 0x18, 0xdd, 0x8d, 0xb1, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e,
+  0x44, 0xae, 0x42, 0x60, 0x82,
+]);
 
 describe("CourseController (e2e)", () => {
   let app: INestApplication;
@@ -69,6 +77,7 @@ describe("CourseController (e2e)", () => {
     getFileUrl: jest.Mock;
     getRawFileBuffer: jest.Mock;
     isBunnyConfigured: jest.Mock;
+    uploadFile: jest.Mock;
   };
   const password = "password123";
 
@@ -108,6 +117,7 @@ describe("CourseController (e2e)", () => {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
+      uploadFile: jest.fn(),
     };
 
     const mockCacheManager = {
@@ -1359,6 +1369,62 @@ describe("CourseController (e2e)", () => {
           perPage: 5,
         });
       });
+    });
+  });
+
+  describe("PATCH /api/course/:id/media", () => {
+    it("uploads and saves a course thumbnail through the update endpoint", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const course = await courseFactory.create({ authorId: admin.id, thumbnailS3Key: null });
+      const uploadedFileKey = `tenants/${admin.tenantId}/course/thumbnail.webp`;
+
+      mockFileService.uploadFile.mockResolvedValue({
+        fileKey: uploadedFileKey,
+        fileUrl: "http://example.com/thumbnail.webp",
+        contentType: "image/webp",
+      });
+      jest.spyOn(FileGuard, "getFileType").mockResolvedValueOnce({ ext: "png", mime: "image/png" });
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", cookies)
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .attach("image", validPngBuffer, {
+          filename: "thumbnail.png",
+          contentType: "image/png",
+        })
+        .expect(200);
+
+      expect(mockFileService.uploadFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          mimetype: "image/png",
+          originalname: "thumbnail.png",
+        }),
+        "course",
+        admin.tenantId,
+      );
+
+      const [updatedCourse] = await db
+        .select({
+          thumbnailPositionY: courses.thumbnailPositionY,
+          thumbnailS3Key: courses.thumbnailS3Key,
+        })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(updatedCourse).toEqual({
+        thumbnailPositionY: 35,
+        thumbnailS3Key: uploadedFileKey,
+      });
+      expect(response.body).toEqual({
+        data: { message: "Course updated successfully" },
+      });
+      expect(response.status).toBe(200);
     });
   });
 
@@ -3025,7 +3091,6 @@ describe("CourseController (e2e)", () => {
         expect.objectContaining({
           id: course.id,
           estimatedDurationMinutes: 1,
-          estimatedDurationFormatted: "1 min",
         }),
       );
     });

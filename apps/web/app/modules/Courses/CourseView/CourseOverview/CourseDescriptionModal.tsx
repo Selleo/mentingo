@@ -38,9 +38,9 @@ export default function CourseDescriptionModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
+              className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
             >
-              <X className="h-5 w-5 text-neutral-800" />
+              <X className="size-5 text-neutral-800" />
             </button>
           </div>
 
@@ -51,8 +51,8 @@ export default function CourseDescriptionModal({
                 {course.category}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {formatDuration(course.estimatedDurationSeconds)}
+                <Clock className="size-4" />
+                {formatDuration(course.estimatedDurationSeconds, t)}
               </span>
             </div>
           </div>
@@ -65,7 +65,7 @@ export default function CourseDescriptionModal({
               <textarea
                 value={courseDescription}
                 onChange={(event) => onChangeDescription(event.target.value)}
-                className="min-h-[120px] w-full rounded-lg border-2 border-neutral-200 p-3 leading-relaxed text-neutral-950 focus:border-primary-700 focus:outline-none"
+                className="min-h-32 w-full rounded-lg border-2 border-neutral-200 p-3 leading-relaxed text-neutral-950 focus:border-primary-700 focus:outline-none"
                 placeholder={t("modernCourseView.overview.descriptionPlaceholder")}
                 onBlur={() => void onSaveDescription()}
               />

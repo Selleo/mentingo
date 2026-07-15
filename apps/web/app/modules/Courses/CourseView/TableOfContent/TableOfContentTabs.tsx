@@ -55,7 +55,7 @@ export default function TableOfContentTabs({
         onClick={onEditContent}
         className="mb-3 flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary-700 px-3 py-2 text-white transition-colors hover:bg-primary-800 md:px-4"
       >
-        <Edit2 className="h-4 w-4" />
+        <Edit2 className="size-4" />
         <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
       </button>
     </div>

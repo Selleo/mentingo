@@ -21,6 +21,7 @@ The feature also gives course managers controlled ways to handle certificate val
 - Download certificate PDFs with generated filenames.
 - Share certificates externally through LinkedIn/public share links.
 - Configure whether a course issues certificates.
+- Preview course certificates with the signed-in user's name before enabling issuance.
 - Set certificate validity rules for a course.
 - Show the impact of validity changes before applying them to active certificates.
 - Reset course certificates for all holders, selected groups, or selected users.
@@ -37,7 +38,7 @@ For administrators, the reset and validity tools reduce operational risk. When a
 
 Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
 
-Course certificate settings are managed from the admin course settings workflow. Administrators can enable certificate issuance, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates.
+Course certificate settings are managed from the admin course settings workflow. Administrators can preview the certificate with their own signed-in name, enable certificate issuance, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates.
 
 Certificate reset actions archive matching active certificates, reset the relevant learner progress, record certificate activity, and optionally send reset emails. Reset scope can target all certificate holders for the course, selected groups, or selected users with active certificates.
 

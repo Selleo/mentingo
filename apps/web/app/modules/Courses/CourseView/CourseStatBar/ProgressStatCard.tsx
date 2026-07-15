@@ -41,7 +41,7 @@ export default function ProgressStatCard({
           <div className="mb-1.5">
             <div className="flex items-baseline gap-1">
               <span className="whitespace-nowrap text-xl font-bold text-neutral-950">
-                {isAdminExperience ? 0 : formatDuration(timeLeftSeconds)}
+                {isAdminExperience ? 0 : formatDuration(timeLeftSeconds, t)}
               </span>
               <span className="whitespace-nowrap text-sm text-neutral-800">
                 {t("modernCourseView.stats.remaining")}
@@ -53,7 +53,11 @@ export default function ProgressStatCard({
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <span className="text-xs font-medium text-neutral-800">
-                  {completedChapterCount} / {courseChapterCount} chapters
+                  {t("modernCourseView.stats.chapterProgress", {
+                    completed: completedChapterCount,
+                    count: courseChapterCount,
+                    total: courseChapterCount,
+                  })}
                 </span>
                 <span className="text-xs font-semibold text-success-500">
                   {progressPercentage}%

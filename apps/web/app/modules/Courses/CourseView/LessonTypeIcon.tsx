@@ -1,7 +1,9 @@
+import { LESSON_TYPES } from "@repo/shared";
 import { Users } from "lucide-react";
 
 import { Icon } from "~/components/Icon";
 
+import type { LessonTypes } from "@repo/shared";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import type { IconName } from "~/types/shared";
@@ -17,34 +19,34 @@ type LessonTypeIconConfig =
     };
 
 const lessonTypeIconConfig = {
-  content: {
+  [LESSON_TYPES.CONTENT]: {
     kind: "svg",
     name: "Content",
   },
-  quiz: {
+  [LESSON_TYPES.QUIZ]: {
     kind: "svg",
     name: "Quiz",
   },
-  ai_mentor: {
+  [LESSON_TYPES.AI_MENTOR]: {
     kind: "svg",
     name: "AiMentor",
   },
-  embed: {
+  [LESSON_TYPES.EMBED]: {
     kind: "svg",
     name: "Embed",
   },
-  scorm: {
+  [LESSON_TYPES.SCORM]: {
     kind: "svg",
     name: "Archive",
   },
-  live_training: {
+  [LESSON_TYPES.LIVE_TRAINING]: {
     kind: "lucide",
     Icon: Users,
   },
-} as const satisfies Record<string, LessonTypeIconConfig>;
+} as const satisfies Record<LessonTypes, LessonTypeIconConfig>;
 
 type LessonTypeIconProps = {
-  type: keyof typeof lessonTypeIconConfig;
+  type: LessonTypes;
   className?: string;
 } & Omit<ComponentProps<typeof Icon>, "name" | "className">;
 

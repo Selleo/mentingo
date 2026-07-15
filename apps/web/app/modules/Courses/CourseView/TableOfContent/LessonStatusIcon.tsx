@@ -11,7 +11,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
   if (status === "completed") {
     return (
       <div className="relative group/status">
-        <CheckCircle2 className="h-5 w-5 text-success-500" />
+        <CheckCircle2 className="size-5 text-success-500" />
         <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 whitespace-nowrap rounded bg-neutral-950 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/status:opacity-100">
           {t("modernCourseView.contents.status.completed")}
         </div>
@@ -22,7 +22,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
   if (status === "in_progress") {
     return (
       <div className="relative group/status">
-        <Circle className="h-4 w-4 fill-current text-secondary-500" />
+        <Circle className="size-4 fill-current text-secondary-500" />
         <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 whitespace-nowrap rounded bg-neutral-950 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/status:opacity-100">
           {t("modernCourseView.contents.status.inProgress")}
         </div>
@@ -33,7 +33,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
   if (status === "not_started") {
     return (
       <div className="relative group/status">
-        <Minus className="h-5 w-5 text-neutral-800" />
+        <Minus className="size-5 text-neutral-800" />
         <div className="pointer-events-none absolute bottom-full right-0 z-10 mb-2 whitespace-nowrap rounded bg-neutral-950 px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover/status:opacity-100">
           {t("modernCourseView.contents.status.notStarted")}
         </div>

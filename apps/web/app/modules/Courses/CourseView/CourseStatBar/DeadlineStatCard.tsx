@@ -41,8 +41,8 @@ export default function DeadlineStatCard({
       )}
     >
       <div className="flex items-start gap-4">
-        <div className="mt-3 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
-          <Calendar className="h-6 w-6 text-secondary-500" />
+        <div className="mt-3 flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-red-50">
+          <Calendar className="size-6 text-secondary-500" />
         </div>
         <div className="flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">

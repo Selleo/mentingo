@@ -4523,6 +4523,13 @@
     "stats": {
       "yourProgress": "Dein Fortschritt",
       "remaining": "verbleibend",
+      "chapterProgress_one": "{{completed}} / {{total}} Kapitel",
+      "chapterProgress_other": "{{completed}} / {{total}} Kapitel",
+      "duration": {
+        "minutes": "{{minutes}} Min.",
+        "hours": "{{hours}} Std.",
+        "hoursAndMinutes": "{{hours}} Std. {{minutes}} Min."
+      },
       "trackProgress": "um deinen Fortschritt zu verfolgen.",
       "deadline": "Frist",
       "daysLeft_one": "Noch {{count}} Tag",

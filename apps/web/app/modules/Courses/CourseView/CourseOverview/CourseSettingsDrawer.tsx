@@ -26,11 +26,11 @@ export default function CourseSettingsDrawer({ onClose, title }: CourseSettingsD
         onClick={onClose}
       />
 
-      <div className="fixed right-0 top-0 z-50 h-full w-full bg-white shadow-2xl transition-transform sm:max-w-md">
+      <div className="fixed right-0 top-0 z-50 size-full bg-white shadow-2xl transition-transform sm:max-w-md">
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-neutral-200 p-4 md:p-6">
             <div className="flex items-center gap-3">
-              <Settings className="h-6 w-6 text-primary-700" />
+              <Settings className="size-6 text-primary-700" />
               <h2 className="font-gothic text-2xl font-bold text-neutral-950">{title}</h2>
             </div>
             <button
@@ -38,13 +38,13 @@ export default function CourseSettingsDrawer({ onClose, title }: CourseSettingsD
               onClick={onClose}
               className="rounded-lg p-2 transition-colors hover:bg-neutral-100"
             >
-              <X className="h-5 w-5 text-neutral-800" />
+              <X className="size-5 text-neutral-800" />
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 md:p-6">
             <div className="rounded-xl border border-primary-200 bg-primary-50 p-6 text-center">
-              <Settings className="mx-auto mb-3 h-12 w-12 text-primary-700" />
+              <Settings className="mx-auto mb-3 size-12 text-primary-700" />
               <h3 className="mb-2 text-lg font-semibold text-neutral-950">
                 {t("modernCourseView.overview.settingsComingSoon")}
               </h3>

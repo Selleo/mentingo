@@ -20,6 +20,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
 - Review and edit the modern course overview in the user's interface language, including media, deadlines, certificates, author details, related author courses, curriculum, and statistics.
+- Upload and reposition a course thumbnail through the course update workflow with server-side file validation and storage.
 - Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.

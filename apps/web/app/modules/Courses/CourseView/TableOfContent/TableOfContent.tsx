@@ -2,7 +2,6 @@ import { useNavigate } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -22,7 +21,6 @@ export function TableOfContent() {
   const [isMobile, setIsMobile] = useState(false);
   const [showAllChapters, setShowAllChapters] = useState(false);
 
-  const { mutate: toggleLearningMode } = useToggleCourseStudentMode(course.id);
   const { data: courseStatistics, isLoading: isLoadingCourseStatistics } = useCourseStatistics({
     id: course.id,
     enabled: isAdminExperience && activeTab === "statistics",
@@ -48,20 +46,13 @@ export function TableOfContent() {
   };
 
   useEffect(() => {
-    const checkMobile = () => {
-      const mobile = window.innerWidth < 1024;
-      setIsMobile(mobile);
-
-      if (mobile) {
-        toggleLearningMode({ enabled: true });
-      }
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
 
     return () => window.removeEventListener("resize", checkMobile);
-  }, [toggleLearningMode]);
+  }, []);
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">

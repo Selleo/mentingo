@@ -1,24 +1,37 @@
-export const formatDuration = (seconds?: number): string => {
-  if (!seconds) return "0 min";
+import type { TFunction } from "i18next";
+
+const formatMinutes = (minutes: number, t: TFunction): string =>
+  t("modernCourseView.stats.duration.minutes", { minutes });
+
+const formatHours = (hours: number, t: TFunction): string =>
+  t("modernCourseView.stats.duration.hours", { hours });
+
+const formatHoursAndMinutes = (hours: number, minutes: number, t: TFunction): string =>
+  t("modernCourseView.stats.duration.hoursAndMinutes", { hours, minutes });
+
+export const formatDuration = (seconds: number | undefined, t: TFunction): string => {
+  if (!seconds) return formatMinutes(0, t);
 
   const minutes = Math.ceil(seconds / 60);
 
-  if (minutes < 60) return `${minutes} min`;
+  if (minutes < 60) return formatMinutes(minutes, t);
 
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
 
-  return remainingMinutes ? `${hours} h ${remainingMinutes} min` : `${hours} h`;
+  return remainingMinutes
+    ? formatHoursAndMinutes(hours, remainingMinutes, t)
+    : formatHours(hours, t);
 };
 
-export const formatDurationToHalfHour = (seconds?: number): string => {
-  if (!seconds) return "0 min";
+export const formatDurationToHalfHour = (seconds: number | undefined, t: TFunction): string => {
+  if (!seconds) return formatMinutes(0, t);
 
   const roundedMinutes = Math.ceil(seconds / 60 / 30) * 30;
   const hours = Math.floor(roundedMinutes / 60);
   const minutes = roundedMinutes % 60;
 
-  if (!hours) return `${minutes} min`;
+  if (!hours) return formatMinutes(minutes, t);
 
-  return minutes ? `${hours}h ${minutes}min` : `${hours}h`;
+  return minutes ? formatHoursAndMinutes(hours, minutes, t) : formatHours(hours, t);
 };

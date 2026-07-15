@@ -10,21 +10,21 @@ export default function LessonTypeIcon({ type }: LessonTypeIconProps) {
 
   const iconMap = {
     content: {
-      icon: <MonitorPlay className="h-4 w-4 text-primary-700" />,
+      icon: <MonitorPlay className="size-4 text-primary-700" />,
       label: t("modernCourseView.contents.lessonTypes.content"),
     },
     quiz: {
-      icon: <HelpCircle className="h-4 w-4 text-primary-700" />,
+      icon: <HelpCircle className="size-4 text-primary-700" />,
       label: t("modernCourseView.contents.lessonTypes.quiz"),
     },
     ai_mentor: {
-      icon: <Sparkles className="h-4 w-4 text-primary-700" />,
+      icon: <Sparkles className="size-4 text-primary-700" />,
       label: t("modernCourseView.contents.lessonTypes.aiMentor"),
     },
   };
 
   const { icon, label } = iconMap[type as keyof typeof iconMap] || {
-    icon: <Play className="h-4 w-4 text-primary-700" />,
+    icon: <Play className="size-4 text-primary-700" />,
     label: t("modernCourseView.contents.lessonTypes.lesson"),
   };
 

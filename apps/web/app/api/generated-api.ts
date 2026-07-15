@@ -2293,6 +2293,27 @@ export interface GetCourseDuplicationJobStatusResponse {
   };
 }
 
+export interface UpdateCourseMediaBody {
+  /** @default "en" */
+  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+  /**
+   * @min 0
+   * @max 100
+   */
+  thumbnailPositionY: number;
+  /**
+   * Course thumbnail image
+   * @format binary
+   */
+  image?: File;
+}
+
+export interface UpdateCourseMediaResponse {
+  data: {
+    message: string;
+  };
+}
+
 export interface UpdateCourseBody {
   title?: string;
   description?: string;
@@ -9532,6 +9553,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<GetCourseDuplicationJobStatusResponse, any>({
         path: `/api/course/duplication-jobs/${jobId}`,
         method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name CourseControllerUpdateCourseMedia
+     * @request PATCH:/api/course/{id}/media
+     */
+    courseControllerUpdateCourseMedia: (
+      id: string,
+      data: UpdateCourseMediaBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateCourseMediaResponse, any>({
+        path: `/api/course/${id}/media`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.FormData,
         format: "json",
         ...params,
       }),

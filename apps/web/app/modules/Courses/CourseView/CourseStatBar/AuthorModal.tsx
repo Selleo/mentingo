@@ -60,14 +60,14 @@ export default function AuthorModal({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md transition-colors hover:bg-neutral-100 md:right-4 md:top-4 md:hidden"
+              className="absolute right-2 top-2 flex size-10 items-center justify-center rounded-full bg-white shadow-md transition-colors hover:bg-neutral-100 md:right-4 md:top-4 md:hidden"
             >
-              <X className="h-5 w-5 text-neutral-800" />
+              <X className="size-5 text-neutral-800" />
             </button>
             <img
               src={DEFAULT_AUTHOR_MODAL_IMAGE}
               alt={authorFullName || t("modernCourseView.author.pictureAlt")}
-              className="h-auto w-full rounded-xl object-cover shadow-lg"
+              className="size-full rounded-xl object-cover shadow-lg"
             />
           </div>
 
@@ -75,9 +75,9 @@ export default function AuthorModal({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-4 top-4 hidden h-10 w-10 items-center justify-center rounded-full bg-neutral-100 transition-colors hover:bg-neutral-200 md:block"
+              className="absolute right-4 top-4 hidden size-10 items-center justify-center rounded-full bg-neutral-100 transition-colors hover:bg-neutral-200 md:block"
             >
-              <X className="mx-auto mt-2.5 h-5 w-5 text-neutral-800" />
+              <X className="mx-auto mt-2.5 size-5 text-neutral-800" />
             </button>
             {isAdminExperience && (
               <div className="mb-6 rounded-xl border border-primary-200 bg-primary-50 p-4">
@@ -102,7 +102,7 @@ export default function AuthorModal({
                   >
                     <div
                       className={cn(
-                        "absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white transition-transform",
+                        "absolute left-0.5 top-0.5 size-6 rounded-full bg-white transition-transform",
                         showAuthorSectionDraft ? "translate-x-7" : "translate-x-0",
                       )}
                     />
@@ -123,7 +123,7 @@ export default function AuthorModal({
               <h4 className="mb-4 font-gothic text-xl font-bold text-neutral-950">
                 {t("modernCourseView.author.otherCourses")}
               </h4>
-              <div className="max-h-[400px] space-y-3 overflow-y-auto pr-2">
+              <div className="max-h-96 space-y-3 overflow-y-auto pr-2">
                 {otherCourses.map((course) => (
                   <div
                     key={course.id}
@@ -139,18 +139,18 @@ export default function AuthorModal({
                     </div>
                     <div className="flex items-center gap-4 text-xs text-neutral-800">
                       <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
+                        <Users className="size-3" />
                         <span>{course.enrolledParticipantCount}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Award className="h-3 w-3 text-warning-500" />
+                        <Award className="size-3 text-warning-500" />
                         <span>4.8</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="size-3" />
                         <span>
                           {course.estimatedDurationMinutes != null
-                            ? formatDurationToHalfHour(course.estimatedDurationMinutes * 60)
+                            ? formatDurationToHalfHour(course.estimatedDurationMinutes * 60, t)
                             : (course.estimatedDurationFormatted ?? "—")}
                         </span>
                       </div>

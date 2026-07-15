@@ -202,7 +202,7 @@ export default function CourseStatisticsPanel({
               </div>
               <div>
                 <p className="text-2xl font-bold text-neutral-950">
-                  {isLoading ? "—" : formatDuration(courseStatistics?.averageSeconds ?? 0)}
+                  {isLoading ? "—" : formatDuration(courseStatistics?.averageSeconds ?? 0, t)}
                 </p>
                 <p className="mt-0.5 text-xs font-semibold uppercase tracking-wide text-neutral-800">
                   {t("modernCourseView.contents.averageTime")}

@@ -44,7 +44,7 @@ export default function AuthorStatCard({
         <img
           src={author?.profilePictureUrl ?? DEFAULT_AUTHOR_STAT_IMAGE}
           alt={authorName || "author picture"}
-          className="h-12 w-12 flex-shrink-0 rounded-full object-cover"
+          className="size-12 flex-shrink-0 rounded-full object-cover"
         />
         <div className="flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">
