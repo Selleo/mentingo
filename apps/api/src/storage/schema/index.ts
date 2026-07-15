@@ -2515,9 +2515,11 @@ export const automationsAutomationSteps = pgTable(
     }),
   }),
 );
+
 type ChildStep = {
   id: UUID;
 };
+
 export const automationSteps = pgTable("automation_steps", {
   ...id,
   childrenSteps: jsonb("children_steps").$type<ChildStep[]>().default([]),

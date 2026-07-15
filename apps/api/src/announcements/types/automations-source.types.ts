@@ -1,6 +1,6 @@
 import type { AutomationStatus } from "./automations.types";
 
-export type CreateAutomationRecordInput = {
+export type AutomationRecordInput = {
   name: string;
   description: string | null;
   status: AutomationStatus;
