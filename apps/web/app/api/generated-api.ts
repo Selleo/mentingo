@@ -472,6 +472,22 @@ export interface GetPublicGlobalSettingsResponse {
   };
 }
 
+export interface GetPwaManifestResponse {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  display: "standalone";
+  orientation: "portrait";
+  start_url: "/";
+  scope: "/";
+  icons: {
+    src: string;
+    sizes: string;
+    type: string;
+  }[];
+}
+
 export interface GetPublicRegistrationFormResponse {
   data: {
     fields: {
@@ -4629,7 +4645,7 @@ export interface GetAllAnnouncementsResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4663,7 +4679,7 @@ export interface GetAnnouncementsForUserResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4712,7 +4728,7 @@ export interface CreateAnnouncementResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -7693,6 +7709,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
       this.request<GetPublicGlobalSettingsResponse, any>({
         path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPwaManifest
+     * @request GET:/api/settings/manifest.webmanifest
+     */
+    settingsControllerGetPwaManifest: (params: RequestParams = {}) =>
+      this.request<GetPwaManifestResponse, any>({
+        path: `/api/settings/manifest.webmanifest`,
         method: "GET",
         format: "json",
         ...params,
@@ -12454,7 +12484,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     courseChatControllerGetCourseChatUsers: (courseId: string, params: RequestParams = {}) =>
       this.request<GetCourseChatUsersResponse, any>({
         path: `/api/course-chat/${courseId}/users`,
-
         method: "GET",
         format: "json",
         ...params,
