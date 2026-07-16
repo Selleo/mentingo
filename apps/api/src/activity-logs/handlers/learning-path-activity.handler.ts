@@ -60,7 +60,6 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
 
     await this.activityLogsService.recordActivity({
       actor: event.learningPathCreationData.actor,
-      tenantId: event.learningPathCreationData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.learningPathCreationData.learningPathId,
@@ -79,7 +78,6 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
 
     await this.activityLogsService.recordActivity({
       actor: learningPathUpdateData.actor,
-      tenantId: learningPathUpdateData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathUpdateData.learningPathId,
@@ -93,7 +91,6 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   private async handleDeleteLearningPath(event: DeleteLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.learningPathDeletionData.actor,
-      tenantId: event.learningPathDeletionData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.learningPathDeletionData.learningPathId,
@@ -101,31 +98,28 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   }
 
   private async handleEnrollLearningPath(event: EnrollLearningPathEvent) {
+    const { actor, learningPathId, userIds } = event.enrollmentData;
+
     await this.activityLogsService.recordActivity({
-      actor: event.enrollmentData.actor,
-      tenantId: event.enrollmentData.actor.tenantId,
+      actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
-      resourceId: event.enrollmentData.learningPathId,
-      context:
-        event.enrollmentData.userId !== event.enrollmentData.actor.userId
-          ? { enrolledUserId: event.enrollmentData.userId }
-          : null,
+      resourceId: learningPathId,
+      context: {
+        enrolledUserIds: JSON.stringify(userIds),
+        enrolledCount: String(userIds.length),
+      },
     });
   }
 
   private async handleStartLearningPath(event: StartLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.startData.actor,
-      tenantId: event.startData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.START_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.startData.learningPathId,
       context: {
-        learningPathId: event.startData.learningPathId,
-        ...(event.startData.userId !== event.startData.actor.userId
-          ? { startedByUserId: event.startData.userId }
-          : {}),
+        startedByUserId: event.startData.userId,
       },
     });
   }
@@ -133,15 +127,11 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   private async handleCompleteLearningPath(event: CompleteLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.completeData.actor,
-      tenantId: event.completeData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.completeData.learningPathId,
       context: {
-        learningPathId: event.completeData.learningPathId,
-        ...(event.completeData.userId !== event.completeData.actor.userId
-          ? { completedByUserId: event.completeData.userId }
-          : {}),
+        completedByUserId: event.completeData.userId,
       },
     });
   }

@@ -101,7 +101,7 @@ describe("ScormActivityHandler", () => {
 
   it("handles DeleteScormEvent", async () => {
     const event = new DeleteScormEvent({
-      scormId,
+      scormIds: [{ scormId }],
       actor,
     });
 

@@ -54,7 +54,6 @@ export class ScormActivityHandler implements IEventHandler<ScormEventType> {
 
     await this.activityLogsService.recordActivity({
       actor: event.scormCreationData.actor,
-      tenantId: event.scormCreationData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: event.scormCreationData.scormId,
@@ -73,7 +72,6 @@ export class ScormActivityHandler implements IEventHandler<ScormEventType> {
 
     await this.activityLogsService.recordActivity({
       actor: scormUpdateData.actor,
-      tenantId: scormUpdateData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: scormUpdateData.scormId,
@@ -85,40 +83,41 @@ export class ScormActivityHandler implements IEventHandler<ScormEventType> {
   }
 
   private async handleDeleteScorm(event: DeleteScormEvent) {
+    const { actor, scormIds } = event.scormDeletionData;
+
     await this.activityLogsService.recordActivity({
-      actor: event.scormDeletionData.actor,
-      tenantId: event.scormDeletionData.actor.tenantId,
+      actor,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
-      resourceId: event.scormDeletionData.scormId,
+      resourceId: scormIds[0].scormId,
+      context: {
+        deletedScormIds: JSON.stringify(scormIds.map((item) => item.scormId)),
+        deletedCount: String(scormIds.length),
+      },
     });
   }
 
   private async handlePlayScorm(event: PlayScormEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.playData.actor,
-      tenantId: event.playData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.PLAY_SCORM,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: event.playData.scormId,
-      context:
-        event.playData.userId !== event.playData.actor.userId
-          ? { playedByUserId: event.playData.userId }
-          : null,
+      context: {
+        playedByUserId: event.playData.userId,
+      },
     });
   }
 
   private async handleCompleteScorm(event: CompleteScormEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.completeData.actor,
-      tenantId: event.completeData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_SCORM,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
       resourceId: event.completeData.scormId,
-      context:
-        event.completeData.userId !== event.completeData.actor.userId
-          ? { completedByUserId: event.completeData.userId }
-          : null,
+      context: {
+        completedByUserId: event.completeData.userId,
+      },
     });
   }
 }

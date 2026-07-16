@@ -3266,17 +3266,17 @@ export class CourseService {
         entityId: id,
         db: trx,
       });
-    });
 
-    if (scormPackageToDelete) {
-      await this.outboxPublisher.publish(
-        new DeleteScormEvent({
-          scormId: scormPackageToDelete.id,
-          actor: currentUser,
-        }),
-        this.db,
-      );
-    }
+      if (scormPackageToDelete) {
+        await this.outboxPublisher.publish(
+          new DeleteScormEvent({
+            scormIds: [{ scormId: scormPackageToDelete.id }],
+            actor: currentUser,
+          }),
+          trx,
+        );
+      }
+    });
 
     return null;
   }
@@ -3290,11 +3290,25 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
-    const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
+    const selectedCourses = await this.db.select().from(courses).where(inArray(courses.id, ids));
 
-    if (course.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))) {
+    if (
+      selectedCourses.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))
+    ) {
       throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
+
+    const scormCourseIds = selectedCourses
+      .filter((course) => course.courseType === COURSE_TYPE.SCORM)
+      .map((course) => course.id);
+
+    const scormPackagesToDelete =
+      scormCourseIds.length > 0
+        ? await this.db
+            .select({ id: scormPackages.id })
+            .from(scormPackages)
+            .where(inArray(scormPackages.entityId, scormCourseIds))
+        : [];
 
     return this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(inArray(quizAttempts.courseId, ids));
@@ -3306,6 +3320,24 @@ export class CourseService {
 
       if (!deletedCourses.length) {
         throw new ConflictException("Failed to delete courses");
+      }
+
+      for (const courseId of ids) {
+        await this.searchIndexService.deleteEntityDocuments({
+          entityType: SEARCH_ENTITY_TYPES.COURSE,
+          entityId: courseId,
+          db: trx,
+        });
+      }
+
+      if (scormPackagesToDelete.length > 0) {
+        await this.outboxPublisher.publish(
+          new DeleteScormEvent({
+            scormIds: scormPackagesToDelete.map((scormPkg) => ({ scormId: scormPkg.id })),
+            actor: currentUser,
+          }),
+          trx,
+        );
       }
 
       return null;

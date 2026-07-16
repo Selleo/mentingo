@@ -3,7 +3,7 @@ import type { ActorUserType } from "src/common/types/actor-user.type";
 
 export type EnrollLearningPathData = {
   learningPathId: UUIDType;
-  userId: UUIDType;
+  userIds: UUIDType[];
   actor: ActorUserType;
 };
 

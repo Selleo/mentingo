@@ -485,36 +485,19 @@ export class LearningPathCourseSyncService {
 
     if (!isStarted && !isCompleted) return;
 
-    let actor: ActorUserType | null = null;
-
-    try {
-      actor = await this.learningPathRepository.getStudentActorInfo(studentId);
-    } catch (error) {
-      console.error(`Failed to fetch actor info for student ${studentId}:`, error);
-      return;
-    }
+    const actor: ActorUserType | null =
+      await this.learningPathRepository.getStudentActorInfo(studentId);
 
     if (!actor) return;
 
+    const eventPayload = { learningPathId, actor, userId: studentId };
+
     if (isStarted) {
-      await this.outboxPublisher.publish(
-        new StartLearningPathEvent({
-          learningPathId,
-          userId: studentId,
-          actor,
-        }),
-      );
+      await this.outboxPublisher.publish(new StartLearningPathEvent(eventPayload));
+      return;
     }
 
-    if (isCompleted) {
-      await this.outboxPublisher.publish(
-        new CompleteLearningPathEvent({
-          learningPathId,
-          userId: studentId,
-          actor,
-        }),
-      );
-    }
+    await this.outboxPublisher.publish(new CompleteLearningPathEvent(eventPayload));
   }
 
   private resolveLearningPathProgress(

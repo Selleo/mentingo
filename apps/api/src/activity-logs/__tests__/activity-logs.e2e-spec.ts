@@ -825,10 +825,11 @@ describe("Activity Logs E2E", () => {
       expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH);
       expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
       expect(enrollLog.resourceId).toBe(learningPath.id);
-      expect(metadata.context?.enrolledUserId).toBe(student.id);
+      expect(metadata.context?.enrolledUserIds).toBe(JSON.stringify([student.id]));
+      expect(metadata.context?.enrolledCount).toBe("1");
     });
 
-    it("should record ENROLL_LEARNING_PATH without enrolledUserId when student self-enrolls", async () => {
+    it("should record ENROLL_LEARNING_PATH when student self-enrolls", async () => {
       const publishedLearningPath = await learningPathService.createLearningPath(
         {
           title: "Published Learning Path",
@@ -862,7 +863,8 @@ describe("Activity Logs E2E", () => {
       expect(enrollLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH);
       expect(enrollLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH);
       expect(enrollLog.actorId).toBe(student.id);
-      expect(metadata.context).toBeNull();
+      expect(metadata.context?.enrolledUserIds).toBe(JSON.stringify([student.id]));
+      expect(metadata.context?.enrolledCount).toBe("1");
     });
   });
 

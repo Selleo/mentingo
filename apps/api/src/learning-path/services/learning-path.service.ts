@@ -808,18 +808,16 @@ export class LearningPathService {
 
       await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
 
-      await Promise.all(
-        newStudentIds.map((userId) =>
-          this.outboxPublisher.publish(
-            new EnrollLearningPathEvent({
-              learningPathId,
-              actor: currentUser,
-              userId,
-            }),
-            trx,
-          ),
-        ),
-      );
+      if (newStudentIds.length > 0) {
+        await this.outboxPublisher.publish(
+          new EnrollLearningPathEvent({
+            learningPathId,
+            actor: currentUser,
+            userIds: newStudentIds,
+          }),
+          trx,
+        );
+      }
 
       return {
         learningPathId,

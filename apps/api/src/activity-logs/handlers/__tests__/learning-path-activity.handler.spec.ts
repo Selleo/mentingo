@@ -11,6 +11,7 @@ import {
   StartLearningPathEvent,
   CompleteLearningPathEvent,
 } from "src/events";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 describe("LearningPathActivityHandler", () => {
   let handler: LearningPathActivityHandler;
@@ -34,6 +35,12 @@ describe("LearningPathActivityHandler", () => {
         {
           provide: ActivityLogsService,
           useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: {
+            runWithTenant: jest.fn((_: string, callback: () => Promise<void>) => callback()),
+          },
         },
       ],
     }).compile();
@@ -118,10 +125,17 @@ describe("LearningPathActivityHandler", () => {
   });
 
   it("handles EnrollLearningPathEvent", async () => {
+    const userIds = [
+      "00000000-0000-0000-0000-000000000002",
+      "00000000-0000-0000-0000-000000000003",
+    ];
     const event = new EnrollLearningPathEvent({
       learningPathId,
       actor,
-      userId: "00000000-0000-0000-0000-000000000002",
+      tenantId: actor.tenantId,
+      userIds,
+      requestedCount: 2,
+      enrolledCount: 2,
     });
 
     await handler.handle(event);
@@ -132,7 +146,11 @@ describe("LearningPathActivityHandler", () => {
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
-      context: { enrolledUserId: "00000000-0000-0000-0000-000000000002" },
+      context: {
+        enrolledUserIds: JSON.stringify(userIds),
+        requestedCount: "2",
+        enrolledCount: "2",
+      },
     });
   });
 
