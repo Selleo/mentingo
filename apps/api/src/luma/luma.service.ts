@@ -5,7 +5,6 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
-  Logger,
   ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -34,8 +33,6 @@ import type { LumaClient } from "src/luma/luma.types";
 
 @Injectable()
 export class LumaService {
-  private readonly logger = new Logger(LumaService.name);
-
   constructor(
     private readonly envService: EnvService,
     private readonly adminLessonService: AdminLessonService,
@@ -44,7 +41,6 @@ export class LumaService {
   ) {}
 
   async getLumaClient() {
-    this.logger.debug("creating Luma client");
     const apiKey = await this.envService
       .getEnv("LUMA_API_KEY")
       .then((r) => r.value)
@@ -54,8 +50,6 @@ export class LumaService {
     if (!baseURL || !apiKey) {
       throw new BadRequestException("adminCourseView.toast.lumaNotConfigured");
     }
-
-    this.logger.debug(`Luma client configured baseURL=${this.safeUrl(baseURL)}`);
 
     return createLumaClient({
       apiKey,
@@ -98,20 +92,11 @@ export class LumaService {
     data: ChatOptions,
     currentUser: CurrentUserType,
   ): Promise<Awaited<ReturnType<LumaClient["courses"]["chat"]>>> {
-    this.logger.debug(`course generation chat preparing integrationId=${data.integrationId}`);
     const luma = await this.getAuthorizedLumaClient(data.integrationId, currentUser, {
       ensureCourseHasNoChapters: false,
     });
-    this.logger.debug(
-      `course generation chat calling Luma SDK integrationId=${data.integrationId}`,
-    );
 
-    const response = await this.withLumaErrorHandling(() => luma.courses.chat(data));
-    this.logger.debug(
-      `course generation chat Luma SDK returned integrationId=${data.integrationId}`,
-    );
-
-    return response;
+    return this.withLumaErrorHandling(() => luma.courses.chat(data));
   }
 
   async getCourseGenerationMessages(data: IntegrationIdOptions, currentUser: CurrentUserType) {
@@ -237,17 +222,13 @@ export class LumaService {
   }
 
   private async validateCourseHasChapters(integrationId: UUIDType) {
-    this.logger.debug(`validating course has no chapters integrationId=${integrationId}`);
     if (await this.adminLessonService.courseHasChapters(integrationId)) {
       throw new ConflictException("adminCourseView.toast.courseHasChapters");
     }
-    this.logger.debug(`course has no chapters integrationId=${integrationId}`);
   }
 
   private async validateCourseAccess(integrationId: string, currentUser: CurrentUserType) {
-    this.logger.debug(`validating course access integrationId=${integrationId}`);
     await this.adminLessonService.validateAccess(ENTITY_TYPE.COURSE, currentUser, integrationId);
-    this.logger.debug(`course access valid integrationId=${integrationId}`);
   }
 
   private async getAuthorizedLumaClient(
@@ -255,17 +236,13 @@ export class LumaService {
     currentUser: CurrentUserType,
     options?: { ensureCourseHasNoChapters?: boolean },
   ) {
-    this.logger.debug(`authorizing Luma client integrationId=${integrationId}`);
     await this.validateCourseAccess(integrationId, currentUser);
 
     if (options?.ensureCourseHasNoChapters) {
       await this.validateCourseHasChapters(integrationId);
     }
 
-    const client = await this.getLumaClient();
-    this.logger.debug(`authorized Luma client ready integrationId=${integrationId}`);
-
-    return client;
+    return this.getLumaClient();
   }
 
   private async withLumaErrorHandling<T>(cb: () => Promise<T>): Promise<T> {
@@ -324,14 +301,5 @@ export class LumaService {
     }
 
     throw new ServiceUnavailableException("adminCourseView.toast.lumaServiceUnavailable");
-  }
-
-  private safeUrl(value: string): string {
-    try {
-      const url = new URL(value);
-      return `${url.origin}${url.pathname}`;
-    } catch {
-      return value;
-    }
   }
 }
