@@ -4466,5 +4466,156 @@
       "maxParticipantsReached": "Die maximale Teilnehmerzahl wurde erreicht.",
       "maxParallelSessionsReached": "Die maximale Anzahl aktiver Live-Schulungssitzungen wurde erreicht."
     }
+  },
+  "automationView": {
+    "title": "Automatisierungen",
+    "description": "Verwalten Sie automatische E-Mail-Benachrichtigungen, die als Reaktion auf Plattformereignisse gesendet werden.",
+    "createAutomation": "Automatisierung erstellen",
+    "filters": {
+      "searchPlaceholder": "Nach Name oder Beschreibung suchen...",
+      "all": "Alle",
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "drafts": "Entwürfe",
+      "archived": "Archiviert"
+    },
+    "status": {
+      "enabled": "Aktiviert",
+      "disabled": "Deaktiviert",
+      "draft": "Entwurf",
+      "archived": "Archiviert"
+    },
+    "table": {
+      "name": "Name der Automatisierung",
+      "status": "Status",
+      "trigger": "Auslöser",
+      "actions": "Aktionen",
+      "lastRun": "Letzte Ausführung",
+      "updatedAt": "Aktualisiert",
+      "menu": "Menü",
+      "manage": "Verwalten",
+      "empty": "Keine Automatisierungen definiert. Klicken Sie auf Automatisierung erstellen, um die erste hinzuzufügen.",
+      "emailCount_one": "{{count}} E-Mail",
+      "emailCount_other": "{{count}} E-Mails",
+      "noRuns": "Noch keine Ausführungen",
+      "runSuccess": "Erfolgreich abgeschlossen",
+      "runFailed": "Ein Fehler ist aufgetreten"
+    },
+    "drawer": {
+      "title": "Automatisierungsdetails",
+      "description": "Bearbeiten Sie die Konfiguration der ausgewählten Automatisierung.",
+      "nameLabel": "Name der Automatisierung",
+      "descriptionLabel": "Beschreibung",
+      "statusLabel": "Status",
+      "statusDraft": "Entwurf",
+      "statusEnabled": "Aktiv (Aktiviert)",
+      "statusDisabled": "Inaktiv (Deaktiviert)",
+      "statusArchived": "Archiviert",
+      "flowManagement": "Ablaufverwaltung",
+      "openBuilder": "Schrittersteller öffnen",
+      "pause": "Pausieren",
+      "activate": "Aktivieren",
+      "archive": "Archivieren",
+      "save": "Änderungen speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
+    },
+    "deleteDialog": {
+      "title": "Automatisierung löschen?",
+      "description": "Diese Aktion ist unwiderruflich. Die Automatisierung wird dauerhaft gelöscht. Sie können sie stattdessen archivieren.",
+      "confirm": "Löschen",
+      "cancel": "Abbrechen"
+    },
+    "actionMenu": {
+      "openMenu": "Menü öffnen",
+      "settingsAndEdit": "Einstellungen & Bearbeiten",
+      "disable": "Benachrichtigung deaktivieren",
+      "enable": "Benachrichtigung aktivieren",
+      "delete": "Automatisierung löschen"
+    },
+    "newAutomation": {
+      "name": "Neue Automatisierung (Entwurf)",
+      "description": "Definieren Sie das Ziel und die Beschreibung dieser Automatisierung und gehen Sie dann zum Ablauf-Builder.",
+      "triggerPlaceholder": "Zu konfigurieren..."
+    },
+    "toasts": {
+      "created": "Automatisierung erfolgreich erstellt.",
+      "createError": "Automatisierung konnte nicht erstellt werden.",
+      "updated": "Automatisierung erfolgreich gespeichert.",
+      "updateError": "Automatisierung konnte nicht gespeichert werden.",
+      "deleted": "Automatisierung gelöscht.",
+      "deleteError": "Automatisierung konnte nicht gelöscht werden."
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Zurück zu Automatisierungen",
+      "automations": "Automatisierungen",
+      "save": "Speichern",
+      "simulate": "Simulieren",
+      "active": "Aktiv",
+      "draft": "Entwurf",
+      "duplicate": "Duplizieren",
+      "exportJson": "Als JSON exportieren",
+      "delete": "Automatisierung löschen",
+      "savedJustNow": "Gerade gespeichert",
+      "savedMinutesAgo": "Vor {{count}} Min. gespeichert"
+    },
+    "sidebar": {
+      "title": "Schritte",
+      "description": "Ziehen Sie Blöcke auf die Leinwand, um Ihren Workflow zu erstellen.",
+      "conditions": "Bedingungen",
+      "actions": "Aktionen"
+    },
+    "blocks": {
+      "courseDeadline": "Kursfrist",
+      "overdue": "Überfällig",
+      "notCompleted": "Nicht abgeschlossen",
+      "userEnrolled": "Benutzer eingeschrieben",
+      "certificateExpiringSoon": "Zertifikat läuft bald ab",
+      "liveTransmissionStartingSoon": "Live-Übertragung startet bald",
+      "sendEmail": "E-Mail senden"
+    },
+    "canvas": {
+      "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
+      "emptyDescription": "Ziehen Sie eine Bedingung oder Aktion von der Seitenleiste, um zu beginnen.",
+      "removeNode": "Knoten entfernen",
+      "addChild": "Unterschritt hinzufügen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "zoomReset": "Zoom zurücksetzen"
+    },
+    "editPanel": {
+      "editCondition": "Bedingung bearbeiten",
+      "editAction": "Aktion bearbeiten",
+      "nodeType": "Knotentyp",
+      "conditionValue": "Wert",
+      "conditionValuePlaceholder": "Wert eingeben...",
+      "operator": "Operator",
+      "operatorEquals": "Gleich",
+      "operatorGreaterThan": "Größer als",
+      "operatorLessThan": "Kleiner als",
+      "operatorContains": "Enthält",
+      "emailSubject": "E-Mail-Betreff",
+      "emailSubjectPlaceholder": "Betreff eingeben...",
+      "emailBody": "E-Mail-Inhalt",
+      "emailBodyPlaceholder": "Schreiben Sie Ihren E-Mail-Inhalt...",
+      "emailRecipient": "Empfänger",
+      "recipientEnrolledUser": "Eingeschriebener Benutzer",
+      "recipientAdmin": "Administrator",
+      "recipientManager": "Manager",
+      "removeNode": "Diesen Schritt entfernen"
+    },
+    "config": {
+      "daysBefore": "Tage vorher",
+      "daysBeforePlaceholder": "z.B. 7",
+      "course": "Kurs",
+      "daysOverdue": "Tage überfällig",
+      "daysOverduePlaceholder": "z.B. 3",
+      "daysEnrolled": "Tage seit Anmeldung",
+      "daysEnrolledPlaceholder": "z.B. 30",
+      "minutesBefore": "Minuten vorher",
+      "minutesBeforePlaceholder": "z.B. 60"
+    }
   }
 }

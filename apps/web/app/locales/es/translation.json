@@ -4545,5 +4545,77 @@
       "maxParticipantsReached": "Se ha alcanzado el número máximo de participantes.",
       "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
     }
+  },
+  "automationView": {
+    "title": "Automatizaciones",
+    "description": "Gestione las notificaciones automáticas por correo electrónico enviadas en respuesta a eventos de la plataforma.",
+    "createAutomation": "Crear automatización",
+    "filters": {
+      "searchPlaceholder": "Buscar por nombre o descripción...",
+      "all": "Todas",
+      "enabled": "Habilitadas",
+      "disabled": "Deshabilitadas",
+      "drafts": "Borradores",
+      "archived": "Archivadas"
+    },
+    "status": {
+      "enabled": "Habilitada",
+      "disabled": "Deshabilitada",
+      "draft": "Borrador",
+      "archived": "Archivada"
+    },
+    "table": {
+      "name": "Nombre de la automatización",
+      "status": "Estado",
+      "trigger": "Disparador",
+      "actions": "Acciones",
+      "lastRun": "Última ejecución",
+      "updatedAt": "Actualizado",
+      "menu": "Menú",
+      "manage": "Gestionar",
+      "empty": "No hay automatizaciones definidas. Haga clic en Crear automatización para agregar la primera.",
+      "emailCount_one": "{{count}} correo",
+      "emailCount_other": "{{count}} correos",
+      "noRuns": "Sin ejecuciones aún",
+      "runSuccess": "Completado con éxito",
+      "runFailed": "Ocurrió un error"
+    },
+    "drawer": {
+      "title": "Detalles de la automatización",
+      "description": "Edite la configuración de la automatización seleccionada.",
+      "nameLabel": "Nombre de la automatización",
+      "descriptionLabel": "Descripción",
+      "statusLabel": "Estado",
+      "statusDraft": "Borrador",
+      "statusEnabled": "Activa (Habilitada)",
+      "statusDisabled": "Inactiva (Deshabilitada)",
+      "statusArchived": "Archivada",
+      "flowManagement": "Gestión del flujo",
+      "openBuilder": "Abrir editor de pasos",
+      "pause": "Pausar",
+      "activate": "Activar",
+      "archive": "Archivar",
+      "save": "Guardar cambios",
+      "cancel": "Cancelar",
+      "delete": "Eliminar"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar automatización?",
+      "description": "Esta acción es irreversible. La automatización se eliminará permanentemente. En su lugar, puede archivarla.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "actionMenu": {
+      "openMenu": "Abrir menú",
+      "settingsAndEdit": "Configuración y edición",
+      "disable": "Deshabilitar notificación",
+      "enable": "Habilitar notificación",
+      "delete": "Eliminar automatización"
+    },
+    "newAutomation": {
+      "name": "Nueva automatización (Borrador)",
+      "description": "Defina el objetivo y la descripción de esta automatización y luego proceda al constructor de flujo.",
+      "triggerPlaceholder": "Por configurar..."
+    }
   }
 }

@@ -4586,5 +4586,156 @@
       "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
       "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
     }
+  },
+  "automationView": {
+    "title": "Automatyzacje",
+    "description": "Zarządzaj automatycznymi powiadomieniami email wysyłanymi w odpowiedzi na zdarzenia w platformie.",
+    "createAutomation": "Utwórz automatyzację",
+    "filters": {
+      "searchPlaceholder": "Szukaj po nazwie lub opisie...",
+      "all": "Wszystkie",
+      "enabled": "Włączone",
+      "disabled": "Wyłączone",
+      "drafts": "Szkice",
+      "archived": "Zarchiwizowane"
+    },
+    "status": {
+      "enabled": "Włączona",
+      "disabled": "Wyłączona",
+      "draft": "Szkic",
+      "archived": "Zarchiwizowana"
+    },
+    "table": {
+      "name": "Nazwa automatyzacji",
+      "status": "Status",
+      "trigger": "Wyzwalacz",
+      "actions": "Akcje",
+      "lastRun": "Ostatnie uruchomienie",
+      "updatedAt": "Aktualizacja",
+      "menu": "Menu",
+      "manage": "Zarządzaj",
+      "empty": "Brak zdefiniowanych automatyzacji. Kliknij Utwórz automatyzację, aby dodać pierwszą.",
+      "emailCount_one": "{{count}} e-mail",
+      "emailCount_other": "{{count}} e-maile",
+      "noRuns": "Brak uruchomień",
+      "runSuccess": "Zakończone sukcesem",
+      "runFailed": "Wystąpił błąd"
+    },
+    "drawer": {
+      "title": "Szczegóły automatyzacji",
+      "description": "Edytuj konfigurację wybranej automatyzacji.",
+      "nameLabel": "Nazwa automatyzacji",
+      "descriptionLabel": "Opis działania",
+      "statusLabel": "Status",
+      "statusDraft": "Szkic (Draft)",
+      "statusEnabled": "Aktywna (Enabled)",
+      "statusDisabled": "Nieaktywna (Disabled)",
+      "statusArchived": "Zarchiwizowana (Archived)",
+      "flowManagement": "Zarządzanie przepływem",
+      "openBuilder": "Otwórz kreator kroków",
+      "pause": "Wstrzymaj",
+      "activate": "Uruchom",
+      "archive": "Archiwizuj",
+      "save": "Zapisz zmiany",
+      "cancel": "Anuluj",
+      "delete": "Usuń"
+    },
+    "deleteDialog": {
+      "title": "Usunąć automatyzację?",
+      "description": "Ta operacja jest nieodwracalna. Automatyzacja zostanie trwale usunięta. Zamiast tego możesz ją zarchiwizować.",
+      "confirm": "Usuń",
+      "cancel": "Anuluj"
+    },
+    "actionMenu": {
+      "openMenu": "Otwórz menu",
+      "settingsAndEdit": "Ustawienia i edycja",
+      "disable": "Wyłącz powiadomienie",
+      "enable": "Włącz powiadomienie",
+      "delete": "Usuń automatyzację"
+    },
+    "newAutomation": {
+      "name": "Nowa automatyzacja (Szkic)",
+      "description": "Zdefiniuj cel i opis tej automatyzacji, a następnie przejdź do kreatora przepływu.",
+      "triggerPlaceholder": "Do skonfigurowania..."
+    },
+    "toasts": {
+      "created": "Automatyzacja utworzona pomyślnie.",
+      "createError": "Nie udało się utworzyć automatyzacji.",
+      "updated": "Automatyzacja zapisana pomyślnie.",
+      "updateError": "Nie udało się zapisać automatyzacji.",
+      "deleted": "Automatyzacja usunięta.",
+      "deleteError": "Nie udało się usunąć automatyzacji."
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Powrót do automatyzacji",
+      "automations": "Automatyzacje",
+      "save": "Zapisz",
+      "simulate": "Symuluj",
+      "active": "Aktywna",
+      "draft": "Szkic",
+      "duplicate": "Duplikuj",
+      "exportJson": "Eksportuj jako JSON",
+      "delete": "Usuń automatyzację",
+      "savedJustNow": "Zapisano właśnie",
+      "savedMinutesAgo": "Zapisano {{count}} min temu"
+    },
+    "sidebar": {
+      "title": "Kroki",
+      "description": "Przeciągnij bloki na płótno, aby zbudować przepływ.",
+      "conditions": "Warunki",
+      "actions": "Akcje"
+    },
+    "blocks": {
+      "courseDeadline": "Termin kursu",
+      "overdue": "Zaległy",
+      "notCompleted": "Nieukończony",
+      "userEnrolled": "Użytkownik zapisany",
+      "certificateExpiringSoon": "Certyfikat wygasa wkrótce",
+      "liveTransmissionStartingSoon": "Transmisja na żywo wkrótce",
+      "sendEmail": "Wyślij e-mail"
+    },
+    "canvas": {
+      "emptyTitle": "Płótno automatyzacji jest puste",
+      "emptyDescription": "Przeciągnij warunek lub akcję z panelu bocznego, aby rozpocząć.",
+      "removeNode": "Usuń węzeł",
+      "addChild": "Dodaj krok podrzędny",
+      "zoomIn": "Przybliż",
+      "zoomOut": "Oddal",
+      "zoomReset": "Resetuj przybliżenie"
+    },
+    "editPanel": {
+      "editCondition": "Edytuj warunek",
+      "editAction": "Edytuj akcję",
+      "nodeType": "Typ węzła",
+      "conditionValue": "Wartość",
+      "conditionValuePlaceholder": "Wprowadź wartość...",
+      "operator": "Operator",
+      "operatorEquals": "Równa się",
+      "operatorGreaterThan": "Większy niż",
+      "operatorLessThan": "Mniejszy niż",
+      "operatorContains": "Zawiera",
+      "emailSubject": "Temat e-maila",
+      "emailSubjectPlaceholder": "Wprowadź temat...",
+      "emailBody": "Treść e-maila",
+      "emailBodyPlaceholder": "Napisz treść wiadomości...",
+      "emailRecipient": "Odbiorca",
+      "recipientEnrolledUser": "Zapisany użytkownik",
+      "recipientAdmin": "Administrator",
+      "recipientManager": "Menedżer",
+      "removeNode": "Usuń ten krok"
+    },
+    "config": {
+      "daysBefore": "Dni przed",
+      "daysBeforePlaceholder": "np. 7",
+      "course": "Kurs",
+      "daysOverdue": "Dni zaległości",
+      "daysOverduePlaceholder": "np. 3",
+      "daysEnrolled": "Dni od zapisu",
+      "daysEnrolledPlaceholder": "np. 30",
+      "minutesBefore": "Minut przed",
+      "minutesBeforePlaceholder": "np. 60"
+    }
   }
 }

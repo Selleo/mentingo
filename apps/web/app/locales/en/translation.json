@@ -4547,5 +4547,156 @@
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
+  },
+  "automationView": {
+    "title": "Automations",
+    "description": "Manage automatic email notifications sent in response to platform events.",
+    "createAutomation": "Create Automation",
+    "filters": {
+      "searchPlaceholder": "Search by name or description...",
+      "all": "All",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "drafts": "Drafts",
+      "archived": "Archived"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "table": {
+      "name": "Automation name",
+      "status": "Status",
+      "trigger": "Trigger",
+      "actions": "Actions",
+      "lastRun": "Last run",
+      "updatedAt": "Updated",
+      "menu": "Menu",
+      "manage": "Manage",
+      "empty": "No automations defined. Click Create Automation to add the first one.",
+      "emailCount_one": "{{count}} e-mail",
+      "emailCount_other": "{{count}} e-mails",
+      "noRuns": "No runs yet",
+      "runSuccess": "Completed successfully",
+      "runFailed": "An error occurred"
+    },
+    "drawer": {
+      "title": "Automation details",
+      "description": "Edit the configuration of the selected automation.",
+      "nameLabel": "Automation name",
+      "descriptionLabel": "Description",
+      "statusLabel": "Status",
+      "statusDraft": "Draft",
+      "statusEnabled": "Active (Enabled)",
+      "statusDisabled": "Inactive (Disabled)",
+      "statusArchived": "Archived",
+      "flowManagement": "Flow management",
+      "openBuilder": "Open step builder",
+      "pause": "Pause",
+      "activate": "Activate",
+      "archive": "Archive",
+      "save": "Save changes",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "deleteDialog": {
+      "title": "Delete automation?",
+      "description": "This action is irreversible. The automation will be permanently deleted. You can archive it instead.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "actionMenu": {
+      "openMenu": "Open menu",
+      "settingsAndEdit": "Settings & edit",
+      "disable": "Disable notification",
+      "enable": "Enable notification",
+      "delete": "Delete automation"
+    },
+    "newAutomation": {
+      "name": "New automation (Draft)",
+      "description": "Define the goal and description of this automation, then proceed to the flow builder.",
+      "triggerPlaceholder": "To be configured..."
+    },
+    "toasts": {
+      "created": "Automation created successfully.",
+      "createError": "Failed to create automation.",
+      "updated": "Automation saved successfully.",
+      "updateError": "Failed to save automation.",
+      "deleted": "Automation deleted.",
+      "deleteError": "Failed to delete automation."
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Back to automations",
+      "automations": "Automations",
+      "save": "Save",
+      "simulate": "Simulate",
+      "active": "Active",
+      "draft": "Draft",
+      "duplicate": "Duplicate",
+      "exportJson": "Export as JSON",
+      "delete": "Delete automation",
+      "savedJustNow": "Saved just now",
+      "savedMinutesAgo": "Saved {{count}} min ago"
+    },
+    "sidebar": {
+      "title": "Steps",
+      "description": "Drag blocks onto the canvas to build your workflow.",
+      "conditions": "Conditions",
+      "actions": "Actions"
+    },
+    "blocks": {
+      "courseDeadline": "Course deadline",
+      "overdue": "Overdue",
+      "notCompleted": "Not completed",
+      "userEnrolled": "User enrolled",
+      "certificateExpiringSoon": "Certificate expiring soon",
+      "liveTransmissionStartingSoon": "Live transmission starting soon",
+      "sendEmail": "Send email"
+    },
+    "canvas": {
+      "emptyTitle": "Your automation canvas is empty",
+      "emptyDescription": "Drag a condition or action from the sidebar to get started.",
+      "removeNode": "Remove node",
+      "addChild": "Add child step",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "zoomReset": "Reset zoom"
+    },
+    "editPanel": {
+      "editCondition": "Edit Condition",
+      "editAction": "Edit Action",
+      "nodeType": "Node type",
+      "conditionValue": "Value",
+      "conditionValuePlaceholder": "Enter value...",
+      "operator": "Operator",
+      "operatorEquals": "Equals",
+      "operatorGreaterThan": "Greater than",
+      "operatorLessThan": "Less than",
+      "operatorContains": "Contains",
+      "emailSubject": "Email subject",
+      "emailSubjectPlaceholder": "Enter subject...",
+      "emailBody": "Email body",
+      "emailBodyPlaceholder": "Write your email content...",
+      "emailRecipient": "Recipient",
+      "recipientEnrolledUser": "Enrolled user",
+      "recipientAdmin": "Administrator",
+      "recipientManager": "Manager",
+      "removeNode": "Remove this step"
+    },
+    "config": {
+      "daysBefore": "Days before",
+      "daysBeforePlaceholder": "e.g. 7",
+      "course": "Course",
+      "daysOverdue": "Days overdue",
+      "daysOverduePlaceholder": "e.g. 3",
+      "daysEnrolled": "Days since enrollment",
+      "daysEnrolledPlaceholder": "e.g. 30",
+      "minutesBefore": "Minutes before",
+      "minutesBeforePlaceholder": "e.g. 60"
+    }
   }
 }

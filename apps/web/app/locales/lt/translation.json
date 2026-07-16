@@ -4468,5 +4468,156 @@
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }
+  },
+  "automationView": {
+    "title": "Automatizavimai",
+    "description": "Valdykite automatinius el. pašto pranešimus, siunčiamus reaguojant į platformos įvykius.",
+    "createAutomation": "Sukurti automatizavimą",
+    "filters": {
+      "searchPlaceholder": "Ieškoti pagal pavadinimą arba aprašymą...",
+      "all": "Visi",
+      "enabled": "Įjungti",
+      "disabled": "Išjungti",
+      "drafts": "Juodraščiai",
+      "archived": "Archyvuoti"
+    },
+    "status": {
+      "enabled": "Įjungtas",
+      "disabled": "Išjungtas",
+      "draft": "Juodraštis",
+      "archived": "Archyvuotas"
+    },
+    "table": {
+      "name": "Automatizavimo pavadinimas",
+      "status": "Būsena",
+      "trigger": "Aktyviklis",
+      "actions": "Veiksmai",
+      "lastRun": "Paskutinis paleidimas",
+      "updatedAt": "Atnaujinta",
+      "menu": "Meniu",
+      "manage": "Valdyti",
+      "empty": "Nėra apibrėžtų automatizavimų. Spustelėkite Sukurti automatizavimą, kad pridėtumėte pirmąjį.",
+      "emailCount_one": "{{count}} el. laiškas",
+      "emailCount_other": "{{count}} el. laiškai",
+      "noRuns": "Dar nebuvo paleista",
+      "runSuccess": "Sėkmingai baigta",
+      "runFailed": "Įvyko klaida"
+    },
+    "drawer": {
+      "title": "Automatizavimo informacija",
+      "description": "Redaguokite pasirinkto automatizavimo konfigūraciją.",
+      "nameLabel": "Automatizavimo pavadinimas",
+      "descriptionLabel": "Aprašymas",
+      "statusLabel": "Būsena",
+      "statusDraft": "Juodraštis",
+      "statusEnabled": "Aktyvus (Įjungtas)",
+      "statusDisabled": "Neaktyvus (Išjungtas)",
+      "statusArchived": "Archyvuotas",
+      "flowManagement": "Srauto valdymas",
+      "openBuilder": "Atidaryti žingsnių kūrimo priemonę",
+      "pause": "Pristabdyti",
+      "activate": "Aktyvuoti",
+      "archive": "Archyvuoti",
+      "save": "Išsaugoti pakeitimus",
+      "cancel": "Atšaukti",
+      "delete": "Ištrinti"
+    },
+    "deleteDialog": {
+      "title": "Ištrinti automatizavimą?",
+      "description": "Šis veiksmas yra negrįžtamas. Automatizavimas bus visam laikui ištrintas. Vietoj to galite jį archyvuoti.",
+      "confirm": "Ištrinti",
+      "cancel": "Atšaukti"
+    },
+    "actionMenu": {
+      "openMenu": "Atidaryti meniu",
+      "settingsAndEdit": "Nustatymai ir redagavimas",
+      "disable": "Išjungti pranešimą",
+      "enable": "Įjungti pranešimą",
+      "delete": "Ištrinti automatizavimą"
+    },
+    "newAutomation": {
+      "name": "Naujas automatizavimas (Juodraštis)",
+      "description": "Apibrėžkite šio automatizavimo tikslą ir aprašymą, tada pereikite prie srauto kūrimo priemonės.",
+      "triggerPlaceholder": "Reikia sukonfigūruoti..."
+    },
+    "toasts": {
+      "created": "Automatizavimas sėkmingai sukurtas.",
+      "createError": "Nepavyko sukurti automatizavimo.",
+      "updated": "Automatizavimas sėkmingai išsaugotas.",
+      "updateError": "Nepavyko išsaugoti automatizavimo.",
+      "deleted": "Automatizavimas ištrintas.",
+      "deleteError": "Nepavyko ištrinti automatizavimo."
+    }
+  },
+  "automationBuilder": {
+    "header": {
+      "back": "Grįžti į automatizavimus",
+      "automations": "Automatizavimai",
+      "save": "Išsaugoti",
+      "simulate": "Simuliuoti",
+      "active": "Aktyvus",
+      "draft": "Juodraštis",
+      "duplicate": "Dubliuoti",
+      "exportJson": "Eksportuoti kaip JSON",
+      "delete": "Ištrinti automatizavimą",
+      "savedJustNow": "Ką tik išsaugota",
+      "savedMinutesAgo": "Išsaugota prieš {{count}} min."
+    },
+    "sidebar": {
+      "title": "Žingsniai",
+      "description": "Vilkite blokus ant drobės, kad sukurtumėte darbo eigą.",
+      "conditions": "Sąlygos",
+      "actions": "Veiksmai"
+    },
+    "blocks": {
+      "courseDeadline": "Kurso terminas",
+      "overdue": "Vėluojantis",
+      "notCompleted": "Nebaigtas",
+      "userEnrolled": "Vartotojas užregistruotas",
+      "certificateExpiringSoon": "Sertifikatas netrukus baigsis",
+      "liveTransmissionStartingSoon": "Tiesioginė transliacija netrukus prasidės",
+      "sendEmail": "Siųsti el. laišką"
+    },
+    "canvas": {
+      "emptyTitle": "Jūsų automatizavimo drobė tuščia",
+      "emptyDescription": "Vilkite sąlygą arba veiksmą iš šoninės juostos, kad pradėtumėte.",
+      "removeNode": "Pašalinti mazgą",
+      "addChild": "Pridėti antrinį žingsnį",
+      "zoomIn": "Priartinti",
+      "zoomOut": "Atitolinti",
+      "zoomReset": "Atstatyti mastelį"
+    },
+    "editPanel": {
+      "editCondition": "Redaguoti sąlygą",
+      "editAction": "Redaguoti veiksmą",
+      "nodeType": "Mazgo tipas",
+      "conditionValue": "Reikšmė",
+      "conditionValuePlaceholder": "Įveskite reikšmę...",
+      "operator": "Operatorius",
+      "operatorEquals": "Lygu",
+      "operatorGreaterThan": "Daugiau nei",
+      "operatorLessThan": "Mažiau nei",
+      "operatorContains": "Apima",
+      "emailSubject": "El. laiško tema",
+      "emailSubjectPlaceholder": "Įveskite temą...",
+      "emailBody": "El. laiško turinys",
+      "emailBodyPlaceholder": "Parašykite el. laiško turinį...",
+      "emailRecipient": "Gavėjas",
+      "recipientEnrolledUser": "Užregistruotas vartotojas",
+      "recipientAdmin": "Administratorius",
+      "recipientManager": "Vadovas",
+      "removeNode": "Pašalinti šį žingsnį"
+    },
+    "config": {
+      "daysBefore": "Dienų prieš",
+      "daysBeforePlaceholder": "pvz. 7",
+      "course": "Kursas",
+      "daysOverdue": "Dienų vėlavimo",
+      "daysOverduePlaceholder": "pvz. 3",
+      "daysEnrolled": "Dienų nuo registracijos",
+      "daysEnrolledPlaceholder": "pvz. 30",
+      "minutesBefore": "Minučių prieš",
+      "minutesBeforePlaceholder": "pvz. 60"
+    }
   }
 }
