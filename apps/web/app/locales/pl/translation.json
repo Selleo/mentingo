@@ -576,9 +576,9 @@
       "beforeDescription": "Materiały dostępne przed rozpoczęciem szkolenia.",
       "afterHeading": "Po szkoleniu",
       "afterDescription": "Materiały dostępne po zakończeniu szkolenia.",
+      "afterLocked": "Materiały zostaną odblokowane po zakończeniu szkolenia.",
       "empty": "Nie dodano jeszcze plików.",
-      "afterLocked": "Pliki po szkoleniu zostaną odblokowane po zakończeniu szkolenia.",
-      "addFile": "Dodaj plik",
+      "addFile": "Prześlij plik lub przeciągnij i upuść tutaj",
       "download": "Pobierz",
       "removeFile": "Usuń {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -1112,6 +1112,19 @@
       "noPartiallyConfigured": "Brak częściowo skonfigurowanych usług.",
       "allConfigured": "Wszystkie zmienne środowiskowe są poprawnie skonfigurowane.",
       "dismissWarning": "Odrzuć",
+      "aiCapabilities": {
+        "title": "Możliwości AI",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generowanie kursów",
+          "assetGeneration": "Generowanie assetów"
+        },
+        "status": {
+          "enabled": "Włączone",
+          "disabled": "Wyłączone"
+        }
+      },
       "serviceNames": {
         "stripe": "Płatności Stripe",
         "bunny": "Bunny CDN",
@@ -1197,6 +1210,11 @@
       "passwordCreatedSuccessfully": "Hasło zostało utworzone pomyślnie"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Zmień hasło",
+    "subHeader": "Ze względów bezpieczeństwa musisz ustawić nowe hasło, aby kontynuować.",
+    "submit": "Zmień hasło"
+  },
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
@@ -1253,7 +1271,9 @@
       "passwordResetEmailsSent": "Wysłano e-maile resetowania hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
       "passwordResetEmailsError": "Nie udało się wysłać e-maili resetowania hasła",
       "passwordCreationEmailsSent": "Wysłano e-maile utworzenia hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nie udało się wysłać e-maili utworzenia hasła"
+      "passwordCreationEmailsError": "Nie udało się wysłać e-maili utworzenia hasła",
+      "passwordEmailsSent": "Wysłano e-maile z hasłem: {{sentCount}}. Resetowanie: {{passwordResetSentCount}}. Utworzenie: {{passwordCreationSentCount}}. Pominięto: {{skippedCount}}.",
+      "passwordEmailsError": "Nie udało się wysłać e-maili z hasłem"
     },
     "field": {
       "description": "Opis",
@@ -1457,7 +1477,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu",
-      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza.",
+      "deleteProtectedCourseFailed": "Nie można usunąć opublikowanego ani prywatnego kursu. Najpierw zmień jego status na Wersja Robocza.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kursów zostały zaktualizowane",
       "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
       "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
@@ -1737,6 +1757,7 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Grupy",
+      "passwordEmail": "Wyślij e-mail z hasłem",
       "passwordReset": "Wyślij e-mail resetowania hasła",
       "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
       "delete": "Usuń",
@@ -1747,6 +1768,7 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
+        "passwordEmail": "Wyślij e-mail z hasłem",
         "passwordReset": "Wyślij e-mail resetowania hasła",
         "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
         "archive": "Archiwizuj konta użytkowników",
@@ -1758,6 +1780,7 @@
         "delete": "Usuń",
         "role": "Zapisz",
         "group": "Zapisz",
+        "passwordEmail": "Wyślij",
         "passwordReset": "Wyślij",
         "passwordCreation": "Wyślij",
         "archive": "Archiwizuj",
@@ -1774,6 +1797,7 @@
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "passwordEmail": "Wyślij e-maile z hasłem do wybranych użytkowników. Użytkownicy z istniejącym hasłem otrzymają e-mail resetowania hasła, a użytkownicy bez hasła otrzymają e-mail utworzenia hasła.",
         "passwordReset": "Wyślij e-maile resetowania hasła do wybranych użytkowników z istniejącymi hasłami. Użytkownicy bez hasła zostaną pominięci.",
         "passwordCreation": "Wyślij ponownie e-maile utworzenia hasła do wybranych użytkowników bez hasła. Użytkownicy z istniejącym hasłem zostaną pominięci.",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
@@ -1848,6 +1872,7 @@
     },
     "button": {
       "createUser": "Utwórz użytkownika",
+      "passwordEmail": "Wyślij e-mail z hasłem",
       "passwordResetEmail": "Wyślij e-mail resetowania hasła",
       "passwordCreationEmail": "Wyślij ponownie e-mail utworzenia hasła"
     },
@@ -2518,7 +2543,7 @@
           "fillInTheBlanksText": "Uzupełnij luki (text)",
           "briefResponse": "Krótka odpowiedź",
           "detailedResponse": "Odpowiedź rozwinięta",
-          "scale1_5": "Skala 1 do 5",
+          "scale_1_5": "Skala 1 do 5",
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "taskDescriptionTooltip": "Krótko opisz, co uczestnik powinien zrobić podczas rozmowy z AI mentorem.",
@@ -2543,7 +2568,8 @@
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
           "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
-          "voiceConfigFishAudioTooltip": "Tryb głosowy korzysta z Cartesia. Aby użyć własnego głosu, wejdź do Cartesia, znajdź wybrany głos i skopiuj tutaj jego identyfikator.",
+          "voiceConfigCartesiaTooltip": "Audio głosu korzysta z Cartesia. Wybierz Male albo Female, aby użyć skonfigurowanego mapowania głosów, albo wybierz Custom i wpisz identyfikator głosu Cartesia.",
+          "voiceConfigOpenAiCompatibleTooltip": "Audio głosu korzysta z endpointu TTS zgodnego z OpenAI. Male i Female używają presetów głosów OpenAI. Wybierz Custom, aby wpisać inną wartość głosu obsługiwaną przez ten endpoint.",
           "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
           "charactersLeft": "pozostałe znaki",
@@ -2991,7 +3017,8 @@
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
-      "openInNewTab": "Otwórz w nowej karcie"
+      "openInNewTab": "Otwórz w nowej karcie",
+      "scale_1_5": "Pytanie typu skala (1-5)"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -3027,6 +3054,10 @@
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
     },
     "videoProgress": {
+      "label": "Postęp wideo",
+      "completedSummary": "Ukończono {{completed}} z {{total}}",
+      "overviewAriaLabel": "Postęp wideo w lekcji",
+      "segmentAriaLabel": "Postęp wideo {{index}}: obejrzano {{progress}}%",
       "errors": {
         "resourceNotFound": "Nie udało się zapisać postępu wideo dla tej lekcji.",
         "unsupportedLessonType": "Postęp wideo jest dostępny tylko dla lekcji z treścią.",
@@ -3145,6 +3176,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Interfejs głosowy",
+          "options": "Opcje",
           "exit": "Zamknij tryb głosowy",
           "mute": "Wycisz",
           "unmute": "Włącz mikrofon",
@@ -3665,12 +3697,18 @@
       "error": "Nie udało się zmienić obrazu tła logowania"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Przetwarzanie pliku nie powiodło się. Spróbuj przesłać inny plik lub prześlij go ponownie.",
+      "noExtractableText": "Nie udało się wyodrębnić czytelnego tekstu z tego pliku."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
-      "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG.",
+      "invalidFileType": "Nieprawidłowy typ pliku.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
       "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}."
     },
@@ -4328,6 +4366,7 @@
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
+      "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
       "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."

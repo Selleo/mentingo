@@ -41,7 +41,13 @@ const AiMentorLessonPreview = ({ onClose, lesson }: AiMentorPreviewProps) => {
           </div>
         </div>
         <div className="box-border flex flex-1 rounded-b-lg bg-neutral-50 p-4">
-          {lessonData && <AiMentorLesson lesson={lessonData} lessonLoading={lessonLoading} />}
+          {lessonData && (
+            <AiMentorLesson
+              lesson={lessonData}
+              lessonLoading={lessonLoading}
+              autoOpenTaskDescription={false}
+            />
+          )}
         </div>
       </div>
     </div>

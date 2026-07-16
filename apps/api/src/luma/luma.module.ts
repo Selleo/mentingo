@@ -8,6 +8,7 @@ import { LocalizationModule } from "src/localization/localization.module";
 import { QueueModule } from "src/queue";
 import { WebSocketModule } from "src/websocket";
 
+import { LumaCourseGenerationStreamService } from "./luma-course-generation-stream.service";
 import { LumaCourseGenerationSyncQueueService } from "./luma-course-generation-sync-queue.service";
 import { LumaCourseGenerationSyncRepository } from "./luma-course-generation-sync.repository";
 import { LumaCourseGenerationSyncService } from "./luma-course-generation-sync.service";
@@ -31,6 +32,7 @@ import { LumaService } from "./luma.service";
     LumaCourseGenerationSyncRepository,
     LumaCourseGenerationSyncQueueService,
     LumaCourseGenerationSyncService,
+    LumaCourseGenerationStreamService,
     LumaCourseGenerationSyncWorker,
     LumaGeneratedCourseImportService,
   ],

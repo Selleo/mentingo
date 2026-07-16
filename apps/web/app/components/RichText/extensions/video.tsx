@@ -25,6 +25,7 @@ import {
 import type { SupportedLanguages } from "@repo/shared";
 import type { NodeConfig } from "@tiptap/core";
 import type { NodeViewProps } from "@tiptap/react";
+import type { VideoCoverageSnapshotChange } from "~/components/VideoPlayer/videoCoverage.types";
 
 type VideoViewerOptions = {
   onVideoEnded?: (index: number | null) => void;
@@ -33,6 +34,7 @@ type VideoViewerOptions = {
     showCoverageMarkers?: boolean;
     lessonId?: string;
     language?: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
   };
 };
 
@@ -255,6 +257,7 @@ const VideoViewerView = ({ node, extension }: NodeViewProps) => {
           initialIsWatched: attrs.videoIsWatched,
           initialDurationSeconds: attrs.videoDurationSeconds,
           initialBucketSizeSeconds: attrs.videoBucketSizeSeconds,
+          onSnapshotChange: videoCoverageTracking?.onSnapshotChange,
         }}
       />
     </NodeViewWrapper>

@@ -8,7 +8,14 @@ import { UUIDSchema } from "src/common";
  */
 export const chatOptionsSchema = Type.Object({
   integrationId: UUIDSchema,
-  message: Type.String(),
+  message: Type.Object(
+    {
+      id: Type.String(),
+      role: Type.String(),
+      parts: Type.Array(Type.Any()),
+    },
+    { additionalProperties: true },
+  ),
 });
 
 export const integrationIdSchema = Type.Object({

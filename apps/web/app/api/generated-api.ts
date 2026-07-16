@@ -126,6 +126,7 @@ export interface RegisterResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -165,6 +166,7 @@ export interface LoginResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -278,6 +280,7 @@ export interface CurrentUserResponse {
       | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -341,6 +344,7 @@ export interface CreatePasswordResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -402,6 +406,7 @@ export interface HandleMagicLinkResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -465,6 +470,22 @@ export interface GetPublicGlobalSettingsResponse {
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
+}
+
+export interface GetPwaManifestResponse {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  display: "standalone";
+  orientation: "portrait";
+  start_url: "/";
+  scope: "/";
+  icons: {
+    src: string;
+    sizes: string;
+    type: string;
+  }[];
 }
 
 export interface GetPublicRegistrationFormResponse {
@@ -1467,6 +1488,19 @@ export interface SendBulkPasswordResetEmailsResponse {
   data: {
     sentCount: number;
     skippedCount: number;
+  };
+}
+
+export interface SendBulkPasswordEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+    passwordResetSentCount: number;
+    passwordCreationSentCount: number;
   };
 }
 
@@ -2644,7 +2678,12 @@ export interface GetCourseOwnershipResponse {
 export interface ChatWithCourseGenerationAgentBody {
   /** @format uuid */
   integrationId: string;
-  message: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
 }
 
 export type GetCourseGenerationMessagesResponse = {
@@ -3979,8 +4018,12 @@ export interface GetThreadMessagesResponse {
 export interface StreamChatBody {
   /** @format uuid */
   threadId: string;
-  /** @minLength 1 */
-  content: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
   /** @format uuid */
   id?: string;
 }
@@ -4761,6 +4804,7 @@ export interface GetLumaConfiguredResponse {
     enabled: boolean;
     courseGenerationEnabled: boolean;
     voiceMentorEnabled: boolean;
+    voiceTtsProvider: "cartesia" | "openaiCompatible";
   };
 }
 
@@ -4780,6 +4824,10 @@ export interface GetIsConfigSetupResponse {
     notConfigured: {
       service: string;
       missingKeys: string[];
+    }[];
+    aiCapabilities: {
+      key: "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
+      status: "enabled" | "disabled";
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;
@@ -5949,6 +5997,27 @@ export interface CreateTenantBody {
 }
 
 export interface CreateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
+export interface UpdateTenantBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantResponse {
   data: {
     /** @format uuid */
     id: string;
@@ -7669,6 +7738,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPwaManifest
+     * @request GET:/api/settings/manifest.webmanifest
+     */
+    settingsControllerGetPwaManifest: (params: RequestParams = {}) =>
+      this.request<GetPwaManifestResponse, any>({
+        path: `/api/settings/manifest.webmanifest`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetPublicRegistrationForm
      * @request GET:/api/settings/registration-form
      */
@@ -8696,6 +8779,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<SendBulkPasswordResetEmailsResponse, any>({
         path: `/api/user/bulk/password-reset-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordEmails
+     * @request POST:/api/user/bulk/password-email
+     */
+    userControllerSendBulkPasswordEmails: (
+      data: SendBulkPasswordEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordEmailsResponse, any>({
+        path: `/api/user/bulk/password-email`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -13272,6 +13374,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<CreateTenantResponse, void>({
         path: `/api/integration/tenants`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Updates the target tenant's name, host, or status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateTenant
+     * @summary Update tenant via integration API
+     * @request PATCH:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerUpdateTenant: (
+      tenantId: string,
+      data: UpdateTenantBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantResponse, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

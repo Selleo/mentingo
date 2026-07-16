@@ -68,7 +68,7 @@ export function AiMentorEvaluationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl gap-0 overflow-hidden p-0">
+      <DialogContent variant="mobileDrawer" className="sm:!max-w-xl">
         <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
           <DialogTitle className="text-lg font-semibold text-neutral-950">
             {t("studentCourseView.lesson.aiMentorLesson.resultButton")}
@@ -76,73 +76,78 @@ export function AiMentorEvaluationDialog({
           <DialogDescription className="sr-only">{statusDescription}</DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5 px-6 py-5">
-          <DialogHeader
-            className={cn(
-              "flex flex-row items-start gap-3 space-y-0 rounded-md border bg-white p-4 text-left",
-              {
-                "border-emerald-200": passed,
-                "border-red-200": !passed,
-              },
-            )}
-          >
-            <span
-              className={cn("mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md", {
-                "bg-emerald-50 text-emerald-700": passed,
-                "bg-red-50 text-red-700": !passed,
-              })}
+        <div className="min-h-0 overflow-y-auto px-6 py-5">
+          <div className="grid gap-5">
+            <DialogHeader
+              className={cn(
+                "flex flex-row items-start gap-3 space-y-0 rounded-md border bg-white p-4 text-left",
+                {
+                  "border-emerald-200": passed,
+                  "border-red-200": !passed,
+                },
+              )}
             >
-              {passed ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />}
-            </span>
-            <div className="grid gap-1">
-              <h3 className="text-base font-semibold text-neutral-950">{statusLabel}</h3>
-              <p className="text-sm leading-relaxed text-neutral-600">{statusDescription}</p>
-            </div>
-          </DialogHeader>
-
-          {hasScore && (
-            <div className="grid gap-3 rounded-md border border-neutral-200 bg-neutral-50/70 p-4 sm:grid-cols-2">
+              <span
+                className={cn(
+                  "mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-md",
+                  {
+                    "bg-emerald-50 text-emerald-700": passed,
+                    "bg-red-50 text-red-700": !passed,
+                  },
+                )}
+              >
+                {passed ? <CheckCircle2 className="size-5" /> : <XCircle className="size-5" />}
+              </span>
               <div className="grid gap-1">
-                <span className="text-xs font-medium text-neutral-500">
-                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreLabel")}
-                </span>
-                <span className="text-base font-semibold text-neutral-950">
-                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreValue", {
-                    score,
-                    maxScore,
-                    percentage,
-                  })}
-                </span>
+                <h3 className="text-base font-semibold text-neutral-950">{statusLabel}</h3>
+                <p className="text-sm leading-relaxed text-neutral-600">{statusDescription}</p>
               </div>
-              {requiredScore !== null && thresholdPercentage !== null && (
+            </DialogHeader>
+
+            {hasScore && (
+              <div className="grid gap-3 rounded-md border border-neutral-200 bg-neutral-50/70 p-4 sm:grid-cols-2">
                 <div className="grid gap-1">
-                  <span className="text-xs font-medium uppercase text-neutral-500">
-                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.thresholdLabel")}
+                  <span className="text-xs font-medium text-neutral-500">
+                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreLabel")}
                   </span>
-                  <span className="text-lg font-semibold text-neutral-950">
-                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.thresholdValue", {
-                      requiredScore,
+                  <span className="text-base font-semibold text-neutral-950">
+                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.scoreValue", {
+                      score,
                       maxScore,
-                      threshold: thresholdPercentage,
+                      percentage,
                     })}
                   </span>
                 </div>
-              )}
-            </div>
-          )}
-
-          {evaluation.summary && (
-            <div className="grid gap-2">
-              <h3 className="text-sm font-semibold text-neutral-950">
-                {t("studentCourseView.lesson.aiMentorLesson.evaluation.feedbackTitle")}
-              </h3>
-              <div className="max-h-60 overflow-y-auto rounded-md border border-neutral-200 bg-white p-4 text-sm leading-relaxed text-neutral-700 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:space-y-1 [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-950 [&_ul]:my-2 [&_ul]:space-y-1">
-                <Markdown components={variants} remarkPlugins={[remarkGfm]}>
-                  {evaluation.summary}
-                </Markdown>
+                {requiredScore !== null && thresholdPercentage !== null && (
+                  <div className="grid gap-1">
+                    <span className="text-xs font-medium uppercase text-neutral-500">
+                      {t("studentCourseView.lesson.aiMentorLesson.evaluation.thresholdLabel")}
+                    </span>
+                    <span className="text-lg font-semibold text-neutral-950">
+                      {t("studentCourseView.lesson.aiMentorLesson.evaluation.thresholdValue", {
+                        requiredScore,
+                        maxScore,
+                        threshold: thresholdPercentage,
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
+
+            {evaluation.summary && (
+              <div className="grid gap-2">
+                <h3 className="text-sm font-semibold text-neutral-950">
+                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.feedbackTitle")}
+                </h3>
+                <div className="max-h-60 overflow-y-auto rounded-md border border-neutral-200 bg-white p-4 text-sm leading-relaxed text-neutral-700 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:space-y-1 [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-950 [&_ul]:my-2 [&_ul]:space-y-1">
+                  <Markdown components={variants} remarkPlugins={[remarkGfm]}>
+                    {evaluation.summary}
+                  </Markdown>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <DialogFooter className="border-t border-neutral-100 px-6 py-4">

@@ -44,6 +44,6 @@
   },
   "packageManager": "pnpm@10.22.0",
   "engines": {
-    "node": ">=20"
+    "node": ">=22.15.0"
   }
 }

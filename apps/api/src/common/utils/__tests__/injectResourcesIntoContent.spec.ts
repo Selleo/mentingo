@@ -81,6 +81,7 @@ describe("injectResourcesIntoContent", () => {
       VIDEO_AUTOPLAY.NO_AUTOPLAY,
       VIDEO_AUTOPLAY.PLAY_NEXT,
     ]);
+    expect(result.internalVideoResourceEntityIds).toEqual([]);
     expect(result.hasAutoplayTrigger).toBe(false);
     expect(result.videos).toEqual([
       `http://localhost:5173/api/lesson/lesson-resource/${resourceA}`,
@@ -109,5 +110,38 @@ describe("injectResourcesIntoContent", () => {
     );
 
     expect(result.html).toContain('data-provider="bunny"');
+    expect(result.internalVideoResourceEntityIds).toEqual([resourceEntityA]);
+  });
+
+  it("returns unique internal video resource entity ids from visible video nodes", () => {
+    const content = [
+      `<div data-node-type="video" data-src="/api/lesson/lesson-resource/${resourceA}"></div>`,
+      `<div data-node-type="video" data-src="/api/lesson/lesson-resource/${resourceA}"></div>`,
+      `<div data-node-type="video" data-src="https://example.com/external.mp4"></div>`,
+      `<div data-node-type="image" data-src="/api/lesson/lesson-resource/${resourceB}"></div>`,
+    ].join("");
+
+    const result = injectResourcesIntoContent(
+      content,
+      [
+        {
+          id: resourceA,
+          resourceEntityId: resourceEntityA,
+          fileUrl: "https://cdn.example.com/a.mp4",
+          contentType: "video/mp4",
+        },
+        {
+          id: resourceB,
+          fileUrl: "https://cdn.example.com/b.png",
+          contentType: "image/png",
+        },
+      ],
+      {
+        resourceIdRegex: createLessonResourceIdRegex(),
+        trackNodeTypes: ["video", "image"],
+      },
+    );
+
+    expect(result.internalVideoResourceEntityIds).toEqual([resourceEntityA]);
   });
 });

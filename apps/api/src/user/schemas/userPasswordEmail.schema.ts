@@ -11,5 +11,13 @@ export const bulkUserPasswordEmailResponseSchema = Type.Object({
   skippedCount: Type.Number(),
 });
 
+export const bulkUserPasswordEmailsResponseSchema = Type.Object({
+  sentCount: Type.Number(),
+  skippedCount: Type.Number(),
+  passwordResetSentCount: Type.Number(),
+  passwordCreationSentCount: Type.Number(),
+});
+
 export type BulkUserPasswordEmailBody = Static<typeof bulkUserPasswordEmailSchema>;
 export type BulkUserPasswordEmailResponse = Static<typeof bulkUserPasswordEmailResponseSchema>;
+export type BulkUserPasswordEmailsResponse = Static<typeof bulkUserPasswordEmailsResponseSchema>;

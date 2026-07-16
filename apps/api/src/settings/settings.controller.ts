@@ -13,6 +13,7 @@ import {
   Req,
   Res,
   Query,
+  Header,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { ApiBody, ApiConsumes } from "@nestjs/swagger";
@@ -35,6 +36,7 @@ import { Validate } from "nestjs-typebox";
 
 import { UUIDType, baseResponse, BaseResponse, UUIDSchema } from "src/common";
 import { FILE_SIZE_BASE } from "src/common/constants";
+import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -48,6 +50,7 @@ import { CompanyInformaitonJSONSchema } from "./schemas/company-information.sche
 import { loginBackgroundResponseSchema } from "./schemas/login-background.schema";
 import { platformLogoResponseSchema } from "./schemas/platform-logo.schema";
 import { platformSimpleLogoResponseSchema } from "./schemas/platform-simple-logo.schema";
+import { pwaManifestSchema, type PwaManifest } from "./schemas/pwa-manifest.schema";
 import {
   localizedRegistrationFormResponseSchema,
   registrationFormResponseSchema,
@@ -94,11 +97,21 @@ export class SettingsController {
 
   @Public()
   @Get("global")
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(globalSettingsJSONSchema),
   })
   async getPublicGlobalSettings(): Promise<BaseResponse<GlobalSettingsJSONContentSchema>> {
     return new BaseResponse(await this.settingsService.getPublicGlobalSettings());
+  }
+
+  @Public()
+  @Get("manifest.webmanifest")
+  @Header("Content-Type", "application/manifest+json")
+  @Header("Cache-Control", "no-store")
+  @Validate({ response: pwaManifestSchema })
+  async getPwaManifest(): Promise<PwaManifest> {
+    return this.settingsService.getPwaManifest();
   }
 
   @Public()
@@ -112,6 +125,7 @@ export class SettingsController {
   }
 
   @Get()
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(userSettingsJSONContentSchema),
   })
@@ -372,6 +386,7 @@ export class SettingsController {
 
   @Get("platform-simple-logo")
   @Public()
+  @AllowPasswordChangeRequired()
   @Validate({
     response: baseResponse(platformSimpleLogoResponseSchema),
   })
@@ -484,6 +499,7 @@ export class SettingsController {
   }
 
   @Get("company-information")
+  @AllowPasswordChangeRequired()
   @Public()
   @Validate({
     response: baseResponse(companyInformationJSONSchema),

@@ -4,6 +4,7 @@ import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { assertAiMentorEntryFlow } from "../../flows/learning/assert-ai-mentor-entry.flow";
+import { dismissAiMentorTaskDescriptionFlow } from "../../flows/learning/dismiss-ai-mentor-task-description.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { createAiMentorLessonCourse } from "../learning/learning-test-helpers";
@@ -48,6 +49,7 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
       await startLearningFlow(page);
 
       await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${aiMentorLesson.id}$`));
+      await dismissAiMentorTaskDescriptionFlow(page);
       await assertAiMentorEntryFlow(page);
       await expect(
         page.getByTestId(LEARNING_HANDLES.aiMentorMessageRole("assistant")).first(),
@@ -99,6 +101,7 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
         .toBeGreaterThan(1);
 
       await page.reload();
+      await dismissAiMentorTaskDescriptionFlow(page);
       await assertAiMentorEntryFlow(page);
       await expect(
         page.getByTestId(LEARNING_HANDLES.aiMentorMessageRole("user")).filter({ hasText: message }),
@@ -108,6 +111,7 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeVisible({
         timeout: 90_000,
       });
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION)).toBeVisible();
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON).click();
 
       await expect
@@ -123,6 +127,18 @@ test("student can chat with AI mentor, check the lesson, and retake it", async (
           { timeout: 90_000 },
         )
         .toBe("completed");
+
+      await page.reload();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON)).toBeVisible();
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeHidden();
+      await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION)).toBeVisible();
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION).click();
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
 
       await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON).click();
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_RETAKE_MODAL)).toBeVisible();

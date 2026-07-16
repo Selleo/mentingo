@@ -8,6 +8,8 @@ import {
   IMAGE_QUALITY,
   IMAGE_VARIANT_DEFINITIONS,
   IMAGE_VARIANT_CONTENT_TYPE,
+  PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+  IMAGE_RESIZE_MODES,
 } from "../image-variant.constants";
 import { ImageVariantService } from "../image-variant.service";
 
@@ -106,6 +108,39 @@ describe("ImageVariantService", () => {
 
     expect(result).toBeNull();
     expect(s3Service.uploadFile).not.toHaveBeenCalled();
+  });
+
+  it("creates square PWA variants when cover-square mode is requested", async () => {
+    const sourceBuffer = await sharp({
+      create: {
+        width: 300,
+        height: 150,
+        channels: 3,
+        background: "#ffffff",
+      },
+    })
+      .png()
+      .toBuffer();
+
+    const result = await service.createVariants({
+      buffer: sourceBuffer,
+      resource: "platform-simple-logos",
+      mimeType: "image/png",
+      tenantId: "00000000-0000-0000-0000-000000000001",
+      options: {
+        variantDefinitions: PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+        resizeMode: IMAGE_RESIZE_MODES.COVER_SQUARE,
+      },
+    });
+
+    expect(result).not.toBeNull();
+    expect(s3Service.uploadFile).toHaveBeenCalledTimes(PWA_ICON_IMAGE_VARIANT_DEFINITIONS.length);
+
+    for (const { quality, width } of PWA_ICON_IMAGE_VARIANT_DEFINITIONS) {
+      const variant = result?.metadata.variants[quality];
+      expect(variant?.width).toBe(width);
+      expect(variant?.height).toBe(width);
+    }
   });
 
   it("repairs variants for an existing logical reference", async () => {

@@ -190,11 +190,11 @@ export class AdminChapterRepository {
           SELECT json_build_object(
             'id', ${aiMentorLessons.id},
             'lessonId', ${aiMentorLessons.lessonId},
-            'aiMentorInstructions', ${this.localizationService.getLocalizedSqlField(
+            'aiMentorInstructions', ${this.localizationService.getFieldByLanguage(
               aiMentorLessons.aiMentorInstructions,
               language,
             )},
-            'completionConditions', ${this.localizationService.getLocalizedSqlField(
+            'completionConditions', ${this.localizationService.getFieldByLanguage(
               aiMentorLessons.completionConditions,
               language,
             )},
@@ -203,7 +203,9 @@ export class AdminChapterRepository {
             'avatarReference', ${aiMentorLessons.avatarReference},
             'voiceMode', ${aiMentorLessons.voiceMode},
             'ttsPreset', ${aiMentorLessons.ttsPreset},
-            'customTtsReference', COALESCE(${aiMentorLessons.customTtsReference}->>${language}::text, '')
+            'customTtsReference', COALESCE(${
+              aiMentorLessons.customTtsReference
+            }->>${language}::text, '')
           )
           FROM ${aiMentorLessons}
           WHERE lessons.id = ${aiMentorLessons.lessonId} 

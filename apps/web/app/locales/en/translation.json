@@ -574,8 +574,8 @@
       "afterHeading": "After training",
       "afterDescription": "Materials available after the training is finished.",
       "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Add file",
+      "afterLocked": "The materials will be unlocked after the training concludes.",
+      "addFile": "Upload a file or drag and drop here",
       "download": "Download",
       "removeFile": "Remove {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -899,6 +899,19 @@
       "noPartiallyConfigured": "No partially configured services.",
       "allConfigured": "All environment keys are configured correctly.",
       "dismissWarning": "Dismiss",
+      "aiCapabilities": {
+        "title": "AI Capabilities",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Course Generation",
+          "assetGeneration": "Asset Generation"
+        },
+        "status": {
+          "enabled": "Enabled",
+          "disabled": "Disabled"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe Payment",
         "bunny": "Bunny CDN",
@@ -974,6 +987,11 @@
       "passwordCreatedSuccessfully": "Password created successfully"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Change your password",
+    "subHeader": "For security, you must set a new password before continuing.",
+    "submit": "Change password"
+  },
   "passwordValidationDisplay": {
     "title": "Password requirements",
     "header": "Your password must contain:",
@@ -1040,7 +1058,9 @@
       "passwordResetEmailsSent": "Password reset emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
       "passwordResetEmailsError": "Failed to send password reset emails",
       "passwordCreationEmailsSent": "Password creation emails sent: {{sentCount}}. Skipped: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Failed to send password creation emails"
+      "passwordCreationEmailsError": "Failed to send password creation emails",
+      "passwordEmailsSent": "Password emails sent: {{sentCount}}. Reset: {{passwordResetSentCount}}. Creation: {{passwordCreationSentCount}}. Skipped: {{skippedCount}}.",
+      "passwordEmailsError": "Failed to send password emails"
     },
     "field": {
       "description": "Description",
@@ -1238,7 +1258,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Course deleted successfully",
       "deleteCourseFailed": "Failed to delete course",
-      "deletePublishedCourseFailed": "Cannot delete a published course. Please set its status to Draft first.",
+      "deleteProtectedCourseFailed": "Cannot delete a published or private course. Please set its status to Draft first.",
       "bulkCategoryUpdateSuccessfully": "Course categories updated successfully",
       "bulkCategoryUpdateFailed": "Failed to update course categories",
       "bulkCategoryUpdateForbidden": "You do not have permission to update one or more selected courses.",
@@ -1518,6 +1538,7 @@
     "dropdown": {
       "roles": "Roles",
       "groups": "Groups",
+      "passwordEmail": "Send password email",
       "passwordReset": "Send password reset email",
       "passwordCreation": "Resend password creation email",
       "delete": "Delete",
@@ -1528,6 +1549,7 @@
         "delete": "Do you want to delete these accounts?",
         "role": "Modify roles",
         "group": "Modify groups",
+        "passwordEmail": "Send password email",
         "passwordReset": "Send password reset email",
         "passwordCreation": "Resend password creation email",
         "archive": "Archive user accounts",
@@ -1539,6 +1561,7 @@
         "delete": "Delete",
         "role": "Save",
         "group": "Save",
+        "passwordEmail": "Send",
         "passwordReset": "Send",
         "passwordCreation": "Send",
         "archive": "Archive",
@@ -1551,6 +1574,7 @@
         "confirmationForGroup_other": "You will change group to {{ group }} for {{ count }} users",
         "confirmationForRole_one": "You will change role to {{ role }} for 1 user.",
         "confirmationForRole_other": "You will change role to {{ role }} for {{ count }} users",
+        "passwordEmail": "Send password emails to selected users. Users with existing passwords will receive password reset emails, and users without passwords will receive password creation emails.",
         "passwordReset": "Send password reset emails to selected users with existing passwords. Users without passwords will be skipped.",
         "passwordCreation": "Resend password creation emails to selected users without passwords. Users with existing passwords will be skipped.",
         "archive": "Are you sure you want to archive these accounts?",
@@ -1625,6 +1649,7 @@
     },
     "button": {
       "createUser": "Create user",
+      "passwordEmail": "Send password email",
       "passwordResetEmail": "Send password reset email",
       "passwordCreationEmail": "Resend password creation email"
     },
@@ -2289,7 +2314,7 @@
           "fillInTheBlanksText": "Gap filling (text)",
           "briefResponse": "Short answer",
           "detailedResponse": "Free text",
-          "scale1_5": "Scale 1 to 5",
+          "scale_1_5": "Scale 1 to 5",
           "selectQuestionType": "Select question type",
           "contentLessonDescription": "Text with multimedia (images, videos, presentations).",
           "quizLessonDescription": "A set of questions to check knowledge.",
@@ -2315,7 +2340,8 @@
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
           "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
-          "voiceConfigFishAudioTooltip": "Voice mode uses Cartesia. To use a custom voice, open Cartesia, find the voice you want, and copy its voice ID here.",
+          "voiceConfigCartesiaTooltip": "Voice audio uses Cartesia. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a Cartesia voice ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Voice audio uses an OpenAI-compatible text-to-speech endpoint. Male and Female use OpenAI voice presets. Choose Custom to enter another voice value supported by that endpoint.",
           "aiMentorPersonaTooltip": "This defines the lesson's persona. You can select a name and avatar for the AI Mentor. The persona will identify itself by this name, and the selected avatar will be shown during lessons.",
           "suggestedExamples": "Suggested examples",
           "charactersLeft": "characters left",
@@ -2753,7 +2779,8 @@
       "passingThreshold": "Passing threshold: {{threshold}}% ({{correct}} of {{questionsNumber}} questions)",
       "score": "Score: {{score}}% ({{correct}} of {{questionsNumber}} questions)",
       "contentCantBeEmbedded": "This content can’t be embedded.",
-      "openInNewTab": "Open in new tab"
+      "openInNewTab": "Open in new tab",
+      "scale_1_5": "Scale question (1-5)"
     },
     "aiMentor": {
       "title": "AI Mentor Session",
@@ -2789,6 +2816,10 @@
       "body": "Please wait a moment. It will appear here once it is ready."
     },
     "videoProgress": {
+      "label": "Video progress",
+      "completedSummary": "{{completed}} of {{total}} completed",
+      "overviewAriaLabel": "Lesson video progress",
+      "segmentAriaLabel": "Video {{index}} progress: {{progress}}% watched",
       "errors": {
         "resourceNotFound": "Video progress could not be saved for this lesson.",
         "unsupportedLessonType": "Video progress is only available for content lessons.",
@@ -2907,6 +2938,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Voice UI",
+          "options": "Options",
           "exit": "Exit voice mode",
           "mute": "Mute",
           "unmute": "Unmute",
@@ -3400,12 +3432,18 @@
       "error": "Error changing login background image"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "File processing failed. Please try another file or upload it again.",
+      "noExtractableText": "No readable text could be extracted from this file."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "File upload failed - invalid file data",
       "fileEmpty": "File upload failed - the file is empty",
       "contentTypeMismatch": "File content type does not match the provided content type",
-      "invalidFileType": "Invalid file type. Please upload a PNG or SVG file.",
+      "invalidFileType": "Invalid file type.",
       "missingTenantContext": "Missing tenant context for file upload",
       "presentationFileTooLarge": "Presentation file is too large. Upload a presentation up to {{size}} {{unit}}."
     },
@@ -4289,6 +4327,7 @@
     "error": {
       "unauthenticated": "User not authenticated",
       "invalidEmailOrPassword": "Invalid email or password",
+      "invalidRefreshToken": "Invalid refresh token",
       "adminRoleRequired": "Admin role required",
       "missingPermission": "You do not have permission to access this resource",
       "sessionRevoked": "Your session was revoked. Please refresh your session."

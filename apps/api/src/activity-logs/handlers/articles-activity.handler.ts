@@ -1,9 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
+import { CreateArticleLanguageEvent } from "src/events/articles/create-article-language.event";
 import { CreateArticleEvent } from "src/events/articles/create-articles.event";
+import { CreateSectionLanguageEvent } from "src/events/articles/create-section-language.event";
 import { CreateArticleSectionEvent } from "src/events/articles/create-section.event";
+import { DeleteArticleLanguageEvent } from "src/events/articles/delete-article-language.event";
 import { DeleteArticleEvent } from "src/events/articles/delete-articles.event";
+import { DeleteSectionLanguageEvent } from "src/events/articles/delete-section-language.event";
 import { DeleteArticleSectionEvent } from "src/events/articles/delete-section.event";
 import { UpdateArticleEvent } from "src/events/articles/update-articles.event";
 import { UpdateArticleSectionEvent } from "src/events/articles/update-section.event";
@@ -18,7 +22,11 @@ type ArticleEventType =
   | DeleteArticleEvent
   | CreateArticleSectionEvent
   | UpdateArticleSectionEvent
-  | DeleteArticleSectionEvent;
+  | DeleteArticleSectionEvent
+  | CreateArticleLanguageEvent
+  | DeleteArticleLanguageEvent
+  | CreateSectionLanguageEvent
+  | DeleteSectionLanguageEvent;
 
 const ArticleActivityEvents = [
   CreateArticleEvent,
@@ -27,6 +35,10 @@ const ArticleActivityEvents = [
   CreateArticleSectionEvent,
   UpdateArticleSectionEvent,
   DeleteArticleSectionEvent,
+  CreateArticleLanguageEvent,
+  DeleteArticleLanguageEvent,
+  CreateSectionLanguageEvent,
+  DeleteSectionLanguageEvent,
 ] as const;
 
 @Injectable()
@@ -36,8 +48,16 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
 
   async handle(event: ArticleEventType) {
     if (event instanceof CreateArticleEvent) return await this.handleCreateArticle(event);
+    if (event instanceof DeleteArticleLanguageEvent)
+      return await this.handleDeleteArticleLanguage(event);
+    if (event instanceof CreateArticleLanguageEvent)
+      return await this.handleCreateArticleLanguage(event);
     if (event instanceof UpdateArticleEvent) return await this.handleUpdateArticle(event);
     if (event instanceof DeleteArticleEvent) return await this.handleDeleteArticle(event);
+    if (event instanceof CreateSectionLanguageEvent)
+      return await this.handleCreateSectionLanguageEvent(event);
+    if (event instanceof DeleteSectionLanguageEvent)
+      return await this.handleDeleteSectionLanguageEvent(event);
     if (event instanceof CreateArticleSectionEvent)
       return await this.handleCreateArticleSection(event);
     if (event instanceof UpdateArticleSectionEvent)
@@ -161,6 +181,47 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
     });
   }
 
+  private async handleCreateSectionLanguageEvent(event: CreateSectionLanguageEvent) {
+    const { articleSectionUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: null,
+      updated: articleSectionUpdateData.updatedArticleSectionData,
+      schema: "create",
+      context: this.buildLanguageContext(
+        articleSectionUpdateData.language,
+        articleSectionUpdateData.updatedArticleSectionData,
+        articleSectionUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleSectionUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE_SECTION,
+      resourceId: articleSectionUpdateData.articleSectionId,
+      before: null,
+      after: metadata.after,
+      context: metadata.context ?? null,
+    });
+  }
+
+  private async handleDeleteSectionLanguageEvent(event: DeleteSectionLanguageEvent) {
+    const { articleSectionUpdateData } = event;
+
+    await this.activityLogsService.recordActivity({
+      actor: articleSectionUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE_SECTION,
+      resourceId: articleSectionUpdateData.articleSectionId,
+      context: this.buildLanguageContext(
+        articleSectionUpdateData.language,
+        undefined,
+        articleSectionUpdateData.action,
+      ),
+    });
+  }
+
   private async handleDeleteArticleSection(event: DeleteArticleSectionEvent) {
     const { articleSectionDeleteData } = event;
 
@@ -203,5 +264,53 @@ export class ArticlesActivityHandler implements IEventHandler<ArticleEventType> 
     if (title) context.title = title;
 
     return Object.keys(context).length ? context : null;
+  }
+
+  private async handleCreateArticleLanguage(event: CreateArticleLanguageEvent) {
+    const { articleUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: articleUpdateData.previousArticleData,
+      updated: articleUpdateData.updatedArticleData,
+      context: this.buildLanguageContext(
+        articleUpdateData.language,
+        articleUpdateData.updatedArticleData,
+        articleUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
+      resourceId: articleUpdateData.articleId,
+      changedFields: metadata.changedFields,
+      after: metadata.after,
+      context: metadata.context ?? null,
+    });
+  }
+
+  private async handleDeleteArticleLanguage(event: DeleteArticleLanguageEvent) {
+    const { articleUpdateData } = event;
+
+    const metadata = buildActivityLogMetadata({
+      previous: articleUpdateData.previousArticleData,
+      updated: null,
+      context: this.buildLanguageContext(
+        articleUpdateData.language,
+        undefined,
+        articleUpdateData.action,
+      ),
+    });
+
+    await this.activityLogsService.recordActivity({
+      actor: articleUpdateData.actor,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.ARTICLE,
+      resourceId: articleUpdateData.articleId,
+      changedFields: metadata.changedFields,
+      before: null,
+      context: metadata.context ?? null,
+    });
   }
 }

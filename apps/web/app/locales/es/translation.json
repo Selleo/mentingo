@@ -487,20 +487,20 @@
   },
   "liveTrainingView": {
     "title": "Formación en vivo",
-    "description": "Esta página contendrá el espacio de trabajo completo de formación en vivo.",
+    "description": "Esta página contendrá el espacio de trabajo completo de la formación en vivo.",
     "errors": {
-      "idRequired": "El ID de la formación en vivo es obligatorio."
+      "idRequired": "Se requiere el ID de la formación en vivo."
     },
     "status": {
-      "scheduled": "Programado",
-      "active": "Activo",
-      "ended": "Terminado",
-      "cancelled": "Cancelado",
-      "expired": "Caducado"
+      "scheduled": "Programada",
+      "active": "Activa",
+      "ended": "Finalizada",
+      "cancelled": "Cancelada",
+      "expired": "Caducada"
     },
     "deliveryType": {
-      "online": "En línea",
-      "offline": "En persona"
+      "online": "Online",
+      "offline": "Presencial"
     },
     "visibility": {
       "all": "Todos los usuarios",
@@ -515,46 +515,46 @@
     },
     "stage": {
       "preview": "Vista previa de la sesión",
-      "activeTitle": "La sesión en vivo está activa.",
-      "waitingTitle": "La sesión está esperando",
-      "runtimeDeferred": "El tiempo de ejecución de la reunión se conectará en un segmento posterior. Los dispositivos multimedia no se inician desde esta vista previa.",
-      "activeBadge": "Activo",
+      "activeTitle": "La sesión en vivo está activa",
+      "waitingTitle": "La sesión está en espera",
+      "runtimeDeferred": "El tiempo de ejecución de la reunión se conectará más adelante. Los dispositivos multimedia no se inician desde esta vista previa.",
+      "activeBadge": "Activa",
       "waitingBadge": "En espera",
       "participants": "Participantes",
-      "viewerMic": "Micrófono del visor",
-      "viewerCamera": "Cámara del visor",
-      "scheduleTooltip": "Tiempo de entrenamiento planificado",
-      "timezoneTooltip": "Zona horaria de entrenamiento",
-      "maxParticipantsTooltip": "Participantes máximos",
-      "locationTooltip": "Lugar de entrenamiento",
-      "offlineTitle": "Entrenamiento presencial",
-      "locationMissing": "La ubicación no ha sido establecida."
+      "viewerMic": "Micrófono del espectador",
+      "viewerCamera": "Cámara del espectador",
+      "scheduleTooltip": "Hora prevista de la formación",
+      "timezoneTooltip": "Zona horaria de la formación",
+      "maxParticipantsTooltip": "Máximo de participantes",
+      "locationTooltip": "Lugar de la formación",
+      "offlineTitle": "Formación presencial",
+      "locationMissing": "No se ha establecido la ubicación"
     },
     "sidebar": {
       "lifecycle": "Ciclo de vida de la sesión",
       "status": "Estado",
       "participants": "Participantes",
-      "peak": "Pico",
+      "peak": "Pico máximo",
       "people": "Personas",
       "author": "Autor",
       "host": "Anfitrión",
       "hosts": "Anfitriones",
-      "noHosts": "No hay hosts asignados",
+      "noHosts": "No hay anfitriones asignados",
       "trainer": "Formador",
       "trainers": "Formadores",
-      "noTrainers": "No hay entrenadores asignados",
+      "noTrainers": "No hay formadores asignados",
       "unknownUser": "Usuario desconocido",
-      "details": "Detalles del entrenamiento",
-      "maxParticipants": "Máximo de participantes",
+      "details": "Detalles de la formación",
+      "maxParticipants": "Participantes máx.",
       "visibility": "Visibilidad",
       "courses": "Cursos vinculados",
       "location": "Ubicación",
       "addHost": "Añadir",
-      "addHostHint": "Agregar anfitrión",
-      "removeHost": "Eliminar el host {{name}}",
+      "addHostHint": "Añadir anfitrión",
+      "removeHost": "Eliminar anfitrión {{name}}",
       "addTrainer": "Añadir",
-      "addTrainerHint": "Agregar entrenador",
-      "removeTrainer": "Quitar entrenador {{name}}",
+      "addTrainerHint": "Añadir formador",
+      "removeTrainer": "Eliminar formador {{name}}",
       "searchPeople": "Buscar personas",
       "noUserResults": "No se encontraron usuarios",
       "loadingUsers": "Cargando usuarios",
@@ -564,30 +564,30 @@
       "overview": "Resumen",
       "files": "Archivos",
       "sessions": "Sesiones",
-      "settings": "Configuración"
+      "settings": "Ajustes"
     },
     "files": {
-      "title": "Archivos de formación en vivo",
-      "description": "Los materiales se dividen según cuándo los estudiantes deben usarlos.",
-      "beforeHeading": "Antes del entrenamiento",
-      "beforeDescription": "Materiales disponibles antes de que comience la capacitación.",
-      "afterHeading": "Después del entrenamiento",
+      "title": "Archivos de la formación en vivo",
+      "description": "Los materiales se dividen según cuándo deben usarlos los estudiantes.",
+      "beforeHeading": "Antes de la formación",
+      "beforeDescription": "Materiales disponibles antes de que comience la formación.",
+      "afterHeading": "Después de la formación",
       "afterDescription": "Materiales disponibles una vez finalizada la formación.",
       "empty": "Aún no hay archivos adjuntos.",
-      "afterLocked": "Los archivos posteriores a la sesión se desbloquean cuando finaliza la capacitación.",
-      "addFile": "Agregar archivo",
+      "afterLocked": "Los materiales se desbloquearán al finalizar la formación.",
+      "addFile": "Sube un archivo o arrástralo y suéltalo aquí",
       "download": "Descargar",
       "removeFile": "Eliminar {{title}}",
       "sizeInMb": "{{size}} MB",
       "toast": {
-        "uploaded": "Se ha agregado el archivo.",
-        "removed": "El archivo ha sido eliminado."
+        "uploaded": "Se ha añadido el archivo.",
+        "removed": "Se ha eliminado el archivo."
       }
     },
     "meeting": {
       "previewLabel": "Sesión en vivo",
       "waitingTitle": "La sesión está lista para unirse",
-      "activeTitle": "La sesión está activa.",
+      "activeTitle": "La sesión está activa",
       "inSession": "En sesión",
       "roomTitle": "Sala en vivo",
       "participants_one": "{{count}} participante",
@@ -596,19 +596,19 @@
       "camera": "Cámara",
       "screenShare": "Compartir pantalla",
       "screen": "Pantalla",
-      "presentOnStage": "Presente en el escenario",
+      "presentOnStage": "Presentar en el escenario",
       "leave": "Salir",
       "finish": "Finalizar sesión",
-      "sessionEndedToast": "Tu sesión {{trainingName}} ha finalizado",
+      "sessionEndedToast": "Su sesión {{trainingName}} ha finalizado",
       "finishDialog": {
-        "title": "¿Terminar sesión?",
-        "lastHostDescription": "Eres el único anfitrión en esta sala. Al salir finalizará la sesión para todos.",
-        "otherHostsDescription": "Otros anfitriones todavía están en esta sala. Puedes salir y la sesión continuará.",
+        "title": "¿Finalizar la sesión?",
+        "lastHostDescription": "Eres el único anfitrión en esta sala. Si sales, la sesión finalizará para todos.",
+        "otherHostsDescription": "Aún hay otros anfitriones en esta sala. Puedes salir y la sesión continuará.",
         "cancel": "Cancelar",
         "confirmEnd": "Finalizar sesión",
         "confirmLeave": "Salir de la sesión"
       },
-      "empty": "Esperando a los participantes",
+      "empty": "Esperando participantes",
       "materials": "Materiales",
       "beforeMaterials": "Antes",
       "afterMaterials": "Después",
@@ -616,71 +616,71 @@
     },
     "sessions": {
       "title": "Sesiones",
-      "description": "Cada sesión iniciada se almacena por separado con su asistencia.",
-      "empty": "Aún no se han iniciado sesiones.",
+      "description": "Cada sesión iniciada se guarda por separado con su asistencia.",
+      "empty": "Aún no se ha iniciado ninguna sesión.",
       "activeParticipants_one": "{{count}} participante activo",
       "activeParticipants_other": "{{count}} participantes activos",
       "uniqueParticipants_one": "{{count}} participante único",
       "uniqueParticipants_other": "{{count}} participantes únicos",
-      "peakParticipants": "Pico {{count}}",
-      "startedBy": "Iniciado por",
-      "endedBy": "Terminado por",
-      "notEnded": "No terminado",
+      "peakParticipants": "Pico máximo {{count}}",
+      "startedBy": "Iniciada por",
+      "endedBy": "Finalizada por",
+      "notEnded": "No finalizada",
       "notAvailable": "N/D",
-      "endReason": "Razón final",
-      "noEndReason": "No hay razón final",
+      "endReason": "Motivo de finalización",
+      "noEndReason": "Sin motivo de finalización",
       "status": {
         "waiting": "En espera",
-        "active": "Activo",
-        "ended": "Terminado",
-        "failed": "Fallido"
+        "active": "Activa",
+        "ended": "Finalizada",
+        "failed": "Fallida"
       },
       "roles": {
         "host": "Anfitrión",
-        "co_trainer": "Coformador",
+        "co_trainer": "Co-formador",
         "moderator": "Moderador",
         "observer": "Observador",
-        "admin": "Administrador"
+        "admin": "Admin"
       },
       "attendance": {
-        "empty": "Aún no se ha registrado asistencia a esta sesión.",
+        "empty": "Aún no se ha registrado ninguna asistencia para esta sesión.",
         "user": "Usuario",
         "role": "Rol",
         "totalTime": "Tiempo de asistencia",
-        "firstJoinedAt": "Se unió por primera vez",
+        "firstJoinedAt": "Primera unión",
         "lastLeftAt": "Última salida",
-        "joinCount": "Se une"
+        "joinCount": "Uniones"
       },
       "toast": {
-        "started": "Se ha iniciado la sesión.",
+        "started": "La sesión ha comenzado.",
         "ended": "La sesión ha finalizado."
       }
     },
     "attendance": {
       "title": "Asistencia",
-      "description": "Los intervalos de asistencia y participantes se implementarán en el segmento de tiempo de ejecución."
+      "description": "La asistencia y los intervalos de los participantes se implementarán en el entorno de ejecución."
     },
     "settings": {
-      "title": "Configuración",
-      "description": "Las configuraciones de sesión utilizadas con menos frecuencia vivirán aquí."
+      "title": "Ajustes",
+      "description": "Los ajustes de sesión menos frecuentes se encontrarán aquí."
     },
     "boolean": {
       "yes": "Sí",
       "no": "No"
     },
     "deleteDialog": {
-      "title": "¿Eliminar formación en vivo?",
+      "title": "¿Eliminar la formación en vivo?",
       "description": "Esto cancelará la formación en vivo y la eliminará del calendario. Esta acción no se puede deshacer.",
-      "assignedToLessonsDescription": "Esta formación en vivo está vinculada a {{count}} lección. Elimina primero la lección relacionada antes de eliminar la formación en vivo.",
-      "assignedToLessonsDescription_plural": "Esta formación en vivo está vinculada a {{count}} lecciones. Elimina primero las lecciones relacionadas antes de eliminar la formación en vivo.",
+      "assignedToLessonsDescription": "Esta formación en vivo está vinculada a {{count}} lección. Elimina la lección relacionada primero antes de eliminar la formación en vivo.",
+      "assignedToLessonsDescription_plural": "Esta formación en vivo está vinculada a {{count}} lecciones. Elimina las lecciones relacionadas primero antes de eliminar la formación en vivo.",
       "toast": {
-        "success": "La formación en vivo se eliminó correctamente."
+        "success": "Formación en vivo eliminada con éxito."
       }
     },
     "edit": {
       "saveChanges": "Guardar cambios",
       "toast": {
-        "success": "La formación en vivo se actualizó correctamente."
+        "success": "Formación en vivo actualizada con éxito."
       }
     }
   },
@@ -899,6 +899,19 @@
       "noPartiallyConfigured": "No hay servicios parcialmente configurados.",
       "allConfigured": "Todas las claves de entorno están configuradas correctamente.",
       "dismissWarning": "Descartar",
+      "aiCapabilities": {
+        "title": "Capacidades de IA",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generación de cursos",
+          "assetGeneration": "Generación de recursos"
+        },
+        "status": {
+          "enabled": "Activado",
+          "disabled": "Desactivado"
+        }
+      },
       "serviceNames": {
         "stripe": "Pago de Stripe",
         "bunny": "Bunny CDN",
@@ -974,6 +987,11 @@
       "passwordCreatedSuccessfully": "Contraseña creada exitosamente"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Cambia tu contraseña",
+    "subHeader": "Por seguridad, debes establecer una contraseña nueva antes de continuar.",
+    "submit": "Cambiar contraseña"
+  },
   "passwordValidationDisplay": {
     "title": "Requisitos de contraseña",
     "header": "Su contraseña debe contener:",
@@ -1040,7 +1058,9 @@
       "passwordResetEmailsSent": "Correos electrónicos de restablecimiento de contraseña enviados: {{sentCount}}. Omitido: {{skippedCount}}.",
       "passwordResetEmailsError": "No se pudieron enviar correos electrónicos para restablecer la contraseña",
       "passwordCreationEmailsSent": "Correos electrónicos de creación de contraseña enviados: {{sentCount}}. Omitido: {{skippedCount}}.",
-      "passwordCreationEmailsError": "No se pudieron enviar correos electrónicos de creación de contraseña"
+      "passwordCreationEmailsError": "No se pudieron enviar correos electrónicos de creación de contraseña",
+      "passwordEmailsSent": "Correos electrónicos de contraseña enviados: {{sentCount}}. Restablecimiento: {{passwordResetSentCount}}. Creación: {{passwordCreationSentCount}}. Omitidos: {{skippedCount}}.",
+      "passwordEmailsError": "No se pudieron enviar correos electrónicos de contraseña"
     },
     "field": {
       "description": "Descripción",
@@ -1238,7 +1258,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Curso eliminado exitosamente",
       "deleteCourseFailed": "No se pudo eliminar el curso",
-      "deletePublishedCourseFailed": "No se puede eliminar un curso publicado. Primero establezca su estado en Borrador.",
+      "deleteProtectedCourseFailed": "No se puede eliminar un curso publicado o privado. Primero establezca su estado en Borrador.",
       "bulkCategoryUpdateSuccessfully": "Categorías de cursos actualizadas exitosamente",
       "bulkCategoryUpdateFailed": "No se pudieron actualizar las categorías del curso",
       "bulkCategoryUpdateForbidden": "No tienes permiso para actualizar uno o más cursos seleccionados.",
@@ -1518,6 +1538,7 @@
     "dropdown": {
       "roles": "Roles",
       "groups": "Grupos",
+      "passwordEmail": "Enviar correo electrónico de contraseña",
       "passwordReset": "Enviar correo electrónico para restablecer contraseña",
       "passwordCreation": "Reenviar correo electrónico de creación de contraseña",
       "delete": "Eliminar",
@@ -1528,6 +1549,7 @@
         "delete": "¿Quieres eliminar estas cuentas?",
         "role": "Modificar roles",
         "group": "Modificar grupos",
+        "passwordEmail": "Enviar correo electrónico de contraseña",
         "passwordReset": "Enviar correo electrónico para restablecer contraseña",
         "passwordCreation": "Reenviar correo electrónico de creación de contraseña",
         "archive": "Archivar cuentas de usuario",
@@ -1539,6 +1561,7 @@
         "delete": "Eliminar",
         "role": "Guardar",
         "group": "Guardar",
+        "passwordEmail": "Enviar",
         "passwordReset": "Enviar",
         "passwordCreation": "Enviar",
         "archive": "Archivar",
@@ -1551,6 +1574,7 @@
         "confirmationForGroup_other": "Cambiará el grupo a {{ group }} para los usuarios de {{ count }}",
         "confirmationForRole_one": "Cambiará el rol a {{ role }} para 1 usuario.",
         "confirmationForRole_other": "Cambiará el rol a {{ role }} para los usuarios de {{ count }}",
+        "passwordEmail": "Envíe correos electrónicos de contraseña a los usuarios seleccionados. Los usuarios con contraseña existente recibirán correos de restablecimiento y los usuarios sin contraseña recibirán correos de creación de contraseña.",
         "passwordReset": "Envíe correos electrónicos de restablecimiento de contraseña a usuarios seleccionados con contraseñas existentes. Se omitirán los usuarios sin contraseñas.",
         "passwordCreation": "Reenviar correos electrónicos de creación de contraseñas a usuarios seleccionados sin contraseñas. Se omitirán los usuarios con contraseñas existentes.",
         "archive": "¿Está seguro de que desea archivar estas cuentas?",
@@ -1625,6 +1649,7 @@
     },
     "button": {
       "createUser": "Crear usuario",
+      "passwordEmail": "Enviar correo electrónico de contraseña",
       "passwordResetEmail": "Enviar correo electrónico para restablecer contraseña",
       "passwordCreationEmail": "Reenviar correo electrónico de creación de contraseña"
     },
@@ -2289,7 +2314,7 @@
           "fillInTheBlanksText": "Relleno de huecos (texto)",
           "briefResponse": "Respuesta corta",
           "detailedResponse": "Texto libre",
-          "scale1_5": "Escala del 1 al 5",
+          "scale_1_5": "Escala del 1 al 5",
           "selectQuestionType": "Seleccionar tipo de pregunta",
           "contentLessonDescription": "Texto con multimedia (imágenes, vídeos, presentaciones).",
           "quizLessonDescription": "Un conjunto de preguntas para comprobar conocimientos.",
@@ -2315,7 +2340,8 @@
           "aiRoleplayTypeTooltip": "Simula un personaje y una situación realistas, sin romper el personaje.\nEjemplo: \"Esta es la segunda vez que tu servicio falla. ¿Qué vas a hacer al respecto?\"",
           "completionConditionsTooltip": "Enumere lo que el estudiante debe lograr para aprobar esta lección. Proporcione puntos claros y mensurables. La IA utilizará esta lista para comprobar el progreso. También puede definir un umbral de aprobación (por ejemplo, porcentaje o número mínimo de puntos a cubrir). Si no se proporciona ningún umbral, se deben cumplir todas las condiciones para aprobar la lección.",
           "passThresholdTooltip": "Establezca el porcentaje mínimo (1-100%) requerido para aprobar. Déjelo vacío si no hay umbral.",
-          "voiceConfigFishAudioTooltip": "El modo de voz utiliza Cartesia. Para usar una voz personalizada, abra Cartesia, busque la voz que desee y copie su ID de voz aquí.",
+          "voiceConfigCartesiaTooltip": "El audio de voz usa Cartesia. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de Cartesia.",
+          "voiceConfigOpenAiCompatibleTooltip": "El audio de voz usa un endpoint de texto a voz compatible con OpenAI. Male y Female usan presets de voces de OpenAI. Elija Custom para introducir otro valor de voz compatible con ese endpoint.",
           "aiMentorPersonaTooltip": "Esto define la personalidad de la lección. Puede seleccionar un nombre y un avatar para el mentor de IA. La persona se identificará con este nombre y el avatar seleccionado se mostrará durante las lecciones.",
           "suggestedExamples": "Ejemplos sugeridos",
           "charactersLeft": "Caracteres restantes",
@@ -2753,7 +2779,8 @@
       "passingThreshold": "Umbral de aprobación: {{threshold}}% ({{correct}} de preguntas {{questionsNumber}})",
       "score": "Puntuación: {{score}}% ({{correct}} de preguntas {{questionsNumber}})",
       "contentCantBeEmbedded": "Este contenido no se puede incrustar.",
-      "openInNewTab": "Abrir en nueva pestaña"
+      "openInNewTab": "Abrir en nueva pestaña",
+      "scale_1_5": "Escala del 1 al 5"
     },
     "aiMentor": {
       "title": "Sesión de mentores de IA",
@@ -2789,6 +2816,10 @@
       "body": "Espere un momento. Aparecerá aquí una vez que esté listo."
     },
     "videoProgress": {
+      "label": "Progreso del video",
+      "completedSummary": "{{completed}} de {{total}} completados",
+      "overviewAriaLabel": "Progreso de los videos de la lección",
+      "segmentAriaLabel": "Progreso del video {{index}}: {{progress}}% visto",
       "errors": {
         "resourceNotFound": "No se pudo guardar el progreso del video para esta lección.",
         "unsupportedLessonType": "El progreso del video solo está disponible para lecciones de contenido.",
@@ -3399,12 +3430,18 @@
       "error": "Error al cambiar la imagen de fondo de inicio de sesión"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "El procesamiento del archivo falló. Intente con otro archivo o vuelva a subirlo.",
+      "noExtractableText": "No se pudo extraer texto legible de este archivo."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Error al cargar el archivo: datos de archivo no válidos",
       "fileEmpty": "Error al cargar el archivo: el archivo está vacío",
       "contentTypeMismatch": "El tipo de contenido del archivo no coincide con el tipo de contenido proporcionado",
-      "invalidFileType": "Tipo de archivo no válido. Cargue un archivo PNG o SVG.",
+      "invalidFileType": "Tipo de archivo no válido.",
       "missingTenantContext": "Falta contexto de inquilino para la carga de archivos",
       "presentationFileTooLarge": "El archivo de presentación es demasiado grande. Cargue una presentación hasta {{size}} {{unit}}."
     },
@@ -4288,6 +4325,7 @@
     "error": {
       "unauthenticated": "Usuario no autenticado",
       "invalidEmailOrPassword": "Correo electrónico o contraseña no válidos",
+      "invalidRefreshToken": "Token de actualización no válido",
       "adminRoleRequired": "Se requiere rol de administrador",
       "missingPermission": "No tienes permiso para acceder a este recurso.",
       "sessionRevoked": "Tu sesión fue revocada. Por favor actualice su sesión."

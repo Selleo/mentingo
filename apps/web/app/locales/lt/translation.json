@@ -486,95 +486,95 @@
   },
   "liveTrainingView": {
     "title": "Tiesioginiai mokymai",
-    "description": "This page will contain the full Tiesioginiai mokymai workspace.",
+    "description": "Šiame puslapyje bus visa tiesioginių mokymų darbo erdvė.",
     "errors": {
-      "idRequired": "Tiesioginiai mokymai id is required."
+      "idRequired": "Būtinas tiesioginių mokymų ID."
     },
     "status": {
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "ended": "Ended",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
+      "scheduled": "Suplanuota",
+      "active": "Aktyvu",
+      "ended": "Baigta",
+      "cancelled": "Atšaukta",
+      "expired": "Nebegalioja"
     },
     "deliveryType": {
-      "online": "Online",
-      "offline": "In-person"
+      "online": "Internetu",
+      "offline": "Gyvai"
     },
     "visibility": {
-      "all": "All users",
-      "linked_courses": "Linked courses"
+      "all": "Visi vartotojai",
+      "linked_courses": "Susieti kursai"
     },
     "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "start": "Start session",
-      "join": "Join session",
-      "finish": "Finish session"
+      "edit": "Redaguoti",
+      "delete": "Ištrinti",
+      "start": "Pradėti sesiją",
+      "join": "Prisijungti prie sesijos",
+      "finish": "Baigti sesiją"
     },
     "stage": {
-      "preview": "Session preview",
-      "activeTitle": "Live session is active",
-      "waitingTitle": "Session is waiting",
-      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
-      "activeBadge": "Active",
-      "waitingBadge": "Waiting",
-      "participants": "Participants",
-      "viewerMic": "Viewer microphone",
-      "viewerCamera": "Viewer camera",
-      "scheduleTooltip": "Planned training time",
-      "timezoneTooltip": "Training timezone",
-      "maxParticipantsTooltip": "Maximum participants",
-      "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "preview": "Sesijos peržiūra",
+      "activeTitle": "Tiesioginė sesija aktyvi",
+      "waitingTitle": "Sesija laukia",
+      "runtimeDeferred": "Susitikimo vykdymo laikas bus prijungtas vėliau. Medijos įrenginiai nebus paleisti iš šios peržiūros.",
+      "activeBadge": "Aktyvu",
+      "waitingBadge": "Laukiama",
+      "participants": "Dalyviai",
+      "viewerMic": "Žiūrovo mikrofonas",
+      "viewerCamera": "Žiūrovo kamera",
+      "scheduleTooltip": "Planuojamas mokymų laikas",
+      "timezoneTooltip": "Mokymų laiko juosta",
+      "maxParticipantsTooltip": "Maksimalus dalyvių skaičius",
+      "locationTooltip": "Mokymų vieta",
+      "offlineTitle": "Mokymai gyvai",
+      "locationMissing": "Vieta nenustatyta"
     },
     "sidebar": {
-      "lifecycle": "Session lifecycle",
-      "status": "Status",
-      "participants": "Participants",
-      "peak": "Peak",
-      "people": "People",
-      "author": "Author",
-      "host": "Host",
-      "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
-      "trainer": "Trainer",
-      "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
-      "unknownUser": "Unknown user",
-      "details": "Training details",
-      "maxParticipants": "Max participants",
-      "visibility": "Visibility",
-      "courses": "Linked courses",
-      "location": "Location",
-      "addHost": "Add",
-      "addHostHint": "Add host",
-      "removeHost": "Remove host {{name}}",
-      "addTrainer": "Add",
-      "addTrainerHint": "Add trainer",
-      "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people",
-      "noUserResults": "No users found",
-      "loadingUsers": "Loading users",
-      "loadMoreUsers": "Load more"
+      "lifecycle": "Sesijos gyvavimo ciklas",
+      "status": "Būsena",
+      "participants": "Dalyviai",
+      "peak": "Pikas",
+      "people": "Žmonės",
+      "author": "Autorius",
+      "host": "Vedėjas",
+      "hosts": "Vedėjai",
+      "noHosts": "Nepriskirtas joks vedėjas",
+      "trainer": "Treneris",
+      "trainers": "Treneriai",
+      "noTrainers": "Nepriskirtas joks treneris",
+      "unknownUser": "Nežinomas vartotojas",
+      "details": "Mokymų informacija",
+      "maxParticipants": "Maks. dalyvių",
+      "visibility": "Matomumas",
+      "courses": "Susieti kursai",
+      "location": "Vieta",
+      "addHost": "Pridėti",
+      "addHostHint": "Pridėti vedėją",
+      "removeHost": "Pašalinti vedėją {{name}}",
+      "addTrainer": "Pridėti",
+      "addTrainerHint": "Pridėti trenerį",
+      "removeTrainer": "Pašalinti trenerį {{name}}",
+      "searchPeople": "Ieškoti žmonių",
+      "noUserResults": "Vartotojų nerasta",
+      "loadingUsers": "Įkeliami vartotojai",
+      "loadMoreUsers": "Įkelti daugiau"
     },
     "tabs": {
-      "overview": "Overview",
-      "files": "Files",
-      "sessions": "Sessions",
-      "settings": "Settings"
+      "overview": "Apžvalga",
+      "files": "Failai",
+      "sessions": "Sesijos",
+      "settings": "Nustatymai"
     },
     "files": {
-      "title": "Tiesioginiai mokymai files",
-      "description": "Materials are split by when students should use them.",
-      "beforeHeading": "Before training",
-      "beforeDescription": "Materials available before the training starts.",
-      "afterHeading": "After training",
-      "afterDescription": "Materials available after the training is finished.",
-      "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Pridėti failą",
+      "title": "Tiesioginių mokymų failai",
+      "description": "Medžiaga skirstoma pagal tai, kada studentai turėtų ja naudotis.",
+      "beforeHeading": "Prieš mokymus",
+      "beforeDescription": "Medžiaga pasiekiama prieš prasidedant mokymams.",
+      "afterHeading": "Po mokymų",
+      "afterDescription": "Medžiaga pasiekiama pasibaigus mokymams.",
+      "empty": "Dar nepridėta jokių failų.",
+      "afterLocked": "Medžiaga bus atrakinta pasibaigus mokymams.",
+      "addFile": "Įkelkite failą arba nutempkite jį čia",
       "download": "Atsisiųsti",
       "removeFile": "Pašalinti {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -584,108 +584,102 @@
       }
     },
     "meeting": {
-      "previewLabel": "Live sesija",
+      "previewLabel": "Tiesioginė sesija",
       "waitingTitle": "Sesija paruošta prisijungti",
       "activeTitle": "Sesija aktyvi",
-      "inSession": "Sesijoje",
-      "roomTitle": "Live kambarys",
+      "inSession": "Vyksta sesija",
+      "roomTitle": "Tiesioginis kambarys",
       "participants_one": "{{count}} dalyvis",
-      "participants_few": "{{count}} dalyviai",
-      "participants_many": "{{count}} dalyvių",
-      "participants_other": "{{count}} dalyvių",
+      "participants_other": "{{count}} dalyviai",
       "microphone": "Mikrofonas",
       "camera": "Kamera",
-      "screenShare": "Bendrinti ekraną",
+      "screenShare": "Dalintis ekranu",
       "screen": "Ekranas",
-      "presentOnStage": "Rodyti scenoje",
+      "presentOnStage": "Pristatyti scenoje",
       "leave": "Išeiti",
-      "finish": "Finish session",
-      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finish": "Baigti sesiją",
+      "sessionEndedToast": "Jūsų sesija {{trainingName}} baigėsi",
       "finishDialog": {
-        "title": "Finish session?",
-        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
-        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
-        "cancel": "Cancel",
-        "confirmEnd": "Finish session",
-        "confirmLeave": "Leave session"
+        "title": "Baigti sesiją?",
+        "lastHostDescription": "Esate vienintelis šio kambario vedėjas. Jums išėjus, sesija baigsis visiems.",
+        "otherHostsDescription": "Šiame kambaryje dar yra kitų vedėjų. Galite išeiti, o sesija tęsis.",
+        "cancel": "Atšaukti",
+        "confirmEnd": "Baigti sesiją",
+        "confirmLeave": "Išeiti iš sesijos"
       },
-      "empty": "Laukiama dalyvių.",
+      "empty": "Laukiama dalyvių",
       "materials": "Medžiaga",
       "beforeMaterials": "Prieš",
       "afterMaterials": "Po",
-      "noMaterials": "Failų nėra"
+      "noMaterials": "Nėra failų"
     },
     "sessions": {
-      "title": "Sessions",
-      "description": "Each started session is stored separately with its attendance.",
-      "empty": "No sessions have been started yet.",
-      "activeParticipants_one": "{{count}} active participant",
-      "activeParticipants_few": "{{count}} active participants",
-      "activeParticipants_many": "{{count}} active participants",
-      "activeParticipants_other": "{{count}} active participants",
-      "uniqueParticipants_one": "{{count}} unique participant",
-      "uniqueParticipants_few": "{{count}} unique participants",
-      "uniqueParticipants_many": "{{count}} unique participants",
-      "uniqueParticipants_other": "{{count}} unique participants",
-      "peakParticipants": "Peak {{count}}",
-      "startedBy": "Started by",
-      "endedBy": "Ended by",
-      "notEnded": "Not ended",
+      "title": "Sesijos",
+      "description": "Kiekviena pradėta sesija saugoma atskirai su lankomumo duomenimis.",
+      "empty": "Dar nepradėta jokia sesija.",
+      "activeParticipants_one": "{{count}} aktyvus dalyvis",
+      "activeParticipants_other": "{{count}} aktyvūs dalyviai",
+      "uniqueParticipants_one": "{{count}} unikalus dalyvis",
+      "uniqueParticipants_other": "{{count}} unikalūs dalyviai",
+      "peakParticipants": "Pikas {{count}}",
+      "startedBy": "Pradėjo",
+      "endedBy": "Baigė",
+      "notEnded": "Nebaigta",
       "notAvailable": "N/A",
-      "endReason": "End reason",
-      "noEndReason": "No end reason",
+      "endReason": "Pabaigos priežastis",
+      "noEndReason": "Nėra pabaigos priežasties",
       "status": {
-        "waiting": "Waiting",
-        "active": "Active",
-        "ended": "Ended",
-        "failed": "Failed"
+        "waiting": "Laukiama",
+        "active": "Aktyvi",
+        "ended": "Baigta",
+        "failed": "Nepavyko"
       },
       "roles": {
-        "host": "Host",
-        "co_trainer": "Co-trainer",
-        "moderator": "Moderator",
-        "observer": "Observer",
-        "admin": "Admin"
+        "host": "Vedėjas",
+        "co_trainer": "Kotreneris",
+        "moderator": "Moderatorius",
+        "observer": "Stebėtojas",
+        "admin": "Administratorius"
       },
       "attendance": {
-        "empty": "No attendance has been recorded for this session yet.",
-        "user": "User",
-        "role": "Role",
-        "totalTime": "Time attended",
-        "firstJoinedAt": "First joined",
-        "lastLeftAt": "Last left",
-        "joinCount": "Joins"
+        "empty": "Šiai sesijai lankomumas dar neužregistruotas.",
+        "user": "Vartotojas",
+        "role": "Rolė",
+        "totalTime": "Dalyvavimo laikas",
+        "firstJoinedAt": "Pirmą kartą prisijungė",
+        "lastLeftAt": "Paskutinį kartą išėjo",
+        "joinCount": "Prisijungimai"
       },
       "toast": {
-        "started": "Sesija pradėta.",
-        "ended": "Sesija baigta."
+        "started": "Sesija prasidėjo.",
+        "ended": "Sesija baigėsi."
       }
     },
     "attendance": {
-      "title": "Attendance",
-      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+      "title": "Lankomumas",
+      "description": "Lankomumo ir dalyvių intervalai bus įgyvendinti vykdymo metu."
     },
     "settings": {
-      "title": "Settings",
-      "description": "Less frequently used session settings will live here."
+      "title": "Nustatymai",
+      "description": "Čia bus rečiau naudojami sesijos nustatymai."
     },
     "boolean": {
-      "yes": "Yes",
-      "no": "No"
+      "yes": "Taip",
+      "no": "Ne"
     },
     "deleteDialog": {
-      "title": "Ištrinti Tiesioginiai mokymai?",
-      "description": "Tiesioginiai mokymai bus atšauktas ir pašalintas iš kalendoriaus. Šio veiksmo anuliuoti nepavyks.",
-      "assignedToLessonsDescription": "Šis Tiesioginiai mokymai susietas su {{count}} pamoka. Pirmiausia ištrinkite susijusią pamoką, tada Tiesioginiai mokymai.",
-      "assignedToLessonsDescription_plural": "Šis Tiesioginiai mokymai susietas su {{count}} pamokomis. Pirmiausia ištrinkite susijusias pamokas, tada Tiesioginiai mokymai.",
+      "title": "Ištrinti tiesioginius mokymus?",
+      "description": "Tai atšauks tiesioginius mokymus ir pašalins juos iš kalendoriaus. Šio veiksmo anuliuoti negalima.",
+      "assignedToLessonsDescription": "Šie tiesioginiai mokymai susieti su {{count}} pamoka. Prieš ištrindami tiesioginius mokymus, pirmiausia ištrinkite susietą pamoką.",
+      "assignedToLessonsDescription_plural": "Šie tiesioginiai mokymai susieti su {{count}} pamokomis. Prieš ištrindami tiesioginius mokymus, pirmiausia ištrinkite susietas pamokas.",
       "toast": {
-        "success": "Tiesioginiai mokymai ištrintas."
+        "success": "Tiesioginiai mokymai sėkmingai ištrinti."
       }
     },
     "edit": {
       "saveChanges": "Išsaugoti pakeitimus",
       "toast": {
-        "success": "Tiesioginiai mokymai atnaujintas."
+        "success": "Tiesioginiai mokymai sėkmingai atnaujinti."
       }
     }
   },
@@ -904,6 +898,19 @@
       "noPartiallyConfigured": "Nėra iš dalies sukonfigūruotų paslaugų.",
       "allConfigured": "Visi aplinkos raktai sukonfigūruoti teisingai.",
       "dismissWarning": "Atsisakyti",
+      "aiCapabilities": {
+        "title": "AI galimybės",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Kursų generavimas",
+          "assetGeneration": "Assetų generavimas"
+        },
+        "status": {
+          "enabled": "Įjungta",
+          "disabled": "Išjungta"
+        }
+      },
       "serviceNames": {
         "stripe": "Mokėjimas juostelėmis",
         "bunny": "Bunny CDN",
@@ -979,6 +986,11 @@
       "passwordCreatedSuccessfully": "Slaptažodis sukurtas sėkmingai"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Pakeiskite slaptažodį",
+    "subHeader": "Saugumo sumetimais prieš tęsdami turite nustatyti naują slaptažodį.",
+    "submit": "Pakeisti slaptažodį"
+  },
   "passwordValidationDisplay": {
     "title": "Slaptažodžio reikalavimai",
     "header": "Jūsų slaptažodyje turi būti:",
@@ -1045,7 +1057,9 @@
       "passwordResetEmailsSent": "Slaptažodžio atkūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
       "passwordResetEmailsError": "Nepavyko išsiųsti slaptažodžio atkūrimo el. laiškų",
       "passwordCreationEmailsSent": "Slaptažodžio sukūrimo el. laiškai išsiųsti: {{sentCount}}. Praleista: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nepavyko išsiųsti slaptažodžio sukūrimo el. laiškų"
+      "passwordCreationEmailsError": "Nepavyko išsiųsti slaptažodžio sukūrimo el. laiškų",
+      "passwordEmailsSent": "Slaptažodžio el. laiškai išsiųsti: {{sentCount}}. Atkūrimas: {{passwordResetSentCount}}. Sukūrimas: {{passwordCreationSentCount}}. Praleista: {{skippedCount}}.",
+      "passwordEmailsError": "Nepavyko išsiųsti slaptažodžio el. laiškų"
     },
     "field": {
       "description": "Aprašymas",
@@ -1243,7 +1257,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kursas sėkmingai ištrintas",
       "deleteCourseFailed": "Nepavyko ištrinti kurso",
-      "deletePublishedCourseFailed": "Negalima ištrinti paskelbto kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
+      "deleteProtectedCourseFailed": "Negalima ištrinti paskelbto ar privataus kurso. Pirmiausia nustatykite jo būseną į juodraštį.",
       "bulkCategoryUpdateSuccessfully": "Kursų kategorijos sėkmingai atnaujintos",
       "bulkCategoryUpdateFailed": "Nepavyko atnaujinti kursų kategorijų",
       "bulkCategoryUpdateForbidden": "Neturite teisės atnaujinti vieno ar daugiau pasirinktų kursų.",
@@ -1463,6 +1477,7 @@
     "dropdown": {
       "roles": "Vaidmenys",
       "groups": "Grupės",
+      "passwordEmail": "Siųsti slaptažodžio el. laišką",
       "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
       "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
       "delete": "Ištrinti",
@@ -1473,6 +1488,7 @@
         "delete": "Ar norite ištrinti šias paskyras?",
         "role": "Keisti vaidmenis",
         "group": "Keisti grupes",
+        "passwordEmail": "Siųsti slaptažodžio el. laišką",
         "passwordReset": "Siųsti slaptažodžio atkūrimo el. laišką",
         "passwordCreation": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką",
         "archive": "Archyvuokite vartotojų paskyras",
@@ -1484,6 +1500,7 @@
         "delete": "Ištrinti",
         "role": "Išsaugoti",
         "group": "Išsaugoti",
+        "passwordEmail": "Siųsti",
         "passwordReset": "Siųsti",
         "passwordCreation": "Siųsti",
         "archive": "Archyvas",
@@ -1496,6 +1513,7 @@
         "confirmationForGroup_other": "Jūs pakeisite grupę į {{ group }} {{ count }} naudotojams",
         "confirmationForRole_one": "1 naudotojo vaidmenį pakeisite į {{ role }}.",
         "confirmationForRole_other": "{{ count }} naudotojų vaidmenį pakeisite į {{ role }}",
+        "passwordEmail": "Siųskite slaptažodžio el. laiškus pasirinktiems naudotojams. Naudotojai su esamais slaptažodžiais gaus slaptažodžio atkūrimo el. laiškus, o naudotojai be slaptažodžių gaus slaptažodžio sukūrimo el. laiškus.",
         "passwordReset": "Siųskite slaptažodžio atkūrimo el. laiškus pasirinktiems naudotojams su esamais slaptažodžiais. Naudotojai be slaptažodžių bus praleisti.",
         "passwordCreation": "Pakartotinai siųskite slaptažodžio sukūrimo el. laiškus pasirinktiems naudotojams be slaptažodžių. Naudotojai su esamais slaptažodžiais bus praleisti.",
         "archive": "Ar tikrai norite archyvuoti šias paskyras?",
@@ -1570,6 +1588,7 @@
     },
     "button": {
       "createUser": "Sukurti vartotoją",
+      "passwordEmail": "Siųsti slaptažodžio el. laišką",
       "passwordResetEmail": "Siųsti slaptažodžio atkūrimo el. laišką",
       "passwordCreationEmail": "Pakartotinai siųsti slaptažodžio sukūrimo el. laišką"
     },
@@ -2234,7 +2253,7 @@
           "fillInTheBlanksText": "Spragų užpildymas (tekstas)",
           "briefResponse": "Trumpas atsakymas",
           "detailedResponse": "Laisvas tekstas",
-          "scale1_5": "Skalė nuo 1 iki 5",
+          "scale_1_5": "Skalė nuo 1 iki 5",
           "selectQuestionType": "Pasirinkite klausimo tipą",
           "contentLessonDescription": "Tekstas su multimedija (vaizdai, vaizdo įrašai, pristatymai).",
           "quizLessonDescription": "Klausimų rinkinys žinioms patikrinti.",
@@ -2260,7 +2279,8 @@
           "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
           "completionConditionsTooltip": "Išvardykite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką. Pateikite aiškius ir išmatuojamus taškus. AI naudos šį sąrašą pažangai patikrinti. Taip pat galite nustatyti išlaikymo slenkstį (pvz., procentą arba minimalų taškų skaičių). Jei slenkstis nenurodytas, turi būti įvykdytos visos sąlygos, norint išlaikyti pamoką.",
           "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
-          "voiceConfigFishAudioTooltip": "Balso režimas naudoja „Cartesia“. Norėdami naudoti pasirinktinį balsą, atidarykite „Cartesia“, raskite norimą balsą ir nukopijuokite jo balso ID čia.",
+          "voiceConfigCartesiaTooltip": "Balso garsas naudoja Cartesia. Pasirinkite Male arba Female, kad būtų naudojamas sukonfigūruotas balsų susiejimas, arba pasirinkite Custom ir įveskite Cartesia balso ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Balso garsas naudoja su OpenAI suderinamą teksto į kalbą endpointą. Male ir Female naudoja OpenAI balso presetus. Pasirinkite Custom, jei norite įvesti kitą šio endpointo palaikomą balso reikšmę.",
           "aiMentorPersonaTooltip": "Tai apibrėžia pamokos asmenybę. Galite pasirinkti AI mentoriaus vardą ir pseudoportretą. Asmuo atpažins save šiuo vardu, o pasirinktas avataras bus rodomas pamokų metu.",
           "suggestedExamples": "Siūlomi pavyzdžiai",
           "charactersLeft": "liko simbolių",
@@ -2698,7 +2718,8 @@
       "passingThreshold": "Išlaikymo slenkstis: {{threshold}} % ({{correct}} iš {{questionsNumber}} klausimų)",
       "score": "Rezultatas: {{score}}% ({{correct}} iš {{questionsNumber}} klausimų)",
       "contentCantBeEmbedded": "Šio turinio negalima įterpti.",
-      "openInNewTab": "Atidaryti naujame skirtuke"
+      "openInNewTab": "Atidaryti naujame skirtuke",
+      "scale_1_5": "Domanda di tipo scala (1–5)"
     },
     "aiMentor": {
       "title": "AI mentoriaus sesija",
@@ -2734,6 +2755,10 @@
       "body": "Šiek tiek palaukite. Jis pasirodys čia, kai bus paruoštas."
     },
     "videoProgress": {
+      "label": "Vaizdo įrašų eiga",
+      "completedSummary": "Užbaigta {{completed}} iš {{total}}",
+      "overviewAriaLabel": "Pamokos vaizdo įrašų eiga",
+      "segmentAriaLabel": "{{index}} vaizdo įrašo eiga: peržiūrėta {{progress}}%",
       "errors": {
         "resourceNotFound": "Nepavyko išsaugoti šios pamokos vaizdo įrašo pažangos.",
         "unsupportedLessonType": "Vaizdo įrašo pažanga pasiekiama tik turinio pamokoms.",
@@ -2852,6 +2877,7 @@
         },
         "voiceOverlay": {
           "headerEyebrow": "Balso vartotojo sąsaja",
+          "options": "Parinktys",
           "exit": "Išeikite iš balso režimo",
           "mute": "Nutildyti",
           "unmute": "Įjungti mikrofoną",
@@ -3328,12 +3354,18 @@
       "error": "Klaida keičiant prisijungimo fono paveikslėlį"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Failo apdoroti nepavyko. Pabandykite kitą failą arba įkelkite jį dar kartą.",
+      "noExtractableText": "Iš šio failo nepavyko išgauti skaitomo teksto."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Failo įkėlimas nepavyko – neteisingi failo duomenys",
       "fileEmpty": "Failo įkėlimas nepavyko – failas tuščias",
       "contentTypeMismatch": "Failo turinio tipas neatitinka pateikto turinio tipo",
-      "invalidFileType": "Neteisingas failo tipas. Įkelkite PNG arba SVG failą.",
+      "invalidFileType": "Neteisingas failo tipas.",
       "missingTenantContext": "Trūksta organizacijos konteksto failo įkėlimui",
       "presentationFileTooLarge": "Pateiktis yra per didelė. Įkelkite pateiktį iki {{size}} {{unit}}."
     },
@@ -4351,6 +4383,7 @@
     "error": {
       "unauthenticated": "Vartotojas neatpažintas",
       "invalidEmailOrPassword": "Neteisingas el. pašto adresas arba slaptažodis",
+      "invalidRefreshToken": "Netinkamas atnaujinimo prieigos raktas",
       "adminRoleRequired": "Reikalingas administratoriaus vaidmuo",
       "missingPermission": "Neturite leidimo pasiekti šio šaltinio",
       "sessionRevoked": "Jūsų sesija buvo atšaukta. Atnaujinkite sesiją."

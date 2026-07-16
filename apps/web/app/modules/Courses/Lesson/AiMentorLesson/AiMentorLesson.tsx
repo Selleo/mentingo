@@ -1,5 +1,7 @@
-import { type Message, useChat } from "@ai-sdk/react";
+import { useChat, type UIMessage } from "@ai-sdk/react";
 import { useParams } from "@remix-run/react";
+import { createTextUiMessage, getUiMessageText, toUiMessageRole } from "@repo/shared";
+import { DefaultChatTransport } from "ai";
 import { BookOpen, CheckCircle2, ClipboardCheck, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -53,9 +55,9 @@ const taskDescriptionViewerClassName =
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
   Boolean(
     evaluation &&
-      (typeof evaluation.passed === "boolean" ||
-        evaluation.score != null ||
-        evaluation.summary?.trim().length),
+    (typeof evaluation.passed === "boolean" ||
+      evaluation.score != null ||
+      evaluation.summary?.trim().length),
   );
 
 interface AiMentorLessonProps {
@@ -63,6 +65,7 @@ interface AiMentorLessonProps {
   lessonLoading: boolean;
   previewUser?: LessonPreviewUser;
   hideControls?: boolean;
+  autoOpenTaskDescription?: boolean;
 }
 
 const AiMentorLesson = ({
@@ -70,6 +73,7 @@ const AiMentorLesson = ({
   lessonLoading,
   previewUser,
   hideControls = false,
+  autoOpenTaskDescription = true,
 }: AiMentorLessonProps) => {
   const { t } = useTranslation();
   const { courseId = "" } = useParams();
@@ -89,52 +93,67 @@ const AiMentorLesson = ({
   const [showEvaluationDialog, setShowEvaluationDialog] = useState(false);
   const [showTaskDialog, setShowTaskDialog] = useState(false);
   const [latestEvaluation, setLatestEvaluation] = useState<AiMentorEvaluation | null>(null);
+  const [input, setInput] = useState("");
+  const taskDialogLessonIdRef = useRef<string | null>(null);
 
-  const { messages, input, setMessages, handleInputChange, handleSubmit, status, setInput } =
-    useChat({
-      api: chatUrl,
-      body: {
-        threadId: lesson.threadId ?? "",
-      },
-      fetch: async (url, options) => {
-        const body = JSON.parse(options?.body as string);
-        return fetch(url, {
-          ...options,
-          body: JSON.stringify({
-            content: body.messages[body.messages.length - 1]?.content || "",
-            threadId: lesson.threadId ?? "",
-          }),
-          credentials: "include",
-        });
-      },
-      onFinish: async () => {
-        if (!lesson.threadId) return;
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport<UIMessage>({
+        api: chatUrl,
+        credentials: "include",
+        prepareSendMessagesRequest: ({ messages }) => {
+          const message = messages[messages.length - 1];
 
-        await queryClient.invalidateQueries({
-          queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
-        });
-        await queryClient.invalidateQueries({
-          queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
-        });
-      },
-    });
+          return {
+            body: {
+              threadId: lesson.threadId ?? "",
+              message,
+            },
+            credentials: "include",
+          };
+        },
+      }),
+    [lesson.threadId],
+  );
+
+  const { messages, setMessages, sendMessage, status } = useChat({
+    transport,
+    onFinish: async () => {
+      if (!lesson.threadId) return;
+
+      await queryClient.invalidateQueries({
+        queryKey: [COURSE_STUDENTS_AI_MENTOR_RESULTS_QUERY_KEY, { id: courseId }],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: getCurrentThreadMessagesQueryKey(lesson.threadId),
+      });
+    },
+  });
 
   useEffect(() => {
-    setMessages((currentThreadMessages?.data as Message[]) || []);
+    setMessages(
+      currentThreadMessages?.data.map((message) =>
+        createTextUiMessage<UIMessage>({
+          id: message.id,
+          role: toUiMessageRole<UIMessage["role"]>(message.role),
+          content: message.content,
+        }),
+      ) ?? [],
+    );
   }, [currentThreadMessages, setMessages]);
 
   const appendVoiceMessage = useCallback(
-    (role: Message["role"], content: string) => {
+    (role: UIMessage["role"], content: string) => {
       const nextContent = content.trim();
       if (!nextContent) {
         return;
       }
 
-      const nextMessage: Message = {
+      const nextMessage = createTextUiMessage<UIMessage>({
         id: `voice-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
         role,
         content: nextContent,
-      };
+      });
 
       setMessages((prev) => [...prev, nextMessage]);
     },
@@ -151,6 +170,21 @@ const AiMentorLesson = ({
     });
   }, [lesson.threadId]);
 
+  const handleInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement>) => {
+      setInput(event.target.value);
+    },
+    [],
+  );
+
+  const handleSubmit = useCallback(() => {
+    const message = input.trim();
+    if (!message || !lesson.threadId) return;
+
+    setInput("");
+    void sendMessage({ text: message });
+  }, [input, lesson.threadId, sendMessage]);
+
   const handleVoiceMentorTranscription = useCallback(
     (text: string) => {
       appendVoiceMessage("user", text);
@@ -165,12 +199,12 @@ const AiMentorLesson = ({
     [appendVoiceMessage],
   );
 
-  const handleJudge = async () => {
+  const handleJudge = useCallback(async () => {
     if (!lesson.threadId) return;
     const response = await judgeLesson({ threadId: lesson.threadId });
     setLatestEvaluation(response.data);
     setShowEvaluationDialog(true);
-  };
+  }, [judgeLesson, lesson.threadId]);
 
   const handleRetakeLesson = async () => {
     if (!lesson.threadId) return;
@@ -190,9 +224,10 @@ const AiMentorLesson = ({
   const hasTaskDescription = Boolean(
     lesson.description && stripHtmlTags(lesson.description).trim().length,
   );
+  const isLessonCompleted = lesson.lessonCompleted === true;
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
-    lastMessage?.role === "assistant" && String(lastMessage.content ?? "").trim().length > 0;
+    lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
   const showChatLoader = (isProcessing && !hasStreamingAssistantText) || isJudgePending;
   const persistedEvaluation = useMemo<AiMentorEvaluation | null>(() => {
     if (!lesson.aiMentorDetails) return null;
@@ -203,6 +238,8 @@ const AiMentorLesson = ({
   }, [lesson.aiMentorDetails]);
   const evaluation = latestEvaluation ?? persistedEvaluation;
   const shouldShowEvaluation = hasEvaluationData(evaluation);
+  const shouldAutoOpenTaskDescription =
+    !isLessonCompleted && !shouldShowEvaluation && hasTaskDescription;
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -211,6 +248,24 @@ const AiMentorLesson = ({
 
     container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (!shouldAutoOpenTaskDescription) setShowTaskDialog(false);
+  }, [shouldAutoOpenTaskDescription]);
+
+  useEffect(() => {
+    if (
+      !autoOpenTaskDescription ||
+      lessonLoading ||
+      !shouldAutoOpenTaskDescription ||
+      taskDialogLessonIdRef.current === lesson.id
+    ) {
+      return;
+    }
+
+    taskDialogLessonIdRef.current = lesson.id;
+    setShowTaskDialog(true);
+  }, [autoOpenTaskDescription, lesson.id, lessonLoading, shouldAutoOpenTaskDescription]);
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -235,9 +290,13 @@ const AiMentorLesson = ({
             onOpenChange={setShowEvaluationDialog}
           />
         )}
-        {!lessonLoading && hasTaskDescription && (
+        {hasTaskDescription && !lessonLoading && (
           <Dialog open={showTaskDialog} onOpenChange={setShowTaskDialog}>
-            <DialogContent className="flex max-h-[82vh] max-w-2xl flex-col gap-0 overflow-hidden p-0">
+            <DialogContent
+              variant="mobileDrawer"
+              data-testid={LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG}
+              className="flex flex-col sm:!max-w-2xl"
+            >
               <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
                 <DialogTitle className="text-lg font-semibold text-neutral-950">
                   {t("studentCourseView.lesson.aiMentorLesson.taskButton")}
@@ -325,15 +384,17 @@ const AiMentorLesson = ({
           className="flex w-full grow max-w-full relative flex-col gap-y-4 overflow-y-scroll"
         >
           {!lessonLoading &&
-            messages.map((messages, idx) => (
+            messages.map((message, idx) => (
               <ChatMessage
                 key={idx}
                 aiName={lesson.aiMentor?.name || ""}
                 avatarUrl={lesson.aiMentor?.avatarReferenceUrl}
                 previewUser={previewUser}
-                testId={LEARNING_HANDLES.aiMentorMessage(messages.id)}
-                contentTestId={LEARNING_HANDLES.aiMentorMessageRole(messages.role)}
-                {...messages}
+                testId={LEARNING_HANDLES.aiMentorMessage(message.id)}
+                contentTestId={LEARNING_HANDLES.aiMentorMessageRole(message.role)}
+                id={message.id}
+                role={message.role}
+                parts={message.parts}
               />
             ))}
 
@@ -357,12 +418,14 @@ const AiMentorLesson = ({
             onMentorResponseCompleted={handleVoiceMentorResponseCompleted}
             onAudioInterrupted={invalidateCurrentThreadMessages}
             onAudioOutputCompleted={invalidateCurrentThreadMessages}
+            onJudge={handleJudge}
+            isJudgePending={isJudgePending}
             handleInputChange={handleInputChange}
             messages={messages}
             input={input}
             setInput={setInput}
             hasTaskDescription={hasTaskDescription}
-            onOpenTaskDescription={() => setShowTaskDialog(true)}
+            taskDescription={lesson.description ?? ""}
           />
         )}
 
@@ -376,7 +439,7 @@ const AiMentorLesson = ({
                   variant="primary"
                   size="lg"
                   className="max-w-fit gap-2"
-                  onClick={handleJudge}
+                  onClick={() => void handleJudge()}
                 >
                   {t("studentCourseView.lesson.aiMentorLesson.check")}
                   <Icon name="ArrowRight" className="size-5" />

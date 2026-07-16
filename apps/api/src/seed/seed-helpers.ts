@@ -12,20 +12,26 @@ import { and, eq, sql } from "drizzle-orm/sql";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
+import { SearchIndexRepository } from "src/global-search/search-index.repository";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
   aiMentorLessons,
+  articles,
   categories,
   chapters,
   courses,
+  learningPaths,
   lessons,
+  news,
   permissionRoleRuleSets,
   permissionRoles,
   permissionRuleSetPermissions,
   permissionRuleSets,
   permissionUserRoles,
   questionAnswerOptions,
+  questionsAndAnswers,
   questions,
   tenants,
 } from "src/storage/schema";
@@ -290,6 +296,50 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
     }
 
     await tx.execute(sql`SET CONSTRAINTS ALL IMMEDIATE`);
+  });
+}
+
+export async function refreshSeedSearchDocuments(db: DatabasePg, tenantId: UUIDType) {
+  await db.transaction(async (trx) => {
+    await trx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+
+    const searchIndexService = new SearchIndexService(new SearchIndexRepository(trx));
+
+    const [courseRows, lessonRows, learningPathRows, newsRows, articleRows, questionAnswerRows] =
+      await Promise.all([
+        trx.select({ id: courses.id }).from(courses).where(eq(courses.tenantId, tenantId)),
+        trx.select({ id: lessons.id }).from(lessons).where(eq(lessons.tenantId, tenantId)),
+        trx
+          .select({ id: learningPaths.id })
+          .from(learningPaths)
+          .where(eq(learningPaths.tenantId, tenantId)),
+        trx.select({ id: news.id }).from(news).where(eq(news.tenantId, tenantId)),
+        trx.select({ id: articles.id }).from(articles).where(eq(articles.tenantId, tenantId)),
+        trx
+          .select({ id: questionsAndAnswers.id })
+          .from(questionsAndAnswers)
+          .where(eq(questionsAndAnswers.tenantId, tenantId)),
+      ]);
+
+    await Promise.all([
+      ...courseRows.map((course) => searchIndexService.refreshCourse(course.id, trx)),
+      searchIndexService.refreshLessons(
+        lessonRows.map((lesson) => lesson.id),
+        trx,
+      ),
+      ...learningPathRows.map((learningPath) =>
+        searchIndexService.refreshLearningPath(learningPath.id, trx),
+      ),
+      ...newsRows.map((newsRow) => searchIndexService.refreshNews(newsRow.id, trx)),
+      ...articleRows.map((article) => searchIndexService.refreshArticle(article.id, trx)),
+      ...questionAnswerRows.map((questionAnswer) =>
+        searchIndexService.refreshQA(questionAnswer.id, trx),
+      ),
+    ]);
+
+    console.log(
+      `🔎 Refreshed search documents for tenant ${tenantId}: ${courseRows.length} courses, ${lessonRows.length} lessons, ${learningPathRows.length} learning paths, ${newsRows.length} news, ${articleRows.length} articles, ${questionAnswerRows.length} Q&A entries`,
+    );
   });
 }
 

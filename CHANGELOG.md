@@ -1,3 +1,59 @@
+<a name="v4.15.0"></a>
+
+## [v4.15.0] - 14.07.2026
+
+### Features:
+
+- add an option to install the platform as an app (PWA) ([#1764](https://github.com/Selleo/mentingo/issues/1764))
+
+- add option to require password change on login ([#1763](https://github.com/Selleo/mentingo/issues/1763))
+
+- allow configuring local LLM providers ([#1754](https://github.com/Selleo/mentingo/issues/1754))
+
+- add progress bar showing video progression ([#1744](https://github.com/Selleo/mentingo/issues/1744))
+
+### Bug Fixes:
+
+- correct behavior of scale question type ([#1745](https://github.com/Selleo/mentingo/issues/1745))
+
+### Chores:
+
+- improve ai mentor user experience for students ([#1765](https://github.com/Selleo/mentingo/issues/1765))
+
+- allow uploading multiple files to the asset library at once ([#1755](https://github.com/Selleo/mentingo/issues/1755))
+
+- add an option to automatically translate AI mentor instructions and completion conditions using AI ([#1742](https://github.com/Selleo/mentingo/issues/1742))
+
+- improve the live training management experience for admins ([#1740](https://github.com/Selleo/mentingo/issues/1740))
+
+- improve activity logs for article language changes ([#1760](https://github.com/Selleo/mentingo/issues/1760))
+
+- improve resending password emails experience ([#1728](https://github.com/Selleo/mentingo/issues/1728))
+
+- add automatic database migrations during application startup ([#1684](https://github.com/Selleo/mentingo/issues/1684))
+
+- protect private courses from being deleted ([#1727](https://github.com/Selleo/mentingo/issues/1727))
+
+- improve global search with base language matching ([#1730](https://github.com/Selleo/mentingo/issues/1730))
+
+<a name="v4.14.1"></a>
+
+## [v4.14.1] - 06.07.2026
+
+### Bug Fixes:
+
+- video completion tracking for multilingual courses and for disabled tracking ([#1733](https://github.com/Selleo/mentingo/issues/1733))
+
+- correct fill-in-the-blank behavior when quiz feedback is hidden ([#1726](https://github.com/Selleo/mentingo/issues/1726))
+
+### Chores:
+
+- add a migration to backfill existing video lesson progress data ([#1734](https://github.com/Selleo/mentingo/issues/1734))
+
+### Documentation:
+
+- update changelog for version v4.14.1
+
 <a name="v4.14.0"></a>
 
 ## [v4.14.0] - 01.07.2026
@@ -55,6 +111,8 @@
 - allow users to have separate accounts with the same email across tenants ([#1665](https://github.com/Selleo/mentingo/issues/1665))
 
 ### Documentation:
+
+- update changelog for version v4.14.0
 
 - update deployment documentation with Docker log retention guidelines ([#1679](https://github.com/Selleo/mentingo/issues/1679))
 
@@ -3004,7 +3062,9 @@ Extend NotifyAdminsHandler to support both UserRegisteredEvent and UserPasswordC
 
 - add afterAll hook for cleaning up test context
 
-[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.14.0...HEAD
+[Unreleased]: https://github.com/Selleo/mentingo/compare/v4.15.0...HEAD
+[v4.15.0]: https://github.com/Selleo/mentingo/compare/v4.14.1...v4.15.0
+[v4.14.1]: https://github.com/Selleo/mentingo/compare/v4.14.0...v4.14.1
 [v4.14.0]: https://github.com/Selleo/mentingo/compare/v4.13.0...v4.14.0
 [v4.13.0]: https://github.com/Selleo/mentingo/compare/v4.12.1...v4.13.0
 [v4.12.1]: https://github.com/Selleo/mentingo/compare/v4.12.0...v4.12.1

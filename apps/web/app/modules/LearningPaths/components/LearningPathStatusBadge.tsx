@@ -11,9 +11,7 @@ import { useTranslation } from "react-i18next";
 import { Badge } from "~/components/ui/badge";
 
 type LearningPathStatusBadgeValue =
-  | LearningPathStatus
-  | LearningPathProgressStatus
-  | CourseProgressStatus;
+  LearningPathStatus | LearningPathProgressStatus | CourseProgressStatus;
 
 type LearningPathStatusBadgeProps = {
   status: LearningPathStatusBadgeValue;

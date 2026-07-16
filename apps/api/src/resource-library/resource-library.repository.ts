@@ -573,6 +573,8 @@ export class ResourceLibraryRepository {
       ([type, mimeTypes]) => sql`WHEN ${resources.contentType} IN ${mimeTypes} THEN ${type}`,
     );
 
-    return sql<ResourceLibraryAssetType>`CASE ${sql.join(whenClauses, sql` `)} ELSE ${RESOURCE_LIBRARY_ASSET_TYPE.OTHER} END`;
+    return sql<ResourceLibraryAssetType>`CASE ${sql.join(whenClauses, sql` `)} ELSE ${
+      RESOURCE_LIBRARY_ASSET_TYPE.OTHER
+    } END`;
   }
 }

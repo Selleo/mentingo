@@ -26,6 +26,7 @@ const markLessonCompletedInCache = (lessonId: string) => {
 
 export const syncLessonVideoCompletionQueries = async (lessonId: string) => {
   await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ["lessons"] }),
     queryClient.invalidateQueries({ queryKey: ["lessonProgress", lessonId] }),
     queryClient.invalidateQueries({ queryKey: ["certificates"] }),
     queryClient.invalidateQueries({ queryKey: ["certificate"] }),

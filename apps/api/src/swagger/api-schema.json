@@ -652,6 +652,23 @@
         }
       }
     },
+    "/api/settings/manifest.webmanifest": {
+      "get": {
+        "operationId": "SettingsController_getPwaManifest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPwaManifestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/registration-form": {
       "get": {
         "operationId": "SettingsController_getPublicRegistrationForm",
@@ -2193,6 +2210,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SendBulkPasswordResetEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/bulk/password-email": {
+      "post": {
+        "operationId": "UserController_sendBulkPasswordEmails",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkPasswordEmailsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendBulkPasswordEmailsResponse"
                 }
               }
             }
@@ -12276,6 +12320,72 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}": {
+      "patch": {
+        "operationId": "IntegrationController_updateTenant",
+        "summary": "Update tenant via integration API",
+        "description": "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTenantResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/deactivate": {
       "post": {
         "operationId": "IntegrationController_deactivateTenant",
@@ -16032,6 +16142,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16094,6 +16207,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -16174,6 +16288,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16236,6 +16353,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -16626,6 +16744,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16735,6 +16856,7 @@
               "roleSlugs",
               "permissions",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin",
               "isSupportMode",
@@ -16904,6 +17026,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16966,6 +17091,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17155,6 +17281,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -17217,6 +17346,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17476,6 +17606,72 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetPwaManifestResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "short_name": {
+            "type": "string"
+          },
+          "theme_color": {
+            "type": "string"
+          },
+          "background_color": {
+            "type": "string"
+          },
+          "display": {
+            "const": "standalone",
+            "type": "string"
+          },
+          "orientation": {
+            "const": "portrait",
+            "type": "string"
+          },
+          "start_url": {
+            "const": "/",
+            "type": "string"
+          },
+          "scope": {
+            "const": "/",
+            "type": "string"
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "sizes": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "sizes",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "short_name",
+          "theme_color",
+          "background_color",
+          "display",
+          "orientation",
+          "start_url",
+          "scope",
+          "icons"
         ]
       },
       "GetPublicRegistrationFormResponse": {
@@ -22412,6 +22608,52 @@
             "required": [
               "sentCount",
               "skippedCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SendBulkPasswordEmailsBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "SendBulkPasswordEmailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentCount": {
+                "type": "number"
+              },
+              "skippedCount": {
+                "type": "number"
+              },
+              "passwordResetSentCount": {
+                "type": "number"
+              },
+              "passwordCreationSentCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sentCount",
+              "skippedCount",
+              "passwordResetSentCount",
+              "passwordCreationSentCount"
             ]
           }
         },
@@ -28379,7 +28621,25 @@
             "type": "string"
           },
           "message": {
-            "type": "string"
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           }
         },
         "required": [
@@ -35639,9 +35899,26 @@
             "format": "uuid",
             "type": "string"
           },
-          "content": {
-            "minLength": 1,
-            "type": "string"
+          "message": {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           },
           "id": {
             "format": "uuid",
@@ -35650,7 +35927,7 @@
         },
         "required": [
           "threadId",
-          "content"
+          "message"
         ]
       },
       "JudgeThreadResponse": {
@@ -40093,12 +40370,25 @@
               },
               "voiceMentorEnabled": {
                 "type": "boolean"
+              },
+              "voiceTtsProvider": {
+                "anyOf": [
+                  {
+                    "const": "cartesia",
+                    "type": "string"
+                  },
+                  {
+                    "const": "openaiCompatible",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "enabled",
               "courseGenerationEnabled",
-              "voiceMentorEnabled"
+              "voiceMentorEnabled",
+              "voiceTtsProvider"
             ]
           }
         },
@@ -40179,6 +40469,50 @@
                   ]
                 }
               },
+              "aiCapabilities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "anyOf": [
+                        {
+                          "const": "aiMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "voiceMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "courseGeneration",
+                          "type": "string"
+                        },
+                        {
+                          "const": "assetGeneration",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "enabled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "disabled",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "status"
+                  ]
+                }
+              },
               "hasIssues": {
                 "type": "boolean"
               },
@@ -40190,6 +40524,7 @@
               "fullyConfigured",
               "partiallyConfigured",
               "notConfigured",
+              "aiCapabilities",
               "hasIssues",
               "isWarningDismissed"
             ]
@@ -45862,6 +46197,85 @@
         ]
       },
       "CreateTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateTenantBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "host": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "active",
+                "type": "string"
+              },
+              {
+                "const": "inactive",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateTenantResponse": {
         "type": "object",
         "properties": {
           "data": {

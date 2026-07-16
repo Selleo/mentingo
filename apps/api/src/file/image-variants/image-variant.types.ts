@@ -1,15 +1,24 @@
 import type {
-  IMAGE_QUALITY,
-  IMAGE_VARIANT_DEFINITIONS,
-  IMAGE_VARIANT_WIDTHS,
+  ALL_IMAGE_QUALITY_VALUES,
+  IMAGE_RESIZE_MODES,
   SUPPORTED_IMAGE_VARIANT_MIME_TYPES,
 } from "./image-variant.constants";
 
-export type ImageQuality = (typeof IMAGE_QUALITY)[keyof typeof IMAGE_QUALITY];
+export type ImageResizeMode = IMAGE_RESIZE_MODES;
 
-export type ImageVariantWidth = (typeof IMAGE_VARIANT_WIDTHS)[ImageQuality];
+export type ImageQuality = (typeof ALL_IMAGE_QUALITY_VALUES)[number];
 
-export type ImageVariantDefinition = (typeof IMAGE_VARIANT_DEFINITIONS)[number];
+export type ImageVariantWidth = number;
+
+export type ImageVariantDefinition<TQuality extends ImageQuality = ImageQuality> = {
+  quality: TQuality;
+  width: ImageVariantWidth;
+};
+
+export type ImageVariantCreationOptions = {
+  variantDefinitions?: readonly ImageVariantDefinition[];
+  resizeMode?: ImageResizeMode;
+};
 
 export type SupportedImageVariantMimeType = (typeof SUPPORTED_IMAGE_VARIANT_MIME_TYPES)[number];
 
@@ -27,7 +36,7 @@ export type ImageVariantBufferDetails = ImageVariantDetails & {
 export type ImageVariantMetadata = {
   originalWidth: number;
   originalHeight: number;
-  variants: Record<ImageQuality, ImageVariantDetails>;
+  variants: Partial<Record<ImageQuality, ImageVariantDetails>>;
 };
 
 export type ImageVariantUploadResult = {

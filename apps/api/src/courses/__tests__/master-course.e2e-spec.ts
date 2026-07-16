@@ -97,6 +97,7 @@ describe("Master course export and sync (e2e)", () => {
     getFileExists: jest.Mock;
     getFileStream: jest.Mock;
     isConfigured: jest.Mock;
+    listFileKeysByPrefix: jest.Mock;
     uploadStreamMultipart: jest.Mock;
   };
   let mockBunnyStreamService: {
@@ -130,6 +131,7 @@ describe("Master course export and sync (e2e)", () => {
         contentType: "video/mp4",
       }),
       isConfigured: jest.fn().mockReturnValue(true),
+      listFileKeysByPrefix: jest.fn().mockResolvedValue([]),
       uploadStreamMultipart: jest.fn().mockResolvedValue(undefined),
     };
     mockBunnyStreamService = {
@@ -251,6 +253,7 @@ describe("Master course export and sync (e2e)", () => {
       if (key.includes("/master-course/")) return false;
       return true;
     });
+    mockS3Service.listFileKeysByPrefix.mockResolvedValue([]);
     mockS3Service.isConfigured.mockReturnValue(true);
     mockBunnyStreamService.isConfigured.mockResolvedValue(false);
     mockBunnyStreamService.getMediaConfigurationSignature.mockResolvedValue("source-target-same");
@@ -672,6 +675,54 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
+  it("preserves the target course status when source updates are synced", async () => {
+    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const updatedTitle = "Updated Master Source Course";
+
+    await runAsTenant(targetTenantId, () =>
+      db.update(courses).set({ status: "published" }).where(eq(courses.id, targetCourseId)),
+    );
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .update(courses)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            en: updatedTitle,
+            pl: "Kurs zrodlowy master",
+          }),
+        })
+        .where(eq(courses.id, sourceCourseId)),
+    );
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId))
+      .limit(1);
+
+    expect(exportLink).toBeDefined();
+    await masterCourseService.processSyncJob({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+      triggerEventType: "UpdateCourseEvent",
+    });
+
+    const syncedTargetCourse = await runAsTenant(targetTenantId, async () => {
+      const [targetCourse] = await db
+        .select({ title: courses.title, status: courses.status })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId))
+        .limit(1);
+
+      return targetCourse;
+    });
+
+    expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.status).toBe("published");
+  });
+
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
     const { sourceCourseId, sourceCookie, targetCourseId } = await setupAndExport();
     const categoryTitle = `Bulk synced category ${faker.string.nanoid(8)}`;
@@ -759,6 +810,86 @@ describe("Master course export and sync (e2e)", () => {
     expect(links).toHaveLength(1);
   });
 
+  it("copies every missing course cover image variant when the target has a partial copy", async () => {
+    const sourceThumbnailReference = `${sourceTenantId}/course/variants/${faker.string.uuid()}.webp`;
+    const sourceStem = sourceThumbnailReference.replace(/\.webp$/, "");
+    const sourceVariantKeys = ["160w", "512w", "2560w"].map(
+      (quality) => `${sourceStem}-${quality}.webp`,
+    );
+
+    mockS3Service.listFileKeysByPrefix.mockImplementation(async (prefix: string) =>
+      prefix === `${sourceStem}-` ? sourceVariantKeys : [],
+    );
+
+    mockS3Service.getFileExists.mockImplementation(async (key: string) => {
+      if (!key.includes("/master-course/")) return false;
+      return key.endsWith("-512w.webp");
+    });
+
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceCourseId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          await db
+            .update(courses)
+            .set({ thumbnailS3Key: sourceThumbnailReference })
+            .where(eq(courses.id, sourceCourseId));
+        });
+      },
+    });
+
+    const [targetCourse] = await runAsTenant(targetTenantId, () =>
+      db
+        .select({ thumbnailS3Key: courses.thumbnailS3Key })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId))
+        .limit(1),
+    );
+
+    expect(targetCourse.thumbnailS3Key).toContain(`${targetTenantId}/master-course/`);
+    expect(targetCourse.thumbnailS3Key).toContain(`/${targetCourseId}/variants/`);
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.sourceCourseId, sourceCourseId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    expect(targetCourse.thumbnailS3Key).not.toContain(`/${exportLink.id}/`);
+    expect(mockS3Service.listFileKeysByPrefix).toHaveBeenCalledWith(`${sourceStem}-`);
+
+    const targetStem = targetCourse.thumbnailS3Key!.replace(/\.webp$/, "");
+    const targetVariantKeys = sourceVariantKeys.map(
+      (sourceVariantKey) => `${targetStem}${sourceVariantKey.slice(sourceStem.length)}`,
+    );
+
+    expect(new Set(targetVariantKeys).size).toBe(sourceVariantKeys.length);
+
+    for (const [index, sourceVariantKey] of sourceVariantKeys.entries()) {
+      const targetVariantKey = targetVariantKeys[index];
+
+      if (targetVariantKey.endsWith("-512w.webp")) {
+        expect(mockS3Service.copyFile).not.toHaveBeenCalledWith(
+          sourceVariantKey,
+          targetVariantKey,
+          "image/webp",
+        );
+        continue;
+      }
+
+      expect(mockS3Service.copyFile).toHaveBeenCalledWith(
+        sourceVariantKey,
+        targetVariantKey,
+        "image/webp",
+      );
+    }
+  });
+
   it("copies rich-text S3 resources, rewrites localized content, and reuses target resource rows on sync", async () => {
     const sourceResourceId = faker.string.uuid();
     const sourceReference = `course/${faker.string.uuid()}.png`;
@@ -825,7 +956,9 @@ describe("Master course export and sync (e2e)", () => {
       pl: "Opis obrazu zrodlowego",
     });
     expect(targetResource.reference).not.toBe(sourceReference);
-    expect(targetResource.reference).toContain(`${targetTenantId}/master-course/`);
+    expect(targetResource.reference).toContain(
+      `${targetTenantId}/master-course/${targetCourseId}/`,
+    );
     expect(targetResource.contentType).toBe("image/png");
     expect(targetResource.metadata).toEqual({
       originalFilename: "source-image.png",
@@ -851,7 +984,7 @@ describe("Master course export and sync (e2e)", () => {
     expect(targetLessonDescription.pl).not.toContain(sourceResourceId);
     expect(mockS3Service.copyFile).toHaveBeenCalledWith(
       sourceReference,
-      expect.stringContaining(`${targetTenantId}/master-course/`),
+      expect.stringContaining(`${targetTenantId}/master-course/${targetCourseId}/`),
       "image/png",
     );
 
@@ -1063,10 +1196,10 @@ describe("Master course export and sync (e2e)", () => {
     );
     expect(mockS3Service.uploadStreamMultipart).toHaveBeenCalledWith(
       expect.any(Readable),
-      expect.stringContaining(`${targetTenantId}/master-course/`),
+      expect.stringContaining(`${targetTenantId}/master-course/${targetCourseId}/`),
       "video/mp4",
     );
-    expect(targetLesson.fileS3Key).toContain(`${targetTenantId}/master-course/`);
+    expect(targetLesson.fileS3Key).toContain(`${targetTenantId}/master-course/${targetCourseId}/`);
     expect(targetLesson.fileS3Key).toMatch(/\.mp4$/);
   });
 

@@ -16,3 +16,4 @@ export const passwordValidationRules = {
 };
 
 export const LOGIN_REDIRECT_URL = "/courses";
+export const REQUIRED_PASSWORD_CHANGE_URL = "/auth/change-password";

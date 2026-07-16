@@ -1,3 +1,4 @@
+import { getUiMessageText } from "@repo/shared";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -13,7 +14,7 @@ import { useVoiceModeUIState } from "~/modules/Voice/hooks/useVoiceModeUIState";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
-import type { Message } from "@ai-sdk/react";
+import type { UIMessage } from "@ai-sdk/react";
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 interface LessonFormProps {
@@ -28,9 +29,11 @@ interface LessonFormProps {
   input: string;
   handleInputChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLTextAreaElement>) => void;
   setInput: Dispatch<SetStateAction<string>>;
-  messages: Message[];
+  messages: UIMessage[];
   hasTaskDescription: boolean;
-  onOpenTaskDescription: () => void;
+  taskDescription: string;
+  onJudge: () => Promise<void>;
+  isJudgePending: boolean;
 }
 
 export const LessonForm = ({
@@ -47,12 +50,15 @@ export const LessonForm = ({
   setInput,
   messages,
   hasTaskDescription,
-  onOpenTaskDescription,
+  taskDescription,
+  onJudge,
+  isJudgePending,
 }: LessonFormProps) => {
   const { t } = useTranslation();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [isVoiceMentorAudioStarted, setIsVoiceMentorAudioStarted] = useState(false);
+  const [isVoiceJudgePending, setIsVoiceJudgePending] = useState(false);
   const [voiceLevel, setVoiceLevel] = useState(0);
   const [mentorVoiceLevel, setMentorVoiceLevel] = useState(0);
   const [latestTranscript, setLatestTranscript] = useState("");
@@ -142,7 +148,7 @@ export const LessonForm = ({
     }
 
     hasTriggeredWelcomeRef.current = true;
-    void triggerWelcomeMessageRef.current(messages[0].content);
+    void triggerWelcomeMessageRef.current(getUiMessageText(messages[0]));
   }, [isVoiceMentorAudioStarted, isVoiceMentorMode, messages]);
 
   const startVoiceMode = async () => {
@@ -219,6 +225,24 @@ export const LessonForm = ({
 
     if (isVoiceMode) {
       await cancelVoiceMode();
+    }
+  };
+
+  const judgeVoiceMentorLesson = async () => {
+    if (isVoiceJudgePending) return;
+
+    setIsVoiceJudgePending(true);
+
+    try {
+      const canceled = await cancelVoiceMentor();
+      if (!canceled) return;
+
+      voiceModeUI.onMicCaptureStopped();
+      setVoiceLevel(0);
+      setMentorVoiceLevel(0);
+      await onJudge();
+    } finally {
+      setIsVoiceJudgePending(false);
     }
   };
 
@@ -299,7 +323,9 @@ export const LessonForm = ({
         mentorName={mentorName}
         mentorAvatarUrl={mentorAvatarUrl}
         hasTaskDescription={hasTaskDescription}
-        onOpenTaskDescription={onOpenTaskDescription}
+        taskDescription={taskDescription}
+        onJudge={() => void judgeVoiceMentorLesson()}
+        isJudgePending={isJudgePending || isVoiceJudgePending}
         isMicMuted={isVoiceMentorMuted}
         onMicMutedChange={(muted) => void setVoiceMentorMuted(muted)}
         onExit={() => void closeVoiceOverlay()}

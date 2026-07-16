@@ -11,6 +11,8 @@ import {
 import { and, eq, inArray, isNull, sql } from "drizzle-orm";
 import request from "supertest";
 
+import { AiRepository } from "src/ai/repositories/ai.repository";
+import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -20,6 +22,7 @@ import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiMentorLessons,
   lessons,
   chapters,
   quizAttempts,
@@ -49,6 +52,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
   let app: INestApplication;
   let db: DatabasePg;
   let baseDb: DatabasePg;
+  let aiRepository: AiRepository;
   let categoryFactory: ReturnType<typeof createCategoryFactory>;
   let userFactory: ReturnType<typeof createUserFactory>;
   let courseFactory: ReturnType<typeof createCourseFactory>;
@@ -88,6 +92,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
     app = testApp;
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
+    aiRepository = app.get(AiRepository);
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
     categoryFactory = createCategoryFactory(db);
@@ -354,7 +359,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       const lessonId = createResponse.body.data.id;
 
-      return { adminCookies, courseId: course.id, lessonId };
+      return { admin, adminCookies, courseId: course.id, lessonId };
     };
 
     const getAiMentorFromCourse = async (
@@ -417,20 +422,31 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       });
     });
 
-    it("falls back to base-language AI mentor scenario fields", async () => {
-      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup([
+    it("falls back to base-language AI mentor scenario fields on the learner endpoint", async () => {
+      const { admin, adminCookies, lessonId } = await createAiMentorLessonSetup([
         SUPPORTED_LANGUAGES.EN,
         SUPPORTED_LANGUAGES.DE,
       ]);
 
-      const aiMentor = await getAiMentorFromCourse(
-        courseId,
-        lessonId,
-        SUPPORTED_LANGUAGES.DE,
-        adminCookies,
-      );
+      const [aiMentorLesson] = await db
+        .select({ id: aiMentorLessons.id })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
 
-      expect(aiMentor).toMatchObject({
+      await aiRepository.createThread({
+        userId: admin.id,
+        aiMentorLessonId: aiMentorLesson.id,
+        status: THREAD_STATUS.ACTIVE,
+        userLanguage: SUPPORTED_LANGUAGES.DE,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}`)
+        .query({ language: SUPPORTED_LANGUAGES.DE })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
         completionConditions: "<p>The learner handles objections in English.</p>",
       });
@@ -799,7 +815,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       }
     });
 
-    it("should show full quiz feedback for admin regardless of quizFeedbackEnabled", async () => {
+    it("should redact quiz feedback for admin when quizFeedbackEnabled is false", async () => {
       const category = await categoryFactory.create();
       const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const admin = await userFactory
@@ -821,6 +837,78 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       const chapter = await chapterFactory.create({ courseId: course.id });
 
       const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(admin.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
+      expect(response.body.data.quizDetails).toBeDefined();
+      expect(response.body.data.thresholdScore).toBe(70);
+
+      if (response.body.data.quizDetails.questions) {
+        for (const question of response.body.data.quizDetails.questions) {
+          expect(question.passQuestion === false || question.passQuestion === null).toBe(true);
+          if (question.options && question.options.length > 0) {
+            for (const option of question.options as Array<{ isCorrect: boolean | null }>) {
+              expect(option.isCorrect === false || option.isCorrect === null).toBe(true);
+            }
+          }
+        }
+      }
+    });
+
+    it("should show full quiz feedback for admin when quizFeedbackEnabled is true", async () => {
+      const category = await categoryFactory.create();
+      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+        settings: {
+          lessonSequenceEnabled: false,
+          quizFeedbackEnabled: true,
+        },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id });
+
+      const { lesson } = await createQuizLesson(course.id, chapter.id, contentCreator.id);
+      await enableStudentMode(admin.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(admin.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
 
       const response = await request(app.getHttpServer())
         .get(`/api/lesson/${lesson.id}?language=en`)
@@ -830,6 +918,67 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       expect(response.body.data.isQuizFeedbackRedacted).toBe(false);
       expect(response.body.data.quizDetails).toBeDefined();
       expect(response.body.data.thresholdScore).toBe(70);
+      expect(
+        response.body.data.quizDetails.questions.some(
+          (question: { options?: Array<{ isCorrect: boolean | null }> }) =>
+            question.options?.some((option) => option.isCorrect === true),
+        ),
+      ).toBe(true);
+    });
+
+    it("should redact quiz feedback for the course author when quizFeedbackEnabled is false", async () => {
+      const category = await categoryFactory.create();
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create();
+      const cookies = await cookieFor(author, app);
+
+      const course = await courseFactory.create({
+        authorId: author.id,
+        categoryId: category.id,
+        status: "published",
+        settings: {
+          lessonSequenceEnabled: false,
+          quizFeedbackEnabled: false,
+        },
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: author.id });
+
+      const { lesson } = await createQuizLesson(course.id, chapter.id, author.id);
+      await enableStudentMode(author.id, course.id);
+
+      const questionsAnswers = await buildQuizAnswers(lesson.id);
+      await resetQuizAttemptState(author.id, lesson.id);
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/evaluation-quiz")
+        .set("Cookie", cookies)
+        .send({
+          lessonId: lesson.id,
+          language: "en",
+          questionsAnswers,
+        })
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${lesson.id}?language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(response.body.data.isQuizFeedbackRedacted).toBe(true);
+      expect(response.body.data.quizDetails).toBeDefined();
+
+      if (response.body.data.quizDetails.questions) {
+        for (const question of response.body.data.quizDetails.questions) {
+          expect(question.passQuestion === false || question.passQuestion === null).toBe(true);
+          if (question.options && question.options.length > 0) {
+            for (const option of question.options as Array<{ isCorrect: boolean | null }>) {
+              expect(option.isCorrect === false || option.isCorrect === null).toBe(true);
+            }
+          }
+        }
+      }
     });
   });
 

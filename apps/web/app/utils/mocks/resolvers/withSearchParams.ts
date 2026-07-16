@@ -1,7 +1,7 @@
 import { passthrough, type ResponseResolver } from "msw";
 
 type Predicate = (searchParams: URLSearchParams) => boolean;
-type Args = { request: Request; requestId: string };
+type Args = Parameters<ResponseResolver>[0];
 
 export const withSearchParams =
   (predicate: Predicate, resolver: ResponseResolver) => (args: Args) => {
