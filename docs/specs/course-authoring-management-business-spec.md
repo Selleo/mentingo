@@ -26,7 +26,8 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Manage course enrollment for users and groups from the course edit area.
 - Transfer course ownership to another eligible user.
 - Delete draft courses individually or in bulk while protecting private and published courses.
-- Export supported courses as SCORM packages or master-course exports when permissions and configuration allow it.
+- Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
+- Export supported courses as SCORM packages when permissions and configuration allow it.
 
 ## End-User Value
 
@@ -40,6 +41,8 @@ Administrators start in the admin course list and open a course edit screen or c
 
 The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
 
+When a managing-tenant administrator shares a master course, Mentingo creates a read-only copy for each selected target tenant and copies tenant-owned media into that tenant's storage. Course covers retain every generated size, including the highest-quality version, and an incomplete earlier copy is repaired by transferring only the missing variants. Subsequent source changes synchronize to the linked target course.
+
 Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Private and published courses must be moved back to draft before deletion is allowed. Language operations respect supported-language and base-language rules.
 
 ## Key Technical Context
@@ -47,6 +50,7 @@ Course mutations are permission-gated. Full course administrators can manage cou
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
 - Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
 - Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
+- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 
@@ -54,4 +58,5 @@ Course mutations are permission-gated. Full course administrators can manage cou
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
+- Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
