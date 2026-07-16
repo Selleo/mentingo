@@ -108,7 +108,6 @@ import type {
   LiveTrainingVisibilityScope,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
-import type { UUIDType } from "src/common";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -2489,15 +2488,19 @@ const automationStatus = pgEnum(
   "automation_status",
   Object.values(AutomationStatus) as [string, ...string[]],
 );
-export const automations = pgTable("automations", {
-  ...id,
-  ...timestamps,
-  tenantId,
-  name: varchar("name", { length: 50 }).notNull(),
-  description: varchar("description", { length: 300 }),
-  lastRun: timestamp("last_run", { mode: "date" }),
-  status: automationStatus("status").notNull(),
-});
+export const automations = pgTable(
+  "automations",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    name: varchar("name", { length: 50 }).notNull(),
+    description: varchar("description", { length: 300 }),
+    lastRun: timestamp("last_run", { mode: "date" }),
+    status: automationStatus("status").notNull(),
+  },
+  withTenantIdIndex("automation_index"),
+);
 
 export const automationsAutomationSteps = pgTable(
   "automations_automation_steps",
@@ -2516,13 +2519,11 @@ export const automationsAutomationSteps = pgTable(
   }),
 );
 
-type ChildStep = {
-  id: UUIDType;
-};
-
 export const automationSteps = pgTable("automation_steps", {
   ...id,
-  childrenSteps: jsonb("children_steps").$type<ChildStep[]>().default([]).notNull(),
+  ...timestamps,
+  tenantId,
+  parentId: uuid("parent_id"),
 });
 
 export const automationStepsAutomationActions = pgTable(
@@ -2543,6 +2544,9 @@ export const automationStepsAutomationActions = pgTable(
 export const automationStepsAutomationConditions = pgTable(
   "automation_steps_automation_conditions",
   {
+    ...id,
+    ...timestamps,
+    tenantId,
     automationStepId: uuid("automation_step_id")
       .references(() => automationSteps.id)
       .notNull(),
@@ -2550,9 +2554,6 @@ export const automationStepsAutomationConditions = pgTable(
       .references(() => automationConditions.id)
       .notNull(),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.automationStepId, table.automationConditionId] }),
-  }),
 );
 
 export const automationActions = pgTable("automation_actions", {
