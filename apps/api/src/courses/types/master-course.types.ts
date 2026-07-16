@@ -229,6 +229,7 @@ export type EnsureCourseExportSyncedParams = {
 };
 
 export type CreateTargetCourseFromSourceParams = {
+  targetCourseId: UUIDType;
   exportLink: MasterCourseExportRecord;
   sourceSnapshot: SourceSnapshot;
   sourceLanguage: string;
@@ -341,7 +342,7 @@ export type AddInternalResourceReferenceParams = {
 };
 
 export type CopySourceResourceReferencesParams = {
-  exportId: UUIDType;
+  targetCourseId: UUIDType;
   sourceTenantId: UUIDType;
   sourceTenantOrigin: string;
   targetTenantId: UUIDType;
@@ -359,7 +360,7 @@ export type CopyVideoReferenceParams = Omit<
 >;
 
 export type BuildCopiedResourceReferenceParams = {
-  exportId: UUIDType;
+  targetCourseId: UUIDType;
   targetTenantId: UUIDType;
   fallbackExtension?: string;
 };
