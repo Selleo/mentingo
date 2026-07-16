@@ -14709,5 +14709,70 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         format: "json",
         ...params,
       }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerGetAllAutomations
+     * @request GET:/api/automations/tenant/{tenantId}
+     */
+    automationsControllerGetAllAutomations: (tenantId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/tenant/${tenantId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerGetAutomationById
+     * @request GET:/api/automations/{id}
+     */
+    automationsControllerGetAutomationById: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerUpdateAutomation
+     * @request PATCH:/api/automations/{id}
+     */
+    automationsControllerUpdateAutomation: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerDeleteAutomation
+     * @request DELETE:/api/automations/{id}
+     */
+    automationsControllerDeleteAutomation: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerCreateAutomation
+     * @request POST:/api/automations
+     */
+    automationsControllerCreateAutomation: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations`,
+        method: "POST",
+        ...params,
+      }),
   };
 }
