@@ -22,7 +22,7 @@ export default function CourseHeroImage({
         className="size-full object-cover"
       />
 
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.7)] via-[rgba(0,0,0,0.2)] to-[rgba(0,0,0,0.1)]" />
 
       {children}
     </div>

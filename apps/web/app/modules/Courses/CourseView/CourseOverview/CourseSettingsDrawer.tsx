@@ -1,6 +1,8 @@
 import { Settings, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
+
 type CourseSettingsDrawerProps = {
   onClose: () => void;
   title: string;
@@ -63,13 +65,9 @@ export default function CourseSettingsDrawer({ onClose, title }: CourseSettingsD
           </div>
 
           <div className="border-t border-neutral-200 p-4 md:p-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-full rounded-lg bg-primary-700 px-6 py-3 font-semibold text-white transition-colors hover:bg-primary-800"
-            >
+            <Button onClick={onClose} className="w-full">
               {t("modernCourseView.common.close")}
-            </button>
+            </Button>
           </div>
         </div>
       </div>

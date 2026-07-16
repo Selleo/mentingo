@@ -61,7 +61,7 @@ export default function CourseCategoryEditor({
         >
           <SelectTrigger
             id="course-category"
-            className="h-8 w-auto min-w-40 rounded-full border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-950 shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-white/70"
+            className="h-8 w-auto min-w-40 rounded-full border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-950 shadow-lg transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-white/70"
           >
             <SelectValue placeholder={categoryTitle} />
           </SelectTrigger>
@@ -88,7 +88,7 @@ export default function CourseCategoryEditor({
             }
           }}
           className={cn(
-            "rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] [text-shadow:0_2px_6px_rgba(0,0,0,0.55)] backdrop-blur-sm transition-all duration-200",
+            "rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition-all duration-200",
             {
               "cursor-pointer outline-2 outline-dashed outline-transparent hover:bg-white/30 hover:outline-white focus-visible:bg-white/30 focus-visible:outline-white":
                 canEdit,
@@ -99,7 +99,7 @@ export default function CourseCategoryEditor({
         </button>
       )}
 
-      <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.35)] [text-shadow:0_2px_6px_rgba(0,0,0,0.55)] backdrop-blur-sm">
+      <span className="flex items-center gap-1 rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">
         <Clock className="size-3.5" />
         {formatDurationToHalfHour(durationSeconds, t)}
       </span>

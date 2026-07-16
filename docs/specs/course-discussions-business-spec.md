@@ -33,7 +33,7 @@ Administrators and managers retain control through tenant-level enablement, enro
 
 ## How It Works
 
-When course discussions are enabled, enrolled learners see a Discussion tab on the course page. The tab loads paginated top-level messages and enrolled course users, then joins a course-specific realtime room for live updates.
+When course discussions are enabled, enrolled learners with discussion access see a Chat tab alongside the table of contents on the course page. Opening it loads paginated top-level messages and enrolled course users, then joins a course-specific realtime room for live updates.
 
 Learners can post a thread or open a thread to reply. Mentions are limited to users enrolled in the same course. Reactions and deletions are broadcast to other open course discussion sessions so the page updates without a full reload.
 
@@ -41,7 +41,7 @@ Discussion APIs are feature-gated and permission-gated. Reading, posting, reacti
 
 ## Key Technical Context
 
-- Frontend UI lives under `apps/web/app/modules/Courses/CourseView/CourseChat`.
+- Frontend UI lives under `apps/web/app/modules/Courses/CourseView/CourseChat` and is surfaced from the table-of-contents tabs.
 - API, gateway, presence, and event handling live under `apps/api/src/course-chat`.
 - The feature is gated by `FEATURES.COURSE_DISCUSSIONS`.
 - Core permissions include `PERMISSIONS.COURSE_DISCUSSION_READ`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_CREATE`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_REACT`, `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE_OWN`, and `PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE`.

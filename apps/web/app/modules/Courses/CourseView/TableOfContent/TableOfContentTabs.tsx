@@ -4,16 +4,24 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
-export type TableOfContentTab = "toc" | "statistics";
+import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+
+export type TableOfContentTab = "toc" | "statistics" | "chat";
 
 type TableOfContentTabsProps = {
   activeTab: TableOfContentTab;
+  canEditContent: boolean;
+  canShowChat: boolean;
+  canShowStatistics: boolean;
   onEditContent: () => void;
   onTabChange: (tab: TableOfContentTab) => void;
 };
 
 export default function TableOfContentTabs({
   activeTab,
+  canEditContent,
+  canShowChat,
+  canShowStatistics,
   onEditContent,
   onTabChange,
 }: TableOfContentTabsProps) {
@@ -35,26 +43,46 @@ export default function TableOfContentTabs({
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
           )}
         </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("statistics")}
-          className={cn(
-            "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-            activeTab === "statistics"
-              ? "text-primary-700"
-              : "text-neutral-800 hover:text-neutral-950",
-          )}
-        >
-          {t("modernCourseView.contents.statistics")}
-          {activeTab === "statistics" && (
-            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
-          )}
-        </button>
+        {canShowStatistics && (
+          <button
+            type="button"
+            onClick={() => onTabChange("statistics")}
+            className={cn(
+              "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
+              activeTab === "statistics"
+                ? "text-primary-700"
+                : "text-neutral-800 hover:text-neutral-950",
+            )}
+          >
+            {t("modernCourseView.contents.statistics")}
+            {activeTab === "statistics" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
+            )}
+          </button>
+        )}
+        {canShowChat && (
+          <button
+            type="button"
+            data-testid={COURSE_DISCUSSION_HANDLES.TAB}
+            onClick={() => onTabChange("chat")}
+            className={cn(
+              "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
+              activeTab === "chat" ? "text-primary-700" : "text-neutral-800 hover:text-neutral-950",
+            )}
+          >
+            {t("studentCourseView.tabs.chat")}
+            {activeTab === "chat" && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
+            )}
+          </button>
+        )}
       </div>
-      <Button variant="primary" onClick={onEditContent} className="mb-3 flex items-center gap-2 ">
-        <Edit2 className="size-4" />
-        <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
-      </Button>
+      {canEditContent && (
+        <Button variant="primary" onClick={onEditContent} className="mb-3 flex items-center gap-2">
+          <Edit2 className="size-4" />
+          <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
+        </Button>
+      )}
     </div>
   );
 }

@@ -36,12 +36,13 @@ A learner opens Progress to see personal learning activity. Mentingo aggregates 
 
 An administrator opens Analytics to review organization-level charts and download a summary report. These charts summarize course popularity, enrollment, completion, freemium conversion, and average quiz performance.
 
-From a course management view, permitted users can open the Statistics tab. Mentingo shows course overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons.
+From the course overview, permitted users can open the Statistics tab beside the table of contents. Mentingo reuses the full course-admin statistics experience there, showing overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons.
 
 ## Key Technical Context
 
 - Learner progress is routed at `/progress` and implemented in `apps/web/app/modules/Statistics/Client`.
 - Admin analytics is routed at `/admin/analytics` and implemented in `apps/web/app/modules/Statistics/Admin`.
+- Course-level reporting in the course overview reuses `apps/web/app/modules/Courses/CourseView/CourseAdminStatistics` rather than maintaining a separate simplified statistics panel.
 - Learner and admin aggregate endpoints live in `apps/api/src/statistics`; course-level statistics endpoints are in `apps/api/src/courses/course.controller.ts`.
 - `STATISTICS_READ` gates admin analytics, and `COURSE_STATISTICS` gates course-level reporting.
 - Statistics draw from course progress, lesson progress, quiz attempts, AI mentor progress, learning-time records, and activity streak data.

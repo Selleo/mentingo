@@ -1,19 +1,25 @@
 import { useNavigate } from "@remix-run/react";
+import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useCourseStatistics } from "~/api/queries/admin/useCourseStatistics";
+import { useCurrentUser } from "~/api/queries";
+import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
+import { hasPermission } from "~/common/permissions/permission.utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStatistics";
+import { CourseChatTab } from "../CourseChat/CourseChatTab";
 
 import ChapterList from "./ChapterList";
-import CourseStatisticsPanel from "./CourseStatisticsPanel";
 import TableOfContentTabs, { type TableOfContentTab } from "./TableOfContentTabs";
 
 export function TableOfContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { course, isAdminExperience } = useCourseAccessProvider();
+  const { data: currentUser } = useCurrentUser();
+  const { data: globalSettings } = useGlobalSettings();
 
   const [completedExpanded, setCompletedExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState<TableOfContentTab>("toc");
@@ -21,11 +27,18 @@ export function TableOfContent() {
   const [isMobile, setIsMobile] = useState(false);
   const [showAllChapters, setShowAllChapters] = useState(false);
 
-  const { data: courseStatistics, isLoading: isLoadingCourseStatistics } = useCourseStatistics({
-    id: course.id,
-    enabled: isAdminExperience && activeTab === "statistics",
-    query: {},
-  });
+  const permissions = currentUser?.permissions ?? [];
+  const canShowChat = Boolean(
+    globalSettings?.courseDiscussionsEnabled &&
+      course.enrolled &&
+      currentUser &&
+      hasPermission(permissions, PERMISSIONS.COURSE_DISCUSSION_READ),
+  );
+
+  const canDeleteAnyMessage = hasPermission(
+    permissions,
+    PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
+  );
 
   const toggleChapter = (id: string) => {
     setExpandedChapters((prev) =>
@@ -56,15 +69,18 @@ export function TableOfContent() {
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
-      {isAdminExperience && (
+      {(isAdminExperience || canShowChat) && (
         <TableOfContentTabs
           activeTab={activeTab}
+          canEditContent={isAdminExperience}
+          canShowChat={canShowChat}
+          canShowStatistics={isAdminExperience}
           onEditContent={navigateToCourseEditor}
           onTabChange={setActiveTab}
         />
       )}
 
-      {!isAdminExperience && !isMobile && (
+      {!isAdminExperience && !canShowChat && !isMobile && (
         <div className="mb-4 md:mb-6">
           <h2 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
             {t("modernCourseView.contents.title")}
@@ -72,7 +88,7 @@ export function TableOfContent() {
         </div>
       )}
 
-      {(!isAdminExperience || activeTab === "toc") && (
+      {activeTab === "toc" && (
         <ChapterList
           completedExpanded={completedExpanded}
           expandedChapters={expandedChapters}
@@ -84,10 +100,13 @@ export function TableOfContent() {
         />
       )}
 
-      {isAdminExperience && activeTab === "statistics" && (
-        <CourseStatisticsPanel
-          courseStatistics={courseStatistics}
-          isLoading={isLoadingCourseStatistics}
+      {isAdminExperience && activeTab === "statistics" && <CourseAdminStatistics course={course} />}
+
+      {canShowChat && activeTab === "chat" && currentUser && (
+        <CourseChatTab
+          courseId={course.id}
+          currentUserId={currentUser.id}
+          canDeleteAnyMessage={canDeleteAnyMessage}
         />
       )}
     </div>

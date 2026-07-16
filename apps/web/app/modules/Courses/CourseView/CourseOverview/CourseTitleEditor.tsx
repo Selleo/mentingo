@@ -69,24 +69,24 @@ export default function CourseTitleEditor({
             onCancel();
           }
         }}
-        className="mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-3 text-2xl font-bold leading-tight text-white [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] backdrop-blur-lg md:text-3xl lg:text-4xl"
+        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-3 text-2xl font-bold leading-tight text-white backdrop-blur-lg md:text-3xl lg:text-4xl"
         rows={1}
       />
     );
   }
 
   return (
-    <h1 className="mb-4 text-xl font-bold leading-snug text-white md:text-3xl md:leading-tight lg:text-4xl">
+    <h1 className="relative z-10 mb-4 text-xl font-bold leading-snug text-white md:text-3xl md:leading-tight lg:text-4xl">
       {canEdit ? (
         <button
           type="button"
           onClick={onEdit}
-          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left [text-shadow:0_8px_24px_rgba(0,0,0,0.95)] transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:border-white focus-visible:bg-primary-700"
+          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:border-white focus-visible:bg-primary-700"
         >
           {title}
         </button>
       ) : (
-        <span className="[text-shadow:0_8px_24px_rgba(0,0,0,0.95)]">{title}</span>
+        title
       )}
     </h1>
   );
