@@ -3887,6 +3887,7 @@ export interface GetConfigurationResponse {
     id: string;
     /** @format uuid */
     aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
     taskGoal: string;
     /**
      * @min 0
@@ -3970,6 +3971,7 @@ export interface ReplaceConfigurationResponse {
     id: string;
     /** @format uuid */
     aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
     taskGoal: string;
     /**
      * @min 0
@@ -4040,6 +4042,7 @@ export interface UpdateTranslationsResponse {
     id: string;
     /** @format uuid */
     aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
     taskGoal: string;
     /**
      * @min 0

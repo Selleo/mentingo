@@ -18,6 +18,7 @@ describe("AiJudgeConfigurationTranslationService", () => {
   };
 
   const repository = {
+    getConfigurationGraph: jest.fn(),
     getConfigurationsForCourse: jest.fn(),
     getCriteriaForCourse: jest.fn(),
     getScoreGuidanceForCourse: jest.fn(),
@@ -34,6 +35,52 @@ describe("AiJudgeConfigurationTranslationService", () => {
     repository.getCriteriaForCourse.mockResolvedValue([]);
     repository.getScoreGuidanceForCourse.mockResolvedValue([]);
     repository.getBlockingErrorsForCourse.mockResolvedValue([]);
+  });
+
+  it("detects missing text in a translated configuration", async () => {
+    repository.getConfigurationGraph.mockResolvedValue({
+      configuration: {
+        taskGoal: { en: "Handle the conversation", pl: "Poprowadź rozmowę" },
+      },
+      criteria: [
+        {
+          title: { en: "Discovery", pl: "Odkrywanie" },
+          expectedBehavior: { en: "Ask an open question" },
+        },
+      ],
+      scoreGuidance: [
+        {
+          description: { en: "Asks a relevant question", pl: "Zadaje trafne pytanie" },
+          example: null,
+        },
+      ],
+      blockingErrors: [],
+    });
+
+    await expect(service.hasMissingTranslations(configurationId, "pl", "en")).resolves.toBe(true);
+  });
+
+  it("does not require a translation for empty optional base text", async () => {
+    repository.getConfigurationGraph.mockResolvedValue({
+      configuration: {
+        taskGoal: { en: "Handle the conversation", pl: "Poprowadź rozmowę" },
+      },
+      criteria: [],
+      scoreGuidance: [
+        {
+          description: { en: "No evidence", pl: "Brak dowodów" },
+          example: null,
+        },
+      ],
+      blockingErrors: [],
+    });
+
+    await expect(service.hasMissingTranslations(configurationId, "pl", "en")).resolves.toBe(false);
+  });
+
+  it("does not inspect translations for the base language", async () => {
+    await expect(service.hasMissingTranslations(configurationId, "en", "en")).resolves.toBe(false);
+    expect(repository.getConfigurationGraph).not.toHaveBeenCalled();
   });
 
   it("collects only missing Judge text and supplies rubric-aware translation context", async () => {

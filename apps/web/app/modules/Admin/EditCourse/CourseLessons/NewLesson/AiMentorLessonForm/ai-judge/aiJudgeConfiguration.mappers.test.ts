@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  hasMissingAiJudgeConfigurationTranslations,
   mapAiJudgeConfigurationDraftToBaseInput,
   mapAiJudgeConfigurationDraftToTranslationInput,
   mapAiJudgeConfigurationResponseToDraft,
@@ -12,6 +11,7 @@ import type { GetConfigurationResponse } from "~/api/generated-api";
 const configuration = {
   id: "00000000-0000-4000-8000-000000000001",
   aiMentorLessonId: "00000000-0000-4000-8000-000000000002",
+  hasMissingTranslations: false,
   taskGoal: "Handle the conversation",
   passingThresholdPercent: 70,
   totalMaxScore: 1,
@@ -96,46 +96,5 @@ describe("AI Judge configuration mappers", () => {
     });
 
     expect(mapAiJudgeConfigurationDraftToBaseInput(draft).criteria).toEqual([]);
-  });
-
-  it("detects missing normalized Judge text without requiring absent optional examples", () => {
-    const completeTranslation = {
-      ...configuration,
-      language: "pl" as const,
-      baseLanguage: "en" as const,
-    };
-
-    expect(hasMissingAiJudgeConfigurationTranslations(configuration, completeTranslation)).toBe(
-      false,
-    );
-    expect(
-      hasMissingAiJudgeConfigurationTranslations(configuration, {
-        ...completeTranslation,
-        criteria: [
-          {
-            ...completeTranslation.criteria[0],
-            expectedBehavior: "",
-          },
-        ],
-      }),
-    ).toBe(true);
-
-    const baseWithExample = {
-      ...configuration,
-      criteria: [
-        {
-          ...configuration.criteria[0],
-          scoreGuidance: [
-            {
-              ...configuration.criteria[0].scoreGuidance[0],
-              example: "What outcome matters most?",
-            },
-          ],
-        },
-      ],
-    };
-    expect(hasMissingAiJudgeConfigurationTranslations(baseWithExample, completeTranslation)).toBe(
-      true,
-    );
   });
 });

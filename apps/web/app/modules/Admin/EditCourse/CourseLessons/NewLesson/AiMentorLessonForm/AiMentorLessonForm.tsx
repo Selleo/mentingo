@@ -60,7 +60,6 @@ import { DeleteContentType } from "../../../EditCourse.types";
 import Breadcrumb from "../components/Breadcrumb";
 
 import {
-  hasMissingAiJudgeConfigurationTranslations,
   mapAiJudgeConfigurationDraftToBaseInput,
   mapAiJudgeConfigurationDraftToTranslationInput,
   mapAiJudgeConfigurationResponseToDraft,
@@ -135,7 +134,6 @@ const AiMentorLessonForm = ({
   const lessonId = lessonToEdit?.id ?? "";
   const { data: savedAiJudgeConfiguration, isLoading: isAiJudgeConfigurationLoading } =
     useAiJudgeConfiguration(lessonId, language);
-  const { data: baseAiJudgeConfiguration } = useAiJudgeConfiguration(lessonId, baseLanguage);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     lessonToEdit?.avatarReferenceUrl ?? null,
@@ -171,15 +169,12 @@ const AiMentorLessonForm = ({
     });
   }, [form, isAiJudgeConfigurationDirty, lessonToEdit, persistedAiJudgeConfiguration]);
 
-  const hasMissingAiJudgeTranslations =
-    language !== baseLanguage &&
-    hasMissingAiJudgeConfigurationTranslations(baseAiJudgeConfiguration, savedAiJudgeConfiguration);
   const hasMissingTranslations = Boolean(
     lessonToEdit &&
       language !== baseLanguage &&
       (!lessonToEdit.title.trim() ||
         !lessonToEdit.aiMentor?.aiMentorInstructions.trim() ||
-        hasMissingAiJudgeTranslations),
+        savedAiJudgeConfiguration?.hasMissingTranslations),
   );
 
   const handleAiJudgeBaseConfigurationSave = async (

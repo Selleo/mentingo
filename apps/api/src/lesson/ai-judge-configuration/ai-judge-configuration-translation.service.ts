@@ -21,6 +21,31 @@ import type {
 export class AiJudgeConfigurationTranslationService {
   constructor(private readonly aiJudgeConfigurationRepository: AiJudgeConfigurationRepository) {}
 
+  async hasMissingTranslations(
+    configurationId: UUIDType,
+    language: SupportedLanguages,
+    baseLanguage: SupportedLanguages,
+  ): Promise<boolean> {
+    if (language === baseLanguage) return false;
+
+    const graph = await this.aiJudgeConfigurationRepository.getConfigurationGraph(configurationId);
+    if (!graph) return false;
+
+    const localizedValues = [
+      graph.configuration.taskGoal,
+      ...graph.criteria.flatMap((criterion) => [criterion.title, criterion.expectedBehavior]),
+      ...graph.scoreGuidance.flatMap((guidance) => [guidance.description, guidance.example]),
+      ...graph.blockingErrors.map((blockingError) => blockingError.description),
+    ];
+
+    return localizedValues.some((value) => {
+      const base = this.getLanguageValue(value, baseLanguage);
+      const translated = this.getLanguageValue(value, language);
+
+      return Boolean(base?.length && !translated?.length);
+    });
+  }
+
   async getMissingTranslations(
     courseId: UUIDType,
     language: SupportedLanguages,

@@ -8,6 +8,7 @@ import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { DB } from "src/storage/db/db.providers";
 
 import { AiJudgeConfigurationGraphService } from "./ai-judge-configuration-graph.service";
+import { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration-translation.service";
 import { AiJudgeConfigurationRepository } from "./ai-judge-configuration.repository";
 
 import type {
@@ -28,6 +29,7 @@ export class AiJudgeConfigurationService {
     @Inject(DB) private readonly db: DatabasePg,
     private readonly aiJudgeConfigurationRepository: AiJudgeConfigurationRepository,
     private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
+    private readonly aiJudgeConfigurationTranslationService: AiJudgeConfigurationTranslationService,
     private readonly adminLessonService: AdminLessonService,
     private readonly masterCourseService: MasterCourseService,
     private readonly courseFeaturePolicyService: CourseFeaturePolicyService,
@@ -199,10 +201,17 @@ export class AiJudgeConfigurationService {
       context.configurationId,
       language,
     );
+    const hasMissingTranslations =
+      await this.aiJudgeConfigurationTranslationService.hasMissingTranslations(
+        context.configurationId,
+        language,
+        context.baseLanguage,
+      );
 
     return {
       id: configuration.id,
       aiMentorLessonId: configuration.aiMentorLessonId,
+      hasMissingTranslations,
       taskGoal: configuration.taskGoal,
       passingThresholdPercent: configuration.passingThresholdPercent,
       totalMaxScore: criteria.reduce((sum, criterion) => sum + criterion.maxScore, 0),

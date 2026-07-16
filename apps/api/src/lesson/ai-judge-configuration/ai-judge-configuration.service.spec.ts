@@ -15,6 +15,7 @@ import {
 import { AiJudgeConfigurationService } from "./ai-judge-configuration.service";
 
 import type { AiJudgeConfigurationGraphService } from "./ai-judge-configuration-graph.service";
+import type { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration-translation.service";
 import type { AiJudgeConfigurationRepository } from "./ai-judge-configuration.repository";
 import type { DatabasePg, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -75,6 +76,7 @@ describe("AiJudgeConfigurationService", () => {
   let service: AiJudgeConfigurationService;
   let repository: jest.Mocked<AiJudgeConfigurationRepository>;
   let graphService: jest.Mocked<AiJudgeConfigurationGraphService>;
+  let translationService: jest.Mocked<AiJudgeConfigurationTranslationService>;
   let db: DatabasePg;
   let adminLessonService: jest.Mocked<AdminLessonService>;
   let masterCourseService: jest.Mocked<MasterCourseService>;
@@ -139,6 +141,9 @@ describe("AiJudgeConfigurationService", () => {
       createConfiguration: jest.fn(),
       updateConfiguration: jest.fn(),
     } as unknown as jest.Mocked<AiJudgeConfigurationGraphService>;
+    translationService = {
+      hasMissingTranslations: jest.fn().mockResolvedValue(false),
+    } as unknown as jest.Mocked<AiJudgeConfigurationTranslationService>;
 
     const transactionDb = {
       transaction: jest.fn(async (callback: (trx: DatabasePg) => unknown) =>
@@ -163,6 +168,7 @@ describe("AiJudgeConfigurationService", () => {
       db,
       repository,
       graphService,
+      translationService,
       adminLessonService,
       masterCourseService,
       courseFeaturePolicyService,
@@ -170,6 +176,7 @@ describe("AiJudgeConfigurationService", () => {
   });
 
   it("returns empty values for missing requested translations in the admin editor", async () => {
+    translationService.hasMissingTranslations.mockResolvedValue(true);
     mockLocalizedGraph(
       {
         configuration: {
@@ -223,6 +230,7 @@ describe("AiJudgeConfigurationService", () => {
 
     expect(result).toMatchObject({
       language: SUPPORTED_LANGUAGES.PL,
+      hasMissingTranslations: true,
       taskGoal: "Wyjaśnij wybór",
       totalMaxScore: 5,
       criteria: [
@@ -234,6 +242,11 @@ describe("AiJudgeConfigurationService", () => {
       ],
       blockingErrors: [{ description: "Zmyśla fakty" }],
     });
+    expect(translationService.hasMissingTranslations).toHaveBeenCalledWith(
+      configurationId,
+      SUPPORTED_LANGUAGES.PL,
+      SUPPORTED_LANGUAGES.EN,
+    );
   });
 
   it("updates an existing configuration using the derived base language", async () => {

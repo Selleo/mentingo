@@ -35328,6 +35328,9 @@
                     "format": "uuid",
                     "type": "string"
                   },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
                   "taskGoal": {
                     "type": "string"
                   },
@@ -35515,6 +35518,7 @@
                 "required": [
                   "id",
                   "aiMentorLessonId",
+                  "hasMissingTranslations",
                   "taskGoal",
                   "passingThresholdPercent",
                   "totalMaxScore",
@@ -35659,6 +35663,9 @@
                 "format": "uuid",
                 "type": "string"
               },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
               "taskGoal": {
                 "type": "string"
               },
@@ -35846,6 +35853,7 @@
             "required": [
               "id",
               "aiMentorLessonId",
+              "hasMissingTranslations",
               "taskGoal",
               "passingThresholdPercent",
               "totalMaxScore",
@@ -35964,6 +35972,9 @@
                 "format": "uuid",
                 "type": "string"
               },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
               "taskGoal": {
                 "type": "string"
               },
@@ -36151,6 +36162,7 @@
             "required": [
               "id",
               "aiMentorLessonId",
+              "hasMissingTranslations",
               "taskGoal",
               "passingThresholdPercent",
               "totalMaxScore",

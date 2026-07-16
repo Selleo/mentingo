@@ -10,7 +10,7 @@ vi.mock("~/api/queryClient", () => ({
   },
 }));
 
-import { invalidateGeneratedTranslationQueries } from "../useGenerateMissingTranslations";
+import { invalidateGeneratedTranslationQueries } from "./invalidateGeneratedTranslationQueries";
 
 describe("invalidateGeneratedTranslationQueries", () => {
   beforeEach(() => {

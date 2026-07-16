@@ -69,6 +69,7 @@ const aiJudgeBlockingErrorResponseSchema = Type.Object({
 export const aiJudgeConfigurationResponseSchema = Type.Object({
   id: UUIDSchema,
   aiMentorLessonId: UUIDSchema,
+  hasMissingTranslations: Type.Boolean(),
   taskGoal: Type.String(),
   passingThresholdPercent: passingThresholdSchema,
   totalMaxScore: scoreSchema,
