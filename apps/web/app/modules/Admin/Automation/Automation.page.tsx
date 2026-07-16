@@ -1,5 +1,17 @@
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 
 import { AutomationDrawer } from "./components/AutomationDrawer";
 import { AutomationFilters, type StatusFilter } from "./components/AutomationFilters";
@@ -20,7 +32,6 @@ export interface Automation {
   updatedAt: string;
 }
 
-// Początkowe dane demonstracyjne
 const INITIAL_DATA: Automation[] = [
   {
     id: "1",
@@ -59,28 +70,24 @@ export async function clientLoader() {
 }
 
 export default function AutomationPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const { initialAutomations } = useLoaderData<typeof clientLoader>();
 
-  // Stan przechowujący listę wszystkich automatyzacji
   const [automations, setAutomations] = useState<Automation[]>(initialAutomations);
-
-  // Stany zarządzające wysuwanym panelem bocznym (Drawer)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null);
-
-  // Stany wyszukiwania i filtrowania
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  // Funkcja tworzenia nowej automatyzacji jako Szkic (Draft)
   const handleCreate = () => {
     const newAutomation: Automation = {
       id: Date.now().toString(),
-      name: "Nowa automatyzacja (Szkic)",
-      description:
-        "Zdefiniuj cel i opis tej automatyzacji, a następnie przejdź do kreatora przepływu.",
+      name: t("automationView.newAutomation.name"),
+      description: t("automationView.newAutomation.description"),
       status: "Draft",
-      trigger: "Do skonfigurowania...",
+      trigger: t("automationView.newAutomation.triggerPlaceholder"),
       actionsCount: 0,
       lastRun: { date: "-", status: "never" },
       updatedAt: new Date().toISOString().split("T")[0],
@@ -88,19 +95,16 @@ export default function AutomationPage() {
     setAutomations((prev) => [newAutomation, ...prev]);
   };
 
-  // Otwarcie panelu bocznego dla wybranego wiersza
   const handleOpenDrawer = (automation: Automation) => {
     setSelectedAutomation(automation);
     setIsDrawerOpen(true);
   };
 
-  // Zamykanie panelu bocznego z czyszczeniem zaznaczenia
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
     setSelectedAutomation(null);
   };
 
-  // Aktualizacja automatyzacji (Zapis zmian z Drawera)
   const handleUpdate = (id: string, updatedFields: Partial<Automation>) => {
     setAutomations((prev) =>
       prev.map((item) => {
@@ -108,10 +112,9 @@ export default function AutomationPage() {
           const updatedItem = {
             ...item,
             ...updatedFields,
-            updatedAt: new Date().toISOString().split("T")[0], // Automatyczne odświeżenie daty modyfikacji
+            updatedAt: new Date().toISOString().split("T")[0],
           };
 
-          // Jeśli aktualizowany element jest aktualnie otwarty w drawerze, synchronizujemy jego stan lokalny
           if (selectedAutomation?.id === id) {
             setSelectedAutomation(updatedItem);
           }
@@ -123,25 +126,28 @@ export default function AutomationPage() {
     );
   };
 
-  // Usuwanie automatyzacji
-  const handleDelete = (id: string) => {
-    if (
-      confirm(
-        "Czy na pewno chcesz bezpowrotnie usunąć tę automatyzację? Zamiast tego możesz ją zarchiwizować.",
-      )
-    ) {
-      setAutomations((prev) => prev.filter((item) => item.id !== id));
-      handleCloseDrawer();
+  const handleRequestDelete = (id: string) => {
+    setDeleteTargetId(id);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTargetId) {
+      setAutomations((prev) => prev.filter((item) => item.id !== deleteTargetId));
+      if (selectedAutomation?.id === deleteTargetId) {
+        handleCloseDrawer();
+      }
+      setDeleteTargetId(null);
     }
   };
 
-  // Przejście do zewnętrznego kreatora/edytora przepływu
-  const handleEdit = (id: string) => {
-    console.log(`Przekierowanie użytkownika do kreatora automatyzacji o ID: ${id}`);
-    // Tutaj możesz dodać np. navigate(`/automations/${id}/builder`);
+  const handleCancelDelete = () => {
+    setDeleteTargetId(null);
   };
 
-  // Logika filtrowania danych w locie na podstawie paska filtrów
+  const handleEdit = (id: string) => {
+    navigate(`/admin/automation/${id}/builder`);
+  };
+
   const filteredAutomations = automations.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -153,11 +159,9 @@ export default function AutomationPage() {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-      {/* Nagłówek sekcji z przyciskiem "Utwórz" */}
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <AutomationHeader onCreate={handleCreate} />
 
-      {/* Pasek filtrowania tekstowego oraz zakładek statusu */}
       <div className="mt-8">
         <AutomationFilters
           searchTerm={searchTerm}
@@ -167,20 +171,40 @@ export default function AutomationPage() {
         />
       </div>
 
-      {/* Tabela prezentująca przefiltrowane wyniki */}
-      <div className="bg-white shadow rounded-lg border border-gray-200 overflow-hidden">
+      <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
         <AutomationTable automations={filteredAutomations} onOpenDrawer={handleOpenDrawer} />
       </div>
 
-      {/* Szuflada boczna (Slide-over drawer) zarządzana centralnym stanem strony */}
       <AutomationDrawer
         isOpen={isDrawerOpen}
         onClose={handleCloseDrawer}
         automation={selectedAutomation}
         onUpdate={handleUpdate}
-        onDelete={handleDelete}
+        onDelete={handleRequestDelete}
         onEdit={handleEdit}
       />
+
+      <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && handleCancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("automationView.deleteDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationView.deleteDialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDelete}>
+              {t("automationView.deleteDialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("automationView.deleteDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

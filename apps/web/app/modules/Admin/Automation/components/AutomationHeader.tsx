@@ -1,26 +1,29 @@
 import { Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { Button } from "~/components/ui/button";
+
+import type { FC } from "react";
 
 interface AutomationHeaderProps {
   onCreate: () => void;
 }
 
-export const AutomationHeader: React.FC<AutomationHeaderProps> = ({ onCreate }) => {
+export const AutomationHeader: FC<AutomationHeaderProps> = ({ onCreate }) => {
+  const { t } = useTranslation();
+
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Automations</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Zarządzaj automatycznymi powiadomieniami email wysyłanymi w odpowiedzi na zdarzenia w
-          platformie.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          {t("automationView.title")}
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("automationView.description")}</p>
       </div>
-      <button
-        onClick={onCreate}
-        className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        <Plus className="w-4 h-4" />
-        Create Automation
-      </button>
+      <Button onClick={onCreate}>
+        <Plus className="mr-2 size-4" />
+        {t("automationView.createAutomation")}
+      </Button>
     </div>
   );
 };

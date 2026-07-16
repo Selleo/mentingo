@@ -1,16 +1,28 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 
 import { AutomationPagination } from "./AutomationPagination";
 import { AutomationRow } from "./AutomationRow";
 
 import type { Automation } from "../Automation.page";
+import type { FC } from "react";
 
 interface AutomationTableProps {
   automations: Automation[];
   onOpenDrawer: (automation: Automation) => void;
 }
 
-export const AutomationTable: React.FC<AutomationTableProps> = ({ automations, onOpenDrawer }) => {
+export const AutomationTable: FC<AutomationTableProps> = ({ automations, onOpenDrawer }) => {
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -20,47 +32,35 @@ export const AutomationTable: React.FC<AutomationTableProps> = ({ automations, o
 
   return (
     <div className="flex flex-col">
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200 text-left">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Nazwa automatyzacji
-              </th>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Status
-              </th>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Trigger (Wyzwalacz)
-              </th>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500 text-center">
-                Akcje
-              </th>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Ostatnie uruchomienie
-              </th>
-              <th className="px-6 py-3.5 text-xs font-semibold uppercase tracking-wider text-gray-500">
-                Aktualizacja
-              </th>
-              <th className="relative px-6 py-3.5">
-                <span className="sr-only">Menu</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {currentItems.map((item) => (
-              <AutomationRow key={item.id} automation={item} onOpenDrawer={onOpenDrawer} />
-            ))}
-            {automations.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-sm text-gray-500">
-                  Brak zdefiniowanych automatyzacji. Kliknij Create Automation, aby dodać pierwszą.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>{t("automationView.table.name")}</TableHead>
+            <TableHead>{t("automationView.table.status")}</TableHead>
+            <TableHead>{t("automationView.table.trigger")}</TableHead>
+            <TableHead className="min-w-[160px] text-center">
+              {t("automationView.table.actions")}
+            </TableHead>
+            <TableHead>{t("automationView.table.lastRun")}</TableHead>
+            <TableHead>{t("automationView.table.updatedAt")}</TableHead>
+            <TableHead className="w-12">
+              <span className="sr-only">{t("automationView.table.menu")}</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {currentItems.map((item) => (
+            <AutomationRow key={item.id} automation={item} onOpenDrawer={onOpenDrawer} />
+          ))}
+          {automations.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+                {t("automationView.table.empty")}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
 
       {automations.length > 0 && (
         <AutomationPagination

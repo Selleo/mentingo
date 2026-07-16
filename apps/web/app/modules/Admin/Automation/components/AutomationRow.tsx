@@ -1,22 +1,30 @@
-import { Mail, CheckCircle, AlertTriangle, HelpCircle, Settings2 } from "lucide-react";
+import { Mail, CheckCircle, AlertTriangle, HelpCircle, MoreVertical } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { TableCell, TableRow } from "~/components/ui/table";
 
 import { StatusBadge } from "./StatusBadge";
 
 import type { Automation } from "../Automation.page";
+import type { FC } from "react";
 
 interface AutomationRowProps {
   automation: Automation;
   onOpenDrawer: (automation: Automation) => void;
 }
 
-export const AutomationRow: React.FC<AutomationRowProps> = ({ automation, onOpenDrawer }) => {
+export const AutomationRow: FC<AutomationRowProps> = ({ automation, onOpenDrawer }) => {
+  const { t } = useTranslation();
+
   const renderLastRun = () => {
     const { date, status } = automation.lastRun;
     if (status === "never") {
       return (
-        <span className="inline-flex items-center gap-1.5 text-sm text-gray-400">
-          <HelpCircle className="w-4 h-4 text-gray-300" />
-          Brak uruchomień
+        <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+          <HelpCircle className="size-4 text-neutral-300" />
+          {t("automationView.table.noRuns")}
         </span>
       );
     }
@@ -24,56 +32,58 @@ export const AutomationRow: React.FC<AutomationRowProps> = ({ automation, onOpen
     const isSuccess = status === "success";
     return (
       <div className="flex flex-col">
-        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900">
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium">
           {isSuccess ? (
-            <CheckCircle className="w-4 h-4 text-emerald-500" />
+            <CheckCircle className="size-4 text-success-500" />
           ) : (
-            <AlertTriangle className="w-4 h-4 text-rose-500" />
+            <AlertTriangle className="size-4 text-error-500" />
           )}
           {date}
         </span>
-        <span className="text-xs text-gray-400 pl-5.5">
-          {isSuccess ? "Zakończone sukcesem" : "Wystąpił błąd"}
+        <span className="pl-5.5 text-xs text-muted-foreground">
+          {isSuccess ? t("automationView.table.runSuccess") : t("automationView.table.runFailed")}
         </span>
       </div>
     );
   };
 
   return (
-    <tr className="hover:bg-gray-50 transition-colors">
-      <td className="px-6 py-4">
+    <TableRow>
+      <TableCell>
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-gray-900">{automation.name}</span>
-          <span className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+          <span className="text-sm font-semibold">{automation.name}</span>
+          <span className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
             {automation.description}
           </span>
         </div>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      </TableCell>
+      <TableCell>
         <StatusBadge status={automation.status} />
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">
-        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-blue-50 text-blue-700 border border-blue-100">
+      </TableCell>
+      <TableCell>
+        <Badge variant="default" className="font-mono text-xs">
           {automation.trigger}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap text-center">
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
-          <Mail className="w-3 h-3" />
-          {automation.actionsCount} {automation.actionsCount === 1 ? "e-mail" : "e-maile"}
-        </span>
-      </td>
-      <td className="px-6 py-4 whitespace-nowrap">{renderLastRun()}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{automation.updatedAt}</td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <button
+        </Badge>
+      </TableCell>
+      <TableCell className="min-w-[160px] text-center">
+        <Badge variant="inProgressFilled" className="gap-1 whitespace-nowrap">
+          <Mail className="size-3" />
+          {t("automationView.table.emailCount", { count: automation.actionsCount })}
+        </Badge>
+      </TableCell>
+      <TableCell>{renderLastRun()}</TableCell>
+      <TableCell className="text-sm text-muted-foreground">{automation.updatedAt}</TableCell>
+      <TableCell className="text-right">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-8"
           onClick={() => onOpenDrawer(automation)}
-          className="inline-flex items-center gap-1 bg-gray-50 hover:bg-gray-100 text-gray-700 hover:text-gray-900 border border-gray-200 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors"
         >
-          <Settings2 className="w-3.5 h-3.5" />
-          Zarządzaj
-        </button>
-      </td>
-    </tr>
+          <MoreVertical className="size-4" />
+          <span className="sr-only">{t("automationView.table.manage")}</span>
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 };

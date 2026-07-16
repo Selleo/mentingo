@@ -1,25 +1,21 @@
-export const StatusBadge: React.FC<{ status: "Enabled" | "Disabled" | "Draft" | "Archived" }> = ({
+import { useTranslation } from "react-i18next";
+
+import { Badge } from "~/components/ui/badge";
+
+import type { FC } from "react";
+
+const statusConfig = {
+  Enabled: { variant: "success" as const, key: "automationView.status.enabled" },
+  Disabled: { variant: "notStarted" as const, key: "automationView.status.disabled" },
+  Draft: { variant: "draft" as const, key: "automationView.status.draft" },
+  Archived: { variant: "blocked" as const, key: "automationView.status.archived" },
+};
+
+export const StatusBadge: FC<{ status: "Enabled" | "Disabled" | "Draft" | "Archived" }> = ({
   status,
 }) => {
-  const styles = {
-    Enabled: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    Disabled: "bg-gray-50 text-gray-600 border-gray-200",
-    Draft: "bg-amber-50 text-amber-700 border-amber-200",
-    Archived: "bg-slate-100 text-slate-700 border-slate-300 font-medium",
-  };
+  const { t } = useTranslation();
+  const config = statusConfig[status];
 
-  const labelPl = {
-    Enabled: "Włączona",
-    Disabled: "Wyłączona",
-    Draft: "Szkic",
-    Archived: "Zarchiwizowana",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${styles[status]}`}
-    >
-      {labelPl[status]}
-    </span>
-  );
+  return <Badge variant={config.variant}>{t(config.key)}</Badge>;
 };
