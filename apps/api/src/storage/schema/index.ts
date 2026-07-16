@@ -2487,12 +2487,16 @@ export const automationStatus = pgEnum(
   "automation_status",
   Object.values(AutomationStatus) as [string, ...string[]],
 );
+
 export const automations = pgTable(
   "automations",
   {
     ...id,
     ...timestamps,
     tenantId,
+    triggerId: uuid("trigger_id")
+      .references(() => automationTriggers.id)
+      .notNull(),
     name: jsonb("name").notNull().$type<LocalizedText>().default({}),
     description: jsonb("description").$type<LocalizedText>().default({}),
     lastRun: timestamp("last_run", { mode: "date" }),
@@ -2540,3 +2544,11 @@ export const automationConditions = pgTable(
   },
   withTenantIdIndex("automation_condition_index"),
 );
+
+export const automationTriggers = pgTable("automation_triggers", {
+  ...id,
+  ...timestamps,
+  tenantId,
+  name: varchar("name", { length: 50 }).notNull(),
+  context: jsonb("context").notNull(),
+});
