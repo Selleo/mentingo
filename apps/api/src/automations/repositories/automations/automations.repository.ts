@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -13,7 +13,7 @@ export class AutomationsRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async getAllAutomationsByTenantId(tenantId: UUIDType) {
-    return await this.db.select().from(automations).where(eq(automations.tenantId, tenantId));
+    return this.db.select().from(automations).where(eq(automations.tenantId, tenantId));
   }
 
   async getAutomationById(automationId: UUIDType) {
@@ -49,9 +49,6 @@ export class AutomationsRepository {
       .delete(automations)
       .where(eq(automations.id, automationId))
       .returning();
-    if (!deleted) {
-      throw new NotFoundException("Automation not found");
-    }
-    return deleted.id;
+    return deleted;
   }
 }
