@@ -74,6 +74,10 @@ export const shouldHideTopbarAndSidebar = (pathname: string) =>
     .with("/admin/beta-courses/new", () => true)
     .with("/admin/beta-courses/new/standard", () => true)
     .with("/admin/courses/new-scorm", () => true)
+    .when(
+      (p) => /^\/admin\/automation\/[^/]+\/builder$/.test(p),
+      () => true,
+    )
     .otherwise(() => false);
 
 const AdminLayout = () => {
