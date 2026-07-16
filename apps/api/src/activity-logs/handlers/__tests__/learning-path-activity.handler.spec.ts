@@ -132,10 +132,7 @@ describe("LearningPathActivityHandler", () => {
     const event = new EnrollLearningPathEvent({
       learningPathId,
       actor,
-      tenantId: actor.tenantId,
       userIds,
-      requestedCount: 2,
-      enrolledCount: 2,
     });
 
     await handler.handle(event);

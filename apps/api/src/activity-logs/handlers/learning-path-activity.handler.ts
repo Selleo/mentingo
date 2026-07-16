@@ -60,6 +60,7 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
 
     await this.activityLogsService.recordActivity({
       actor: event.learningPathCreationData.actor,
+      tenantId: event.learningPathCreationData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.CREATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.learningPathCreationData.learningPathId,
@@ -78,6 +79,7 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
 
     await this.activityLogsService.recordActivity({
       actor: learningPathUpdateData.actor,
+      tenantId: learningPathUpdateData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathUpdateData.learningPathId,
@@ -91,6 +93,7 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   private async handleDeleteLearningPath(event: DeleteLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.learningPathDeletionData.actor,
+      tenantId: event.learningPathDeletionData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.learningPathDeletionData.learningPathId,
@@ -102,11 +105,13 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
 
     await this.activityLogsService.recordActivity({
       actor,
+      tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
       context: {
         enrolledUserIds: JSON.stringify(userIds),
+        requestedCount: String(userIds.length),
         enrolledCount: String(userIds.length),
       },
     });
@@ -115,24 +120,22 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   private async handleStartLearningPath(event: StartLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.startData.actor,
+      tenantId: event.startData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.START_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.startData.learningPathId,
-      context: {
-        startedByUserId: event.startData.userId,
-      },
+      context: { learningPathId: event.startData.learningPathId },
     });
   }
 
   private async handleCompleteLearningPath(event: CompleteLearningPathEvent) {
     await this.activityLogsService.recordActivity({
       actor: event.completeData.actor,
+      tenantId: event.completeData.actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.COMPLETE_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: event.completeData.learningPathId,
-      context: {
-        completedByUserId: event.completeData.userId,
-      },
+      context: { learningPathId: event.completeData.learningPathId },
     });
   }
 }
