@@ -46,7 +46,6 @@ import {
   varchar,
   vector,
 } from "drizzle-orm/pg-core";
-import { primaryKey } from "drizzle-orm/pg-core";
 
 import { AutomationStatus } from "src/announcements/types/automations.types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
@@ -2502,66 +2501,42 @@ export const automations = pgTable(
   withTenantIdIndex("automation_index"),
 );
 
-export const automationsAutomationSteps = pgTable(
-  "automations_automation_steps",
-  {
-    automationId: uuid("automation_id")
-      .references(() => automations.id)
-      .notNull(),
-    automationStepId: uuid("automation_step_id")
-      .references(() => automationSteps.id)
-      .notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({
-      columns: [table.automationId, table.automationStepId],
-    }),
-  }),
-);
-
-export const automationSteps = pgTable("automation_steps", {
-  ...id,
-  ...timestamps,
-  tenantId,
-  parentId: uuid("parent_id"),
-});
-
-export const automationStepsAutomationActions = pgTable(
-  "automation_steps_automation_actions",
-  {
-    automationStepId: uuid("automation_step_id")
-      .references(() => automationSteps.id)
-      .notNull(),
-    automationActionId: uuid("automation_action_id")
-      .references(() => automationActions.id)
-      .notNull(),
-  },
-  (table) => ({
-    pk: primaryKey({ columns: [table.automationStepId, table.automationActionId] }),
-  }),
-);
-
-export const automationStepsAutomationConditions = pgTable(
-  "automation_steps_automation_conditions",
+export const automationSteps = pgTable(
+  "automation_steps",
   {
     ...id,
     ...timestamps,
     tenantId,
-    automationStepId: uuid("automation_step_id")
-      .references(() => automationSteps.id)
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
       .notNull(),
-    automationConditionId: uuid("automation_condition_id")
-      .references(() => automationConditions.id)
-      .notNull(),
+    parentId: uuid("parent_id"),
+    actionId: uuid("action_id").references(() => automationActions.id, { onDelete: "cascade" }),
+    conditionId: uuid("condition_id").references(() => automationConditions.id, {
+      onDelete: "cascade",
+    }),
   },
+  withTenantIdIndex("automation_steps_index"),
 );
 
-export const automationActions = pgTable("automation_actions", {
-  ...id,
-  name: varchar("name", { length: 50 }).notNull(),
-});
+export const automationActions = pgTable(
+  "automation_actions",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    name: varchar("name", { length: 50 }).notNull(),
+  },
+  withTenantIdIndex("automation_actions_index"),
+);
 
-export const automationConditions = pgTable("automation_conditions", {
-  ...id,
-  name: varchar("name", { length: 50 }).notNull(),
-});
+export const automationConditions = pgTable(
+  "automation_conditions",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    name: varchar("name", { length: 50 }).notNull(),
+  },
+  withTenantIdIndex("automation_condition_index"),
+);
