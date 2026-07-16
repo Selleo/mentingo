@@ -2483,7 +2483,7 @@ export const learningPathEntityMap = pgTable(
     ),
   }),
 );
-const automationStatus = pgEnum(
+export const automationStatus = pgEnum(
   "automation_status",
   Object.values(AutomationStatus) as [string, ...string[]],
 );

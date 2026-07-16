@@ -1135,6 +1135,13 @@
       "when": 1783673985611,
       "tag": "0161_add_require_password_change_field",
       "breakpoints": true
+    },
+    {
+      "idx": 162,
+      "version": "7",
+      "when": 1784195655977,
+      "tag": "0162_add_automations_tables",
+      "breakpoints": true
     }
   ]
 }
