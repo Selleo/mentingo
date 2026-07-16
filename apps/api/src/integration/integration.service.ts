@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
@@ -27,6 +28,7 @@ import type {
 import type {
   IntegrationCreateTenantBody,
   IntegrationTenantLifecycleResponse,
+  IntegrationUpdateTenantBody,
 } from "./schemas/integration.schema";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -170,6 +172,17 @@ export class IntegrationService {
     });
   }
 
+  async updateTenantForIntegration(
+    tenantId: string,
+    input: IntegrationUpdateTenantBody,
+    actor: CurrentUserType,
+    keyTenant: IntegrationKeyTenantContext,
+  ): Promise<IntegrationTenantLifecycleResponse> {
+    this.assertCanManageTenants(actor, keyTenant);
+
+    return this.tenantsService.updateTenantById(tenantId, input);
+  }
+
   async getTrainingResults(
     actor: CurrentUserType,
     query: IntegrationTrainingResultsQuery,
@@ -203,11 +216,11 @@ export class IntegrationService {
 
   private assertCanManageTenants(actor: CurrentUserType, keyTenant: IntegrationKeyTenantContext) {
     if (!hasPermission(actor.permissions, PERMISSIONS.TENANT_MANAGE)) {
-      throw new ForbiddenException("auth.error.missingPermission");
+      throw new NotFoundException("auth.error.missingPermission");
     }
 
     if (!keyTenant.isManaging) {
-      throw new ForbiddenException("superAdminTenants.error.managingTenantRequired");
+      throw new NotFoundException("superAdminTenants.error.managingTenantRequired");
     }
   }
 }
