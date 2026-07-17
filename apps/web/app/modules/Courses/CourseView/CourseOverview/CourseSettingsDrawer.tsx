@@ -2,22 +2,20 @@ import { Settings, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { CourseSettingsSwitches } from "~/modules/Admin/EditCourse/CourseSettings/components/CourseSettingsSwitches";
 
 type CourseSettingsDrawerProps = {
   onClose: () => void;
   title: string;
+  courseId: string;
 };
 
-export default function CourseSettingsDrawer({ onClose, title }: CourseSettingsDrawerProps) {
+export default function CourseSettingsDrawer({
+  onClose,
+  title,
+  courseId,
+}: CourseSettingsDrawerProps) {
   const { t } = useTranslation();
-  const settingsItems = [
-    t("modernCourseView.overview.settingsStatus"),
-    t("modernCourseView.overview.settingsPricing"),
-    t("modernCourseView.overview.settingsAssignments"),
-    t("modernCourseView.overview.settingsSequential"),
-    t("modernCourseView.overview.settingsVisibility"),
-    t("modernCourseView.overview.settingsPermissions"),
-  ];
 
   return (
     <>
@@ -45,23 +43,7 @@ export default function CourseSettingsDrawer({ onClose, title }: CourseSettingsD
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 md:p-6">
-            <div className="rounded-xl border border-primary-200 bg-primary-50 p-6 text-center">
-              <Settings className="mx-auto mb-3 size-12 text-primary-700" />
-              <h3 className="mb-2 text-lg font-semibold text-neutral-950">
-                {t("modernCourseView.overview.settingsComingSoon")}
-              </h3>
-              <p className="text-sm text-neutral-800">
-                {t("modernCourseView.overview.settingsIntro")}
-              </p>
-              <ul className="mt-4 space-y-2 text-left text-sm text-neutral-800">
-                {settingsItems.map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <span className="font-bold text-primary-700">•</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            <CourseSettingsSwitches courseId={courseId} />
           </div>
 
           <div className="border-t border-neutral-200 p-4 md:p-6">

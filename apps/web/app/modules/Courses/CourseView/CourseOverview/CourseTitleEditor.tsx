@@ -69,7 +69,7 @@ export default function CourseTitleEditor({
             onCancel();
           }
         }}
-        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-3 text-2xl font-bold leading-tight text-white backdrop-blur-lg md:text-3xl lg:text-4xl"
+        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-2 text-2xl font-bold leading-tight text-white backdrop-blur-lg md:text-3xl lg:text-4xl"
         rows={1}
       />
     );

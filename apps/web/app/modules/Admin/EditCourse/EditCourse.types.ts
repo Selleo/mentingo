@@ -7,7 +7,6 @@ import type {
 } from "@repo/shared";
 
 export const EDIT_COURSE_TABS = {
-  SETTINGS: "Settings",
   CURRICULUM: "Curriculum",
   PRICING: "Pricing",
   STATUS: "Status",

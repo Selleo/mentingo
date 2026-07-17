@@ -76,7 +76,7 @@ export default function ProgressStatCard({
       </div>
       {isAdminExperience && (
         <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-neutral-950/35 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
-          <p className="mx-3 rounded-xl border border-white/70 bg-white/95 px-4 py-3 text-center text-sm font-semibold text-neutral-950 shadow-lg">
+          <p className="mx-3 rounded-xl  bg-white/95 px-4 py-3 text-center text-sm font-semibold text-neutral-950 ">
             <button
               type="button"
               onClick={onEnterLearningMode}

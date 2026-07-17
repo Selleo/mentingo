@@ -1,14 +1,17 @@
 import { useNavigate } from "@remix-run/react";
+import { ENTITY_TYPES } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { type ChangeEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
+import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
 import { useCategories } from "~/api/queries";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Button } from "~/components/ui/button";
+import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
@@ -41,13 +44,17 @@ export default function CourseOverview({ language }: CourseHeroProps) {
     useToggleCourseStudentMode(course.id);
   const { mutateAsync: updateCourse, isPending: isUpdatingCourse } = useUpdateCourse();
   const { mutateAsync: updateCourseMedia, isPending: isUpdatingMedia } = useUpdateCourseMedia();
+  const { mutateAsync: initVideoUpload, isPending: isInitializingTrailer } = useInitVideoUpload();
+  const { getSessionForFile, uploadVideo, isUploading: isUploadingTrailer } = useTusVideoUpload();
 
   const savedImagePosition = course.thumbnailPositionY ?? 50;
   const imageUrl = course.thumbnailUrl ?? CardPlaceholder;
 
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const trailerInputRef = useRef<HTMLInputElement>(null);
   const [heroImagePositionDraft, setHeroImagePositionDraft] = useState(savedImagePosition);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [selectedTrailerFile, setSelectedTrailerFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState(imageUrl);
   const [courseTitle, setCourseTitle] = useState(course.title);
   const [courseDescription, setCourseDescription] = useState(course.description);
@@ -93,11 +100,16 @@ export default function CourseOverview({ language }: CourseHeroProps) {
 
   const resetMediaDraft = () => {
     setSelectedImageFile(null);
+    setSelectedTrailerFile(null);
     setImagePreviewUrl(imageUrl);
     setHeroImagePositionDraft(savedImagePosition);
 
     if (imageInputRef.current) {
       imageInputRef.current.value = "";
+    }
+
+    if (trailerInputRef.current) {
+      trailerInputRef.current.value = "";
     }
   };
 
@@ -108,6 +120,10 @@ export default function CourseOverview({ language }: CourseHeroProps) {
 
     setSelectedImageFile(file);
     setImagePreviewUrl(URL.createObjectURL(file));
+  };
+
+  const handleTrailerSelection = (event: ChangeEvent<HTMLInputElement>) => {
+    setSelectedTrailerFile(event.target.files?.[0] ?? null);
   };
 
   const openMediaModal = () => {
@@ -121,6 +137,25 @@ export default function CourseOverview({ language }: CourseHeroProps) {
   };
 
   const saveMediaSettings = async () => {
+    if (selectedTrailerFile) {
+      const session = await getSessionForFile({
+        file: selectedTrailerFile,
+        init: () =>
+          initVideoUpload({
+            filename: selectedTrailerFile.name,
+            sizeBytes: selectedTrailerFile.size,
+            mimeType: selectedTrailerFile.type,
+            title: selectedTrailerFile.name,
+            resource: ENTITY_TYPES.COURSE,
+            entityId: course.id,
+            entityType: ENTITY_TYPES.COURSE,
+            relationshipType: "trailer",
+          }),
+      });
+
+      await uploadVideo({ file: selectedTrailerFile, session });
+    }
+
     await updateCourseMedia({
       courseId: course.id,
       data: {
@@ -131,8 +166,11 @@ export default function CourseOverview({ language }: CourseHeroProps) {
     });
 
     setSelectedImageFile(null);
+    setSelectedTrailerFile(null);
     setIsMediaModalOpen(false);
   };
+
+  const isSavingMedia = isUpdatingMedia || isInitializingTrailer || isUploadingTrailer;
 
   const handleToggleLearningMode = () => {
     toggleLearningMode({ enabled: !isCourseStudentModeActive });
@@ -295,11 +333,14 @@ export default function CourseOverview({ language }: CourseHeroProps) {
           imagePreviewUrl={imagePreviewUrl}
           heroImagePositionDraft={heroImagePositionDraft}
           imageInputRef={imageInputRef}
-          isSaving={isUpdatingMedia}
+          trailerInputRef={trailerInputRef}
+          isSaving={isSavingMedia}
           onClose={closeMediaModal}
           onSave={saveMediaSettings}
           onPositionChange={setHeroImagePositionDraft}
           onImageSelection={handleImageSelection}
+          onTrailerSelection={handleTrailerSelection}
+          selectedTrailerFile={selectedTrailerFile}
         />
       )}
 
@@ -316,6 +357,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
         <CourseSettingsDrawer
           onClose={() => setShowSettingsDrawer(false)}
           title={t("modernCourseView.overview.courseSettings")}
+          courseId={course.id}
         />
       )}
     </section>

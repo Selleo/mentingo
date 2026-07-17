@@ -2,16 +2,18 @@ import { Award, Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { Switch } from "~/components/ui/switch";
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
-import { DEFAULT_AUTHOR_MODAL_IMAGE, getAuthorName } from "./author.utils";
+import { getAuthorName } from "./author.utils";
 
 type Author = {
   description?: string | null;
   firstName?: string | null;
   jobTitle?: string | null;
   lastName?: string | null;
+  profilePictureUrl?: string | null;
 };
 
 type OtherCourse = {
@@ -29,7 +31,7 @@ type AuthorModalProps = {
   isSaving: boolean;
   onClose: () => void;
   onSave: () => Promise<void>;
-  onToggleShowAuthorSection: () => void;
+  onToggleShowAuthorSection: (visible: boolean) => void;
   otherCourses: OtherCourse[];
   showAuthorSectionDraft: boolean;
 };
@@ -65,10 +67,10 @@ export default function AuthorModal({
             >
               <X className="size-5 text-neutral-800" />
             </button>
-            <img
-              src={DEFAULT_AUTHOR_MODAL_IMAGE}
-              alt={authorFullName || t("modernCourseView.author.pictureAlt")}
-              className="size-full rounded-xl object-cover shadow-lg"
+            <UserAvatar
+              userName={authorFullName}
+              profilePictureUrl={author?.profilePictureUrl}
+              className="size-30"
             />
           </div>
 
@@ -91,23 +93,12 @@ export default function AuthorModal({
                       {t("modernCourseView.author.showSectionDescription")}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={showAuthorSectionDraft}
-                    className={cn("relative h-7 w-14 rounded-full transition-colors", {
-                      "bg-success-500": showAuthorSectionDraft,
-                      "bg-neutral-300": !showAuthorSectionDraft,
-                    })}
-                    onClick={onToggleShowAuthorSection}
-                  >
-                    <div
-                      className={cn(
-                        "absolute left-0.5 top-0.5 size-6 rounded-full bg-white transition-transform",
-                        showAuthorSectionDraft ? "translate-x-7" : "translate-x-0",
-                      )}
-                    />
-                  </button>
+                  <Switch
+                    checked={showAuthorSectionDraft}
+                    onCheckedChange={onToggleShowAuthorSection}
+                    disabled={isSaving}
+                    aria-label={t("modernCourseView.author.showSection")}
+                  />
                 </div>
               </div>
             )}

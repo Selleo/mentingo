@@ -29,9 +29,6 @@ const NavigationTabs = ({ setNavigationTabState }: NavigationTabsProps) => {
       onValueChange={handleValueChange}
     >
       <Tabs.List className="flex items-center gap-5 border-b border-gray-200">
-        <TabTrigger value={EDIT_COURSE_TABS.SETTINGS}>
-          {t("adminCourseView.common.settings")}
-        </TabTrigger>
         <TabTrigger value={EDIT_COURSE_TABS.CURRICULUM}>
           {t("adminCourseView.common.curriculum")}
         </TabTrigger>

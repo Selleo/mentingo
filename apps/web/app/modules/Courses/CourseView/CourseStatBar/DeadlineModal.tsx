@@ -2,7 +2,7 @@ import { Calendar, Check, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
-import { cn } from "~/lib/utils";
+import { Switch } from "~/components/ui/switch";
 
 export type GroupDeadline = {
   deadline: string;
@@ -17,7 +17,7 @@ type DeadlineModalProps = {
   onChangeGroupDeadlines: (groups: GroupDeadline[]) => void;
   onClose: () => void;
   onSave: () => void;
-  onToggleDeadline: () => void;
+  onToggleDeadline: (enabled: boolean) => void;
 };
 
 export default function DeadlineModal({
@@ -59,27 +59,12 @@ export default function DeadlineModal({
                 {t("modernCourseView.deadline.enableDescription")}
               </p>
             </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={deadlineEnabledDraft}
-              disabled={groupDeadlines.length === 0}
-              onClick={onToggleDeadline}
-              className={cn("relative h-8 w-14 rounded-full transition-colors", {
-                "cursor-not-allowed": groupDeadlines.length === 0,
-                "bg-secondary-500": deadlineEnabledDraft,
-                "bg-neutral-300": !deadlineEnabledDraft,
-              })}
-            >
-              <div
-                className={cn(
-                  "absolute left-1 top-1 size-6 rounded-full bg-white transition-transform",
-                  {
-                    "translate-x-6": deadlineEnabledDraft,
-                  },
-                )}
-              />
-            </button>
+            <Switch
+              checked={deadlineEnabledDraft}
+              onCheckedChange={onToggleDeadline}
+              disabled={isSaving || groupDeadlines.length === 0}
+              aria-label={t("modernCourseView.deadline.enable")}
+            />
           </div>
 
           {groupDeadlines.length === 0 && (

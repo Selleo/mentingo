@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
-import { useUpdateHasCertificate } from "~/api/mutations/useUpdateHasCertificate";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
@@ -24,8 +23,6 @@ import type { SupportedLanguages } from "@repo/shared";
 type CourseHeroProps = {
   language: SupportedLanguages;
 };
-
-const DEFAULT_CERTIFICATE_COLOR = "#3f58b6";
 
 const getGridClassName = ({
   hasAuthor,
@@ -65,11 +62,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const [showAuthorSectionDraft, setShowAuthorSectionDraft] = useState(showAuthorSection);
   const [deadlineEnabledDraft, setDeadlineEnabledDraft] = useState(Boolean(course.dueDate));
   const [groupDeadlines, setGroupDeadlines] = useState<GroupDeadline[]>([]);
-  const [certificateEnabledDraft, setCertificateEnabledDraft] = useState(hasCertificate);
-  const [certificateColor, setCertificateColor] = useState(DEFAULT_CERTIFICATE_COLOR);
 
-  const { mutate: updateHasCertificate, isPending: isUpdatingCertificate } =
-    useUpdateHasCertificate();
   const { mutateAsync: updateCourse, isPending: isUpdatingAuthorSection } = useUpdateCourse();
   const { mutate: updateGroupDeadlines, isPending: isUpdatingDeadlines } = useBulkGroupCourseEnroll(
     course.id,
@@ -109,10 +102,6 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   }, [enrolledGroups]);
 
   useEffect(() => {
-    setCertificateEnabledDraft(hasCertificate);
-  }, [hasCertificate]);
-
-  useEffect(() => {
     setShowAuthorSectionDraft(showAuthorSection);
   }, [showAuthorSection]);
 
@@ -121,12 +110,10 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   }, [resetDeadlineDraft]);
 
   const openCertificateModal = () => {
-    setCertificateEnabledDraft(hasCertificate);
     setShowCertificateModal(true);
   };
 
   const closeCertificateModal = () => {
-    setCertificateEnabledDraft(hasCertificate);
     setShowCertificateModal(false);
   };
 
@@ -154,32 +141,12 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     toggleLearningMode({ enabled: true });
   };
 
-  const toggleCertificateDraft = () => {
-    setCertificateEnabledDraft((enabled) => !enabled);
+  const toggleDeadlineDraft = (enabled: boolean) => {
+    setDeadlineEnabledDraft(enabled);
   };
 
-  const toggleDeadlineDraft = () => {
-    setDeadlineEnabledDraft((enabled) => !enabled);
-  };
-
-  const toggleShowAuthorSectionDraft = () => {
-    setShowAuthorSectionDraft((visible) => !visible);
-  };
-
-  const saveCertificate = () => {
-    updateHasCertificate(
-      {
-        courseId: course.id,
-        data: {
-          hasCertificate: certificateEnabledDraft,
-        },
-      },
-      {
-        onSuccess: () => {
-          setShowCertificateModal(false);
-        },
-      },
-    );
+  const toggleShowAuthorSectionDraft = (visible: boolean) => {
+    setShowAuthorSectionDraft(visible);
   };
 
   const saveDeadlines = () => {
@@ -268,14 +235,9 @@ export function CourseStatBar({ language }: CourseHeroProps) {
 
       {showCertificateModal && (
         <CertificateModal
-          certificateColor={certificateColor}
-          certificateEnabledDraft={certificateEnabledDraft}
           courseTitle={course.title}
-          isSaving={isUpdatingCertificate}
-          onCertificateColorChange={setCertificateColor}
+          hasCertificate={hasCertificate}
           onClose={closeCertificateModal}
-          onSave={saveCertificate}
-          onToggleCertificate={toggleCertificateDraft}
         />
       )}
 

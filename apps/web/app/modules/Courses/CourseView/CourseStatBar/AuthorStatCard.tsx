@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 
+import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { cn } from "~/lib/utils";
 
-import { DEFAULT_AUTHOR_STAT_IMAGE, getAuthorName } from "./author.utils";
+import { getAuthorName } from "./author.utils";
 
 type Author = {
   firstName?: string | null;
@@ -32,20 +33,19 @@ export default function AuthorStatCard({
       type="button"
       onClick={onOpen}
       className={cn(
-        "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg transition-all hover:shadow-xl",
+        "relative cursor-pointer overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg transition-all hover:bg-neutral-50 hover:shadow-xl",
         {
-          "hover:outline hover:outline-2 hover:outline-dashed hover:outline-primary-700/40":
-            isAdminExperience,
-          "opacity-50": isAdminExperience && !showAuthorSection,
+          "opacity-50 hover:bg-neutral-100 hover:opacity-75":
+            isAdminExperience && !showAuthorSection,
         },
       )}
     >
       <div className="absolute inset-y-0 left-0 w-1 bg-primary-700" aria-hidden="true" />
       <div className="flex items-center gap-4">
-        <img
-          src={author?.profilePictureUrl ?? DEFAULT_AUTHOR_STAT_IMAGE}
-          alt={authorName || "author picture"}
-          className="size-12 flex-shrink-0 rounded-full object-cover"
+        <UserAvatar
+          userName={`${author?.firstName} ${author?.lastName}`}
+          profilePictureUrl={author?.profilePictureUrl}
+          className="size-8"
         />
         <div className="flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">

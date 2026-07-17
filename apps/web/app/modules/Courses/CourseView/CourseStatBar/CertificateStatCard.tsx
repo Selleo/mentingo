@@ -31,20 +31,19 @@ export default function CertificateStatCard({
     <button
       type="button"
       disabled={!isAdminExperience}
-      onClick={() => {
-        if (isAdminExperience) {
-          onOpen();
-        }
-      }}
-      className={cn("relative overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg", {
-        "cursor-pointer transition-all hover:shadow-xl hover:outline hover:outline-2 hover:outline-dashed hover:outline-success-500/40":
-          isAdminExperience,
-        "opacity-50": isAdminExperience && !hasCertificate,
-      })}
+      onClick={isAdminExperience ? onOpen : undefined}
+      className={cn(
+        "relative h-full w-full overflow-hidden rounded-2xl bg-white p-4 text-left shadow-lg",
+        {
+          "cursor-pointer transition-all hover:bg-neutral-50 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success-500 focus-visible:ring-offset-2":
+            isAdminExperience,
+          "opacity-50 hover:bg-neutral-100 hover:opacity-75": isAdminExperience && !hasCertificate,
+        },
+      )}
     >
       <div className="absolute inset-y-0 left-0 w-1 bg-success-500" aria-hidden="true" />
-      <div className="flex items-start gap-4">
-        <div className="mt-3 flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
+      <div className="flex items-center gap-4">
+        <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
           <Award className="size-6 text-success-500" />
         </div>
         <div className="flex-1">

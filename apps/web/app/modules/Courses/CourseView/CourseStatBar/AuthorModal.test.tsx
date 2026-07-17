@@ -67,7 +67,7 @@ describe("AuthorModal", () => {
     await user.click(screen.getByRole("switch"));
     await user.click(screen.getByRole("button", { name: "Save changes" }));
 
-    expect(onToggleShowAuthorSection).toHaveBeenCalledOnce();
+    expect(onToggleShowAuthorSection).toHaveBeenCalledWith(false);
     expect(onSave).toHaveBeenCalledOnce();
   });
 });
