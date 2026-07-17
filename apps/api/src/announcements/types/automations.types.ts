@@ -4,3 +4,7 @@ export enum AutomationStatus {
   Archived = "archived",
   Draft = "draft",
 }
+
+export const automationTypes = ["action", "condition", "trigger"] as const;
+
+export type AutomationType = (typeof automationTypes)[number];

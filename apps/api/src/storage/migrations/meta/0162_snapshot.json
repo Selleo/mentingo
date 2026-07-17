@@ -1,5 +1,5 @@
 {
-  "id": "ac335732-5137-4fc0-bb55-39ac88623eb7",
+  "id": "1a2678c4-2817-43df-86f0-737892f72ef7",
   "prevId": "51473765-3cec-469b-a0ac-a0ccb4880ca1",
   "version": "7",
   "dialect": "postgresql",
@@ -1169,154 +1169,6 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "public.automation_actions": {
-      "name": "automation_actions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "automation_actions_index_tenant_id_idx": {
-          "name": "automation_actions_index_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "automation_actions_tenant_id_tenants_id_fk": {
-          "name": "automation_actions_tenant_id_tenants_id_fk",
-          "tableFrom": "automation_actions",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
-    "public.automation_conditions": {
-      "name": "automation_conditions",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "CURRENT_TIMESTAMP"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "current_setting('app.tenant_id', true)::uuid"
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "automation_condition_index_tenant_id_idx": {
-          "name": "automation_condition_index_tenant_id_idx",
-          "columns": [
-            {
-              "expression": "tenant_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "automation_conditions_tenant_id_tenants_id_fk": {
-          "name": "automation_conditions_tenant_id_tenants_id_fk",
-          "tableFrom": "automation_conditions",
-          "tableTo": "tenants",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "public.automation_steps": {
       "name": "automation_steps",
       "schema": "",
@@ -1361,17 +1213,19 @@
           "primaryKey": false,
           "notNull": false
         },
-        "action_id": {
-          "name": "action_id",
-          "type": "uuid",
+        "type": {
+          "name": "type",
+          "type": "automation_type",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
-        "condition_id": {
-          "name": "condition_id",
-          "type": "uuid",
+        "type_context": {
+          "name": "type_context",
+          "type": "jsonb",
           "primaryKey": false,
-          "notNull": false
+          "notNull": false,
+          "default": "'{}'::jsonb"
         }
       },
       "indexes": {
@@ -1411,32 +1265,6 @@
           "tableTo": "automations",
           "columnsFrom": [
             "automation_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "automation_steps_action_id_automation_actions_id_fk": {
-          "name": "automation_steps_action_id_automation_actions_id_fk",
-          "tableFrom": "automation_steps",
-          "tableTo": "automation_actions",
-          "columnsFrom": [
-            "action_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "automation_steps_condition_id_automation_conditions_id_fk": {
-          "name": "automation_steps_condition_id_automation_conditions_id_fk",
-          "tableFrom": "automation_steps",
-          "tableTo": "automation_conditions",
-          "columnsFrom": [
-            "condition_id"
           ],
           "columnsTo": [
             "id"
@@ -13838,6 +13666,15 @@
         "disabled",
         "archived",
         "draft"
+      ]
+    },
+    "public.automation_type": {
+      "name": "automation_type",
+      "schema": "public",
+      "values": [
+        "action",
+        "condition",
+        "trigger"
       ]
     },
     "public.course_type": {
