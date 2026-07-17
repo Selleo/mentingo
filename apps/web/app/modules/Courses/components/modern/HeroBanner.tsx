@@ -131,7 +131,7 @@ const HeroBanner = ({
           }}
         />
         <div
-          className="absolute inset-0 pointer-events-none -bottom-0.5"
+          className="pointer-events-none absolute bottom-0 left-0 h-1/2 w-full md:inset-x-0 md:top-0 md:-bottom-0.5 md:h-auto"
           style={{
             backgroundImage: `
               linear-gradient(0deg, var(--primary-50) 0%, color-mix(in srgb, var(--primary-50) 72%, var(--primary-200)) 8%, color-mix(in srgb, var(--primary-200) 24%, transparent) 25%, color-mix(in srgb, var(--primary-200) 5%, transparent) 50%, transparent 75%),
@@ -153,7 +153,9 @@ const HeroBanner = ({
 
       <div className="relative z-20 px-4 py-5 md:flex md:h-full md:items-end md:px-8 md:pb-16 md:pt-0">
         <div className="max-w-2xl space-y-3 md:space-y-4">
-          <h1 className="h1 text-3xl leading-tight md:text-4xl md:leading-relaxed">{title}</h1>
+          <h1 className="h1 -mt-3 text-3xl leading-tight md:mt-0 md:text-4xl md:leading-relaxed">
+            {title}
+          </h1>
 
           {(durationLabel || lessonsLabel) && (
             <div className="flex gap-3 font-medium md:gap-4 md:text-sm">
