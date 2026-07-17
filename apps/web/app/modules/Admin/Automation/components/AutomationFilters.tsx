@@ -2,7 +2,13 @@ import { Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "~/components/ui/input";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 import type { FC } from "react";
 
@@ -23,7 +29,7 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const tabs: { value: StatusFilter; labelKey: string }[] = [
+  const statusOptions: { value: StatusFilter; labelKey: string }[] = [
     { value: "All", labelKey: "automationView.filters.all" },
     { value: "Enabled", labelKey: "automationView.filters.enabled" },
     { value: "Disabled", labelKey: "automationView.filters.disabled" },
@@ -32,7 +38,7 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
   ];
 
   return (
-    <div className="mb-6 flex flex-col items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-sm sm:flex-row">
+    <div className="mb-6 flex flex-col items-center justify-between gap-4 sm:flex-row">
       <div className="relative w-full sm:max-w-xs">
         <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         <Input
@@ -43,18 +49,21 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
         />
       </div>
 
-      <Tabs
+      <Select
         value={statusFilter}
         onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}
       >
-        <TabsList>
-          {tabs.map((tab) => (
-            <TabsTrigger key={tab.value} value={tab.value}>
-              {t(tab.labelKey)}
-            </TabsTrigger>
+        <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {statusOptions.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {t(option.labelKey)}
+            </SelectItem>
           ))}
-        </TabsList>
-      </Tabs>
+        </SelectContent>
+      </Select>
     </div>
   );
 };
