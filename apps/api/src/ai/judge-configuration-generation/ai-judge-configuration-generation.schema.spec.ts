@@ -1,9 +1,12 @@
 import { Value } from "@sinclair/typebox/value";
 
 import {
+  aiJudgeConfigurationValidatorModelResultSchema,
   aiJudgeConfigurationValidationResultSchema,
+  aiJudgeGenerationApplicationResultSchema,
   aiJudgeGenerationProgressEventSchema,
   aiJudgeGenerationResultSchema,
+  aiJudgeGenerationSnapshotSchema,
   generateAiJudgeConfigurationInputSchema,
   referencedAiJudgeConfigurationSchema,
   validateAiJudgeConfigurationInputSchema,
@@ -144,6 +147,13 @@ describe("AI Judge configuration generation schemas", () => {
     ).toBe(false);
   });
 
+  it("keeps the model from deciding whether semantic validation passed", () => {
+    const { passed: _passed, ...modelResult } = validation;
+
+    expect(Value.Check(aiJudgeConfigurationValidatorModelResultSchema, modelResult)).toBe(true);
+    expect(Value.Check(aiJudgeConfigurationValidatorModelResultSchema, validation)).toBe(false);
+  });
+
   it("accepts independent validation without an original brief", () => {
     expect(
       Value.Check(validateAiJudgeConfigurationInputSchema, {
@@ -197,5 +207,56 @@ describe("AI Judge configuration generation schemas", () => {
         validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
       }),
     ).toBe(false);
+  });
+
+  it("allows reconciled persisted identities only in the application result", () => {
+    const configurationWithIds = {
+      ...configuration,
+      criteria: [
+        {
+          ...configuration.criteria[0],
+          id: "87ee9005-970c-45f2-a9b0-5cf642440ff7",
+          scoreGuidance: configuration.criteria[0].scoreGuidance.map((guidance, index) => ({
+            ...guidance,
+            id: `00000000-0000-4000-8000-00000000000${index + 1}`,
+          })),
+        },
+      ],
+      blockingErrors: [
+        {
+          ...configuration.blockingErrors[0],
+          id: "00000000-0000-4000-8000-000000000009",
+        },
+      ],
+    };
+
+    expect(
+      Value.Check(aiJudgeGenerationApplicationResultSchema, {
+        status: "completed",
+        attempt: 1,
+        configuration: configurationWithIds,
+        validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(aiJudgeGenerationResultSchema, {
+        status: "completed",
+        attempt: 1,
+        configuration: configurationWithIds,
+        validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
+      }),
+    ).toBe(false);
+  });
+
+  it("wraps temporary progress in a generation-addressable snapshot", () => {
+    expect(
+      Value.Check(aiJudgeGenerationSnapshotSchema, {
+        generationId: "f40c0e4c-4ccb-48a3-b774-1fd710238a01",
+        progress: {
+          status: "drafting",
+          attempt: 1,
+        },
+      }),
+    ).toBe(true);
   });
 });

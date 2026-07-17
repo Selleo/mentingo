@@ -2224,6 +2224,8 @@
           "structureLockedTooltip": "Vertinimo struktūrą galima keisti tik pagrindine kurso kalba.",
           "summary": "{{criteria}} kriterijai · iš viso {{score}} taškų · {{threshold}} % išlaikymui · {{blockingErrors}} blokuojančios klaidos",
           "configureWithAi": "Konfigūruoti su AI",
+          "createWithAi": "Kurti vertinimą su DI",
+          "improveWithAi": "Tobulinti su DI",
           "configureManually": "Konfigūruoti rankiniu būdu",
           "editAssessment": "Redaguoti vertinimą",
           "dialogTitle": "Konfigūruoti AI Judge",
@@ -2275,6 +2277,66 @@
           "saveTranslation": "Išsaugoti vertimą",
           "configurationSavedSuccessfully": "AI Judge konfigūracija išsaugota.",
           "translationSavedSuccessfully": "AI Judge vertimas išsaugotas.",
+          "generation": {
+            "create": {
+              "title": "Kurti vertinimą su DI",
+              "description": "Aprašykite, ką turi pasiekti geras besimokančiojo atsakymas. Juodraštį galėsite peržiūrėti ir redaguoti prieš pritaikydami.",
+              "fieldLabel": "Ką turi pademonstruoti besimokantysis?",
+              "placeholder": "Pavyzdžiui: išsiaiškinti kliento poreikius, pasiūlyti tinkamą kitą žingsnį ir profesionaliai atsakyti į prieštaravimus."
+            },
+            "improve": {
+              "title": "Tobulinti vertinimą su DI",
+              "description": "Nurodykite, kas turi būti aiškiau ar tiksliau. Dabartinis vertinimas bus atspirties taškas.",
+              "fieldLabel": "Ką reikėtų patobulinti?",
+              "placeholder": "Pavyzdžiui: padaryti kriterijus labiau stebimus ir aiškiau atskirti dalinį bei pilną atsakymą."
+            },
+            "instructionRequired": "Aprašykite, ką DI turi sukurti ar patobulinti",
+            "willCreate": "Juodraštyje bus",
+            "artifacts": {
+              "taskGoal": "Pamatuojamas užduoties tikslas",
+              "criteria": "Kriterijai su vertinimo gairėmis",
+              "threshold": "Išlaikymo riba",
+              "blockingErrors": "Blokuojančios klaidos, kai aktualu"
+            },
+            "generateDraft": "Generuoti juodraštį",
+            "progressLabel": "Vertinimo generavimo eiga",
+            "stages": {
+              "draft": "Generuojamas juodraštis",
+              "qualityCheck": "Kokybės patikra",
+              "ready": "Paruošta"
+            },
+            "status": {
+              "drafting": "Kuriamas vertinimas",
+              "evaluating": "Tikrinama kokybė",
+              "revising": "Tobulinamas juodraštis",
+              "completed": "Vertinimas paruoštas",
+              "requires_review": "Juodraščiui reikia jūsų sprendimo",
+              "failed": "Generavimo nepavyko užbaigti",
+              "cancelled": "Generavimas atšauktas"
+            },
+            "statusDescription": {
+              "drafting": "Ruošiami tikslas, kriterijai, balai ir blokuojančios klaidos.",
+              "evaluating": "Tikrinama, ar kriterijai pamatuojami, o balai nuoseklūs.",
+              "revising": "Pritaikomas naujausias kokybės patikros pataisymas.",
+              "completed": "Juodraštis praėjo kokybės patikrą.",
+              "requires_review": "Naujausias juodraštis išsaugotas jūsų sprendimui.",
+              "failed": "Bandykite dar kartą arba konfigūruokite vertinimą rankiniu būdu.",
+              "cancelled": "Vertinimo pakeitimai nebuvo pritaikyti."
+            },
+            "attempt": "Bandymas {{attempt}} iš {{maxAttempts}}",
+            "completedArtifacts": "Jau paruošta",
+            "stopAndInspect": "Stabdyti ir peržiūrėti dabartinį juodraštį",
+            "cancel": "Atšaukti generavimą",
+            "draftSummary": "{{criteria}} kriterijai · {{score}} balų · išlaikymui {{threshold}}% · {{blockingErrors}} blokuojančios klaidos",
+            "review": {
+              "completedTitle": "Juodraštis praėjo kokybės patikrą",
+              "completedDescription": "Peržiūrėkite vertinimą prieš pritaikydami jį pamokos formoje.",
+              "requiresReviewTitle": "Juodraščiui reikia jūsų sprendimo",
+              "notSaved": "Niekas nebuvo automatiškai išsaugota ar paskelbta."
+            },
+            "editAssessment": "Redaguoti vertinimą",
+            "applyDraft": "Pritaikyti juodraštį"
+          },
           "validation": {
             "configurationRequired": "Prieš išsaugodami šią pamoką sukonfigūruokite AI Judge",
             "taskGoalRequired": "Užduoties tikslas yra privalomas",

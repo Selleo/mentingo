@@ -158,8 +158,11 @@ export const AiJudgeConfigurationDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[92vh] w-[min(96vw,58rem)] max-w-none flex-col gap-0 overflow-hidden p-0">
-        <DialogHeader className="border-b border-neutral-200 px-6 py-5 pr-14">
+      <DialogContent
+        variant="mobileDrawer"
+        className="!flex h-[85dvh] !flex-col sm:h-auto sm:w-[min(96vw,58rem)] sm:!max-w-none"
+      >
+        <DialogHeader className="shrink-0 border-b border-neutral-200 px-5 py-4 pr-14 sm:px-6 sm:py-5">
           <DialogTitle className="text-xl">
             {t("adminCourseView.curriculum.lesson.aiJudge.dialogTitle")}
           </DialogTitle>
@@ -176,7 +179,7 @@ export const AiJudgeConfigurationDialog = ({
             }}
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
+            <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 [-webkit-overflow-scrolling:touch] sm:px-6">
               <FormField
                 control={form.control}
                 name="taskGoal"
@@ -314,13 +317,13 @@ export const AiJudgeConfigurationDialog = ({
                     control={form.control}
                     name="passingThresholdPercent"
                     render={({ field, fieldState }) => (
-                      <FormItem className="flex items-center gap-3 space-y-0">
+                      <FormItem className="flex w-full flex-col items-stretch gap-2 space-y-0 sm:w-auto sm:flex-row sm:items-center sm:gap-3">
                         <FormLabel className="whitespace-nowrap text-sm text-neutral-900">
                           {t("adminCourseView.curriculum.lesson.aiJudge.passingThreshold")}
                         </FormLabel>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <span className="relative inline-flex w-24">
+                            <span className="relative inline-flex w-full sm:w-24">
                               <FormControl>
                                 <Input
                                   {...field}
@@ -467,7 +470,7 @@ export const AiJudgeConfigurationDialog = ({
               </details>
             </div>
 
-            <DialogFooter className="border-t border-neutral-200 bg-white px-6 py-4">
+            <DialogFooter className="shrink-0 gap-2 border-t border-neutral-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:gap-0 sm:px-6 sm:py-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 {t("common.button.cancel")}
               </Button>

@@ -9,7 +9,10 @@ import { cn } from "~/lib/utils";
 
 import { AiJudgeConfigurationDialog } from "./AiJudgeConfigurationDialog";
 
-import type { AiJudgeConfigurationDraft } from "./aiJudgeConfiguration.types";
+import type {
+  AiJudgeConfigurationDraft,
+  AiJudgeGenerationMode,
+} from "./aiJudgeConfiguration.types";
 import type { SupportedLanguages } from "@repo/shared";
 
 type AiJudgeConfigurationCardProps = {
@@ -21,7 +24,7 @@ type AiJudgeConfigurationCardProps = {
   isPersisted: boolean;
   isLoading?: boolean;
   isSaving?: boolean;
-  onConfigureWithAi?: () => void;
+  onConfigureWithAi?: (mode: AiJudgeGenerationMode) => void;
   error?: string;
 };
 
@@ -46,9 +49,13 @@ export const AiJudgeConfigurationCard = ({
   const emptyDescriptionKey = canOpenEditor
     ? "adminCourseView.curriculum.lesson.aiJudge.emptyDescription"
     : "adminCourseView.curriculum.lesson.aiJudge.baseLanguageRequired";
-  const editorButtonLabelKey = value
+  const editorButtonLabelKey = isConfigured
     ? "adminCourseView.curriculum.lesson.aiJudge.editAssessment"
     : "adminCourseView.curriculum.lesson.aiJudge.configureManually";
+  const isAiActionDisabled = language !== baseLanguage || isLoading;
+  const aiButtonLabelKey = isConfigured
+    ? "adminCourseView.curriculum.lesson.aiJudge.improveWithAi"
+    : "adminCourseView.curriculum.lesson.aiJudge.createWithAi";
 
   return (
     <>
@@ -93,21 +100,22 @@ export const AiJudgeConfigurationCard = ({
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-              {!value && onConfigureWithAi && (
+              {onConfigureWithAi && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span
                       className={cn("inline-flex", {
-                        "cursor-not-allowed": language !== baseLanguage || isLoading,
+                        "cursor-not-allowed": isAiActionDisabled,
                       })}
                     >
                       <Button
                         type="button"
-                        disabled={language !== baseLanguage || isLoading}
-                        onClick={onConfigureWithAi}
+                        variant={isConfigured ? "outline" : "default"}
+                        disabled={isAiActionDisabled}
+                        onClick={() => onConfigureWithAi(isConfigured ? "improve" : "create")}
                       >
                         <Sparkles className="mr-2 size-4" />
-                        {t("adminCourseView.curriculum.lesson.aiJudge.configureWithAi")}
+                        {t(aiButtonLabelKey)}
                       </Button>
                     </span>
                   </TooltipTrigger>
@@ -127,18 +135,20 @@ export const AiJudgeConfigurationCard = ({
                 <TooltipTrigger asChild>
                   <span
                     className={cn("inline-flex", {
+                      "order-first": isConfigured,
                       "cursor-not-allowed": !canOpenEditor,
                     })}
                   >
                     <Button
                       type="button"
-                      variant="outline"
+                      variant={isConfigured ? "default" : "link"}
                       data-testid="curriculum-ai-mentor-judge-configure-button"
                       disabled={!canOpenEditor}
                       onClick={() => setIsDialogOpen(true)}
+                      className={cn({ "px-2": !isConfigured })}
                     >
                       {t(editorButtonLabelKey)}
-                      <ChevronRight className="ml-2 size-4" />
+                      {isConfigured && <ChevronRight className="ml-2 size-4" />}
                     </Button>
                   </span>
                 </TooltipTrigger>

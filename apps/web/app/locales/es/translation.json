@@ -2285,6 +2285,8 @@
           "structureLockedTooltip": "La estructura de evaluación solo se puede cambiar en el idioma base del curso.",
           "summary": "{{criteria}} criterios · {{score}} puntos totales · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
           "configureWithAi": "Configurar con IA",
+          "createWithAi": "Crear evaluación con IA",
+          "improveWithAi": "Mejorar con IA",
           "configureManually": "Configurar manualmente",
           "editAssessment": "Editar evaluación",
           "dialogTitle": "Configurar AI Judge",
@@ -2336,6 +2338,66 @@
           "saveTranslation": "Guardar traducción",
           "configurationSavedSuccessfully": "La configuración de AI Judge se ha guardado.",
           "translationSavedSuccessfully": "La traducción de AI Judge se ha guardado.",
+          "generation": {
+            "create": {
+              "title": "Crear evaluación con IA",
+              "description": "Describe qué debe lograr una buena respuesta. Podrás revisar y editar el borrador antes de aplicarlo.",
+              "fieldLabel": "¿Qué debe demostrar el alumno?",
+              "placeholder": "Por ejemplo: descubrir las necesidades del cliente, proponer el siguiente paso y responder profesionalmente a las objeciones."
+            },
+            "improve": {
+              "title": "Mejorar evaluación con IA",
+              "description": "Indica qué debe ser más claro o preciso. La evaluación actual será el punto de partida.",
+              "fieldLabel": "¿Qué debe mejorarse?",
+              "placeholder": "Por ejemplo: hacer los criterios más observables y diferenciar mejor las respuestas parciales y completas."
+            },
+            "instructionRequired": "Describe qué debe crear o mejorar la IA",
+            "willCreate": "El borrador incluirá",
+            "artifacts": {
+              "taskGoal": "Un objetivo medible",
+              "criteria": "Criterios con guía de puntuación",
+              "threshold": "Un umbral de aprobación",
+              "blockingErrors": "Errores bloqueantes, cuando proceda"
+            },
+            "generateDraft": "Generar borrador",
+            "progressLabel": "Progreso de generación de la evaluación",
+            "stages": {
+              "draft": "Generando borrador",
+              "qualityCheck": "Control de calidad",
+              "ready": "Listo"
+            },
+            "status": {
+              "drafting": "Generando la evaluación",
+              "evaluating": "Comprobando la calidad",
+              "revising": "Mejorando el borrador",
+              "completed": "La evaluación está lista",
+              "requires_review": "El borrador requiere tu decisión",
+              "failed": "No se pudo completar la generación",
+              "cancelled": "Generación cancelada"
+            },
+            "statusDescription": {
+              "drafting": "Preparando el objetivo, los criterios, la puntuación y los errores bloqueantes.",
+              "evaluating": "Comprobando que los criterios sean medibles y la puntuación coherente.",
+              "revising": "Aplicando la última corrección del control de calidad.",
+              "completed": "El borrador superó el control de calidad.",
+              "requires_review": "Se conservó el último borrador para que decidas qué cambiar.",
+              "failed": "Inténtalo de nuevo o configura la evaluación manualmente.",
+              "cancelled": "No se aplicaron cambios a la evaluación."
+            },
+            "attempt": "Intento {{attempt}} de {{maxAttempts}}",
+            "completedArtifacts": "Preparado hasta ahora",
+            "stopAndInspect": "Detener y revisar el borrador actual",
+            "cancel": "Cancelar generación",
+            "draftSummary": "{{criteria}} criterios · {{score}} puntos · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
+            "review": {
+              "completedTitle": "El borrador superó el control de calidad",
+              "completedDescription": "Revisa la evaluación antes de aplicarla al formulario de la lección.",
+              "requiresReviewTitle": "El borrador requiere tu decisión",
+              "notSaved": "Nada se ha guardado ni publicado automáticamente."
+            },
+            "editAssessment": "Editar evaluación",
+            "applyDraft": "Aplicar borrador"
+          },
           "validation": {
             "configurationRequired": "Configura AI Judge antes de guardar esta lección",
             "taskGoalRequired": "El objetivo de la tarea es obligatorio",

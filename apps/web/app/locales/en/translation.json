@@ -2285,6 +2285,8 @@
           "structureLockedTooltip": "Assessment structure can only be changed in the course base language.",
           "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
           "configureWithAi": "Configure with AI",
+          "createWithAi": "Create assessment with AI",
+          "improveWithAi": "Improve with AI",
           "configureManually": "Configure manually",
           "editAssessment": "Edit assessment",
           "dialogTitle": "Configure AI Judge",
@@ -2336,6 +2338,66 @@
           "saveTranslation": "Save translation",
           "configurationSavedSuccessfully": "AI Judge configuration saved successfully.",
           "translationSavedSuccessfully": "AI Judge translation saved successfully.",
+          "generation": {
+            "create": {
+              "title": "Create assessment with AI",
+              "description": "Describe what a good learner response should achieve. You can review and edit the draft before applying it.",
+              "fieldLabel": "What should the learner demonstrate?",
+              "placeholder": "For example: The learner should discover the client's needs, propose a suitable next step, and respond professionally to objections."
+            },
+            "improve": {
+              "title": "Improve assessment with AI",
+              "description": "Tell AI what should be clearer or more precise. Your current assessment will be used as the starting point.",
+              "fieldLabel": "What should be improved?",
+              "placeholder": "For example: Make the criteria more observable and distinguish partial from full-score responses more clearly."
+            },
+            "instructionRequired": "Describe what you want AI to create or improve",
+            "willCreate": "The draft will include",
+            "artifacts": {
+              "taskGoal": "A measurable task goal",
+              "criteria": "Criteria with score guidance",
+              "threshold": "A passing threshold",
+              "blockingErrors": "Blocking errors, when relevant"
+            },
+            "generateDraft": "Generate draft",
+            "progressLabel": "Assessment generation progress",
+            "stages": {
+              "draft": "Generating draft",
+              "qualityCheck": "Quality check",
+              "ready": "Ready"
+            },
+            "status": {
+              "drafting": "Generating the assessment",
+              "evaluating": "Checking assessment quality",
+              "revising": "Improving the draft",
+              "completed": "Assessment is ready",
+              "requires_review": "Draft requires your decision",
+              "failed": "Generation could not be completed",
+              "cancelled": "Generation cancelled"
+            },
+            "statusDescription": {
+              "drafting": "Preparing the task goal, criteria, scoring, and blocking errors.",
+              "evaluating": "Checking whether the criteria are measurable and the scoring is coherent.",
+              "revising": "Applying the latest quality-check correction.",
+              "completed": "The draft passed the quality check.",
+              "requires_review": "The latest draft was kept so you can decide what to change.",
+              "failed": "Try again or configure the assessment manually.",
+              "cancelled": "No assessment changes were applied."
+            },
+            "attempt": "Attempt {{attempt}} of {{maxAttempts}}",
+            "completedArtifacts": "Prepared so far",
+            "stopAndInspect": "Stop and inspect current draft",
+            "cancel": "Cancel generation",
+            "draftSummary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
+            "review": {
+              "completedTitle": "Draft passed the quality check",
+              "completedDescription": "Review the assessment before applying it to the lesson form.",
+              "requiresReviewTitle": "Draft requires your decision",
+              "notSaved": "Nothing has been saved or published automatically."
+            },
+            "editAssessment": "Edit assessment",
+            "applyDraft": "Apply draft"
+          },
           "validation": {
             "configurationRequired": "Configure the AI Judge before saving this lesson",
             "taskGoalRequired": "Task goal is required",

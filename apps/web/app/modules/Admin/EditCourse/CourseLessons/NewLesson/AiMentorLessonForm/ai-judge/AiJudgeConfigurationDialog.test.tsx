@@ -10,6 +10,28 @@ import { AiJudgeConfigurationDialog } from "./AiJudgeConfigurationDialog";
 import type { FormEvent } from "react";
 
 describe("AiJudgeConfigurationDialog criterion accordion", () => {
+  it("uses the bounded mobile drawer shell and a full-width threshold control", () => {
+    renderWith().render(
+      <TooltipProvider>
+        <AiJudgeConfigurationDialog
+          open
+          onOpenChange={vi.fn()}
+          onSaveBaseConfiguration={vi.fn()}
+          onSaveTranslation={vi.fn()}
+          language="en"
+          baseLanguage="en"
+          isPersisted={false}
+        />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getByRole("dialog")).toHaveClass("h-[85dvh]");
+    expect(screen.getByLabelText("Passing threshold").parentElement).toHaveClass(
+      "w-full",
+      "sm:w-24",
+    );
+  });
+
   it("applies a new-lesson configuration without submitting the outer lesson form", async () => {
     const user = userEvent.setup();
     const onApply = vi.fn();

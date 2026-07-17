@@ -3,6 +3,14 @@ import { z } from "zod";
 
 import type { TFunction } from "i18next";
 
+export const aiJudgeGenerationBriefSchema = (t: TFunction) =>
+  z.object({
+    instruction: z
+      .string()
+      .trim()
+      .min(1, t("adminCourseView.curriculum.lesson.aiJudge.generation.instructionRequired")),
+  });
+
 export const aiJudgeConfigurationSchema = (t: TFunction) =>
   z
     .object({

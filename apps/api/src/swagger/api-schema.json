@@ -7334,6 +7334,60 @@
         }
       }
     },
+    "/api/ai/judge-configuration/generate": {
+      "post": {
+        "operationId": "AiJudgeConfigurationGenerationController_generate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/judge-configuration/validate": {
+      "post": {
+        "operationId": "AiJudgeConfigurationGenerationController_validateConfiguration",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/studentLessonProgress": {
       "post": {
         "operationId": "StudentLessonProgressController_markLessonAsCompleted",
@@ -36321,6 +36375,1720 @@
               "language",
               "baseLanguage",
               "availableLocales"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GenerateBody": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonContext": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "taskDescription": {
+                    "type": "string"
+                  },
+                  "aiMentorInstructions": {
+                    "type": "string"
+                  },
+                  "aiMentorType": {
+                    "anyOf": [
+                      {
+                        "const": "mentor",
+                        "type": "string"
+                      },
+                      {
+                        "const": "teacher",
+                        "type": "string"
+                      },
+                      {
+                        "const": "roleplay",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "aiMentorType"
+                ]
+              },
+              "mode": {
+                "const": "create",
+                "type": "string"
+              },
+              "brief": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "courseId",
+              "lessonContext",
+              "mode",
+              "brief"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "courseId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "lessonContext": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "taskDescription": {
+                    "type": "string"
+                  },
+                  "aiMentorInstructions": {
+                    "type": "string"
+                  },
+                  "aiMentorType": {
+                    "anyOf": [
+                      {
+                        "const": "mentor",
+                        "type": "string"
+                      },
+                      {
+                        "const": "teacher",
+                        "type": "string"
+                      },
+                      {
+                        "const": "roleplay",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "aiMentorType"
+                ]
+              },
+              "mode": {
+                "const": "improve",
+                "type": "string"
+              },
+              "instruction": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "brief": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "currentConfiguration": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "taskGoal": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "passingThresholdPercent": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "expectedBehavior": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "maxScore": {
+                          "minimum": 1,
+                          "maximum": 5,
+                          "type": "integer"
+                        },
+                        "scoreGuidance": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "score": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "example": {
+                                "anyOf": [
+                                  {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "description"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "title",
+                        "expectedBehavior",
+                        "maxScore",
+                        "scoreGuidance"
+                      ]
+                    }
+                  },
+                  "blockingErrors": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "description": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "description"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "taskGoal",
+                  "passingThresholdPercent",
+                  "criteria",
+                  "blockingErrors"
+                ]
+              },
+              "latestValidation": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "passed": {
+                    "type": "boolean"
+                  },
+                  "summary": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "issues": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "severity": {
+                          "anyOf": [
+                            {
+                              "const": "error",
+                              "type": "string"
+                            },
+                            {
+                              "const": "warning",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "target": {
+                          "anyOf": [
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "configuration",
+                                  "type": "string"
+                                },
+                                "field": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type"
+                              ]
+                            },
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                "ref": {
+                                  "pattern": "^C[1-9][0-9]*$",
+                                  "type": "string"
+                                },
+                                "field": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ref"
+                              ]
+                            },
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                "ref": {
+                                  "pattern": "^C[1-9][0-9]*$",
+                                  "type": "string"
+                                },
+                                "score": {
+                                  "minimum": 0,
+                                  "type": "integer"
+                                },
+                                "field": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ref",
+                                "score"
+                              ]
+                            },
+                            {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                },
+                                "ref": {
+                                  "pattern": "^B[1-9][0-9]*$",
+                                  "type": "string"
+                                },
+                                "field": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "ref"
+                              ]
+                            }
+                          ]
+                        },
+                        "message": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "correction": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "severity",
+                        "target",
+                        "message",
+                        "correction"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "passed",
+                  "summary",
+                  "issues"
+                ]
+              }
+            },
+            "required": [
+              "courseId",
+              "lessonContext",
+              "mode",
+              "instruction",
+              "currentConfiguration"
+            ]
+          }
+        ]
+      },
+      "GenerateResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "completed",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "minimum": 1,
+                    "maximum": 3,
+                    "type": "integer"
+                  },
+                  "configuration": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "passingThresholdPercent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "expectedBehavior": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "maxScore": {
+                              "minimum": 1,
+                              "maximum": 5,
+                              "type": "integer"
+                            },
+                            "scoreGuidance": {
+                              "minItems": 1,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "description": {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "anyOf": [
+                                      {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "score",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "expectedBehavior",
+                            "maxScore",
+                            "scoreGuidance"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "taskGoal",
+                      "passingThresholdPercent",
+                      "criteria",
+                      "blockingErrors"
+                    ]
+                  },
+                  "validation": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "summary": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "issues": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "severity": {
+                              "anyOf": [
+                                {
+                                  "const": "error",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "warning",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "target": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "configuration",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "criterion",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^C[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "scoreGuidance",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^C[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "score": {
+                                      "minimum": 0,
+                                      "type": "integer"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref",
+                                    "score"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "blockingError",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^B[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref"
+                                  ]
+                                }
+                              ]
+                            },
+                            "message": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "correction": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "severity",
+                            "target",
+                            "message",
+                            "correction"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "summary",
+                      "issues"
+                    ]
+                  },
+                  "changes": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "added",
+                              "type": "string"
+                            },
+                            {
+                              "const": "removed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "changed",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "targetRef": {
+                          "anyOf": [
+                            {
+                              "pattern": "^C[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            {
+                              "pattern": "^B[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            {
+                              "const": "configuration",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "score": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "field": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "before": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "after": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "targetRef",
+                        "field"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "attempt",
+                  "configuration",
+                  "validation"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "requires_review",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "const": 3,
+                    "type": "number"
+                  },
+                  "configuration": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "passingThresholdPercent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "expectedBehavior": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "maxScore": {
+                              "minimum": 1,
+                              "maximum": 5,
+                              "type": "integer"
+                            },
+                            "scoreGuidance": {
+                              "minItems": 1,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "description": {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "anyOf": [
+                                      {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "score",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "expectedBehavior",
+                            "maxScore",
+                            "scoreGuidance"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "taskGoal",
+                      "passingThresholdPercent",
+                      "criteria",
+                      "blockingErrors"
+                    ]
+                  },
+                  "validation": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "passed": {
+                        "type": "boolean"
+                      },
+                      "summary": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "issues": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "severity": {
+                              "anyOf": [
+                                {
+                                  "const": "error",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "warning",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "target": {
+                              "anyOf": [
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "configuration",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "criterion",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^C[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "scoreGuidance",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^C[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "score": {
+                                      "minimum": 0,
+                                      "type": "integer"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref",
+                                    "score"
+                                  ]
+                                },
+                                {
+                                  "additionalProperties": false,
+                                  "type": "object",
+                                  "properties": {
+                                    "type": {
+                                      "const": "blockingError",
+                                      "type": "string"
+                                    },
+                                    "ref": {
+                                      "pattern": "^B[1-9][0-9]*$",
+                                      "type": "string"
+                                    },
+                                    "field": {
+                                      "minLength": 1,
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "type",
+                                    "ref"
+                                  ]
+                                }
+                              ]
+                            },
+                            "message": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "correction": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "code",
+                            "severity",
+                            "target",
+                            "message",
+                            "correction"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "passed",
+                      "summary",
+                      "issues"
+                    ]
+                  },
+                  "changes": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "anyOf": [
+                            {
+                              "const": "added",
+                              "type": "string"
+                            },
+                            {
+                              "const": "removed",
+                              "type": "string"
+                            },
+                            {
+                              "const": "changed",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "targetRef": {
+                          "anyOf": [
+                            {
+                              "pattern": "^C[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            {
+                              "pattern": "^B[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            {
+                              "const": "configuration",
+                              "type": "string"
+                            }
+                          ]
+                        },
+                        "score": {
+                          "minimum": 0,
+                          "type": "integer"
+                        },
+                        "field": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "before": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "after": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "targetRef",
+                        "field"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "status",
+                  "attempt",
+                  "configuration",
+                  "validation"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "failed",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "minimum": 1,
+                    "maximum": 3,
+                    "type": "integer"
+                  },
+                  "message": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "configuration": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "passingThresholdPercent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "expectedBehavior": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "maxScore": {
+                              "minimum": 1,
+                              "maximum": 5,
+                              "type": "integer"
+                            },
+                            "scoreGuidance": {
+                              "minItems": 1,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "description": {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "anyOf": [
+                                      {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "score",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "expectedBehavior",
+                            "maxScore",
+                            "scoreGuidance"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "taskGoal",
+                      "passingThresholdPercent",
+                      "criteria",
+                      "blockingErrors"
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "attempt",
+                  "message"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "const": "cancelled",
+                    "type": "string"
+                  },
+                  "attempt": {
+                    "minimum": 1,
+                    "maximum": 3,
+                    "type": "integer"
+                  },
+                  "configuration": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "passingThresholdPercent": {
+                        "minimum": 0,
+                        "maximum": 100,
+                        "type": "integer"
+                      },
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "title": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "expectedBehavior": {
+                              "minLength": 1,
+                              "type": "string"
+                            },
+                            "maxScore": {
+                              "minimum": 1,
+                              "maximum": 5,
+                              "type": "integer"
+                            },
+                            "scoreGuidance": {
+                              "minItems": 1,
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "format": "uuid",
+                                    "type": "string"
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "description": {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  "example": {
+                                    "anyOf": [
+                                      {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "score",
+                                  "description"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "title",
+                            "expectedBehavior",
+                            "maxScore",
+                            "scoreGuidance"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "format": "uuid",
+                              "type": "string"
+                            },
+                            "description": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "description"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "taskGoal",
+                      "passingThresholdPercent",
+                      "criteria",
+                      "blockingErrors"
+                    ]
+                  }
+                },
+                "required": [
+                  "status",
+                  "attempt"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ValidateConfigurationBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "courseId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lessonId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "lessonContext": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "taskDescription": {
+                "type": "string"
+              },
+              "aiMentorInstructions": {
+                "type": "string"
+              },
+              "aiMentorType": {
+                "anyOf": [
+                  {
+                    "const": "mentor",
+                    "type": "string"
+                  },
+                  {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  {
+                    "const": "roleplay",
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "aiMentorType"
+            ]
+          },
+          "brief": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "configuration": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "taskGoal": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "passingThresholdPercent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "expectedBehavior": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxScore": {
+                      "minimum": 1,
+                      "maximum": 5,
+                      "type": "integer"
+                    },
+                    "scoreGuidance": {
+                      "minItems": 1,
+                      "type": "array",
+                      "items": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "score": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "description": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "example": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "score",
+                          "description"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "expectedBehavior",
+                    "maxScore",
+                    "scoreGuidance"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "description"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "taskGoal",
+              "passingThresholdPercent",
+              "criteria",
+              "blockingErrors"
+            ]
+          }
+        },
+        "required": [
+          "courseId",
+          "lessonContext",
+          "configuration"
+        ]
+      },
+      "ValidateConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "passed": {
+                "type": "boolean"
+              },
+              "summary": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "issues": {
+                "type": "array",
+                "items": {
+                  "additionalProperties": false,
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "severity": {
+                      "anyOf": [
+                        {
+                          "const": "error",
+                          "type": "string"
+                        },
+                        {
+                          "const": "warning",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "target": {
+                      "anyOf": [
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "const": "configuration",
+                              "type": "string"
+                            },
+                            "field": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "const": "criterion",
+                              "type": "string"
+                            },
+                            "ref": {
+                              "pattern": "^C[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            "field": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "ref"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "const": "scoreGuidance",
+                              "type": "string"
+                            },
+                            "ref": {
+                              "pattern": "^C[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            "score": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "field": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "ref",
+                            "score"
+                          ]
+                        },
+                        {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "const": "blockingError",
+                              "type": "string"
+                            },
+                            "ref": {
+                              "pattern": "^B[1-9][0-9]*$",
+                              "type": "string"
+                            },
+                            "field": {
+                              "minLength": 1,
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "ref"
+                          ]
+                        }
+                      ]
+                    },
+                    "message": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "correction": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "severity",
+                    "target",
+                    "message",
+                    "correction"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "passed",
+              "summary",
+              "issues"
             ]
           }
         },

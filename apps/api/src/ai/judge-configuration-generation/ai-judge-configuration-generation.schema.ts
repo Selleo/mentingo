@@ -60,7 +60,7 @@ export const referencedAiJudgeConfigurationSchema = Type.Object(
 
 export const generatedAiJudgeConfigurationSchema = aiJudgeConfigurationContentSchema;
 
-const lessonContextSchema = Type.Object(
+export const aiJudgeGenerationLessonContextSchema = Type.Object(
   {
     title: Type.Optional(Type.String()),
     taskDescription: Type.Optional(Type.String()),
@@ -73,7 +73,7 @@ const lessonContextSchema = Type.Object(
 const generationContextProperties = {
   courseId: UUIDSchema,
   lessonId: Type.Optional(UUIDSchema),
-  lessonContext: lessonContextSchema,
+  lessonContext: aiJudgeGenerationLessonContextSchema,
 };
 
 const configurationValidationTargetSchema = Type.Object(
@@ -115,10 +115,7 @@ const blockingErrorValidationTargetSchema = Type.Object(
 export const aiJudgeValidationIssueSchema = Type.Object(
   {
     code: nonEmptyTextSchema,
-    severity: Type.Union([
-      Type.Literal(AI_JUDGE_VALIDATION_SEVERITY.ERROR),
-      Type.Literal(AI_JUDGE_VALIDATION_SEVERITY.WARNING),
-    ]),
+    severity: Type.Enum(AI_JUDGE_VALIDATION_SEVERITY),
     target: Type.Union([
       configurationValidationTargetSchema,
       criterionValidationTargetSchema,
@@ -131,11 +128,18 @@ export const aiJudgeValidationIssueSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const aiJudgeConfigurationValidatorModelResultSchema = Type.Object(
+  {
+    summary: nonEmptyTextSchema,
+    issues: Type.Array(aiJudgeValidationIssueSchema),
+  },
+  { additionalProperties: false },
+);
+
 export const aiJudgeConfigurationValidationResultSchema = Type.Object(
   {
     passed: Type.Boolean(),
-    summary: nonEmptyTextSchema,
-    issues: Type.Array(aiJudgeValidationIssueSchema),
+    ...aiJudgeConfigurationValidatorModelResultSchema.properties,
   },
   { additionalProperties: false },
 );
@@ -175,16 +179,13 @@ const draftChangeValueSchema = Type.Union([Type.String(), Type.Number(), Type.Nu
 
 export const aiJudgeDraftChangeSchema = Type.Object(
   {
-    type: Type.Union([
-      Type.Literal(AI_JUDGE_DRAFT_CHANGE_TYPE.ADDED),
-      Type.Literal(AI_JUDGE_DRAFT_CHANGE_TYPE.REMOVED),
-      Type.Literal(AI_JUDGE_DRAFT_CHANGE_TYPE.CHANGED),
-    ]),
+    type: Type.Enum(AI_JUDGE_DRAFT_CHANGE_TYPE),
     targetRef: Type.Union([
       aiJudgeCriterionRefSchema,
       aiJudgeBlockingErrorRefSchema,
       Type.Literal(AI_JUDGE_VALIDATION_TARGET.CONFIGURATION),
     ]),
+    score: Type.Optional(aiJudgeScoreGuidanceContentSchema.properties.score),
     field: nonEmptyTextSchema,
     before: Type.Optional(draftChangeValueSchema),
     after: Type.Optional(draftChangeValueSchema),
@@ -216,6 +217,7 @@ const revisingEventSchema = Type.Object(
     attempt: attemptSchema,
     draft: referencedAiJudgeConfigurationSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
 );
@@ -278,9 +280,69 @@ export const aiJudgeGenerationResultSchema = Type.Union([
   cancelledEventSchema,
 ]);
 
+const completedApplicationResultSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.COMPLETED),
+    attempt: attemptSchema,
+    configuration: aiJudgeConfigurationInputSchema,
+    validation: aiJudgeConfigurationValidationResultSchema,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+const requiresReviewApplicationResultSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW),
+    attempt: Type.Literal(AI_JUDGE_GENERATION_MAX_ATTEMPTS),
+    configuration: aiJudgeConfigurationInputSchema,
+    validation: aiJudgeConfigurationValidationResultSchema,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+const failedApplicationResultSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.FAILED),
+    attempt: attemptSchema,
+    message: nonEmptyTextSchema,
+    configuration: Type.Optional(aiJudgeConfigurationInputSchema),
+  },
+  { additionalProperties: false },
+);
+
+const cancelledApplicationResultSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.CANCELLED),
+    attempt: attemptSchema,
+    configuration: Type.Optional(aiJudgeConfigurationInputSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const aiJudgeGenerationApplicationResultSchema = Type.Union([
+  completedApplicationResultSchema,
+  requiresReviewApplicationResultSchema,
+  failedApplicationResultSchema,
+  cancelledApplicationResultSchema,
+]);
+
+export const aiJudgeGenerationSnapshotSchema = Type.Object(
+  {
+    generationId: UUIDSchema,
+    progress: aiJudgeGenerationProgressEventSchema,
+  },
+  { additionalProperties: false },
+);
+
 export type ReferencedAiJudgeConfiguration = Static<typeof referencedAiJudgeConfigurationSchema>;
 export type GeneratedAiJudgeConfiguration = Static<typeof generatedAiJudgeConfigurationSchema>;
+export type AiJudgeGenerationLessonContext = Static<typeof aiJudgeGenerationLessonContextSchema>;
 export type AiJudgeValidationIssue = Static<typeof aiJudgeValidationIssueSchema>;
+export type AiJudgeConfigurationValidatorModelResult = Static<
+  typeof aiJudgeConfigurationValidatorModelResultSchema
+>;
 export type AiJudgeConfigurationValidationResult = Static<
   typeof aiJudgeConfigurationValidationResultSchema
 >;
@@ -293,11 +355,15 @@ export type ValidateAiJudgeConfigurationInput = Static<
 export type AiJudgeDraftChange = Static<typeof aiJudgeDraftChangeSchema>;
 export type AiJudgeGenerationProgressEvent = Static<typeof aiJudgeGenerationProgressEventSchema>;
 export type AiJudgeGenerationResult = Static<typeof aiJudgeGenerationResultSchema>;
+export type AiJudgeGenerationApplicationResult = Static<
+  typeof aiJudgeGenerationApplicationResultSchema
+>;
+export type AiJudgeGenerationSnapshot = Static<typeof aiJudgeGenerationSnapshotSchema>;
 export type CreateAiJudgeConfigurationInput = Extract<
   GenerateAiJudgeConfigurationInput,
-  { mode: "create" }
+  { mode: typeof AI_JUDGE_GENERATION_MODE.CREATE }
 >;
 export type ImproveAiJudgeConfigurationInput = Extract<
   GenerateAiJudgeConfigurationInput,
-  { mode: "improve" }
+  { mode: typeof AI_JUDGE_GENERATION_MODE.IMPROVE }
 >;

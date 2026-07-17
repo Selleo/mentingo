@@ -2225,6 +2225,8 @@
           "structureLockedTooltip": "Die Bewertungsstruktur kann nur in der Basissprache des Kurses geändert werden.",
           "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
           "configureWithAi": "Mit KI konfigurieren",
+          "createWithAi": "Bewertung mit KI erstellen",
+          "improveWithAi": "Mit KI verbessern",
           "configureManually": "Manuell konfigurieren",
           "editAssessment": "Bewertung bearbeiten",
           "dialogTitle": "AI Judge konfigurieren",
@@ -2276,6 +2278,66 @@
           "saveTranslation": "Übersetzung speichern",
           "configurationSavedSuccessfully": "Die AI-Judge-Konfiguration wurde gespeichert.",
           "translationSavedSuccessfully": "Die AI-Judge-Übersetzung wurde gespeichert.",
+          "generation": {
+            "create": {
+              "title": "Bewertung mit KI erstellen",
+              "description": "Beschreiben Sie, was eine gute Antwort erreichen soll. Den Entwurf können Sie vor der Übernahme prüfen und bearbeiten.",
+              "fieldLabel": "Was soll der Lernende zeigen?",
+              "placeholder": "Zum Beispiel: Bedürfnisse erkennen, einen passenden nächsten Schritt vorschlagen und professionell auf Einwände reagieren."
+            },
+            "improve": {
+              "title": "Bewertung mit KI verbessern",
+              "description": "Beschreiben Sie, was klarer oder präziser werden soll. Die aktuelle Bewertung dient als Ausgangspunkt.",
+              "fieldLabel": "Was soll verbessert werden?",
+              "placeholder": "Zum Beispiel: Kriterien beobachtbarer machen und Teil- von Vollpunktantworten klarer unterscheiden."
+            },
+            "instructionRequired": "Beschreiben Sie, was die KI erstellen oder verbessern soll",
+            "willCreate": "Der Entwurf enthält",
+            "artifacts": {
+              "taskGoal": "Ein messbares Aufgabenziel",
+              "criteria": "Kriterien mit Bewertungshinweisen",
+              "threshold": "Eine Bestehensgrenze",
+              "blockingErrors": "Ausschlussfehler, falls relevant"
+            },
+            "generateDraft": "Entwurf erstellen",
+            "progressLabel": "Fortschritt der Bewertungserstellung",
+            "stages": {
+              "draft": "Entwurf erstellen",
+              "qualityCheck": "Qualitätsprüfung",
+              "ready": "Bereit"
+            },
+            "status": {
+              "drafting": "Bewertung wird erstellt",
+              "evaluating": "Qualität wird geprüft",
+              "revising": "Entwurf wird verbessert",
+              "completed": "Bewertung ist bereit",
+              "requires_review": "Entwurf erfordert Ihre Entscheidung",
+              "failed": "Erstellung konnte nicht abgeschlossen werden",
+              "cancelled": "Erstellung abgebrochen"
+            },
+            "statusDescription": {
+              "drafting": "Aufgabenziel, Kriterien, Bewertung und Ausschlussfehler werden vorbereitet.",
+              "evaluating": "Messbarkeit der Kriterien und Konsistenz der Bewertung werden geprüft.",
+              "revising": "Die aktuelle Korrektur aus der Qualitätsprüfung wird angewendet.",
+              "completed": "Der Entwurf hat die Qualitätsprüfung bestanden.",
+              "requires_review": "Der neueste Entwurf wurde für Ihre Entscheidung behalten.",
+              "failed": "Versuchen Sie es erneut oder konfigurieren Sie die Bewertung manuell.",
+              "cancelled": "Es wurden keine Änderungen übernommen."
+            },
+            "attempt": "Versuch {{attempt}} von {{maxAttempts}}",
+            "completedArtifacts": "Bisher vorbereitet",
+            "stopAndInspect": "Anhalten und aktuellen Entwurf prüfen",
+            "cancel": "Erstellung abbrechen",
+            "draftSummary": "{{criteria}} Kriterien · {{score}} Punkte · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
+            "review": {
+              "completedTitle": "Entwurf hat die Qualitätsprüfung bestanden",
+              "completedDescription": "Prüfen Sie die Bewertung, bevor Sie sie in das Unterrichtsformular übernehmen.",
+              "requiresReviewTitle": "Entwurf erfordert Ihre Entscheidung",
+              "notSaved": "Nichts wurde automatisch gespeichert oder veröffentlicht."
+            },
+            "editAssessment": "Bewertung bearbeiten",
+            "applyDraft": "Entwurf übernehmen"
+          },
           "validation": {
             "configurationRequired": "Konfiguriere den AI Judge, bevor du diese Lektion speicherst",
             "taskGoalRequired": "Das Aufgabenziel ist erforderlich",
