@@ -1,7 +1,7 @@
 import { Test } from "@nestjs/testing";
 
-import { AutomationsModule } from "./automations.module";
 import { AutomationsService } from "./automations.service";
+import { AutomationsRepository } from "./repositories/automations/automations.repository";
 
 import type { TestingModule } from "@nestjs/testing";
 
@@ -10,7 +10,15 @@ describe("AutomationsService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [AutomationsModule],
+      providers: [
+        AutomationsService,
+        {
+          provide: AutomationsRepository,
+          useValue: {
+            changeStatus: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
     service = module.get<AutomationsService>(AutomationsService);
