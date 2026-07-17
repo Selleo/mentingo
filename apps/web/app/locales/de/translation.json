@@ -4495,6 +4495,7 @@
       "menu": "Menü",
       "manage": "Verwalten",
       "empty": "Keine Automatisierungen definiert. Klicken Sie auf Automatisierung erstellen, um die erste hinzuzufügen.",
+      "emptyFiltered": "Keine Automatisierungen entsprechen den aktuellen Filtern. Passen Sie die Suche oder den Statusfilter an.",
       "emailCount_one": "{{count}} E-Mail",
       "emailCount_other": "{{count}} E-Mails",
       "noRuns": "Noch keine Ausführungen",
@@ -4564,6 +4565,10 @@
     "sidebar": {
       "title": "Schritte",
       "description": "Ziehen Sie Blöcke auf die Leinwand, um Ihren Workflow zu erstellen.",
+      "descriptionTrigger": "Wählen Sie zunächst einen Trigger für Ihre Automatisierung.",
+      "descriptionActions": "Fügen Sie Aktionen hinzu, die ausgeführt werden, wenn der Trigger ausgelöst wird.",
+      "triggerInstruction": "Jede Automatisierung beginnt mit einem Trigger. Ziehen Sie einen auf die Leinwand, um mit dem Aufbau Ihres Workflows zu beginnen.",
+      "triggers": "Trigger",
       "conditions": "Bedingungen",
       "actions": "Aktionen"
     },
@@ -4579,6 +4584,7 @@
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
       "emptyDescription": "Ziehen Sie eine Bedingung oder Aktion von der Seitenleiste, um zu beginnen.",
+      "emptyDescriptionTrigger": "Ziehen Sie einen Trigger von der Seitenleiste, um mit dem Aufbau Ihrer Automatisierung zu beginnen.",
       "removeNode": "Knoten entfernen",
       "addChild": "Unterschritt hinzufügen",
       "zoomIn": "Vergrößern",
@@ -4587,8 +4593,14 @@
     },
     "editPanel": {
       "editCondition": "Bedingung bearbeiten",
+      "editTrigger": "Trigger bearbeiten",
       "editAction": "Aktion bearbeiten",
       "nodeType": "Knotentyp",
+      "changeTriggerLabel": "Trigger ändern zu",
+      "changeTriggerDialogTitle": "Trigger ändern",
+      "changeTriggerDialogDescription": "Das Ändern des Trigger-Typs setzt seine Konfiguration zurück. Möchten Sie wirklich fortfahren?",
+      "changeTriggerDialogCancel": "Abbrechen",
+      "changeTriggerDialogConfirm": "Trigger ändern",
       "conditionValue": "Wert",
       "conditionValuePlaceholder": "Wert eingeben...",
       "operator": "Operator",

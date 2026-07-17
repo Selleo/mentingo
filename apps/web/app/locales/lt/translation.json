@@ -4497,6 +4497,7 @@
       "menu": "Meniu",
       "manage": "Valdyti",
       "empty": "Nėra apibrėžtų automatizavimų. Spustelėkite Sukurti automatizavimą, kad pridėtumėte pirmąjį.",
+      "emptyFiltered": "Jokios automatizacijos neatitinka pasirinktų filtrų. Pabandykite pakeisti paiešką arba būsenos filtrą.",
       "emailCount_one": "{{count}} el. laiškas",
       "emailCount_other": "{{count}} el. laiškai",
       "noRuns": "Dar nebuvo paleista",
@@ -4566,6 +4567,10 @@
     "sidebar": {
       "title": "Žingsniai",
       "description": "Vilkite blokus ant drobės, kad sukurtumėte darbo eigą.",
+      "descriptionTrigger": "Pradėkite pasirinkdami trigerį savo automatizavimui.",
+      "descriptionActions": "Pridėkite veiksmus, kurie bus vykdomi suveikus trigeriui.",
+      "triggerInstruction": "Kiekvienas automatizavimas prasideda trigeriu. Vilkite jį ant drobės, kad pradėtumėte kurti darbo eigą.",
+      "triggers": "Trigeriai",
       "conditions": "Sąlygos",
       "actions": "Veiksmai"
     },
@@ -4581,6 +4586,7 @@
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
       "emptyDescription": "Vilkite sąlygą arba veiksmą iš šoninės juostos, kad pradėtumėte.",
+      "emptyDescriptionTrigger": "Vilkite trigerį iš šoninės juostos, kad pradėtumėte kurti automatizavimą.",
       "removeNode": "Pašalinti mazgą",
       "addChild": "Pridėti antrinį žingsnį",
       "zoomIn": "Priartinti",
@@ -4589,8 +4595,14 @@
     },
     "editPanel": {
       "editCondition": "Redaguoti sąlygą",
+      "editTrigger": "Redaguoti trigerį",
       "editAction": "Redaguoti veiksmą",
       "nodeType": "Mazgo tipas",
+      "changeTriggerLabel": "Pakeisti trigerį į",
+      "changeTriggerDialogTitle": "Pakeisti trigerį",
+      "changeTriggerDialogDescription": "Pakeitus trigerio tipą, jo konfigūracija bus atstatyta. Ar tikrai norite tęsti?",
+      "changeTriggerDialogCancel": "Atšaukti",
+      "changeTriggerDialogConfirm": "Pakeisti trigerį",
       "conditionValue": "Reikšmė",
       "conditionValuePlaceholder": "Įveskite reikšmę...",
       "operator": "Operatorius",

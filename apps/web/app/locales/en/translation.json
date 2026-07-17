@@ -4576,6 +4576,7 @@
       "menu": "Menu",
       "manage": "Manage",
       "empty": "No automations defined. Click Create Automation to add the first one.",
+      "emptyFiltered": "No automations match the current filters. Try adjusting your search or status filter.",
       "emailCount_one": "{{count}} e-mail",
       "emailCount_other": "{{count}} e-mails",
       "noRuns": "No runs yet",
@@ -4645,7 +4646,10 @@
     "sidebar": {
       "title": "Steps",
       "description": "Drag blocks onto the canvas to build your workflow.",
-      "conditions": "Conditions",
+      "descriptionTrigger": "Start by choosing a trigger for your automation.",
+      "descriptionActions": "Add actions that will execute when the trigger fires.",
+      "triggerInstruction": "Every automation starts with a trigger. Drag one onto the canvas to begin building your workflow.",
+      "triggers": "Triggers",
       "actions": "Actions"
     },
     "blocks": {
@@ -4659,7 +4663,8 @@
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
-      "emptyDescription": "Drag a condition or action from the sidebar to get started.",
+      "emptyDescription": "Drag a trigger or action from the sidebar to get started.",
+      "emptyDescriptionTrigger": "Drag a trigger from the sidebar to start building your automation.",
       "removeNode": "Remove node",
       "addChild": "Add child step",
       "zoomIn": "Zoom in",
@@ -4667,11 +4672,16 @@
       "zoomReset": "Reset zoom"
     },
     "editPanel": {
-      "editCondition": "Edit Condition",
+      "editTrigger": "Edit Trigger",
       "editAction": "Edit Action",
       "nodeType": "Node type",
-      "conditionValue": "Value",
-      "conditionValuePlaceholder": "Enter value...",
+      "changeTriggerLabel": "Change trigger to",
+      "changeTriggerDialogTitle": "Change trigger",
+      "changeTriggerDialogDescription": "Changing the trigger type will reset its configuration. Are you sure you want to continue?",
+      "changeTriggerDialogCancel": "Cancel",
+      "changeTriggerDialogConfirm": "Change trigger",
+      "triggerValue": "Value",
+      "triggerValuePlaceholder": "Enter value...",
       "operator": "Operator",
       "operatorEquals": "Equals",
       "operatorGreaterThan": "Greater than",

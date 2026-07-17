@@ -4496,6 +4496,7 @@
       "menu": "Menu",
       "manage": "Spravovat",
       "empty": "Nejsou definovány žádné automatizace. Klikněte na Vytvořit automatizaci a přidejte první.",
+      "emptyFiltered": "Žádné automatizace neodpovídají aktuálním filtrům. Zkuste upravit vyhledávání nebo filtr stavu.",
       "emailCount_one": "{{count}} e-mail",
       "emailCount_other": "{{count}} e-mailů",
       "noRuns": "Zatím žádná spuštění",
@@ -4565,7 +4566,10 @@
     "sidebar": {
       "title": "Kroky",
       "description": "Přetáhněte bloky na plátno pro vytvoření workflow.",
-      "conditions": "Podmínky",
+      "descriptionTrigger": "Začněte výběrem triggeru pro vaši automatizaci.",
+      "descriptionActions": "Přidejte akce, které se provedou po spuštění triggeru.",
+      "triggerInstruction": "Každá automatizace začíná triggerem. Přetáhněte jeden na plátno pro zahájení tvorby workflow.",
+      "triggers": "Triggery",
       "actions": "Akce"
     },
     "blocks": {
@@ -4579,7 +4583,8 @@
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
-      "emptyDescription": "Přetáhněte podmínku nebo akci z postranního panelu pro začátek.",
+      "emptyDescription": "Přetáhněte trigger nebo akci z postranního panelu pro začátek.",
+      "emptyDescriptionTrigger": "Přetáhněte trigger z postranního panelu pro zahájení tvorby automatizace.",
       "removeNode": "Odstranit uzel",
       "addChild": "Přidat podřízený krok",
       "zoomIn": "Přiblížit",
@@ -4587,11 +4592,16 @@
       "zoomReset": "Resetovat přiblížení"
     },
     "editPanel": {
-      "editCondition": "Upravit podmínku",
+      "editTrigger": "Upravit trigger",
       "editAction": "Upravit akci",
       "nodeType": "Typ uzlu",
-      "conditionValue": "Hodnota",
-      "conditionValuePlaceholder": "Zadejte hodnotu...",
+      "changeTriggerLabel": "Změnit trigger na",
+      "changeTriggerDialogTitle": "Změnit trigger",
+      "changeTriggerDialogDescription": "Změna typu triggeru resetuje jeho konfiguraci. Opravdu chcete pokračovat?",
+      "changeTriggerDialogCancel": "Zrušit",
+      "changeTriggerDialogConfirm": "Změnit trigger",
+      "triggerValue": "Hodnota",
+      "triggerValuePlaceholder": "Zadejte hodnotu...",
       "operator": "Operátor",
       "operatorEquals": "Rovná se",
       "operatorGreaterThan": "Větší než",

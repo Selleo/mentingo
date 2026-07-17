@@ -4615,6 +4615,7 @@
       "menu": "Menu",
       "manage": "Zarządzaj",
       "empty": "Brak zdefiniowanych automatyzacji. Kliknij Utwórz automatyzację, aby dodać pierwszą.",
+      "emptyFiltered": "Brak automatyzacji pasujących do wybranych filtrów. Spróbuj zmienić wyszukiwanie lub filtr statusu.",
       "emailCount_one": "{{count}} e-mail",
       "emailCount_other": "{{count}} e-maile",
       "noRuns": "Brak uruchomień",
@@ -4684,7 +4685,10 @@
     "sidebar": {
       "title": "Kroki",
       "description": "Przeciągnij bloki na płótno, aby zbudować przepływ.",
-      "conditions": "Warunki",
+      "descriptionTrigger": "Zacznij od wybrania triggera dla automatyzacji.",
+      "descriptionActions": "Dodaj akcje, które wykonają się po wyzwoleniu triggera.",
+      "triggerInstruction": "Każda automatyzacja zaczyna się od triggera. Przeciągnij jeden na płótno, aby rozpocząć budowanie przepływu.",
+      "triggers": "Triggery",
       "actions": "Akcje"
     },
     "blocks": {
@@ -4698,7 +4702,8 @@
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
-      "emptyDescription": "Przeciągnij warunek lub akcję z panelu bocznego, aby rozpocząć.",
+      "emptyDescription": "Przeciągnij trigger lub akcję z panelu bocznego, aby rozpocząć.",
+      "emptyDescriptionTrigger": "Przeciągnij trigger z panelu bocznego, aby rozpocząć budowanie automatyzacji.",
       "removeNode": "Usuń węzeł",
       "addChild": "Dodaj krok podrzędny",
       "zoomIn": "Przybliż",
@@ -4706,11 +4711,16 @@
       "zoomReset": "Resetuj przybliżenie"
     },
     "editPanel": {
-      "editCondition": "Edytuj warunek",
+      "editTrigger": "Edytuj trigger",
       "editAction": "Edytuj akcję",
       "nodeType": "Typ węzła",
-      "conditionValue": "Wartość",
-      "conditionValuePlaceholder": "Wprowadź wartość...",
+      "changeTriggerLabel": "Zmień trigger na",
+      "changeTriggerDialogTitle": "Zmiana triggera",
+      "changeTriggerDialogDescription": "Zmiana typu triggera spowoduje zresetowanie jego konfiguracji. Czy na pewno chcesz kontynuować?",
+      "changeTriggerDialogCancel": "Anuluj",
+      "changeTriggerDialogConfirm": "Zmień trigger",
+      "triggerValue": "Wartość",
+      "triggerValuePlaceholder": "Wprowadź wartość...",
       "operator": "Operator",
       "operatorEquals": "Równa się",
       "operatorGreaterThan": "Większy niż",

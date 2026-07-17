@@ -4574,6 +4574,7 @@
       "menu": "Menú",
       "manage": "Gestionar",
       "empty": "No hay automatizaciones definidas. Haga clic en Crear automatización para agregar la primera.",
+      "emptyFiltered": "Ninguna automatización coincide con los filtros actuales. Intente ajustar la búsqueda o el filtro de estado.",
       "emailCount_one": "{{count}} correo",
       "emailCount_other": "{{count}} correos",
       "noRuns": "Sin ejecuciones aún",
