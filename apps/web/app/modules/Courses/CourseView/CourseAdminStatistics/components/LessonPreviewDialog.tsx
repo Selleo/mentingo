@@ -44,12 +44,7 @@ interface LessonPreviewDialogProps {
 }
 
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
-  Boolean(
-    evaluation &&
-      (typeof evaluation.passed === "boolean" ||
-        evaluation.score != null ||
-        evaluation.summary?.trim().length),
-  );
+  Boolean(evaluation && (typeof evaluation.passed === "boolean" || evaluation.score != null));
 
 export default function LessonPreviewDialog({
   course,
