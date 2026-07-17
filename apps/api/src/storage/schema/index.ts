@@ -2514,7 +2514,7 @@ export const automationSteps = pgTable(
       .notNull(),
     parentId: uuid("parent_id"),
     type: automationTypeEnum("type").notNull(),
-    typeContext: jsonb("type_context").default({}),
+    typeContext: jsonb("type_context").default({}).notNull(),
   },
   withTenantIdIndex("automation_steps_index"),
 );
