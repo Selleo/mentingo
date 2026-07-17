@@ -6,6 +6,8 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 
 import { AutomationsService } from "./automations.service";
 
+import type { AutomationStatus } from "src/announcements/types/automations.types";
+
 @Controller("automations")
 export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}
@@ -23,6 +25,14 @@ export class AutomationsController {
   @Post()
   async createAutomation(@Body() input: AutomationRecordInput) {
     return this.automationsService.createAutomation(input);
+  }
+
+  @Patch("status/:id")
+  async updateStatus(
+    @Param("id") automationId: UUIDType,
+    @Body() body: { status: AutomationStatus },
+  ) {
+    return this.automationsService.updateStatus(automationId, body.status);
   }
 
   @Patch(":id")

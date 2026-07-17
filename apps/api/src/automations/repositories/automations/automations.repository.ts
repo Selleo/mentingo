@@ -6,6 +6,7 @@ import { DB } from "src/storage/db/db.providers";
 import { automations } from "src/storage/schema";
 
 import type { AutomationRecordInput } from "src/announcements/types/automations-source.types";
+import type { AutomationStatus } from "src/announcements/types/automations.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -39,6 +40,15 @@ export class AutomationsRepository {
     const [updated] = await this.db
       .update(automations)
       .set({ name: input.name, description: input.description, status: input.status })
+      .where(eq(automations.id, automationId))
+      .returning();
+    return updated.id;
+  }
+
+  async changeStatus(automationId: UUIDType, status: AutomationStatus) {
+    const [updated] = await this.db
+      .update(automations)
+      .set({ status: status })
       .where(eq(automations.id, automationId))
       .returning();
     return updated.id;

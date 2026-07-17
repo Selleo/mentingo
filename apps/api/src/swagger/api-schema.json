@@ -15744,6 +15744,26 @@
           }
         }
       }
+    },
+    "/api/automations/status/{id}": {
+      "patch": {
+        "operationId": "AutomationsController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
