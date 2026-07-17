@@ -328,10 +328,54 @@ export const aiJudgeGenerationApplicationResultSchema = Type.Union([
   cancelledApplicationResultSchema,
 ]);
 
+const evaluatingApplicationEventSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.EVALUATING),
+    attempt: attemptSchema,
+    draft: aiJudgeConfigurationInputSchema,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+const revisingApplicationEventSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.REVISING),
+    attempt: attemptSchema,
+    draft: aiJudgeConfigurationInputSchema,
+    validation: aiJudgeConfigurationValidationResultSchema,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+export const aiJudgeGenerationApplicationProgressEventSchema = Type.Union([
+  draftingEventSchema,
+  evaluatingApplicationEventSchema,
+  revisingApplicationEventSchema,
+  completedApplicationResultSchema,
+  requiresReviewApplicationResultSchema,
+  failedApplicationResultSchema,
+  cancelledApplicationResultSchema,
+]);
+
 export const aiJudgeGenerationSnapshotSchema = Type.Object(
   {
     generationId: UUIDSchema,
-    progress: aiJudgeGenerationProgressEventSchema,
+    progress: aiJudgeGenerationApplicationProgressEventSchema,
+  },
+  { additionalProperties: false },
+);
+
+export const startAiJudgeGenerationResponseSchema = Type.Object(
+  { generationId: UUIDSchema },
+  { additionalProperties: false },
+);
+
+export const cancelAiJudgeGenerationResponseSchema = Type.Object(
+  {
+    generationId: UUIDSchema,
+    cancellationRequested: Type.Literal(true),
   },
   { additionalProperties: false },
 );
@@ -358,7 +402,12 @@ export type AiJudgeGenerationResult = Static<typeof aiJudgeGenerationResultSchem
 export type AiJudgeGenerationApplicationResult = Static<
   typeof aiJudgeGenerationApplicationResultSchema
 >;
+export type AiJudgeGenerationApplicationProgressEvent = Static<
+  typeof aiJudgeGenerationApplicationProgressEventSchema
+>;
 export type AiJudgeGenerationSnapshot = Static<typeof aiJudgeGenerationSnapshotSchema>;
+export type StartAiJudgeGenerationResponse = Static<typeof startAiJudgeGenerationResponseSchema>;
+export type CancelAiJudgeGenerationResponse = Static<typeof cancelAiJudgeGenerationResponseSchema>;
 export type CreateAiJudgeConfigurationInput = Extract<
   GenerateAiJudgeConfigurationInput,
   { mode: typeof AI_JUDGE_GENERATION_MODE.CREATE }

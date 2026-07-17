@@ -67,33 +67,33 @@ const currentConfiguration = {
 };
 
 describe("AiJudgeConfigurationGenerationService", () => {
-  let service: AiJudgeConfigurationGenerationService;
-  let configurationService: jest.Mocked<AiJudgeConfigurationService>;
-  let workflowService: jest.Mocked<AiJudgeConfigurationGenerationWorkflowService>;
-  let validatorService: jest.Mocked<AiJudgeConfigurationValidatorService>;
+  let aiJudgeConfigurationGenerationService: AiJudgeConfigurationGenerationService;
+  let aiJudgeConfigurationService: jest.Mocked<AiJudgeConfigurationService>;
+  let aiJudgeConfigurationGenerationWorkflowService: jest.Mocked<AiJudgeConfigurationGenerationWorkflowService>;
+  let aiJudgeConfigurationValidatorService: jest.Mocked<AiJudgeConfigurationValidatorService>;
 
   beforeEach(() => {
-    configurationService = {
+    aiJudgeConfigurationService = {
       prepareGenerationAuthoringContext: jest.fn().mockResolvedValue({
         courseId,
         baseLanguage: SUPPORTED_LANGUAGES.PL,
       }),
     } as unknown as jest.Mocked<AiJudgeConfigurationService>;
-    workflowService = {
+    aiJudgeConfigurationGenerationWorkflowService = {
       run: jest.fn(),
     } as unknown as jest.Mocked<AiJudgeConfigurationGenerationWorkflowService>;
-    validatorService = {
+    aiJudgeConfigurationValidatorService = {
       validate: jest.fn(),
     } as unknown as jest.Mocked<AiJudgeConfigurationValidatorService>;
-    service = new AiJudgeConfigurationGenerationService(
-      configurationService,
-      workflowService,
-      validatorService,
+    aiJudgeConfigurationGenerationService = new AiJudgeConfigurationGenerationService(
+      aiJudgeConfigurationService,
+      aiJudgeConfigurationGenerationWorkflowService,
+      aiJudgeConfigurationValidatorService,
     );
   });
 
   it("generates an unsaved create draft in the server-derived base language", async () => {
-    workflowService.run.mockImplementation(async (input, options) => {
+    aiJudgeConfigurationGenerationWorkflowService.run.mockImplementation(async (input, options) => {
       await options?.onDraft?.(referencedDraft);
 
       return {
@@ -104,7 +104,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
       };
     });
 
-    const result = await service.generate(
+    const result = await aiJudgeConfigurationGenerationService.generate(
       {
         courseId,
         mode: "create",
@@ -114,12 +114,12 @@ describe("AiJudgeConfigurationGenerationService", () => {
       currentUser,
     );
 
-    expect(configurationService.prepareGenerationAuthoringContext).toHaveBeenCalledWith(
+    expect(aiJudgeConfigurationService.prepareGenerationAuthoringContext).toHaveBeenCalledWith(
       courseId,
       undefined,
       currentUser,
     );
-    expect(workflowService.run).toHaveBeenCalledWith(
+    expect(aiJudgeConfigurationGenerationWorkflowService.run).toHaveBeenCalledWith(
       expect.objectContaining({ mode: "create", language: SUPPORTED_LANGUAGES.PL }),
       expect.objectContaining({ onDraft: expect.any(Function) }),
     );
@@ -132,7 +132,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
   });
 
   it("preserves persisted identities when improving unsaved form values", async () => {
-    workflowService.run.mockImplementation(
+    aiJudgeConfigurationGenerationWorkflowService.run.mockImplementation(
       async (_input, options: AiJudgeConfigurationGenerationWorkflowOptions = {}) => {
         await options.onDraft?.(referencedDraft);
 
@@ -145,7 +145,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
       },
     );
 
-    const result = await service.generate(
+    const result = await aiJudgeConfigurationGenerationService.generate(
       {
         courseId,
         lessonId,
@@ -157,7 +157,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
       currentUser,
     );
 
-    expect(workflowService.run).toHaveBeenCalledWith(
+    expect(aiJudgeConfigurationGenerationWorkflowService.run).toHaveBeenCalledWith(
       expect.objectContaining({
         mode: "improve",
         language: SUPPORTED_LANGUAGES.PL,
@@ -179,8 +179,51 @@ describe("AiJudgeConfigurationGenerationService", () => {
     });
   });
 
+  it("reconciles temporary references before reporting progress", async () => {
+    const reportProgress = jest.fn();
+    aiJudgeConfigurationGenerationWorkflowService.run.mockImplementation(
+      async (_input, options) => {
+        await options?.onDraft?.(referencedDraft);
+        await options?.reportProgress?.({
+          status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
+          attempt: 1,
+          draft: referencedDraft,
+        });
+
+        return {
+          status: AI_JUDGE_GENERATION_STATUS.COMPLETED,
+          attempt: 1,
+          configuration: currentConfiguration,
+          validation: passedValidation,
+        };
+      },
+    );
+
+    await aiJudgeConfigurationGenerationService.generate(
+      {
+        courseId,
+        lessonId,
+        mode: "improve",
+        lessonContext,
+        instruction: "Make the criterion observable.",
+        currentConfiguration,
+      },
+      currentUser,
+      { reportProgress },
+    );
+
+    expect(reportProgress).toHaveBeenCalledWith({
+      status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
+      attempt: 1,
+      draft: expect.objectContaining({
+        criteria: [expect.objectContaining({ id: criterionId })],
+        blockingErrors: [expect.objectContaining({ id: blockingErrorId })],
+      }),
+    });
+  });
+
   it("returns deterministic findings without calling the semantic Validator", async () => {
-    const result = await service.validate(
+    const result = await aiJudgeConfigurationGenerationService.validate(
       {
         courseId,
         lessonContext,
@@ -201,13 +244,13 @@ describe("AiJudgeConfigurationGenerationService", () => {
       passed: false,
       issues: [expect.objectContaining({ code: "missing_guidance_scores" })],
     });
-    expect(validatorService.validate).not.toHaveBeenCalled();
+    expect(aiJudgeConfigurationValidatorService.validate).not.toHaveBeenCalled();
   });
 
   it("validates the submitted form values without loading or persisting a configuration", async () => {
-    validatorService.validate.mockResolvedValue(passedValidation);
+    aiJudgeConfigurationValidatorService.validate.mockResolvedValue(passedValidation);
 
-    const result = await service.validate(
+    const result = await aiJudgeConfigurationGenerationService.validate(
       {
         courseId,
         lessonId,
@@ -219,12 +262,12 @@ describe("AiJudgeConfigurationGenerationService", () => {
     );
 
     expect(result).toEqual(passedValidation);
-    expect(configurationService.prepareGenerationAuthoringContext).toHaveBeenCalledWith(
+    expect(aiJudgeConfigurationService.prepareGenerationAuthoringContext).toHaveBeenCalledWith(
       courseId,
       lessonId,
       currentUser,
     );
-    expect(validatorService.validate).toHaveBeenCalledWith(
+    expect(aiJudgeConfigurationValidatorService.validate).toHaveBeenCalledWith(
       expect.objectContaining({
         language: SUPPORTED_LANGUAGES.PL,
         brief: "Assess price-objection handling.",
@@ -233,6 +276,6 @@ describe("AiJudgeConfigurationGenerationService", () => {
         }),
       }),
     );
-    expect(workflowService.run).not.toHaveBeenCalled();
+    expect(aiJudgeConfigurationGenerationWorkflowService.run).not.toHaveBeenCalled();
   });
 });

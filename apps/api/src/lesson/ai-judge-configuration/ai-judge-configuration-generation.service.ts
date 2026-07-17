@@ -2,7 +2,10 @@ import { Injectable } from "@nestjs/common";
 
 import { getDeterministicAiJudgeConfigurationValidation } from "src/ai/judge-configuration-generation/ai-judge-configuration-draft";
 import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.service";
-import { AI_JUDGE_GENERATION_MODE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import {
+  AI_JUDGE_GENERATION_MODE,
+  AI_JUDGE_GENERATION_STATUS,
+} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 import {
   reconcileAiJudgeConfigurationDraft,
   referenceAiJudgeConfiguration,
@@ -19,6 +22,8 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type {
   AiJudgeConfigurationValidationResult,
+  AiJudgeGenerationApplicationProgressEvent,
+  AiJudgeGenerationProgressEvent,
   GenerateAiJudgeConfigurationInput,
   ReferencedAiJudgeConfiguration,
   ValidateAiJudgeConfigurationInput,
@@ -30,8 +35,8 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 export class AiJudgeConfigurationGenerationService {
   constructor(
     private readonly aiJudgeConfigurationService: AiJudgeConfigurationService,
-    private readonly workflowService: AiJudgeConfigurationGenerationWorkflowService,
-    private readonly validatorService: AiJudgeConfigurationValidatorService,
+    private readonly aiJudgeConfigurationGenerationWorkflowService: AiJudgeConfigurationGenerationWorkflowService,
+    private readonly aiJudgeConfigurationValidatorService: AiJudgeConfigurationValidatorService,
   ) {}
 
   async generate(
@@ -39,19 +44,43 @@ export class AiJudgeConfigurationGenerationService {
     currentUser: CurrentUserType,
     options: AiJudgeGenerationExecutionOptions = {},
   ): Promise<GenerateAiJudgeConfigurationApplicationResult> {
+    const prepared = await this.prepare(input, currentUser);
+
+    return this.execute(prepared, options);
+  }
+
+  async prepare(
+    input: GenerateAiJudgeConfigurationInput,
+    currentUser: CurrentUserType,
+  ): Promise<PreparedAiJudgeConfigurationGeneration> {
     const context = await this.aiJudgeConfigurationService.prepareGenerationAuthoringContext(
       input.courseId,
       input.lessonId,
       currentUser,
     );
-    const prepared = this.prepareGeneration(input, context.baseLanguage);
+
+    return this.prepareGeneration(input, context.baseLanguage);
+  }
+
+  async execute(
+    prepared: PreparedAiJudgeConfigurationGeneration,
+    options: AiJudgeGenerationExecutionOptions = {},
+  ): Promise<GenerateAiJudgeConfigurationApplicationResult> {
     let latestDraft: ReferencedAiJudgeConfiguration | undefined;
-    const result = await this.workflowService.run(prepared.workflowInput, {
-      ...options,
-      onDraft: (draft) => {
-        latestDraft = draft;
+    const result = await this.aiJudgeConfigurationGenerationWorkflowService.run(
+      prepared.workflowInput,
+      {
+        isCancelled: options.isCancelled,
+        onDraft: (draft) => {
+          latestDraft = draft;
+        },
+        reportProgress: async (progress) => {
+          await options.reportProgress?.(
+            this.reconcileProgress(progress, latestDraft, prepared.identities),
+          );
+        },
       },
-    });
+    );
 
     return this.reconcileResult(result, latestDraft, prepared.identities);
   }
@@ -72,7 +101,7 @@ export class AiJudgeConfigurationGenerationService {
     );
     if (deterministicValidation) return deterministicValidation;
 
-    return this.validatorService.validate({
+    return this.aiJudgeConfigurationValidatorService.validate({
       language: context.baseLanguage,
       lessonContext: input.lessonContext,
       configuration: referenced,
@@ -123,5 +152,27 @@ export class AiJudgeConfigurationGenerationService {
       ...result,
       configuration: reconcileAiJudgeConfigurationDraft(latestDraft, identities),
     };
+  }
+
+  private reconcileProgress(
+    progress: AiJudgeGenerationProgressEvent,
+    latestDraft: ReferencedAiJudgeConfiguration | undefined,
+    identities: AiJudgeConfigurationIdentityMap,
+  ): AiJudgeGenerationApplicationProgressEvent {
+    switch (progress.status) {
+      case AI_JUDGE_GENERATION_STATUS.DRAFTING:
+        return progress;
+      case AI_JUDGE_GENERATION_STATUS.EVALUATING:
+      case AI_JUDGE_GENERATION_STATUS.REVISING:
+        return {
+          ...progress,
+          draft: reconcileAiJudgeConfigurationDraft(progress.draft, identities),
+        };
+      case AI_JUDGE_GENERATION_STATUS.COMPLETED:
+      case AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW:
+      case AI_JUDGE_GENERATION_STATUS.FAILED:
+      case AI_JUDGE_GENERATION_STATUS.CANCELLED:
+        return this.reconcileResult(progress, latestDraft, identities);
+    }
   }
 }

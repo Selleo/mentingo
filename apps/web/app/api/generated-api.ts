@@ -4202,295 +4202,477 @@ export type GenerateBody =
     };
 
 export interface GenerateResponse {
-  data:
-    | {
-        status: "completed";
-        /**
-         * @min 1
-         * @max 3
-         */
-        attempt: number;
-        configuration: {
-          /** @minLength 1 */
-          taskGoal: string;
+  data: {
+    /** @format uuid */
+    generationId: string;
+  };
+}
+
+export interface GetGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    progress:
+      | {
+          status: "drafting";
           /**
-           * @min 0
-           * @max 100
+           * @min 1
+           * @max 3
            */
-          passingThresholdPercent: number;
-          criteria: {
-            /** @format uuid */
-            id?: string;
+          attempt: number;
+        }
+      | {
+          status: "evaluating";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          draft: {
             /** @minLength 1 */
-            title: string;
-            /** @minLength 1 */
-            expectedBehavior: string;
+            taskGoal: string;
             /**
-             * @min 1
-             * @max 5
+             * @min 0
+             * @max 100
              */
-            maxScore: number;
-            /** @minItems 1 */
-            scoreGuidance: {
+            passingThresholdPercent: number;
+            criteria: {
               /** @format uuid */
               id?: string;
-              /** @min 0 */
-              score: number;
               /** @minLength 1 */
-              description: string;
-              example?: string | null;
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
             }[];
-          }[];
-          blockingErrors: {
-            /** @format uuid */
-            id?: string;
-            /** @minLength 1 */
-            description: string;
-          }[];
-        };
-        validation: {
-          passed: boolean;
-          /** @minLength 1 */
-          summary: string;
-          issues: {
-            /** @minLength 1 */
-            code: string;
-            severity: "error" | "warning";
-            target:
-              | {
-                  type: "configuration";
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "criterion";
-                  /** @pattern ^C[1-9][0-9]*$ */
-                  ref: string;
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "scoreGuidance";
-                  /** @pattern ^C[1-9][0-9]*$ */
-                  ref: string;
-                  /** @min 0 */
-                  score: number;
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "blockingError";
-                  /** @pattern ^B[1-9][0-9]*$ */
-                  ref: string;
-                  /** @minLength 1 */
-                  field?: string;
-                };
-            /** @minLength 1 */
-            message: string;
-            /** @minLength 1 */
-            correction: string;
-          }[];
-        };
-        changes?: {
-          type: "added" | "removed" | "changed";
-          targetRef: string | "configuration";
-          /** @min 0 */
-          score?: number;
-          /** @minLength 1 */
-          field: string;
-          before?: string | number | null;
-          after?: string | number | null;
-        }[];
-      }
-    | {
-        status: "requires_review";
-        attempt: 3;
-        configuration: {
-          /** @minLength 1 */
-          taskGoal: string;
-          /**
-           * @min 0
-           * @max 100
-           */
-          passingThresholdPercent: number;
-          criteria: {
-            /** @format uuid */
-            id?: string;
-            /** @minLength 1 */
-            title: string;
-            /** @minLength 1 */
-            expectedBehavior: string;
-            /**
-             * @min 1
-             * @max 5
-             */
-            maxScore: number;
-            /** @minItems 1 */
-            scoreGuidance: {
+            blockingErrors: {
               /** @format uuid */
               id?: string;
-              /** @min 0 */
-              score: number;
               /** @minLength 1 */
               description: string;
-              example?: string | null;
             }[];
+          };
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            /** @minLength 1 */
+            field: string;
+            before?: string | number | null;
+            after?: string | number | null;
           }[];
-          blockingErrors: {
-            /** @format uuid */
-            id?: string;
-            /** @minLength 1 */
-            description: string;
-          }[];
-        };
-        validation: {
-          passed: boolean;
-          /** @minLength 1 */
-          summary: string;
-          issues: {
-            /** @minLength 1 */
-            code: string;
-            severity: "error" | "warning";
-            target:
-              | {
-                  type: "configuration";
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "criterion";
-                  /** @pattern ^C[1-9][0-9]*$ */
-                  ref: string;
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "scoreGuidance";
-                  /** @pattern ^C[1-9][0-9]*$ */
-                  ref: string;
-                  /** @min 0 */
-                  score: number;
-                  /** @minLength 1 */
-                  field?: string;
-                }
-              | {
-                  type: "blockingError";
-                  /** @pattern ^B[1-9][0-9]*$ */
-                  ref: string;
-                  /** @minLength 1 */
-                  field?: string;
-                };
-            /** @minLength 1 */
-            message: string;
-            /** @minLength 1 */
-            correction: string;
-          }[];
-        };
-        changes?: {
-          type: "added" | "removed" | "changed";
-          targetRef: string | "configuration";
-          /** @min 0 */
-          score?: number;
-          /** @minLength 1 */
-          field: string;
-          before?: string | number | null;
-          after?: string | number | null;
-        }[];
-      }
-    | {
-        status: "failed";
-        /**
-         * @min 1
-         * @max 3
-         */
-        attempt: number;
-        /** @minLength 1 */
-        message: string;
-        configuration?: {
-          /** @minLength 1 */
-          taskGoal: string;
+        }
+      | {
+          status: "revising";
           /**
-           * @min 0
-           * @max 100
+           * @min 1
+           * @max 3
            */
-          passingThresholdPercent: number;
-          criteria: {
-            /** @format uuid */
-            id?: string;
+          attempt: number;
+          draft: {
             /** @minLength 1 */
-            title: string;
-            /** @minLength 1 */
-            expectedBehavior: string;
+            taskGoal: string;
             /**
-             * @min 1
-             * @max 5
+             * @min 0
+             * @max 100
              */
-            maxScore: number;
-            /** @minItems 1 */
-            scoreGuidance: {
+            passingThresholdPercent: number;
+            criteria: {
               /** @format uuid */
               id?: string;
-              /** @min 0 */
-              score: number;
               /** @minLength 1 */
-              description: string;
-              example?: string | null;
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
             }[];
-          }[];
-          blockingErrors: {
-            /** @format uuid */
-            id?: string;
-            /** @minLength 1 */
-            description: string;
-          }[];
-        };
-      }
-    | {
-        status: "cancelled";
-        /**
-         * @min 1
-         * @max 3
-         */
-        attempt: number;
-        configuration?: {
-          /** @minLength 1 */
-          taskGoal: string;
-          /**
-           * @min 0
-           * @max 100
-           */
-          passingThresholdPercent: number;
-          criteria: {
-            /** @format uuid */
-            id?: string;
-            /** @minLength 1 */
-            title: string;
-            /** @minLength 1 */
-            expectedBehavior: string;
-            /**
-             * @min 1
-             * @max 5
-             */
-            maxScore: number;
-            /** @minItems 1 */
-            scoreGuidance: {
+            blockingErrors: {
               /** @format uuid */
               id?: string;
-              /** @min 0 */
-              score: number;
               /** @minLength 1 */
               description: string;
-              example?: string | null;
             }[];
-          }[];
-          blockingErrors: {
-            /** @format uuid */
-            id?: string;
+          };
+          validation: {
+            passed: boolean;
             /** @minLength 1 */
-            description: string;
+            summary: string;
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            /** @minLength 1 */
+            field: string;
+            before?: string | number | null;
+            after?: string | number | null;
           }[];
+        }
+      | {
+          status: "completed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            /** @minLength 1 */
+            field: string;
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "requires_review";
+          attempt: 3;
+          configuration: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            /** @minLength 1 */
+            field: string;
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "failed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          /** @minLength 1 */
+          message: string;
+          configuration?: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+        }
+      | {
+          status: "cancelled";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration?: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
         };
-      };
+  };
+}
+
+export interface CancelGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    cancellationRequested: true;
+  };
 }
 
 export interface ValidateConfigurationBody {
@@ -11793,6 +11975,40 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerGetGeneration
+     * @request GET:/api/ai/judge-configuration/generations/{generationId}
+     */
+    aiJudgeConfigurationGenerationControllerGetGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetGenerationResponse, any>({
+        path: `/api/ai/judge-configuration/generations/${generationId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerCancelGeneration
+     * @request POST:/api/ai/judge-configuration/generations/{generationId}/cancel
+     */
+    aiJudgeConfigurationGenerationControllerCancelGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CancelGenerationResponse, any>({
+        path: `/api/ai/judge-configuration/generations/${generationId}/cancel`,
+        method: "POST",
         format: "json",
         ...params,
       }),

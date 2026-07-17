@@ -369,3 +369,44 @@ This is a temporary architecture decision log for the scoped AI Judge creator. E
 - The current generation HTTP call returns only the terminal result; real stage progress still requires the planned BullMQ snapshot and socket adapter.
 - The application result may contain existing criterion, guidance, and blocking-error IDs, while model and workflow results remain UUID-free.
 - The BullMQ payload must preserve the serializable identity lookup and the authenticated generation owner.
+
+## 2026-07-17 — Ephemeral BullMQ job as generation source of truth
+
+**Status:** Accepted
+
+### Decision
+
+- Prepare and authorize generation synchronously, then enqueue the prepared workflow input and serializable identity map with a generated UUID job ID.
+- Use BullMQ job data and `job.progress` as the short-lived source of truth instead of adding a Postgres generation-job table or a second Redis repository.
+- Retain completed and failed jobs for one hour, capped at 1,000 jobs, so reconnect recovery works without creating permanent authoring history.
+- Run the worker inside `TenantDbRunnerService.runWithTenant` because model/provider configuration may resolve through tenant-scoped runtime settings.
+- Publish every application-level progress snapshot to the existing authenticated `user:{userId}` room and expose ownership-checked snapshot and cancellation endpoints.
+- Define generation socket events in the shared package as an `as const` event map so API publishers and web subscribers use the same vocabulary without hardcoded strings.
+- Store cancellation as a mutable job-data flag and reload the job between workflow stages. Keep active provider-call aborting as a separate capability-specific follow-up.
+- Reconcile internal `C*` and `B*` references into form-ready persisted IDs before updating BullMQ progress or publishing Socket.IO events.
+- Keep `AiJudgeConfigurationGenerationQueueService` responsible for enqueueing, job lookup, ownership, snapshots, cancellation state, and progress publication. The worker invokes `AiJudgeConfigurationGenerationService` directly rather than hiding application execution behind a `process` method on the queue service.
+
+### Rationale
+
+- Generation is disposable authoring work: the creator needs progress and reconnect recovery during the flow, but there is no product requirement for generation history or resumable drafts after the short recovery window.
+- Using BullMQ itself avoids two temporary stores that could disagree about cancellation, ownership, or the latest draft.
+- Authorizing before enqueue prevents unauthorized work from entering the queue, while storing tenant and actor IDs lets every later read, cancellation, and background execution retain the original security scope.
+- Per-user rooms reuse the WebSocket guard's authenticated membership and avoid a new join/leave protocol. HTTP ownership checks remain authoritative for recovery and cancellation.
+- A shared event map prevents spelling drift once the frontend subscribes, while still allowing future generation events to be added without creating unrelated top-level constants.
+- Translating internal workflow events at the lesson application boundary preserves one model-friendly reference system without leaking it into browser state or save payloads.
+- Separating queue lifecycle from workflow execution makes the call graph explicit: controller to queue for job lifecycle, worker to application service for business execution, and application service to the transport-neutral workflow.
+
+### Alternatives considered
+
+- **Persist generation jobs and attempts in Postgres:** rejected because the product has no history, audit, or resume-later workflow in this version.
+- **Add a separate Redis snapshot repository:** rejected because BullMQ already stores mutable job data, progress, terminal state, and retention policy.
+- **Create a generation-specific socket room:** rejected because it would require a new authenticated subscription protocol and duplicate ownership checks for a flow visible only to its creator.
+- **Keep the HTTP request open until all attempts finish:** rejected because disconnecting the dialog would terminate transport even though generated-content work should continue.
+- **Publish referenced drafts and reconcile only at completion:** rejected because progress previews and stop-to-inspect behavior also need safe, directly editable configurations.
+
+### Consequences and follow-ups
+
+- The frontend can subscribe once to the shared progress event, filter by `generationId`, and recover missed events with the snapshot endpoint.
+- Cancellation can take effect before an attempt, after draft generation, or after semantic validation; it cannot yet interrupt an in-flight provider call.
+- Unexpected worker failures are converted into a typed failed snapshot before BullMQ records the job failure.
+- The next implementation slice is the frontend mutation/query/socket hook that owns one active generation ID and maps snapshots into the existing dialog state.

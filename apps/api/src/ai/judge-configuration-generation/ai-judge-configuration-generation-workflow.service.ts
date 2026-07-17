@@ -30,8 +30,8 @@ import type { GenerateAiJudgeConfigurationDraftInput } from "./ai-judge-configur
 @Injectable()
 export class AiJudgeConfigurationGenerationWorkflowService {
   constructor(
-    private readonly generatorService: AiJudgeConfigurationGeneratorService,
-    private readonly validatorService: AiJudgeConfigurationValidatorService,
+    private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
+    private readonly aiJudgeConfigurationValidatorService: AiJudgeConfigurationValidatorService,
   ) {}
 
   async run(
@@ -65,7 +65,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
 
       const previousDraft = latestDraft ?? this.getInitialDraft(input);
       try {
-        latestDraft = await this.generatorService.generate(generatorInput);
+        latestDraft = await this.aiJudgeConfigurationGeneratorService.generate(generatorInput);
         await options.onDraft?.(latestDraft);
         latestChanges = previousDraft
           ? diffAiJudgeConfigurationDrafts(previousDraft, latestDraft)
@@ -86,7 +86,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
       if (deterministicValidation) validation = deterministicValidation;
       else {
         await this.report(this.createEvaluatingEvent(attempt, latestDraft, latestChanges), options);
-        validation = await this.validatorService.validate({
+        validation = await this.aiJudgeConfigurationValidatorService.validate({
           language: input.language,
           lessonContext: input.lessonContext,
           configuration: latestDraft,
