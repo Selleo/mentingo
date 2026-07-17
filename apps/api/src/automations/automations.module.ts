@@ -7,6 +7,6 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
 @Module({
   providers: [AutomationsRepository, AutomationsRepository, AutomationsService],
   controllers: [AutomationsController],
-  exports: [AutomationsController],
+  exports: [AutomationsController, AutomationsModule],
 })
 export class AutomationsModule {}
