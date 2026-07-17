@@ -1,5 +1,5 @@
-import { Trash2, Save, Play, Square, Archive } from "lucide-react";
-import { type FC, useState, useEffect } from "react";
+import { Archive, Play, Square, Trash2 } from "lucide-react";
+import { type FC, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -17,11 +17,12 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Textarea } from "~/components/ui/textarea";
+
+import { useAutoSave } from "../hooks/useAutoSave";
 
 import type { Automation } from "../Automation.page";
 
@@ -58,12 +59,26 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<Automation["status"]>("Draft");
+  const prevAutomationId = useRef<string | null>(null);
+
+  const triggerAutoSave = useAutoSave<Partial<Automation>>((fields) => {
+    if (automation) {
+      onUpdate(automation.id, fields);
+    }
+  });
 
   useEffect(() => {
     if (automation) {
-      setName(automation.name);
-      setDescription(automation.description);
-      setStatus(automation.status);
+      if (automation.id !== prevAutomationId.current) {
+        prevAutomationId.current = automation.id;
+        setName(automation.name);
+        setDescription(automation.description);
+        setStatus(automation.status);
+      } else {
+        setStatus(automation.status);
+      }
+    } else {
+      prevAutomationId.current = null;
     }
   }, [automation]);
 
@@ -72,9 +87,20 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   const isDraft = automation.status === "Draft";
   const availableStatuses = getAvailableStatuses(automation.status, t);
 
-  const handleSave = () => {
-    onUpdate(automation.id, { name, description, status });
-    onClose();
+  const handleNameChange = (value: string) => {
+    setName(value);
+    triggerAutoSave({ name: value, description, status });
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    setDescription(value);
+    triggerAutoSave({ name, description: value, status });
+  };
+
+  const handleStatusChange = (val: string) => {
+    const newStatus = val as Automation["status"];
+    setStatus(newStatus);
+    onUpdate(automation.id, { name, description, status: newStatus });
   };
 
   const toggleActivation = () => {
@@ -97,7 +123,7 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
             <Input
               id="drawer-automation-name"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleNameChange(e.target.value)}
             />
           </div>
 
@@ -109,17 +135,13 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
               id="drawer-automation-desc"
               rows={3}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => handleDescriptionChange(e.target.value)}
             />
           </div>
 
           <div className="space-y-2">
             <Label>{t("automationView.drawer.statusLabel")}</Label>
-            <Select
-              value={status}
-              onValueChange={(val) => setStatus(val as Automation["status"])}
-              disabled={isDraft}
-            >
+            <Select value={status} onValueChange={handleStatusChange} disabled={isDraft}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -178,22 +200,18 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
               </Button>
             </div>
           </div>
-        </div>
 
-        <SheetFooter className="flex-row items-center justify-between border-t pt-4">
-          <Button variant="destructive" size="sm" onClick={() => onDelete(automation.id)}>
+          <Separator />
+
+          <Button
+            variant="destructive"
+            size="sm"
+            className="w-full"
+            onClick={() => onDelete(automation.id)}
+          >
             <Trash2 className="mr-2 size-4" /> {t("automationView.drawer.delete")}
           </Button>
-
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={onClose}>
-              {t("automationView.drawer.cancel")}
-            </Button>
-            <Button onClick={handleSave}>
-              <Save className="mr-2 size-4" /> {t("automationView.drawer.save")}
-            </Button>
-          </div>
-        </SheetFooter>
+        </div>
       </SheetContent>
     </Sheet>
   );
