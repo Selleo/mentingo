@@ -18,6 +18,28 @@ import type {
 } from "./automationBuilder.types";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 
+function generateNodeId(): string {
+  return `node-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function createNode(
+  kind: BuilderNode["kind"],
+  type: BuilderNode["type"],
+  label: string,
+  parentId: string | null,
+): BuilderNode {
+  return {
+    id: generateNodeId(),
+    kind,
+    type,
+    label,
+    parentId,
+    children: [],
+    position: { x: 0, y: 0 },
+    config: {},
+  };
+}
+
 export default function AutomationBuilderPage() {
   const { t } = useTranslation();
   const { id: automationId = "new" } = useParams<{ id: string }>();
@@ -31,31 +53,6 @@ export default function AutomationBuilderPage() {
       activationConstraint: { distance: 8 },
     }),
   );
-
-  const createNodeFromDefinition = (
-    definition: AutomationStepDefinition,
-    parentId: string | null,
-  ): BuilderNode => ({
-    id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    kind: definition.kind,
-    type: definition.type,
-    label: t(definition.labelKey),
-    parentId,
-    children: [],
-    position: { x: 0, y: 0 },
-    config: {},
-  });
-
-  const createNodeFromBlock = (block: SidebarBlock, parentId: string | null): BuilderNode => ({
-    id: `node-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    kind: block.kind,
-    type: block.type,
-    label: t(block.labelKey),
-    parentId,
-    children: [],
-    position: { x: 0, y: 0 },
-    config: {},
-  });
 
   const handleDragStart = (event: DragStartEvent) => {
     const block = event.active.data.current?.block as SidebarBlock | undefined;
@@ -72,19 +69,27 @@ export default function AutomationBuilderPage() {
     if (!block) return;
 
     const targetNodeId = over.data.current?.targetNodeId as string | null | undefined;
+    const nodes = useBuilderStore.getState().nodes;
+    const hasTrigger = nodes.some((n) => n.kind === "trigger");
 
     if (over.id === "canvas-root") {
-      const newNode = createNodeFromBlock(block, null);
-      addNode(newNode);
+      if (block.kind !== "trigger" || hasTrigger) return;
+      addNode(createNode(block.kind, block.type, t(block.labelKey), null));
     } else if (targetNodeId) {
-      const newNode = createNodeFromBlock(block, targetNodeId);
-      addChildNode(targetNodeId, newNode);
+      if (block.kind !== "action") return;
+      addChildNode(
+        targetNodeId,
+        createNode(block.kind, block.type, t(block.labelKey), targetNodeId),
+      );
     }
   };
 
   const handleAddChild = (parentId: string, definition: AutomationStepDefinition) => {
-    const newNode = createNodeFromDefinition(definition, parentId);
-    addChildNode(parentId, newNode);
+    if (definition.kind !== "action") return;
+    addChildNode(
+      parentId,
+      createNode(definition.kind, definition.type, t(definition.labelKey), parentId),
+    );
   };
 
   return (
@@ -94,9 +99,7 @@ export default function AutomationBuilderPage() {
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div className="relative flex flex-1 overflow-hidden">
           <BlocksSidebar />
-
           <BuilderCanvas onAddChild={handleAddChild} />
-
           <EditNodePanel />
         </div>
 
@@ -105,7 +108,7 @@ export default function AutomationBuilderPage() {
             <div
               className={cn(
                 "flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm shadow-lg",
-                activeDragBlock.kind === "condition"
+                activeDragBlock.kind === "trigger"
                   ? "border-blue-200 bg-blue-50"
                   : "border-emerald-200 bg-emerald-50",
               )}

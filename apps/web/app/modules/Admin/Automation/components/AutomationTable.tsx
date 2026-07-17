@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Pagination } from "~/components/Pagination/Pagination";
 import {
   Table,
   TableBody,
@@ -10,25 +11,35 @@ import {
   TableRow,
 } from "~/components/ui/table";
 
-import { AutomationPagination } from "./AutomationPagination";
 import { AutomationRow } from "./AutomationRow";
 
 import type { Automation } from "../Automation.page";
 import type { FC } from "react";
+import type { ItemsPerPageOption } from "~/components/Pagination/Pagination";
 
 interface AutomationTableProps {
   automations: Automation[];
+  totalCount: number;
   onOpenDrawer: (automation: Automation) => void;
 }
 
-export const AutomationTable: FC<AutomationTableProps> = ({ automations, onOpenDrawer }) => {
+export const AutomationTable: FC<AutomationTableProps> = ({
+  automations,
+  totalCount,
+  onOpenDrawer,
+}) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [itemsPerPage, setItemsPerPage] = useState<ItemsPerPageOption>(10);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = automations.slice(indexOfFirstItem, indexOfLastItem);
+
+  const handleItemsPerPageChange = (newPerPage: string) => {
+    setItemsPerPage(Number(newPerPage) as ItemsPerPageOption);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="flex flex-col">
@@ -55,21 +66,24 @@ export const AutomationTable: FC<AutomationTableProps> = ({ automations, onOpenD
           {automations.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
-                {t("automationView.table.empty")}
+                {totalCount > 0
+                  ? t("automationView.table.emptyFiltered")
+                  : t("automationView.table.empty")}
               </TableCell>
             </TableRow>
           )}
         </TableBody>
       </Table>
 
-      {automations.length > 0 && (
-        <AutomationPagination
-          totalItems={automations.length}
-          itemsPerPage={itemsPerPage}
-          currentPage={currentPage}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      <Pagination
+        className="border-b border-x bg-neutral-50 rounded-b-lg"
+        emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
+        totalItems={automations.length}
+        itemsPerPage={itemsPerPage}
+        currentPage={currentPage}
+        onPageChange={setCurrentPage}
+        onItemsPerPageChange={handleItemsPerPageChange}
+      />
     </div>
   );
 };
