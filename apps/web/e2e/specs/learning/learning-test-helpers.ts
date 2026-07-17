@@ -315,7 +315,6 @@ export const createAiMentorLessonCourse = async (
         title: `${prefix}-lesson`,
         description: "<p>Practice with your AI mentor.</p>",
         aiMentorInstructions: "<p>Ask concise questions.</p>",
-        completionConditions: "<p>Complete the mentor conversation.</p>",
         displayOrder: 1,
       });
 

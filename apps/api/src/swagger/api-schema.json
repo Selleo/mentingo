@@ -7169,6 +7169,171 @@
         }
       }
     },
+    "/api/lesson/{lessonId}/ai-judge-configuration": {
+      "get": {
+        "operationId": "AiJudgeConfigurationController_getConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AiJudgeConfigurationController_replaceConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/{lessonId}/ai-judge-configuration/translations/{language}": {
+      "patch": {
+        "operationId": "AiJudgeConfigurationController_updateTranslations",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTranslationsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/studentLessonProgress": {
       "post": {
         "operationId": "StudentLessonProgressController_markLessonAsCompleted",
@@ -26432,9 +26597,6 @@
                                   "aiMentorInstructions": {
                                     "type": "string"
                                   },
-                                  "completionConditions": {
-                                    "type": "string"
-                                  },
                                   "type": {
                                     "anyOf": [
                                       {
@@ -26500,7 +26662,6 @@
                                   "id",
                                   "lessonId",
                                   "aiMentorInstructions",
-                                  "completionConditions",
                                   "type",
                                   "avatarReference",
                                   "voiceMode",
@@ -29606,9 +29767,6 @@
                             "aiMentorInstructions": {
                               "type": "string"
                             },
-                            "completionConditions": {
-                              "type": "string"
-                            },
                             "type": {
                               "anyOf": [
                                 {
@@ -29674,7 +29832,6 @@
                             "id",
                             "lessonId",
                             "aiMentorInstructions",
-                            "completionConditions",
                             "type",
                             "avatarReference",
                             "voiceMode",
@@ -30113,9 +30270,6 @@
                                 "aiMentorInstructions": {
                                   "type": "string"
                                 },
-                                "completionConditions": {
-                                  "type": "string"
-                                },
                                 "type": {
                                   "anyOf": [
                                     {
@@ -30181,7 +30335,6 @@
                                 "id",
                                 "lessonId",
                                 "aiMentorInstructions",
-                                "completionConditions",
                                 "type",
                                 "avatarReference",
                                 "voiceMode",
@@ -31104,15 +31257,90 @@
                           }
                         ]
                       },
-                      "summary": {
-                        "anyOf": [
-                          {
-                            "type": "string"
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
                           },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
                       }
                     },
                     "required": [
@@ -31122,7 +31350,8 @@
                       "percentage",
                       "requiredScore",
                       "passed",
-                      "summary"
+                      "criteria",
+                      "blockingErrors"
                     ]
                   },
                   {
@@ -32081,9 +32310,6 @@
                       "aiMentorInstructions": {
                         "type": "string"
                       },
-                      "completionConditions": {
-                        "type": "string"
-                      },
                       "type": {
                         "anyOf": [
                           {
@@ -32149,7 +32375,6 @@
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions",
                       "type",
                       "avatarReference",
                       "voiceMode",
@@ -32896,103 +33121,6 @@
                   ]
                 }
               },
-              "aiMentor": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "completionConditions": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "anyOf": [
-                          {
-                            "const": "mentor",
-                            "type": "string"
-                          },
-                          {
-                            "const": "teacher",
-                            "type": "string"
-                          },
-                          {
-                            "const": "roleplay",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "avatarReference": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "voiceMode": {
-                        "anyOf": [
-                          {
-                            "const": "preset",
-                            "type": "string"
-                          },
-                          {
-                            "const": "custom",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "ttsPreset": {
-                        "anyOf": [
-                          {
-                            "const": "male",
-                            "type": "string"
-                          },
-                          {
-                            "const": "female",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "customTtsReference": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "lessonId",
-                      "aiMentorInstructions",
-                      "completionConditions",
-                      "type",
-                      "avatarReference",
-                      "voiceMode",
-                      "ttsPreset",
-                      "customTtsReference"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "liveTrainingId": {
                 "anyOf": [
                   {
@@ -33025,8 +33153,115 @@
               "aiMentorInstructions": {
                 "type": "string"
               },
-              "completionConditions": {
-                "type": "string"
+              "aiJudgeConfiguration": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "taskGoal": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "passingThresholdPercent": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "expectedBehavior": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "maxScore": {
+                          "minimum": 1,
+                          "maximum": 5,
+                          "type": "integer"
+                        },
+                        "scoreGuidance": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "score": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "example": {
+                                "anyOf": [
+                                  {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "description"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "title",
+                        "expectedBehavior",
+                        "maxScore",
+                        "scoreGuidance"
+                      ]
+                    }
+                  },
+                  "blockingErrors": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "description": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "description"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "taskGoal",
+                  "passingThresholdPercent",
+                  "criteria",
+                  "blockingErrors"
+                ]
               },
               "type": {
                 "anyOf": [
@@ -33085,7 +33320,7 @@
             "required": [
               "chapterId",
               "aiMentorInstructions",
-              "completionConditions",
+              "aiJudgeConfiguration",
               "type"
             ]
           }
@@ -33378,103 +33613,6 @@
                       ]
                     }
                   },
-                  "aiMentor": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "lessonId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "aiMentorInstructions": {
-                            "type": "string"
-                          },
-                          "completionConditions": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "anyOf": [
-                              {
-                                "const": "mentor",
-                                "type": "string"
-                              },
-                              {
-                                "const": "teacher",
-                                "type": "string"
-                              },
-                              {
-                                "const": "roleplay",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "avatarReference": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "voiceMode": {
-                            "anyOf": [
-                              {
-                                "const": "preset",
-                                "type": "string"
-                              },
-                              {
-                                "const": "custom",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "ttsPreset": {
-                            "anyOf": [
-                              {
-                                "const": "male",
-                                "type": "string"
-                              },
-                              {
-                                "const": "female",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "customTtsReference": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "lessonId",
-                          "aiMentorInstructions",
-                          "completionConditions",
-                          "type",
-                          "avatarReference",
-                          "voiceMode",
-                          "ttsPreset",
-                          "customTtsReference"
-                        ]
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "liveTrainingId": {
                     "anyOf": [
                       {
@@ -33498,9 +33636,6 @@
                 "type": "object",
                 "properties": {
                   "aiMentorInstructions": {
-                    "type": "string"
-                  },
-                  "completionConditions": {
                     "type": "string"
                   },
                   "type": {
@@ -33559,7 +33694,6 @@
                 },
                 "required": [
                   "aiMentorInstructions",
-                  "completionConditions",
                   "type"
                 ]
               }
@@ -34588,9 +34722,6 @@
                           "aiMentorInstructions": {
                             "type": "string"
                           },
-                          "completionConditions": {
-                            "type": "string"
-                          },
                           "type": {
                             "anyOf": [
                               {
@@ -34656,7 +34787,6 @@
                           "id",
                           "lessonId",
                           "aiMentorInstructions",
-                          "completionConditions",
                           "type",
                           "avatarReference",
                           "voiceMode",
@@ -35175,6 +35305,872 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "taskGoal": {
+                    "type": "string"
+                  },
+                  "passingThresholdPercent": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "totalMaxScore": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "expectedBehavior": {
+                          "type": "string"
+                        },
+                        "maxScore": {
+                          "minimum": 1,
+                          "maximum": 5,
+                          "type": "integer"
+                        },
+                        "scoreGuidance": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "score": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "example": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "score",
+                              "description",
+                              "example"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "expectedBehavior",
+                        "maxScore",
+                        "scoreGuidance"
+                      ]
+                    }
+                  },
+                  "blockingErrors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "description"
+                      ]
+                    }
+                  },
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "hasMissingTranslations",
+                  "taskGoal",
+                  "passingThresholdPercent",
+                  "totalMaxScore",
+                  "criteria",
+                  "blockingErrors",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceConfigurationBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "taskGoal": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passingThresholdPercent": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expectedBehavior": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxScore": {
+                  "minimum": 1,
+                  "maximum": 5,
+                  "type": "integer"
+                },
+                "scoreGuidance": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "score": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "description": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "example": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "score",
+                      "description"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "title",
+                "expectedBehavior",
+                "maxScore",
+                "scoreGuidance"
+              ]
+            }
+          },
+          "blockingErrors": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description"
+              ]
+            }
+          }
+        },
+        "required": [
+          "taskGoal",
+          "passingThresholdPercent",
+          "criteria",
+          "blockingErrors"
+        ]
+      },
+      "ReplaceConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
+              "taskGoal": {
+                "type": "string"
+              },
+              "passingThresholdPercent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "totalMaxScore": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "expectedBehavior": {
+                      "type": "string"
+                    },
+                    "maxScore": {
+                      "minimum": 1,
+                      "maximum": 5,
+                      "type": "integer"
+                    },
+                    "scoreGuidance": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "score": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "score",
+                          "description",
+                          "example"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "expectedBehavior",
+                    "maxScore",
+                    "scoreGuidance"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description"
+                  ]
+                }
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "hasMissingTranslations",
+              "taskGoal",
+              "passingThresholdPercent",
+              "totalMaxScore",
+              "criteria",
+              "blockingErrors",
+              "language",
+              "baseLanguage",
+              "availableLocales"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateTranslationsBody": {
+        "additionalProperties": false,
+        "minProperties": 1,
+        "type": "object",
+        "properties": {
+          "taskGoal": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "minProperties": 2,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expectedBehavior": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "scoreGuidance": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "minProperties": 2,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "example": {
+                  "anyOf": [
+                    {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "blockingErrors": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "description"
+              ]
+            }
+          }
+        }
+      },
+      "UpdateTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
+              "taskGoal": {
+                "type": "string"
+              },
+              "passingThresholdPercent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "totalMaxScore": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "expectedBehavior": {
+                      "type": "string"
+                    },
+                    "maxScore": {
+                      "minimum": 1,
+                      "maximum": 5,
+                      "type": "integer"
+                    },
+                    "scoreGuidance": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "score": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "score",
+                          "description",
+                          "example"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "expectedBehavior",
+                    "maxScore",
+                    "scoreGuidance"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description"
+                  ]
+                }
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "hasMissingTranslations",
+              "taskGoal",
+              "passingThresholdPercent",
+              "totalMaxScore",
+              "criteria",
+              "blockingErrors",
+              "language",
+              "baseLanguage",
+              "availableLocales"
             ]
           }
         },
@@ -35936,9 +36932,6 @@
           "data": {
             "type": "object",
             "properties": {
-              "summary": {
-                "type": "string"
-              },
               "passed": {
                 "type": "boolean"
               },
@@ -35953,15 +36946,87 @@
               },
               "percentage": {
                 "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "criterionId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "awardedScore": {
+                      "type": "integer"
+                    },
+                    "maxScore": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "not_met",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
+                          "type": "string"
+                        },
+                        {
+                          "const": "met",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "learnerSafeFeedback": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "criterionId",
+                    "title",
+                    "awardedScore",
+                    "maxScore",
+                    "status",
+                    "learnerSafeFeedback"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "blockingErrorId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "learnerSafeFeedback": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "blockingErrorId",
+                    "description",
+                    "learnerSafeFeedback"
+                  ]
+                }
               }
             },
             "required": [
-              "summary",
               "passed",
               "minScore",
               "score",
               "maxScore",
-              "percentage"
+              "percentage",
+              "criteria",
+              "blockingErrors"
             ]
           }
         },

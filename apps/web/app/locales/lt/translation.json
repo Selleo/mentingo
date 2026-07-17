@@ -54,7 +54,9 @@
       "live_training": "Tiesioginiai mokymai"
     },
     "error": {
-      "somethingWentWrong": "Oi! Kažkas nutiko."
+      "somethingWentWrong": "Oi! Kažkas nutiko.",
+      "threadMustBeActive": "Pokalbio gija turi būti aktyvi.",
+      "aiJudgeConfigurationMissing": "Trūksta AI Judge konfigūracijos."
     },
     "loader": {
       "textSequence": {
@@ -1838,7 +1840,6 @@
         "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
       },
       "lesson": {
-        "aiMentorRequiredContent": "AI mentoriaus instrukcijos ir užbaigimo sąlygos yra būtinos.",
         "customTtsReferenceRequired": "Pasirinktiniame režime būtina nurodyti tinkintą TTS nuorodą.",
         "aiMentorCreateFailed": "Nepavyko sukurti AI mentoriaus pamokos.",
         "questionsRequired": "Būtinas bent vienas klausimas.",
@@ -2110,8 +2111,6 @@
           "descriptionRequired": "Būtinas aprašymas",
           "aiMentorInstructionsRequired": "Reikalingos AI mentoriaus instrukcijos",
           "aiMentorInstructionsMaxLength": "AI mentoriaus instrukcijos per ilgos (maks. 20 000 simbolių)",
-          "completionConditionsRequired": "Reikalingos užbaigimo sąlygos",
-          "completionConditionsMaxLength": "Užbaigimo sąlygos per ilgos (maks. 20 000 simbolių)",
           "customTTSReferenceRequired": "Pasirinktiniame režime reikalinga tinkinta TTS nuoroda",
           "taskDescriptionMaxLength": "Užduoties aprašymas per ilgas (maks. {{ count }} simbolių)",
           "passThresholdMin": "Išlaikymo slenkstis turi būti bent 1",
@@ -2186,7 +2185,6 @@
           "sentence": "Sakinys",
           "sourceUrl": "Šaltinio URL",
           "aiMentorInstructions": "AI mentoriaus instrukcijos",
-          "completionConditions": "Užbaigimo sąlygos",
           "aiMentor": "AI mentorius",
           "mentorName": "Mentoriaus vardas",
           "taskDescription": "Užduoties aprašymas",
@@ -2212,11 +2210,84 @@
           "sourceUrl": "Įveskite šaltinio URL...",
           "allowFullscreen": "Leisti per visą ekraną",
           "aiMentorInstructions": "Aprašykite, kaip AI mentorius turėtų elgtis pamokos metu...",
-          "completionConditions": "Išvardinkite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką...",
           "taskDescription": "Aprašykite užduotį, kurią dalyvis turi atlikti...",
           "passThreshold": "pvz., 70 proc.",
           "customTTSReference": "Įveskite tinkintą TTS nuorodos ID...",
           "aiMentorTypes": "Mentorė"
+        },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Sukonfigūruota",
+          "emptyDescription": "Nustatykite, kaip bus vertinamas mokinio atsakymas ir kada pamoka bus išlaikyta.",
+          "baseLanguageRequired": "Prieš versdami sukurkite vertinimo struktūrą pagrindine kurso kalba.",
+          "structureLockedTooltip": "Vertinimo struktūrą galima keisti tik pagrindine kurso kalba.",
+          "summary": "{{criteria}} kriterijai · iš viso {{score}} taškų · {{threshold}} % išlaikymui · {{blockingErrors}} blokuojančios klaidos",
+          "configureWithAi": "Konfigūruoti su AI",
+          "configureManually": "Konfigūruoti rankiniu būdu",
+          "editAssessment": "Redaguoti vertinimą",
+          "dialogTitle": "Konfigūruoti AI Judge",
+          "dialogDescription": "Nustatykite išmatuojamus kriterijus, tikslias vertinimo gaires ir klaidas, kurios visada reiškia neišlaikymą.",
+          "translationModeTitle": "Vertimo režimas",
+          "translationModeDescription": "Čia galite versti vertinimo tekstą. Taškai, slenkstis ir struktūra tvarkomi pagrindine kurso kalba.",
+          "taskGoal": "Užduoties tikslas",
+          "taskGoalPlaceholder": "Aprašykite išmatuojamą rezultatą, kurį mokinys turėtų pasiekti...",
+          "passingThreshold": "Išlaikymo slenkstis",
+          "criteria": "Vertinimo kriterijai",
+          "addFirstCriterion": "Pridėti pirmą kriterijų",
+          "criterionNumber": "Kriterijus {{number}}",
+          "untitledCriterion": "Kriterijus be pavadinimo",
+          "complete": "Užbaigta",
+          "needsDetails": "Trūksta informacijos",
+          "criterionDescription": "Aprašykite vieną stebimą mokinio elgesį.",
+          "criterionTitle": "Kriterijaus pavadinimas",
+          "criterionTitlePlaceholder": "pvz., Išsiaiškina kliento poreikius",
+          "expectedBehavior": "Laukiamas elgesys",
+          "expectedBehaviorPlaceholder": "Paaiškinkite, ką mokinys turėtų pasakyti ar padaryti...",
+          "maxScore": "Didžiausias balas",
+          "score": "Balas",
+          "scoringGuidance": "Vertinimo gairės",
+          "advancedScoring": "Išplėstinės vertinimo gairės",
+          "scoreLevelsCount": "Balų lygių: {{count}}",
+          "scoreBadge": "{{score}} tšk.",
+          "itemsCount": "Pridėta: {{count}}",
+          "scoringSummary": "Vertinimas",
+          "pointsRequired": "Išlaikymui reikia {{required}} iš {{total}} taškų",
+          "scoringGuidanceDescription": "Pasirinktinai aprašykite, kaip atrodo konkretus balas.",
+          "scoreDescription": "Kas suteikia šį balą",
+          "scoreDescriptionPlaceholder": "Aprašykite stebimą atlikimo lygį...",
+          "acceptedExample": "Priimtinas pavyzdys",
+          "examplePlaceholder": "Pridėkite vieną atsakymo pavyzdį...",
+          "addCriterion": "Pridėti kriterijų",
+          "removeCriterion": "Pašalinti kriterijų",
+          "addScoreGuidance": "Pridėti vertinimo gairę",
+          "removeScoreGuidance": "Pašalinti vertinimo gairę",
+          "noScoringGuidance": "Konkrečių balų gairių nepridėta.",
+          "blockingErrors": "Blokuojančios klaidos",
+          "blockingErrorsDescription": "Jei įvyksta bent viena, mokinys neišlaiko nepaisant surinkto balo.",
+          "blockingErrorNumber": "Blokuojanti klaida {{number}}",
+          "blockingErrorPlaceholder": "Aprašykite klaidą, kuri visada reiškia neišlaikymą...",
+          "addBlockingError": "Pridėti blokuojančią klaidą",
+          "removeBlockingError": "Pašalinti blokuojančią klaidą",
+          "noBlockingErrors": "Blokuojančių klaidų nenustatyta.",
+          "applyConfiguration": "Taikyti konfigūraciją",
+          "saveConfiguration": "Išsaugoti konfigūraciją",
+          "saveTranslation": "Išsaugoti vertimą",
+          "configurationSavedSuccessfully": "AI Judge konfigūracija išsaugota.",
+          "translationSavedSuccessfully": "AI Judge vertimas išsaugotas.",
+          "validation": {
+            "configurationRequired": "Prieš išsaugodami šią pamoką sukonfigūruokite AI Judge",
+            "taskGoalRequired": "Užduoties tikslas yra privalomas",
+            "thresholdRange": "Išlaikymo slenkstis turi būti nuo 1 iki 100",
+            "titleRequired": "Kriterijaus pavadinimas yra privalomas",
+            "expectedBehaviorRequired": "Laukiamas elgesys yra privalomas",
+            "maxScoreRange": "Didžiausias balas turi būti nuo 1 iki 5",
+            "scoreRange": "Balas negali būti neigiamas",
+            "scoreExceedsMaximum": "Balas negali viršyti kriterijaus maksimumo",
+            "scoreMustBeUnique": "Kiekvienas gairės balas kriterijuje turi būti unikalus",
+            "guidanceRequired": "Vertinimo gairės aprašymas yra privalomas",
+            "completeGuidanceRequired": "Pridėkite šio kriterijaus vertinimo gaires",
+            "blockingErrorRequired": "Blokuojančios klaidos aprašymas yra privalomas"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2277,7 +2348,6 @@
           "aiMentorTypeTooltip": "Scenarijuje elgiasi kaip veikėjas, tačiau scenos metu užduoda klausimus ir padeda daryti išvadas.\nPavyzdys: \"Ką dabar darytumėte eidamas vadovo vaidmenį?\"",
           "aiTeacherTypeTooltip": "Aiškina, moko ir klausinėja – kaip mokytojas.\nPavyzdys: \"Esant tokiai situacijai, klientas prieštarauja kainai. Ką turėtumėte atsakyti ir kodėl?\"",
           "aiRoleplayTypeTooltip": "Imituoja tikrovišką charakterį ir situaciją – nepažeidžiant charakterio.\nPavyzdys: \"Tai antras kartas, kai jūsų paslauga sugenda. Ką ketinate dėl to daryti?\"",
-          "completionConditionsTooltip": "Išvardykite, ką mokinys turi pasiekti, kad išlaikytų šią pamoką. Pateikite aiškius ir išmatuojamus taškus. AI naudos šį sąrašą pažangai patikrinti. Taip pat galite nustatyti išlaikymo slenkstį (pvz., procentą arba minimalų taškų skaičių). Jei slenkstis nenurodytas, turi būti įvykdytos visos sąlygos, norint išlaikyti pamoką.",
           "passThresholdTooltip": "Nustatykite minimalų procentą (1–100 %), reikalingą išlaikyti. Palikite tuščią, kad nebūtų slenksčio.",
           "voiceConfigCartesiaTooltip": "Balso garsas naudoja Cartesia. Pasirinkite Male arba Female, kad būtų naudojamas sukonfigūruotas balsų susiejimas, arba pasirinkite Custom ir įveskite Cartesia balso ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Balso garsas naudoja su OpenAI suderinamą teksto į kalbą endpointą. Male ir Female naudoja OpenAI balso presetus. Pasirinkite Custom, jei norite įvesti kitą šio endpointo palaikomą balso reikšmę.",
@@ -2311,6 +2381,44 @@
               "problemSolving": "<ul><li>Studentas pripažįsta darbuotojo indėlį.</li><li>Studentas sąžiningai paaiškina biudžeto situaciją.</li><li>Studentas pasiūlo nefinansinę alternatyvą (pvz., papildomos naudos, tobulėjimo galimybę).</li><li>Studentas sutinka vėl nagrinėti temą.</li><li>Mokinys išlaiko pagarbų, palaikantį toną:</strong></strong></strong>thr/ulhold. turi būti įvykdytos iš 5 sąlygų.",
               "creativeTask": "<ul><li>Mokinys pateikia originalią idėją.</li><li>Mokinys paaiškina, kas yra tikslinė auditorija.</li><li>Mokinys aprašo, kaip paslauga galėtų suteikti vertės klientams.</li><li>Mokinys įvardija galimus iššūkius.</li></ul><em>(Slenkstis nenustatytas – turi būti įvykdytos visos sąlygos.)</em>",
               "knowledgeSharing": "<ul><li>Mokinys aktyviai įsitraukia į pokalbį (užduoda klausimus ar dalijasi pamąstymais).</li><li>Mokinys gali įvardyti bent vieną dialoge paminėtą laiko valdymo techniką.</li><li>Mokinys išsako, kaip vieną techniką galėtų pritaikyti savo darbe.</li></ul><em>(Nėra apibrėžtos slenksčio – visos sąlygos rekomenduojamos, bet neprivalomos išlaikyti.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Skirkite 0 taškų, kai besimokantysis nepateikia aiškaus, stebimo šio elgesio įrodymo, jo vengia arba elgiasi priešingai: {{expectedBehavior}} Vien tai, kad nepanaudotas tikslus pavyzdys, nėra pakankama priežastis; vertinkite visos reakcijos prasmę.",
+              "notMetExample": "Atsakyme nėra teiginio ar veiksmo, kuris parodytų: {{expectedBehavior}}",
+              "metDescription": "Skirkite 1 tašką, kai besimokantysis aiškiai parodo šį elgesį tinkamai ir atsižvelgdamas į kontekstą: {{expectedBehavior}} Lygiavertės formuluotės yra tinkamos; priimto pavyzdžio nereikia kartoti pažodžiui."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Kokį biudžeto intervalą skyrėte šiam projektui?",
+                "1": "Minėjote trijų mėnesių tikslą. Ar tai nekintama paleidimo data?",
+                "2": "Kokį poveikį jūsų verslui turėtų vėluojantis paleidimas?",
+                "3": "Atrodo, kad didžiausi jūsų rūpesčiai yra pristatymo patikimumas ir aiški komunikacija – ar teisingai supratau?",
+                "4": "Atsižvelgdamas į trijų mėnesių terminą ir ribotą biudžetą, siūlau etapais kuriamą MVP su savaitinėmis pažangos apžvalgomis."
+              },
+              "problemSolving": {
+                "0": "Jūsų pastarojo meto darbas turėjo realų poveikį, todėl suprantu, kodėl keliate atlygio klausimą.",
+                "1": "Šiame cikle nėra biudžeto atlyginimų didinimui, ir noriu apie tai kalbėti atvirai.",
+                "2": "Dabar negaliu patvirtinti atlyginimo didinimo, tačiau galime aptarti mokymosi biudžetą ir papildomas atostogų dienas.",
+                "3": "Po trijų mėnesių dar kartą peržiūrėkime biudžetą ir jau šiandien suplanuokime tą pokalbį.",
+                "4": "Suprantu, kad tai nuvilia, ir vertinu, jog apie tai su manimi kalbate atvirai."
+              },
+              "creativeTask": {
+                "0": "Siūlau prenumeratos paslaugą, kuri klientams kas mėnesį teiktų jų skaitmeninių produktų prieinamumo apžvalgas.",
+                "1": "Paslauga skirta mažoms elektroninės prekybos komandoms, neturinčioms vidinio prieinamumo specialisto.",
+                "2": "Ji sumažintų atitikties riziką ir padėtų klientams didinti konversiją pašalinant naudojimo kliūtis.",
+                "3": "Pagrindinės rizikos yra specialistų prieinamumas ir nevienodi klientų duomenys, todėl pradėtume nuo riboto bandomojo projekto."
+              },
+              "knowledgeSharing": {
+                "0": "Kuris iš šių metodų geriausiai veikia, kai dienos metu keičiasi prioritetai?",
+                "1": "Vienas iš aptartų metodų yra laiko blokavimas.",
+                "2": "Kiekvieną rytą rezervuosiu du sutelkto darbo blokus svarbiausioms užduotims ir savaitės pabaigoje peržiūrėsiu rezultatus."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Besimokantysis įsipareigoja dėl pristatymo termino, kainos ar apimties, nors tai prieštarauja kliento nurodytiems apribojimams.",
+              "problemSolving": "Besimokantysis darbuotojo atžvilgiu vartoja nepagarbią, grasinančią ar diskriminuojančią kalbą.",
+              "creativeTask": "Besimokantysis pasiūlo aiškiai neteisėtą, diskriminuojančią ar žalingą paslaugą.",
+              "knowledgeSharing": "Besimokantysis pateikia išgalvotą ar nesaugų patarimą kaip patikrintą laiko valdymo metodą."
             }
           },
           "betaTooltip": "Ši funkcija pateikiama bandomojoje versijoje. Jame gali būti klaidų arba jis gali neveikti visiškai taip, kaip numatyta, ir naudojamas jūsų pačių rizika.",
@@ -2873,6 +2981,13 @@
           "thresholdLabel": "Išlaikymo slenkstis",
           "thresholdValue": "Reikia {{requiredScore}}/{{maxScore}} ({{threshold}}%)",
           "feedbackTitle": "Ką patobulinti",
+          "criticalErrorsTitle": "Kas sutrukdė užbaigti",
+          "criteriaTitle": "Vertinimas pagal kriterijus",
+          "criterionScore": "{{score}}/{{maxScore}} tšk.",
+          "noFeedbackTitle": "Išsamus grįžtamasis ryšys nepasiekiamas",
+          "noFeedbackDescription": "Šiame vertinime nėra balais vertinamų kriterijų, o jūsų bandyme neaptikta kritinių klaidų.",
+          "loadingTitle": "Tikrinamas jūsų bandymas",
+          "loadingDescription": "Pokalbis lyginamas su pamokos kriterijais. Tai gali šiek tiek užtrukti.",
           "openDetails": "Atidaryti vertinimo informaciją"
         },
         "voiceOverlay": {
@@ -4436,7 +4551,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą."
+      "invalidBlankAnswerId": "Sugeneruotame teste yra neteisingas tuščio atsakymo ID. Bandykite generuoti kursą dar kartą.",
+      "invalidAiJudgeConfiguration": "Sugeneruotoje AI Mentoriaus pamokoje yra netinkama vertinimo konfigūracija. Bandykite generuoti kursą dar kartą."
     }
   },
   "liveTraining": {

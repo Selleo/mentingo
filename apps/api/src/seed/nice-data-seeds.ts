@@ -106,8 +106,46 @@ export const niceCourses: NiceCourseData[] = [
             title: "HTML Basics",
             aiMentorInstructions:
               "Guide the learner through the basics of HTML structure, including elements, tags, and their roles in building a web page. Encourage questions and provide examples for each concept.",
-            completionConditions:
-              "Learner can identify and explain the purpose of basic HTML elements and successfully create a simple HTML page structure.",
+            aiJudgeConfiguration: {
+              taskGoal:
+                "Identify the purpose of basic HTML elements and create a simple HTML page structure.",
+              passingThresholdPercent: 70,
+              criteria: [
+                {
+                  title: "HTML structure",
+                  expectedBehavior:
+                    "Explains the role of basic HTML elements and produces a valid page structure.",
+                  maxScore: 2,
+                  scoreGuidance: [
+                    {
+                      score: 0,
+                      description:
+                        "Does not identify basic elements or provide a usable HTML structure.",
+                      example: "HTML is used to style a website.",
+                    },
+                    {
+                      score: 1,
+                      description:
+                        "Identifies some relevant elements but the explanation or structure is incomplete.",
+                      example: "A page uses html and body tags, and headings can be added with h1.",
+                    },
+                    {
+                      score: 2,
+                      description:
+                        "Correctly explains the core elements and provides a coherent basic page structure.",
+                      example:
+                        "The html element contains head metadata and a body with visible content such as an h1 and paragraph.",
+                    },
+                  ],
+                },
+              ],
+              blockingErrors: [
+                {
+                  description:
+                    "Claims that CSS declarations or JavaScript statements are valid replacements for HTML page structure.",
+                },
+              ],
+            },
           },
           {
             type: LESSON_TYPES.QUIZ,

@@ -17,6 +17,10 @@ import { SearchIndexService } from "src/global-search/search-index.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorLessons,
   articles,
   categories,
@@ -217,17 +221,58 @@ export async function createNiceCourses(
         if (
           lessonData.type === LESSON_TYPES.AI_MENTOR &&
           lessonData.aiMentorInstructions &&
-          lessonData.completionConditions
+          lessonData.aiJudgeConfiguration
         ) {
-          await db
+          const [aiMentorLesson] = await db
             .insert(aiMentorLessons)
             .values({
               lessonId: lesson.id,
               aiMentorInstructions: buildJsonbField("en", lessonData.aiMentorInstructions),
-              completionConditions: buildJsonbField("en", lessonData.completionConditions),
               tenantId,
             })
             .returning();
+
+          const [configuration] = await db
+            .insert(aiJudgeConfigurations)
+            .values({
+              aiMentorLessonId: aiMentorLesson.id,
+              taskGoal: buildJsonbField("en", lessonData.aiJudgeConfiguration.taskGoal),
+              passingThresholdPercent: lessonData.aiJudgeConfiguration.passingThresholdPercent,
+              tenantId,
+            })
+            .returning();
+
+          for (const criterionData of lessonData.aiJudgeConfiguration.criteria) {
+            const [criterion] = await db
+              .insert(aiJudgeCriteria)
+              .values({
+                configurationId: configuration.id,
+                title: buildJsonbField("en", criterionData.title),
+                expectedBehavior: buildJsonbField("en", criterionData.expectedBehavior),
+                maxScore: criterionData.maxScore,
+                tenantId,
+              })
+              .returning();
+
+            await db.insert(aiJudgeScoreGuidance).values(
+              criterionData.scoreGuidance.map((guidance) => ({
+                criterionId: criterion.id,
+                score: guidance.score,
+                description: buildJsonbField("en", guidance.description),
+                example: guidance.example ? buildJsonbField("en", guidance.example) : undefined,
+                tenantId,
+              })),
+            );
+          }
+
+          if (lessonData.aiJudgeConfiguration.blockingErrors.length)
+            await db.insert(aiJudgeBlockingErrors).values(
+              lessonData.aiJudgeConfiguration.blockingErrors.map((blockingError) => ({
+                configurationId: configuration.id,
+                description: buildJsonbField("en", blockingError.description),
+                tenantId,
+              })),
+            );
         }
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
           for (const [index, questionData] of lessonData.questions.entries()) {
