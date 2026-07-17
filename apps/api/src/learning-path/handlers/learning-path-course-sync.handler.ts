@@ -70,6 +70,7 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
         groupId,
         userId,
         actor.tenantId,
+        actor,
       );
     });
   }

@@ -195,6 +195,39 @@ export class LearningPathRepository {
     return learningPath ?? null;
   }
 
+  async getLearningPathActivitySnapshot(
+    id: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [learningPath] = await dbInstance
+      .select({
+        id: learningPaths.id,
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+        status: learningPaths.status,
+        authorId: learningPaths.authorId,
+        sequenceEnabled: learningPaths.sequenceEnabled,
+        includesCertificate: learningPaths.includesCertificate,
+        baseLanguage: learningPaths.baseLanguage,
+        availableLocales: learningPaths.availableLocales,
+        settings: learningPaths.settings,
+      })
+      .from(learningPaths)
+      .where(eq(learningPaths.id, id))
+      .limit(1);
+
+    return learningPath ?? null;
+  }
+
   async getLearningPaths(query: LearningPathListQuery = {}, dbInstance: DatabasePg = this.db) {
     const { page = 1, perPage = DEFAULT_PAGE_SIZE, language, searchQuery, visibility } = query;
 

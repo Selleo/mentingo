@@ -101,7 +101,16 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
   }
 
   private async handleEnrollLearningPath(event: EnrollLearningPathEvent) {
-    const { actor, learningPathId, userIds } = event.enrollmentData;
+    const { actor, learningPathId, userIds, groupIds } = event.enrollmentData;
+
+    const context: Record<string, string> = {
+      enrolledUserIds: JSON.stringify(userIds),
+      enrolledCount: String(userIds.length),
+    };
+
+    if (groupIds?.length) {
+      context.groupIds = JSON.stringify(groupIds);
+    }
 
     await this.activityLogsService.recordActivity({
       actor,
@@ -109,11 +118,7 @@ export class LearningPathActivityHandler implements IEventHandler<LearningPathEv
       operation: ACTIVITY_LOG_ACTION_TYPES.ENROLL_LEARNING_PATH,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.LEARNING_PATH,
       resourceId: learningPathId,
-      context: {
-        enrolledUserIds: JSON.stringify(userIds),
-        requestedCount: String(userIds.length),
-        enrolledCount: String(userIds.length),
-      },
+      context,
     });
   }
 

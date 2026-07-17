@@ -8,7 +8,11 @@ import {
 
 import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
-import { CompleteLearningPathEvent, StartLearningPathEvent } from "src/events";
+import {
+  CompleteLearningPathEvent,
+  EnrollLearningPathEvent,
+  StartLearningPathEvent,
+} from "src/events";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 
@@ -117,6 +121,7 @@ export class LearningPathCourseSyncService {
     groupId: string,
     studentId: string,
     tenantId: string,
+    actor?: ActorUserType,
   ) {
     const pathIds = await this.learningPathRepository.getLearningPathIdsByGroupId(groupId);
 
@@ -142,6 +147,18 @@ export class LearningPathCourseSyncService {
           courseIds,
           tenantId,
         );
+
+        if (actor) {
+          await this.outboxPublisher.publish(
+            new EnrollLearningPathEvent({
+              learningPathId,
+              actor,
+              userIds: newStudentIds,
+              groupIds: [groupId],
+            }),
+            this.db,
+          );
+        }
       }
 
       await this.syncStudentLearningPath(learningPathId, studentId);

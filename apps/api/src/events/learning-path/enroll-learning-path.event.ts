@@ -5,6 +5,7 @@ export type EnrollLearningPathData = {
   learningPathId: UUIDType;
   userIds: UUIDType[];
   actor: ActorUserType;
+  groupIds?: UUIDType[];
 };
 
 export class EnrollLearningPathEvent {

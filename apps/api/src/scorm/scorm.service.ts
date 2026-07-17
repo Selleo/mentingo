@@ -958,14 +958,23 @@ export class ScormService {
     });
 
     if (scoCompleted && !previouslyCompleted && lessonCompleted) {
-      await this.outboxPublisher.publish(
-        new CompleteScormEvent({
-          scormId: body.packageId,
-          actor: currentUser,
-          userId: currentUser.userId,
-        }),
-        this.db,
-      );
+      const packageCompleted = await this.scormRepository.areAllPackageScosCompleted({
+        studentId: currentUser.userId,
+        packageId: body.packageId,
+        completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
+        excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
+      });
+
+      if (packageCompleted) {
+        await this.outboxPublisher.publish(
+          new CompleteScormEvent({
+            scormId: body.packageId,
+            actor: currentUser,
+            userId: currentUser.userId,
+          }),
+          this.db,
+        );
+      }
     }
 
     const progressResult = lessonCompleted

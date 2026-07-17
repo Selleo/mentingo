@@ -37,6 +37,8 @@ import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { learningPaths } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
@@ -85,6 +87,7 @@ export class LearningPathService {
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly learningPathExportService: LearningPathExportService,
     private readonly searchIndexService: SearchIndexService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   private assertPermission(currentUser: CurrentUserType, permission: PermissionKey) {
@@ -184,6 +187,36 @@ export class LearningPathService {
     }
 
     return learningPath;
+  }
+
+  private async buildLearningPathActivitySnapshot(
+    learningPathId: UUIDType,
+    language?: SupportedLanguages,
+  ) {
+    const {
+      language: resolvedLanguage,
+      baseLanguage,
+      availableLocales,
+    } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LEARNING_PATH,
+      learningPathId,
+      language,
+    );
+
+    const snapshot = await this.learningPathRepository.getLearningPathActivitySnapshot(
+      learningPathId,
+      resolvedLanguage,
+    );
+
+    if (!snapshot) {
+      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    return {
+      ...snapshot,
+      baseLanguage,
+      availableLocales: Array.isArray(availableLocales) ? availableLocales : [availableLocales],
+    };
   }
 
   private buildUpdateData(
@@ -351,11 +384,16 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.CREATE_FAILED);
     }
 
+    const createdSnapshot = await this.buildLearningPathActivitySnapshot(
+      createdLearningPath.id,
+      body.language,
+    );
+
     await this.outboxPublisher.publish(
       new CreateLearningPathEvent({
         learningPathId: createdLearningPath.id,
         actor: currentUser,
-        createdLearningPath: createdLearningPath as any,
+        createdLearningPath: createdSnapshot,
       }),
       this.db,
     );
@@ -556,6 +594,8 @@ export class LearningPathService {
       updateData.includesCertificate !== undefined &&
       updateData.includesCertificate !== existingLearningPath.includesCertificate;
 
+    const previousSnapshot = await this.buildLearningPathActivitySnapshot(learningPathId, language);
+
     const updatedLearningPath = await this.db.transaction(async (trx) => {
       const learningPath = await this.learningPathRepository.updateLearningPath(
         learningPathId,
@@ -574,12 +614,14 @@ export class LearningPathService {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
     }
 
+    const updatedSnapshot = await this.buildLearningPathActivitySnapshot(learningPathId, language);
+
     await this.outboxPublisher.publish(
       new UpdateLearningPathEvent({
         learningPathId,
         actor: currentUser,
-        previousLearningPathData: existingLearningPath as any,
-        updatedLearningPathData: updatedLearningPath as any,
+        previousLearningPathData: previousSnapshot,
+        updatedLearningPathData: updatedSnapshot,
       }),
       this.db,
     );
@@ -958,6 +1000,18 @@ export class LearningPathService {
       );
 
       await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+
+      if (studentIds.length > 0) {
+        await this.outboxPublisher.publish(
+          new EnrollLearningPathEvent({
+            learningPathId,
+            actor: currentUser,
+            userIds: studentIds,
+            groupIds: existingGroupIds,
+          }),
+          trx,
+        );
+      }
 
       return {
         learningPathId,

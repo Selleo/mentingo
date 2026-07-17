@@ -92,7 +92,10 @@ export class ScormActivityHandler implements IEventHandler<ScormEventType> {
       tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
-      resourceId: scormIds[0].scormId,
+      resourceId: scormIds[0].scormId ?? null,
+      context: {
+        deletedScormIds: scormIds.map((scorm) => scorm.scormId).join(","),
+      },
     });
   }
 
