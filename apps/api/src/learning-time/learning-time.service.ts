@@ -1,9 +1,10 @@
 import { Inject, Injectable, Logger, type OnModuleInit } from "@nestjs/common";
 import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { ilike, inArray, or, sql } from "drizzle-orm";
+import { inArray, or, sql } from "drizzle-orm";
 import { validate as uuidValidate } from "uuid";
 
 import { getSortOptions } from "src/common/helpers/getSortOptions";
+import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { FileService } from "src/file/file.service";
@@ -286,8 +287,7 @@ export class LearningTimeService implements OnModuleInit {
 
     if (searchQuery) {
       const searchCondition = or(
-        ilike(users.firstName, `%${searchQuery}%`),
-        ilike(users.lastName, `%${searchQuery}%`),
+        getUserNameSearchCondition(searchQuery),
         this.localizationService.getLocalizedFieldSearchCondition(groups.name, `%${searchQuery}%`),
       );
 
