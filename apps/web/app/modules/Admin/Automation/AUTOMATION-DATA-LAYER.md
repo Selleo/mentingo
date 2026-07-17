@@ -77,7 +77,7 @@ All responses follow the existing `BaseResponse` / `PaginatedResponse` pattern f
     "nodes": [
       {
         "id": "node-uuid-1",
-        "kind": "condition",
+        "kind": "trigger",
         "type": "course_deadline",
         "label": "Course deadline",
         "parentId": null,

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-import type { BuilderNode, BuilderState } from "./automationBuilder.types";
+import type { ActionType, BuilderNode, BuilderState, TriggerType } from "./automationBuilder.types";
 
 interface BuilderActions {
   addNode: (node: BuilderNode) => void;
@@ -8,6 +8,7 @@ interface BuilderActions {
   removeNode: (nodeId: string) => void;
   selectNode: (nodeId: string | null) => void;
   updateNodeConfig: (nodeId: string, config: Record<string, unknown>) => void;
+  updateNodeType: (nodeId: string, type: TriggerType | ActionType, label: string) => void;
   setAutomationName: (name: string) => void;
   setActive: (active: boolean) => void;
   markSaved: () => void;
@@ -66,6 +67,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       nodes: state.nodes.map((n) =>
         n.id === nodeId ? { ...n, config: { ...n.config, ...config } } : n,
       ),
+    })),
+
+  updateNodeType: (nodeId, type, label) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, type, label, config: {} } : n)),
     })),
 
   setAutomationName: (name) => set({ automationName: name }),

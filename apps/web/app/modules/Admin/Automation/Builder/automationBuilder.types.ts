@@ -1,4 +1,4 @@
-export type ConditionType =
+export type TriggerType =
   | "course_deadline"
   | "overdue"
   | "not_completed"
@@ -8,7 +8,7 @@ export type ConditionType =
 
 export type ActionType = "send_email";
 
-export type NodeKind = "condition" | "action";
+export type NodeKind = "trigger" | "action";
 
 // ---------------------------------------------------------------------------
 // Polymorphic step definitions
@@ -22,13 +22,9 @@ export interface StepConfigField {
   options?: { value: string; labelKey: string }[];
 }
 
-/**
- * Base abstract-like interface for all automation step definitions.
- * Each condition/action implements this via a concrete class below.
- */
 export interface AutomationStepDefinition {
   kind: NodeKind;
-  type: ConditionType | ActionType;
+  type: TriggerType | ActionType;
   labelKey: string;
   icon: string;
   color: "blue" | "emerald";
@@ -36,16 +32,16 @@ export interface AutomationStepDefinition {
 }
 
 // ---------------------------------------------------------------------------
-// Condition classes (polymorphic — each implements AutomationStepDefinition)
+// Trigger definitions
 // ---------------------------------------------------------------------------
 
-class CourseDeadlineCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "course_deadline" as const;
-  labelKey = "automationBuilder.blocks.courseDeadline";
-  icon = "calendar-clock";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const COURSE_DEADLINE_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "course_deadline",
+  labelKey: "automationBuilder.blocks.courseDeadline",
+  icon: "calendar-clock",
+  color: "blue",
+  configFields: [
     {
       key: "daysBefore",
       labelKey: "automationBuilder.config.daysBefore",
@@ -53,32 +49,32 @@ class CourseDeadlineCondition implements AutomationStepDefinition {
       placeholderKey: "automationBuilder.config.daysBeforePlaceholder",
     },
     { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
-  ];
-}
+  ],
+};
 
-class OverdueCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "overdue" as const;
-  labelKey = "automationBuilder.blocks.overdue";
-  icon = "alert-triangle";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const OVERDUE_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "overdue",
+  labelKey: "automationBuilder.blocks.overdue",
+  icon: "alert-triangle",
+  color: "blue",
+  configFields: [
     {
       key: "daysOverdue",
       labelKey: "automationBuilder.config.daysOverdue",
       type: "number",
       placeholderKey: "automationBuilder.config.daysOverduePlaceholder",
     },
-  ];
-}
+  ],
+};
 
-class NotCompletedCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "not_completed" as const;
-  labelKey = "automationBuilder.blocks.notCompleted";
-  icon = "circle-x";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const NOT_COMPLETED_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "not_completed",
+  labelKey: "automationBuilder.blocks.notCompleted",
+  icon: "circle-x",
+  color: "blue",
+  configFields: [
     { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
     {
       key: "daysEnrolled",
@@ -86,63 +82,63 @@ class NotCompletedCondition implements AutomationStepDefinition {
       type: "number",
       placeholderKey: "automationBuilder.config.daysEnrolledPlaceholder",
     },
-  ];
-}
+  ],
+};
 
-class UserEnrolledCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "user_enrolled" as const;
-  labelKey = "automationBuilder.blocks.userEnrolled";
-  icon = "user-plus";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const USER_ENROLLED_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "user_enrolled",
+  labelKey: "automationBuilder.blocks.userEnrolled",
+  icon: "user-plus",
+  color: "blue",
+  configFields: [
     { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
-  ];
-}
+  ],
+};
 
-class CertificateExpiringSoonCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "certificate_expiring_soon" as const;
-  labelKey = "automationBuilder.blocks.certificateExpiringSoon";
-  icon = "award";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const CERTIFICATE_EXPIRING_SOON_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "certificate_expiring_soon",
+  labelKey: "automationBuilder.blocks.certificateExpiringSoon",
+  icon: "award",
+  color: "blue",
+  configFields: [
     {
       key: "daysBefore",
       labelKey: "automationBuilder.config.daysBefore",
       type: "number",
       placeholderKey: "automationBuilder.config.daysBeforePlaceholder",
     },
-  ];
-}
+  ],
+};
 
-class LiveTransmissionStartingSoonCondition implements AutomationStepDefinition {
-  kind = "condition" as const;
-  type = "live_transmission_starting_soon" as const;
-  labelKey = "automationBuilder.blocks.liveTransmissionStartingSoon";
-  icon = "video";
-  color = "blue" as const;
-  configFields: StepConfigField[] = [
+const LIVE_TRANSMISSION_STARTING_SOON_TRIGGER: AutomationStepDefinition = {
+  kind: "trigger",
+  type: "live_transmission_starting_soon",
+  labelKey: "automationBuilder.blocks.liveTransmissionStartingSoon",
+  icon: "video",
+  color: "blue",
+  configFields: [
     {
       key: "minutesBefore",
       labelKey: "automationBuilder.config.minutesBefore",
       type: "number",
       placeholderKey: "automationBuilder.config.minutesBeforePlaceholder",
     },
-  ];
-}
+  ],
+};
 
 // ---------------------------------------------------------------------------
-// Action classes
+// Action definitions
 // ---------------------------------------------------------------------------
 
-class SendEmailAction implements AutomationStepDefinition {
-  kind = "action" as const;
-  type = "send_email" as const;
-  labelKey = "automationBuilder.blocks.sendEmail";
-  icon = "mail";
-  color = "emerald" as const;
-  configFields: StepConfigField[] = [
+const SEND_EMAIL_ACTION: AutomationStepDefinition = {
+  kind: "action",
+  type: "send_email",
+  labelKey: "automationBuilder.blocks.sendEmail",
+  icon: "mail",
+  color: "emerald",
+  configFields: [
     {
       key: "subject",
       labelKey: "automationBuilder.editPanel.emailSubject",
@@ -165,44 +161,49 @@ class SendEmailAction implements AutomationStepDefinition {
         { value: "manager", labelKey: "automationBuilder.editPanel.recipientManager" },
       ],
     },
-  ];
-}
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // Registry — single source of truth for all step definitions
 // ---------------------------------------------------------------------------
 
 export const STEP_DEFINITIONS: AutomationStepDefinition[] = [
-  new CourseDeadlineCondition(),
-  new OverdueCondition(),
-  new NotCompletedCondition(),
-  new UserEnrolledCondition(),
-  new CertificateExpiringSoonCondition(),
-  new LiveTransmissionStartingSoonCondition(),
-  new SendEmailAction(),
+  COURSE_DEADLINE_TRIGGER,
+  OVERDUE_TRIGGER,
+  NOT_COMPLETED_TRIGGER,
+  USER_ENROLLED_TRIGGER,
+  CERTIFICATE_EXPIRING_SOON_TRIGGER,
+  LIVE_TRANSMISSION_STARTING_SOON_TRIGGER,
+  SEND_EMAIL_ACTION,
 ];
 
-export const CONDITION_DEFINITIONS = STEP_DEFINITIONS.filter((s) => s.kind === "condition");
-export const ACTION_DEFINITIONS = STEP_DEFINITIONS.filter((s) => s.kind === "action");
+export const TRIGGER_DEFINITIONS = STEP_DEFINITIONS.filter(
+  (s): s is AutomationStepDefinition & { kind: "trigger" } => s.kind === "trigger",
+);
+
+export const ACTION_DEFINITIONS = STEP_DEFINITIONS.filter(
+  (s): s is AutomationStepDefinition & { kind: "action" } => s.kind === "action",
+);
 
 export function getStepDefinition(
-  type: ConditionType | ActionType,
+  type: TriggerType | ActionType,
 ): AutomationStepDefinition | undefined {
   return STEP_DEFINITIONS.find((s) => s.type === type);
 }
 
 // ---------------------------------------------------------------------------
-// Legacy sidebar block type (kept for sidebar DnD compatibility)
+// Sidebar block type (used for DnD)
 // ---------------------------------------------------------------------------
 
 export interface SidebarBlock {
   kind: NodeKind;
-  type: ConditionType | ActionType;
+  type: TriggerType | ActionType;
   labelKey: string;
   icon: string;
 }
 
-export const CONDITION_BLOCKS: SidebarBlock[] = CONDITION_DEFINITIONS.map((d) => ({
+export const TRIGGER_BLOCKS: SidebarBlock[] = TRIGGER_DEFINITIONS.map((d) => ({
   kind: d.kind,
   type: d.type,
   labelKey: d.labelKey,
@@ -223,7 +224,7 @@ export const ACTION_BLOCKS: SidebarBlock[] = ACTION_DEFINITIONS.map((d) => ({
 export interface BuilderNode {
   id: string;
   kind: NodeKind;
-  type: ConditionType | ActionType;
+  type: TriggerType | ActionType;
   label: string;
   parentId: string | null;
   children: string[];
