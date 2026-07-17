@@ -54,12 +54,7 @@ const taskDescriptionViewerClassName =
   "max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800";
 
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
-  Boolean(
-    evaluation &&
-      (typeof evaluation.passed === "boolean" ||
-        evaluation.score != null ||
-        evaluation.summary?.trim().length),
-  );
+  Boolean(evaluation && (typeof evaluation.passed === "boolean" || evaluation.score != null));
 
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
