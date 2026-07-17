@@ -1,18 +1,30 @@
 import { Test } from "@nestjs/testing";
 
+import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
+
 import { AutomationStepsService } from "./automations-steps.service";
 
-import type { TestingModule } from "@nestjs/testing";
-
-describe("AutomationsStepsService", () => {
+describe("AutomationStepsService", () => {
   let service: AutomationStepsService;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AutomationStepsService],
+    const module = await Test.createTestingModule({
+      providers: [
+        AutomationStepsService,
+        {
+          provide: AutomationStepsRepository,
+          useValue: {
+            createAutomationStep: jest.fn(),
+            getAutomationStepById: jest.fn(),
+            getAllAutomationStepsByAutomationId: jest.fn(),
+            updateAutomationStep: jest.fn(),
+            deleteAutomationStep: jest.fn(),
+          },
+        },
+      ],
     }).compile();
 
-    service = module.get<AutomationStepsService>(AutomationStepsService);
+    service = module.get(AutomationStepsService);
   });
 
   it("should be defined", () => {

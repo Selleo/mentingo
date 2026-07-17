@@ -2,20 +2,24 @@ import { Test } from "@nestjs/testing";
 
 import { AutomationStepsRepository } from "./automation-steps.repository";
 
-import type { TestingModule } from "@nestjs/testing";
-
-describe("AutomationSteps", () => {
-  let provider: AutomationStepsRepository;
+describe("AutomationStepsRepository", () => {
+  let repository: AutomationStepsRepository;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [AutomationStepsRepository],
+    const module = await Test.createTestingModule({
+      providers: [
+        AutomationStepsRepository,
+        {
+          provide: "DB",
+          useValue: {},
+        },
+      ],
     }).compile();
 
-    provider = module.get<AutomationStepsRepository>(AutomationStepsRepository);
+    repository = module.get(AutomationStepsRepository);
   });
 
   it("should be defined", () => {
-    expect(provider).toBeDefined();
+    expect(repository).toBeDefined();
   });
 });
