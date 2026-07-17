@@ -5,8 +5,8 @@ import { AutomationsService } from "./automations.service";
 import { AutomationsRepository } from "./repositories/automations/automations.repository";
 
 @Module({
-  providers: [AutomationsRepository, AutomationsRepository, AutomationsService],
+  providers: [AutomationsRepository, AutomationsService],
   controllers: [AutomationsController],
-  exports: [AutomationsController, AutomationsModule],
+  exports: [AutomationsService],
 })
 export class AutomationsModule {}

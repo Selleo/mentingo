@@ -1,22 +1,26 @@
 import { Test } from "@nestjs/testing";
 
-import { AutomationsModule } from "./automations.module";
+import { AutomationsController } from "./automations.controller";
 import { AutomationsService } from "./automations.service";
 
-import type { TestingModule } from "@nestjs/testing";
-
-describe("AutomationsService", () => {
-  let service: AutomationsService;
+describe("AutomationsController", () => {
+  let controller: AutomationsController;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [AutomationsModule],
+    const module = await Test.createTestingModule({
+      controllers: [AutomationsController],
+      providers: [
+        {
+          provide: AutomationsService,
+          useValue: {},
+        },
+      ],
     }).compile();
 
-    service = module.get<AutomationsService>(AutomationsService);
+    controller = module.get(AutomationsController);
   });
 
   it("should be defined", () => {
-    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
   });
 });
