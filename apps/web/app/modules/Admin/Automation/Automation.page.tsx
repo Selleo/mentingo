@@ -172,7 +172,11 @@ export default function AutomationPage() {
       </div>
 
       <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
-        <AutomationTable automations={filteredAutomations} onOpenDrawer={handleOpenDrawer} />
+        <AutomationTable
+          automations={filteredAutomations}
+          totalCount={automations.length}
+          onOpenDrawer={handleOpenDrawer}
+        />
       </div>
 
       <AutomationDrawer

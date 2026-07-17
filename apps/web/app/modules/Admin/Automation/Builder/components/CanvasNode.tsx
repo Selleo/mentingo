@@ -1,36 +1,62 @@
 import { useDroppable } from "@dnd-kit/core";
-import {
-  AlertTriangle,
-  Award,
-  CalendarClock,
-  CircleX,
-  Mail,
-  Plus,
-  Trash2,
-  UserPlus,
-  Video,
-} from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Card } from "~/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 import { useBuilderStore } from "../automationBuilderStore";
 
 import { AddNodePicker } from "./AddNodePicker";
+import { BLOCK_ICON_MAP } from "./automationIcons";
 
 import type { AutomationStepDefinition, BuilderNode } from "../automationBuilder.types";
-import type { FC, ReactNode } from "react";
+import type { FC } from "react";
 
-const ICON_MAP: Record<string, ReactNode> = {
-  course_deadline: <CalendarClock className="size-4" />,
-  overdue: <AlertTriangle className="size-4" />,
-  not_completed: <CircleX className="size-4" />,
-  user_enrolled: <UserPlus className="size-4" />,
-  certificate_expiring_soon: <Award className="size-4" />,
-  live_transmission_starting_soon: <Video className="size-4" />,
-  send_email: <Mail className="size-4" />,
-};
+// ─── Connector primitives ────────────────────────────────────────────────────
+
+const VLine: FC<{ height: number }> = ({ height }) => (
+  <div
+    className="mx-auto shrink-0"
+    style={{ width: 2, height, backgroundColor: "var(--connector-color)" }}
+  />
+);
+
+const DownArrow: FC = () => (
+  <div
+    className="mx-auto shrink-0"
+    style={{
+      width: 0,
+      height: 0,
+      borderLeft: "5px solid transparent",
+      borderRight: "5px solid transparent",
+      borderTop: "6px solid var(--connector-color)",
+    }}
+  />
+);
+
+// ─── Multi-child horizontal rail segment ─────────────────────────────────────
+
+const RailSegment: FC<{ isFirst: boolean; isLast: boolean }> = ({ isFirst, isLast }) => (
+  <div className="relative flex w-full justify-center" style={{ height: 2 }}>
+    {!isFirst && (
+      <div
+        className="absolute left-0 top-0 h-0.5 w-1/2"
+        style={{ backgroundColor: "var(--connector-color)" }}
+      />
+    )}
+    {!isLast && (
+      <div
+        className="absolute right-0 top-0 h-0.5 w-1/2"
+        style={{ backgroundColor: "var(--connector-color)" }}
+      />
+    )}
+  </div>
+);
+
+// ─── Main component ──────────────────────────────────────────────────────────
 
 interface CanvasNodeProps {
   node: BuilderNode;
@@ -51,159 +77,108 @@ export const CanvasNode: FC<CanvasNodeProps> = ({ node, onAddChild }) => {
 
   const isSelected = selectedNodeId === node.id;
   const childNodes = nodes.filter((n) => node.children.includes(n.id));
-  const hasMultipleChildren = childNodes.length > 1;
 
   return (
-    <div className="flex flex-col items-center">
-      {/* The node card */}
-      <Button
-        ref={setNodeRef}
-        variant="ghost"
-        onClick={() => selectNode(node.id)}
-        className={cn(
-          "group relative flex h-auto w-56 items-center gap-2 rounded-lg border-2 px-3 py-2.5 shadow-sm transition-all text-left whitespace-normal",
-          node.kind === "condition"
-            ? "border-blue-200 bg-blue-50 hover:bg-blue-100/60"
-            : "border-emerald-200 bg-emerald-50 hover:bg-emerald-100/60",
-          isSelected && "ring-2 ring-primary ring-offset-2",
-          isOver && "ring-2 ring-amber-400 ring-offset-1",
-        )}
-      >
-        <span
+    <TooltipProvider>
+      <div className="flex flex-col items-center [--connector-color:theme(colors.black)]">
+        {/* Node card */}
+        <Card
+          ref={setNodeRef}
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-md",
-            node.kind === "condition"
-              ? "bg-blue-100 text-blue-600"
-              : "bg-emerald-100 text-emerald-600",
+            "group flex w-56 cursor-pointer items-center gap-2 border-2 px-3 py-2.5 transition-all",
+            node.kind === "trigger"
+              ? "border-blue-200 bg-blue-50 hover:bg-blue-100/60"
+              : "border-emerald-200 bg-emerald-50 hover:bg-emerald-100/60",
+            isSelected && "ring-2 ring-primary ring-offset-2",
+            isOver && "ring-2 ring-amber-400 ring-offset-1",
           )}
-        >
-          {ICON_MAP[node.type]}
-        </span>
-        <span className="flex-1 truncate text-sm font-medium">{node.label}</span>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
-          onClick={(e) => {
-            e.stopPropagation();
-            removeNode(node.id);
+          role="button"
+          tabIndex={0}
+          onClick={() => selectNode(node.id)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              selectNode(node.id);
+            }
           }}
-          aria-label={t("automationBuilder.canvas.removeNode")}
         >
-          <Trash2 className="size-3.5 text-error-500" />
-        </Button>
-      </Button>
-
-      {/* Vertical connector line down to the "add child" button */}
-      <svg width="2" height="16" className="shrink-0">
-        <line
-          x1="1"
-          y1="0"
-          x2="1"
-          y2="16"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-muted-foreground/40"
-        />
-      </svg>
-
-      {/* Add child picker button */}
-      <AddNodePicker
-        onSelect={(definition) => onAddChild(node.id, definition)}
-        trigger={
-          <Button
-            variant="outline"
-            size="icon"
-            className="size-7 rounded-full border-dashed"
-            aria-label={t("automationBuilder.canvas.addChild")}
+          <span
+            className={cn(
+              "flex size-8 shrink-0 items-center justify-center rounded-md",
+              node.kind === "trigger"
+                ? "bg-blue-100 text-blue-600"
+                : "bg-emerald-100 text-emerald-600",
+            )}
           >
-            <Plus className="size-3.5" />
-          </Button>
-        }
-      />
-
-      {/* Children with proper connector lines */}
-      {childNodes.length > 0 && (
-        <div className="flex flex-col items-center">
-          {/* Vertical stem from "+" button down to children area */}
-          <svg width="2" height="20" className="shrink-0">
-            <line
-              x1="1"
-              y1="0"
-              x2="1"
-              y2="20"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="text-muted-foreground/40"
-            />
-          </svg>
-
-          {hasMultipleChildren ? (
-            <div className="flex flex-col items-center">
-              {/* Horizontal rail connecting all children branches */}
-              <svg
-                height="2"
-                className="shrink-0"
-                style={{ width: `${(childNodes.length - 1) * 240 + 2}px` }}
+            {BLOCK_ICON_MAP[node.type]}
+          </span>
+          <span className="flex-1 truncate text-sm font-medium">{node.label}</span>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeNode(node.id);
+                }}
+                aria-label={t("automationBuilder.canvas.removeNode")}
               >
-                <line
-                  x1="0"
-                  y1="1"
-                  x2="100%"
-                  y2="1"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  className="text-muted-foreground/40"
-                />
-              </svg>
+                <Trash2 className="size-3.5 text-error-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top">{t("automationBuilder.canvas.removeNode")}</TooltipContent>
+          </Tooltip>
+        </Card>
 
-              {/* Children evenly spaced below the rail */}
-              <div className="flex items-start" style={{ gap: "2rem" }}>
-                {childNodes.map((child) => (
-                  <div key={child.id} className="flex flex-col items-center">
-                    {/* Vertical drop from rail to child node */}
-                    <svg width="2" height="20" className="shrink-0">
-                      <line
-                        x1="1"
-                        y1="0"
-                        x2="1"
-                        y2="20"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        className="text-muted-foreground/40"
-                      />
-                    </svg>
-                    {/* Arrow indicator */}
-                    <svg width="10" height="8" className="shrink-0 -mt-0.5 mb-0.5">
-                      <polygon
-                        points="5,8 0,0 10,0"
-                        fill="currentColor"
-                        className="text-muted-foreground/40"
-                      />
-                    </svg>
-                    <CanvasNode node={child} onAddChild={onAddChild} />
-                  </div>
-                ))}
+        {/* Connector: card → add button */}
+        <VLine height={16} />
+
+        {/* Add child picker */}
+        <AddNodePicker
+          onSelect={(definition) => onAddChild(node.id, definition)}
+          trigger={
+            <Button
+              variant="outline"
+              size="icon"
+              className="size-7 rounded-full border-dashed"
+              aria-label={t("automationBuilder.canvas.addChild")}
+            >
+              <Plus className="size-3.5" />
+            </Button>
+          }
+        />
+
+        {/* Children */}
+        {childNodes.length > 0 && (
+          <>
+            <VLine height={20} />
+
+            {childNodes.length === 1 ? (
+              <div className="flex flex-col items-center">
+                <DownArrow />
+                <CanvasNode node={childNodes[0]} onAddChild={onAddChild} />
               </div>
-            </div>
-          ) : (
-            /* Single child — straight vertical connector with arrow */
-            childNodes.map((child) => (
-              <div key={child.id} className="flex flex-col items-center">
-                {/* Arrow indicator */}
-                <svg width="10" height="8" className="shrink-0 mb-0.5">
-                  <polygon
-                    points="5,8 0,0 10,0"
-                    fill="currentColor"
-                    className="text-muted-foreground/40"
-                  />
-                </svg>
-                <CanvasNode node={child} onAddChild={onAddChild} />
+            ) : (
+              <div className="flex flex-col items-center">
+                <div className="flex">
+                  {childNodes.map((child, index) => (
+                    <div key={child.id} className="flex flex-col items-center">
+                      <RailSegment isFirst={index === 0} isLast={index === childNodes.length - 1} />
+                      <div className="flex flex-col items-center px-5">
+                        <VLine height={18} />
+                        <DownArrow />
+                        <CanvasNode node={child} onAddChild={onAddChild} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))
-          )}
-        </div>
-      )}
-    </div>
+            )}
+          </>
+        )}
+      </div>
+    </TooltipProvider>
   );
 };
