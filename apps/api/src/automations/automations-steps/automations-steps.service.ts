@@ -10,6 +10,16 @@ export class AutomationStepsService {
   constructor(private readonly automationStepsRepository: AutomationStepsRepository) {}
 
   async createAutomationStep(input: AutomationStepRecordInput) {
+    const hasNoSteps = await this.hasNoSteps(input.automationId);
+
+    if (hasNoSteps && input.parentId != null) {
+      throw new BadRequestException("Empty automation has to have root step first");
+    }
+
+    if (!hasNoSteps && input.parentId == null) {
+      throw new BadRequestException("Automation already has a root step");
+    }
+
     return this.automationStepsRepository.createAutomationStep(input);
   }
 
@@ -45,5 +55,12 @@ export class AutomationStepsService {
     }
 
     return deletedId;
+  }
+
+  private async hasNoSteps(automationId: UUIDType) {
+    const allSteps = await this.getAllAutomationSteps(automationId);
+
+    if (allSteps.length == 0) return true;
+    return false;
   }
 }
