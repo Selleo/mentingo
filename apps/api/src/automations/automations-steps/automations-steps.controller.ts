@@ -1,0 +1,36 @@
+import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+
+import { AutomationStepRecordInput } from "src/announcements/types/automations-source.types";
+import { UUIDType } from "src/common";
+
+import { AutomationStepsService } from "./automations-steps.service";
+
+@Controller("automation-steps")
+export class AutomationStepsController {
+  constructor(private readonly automationStepsService: AutomationStepsService) {}
+
+  @Post()
+  async create(@Body() input: AutomationStepRecordInput) {
+    return this.automationStepsService.createAutomationStep(input);
+  }
+
+  @Get(":id")
+  async getById(@Param("id") stepId: UUIDType) {
+    return this.automationStepsService.getAutomationStepById(stepId);
+  }
+
+  @Get("automation/:automationId")
+  async getAll(@Param("automationId") automationId: UUIDType) {
+    return this.automationStepsService.getAllAutomationSteps(automationId);
+  }
+
+  @Patch(":id")
+  async update(@Param("id") stepId: UUIDType, @Body() input: AutomationStepRecordInput) {
+    return this.automationStepsService.updateAutomationStep(stepId, input);
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") stepId: UUIDType) {
+    return this.automationStepsService.deleteAutomationStep(stepId);
+  }
+}
