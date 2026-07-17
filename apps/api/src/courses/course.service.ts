@@ -52,6 +52,7 @@ import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
+import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
@@ -5488,8 +5489,7 @@ export class CourseService {
 
   private getSearchQueryConditions(searchQuery: string, language?: SupportedLanguages) {
     return or(
-      ilike(users.firstName, `%${searchQuery}%`),
-      ilike(users.lastName, `%${searchQuery}%`),
+      getUserNameSearchCondition(searchQuery),
       this.localizationService.getLocalizedFieldSearchCondition(
         groups.name,
         `%${searchQuery}%`,

@@ -14,7 +14,8 @@ import ModernCourseCard from "./ModernCourseCard";
 import type { GetAvailableCoursesResponse, GetStudentCoursesResponse } from "~/api/generated-api";
 
 type CourseCarouselCourse =
-  GetAvailableCoursesResponse["data"][number] | GetStudentCoursesResponse["data"][number];
+  | GetAvailableCoursesResponse["data"][number]
+  | GetStudentCoursesResponse["data"][number];
 
 const WATCHED_SLIDE_INTERSECTION_THRESHOLD = 0.25;
 const WATCHED_SLIDE_FALLBACK_DELAY_MS = 400;
@@ -167,7 +168,9 @@ const ModernCourseCarousel = ({
 
   return (
     <section ref={rowRef} className="space-y-4 pb-6">
-      <h2 className="h2 px-4 md:px-8">{title}</h2>
+      <h2 className="h2 px-4 text-2xl leading-snug md:px-8 md:text-[32px] md:leading-relaxed">
+        {title}
+      </h2>
 
       <div className="group relative px-4 md:px-8 mt-10" data-course-row data-testid="course-row">
         <Carousel opts={CAROUSEL_OPTIONS} setApi={setCarouselApi}>

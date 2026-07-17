@@ -238,9 +238,32 @@ describe("CourseController (e2e)", () => {
         totalSeconds: 120,
       });
 
+      const partialFullName = `${student.firstName} ${student.lastName.slice(0, 1)}`;
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-progress`)
+        .query({
+          language: SUPPORTED_LANGUAGES.EN,
+          perPage: 100,
+          search: partialFullName,
+        })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data).toEqual([
+            expect.objectContaining({
+              studentId: student.id,
+            }),
+          ]);
+        });
+
       await request(app.getHttpServer())
         .get(`/api/course/${course.id}/statistics/students-quiz-results`)
-        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .query({
+          language: SUPPORTED_LANGUAGES.EN,
+          perPage: 100,
+          search: partialFullName,
+        })
         .set("Cookie", cookies)
         .expect(200)
         .expect(({ body }) => {
@@ -249,6 +272,19 @@ describe("CourseController (e2e)", () => {
               studentId: student.id,
               lessonId: quizLesson.id,
               quizScore: 80,
+            }),
+          ]);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/learning-time`)
+        .query({ perPage: 100, search: partialFullName })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.users).toEqual([
+            expect.objectContaining({
+              id: student.id,
             }),
           ]);
         });

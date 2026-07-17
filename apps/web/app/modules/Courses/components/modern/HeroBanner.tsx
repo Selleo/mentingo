@@ -120,8 +120,8 @@ const HeroBanner = ({
   }, [heroCourseData, isPreviewMode, navigate, enrollCourse, canUpdateLearningProgress, language]);
 
   return (
-    <div className="relative h-[50vh] min-h-[400px] w-full overflow-hidden md:h-[70vh] md:min-h-[500px]">
-      <div className="absolute inset-0">
+    <section className="relative w-full bg-primary-50 md:h-[70vh] md:min-h-[500px] md:overflow-hidden">
+      <div className="relative aspect-video w-full overflow-hidden bg-primary-200 md:absolute md:inset-0 md:aspect-auto">
         <img
           src={thumbnailUrl || DefaultPhotoCourse}
           alt={title}
@@ -151,9 +151,9 @@ const HeroBanner = ({
         </div>
       )}
 
-      <div className="relative z-20 flex h-full items-end px-4 pb-12 md:px-8 md:pb-16">
+      <div className="relative z-20 px-4 py-5 md:flex md:h-full md:items-end md:px-8 md:pb-16 md:pt-0">
         <div className="max-w-2xl space-y-3 md:space-y-4">
-          <h1 className="h1">{title}</h1>
+          <h1 className="h1 text-3xl leading-tight md:text-4xl md:leading-relaxed">{title}</h1>
 
           {(durationLabel || lessonsLabel) && (
             <div className="flex gap-3 font-medium md:gap-4 md:text-sm">
@@ -197,7 +197,7 @@ const HeroBanner = ({
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
