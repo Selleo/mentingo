@@ -1,6 +1,7 @@
 import { Test } from "@nestjs/testing";
 
-import type { AutomationStepsService } from "./automations-steps.service";
+import { AutomationStepsService } from "./automations-steps.service";
+
 import type { TestingModule } from "@nestjs/testing";
 
 describe("AutomationsStepsService", () => {
@@ -8,10 +9,10 @@ describe("AutomationsStepsService", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AutomationsStepsService],
+      providers: [AutomationStepsService],
     }).compile();
 
-    service = module.get<AutomationsStepsService>(AutomationsStepsService);
+    service = module.get<AutomationStepsService>(AutomationStepsService);
   });
 
   it("should be defined", () => {

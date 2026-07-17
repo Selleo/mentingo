@@ -1,18 +1,18 @@
 import { Test } from "@nestjs/testing";
 
-import { AutomationSteps } from "./automation-steps";
+import { AutomationStepsRepository } from "./automation-steps.repository";
 
 import type { TestingModule } from "@nestjs/testing";
 
 describe("AutomationSteps", () => {
-  let provider: AutomationSteps;
+  let provider: AutomationStepsRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AutomationSteps],
+      providers: [AutomationStepsRepository],
     }).compile();
 
-    provider = module.get<AutomationSteps>(AutomationSteps);
+    provider = module.get<AutomationStepsRepository>(AutomationStepsRepository);
   });
 
   it("should be defined", () => {

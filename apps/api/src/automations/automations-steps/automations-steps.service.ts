@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
-import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps";
+import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
 
 import type { AutomationStepRecordInput } from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
