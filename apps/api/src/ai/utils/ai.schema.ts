@@ -1,6 +1,7 @@
 import { AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { type Static, Type } from "@sinclair/typebox";
 
+import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
 import { THREAD_STATUS, MESSAGE_ROLE } from "src/ai/utils/ai.type";
 import { UUIDSchema } from "src/common";
 
@@ -67,34 +68,59 @@ export const aiMentorGroupsSchema = Type.Array(
 export const aiMentorLessonSchema = Type.Object({
   title: Type.String(),
   instructions: Type.String(),
-  conditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
   name: Type.String(),
 });
 
-export const aiJudgeJudgementSchema = Type.Object({
-  summary: Type.String({
-    description:
-      "Supportive learner-facing feedback formatted as GitHub-flavored Markdown with compact sections, at least one bullet list, and bold emphasis for key phrases. It may reference learner-facing progress and improvement areas, but must not quote hidden/internal grading logic verbatim or reveal the exact expected answer, sample solution, answer key, missing phrase, or correction the learner can copy directly.",
-  }),
-  minScore: Type.Integer({
-    description: "Minimum score required to pass implied from the lesson conditions",
-    default: 0,
-  }),
-  score: Type.Integer({ description: "Score implied from the user conversation", default: 0 }),
-  maxScore: Type.Integer({
-    description: "Maximum score possible to get implied from the lesson conditions",
-    default: 0,
-  }),
+export const aiJudgeJudgementSchema = Type.Object(
+  {
+    criterionResults: Type.Array(
+      Type.Object(
+        {
+          criterionRef: Type.String({ pattern: "^C[1-9][0-9]*$" }),
+          awardedScore: Type.Integer({ minimum: 0 }),
+          learnerSafeFeedback: Type.String(),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+    triggeredBlockingErrors: Type.Array(
+      Type.Object(
+        {
+          blockingErrorRef: Type.String({ pattern: "^B[1-9][0-9]*$" }),
+          learnerSafeFeedback: Type.String(),
+        },
+        { additionalProperties: false },
+      ),
+    ),
+  },
+  { additionalProperties: false },
+);
+
+const responseAiJudgeCriterionSchema = Type.Object({
+  criterionId: UUIDSchema,
+  title: Type.String(),
+  awardedScore: Type.Integer(),
+  maxScore: Type.Integer(),
+  status: Type.Enum(AI_JUDGE_CRITERION_STATUS),
+  learnerSafeFeedback: Type.String(),
 });
 
-export const responseAiJudgeJudgementSchema = Type.Intersect([
-  aiJudgeJudgementSchema,
-  Type.Object({
-    passed: Type.Boolean(),
-    percentage: Type.Integer(),
-  }),
-]);
+const responseAiJudgeBlockingErrorSchema = Type.Object({
+  blockingErrorId: UUIDSchema,
+  description: Type.String(),
+  learnerSafeFeedback: Type.String(),
+});
+
+export const responseAiJudgeJudgementSchema = Type.Object({
+  passed: Type.Boolean(),
+  minScore: Type.Integer(),
+  score: Type.Integer(),
+  maxScore: Type.Integer(),
+  percentage: Type.Integer(),
+  criteria: Type.Array(responseAiJudgeCriterionSchema),
+  blockingErrors: Type.Array(responseAiJudgeBlockingErrorSchema),
+});
 
 export const threadOwnershipSchema = Type.Object({
   threadId: UUIDSchema,
@@ -102,12 +128,13 @@ export const threadOwnershipSchema = Type.Object({
 });
 
 export const responseJudgeSchema = Type.Object({
-  summary: Type.String(),
   passed: Type.Boolean(),
   minScore: Type.Integer(),
   score: Type.Integer(),
   maxScore: Type.Integer(),
   percentage: Type.Integer(),
+  criteria: Type.Array(responseAiJudgeCriterionSchema),
+  blockingErrors: Type.Array(responseAiJudgeBlockingErrorSchema),
 });
 
 export const streamChatSchema = Type.Object({

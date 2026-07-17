@@ -25,6 +25,7 @@ import {
   PERMISSIONS,
   SUPPORTED_LANGUAGES,
   SupportedLanguages,
+  FEATURES,
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Request, Response } from "express";
@@ -32,6 +33,7 @@ import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, PaginatedResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -63,6 +65,7 @@ export class NewsController {
   constructor(private readonly newsService: NewsService) {}
 
   @Get("drafts")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -82,6 +85,7 @@ export class NewsController {
   }
 
   @Post("preview")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "body", schema: previewNewsRequestSchema }],
     response: baseResponse(previewNewsResponseSchema),
@@ -104,6 +108,7 @@ export class NewsController {
 
   @Public()
   @Get("news-resource/:resourceId")
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "param", schema: UUIDSchema, name: "resourceId" },
@@ -122,6 +127,7 @@ export class NewsController {
 
   @Public()
   @Get(":id")
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -135,12 +141,12 @@ export class NewsController {
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<BaseResponse<GetNewsResponseWithPlainContent>> {
     const news = await this.newsService.getNews(id, language, currentUser);
-
     return new BaseResponse(news);
   }
 
   @Public()
   @Get()
+  @RequireFeature({ features: [FEATURES.NEWS], allowUnregisteredUser: true })
   @Validate({
     request: [
       { type: "query", name: "language", schema: supportedLanguagesSchema },
@@ -159,6 +165,7 @@ export class NewsController {
   }
 
   @Post()
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "body", schema: createNewsSchema }],
     response: baseResponse(createNewsResponseSchema),
@@ -176,6 +183,7 @@ export class NewsController {
   @Patch(":id")
   @UseInterceptors(FileInterceptor("cover"))
   @ApiConsumes("multipart/form-data")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -203,6 +211,7 @@ export class NewsController {
 
   @ApiOperation({ summary: "Add a new language to a news item" })
   @Post(":id")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -226,6 +235,7 @@ export class NewsController {
   }
 
   @Delete(":id/language")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [
       { type: "param", name: "id", schema: UUIDSchema },
@@ -245,6 +255,7 @@ export class NewsController {
   }
 
   @Delete(":id")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(deleteNewsResponseSchema),
@@ -257,6 +268,7 @@ export class NewsController {
   }
 
   @Post(":id/upload")
+  @RequireFeature({ features: [FEATURES.NEWS] })
   @UseInterceptors(FileInterceptor("file"))
   @ApiConsumes("multipart/form-data")
   @ApiBody({

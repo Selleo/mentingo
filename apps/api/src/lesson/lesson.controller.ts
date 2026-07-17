@@ -165,7 +165,7 @@ export class LessonController {
 
   @Post("beta-create-lesson/live")
   @UseGuards(FeaturesGuard)
-  @RequireFeature(FEATURES.LIVE_TRAINING)
+  @RequireFeature({ features: [FEATURES.LIVE_TRAINING] })
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [
@@ -194,7 +194,7 @@ export class LessonController {
 
   @Patch(":lessonId/live-training")
   @UseGuards(FeaturesGuard)
-  @RequireFeature(FEATURES.LIVE_TRAINING)
+  @RequireFeature({ features: [FEATURES.LIVE_TRAINING] })
   @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)
   @Validate({
     request: [

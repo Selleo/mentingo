@@ -80,13 +80,14 @@ export default function LessonPreviewDialog({
     if (!isAiMentorLesson || !aiMentorDetails) return null;
 
     return {
-      summary: aiMentorDetails.summary,
       passed: aiMentorDetails.passed,
       minScore: aiMentorDetails.minScore,
       score: aiMentorDetails.score,
       maxScore: aiMentorDetails.maxScore,
       percentage: aiMentorDetails.percentage,
       requiredScore: aiMentorDetails.requiredScore,
+      criteria: aiMentorDetails.criteria,
+      blockingErrors: aiMentorDetails.blockingErrors,
     };
   }, [aiMentorDetails, isAiMentorLesson]);
   const shouldShowEvaluation = hasEvaluationData(aiMentorEvaluation);

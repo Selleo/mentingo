@@ -33,7 +33,7 @@ import {
 } from "src/course-chat/schemas/course-chat.schema";
 
 @Controller("course-chat")
-@RequireFeature(FEATURES.COURSE_DISCUSSIONS)
+@RequireFeature({ features: [FEATURES.COURSE_DISCUSSIONS] })
 export class CourseChatController {
   constructor(private readonly courseChatService: CourseChatService) {}
 
