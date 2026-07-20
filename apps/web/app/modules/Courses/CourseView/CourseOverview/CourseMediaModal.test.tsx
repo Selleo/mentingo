@@ -8,6 +8,31 @@ import { renderWith } from "~/utils/testUtils";
 import CourseMediaModal from "./CourseMediaModal";
 
 describe("CourseMediaModal", () => {
+  it("closes with Escape", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    renderWith().render(
+      <CourseMediaModal
+        heroImagePositionDraft={50}
+        imageInputRef={createRef<HTMLInputElement>()}
+        imagePreviewUrl="/course-image.jpg"
+        isSaving={false}
+        onClose={onClose}
+        onImageSelection={vi.fn()}
+        onPositionChange={vi.fn()}
+        onSave={vi.fn()}
+        onTrailerSelection={vi.fn()}
+        selectedTrailerFile={null}
+        trailerInputRef={createRef<HTMLInputElement>()}
+      />,
+    );
+
+    await user.keyboard("{Escape}");
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it("lets an administrator select or drop a hero image", async () => {
     const user = userEvent.setup();
     const onImageSelection = vi.fn();

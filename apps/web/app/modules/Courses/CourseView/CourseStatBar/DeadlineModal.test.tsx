@@ -7,6 +7,27 @@ import { renderWith } from "~/utils/testUtils";
 import DeadlineModal from "./DeadlineModal";
 
 describe("DeadlineModal", () => {
+  it("closes with Escape", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    renderWith().render(
+      <DeadlineModal
+        deadlineEnabledDraft
+        groupDeadlines={[{ id: "group-1", name: "Sales", deadline: "2026-08-01" }]}
+        isSaving={false}
+        onChangeGroupDeadlines={vi.fn()}
+        onClose={onClose}
+        onSave={vi.fn()}
+        onToggleDeadline={vi.fn()}
+      />,
+    );
+
+    await user.keyboard("{Escape}");
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it("uses the project switch and passes its next value", async () => {
     const user = userEvent.setup();
     const onToggleDeadline = vi.fn();

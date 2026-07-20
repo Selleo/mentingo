@@ -7,6 +7,30 @@ import { renderWith } from "~/utils/testUtils";
 import AuthorModal from "./AuthorModal";
 
 describe("AuthorModal", () => {
+  it("has dialog semantics and closes with Escape", async () => {
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+
+    renderWith().render(
+      <AuthorModal
+        author={{ firstName: "Ada", lastName: "Lovelace" }}
+        isAdminExperience={false}
+        isSaving={false}
+        onClose={onClose}
+        onSave={vi.fn()}
+        onToggleShowAuthorSection={vi.fn()}
+        otherCourses={[]}
+        showAuthorSectionDraft
+      />,
+    );
+
+    expect(screen.getByRole("dialog", { name: "Ada Lovelace" })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it("renders other courses with enrolled students, hardcoded rating, and half-hour duration", () => {
     renderWith().render(
       <AuthorModal

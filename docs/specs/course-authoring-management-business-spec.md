@@ -49,6 +49,8 @@ Course mutations are permission-gated. Full course administrators can manage cou
 
 The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, related author courses, curriculum labels, lesson statuses, and summary statistics. The author modal can also show other published courses by the same author with practical catalog context such as enrolled learner count and estimated course duration.
 
+Course statistics are available only to users with the dedicated statistics permission and are hidden while the user is in Learning Mode. If Learning Mode is enabled while Statistics is active, the overview returns to the table of contents. Course description, deadline, and media editors use accessible dialogs with keyboard dismissal and managed focus.
+
 Course administrators can select a trailer video in the same media editor used for the hero image. Mentingo uploads the video through the resumable video-upload flow, associates it with the course as its trailer, and refreshes course and catalog data after the media update completes.
 
 ## Key Technical Context
@@ -68,4 +70,4 @@ Course administrators can select a trailer video in the same media editor used f
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
 - Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
-- Component-level coverage verifies that the modern media editor accepts an allowed trailer video and exposes the selected file before upload; the upload service itself remains covered through the existing course settings flow and source-level integration evidence.
+- Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, accessible keyboard dismissal for the description, deadline, and media dialogs, expanded lesson links to course lesson routes, and allowed trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.

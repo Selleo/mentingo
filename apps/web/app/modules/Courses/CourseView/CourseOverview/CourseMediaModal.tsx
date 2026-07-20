@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
 import VideoUploadInput from "~/components/FileUploadInput/VideoUploadInput";
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 
 import type { RefObject } from "react";
 
@@ -38,19 +39,22 @@ export default function CourseMediaModal({
   const { t } = useTranslation();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label={t("modernCourseView.common.close")}
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl md:p-6">
+    <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
+      <DialogContent
+        className="max-h-[90vh] max-w-4xl overflow-y-auto rounded-2xl border-0 bg-white p-4 shadow-2xl md:p-6"
+        noCloseButton
+        aria-describedby={undefined}
+      >
         <div className="mb-4 flex items-center justify-between md:mb-6">
-          <h3 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
+          <DialogTitle className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
             {t("modernCourseView.media.title")}
-          </h3>
-          <button type="button" onClick={onClose}>
+          </DialogTitle>
+          <button
+            type="button"
+            aria-label={t("modernCourseView.common.close")}
+            onClick={onClose}
+            disabled={isSaving}
+          >
             <X className="size-5 text-neutral-800 md:size-6" />
           </button>
         </div>
@@ -147,7 +151,7 @@ export default function CourseMediaModal({
             {t("modernCourseView.media.save")}
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -20,7 +20,7 @@ import TableOfContentTabs, {
 export function TableOfContent() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { course, isAdminExperience } = useCourseAccessProvider();
+  const { course, isAdminExperience, isCourseStudentModeActive } = useCourseAccessProvider();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
 
@@ -42,6 +42,8 @@ export function TableOfContent() {
     permissions,
     PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
   );
+  const canShowStatistics =
+    !isCourseStudentModeActive && hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
 
   const toggleChapter = (id: string) => {
     setExpandedChapters((prev) =>
@@ -71,19 +73,19 @@ export function TableOfContent() {
   }, []);
 
   useEffect(() => {
-    if (!isAdminExperience && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS) {
+    if (!canShowStatistics && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS) {
       setActiveTab(TABLE_OF_CONTENT_TABS.TOC);
     }
-  }, [activeTab, isAdminExperience]);
+  }, [activeTab, canShowStatistics]);
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
-      {(isAdminExperience || canShowChat) && (
+      {(isAdminExperience || canShowChat || canShowStatistics) && (
         <TableOfContentTabs
           activeTab={activeTab}
           canEditContent={isAdminExperience}
           canShowChat={canShowChat}
-          canShowStatistics={isAdminExperience}
+          canShowStatistics={canShowStatistics}
           onEditContent={navigateToCourseEditor}
           onTabChange={setActiveTab}
         />
@@ -109,7 +111,7 @@ export function TableOfContent() {
         />
       )}
 
-      {isAdminExperience && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
+      {canShowStatistics && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
         <CourseAdminStatistics course={course} />
       )}
 

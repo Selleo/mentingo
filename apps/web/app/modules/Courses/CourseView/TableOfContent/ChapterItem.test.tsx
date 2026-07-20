@@ -1,3 +1,4 @@
+import { createRemixStub } from "@remix-run/testing";
 import { screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -53,6 +54,7 @@ describe("ChapterItem", () => {
       <ChapterItem
         chapter={createChapter()}
         chapterNumber={4}
+        courseSlug="statistics-course"
         isAdminExperience={false}
         isExpanded={false}
         onToggle={onToggle}
@@ -72,6 +74,7 @@ describe("ChapterItem", () => {
       <ChapterItem
         chapter={createChapter()}
         chapterNumber={4}
+        courseSlug="statistics-course"
         isAdminExperience
         isExpanded={false}
         onToggle={onToggle}
@@ -79,5 +82,30 @@ describe("ChapterItem", () => {
     );
 
     expect(screen.queryByText("2/3")).not.toBeInTheDocument();
+  });
+
+  it("links expanded lessons to their course lesson routes", () => {
+    const RemixStub = createRemixStub([
+      {
+        path: "*",
+        Component: () => (
+          <ChapterItem
+            chapter={createChapter()}
+            chapterNumber={4}
+            courseSlug="statistics-course"
+            isAdminExperience={false}
+            isExpanded
+            onToggle={onToggle}
+          />
+        ),
+      },
+    ]);
+
+    renderWith().render(<RemixStub />);
+
+    expect(screen.getByRole("link", { name: /Completed lesson/ })).toHaveAttribute(
+      "href",
+      "/course/statistics-course/lesson/lesson-1",
+    );
   });
 });

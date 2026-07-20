@@ -1,6 +1,8 @@
 import { CheckCircle2, Circle, Minus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
+
 type LessonStatusIconProps = {
   status: string;
 };
@@ -8,7 +10,7 @@ type LessonStatusIconProps = {
 export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
   const { t } = useTranslation();
 
-  if (status === "completed") {
+  if (status === CHAPTER_PROGRESS_STATUSES.COMPLETED) {
     return (
       <div className="relative group/status">
         <CheckCircle2 className="size-5 text-success-500" />
@@ -19,7 +21,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
     );
   }
 
-  if (status === "in_progress") {
+  if (status === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS) {
     return (
       <div className="relative group/status">
         <Circle className="size-4 fill-current text-secondary-500" />
@@ -30,7 +32,7 @@ export default function LessonStatusIcon({ status }: LessonStatusIconProps) {
     );
   }
 
-  if (status === "not_started") {
+  if (status === CHAPTER_PROGRESS_STATUSES.NOT_STARTED) {
     return (
       <div className="relative group/status">
         <Minus className="size-5 text-neutral-800" />

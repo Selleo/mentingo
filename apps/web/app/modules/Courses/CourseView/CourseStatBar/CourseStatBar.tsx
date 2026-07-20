@@ -9,6 +9,7 @@ import { useUserDetails } from "~/api/queries/useUserDetails";
 import { cn } from "~/lib/utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
 import AuthorModal from "./AuthorModal";
 import AuthorStatCard from "./AuthorStatCard";
@@ -181,7 +182,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     () =>
       course.chapters
         .flatMap((chapter) => chapter.lessons)
-        .filter((lesson) => lesson.status !== "completed")
+        .filter((lesson) => lesson.status !== CHAPTER_PROGRESS_STATUSES.COMPLETED)
         .reduce((total, lesson) => total + (lesson.estimatedDurationSeconds ?? 0), 0),
     [course.chapters],
   );

@@ -15,6 +15,7 @@ type Chapter = GetCourseResponse["data"]["chapters"][number];
 type ChapterItemProps = {
   chapter: Chapter;
   chapterNumber: number;
+  courseSlug: string;
   isAdminExperience: boolean;
   isExpanded: boolean;
   onToggle: () => void;
@@ -78,6 +79,7 @@ const getActiveLessonProgressCount = (chapter: Chapter) =>
 export default function ChapterItem({
   chapter,
   chapterNumber,
+  courseSlug,
   isAdminExperience,
   isExpanded,
   onToggle,
@@ -104,7 +106,7 @@ export default function ChapterItem({
           )}
         >
           {isCompleted ? (
-            <Check className="size-6text-white md:size-5" />
+            <Check className="size-6 text-white md:size-5" />
           ) : isCurrent ? (
             <span className="text-base font-bold text-white md:text-sm">{chapterNumber}</span>
           ) : (
@@ -132,7 +134,7 @@ export default function ChapterItem({
               {isExpanded ? (
                 <ChevronUp className={cn("size-5 flex-shrink-0 md:size-4", chapterStyle.icon)} />
               ) : (
-                <ChevronDown className={cn("size-5flex-shrink-0 md:size-4", chapterStyle.icon)} />
+                <ChevronDown className={cn("size-5 flex-shrink-0 md:size-4", chapterStyle.icon)} />
               )}
               <h3
                 className={cn(
@@ -185,6 +187,7 @@ export default function ChapterItem({
               {chapter.lessons.map((lesson, lessonIndex) => (
                 <LessonItem
                   key={lesson.id}
+                  courseSlug={courseSlug}
                   isAdminExperience={isAdminExperience}
                   isCompleted={isCompleted}
                   isCurrent={isCurrent}

@@ -1,6 +1,7 @@
 import { Check, Clock, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -22,21 +23,20 @@ export default function CourseDescriptionModal({
   const { t } = useTranslation();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label={t("modernCourseView.overview.closeDetails")}
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="max-h-[90vh] max-w-2xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
+        noCloseButton
+        aria-describedby={undefined}
+      >
         <div className="p-4 md:p-6 lg:p-8">
           <div className="mb-4 flex items-center justify-between md:mb-6">
-            <h3 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
+            <DialogTitle className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
               {t("modernCourseView.overview.aboutCourse")}
-            </h3>
+            </DialogTitle>
             <button
               type="button"
+              aria-label={t("modernCourseView.overview.closeDetails")}
               onClick={onClose}
               className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
             >
@@ -104,7 +104,7 @@ export default function CourseDescriptionModal({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

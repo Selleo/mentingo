@@ -146,7 +146,7 @@ export default function CourseWhatYouWillLearn({
                   }
                 }}
                 disabled={isPending}
-                className="flex-1 rounded-lg border-2 border-whte bg-transparent px-3 py-2 text-base font-medium text-white outline-none backdrop-blur-lg disabled:opacity-50"
+                className="flex-1 rounded-lg border-2 border-white bg-transparent px-3 py-2 text-base font-medium text-white outline-none backdrop-blur-lg disabled:opacity-50"
                 placeholder={t("modernCourseView.overview.learningOutcomePlaceholder")}
               />
             ) : (

@@ -2,6 +2,7 @@ import { Award, Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { Switch } from "~/components/ui/switch";
 import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
@@ -50,19 +51,19 @@ export default function AuthorModal({
   const authorFullName = getAuthorName(author);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button
-        type="button"
-        aria-label={t("modernCourseView.author.close")}
-        className="absolute inset-0 bg-black/50"
-        onClick={onClose}
-      />
-      <div className="relative mx-4 max-h-[90vh] w-full max-w-6xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+    <Dialog open onOpenChange={(open) => !open && !isSaving && onClose()}>
+      <DialogContent
+        className="max-h-[90vh] max-w-6xl overflow-y-auto rounded-2xl border-0 bg-white p-0 shadow-2xl"
+        noCloseButton
+        aria-describedby={undefined}
+      >
         <div className="flex flex-col md:flex-row">
           <div className="relative flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100 p-6 md:w-2/5 md:rounded-l-2xl md:p-8">
             <button
               type="button"
+              aria-label={t("modernCourseView.author.close")}
               onClick={onClose}
+              disabled={isSaving}
               className="absolute right-2 top-2 flex size-10 items-center justify-center rounded-full bg-white shadow-md transition-colors hover:bg-neutral-100 md:right-4 md:top-4 md:hidden"
             >
               <X className="size-5 text-neutral-800" />
@@ -77,7 +78,9 @@ export default function AuthorModal({
           <div className="relative p-4 md:w-3/5 md:p-6 lg:p-8">
             <button
               type="button"
+              aria-label={t("modernCourseView.author.close")}
               onClick={onClose}
+              disabled={isSaving}
               className="absolute right-4 top-4 hidden size-10 items-center justify-center rounded-full bg-neutral-100 transition-colors hover:bg-neutral-200 md:block"
             >
               <X className="mx-auto size-5 text-neutral-800" />
@@ -104,9 +107,9 @@ export default function AuthorModal({
             )}
 
             <div className="mb-8">
-              <h3 className="mb-2 font-gothic text-3xl font-bold text-neutral-950">
+              <DialogTitle className="mb-2 font-gothic text-3xl font-bold text-neutral-950">
                 {authorFullName}
-              </h3>
+              </DialogTitle>
               <p className="mb-4 text-lg text-primary-700">{author?.jobTitle}</p>
               <p className="leading-relaxed text-neutral-800">{author?.description}</p>
             </div>
@@ -171,7 +174,7 @@ export default function AuthorModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -51,7 +51,7 @@ export default function ChapterList({
 
   return (
     <div className="relative">
-      <div className="absolute bottom-2 left-[24px] top-2 hidden w-0.5 bg-neutral-200 md:left-[20px] md:block" />
+      <div className="absolute bottom-2 left-6 top-2 hidden w-0.5 bg-neutral-200 md:left-5 md:block" />
 
       <div className="space-y-4">
         {!isAdminExperience && completedChapters.length > 0 && !completedExpanded && (
@@ -88,6 +88,7 @@ export default function ChapterList({
               key={chapter.id}
               chapter={chapter}
               chapterNumber={course.chapters.indexOf(chapter) + 1}
+              courseSlug={course.slug}
               isAdminExperience={isAdminExperience}
               isExpanded={expandedChapters.includes(chapter.id)}
               onToggle={() => onToggleChapter(chapter.id)}
@@ -99,6 +100,7 @@ export default function ChapterList({
             key={chapter.id}
             chapter={chapter}
             chapterNumber={course.chapters.indexOf(chapter) + 1}
+            courseSlug={course.slug}
             isAdminExperience={isAdminExperience}
             isExpanded={expandedChapters.includes(chapter.id)}
             onToggle={() => onToggleChapter(chapter.id)}

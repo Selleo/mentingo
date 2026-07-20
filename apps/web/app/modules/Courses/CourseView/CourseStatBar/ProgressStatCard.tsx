@@ -31,8 +31,8 @@ export default function ProgressStatCard({
           "opacity-45 group-hover:blur-[2px]": isAdminExperience,
         })}
       >
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
-          <Clock className="h-6 w-6 text-success-500" />
+        <div className="flex size-12 flex-shrink-0 items-center justify-center rounded-xl bg-success-50">
+          <Clock className="size-6 text-success-500" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="mb-0.5 text-xs uppercase tracking-wider text-neutral-800">

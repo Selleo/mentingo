@@ -1,3 +1,5 @@
+import { Link } from "@remix-run/react";
+
 import { cn } from "~/lib/utils";
 
 import LessonStatusIcon from "./LessonStatusIcon";
@@ -8,6 +10,7 @@ import type { GetCourseResponse } from "~/api/generated-api";
 type CourseLesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
 
 type LessonItemProps = {
+  courseSlug: string;
   isAdminExperience: boolean;
   isCompleted: boolean;
   isCurrent: boolean;
@@ -34,6 +37,7 @@ const getLessonHoverStyle = ({
 };
 
 export default function LessonItem({
+  courseSlug,
   isAdminExperience,
   isCompleted,
   isCurrent,
@@ -42,7 +46,8 @@ export default function LessonItem({
 }: LessonItemProps) {
   return (
     <div>
-      <div
+      <Link
+        to={`/course/${courseSlug}/lesson/${lesson.id}`}
         className={cn(
           "flex cursor-pointer items-center gap-3 py-4 transition-all group/lesson md:py-3",
           getLessonHoverStyle({ isCompleted, isCurrent }),
@@ -57,7 +62,7 @@ export default function LessonItem({
           </p>
         </div>
         {!isAdminExperience && <LessonStatusIcon status={lesson.status} />}
-      </div>
+      </Link>
       {!isLast && <div className="ml-12 border-t border-neutral-200 md:ml-11" />}
     </div>
   );
