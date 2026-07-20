@@ -22,6 +22,7 @@ import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiJudgeConfigurations,
   aiMentorLessons,
   chapters,
   courses,
@@ -724,6 +725,22 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
     it("reports a missing translation when only the AI mentor name is untranslated", async () => {
       const { adminCookies, chapterId, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      const [aiMentorLesson] = await db
+        .select({ id: aiMentorLessons.id })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      await db
+        .update(aiJudgeConfigurations)
+        .set({
+          taskGoal: setJsonbField(
+            aiJudgeConfigurations.taskGoal,
+            SUPPORTED_LANGUAGES.PL,
+            "Complete the negotiation practice",
+          ),
+        })
+        .where(eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLesson.id));
 
       await db
         .update(courses)
