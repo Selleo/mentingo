@@ -135,7 +135,7 @@ export class AutomationStepsService {
       throw new BadRequestException("Automation already has a root step");
     }
     if (input.parentId) {
-      await this.getAutomationStepById(input.parentId!);
+      await this.getAutomationStepById(input.parentId);
     }
   }
 
