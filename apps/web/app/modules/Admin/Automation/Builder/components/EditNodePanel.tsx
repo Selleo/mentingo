@@ -51,10 +51,12 @@ export const EditNodePanel: FC = () => {
 
   const selectedCourseId = selectedNode?.config?.courseId as string | undefined;
 
-  const { options: userOptions } = useCourseUsers(selectedCourseId);
+  const { options } = useCourseUsers({
+    courseId: selectedCourseId,
+  });
   const dynamicOptions: Record<string, Option[]> = {
     courses: courseOptions,
-    users: userOptions,
+    users: options,
   };
 
   const [changeTriggerDialogOpen, setChangeTriggerDialogOpen] = useState(false);

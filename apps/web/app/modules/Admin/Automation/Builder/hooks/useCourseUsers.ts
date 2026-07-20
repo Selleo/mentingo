@@ -1,14 +1,30 @@
 import { useQuery } from "@tanstack/react-query";
-import { /*useEffect,*/ useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 import { useUsersEnrolledQuery } from "../../../../../../app/api/queries/admin/useUsersEnrolled";
 
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
 import type { Option } from "~/components/ui/multiselect";
 
-type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number];
+export type FetchMode = "all_enrolled" | "organization" | "in_progress" | "inactive_for_days";
 
-export function useCourseUsers(courseId?: string) {
+export interface UseCourseUsersParams {
+  courseId?: string;
+  mode?: FetchMode;
+  inactiveDaysThreshold?: number;
+}
+
+type EnrolledStudent = GetStudentsWithEnrollmentDateResponse["data"][number] & {
+  isOrganizationMember?: boolean;
+  completedAt?: string | null;
+  lastLessonCompletedAt?: string | null;
+};
+
+export function useCourseUsers({
+  courseId,
+  mode = "all_enrolled",
+  inactiveDaysThreshold = 7,
+}: UseCourseUsersParams) {
   const queryDef = useUsersEnrolledQuery(courseId ?? "");
 
   const { data, isLoading } = useQuery({
@@ -16,10 +32,36 @@ export function useCourseUsers(courseId?: string) {
     enabled: Boolean(courseId),
   });
 
-  const options: Option[] = useMemo(() => {
-    if (!data?.data) return [];
+  const filteredStudents = useMemo(() => {
+    const rawStudents = (data?.data ?? []) as EnrolledStudent[];
+    if (!rawStudents.length) return [];
 
-    return data.data.map((student: EnrolledStudent) => {
+    const now = new Date().getTime();
+
+    return rawStudents.filter((student) => {
+      switch (mode) {
+        case "organization":
+          return Boolean(student.isOrganizationMember);
+
+        case "in_progress":
+          return !student.completedAt;
+
+        case "inactive_for_days": {
+          if (!student.lastLessonCompletedAt) return true;
+          const lastActivityTime = new Date(student.lastLessonCompletedAt).getTime();
+          const diffInDays = (now - lastActivityTime) / (1000 * 60 * 60 * 24);
+          return diffInDays >= inactiveDaysThreshold;
+        }
+
+        case "all_enrolled":
+        default:
+          return true;
+      }
+    });
+  }, [data, mode, inactiveDaysThreshold]);
+
+  const options: Option[] = useMemo(() => {
+    return filteredStudents.map((student) => {
       const fullName = [student.firstName, student.lastName].filter(Boolean).join(" ");
       const label = fullName || student.email || student.id;
 
@@ -29,24 +71,33 @@ export function useCourseUsers(courseId?: string) {
         imageUrl: (student as { avatarUrl?: string }).avatarUrl ?? undefined,
       };
     });
-  }, [data]);
+  }, [filteredStudents]);
 
-  //   useEffect(() => {
-  //     if (!courseId) {
-  //       console.log("Nie wybrano żadnego kursu.");
-  //       return;
-  //     }
+  useEffect(() => {
+    if (!courseId) {
+      console.log("[useCourseUsersOptions] Brak wybranego courseId.");
+      return;
+    }
 
-  //     if (isLoading) {
-  //       console.log(`Ładowanie uczestników dla kursu ID: ${courseId}...`);
-  //       return;
-  //     }
+    if (isLoading) {
+      console.log(`[useCourseUsersOptions] Ładowanie danych dla kursu ${courseId}...`);
+      return;
+    }
 
-  //     console.log(`Uczestnicy dla kursu [ID: ${courseId}]:`, {
-  //       rawStudentsData: data?.data ?? [],
-  //       asSelectOptions: options,
-  //     });
-  //   }, [courseId, data, options, isLoading]);
+    console.log(
+      `[useCourseUsersOptions] Zmiana filtrów/danych | Tryb: "${mode}" | Kurs: ${courseId}`,
+      {
+        rawTotalCount: data?.data?.length ?? 0,
+        filteredCount: filteredStudents.length,
+        filteredStudents,
+        options,
+      },
+    );
+  }, [courseId, mode, inactiveDaysThreshold, data, filteredStudents, options, isLoading]);
 
-  return { options, isLoading: isLoading && Boolean(courseId) };
+  return {
+    options,
+    students: filteredStudents,
+    isLoading: isLoading && Boolean(courseId),
+  };
 }
