@@ -10,14 +10,10 @@ export type ActionType = "send_email";
 
 export type NodeKind = "trigger" | "action";
 
-// ---------------------------------------------------------------------------
-// Polymorphic step definitions
-// ---------------------------------------------------------------------------
-
 export interface StepConfigField {
   key: string;
   labelKey: string;
-  type: "text" | "number" | "select" | "multiselect" | "textarea";
+  type: "text" | "number" | "select" | "multiselect" | "textarea" | "emailTemplateSelect";
   placeholderKey?: string;
   options?: { value: string; labelKey: string; label?: string; imageUrl?: string }[];
   dataSource?: "courses";
@@ -31,10 +27,6 @@ export interface AutomationStepDefinition {
   color: "blue" | "emerald";
   configFields: StepConfigField[];
 }
-
-// ---------------------------------------------------------------------------
-// Trigger definitions
-// ---------------------------------------------------------------------------
 
 const COURSE_DEADLINE_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
@@ -147,10 +139,6 @@ const LIVE_TRANSMISSION_STARTING_SOON_TRIGGER: AutomationStepDefinition = {
   ],
 };
 
-// ---------------------------------------------------------------------------
-// Action definitions
-// ---------------------------------------------------------------------------
-
 const SEND_EMAIL_ACTION: AutomationStepDefinition = {
   kind: "action",
   type: "send_email",
@@ -165,10 +153,10 @@ const SEND_EMAIL_ACTION: AutomationStepDefinition = {
       placeholderKey: "automationBuilder.editPanel.emailSubjectPlaceholder",
     },
     {
-      key: "body",
-      labelKey: "automationBuilder.editPanel.emailBody",
-      type: "textarea",
-      placeholderKey: "automationBuilder.editPanel.emailBodyPlaceholder",
+      key: "emailTemplateId",
+      labelKey: "automationBuilder.editPanel.emailTemplate",
+      type: "emailTemplateSelect",
+      placeholderKey: "automationBuilder.editPanel.emailTemplatePlaceholder",
     },
     {
       key: "recipient",
@@ -182,10 +170,6 @@ const SEND_EMAIL_ACTION: AutomationStepDefinition = {
     },
   ],
 };
-
-// ---------------------------------------------------------------------------
-// Registry — single source of truth for all step definitions
-// ---------------------------------------------------------------------------
 
 export const STEP_DEFINITIONS: AutomationStepDefinition[] = [
   COURSE_DEADLINE_TRIGGER,
@@ -211,10 +195,6 @@ export function getStepDefinition(
   return STEP_DEFINITIONS.find((s) => s.type === type);
 }
 
-// ---------------------------------------------------------------------------
-// Sidebar block type (used for DnD)
-// ---------------------------------------------------------------------------
-
 export interface SidebarBlock {
   kind: NodeKind;
   type: TriggerType | ActionType;
@@ -235,10 +215,6 @@ export const ACTION_BLOCKS: SidebarBlock[] = ACTION_DEFINITIONS.map((d) => ({
   labelKey: d.labelKey,
   icon: d.icon,
 }));
-
-// ---------------------------------------------------------------------------
-// Node shape (used in store)
-// ---------------------------------------------------------------------------
 
 export interface BuilderNode {
   id: string;

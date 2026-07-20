@@ -27,6 +27,7 @@ import { cn } from "~/lib/utils";
 import { TRIGGER_DEFINITIONS, getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
 import { useCoursesOptions } from "../hooks/useCourses";
+import { useCourseUsers } from "../hooks/useCourseUsers";
 
 import { ConfigFieldRenderer } from "./CofigFieldRenderer";
 
@@ -43,14 +44,21 @@ export const EditNodePanel: FC = () => {
   const updateNodeType = useBuilderStore((s) => s.updateNodeType);
   const removeNode = useBuilderStore((s) => s.removeNode);
 
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId);
+  const stepDefinition = selectedNode ? getStepDefinition(selectedNode.type) : undefined;
+
   const { options: courseOptions } = useCoursesOptions();
-  const dynamicOptions: Record<string, Option[]> = { courses: courseOptions };
+
+  const selectedCourseId = selectedNode?.config?.courseId as string | undefined;
+
+  const { options: userOptions } = useCourseUsers(selectedCourseId);
+  const dynamicOptions: Record<string, Option[]> = {
+    courses: courseOptions,
+    users: userOptions,
+  };
 
   const [changeTriggerDialogOpen, setChangeTriggerDialogOpen] = useState(false);
   const [pendingTriggerDef, setPendingTriggerDef] = useState<AutomationStepDefinition | null>(null);
-
-  const selectedNode = nodes.find((n) => n.id === selectedNodeId);
-  const stepDefinition = selectedNode ? getStepDefinition(selectedNode.type) : undefined;
 
   const handleRequestChangeTrigger = (def: AutomationStepDefinition) => {
     setPendingTriggerDef(def);
