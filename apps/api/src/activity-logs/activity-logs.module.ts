@@ -15,9 +15,11 @@ import { ChapterActivityHandler } from "./handlers/chapter-activity.handler";
 import { CourseActivityHandler } from "./handlers/course-activity.handler";
 import { EnvActivityHandler } from "./handlers/env-activity.handler";
 import { GroupActivityHandler } from "./handlers/group-activity.handler";
+import { LearningPathActivityHandler } from "./handlers/learning-path-activity.handler";
 import { LessonActivityHandler } from "./handlers/lesson-activity.handler";
 import { LiveTrainingActivityHandler } from "./handlers/live-training-activity.handler";
 import { NewsActivityHandler } from "./handlers/news-activity.handler";
+import { ScormActivityHandler } from "./handlers/scorm-activity.handler";
 import { SettingsActivityHandler } from "./handlers/settings-activity.handler";
 import { UserActivityHandler } from "./handlers/user-activity.handler";
 import { UserPasswordEmailsActivityHandler } from "./handlers/user-password-emails-activity.handler";
@@ -48,6 +50,8 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
     ActivityLogsQueueService,
     ActivityLogsWorker,
     QAActivityHandler,
+    LearningPathActivityHandler,
+    ScormActivityHandler,
   ],
   exports: [ActivityLogsService, CqrsModule],
 })

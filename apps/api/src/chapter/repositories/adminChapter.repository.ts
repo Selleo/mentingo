@@ -194,10 +194,6 @@ export class AdminChapterRepository {
               aiMentorLessons.aiMentorInstructions,
               language,
             )},
-            'completionConditions', ${this.localizationService.getFieldByLanguage(
-              aiMentorLessons.completionConditions,
-              language,
-            )},
             'type', ${aiMentorLessons.type},
             'name', ${this.localizationService.getFieldByLanguage(aiMentorLessons.name, language)},
             'avatarReference', ${aiMentorLessons.avatarReference},

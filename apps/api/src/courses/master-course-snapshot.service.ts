@@ -29,6 +29,23 @@ export class MasterCourseSnapshotService {
     const optionRows = await this.masterCourseRepository.getSourceOptions(questionIds);
     const aiMentorRows = await this.masterCourseRepository.getSourceAiMentors(lessonIds);
     const aiMentorIds = aiMentorRows.map((row) => row.id);
+    let aiJudgeConfigurationRows: SourceSnapshot["aiJudgeConfigurations"] = [];
+    if (aiMentorIds.length)
+      aiJudgeConfigurationRows =
+        await this.masterCourseRepository.getSourceAiJudgeConfigurations(aiMentorIds);
+    const aiJudgeConfigurationIds = aiJudgeConfigurationRows.map((row) => row.id);
+    let aiJudgeCriterionRows: SourceSnapshot["aiJudgeCriteria"] = [];
+    let aiJudgeBlockingErrorRows: SourceSnapshot["aiJudgeBlockingErrors"] = [];
+    if (aiJudgeConfigurationIds.length)
+      [aiJudgeCriterionRows, aiJudgeBlockingErrorRows] = await Promise.all([
+        this.masterCourseRepository.getSourceAiJudgeCriteria(aiJudgeConfigurationIds),
+        this.masterCourseRepository.getSourceAiJudgeBlockingErrors(aiJudgeConfigurationIds),
+      ]);
+    const aiJudgeCriterionIds = aiJudgeCriterionRows.map((row) => row.id);
+    let aiJudgeScoreGuidanceRows: SourceSnapshot["aiJudgeScoreGuidance"] = [];
+    if (aiJudgeCriterionIds.length)
+      aiJudgeScoreGuidanceRows =
+        await this.masterCourseRepository.getSourceAiJudgeScoreGuidance(aiJudgeCriterionIds);
     const aiMentorDocumentLinkRows =
       await this.masterCourseRepository.getSourceAiMentorDocumentLinks(aiMentorIds);
     const aiMentorDocumentIds = aiMentorDocumentLinkRows.map((row) => row.documentId);
@@ -66,6 +83,10 @@ export class MasterCourseSnapshotService {
       questions: questionRows,
       options: optionRows,
       aiMentors: aiMentorRows,
+      aiJudgeConfigurations: aiJudgeConfigurationRows,
+      aiJudgeCriteria: aiJudgeCriterionRows,
+      aiJudgeScoreGuidance: aiJudgeScoreGuidanceRows,
+      aiJudgeBlockingErrors: aiJudgeBlockingErrorRows,
       aiMentorDocumentLinks: aiMentorDocumentLinkRows,
       aiMentorDocuments: aiMentorDocumentRows,
       aiMentorDocChunks: aiMentorDocChunkRows,

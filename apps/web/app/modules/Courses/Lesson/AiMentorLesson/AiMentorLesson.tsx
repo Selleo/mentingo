@@ -35,6 +35,7 @@ import {
 import { cn } from "~/lib/utils";
 import { useOptionalCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { AiMentorEvaluationDialog } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationDialog";
+import { AiMentorEvaluationLoader } from "~/modules/Courses/Lesson/AiMentorLesson/components/AiMentorEvaluationLoader";
 import ChatLoader from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatLoader";
 import ChatMessage from "~/modules/Courses/Lesson/AiMentorLesson/components/ChatMessage";
 import { LessonForm } from "~/modules/Courses/Lesson/AiMentorLesson/components/LessonForm";
@@ -53,12 +54,7 @@ const taskDescriptionViewerClassName =
   "max-h-[62vh] overflow-y-auto pr-2 text-left text-sm leading-relaxed text-neutral-800";
 
 const hasEvaluationData = (evaluation?: AiMentorEvaluation | null) =>
-  Boolean(
-    evaluation &&
-      (typeof evaluation.passed === "boolean" ||
-        evaluation.score != null ||
-        evaluation.summary?.trim().length),
-  );
+  Boolean(evaluation && (typeof evaluation.passed === "boolean" || evaluation.score != null));
 
 interface AiMentorLessonProps {
   lesson: GetLessonByIdResponse["data"];
@@ -228,7 +224,7 @@ const AiMentorLesson = ({
   const lastMessage = messages[messages.length - 1];
   const hasStreamingAssistantText =
     lastMessage?.role === "assistant" && getUiMessageText(lastMessage).trim().length > 0;
-  const showChatLoader = (isProcessing && !hasStreamingAssistantText) || isJudgePending;
+  const showChatLoader = isProcessing && !hasStreamingAssistantText;
   const persistedEvaluation = useMemo<AiMentorEvaluation | null>(() => {
     if (!lesson.aiMentorDetails) return null;
 
@@ -337,6 +333,7 @@ const AiMentorLesson = ({
               <TooltipTrigger asChild>
                 <span className="min-w-0">
                   <Button
+                    data-testid={LEARNING_HANDLES.AI_MENTOR_RESULT_BUTTON}
                     type="button"
                     variant="outline"
                     className={cn(
@@ -406,6 +403,8 @@ const AiMentorLesson = ({
           )}
         </div>
 
+        {isJudgePending && <AiMentorEvaluationLoader />}
+
         {isThreadActive && !isJudgePending && !hideControls && (
           <LessonForm
             lessonId={lesson.id}
@@ -433,7 +432,7 @@ const AiMentorLesson = ({
           <>
             <hr className="mt-4 w-full border-t border-[#EDEDED]" />
             <div className="mt-4 flex w-full justify-center">
-              {isThreadActive && !isJudgePending ? (
+              {isThreadActive && !isJudgePending && (
                 <Button
                   data-testid={LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON}
                   variant="primary"
@@ -444,7 +443,8 @@ const AiMentorLesson = ({
                   {t("studentCourseView.lesson.aiMentorLesson.check")}
                   <Icon name="ArrowRight" className="size-5" />
                 </Button>
-              ) : (
+              )}
+              {!isThreadActive && !isJudgePending && (
                 <Button
                   data-testid={LEARNING_HANDLES.AI_MENTOR_RETAKE_BUTTON}
                   variant="outline"

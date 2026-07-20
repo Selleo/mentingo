@@ -100,7 +100,6 @@ export type LessonActivityLogSnapshot = {
   questions?: LessonActivityLogQuestion[];
   aiMentor?: {
     aiMentorInstructions?: string | null;
-    completionConditions?: string | null;
     name?: string | null;
     avatarReference?: string | null;
     type?: string | null;
@@ -230,4 +229,25 @@ export type ArticleSectionActivityLogSnapshot = {
   title?: string | null;
   baseLanguage?: string;
   availableLocales?: string[];
+};
+
+export type LearningPathActivityLogSnapshot = {
+  id: UUIDType;
+  title?: string | null;
+  description?: string | null;
+  status?: string | null;
+  authorId?: UUIDType | null;
+  sequenceEnabled?: boolean;
+  includesCertificate?: boolean;
+  baseLanguage?: string;
+  availableLocales?: string[];
+  settings?: Record<string, unknown>;
+};
+
+export type ScormActivityLogSnapshot = {
+  id: UUIDType;
+  entityType?: string | null;
+  standard?: string | null;
+  status?: string | null;
+  packageId?: UUIDType | null;
 };

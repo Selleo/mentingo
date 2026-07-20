@@ -133,7 +133,6 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   DESCRIPTION_INPUT: "curriculum-ai-mentor-lesson-description-input",
   NAME_INPUT: "curriculum-ai-mentor-lesson-name-input",
   INSTRUCTIONS_INPUT: "curriculum-ai-mentor-lesson-instructions-input",
-  COMPLETION_CONDITIONS_INPUT: "curriculum-ai-mentor-lesson-completion-conditions-input",
   TYPE_SELECT: "curriculum-ai-mentor-lesson-type-select",
   SAVE_BUTTON: "curriculum-ai-mentor-lesson-save-button",
   DELETE_BUTTON: "curriculum-ai-mentor-lesson-delete-button",
@@ -141,6 +140,9 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   PREVIEW_BUTTON: "curriculum-ai-mentor-lesson-preview-button",
   RESOURCE_FILE_INPUT: "curriculum-ai-mentor-lesson-resource-file-input",
   AVATAR_FILE_INPUT: "curriculum-ai-mentor-lesson-avatar-file-input",
+  JUDGE_CONFIGURE_BUTTON: "curriculum-ai-mentor-judge-configure-button",
+  JUDGE_TASK_GOAL_INPUT: "curriculum-ai-mentor-judge-task-goal-input",
+  JUDGE_APPLY_BUTTON: "curriculum-ai-mentor-judge-apply-button",
 } as const;
 
 export const COURSE_GENERATION_HANDLES = {

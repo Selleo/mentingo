@@ -8,7 +8,9 @@ type ModernCourseRowSkeletonProps = {
 const ModernCourseRowSkeleton = ({ title, courseCount = 5 }: ModernCourseRowSkeletonProps) => (
   <section className="space-y-4 pb-6">
     {title ? (
-      <h2 className="h2 px-4 md:px-8">{title}</h2>
+      <h2 className="h2 px-4 text-2xl leading-snug md:px-8 md:text-[32px] md:leading-relaxed">
+        {title}
+      </h2>
     ) : (
       <Skeleton className="mx-4 h-8 w-48 md:mx-8" />
     )}
