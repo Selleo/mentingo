@@ -2,6 +2,7 @@ import { Calendar, Check, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
 
 export type GroupDeadline = {
@@ -50,7 +51,7 @@ export default function DeadlineModal({
         </div>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <div className="flex items-center justify-between rounded-xl p-4">
             <div>
               <p className="font-semibold text-neutral-950">
                 {t("modernCourseView.deadline.enable")}
@@ -73,11 +74,13 @@ export default function DeadlineModal({
             </p>
           )}
 
+          {deadlineEnabledDraft && groupDeadlines && <Separator />}
+
           {deadlineEnabledDraft &&
             groupDeadlines.map((group) => (
               <div
                 key={group.id}
-                className="flex flex-col items-start justify-between gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 sm:flex-row sm:items-center"
+                className="flex flex-col items-start justify-between gap-3 rounded-xl p-4 sm:flex-row sm:items-center"
               >
                 <div className="flex-1">
                   <p className="font-semibold text-neutral-950">{group.name}</p>

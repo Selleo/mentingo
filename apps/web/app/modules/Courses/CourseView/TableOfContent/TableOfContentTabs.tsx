@@ -6,7 +6,13 @@ import { cn } from "~/lib/utils";
 
 import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
 
-export type TableOfContentTab = "toc" | "statistics" | "chat";
+export const TABLE_OF_CONTENT_TABS = {
+  TOC: "toc",
+  STATISTICS: "statistics",
+  CHAT: "chat",
+} as const;
+
+export type TableOfContentTab = (typeof TABLE_OF_CONTENT_TABS)[keyof typeof TABLE_OF_CONTENT_TABS];
 
 type TableOfContentTabsProps = {
   activeTab: TableOfContentTab;
@@ -32,30 +38,32 @@ export default function TableOfContentTabs({
       <div className="flex w-full items-center gap-4 overflow-x-auto sm:w-auto md:gap-6">
         <button
           type="button"
-          onClick={() => onTabChange("toc")}
+          onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.TOC)}
           className={cn(
             "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-            activeTab === "toc" ? "text-primary-700" : "text-neutral-800 hover:text-neutral-950",
+            activeTab === TABLE_OF_CONTENT_TABS.TOC
+              ? "text-primary-700"
+              : "text-neutral-800 hover:text-neutral-950",
           )}
         >
           {t("modernCourseView.contents.title")}
-          {activeTab === "toc" && (
+          {activeTab === TABLE_OF_CONTENT_TABS.TOC && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
           )}
         </button>
         {canShowStatistics && (
           <button
             type="button"
-            onClick={() => onTabChange("statistics")}
+            onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.STATISTICS)}
             className={cn(
               "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-              activeTab === "statistics"
+              activeTab === TABLE_OF_CONTENT_TABS.STATISTICS
                 ? "text-primary-700"
                 : "text-neutral-800 hover:text-neutral-950",
             )}
           >
             {t("modernCourseView.contents.statistics")}
-            {activeTab === "statistics" && (
+            {activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
             )}
           </button>
@@ -64,14 +72,16 @@ export default function TableOfContentTabs({
           <button
             type="button"
             data-testid={COURSE_DISCUSSION_HANDLES.TAB}
-            onClick={() => onTabChange("chat")}
+            onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.CHAT)}
             className={cn(
               "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-              activeTab === "chat" ? "text-primary-700" : "text-neutral-800 hover:text-neutral-950",
+              activeTab === TABLE_OF_CONTENT_TABS.CHAT
+                ? "text-primary-700"
+                : "text-neutral-800 hover:text-neutral-950",
             )}
           >
             {t("studentCourseView.tabs.chat")}
-            {activeTab === "chat" && (
+            {activeTab === TABLE_OF_CONTENT_TABS.CHAT && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
             )}
           </button>

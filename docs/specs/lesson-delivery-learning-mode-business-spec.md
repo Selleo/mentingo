@@ -37,7 +37,7 @@ Learning-time tracking adds another reporting signal, helping teams understand b
 
 ## How It Works
 
-The lesson page loads the selected course and lesson in the active content language. It shows the lesson content, chapter context, navigation controls, and the course lesson sidebar.
+The lesson page loads the selected course and lesson in the active content language. It shows the lesson content, chapter context, navigation controls, and the course lesson sidebar. When an administrator or content creator enters learning mode from the course overview, Mentingo returns the course panel to the table of contents so an admin-only Statistics tab cannot leave the learner view empty.
 
 Each lesson type has its own completion behavior. Content and embed lessons can complete when opened or when required video content finishes. Quiz lessons depend on quiz submission and passing rules. AI mentor, SCORM, and live training lessons use their own lesson-specific state. When sequence mode is enabled, Mentingo blocks access to later lessons until earlier lessons are complete.
 
@@ -59,5 +59,5 @@ While the learner studies, the page also runs the learning-time tracker. Complet
 ## Test Evidence
 
 - Web E2E coverage verifies starting learning, continuing to the next content lesson, opening lessons out of order when sequence is disabled, blocking skipped lessons when sequence is enabled, keeping the next lesson locked after a failed required quiz, submitting and retaking quizzes, completing embed lessons, accessing AI mentor entry points, and SCORM launch/resume/completion behavior.
-- Web unit coverage verifies the segmented lesson video progress strip, watched chunk rendering, 90% green completion state, and live updates from the video tracker.
+- Web unit coverage verifies the learning-mode reset from Statistics to the table of contents, the segmented lesson video progress strip, watched chunk rendering, 90% green completion state, and live updates from the video tracker.
 - API E2E coverage verifies quiz feedback visibility rules, lesson completion restrictions for authors/admins outside learning mode, admin/content-creator learning-mode behavior, quiz submission rules, quiz lesson deletion with submitted answers, and learning-time queue processing.

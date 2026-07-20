@@ -12,7 +12,10 @@ import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStati
 import { CourseChatTab } from "../CourseChat/CourseChatTab";
 
 import ChapterList from "./ChapterList";
-import TableOfContentTabs, { type TableOfContentTab } from "./TableOfContentTabs";
+import TableOfContentTabs, {
+  TABLE_OF_CONTENT_TABS,
+  type TableOfContentTab,
+} from "./TableOfContentTabs";
 
 export function TableOfContent() {
   const navigate = useNavigate();
@@ -22,7 +25,7 @@ export function TableOfContent() {
   const { data: globalSettings } = useGlobalSettings();
 
   const [completedExpanded, setCompletedExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<TableOfContentTab>("toc");
+  const [activeTab, setActiveTab] = useState<TableOfContentTab>(TABLE_OF_CONTENT_TABS.TOC);
   const [expandedChapters, setExpandedChapters] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showAllChapters, setShowAllChapters] = useState(false);
@@ -67,6 +70,12 @@ export function TableOfContent() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  useEffect(() => {
+    if (!isAdminExperience && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS) {
+      setActiveTab(TABLE_OF_CONTENT_TABS.TOC);
+    }
+  }, [activeTab, isAdminExperience]);
+
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
       {(isAdminExperience || canShowChat) && (
@@ -88,7 +97,7 @@ export function TableOfContent() {
         </div>
       )}
 
-      {activeTab === "toc" && (
+      {activeTab === TABLE_OF_CONTENT_TABS.TOC && (
         <ChapterList
           completedExpanded={completedExpanded}
           expandedChapters={expandedChapters}
@@ -100,9 +109,11 @@ export function TableOfContent() {
         />
       )}
 
-      {isAdminExperience && activeTab === "statistics" && <CourseAdminStatistics course={course} />}
+      {isAdminExperience && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
+        <CourseAdminStatistics course={course} />
+      )}
 
-      {canShowChat && activeTab === "chat" && currentUser && (
+      {canShowChat && activeTab === TABLE_OF_CONTENT_TABS.CHAT && currentUser && (
         <CourseChatTab
           courseId={course.id}
           currentUserId={currentUser.id}

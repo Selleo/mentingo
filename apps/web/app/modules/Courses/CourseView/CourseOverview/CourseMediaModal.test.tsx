@@ -33,6 +33,7 @@ describe("CourseMediaModal", () => {
     await user.upload(screen.getByLabelText("Upload new hero image"), image);
 
     expect(onImageSelection).toHaveBeenCalledOnce();
+    expect(onImageSelection).toHaveBeenCalledWith(image);
     expect(imageInputRef.current?.files?.[0]).toBe(image);
   });
 
@@ -61,6 +62,7 @@ describe("CourseMediaModal", () => {
     await user.upload(screen.getByLabelText("Course trailer (optional)"), trailer);
 
     expect(onTrailerSelection).toHaveBeenCalledOnce();
+    expect(onTrailerSelection).toHaveBeenCalledWith(trailer);
     expect(trailerInputRef.current?.files?.[0]).toBe(trailer);
   });
 });

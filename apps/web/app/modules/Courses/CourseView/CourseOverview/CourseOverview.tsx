@@ -1,7 +1,7 @@
 import { useNavigate } from "@remix-run/react";
 import { ENTITY_TYPES } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
-import { type ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
@@ -113,17 +113,13 @@ export default function CourseOverview({ language }: CourseHeroProps) {
     }
   };
 
-  const handleImageSelection = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) return;
-
+  const handleImageSelection = (file: File) => {
     setSelectedImageFile(file);
     setImagePreviewUrl(URL.createObjectURL(file));
   };
 
-  const handleTrailerSelection = (event: ChangeEvent<HTMLInputElement>) => {
-    setSelectedTrailerFile(event.target.files?.[0] ?? null);
+  const handleTrailerSelection = (file: File) => {
+    setSelectedTrailerFile(file);
   };
 
   const openMediaModal = () => {

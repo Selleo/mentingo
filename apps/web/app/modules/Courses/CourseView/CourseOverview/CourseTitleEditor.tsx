@@ -69,7 +69,7 @@ export default function CourseTitleEditor({
             onCancel();
           }
         }}
-        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg border-2 border-white bg-transparent px-2 py-2 text-2xl font-bold leading-tight text-white backdrop-blur-lg md:text-3xl lg:text-4xl"
+        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg bg-transparent p-2 text-2xl font-bold leading-tight text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-white md:text-3xl lg:text-4xl"
         rows={1}
       />
     );
@@ -81,7 +81,7 @@ export default function CourseTitleEditor({
         <button
           type="button"
           onClick={onEdit}
-          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white hover:bg-white/10 focus-visible:border-white focus-visible:bg-primary-700"
+          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
         >
           {title}
         </button>

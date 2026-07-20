@@ -1,10 +1,12 @@
-import { ALLOWED_LESSON_IMAGE_FILE_TYPES, ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
-import { Play, Upload, X } from "lucide-react";
+import { ALLOWED_LESSON_IMAGE_FILE_TYPES } from "@repo/shared";
+import { Upload, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import ImageUploadInput from "~/components/FileUploadInput/ImageUploadInput";
+import VideoUploadInput from "~/components/FileUploadInput/VideoUploadInput";
 import { Button } from "~/components/ui/button";
 
-import type { ChangeEvent, RefObject } from "react";
+import type { RefObject } from "react";
 
 type CourseMediaModalProps = {
   heroImagePositionDraft: number;
@@ -12,10 +14,10 @@ type CourseMediaModalProps = {
   imagePreviewUrl: string;
   isSaving: boolean;
   onClose: () => void;
-  onImageSelection: (event: ChangeEvent<HTMLInputElement>) => void;
+  onImageSelection: (file: File) => void;
   onPositionChange: (position: number) => void;
   onSave: () => Promise<void>;
-  onTrailerSelection: (event: ChangeEvent<HTMLInputElement>) => void;
+  onTrailerSelection: (file: File) => void;
   selectedTrailerFile: File | null;
   trailerInputRef: RefObject<HTMLInputElement>;
 };
@@ -69,8 +71,7 @@ export default function CourseMediaModal({
               {t("modernCourseView.media.previewPosition")}
             </div>
           </div>
-
-          <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <div className="rounded-xl p-4">
             <p className="mb-2 text-sm font-semibold text-neutral-950">
               {t("modernCourseView.media.verticalPosition")}
             </p>
@@ -91,59 +92,45 @@ export default function CourseMediaModal({
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6">
           <div>
-            <p className="mb-3 block text-sm font-semibold text-neutral-950">
+            <label
+              htmlFor="course-hero-image-upload"
+              className="mb-3 block text-sm font-semibold text-neutral-950"
+            >
               {t("modernCourseView.media.uploadImage")}
-            </p>
-            <div className="relative flex h-40 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8">
-              <div className="mb-3 flex size-16 items-center justify-center rounded-full bg-primary-50">
-                <Upload className="size-8 text-primary-700" />
-              </div>
-              <p className="mb-1 text-sm font-semibold text-neutral-950">
-                {t("modernCourseView.media.dropImage")}
-              </p>
-              <p className="mb-3 text-xs text-neutral-800">{t("modernCourseView.media.browse")}</p>
-              <p className="text-xs text-neutral-800">{t("modernCourseView.media.imageLimit")}</p>
-              <p className="text-xs text-neutral-800">
-                {t("modernCourseView.media.imageRecommendation")}
-              </p>
-              <input
-                ref={imageInputRef}
-                type="file"
-                accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
-                aria-label={t("modernCourseView.media.uploadImage")}
-                disabled={isSaving}
-                onChange={onImageSelection}
-                className="absolute inset-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
-              />
-            </div>
+            </label>
+            <ImageUploadInput
+              field={{}}
+              handleImageUpload={onImageSelection}
+              isUploading={isSaving}
+              disabled={isSaving}
+              fileInputRef={imageInputRef}
+              inputId="course-hero-image-upload"
+              variant="video"
+              accept={ALLOWED_LESSON_IMAGE_FILE_TYPES.join(",")}
+              detailsText={`${t("modernCourseView.media.imageLimit")} · ${t(
+                "modernCourseView.media.imageRecommendation",
+              )}`}
+            />
           </div>
 
           <div>
-            <p className="mb-3 block text-sm font-semibold text-neutral-950">
+            <label
+              htmlFor="course-trailer-upload"
+              className="mb-3 block text-sm font-semibold text-neutral-950"
+            >
               {t("modernCourseView.media.trailer")}
-            </p>
-            <div className="relative flex h-40 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-200 bg-neutral-50 p-6 text-center transition-colors hover:border-primary-700 hover:bg-neutral-100 md:h-48 md:p-8">
-              <div className="mb-3 flex size-16 items-center justify-center rounded-full bg-amethyst-50">
-                <Play className="size-8 text-amethyst-600" />
-              </div>
-              <p className="mb-1 text-sm font-semibold text-neutral-950">
-                {selectedTrailerFile?.name ?? t("modernCourseView.media.dropVideo")}
-              </p>
-              <p className="mb-3 text-xs text-neutral-800">{t("modernCourseView.media.browse")}</p>
-              <p className="text-xs text-neutral-800">{t("modernCourseView.media.videoLimit")}</p>
-              <p className="text-xs text-neutral-800">
-                {t("modernCourseView.media.videoRecommendation")}
-              </p>
-              <input
-                ref={trailerInputRef}
-                type="file"
-                accept={ALLOWED_VIDEO_FILE_TYPES.join(",")}
-                aria-label={t("modernCourseView.media.trailer")}
-                disabled={isSaving}
-                onChange={onTrailerSelection}
-                className="absolute inset-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
-              />
-            </div>
+            </label>
+            <VideoUploadInput
+              handleVideoUpload={onTrailerSelection}
+              isUploading={isSaving}
+              disabled={isSaving}
+              file={selectedTrailerFile}
+              fileInputRef={trailerInputRef}
+              inputId="course-trailer-upload"
+              detailsText={`${t("modernCourseView.media.videoLimit")} · ${t(
+                "modernCourseView.media.videoRecommendation",
+              )}`}
+            />
           </div>
         </div>
 

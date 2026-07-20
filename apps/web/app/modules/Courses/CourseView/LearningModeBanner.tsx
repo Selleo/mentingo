@@ -17,7 +17,7 @@ export function LearningModeBannerNew() {
   }
 
   return (
-    <div className="bg-primary-700 px-4 py-4 text-white md:px-8">
+    <div className="bg-primary-700 p-4 text-white md:px-8">
       <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 md:flex-row md:items-center">
         <div className="flex items-center gap-3">
           <GraduationCap className="size-5" />

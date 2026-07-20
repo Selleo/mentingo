@@ -80,7 +80,7 @@ export default function AuthorModal({
               onClick={onClose}
               className="absolute right-4 top-4 hidden size-10 items-center justify-center rounded-full bg-neutral-100 transition-colors hover:bg-neutral-200 md:block"
             >
-              <X className="mx-auto mt-2.5 size-5 text-neutral-800" />
+              <X className="mx-auto size-5 text-neutral-800" />
             </button>
             {isAdminExperience && (
               <div className="mb-6 rounded-xl border border-primary-200 bg-primary-50 p-4">
@@ -119,7 +119,7 @@ export default function AuthorModal({
                 {otherCourses.map((course) => (
                   <div
                     key={course.id}
-                    className="group cursor-pointer rounded-xl border border-neutral-200 bg-neutral-50 p-4 transition-all hover:border-primary-700 hover:shadow-md"
+                    className="group cursor-pointer rounded-xl border border-neutral-200  p-4 transition-all hover:border-primary-700 hover:shadow-md"
                   >
                     <div className="mb-2">
                       <h5 className="mb-1 font-bold leading-snug text-neutral-950 transition-colors group-hover:text-primary-700">

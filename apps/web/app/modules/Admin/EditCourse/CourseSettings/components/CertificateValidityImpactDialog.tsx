@@ -68,11 +68,11 @@ export function CertificateValidityImpactDialog({
                 </p>
               </div>
             </div>
-          ) : (
+          ) : !isEnablingValidity ? (
             <div className="rounded-md border border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-700">
               {t("adminCourseView.settings.other.noActiveCertificatesValidityDescription")}
             </div>
-          )}
+          ) : null}
 
           <DialogFooter className="gap-2 sm:flex-wrap sm:justify-end sm:space-x-0">
             <Button

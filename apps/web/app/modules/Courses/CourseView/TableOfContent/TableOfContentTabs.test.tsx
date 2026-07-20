@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
-import TableOfContentTabs from "./TableOfContentTabs";
+import TableOfContentTabs, { TABLE_OF_CONTENT_TABS } from "./TableOfContentTabs";
 
 describe("TableOfContentTabs", () => {
   it("shows the chat tab to learners and selects it", async () => {
@@ -13,7 +13,7 @@ describe("TableOfContentTabs", () => {
 
     renderWith().render(
       <TableOfContentTabs
-        activeTab="toc"
+        activeTab={TABLE_OF_CONTENT_TABS.TOC}
         canEditContent={false}
         canShowChat
         canShowStatistics={false}
@@ -27,6 +27,6 @@ describe("TableOfContentTabs", () => {
 
     await user.click(screen.getByRole("button", { name: "Discussion" }));
 
-    expect(onTabChange).toHaveBeenCalledWith("chat");
+    expect(onTabChange).toHaveBeenCalledWith(TABLE_OF_CONTENT_TABS.CHAT);
   });
 });
