@@ -17,9 +17,10 @@ export type NodeKind = "trigger" | "action";
 export interface StepConfigField {
   key: string;
   labelKey: string;
-  type: "text" | "number" | "select" | "textarea";
+  type: "text" | "number" | "select" | "multiselect" | "textarea";
   placeholderKey?: string;
-  options?: { value: string; labelKey: string }[];
+  options?: { value: string; labelKey: string; label?: string; imageUrl?: string }[];
+  dataSource?: "courses";
 }
 
 export interface AutomationStepDefinition {
@@ -48,7 +49,13 @@ const COURSE_DEADLINE_TRIGGER: AutomationStepDefinition = {
       type: "number",
       placeholderKey: "automationBuilder.config.daysBeforePlaceholder",
     },
-    { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
+    {
+      key: "courseId",
+      labelKey: "automationBuilder.config.course",
+      type: "select",
+      dataSource: "courses",
+      placeholderKey: "automationBuilder.config.coursePlaceholder",
+    },
   ],
 };
 
@@ -75,7 +82,13 @@ const NOT_COMPLETED_TRIGGER: AutomationStepDefinition = {
   icon: "circle-x",
   color: "blue",
   configFields: [
-    { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
+    {
+      key: "courseId",
+      labelKey: "automationBuilder.config.course",
+      type: "select",
+      dataSource: "courses",
+      placeholderKey: "automationBuilder.config.coursePlaceholder",
+    },
     {
       key: "daysEnrolled",
       labelKey: "automationBuilder.config.daysEnrolled",
@@ -92,7 +105,13 @@ const USER_ENROLLED_TRIGGER: AutomationStepDefinition = {
   icon: "user-plus",
   color: "blue",
   configFields: [
-    { key: "courseId", labelKey: "automationBuilder.config.course", type: "select", options: [] },
+    {
+      key: "courseId",
+      labelKey: "automationBuilder.config.course",
+      type: "select",
+      dataSource: "courses",
+      placeholderKey: "automationBuilder.config.coursePlaceholder",
+    },
   ],
 };
 

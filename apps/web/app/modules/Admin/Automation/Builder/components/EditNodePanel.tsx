@@ -13,7 +13,6 @@ import {
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
   Select,
@@ -23,68 +22,17 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
-import { Textarea } from "~/components/ui/textarea";
 import { cn } from "~/lib/utils";
 
 import { TRIGGER_DEFINITIONS, getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
+import { useCoursesOptions } from "../hooks/useCourses";
 
-import type {
-  AutomationStepDefinition,
-  StepConfigField,
-  TriggerType,
-} from "../automationBuilder.types";
+import { ConfigFieldRenderer } from "./CofigFieldRenderer";
+
+import type { AutomationStepDefinition, TriggerType } from "../automationBuilder.types";
 import type { FC } from "react";
-
-const ConfigFieldRenderer: FC<{
-  field: StepConfigField;
-  value: unknown;
-  onChange: (value: string) => void;
-}> = ({ field, value, onChange }) => {
-  const { t } = useTranslation();
-
-  switch (field.type) {
-    case "text":
-    case "number":
-      return (
-        <Input
-          type={field.type}
-          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      );
-    case "textarea":
-      return (
-        <Textarea
-          rows={4}
-          placeholder={field.placeholderKey ? t(field.placeholderKey) : undefined}
-          value={(value as string) ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      );
-    case "select":
-      return (
-        <Select
-          value={(value as string) ?? field.options?.[0]?.value ?? ""}
-          onValueChange={onChange}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options?.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                {t(opt.labelKey)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    default:
-      return null;
-  }
-};
+import type { Option } from "~/components/ui/multiselect";
 
 export const EditNodePanel: FC = () => {
   const { t } = useTranslation();
@@ -94,6 +42,9 @@ export const EditNodePanel: FC = () => {
   const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
   const updateNodeType = useBuilderStore((s) => s.updateNodeType);
   const removeNode = useBuilderStore((s) => s.removeNode);
+
+  const { options: courseOptions } = useCoursesOptions();
+  const dynamicOptions: Record<string, Option[]> = { courses: courseOptions };
 
   const [changeTriggerDialogOpen, setChangeTriggerDialogOpen] = useState(false);
   const [pendingTriggerDef, setPendingTriggerDef] = useState<AutomationStepDefinition | null>(null);
@@ -165,7 +116,6 @@ export const EditNodePanel: FC = () => {
                   </div>
                 </div>
 
-                {/* Change trigger select — only for trigger nodes */}
                 {selectedNode.kind === "trigger" && (
                   <div className="space-y-2">
                     <Label>{t("automationBuilder.editPanel.changeTriggerLabel")}</Label>
@@ -194,7 +144,6 @@ export const EditNodePanel: FC = () => {
 
                 <Separator />
 
-                {/* Polymorphic config fields rendered from step definition */}
                 {stepDefinition.configFields.map((field) => (
                   <div key={field.key} className="space-y-2">
                     <Label>{t(field.labelKey)}</Label>
@@ -204,6 +153,8 @@ export const EditNodePanel: FC = () => {
                       onChange={(value) =>
                         updateNodeConfig(selectedNode.id, { [field.key]: value })
                       }
+                      t={t}
+                      dynamicOptions={dynamicOptions}
                     />
                   </div>
                 ))}
@@ -226,7 +177,6 @@ export const EditNodePanel: FC = () => {
         )}
       </aside>
 
-      {/* Confirmation dialog for changing trigger type */}
       <AlertDialog open={changeTriggerDialogOpen} onOpenChange={setChangeTriggerDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
