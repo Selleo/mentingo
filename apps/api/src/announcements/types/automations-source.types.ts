@@ -16,7 +16,7 @@ export type AutomationRecordInput = {
 };
 
 export type AutomationStepRecordInput = {
-  parentId: UUIDType;
+  parentId: UUIDType | null;
   automationId: UUIDType;
   type: AutomationType;
   typeContext: JSON;

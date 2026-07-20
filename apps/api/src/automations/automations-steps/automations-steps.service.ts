@@ -19,7 +19,7 @@ export class AutomationStepsService {
 
   async createAutomationStep(input: AutomationStepRecordInput) {
     await this.validateStep(input);
-    await this.validateTree(input);
+    //await this.validateTree(input);
     return this.automationStepsRepository.createAutomationStep(input);
   }
 
@@ -133,6 +133,9 @@ export class AutomationStepsService {
 
     if (!hasNoSteps && input.parentId == null) {
       throw new BadRequestException("Automation already has a root step");
+    }
+    if (input.parentId) {
+      await this.getAutomationStepById(input.parentId!);
     }
   }
 
