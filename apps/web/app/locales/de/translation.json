@@ -4622,6 +4622,7 @@
       "daysBefore": "Tage vorher",
       "daysBeforePlaceholder": "z.B. 7",
       "course": "Kurs",
+      "coursePlaceholder": "Kurs auswählen",
       "daysOverdue": "Tage überfällig",
       "daysOverduePlaceholder": "z.B. 3",
       "daysEnrolled": "Tage seit Anmeldung",

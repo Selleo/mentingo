@@ -4621,6 +4621,7 @@
       "daysBefore": "Dní předem",
       "daysBeforePlaceholder": "např. 7",
       "course": "Kurz",
+      "coursePlaceholder": "Vyberte kurz",
       "daysOverdue": "Dní po termínu",
       "daysOverduePlaceholder": "např. 3",
       "daysEnrolled": "Dní od zápisu",

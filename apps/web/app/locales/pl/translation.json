@@ -4740,6 +4740,7 @@
       "daysBefore": "Dni przed",
       "daysBeforePlaceholder": "np. 7",
       "course": "Kurs",
+      "coursePlaceholder": "Wybierz kurs",
       "daysOverdue": "Dni zaległości",
       "daysOverduePlaceholder": "np. 3",
       "daysEnrolled": "Dni od zapisu",
