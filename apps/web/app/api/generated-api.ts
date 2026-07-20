@@ -6554,7 +6554,12 @@ export interface GetActivityLogsResponse {
       | "complete_chapter"
       | "expire_certificate"
       | "reset_certificate"
-      | "view_announcement";
+      | "view_announcement"
+      | "enroll_learning_path"
+      | "start_learning_path"
+      | "complete_learning_path"
+      | "play_scorm"
+      | "complete_scorm";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
@@ -14167,7 +14172,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "news"
           | "article"
           | "articleSection"
-          | "live_training";
+          | "live_training"
+          | "learning_path"
+          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -14193,6 +14200,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )
           | (
               | "create"
@@ -14216,6 +14228,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )[];
       },
       params: RequestParams = {},

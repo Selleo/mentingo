@@ -6,6 +6,7 @@ import {
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
+  LessonCompletedEvent,
   UserCourseFinishedEvent,
 } from "src/events";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -17,6 +18,7 @@ type EventType =
   | LearningPathCourseAddedEvent
   | LearningPathCourseRemovedEvent
   | LearningPathCourseSyncEvent
+  | LessonCompletedEvent
   | UserCourseFinishedEvent;
 
 const LearningPathCourseEvents = [
@@ -24,6 +26,7 @@ const LearningPathCourseEvents = [
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
+  LessonCompletedEvent,
   UserCourseFinishedEvent,
 ] as const;
 
@@ -52,6 +55,10 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
       return this.handleLearningPathCourseSync(event);
     }
 
+    if (event instanceof LessonCompletedEvent) {
+      return this.handleLessonCompleted(event);
+    }
+
     return this.handleUserCourseFinished(event);
   }
 
@@ -63,6 +70,7 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
         groupId,
         userId,
         actor.tenantId,
+        actor,
       );
     });
   }
@@ -88,6 +96,14 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
       await this.syncService.syncLearningPathEnrollments(learningPathId);
+    });
+  }
+
+  private async handleLessonCompleted(event: LessonCompletedEvent) {
+    const { courseId, userId, actor } = event.lessonCompletionData;
+
+    await this.tenantRunner.runWithTenant(actor.tenantId, async () => {
+      await this.syncService.syncStudentLearningPathsForStartedCourse(userId, courseId, actor);
     });
   }
 

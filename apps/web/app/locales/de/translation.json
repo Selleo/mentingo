@@ -3901,7 +3901,12 @@
       "complete_chapter": "Kapitel abgeschlossen",
       "expire_certificate": "Zertifikat abgelaufen",
       "reset_certificate": "Zertifikat zurückgesetzt",
-      "view_announcement": "Angezeigt"
+      "view_announcement": "Angezeigt",
+      "enroll_learning_path": "Lernpfad eingeschrieben",
+      "start_learning_path": "Lernpfad gestartet",
+      "complete_learning_path": "Lernpfad abgeschlossen",
+      "play_scorm": "SCORM gestartet",
+      "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
       "course": "Kurs",
@@ -3920,6 +3925,8 @@
       "qa": "Q&A",
       "announcement": "Ankündigung",
       "live_training": "Live-Schulung",
+      "learning_path": "Lernpfad",
+      "scorm": "SCORM",
       "global_settings": "Einstellungen"
     },
     "table": {

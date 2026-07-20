@@ -4596,7 +4596,12 @@
       "complete_chapter": "Chapter completed",
       "expire_certificate": "Certificate expired",
       "reset_certificate": "Certificate reset",
-      "view_announcement": "Viewed"
+      "view_announcement": "Viewed",
+      "enroll_learning_path": "Learning Path enrolled",
+      "start_learning_path": "Learning Path started",
+      "complete_learning_path": "Learning Path completed",
+      "play_scorm": "SCORM played",
+      "complete_scorm": "SCORM completed"
     },
     "entity": {
       "course": "Course",
@@ -4615,6 +4620,8 @@
       "qa": "Q&A",
       "announcement": "Announcement",
       "live_training": "Live Training",
+      "learning_path": "Learning Path",
+      "scorm": "SCORM",
       "global_settings": "Settings"
     },
     "table": {
