@@ -41,10 +41,7 @@ import { MasterCourseRepository } from "src/courses/master-course.repository";
 import { MASTER_COURSE_RESOURCE_REFERENCE_KIND } from "src/courses/types/master-course.types";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { IMAGE_VARIANT_CONTENT_TYPE } from "src/file/image-variants/image-variant.constants";
-import {
-  getAllImageVariantKeys,
-  isImageVariantReference,
-} from "src/file/image-variants/image-variant.utils";
+import { isImageVariantReference } from "src/file/image-variants/image-variant.utils";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 import { rewriteBlankAnswerIds } from "src/questions/fill-in-the-blanks.utils";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
@@ -244,7 +241,7 @@ export class MasterCourseService {
 
     const resourceCollection = this.buildSourceResourceCollection(sourceSnapshot);
     await this.copySourceResourceReferences(resourceCollection, {
-      exportId: params.targetCourseId,
+      targetCourseId: params.targetCourseId,
       sourceTenantId: params.tenantId,
       sourceTenantOrigin: this.toTenantOrigin(tenantHost),
       targetTenantId: params.tenantId,
@@ -328,6 +325,7 @@ export class MasterCourseService {
       resourceCollection,
     });
 
+    await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
     await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, params.tenantId);
     await this.syncScormPackages({
       exportId: params.targetCourseId,
@@ -540,9 +538,10 @@ export class MasterCourseService {
     if (!targetTenantHost) throw new NotFoundException("masterCourse.error.targetTenantMissing");
     if (!sourceTenantHost) throw new NotFoundException("masterCourse.error.sourceTenantMissing");
 
+    const targetCourseId = await this.resolveTargetCourseId(exportLink, sourceSnapshot.course.id);
     const resourceCollection = this.buildSourceResourceCollection(sourceSnapshot);
     await this.copySourceResourceReferences(resourceCollection, {
-      exportId: exportLink.id,
+      targetCourseId,
       sourceTenantId: exportLink.sourceTenantId,
       sourceTenantOrigin: this.toTenantOrigin(sourceTenantHost),
       targetTenantId: exportLink.targetTenantId,
@@ -565,14 +564,14 @@ export class MasterCourseService {
 
       const categoryId = await this.syncCategoryFromSource(sourceSnapshot);
 
-      const existingTargetCourse = await this.masterCourseRepository.findCourseByIdInTenant(
-        exportLink.targetCourseId,
-      );
+      const existingTargetCourse =
+        await this.masterCourseRepository.findCourseByIdInTenant(targetCourseId);
 
-      let targetCourseId = existingTargetCourse?.id;
+      let syncedTargetCourseId = existingTargetCourse?.id;
 
-      if (!targetCourseId) {
-        targetCourseId = await this.createTargetCourseFromSource({
+      if (!syncedTargetCourseId) {
+        syncedTargetCourseId = await this.createTargetCourseFromSource({
+          targetCourseId,
           exportLink,
           sourceSnapshot,
           sourceLanguage,
@@ -583,7 +582,7 @@ export class MasterCourseService {
         });
       } else {
         await this.updateTargetCourseFromSource({
-          targetCourseId,
+          targetCourseId: syncedTargetCourseId,
           sourceSnapshot,
           sourceLanguage,
           courseSettings,
@@ -594,11 +593,11 @@ export class MasterCourseService {
         });
       }
 
-      if (!targetCourseId) {
+      if (!syncedTargetCourseId) {
         throw new BadRequestException("masterCourse.error.targetCourseMissing");
       }
 
-      const resolvedTargetCourseId = targetCourseId;
+      const resolvedTargetCourseId = syncedTargetCourseId;
 
       const chapterMap = await this.syncChapters({
         exportId: exportLink.id,
@@ -637,6 +636,7 @@ export class MasterCourseService {
         lessonMap,
         resourceCollection,
       });
+      await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
       await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, exportLink.targetTenantId);
       await this.syncScormPackages({
         exportId: exportLink.id,
@@ -688,6 +688,7 @@ export class MasterCourseService {
     );
 
     const targetCourseId = await this.masterCourseRepository.createTargetCourse({
+      id: params.targetCourseId,
       title: toJsonbBuildObject(params.sourceSnapshot.course.title),
       description: toJsonbBuildObject(params.sourceSnapshot.course.description),
       thumbnailS3Key: this.getCopiedInternalReference(
@@ -800,7 +801,6 @@ export class MasterCourseService {
         "thumbnailS3Key",
         course.thumbnailS3Key,
       ),
-      status: "draft",
       hasCertificate: course.hasCertificate,
       priceInCents: 0,
       currency: course.currency,
@@ -1219,7 +1219,6 @@ export class MasterCourseService {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
           aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
-          completionConditions: sourceAiMentor.completionConditions,
           name: sourceAiMentor.name,
           avatarReference,
           type: sourceAiMentor.type,
@@ -1233,7 +1232,6 @@ export class MasterCourseService {
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
         aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
-        completionConditions: sourceAiMentor.completionConditions,
         name: sourceAiMentor.name,
         avatarReference,
         type: sourceAiMentor.type,
@@ -1245,6 +1243,104 @@ export class MasterCourseService {
     }
 
     return aiMentorMap;
+  }
+
+  private async syncAiJudgeConfigurations(
+    sourceSnapshot: SourceSnapshot,
+    aiMentorMap: Map<UUIDType, UUIDType>,
+  ) {
+    const criteriaByConfiguration = groupBy(
+      sourceSnapshot.aiJudgeCriteria,
+      ({ configurationId }) => configurationId,
+    );
+    const guidanceByCriterion = groupBy(
+      sourceSnapshot.aiJudgeScoreGuidance,
+      ({ criterionId }) => criterionId,
+    );
+    const blockingErrorsByConfiguration = groupBy(
+      sourceSnapshot.aiJudgeBlockingErrors,
+      ({ configurationId }) => configurationId,
+    );
+
+    for (const sourceConfiguration of sourceSnapshot.aiJudgeConfigurations) {
+      const targetAiMentorLessonId = aiMentorMap.get(sourceConfiguration.aiMentorLessonId);
+      if (!targetAiMentorLessonId) continue;
+
+      await this.db.transaction(async (transaction) => {
+        const existingConfiguration =
+          await this.masterCourseRepository.findAiJudgeConfigurationByAiMentorLessonId(
+            targetAiMentorLessonId,
+            transaction,
+          );
+
+        let targetConfigurationId: UUIDType;
+        if (existingConfiguration) {
+          targetConfigurationId = existingConfiguration.id;
+          await this.masterCourseRepository.updateAiJudgeConfiguration(
+            targetConfigurationId,
+            {
+              taskGoal: toJsonbBuildObject(sourceConfiguration.taskGoal),
+              passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
+            },
+            transaction,
+          );
+        } else {
+          targetConfigurationId = await this.masterCourseRepository.createAiJudgeConfiguration(
+            {
+              aiMentorLessonId: targetAiMentorLessonId,
+              taskGoal: toJsonbBuildObject(sourceConfiguration.taskGoal),
+              passingThresholdPercent: sourceConfiguration.passingThresholdPercent,
+            },
+            transaction,
+          );
+        }
+
+        await this.masterCourseRepository.deleteAiJudgeCriteria(targetConfigurationId, transaction);
+        await this.masterCourseRepository.deleteAiJudgeBlockingErrors(
+          targetConfigurationId,
+          transaction,
+        );
+
+        for (const sourceCriterion of criteriaByConfiguration[sourceConfiguration.id] ?? []) {
+          const targetCriterionId = await this.masterCourseRepository.createAiJudgeCriterion(
+            {
+              configurationId: targetConfigurationId,
+              maxScore: sourceCriterion.maxScore,
+              title: toJsonbBuildObject(sourceCriterion.title),
+              expectedBehavior: toJsonbBuildObject(sourceCriterion.expectedBehavior),
+              createdAt: sourceCriterion.createdAt,
+              updatedAt: sourceCriterion.updatedAt,
+            },
+            transaction,
+          );
+
+          for (const sourceGuidance of guidanceByCriterion[sourceCriterion.id] ?? [])
+            await this.masterCourseRepository.createAiJudgeScoreGuidance(
+              {
+                criterionId: targetCriterionId,
+                score: sourceGuidance.score,
+                description: toJsonbBuildObject(sourceGuidance.description),
+                example: toNullableJsonbBuildObject(sourceGuidance.example),
+                createdAt: sourceGuidance.createdAt,
+                updatedAt: sourceGuidance.updatedAt,
+              },
+              transaction,
+            );
+        }
+
+        for (const sourceBlockingError of blockingErrorsByConfiguration[sourceConfiguration.id] ??
+          [])
+          await this.masterCourseRepository.createAiJudgeBlockingError(
+            {
+              configurationId: targetConfigurationId,
+              description: toJsonbBuildObject(sourceBlockingError.description),
+              createdAt: sourceBlockingError.createdAt,
+              updatedAt: sourceBlockingError.updatedAt,
+            },
+            transaction,
+          );
+      });
+    }
   }
 
   private async syncAiMentorContexts(
@@ -1934,7 +2030,7 @@ export class MasterCourseService {
 
     for (const resourceReference of this.getAllResourceReferences(collection)) {
       const targetReference = await this.resolveTargetResourceReference(resourceReference.source, {
-        exportId: params.exportId,
+        targetCourseId: params.targetCourseId,
         sourceTenantId: params.sourceTenantId,
         sourceTenantOrigin: params.sourceTenantOrigin,
         targetTenantId: params.targetTenantId,
@@ -1963,7 +2059,7 @@ export class MasterCourseService {
     if (!this.isCopyableS3Reference(source.reference)) return source.reference;
 
     const targetReference = this.buildCopiedResourceReference(source.reference, {
-      exportId: params.exportId,
+      targetCourseId: params.targetCourseId,
       targetTenantId: params.targetTenantId,
     });
 
@@ -1993,16 +2089,28 @@ export class MasterCourseService {
   }
 
   private async copyImageVariantReference(sourceReference: string, targetReference: string) {
-    const sourceKeys = getAllImageVariantKeys(sourceReference);
-    const targetKeys = getAllImageVariantKeys(targetReference);
-    const targetHighKey = targetKeys[targetKeys.length - 1];
+    const sourceExtension = path.extname(sourceReference);
+    const sourceStem = sourceExtension
+      ? sourceReference.slice(0, -sourceExtension.length)
+      : sourceReference;
 
-    if (targetHighKey && (await this.s3Service.getFileExists(targetHighKey))) return;
+    const targetExtension = path.extname(targetReference);
+    const targetStem = targetExtension
+      ? targetReference.slice(0, -targetExtension.length)
+      : targetReference;
+
+    const sourcePrefix = `${sourceStem}-`;
+    const sourceKeys = await this.s3Service.listFileKeysByPrefix(sourcePrefix);
 
     await Promise.all(
-      sourceKeys.map(async (sourceKey, index) => {
-        const targetKey = targetKeys[index];
-        if (!targetKey || !(await this.s3Service.getFileExists(sourceKey))) return;
+      sourceKeys.map(async (sourceKey) => {
+        if (!sourceKey.startsWith(sourcePrefix)) return;
+
+        const variantSuffix = sourceKey.slice(sourceStem.length);
+        if (!variantSuffix) return;
+
+        const targetKey = `${targetStem}${variantSuffix}`;
+        if (await this.s3Service.getFileExists(targetKey)) return;
 
         await this.s3Service.copyFile(sourceKey, targetKey, IMAGE_VARIANT_CONTENT_TYPE);
       }),
@@ -2053,7 +2161,7 @@ export class MasterCourseService {
 
     if (this.isCopyableS3Reference(source.reference)) {
       const targetReference = this.buildCopiedResourceReference(source.reference, {
-        exportId: params.exportId,
+        targetCourseId: params.targetCourseId,
         targetTenantId: params.targetTenantId,
       });
 
@@ -2077,7 +2185,7 @@ export class MasterCourseService {
       params.sourceTenantOrigin,
     );
     const targetReference = this.buildCopiedResourceReference(source.reference, {
-      exportId: params.exportId,
+      targetCourseId: params.targetCourseId,
       targetTenantId: params.targetTenantId,
       fallbackExtension: ".mp4",
     });
@@ -2168,11 +2276,31 @@ export class MasterCourseService {
     const extension =
       path.extname(sourceReference.split("?")[0] ?? "") || params.fallbackExtension || "";
     const sourceHash = createHash("sha256").update(sourceReference).digest("hex").slice(0, 32);
+    const targetDirectory = isImageVariantReference(sourceReference)
+      ? `master-course/${params.targetCourseId}/variants`
+      : `master-course/${params.targetCourseId}`;
 
     return prefixTenantStorageKey(
-      `master-course/${params.exportId}/${sourceHash}${extension}`,
+      `${targetDirectory}/${sourceHash}${extension}`,
       params.targetTenantId,
     );
+  }
+
+  private async resolveTargetCourseId(
+    exportLink: MasterCourseExportRecord,
+    sourceCourseId: UUIDType,
+  ): Promise<UUIDType> {
+    if (exportLink.targetCourseId) return exportLink.targetCourseId;
+
+    const mappedTargetCourseId = await this.masterCourseRepository.getMappedTargetEntityId(
+      exportLink.id,
+      MASTER_COURSE_ENTITY_TYPES.COURSE,
+      sourceCourseId,
+    );
+
+    if (mappedTargetCourseId) return mappedTargetCourseId;
+
+    return uuidv5(exportLink.id, exportLink.targetTenantId) as UUIDType;
   }
 
   private getAllResourceReferences(collection: MasterCourseResourceCollection) {

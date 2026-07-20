@@ -510,6 +510,51 @@ describe("IntegrationController (e2e)", () => {
       expect(tenant.status).toBe(TENANT_STATUSES.INACTIVE);
     });
 
+    it("allows managing tenant integration key to update tenant", async () => {
+      const { apiKey } = await createApiKey({ isManaging: true });
+
+      const [{ id: tenantId }] = await dbAdmin
+        .insert(tenants)
+        .values({
+          name: "Integration Tenant Before Update",
+          host: uniqueTenantHost("integration-tenant-before-update"),
+          status: TENANT_STATUSES.ACTIVE,
+        })
+        .returning({ id: tenants.id });
+
+      const updatedHost = uniqueTenantHost("integration-tenant-after-update");
+      const response = await request(app.getHttpServer())
+        .patch(`/api/integration/tenants/${tenantId}`)
+        .set("X-API-Key", apiKey)
+        .send({
+          name: "Integration Tenant After Update",
+          host: `${updatedHost}/ignored-path`,
+          status: TENANT_STATUSES.INACTIVE,
+        })
+        .expect(200);
+
+      expect(response.body.data).toEqual(
+        expect.objectContaining({
+          id: tenantId,
+          name: "Integration Tenant After Update",
+          host: updatedHost,
+          status: TENANT_STATUSES.INACTIVE,
+        }),
+      );
+
+      const [tenant] = await dbAdmin
+        .select({ name: tenants.name, host: tenants.host, status: tenants.status })
+        .from(tenants)
+        .where(eq(tenants.id, tenantId))
+        .limit(1);
+
+      expect(tenant).toEqual({
+        name: "Integration Tenant After Update",
+        host: updatedHost,
+        status: TENANT_STATUSES.INACTIVE,
+      });
+    });
+
     it("rejects tenant creation for non-managing tenant integration key", async () => {
       const { apiKey } = await createApiKey({ isManaging: false });
 
@@ -524,7 +569,19 @@ describe("IntegrationController (e2e)", () => {
           adminLastName: "Admin",
           adminLanguage: SUPPORTED_LANGUAGES.EN,
         })
-        .expect(403);
+        .expect(404);
+
+      expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
+    });
+
+    it("rejects tenant updates for non-managing tenant integration key", async () => {
+      const { admin, apiKey } = await createApiKey({ isManaging: false });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/integration/tenants/${admin.tenantId}`)
+        .set("X-API-Key", apiKey)
+        .send({ name: "Rejected Integration Tenant Update" })
+        .expect(404);
 
       expect(response.body.message).toBe("superAdminTenants.error.managingTenantRequired");
     });

@@ -140,7 +140,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({
     id: courseId,
     enabled: canManageCourses,
-    query: courseStatisticsParams,
+    query: { ...courseStatisticsParams, language },
   });
   const { data: aiConfigured } = useAIConfigured();
 

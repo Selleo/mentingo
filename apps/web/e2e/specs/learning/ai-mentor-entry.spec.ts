@@ -38,6 +38,18 @@ test("student can access AI mentor interaction entry points", async ({
       await expect(page.getByTestId(LEARNING_HANDLES.LESSON_TITLE)).toHaveText(
         aiMentorLesson.title,
       );
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeHidden();
+      await page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION).click();
+      await expect(
+        page.getByTestId(LEARNING_HANDLES.AI_MENTOR_TASK_DESCRIPTION_DIALOG),
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
 
       await assertAiMentorEntryFlow(page);
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_CHECK_BUTTON)).toBeVisible();

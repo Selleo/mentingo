@@ -1139,8 +1139,43 @@
     {
       "idx": 162,
       "version": "7",
-      "when": 1784015069137,
-      "tag": "0162_add_course_overview_fields",
+      "when": 1784109199035,
+      "tag": "0162_add_ai_judge_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 163,
+      "version": "7",
+      "when": 1784109252645,
+      "tag": "0163_backfill_ai_judge_task_goals",
+      "breakpoints": true
+    },
+    {
+      "idx": 164,
+      "version": "7",
+      "when": 1784109254568,
+      "tag": "0164_enable_ai_judge_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1784110370014,
+      "tag": "0165_drop_ai_mentor_completion_conditions",
+      "breakpoints": true
+    },
+    {
+      "idx": 166,
+      "version": "7",
+      "when": 1784276853950,
+      "tag": "0166_add_course_statistics_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1784539714232,
+      "tag": "0167_add_course_overview_fields",
       "breakpoints": true
     }
   ]

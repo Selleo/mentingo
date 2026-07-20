@@ -1,21 +1,28 @@
-import { LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES, LIVE_TRAINING_STATUSES } from "@repo/shared";
-import { Download, Folder, Loader2, Plus, Trash2 } from "lucide-react";
-import { useRef } from "react";
+import {
+  ALLOWED_EXCEL_FILE_TYPES,
+  ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ALLOWED_PDF_FILE_TYPES,
+  ALLOWED_PRESENTATION_FILE_TYPES,
+  ALLOWED_VIDEO_FILE_TYPES,
+  ALLOWED_WORD_FILE_TYPES,
+  LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES,
+  LIVE_TRAINING_STATUSES,
+} from "@repo/shared";
+import { Download, Folder, Loader2, Lock, Plus, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { P, match } from "ts-pattern";
 
 import { useDeleteLiveTrainingResource } from "~/api/mutations/live-training/useDeleteLiveTrainingResource";
 import { useOpenLiveTrainingResource } from "~/api/mutations/live-training/useOpenLiveTrainingResource";
 import { useUploadLiveTrainingResource } from "~/api/mutations/live-training/useUploadLiveTrainingResource";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
-import { LIVE_TRAINING_FILE_TABS } from "~/modules/LiveTraining/liveTraining.types";
 import { getReadableFileTypeLabel } from "~/utils/fileDisplay";
 
 import { LIVE_TRAINING_HANDLES } from "../../../../e2e/data/live-training/handles";
 
-import type { LiveTrainingResourceRelationshipType } from "@repo/shared";
 import type {
   LiveTrainingDetails,
   LiveTrainingUiActions,
@@ -24,6 +31,7 @@ import type {
 type LiveTrainingMaterialsProps = {
   liveTraining: LiveTrainingDetails;
   actions: LiveTrainingUiActions;
+  className?: string;
 };
 
 type LiveTrainingMaterial = LiveTrainingDetails["materials"]["before"][number];
@@ -40,19 +48,26 @@ type MaterialCardProps = {
 type MaterialsSectionProps = {
   title: string;
   materials: LiveTrainingMaterial[];
-  relationshipType: LiveTrainingResourceRelationshipType;
   fileInputTestId: string;
   materialCardTestId: (resourceId: string) => string;
   canEditMaterials: boolean;
   isUploading: boolean;
   isRemoving: boolean;
-  onUpload: (
-    files: FileList | null,
-    relationshipType: LiveTrainingResourceRelationshipType,
-  ) => void;
+  onUpload: (files: FileList | null) => void;
   onOpen: (material: LiveTrainingMaterial) => void;
   onRemove: (resourceId: string) => void;
+  isLocked?: boolean;
+  lockedMessageTestId?: string;
 };
+
+const ACCEPTED_FILE_TYPES = [
+  ...ALLOWED_PDF_FILE_TYPES,
+  ...ALLOWED_EXCEL_FILE_TYPES,
+  ...ALLOWED_WORD_FILE_TYPES,
+  ...ALLOWED_VIDEO_FILE_TYPES,
+  ...ALLOWED_LESSON_IMAGE_FILE_TYPES,
+  ...ALLOWED_PRESENTATION_FILE_TYPES,
+].join(",");
 
 function MaterialCard({
   material,
@@ -110,7 +125,7 @@ function MaterialCard({
           type="button"
           variant="ghost"
           size="xs"
-          className="absolute right-2 top-2 size-7 bg-white/90 opacity-100 shadow-sm sm:opacity-0 sm:group-hover/material:opacity-100"
+          className="absolute right-2 top-2 size-7 bg-white/90 opacity-100 shadow-sm sm:opacity-0 sm:focus:opacity-100 sm:group-hover/material:opacity-100"
           disabled={isRemoving}
           aria-label={t("liveTrainingView.files.removeFile", { title: material.title })}
           onClick={onRemove}
@@ -137,38 +152,30 @@ function AddMaterialTile({
   inputTestId: string;
   onFilesSelected: (files: FileList | null) => void;
 }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
   return (
-    <>
+    <label className="relative flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-within:border-primary-500 focus-within:bg-primary-50 focus-within:text-primary-700 focus-within:outline-none">
       <input
-        ref={inputRef}
         data-testid={inputTestId}
         type="file"
+        accept={ACCEPTED_FILE_TYPES}
+        disabled={isUploading}
         multiple
-        className="sr-only"
+        className="absolute size-full opacity-0 cursor-pointer"
+        tabIndex={0}
         onChange={(event) => {
           onFilesSelected(event.target.files);
           event.target.value = "";
         }}
       />
-      <button
-        type="button"
-        className="flex min-h-28 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-neutral-300 bg-white p-3 text-sm text-neutral-500 transition hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus-visible:border-primary-500 focus-visible:bg-primary-50 focus-visible:text-primary-700 focus-visible:outline-none"
-        disabled={isUploading}
-        onClick={() => inputRef.current?.click()}
-      >
-        {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
-        <span>{title}</span>
-      </button>
-    </>
+      {isUploading ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
+      <span>{title}</span>
+    </label>
   );
 }
 
 function MaterialsSection({
   title,
   materials,
-  relationshipType,
   fileInputTestId,
   materialCardTestId,
   canEditMaterials,
@@ -177,10 +184,12 @@ function MaterialsSection({
   onUpload,
   onOpen,
   onRemove,
+  isLocked,
+  lockedMessageTestId,
 }: MaterialsSectionProps) {
   const { t } = useTranslation();
-
-  if (!canEditMaterials && materials.length === 0) return null;
+  const isSectionLocked = !canEditMaterials && isLocked;
+  const isEmpty = !canEditMaterials && materials.length === 0;
 
   return (
     <section className="rounded-md border border-neutral-200 bg-white p-4 shadow-sm">
@@ -192,52 +201,90 @@ function MaterialsSection({
       </div>
 
       <div className="max-h-[22rem] overflow-y-auto pr-1">
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
-          {materials.map((material) => (
-            <MaterialCard
-              key={material.resourceId}
-              material={material}
-              testId={materialCardTestId(material.resourceId)}
-              isRemoving={isRemoving}
-              canEditMaterials={canEditMaterials}
-              onOpen={() => onOpen(material)}
-              onRemove={() => onRemove(material.resourceId)}
-            />
+        {match([isSectionLocked, isEmpty] as const)
+          .with([true, P._], () => (
+            <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+                <Lock className="size-5" />
+              </span>
+              <p data-testid={lockedMessageTestId} className="text-sm text-neutral-950">
+                {t("liveTrainingView.files.afterLocked")}
+              </p>
+            </div>
+          ))
+          .with([false, true], () => (
+            <div className="relative flex justify-center items-center gap-3 min-h-28 min-w-0 flex-col rounded-md border border-neutral-200 bg-white p-3 shadow-sm">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded bg-neutral-100 text-neutral-600">
+                <Folder className="size-5" />
+              </span>
+              <p className="text-sm text-neutral-950">{t("liveTrainingView.files.empty")}</p>
+            </div>
+          ))
+          .otherwise(() => (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(12rem,1fr))] gap-3">
+              {materials.map((material) => (
+                <MaterialCard
+                  key={material.resourceId}
+                  material={material}
+                  testId={materialCardTestId(material.resourceId)}
+                  isRemoving={isRemoving}
+                  canEditMaterials={canEditMaterials}
+                  onOpen={() => onOpen(material)}
+                  onRemove={() => onRemove(material.resourceId)}
+                />
+              ))}
+              {canEditMaterials && (
+                <AddMaterialTile
+                  title={t("liveTrainingView.files.addFile")}
+                  isUploading={isUploading}
+                  inputTestId={fileInputTestId}
+                  onFilesSelected={(files) => onUpload(files)}
+                />
+              )}
+            </div>
           ))}
-          {canEditMaterials && (
-            <AddMaterialTile
-              title={t("liveTrainingView.files.addFile")}
-              isUploading={isUploading}
-              inputTestId={fileInputTestId}
-              onFilesSelected={(files) => onUpload(files, relationshipType)}
-            />
-          )}
-        </div>
       </div>
     </section>
   );
 }
 
-export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMaterialsProps) {
+export function LiveTrainingMaterials({
+  liveTraining,
+  actions,
+  className,
+}: LiveTrainingMaterialsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
-  const { mutateAsync: uploadResource, isPending: isUploading } = useUploadLiveTrainingResource();
+  const { mutateAsync: uploadBeforeResource, isPending: isUploadingBefore } =
+    useUploadLiveTrainingResource();
+  const { mutateAsync: uploadAfterResource, isPending: isUploadingAfter } =
+    useUploadLiveTrainingResource();
   const { mutate: openResource } = useOpenLiveTrainingResource();
   const { mutate: deleteResource, isPending: isRemoving } = useDeleteLiveTrainingResource();
   const isAfterTabLocked =
     !actions.canViewAllMaterials && liveTraining.status !== LIVE_TRAINING_STATUSES.ENDED;
 
-  const handleUpload = async (
-    files: FileList | null,
-    relationshipType: LiveTrainingResourceRelationshipType,
-  ) => {
+  const handleBeforeUpload = async (files: FileList | null) => {
     if (!files?.length) return;
 
     for (const file of Array.from(files)) {
-      await uploadResource({
+      await uploadBeforeResource({
         liveTrainingId: liveTraining.id,
         file,
-        relationshipType,
+        relationshipType: LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE,
+        language,
+      });
+    }
+  };
+
+  const handleAfterUpload = async (files: FileList | null) => {
+    if (!files?.length) return;
+
+    for (const file of Array.from(files)) {
+      await uploadAfterResource({
+        liveTrainingId: liveTraining.id,
+        file,
+        relationshipType: LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER,
         language,
       });
     }
@@ -257,60 +304,33 @@ export function LiveTrainingMaterials({ liveTraining, actions }: LiveTrainingMat
   };
 
   return (
-    <Tabs defaultValue={LIVE_TRAINING_FILE_TABS.BEFORE} className="grid gap-4">
-      <TabsList className="h-auto w-fit bg-neutral-100 p-1">
-        <TabsTrigger
-          value={LIVE_TRAINING_FILE_TABS.BEFORE}
-          data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_TAB}
-        >
-          {t("liveTrainingView.files.beforeHeading")}
-        </TabsTrigger>
-        <TabsTrigger
-          value={LIVE_TRAINING_FILE_TABS.AFTER}
-          disabled={isAfterTabLocked}
-          data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_TAB}
-        >
-          {t("liveTrainingView.files.afterHeading")}
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent
-        value={LIVE_TRAINING_FILE_TABS.BEFORE}
-        data-testid={LIVE_TRAINING_HANDLES.BEFORE_FILES_PANEL}
-      >
-        <MaterialsSection
-          title={t("liveTrainingView.files.beforeHeading")}
-          materials={liveTraining.materials.before}
-          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.BEFORE}
-          fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
-          materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
-          canEditMaterials={actions.canEditMaterials}
-          isUploading={isUploading}
-          isRemoving={isRemoving}
-          onUpload={handleUpload}
-          onOpen={handleOpen}
-          onRemove={handleRemove}
-        />
-      </TabsContent>
-
-      <TabsContent
-        value={LIVE_TRAINING_FILE_TABS.AFTER}
-        data-testid={LIVE_TRAINING_HANDLES.AFTER_FILES_PANEL}
-      >
-        <MaterialsSection
-          title={t("liveTrainingView.files.afterHeading")}
-          materials={liveTraining.materials.after}
-          relationshipType={LIVE_TRAINING_RESOURCE_RELATIONSHIP_TYPES.AFTER}
-          fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
-          materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
-          canEditMaterials={actions.canEditMaterials}
-          isUploading={isUploading}
-          isRemoving={isRemoving}
-          onUpload={handleUpload}
-          onOpen={handleOpen}
-          onRemove={handleRemove}
-        />
-      </TabsContent>
-    </Tabs>
+    <div className={cn("grid items-start gap-4", className)}>
+      <MaterialsSection
+        title={t("liveTrainingView.files.beforeHeading")}
+        materials={liveTraining.materials.before}
+        fileInputTestId={LIVE_TRAINING_HANDLES.BEFORE_FILE_INPUT}
+        materialCardTestId={LIVE_TRAINING_HANDLES.beforeFileCard}
+        canEditMaterials={actions.canEditMaterials}
+        isUploading={isUploadingBefore}
+        isRemoving={isRemoving}
+        onUpload={handleBeforeUpload}
+        onOpen={handleOpen}
+        onRemove={handleRemove}
+      />
+      <MaterialsSection
+        title={t("liveTrainingView.files.afterHeading")}
+        materials={liveTraining.materials.after}
+        fileInputTestId={LIVE_TRAINING_HANDLES.AFTER_FILE_INPUT}
+        materialCardTestId={LIVE_TRAINING_HANDLES.afterFileCard}
+        canEditMaterials={actions.canEditMaterials}
+        isUploading={isUploadingAfter}
+        isRemoving={isRemoving}
+        onUpload={handleAfterUpload}
+        onOpen={handleOpen}
+        onRemove={handleRemove}
+        isLocked={isAfterTabLocked}
+        lockedMessageTestId={LIVE_TRAINING_HANDLES.AFTER_FILES_LOCKED_MESSAGE}
+      />
+    </div>
   );
 }

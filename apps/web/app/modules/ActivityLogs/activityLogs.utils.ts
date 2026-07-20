@@ -166,6 +166,36 @@ export const activityLogActionConfig: Record<ActivityLogActionType, ActivityLogA
     iconClassName: "text-fuchsia-700",
     ringClassName: "border-fuchsia-600",
   },
+  enroll_learning_path: {
+    icon: ArrowRightToLine,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
+  },
+  start_learning_path: {
+    icon: Play,
+    badgeClassName: "border-sky-200 bg-sky-50 text-sky-700",
+    iconClassName: "text-sky-700",
+    ringClassName: "border-sky-600",
+  },
+  complete_learning_path: {
+    icon: CheckCircle2,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
+  },
+  play_scorm: {
+    icon: Play,
+    badgeClassName: "border-sky-200 bg-sky-50 text-sky-700",
+    iconClassName: "text-sky-700",
+    ringClassName: "border-sky-600",
+  },
+  complete_scorm: {
+    icon: CheckCircle2,
+    badgeClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    iconClassName: "text-emerald-700",
+    ringClassName: "border-emerald-600",
+  },
 };
 
 export const getActivityLogActionConfig = (actionType: ActivityLogActionType) =>

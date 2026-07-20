@@ -21,7 +21,6 @@ type AiMentor = {
   id: string;
   lessonId: string;
   aiMentorInstructions: string;
-  completionConditions: string;
   type: AiMentorType;
   name: string;
   voiceMode: AiMentorVoiceMode;

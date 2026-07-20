@@ -190,12 +190,8 @@ export class AdminChapterRepository {
           SELECT json_build_object(
             'id', ${aiMentorLessons.id},
             'lessonId', ${aiMentorLessons.lessonId},
-            'aiMentorInstructions', ${this.localizationService.getLocalizedSqlField(
+            'aiMentorInstructions', ${this.localizationService.getFieldByLanguage(
               aiMentorLessons.aiMentorInstructions,
-              language,
-            )},
-            'completionConditions', ${this.localizationService.getLocalizedSqlField(
-              aiMentorLessons.completionConditions,
               language,
             )},
             'type', ${aiMentorLessons.type},

@@ -22,6 +22,7 @@ import {
   ALLOWED_PRESENTATION_FILE_TYPES,
   ALLOWED_VIDEO_FILE_TYPES,
   ALLOWED_WORD_FILE_TYPES,
+  FEATURES,
   PERMISSIONS,
   SupportedLanguages,
 } from "@repo/shared";
@@ -37,6 +38,7 @@ import {
 } from "src/articles/schemas/previewArticle.schema";
 import { BaseResponse, UUIDSchema, UUIDType, baseResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
+import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
@@ -88,6 +90,7 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async createArticleSection(
     @Body() createArticleSectionBody: CreateArticleSection,
     @CurrentUser() currentUser: CurrentUserType,
@@ -109,6 +112,7 @@ export class ArticlesController {
     response: baseResponse(getArticleSectionDetailsResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async getArticleSection(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -128,6 +132,7 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async updateArticleSection(
     @Param("id") id: UUIDType,
     @Body() updateArticleSectionBody: UpdateArticleSection,
@@ -152,6 +157,7 @@ export class ArticlesController {
     response: baseResponse(createArticleSectionResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async addNewLanguageToSection(
     @Param("id") id: UUIDType,
     @Body() createLanguageBody: CreateArticleSection,
@@ -174,6 +180,7 @@ export class ArticlesController {
     ],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async deleteArticleSectionLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -187,6 +194,7 @@ export class ArticlesController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async deleteArticleSection(
     @Param("id") id: UUIDType,
     @CurrentUser() currentUser: CurrentUserType,
@@ -215,6 +223,7 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleSectionResponseSchema),
   })
+  @RequireFeature({ features: [FEATURES.ARTICLES], allowUnregisteredUser: true })
   async getArticleToc(
     @Query("language") language: SupportedLanguages,
     @Query("isDraftMode") isDraftMode?: boolean,
@@ -233,6 +242,7 @@ export class ArticlesController {
       { type: "query", name: "preview", schema: filePreviewQuerySchema },
     ],
   })
+  @RequireFeature({ features: [FEATURES.ARTICLES], allowUnregisteredUser: true })
   async getArticleResource(
     @Param("resourceId") resourceId: UUIDType,
     @Query("preview") preview: FilePreviewQuery,
@@ -253,6 +263,7 @@ export class ArticlesController {
     ],
     response: baseResponse(getArticleResponseSchema),
   })
+  @RequireFeature({ features: [FEATURES.ARTICLES], allowUnregisteredUser: true })
   async getArticle(
     @Param("id") id: string,
     @Query("language") language: SupportedLanguages,
@@ -270,6 +281,7 @@ export class ArticlesController {
     request: [{ type: "query", name: "language", schema: supportedLanguagesSchema }],
     response: getArticlesResponseSchema,
   })
+  @RequireFeature({ features: [FEATURES.ARTICLES], allowUnregisteredUser: true })
   async getArticles(
     @Query("language") language: SupportedLanguages,
     @CurrentUser() currentUser?: CurrentUserType,
@@ -283,6 +295,7 @@ export class ArticlesController {
     response: baseResponse(createArticleResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async createArticle(
     @Body() createArticleBody: CreateArticle,
     @CurrentUser() currentUser: CurrentUserType,
@@ -303,6 +316,7 @@ export class ArticlesController {
     response: baseResponse(createArticleResponseSchema),
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async updateArticle(
     @Param("id") id: string,
     @Body(new ValidateMultipartPipe(updateArticleSchema)) updateArticleBody: UpdateArticle,
@@ -357,6 +371,7 @@ export class ArticlesController {
     ],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async deleteArticleLanguage(
     @Param("id") id: UUIDType,
     @Query("language") language: SupportedLanguages,
@@ -370,6 +385,7 @@ export class ArticlesController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
   @RequirePermission(PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN)
+  @RequireFeature({ features: [FEATURES.ARTICLES] })
   async deleteArticle(@Param("id") id: string, @CurrentUser() currentUser?: CurrentUserType) {
     await this.articlesService.deleteArticle(id, currentUser);
   }
