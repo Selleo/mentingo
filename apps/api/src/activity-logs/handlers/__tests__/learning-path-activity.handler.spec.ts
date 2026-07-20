@@ -145,7 +145,6 @@ describe("LearningPathActivityHandler", () => {
       resourceId: learningPathId,
       context: {
         enrolledUserIds: JSON.stringify(userIds),
-        requestedCount: "2",
         enrolledCount: "2",
       },
     });
