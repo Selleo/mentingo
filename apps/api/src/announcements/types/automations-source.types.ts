@@ -14,3 +14,8 @@ export type AutomationStepRecordInput = {
   type: AutomationType;
   typeContext: JSON;
 };
+
+export type AutomationStepUpdateInput = {
+  type: AutomationType;
+  typeContext: JSON;
+};

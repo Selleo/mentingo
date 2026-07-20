@@ -10,16 +10,7 @@ export class AutomationStepsService {
   constructor(private readonly automationStepsRepository: AutomationStepsRepository) {}
 
   async createAutomationStep(input: AutomationStepRecordInput) {
-    const hasNoSteps = await this.hasNoSteps(input.automationId);
-
-    if (hasNoSteps && input.parentId != null) {
-      throw new BadRequestException("Empty automation has to have root step first");
-    }
-
-    if (!hasNoSteps && input.parentId == null) {
-      throw new BadRequestException("Automation already has a root step");
-    }
-
+    await this.validateStep(input);
     return this.automationStepsRepository.createAutomationStep(input);
   }
 
@@ -38,6 +29,15 @@ export class AutomationStepsService {
   }
 
   async updateAutomationStep(stepId: UUIDType, input: AutomationStepRecordInput) {
+    const stepToUpdate = await this.getAutomationStepById(stepId);
+    const isIdMismatch =
+      stepToUpdate.parentId != input.parentId || stepToUpdate.automationId != input.automationId;
+    if (isIdMismatch) {
+      throw new BadRequestException("You can't change step's parent or automation");
+    }
+
+    await this.validateStep(input);
+
     const updatedId = await this.automationStepsRepository.updateAutomationStep(stepId, input);
 
     if (!updatedId) {
@@ -62,5 +62,17 @@ export class AutomationStepsService {
 
     if (allSteps.length == 0) return true;
     return false;
+  }
+
+  private async validateStep(input: AutomationStepRecordInput) {
+    const hasNoSteps = await this.hasNoSteps(input.automationId);
+
+    if (hasNoSteps && input.parentId != null) {
+      throw new BadRequestException("Empty automation has to have root step first");
+    }
+
+    if (!hasNoSteps && input.parentId == null) {
+      throw new BadRequestException("Automation already has a root step");
+    }
   }
 }
