@@ -112,7 +112,11 @@ describe("ScormActivityHandler", () => {
       tenantId: actor.tenantId,
       operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.SCORM,
-      resourceId: scormId,
+      resourceId: null,
+      context: {
+        deletedScormIds: JSON.stringify([scormId]),
+        deletedCount: "1",
+      },
     });
   });
 
