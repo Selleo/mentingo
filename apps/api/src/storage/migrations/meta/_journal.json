@@ -1156,6 +1156,13 @@
       "when": 1784019767045,
       "tag": "0164_remove_is_everyone_field_in_announcements",
       "breakpoints": true
+    },
+    {
+      "idx": 165,
+      "version": "7",
+      "when": 1784623980710,
+      "tag": "0165_repair_announcement_delivery",
+      "breakpoints": true
     }
   ]
 }

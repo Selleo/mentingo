@@ -1,13 +1,15 @@
 import type { SupportedLanguages } from "@repo/shared";
 
-export function getLocalizedUserMentionContentAnnouncement(courseName: string) {
+export function getLocalizedUserMentionContentAnnouncement(
+  courseNames: Record<SupportedLanguages, string>,
+) {
   const content: Record<SupportedLanguages, string> = {
-    en: `In the course "${courseName}"`,
-    pl: `W kursie "${courseName}"`,
-    de: `Im Kurs "${courseName}"`,
-    lt: `Kurse "${courseName}"`,
-    cs: `V kurzu "${courseName}"`,
-    es: `En el curso "${courseName}"`,
+    en: `In the course "${courseNames.en}"`,
+    pl: `W kursie "${courseNames.pl}"`,
+    de: `Im Kurs "${courseNames.de}"`,
+    lt: `Kurse "${courseNames.lt}"`,
+    cs: `V kurzu "${courseNames.cs}"`,
+    es: `En el curso "${courseNames.es}"`,
   };
   return content;
 }

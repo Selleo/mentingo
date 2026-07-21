@@ -5,6 +5,14 @@ export const ANNOUNCEMENT_STATUSES = {
 
 export type AnnouncementStatus = (typeof ANNOUNCEMENT_STATUSES)[keyof typeof ANNOUNCEMENT_STATUSES];
 
+export const ANNOUNCEMENT_FEEDS = {
+  ALL: "all",
+  ADMIN_ANNOUNCEMENTS: "admin_announcements",
+  SYSTEM: "system",
+} as const;
+
+export type AnnouncementFeed = (typeof ANNOUNCEMENT_FEEDS)[keyof typeof ANNOUNCEMENT_FEEDS];
+
 export const ANNOUNCEMENT_SOURCE_TYPES = {
   MANUAL: "manual",
   LIVE_TRAINING: "live_training",

@@ -4658,6 +4658,7 @@ export interface GetAllAnnouncementsResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     deletedAt: string | null;
+    isRead: boolean | null;
   }[];
   pagination: {
     totalItems: number;
@@ -11772,6 +11773,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     announcementsControllerGetAllAnnouncements: (
       query?: {
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        feed?: "all" | "admin_announcements" | "system";
         status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;

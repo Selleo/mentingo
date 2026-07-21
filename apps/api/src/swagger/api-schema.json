@@ -9188,6 +9188,27 @@
             }
           },
           {
+            "name": "feed",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_announcements",
+                  "type": "string"
+                },
+                {
+                  "const": "system",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -39558,6 +39579,16 @@
                       "type": "null"
                     }
                   ]
+                },
+                "isRead": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -39577,7 +39608,8 @@
                 "content",
                 "baseLanguage",
                 "availableLocales",
-                "deletedAt"
+                "deletedAt",
+                "isRead"
               ]
             }
           },

@@ -3357,7 +3357,8 @@
     "title": "Notificaciones",
     "tabs": {
       "all": "Todos",
-      "adminAnnouncements": "Anuncios de administrador"
+      "adminAnnouncements": "Anuncios de administrador",
+      "system": "Sistema"
     },
     "actions": {
       "refresh": "Actualizar",

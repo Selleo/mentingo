@@ -21,7 +21,6 @@ import {
   getCourseChatMentionEmailParagraphs,
 } from "src/course-chat/course-chat-email.translations";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
-import { CourseService } from "src/courses/course.service";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -44,7 +43,6 @@ export class CourseChatMentionEmailHandler
     private readonly announcementRepository: AnnouncementsRepository,
     private readonly emailService: EmailService,
     private readonly userService: UserService,
-    private readonly courseService: CourseService,
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
@@ -64,20 +62,22 @@ export class CourseChatMentionEmailHandler
     if (!uniqueMentionedUserIds.length) return;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const [message, recipients, tenantOrigin] = await Promise.all([
+      const [message, recipients, tenantOrigin, localizedCourseTitles] = await Promise.all([
         this.courseChatRepository.getMessageById(messageId),
         this.courseChatRepository.getMentionEmailRecipients(courseId, uniqueMentionedUserIds),
         resolveTenantOrigin(this.dbAdmin, tenantId),
+        this.courseChatRepository.getLocalizedCourseTitles(courseId),
       ]);
+
+      if (!localizedCourseTitles) return;
 
       const mentioningUser = await this.userService.getUserById(currentUser.userId);
       const mentioningUserFullName = mentioningUser.firstName + " " + mentioningUser.lastName;
-      const courseData = await this.courseService.getCourseEmailData(courseId);
 
       await this.announcementRepository.createAnnouncement({
         groupId: null,
         title: getLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
-        content: getLocalizedUserMentionContentAnnouncement(courseData.courseName),
+        content: getLocalizedUserMentionContentAnnouncement(localizedCourseTitles),
         baseLanguage: SUPPORTED_LANGUAGES.EN,
         availableLocales: [...Object.values(SUPPORTED_LANGUAGES)],
         authorId: currentUser.userId,
