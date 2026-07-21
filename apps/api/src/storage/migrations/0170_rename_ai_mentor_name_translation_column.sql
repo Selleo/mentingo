@@ -1,0 +1,1 @@
+ALTER TABLE "ai_mentor_lessons" RENAME COLUMN "name_translations" TO "name";

@@ -22,6 +22,7 @@ import { UserAvatar } from "~/components/UserProfile/UserAvatar";
 import { usePermissions } from "~/hooks/usePermissions";
 import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
+import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { tanstackSortingToParam } from "~/utils/tanstackSortingToParam";
 
 import { COURSE_STATISTICS_HANDLES } from "../../../../../../e2e/data/statistics/handles";
@@ -53,6 +54,7 @@ export function CourseStudentsQuizResultsTable({
   onFilterChange,
 }: CourseStudentsQuizResultsTableProps) {
   const { t } = useTranslation();
+  const language = useLanguageStore((state) => state.language);
 
   const { hasAccess: canManageCourses } = usePermissions({
     required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
@@ -68,8 +70,8 @@ export function CourseStudentsQuizResultsTable({
 
   const query = useMemo(() => {
     const sort = tanstackSortingToParam(sorting) as CourseStudentsQuizResultsQueryParams["sort"];
-    return { ...searchParams, sort };
-  }, [searchParams, sorting]);
+    return { ...searchParams, sort, language };
+  }, [language, searchParams, sorting]);
 
   const {
     data: courseStudentsQuizResults,

@@ -20,4 +20,12 @@ export const FEATURE_SETTINGS_KEYS = {
   [FEATURES.COURSE_DISCUSSIONS]: "courseDiscussionsEnabled",
 } as const satisfies Record<FeatureKey, string>;
 
-export type FeatureSettingsKey = (typeof FEATURE_SETTINGS_KEYS)[FeatureKey];
+export type FeatureSettingKey = (typeof FEATURE_SETTINGS_KEYS)[keyof typeof FEATURE_SETTINGS_KEYS];
+
+export const FEATURE_UNREGISTERED_ACCESS_KEYS = {
+  [FEATURES.NEWS]: "unregisteredUserNewsAccessibility",
+  [FEATURES.ARTICLES]: "unregisteredUserArticlesAccessibility",
+  [FEATURES.QA]: "unregisteredUserQAAccessibility",
+} as const satisfies Partial<Record<FeatureKey, string>>;
+
+export type UnregisteredAccessFeatureKey = keyof typeof FEATURE_UNREGISTERED_ACCESS_KEYS;

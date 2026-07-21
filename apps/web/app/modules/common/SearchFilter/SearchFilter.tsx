@@ -30,7 +30,10 @@ export type StatusFilterValue = boolean | undefined;
 export type MultiSelectFilterValue = Option[] | undefined;
 
 export type FilterValue =
-  TextFilterValue | SelectFilterValue | StatusFilterValue | MultiSelectFilterValue;
+  | TextFilterValue
+  | SelectFilterValue
+  | StatusFilterValue
+  | MultiSelectFilterValue;
 
 export type FilterOption = {
   value: string;
@@ -67,7 +70,10 @@ export type StatusFilterConfig = BaseFilterConfig & {
 };
 
 export type FilterConfig =
-  TextFilterConfig | SelectFilterConfig | DateFilterConfig | StatusFilterConfig;
+  | TextFilterConfig
+  | SelectFilterConfig
+  | DateFilterConfig
+  | StatusFilterConfig;
 
 export type FilterValues = Partial<{
   [key: string]: FilterValue;
@@ -229,7 +235,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                   disabled={(date) =>
                     Boolean(
                       (filter.minDate && isBefore(date, filter.minDate)) ||
-                      (filter.maxDate && isAfter(date, filter.maxDate)),
+                        (filter.maxDate && isAfter(date, filter.maxDate)),
                     )
                   }
                   fromYear={2000}

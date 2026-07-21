@@ -1,6 +1,7 @@
 export * from "./constants/AnnouncementAudience";
 export * from "./constants/accessGuard";
 export * from "./constants/activityLogs";
+export * from "./constants/aiJudge";
 export * from "./constants/aiMentorAvatar";
 export * from "./constants/aiMentorTypes";
 export * from "./constants/aiMentorVoice";

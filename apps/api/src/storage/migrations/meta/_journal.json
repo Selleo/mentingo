@@ -1139,29 +1139,64 @@
     {
       "idx": 162,
       "version": "7",
-      "when": 1784019493330,
-      "tag": "0162_add_audience_in_announcements",
+      "when": 1784109199035,
+      "tag": "0162_add_ai_judge_schema",
       "breakpoints": true
     },
     {
       "idx": 163,
       "version": "7",
-      "when": 1784019585580,
-      "tag": "0163_map_is_everyone_to_audience_field",
+      "when": 1784109252645,
+      "tag": "0163_backfill_ai_judge_task_goals",
       "breakpoints": true
     },
     {
       "idx": 164,
       "version": "7",
-      "when": 1784019767045,
-      "tag": "0164_remove_is_everyone_field_in_announcements",
+      "when": 1784109254568,
+      "tag": "0164_enable_ai_judge_rls",
       "breakpoints": true
     },
     {
       "idx": 165,
       "version": "7",
-      "when": 1784623980710,
-      "tag": "0165_repair_announcement_delivery",
+      "when": 1784110370014,
+      "tag": "0165_drop_ai_mentor_completion_conditions",
+      "breakpoints": true
+    },
+    {
+      "idx": 166,
+      "version": "7",
+      "when": 1784276853950,
+      "tag": "0166_add_course_statistics_indexes",
+      "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1784540972336,
+      "tag": "0167_add_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1784541112836,
+      "tag": "0168_backfill_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 169,
+      "version": "7",
+      "when": 1784541141829,
+      "tag": "0169_drop_ai_mentor_name_text_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 170,
+      "version": "7",
+      "when": 1784541162859,
+      "tag": "0170_rename_ai_mentor_name_translation_column",
       "breakpoints": true
     }
   ]

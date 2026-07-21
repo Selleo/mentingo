@@ -2171,8 +2171,8 @@ export interface GetBetaCourseByIdResponse {
           /** @format uuid */
           lessonId: string;
           aiMentorInstructions: string;
-          completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
+          name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
           ttsPreset: "male" | "female";
@@ -2855,8 +2855,8 @@ export type BetaCreateChapterBody = {
       /** @format uuid */
       lessonId: string;
       aiMentorInstructions: string;
-      completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -2941,8 +2941,8 @@ export type UpdateChapterBody = ({
       /** @format uuid */
       lessonId: string;
       aiMentorInstructions: string;
-      completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -3109,7 +3109,19 @@ export interface GetLessonByIdResponse {
       percentage: number | null;
       requiredScore: number | null;
       passed: boolean | null;
-      summary: string | null;
+      criteria: {
+        criterionId: string | null;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        blockingErrorId: string | null;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
     } | null;
     aiMentor?: {
       name: string;
@@ -3263,8 +3275,8 @@ export type BetaCreateLessonBody = {
     /** @format uuid */
     lessonId: string;
     aiMentorInstructions: string;
-    completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3449,19 +3461,6 @@ export type BetaCreateAiMentorLessonBody = {
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
   }[];
-  aiMentor?: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    lessonId: string;
-    aiMentorInstructions: string;
-    completionConditions: string;
-    type: "mentor" | "teacher" | "roleplay";
-    avatarReference: string | null;
-    voiceMode: "preset" | "custom";
-    ttsPreset: "male" | "female";
-    customTtsReference: string | null;
-  } | null;
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
@@ -3469,7 +3468,44 @@ export type BetaCreateAiMentorLessonBody = {
   chapterId: string;
   displayOrder?: number;
   aiMentorInstructions: string;
-  completionConditions: string;
+  aiJudgeConfiguration: {
+    /** @minLength 1 */
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    criteria: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      title: string;
+      /** @minLength 1 */
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      /** @minItems 1 */
+      scoreGuidance: {
+        /** @format uuid */
+        id?: string;
+        /** @min 0 */
+        score: number;
+        /** @minLength 1 */
+        description: string;
+        example?: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      description: string;
+    }[];
+  };
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
@@ -3529,24 +3565,10 @@ export type BetaUpdateAiMentorLessonBody = ({
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
   }[];
-  aiMentor?: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    lessonId: string;
-    aiMentorInstructions: string;
-    completionConditions: string;
-    type: "mentor" | "teacher" | "roleplay";
-    avatarReference: string | null;
-    voiceMode: "preset" | "custom";
-    ttsPreset: "male" | "female";
-    customTtsReference: string | null;
-  } | null;
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
-  completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
@@ -3739,8 +3761,8 @@ export type BetaUpdateLessonBody = ({
     /** @format uuid */
     lessonId: string;
     aiMentorInstructions: string;
-    completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3861,6 +3883,206 @@ export interface UpdateLessonDisplayOrderBody {
 export interface UpdateLessonDisplayOrderResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  } | null;
+}
+
+export interface ReplaceConfigurationBody {
+  /** @minLength 1 */
+  taskGoal: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  passingThresholdPercent: number;
+  criteria: {
+    /** @format uuid */
+    id?: string;
+    /** @minLength 1 */
+    title: string;
+    /** @minLength 1 */
+    expectedBehavior: string;
+    /**
+     * @min 1
+     * @max 5
+     */
+    maxScore: number;
+    /** @minItems 1 */
+    scoreGuidance: {
+      /** @format uuid */
+      id?: string;
+      /** @min 0 */
+      score: number;
+      /** @minLength 1 */
+      description: string;
+      example?: string | null;
+    }[];
+  }[];
+  blockingErrors: {
+    /** @format uuid */
+    id?: string;
+    /** @minLength 1 */
+    description: string;
+  }[];
+}
+
+export interface ReplaceConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  };
+}
+
+export interface UpdateTranslationsBody {
+  /** @minLength 1 */
+  taskGoal?: string;
+  criteria?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    title?: string;
+    /** @minLength 1 */
+    expectedBehavior?: string;
+  }[];
+  scoreGuidance?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    description?: string;
+    example?: string | null;
+  }[];
+  blockingErrors?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    description: string;
+  }[];
+}
+
+export interface UpdateTranslationsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
   };
 }
 
@@ -4030,12 +4252,26 @@ export interface StreamChatBody {
 
 export interface JudgeThreadResponse {
   data: {
-    summary: string;
     passed: boolean;
     minScore: number;
     score: number;
     maxScore: number;
     percentage: number;
+    criteria: {
+      /** @format uuid */
+      criterionId: string;
+      title: string;
+      awardedScore: number;
+      maxScore: number;
+      status: "not_met" | "partial" | "met";
+      learnerSafeFeedback: string;
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      blockingErrorId: string;
+      description: string;
+      learnerSafeFeedback: string;
+    }[];
   };
 }
 
@@ -6324,7 +6560,12 @@ export interface GetActivityLogsResponse {
       | "complete_chapter"
       | "expire_certificate"
       | "reset_certificate"
-      | "view_announcement";
+      | "view_announcement"
+      | "enroll_learning_path"
+      | "start_learning_path"
+      | "complete_learning_path"
+      | "play_scorm"
+      | "complete_scorm";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
@@ -10925,6 +11166,68 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AiJudgeConfigurationControllerGetConfiguration
+     * @request GET:/api/lesson/{lessonId}/ai-judge-configuration
+     */
+    aiJudgeConfigurationControllerGetConfiguration: (
+      lessonId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationControllerReplaceConfiguration
+     * @request PUT:/api/lesson/{lessonId}/ai-judge-configuration
+     */
+    aiJudgeConfigurationControllerReplaceConfiguration: (
+      lessonId: string,
+      data: ReplaceConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationControllerUpdateTranslations
+     * @request PATCH:/api/lesson/{lessonId}/ai-judge-configuration/translations/{language}
+     */
+    aiJudgeConfigurationControllerUpdateTranslations: (
+      lessonId: string,
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es",
+      data: UpdateTranslationsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTranslationsResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration/translations/${language}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StudentLessonProgressControllerMarkLessonAsCompleted
      * @request POST:/api/studentLessonProgress
      */
@@ -13876,7 +14179,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "news"
           | "article"
           | "articleSection"
-          | "live_training";
+          | "live_training"
+          | "learning_path"
+          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -13902,6 +14207,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )
           | (
               | "create"
@@ -13925,6 +14235,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )[];
       },
       params: RequestParams = {},

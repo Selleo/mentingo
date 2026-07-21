@@ -1,6 +1,6 @@
 {
-  "id": "c549b8a6-a67e-4510-ab43-d255ed17d6bf",
-  "prevId": "5d765c26-93d6-4553-8f99-1dc24d37e240",
+  "id": "ed3b83f2-6d13-4378-92d1-ef7334fc28e3",
+  "prevId": "7c956970-3e0a-4728-a109-0d1c5f8db639",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -205,6 +205,926 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
+    "public.ai_judge_blocking_errors": {
+      "name": "ai_judge_blocking_errors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "configuration_id": {
+          "name": "configuration_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_judge_blocking_errors_tenant_id_idx": {
+          "name": "ai_judge_blocking_errors_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ai_judge_blocking_errors_configuration_id_created_at_idx": {
+          "name": "ai_judge_blocking_errors_configuration_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "configuration_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_judge_blocking_errors_configuration_id_ai_judge_configurations_id_fk": {
+          "name": "ai_judge_blocking_errors_configuration_id_ai_judge_configurations_id_fk",
+          "tableFrom": "ai_judge_blocking_errors",
+          "columnsFrom": [
+            "configuration_id"
+          ],
+          "tableTo": "ai_judge_configurations",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_judge_blocking_errors_tenant_id_tenants_id_fk": {
+          "name": "ai_judge_blocking_errors_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_judge_blocking_errors",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_judge_configurations": {
+      "name": "ai_judge_configurations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "ai_mentor_lesson_id": {
+          "name": "ai_mentor_lesson_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "task_goal": {
+          "name": "task_goal",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "passing_threshold_percent": {
+          "name": "passing_threshold_percent",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_judge_configurations_tenant_id_idx": {
+          "name": "ai_judge_configurations_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_judge_configurations_ai_mentor_lesson_id_ai_mentor_lessons_id_fk": {
+          "name": "ai_judge_configurations_ai_mentor_lesson_id_ai_mentor_lessons_id_fk",
+          "tableFrom": "ai_judge_configurations",
+          "columnsFrom": [
+            "ai_mentor_lesson_id"
+          ],
+          "tableTo": "ai_mentor_lessons",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_judge_configurations_tenant_id_tenants_id_fk": {
+          "name": "ai_judge_configurations_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_judge_configurations",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_judge_configurations_ai_mentor_lesson_id_unique": {
+          "name": "ai_judge_configurations_ai_mentor_lesson_id_unique",
+          "columns": [
+            "ai_mentor_lesson_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      }
+    },
+    "public.ai_judge_criteria": {
+      "name": "ai_judge_criteria",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "configuration_id": {
+          "name": "configuration_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_score": {
+          "name": "max_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "expected_behavior": {
+          "name": "expected_behavior",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_judge_criteria_tenant_id_idx": {
+          "name": "ai_judge_criteria_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ai_judge_criteria_configuration_id_created_at_idx": {
+          "name": "ai_judge_criteria_configuration_id_created_at_idx",
+          "columns": [
+            {
+              "expression": "configuration_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_judge_criteria_configuration_id_ai_judge_configurations_id_fk": {
+          "name": "ai_judge_criteria_configuration_id_ai_judge_configurations_id_fk",
+          "tableFrom": "ai_judge_criteria",
+          "columnsFrom": [
+            "configuration_id"
+          ],
+          "tableTo": "ai_judge_configurations",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_judge_criteria_tenant_id_tenants_id_fk": {
+          "name": "ai_judge_criteria_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_judge_criteria",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_judge_score_guidance": {
+      "name": "ai_judge_score_guidance",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "criterion_id": {
+          "name": "criterion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "score": {
+          "name": "score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "example": {
+          "name": "example",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_judge_score_guidance_tenant_id_idx": {
+          "name": "ai_judge_score_guidance_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ai_judge_score_guidance_criterion_id_score_unique": {
+          "name": "ai_judge_score_guidance_criterion_id_score_unique",
+          "columns": [
+            {
+              "expression": "criterion_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "score",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_judge_score_guidance_criterion_id_ai_judge_criteria_id_fk": {
+          "name": "ai_judge_score_guidance_criterion_id_ai_judge_criteria_id_fk",
+          "tableFrom": "ai_judge_score_guidance",
+          "columnsFrom": [
+            "criterion_id"
+          ],
+          "tableTo": "ai_judge_criteria",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_judge_score_guidance_tenant_id_tenants_id_fk": {
+          "name": "ai_judge_score_guidance_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_judge_score_guidance",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_mentor_judgement_blocking_errors": {
+      "name": "ai_mentor_judgement_blocking_errors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "judgement_id": {
+          "name": "judgement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "blocking_error_id": {
+          "name": "blocking_error_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "blocking_error_description": {
+          "name": "blocking_error_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "learner_safe_feedback": {
+          "name": "learner_safe_feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_mentor_judgement_blocking_errors_tenant_id_idx": {
+          "name": "ai_mentor_judgement_blocking_errors_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ai_mentor_judgement_blocking_errors_judgement_id_blocking_error_id_unique": {
+          "name": "ai_mentor_judgement_blocking_errors_judgement_id_blocking_error_id_unique",
+          "columns": [
+            {
+              "expression": "judgement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "blocking_error_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_mentor_judgement_blocking_errors_judgement_id_ai_mentor_judgements_id_fk": {
+          "name": "ai_mentor_judgement_blocking_errors_judgement_id_ai_mentor_judgements_id_fk",
+          "tableFrom": "ai_mentor_judgement_blocking_errors",
+          "columnsFrom": [
+            "judgement_id"
+          ],
+          "tableTo": "ai_mentor_judgements",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_mentor_judgement_blocking_errors_blocking_error_id_ai_judge_blocking_errors_id_fk": {
+          "name": "ai_mentor_judgement_blocking_errors_blocking_error_id_ai_judge_blocking_errors_id_fk",
+          "tableFrom": "ai_mentor_judgement_blocking_errors",
+          "columnsFrom": [
+            "blocking_error_id"
+          ],
+          "tableTo": "ai_judge_blocking_errors",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "set null"
+        },
+        "ai_mentor_judgement_blocking_errors_tenant_id_tenants_id_fk": {
+          "name": "ai_mentor_judgement_blocking_errors_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_mentor_judgement_blocking_errors",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_mentor_judgement_criteria": {
+      "name": "ai_mentor_judgement_criteria",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "judgement_id": {
+          "name": "judgement_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criterion_id": {
+          "name": "criterion_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criterion_title": {
+          "name": "criterion_title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "awarded_points": {
+          "name": "awarded_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_score_at_judgement": {
+          "name": "max_score_at_judgement",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "learner_safe_feedback": {
+          "name": "learner_safe_feedback",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_mentor_judgement_criteria_tenant_id_idx": {
+          "name": "ai_mentor_judgement_criteria_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        },
+        "ai_mentor_judgement_criteria_judgement_id_criterion_id_unique": {
+          "name": "ai_mentor_judgement_criteria_judgement_id_criterion_id_unique",
+          "columns": [
+            {
+              "expression": "judgement_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "criterion_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_mentor_judgement_criteria_judgement_id_ai_mentor_judgements_id_fk": {
+          "name": "ai_mentor_judgement_criteria_judgement_id_ai_mentor_judgements_id_fk",
+          "tableFrom": "ai_mentor_judgement_criteria",
+          "columnsFrom": [
+            "judgement_id"
+          ],
+          "tableTo": "ai_mentor_judgements",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_mentor_judgement_criteria_criterion_id_ai_judge_criteria_id_fk": {
+          "name": "ai_mentor_judgement_criteria_criterion_id_ai_judge_criteria_id_fk",
+          "tableFrom": "ai_mentor_judgement_criteria",
+          "columnsFrom": [
+            "criterion_id"
+          ],
+          "tableTo": "ai_judge_criteria",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "set null"
+        },
+        "ai_mentor_judgement_criteria_tenant_id_tenants_id_fk": {
+          "name": "ai_mentor_judgement_criteria_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_mentor_judgement_criteria",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.ai_mentor_judgements": {
+      "name": "ai_mentor_judgements",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp(3) with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "thread_id": {
+          "name": "thread_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "configuration_id": {
+          "name": "configuration_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "language": {
+          "name": "language",
+          "type": "varchar(20)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "earned_points": {
+          "name": "earned_points",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_score": {
+          "name": "max_score",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "percentage": {
+          "name": "percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "passed": {
+          "name": "passed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tenant_id": {
+          "name": "tenant_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "current_setting('app.tenant_id', true)::uuid"
+        }
+      },
+      "indexes": {
+        "ai_mentor_judgements_tenant_id_idx": {
+          "name": "ai_mentor_judgements_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "ai_mentor_judgements_thread_id_ai_mentor_threads_id_fk": {
+          "name": "ai_mentor_judgements_thread_id_ai_mentor_threads_id_fk",
+          "tableFrom": "ai_mentor_judgements",
+          "columnsFrom": [
+            "thread_id"
+          ],
+          "tableTo": "ai_mentor_threads",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "ai_mentor_judgements_configuration_id_ai_judge_configurations_id_fk": {
+          "name": "ai_mentor_judgements_configuration_id_ai_judge_configurations_id_fk",
+          "tableFrom": "ai_mentor_judgements",
+          "columnsFrom": [
+            "configuration_id"
+          ],
+          "tableTo": "ai_judge_configurations",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "restrict"
+        },
+        "ai_mentor_judgements_tenant_id_tenants_id_fk": {
+          "name": "ai_mentor_judgements_tenant_id_tenants_id_fk",
+          "tableFrom": "ai_mentor_judgements",
+          "columnsFrom": [
+            "tenant_id"
+          ],
+          "tableTo": "tenants",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "ai_mentor_judgements_thread_id_unique": {
+          "name": "ai_mentor_judgements_thread_id_unique",
+          "columns": [
+            "thread_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      }
+    },
     "public.ai_mentor_lessons": {
       "name": "ai_mentor_lessons",
       "schema": "",
@@ -268,7 +1188,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "default": "'mentor'"
+          "default": "'roleplay'"
         },
         "voice_mode": {
           "name": "voice_mode",
@@ -376,12 +1296,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "summary": {
-          "name": "summary",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         },
         "score": {
           "name": "score",
@@ -747,13 +1661,6 @@
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
-        },
-        "audience": {
-          "name": "audience",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'all_users'"
         },
         "is_everyone": {
           "name": "is_everyone",

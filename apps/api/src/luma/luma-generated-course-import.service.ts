@@ -1,7 +1,13 @@
 import { Readable } from "stream";
 
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
+  DEFAULT_AI_MENTOR_TYPE,
+} from "@repo/shared";
+import { Value } from "@sinclair/typebox/value";
 import axios from "axios";
 import { load as loadHtml } from "cheerio";
 import { count, eq, sql } from "drizzle-orm";
@@ -13,6 +19,8 @@ import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { RESOURCE_CATEGORIES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { IngestionService } from "src/ingestion/services/ingestion.service";
+import { AiJudgeConfigurationGraphService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-graph.service";
+import { aiJudgeConfigurationInputSchema } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { AdminLessonRepository } from "src/lesson/repositories/adminLesson.repository";
 import {
@@ -51,6 +59,7 @@ import type {
 } from "src/luma/luma-generated-course-import.types";
 import type {
   LumaGeneratedCourseAiMentorType,
+  LumaGeneratedCourseAiMentor,
   LumaGeneratedCourseLesson,
   LumaGeneratedCourseImportResult,
   LumaGeneratedCourseImportStats,
@@ -68,6 +77,7 @@ export class LumaGeneratedCourseImportService {
     private readonly fileService: FileService,
     private readonly adminChapterRepository: AdminChapterRepository,
     private readonly adminLessonRepository: AdminLessonRepository,
+    private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
     private readonly ingestionService: IngestionService,
     private readonly lumaCourseGenerationSyncRepository: LumaCourseGenerationSyncRepository,
   ) {}
@@ -202,7 +212,7 @@ export class LumaGeneratedCourseImportService {
   }
 
   private async insertAiMentorLesson(data: InsertAiMentorLessonData) {
-    const aiMentor = data.lesson.aiMentor;
+    const aiMentor = this.getAiMentor(data.lesson);
     const description = this.sanitizeText(aiMentor?.taskDescription ?? data.lesson.content ?? "");
     const [lesson] = await data.trx
       .insert(lessons)
@@ -216,21 +226,27 @@ export class LumaGeneratedCourseImportService {
       })
       .returning({ id: lessons.id });
 
-    await data.trx.insert(aiMentorLessons).values({
-      lessonId: lesson.id,
-      aiMentorInstructions: buildJsonbField(
-        data.language,
-        this.sanitizeText(aiMentor?.aiMentorInstructions ?? ""),
-      ),
-      completionConditions: buildJsonbField(
-        data.language,
-        this.sanitizeText(aiMentor?.completionConditions ?? ""),
-      ),
-      type: this.mapAiMentorType(aiMentor?.type),
-      name: this.sanitizeText(aiMentor?.name ?? "AI Mentor"),
-      voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
-      ttsPreset: this.mapAiMentorTtsPreset(aiMentor?.ttsPreset),
-    });
+    const [aiMentorLesson] = await data.trx
+      .insert(aiMentorLessons)
+      .values({
+        lessonId: lesson.id,
+        aiMentorInstructions: buildJsonbField(
+          data.language,
+          this.sanitizeText(aiMentor.aiMentorInstructions),
+        ),
+        type: this.mapAiMentorType(aiMentor.type),
+        name: buildJsonbField(data.language, this.sanitizeText(aiMentor?.name ?? "AI Mentor")),
+        voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
+        ttsPreset: this.mapAiMentorTtsPreset(aiMentor.ttsPreset),
+      })
+      .returning({ id: aiMentorLessons.id });
+
+    await this.aiJudgeConfigurationGraphService.createConfigurationInTransaction(
+      aiMentorLesson.id,
+      aiMentor.aiJudgeConfiguration,
+      data.language,
+      data.trx,
+    );
 
     const relevantContext = this.getRelevantContext(data.lesson);
     if (relevantContext) {
@@ -250,6 +266,20 @@ export class LumaGeneratedCourseImportService {
       stats: data.stats,
       trx: data.trx,
     });
+  }
+
+  private getAiMentor(lesson: LumaGeneratedCourseLesson): LumaGeneratedCourseAiMentor {
+    const aiMentor = lesson.aiMentor;
+
+    if (
+      !aiMentor ||
+      typeof aiMentor !== "object" ||
+      !("aiJudgeConfiguration" in aiMentor) ||
+      !Value.Check(aiJudgeConfigurationInputSchema, aiMentor.aiJudgeConfiguration)
+    )
+      throw new BadRequestException("luma.errors.invalidAiJudgeConfiguration");
+
+    return aiMentor;
   }
 
   private async insertQuizLesson(data: InsertQuizLessonData) {
@@ -692,7 +722,7 @@ export class LumaGeneratedCourseImportService {
       return AI_MENTOR_TYPE.TEACHER;
     }
 
-    return AI_MENTOR_TYPE.MENTOR;
+    return DEFAULT_AI_MENTOR_TYPE;
   }
 
   private mapAiMentorTtsPreset(preset: "male" | "female" | undefined): AiMentorTTSPreset {

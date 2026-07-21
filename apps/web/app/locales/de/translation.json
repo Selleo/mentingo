@@ -54,7 +54,9 @@
       "live_training": "Live-Schulung"
     },
     "error": {
-      "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen."
+      "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
+      "threadMustBeActive": "Der Thread muss aktiv sein.",
+      "aiJudgeConfigurationMissing": "Die AI-Judge-Konfiguration fehlt."
     },
     "loader": {
       "textSequence": {
@@ -1839,7 +1841,6 @@
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
       },
       "lesson": {
-        "aiMentorRequiredContent": "AI-Mentor-Anweisungen und Abschlussbedingungen sind erforderlich.",
         "customTtsReferenceRequired": "Eine eigene TTS-Referenz ist im benutzerdefinierten Modus erforderlich.",
         "aiMentorCreateFailed": "AI-Mentor-Lektion konnte nicht erstellt werden.",
         "questionsRequired": "Mindestens eine Frage ist erforderlich.",
@@ -2111,8 +2112,6 @@
           "descriptionRequired": "Beschreibung ist erforderlich",
           "aiMentorInstructionsRequired": "Anweisungen für den AI-Mentor sind erforderlich",
           "aiMentorInstructionsMaxLength": "Die Anweisungen für den AI-Mentor sind zu lang (maximal 20.000 Zeichen).",
-          "completionConditionsRequired": "Abschlussbedingungen sind erforderlich",
-          "completionConditionsMaxLength": "Die Abschlussbedingungen sind zu lang (maximal 20.000 Zeichen).",
           "customTTSReferenceRequired": "Im benutzerdefinierten Modus ist eine benutzerdefinierte TTS-Referenz erforderlich",
           "taskDescriptionMaxLength": "Die Aufgabenbeschreibung ist zu lang (maximal {{ count }} Zeichen)",
           "passThresholdMin": "Der Erfolgsschwellenwert muss mindestens 1 betragen",
@@ -2187,7 +2186,6 @@
           "sentence": "Satz",
           "sourceUrl": "Quell-URL",
           "aiMentorInstructions": "Anweisungen für KI-Mentoren",
-          "completionConditions": "Abschlussbedingungen",
           "aiMentor": "KI-Mentor",
           "mentorName": "Name des Mentors",
           "taskDescription": "Aufgabenbeschreibung",
@@ -2213,11 +2211,84 @@
           "sourceUrl": "Geben Sie die Quell-URL ein...",
           "allowFullscreen": "Vollbild zulassen",
           "aiMentorInstructions": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll ...",
-          "completionConditions": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen ...",
           "taskDescription": "Beschreiben Sie die Aufgabe, die der Teilnehmer erledigen muss ...",
           "passThreshold": "z. B. 70 %",
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
+        },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Konfiguriert",
+          "emptyDescription": "Legen Sie fest, wie die Antwort des Lernenden bewertet und wann die Lektion bestanden wird.",
+          "baseLanguageRequired": "Erstellen Sie die Bewertungsstruktur in der Basissprache des Kurses, bevor Sie sie übersetzen.",
+          "structureLockedTooltip": "Die Bewertungsstruktur kann nur in der Basissprache des Kurses geändert werden.",
+          "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
+          "configureWithAi": "Mit KI konfigurieren",
+          "configureManually": "Manuell konfigurieren",
+          "editAssessment": "Bewertung bearbeiten",
+          "dialogTitle": "AI Judge konfigurieren",
+          "dialogDescription": "Definieren Sie messbare Kriterien, genaue Bewertungshinweise und Fehler, die immer zum Nichtbestehen führen.",
+          "translationModeTitle": "Übersetzungsmodus",
+          "translationModeDescription": "Hier können Sie Bewertungstexte übersetzen. Punkte, Schwellenwert und Struktur werden in der Basissprache des Kurses verwaltet.",
+          "taskGoal": "Aufgabenziel",
+          "taskGoalPlaceholder": "Beschreiben Sie das messbare Ergebnis, das der Lernende erreichen soll...",
+          "passingThreshold": "Bestehensschwelle",
+          "criteria": "Bewertungskriterien",
+          "addFirstCriterion": "Erstes Kriterium hinzufügen",
+          "criterionNumber": "Kriterium {{number}}",
+          "untitledCriterion": "Unbenanntes Kriterium",
+          "complete": "Vollständig",
+          "needsDetails": "Details fehlen",
+          "criterionDescription": "Beschreiben Sie ein beobachtbares Verhalten des Lernenden.",
+          "criterionTitle": "Kriteriumsname",
+          "criterionTitlePlaceholder": "z. B. Erkennt die Bedürfnisse des Kunden",
+          "expectedBehavior": "Erwartetes Verhalten",
+          "expectedBehaviorPlaceholder": "Erklären Sie, was der Lernende sagen oder tun soll...",
+          "maxScore": "Maximale Punktzahl",
+          "score": "Punkte",
+          "scoringGuidance": "Bewertungshinweise",
+          "advancedScoring": "Erweiterte Bewertungshinweise",
+          "scoreLevelsCount": "{{count}} Punktestufen",
+          "scoreBadge": "{{score}} Pkt.",
+          "itemsCount": "{{count}} hinzugefügt",
+          "scoringSummary": "Bewertung",
+          "pointsRequired": "{{required}} von {{total}} Punkten zum Bestehen erforderlich",
+          "scoringGuidanceDescription": "Beschreiben Sie optional, wie eine genaue Punktzahl erreicht wird.",
+          "scoreDescription": "Was diese Punktzahl ergibt",
+          "scoreDescriptionPlaceholder": "Beschreiben Sie das beobachtbare Leistungsniveau...",
+          "acceptedExample": "Akzeptiertes Beispiel",
+          "examplePlaceholder": "Fügen Sie eine Beispielantwort hinzu...",
+          "addCriterion": "Kriterium hinzufügen",
+          "removeCriterion": "Kriterium entfernen",
+          "addScoreGuidance": "Bewertungshinweis hinzufügen",
+          "removeScoreGuidance": "Bewertungshinweis entfernen",
+          "noScoringGuidance": "Keine punktspezifischen Hinweise hinzugefügt.",
+          "blockingErrors": "Ausschlussfehler",
+          "blockingErrorsDescription": "Tritt einer dieser Fehler auf, gilt der Versuch unabhängig von der Punktzahl als nicht bestanden.",
+          "blockingErrorNumber": "Ausschlussfehler {{number}}",
+          "blockingErrorPlaceholder": "Beschreiben Sie den Fehler, der immer zum Nichtbestehen führt...",
+          "addBlockingError": "Ausschlussfehler hinzufügen",
+          "removeBlockingError": "Ausschlussfehler entfernen",
+          "noBlockingErrors": "Keine Ausschlussfehler konfiguriert.",
+          "applyConfiguration": "Konfiguration übernehmen",
+          "saveConfiguration": "Konfiguration speichern",
+          "saveTranslation": "Übersetzung speichern",
+          "configurationSavedSuccessfully": "Die AI-Judge-Konfiguration wurde gespeichert.",
+          "translationSavedSuccessfully": "Die AI-Judge-Übersetzung wurde gespeichert.",
+          "validation": {
+            "configurationRequired": "Konfiguriere den AI Judge, bevor du diese Lektion speicherst",
+            "taskGoalRequired": "Das Aufgabenziel ist erforderlich",
+            "thresholdRange": "Die Bestehensschwelle muss zwischen 1 und 100 liegen",
+            "titleRequired": "Der Kriteriumsname ist erforderlich",
+            "expectedBehaviorRequired": "Das erwartete Verhalten ist erforderlich",
+            "maxScoreRange": "Die maximale Punktzahl muss zwischen 1 und 5 liegen",
+            "scoreRange": "Die Punktzahl darf nicht negativ sein",
+            "scoreExceedsMaximum": "Die Punktzahl darf das Kriteriumsmaximum nicht überschreiten",
+            "scoreMustBeUnique": "Jede Hinweispunktzahl muss innerhalb des Kriteriums eindeutig sein",
+            "guidanceRequired": "Die Beschreibung des Bewertungshinweises ist erforderlich",
+            "completeGuidanceRequired": "Fügen Sie für dieses Kriterium eine Bewertungsanleitung hinzu",
+            "blockingErrorRequired": "Die Beschreibung des Ausschlussfehlers ist erforderlich"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2278,7 +2349,6 @@
           "aiMentorTypeTooltip": "Verhält sich wie eine Figur in einem Szenario, stellt aber während der Szene Fragen und hilft, Schlussfolgerungen zu ziehen.\nBeispiel: „Was würden Sie jetzt in der Rolle des Managers tun?“",
           "aiTeacherTypeTooltip": "Erklärt, lehrt und stellt Fragen – wie ein Lehrer.\nBeispiel: „In dieser Situation erhebt der Kunde einen Preiseinwand. Was sollten Sie antworten und warum?“",
           "aiRoleplayTypeTooltip": "Simuliert einen realistischen Charakter und eine realistische Situation – ohne den Charakter zu zerstören.\nBeispiel: „Dies ist das zweite Mal, dass Ihr Dienst ausgefallen ist. Was werden Sie dagegen tun?“",
-          "completionConditionsTooltip": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen. Geben Sie klare und messbare Punkte an. Die KI wird diese Liste verwenden, um den Fortschritt zu überprüfen. Sie können auch einen Schwellenwert für das Bestehen festlegen (z. B. einen Prozentsatz oder eine Mindestpunktzahl). Wenn keine Schwelle angegeben ist, müssen alle Bedingungen erfüllt sein, um die Lektion zu bestehen.",
           "passThresholdTooltip": "Legen Sie den Mindestprozentsatz (1-100 %) fest, der zum Bestehen erforderlich ist. Für keine Schwelle leer lassen.",
           "voiceConfigCartesiaTooltip": "Die Sprachausgabe verwendet Cartesia. Wählen Sie Male oder Female, um die konfigurierte Stimmenzuordnung zu verwenden, oder wählen Sie Custom und geben Sie eine Cartesia-Voice-ID ein.",
           "voiceConfigOpenAiCompatibleTooltip": "Die Sprachausgabe verwendet einen OpenAI-kompatiblen Text-to-Speech-Endpunkt. Male und Female verwenden OpenAI-Stimm-Presets. Wählen Sie Custom, um einen anderen von diesem Endpunkt unterstützten Stimmwert einzugeben.",
@@ -2312,6 +2382,44 @@
               "problemSolving": "<ul><li>Der Student erkennt den Beitrag des Mitarbeiters an.</li><li>Der Student erläutert die Budgetsituation ehrlich.</li><li>Der Student schlägt eine nichtfinanzielle Alternative vor (z. B. Zusatzleistungen, Entwicklungsmöglichkeiten).</li><li>Der Student erklärt sich damit einverstanden, das Thema zu einem späteren Zeitpunkt noch einmal aufzugreifen.</li><li>Der Student pflegt einen respektvollen, unterstützenden Umgangston.</li></ul><strong>Grenzwert:</strong> mindestens 3 von 5 Bedingungen muss erfüllt werden.",
               "creativeTask": "<ul><li>Der Student präsentiert eine originelle Idee.</li><li>Der Student erklärt, wer die Zielgruppe ist.</li><li>Der Student beschreibt, wie der Service den Kunden einen Mehrwert bieten könnte.</li><li>Der Student identifiziert mögliche Herausforderungen.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen müssen erfüllt sein.)</em>",
               "knowledgeSharing": "<ul><li>Der Student beteiligt sich aktiv an der Konversation (stellt Fragen oder tauscht Überlegungen aus).</li><li>Der Student kann mindestens eine im Dialog erwähnte Zeitmanagementtechnik nennen.</li><li>Der Student drückt aus, wie er eine Technik in seiner Arbeit anwenden könnte.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen werden empfohlen, sind aber für das Bestehen nicht zwingend erforderlich.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Vergeben Sie 0 Punkte, wenn der Lernende keinen klaren, beobachtbaren Nachweis für dieses Verhalten liefert, es vermeidet oder ihm entgegenhandelt: {{expectedBehavior}} Das Fehlen des genauen Beispiels allein reicht nicht aus; bewerten Sie die Bedeutung der gesamten Antwort.",
+              "notMetExample": "Die Antwort enthält keine Aussage oder Handlung, die Folgendes zeigt: {{expectedBehavior}}",
+              "metDescription": "Vergeben Sie 1 Punkt, wenn der Lernende dieses Verhalten klar, relevant und kontextgerecht zeigt: {{expectedBehavior}} Gleichwertige Formulierungen sind gültig; das akzeptierte Beispiel muss nicht wörtlich wiederholt werden."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Welchen Budgetrahmen haben Sie für dieses Projekt vorgesehen?",
+                "1": "Sie haben ein Ziel von drei Monaten genannt. Ist dieser Starttermin verbindlich?",
+                "2": "Welche Auswirkungen hätte ein verspäteter Start auf Ihr Unternehmen?",
+                "3": "Es klingt so, als wären Liefersicherheit und klare Kommunikation Ihre größten Anliegen – stimmt das?",
+                "4": "Angesichts der Frist von drei Monaten und des begrenzten Budgets schlage ich ein stufenweises MVP mit wöchentlichen Fortschrittsbesprechungen vor."
+              },
+              "problemSolving": {
+                "0": "Ihre jüngste Arbeit hat wirklich etwas bewirkt, und ich verstehe, warum Sie das Thema Vergütung ansprechen.",
+                "1": "Im aktuellen Zyklus steht kein Budget für Gehaltserhöhungen zur Verfügung, und ich möchte das offen kommunizieren.",
+                "2": "Ich kann derzeit keine Gehaltserhöhung genehmigen, aber wir können ein Weiterbildungsbudget und zusätzliche Urlaubstage besprechen.",
+                "3": "Lassen Sie uns das Budget in drei Monaten erneut prüfen und dieses Gespräch heute schon einplanen.",
+                "4": "Ich verstehe, dass das enttäuschend ist, und schätze es, dass Sie offen mit mir darüber sprechen."
+              },
+              "creativeTask": {
+                "0": "Ich schlage einen Abonnementdienst vor, der Kunden monatliche Barrierefreiheitsprüfungen ihrer digitalen Produkte bietet.",
+                "1": "Der Dienst richtet sich an kleine E-Commerce-Teams ohne eigene Fachkraft für Barrierefreiheit.",
+                "2": "Er würde Compliance-Risiken reduzieren und Kunden helfen, durch den Abbau von Nutzungshürden die Konversion zu verbessern.",
+                "3": "Die Hauptrisiken sind die Verfügbarkeit von Fachkräften und uneinheitliche Kundendaten; deshalb würden wir mit einem begrenzten Pilotprojekt beginnen."
+              },
+              "knowledgeSharing": {
+                "0": "Welche dieser Techniken funktioniert am besten, wenn sich die Prioritäten im Laufe des Tages ändern?",
+                "1": "Eine der besprochenen Techniken ist Timeboxing.",
+                "2": "Ich reserviere jeden Morgen zwei konzentrierte Arbeitsblöcke für Aufgaben mit hoher Priorität und überprüfe sie am Ende der Woche."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Der Lernende macht eine Zusage zu Lieferzeit, Preis oder Umfang, die den genannten Einschränkungen des Kunden widerspricht.",
+              "problemSolving": "Der Lernende verwendet gegenüber dem Mitarbeiter respektlose, drohende oder diskriminierende Sprache.",
+              "creativeTask": "Der Lernende schlägt eine Dienstleistung vor, die eindeutig illegal, diskriminierend oder schädlich ist.",
+              "knowledgeSharing": "Der Lernende stellt erfundene oder unsichere Ratschläge als geprüfte Zeitmanagementtechnik dar."
             }
           },
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
@@ -2874,6 +2982,13 @@
           "thresholdLabel": "Bestehensschwelle",
           "thresholdValue": "{{requiredScore}}/{{maxScore}} erforderlich ({{threshold}}%)",
           "feedbackTitle": "Was verbessert werden kann",
+          "criticalErrorsTitle": "Was den Abschluss verhindert hat",
+          "criteriaTitle": "Bewertung nach Kriterien",
+          "criterionScore": "{{score}}/{{maxScore}} Pkt.",
+          "noFeedbackTitle": "Kein detailliertes Feedback verfügbar",
+          "noFeedbackDescription": "Diese Bewertung enthält keine bewerteten Kriterien und in Ihrem Versuch wurden keine kritischen Fehler erkannt.",
+          "loadingTitle": "Ihr Versuch wird geprüft",
+          "loadingDescription": "Das Gespräch wird mit den Kriterien der Lektion verglichen. Dies kann einen Moment dauern.",
           "openDetails": "Bewertungsdetails öffnen"
         },
         "voiceOverlay": {
@@ -3787,7 +3902,12 @@
       "complete_chapter": "Kapitel abgeschlossen",
       "expire_certificate": "Zertifikat abgelaufen",
       "reset_certificate": "Zertifikat zurückgesetzt",
-      "view_announcement": "Angezeigt"
+      "view_announcement": "Angezeigt",
+      "enroll_learning_path": "Lernpfad eingeschrieben",
+      "start_learning_path": "Lernpfad gestartet",
+      "complete_learning_path": "Lernpfad abgeschlossen",
+      "play_scorm": "SCORM gestartet",
+      "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
       "course": "Kurs",
@@ -3806,6 +3926,8 @@
       "qa": "Q&A",
       "announcement": "Ankündigung",
       "live_training": "Live-Schulung",
+      "learning_path": "Lernpfad",
+      "scorm": "SCORM",
       "global_settings": "Einstellungen"
     },
     "table": {
@@ -4435,7 +4557,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren."
+      "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren.",
+      "invalidAiJudgeConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Bewertungskonfiguration. Bitte generiere den Kurs erneut."
     }
   },
   "liveTraining": {

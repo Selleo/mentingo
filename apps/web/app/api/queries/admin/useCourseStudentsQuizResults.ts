@@ -4,24 +4,9 @@ import { ApiClient } from "../../api-client";
 
 export const COURSE_STUDENTS_QUIZ_RESULTS_QUERY_KEY = ["course-students-quiz-results", "admin"];
 
-export type CourseStudentsQuizResultsQueryParams = {
-  page?: number;
-  perPage?: number;
-  quizId?: string;
-  groupId?: string;
-  search?: string;
-  sort?:
-    | "studentName"
-    | "quizName"
-    | "quizScore"
-    | "attempts"
-    | "lastAttempt"
-    | "-studentName"
-    | "-quizName"
-    | "-quizScore"
-    | "-attempts"
-    | "-lastAttempt";
-};
+export type CourseStudentsQuizResultsQueryParams = NonNullable<
+  Parameters<typeof ApiClient.api.courseControllerGetCourseStudentsQuizResults>[1]
+>;
 
 interface CourseStudentsQuizResultsOptions {
   id: string;
