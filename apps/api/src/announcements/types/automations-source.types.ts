@@ -19,12 +19,15 @@ export type AutomationStepRecordInput = {
   parentId: UUIDType | null;
   automationId: UUIDType;
   type: AutomationType;
-  typeContext: JSON;
+  typeContext: typeContext;
 };
-
+export type typeContext = {
+  name: string;
+  [key: string]: unknown;
+};
 export type AutomationStepUpdateInput = {
   type: AutomationType;
-  typeContext: JSON;
+  typeContext: typeContext;
 };
 
 export type AutomationStepBulkUpdate = {
@@ -32,7 +35,7 @@ export type AutomationStepBulkUpdate = {
   parentId: UUIDType | null;
   automationId: UUIDType;
   type: AutomationType;
-  typeContext: JSON;
+  typeContext: typeContext;
 };
 
 export const AutomationStepSchema = Type.Omit(omitTenantId(createSelectSchema(automationSteps)), [
