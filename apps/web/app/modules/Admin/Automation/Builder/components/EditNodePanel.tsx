@@ -26,38 +26,28 @@ import { cn } from "~/lib/utils";
 
 import { TRIGGER_DEFINITIONS, getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
-import { useCoursesOptions } from "../hooks/useCourses";
-import { useCourseUsers } from "../hooks/useCourseUsers";
 
-import { ConfigFieldRenderer } from "./CofigFieldRenderer";
+import { EditActionModal } from "./EditActionModal";
 
-import type { AutomationStepDefinition, TriggerType } from "../automationBuilder.types";
+import type {
+  AutomationStepDefinition,
+  BuilderNode,
+  TriggerType,
+} from "../automationBuilder.types";
 import type { FC } from "react";
-import type { Option } from "~/components/ui/multiselect";
 
 export const EditNodePanel: FC = () => {
   const { t } = useTranslation();
   const selectedNodeId = useBuilderStore((s) => s.selectedNodeId);
   const nodes = useBuilderStore((s) => s.nodes);
   const selectNode = useBuilderStore((s) => s.selectNode);
-  const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
   const updateNodeType = useBuilderStore((s) => s.updateNodeType);
   const removeNode = useBuilderStore((s) => s.removeNode);
 
+  const [editActionNode, setEditActionNode] = useState<BuilderNode | null>(null);
+
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const stepDefinition = selectedNode ? getStepDefinition(selectedNode.type) : undefined;
-
-  const { options: courseOptions } = useCoursesOptions();
-
-  const selectedCourseId = selectedNode?.config?.courseId as string | undefined;
-
-  const { options } = useCourseUsers({
-    courseId: selectedCourseId,
-  });
-  const dynamicOptions: Record<string, Option[]> = {
-    courses: courseOptions,
-    users: options,
-  };
 
   const [changeTriggerDialogOpen, setChangeTriggerDialogOpen] = useState(false);
   const [pendingTriggerDef, setPendingTriggerDef] = useState<AutomationStepDefinition | null>(null);
@@ -69,6 +59,11 @@ export const EditNodePanel: FC = () => {
 
   const handleConfirmChangeTrigger = () => {
     if (selectedNode && pendingTriggerDef) {
+      const nonTriggerNodes = nodes.filter((n) => n.id !== selectedNode.id);
+      for (const node of nonTriggerNodes) {
+        removeNode(node.id);
+      }
+
       updateNodeType(
         selectedNode.id,
         pendingTriggerDef.type as TriggerType,
@@ -154,20 +149,17 @@ export const EditNodePanel: FC = () => {
 
                 <Separator />
 
-                {stepDefinition.configFields.map((field) => (
-                  <div key={field.key} className="space-y-2">
-                    <Label>{t(field.labelKey)}</Label>
-                    <ConfigFieldRenderer
-                      field={field}
-                      value={selectedNode.config[field.key]}
-                      onChange={(value) =>
-                        updateNodeConfig(selectedNode.id, { [field.key]: value })
-                      }
-                      t={t}
-                      dynamicOptions={dynamicOptions}
-                    />
-                  </div>
-                ))}
+                {selectedNode.kind === "action" && (
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    onClick={() => {
+                      setEditActionNode(selectedNode);
+                    }}
+                  >
+                    {t("automationBuilder.editPanel.editAction")}
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -201,12 +193,23 @@ export const EditNodePanel: FC = () => {
             <AlertDialogCancel onClick={handleCancelChangeTrigger}>
               {t("automationBuilder.editPanel.changeTriggerDialogCancel")}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmChangeTrigger}>
+            <AlertDialogAction
+              onClick={handleConfirmChangeTrigger}
+              className="bg-destructive text-primary-foreground hover:bg-destructive/90"
+            >
               {t("automationBuilder.editPanel.changeTriggerDialogConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editActionNode && (
+        <EditActionModal
+          open={Boolean(editActionNode)}
+          onClose={() => setEditActionNode(null)}
+          node={editActionNode}
+        />
+      )}
     </>
   );
 };
