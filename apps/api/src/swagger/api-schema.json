@@ -15851,6 +15851,39 @@
           }
         }
       }
+    },
+    "/api/automation-steps/{automationId}/steps": {
+      "put": {
+        "operationId": "AutomationStepsController_replaceAutomationStepTree",
+        "parameters": [
+          {
+            "name": "automationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {

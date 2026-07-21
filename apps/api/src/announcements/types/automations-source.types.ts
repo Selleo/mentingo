@@ -27,6 +27,14 @@ export type AutomationStepUpdateInput = {
   typeContext: JSON;
 };
 
+export type AutomationStepBulkUpdate = {
+  id: UUIDType;
+  parentId: UUIDType | null;
+  automationId: UUIDType;
+  type: AutomationType;
+  typeContext: JSON;
+};
+
 export const AutomationStepSchema = Type.Omit(omitTenantId(createSelectSchema(automationSteps)), [
   "createdAt",
   "updatedAt",

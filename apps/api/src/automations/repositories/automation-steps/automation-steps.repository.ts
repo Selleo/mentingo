@@ -5,7 +5,10 @@ import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { automationSteps } from "src/storage/schema";
 
-import type { AutomationStepRecordInput } from "src/announcements/types/automations-source.types";
+import type {
+  AutomationStepBulkUpdate,
+  AutomationStepRecordInput,
+} from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -64,5 +67,22 @@ export class AutomationStepsRepository {
       .returning();
 
     return deletedStep?.id;
+  }
+
+  async replaceAutomationStepTree(automationId: UUIDType, steps: AutomationStepBulkUpdate[]) {
+    return this.db.transaction(async (tx) => {
+      await tx.delete(automationSteps).where(eq(automationSteps.automationId, automationId));
+      await tx.insert(automationSteps).values(
+        steps.map((step) => ({
+          id: step.id,
+          parentId: step.parentId,
+          automationId,
+          type: step.type,
+          typeContext: step.typeContext,
+        })),
+      );
+
+      return true;
+    });
   }
 }

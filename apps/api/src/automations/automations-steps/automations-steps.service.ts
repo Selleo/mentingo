@@ -4,6 +4,7 @@ import { AutomationStepsRepository } from "../repositories/automation-steps/auto
 
 import type {
   AutomationStep,
+  AutomationStepBulkUpdate,
   AutomationStepRecordInput,
 } from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
@@ -19,7 +20,7 @@ export class AutomationStepsService {
 
   async createAutomationStep(input: AutomationStepRecordInput) {
     await this.validateStep(input);
-    await this.validateTree(input);
+    //await this.validateTree(input);
     return this.automationStepsRepository.createAutomationStep(input);
   }
 
@@ -58,6 +59,28 @@ export class AutomationStepsService {
     return updatedId;
   }
 
+  async ReplaceAutomationStepTree(automationId: UUIDType, input: AutomationStepBulkUpdate[]) {
+    const roots = input.filter((step) => step.parentId == null);
+    if (roots.length !== 1) {
+      throw new BadRequestException("automationSteps.toast.wrongNumberOfRoots");
+    }
+    const root = this.buildStepGraph(input as AutomationStep[]);
+    const hasCycle = this.hasCycle(root);
+    const isConnected = this.isConnected(root, input.length);
+
+    if (hasCycle) {
+      throw new BadRequestException("automationSteps.toast.cycleDetected");
+    }
+    if (!isConnected) {
+      throw new BadRequestException("automationSteps.toast.treeNotConnected");
+    }
+    //await this.deletePreviousTree(automationId);
+    const res = await this.automationStepsRepository.replaceAutomationStepTree(automationId, input);
+    if (!res) {
+      throw new BadRequestException("automationSteps.toast.bulkInsertFailed");
+    }
+  }
+
   async deleteAutomationStep(stepId: UUIDType) {
     const childrenIdsToDelete = await this.getIdsToDeleteCascade(stepId);
     const idsToDelete = [...childrenIdsToDelete, stepId];
@@ -73,6 +96,19 @@ export class AutomationStepsService {
     return stepId;
   }
 
+  private async deletePreviousTree(automationId: UUIDType) {
+    const allSteps = await this.getAllAutomationSteps(automationId);
+    if (allSteps.length > 0) {
+      const rootStep = allSteps.find((step) => step.parentId == null);
+      if (!rootStep) {
+        throw new BadRequestException("automationSteps.toast.updateFailed");
+      }
+      const deletedId = await this.deleteAutomationStep(rootStep.id);
+      if (!deletedId) {
+        throw new BadRequestException("automationSteps.toast.deleteFailed");
+      }
+    }
+  }
   private async getIdsToDeleteCascade(stepId: UUIDType) {
     const stepToDelete = await this.getAutomationStepById(stepId);
     const allSteps = await this.getAllAutomationSteps(stepToDelete.automationId);
@@ -232,5 +268,23 @@ export class AutomationStepsService {
     }
 
     return dfs(root);
+  }
+
+  private isConnected(root: StepNode, numberOfSteps: number) {
+    const visited = new Set<UUIDType>();
+
+    const dfs = (node: StepNode) => {
+      if (visited.has(node.value.id)) {
+        return;
+      }
+
+      visited.add(node.value.id);
+      for (const child of node.children) {
+        dfs(child);
+      }
+    };
+    dfs(root);
+
+    return visited.size === numberOfSteps;
   }
 }
