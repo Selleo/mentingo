@@ -98,13 +98,38 @@ export const ConfigFieldRenderer: FC<ConfigFieldRendererProps> = ({
 
     case "text":
       return (
-        <input
+        <Input
           type="text"
           className="w-full rounded-md border px-3 py-2 text-sm"
           placeholder={placeholder}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         />
+      );
+
+    case "emailTemplateSelect":
+      return (
+        <Select value={(value as string) ?? ""} onValueChange={(val) => onChange(val)}>
+          <SelectTrigger>
+            <SelectValue placeholder={placeholder ?? t("emailTemplates.select")} />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                <span className="flex items-center gap-2">
+                  {opt.imageUrl && (
+                    <img
+                      src={opt.imageUrl}
+                      alt=""
+                      className="size-5 shrink-0 rounded object-cover"
+                    />
+                  )}
+                  <span className="truncate">{opt.label}</span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
 
     default:

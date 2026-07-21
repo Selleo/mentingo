@@ -114,7 +114,6 @@ const TRIGGER_VARIABLES: Record<TriggerType, string[]> = {
   user_invited: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
   users_imported_invite: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
   user_password_reminder: ["email", "userId", "createPasswordLink"],
-  user_password_changed: ["email", "userId"],
   user_welcome: ["email", "userId", "coursesLink", "origin"],
   user_first_login: ["userId", "name", "coursesUrl"],
   users_assigned_to_course: [
