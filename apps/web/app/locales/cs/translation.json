@@ -4467,5 +4467,18 @@
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
     }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Krok automatizace nebyl nalezen",
+      "idMismatch": "Nelze změnit rodiče kroku ani automatizaci",
+      "updateFailed": "Krok automatizace se nepodařilo aktualizovat",
+      "deleteFailed": "Při mazání kroku automatizace došlo k chybě",
+      "nodeDeleteFailed": "Při hledání uzlu pro smazání došlo k chybě",
+      "noRootStep": "Prázdná automatizace musí nejprve obsahovat kořenový krok",
+      "hasRootAlready": "Automatizace již obsahuje kořenový krok",
+      "cycleDetected": "Strom kroků automatizace nesmí obsahovat cykly",
+      "stepTreeBuildFailed": "Při vytváření stromu kroků automatizace došlo k chybě"
+    }
   }
 }

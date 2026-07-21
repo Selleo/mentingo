@@ -4468,5 +4468,18 @@
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Passaggio dell'automazione non trovato",
+      "idMismatch": "Non è possibile modificare il passaggio padre o l'automazione",
+      "updateFailed": "Impossibile aggiornare il passaggio dell'automazione",
+      "deleteFailed": "Si è verificato un errore durante l'eliminazione del passaggio dell'automazione",
+      "nodeDeleteFailed": "Si è verificato un errore durante la ricerca del nodo da eliminare",
+      "noRootStep": "Un'automazione vuota deve prima avere un passaggio radice",
+      "hasRootAlready": "L'automazione ha già un passaggio radice",
+      "cycleDetected": "L'albero dei passaggi dell'automazione non può contenere cicli",
+      "stepTreeBuildFailed": "Si è verificato un errore durante la creazione dell'albero dei passaggi dell'automazione"
+    }
   }
 }

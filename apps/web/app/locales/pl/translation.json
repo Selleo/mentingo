@@ -4586,5 +4586,18 @@
       "maxParticipantsReached": "Osiągnięto maksymalną liczbę uczestników.",
       "maxParallelSessionsReached": "Osiągnięto maksymalną liczbę aktywnych sesji szkoleń na żywo."
     }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Nie znaleziono kroku automatyzacji",
+      "idMismatch": "Nie można zmienić rodzica kroku ani automatyzacji",
+      "updateFailed": "Nie udało się zaktualizować kroku automatyzacji",
+      "deleteFailed": "Wystąpił błąd podczas usuwania kroku automatyzacji",
+      "nodeDeleteFailed": "Wystąpił błąd podczas wyszukiwania węzła do usunięcia",
+      "noRootStep": "Pusta automatyzacja musi najpierw zawierać krok główny",
+      "hasRootAlready": "Automatyzacja ma już krok główny",
+      "cycleDetected": "Drzewo kroków automatyzacji nie może zawierać cykli",
+      "stepTreeBuildFailed": "Wystąpił błąd podczas budowania drzewa kroków automatyzacji"
+    }
   }
 }
