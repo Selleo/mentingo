@@ -235,7 +235,7 @@ export class LumaGeneratedCourseImportService {
           this.sanitizeText(aiMentor.aiMentorInstructions),
         ),
         type: this.mapAiMentorType(aiMentor.type),
-        name: this.sanitizeText(aiMentor.name),
+        name: buildJsonbField(data.language, this.sanitizeText(aiMentor?.name ?? "AI Mentor")),
         voiceMode: AI_MENTOR_VOICE_MODE.PRESET,
         ttsPreset: this.mapAiMentorTtsPreset(aiMentor.ttsPreset),
       })

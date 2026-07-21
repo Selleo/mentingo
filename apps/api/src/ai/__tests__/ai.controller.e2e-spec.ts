@@ -86,6 +86,7 @@ describe("AiController (e2e)", () => {
             SUPPORTED_LANGUAGES.PL,
             "Polish mentor instructions",
           ),
+          name: setJsonbField(aiMentorLessons.name, SUPPORTED_LANGUAGES.PL, "Polish mentor"),
         })
         .where(eq(aiMentorLessons.id, aiMentorLessonId));
     };
@@ -131,6 +132,7 @@ describe("AiController (e2e)", () => {
       );
 
       expect(polishLesson.instructions).toBe("Polish mentor instructions");
+      expect(polishLesson.name).toBe("Polish mentor");
       expect(fallbackLesson.instructions).toBe("English mentor instructions");
     });
   });

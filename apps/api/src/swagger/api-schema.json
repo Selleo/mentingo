@@ -26712,6 +26712,9 @@
                                       }
                                     ]
                                   },
+                                  "name": {
+                                    "type": "string"
+                                  },
                                   "avatarReference": {
                                     "anyOf": [
                                       {
@@ -26762,6 +26765,7 @@
                                   "lessonId",
                                   "aiMentorInstructions",
                                   "type",
+                                  "name",
                                   "avatarReference",
                                   "voiceMode",
                                   "ttsPreset",
@@ -29982,6 +29986,9 @@
                                 }
                               ]
                             },
+                            "name": {
+                              "type": "string"
+                            },
                             "avatarReference": {
                               "anyOf": [
                                 {
@@ -30032,6 +30039,7 @@
                             "lessonId",
                             "aiMentorInstructions",
                             "type",
+                            "name",
                             "avatarReference",
                             "voiceMode",
                             "ttsPreset",
@@ -30485,6 +30493,9 @@
                                     }
                                   ]
                                 },
+                                "name": {
+                                  "type": "string"
+                                },
                                 "avatarReference": {
                                   "anyOf": [
                                     {
@@ -30535,6 +30546,7 @@
                                 "lessonId",
                                 "aiMentorInstructions",
                                 "type",
+                                "name",
                                 "avatarReference",
                                 "voiceMode",
                                 "ttsPreset",
@@ -32525,6 +32537,9 @@
                           }
                         ]
                       },
+                      "name": {
+                        "type": "string"
+                      },
                       "avatarReference": {
                         "anyOf": [
                           {
@@ -32575,6 +32590,7 @@
                       "lessonId",
                       "aiMentorInstructions",
                       "type",
+                      "name",
                       "avatarReference",
                       "voiceMode",
                       "ttsPreset",
@@ -34937,6 +34953,9 @@
                               }
                             ]
                           },
+                          "name": {
+                            "type": "string"
+                          },
                           "avatarReference": {
                             "anyOf": [
                               {
@@ -34987,6 +35006,7 @@
                           "lessonId",
                           "aiMentorInstructions",
                           "type",
+                          "name",
                           "avatarReference",
                           "voiceMode",
                           "ttsPreset",
