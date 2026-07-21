@@ -1,4 +1,10 @@
--- Custom SQL migration file, put you code below! --
+-- Preserve the existing audience selection before the legacy column is removed.
+UPDATE "announcements"
+SET "audience" = CASE
+  WHEN "is_everyone" = true THEN 'all_users'
+  ELSE 'selected_users'
+END;
+--> statement-breakpoint
 
 -- System notifications are delivered to resolved recipients rather than to every tenant user.
 UPDATE "announcements"
