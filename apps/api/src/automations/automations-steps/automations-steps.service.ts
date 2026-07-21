@@ -19,7 +19,7 @@ export class AutomationStepsService {
 
   async createAutomationStep(input: AutomationStepRecordInput) {
     await this.validateStep(input);
-    //await this.validateTree(input);
+    await this.validateTree(input);
     return this.automationStepsRepository.createAutomationStep(input);
   }
 
@@ -31,7 +31,7 @@ export class AutomationStepsService {
     const step = await this.automationStepsRepository.getAutomationStepById(stepId);
 
     if (!step) {
-      throw new BadRequestException("Automation step not found");
+      throw new BadRequestException("automationSteps.toast.notFound");
     }
 
     return step;
@@ -39,10 +39,12 @@ export class AutomationStepsService {
 
   async updateAutomationStep(stepId: UUIDType, input: AutomationStepRecordInput) {
     const stepToUpdate = await this.getAutomationStepById(stepId);
+
     const isIdMismatch =
-      stepToUpdate.parentId != input.parentId || stepToUpdate.automationId != input.automationId;
+      stepToUpdate.parentId !== input.parentId || stepToUpdate.automationId !== input.automationId;
+
     if (isIdMismatch) {
-      throw new BadRequestException("You can't change step's parent or automation");
+      throw new BadRequestException("automationSteps.toast.idMismatch");
     }
 
     await this.validateStep(input);
@@ -50,7 +52,7 @@ export class AutomationStepsService {
     const updatedId = await this.automationStepsRepository.updateAutomationStep(stepId, input);
 
     if (!updatedId) {
-      throw new BadRequestException("Couldn't update automation step");
+      throw new BadRequestException("automationSteps.toast.updateFailed");
     }
 
     return updatedId;
@@ -58,13 +60,16 @@ export class AutomationStepsService {
 
   async deleteAutomationStep(stepId: UUIDType) {
     const childrenIdsToDelete = await this.getIdsToDeleteCascade(stepId);
-    const IdsToDelete = [...childrenIdsToDelete, stepId];
-    for (const id of IdsToDelete) {
+    const idsToDelete = [...childrenIdsToDelete, stepId];
+
+    for (const id of idsToDelete) {
       const deletedId = await this.automationStepsRepository.deleteAutomationStep(id);
+
       if (!deletedId) {
-        throw new BadRequestException("Error while deleting automation step");
+        throw new BadRequestException("automationSteps.toast.deleteFailed");
       }
     }
+
     return stepId;
   }
 
@@ -74,6 +79,7 @@ export class AutomationStepsService {
 
     const root = this.buildStepGraph(allSteps);
     const nodeToDelete = this.findNode(root, stepId);
+
     return this.getChildrenIds(nodeToDelete);
   }
 
@@ -114,26 +120,25 @@ export class AutomationStepsService {
       stack.push(...current.children);
     }
 
-    throw new BadRequestException("Error while finding node to delete");
+    throw new BadRequestException("automationSteps.toast.nodeDeleteFailed");
   }
 
   private async hasNoSteps(automationId: UUIDType) {
     const allSteps = await this.getAllAutomationSteps(automationId);
-
-    if (allSteps.length == 0) return true;
-    return false;
+    return allSteps.length === 0;
   }
 
   private async validateStep(input: AutomationStepRecordInput) {
     const hasNoSteps = await this.hasNoSteps(input.automationId);
 
     if (hasNoSteps && input.parentId != null) {
-      throw new BadRequestException("Empty automation has to have root step first");
+      throw new BadRequestException("automationSteps.toast.noRootStep");
     }
 
     if (!hasNoSteps && input.parentId == null) {
-      throw new BadRequestException("Automation already has a root step");
+      throw new BadRequestException("automationSteps.toast.hasRootAlready");
     }
+
     if (input.parentId) {
       await this.getAutomationStepById(input.parentId);
     }
@@ -141,19 +146,25 @@ export class AutomationStepsService {
 
   private async validateTree(input: AutomationStepRecordInput) {
     const fetchedSteps = (await this.getAllAutomationSteps(input.automationId)) as AutomationStep[];
-    if (fetchedSteps.length == 0) return;
+
+    if (fetchedSteps.length === 0) {
+      return;
+    }
+
     const stepToInsert: AutomationStep = {
-      type: input.type,
       id: "-1",
       automationId: input.automationId,
       parentId: input.parentId,
+      type: input.type,
       typeContext: input.typeContext,
     };
 
     fetchedSteps.push(stepToInsert);
+
     const root = this.buildStepGraph(fetchedSteps);
+
     if (this.hasCycle(root)) {
-      throw new BadRequestException("Automation step tree can't have cycles");
+      throw new BadRequestException("automationSteps.toast.cycleDetected");
     }
   }
 
@@ -166,6 +177,7 @@ export class AutomationStepsService {
         children: [],
       });
     }
+
     let root: StepNode | null = null;
 
     for (const step of steps) {
@@ -177,14 +189,16 @@ export class AutomationStepsService {
       }
 
       const parent = nodes.get(step.parentId);
-      console.log("CONNECT:", step.id, "->", step.parentId, "parent exists:", !!parent);
+
       if (parent) {
         parent.children.push(node);
       }
     }
+
     if (!root) {
-      throw new BadRequestException("Error while building step tree");
+      throw new BadRequestException("automationSteps.toast.stepTreeBuildFailed");
     }
+
     return root;
   }
 
@@ -192,11 +206,16 @@ export class AutomationStepsService {
     const visited = new Set<UUIDType>();
     const visiting = new Set<UUIDType>();
 
-    function dfs(node: StepNode) {
+    function dfs(node: StepNode): boolean {
       const id = node.value.id;
 
-      if (visiting.has(id)) return true;
-      if (visited.has(id)) return false;
+      if (visiting.has(id)) {
+        return true;
+      }
+
+      if (visited.has(id)) {
+        return false;
+      }
 
       visiting.add(id);
 
@@ -205,10 +224,13 @@ export class AutomationStepsService {
           return true;
         }
       }
+
       visiting.delete(id);
       visited.add(id);
+
       return false;
     }
+
     return dfs(root);
   }
 }

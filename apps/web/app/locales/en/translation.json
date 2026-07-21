@@ -4547,5 +4547,18 @@
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Automation step not found",
+      "idMismatch": "You can't change step's parent or automation",
+      "updateFailed": "Couldn't update automation step",
+      "deleteFailed": "Error while deleting automation step",
+      "nodeDeleteFailed": "Error while finding node to delete",
+      "noRootStep": "Empty automation has to have root step first",
+      "hasRootAlready": "Automation already has a root step",
+      "cycleDetected": "Automation step tree can't have cycles",
+      "stepTreeBuildFailed": "Error while building step tree"
+    }
   }
 }
