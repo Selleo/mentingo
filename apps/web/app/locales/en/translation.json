@@ -4685,6 +4685,10 @@
       "emptyDescription": "Drag a trigger or action from the sidebar to get started.",
       "emptyDescriptionTrigger": "Drag a trigger from the sidebar to start building your automation.",
       "removeNode": "Remove node",
+      "deleteNodeDialogTitle": "Remove node",
+      "deleteNodeDialogDescription": "Are you sure you want to remove this node? This action cannot be undone.",
+      "deleteNodeDialogCancel": "Cancel",
+      "deleteNodeDialogConfirm": "Remove",
       "addChild": "Add child step",
       "zoomIn": "Zoom in",
       "zoomOut": "Zoom out",
@@ -4716,7 +4720,11 @@
       "recipientEnrolledUser": "Enrolled user",
       "recipientAdmin": "Administrator",
       "recipientManager": "Manager",
-      "removeNode": "Remove this step"
+      "removeNode": "Remove this step",
+      "deleteNodeDialogTitle": "Remove node",
+      "deleteNodeDialogDescription": "Are you sure you want to remove this node? This action cannot be undone.",
+      "deleteNodeDialogCancel": "Cancel",
+      "deleteNodeDialogConfirm": "Remove"
     },
     "config": {
       "daysBefore": "Days before",

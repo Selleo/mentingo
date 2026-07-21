@@ -49,6 +49,7 @@ export const EditNodePanel: FC = () => {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const stepDefinition = selectedNode ? getStepDefinition(selectedNode.type) : undefined;
 
+  const [deleteNodeDialogOpen, setDeleteNodeDialogOpen] = useState(false);
   const [changeTriggerDialogOpen, setChangeTriggerDialogOpen] = useState(false);
   const [pendingTriggerDef, setPendingTriggerDef] = useState<AutomationStepDefinition | null>(null);
 
@@ -169,7 +170,7 @@ export const EditNodePanel: FC = () => {
                 size="sm"
                 className="w-full"
                 onClick={() => {
-                  removeNode(selectedNode.id);
+                  setDeleteNodeDialogOpen(true);
                 }}
               >
                 {t("automationBuilder.editPanel.removeNode")}
@@ -178,6 +179,35 @@ export const EditNodePanel: FC = () => {
           </div>
         )}
       </aside>
+
+      <AlertDialog open={deleteNodeDialogOpen} onOpenChange={setDeleteNodeDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("automationBuilder.editPanel.deleteNodeDialogTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationBuilder.editPanel.deleteNodeDialogDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteNodeDialogOpen(false)}>
+              {t("automationBuilder.editPanel.deleteNodeDialogCancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (selectedNode) {
+                  removeNode(selectedNode.id);
+                }
+                setDeleteNodeDialogOpen(false);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("automationBuilder.editPanel.deleteNodeDialogConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={changeTriggerDialogOpen} onOpenChange={setChangeTriggerDialogOpen}>
         <AlertDialogContent>

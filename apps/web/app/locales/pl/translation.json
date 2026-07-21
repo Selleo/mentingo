@@ -4724,6 +4724,10 @@
       "emptyDescription": "Przeciągnij trigger lub akcję z panelu bocznego, aby rozpocząć.",
       "emptyDescriptionTrigger": "Przeciągnij trigger z panelu bocznego, aby rozpocząć budowanie automatyzacji.",
       "removeNode": "Usuń węzeł",
+      "deleteNodeDialogTitle": "Usuń węzeł",
+      "deleteNodeDialogDescription": "Czy na pewno chcesz usunąć ten węzeł? Tej operacji nie można cofnąć.",
+      "deleteNodeDialogCancel": "Anuluj",
+      "deleteNodeDialogConfirm": "Usuń",
       "addChild": "Dodaj krok podrzędny",
       "zoomIn": "Przybliż",
       "zoomOut": "Oddal",
@@ -4755,7 +4759,11 @@
       "recipientEnrolledUser": "Zapisany użytkownik",
       "recipientAdmin": "Administrator",
       "recipientManager": "Menedżer",
-      "removeNode": "Usuń ten krok"
+      "removeNode": "Usuń ten krok",
+      "deleteNodeDialogTitle": "Usuń węzeł",
+      "deleteNodeDialogDescription": "Czy na pewno chcesz usunąć ten węzeł? Tej operacji nie można cofnąć.",
+      "deleteNodeDialogCancel": "Anuluj",
+      "deleteNodeDialogConfirm": "Usuń"
     },
     "config": {
       "daysBefore": "Dni przed",

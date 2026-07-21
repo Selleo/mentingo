@@ -1,7 +1,18 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
@@ -70,6 +81,8 @@ export const CanvasNode: FC<CanvasNodeProps> = ({ node, onAddChild }) => {
   const selectedNodeId = useBuilderStore((s) => s.selectedNodeId);
   const nodes = useBuilderStore((s) => s.nodes);
 
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
   const { setNodeRef, isOver } = useDroppable({
     id: `canvas-node-${node.id}`,
     data: { targetNodeId: node.id },
@@ -121,7 +134,7 @@ export const CanvasNode: FC<CanvasNodeProps> = ({ node, onAddChild }) => {
                 className="size-6 shrink-0 opacity-0 transition-opacity group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
-                  removeNode(node.id);
+                  setDeleteDialogOpen(true);
                 }}
                 aria-label={t("automationBuilder.canvas.removeNode")}
               >
@@ -179,6 +192,33 @@ export const CanvasNode: FC<CanvasNodeProps> = ({ node, onAddChild }) => {
           </>
         )}
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("automationBuilder.canvas.deleteNodeDialogTitle")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationBuilder.canvas.deleteNodeDialogDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteDialogOpen(false)}>
+              {t("automationBuilder.canvas.deleteNodeDialogCancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                removeNode(node.id);
+                setDeleteDialogOpen(false);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("automationBuilder.canvas.deleteNodeDialogConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 };
