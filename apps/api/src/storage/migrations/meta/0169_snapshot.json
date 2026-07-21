@@ -1,6 +1,6 @@
 {
-  "id": "4fef83a0-d466-4ce5-816b-5616d6849b72",
-  "prevId": "62b4757e-32f1-4fc9-8c16-4f3edc2bb66e",
+  "id": "26d3d922-229a-4e20-ad46-1680fb3053d9",
+  "prevId": "fe124e34-ec33-44a1-af29-75af924ceabf",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1162,13 +1162,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{}'::jsonb"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'AI Mentor'"
         },
         "name_translations": {
           "name": "name_translations",

@@ -1,6 +1,6 @@
 {
-  "id": "4fef83a0-d466-4ce5-816b-5616d6849b72",
-  "prevId": "62b4757e-32f1-4fc9-8c16-4f3edc2bb66e",
+  "id": "d59982a9-f36d-498a-a86b-dc8c9b5d25c8",
+  "prevId": "5c666043-650a-4d7f-9554-0fd2fd4d7326",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1169,13 +1169,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'AI Mentor'"
-        },
-        "name_translations": {
-          "name": "name_translations",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
         },
         "avatar_reference": {
           "name": "avatar_reference",
@@ -3753,6 +3746,13 @@
           "notNull": true,
           "default": "'draft'"
         },
+        "thumbnail_position_y": {
+          "name": "thumbnail_position_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
         "has_certificate": {
           "name": "has_certificate",
           "type": "boolean",
@@ -3767,6 +3767,13 @@
           "notNull": true,
           "default": 0
         },
+        "show_author_section": {
+          "name": "show_author_section",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
         "currency": {
           "name": "currency",
           "type": "varchar",
@@ -3780,6 +3787,13 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "learning_outcomes": {
+          "name": "learning_outcomes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "course_type": {
           "name": "course_type",
