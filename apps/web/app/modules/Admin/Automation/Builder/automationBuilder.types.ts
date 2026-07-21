@@ -42,7 +42,26 @@ export interface AutomationStepDefinition {
   kind: NodeKind;
   type: TriggerType | ActionType;
   labelKey: string;
-  icon: string;
+  icon:
+    | "user-plus"
+    | "upload"
+    | "key"
+    | "lock"
+    | "sparkles"
+    | "log-in"
+    | "book-open"
+    | "user-x"
+    | "check-circle"
+    | "graduation-cap"
+    | "user-check"
+    | "shield"
+    | "trophy"
+    | "award"
+    | "archive"
+    | "megaphone"
+    | "at-sign"
+    | "calendar-clock"
+    | "mail";
   color: "blue" | "emerald";
 }
 
@@ -58,7 +77,7 @@ const USERS_IMPORTED_INVITE_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "users_imported_invite",
   labelKey: "automationBuilder.blocks.usersImportedInvite",
-  icon: "file-up",
+  icon: "upload",
   color: "blue",
 };
 
@@ -66,7 +85,7 @@ const USER_PASSWORD_REMINDER_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "user_password_reminder",
   labelKey: "automationBuilder.blocks.userPasswordReminder",
-  icon: "key-round",
+  icon: "key",
   color: "blue",
 };
 
@@ -98,7 +117,7 @@ const USERS_ASSIGNED_TO_COURSE_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "users_assigned_to_course",
   labelKey: "automationBuilder.blocks.usersAssignedToCourse",
-  icon: "book-open-check",
+  icon: "book-open",
   color: "blue",
 };
 
@@ -114,7 +133,7 @@ const USERS_LONG_INACTIVITY_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "users_long_inactivity",
   labelKey: "automationBuilder.blocks.usersLongInactivity",
-  icon: "user-minus",
+  icon: "user-x",
   color: "blue",
 };
 
@@ -122,7 +141,7 @@ const USER_CHAPTER_FINISHED_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "user_chapter_finished",
   labelKey: "automationBuilder.blocks.userChapterFinished",
-  icon: "check-circle-2",
+  icon: "check-circle",
   color: "blue",
 };
 
@@ -147,7 +166,7 @@ const USER_PASSWORD_CREATED_TRIGGER: AutomationStepDefinition = {
   kind: "trigger",
   type: "user_password_created",
   labelKey: "automationBuilder.blocks.userPasswordCreated",
-  icon: "shield-check",
+  icon: "shield",
   color: "blue",
 };
 

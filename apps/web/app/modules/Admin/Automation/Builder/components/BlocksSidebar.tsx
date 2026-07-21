@@ -39,7 +39,7 @@ const DraggableBlock: FC<DraggableBlockProps> = ({ block }) => {
     >
       <span
         className={cn(
-          "flex size-7 items-center justify-center rounded",
+          "flex size-7 items-center justify-center rounded shrink-0",
           block.kind === "trigger"
             ? "bg-blue-100 text-blue-600"
             : "bg-emerald-100 text-emerald-600",
