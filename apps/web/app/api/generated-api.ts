@@ -2172,6 +2172,7 @@ export interface GetBetaCourseByIdResponse {
           lessonId: string;
           aiMentorInstructions: string;
           type: "mentor" | "teacher" | "roleplay";
+          name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
           ttsPreset: "male" | "female";
@@ -2855,6 +2856,7 @@ export type BetaCreateChapterBody = {
       lessonId: string;
       aiMentorInstructions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -2940,6 +2942,7 @@ export type UpdateChapterBody = ({
       lessonId: string;
       aiMentorInstructions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -3273,6 +3276,7 @@ export type BetaCreateLessonBody = {
     lessonId: string;
     aiMentorInstructions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3758,6 +3762,7 @@ export type BetaUpdateLessonBody = ({
     lessonId: string;
     aiMentorInstructions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";

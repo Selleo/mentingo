@@ -4575,6 +4575,14 @@ export class CourseService {
             description: deleteJsonbField(lessons.description, language),
           })
           .where(inArray(lessons.id, lessonIds));
+
+        await trx
+          .update(aiMentorLessons)
+          .set({
+            name: deleteJsonbField(aiMentorLessons.name, language),
+            aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
+          })
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
       }
 
       if (questionIds.length) {
@@ -5147,6 +5155,14 @@ export class CourseService {
         };
 
         if (lesson.type === LESSON_TYPES.AI_MENTOR) {
+          yield {
+            id: lesson.id,
+            hasValue: Boolean(lesson.aiMentor?.name?.length),
+            baseValue: baseLesson?.aiMentor?.name,
+            field: aiMentorLessons.name,
+            idColumn: aiMentorLessons.lessonId,
+          };
+
           yield {
             id: lesson.id,
             hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),

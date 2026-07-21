@@ -1170,6 +1170,34 @@
       "when": 1784276853950,
       "tag": "0166_add_course_statistics_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 167,
+      "version": "7",
+      "when": 1784540972336,
+      "tag": "0167_add_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 168,
+      "version": "7",
+      "when": 1784541112836,
+      "tag": "0168_backfill_ai_mentor_name_translation_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 169,
+      "version": "7",
+      "when": 1784541141829,
+      "tag": "0169_drop_ai_mentor_name_text_column",
+      "breakpoints": true
+    },
+    {
+      "idx": 170,
+      "version": "7",
+      "when": 1784541162859,
+      "tag": "0170_rename_ai_mentor_name_translation_column",
+      "breakpoints": true
     }
   ]
 }
