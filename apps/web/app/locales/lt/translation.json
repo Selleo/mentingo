@@ -4581,7 +4581,26 @@
       "userEnrolled": "Vartotojas užregistruotas",
       "certificateExpiringSoon": "Sertifikatas netrukus baigsis",
       "liveTransmissionStartingSoon": "Tiesioginė transliacija netrukus prasidės",
-      "sendEmail": "Siųsti el. laišką"
+      "sendEmail": "Siųsti el. laišką",
+      "userInvited": "Vartotojas pakviestas",
+      "usersImportedInvite": "Vartotojai importuoti (kvietimas)",
+      "userPasswordReminder": "Slaptažodžio priminimas",
+      "userPasswordChanged": "Slaptažodis pakeistas",
+      "userWelcome": "Pasisveikinimo žinutė",
+      "userFirstLogin": "Pirmas prisijungimas",
+      "usersAssignedToCourse": "Vartotojai priskirti kursui",
+      "usersShortInactivity": "Trumpas neaktyvumas",
+      "usersLongInactivity": "Ilgas neaktyvumas",
+      "userChapterFinished": "Skyrius baigtas",
+      "userCourseFinished": "Kursas baigtas",
+      "userRegistered": "Vartotojas užsiregistravo",
+      "userPasswordCreated": "Slaptažodis sukurtas",
+      "courseCompleted": "Kursas užbaigtas",
+      "certificateExpirationWarning": "Sertifikato galiojimo pabaigos įspėjimas",
+      "certificateArchived": "Sertifikatas archyvuotas",
+      "announcementPublished": "Skelbimas paskelbtas",
+      "courseChatUserMentioned": "Vartotojas paminėtas pokalbyje",
+      "courseDueDateReminder": "Kurso termino priminimas"
     },
     "canvas": {
       "emptyTitle": "Jūsų automatizavimo drobė tuščia",
@@ -4600,9 +4619,9 @@
       "nodeType": "Mazgo tipas",
       "changeTriggerLabel": "Pakeisti trigerį į",
       "changeTriggerDialogTitle": "Pakeisti trigerį",
-      "changeTriggerDialogDescription": "Pakeitus trigerio tipą, jo konfigūracija bus atstatyta. Ar tikrai norite tęsti?",
+      "changeTriggerDialogDescription": "Pakeitus trigerio tipą, visi veiksmai ir sąlygos bus pašalinti iš automatizacijos. Drobėje liks tik trigeris. Ar tikrai norite tęsti?",
       "changeTriggerDialogCancel": "Atšaukti",
-      "changeTriggerDialogConfirm": "Pakeisti trigerį",
+      "changeTriggerDialogConfirm": "Ištrinti viską ir pakeisti trigerį",
       "conditionValue": "Reikšmė",
       "conditionValuePlaceholder": "Įveskite reikšmę...",
       "operator": "Operatorius",
@@ -4612,6 +4631,8 @@
       "operatorContains": "Apima",
       "emailSubject": "El. laiško tema",
       "emailSubjectPlaceholder": "Įveskite temą...",
+      "emailTemplate": "El. laiško šablonas",
+      "emailTemplatePlaceholder": "Pasirinkite šabloną",
       "emailBody": "El. laiško turinys",
       "emailBodyPlaceholder": "Parašykite el. laiško turinį...",
       "emailRecipient": "Gavėjas",
@@ -4630,7 +4651,9 @@
       "daysEnrolled": "Dienų nuo registracijos",
       "daysEnrolledPlaceholder": "pvz. 30",
       "minutesBefore": "Minučių prieš",
-      "minutesBeforePlaceholder": "pvz. 60"
+      "minutesBeforePlaceholder": "pvz. 60",
+      "daysInactive": "Neaktyvumo dienų",
+      "daysInactivePlaceholder": "pvz. 14"
     }
   }
 }

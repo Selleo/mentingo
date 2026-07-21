@@ -4579,7 +4579,26 @@
       "userEnrolled": "Uživatel zapsán",
       "certificateExpiringSoon": "Certifikát brzy vyprší",
       "liveTransmissionStartingSoon": "Živý přenos brzy začne",
-      "sendEmail": "Odeslat e-mail"
+      "sendEmail": "Odeslat e-mail",
+      "userInvited": "Uživatel pozván",
+      "usersImportedInvite": "Uživatelé importováni (pozvánka)",
+      "userPasswordReminder": "Připomínka hesla",
+      "userPasswordChanged": "Heslo změněno",
+      "userWelcome": "Uvítací zpráva",
+      "userFirstLogin": "První přihlášení",
+      "usersAssignedToCourse": "Uživatelé přiřazeni ke kurzu",
+      "usersShortInactivity": "Krátká neaktivita",
+      "usersLongInactivity": "Dlouhá neaktivita",
+      "userChapterFinished": "Kapitola dokončena",
+      "userCourseFinished": "Kurz dokončen",
+      "userRegistered": "Uživatel registrován",
+      "userPasswordCreated": "Heslo vytvořeno",
+      "courseCompleted": "Kurz splněn",
+      "certificateExpirationWarning": "Varování o vypršení certifikátu",
+      "certificateArchived": "Certifikát archivován",
+      "announcementPublished": "Oznámení zveřejněno",
+      "courseChatUserMentioned": "Uživatel zmíněn v chatu",
+      "courseDueDateReminder": "Připomínka termínu kurzu"
     },
     "canvas": {
       "emptyTitle": "Vaše plátno automatizace je prázdné",
@@ -4597,9 +4616,9 @@
       "nodeType": "Typ uzlu",
       "changeTriggerLabel": "Změnit trigger na",
       "changeTriggerDialogTitle": "Změnit trigger",
-      "changeTriggerDialogDescription": "Změna typu triggeru resetuje jeho konfiguraci. Opravdu chcete pokračovat?",
+      "changeTriggerDialogDescription": "Změna typu triggeru odstraní všechny akce a podmínky z automatizace. Na plátně zůstane pouze trigger. Opravdu chcete pokračovat?",
       "changeTriggerDialogCancel": "Zrušit",
-      "changeTriggerDialogConfirm": "Změnit trigger",
+      "changeTriggerDialogConfirm": "Smazat vše a změnit trigger",
       "triggerValue": "Hodnota",
       "triggerValuePlaceholder": "Zadejte hodnotu...",
       "operator": "Operátor",
@@ -4609,6 +4628,8 @@
       "operatorContains": "Obsahuje",
       "emailSubject": "Předmět e-mailu",
       "emailSubjectPlaceholder": "Zadejte předmět...",
+      "emailTemplate": "Šablona e-mailu",
+      "emailTemplatePlaceholder": "Vyberte šablonu",
       "emailBody": "Tělo e-mailu",
       "emailBodyPlaceholder": "Napište obsah e-mailu...",
       "emailRecipient": "Příjemce",
@@ -4627,7 +4648,9 @@
       "daysEnrolled": "Dní od zápisu",
       "daysEnrolledPlaceholder": "např. 30",
       "minutesBefore": "Minut předem",
-      "minutesBeforePlaceholder": "např. 60"
+      "minutesBeforePlaceholder": "např. 60",
+      "daysInactive": "Dní neaktivity",
+      "daysInactivePlaceholder": "např. 14"
     }
   }
 }

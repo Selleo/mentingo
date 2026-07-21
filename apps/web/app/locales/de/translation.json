@@ -4579,7 +4579,26 @@
       "userEnrolled": "Benutzer eingeschrieben",
       "certificateExpiringSoon": "Zertifikat läuft bald ab",
       "liveTransmissionStartingSoon": "Live-Übertragung startet bald",
-      "sendEmail": "E-Mail senden"
+      "sendEmail": "E-Mail senden",
+      "userInvited": "Benutzer eingeladen",
+      "usersImportedInvite": "Benutzer importiert (Einladung)",
+      "userPasswordReminder": "Passworterinnerung",
+      "userPasswordChanged": "Passwort geändert",
+      "userWelcome": "Willkommensnachricht",
+      "userFirstLogin": "Erste Anmeldung",
+      "usersAssignedToCourse": "Benutzer zum Kurs zugewiesen",
+      "usersShortInactivity": "Kurze Inaktivität",
+      "usersLongInactivity": "Lange Inaktivität",
+      "userChapterFinished": "Kapitel abgeschlossen",
+      "userCourseFinished": "Kurs abgeschlossen",
+      "userRegistered": "Benutzer registriert",
+      "userPasswordCreated": "Passwort erstellt",
+      "courseCompleted": "Kurs bestanden",
+      "certificateExpirationWarning": "Zertifikat-Ablaufwarnung",
+      "certificateArchived": "Zertifikat archiviert",
+      "announcementPublished": "Ankündigung veröffentlicht",
+      "courseChatUserMentioned": "Benutzer im Chat erwähnt",
+      "courseDueDateReminder": "Kurs-Fälligkeitserinnerung"
     },
     "canvas": {
       "emptyTitle": "Ihre Automatisierungsleinwand ist leer",
@@ -4598,9 +4617,9 @@
       "nodeType": "Knotentyp",
       "changeTriggerLabel": "Trigger ändern zu",
       "changeTriggerDialogTitle": "Trigger ändern",
-      "changeTriggerDialogDescription": "Das Ändern des Trigger-Typs setzt seine Konfiguration zurück. Möchten Sie wirklich fortfahren?",
+      "changeTriggerDialogDescription": "Das Ändern des Trigger-Typs entfernt alle Aktionen und Bedingungen aus der Automatisierung. Nur der Trigger bleibt auf der Leinwand. Möchten Sie wirklich fortfahren?",
       "changeTriggerDialogCancel": "Abbrechen",
-      "changeTriggerDialogConfirm": "Trigger ändern",
+      "changeTriggerDialogConfirm": "Alles löschen und Trigger ändern",
       "conditionValue": "Wert",
       "conditionValuePlaceholder": "Wert eingeben...",
       "operator": "Operator",
@@ -4610,6 +4629,8 @@
       "operatorContains": "Enthält",
       "emailSubject": "E-Mail-Betreff",
       "emailSubjectPlaceholder": "Betreff eingeben...",
+      "emailTemplate": "E-Mail-Vorlage",
+      "emailTemplatePlaceholder": "Vorlage auswählen",
       "emailBody": "E-Mail-Inhalt",
       "emailBodyPlaceholder": "Schreiben Sie Ihren E-Mail-Inhalt...",
       "emailRecipient": "Empfänger",
@@ -4628,7 +4649,9 @@
       "daysEnrolled": "Tage seit Anmeldung",
       "daysEnrolledPlaceholder": "z.B. 30",
       "minutesBefore": "Minuten vorher",
-      "minutesBeforePlaceholder": "z.B. 60"
+      "minutesBeforePlaceholder": "z.B. 60",
+      "daysInactive": "Tage Inaktivität",
+      "daysInactivePlaceholder": "z.B. 14"
     }
   }
 }

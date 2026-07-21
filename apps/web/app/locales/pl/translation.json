@@ -4698,7 +4698,26 @@
       "userEnrolled": "Użytkownik zapisany",
       "certificateExpiringSoon": "Certyfikat wygasa wkrótce",
       "liveTransmissionStartingSoon": "Transmisja na żywo wkrótce",
-      "sendEmail": "Wyślij e-mail"
+      "sendEmail": "Wyślij e-mail",
+      "userInvited": "Użytkownik zaproszony",
+      "usersImportedInvite": "Użytkownicy zaimportowani (zaproszenie)",
+      "userPasswordReminder": "Przypomnienie hasła",
+      "userPasswordChanged": "Hasło zmienione",
+      "userWelcome": "Wiadomość powitalna",
+      "userFirstLogin": "Pierwsze logowanie",
+      "usersAssignedToCourse": "Użytkownicy przypisani do kursu",
+      "usersShortInactivity": "Krótka nieaktywność",
+      "usersLongInactivity": "Długa nieaktywność",
+      "userChapterFinished": "Rozdział ukończony",
+      "userCourseFinished": "Kurs ukończony",
+      "userRegistered": "Użytkownik zarejestrowany",
+      "userPasswordCreated": "Hasło utworzone",
+      "courseCompleted": "Kurs zaliczony",
+      "certificateExpirationWarning": "Ostrzeżenie o wygaśnięciu certyfikatu",
+      "certificateArchived": "Certyfikat zarchiwizowany",
+      "announcementPublished": "Ogłoszenie opublikowane",
+      "courseChatUserMentioned": "Użytkownik wspomniany na czacie",
+      "courseDueDateReminder": "Przypomnienie o terminie kursu"
     },
     "canvas": {
       "emptyTitle": "Płótno automatyzacji jest puste",
@@ -4716,9 +4735,9 @@
       "nodeType": "Typ węzła",
       "changeTriggerLabel": "Zmień trigger na",
       "changeTriggerDialogTitle": "Zmiana triggera",
-      "changeTriggerDialogDescription": "Zmiana typu triggera spowoduje zresetowanie jego konfiguracji. Czy na pewno chcesz kontynuować?",
+      "changeTriggerDialogDescription": "Zmiana typu triggera usunie wszystkie akcje i warunki z automatyzacji. Na canvas pozostanie tylko trigger. Czy na pewno chcesz kontynuować?",
       "changeTriggerDialogCancel": "Anuluj",
-      "changeTriggerDialogConfirm": "Zmień trigger",
+      "changeTriggerDialogConfirm": "Usuń wszystko i zmień trigger",
       "triggerValue": "Wartość",
       "triggerValuePlaceholder": "Wprowadź wartość...",
       "operator": "Operator",
@@ -4728,6 +4747,8 @@
       "operatorContains": "Zawiera",
       "emailSubject": "Temat e-maila",
       "emailSubjectPlaceholder": "Wprowadź temat...",
+      "emailTemplate": "Szablon e-maila",
+      "emailTemplatePlaceholder": "Wybierz szablon",
       "emailBody": "Treść e-maila",
       "emailBodyPlaceholder": "Napisz treść wiadomości...",
       "emailRecipient": "Odbiorca",
@@ -4746,7 +4767,22 @@
       "daysEnrolled": "Dni od zapisu",
       "daysEnrolledPlaceholder": "np. 30",
       "minutesBefore": "Minut przed",
-      "minutesBeforePlaceholder": "np. 60"
+      "minutesBeforePlaceholder": "np. 60",
+      "daysInactive": "Dni nieaktywności",
+      "daysInactivePlaceholder": "np. 14"
+    },
+    "editAction": {
+      "title": "Edytuj akcję",
+      "sendEmail": "Wyślij email",
+      "emailTemplate": "Szablon email",
+      "selectTemplate": "Wybierz szablon...",
+      "language": "Język",
+      "placeholders": "Zmienne szablonu",
+      "selectTemplateFirst": "Wybierz szablon email, aby zobaczyć dostępne zmienne.",
+      "noPlaceholders": "Ten szablon nie posiada zmiennych do uzupełnienia.",
+      "placeholdersDescription": "Przypisz każdą zmienną szablonu do danych dostarczanych przez trigger.",
+      "selectVariable": "Wybierz zmienną triggera...",
+      "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne."
     }
   }
 }

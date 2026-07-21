@@ -4659,7 +4659,26 @@
       "userEnrolled": "User enrolled",
       "certificateExpiringSoon": "Certificate expiring soon",
       "liveTransmissionStartingSoon": "Live transmission starting soon",
-      "sendEmail": "Send email"
+      "sendEmail": "Send email",
+      "userInvited": "User invited",
+      "usersImportedInvite": "Users imported (invite)",
+      "userPasswordReminder": "Password reminder",
+      "userPasswordChanged": "Password changed",
+      "userWelcome": "Welcome message",
+      "userFirstLogin": "First login",
+      "usersAssignedToCourse": "Users assigned to course",
+      "usersShortInactivity": "Short inactivity",
+      "usersLongInactivity": "Long inactivity",
+      "userChapterFinished": "Chapter finished",
+      "userCourseFinished": "Course finished",
+      "userRegistered": "User registered",
+      "userPasswordCreated": "Password created",
+      "courseCompleted": "Course completed",
+      "certificateExpirationWarning": "Certificate expiration warning",
+      "certificateArchived": "Certificate archived",
+      "announcementPublished": "Announcement published",
+      "courseChatUserMentioned": "User mentioned in chat",
+      "courseDueDateReminder": "Course due date reminder"
     },
     "canvas": {
       "emptyTitle": "Your automation canvas is empty",
@@ -4677,9 +4696,9 @@
       "nodeType": "Node type",
       "changeTriggerLabel": "Change trigger to",
       "changeTriggerDialogTitle": "Change trigger",
-      "changeTriggerDialogDescription": "Changing the trigger type will reset its configuration. Are you sure you want to continue?",
+      "changeTriggerDialogDescription": "Changing the trigger type will remove all actions and conditions from the automation. Only the trigger will remain on the canvas. Are you sure you want to continue?",
       "changeTriggerDialogCancel": "Cancel",
-      "changeTriggerDialogConfirm": "Change trigger",
+      "changeTriggerDialogConfirm": "Delete all and change trigger",
       "triggerValue": "Value",
       "triggerValuePlaceholder": "Enter value...",
       "operator": "Operator",
@@ -4689,6 +4708,8 @@
       "operatorContains": "Contains",
       "emailSubject": "Email subject",
       "emailSubjectPlaceholder": "Enter subject...",
+      "emailTemplate": "Email template",
+      "emailTemplatePlaceholder": "Select a template",
       "emailBody": "Email body",
       "emailBodyPlaceholder": "Write your email content...",
       "emailRecipient": "Recipient",
@@ -4707,7 +4728,22 @@
       "daysEnrolled": "Days since enrollment",
       "daysEnrolledPlaceholder": "e.g. 30",
       "minutesBefore": "Minutes before",
-      "minutesBeforePlaceholder": "e.g. 60"
+      "minutesBeforePlaceholder": "e.g. 60",
+      "daysInactive": "Days of inactivity",
+      "daysInactivePlaceholder": "e.g. 14"
+    },
+    "editAction": {
+      "title": "Edit Action",
+      "sendEmail": "Send Email",
+      "emailTemplate": "Email template",
+      "selectTemplate": "Select a template...",
+      "language": "Language",
+      "placeholders": "Template placeholders",
+      "selectTemplateFirst": "Select an email template to see available placeholders.",
+      "noPlaceholders": "This template has no placeholders to fill.",
+      "placeholdersDescription": "Map each template placeholder to a variable provided by the trigger.",
+      "selectVariable": "Select trigger variable...",
+      "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables."
     }
   }
 }
