@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
@@ -70,6 +70,8 @@ export class AutomationStepsRepository {
   }
 
   async replaceAutomationStepTree(automationId: UUIDType, steps: AutomationStepBulkUpdate[]) {
+    console.log("REPO:", steps[0].typeContext);
+    console.log("TYPE:", typeof steps[0].typeContext);
     return this.db.transaction(async (tx) => {
       await tx.delete(automationSteps).where(eq(automationSteps.automationId, automationId));
       await tx.insert(automationSteps).values(
@@ -84,5 +86,12 @@ export class AutomationStepsRepository {
 
       return true;
     });
+  }
+
+  async findAutomationTriggerToRun(triggerName: string) {
+    return this.db
+      .select()
+      .from(automationSteps)
+      .where(sql`${automationSteps.typeContext} ->> 'name' = ${triggerName}`);
   }
 }

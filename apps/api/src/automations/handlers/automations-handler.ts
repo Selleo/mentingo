@@ -23,6 +23,8 @@ import {
   UserWelcomeEvent,
 } from "src/events";
 
+import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
+
 import type { IEventHandler } from "@nestjs/cqrs";
 
 export type AutomationEventTypes =
@@ -69,8 +71,11 @@ export const AutomationEvents = [
 @Injectable()
 @EventsHandler(...AutomationEvents)
 export class AutomationsHandler implements IEventHandler<AutomationEventTypes> {
-  handle(event: AutomationEventTypes) {
+  constructor(private readonly automationStepsRepository: AutomationStepsRepository) {}
+  async handle(event: AutomationEventTypes) {
     const eventName = AutomationEventNames[event.constructor.name];
     console.log(eventName);
+    const automation = await this.automationStepsRepository.findAutomationTriggerToRun(eventName);
+    console.log(automation);
   }
 }
