@@ -12,6 +12,15 @@ interface SortButtonProps<T> {
 }
 
 const SortButton = <T,>({ column, children, testId }: SortButtonProps<T>) => {
+  const handleSort = () => {
+    const currentDirection = column.getIsSorted();
+    let sortDescending = column.getFirstSortDir() === "desc";
+
+    if (currentDirection) sortDescending = currentDirection === "asc";
+
+    column.toggleSorting(sortDescending);
+  };
+
   const renderSortIcon = () => {
     const sortDirection = column.getIsSorted();
 
@@ -28,7 +37,7 @@ const SortButton = <T,>({ column, children, testId }: SortButtonProps<T>) => {
     <Button
       data-testid={testId}
       variant="ghost"
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      onClick={handleSort}
       className="flex items-center p-0 hover:bg-transparent hover:text-primary-600"
     >
       {children}

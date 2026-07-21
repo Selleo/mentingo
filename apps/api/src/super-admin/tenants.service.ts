@@ -39,7 +39,7 @@ export class TenantsService {
   ) {}
 
   async findAllTenants(
-    { page = 1, perPage = 20, search }: ListTenantsQuery,
+    { page = 1, perPage = 20, search, status, sort }: ListTenantsQuery,
     currentTenantId: string,
   ): Promise<PaginatedResponse<TenantsListItemResponse[]>> {
     const normalizedSearch = search?.trim() ? search.trim() : undefined;
@@ -49,9 +49,11 @@ export class TenantsService {
         page,
         perPage,
         search: normalizedSearch,
+        status,
+        sort,
         currentTenantId,
       }),
-      this.tenantsRepository.countAll({ search: normalizedSearch }),
+      this.tenantsRepository.countAll({ search: normalizedSearch, status }),
     ]);
 
     return {
@@ -149,6 +151,18 @@ export class TenantsService {
     await invalidateCorsCache();
 
     return updatedTenant;
+  }
+
+  async deleteTenantById(id: string, currentTenantId: string): Promise<void> {
+    if (id === currentTenantId) {
+      throw new BadRequestException("superAdminTenants.error.currentTenantDeleteNotAllowed");
+    }
+
+    const deletedTenant = await this.tenantsRepository.deleteById(id);
+
+    if (!deletedTenant) throw new NotFoundException("superAdminTenants.error.notFound");
+
+    await invalidateCorsCache();
   }
 
   private normalizeHost(host: string) {

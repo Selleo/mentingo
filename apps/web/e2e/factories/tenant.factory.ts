@@ -84,4 +84,8 @@ export class TenantFactory {
   async deactivate(id: string): Promise<TenantFactoryRecord> {
     return this.update(id, { status: "inactive" });
   }
+
+  async delete(id: string): Promise<void> {
+    await this.apiClient.api.tenantsControllerDeleteTenantById(id);
+  }
 }
