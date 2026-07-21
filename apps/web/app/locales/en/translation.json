@@ -4558,7 +4558,10 @@
       "noRootStep": "Empty automation has to have root step first",
       "hasRootAlready": "Automation already has a root step",
       "cycleDetected": "Automation step tree can't have cycles",
-      "stepTreeBuildFailed": "Error while building step tree"
+      "stepTreeBuildFailed": "Error while building step tree",
+      "wrongNumberOfRoots": "Automation can have only 1 root",
+      "treeNotConnected": "Not all provided steps are connected with each other",
+      "bulkInsertFailed": "Could not update automation steps"
     }
   }
 }

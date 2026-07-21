@@ -4590,14 +4590,17 @@
   "automationSteps": {
     "toast": {
       "notFound": "Nie znaleziono kroku automatyzacji",
-      "idMismatch": "Nie można zmienić rodzica kroku ani automatyzacji",
+      "idMismatch": "Nie możesz zmienić rodzica ani automatyzacji kroku",
       "updateFailed": "Nie udało się zaktualizować kroku automatyzacji",
-      "deleteFailed": "Wystąpił błąd podczas usuwania kroku automatyzacji",
-      "nodeDeleteFailed": "Wystąpił błąd podczas wyszukiwania węzła do usunięcia",
-      "noRootStep": "Pusta automatyzacja musi najpierw zawierać krok główny",
-      "hasRootAlready": "Automatyzacja ma już krok główny",
+      "deleteFailed": "Błąd podczas usuwania kroku automatyzacji",
+      "nodeDeleteFailed": "Błąd podczas wyszukiwania węzła do usunięcia",
+      "noRootStep": "Pusta automatyzacja musi najpierw posiadać krok główny",
+      "hasRootAlready": "Automatyzacja posiada już krok główny",
       "cycleDetected": "Drzewo kroków automatyzacji nie może zawierać cykli",
-      "stepTreeBuildFailed": "Wystąpił błąd podczas budowania drzewa kroków automatyzacji"
+      "stepTreeBuildFailed": "Błąd podczas budowania drzewa kroków",
+      "wrongNumberOfRoots": "Automatyzacja może posiadać tylko jeden krok główny",
+      "treeNotConnected": "Nie wszystkie podane kroki są ze sobą połączone",
+      "bulkInsertFailed": "Nie udało się zaktualizować kroków automatyzacji"
     }
   }
 }

@@ -4469,15 +4469,18 @@
   },
   "automationSteps": {
     "toast": {
-      "notFound": "Automatisierungsschritt wurde nicht gefunden",
-      "idMismatch": "Der übergeordnete Schritt oder die Automatisierung kann nicht geändert werden",
+      "notFound": "Automatisierungsschritt nicht gefunden",
+      "idMismatch": "Sie können den übergeordneten Schritt oder die Automatisierung nicht ändern",
       "updateFailed": "Der Automatisierungsschritt konnte nicht aktualisiert werden",
       "deleteFailed": "Fehler beim Löschen des Automatisierungsschritts",
       "nodeDeleteFailed": "Fehler beim Finden des zu löschenden Knotens",
-      "noRootStep": "Eine leere Automatisierung muss zuerst einen Wurzelschritt haben",
-      "hasRootAlready": "Die Automatisierung hat bereits einen Wurzelschritt",
-      "cycleDetected": "Der Baum der Automatisierungsschritte darf keine Zyklen enthalten",
-      "stepTreeBuildFailed": "Fehler beim Erstellen des Baums der Automatisierungsschritte"
+      "noRootStep": "Eine leere Automatisierung muss zuerst einen Stammschritt besitzen",
+      "hasRootAlready": "Die Automatisierung besitzt bereits einen Stammschritt",
+      "cycleDetected": "Der Automatisierungsbaum darf keine Zyklen enthalten",
+      "stepTreeBuildFailed": "Fehler beim Erstellen des Schrittbaums",
+      "wrongNumberOfRoots": "Eine Automatisierung darf nur einen Stammschritt besitzen",
+      "treeNotConnected": "Nicht alle angegebenen Schritte sind miteinander verbunden",
+      "bulkInsertFailed": "Die Automatisierungsschritte konnten nicht aktualisiert werden"
     }
   }
 }

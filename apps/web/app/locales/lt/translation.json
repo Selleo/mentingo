@@ -4471,15 +4471,18 @@
   },
   "automationSteps": {
     "toast": {
-      "notFound": "Passaggio dell'automazione non trovato",
-      "idMismatch": "Non è possibile modificare il passaggio padre o l'automazione",
-      "updateFailed": "Impossibile aggiornare il passaggio dell'automazione",
-      "deleteFailed": "Si è verificato un errore durante l'eliminazione del passaggio dell'automazione",
-      "nodeDeleteFailed": "Si è verificato un errore durante la ricerca del nodo da eliminare",
-      "noRootStep": "Un'automazione vuota deve prima avere un passaggio radice",
+      "notFound": "Passaggio di automazione non trovato",
+      "idMismatch": "Non puoi modificare il passaggio padre o l'automazione",
+      "updateFailed": "Impossibile aggiornare il passaggio di automazione",
+      "deleteFailed": "Errore durante l'eliminazione del passaggio di automazione",
+      "nodeDeleteFailed": "Errore durante la ricerca del nodo da eliminare",
+      "noRootStep": "Un'automazione vuota deve avere prima un passaggio radice",
       "hasRootAlready": "L'automazione ha già un passaggio radice",
-      "cycleDetected": "L'albero dei passaggi dell'automazione non può contenere cicli",
-      "stepTreeBuildFailed": "Si è verificato un errore durante la creazione dell'albero dei passaggi dell'automazione"
+      "cycleDetected": "L'albero dei passaggi di automazione non può contenere cicli",
+      "stepTreeBuildFailed": "Errore durante la creazione dell'albero dei passaggi",
+      "wrongNumberOfRoots": "Un'automazione può avere un solo passaggio radice",
+      "treeNotConnected": "Non tutti i passaggi forniti sono collegati tra loro",
+      "bulkInsertFailed": "Impossibile aggiornare i passaggi di automazione"
     }
   }
 }

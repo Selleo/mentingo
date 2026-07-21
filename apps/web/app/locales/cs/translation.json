@@ -4471,14 +4471,17 @@
   "automationSteps": {
     "toast": {
       "notFound": "Krok automatizace nebyl nalezen",
-      "idMismatch": "Nelze změnit rodiče kroku ani automatizaci",
-      "updateFailed": "Krok automatizace se nepodařilo aktualizovat",
-      "deleteFailed": "Při mazání kroku automatizace došlo k chybě",
-      "nodeDeleteFailed": "Při hledání uzlu pro smazání došlo k chybě",
+      "idMismatch": "Nemůžete změnit nadřazený krok ani automatizaci",
+      "updateFailed": "Nepodařilo se aktualizovat krok automatizace",
+      "deleteFailed": "Chyba při mazání kroku automatizace",
+      "nodeDeleteFailed": "Chyba při hledání uzlu ke smazání",
       "noRootStep": "Prázdná automatizace musí nejprve obsahovat kořenový krok",
       "hasRootAlready": "Automatizace již obsahuje kořenový krok",
       "cycleDetected": "Strom kroků automatizace nesmí obsahovat cykly",
-      "stepTreeBuildFailed": "Při vytváření stromu kroků automatizace došlo k chybě"
+      "stepTreeBuildFailed": "Chyba při vytváření stromu kroků",
+      "wrongNumberOfRoots": "Automatizace může mít pouze jeden kořenový krok",
+      "treeNotConnected": "Ne všechny zadané kroky jsou mezi sebou propojené",
+      "bulkInsertFailed": "Nepodařilo se aktualizovat kroky automatizace"
     }
   }
 }

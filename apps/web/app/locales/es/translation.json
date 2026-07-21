@@ -4546,17 +4546,21 @@
       "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
     }
   },
+
   "automationSteps": {
     "toast": {
-      "notFound": "No se encontró el paso de automatización",
-      "idMismatch": "No se puede cambiar el paso padre ni la automatización",
+      "notFound": "Paso de automatización no encontrado",
+      "idMismatch": "No puedes cambiar el paso padre ni la automatización",
       "updateFailed": "No se pudo actualizar el paso de automatización",
-      "deleteFailed": "Se produjo un error al eliminar el paso de automatización",
-      "nodeDeleteFailed": "Se produjo un error al buscar el nodo que se va a eliminar",
+      "deleteFailed": "Error al eliminar el paso de automatización",
+      "nodeDeleteFailed": "Error al encontrar el nodo para eliminar",
       "noRootStep": "Una automatización vacía debe tener primero un paso raíz",
       "hasRootAlready": "La automatización ya tiene un paso raíz",
       "cycleDetected": "El árbol de pasos de automatización no puede contener ciclos",
-      "stepTreeBuildFailed": "Se produjo un error al crear el árbol de pasos de automatización"
+      "stepTreeBuildFailed": "Error al construir el árbol de pasos",
+      "wrongNumberOfRoots": "Una automatización solo puede tener un paso raíz",
+      "treeNotConnected": "No todos los pasos proporcionados están conectados entre sí",
+      "bulkInsertFailed": "No se pudieron actualizar los pasos de automatización"
     }
   }
 }
