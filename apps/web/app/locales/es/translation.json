@@ -4618,5 +4618,22 @@
       "description": "Defina el objetivo y la descripción de esta automatización y luego proceda al constructor de flujo.",
       "triggerPlaceholder": "Por configurar..."
     }
+  },
+
+  "automationSteps": {
+    "toast": {
+      "notFound": "Paso de automatización no encontrado",
+      "idMismatch": "No puedes cambiar el paso padre ni la automatización",
+      "updateFailed": "No se pudo actualizar el paso de automatización",
+      "deleteFailed": "Error al eliminar el paso de automatización",
+      "nodeDeleteFailed": "Error al encontrar el nodo para eliminar",
+      "noRootStep": "Una automatización vacía debe tener primero un paso raíz",
+      "hasRootAlready": "La automatización ya tiene un paso raíz",
+      "cycleDetected": "El árbol de pasos de automatización no puede contener ciclos",
+      "stepTreeBuildFailed": "Error al construir el árbol de pasos",
+      "wrongNumberOfRoots": "Una automatización solo puede tener un paso raíz",
+      "treeNotConnected": "No todos los pasos proporcionados están conectados entre sí",
+      "bulkInsertFailed": "No se pudieron actualizar los pasos de automatización"
+    }
   }
 }

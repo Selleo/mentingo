@@ -4653,5 +4653,21 @@
       "daysInactive": "Tage Inaktivität",
       "daysInactivePlaceholder": "z.B. 14"
     }
+  },
+  "automationSteps": {
+    "toast": {
+      "notFound": "Automatisierungsschritt nicht gefunden",
+      "idMismatch": "Sie können den übergeordneten Schritt oder die Automatisierung nicht ändern",
+      "updateFailed": "Der Automatisierungsschritt konnte nicht aktualisiert werden",
+      "deleteFailed": "Fehler beim Löschen des Automatisierungsschritts",
+      "nodeDeleteFailed": "Fehler beim Finden des zu löschenden Knotens",
+      "noRootStep": "Eine leere Automatisierung muss zuerst einen Stammschritt besitzen",
+      "hasRootAlready": "Die Automatisierung besitzt bereits einen Stammschritt",
+      "cycleDetected": "Der Automatisierungsbaum darf keine Zyklen enthalten",
+      "stepTreeBuildFailed": "Fehler beim Erstellen des Schrittbaums",
+      "wrongNumberOfRoots": "Eine Automatisierung darf nur einen Stammschritt besitzen",
+      "treeNotConnected": "Nicht alle angegebenen Schritte sind miteinander verbunden",
+      "bulkInsertFailed": "Die Automatisierungsschritte konnten nicht aktualisiert werden"
+    }
   }
 }
