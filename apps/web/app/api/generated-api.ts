@@ -6610,6 +6610,20 @@ export interface UpdateAchievementBody {
   triggerEventType?: string;
 }
 
+export interface CreateAchievementLevelBody {
+  threshold: number;
+  xpReward: number;
+}
+
+export interface UpdateAchievementLevelBody {
+  threshold: number;
+  xpReward: number;
+}
+
+export interface CreateTranslationBody {
+  key: string;
+}
+
 export interface GetQAResponse {
   /** @format uuid */
   id: string;
@@ -14287,6 +14301,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name GamificationControllerGetUserProgress
+     * @request GET:/api/gamification/user-progress
+     */
+    gamificationControllerGetUserProgress: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/gamification/user-progress`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AchievementsControllerGetAchievementsList
      * @request GET:/api/achievements
      */
@@ -14346,26 +14373,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
-     * @name AchievementsControllerGetAchievement
-     * @request GET:/api/achievements/{id}
-     */
-    achievementsControllerGetAchievement: (
-      id: string,
-      query?: {
-        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-      },
-      params: RequestParams = {},
-    ) =>
-      this.request<void, any>({
-        path: `/api/achievements/${id}`,
-        method: "GET",
-        query: query,
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
      * @name AchievementsControllerUpdateAchievement
      * @request PATCH:/api/achievements/{id}
      */
@@ -14398,6 +14405,26 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AchievementsControllerGetAchievement
+     * @request GET:/api/achievements/{id}
+     */
+    achievementsControllerGetAchievement: (
+      id: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/${id}`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name AchievementsControllerGetAchievementAllLevels
      * @request GET:/api/achievements/levels/{achievementId}
      */
@@ -14419,11 +14446,14 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     achievementsControllerCreateAchievementLevel: (
       achievementId: string,
+      data: CreateAchievementLevelBody,
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/achievements/levels/${achievementId}`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 
@@ -14469,11 +14499,37 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     achievementsControllerUpdateAchievementLevel: (
       achievementId: string,
       levelNumber: number,
+      data: UpdateAchievementLevelBody,
       params: RequestParams = {},
     ) =>
       this.request<void, any>({
         path: `/api/achievements/levels/${achievementId}/${levelNumber}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AchievementsControllerCreateTranslation
+     * @request POST:/api/achievements/{achievementId}/translation
+     */
+    achievementsControllerCreateTranslation: (
+      achievementId: string,
+      data: CreateTranslationBody,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/achievements/${achievementId}/translation`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
         ...params,
       }),
 

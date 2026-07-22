@@ -12,7 +12,16 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
 
-import type { UserAchievement } from "~/api/generated-api";
+type UserAchievement = {
+  achievementId: string;
+  achievementKey: string;
+  visibility: "hidden" | "visible";
+  levelId: string;
+  levelNumber: number;
+  threshold: number;
+  xpReward: number;
+  earnedAt: string;
+};
 
 type GroupedAchievement = {
   achievementId: string;
