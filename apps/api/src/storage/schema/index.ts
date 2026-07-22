@@ -47,6 +47,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core";
 
+import { AutomationStatus, automationTypes } from "src/announcements/types/automations.types";
 import { coursesSettingsSchema } from "src/courses/types/settings";
 import {
   DEFAULT_LEARNING_PATH_SETTINGS,
@@ -2482,3 +2483,68 @@ export const learningPathEntityMap = pgTable(
     ),
   }),
 );
+export const automationStatus = pgEnum(
+  "automation_status",
+  Object.values(AutomationStatus) as [string, ...string[]],
+);
+
+export const automations = pgTable(
+  "automations",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    name: jsonb("name").notNull().$type<LocalizedText>().default({}),
+    description: jsonb("description").$type<LocalizedText>().default({}),
+    lastRun: timestamp("last_run", { mode: "date" }),
+    status: automationStatus("status").notNull(),
+  },
+  withTenantIdIndex("automation_index"),
+);
+export const automationTypeEnum = pgEnum("automation_type", automationTypes);
+
+export const automationSteps = pgTable(
+  "automation_steps",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    parentId: uuid("parent_id"),
+    type: automationTypeEnum("type").notNull(),
+    typeContext: jsonb("type_context").default({}),
+  },
+  withTenantIdIndex("automation_steps_index"),
+);
+
+// export const automationActions = pgTable(
+//   "automation_actions",
+//   {
+//     ...id,
+//     ...timestamps,
+//     tenantId,
+//     name: varchar("name", { length: 50 }).notNull(),
+//   },
+//   withTenantIdIndex("automation_actions_index"),
+// );
+
+// export const automationConditions = pgTable(
+//   "automation_conditions",
+//   {
+//     ...id,
+//     ...timestamps,
+//     tenantId,
+//     name: varchar("name", { length: 50 }).notNull(),
+//   },
+//   withTenantIdIndex("automation_condition_index"),
+// );
+
+// export const automationTriggers = pgTable("automation_triggers", {
+//   ...id,
+//   ...timestamps,
+//   tenantId,
+//   name: varchar("name", { length: 50 }).notNull(),
+//   context: jsonb("context").notNull(),
+// });

@@ -472,6 +472,22 @@ export interface GetPublicGlobalSettingsResponse {
   };
 }
 
+export interface GetPwaManifestResponse {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  display: "standalone";
+  orientation: "portrait";
+  start_url: "/";
+  scope: "/";
+  icons: {
+    src: string;
+    sizes: string;
+    type: string;
+  }[];
+}
+
 export interface GetPublicRegistrationFormResponse {
   data: {
     fields: {
@@ -5993,6 +6009,27 @@ export interface CreateTenantResponse {
   };
 }
 
+export interface UpdateTenantBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export interface DeactivateTenantResponse {
   data: {
     /** @format uuid */
@@ -7693,6 +7730,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     settingsControllerGetPublicGlobalSettings: (params: RequestParams = {}) =>
       this.request<GetPublicGlobalSettingsResponse, any>({
         path: `/api/settings/global`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name SettingsControllerGetPwaManifest
+     * @request GET:/api/settings/manifest.webmanifest
+     */
+    settingsControllerGetPwaManifest: (params: RequestParams = {}) =>
+      this.request<GetPwaManifestResponse, any>({
+        path: `/api/settings/manifest.webmanifest`,
         method: "GET",
         format: "json",
         ...params,
@@ -13330,6 +13381,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Updates the target tenant's name, host, or status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateTenant
+     * @summary Update tenant via integration API
+     * @request PATCH:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerUpdateTenant: (
+      tenantId: string,
+      data: UpdateTenantBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantResponse, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Marks the target tenant as inactive. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
@@ -14634,6 +14707,71 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerGetAllAutomations
+     * @request GET:/api/automations/tenant/{tenantId}
+     */
+    automationsControllerGetAllAutomations: (tenantId: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/tenant/${tenantId}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerGetAutomationById
+     * @request GET:/api/automations/{id}
+     */
+    automationsControllerGetAutomationById: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "GET",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerUpdateAutomation
+     * @request PATCH:/api/automations/{id}
+     */
+    automationsControllerUpdateAutomation: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "PATCH",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerDeleteAutomation
+     * @request DELETE:/api/automations/{id}
+     */
+    automationsControllerDeleteAutomation: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations/${id}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AutomationsControllerCreateAutomation
+     * @request POST:/api/automations
+     */
+    automationsControllerCreateAutomation: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/automations`,
+        method: "POST",
         ...params,
       }),
   };
