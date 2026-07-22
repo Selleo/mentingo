@@ -12,7 +12,7 @@ import {
 
 import type { FC } from "react";
 
-export type StatusFilter = "All" | "Enabled" | "Disabled" | "Draft" | "Archived";
+export type StatusFilter = "All" | "enabled" | "disabled" | "draft" | "archived";
 
 interface AutomationFiltersProps {
   searchTerm: string;
@@ -31,10 +31,10 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
 
   const statusOptions: { value: StatusFilter; labelKey: string }[] = [
     { value: "All", labelKey: "automationView.filters.all" },
-    { value: "Enabled", labelKey: "automationView.filters.enabled" },
-    { value: "Disabled", labelKey: "automationView.filters.disabled" },
-    { value: "Draft", labelKey: "automationView.filters.drafts" },
-    { value: "Archived", labelKey: "automationView.filters.archived" },
+    { value: "enabled", labelKey: "automationView.filters.enabled" },
+    { value: "disabled", labelKey: "automationView.filters.disabled" },
+    { value: "draft", labelKey: "automationView.filters.drafts" },
+    { value: "archived", labelKey: "automationView.filters.archived" },
   ];
 
   return (

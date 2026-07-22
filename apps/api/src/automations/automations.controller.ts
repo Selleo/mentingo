@@ -1,7 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 
-import { AutomationRecordInput } from "src/announcements/types/automations-source.types";
-import { UUIDType } from "src/common";
+import {
+  AutomationRecordInput,
+  AutomationRecordUpdateInput,
+} from "src/announcements/types/automations-source.types";
+import { BaseResponse, UUIDType } from "src/common";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
 import { AutomationsService } from "./automations.service";
@@ -12,19 +15,22 @@ import type { AutomationStatus } from "src/announcements/types/automations.types
 export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}
 
-  @Get("tenant/:tenantId")
+  @Get()
   async getAllAutomations(@CurrentUser("tenantId") tenantId: UUIDType) {
-    return this.automationsService.getAllAutomations(tenantId);
+    const automations = await this.automationsService.getAllAutomations(tenantId);
+    return new BaseResponse(automations);
   }
 
   @Get(":id")
   async getAutomationById(@Param("id") automationId: UUIDType) {
-    return this.automationsService.getAutomationById(automationId);
+    const automation = await this.automationsService.getAutomationById(automationId);
+    return new BaseResponse(automation);
   }
 
   @Post()
   async createAutomation(@Body() input: AutomationRecordInput) {
-    return this.automationsService.createAutomation(input);
+    const automation = await this.automationsService.createAutomation(input);
+    return new BaseResponse(automation);
   }
 
   @Patch("status/:id")
@@ -32,19 +38,22 @@ export class AutomationsController {
     @Param("id") automationId: UUIDType,
     @Body() body: { status: AutomationStatus },
   ) {
-    return this.automationsService.updateStatus(automationId, body.status);
+    const updatedId = await this.automationsService.updateStatus(automationId, body.status);
+    return new BaseResponse({ id: updatedId });
   }
 
   @Patch(":id")
   async updateAutomation(
     @Param("id") automationId: UUIDType,
-    @Body() input: AutomationRecordInput,
+    @Body() input: AutomationRecordUpdateInput,
   ) {
-    return this.automationsService.updateAutomation(automationId, input);
+    const updatedId = await this.automationsService.updateAutomation(automationId, input);
+    return new BaseResponse({ id: updatedId });
   }
 
   @Delete(":id")
   async deleteAutomation(@Param("id") automationId: UUIDType) {
-    return this.automationsService.deleteAutomation(automationId);
+    const deleted = await this.automationsService.deleteAutomation(automationId);
+    return new BaseResponse(deleted);
   }
 }

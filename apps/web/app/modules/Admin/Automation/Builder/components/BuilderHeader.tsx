@@ -1,39 +1,113 @@
 import { useNavigate } from "@remix-run/react";
-import { ArrowLeft, ChevronRight, Play, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Play, Save, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
+import { useUpdateAutomation } from "~/api/mutations/admin/useUpdateAutomation";
+import { nodesToSteps } from "~/api/queries/admin/automation.utils";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
+import { Separator } from "~/components/ui/separator";
 import { Switch } from "~/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 import { useBuilderStore } from "../automationBuilderStore";
 
+import type { BuilderNode } from "../automationBuilder.types";
 import type { FC } from "react";
+import type { AutomationNode, AutomationStatus } from "~/api/queries/admin/automation.types";
 
 interface BuilderHeaderProps {
   automationId: string;
 }
 
 export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
   const automationName = useBuilderStore((s) => s.automationName);
   const isActive = useBuilderStore((s) => s.isActive);
   const lastSavedAt = useBuilderStore((s) => s.lastSavedAt);
+  const nodes = useBuilderStore((s) => s.nodes);
   const setActive = useBuilderStore((s) => s.setActive);
   const markSaved = useBuilderStore((s) => s.markSaved);
+
+  const updateAutomation = useUpdateAutomation();
+  const deleteAutomation = useDeleteAutomation();
 
   const handleBack = () => {
     navigate("/admin/automation");
   };
 
   const handleSave = () => {
-    markSaved();
+    if (automationId === "new") return;
+
+    const lang = i18n.language || "pl";
+    const status: AutomationStatus = isActive ? "enabled" : "draft";
+
+    // Convert builder nodes to backend step format
+    const automationNodes: AutomationNode[] = nodes.map((n: BuilderNode) => ({
+      id: n.id,
+      kind: n.kind,
+      type: n.type,
+      label: n.label,
+      parentId: n.parentId,
+      children: n.children,
+      config: n.config,
+      position: n.position,
+    }));
+
+    const steps = nodesToSteps(automationNodes, automationId);
+
+    updateAutomation.mutate(
+      {
+        automationId,
+        body: {
+          name: { [lang]: automationName },
+          status,
+        },
+        steps,
+      },
+      {
+        onSuccess: () => {
+          markSaved();
+        },
+      },
+    );
+  };
+
+  const handleDelete = () => {
+    if (automationId === "new") return;
+    deleteAutomation.mutate(automationId, {
+      onSuccess: () => {
+        navigate("/admin/automation");
+      },
+    });
   };
 
   const handleSimulate = () => {
     console.log("Simulate automation:", automationId);
+  };
+
+  const handleToggleActive = (active: boolean) => {
+    setActive(active);
+
+    // Persist status change immediately if saved automation
+    if (automationId !== "new") {
+      const status: AutomationStatus = active ? "enabled" : "draft";
+      updateAutomation.mutate({
+        automationId,
+        body: { status },
+      });
+    }
   };
 
   const formatSavedTime = () => {
@@ -45,53 +119,94 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b bg-background px-4">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          aria-label={t("automationBuilder.header.back")}
-        >
-          <ArrowLeft className="size-5" />
-        </Button>
+    <TooltipProvider>
+      <header className="flex h-14 items-center justify-between border-b bg-background px-4">
+        <div className="flex items-center gap-3">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleBack}
+                aria-label={t("automationBuilder.header.back")}
+              >
+                <ArrowLeft className="size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("automationBuilder.header.back")}</TooltipContent>
+          </Tooltip>
 
-        <nav className="flex items-center gap-1 text-sm text-muted-foreground">
-          <button onClick={handleBack} className="hover:text-foreground transition-colors">
-            {t("automationBuilder.header.automations")}
-          </button>
-          <ChevronRight className="size-3.5" />
-          <span className="font-medium text-foreground">{automationName}</span>
-        </nav>
-      </div>
-
-      <div className="flex items-center gap-3">
-        {lastSavedAt && <span className="text-xs text-muted-foreground">{formatSavedTime()}</span>}
-
-        <Button variant="outline" size="sm" onClick={handleSave}>
-          <Save className="mr-1.5 size-4" />
-          {t("automationBuilder.header.save")}
-        </Button>
-
-        <Button variant="outline" size="sm" onClick={handleSimulate}>
-          <Play className="mr-1.5 size-4" />
-          {t("automationBuilder.header.simulate")}
-        </Button>
-
-        <div className="flex items-center gap-2">
-          <span
-            className={cn("text-xs font-medium", isActive ? "text-success-600" : "text-amber-600")}
-          >
-            {isActive ? t("automationBuilder.header.active") : t("automationBuilder.header.draft")}
-          </span>
-          <Switch checked={isActive} onCheckedChange={setActive} />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <button onClick={handleBack} className="cursor-pointer">
+                    {t("automationBuilder.header.automations")}
+                  </button>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{automationName}</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </div>
 
-        <Button variant="destructive" size="sm">
-          <Trash2 className="mr-1.5 size-4" />
-          {t("automationBuilder.header.delete")}
-        </Button>
-      </div>
-    </header>
+        <div className="flex items-center gap-3">
+          {lastSavedAt && (
+            <span className="text-xs text-muted-foreground">{formatSavedTime()}</span>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSave}
+            disabled={updateAutomation.isPending || automationId === "new"}
+          >
+            <Save className="mr-1.5 size-4" />
+            {t("automationBuilder.header.save")}
+          </Button>
+
+          <Button variant="outline" size="sm" onClick={handleSimulate}>
+            <Play className="mr-1.5 size-4" />
+            {t("automationBuilder.header.simulate")}
+          </Button>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <div className="flex items-center gap-2">
+            <span
+              className={cn(
+                "text-xs font-medium",
+                isActive ? "text-success-600" : "text-amber-600",
+              )}
+            >
+              {isActive
+                ? t("automationBuilder.header.active")
+                : t("automationBuilder.header.draft")}
+            </span>
+            <Switch checked={isActive} onCheckedChange={handleToggleActive} />
+          </div>
+
+          <Separator orientation="vertical" className="h-6" />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={handleDelete}
+                disabled={deleteAutomation.isPending || automationId === "new"}
+              >
+                <Trash2 className="mr-1.5 size-4" />
+                {t("automationBuilder.header.delete")}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">{t("automationBuilder.header.delete")}</TooltipContent>
+          </Tooltip>
+        </div>
+      </header>
+    </TooltipProvider>
   );
 };

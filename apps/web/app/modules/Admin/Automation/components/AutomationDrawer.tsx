@@ -2,6 +2,7 @@ import { Archive, Play, Square, Trash2 } from "lucide-react";
 import { type FC, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useUpdateAutomation } from "~/api/mutations/admin/useUpdateAutomation";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -24,26 +25,25 @@ import { Textarea } from "~/components/ui/textarea";
 
 import { useAutoSave } from "../hooks/useAutoSave";
 
-import type { Automation } from "../Automation.page";
+import type { AutomationListItem, AutomationStatus } from "~/api/queries/admin/automation.types";
 
 interface AutomationDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  automation: Automation | null;
-  onUpdate: (id: string, updatedFields: Partial<Automation>) => void;
+  automation: AutomationListItem | null;
   onDelete: (id: string) => void;
   onEdit: (id: string) => void;
 }
 
-const getAvailableStatuses = (currentStatus: Automation["status"], t: (key: string) => string) => {
-  if (currentStatus === "Draft") {
-    return [{ value: "Draft", label: t("automationView.drawer.statusDraft") }];
+const getAvailableStatuses = (currentStatus: AutomationStatus, t: (key: string) => string) => {
+  if (currentStatus === "draft") {
+    return [{ value: "draft", label: t("automationView.drawer.statusDraft") }];
   }
 
   return [
-    { value: "Enabled", label: t("automationView.drawer.statusEnabled") },
-    { value: "Disabled", label: t("automationView.drawer.statusDisabled") },
-    { value: "Archived", label: t("automationView.drawer.statusArchived") },
+    { value: "enabled", label: t("automationView.drawer.statusEnabled") },
+    { value: "disabled", label: t("automationView.drawer.statusDisabled") },
+    { value: "archived", label: t("automationView.drawer.statusArchived") },
   ];
 };
 
@@ -51,19 +51,31 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   isOpen,
   onClose,
   automation,
-  onUpdate,
   onDelete,
   onEdit,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const updateAutomation = useUpdateAutomation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [status, setStatus] = useState<Automation["status"]>("Draft");
+  const [status, setStatus] = useState<AutomationStatus>("draft");
   const prevAutomationId = useRef<string | null>(null);
 
-  const triggerAutoSave = useAutoSave<Partial<Automation>>((fields) => {
+  const triggerAutoSave = useAutoSave<{
+    name: string;
+    description: string;
+    status: AutomationStatus;
+  }>((fields) => {
     if (automation) {
-      onUpdate(automation.id, fields);
+      const lang = i18n.language || "pl";
+      updateAutomation.mutate({
+        automationId: automation.id,
+        body: {
+          name: { [lang]: fields.name },
+          description: { [lang]: fields.description },
+          status: fields.status,
+        },
+      });
     }
   });
 
@@ -84,7 +96,7 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
 
   if (!automation) return null;
 
-  const isDraft = automation.status === "Draft";
+  const isDraft = automation.status === "draft";
   const availableStatuses = getAvailableStatuses(automation.status, t);
 
   const handleNameChange = (value: string) => {
@@ -98,15 +110,22 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   };
 
   const handleStatusChange = (val: string) => {
-    const newStatus = val as Automation["status"];
+    const newStatus = val as AutomationStatus;
     setStatus(newStatus);
-    onUpdate(automation.id, { name, description, status: newStatus });
+    const lang = i18n.language || "pl";
+    updateAutomation.mutate({
+      automationId: automation.id,
+      body: { name: { [lang]: name }, description: { [lang]: description }, status: newStatus },
+    });
   };
 
   const toggleActivation = () => {
-    const nextStatus: Automation["status"] = status === "Enabled" ? "Disabled" : "Enabled";
+    const nextStatus: AutomationStatus = status === "enabled" ? "disabled" : "enabled";
     setStatus(nextStatus);
-    onUpdate(automation.id, { status: nextStatus });
+    updateAutomation.mutate({
+      automationId: automation.id,
+      body: { status: nextStatus },
+    });
   };
 
   return (
@@ -170,14 +189,14 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
               <Button
                 variant="outline"
                 className={
-                  status === "Enabled"
+                  status === "enabled"
                     ? "border-warning-200 bg-warning-50 text-warning-700 hover:bg-warning-100"
                     : "border-success-200 bg-success-50 text-success-700 hover:bg-success-100"
                 }
                 onClick={toggleActivation}
-                disabled={status === "Archived" || isDraft}
+                disabled={status === "archived" || isDraft}
               >
-                {status === "Enabled" ? (
+                {status === "enabled" ? (
                   <>
                     <Square className="mr-2 size-4" /> {t("automationView.drawer.pause")}
                   </>
@@ -191,10 +210,13 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setStatus("Archived");
-                  onUpdate(automation.id, { status: "Archived" });
+                  setStatus("archived");
+                  updateAutomation.mutate({
+                    automationId: automation.id,
+                    body: { status: "archived" },
+                  });
                 }}
-                disabled={status === "Archived" || isDraft}
+                disabled={status === "archived" || isDraft}
               >
                 <Archive className="mr-2 size-4" /> {t("automationView.drawer.archive")}
               </Button>

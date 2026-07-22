@@ -15,6 +15,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 
 import { useBuilderStore } from "../automationBuilderStore";
+import { useSaveAutomationSteps } from "../hooks/useSaveAutomationSteps";
 
 import type { BuilderNode, TriggerType } from "../automationBuilder.types";
 import type { FC } from "react";
@@ -174,6 +175,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
   const { t } = useTranslation();
   const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
   const nodes = useBuilderStore((s) => s.nodes);
+  const { saveSteps } = useSaveAutomationSteps();
 
   const triggerNode = nodes.find((n) => n.kind === "trigger");
   const triggerType = triggerNode?.type as TriggerType | undefined;
@@ -219,8 +221,18 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
       language: selectedLanguage,
       placeholderValues,
     });
+    // Persist the updated step tree to the backend
+    setTimeout(() => saveSteps(), 0);
     onClose();
-  }, [node.id, selectedTemplate, selectedLanguage, placeholderValues, updateNodeConfig, onClose]);
+  }, [
+    node.id,
+    selectedTemplate,
+    selectedLanguage,
+    placeholderValues,
+    updateNodeConfig,
+    onClose,
+    saveSteps,
+  ]);
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>

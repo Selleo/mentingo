@@ -2,62 +2,46 @@
  * Automation data layer types.
  *
  * These define the shape of data expected from and sent to the backend.
- * Once the API is built, these types will be superseded by the generated-api types.
- * Until then, they serve as the contract between frontend and (future) backend.
- *
- * ─── DESIGN DECISIONS ──────────────────────────────────────────────────────────
- *
- * 1. The automation "flow" is stored as a flat adjacency list of nodes.
- *    Each node has a `parentId` and `children[]` for tree reconstruction.
- *    This makes serialization/deserialization trivial and allows the backend
- *    to store it in a single JSON column or a normalized `automation_nodes` table.
- *
- * 2. Node `config` is an open Record<string, unknown> on the frontend.
- *    The backend can validate it per node `type` using a discriminated union
- *    or JSON Schema at persistence time.
- *
- * 3. Status follows a state machine: Draft → Active → Disabled → Archived.
- *    The frontend toggle in the builder only switches between Draft ↔ Active.
- *
- * 4. `lastRun` is read-only; populated by the backend scheduler/executor.
- *
- * ─── NAMING CONVENTION ─────────────────────────────────────────────────────────
- *
- * - `*Response` types represent raw API response wrappers (BaseResponse shape).
- * - `*Body` types represent payloads sent via POST/PUT/PATCH.
- * - Domain types (AutomationListItem, AutomationDetail, AutomationNode) are
- *   the extracted `.data` from responses.
+ * Aligned with backend enums and table structures.
  */
 
 // ─── Domain types ───────────────────────────────────────────────────────────────
 
-export type AutomationStatus = "Draft" | "Active" | "Disabled" | "Archived";
+/** Matches backend AutomationStatus enum (lowercase) */
+export type AutomationStatus = "draft" | "enabled" | "disabled" | "archived";
 
-export type AutomationNodeKind = "condition" | "action";
+/** Matches backend AutomationType: "trigger" | "action" | "condition" */
+export type AutomationNodeKind = "trigger" | "action" | "condition";
 
-export type AutomationConditionType =
-  | "course_deadline"
-  | "overdue"
-  | "not_completed"
-  | "user_enrolled"
-  | "certificate_expiring_soon"
-  | "live_transmission_starting_soon";
+/**
+ * Backend automation_steps row shape (from getAllAutomationSteps).
+ * `typeContext` holds kind, label, config, position and step-specific name.
+ */
+export interface AutomationStepRaw {
+  id: string;
+  automationId: string;
+  parentId: string | null;
+  type: AutomationNodeKind;
+  typeContext: {
+    name: string;
+    label?: string;
+    config?: Record<string, unknown>;
+    position?: { x: number; y: number };
+    [key: string]: unknown;
+  };
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-export type AutomationActionType = "send_email";
-
-export type AutomationNodeType = AutomationConditionType | AutomationActionType;
-
+/** Frontend node representation (derived from AutomationStepRaw) */
 export interface AutomationNode {
-  /** UUID assigned by the backend. New (unsaved) nodes use a client-generated temp id. */
   id: string;
   kind: AutomationNodeKind;
-  type: AutomationNodeType;
+  type: string;
   label: string;
   parentId: string | null;
   children: string[];
-  /** Type-specific configuration (validated per `type` on the backend). */
   config: Record<string, unknown>;
-  /** Display position on canvas (stored for UX persistence). */
   position: { x: number; y: number };
 }
 
@@ -66,15 +50,24 @@ export interface AutomationLastRun {
   status: "success" | "failed" | "never";
 }
 
-/** Lightweight item for the list view. Does NOT contain nodes. */
+/** Raw automation record from backend (LocalizedText fields) */
+export interface AutomationRecord {
+  id: string;
+  name: Record<string, string>;
+  description: Record<string, string>;
+  status: AutomationStatus;
+  lastRun: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Lightweight item for the list view. */
 export interface AutomationListItem {
   id: string;
   name: string;
   description: string;
   status: AutomationStatus;
-  trigger: string;
-  actionsCount: number;
-  lastRun: AutomationLastRun;
+  lastRun: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -93,34 +86,42 @@ export interface AutomationDetail {
 // ─── API response wrappers (matches BaseResponse from apps/api) ────────────────
 
 export interface GetAllAutomationsResponse {
-  data: AutomationListItem[];
-  pagination: {
-    total: number;
-    page: number;
-    perPage: number;
-  };
+  data: AutomationRecord[];
 }
 
 export interface GetAutomationByIdResponse {
-  data: AutomationDetail;
+  data: AutomationRecord;
+}
+
+export interface GetAutomationStepsResponse {
+  data: AutomationStepRaw[];
 }
 
 // ─── Mutation payloads (request bodies) ────────────────────────────────────────
 
 export interface CreateAutomationBody {
-  name: string;
-  description?: string;
+  name: Record<string, string>;
+  description?: Record<string, string>;
+  status: AutomationStatus;
 }
 
 export interface UpdateAutomationBody {
-  name?: string;
-  description?: string;
+  name?: Record<string, string>;
+  description?: Record<string, string>;
   status?: AutomationStatus;
-  /** Full node tree — sent on every save from the builder. */
-  nodes?: AutomationNode[];
 }
 
-export interface DeleteAutomationBody {
-  /** Optional soft-delete flag; defaults to hard delete. */
-  archive?: boolean;
+/** Step payload for bulk replace (PUT /automation-steps/:automationId/steps) */
+export interface AutomationStepBulkItem {
+  id: string;
+  parentId: string | null;
+  automationId: string;
+  type: AutomationNodeKind;
+  typeContext: {
+    name: string;
+    label?: string;
+    config?: Record<string, unknown>;
+    position?: { x: number; y: number };
+    [key: string]: unknown;
+  };
 }

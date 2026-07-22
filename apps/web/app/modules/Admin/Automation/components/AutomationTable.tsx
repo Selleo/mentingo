@@ -13,20 +13,22 @@ import {
 
 import { AutomationRow } from "./AutomationRow";
 
-import type { Automation } from "../Automation.page";
 import type { FC } from "react";
+import type { AutomationListItem } from "~/api/queries/admin/automation.types";
 import type { ItemsPerPageOption } from "~/components/Pagination/Pagination";
 
 interface AutomationTableProps {
-  automations: Automation[];
+  automations: AutomationListItem[];
   totalCount: number;
-  onOpenDrawer: (automation: Automation) => void;
+  onOpenDrawer: (automation: AutomationListItem) => void;
+  isLoading?: boolean;
 }
 
 export const AutomationTable: FC<AutomationTableProps> = ({
   automations,
   totalCount,
   onOpenDrawer,
+  isLoading,
 }) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
@@ -48,10 +50,6 @@ export const AutomationTable: FC<AutomationTableProps> = ({
           <TableRow>
             <TableHead>{t("automationView.table.name")}</TableHead>
             <TableHead>{t("automationView.table.status")}</TableHead>
-            <TableHead>{t("automationView.table.trigger")}</TableHead>
-            <TableHead className="min-w-[160px] text-center">
-              {t("automationView.table.actions")}
-            </TableHead>
             <TableHead>{t("automationView.table.lastRun")}</TableHead>
             <TableHead>{t("automationView.table.updatedAt")}</TableHead>
             <TableHead className="w-12">
@@ -60,12 +58,20 @@ export const AutomationTable: FC<AutomationTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {currentItems.map((item) => (
-            <AutomationRow key={item.id} automation={item} onOpenDrawer={onOpenDrawer} />
-          ))}
-          {automations.length === 0 && (
+          {isLoading && (
             <TableRow>
-              <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
+              <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
+                {t("common.loading")}
+              </TableCell>
+            </TableRow>
+          )}
+          {!isLoading &&
+            currentItems.map((item) => (
+              <AutomationRow key={item.id} automation={item} onOpenDrawer={onOpenDrawer} />
+            ))}
+          {!isLoading && automations.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                 {totalCount > 0
                   ? t("automationView.table.emptyFiltered")
                   : t("automationView.table.empty")}

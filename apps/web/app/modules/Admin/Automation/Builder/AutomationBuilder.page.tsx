@@ -1,8 +1,9 @@
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useParams } from "@remix-run/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useAutomationById } from "~/api/queries/admin/useAutomationById";
 import { cn } from "~/lib/utils";
 
 import { useBuilderStore } from "./automationBuilderStore";
@@ -19,7 +20,7 @@ import type {
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core";
 
 function generateNodeId(): string {
-  return `node-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  return crypto.randomUUID();
 }
 
 function createNode(
@@ -47,6 +48,34 @@ export default function AutomationBuilderPage() {
 
   const addNode = useBuilderStore((s) => s.addNode);
   const addChildNode = useBuilderStore((s) => s.addChildNode);
+  const reset = useBuilderStore((s) => s.reset);
+  const setAutomationName = useBuilderStore((s) => s.setAutomationName);
+  const setActive = useBuilderStore((s) => s.setActive);
+
+  // Load automation data from API when editing existing automation
+  const { data: automation } = useAutomationById(automationId);
+
+  useEffect(() => {
+    if (automation) {
+      reset();
+      setAutomationName(automation.name);
+      setActive(automation.status === "enabled");
+
+      // Load nodes into store
+      for (const node of automation.nodes) {
+        addNode({
+          id: node.id,
+          kind: node.kind as BuilderNode["kind"],
+          type: node.type as BuilderNode["type"],
+          label: node.label,
+          parentId: node.parentId,
+          children: node.children,
+          position: node.position,
+          config: node.config,
+        });
+      }
+    }
+  }, [automation]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {

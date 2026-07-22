@@ -1,44 +1,51 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
-// import { ApiClient } from "~/api/api-client";
+import { ApiClient } from "~/api/api-client";
 import { AUTOMATIONS_QUERY_KEY } from "~/api/queries/admin/useAutomations";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-import type { UpdateAutomationBody } from "~/api/queries/admin/automation.types";
+import type {
+  AutomationStepBulkItem,
+  UpdateAutomationBody,
+} from "~/api/queries/admin/automation.types";
 
 interface UpdateAutomationInput {
   automationId: string;
   body: UpdateAutomationBody;
+  /** If provided, replaces the full step tree via PUT /automation-steps/:automationId/steps */
+  steps?: AutomationStepBulkItem[];
 }
 
 /**
- * Updates an existing automation (name, description, status, and/or node tree).
+ * Updates an existing automation (name, description, status) and optionally
+ * replaces the full step tree.
  *
- * Backend contract (expected endpoint):
- *   PATCH /api/automations/:id
- *   Body: UpdateAutomationBody (partial — only changed fields)
- *   Response: { data: AutomationDetail }
- *
- * The builder sends the full `nodes` array on every save.
- * The backend should replace the existing node tree atomically.
+ * Backend endpoints:
+ *   PATCH /api/automations/:id  (metadata update)
+ *   PUT /api/automation-steps/:automationId/steps  (bulk step replace)
  */
 export function useUpdateAutomation() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async ({ automationId, body }: UpdateAutomationInput) => {
-      // TODO: Uncomment once backend is ready:
-      // const { data } = await ApiClient.api.automationControllerUpdate(automationId, body);
-      // await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      // return data;
+    mutationFn: async ({ automationId, body, steps }: UpdateAutomationInput) => {
+      // Update automation metadata
+      const { data } = await ApiClient.instance.patch<{ data: unknown }>(
+        `/api/automations/${automationId}`,
+        body,
+      );
 
-      // Stub: simulate successful update
+      // If steps provided, replace the full step tree
+      if (steps && steps.length > 0) {
+        await ApiClient.instance.put(`/api/automation-steps/${automationId}/steps`, steps);
+      }
+
       await queryClient.invalidateQueries({ queryKey: [AUTOMATIONS_QUERY_KEY] });
-      return { data: { id: automationId, ...body } };
+      return data.data;
     },
 
     onSuccess: () => {
