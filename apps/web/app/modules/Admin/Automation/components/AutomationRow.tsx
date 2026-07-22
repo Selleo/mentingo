@@ -15,7 +15,17 @@ interface AutomationRowProps {
 }
 
 export const AutomationRow: FC<AutomationRowProps> = ({ automation, onOpenDrawer }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat(i18n.language, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(dateString));
+  };
 
   return (
     <TableRow>
@@ -33,7 +43,9 @@ export const AutomationRow: FC<AutomationRowProps> = ({ automation, onOpenDrawer
       <TableCell className="text-sm text-muted-foreground">
         {automation.lastRun ?? t("automationView.table.noRuns")}
       </TableCell>
-      <TableCell className="text-sm text-muted-foreground">{automation.updatedAt}</TableCell>
+      <TableCell className="text-sm text-muted-foreground">
+        {formatDate(automation.updatedAt)}
+      </TableCell>
       <TableCell className="text-right">
         <Button
           variant="ghost"
