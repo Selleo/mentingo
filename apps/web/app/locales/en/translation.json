@@ -4508,5 +4508,25 @@
       "maxParticipantsReached": "The maximum number of participants has been reached.",
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "You achieved new level!",
+        "level": "Your actual level"
+      },
+      "achievement": {
+        "title": "New Achievement",
+        "level": "New level"
+      }
+    },
+    "profile": {
+      "header": "Your achievements",
+      "zeroAchievementsHeader": "You don't have any achievements",
+      "showHistory": "Show history",
+      "dialog": {
+        "level": "Level"
+      }
+    }
   }
 }

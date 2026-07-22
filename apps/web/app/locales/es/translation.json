@@ -4507,5 +4507,25 @@
       "maxParticipantsReached": "Se ha alcanzado el número máximo de participantes.",
       "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "¡Has alcanzado un nuevo nivel!",
+        "level": "Tu nivel actual"
+      },
+      "achievement": {
+        "title": "Nuevo logro",
+        "level": "Nuevo nivel"
+      }
+    },
+    "profile": {
+      "header": "Tus logros",
+      "zeroAchievementsHeader": "No tienes ningún logro",
+      "showHistory": "Mostrar historial",
+      "dialog": {
+        "level": "Nivel"
+      }
+    }
   }
 }

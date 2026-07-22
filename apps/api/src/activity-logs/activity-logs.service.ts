@@ -30,8 +30,10 @@ import type {
   RecordActivityLogParams,
 } from "./activity-logs.types";
 import type { ActivityLogMetadata } from "./types";
-import type { SQL } from "drizzle-orm";
+import type { InferSelectModel, SQL } from "drizzle-orm";
 import type { ActorUserType } from "src/common/types/actor-user.type";
+
+export type ActivityLog = InferSelectModel<typeof activityLogs>;
 
 @Injectable()
 export class ActivityLogsService {
@@ -61,6 +63,14 @@ export class ActivityLogsService {
   }
 
   async persistActivityLog(payload: RecordActivityLogInput): Promise<void> {
+    await this.insertActivityLog(payload);
+  }
+
+  async persistActivityLogAndReturn(payload: RecordActivityLogInput): Promise<ActivityLog> {
+    return this.insertActivityLog(payload);
+  }
+
+  private async insertActivityLog(payload: RecordActivityLogInput): Promise<ActivityLog> {
     const metadata: ActivityLogMetadata = {
       operation: payload.operation,
       changedFields: payload.changedFields,
@@ -69,20 +79,18 @@ export class ActivityLogsService {
       context: payload.context ?? null,
     };
 
-    try {
-      await this.db.insert(activityLogs).values({
+    const [activityLog] = await this.db
+      .insert(activityLogs)
+      .values({
         ...payload.actor,
         actionType: payload.operation,
         resourceType: payload.resourceType ?? null,
         resourceId: payload.resourceId ?? null,
         metadata: settingsToJSONBuildObject(metadata),
-      });
-    } catch (error) {
-      this.logger.error(
-        `Failed to persist activity log for operation ${payload.operation}`,
-        error instanceof Error ? error.stack : String(error),
-      );
-    }
+      })
+      .returning();
+
+    return activityLog;
   }
 
   async getActivityLogs({

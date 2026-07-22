@@ -3,7 +3,7 @@ import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
-import { outboxEvents } from "src/storage/schema";
+import { outboxEvents, processedSourceEvents } from "src/storage/schema";
 
 import { OUTBOX_STATUSES } from "./outbox.types";
 
@@ -74,6 +74,22 @@ export class OutboxRepository {
         updatedAt: sql`CURRENT_TIMESTAMP`,
       })
       .where(eq(outboxEvents.id, id));
+  }
+
+  async markProcessedOrSkip(
+    sourceId: string,
+    tenantId: string,
+    dbInstance?: DatabasePg,
+  ): Promise<boolean> {
+    const db = dbInstance ?? this.db;
+
+    const [inserted] = await db
+      .insert(processedSourceEvents)
+      .values({ tenantId, sourceId })
+      .onConflictDoNothing()
+      .returning({ id: processedSourceEvents.id });
+
+    return Boolean(inserted);
   }
 
   private normalizeRow(row: Record<string, unknown>): OutboxEnvelope {

@@ -4434,5 +4434,25 @@
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "Dosáhli jste nové úrovně!",
+        "level": "Vaše aktuální úroveň"
+      },
+      "achievement": {
+        "title": "Nový úspěch",
+        "level": "Nová úroveň"
+      }
+    },
+    "profile": {
+      "header": "Vaše úspěchy",
+      "zeroAchievementsHeader": "Nemáte žádné úspěchy",
+      "showHistory": "Zobrazit historii",
+      "dialog": {
+        "level": "Úroveň"
+      }
+    }
   }
 }

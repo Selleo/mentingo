@@ -105,7 +105,6 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
   GamificationVisibility,
-  GamificationSourceType,
   ChallengePeriodType,
   ChallengeStatus,
   XpTransactionType,
@@ -2493,28 +2492,27 @@ export const achievements = pgTable(
     ...id,
     ...timestamps,
 
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
 
-    key: text("key").notNull(),
+    key: jsonb("key").$type<LocalizedText>().default({}).notNull(),
 
     visibility: text("visibility").$type<GamificationVisibility>().notNull(),
 
     isEnabled: boolean("is_enabled").notNull().default(true),
 
     triggerEventType: text("trigger_event_type").notNull(),
+
+    baseLanguage,
+
+    availableLocales,
   },
   withTenantIdIndex("achievements", (table) => ({
-    tenantKeyUniqueIdx: uniqueIndex("achievements_tenant_key_unique_idx").on(
+    tenantIdIdUniqueIdx: uniqueIndex("achievements_tenant_id_unique_idx").on(
       table.tenantId,
-      table.key,
+      table.id,
     ),
 
     triggerEventIdx: index("achievements_trigger_event_idx").on(table.triggerEventType),
-    tenantUniqueIdx: unique("achievements_tenant_unique_idx").on(table.id, table.tenantId),
   })),
 );
 
@@ -2524,17 +2522,9 @@ export const achievementLevels = pgTable(
     ...id,
     ...timestamps,
 
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
 
-    achievementId: uuid("achievement_id")
-      .references(() => achievements.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    achievementId: uuid("achievement_id").notNull(),
 
     levelNumber: integer("level_number").notNull(),
 
@@ -2558,11 +2548,7 @@ export const userAchievementLevels = pgTable(
     ...id,
     ...timestamps,
 
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
 
     userId: uuid("user_id")
       .references(() => users.id, {
@@ -2575,8 +2561,6 @@ export const userAchievementLevels = pgTable(
         onDelete: "cascade",
       })
       .notNull(),
-
-    sourceType: text("source_type").$type<GamificationSourceType>().notNull(),
 
     sourceId: uuid("source_id").notNull(),
 
@@ -2592,7 +2576,7 @@ export const userAchievementLevels = pgTable(
 
     achievementLevelIdx: index("user_achievement_levels_level_idx").on(table.achievementLevelId),
 
-    sourceIdx: index("user_achievement_levels_source_idx").on(table.sourceType, table.sourceId),
+    sourceIdx: index("user_achievement_levels_source_idx").on(table.sourceId),
   })),
 );
 
@@ -2602,13 +2586,9 @@ export const challenges = pgTable(
     ...id,
     ...timestamps,
 
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
 
-    key: text("key").notNull(),
+    key: jsonb("key").$type<LocalizedText>().default({}).notNull(),
 
     visibility: text("visibility").$type<GamificationVisibility>().notNull(),
 
@@ -2621,10 +2601,16 @@ export const challenges = pgTable(
     targetCount: integer("target_count").notNull(),
 
     xpReward: integer("xp_reward").notNull(),
+
+    baseLanguage,
+
+    availableLocales,
   },
   withTenantIdIndex("challenges", (table) => ({
-    tenantKeyUnique: uniqueIndex("challenges_tenant_key_unique_idx").on(table.tenantId, table.key),
-
+    tenantIdIdUniqueIdx: uniqueIndex("challenges_tenant_id_unique_idx").on(
+      table.tenantId,
+      table.id,
+    ),
     triggerEventIdx: index("challenges_trigger_event_idx").on(table.triggerEventType),
   })),
 );
@@ -2635,16 +2621,10 @@ export const userChallengeProgress = pgTable(
     ...id,
     ...timestamps,
 
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
 
     userId: uuid("user_id")
-      .references(() => users.id, {
-        onDelete: "cascade",
-      })
+      .references(() => users.id)
       .notNull(),
 
     challengeId: uuid("challenge_id")
@@ -2678,20 +2658,15 @@ export const xpTransactions = pgTable(
   {
     ...id,
     ...timestamps,
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
     userId: uuid("user_id")
       .references(() => users.id, {
         onDelete: "cascade",
       })
       .notNull(),
-    amount: integer("amount").notNull(),
+    lifetimeDelta: integer("lifetime_delta").notNull(),
+    spendableDelta: integer("spendable_delta").notNull(),
     type: text("type").$type<XpTransactionType>().notNull(),
-    affectsLifetime: boolean("affects_lifetime").notNull(),
-    sourceType: text("source_type").$type<GamificationSourceType>().notNull(),
     sourceId: uuid("source_id").notNull(),
   },
   withTenantIdIndex("xp_transactions", (table) => ({
@@ -2699,9 +2674,9 @@ export const xpTransactions = pgTable(
       table.userId,
       table.createdAt,
     ),
-    sourceIdx: index("xp_transactions_source_idx").on(table.sourceType, table.sourceId),
+    sourceIdx: index("xp_transactions_source_idx").on(table.sourceId),
 
-    sourceType: index("xp_transactions_type_idx").on(table.type),
+    typeIdx: index("xp_transactions_type_idx").on(table.type),
   })),
 );
 
@@ -2710,11 +2685,7 @@ export const userProgress = pgTable(
   {
     ...id,
     ...timestamps,
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
+    tenantId,
     userId: uuid("user_id")
       .references(() => users.id, {
         onDelete: "cascade",
@@ -2740,19 +2711,13 @@ export const processedSourceEvents = pgTable(
   {
     ...id,
     ...timestamps,
-    tenantId: tenantId
-      .references(() => tenants.id, {
-        onDelete: "cascade",
-      })
-      .notNull(),
-    sourceType: text("source_type").$type<GamificationSourceType>().notNull(),
+    tenantId,
     sourceId: uuid("source_id").notNull(),
     processedAt: timestampWithTimezone({ name: "processed_at" }).notNull().defaultNow(),
   },
   withTenantIdIndex("processed_source_events", (table) => ({
     sourceUnique: uniqueIndex("processed_source_events_source_unique").on(
       table.tenantId,
-      table.sourceType,
       table.sourceId,
     ),
 

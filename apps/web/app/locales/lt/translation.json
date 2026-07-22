@@ -4435,5 +4435,25 @@
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
     }
+  },
+  "gamification": {
+    "toast": {
+      "nextLevel": {
+        "title": "Pasiekei naują lygį!",
+        "level": "Tavo dabartinis lygis"
+      },
+      "achievement": {
+        "title": "Naujas pasiekimas",
+        "level": "Naujas lygis"
+      }
+    },
+    "profile": {
+      "header": "Tavo pasiekimai",
+      "zeroAchievementsHeader": "Neturi jokių pasiekimų",
+      "showHistory": "Rodyti istoriją",
+      "dialog": {
+        "level": "Lygis"
+      }
+    }
   }
 }
