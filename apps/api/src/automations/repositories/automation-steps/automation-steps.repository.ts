@@ -70,20 +70,18 @@ export class AutomationStepsRepository {
   }
 
   async replaceAutomationStepTree(automationId: UUIDType, steps: AutomationStepBulkUpdate[]) {
-    console.log("REPO:", steps[0].typeContext);
-    console.log("TYPE:", typeof steps[0].typeContext);
     return this.db.transaction(async (tx) => {
       await tx.delete(automationSteps).where(eq(automationSteps.automationId, automationId));
+
       await tx.insert(automationSteps).values(
         steps.map((step) => ({
           id: step.id,
           parentId: step.parentId,
           automationId,
           type: step.type,
-          typeContext: step.typeContext,
+          typeContext: sql`${JSON.stringify(step.typeContext)}::jsonb`,
         })),
       );
-
       return true;
     });
   }
@@ -92,6 +90,6 @@ export class AutomationStepsRepository {
     return this.db
       .select()
       .from(automationSteps)
-      .where(sql`${automationSteps.typeContext} ->> 'name' = ${triggerName}`);
+      .where(sql`${automationSteps.typeContext}::text LIKE ${`%${triggerName}%`}`);
   }
 }

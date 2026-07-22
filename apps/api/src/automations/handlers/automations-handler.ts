@@ -75,7 +75,12 @@ export class AutomationsHandler implements IEventHandler<AutomationEventTypes> {
   async handle(event: AutomationEventTypes) {
     const eventName = AutomationEventNames[event.constructor.name];
     console.log(eventName);
-    const automation = await this.automationStepsRepository.findAutomationTriggerToRun(eventName);
-    console.log(automation);
+    const triggers = await this.automationStepsRepository.findAutomationTriggerToRun(eventName);
+    console.log(triggers);
+    //const automationIds = triggers.map((step) => step.automationId);
+    //const uniqueAutomationIds = [...new Set(automationIds)];
+
+    // for (const automationId of uniqueAutomationIds) {
+    // }
   }
 }
