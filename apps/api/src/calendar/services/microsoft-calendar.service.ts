@@ -89,10 +89,12 @@ export class MicrosoftCalendarService {
     };
   }
 
-  async getAuthorizationUrl(currentUser: CurrentUserType, origin: string, replace: boolean) {
+  async getAuthorizationUrl(currentUser: CurrentUserType, replace: boolean) {
     if (!(await this.graph.isConfigured())) {
       throw new ForbiddenException("microsoftCalendar.errors.unavailable");
     }
+
+    const origin = await resolveTenantOrigin(this.dbAdmin, currentUser.tenantId);
 
     const state = await this.tenantState.signMicrosoftCalendar({
       tenantId: currentUser.tenantId,

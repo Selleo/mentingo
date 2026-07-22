@@ -378,6 +378,9 @@
       "disconnect": "Odpojit",
       "continue": "Pokračovat do Microsoftu"
     },
+    "errors": {
+      "syncCooldown": "Před spuštěním další synchronizace chvíli počkejte."
+    },
     "stale": {
       "title": "Data kalendáře mohou být zastaralá",
       "description": "Importované události zůstávají viditelné. Zkuste synchronizaci znovu nebo znovu připojte účet Microsoft."

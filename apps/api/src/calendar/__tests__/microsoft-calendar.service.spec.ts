@@ -44,6 +44,8 @@ describe("MicrosoftCalendarService synchronization", () => {
     removeEventsMissingFromFullSync: jest.fn(),
   };
   const graph = {
+    isConfigured: jest.fn(),
+    getAuthorizationUrl: jest.fn(),
     refreshAccessToken: jest.fn(),
     getDeltaPage: jest.fn(),
     renewSubscription: jest.fn(),
@@ -51,6 +53,7 @@ describe("MicrosoftCalendarService synchronization", () => {
   };
   const tokenEncryption = { decrypt: jest.fn(), encrypt: jest.fn() };
   const syncQueue = { enqueue: jest.fn() };
+  const tenantState = { signMicrosoftCalendar: jest.fn() };
   const dbAdmin = {
     select: jest.fn(() => ({
       from: () => ({
@@ -63,7 +66,7 @@ describe("MicrosoftCalendarService synchronization", () => {
     graph as never,
     tokenEncryption as never,
     syncQueue as never,
-    {} as never,
+    tenantState as never,
     { runWithTenant: jest.fn((_tenantId, callback) => callback()) } as never,
     dbAdmin as never,
   );
@@ -76,6 +79,27 @@ describe("MicrosoftCalendarService synchronization", () => {
     tokenEncryption.decrypt.mockReturnValue("refresh-token");
     graph.refreshAccessToken.mockResolvedValue({ access_token: "access-token" });
     repository.getConnectionBySubscriptionId.mockResolvedValue(connection());
+    graph.isConfigured.mockResolvedValue(true);
+    tenantState.signMicrosoftCalendar.mockResolvedValue("signed-state");
+    graph.getAuthorizationUrl.mockResolvedValue("https://login.microsoftonline.com/authorize");
+  });
+
+  it("uses the authenticated user's tenant origin for the OAuth redirect", async () => {
+    await service.getAuthorizationUrl(
+      { tenantId: connection().tenantId, userId: connection().userId } as never,
+      false,
+    );
+
+    expect(tenantState.signMicrosoftCalendar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: connection().tenantId,
+        origin: "https://tenant.example.com",
+      }),
+    );
+    expect(graph.getAuthorizationUrl).toHaveBeenCalledWith(
+      "signed-state",
+      "https://tenant.example.com/api/auth/microsoft-calendar/callback",
+    );
   });
 
   it("accepts a valid webhook and queues an incremental sync", async () => {

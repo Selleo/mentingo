@@ -4,6 +4,7 @@ export const CALENDAR_HANDLES = {
   EVENT_DETAILS_GO_TO_LIVE_TRAINING: "calendar-event-details-go-to-live-training",
   EVENT_DETAILS_OPEN_OUTLOOK: "calendar-event-details-open-outlook",
   SOURCE_LEGEND: "calendar-source-legend",
+  MICROSOFT_CALENDAR_SYNC: "calendar-microsoft-calendar-sync",
   STALE_WARNING: "calendar-microsoft-stale-warning",
   HORIZON_NOTICE: "calendar-microsoft-horizon-notice",
   CREATE_DIALOG: "calendar-create-dialog",

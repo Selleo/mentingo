@@ -378,6 +378,9 @@
       "disconnect": "Trennen",
       "continue": "Weiter zu Microsoft"
     },
+    "errors": {
+      "syncCooldown": "Bitte warten Sie, bevor Sie eine weitere Synchronisierung starten."
+    },
     "stale": {
       "title": "Kalenderdaten sind möglicherweise veraltet",
       "description": "Importierte Termine bleiben sichtbar. Synchronisieren Sie erneut oder verbinden Sie Ihr Microsoft-Konto neu."

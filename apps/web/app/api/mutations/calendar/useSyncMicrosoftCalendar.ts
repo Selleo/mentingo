@@ -16,9 +16,13 @@ export function useSyncMicrosoftCalendar() {
     mutationFn: async () => {
       await ApiClient.api.microsoftCalendarControllerSync();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: microsoftCalendarConnectionQueryOptions.queryKey });
-      queryClient.invalidateQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY });
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: microsoftCalendarConnectionQueryOptions.queryKey,
+        }),
+        queryClient.invalidateQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY }),
+      ]);
       toast({ description: t("microsoftCalendar.toast.syncQueued") });
     },
     onError: (error) => {

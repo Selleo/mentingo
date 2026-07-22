@@ -1,14 +1,13 @@
-import { Body, Controller, Delete, Get, HttpCode, Post, Query, Req, Res } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, Logger, Post, Query, Res } from "@nestjs/common";
 import { PERMISSIONS } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, nullResponse } from "src/common";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
-import { getRequestBaseUrl } from "src/common/helpers/getRequestBaseUrl";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { MICROSOFT_CALENDAR_OAUTH_RESULTS } from "./calendar.constants";
@@ -24,6 +23,8 @@ import type { MicrosoftCalendarConnectionResponse } from "./types/calendar.types
 
 @Controller("calendar/microsoft")
 export class MicrosoftCalendarController {
+  private readonly logger = new Logger(MicrosoftCalendarController.name);
+
   constructor(private readonly microsoftCalendarService: MicrosoftCalendarService) {}
 
   @Get("connection")
@@ -65,6 +66,10 @@ export class MicrosoftCalendarController {
     @Body() body: MicrosoftGraphNotificationBody,
     @Res() response: Response,
   ) {
+    this.logger.log(
+      `Microsoft calendar webhook endpoint called: validation=${Boolean(validationToken)} notifications=${body?.value?.length ?? 0}`,
+    );
+
     if (validationToken) {
       return response.status(200).type("text/plain").send(validationToken);
     }
@@ -91,6 +96,10 @@ export class MicrosoftCalendarController {
     @Body() body: MicrosoftGraphNotificationBody,
     @Res() response: Response,
   ) {
+    this.logger.log(
+      `Microsoft calendar lifecycle webhook endpoint called: validation=${Boolean(validationToken)} notifications=${body?.value?.length ?? 0}`,
+    );
+
     if (validationToken) {
       return response.status(200).type("text/plain").send(validationToken);
     }
@@ -116,16 +125,10 @@ export class MicrosoftCalendarOAuthController {
   async connect(
     @Query("replace") replace: string | undefined,
     @CurrentUser() currentUser: CurrentUserType,
-    @Req() request: Request,
     @Res() response: Response,
   ) {
-    const origin = getRequestBaseUrl(request);
-
-    if (!origin) throw new Error("Unable to determine Microsoft Calendar callback origin");
-
     const authorizationUrl = await this.microsoftCalendarService.getAuthorizationUrl(
       currentUser,
-      origin,
       replace === "true",
     );
 
@@ -143,7 +146,7 @@ export class MicrosoftCalendarOAuthController {
   ) {
     if (!state) {
       return response.redirect(
-        `/settings?microsoftCalendar=${MICROSOFT_CALENDAR_OAUTH_RESULTS.AUTHORIZATION_FAILED}`,
+        `/settings?tab=integrations&microsoftCalendar=${MICROSOFT_CALENDAR_OAUTH_RESULTS.AUTHORIZATION_FAILED}`,
       );
     }
 
@@ -155,19 +158,19 @@ export class MicrosoftCalendarOAuthController {
 
       if (!failure) {
         return response.redirect(
-          `/settings?microsoftCalendar=${MICROSOFT_CALENDAR_OAUTH_RESULTS.AUTHORIZATION_FAILED}`,
+          `/settings?tab=integrations&microsoftCalendar=${MICROSOFT_CALENDAR_OAUTH_RESULTS.AUTHORIZATION_FAILED}`,
         );
       }
 
       return response.redirect(
-        `${failure.origin}/settings?microsoftCalendar=${encodeURIComponent(failure.result)}`,
+        `${failure.origin}/settings?tab=integrations&microsoftCalendar=${encodeURIComponent(failure.result)}`,
       );
     }
 
     try {
       const result = await this.microsoftCalendarService.completeAuthorization({ code, state });
       return response.redirect(
-        `${result.origin}/settings?microsoftCalendar=${encodeURIComponent(result.result)}`,
+        `${result.origin}/settings?tab=integrations&microsoftCalendar=${encodeURIComponent(result.result)}`,
       );
     } catch (authorizationError) {
       const failure = await this.microsoftCalendarService.handleAuthorizationFailure(
@@ -177,7 +180,7 @@ export class MicrosoftCalendarOAuthController {
       const origin = failure?.origin ?? "";
       const result = failure?.result ?? MICROSOFT_CALENDAR_OAUTH_RESULTS.AUTHORIZATION_FAILED;
       return response.redirect(
-        `${origin}/settings?microsoftCalendar=${encodeURIComponent(result)}`,
+        `${origin}/settings?tab=integrations&microsoftCalendar=${encodeURIComponent(result)}`,
       );
     }
   }

@@ -382,6 +382,9 @@
       "disconnect": "Rozłącz",
       "continue": "Przejdź do Microsoft"
     },
+    "errors": {
+      "syncCooldown": "Przed rozpoczęciem kolejnej synchronizacji poczekaj chwilę."
+    },
     "stale": {
       "title": "Dane kalendarza mogą być nieaktualne",
       "description": "Zaimportowane wydarzenia pozostają widoczne. Spróbuj ponownie zsynchronizować lub połączyć konto."

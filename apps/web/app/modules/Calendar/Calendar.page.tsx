@@ -4,9 +4,11 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { redirect } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
+import { RefreshCw } from "lucide-react";
 import { useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useSyncMicrosoftCalendar } from "~/api/mutations/calendar/useSyncMicrosoftCalendar";
 import { currentUserQueryOptions } from "~/api/queries";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
 import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
@@ -15,7 +17,9 @@ import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
+import { Button } from "~/components/ui/button";
 import { usePermissions } from "~/hooks/usePermissions";
+import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { saveEntryToNavigationHistory } from "~/utils/saveEntryToNavigationHistory";
 import { setPageTitle } from "~/utils/setPageTitle";
@@ -79,12 +83,15 @@ export default function CalendarPage() {
   const language = useLanguageStore((state) => state.language);
   const { data: globalSettings } = useGlobalSettings();
   const { data: microsoftConnection } = useMicrosoftCalendarConnection();
+  const { mutateAsync: syncCalendar, isPending: isSyncPending } = useSyncMicrosoftCalendar();
   const { hasAccess: hasLiveTrainingCreateAccess } = usePermissions({
     required: PERMISSIONS.LIVE_TRAINING_CREATE,
   });
   const timezone = useMemo(() => getBrowserTimezone(), []);
   const canCreateLiveTraining =
     Boolean(globalSettings?.liveTrainingEnabled) && hasLiveTrainingCreateAccess;
+  const canSyncMicrosoftCalendar =
+    microsoftConnection?.status === "connected" || microsoftConnection?.status === "syncing";
   const visibleRange = calendarState.visibleRange;
   const showHorizonNotice = useMemo(() => {
     if (!visibleRange || microsoftConnection?.status === "disconnected") return false;
@@ -218,6 +225,23 @@ export default function CalendarPage() {
               {t("calendarView.details.sourceType.microsoftOutlook")}
             </span>
           </div>
+          {canSyncMicrosoftCalendar ? (
+            <Button
+              variant="outline"
+              disabled={microsoftConnection?.status === "syncing" || isSyncPending}
+              onClick={() => syncCalendar()}
+              data-testid={CALENDAR_HANDLES.MICROSOFT_CALENDAR_SYNC}
+            >
+              <RefreshCw
+                className={cn(
+                  "mr-2 size-4",
+                  (microsoftConnection?.status === "syncing" || isSyncPending) && "animate-spin",
+                )}
+                aria-hidden="true"
+              />
+              {t("microsoftCalendar.action.sync")}
+            </Button>
+          ) : null}
         </div>
 
         {microsoftConnection?.stale ? (

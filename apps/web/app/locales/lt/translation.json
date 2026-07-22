@@ -378,6 +378,9 @@
       "disconnect": "Atjungti",
       "continue": "Tęsti Microsoft"
     },
+    "errors": {
+      "syncCooldown": "Prieš pradėdami kitą sinchronizavimą palaukite."
+    },
     "stale": {
       "title": "Kalendoriaus duomenys gali būti pasenę",
       "description": "Importuoti įvykiai lieka matomi. Sinchronizuokite dar kartą arba iš naujo prijunkite Microsoft paskyrą."

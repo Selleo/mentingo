@@ -379,6 +379,9 @@
       "disconnect": "Disconnect",
       "continue": "Continue to Microsoft"
     },
+    "errors": {
+      "syncCooldown": "Please wait before starting another sync."
+    },
     "stale": {
       "title": "Calendar data may be out of date",
       "description": "Your imported events remain visible. Try syncing again or reconnect your Microsoft account."

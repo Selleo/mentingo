@@ -379,6 +379,9 @@
       "disconnect": "Desconectar",
       "continue": "Continuar a Microsoft"
     },
+    "errors": {
+      "syncCooldown": "Espera antes de iniciar otra sincronización."
+    },
     "stale": {
       "title": "Los datos del calendario pueden estar desactualizados",
       "description": "Los eventos importados siguen visibles. Vuelve a sincronizar o conecta de nuevo tu cuenta Microsoft."
