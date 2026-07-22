@@ -15,6 +15,8 @@ export type AutomationRecordInput = {
   status: AutomationStatus;
 };
 
+export type AutomationRecordUpdateInput = Partial<AutomationRecordInput>;
+
 export type AutomationStepRecordInput = {
   parentId: UUIDType | null;
   automationId: UUIDType;

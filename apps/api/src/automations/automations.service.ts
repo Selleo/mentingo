@@ -2,7 +2,10 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AutomationsRepository } from "./repositories/automations/automations.repository";
 
-import type { AutomationRecordInput } from "src/announcements/types/automations-source.types";
+import type {
+  AutomationRecordInput,
+  AutomationRecordUpdateInput,
+} from "src/announcements/types/automations-source.types";
 import type { AutomationStatus } from "src/announcements/types/automations.types";
 import type { UUIDType } from "src/common";
 
@@ -28,7 +31,7 @@ export class AutomationsService {
     return automation;
   }
 
-  async updateAutomation(automationId: UUIDType, input: AutomationRecordInput) {
+  async updateAutomation(automationId: UUIDType, input: AutomationRecordUpdateInput) {
     const updatedId = await this.automationsRepository.updateAutomation(automationId, input);
     if (!updatedId) {
       throw new BadRequestException("Couldn't update the automation");

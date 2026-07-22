@@ -5,7 +5,10 @@ import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { automations } from "src/storage/schema";
 
-import type { AutomationRecordInput } from "src/announcements/types/automations-source.types";
+import type {
+  AutomationRecordInput,
+  AutomationRecordUpdateInput,
+} from "src/announcements/types/automations-source.types";
 import type { AutomationStatus } from "src/announcements/types/automations.types";
 import type { UUIDType } from "src/common";
 
@@ -36,10 +39,19 @@ export class AutomationsRepository {
 
     return automation;
   }
-  async updateAutomation(automationId: UUIDType, input: AutomationRecordInput) {
+  async updateAutomation(automationId: UUIDType, input: AutomationRecordUpdateInput) {
+    const setFields: Record<string, unknown> = {};
+    if (input.name !== undefined) setFields.name = input.name;
+    if (input.description !== undefined) setFields.description = input.description;
+    if (input.status !== undefined) setFields.status = input.status;
+
+    if (Object.keys(setFields).length === 0) {
+      return automationId;
+    }
+
     const [updated] = await this.db
       .update(automations)
-      .set({ name: input.name, description: input.description, status: input.status })
+      .set(setFields)
       .where(eq(automations.id, automationId))
       .returning();
     return updated.id;

@@ -182,6 +182,11 @@ export const getNavigationConfig = (
           iconName: "Category",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
         },
+        {
+          label: "Automatyzacja", //t("navigationSideBar.automation"),
+          path: "admin/automation",
+          iconName: "InProgress",
+        },
         ...(isStripeConfigured
           ? [
               {

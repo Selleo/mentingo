@@ -15667,12 +15667,21 @@
         }
       }
     },
-    "/api/automations/tenant/{tenantId}": {
+    "/api/automations": {
       "get": {
         "operationId": "AutomationsController_getAllAutomations",
         "parameters": [],
         "responses": {
           "200": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "operationId": "AutomationsController_createAutomation",
+        "parameters": [],
+        "responses": {
+          "201": {
             "description": ""
           }
         }
@@ -15729,17 +15738,6 @@
         ],
         "responses": {
           "200": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/api/automations": {
-      "post": {
-        "operationId": "AutomationsController_createAutomation",
-        "parameters": [],
-        "responses": {
-          "201": {
             "description": ""
           }
         }
