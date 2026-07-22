@@ -40,6 +40,10 @@ export type AutomationStepBulkUpdate = {
   typeContext: typeContext;
 };
 
+export type AutomationActionStep = {
+  typeContext: typeContext;
+};
+
 export const AutomationStepSchema = Type.Omit(omitTenantId(createSelectSchema(automationSteps)), [
   "createdAt",
   "updatedAt",

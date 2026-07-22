@@ -400,3 +400,28 @@ export function getStepDefinition(
 ): AutomationStepDefinition | undefined {
   return STEP_DEFINITIONS.find((s) => s.type === type);
 }
+export const AUTOMATION_TRIGGER_MAP: Record<TriggerType, AutomationStepDefinition> = {
+  user_invited: USER_INVITED_TRIGGER,
+  users_imported_invite: USERS_IMPORTED_INVITE_TRIGGER,
+  user_password_reminder: USER_PASSWORD_REMINDER_TRIGGER,
+  user_welcome: USER_WELCOME_TRIGGER,
+  user_first_login: USER_FIRST_LOGIN_TRIGGER,
+  users_assigned_to_course: USERS_ASSIGNED_TO_COURSE_TRIGGER,
+  users_short_inactivity: USERS_SHORT_INACTIVITY_TRIGGER,
+  users_long_inactivity: USERS_LONG_INACTIVITY_TRIGGER,
+  user_chapter_finished: USER_CHAPTER_FINISHED_TRIGGER,
+  user_course_finished: USER_COURSE_FINISHED_TRIGGER,
+
+  user_registered: USER_REGISTERED_TRIGGER,
+  user_password_created: USER_PASSWORD_CREATED_TRIGGER,
+  course_completed: COURSE_COMPLETED_TRIGGER,
+
+  certificate_expiration_warning: CERTIFICATE_EXPIRATION_WARNING_TRIGGER,
+  certificate_archived: CERTIFICATE_ARCHIVED_TRIGGER,
+
+  announcement_published: ANNOUNCEMENT_PUBLISHED_TRIGGER,
+
+  course_chat_user_mentioned: COURSE_CHAT_USER_MENTIONED_TRIGGER,
+
+  course_due_date_reminder: COURSE_DUE_DATE_REMINDER_TRIGGER,
+};
