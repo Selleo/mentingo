@@ -1,6 +1,7 @@
 import {
   LIVE_TRAINING_DELIVERY_TYPES,
   LIVE_TRAINING_DESCRIPTION_MAX_LENGTH,
+  LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT,
   LIVE_TRAINING_STATUSES,
   LIVE_TRAINING_TITLE_MAX_LENGTH,
 } from "@repo/shared";
@@ -21,6 +22,16 @@ import {
 
 import type { LiveTrainingSessionStageLogicParams } from "./LiveTrainingSessionStage.types";
 import type { LiveTrainingEditFormState } from "~/modules/LiveTraining/liveTrainingEdit.types";
+
+const normalizeMaxParticipants = (value: string) => {
+  if (!value) return value;
+
+  const numericValue = Number(value);
+
+  if (Number.isNaN(numericValue)) return null;
+
+  return String(Math.min(numericValue, LIVE_TRAINING_MAX_PARTICIPANTS_LIMIT));
+};
 
 export function useLiveTrainingSessionStage({
   liveTraining,
@@ -102,18 +113,24 @@ export function useLiveTrainingSessionStage({
 
   const handleMaxParticipantsChange = useCallback(
     (value: string) => {
-      if (!value) {
-        onEditFormStateChange("maxParticipants", value);
-        return;
+      const normalizedValue = normalizeMaxParticipants(value);
+
+      if (normalizedValue !== null) {
+        onEditFormStateChange("maxParticipants", normalizedValue);
       }
-
-      const numericValue = Number(value);
-
-      if (Number.isNaN(numericValue)) return;
-
-      onEditFormStateChange("maxParticipants", String(Math.min(numericValue, 100)));
     },
     [onEditFormStateChange],
+  );
+
+  const handleMaxParticipantsBlur = useCallback(
+    (value: string) => {
+      const normalizedValue = normalizeMaxParticipants(value);
+
+      if (normalizedValue !== null) {
+        updateAndCommit("maxParticipants", normalizedValue);
+      }
+    },
+    [updateAndCommit],
   );
 
   const handleDescriptionChange = useCallback(
@@ -157,6 +174,7 @@ export function useLiveTrainingSessionStage({
     displayedStartsAt,
     handleDescriptionBlur,
     handleDescriptionChange,
+    handleMaxParticipantsBlur,
     handleMaxParticipantsChange,
     handleTitleBlur,
     handleTitleChange,

@@ -15,16 +15,20 @@ export const fillCourseSettingsFlow = async (
 ) => {
   if (title !== undefined) {
     await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).click();
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).fill(title);
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).press("Enter");
+    const titleEditor = page.locator(
+      `textarea[data-testid="${COURSE_SETTINGS_HANDLES.TITLE_INPUT}"]`,
+    );
+    await titleEditor.fill(title);
+    await titleEditor.press("Enter");
   }
 
   if (categoryTitle !== undefined) {
     if (currentCategoryTitle !== undefined) {
       await page.getByRole("button", { name: currentCategoryTitle }).click();
+    } else {
+      await page.getByTestId(COURSE_SETTINGS_HANDLES.CATEGORY_SELECT).click();
     }
 
-    await page.getByTestId(COURSE_SETTINGS_HANDLES.CATEGORY_SELECT).click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.categoryOption(categoryTitle)).click();
   }
 

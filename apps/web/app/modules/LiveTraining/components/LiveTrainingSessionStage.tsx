@@ -86,6 +86,7 @@ export function LiveTrainingSessionStage({
     displayedStartsAt,
     handleDescriptionBlur,
     handleDescriptionChange,
+    handleMaxParticipantsBlur,
     handleMaxParticipantsChange,
     handleTitleBlur,
     handleTitleChange,
@@ -336,7 +337,7 @@ export function LiveTrainingSessionStage({
                           readOnly={!canEdit}
                           value={editFormState.maxParticipants}
                           onChange={(event) => handleMaxParticipantsChange(event.target.value)}
-                          onBlur={commitCurrentFormState}
+                          onBlur={(event) => handleMaxParticipantsBlur(event.currentTarget.value)}
                           className="h-auto w-10 rounded-none border-0 bg-transparent p-0 text-xs text-white shadow-none focus-visible:ring-0 sm:text-sm"
                         />
                       </span>

@@ -37,6 +37,8 @@ L&D teams can coordinate blended programs more reliably because scheduling, cour
 
 Administrators create a live training item with title, schedule, delivery type, hosts, location or online room behavior, participant visibility, and optional course links. Sessions can also be created from the calendar, which pre-fills scheduling context.
 
+Authorized editors can adjust key session details directly from the Live Training workspace. Valid inline changes, including maximum participant capacity, are saved when the editor leaves the field and are then reflected in the session data and connected calendar views.
+
 When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
 
 In online rooms, participant tiles adapt to the available stage size so small group sessions remain easy to scan, including a balanced two-by-two arrangement when four camera tiles are visible.
@@ -55,4 +57,4 @@ Materials are separated into before-session and after-session resources. Privile
 ## Test Evidence
 
 - API E2E coverage verifies creation with calendar events, course links, host access, calendar updates, soft deletion, material visibility, learner visibility, session ending, and notification/email behavior.
-- Web E2E coverage verifies disabled online delivery when LiveKit is unavailable, live-training lesson view behavior, material permissions, trainer/host visibility, offline session start/end, edit/delete, and calendar-driven creation/navigation.
+- Web E2E coverage verifies disabled online delivery when LiveKit is unavailable, live-training lesson view behavior, material permissions, trainer/host visibility, offline session start/end, inline edits including maximum participant capacity, deletion, and calendar-driven creation/navigation. A focused frontend test also verifies that the current capacity value is committed when the editor leaves the field.
