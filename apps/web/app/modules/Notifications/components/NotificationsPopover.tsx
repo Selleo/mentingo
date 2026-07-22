@@ -1,12 +1,11 @@
 import { Link } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { ANNOUNCEMENT_FEEDS, PERMISSIONS, type AnnouncementFeed } from "@repo/shared";
 import { CheckCheck, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useMarkAllAnnouncementsAsRead } from "~/api/mutations/useMarkAllAnnouncementsAsRead";
 import { useInfiniteAllAnnouncements } from "~/api/queries/admin/useInfiniteAllAnnouncements";
-import { useInfiniteAnnouncementsForUser } from "~/api/queries/useInfiniteAnnouncementsForUser";
 import { useUnreadAnnouncementsCount } from "~/api/queries/useUnreadAnnouncementsCount";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { PopoverClose } from "~/components/ui/popover";
@@ -36,11 +35,6 @@ type NotificationsPopoverProps = {
   variant?: NotificationsPopoverVariant;
 };
 
-const TAB_VALUE = {
-  ALL: "all",
-  ADMIN: "admin-announcements",
-} as const;
-
 export function NotificationsPopover({
   className,
   variant = NOTIFICATIONS_POPOVER_VARIANT.POPOVER,
@@ -50,6 +44,7 @@ export function NotificationsPopover({
   const isPageVariant = variant === NOTIFICATIONS_POPOVER_VARIANT.PAGE;
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [activeFeed, setActiveFeed] = useState<AnnouncementFeed>(ANNOUNCEMENT_FEEDS.ALL);
 
   const { hasAccess: canCreateAnnouncements } = usePermissions({
     required: PERMISSIONS.ANNOUNCEMENT_CREATE,
@@ -58,17 +53,15 @@ export function NotificationsPopover({
     required: PERMISSIONS.ANNOUNCEMENT_DELETE,
   });
 
-  const canManageAnnouncements = canCreateAnnouncements || canDeleteAnnouncements;
-
   const { mutate: markAllAsRead, isPending: isMarkingAllRead } = useMarkAllAnnouncementsAsRead();
 
   const {
-    data: userAnnouncementsData,
-    fetchNextPage: fetchNextUserAnnouncementsPage,
-    hasNextPage: hasNextUserAnnouncementsPage,
-    isFetchingNextPage: isFetchingNextUserAnnouncementsPage,
-    refetch: refetchUserAnnouncements,
-  } = useInfiniteAnnouncementsForUser({ language }, { enabled: !canManageAnnouncements });
+    data: allAnnouncementsData,
+    fetchNextPage: fetchNextAllAnnouncementsPage,
+    hasNextPage: hasNextAllAnnouncementsPage,
+    isFetchingNextPage: isFetchingNextAllAnnouncementsPage,
+    refetch: refetchAllAnnouncements,
+  } = useInfiniteAllAnnouncements({ feed: ANNOUNCEMENT_FEEDS.ALL, language });
 
   const {
     data: adminAnnouncementsData,
@@ -76,20 +69,31 @@ export function NotificationsPopover({
     hasNextPage: hasNextAdminAnnouncementsPage,
     isFetchingNextPage: isFetchingNextAdminAnnouncementsPage,
     refetch: refetchAdminAnnouncements,
-  } = useInfiniteAllAnnouncements({ language }, { enabled: canManageAnnouncements });
+  } = useInfiniteAllAnnouncements({
+    feed: ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS,
+    language,
+  });
 
-  const shouldFetchUnreadCount = !isPageVariant || !canManageAnnouncements;
+  const {
+    data: systemAnnouncementsData,
+    fetchNextPage: fetchNextSystemAnnouncementsPage,
+    hasNextPage: hasNextSystemAnnouncementsPage,
+    isFetchingNextPage: isFetchingNextSystemAnnouncementsPage,
+    refetch: refetchSystemAnnouncements,
+  } = useInfiniteAllAnnouncements({ feed: ANNOUNCEMENT_FEEDS.SYSTEM, language });
+
   const { data: unreadAnnouncementsCount, refetch: refetchUnreadAnnouncementsCount } =
-    useUnreadAnnouncementsCount({ enabled: shouldFetchUnreadCount });
+    useUnreadAnnouncementsCount();
 
   const unreadCount = unreadAnnouncementsCount?.unreadCount ?? 0;
 
-  const userFeed = {
-    announcements: userAnnouncementsData?.pages.flatMap((page) => page.data) ?? [],
-    count: userAnnouncementsData?.pages[0]?.pagination.totalItems ?? 0,
-    hasMore: hasNextUserAnnouncementsPage,
-    isFetchingMore: isFetchingNextUserAnnouncementsPage,
-    onLoadMore: fetchNextUserAnnouncementsPage,
+  const allFeed = {
+    announcements: allAnnouncementsData?.pages.flatMap((page) => page.data) ?? [],
+    count: allAnnouncementsData?.pages[0]?.pagination.totalItems ?? 0,
+    hasMore: hasNextAllAnnouncementsPage,
+    isFetchingMore: isFetchingNextAllAnnouncementsPage,
+    onLoadMore: fetchNextAllAnnouncementsPage,
+    refetch: refetchAllAnnouncements,
   };
 
   const adminFeed = {
@@ -98,20 +102,29 @@ export function NotificationsPopover({
     hasMore: hasNextAdminAnnouncementsPage,
     isFetchingMore: isFetchingNextAdminAnnouncementsPage,
     onLoadMore: fetchNextAdminAnnouncementsPage,
+    refetch: refetchAdminAnnouncements,
   };
 
-  const notificationsFeed = canManageAnnouncements ? adminFeed : userFeed;
+  const systemFeed = {
+    announcements: systemAnnouncementsData?.pages.flatMap((page) => page.data) ?? [],
+    count: systemAnnouncementsData?.pages[0]?.pagination.totalItems ?? 0,
+    hasMore: hasNextSystemAnnouncementsPage,
+    isFetchingMore: isFetchingNextSystemAnnouncementsPage,
+    onLoadMore: fetchNextSystemAnnouncementsPage,
+    refetch: refetchSystemAnnouncements,
+  };
 
-  const shouldShowMarkAllRead = !canManageAnnouncements;
+  const feeds = {
+    [ANNOUNCEMENT_FEEDS.ALL]: allFeed,
+    [ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS]: adminFeed,
+    [ANNOUNCEMENT_FEEDS.SYSTEM]: systemFeed,
+  };
+
+  const notificationsFeed = feeds[activeFeed];
 
   const handleRefresh = () => {
-    if (shouldFetchUnreadCount) refetchUnreadAnnouncementsCount();
-
-    if (canManageAnnouncements) {
-      refetchAdminAnnouncements();
-    } else {
-      refetchUserAnnouncements();
-    }
+    refetchUnreadAnnouncementsCount();
+    notificationsFeed.refetch();
   };
 
   const renderAnnouncements = ({
@@ -184,7 +197,7 @@ export function NotificationsPopover({
               <RefreshCw className="size-5" aria-hidden />
               <span className="sr-only">{t("notifications.actions.refresh")}</span>
             </Button>
-            {isPageVariant && shouldShowMarkAllRead && (
+            {isPageVariant && (
               <Button
                 type="button"
                 variant="outline"
@@ -214,18 +227,44 @@ export function NotificationsPopover({
           </div>
         </div>
 
-        <Tabs defaultValue={TAB_VALUE.ADMIN} className="space-y-4">
-          <TabsList className="grid h-auto w-full grid-cols-2 rounded-lg bg-neutral-100 p-1">
-            <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ALL}>
-              {t("notifications.tabs.all")}
-              <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-                {notificationsFeed.count}
+        <Tabs
+          value={activeFeed}
+          onValueChange={(value) => setActiveFeed(value as AnnouncementFeed)}
+          className="space-y-4"
+        >
+          <TabsList className="flex h-auto w-full rounded-lg bg-neutral-100 p-1">
+            <TabsTrigger
+              className="w-fit shrink-0 gap-1 whitespace-nowrap rounded-md px-8 py-2 text-xs leading-tight"
+              value={ANNOUNCEMENT_FEEDS.ALL}
+              data-testid={NOTIFICATIONS_HANDLES.TAB_ALL}
+            >
+              <span className="min-w-0 break-words text-center">{t("notifications.tabs.all")}</span>
+              <span className="shrink-0 rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
+                {allFeed.count}
               </span>
             </TabsTrigger>
-            <TabsTrigger className="gap-2 rounded-md py-2" value={TAB_VALUE.ADMIN}>
-              {t("notifications.tabs.adminAnnouncements")}
-              <span className="rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
-                {notificationsFeed.count}
+            <TabsTrigger
+              className="min-w-0 flex-1 gap-1 overflow-hidden whitespace-normal rounded-md px-1.5 py-2 text-xs leading-tight"
+              value={ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS}
+              data-testid={NOTIFICATIONS_HANDLES.TAB_ADMIN_ANNOUNCEMENTS}
+            >
+              <span className="min-w-0 break-words text-center">
+                {t("notifications.tabs.adminAnnouncements")}
+              </span>
+              <span className="shrink-0 rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
+                {adminFeed.count}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger
+              className="w-fit shrink-0 gap-1 whitespace-nowrap rounded-md px-8 py-2 text-xs leading-tight"
+              value={ANNOUNCEMENT_FEEDS.SYSTEM}
+              data-testid={NOTIFICATIONS_HANDLES.TAB_SYSTEM}
+            >
+              <span className="min-w-0 break-words text-center">
+                {t("notifications.tabs.system")}
+              </span>
+              <span className="shrink-0 rounded-full bg-neutral-200 px-1.5 text-xs text-neutral-700">
+                {systemFeed.count}
               </span>
             </TabsTrigger>
           </TabsList>
@@ -235,19 +274,17 @@ export function NotificationsPopover({
 
         {!isPageVariant && (
           <div className="flex items-center justify-between gap-3">
-            {shouldShowMarkAllRead && (
-              <Button
-                type="button"
-                variant="link"
-                className="h-auto gap-1.5 p-0 text-neutral-950"
-                disabled={!unreadCount || isMarkingAllRead}
-                onClick={() => markAllAsRead()}
-                data-testid={NOTIFICATIONS_HANDLES.MARK_ALL_READ_BUTTON}
-              >
-                <CheckCheck className="size-4" aria-hidden />
-                {t("notifications.actions.markAllRead")}
-              </Button>
-            )}
+            <Button
+              type="button"
+              variant="link"
+              className="h-auto gap-1.5 p-0 text-neutral-950"
+              disabled={!unreadCount || isMarkingAllRead}
+              onClick={() => markAllAsRead()}
+              data-testid={NOTIFICATIONS_HANDLES.MARK_ALL_READ_BUTTON}
+            >
+              <CheckCheck className="size-4" aria-hidden />
+              {t("notifications.actions.markAllRead")}
+            </Button>
             <PopoverClose asChild>
               <Link
                 to="/notifications"

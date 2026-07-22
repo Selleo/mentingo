@@ -1,4 +1,4 @@
-import { ANNOUNCEMENT_STATUSES } from "@repo/shared";
+import { ANNOUNCEMENT_SOURCE_TYPES, ANNOUNCEMENT_STATUSES } from "@repo/shared";
 import { formatDistanceToNow } from "date-fns";
 import { CheckCheck, Megaphone, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -45,6 +45,8 @@ export function NotificationAnnouncementItem({
   const { mutate: deleteAnnouncement, isPending: isDeleting } = useDeleteAnnouncement();
 
   const isUnread = announcement.isRead === false;
+  const canDeleteAnnouncement =
+    canDelete && announcement.sourceType === ANNOUNCEMENT_SOURCE_TYPES.MANUAL;
 
   const distance = formatDistanceToNow(new Date(announcement.createdAt), {
     addSuffix: true,
@@ -102,7 +104,7 @@ export function NotificationAnnouncementItem({
           </Tooltip>
         )}
 
-        {canDelete && (
+        {canDeleteAnnouncement && (
           <Dialog>
             <Tooltip>
               <TooltipTrigger asChild>

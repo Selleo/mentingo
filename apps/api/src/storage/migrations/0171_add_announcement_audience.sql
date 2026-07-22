@@ -1,0 +1,1 @@
+ALTER TABLE "announcements" ADD COLUMN "audience" text DEFAULT 'all_users' NOT NULL;
