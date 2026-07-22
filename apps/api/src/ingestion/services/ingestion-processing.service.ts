@@ -77,6 +77,10 @@ export class IngestionProcessingService {
         `Extracted text pages: tenantId=${tenantId}, lessonId=${lessonId}, documentId=${newDocument.id}, pages=${extractedPages.length}`,
       );
 
+      if (!extractedPages.length) {
+        throw new Error("ingestion.error.noExtractableText");
+      }
+
       const { loc: _loc, ...rest } = extractedPages[0].metadata;
       await this.documentRepository.updateDocument(newDocument.id, {
         metadata: { ...rest },

@@ -12,20 +12,30 @@ import { and, eq, sql } from "drizzle-orm/sql";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
+import { SearchIndexRepository } from "src/global-search/search-index.repository";
+import { SearchIndexService } from "src/global-search/search-index.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorLessons,
+  articles,
   categories,
   chapters,
   courses,
+  learningPaths,
   lessons,
+  news,
   permissionRoleRuleSets,
   permissionRoles,
   permissionRuleSetPermissions,
   permissionRuleSets,
   permissionUserRoles,
   questionAnswerOptions,
+  questionsAndAnswers,
   questions,
   tenants,
 } from "src/storage/schema";
@@ -211,17 +221,58 @@ export async function createNiceCourses(
         if (
           lessonData.type === LESSON_TYPES.AI_MENTOR &&
           lessonData.aiMentorInstructions &&
-          lessonData.completionConditions
+          lessonData.aiJudgeConfiguration
         ) {
-          await db
+          const [aiMentorLesson] = await db
             .insert(aiMentorLessons)
             .values({
               lessonId: lesson.id,
               aiMentorInstructions: buildJsonbField("en", lessonData.aiMentorInstructions),
-              completionConditions: buildJsonbField("en", lessonData.completionConditions),
               tenantId,
             })
             .returning();
+
+          const [configuration] = await db
+            .insert(aiJudgeConfigurations)
+            .values({
+              aiMentorLessonId: aiMentorLesson.id,
+              taskGoal: buildJsonbField("en", lessonData.aiJudgeConfiguration.taskGoal),
+              passingThresholdPercent: lessonData.aiJudgeConfiguration.passingThresholdPercent,
+              tenantId,
+            })
+            .returning();
+
+          for (const criterionData of lessonData.aiJudgeConfiguration.criteria) {
+            const [criterion] = await db
+              .insert(aiJudgeCriteria)
+              .values({
+                configurationId: configuration.id,
+                title: buildJsonbField("en", criterionData.title),
+                expectedBehavior: buildJsonbField("en", criterionData.expectedBehavior),
+                maxScore: criterionData.maxScore,
+                tenantId,
+              })
+              .returning();
+
+            await db.insert(aiJudgeScoreGuidance).values(
+              criterionData.scoreGuidance.map((guidance) => ({
+                criterionId: criterion.id,
+                score: guidance.score,
+                description: buildJsonbField("en", guidance.description),
+                example: guidance.example ? buildJsonbField("en", guidance.example) : undefined,
+                tenantId,
+              })),
+            );
+          }
+
+          if (lessonData.aiJudgeConfiguration.blockingErrors.length)
+            await db.insert(aiJudgeBlockingErrors).values(
+              lessonData.aiJudgeConfiguration.blockingErrors.map((blockingError) => ({
+                configurationId: configuration.id,
+                description: buildJsonbField("en", blockingError.description),
+                tenantId,
+              })),
+            );
         }
         if (lessonData.type === LESSON_TYPES.QUIZ && lessonData.questions) {
           for (const [index, questionData] of lessonData.questions.entries()) {
@@ -290,6 +341,50 @@ export async function seedTruncateAllTables(db: DatabasePg): Promise<void> {
     }
 
     await tx.execute(sql`SET CONSTRAINTS ALL IMMEDIATE`);
+  });
+}
+
+export async function refreshSeedSearchDocuments(db: DatabasePg, tenantId: UUIDType) {
+  await db.transaction(async (trx) => {
+    await trx.execute(sql`SELECT set_config('app.tenant_id', ${tenantId}, true)`);
+
+    const searchIndexService = new SearchIndexService(new SearchIndexRepository(trx));
+
+    const [courseRows, lessonRows, learningPathRows, newsRows, articleRows, questionAnswerRows] =
+      await Promise.all([
+        trx.select({ id: courses.id }).from(courses).where(eq(courses.tenantId, tenantId)),
+        trx.select({ id: lessons.id }).from(lessons).where(eq(lessons.tenantId, tenantId)),
+        trx
+          .select({ id: learningPaths.id })
+          .from(learningPaths)
+          .where(eq(learningPaths.tenantId, tenantId)),
+        trx.select({ id: news.id }).from(news).where(eq(news.tenantId, tenantId)),
+        trx.select({ id: articles.id }).from(articles).where(eq(articles.tenantId, tenantId)),
+        trx
+          .select({ id: questionsAndAnswers.id })
+          .from(questionsAndAnswers)
+          .where(eq(questionsAndAnswers.tenantId, tenantId)),
+      ]);
+
+    await Promise.all([
+      ...courseRows.map((course) => searchIndexService.refreshCourse(course.id, trx)),
+      searchIndexService.refreshLessons(
+        lessonRows.map((lesson) => lesson.id),
+        trx,
+      ),
+      ...learningPathRows.map((learningPath) =>
+        searchIndexService.refreshLearningPath(learningPath.id, trx),
+      ),
+      ...newsRows.map((newsRow) => searchIndexService.refreshNews(newsRow.id, trx)),
+      ...articleRows.map((article) => searchIndexService.refreshArticle(article.id, trx)),
+      ...questionAnswerRows.map((questionAnswer) =>
+        searchIndexService.refreshQA(questionAnswer.id, trx),
+      ),
+    ]);
+
+    console.log(
+      `🔎 Refreshed search documents for tenant ${tenantId}: ${courseRows.length} courses, ${lessonRows.length} lessons, ${learningPathRows.length} learning paths, ${newsRows.length} news, ${articleRows.length} articles, ${questionAnswerRows.length} Q&A entries`,
+    );
   });
 }
 

@@ -26,6 +26,8 @@ describe("image variant utils", () => {
       "tenant/course/variants/image-960w.webp",
       "tenant/course/variants/image-1280w.webp",
       "tenant/course/variants/image-1920w.webp",
+      "tenant/course/variants/image-192w.webp",
+      "tenant/course/variants/image-512w.webp",
     ]);
   });
 

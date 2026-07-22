@@ -1,0 +1,1 @@
+export const AI_JUDGE_MAX_CRITERION_SCORE = 5;

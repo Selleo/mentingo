@@ -59,7 +59,11 @@ export function LiveTrainingWorkspace({ liveTraining, actions }: LiveTrainingWor
       </TabsContent>
 
       <TabsContent value={LIVE_TRAINING_WORKSPACE_TABS.FILES}>
-        <LiveTrainingMaterials liveTraining={liveTraining} actions={actions} />
+        <LiveTrainingMaterials
+          liveTraining={liveTraining}
+          actions={actions}
+          className="lg:grid-cols-2"
+        />
       </TabsContent>
 
       {actions.canViewSessionData && (

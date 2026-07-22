@@ -6,6 +6,7 @@ import { Validate } from "nestjs-typebox";
 
 import { AiService } from "src/ai/services/ai.service";
 import { ThreadService } from "src/ai/services/thread.service";
+import { loadAiSdk } from "src/ai/utils/ai-esm";
 import {
   type ResponseJudgeBody,
   responseJudgeSchema,
@@ -65,8 +66,17 @@ export class AiController {
     @CurrentUser() currentUser: CurrentUserType,
     @Res() res: Response,
   ) {
-    const response = await this.aiService.streamMessage(data, OPENAI_MODELS.BASIC, currentUser);
-    return response.pipeDataStreamToResponse(res);
+    const stream = await this.aiService.createChatMessageUiStream(
+      data,
+      OPENAI_MODELS.BASIC,
+      currentUser,
+    );
+    const { pipeUIMessageStreamToResponse } = await loadAiSdk();
+
+    return pipeUIMessageStreamToResponse({
+      response: res,
+      stream,
+    });
   }
 
   @Post("judge/:threadId")

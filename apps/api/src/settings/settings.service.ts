@@ -27,7 +27,14 @@ import { getSupportModeContext } from "src/common/helpers/support-mode-context";
 import { UpdateSettingsEvent } from "src/events";
 import { RESOURCE_CATEGORIES, RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
-import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
+import {
+  IMAGE_QUALITY,
+  IMAGE_RESIZE_MODES,
+  IMAGE_VARIANT_DEFINITIONS,
+  PWA_ICON_IMAGE_QUALITY,
+  PWA_ICON_IMAGE_VARIANT_DEFINITIONS,
+} from "src/file/image-variants/image-variant.constants";
+import { isImageQuality } from "src/file/image-variants/image-variant.utils";
 import { FILE_DELIVERY_TYPE } from "src/file/types/file-delivery.type";
 import { streamFileToResponse } from "src/file/utils/streamFileToResponse";
 import { LocalizationService } from "src/localization/localization.service";
@@ -56,6 +63,7 @@ import {
 } from "./constants/settings.constants";
 
 import type { CompanyInformaitonJSONSchema } from "./schemas/company-information.schema";
+import type { PwaManifest } from "./schemas/pwa-manifest.schema";
 import type {
   LocalizedRegistrationFormField,
   LocalizedRegistrationFormResponse,
@@ -89,6 +97,7 @@ import type { Request, Response } from "express";
 import type { SettingsActivityLogSnapshot } from "src/activity-logs/types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type { LoginBackgroundResponseBody } from "src/settings/schemas/login-background.schema";
 import type {
   CreateSettingsForUsersGroup,
@@ -1065,7 +1074,10 @@ export class SettingsService {
     let newValue: string | null = null;
     if (file) {
       const resource = "platform-simple-logos";
-      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId);
+      const { fileKey } = await this.fileService.uploadFile(file, resource, actor?.tenantId, {
+        variantDefinitions: [...IMAGE_VARIANT_DEFINITIONS, ...PWA_ICON_IMAGE_VARIANT_DEFINITIONS],
+        resizeMode: IMAGE_RESIZE_MODES.COVER_SQUARE,
+      });
       newValue = fileKey;
     }
 
@@ -1098,6 +1110,42 @@ export class SettingsService {
       SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
       globalSettings.settings.platformSimpleLogoS3Key,
     );
+  }
+
+  public async getPwaManifest(): Promise<PwaManifest> {
+    const globalSettings = await this.getGlobalSettingsRecord();
+    const parsedSettings = this.parseGlobalSettings(globalSettings.settings);
+    const companyName =
+      parsedSettings.companyInformation?.companyShortName ||
+      parsedSettings.companyInformation?.companyName ||
+      "Mentingo";
+    const shortName = parsedSettings.companyInformation?.companyShortName || companyName;
+    const simpleLogoUrl = this.buildSettingsImageUrl(
+      SETTINGS_IMAGE_ASSET.PLATFORM_SIMPLE_LOGO,
+      parsedSettings.platformSimpleLogoS3Key,
+    );
+
+    const icons = simpleLogoUrl
+      ? ([192, 512] as const).map((size) => {
+          return {
+            src: `${simpleLogoUrl}&quality=${PWA_ICON_IMAGE_QUALITY[`ICON_${size}`]}`,
+            sizes: `${size}x${size}`,
+            type: "image/webp",
+          };
+        })
+      : [{ src: "/app-signet.svg", sizes: "any", type: "image/svg+xml" }];
+
+    return {
+      name: `${companyName} LMS`,
+      short_name: `${shortName} LMS`,
+      theme_color: parsedSettings.primaryColor || "#3f58b6",
+      background_color: parsedSettings.contrastColor || "#fcfcfc",
+      display: "standalone",
+      orientation: "portrait",
+      start_url: "/",
+      scope: "/",
+      icons,
+    };
   }
 
   public async uploadLoginBackgroundImage(
@@ -1157,7 +1205,9 @@ export class SettingsService {
 
     if (!key) throw new NotFoundException("Settings image not found");
 
-    const file = await this.fileService.getFileDelivery(key, req.headers.range);
+    const file = await this.fileService.getFileDelivery(key, req.headers.range, {
+      quality: this.getRequestedImageQuality(req),
+    });
 
     res.setHeader("Cache-Control", STATIC_SETTINGS_IMAGE_CACHE_CONTROL);
 
@@ -2011,6 +2061,15 @@ export class SettingsService {
       default:
         return null;
     }
+  }
+
+  private getRequestedImageQuality(req: Request): ImageQuality | undefined {
+    const quality = req.query.quality;
+
+    if (typeof quality !== "string") return undefined;
+    if (!isImageQuality(quality)) return undefined;
+
+    return quality;
   }
 
   private isRevalidationHit(

@@ -211,11 +211,9 @@ export const AssetLibraryDialog = ({
   };
 
   const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+    const files = event.target.files;
 
-    if (!file) return;
-
-    if (uploadInputRef.current) uploadInputRef.current.value = "";
+    if (!files?.length) return;
 
     if (!canUploadToLibrary) {
       toast({
@@ -225,7 +223,11 @@ export const AssetLibraryDialog = ({
       return;
     }
 
-    await handleUploadToLibrary(file);
+    await Promise.allSettled(Array.from(files).map((file) => handleUploadToLibrary(file)));
+
+    if (uploadInputRef.current) {
+      uploadInputRef.current.value = "";
+    }
   };
 
   const handleDelete = async () => {
@@ -286,6 +288,7 @@ export const AssetLibraryDialog = ({
                   ref={uploadInputRef}
                   type="file"
                   className="hidden"
+                  multiple
                   accept={acceptedFileTypes.join(",")}
                   onChange={(event) => void handleUpload(event)}
                 />

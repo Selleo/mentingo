@@ -501,6 +501,7 @@ describe("parseQuizFormData", () => {
           "1": "dragged",
         },
       },
+      scaleQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);
@@ -601,6 +602,7 @@ describe("fill in the blanks text mapping", () => {
         },
       },
       fillInTheBlanksDnd: {},
+      scaleQuestions: {},
     };
 
     const parsed = parseQuizFormData(formData);

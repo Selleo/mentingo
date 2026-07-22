@@ -4,6 +4,7 @@ import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { LEARNING_HANDLES } from "../../data/learning/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { assertAiMentorEntryFlow } from "../../flows/learning/assert-ai-mentor-entry.flow";
+import { dismissAiMentorTaskDescriptionFlow } from "../../flows/learning/dismiss-ai-mentor-task-description.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 import { startLearningFlow } from "../../flows/learning/start-learning.flow";
 import { createAiMentorLessonCourse } from "../learning/learning-test-helpers";
@@ -47,6 +48,7 @@ test("student sees voice input but no voice mentor action when Luma voice is una
       await openCourseOverviewFlow(page, courseId);
       await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
       await startLearningFlow(page);
+      await dismissAiMentorTaskDescriptionFlow(page);
       await assertAiMentorEntryFlow(page);
 
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeVisible();
@@ -83,6 +85,7 @@ test("student sees voice mentor action when Luma voice is available", async ({
       await openCourseOverviewFlow(page, courseId);
       await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
       await startLearningFlow(page);
+      await dismissAiMentorTaskDescriptionFlow(page);
       await assertAiMentorEntryFlow(page);
 
       await expect(page.getByTestId(LEARNING_HANDLES.AI_MENTOR_MIC_BUTTON)).toBeVisible();

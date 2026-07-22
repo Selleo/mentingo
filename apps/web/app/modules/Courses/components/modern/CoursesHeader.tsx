@@ -8,7 +8,7 @@ const CoursesHeader = () => {
   const { t } = useTranslation();
 
   return (
-    <header className="sticky top-0 w-full flex justify-end p-1 -mt-16 z-[40] bg-[rgba(255,255,255,0.3)] backdrop-blur">
+    <header className="sticky top-0 mb-12 w-full flex justify-end p-1 -mt-16 z-[40] bg-[rgba(255,255,255,0.3)] backdrop-blur md:mb-0">
       <div className="items-center gap-3 flex">
         <Link to="/admin/courses">
           <Button variant="outline" className="w-full">

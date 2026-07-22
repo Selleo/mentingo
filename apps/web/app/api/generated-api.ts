@@ -126,6 +126,7 @@ export interface RegisterResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -165,6 +166,7 @@ export interface LoginResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -278,6 +280,7 @@ export interface CurrentUserResponse {
       | "activity_log.read"
     )[];
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -341,6 +344,7 @@ export interface CreatePasswordResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -402,6 +406,7 @@ export interface HandleMagicLinkResponse {
     deletedAt: string | null;
     profilePictureUrl: string | null;
     shouldVerifyMFA: boolean;
+    requiresPasswordChange: boolean;
     onboardingStatus: {
       id: string;
       createdAt: string;
@@ -465,6 +470,22 @@ export interface GetPublicGlobalSettingsResponse {
     ageLimit: 13 | 16 | null;
     loginPageFiles: string[];
   };
+}
+
+export interface GetPwaManifestResponse {
+  name: string;
+  short_name: string;
+  theme_color: string;
+  background_color: string;
+  display: "standalone";
+  orientation: "portrait";
+  start_url: "/";
+  scope: "/";
+  icons: {
+    src: string;
+    sizes: string;
+    type: string;
+  }[];
 }
 
 export interface GetPublicRegistrationFormResponse {
@@ -1470,6 +1491,19 @@ export interface SendBulkPasswordResetEmailsResponse {
   };
 }
 
+export interface SendBulkPasswordEmailsBody {
+  userIds: string[];
+}
+
+export interface SendBulkPasswordEmailsResponse {
+  data: {
+    sentCount: number;
+    skippedCount: number;
+    passwordResetSentCount: number;
+    passwordCreationSentCount: number;
+  };
+}
+
 export interface SendBulkPasswordCreationEmailsBody {
   userIds: string[];
 }
@@ -2137,8 +2171,8 @@ export interface GetBetaCourseByIdResponse {
           /** @format uuid */
           lessonId: string;
           aiMentorInstructions: string;
-          completionConditions: string;
           type: "mentor" | "teacher" | "roleplay";
+          name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
           ttsPreset: "male" | "female";
@@ -2644,7 +2678,12 @@ export interface GetCourseOwnershipResponse {
 export interface ChatWithCourseGenerationAgentBody {
   /** @format uuid */
   integrationId: string;
-  message: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
 }
 
 export type GetCourseGenerationMessagesResponse = {
@@ -2816,8 +2855,8 @@ export type BetaCreateChapterBody = {
       /** @format uuid */
       lessonId: string;
       aiMentorInstructions: string;
-      completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -2902,8 +2941,8 @@ export type UpdateChapterBody = ({
       /** @format uuid */
       lessonId: string;
       aiMentorInstructions: string;
-      completionConditions: string;
       type: "mentor" | "teacher" | "roleplay";
+      name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
       ttsPreset: "male" | "female";
@@ -3070,7 +3109,19 @@ export interface GetLessonByIdResponse {
       percentage: number | null;
       requiredScore: number | null;
       passed: boolean | null;
-      summary: string | null;
+      criteria: {
+        criterionId: string | null;
+        title: string;
+        awardedScore: number;
+        maxScore: number;
+        status: "not_met" | "partial" | "met";
+        learnerSafeFeedback: string;
+      }[];
+      blockingErrors: {
+        blockingErrorId: string | null;
+        description: string;
+        learnerSafeFeedback: string;
+      }[];
     } | null;
     aiMentor?: {
       name: string;
@@ -3224,8 +3275,8 @@ export type BetaCreateLessonBody = {
     /** @format uuid */
     lessonId: string;
     aiMentorInstructions: string;
-    completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3410,19 +3461,6 @@ export type BetaCreateAiMentorLessonBody = {
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
   }[];
-  aiMentor?: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    lessonId: string;
-    aiMentorInstructions: string;
-    completionConditions: string;
-    type: "mentor" | "teacher" | "roleplay";
-    avatarReference: string | null;
-    voiceMode: "preset" | "custom";
-    ttsPreset: "male" | "female";
-    customTtsReference: string | null;
-  } | null;
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
@@ -3430,7 +3468,44 @@ export type BetaCreateAiMentorLessonBody = {
   chapterId: string;
   displayOrder?: number;
   aiMentorInstructions: string;
-  completionConditions: string;
+  aiJudgeConfiguration: {
+    /** @minLength 1 */
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    criteria: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      title: string;
+      /** @minLength 1 */
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      /** @minItems 1 */
+      scoreGuidance: {
+        /** @format uuid */
+        id?: string;
+        /** @min 0 */
+        score: number;
+        /** @minLength 1 */
+        description: string;
+        example?: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      description: string;
+    }[];
+  };
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
@@ -3490,24 +3565,10 @@ export type BetaUpdateAiMentorLessonBody = ({
     /** @default "en" */
     language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
   }[];
-  aiMentor?: {
-    /** @format uuid */
-    id: string;
-    /** @format uuid */
-    lessonId: string;
-    aiMentorInstructions: string;
-    completionConditions: string;
-    type: "mentor" | "teacher" | "roleplay";
-    avatarReference: string | null;
-    voiceMode: "preset" | "custom";
-    ttsPreset: "male" | "female";
-    customTtsReference: string | null;
-  } | null;
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
   aiMentorInstructions: string;
-  completionConditions: string;
   type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
@@ -3700,8 +3761,8 @@ export type BetaUpdateLessonBody = ({
     /** @format uuid */
     lessonId: string;
     aiMentorInstructions: string;
-    completionConditions: string;
     type: "mentor" | "teacher" | "roleplay";
+    name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
     ttsPreset: "male" | "female";
@@ -3822,6 +3883,206 @@ export interface UpdateLessonDisplayOrderBody {
 export interface UpdateLessonDisplayOrderResponse {
   data: {
     message: string;
+  };
+}
+
+export interface GetConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  } | null;
+}
+
+export interface ReplaceConfigurationBody {
+  /** @minLength 1 */
+  taskGoal: string;
+  /**
+   * @min 0
+   * @max 100
+   */
+  passingThresholdPercent: number;
+  criteria: {
+    /** @format uuid */
+    id?: string;
+    /** @minLength 1 */
+    title: string;
+    /** @minLength 1 */
+    expectedBehavior: string;
+    /**
+     * @min 1
+     * @max 5
+     */
+    maxScore: number;
+    /** @minItems 1 */
+    scoreGuidance: {
+      /** @format uuid */
+      id?: string;
+      /** @min 0 */
+      score: number;
+      /** @minLength 1 */
+      description: string;
+      example?: string | null;
+    }[];
+  }[];
+  blockingErrors: {
+    /** @format uuid */
+    id?: string;
+    /** @minLength 1 */
+    description: string;
+  }[];
+}
+
+export interface ReplaceConfigurationResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+  };
+}
+
+export interface UpdateTranslationsBody {
+  /** @minLength 1 */
+  taskGoal?: string;
+  criteria?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    title?: string;
+    /** @minLength 1 */
+    expectedBehavior?: string;
+  }[];
+  scoreGuidance?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    description?: string;
+    example?: string | null;
+  }[];
+  blockingErrors?: {
+    /** @format uuid */
+    id: string;
+    /** @minLength 1 */
+    description: string;
+  }[];
+}
+
+export interface UpdateTranslationsResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    /** @format uuid */
+    aiMentorLessonId: string;
+    hasMissingTranslations: boolean;
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    /** @min 0 */
+    totalMaxScore: number;
+    criteria: {
+      /** @format uuid */
+      id: string;
+      title: string;
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      scoreGuidance: {
+        /** @format uuid */
+        id: string;
+        /** @min 0 */
+        score: number;
+        description: string;
+        example: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id: string;
+      description: string;
+    }[];
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
   };
 }
 
@@ -3979,20 +4240,38 @@ export interface GetThreadMessagesResponse {
 export interface StreamChatBody {
   /** @format uuid */
   threadId: string;
-  /** @minLength 1 */
-  content: string;
+  message: {
+    id: string;
+    role: string;
+    parts: any[];
+    [key: string]: any;
+  };
   /** @format uuid */
   id?: string;
 }
 
 export interface JudgeThreadResponse {
   data: {
-    summary: string;
     passed: boolean;
     minScore: number;
     score: number;
     maxScore: number;
     percentage: number;
+    criteria: {
+      /** @format uuid */
+      criterionId: string;
+      title: string;
+      awardedScore: number;
+      maxScore: number;
+      status: "not_met" | "partial" | "met";
+      learnerSafeFeedback: string;
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      blockingErrorId: string;
+      description: string;
+      learnerSafeFeedback: string;
+    }[];
   };
 }
 
@@ -4602,7 +4881,7 @@ export interface GetAllAnnouncementsResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4615,6 +4894,7 @@ export interface GetAllAnnouncementsResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     deletedAt: string | null;
+    isRead: boolean | null;
   }[];
   pagination: {
     totalItems: number;
@@ -4636,7 +4916,7 @@ export interface GetAnnouncementsForUserResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4685,7 +4965,7 @@ export interface CreateAnnouncementResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4761,6 +5041,7 @@ export interface GetLumaConfiguredResponse {
     enabled: boolean;
     courseGenerationEnabled: boolean;
     voiceMentorEnabled: boolean;
+    voiceTtsProvider: "cartesia" | "openaiCompatible";
   };
 }
 
@@ -4780,6 +5061,10 @@ export interface GetIsConfigSetupResponse {
     notConfigured: {
       service: string;
       missingKeys: string[];
+    }[];
+    aiCapabilities: {
+      key: "aiMentor" | "voiceMentor" | "courseGeneration" | "assetGeneration";
+      status: "enabled" | "disabled";
     }[];
     hasIssues: boolean;
     isWarningDismissed: boolean;
@@ -5961,6 +6246,27 @@ export interface CreateTenantResponse {
   };
 }
 
+export interface UpdateTenantBody {
+  /** @minLength 1 */
+  name?: string;
+  /** @minLength 1 */
+  host?: string;
+  status?: "active" | "inactive";
+}
+
+export interface UpdateTenantResponse {
+  data: {
+    /** @format uuid */
+    id: string;
+    name: string;
+    host: string;
+    status: "active" | "inactive";
+    isManaging: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+}
+
 export interface DeactivateTenantResponse {
   data: {
     /** @format uuid */
@@ -6254,7 +6560,12 @@ export interface GetActivityLogsResponse {
       | "complete_chapter"
       | "expire_certificate"
       | "reset_certificate"
-      | "view_announcement";
+      | "view_announcement"
+      | "enroll_learning_path"
+      | "start_learning_path"
+      | "complete_learning_path"
+      | "play_scorm"
+      | "complete_scorm";
     resourceType: (string | null) | null;
     resourceId: (string | null) | null;
     metadata: any;
@@ -7701,6 +8012,20 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name SettingsControllerGetPwaManifest
+     * @request GET:/api/settings/manifest.webmanifest
+     */
+    settingsControllerGetPwaManifest: (params: RequestParams = {}) =>
+      this.request<GetPwaManifestResponse, any>({
+        path: `/api/settings/manifest.webmanifest`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name SettingsControllerGetPublicRegistrationForm
      * @request GET:/api/settings/registration-form
      */
@@ -8728,6 +9053,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     ) =>
       this.request<SendBulkPasswordResetEmailsResponse, any>({
         path: `/api/user/bulk/password-reset-email`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name UserControllerSendBulkPasswordEmails
+     * @request POST:/api/user/bulk/password-email
+     */
+    userControllerSendBulkPasswordEmails: (
+      data: SendBulkPasswordEmailsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<SendBulkPasswordEmailsResponse, any>({
+        path: `/api/user/bulk/password-email`,
         method: "POST",
         body: data,
         type: ContentType.Json,
@@ -10854,6 +11198,68 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name AiJudgeConfigurationControllerGetConfiguration
+     * @request GET:/api/lesson/{lessonId}/ai-judge-configuration
+     */
+    aiJudgeConfigurationControllerGetConfiguration: (
+      lessonId: string,
+      query?: {
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationControllerReplaceConfiguration
+     * @request PUT:/api/lesson/{lessonId}/ai-judge-configuration
+     */
+    aiJudgeConfigurationControllerReplaceConfiguration: (
+      lessonId: string,
+      data: ReplaceConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationControllerUpdateTranslations
+     * @request PATCH:/api/lesson/{lessonId}/ai-judge-configuration/translations/{language}
+     */
+    aiJudgeConfigurationControllerUpdateTranslations: (
+      lessonId: string,
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es",
+      data: UpdateTranslationsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTranslationsResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-judge-configuration/translations/${language}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name StudentLessonProgressControllerMarkLessonAsCompleted
      * @request POST:/api/studentLessonProgress
      */
@@ -11702,6 +12108,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     announcementsControllerGetAllAnnouncements: (
       query?: {
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        feed?: "all" | "admin_announcements" | "system";
         status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;
@@ -13311,6 +13718,28 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       }),
 
     /**
+     * @description Updates the target tenant's name, host, or status. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
+     *
+     * @tags Integration
+     * @name IntegrationControllerUpdateTenant
+     * @summary Update tenant via integration API
+     * @request PATCH:/api/integration/tenants/{tenantId}
+     */
+    integrationControllerUpdateTenant: (
+      tenantId: string,
+      data: UpdateTenantBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateTenantResponse, void>({
+        path: `/api/integration/tenants/${tenantId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
      * @description Marks the target tenant as inactive. Only integration API keys owned by a managing tenant with tenant management permission can use this endpoint.
      *
      * @tags Integration
@@ -13782,7 +14211,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
           | "news"
           | "article"
           | "articleSection"
-          | "live_training";
+          | "live_training"
+          | "learning_path"
+          | "scorm";
         from?: string;
         to?: string;
         actionTypes?:
@@ -13808,6 +14239,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )
           | (
               | "create"
@@ -13831,6 +14267,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
               | "expire_certificate"
               | "reset_certificate"
               | "view_announcement"
+              | "enroll_learning_path"
+              | "start_learning_path"
+              | "complete_learning_path"
+              | "play_scorm"
+              | "complete_scorm"
             )[];
       },
       params: RequestParams = {},

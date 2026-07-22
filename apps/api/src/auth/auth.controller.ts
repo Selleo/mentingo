@@ -17,6 +17,7 @@ import { type Request, Response } from "express";
 import { Validate } from "nestjs-typebox";
 
 import { baseResponse, BaseResponse, nullResponse, type UUIDType } from "src/common";
+import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -144,6 +145,7 @@ export class AuthController {
   }
 
   @Post("logout")
+  @AllowPasswordChangeRequired()
   @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: nullResponse(),
@@ -169,6 +171,7 @@ export class AuthController {
   @Public()
   @UseGuards(RefreshTokenGuard)
   @Post("refresh")
+  @AllowPasswordChangeRequired()
   @Validate({
     response: nullResponse(),
   })
@@ -196,6 +199,7 @@ export class AuthController {
   }
 
   @Get("current-user")
+  @AllowPasswordChangeRequired()
   @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
     response: baseResponse(currentUserResponseSchema),
@@ -434,6 +438,7 @@ export class AuthController {
   }
 
   @Post("mfa/verify")
+  @AllowPasswordChangeRequired()
   @Validate({
     request: [{ type: "body", schema: MFAVerifySchema }],
     response: baseResponse(MFAVerifyResponseSchema),

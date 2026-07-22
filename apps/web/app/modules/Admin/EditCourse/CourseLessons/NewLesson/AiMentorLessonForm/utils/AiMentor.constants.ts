@@ -13,28 +13,61 @@ export const SUGGESTION_EXAMPLES = {
   scenarioSimulation: {
     instructions:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.instructions.scenarioSimulation",
-    conditions:
+    assessmentCriteria:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.conditions.scenarioSimulation",
+    blockingError:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.blockingErrors.scenarioSimulation",
+    acceptedExamplesPrefix:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.acceptedExamples.scenarioSimulation",
+    criteriaCount: 5,
+    passingThresholdPercent: 60,
   },
   problemSolving: {
     instructions:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.instructions.problemSolving",
-    conditions:
+    assessmentCriteria:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.conditions.problemSolving",
+    blockingError:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.blockingErrors.problemSolving",
+    acceptedExamplesPrefix:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.acceptedExamples.problemSolving",
+    criteriaCount: 5,
+    passingThresholdPercent: 60,
   },
   creativeTask: {
     instructions:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.instructions.creativeTask",
-    conditions:
+    assessmentCriteria:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.conditions.creativeTask",
+    blockingError:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.blockingErrors.creativeTask",
+    acceptedExamplesPrefix:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.acceptedExamples.creativeTask",
+    criteriaCount: 4,
+    passingThresholdPercent: 100,
   },
   knowledgeSharing: {
     instructions:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.instructions.knowledgeSharing",
-    conditions:
+    assessmentCriteria:
       "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.conditions.knowledgeSharing",
+    blockingError:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.blockingErrors.knowledgeSharing",
+    acceptedExamplesPrefix:
+      "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.acceptedExamples.knowledgeSharing",
+    criteriaCount: 3,
+    passingThresholdPercent: 1,
   },
-};
+} as const;
+
+export const SUGGESTION_SCORE_GUIDANCE = {
+  notMetDescription:
+    "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.scoreGuidance.notMetDescription",
+  notMetExample:
+    "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.scoreGuidance.notMetExample",
+  metDescription:
+    "adminCourseView.curriculum.lesson.other.aiMentorSuggestionExamples.scoreGuidance.metDescription",
+} as const;
 
 export const SuggestionExamples: SuggestionsButton[] = [
   {

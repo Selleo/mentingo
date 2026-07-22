@@ -1,5 +1,5 @@
 export const OPENAI_MODELS = {
-  BASIC: "gpt-4.1-mini",
+  BASIC: "gpt-5.4-nano",
   EMBEDDING: "text-embedding-3-small",
   TRANSCRIBE: "whisper-1",
 } as const;

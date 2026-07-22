@@ -271,15 +271,20 @@ export class UserService {
           language,
           groups,
         )})) FILTER (WHERE ${groups.id} IS NOT NULL), '[]')`.as("groups"),
+        requiresPasswordChange:
+          sql<boolean>`COALESCE(bool_or(${credentials.requiresPasswordChange}), false)`.as(
+            "requiresPasswordChange",
+          ),
       })
       .from(users)
+      .leftJoin(credentials, eq(users.id, credentials.userId))
       .leftJoin(groupUsers, eq(users.id, groupUsers.userId))
       .leftJoin(groups, eq(groupUsers.groupId, groups.id))
       .where(and(eq(users.id, id), isNull(users.deletedAt)))
       .groupBy(users.id);
 
     if (!user) {
-      throw new NotFoundException("User not found");
+      throw new NotFoundException("adminUserView.error.userNotFound");
     }
 
     const { avatarReference, ...userWithoutAvatar } = user;
@@ -519,7 +524,7 @@ export class UserService {
     const hashedNewPassword = await hashPassword(newPassword);
     await this.db
       .update(credentials)
-      .set({ password: hashedNewPassword })
+      .set({ password: hashedNewPassword, requiresPasswordChange: false })
       .where(eq(credentials.userId, id));
   }
 
@@ -552,7 +557,7 @@ export class UserService {
     const hashedNewPassword = await hashPassword(newPassword);
     await this.db
       .update(credentials)
-      .set({ password: hashedNewPassword })
+      .set({ password: hashedNewPassword, requiresPasswordChange: false })
       .where(eq(credentials.userId, id));
   }
 

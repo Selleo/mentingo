@@ -652,6 +652,23 @@
         }
       }
     },
+    "/api/settings/manifest.webmanifest": {
+      "get": {
+        "operationId": "SettingsController_getPwaManifest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPwaManifestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/settings/registration-form": {
       "get": {
         "operationId": "SettingsController_getPublicRegistrationForm",
@@ -2193,6 +2210,33 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/SendBulkPasswordResetEmailsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/bulk/password-email": {
+      "post": {
+        "operationId": "UserController_sendBulkPasswordEmails",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendBulkPasswordEmailsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendBulkPasswordEmailsResponse"
                 }
               }
             }
@@ -7125,6 +7169,171 @@
         }
       }
     },
+    "/api/lesson/{lessonId}/ai-judge-configuration": {
+      "get": {
+        "operationId": "AiJudgeConfigurationController_getConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AiJudgeConfigurationController_replaceConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/{lessonId}/ai-judge-configuration/translations/{language}": {
+      "patch": {
+        "operationId": "AiJudgeConfigurationController_updateTranslations",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTranslationsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/studentLessonProgress": {
       "post": {
         "operationId": "StudentLessonProgressController_markLessonAsCompleted",
@@ -9138,6 +9347,27 @@
                 },
                 {
                   "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "feed",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_announcements",
+                  "type": "string"
+                },
+                {
+                  "const": "system",
                   "type": "string"
                 }
               ]
@@ -12276,6 +12506,72 @@
         ]
       }
     },
+    "/api/integration/tenants/{tenantId}": {
+      "patch": {
+        "operationId": "IntegrationController_updateTenant",
+        "summary": "Update tenant via integration API",
+        "description": "Updates the target tenant's name, host, or status.\n\nOnly integration API keys owned by a managing tenant with tenant management permission can use this endpoint.",
+        "parameters": [
+          {
+            "name": "X-API-Key",
+            "in": "header",
+            "description": "Integration API key used to authenticate every integration request.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "tenantId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Tenant-Id",
+            "in": "header",
+            "description": "Tenant ID is not required because the target tenant is in the path.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTenantBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateTenantResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid integration API key."
+          },
+          "403": {
+            "description": "Authenticated integration key owner is not authorized."
+          }
+        },
+        "tags": [
+          "Integration"
+        ]
+      }
+    },
     "/api/integration/tenants/{tenantId}/deactivate": {
       "post": {
         "operationId": "IntegrationController_deactivateTenant",
@@ -13632,6 +13928,14 @@
                 {
                   "const": "live_training",
                   "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
                 }
               ]
             }
@@ -13743,6 +14047,26 @@
                     {
                       "const": "view_announcement",
                       "type": "string"
+                    },
+                    {
+                      "const": "enroll_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "play_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_scorm",
+                      "type": "string"
                     }
                   ]
                 },
@@ -13832,6 +14156,26 @@
                       },
                       {
                         "const": "view_announcement",
+                        "type": "string"
+                      },
+                      {
+                        "const": "enroll_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "start_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_learning_path",
+                        "type": "string"
+                      },
+                      {
+                        "const": "play_scorm",
+                        "type": "string"
+                      },
+                      {
+                        "const": "complete_scorm",
                         "type": "string"
                       }
                     ]
@@ -16453,6 +16797,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16515,6 +16862,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -16595,6 +16943,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -16657,6 +17008,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17047,6 +17399,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -17156,6 +17511,7 @@
               "roleSlugs",
               "permissions",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin",
               "isSupportMode",
@@ -17325,6 +17681,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -17387,6 +17746,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17576,6 +17936,9 @@
               "shouldVerifyMFA": {
                 "type": "boolean"
               },
+              "requiresPasswordChange": {
+                "type": "boolean"
+              },
               "onboardingStatus": {
                 "type": "object",
                 "properties": {
@@ -17638,6 +18001,7 @@
               "deletedAt",
               "profilePictureUrl",
               "shouldVerifyMFA",
+              "requiresPasswordChange",
               "onboardingStatus",
               "isManagingTenantAdmin"
             ]
@@ -17897,6 +18261,72 @@
         },
         "required": [
           "data"
+        ]
+      },
+      "GetPwaManifestResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "short_name": {
+            "type": "string"
+          },
+          "theme_color": {
+            "type": "string"
+          },
+          "background_color": {
+            "type": "string"
+          },
+          "display": {
+            "const": "standalone",
+            "type": "string"
+          },
+          "orientation": {
+            "const": "portrait",
+            "type": "string"
+          },
+          "start_url": {
+            "const": "/",
+            "type": "string"
+          },
+          "scope": {
+            "const": "/",
+            "type": "string"
+          },
+          "icons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "src": {
+                  "type": "string"
+                },
+                "sizes": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "src",
+                "sizes",
+                "type"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "short_name",
+          "theme_color",
+          "background_color",
+          "display",
+          "orientation",
+          "start_url",
+          "scope",
+          "icons"
         ]
       },
       "GetPublicRegistrationFormResponse": {
@@ -22840,6 +23270,52 @@
           "data"
         ]
       },
+      "SendBulkPasswordEmailsBody": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "type": "array",
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "userIds"
+        ]
+      },
+      "SendBulkPasswordEmailsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "sentCount": {
+                "type": "number"
+              },
+              "skippedCount": {
+                "type": "number"
+              },
+              "passwordResetSentCount": {
+                "type": "number"
+              },
+              "passwordCreationSentCount": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "sentCount",
+              "skippedCount",
+              "passwordResetSentCount",
+              "passwordCreationSentCount"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "SendBulkPasswordCreationEmailsBody": {
         "type": "object",
         "properties": {
@@ -26611,9 +27087,6 @@
                                   "aiMentorInstructions": {
                                     "type": "string"
                                   },
-                                  "completionConditions": {
-                                    "type": "string"
-                                  },
                                   "type": {
                                     "anyOf": [
                                       {
@@ -26629,6 +27102,9 @@
                                         "type": "string"
                                       }
                                     ]
+                                  },
+                                  "name": {
+                                    "type": "string"
                                   },
                                   "avatarReference": {
                                     "anyOf": [
@@ -26679,8 +27155,8 @@
                                   "id",
                                   "lessonId",
                                   "aiMentorInstructions",
-                                  "completionConditions",
                                   "type",
+                                  "name",
                                   "avatarReference",
                                   "voiceMode",
                                   "ttsPreset",
@@ -28800,7 +29276,25 @@
             "type": "string"
           },
           "message": {
-            "type": "string"
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           }
         },
         "required": [
@@ -29767,9 +30261,6 @@
                             "aiMentorInstructions": {
                               "type": "string"
                             },
-                            "completionConditions": {
-                              "type": "string"
-                            },
                             "type": {
                               "anyOf": [
                                 {
@@ -29785,6 +30276,9 @@
                                   "type": "string"
                                 }
                               ]
+                            },
+                            "name": {
+                              "type": "string"
                             },
                             "avatarReference": {
                               "anyOf": [
@@ -29835,8 +30329,8 @@
                             "id",
                             "lessonId",
                             "aiMentorInstructions",
-                            "completionConditions",
                             "type",
+                            "name",
                             "avatarReference",
                             "voiceMode",
                             "ttsPreset",
@@ -30274,9 +30768,6 @@
                                 "aiMentorInstructions": {
                                   "type": "string"
                                 },
-                                "completionConditions": {
-                                  "type": "string"
-                                },
                                 "type": {
                                   "anyOf": [
                                     {
@@ -30292,6 +30783,9 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "name": {
+                                  "type": "string"
                                 },
                                 "avatarReference": {
                                   "anyOf": [
@@ -30342,8 +30836,8 @@
                                 "id",
                                 "lessonId",
                                 "aiMentorInstructions",
-                                "completionConditions",
                                 "type",
+                                "name",
                                 "avatarReference",
                                 "voiceMode",
                                 "ttsPreset",
@@ -31265,15 +31759,90 @@
                           }
                         ]
                       },
-                      "summary": {
-                        "anyOf": [
-                          {
-                            "type": "string"
+                      "criteria": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "criterionId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "title": {
+                              "type": "string"
+                            },
+                            "awardedScore": {
+                              "type": "integer"
+                            },
+                            "maxScore": {
+                              "type": "integer"
+                            },
+                            "status": {
+                              "anyOf": [
+                                {
+                                  "const": "not_met",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "partial",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "met",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
                           },
-                          {
-                            "type": "null"
-                          }
-                        ]
+                          "required": [
+                            "criterionId",
+                            "title",
+                            "awardedScore",
+                            "maxScore",
+                            "status",
+                            "learnerSafeFeedback"
+                          ]
+                        }
+                      },
+                      "blockingErrors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "blockingErrorId": {
+                              "anyOf": [
+                                {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "learnerSafeFeedback": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blockingErrorId",
+                            "description",
+                            "learnerSafeFeedback"
+                          ]
+                        }
                       }
                     },
                     "required": [
@@ -31283,7 +31852,8 @@
                       "percentage",
                       "requiredScore",
                       "passed",
-                      "summary"
+                      "criteria",
+                      "blockingErrors"
                     ]
                   },
                   {
@@ -32242,9 +32812,6 @@
                       "aiMentorInstructions": {
                         "type": "string"
                       },
-                      "completionConditions": {
-                        "type": "string"
-                      },
                       "type": {
                         "anyOf": [
                           {
@@ -32260,6 +32827,9 @@
                             "type": "string"
                           }
                         ]
+                      },
+                      "name": {
+                        "type": "string"
                       },
                       "avatarReference": {
                         "anyOf": [
@@ -32310,8 +32880,8 @@
                       "id",
                       "lessonId",
                       "aiMentorInstructions",
-                      "completionConditions",
                       "type",
+                      "name",
                       "avatarReference",
                       "voiceMode",
                       "ttsPreset",
@@ -33057,103 +33627,6 @@
                   ]
                 }
               },
-              "aiMentor": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "lessonId": {
-                        "format": "uuid",
-                        "type": "string"
-                      },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "completionConditions": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "anyOf": [
-                          {
-                            "const": "mentor",
-                            "type": "string"
-                          },
-                          {
-                            "const": "teacher",
-                            "type": "string"
-                          },
-                          {
-                            "const": "roleplay",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "avatarReference": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "voiceMode": {
-                        "anyOf": [
-                          {
-                            "const": "preset",
-                            "type": "string"
-                          },
-                          {
-                            "const": "custom",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "ttsPreset": {
-                        "anyOf": [
-                          {
-                            "const": "male",
-                            "type": "string"
-                          },
-                          {
-                            "const": "female",
-                            "type": "string"
-                          }
-                        ]
-                      },
-                      "customTtsReference": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "lessonId",
-                      "aiMentorInstructions",
-                      "completionConditions",
-                      "type",
-                      "avatarReference",
-                      "voiceMode",
-                      "ttsPreset",
-                      "customTtsReference"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "liveTrainingId": {
                 "anyOf": [
                   {
@@ -33186,8 +33659,115 @@
               "aiMentorInstructions": {
                 "type": "string"
               },
-              "completionConditions": {
-                "type": "string"
+              "aiJudgeConfiguration": {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "taskGoal": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "passingThresholdPercent": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "expectedBehavior": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "maxScore": {
+                          "minimum": 1,
+                          "maximum": 5,
+                          "type": "integer"
+                        },
+                        "scoreGuidance": {
+                          "minItems": 1,
+                          "type": "array",
+                          "items": {
+                            "additionalProperties": false,
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "score": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "description": {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              "example": {
+                                "anyOf": [
+                                  {
+                                    "minLength": 1,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "score",
+                              "description"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "title",
+                        "expectedBehavior",
+                        "maxScore",
+                        "scoreGuidance"
+                      ]
+                    }
+                  },
+                  "blockingErrors": {
+                    "type": "array",
+                    "items": {
+                      "additionalProperties": false,
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "description": {
+                          "minLength": 1,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "description"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "taskGoal",
+                  "passingThresholdPercent",
+                  "criteria",
+                  "blockingErrors"
+                ]
               },
               "type": {
                 "anyOf": [
@@ -33246,7 +33826,7 @@
             "required": [
               "chapterId",
               "aiMentorInstructions",
-              "completionConditions",
+              "aiJudgeConfiguration",
               "type"
             ]
           }
@@ -33539,103 +34119,6 @@
                       ]
                     }
                   },
-                  "aiMentor": {
-                    "anyOf": [
-                      {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "lessonId": {
-                            "format": "uuid",
-                            "type": "string"
-                          },
-                          "aiMentorInstructions": {
-                            "type": "string"
-                          },
-                          "completionConditions": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "anyOf": [
-                              {
-                                "const": "mentor",
-                                "type": "string"
-                              },
-                              {
-                                "const": "teacher",
-                                "type": "string"
-                              },
-                              {
-                                "const": "roleplay",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "avatarReference": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          },
-                          "voiceMode": {
-                            "anyOf": [
-                              {
-                                "const": "preset",
-                                "type": "string"
-                              },
-                              {
-                                "const": "custom",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "ttsPreset": {
-                            "anyOf": [
-                              {
-                                "const": "male",
-                                "type": "string"
-                              },
-                              {
-                                "const": "female",
-                                "type": "string"
-                              }
-                            ]
-                          },
-                          "customTtsReference": {
-                            "anyOf": [
-                              {
-                                "type": "string"
-                              },
-                              {
-                                "type": "null"
-                              }
-                            ]
-                          }
-                        },
-                        "required": [
-                          "id",
-                          "lessonId",
-                          "aiMentorInstructions",
-                          "completionConditions",
-                          "type",
-                          "avatarReference",
-                          "voiceMode",
-                          "ttsPreset",
-                          "customTtsReference"
-                        ]
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "liveTrainingId": {
                     "anyOf": [
                       {
@@ -33659,9 +34142,6 @@
                 "type": "object",
                 "properties": {
                   "aiMentorInstructions": {
-                    "type": "string"
-                  },
-                  "completionConditions": {
                     "type": "string"
                   },
                   "type": {
@@ -33720,7 +34200,6 @@
                 },
                 "required": [
                   "aiMentorInstructions",
-                  "completionConditions",
                   "type"
                 ]
               }
@@ -34749,9 +35228,6 @@
                           "aiMentorInstructions": {
                             "type": "string"
                           },
-                          "completionConditions": {
-                            "type": "string"
-                          },
                           "type": {
                             "anyOf": [
                               {
@@ -34767,6 +35243,9 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "name": {
+                            "type": "string"
                           },
                           "avatarReference": {
                             "anyOf": [
@@ -34817,8 +35296,8 @@
                           "id",
                           "lessonId",
                           "aiMentorInstructions",
-                          "completionConditions",
                           "type",
+                          "name",
                           "avatarReference",
                           "voiceMode",
                           "ttsPreset",
@@ -35336,6 +35815,872 @@
             },
             "required": [
               "message"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "taskGoal": {
+                    "type": "string"
+                  },
+                  "passingThresholdPercent": {
+                    "minimum": 0,
+                    "maximum": 100,
+                    "type": "integer"
+                  },
+                  "totalMaxScore": {
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "criteria": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "expectedBehavior": {
+                          "type": "string"
+                        },
+                        "maxScore": {
+                          "minimum": 1,
+                          "maximum": 5,
+                          "type": "integer"
+                        },
+                        "scoreGuidance": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "score": {
+                                "minimum": 0,
+                                "type": "integer"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "example": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "null"
+                                  }
+                                ]
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "score",
+                              "description",
+                              "example"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "title",
+                        "expectedBehavior",
+                        "maxScore",
+                        "scoreGuidance"
+                      ]
+                    }
+                  },
+                  "blockingErrors": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "description"
+                      ]
+                    }
+                  },
+                  "language": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "hasMissingTranslations",
+                  "taskGoal",
+                  "passingThresholdPercent",
+                  "totalMaxScore",
+                  "criteria",
+                  "blockingErrors",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceConfigurationBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "taskGoal": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "passingThresholdPercent": {
+            "minimum": 0,
+            "maximum": 100,
+            "type": "integer"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expectedBehavior": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxScore": {
+                  "minimum": 1,
+                  "maximum": 5,
+                  "type": "integer"
+                },
+                "scoreGuidance": {
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "format": "uuid",
+                        "type": "string"
+                      },
+                      "score": {
+                        "minimum": 0,
+                        "type": "integer"
+                      },
+                      "description": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "example": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "score",
+                      "description"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "title",
+                "expectedBehavior",
+                "maxScore",
+                "scoreGuidance"
+              ]
+            }
+          },
+          "blockingErrors": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description"
+              ]
+            }
+          }
+        },
+        "required": [
+          "taskGoal",
+          "passingThresholdPercent",
+          "criteria",
+          "blockingErrors"
+        ]
+      },
+      "ReplaceConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
+              "taskGoal": {
+                "type": "string"
+              },
+              "passingThresholdPercent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "totalMaxScore": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "expectedBehavior": {
+                      "type": "string"
+                    },
+                    "maxScore": {
+                      "minimum": 1,
+                      "maximum": 5,
+                      "type": "integer"
+                    },
+                    "scoreGuidance": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "score": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "score",
+                          "description",
+                          "example"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "expectedBehavior",
+                    "maxScore",
+                    "scoreGuidance"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description"
+                  ]
+                }
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "hasMissingTranslations",
+              "taskGoal",
+              "passingThresholdPercent",
+              "totalMaxScore",
+              "criteria",
+              "blockingErrors",
+              "language",
+              "baseLanguage",
+              "availableLocales"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateTranslationsBody": {
+        "additionalProperties": false,
+        "minProperties": 1,
+        "type": "object",
+        "properties": {
+          "taskGoal": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "criteria": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "minProperties": 2,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "title": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "expectedBehavior": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "scoreGuidance": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "minProperties": 2,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "example": {
+                  "anyOf": [
+                    {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id"
+              ]
+            }
+          },
+          "blockingErrors": {
+            "type": "array",
+            "items": {
+              "additionalProperties": false,
+              "type": "object",
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "description": {
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "description"
+              ]
+            }
+          }
+        }
+      },
+      "UpdateTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "aiMentorLessonId": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "hasMissingTranslations": {
+                "type": "boolean"
+              },
+              "taskGoal": {
+                "type": "string"
+              },
+              "passingThresholdPercent": {
+                "minimum": 0,
+                "maximum": 100,
+                "type": "integer"
+              },
+              "totalMaxScore": {
+                "minimum": 0,
+                "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "expectedBehavior": {
+                      "type": "string"
+                    },
+                    "maxScore": {
+                      "minimum": 1,
+                      "maximum": 5,
+                      "type": "integer"
+                    },
+                    "scoreGuidance": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "score": {
+                            "minimum": 0,
+                            "type": "integer"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "example": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "score",
+                          "description",
+                          "example"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title",
+                    "expectedBehavior",
+                    "maxScore",
+                    "scoreGuidance"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "description"
+                  ]
+                }
+              },
+              "language": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "baseLanguage": {
+                "anyOf": [
+                  {
+                    "const": "en",
+                    "type": "string"
+                  },
+                  {
+                    "const": "pl",
+                    "type": "string"
+                  },
+                  {
+                    "const": "de",
+                    "type": "string"
+                  },
+                  {
+                    "const": "lt",
+                    "type": "string"
+                  },
+                  {
+                    "const": "cs",
+                    "type": "string"
+                  },
+                  {
+                    "const": "es",
+                    "type": "string"
+                  }
+                ]
+              },
+              "availableLocales": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "id",
+              "aiMentorLessonId",
+              "hasMissingTranslations",
+              "taskGoal",
+              "passingThresholdPercent",
+              "totalMaxScore",
+              "criteria",
+              "blockingErrors",
+              "language",
+              "baseLanguage",
+              "availableLocales"
             ]
           }
         },
@@ -36060,9 +37405,26 @@
             "format": "uuid",
             "type": "string"
           },
-          "content": {
-            "minLength": 1,
-            "type": "string"
+          "message": {
+            "additionalProperties": true,
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "parts": {
+                "type": "array",
+                "items": {}
+              }
+            },
+            "required": [
+              "id",
+              "role",
+              "parts"
+            ]
           },
           "id": {
             "format": "uuid",
@@ -36071,7 +37433,7 @@
         },
         "required": [
           "threadId",
-          "content"
+          "message"
         ]
       },
       "JudgeThreadResponse": {
@@ -36080,9 +37442,6 @@
           "data": {
             "type": "object",
             "properties": {
-              "summary": {
-                "type": "string"
-              },
               "passed": {
                 "type": "boolean"
               },
@@ -36097,15 +37456,87 @@
               },
               "percentage": {
                 "type": "integer"
+              },
+              "criteria": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "criterionId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "awardedScore": {
+                      "type": "integer"
+                    },
+                    "maxScore": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "not_met",
+                          "type": "string"
+                        },
+                        {
+                          "const": "partial",
+                          "type": "string"
+                        },
+                        {
+                          "const": "met",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "learnerSafeFeedback": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "criterionId",
+                    "title",
+                    "awardedScore",
+                    "maxScore",
+                    "status",
+                    "learnerSafeFeedback"
+                  ]
+                }
+              },
+              "blockingErrors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "blockingErrorId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "learnerSafeFeedback": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "blockingErrorId",
+                    "description",
+                    "learnerSafeFeedback"
+                  ]
+                }
               }
             },
             "required": [
-              "summary",
               "passed",
               "minScore",
               "score",
               "maxScore",
-              "percentage"
+              "percentage",
+              "criteria",
+              "blockingErrors"
             ]
           }
         },
@@ -39555,8 +40986,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -39702,6 +41133,16 @@
                       "type": "null"
                     }
                   ]
+                },
+                "isRead": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -39709,7 +41150,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -39721,7 +41162,8 @@
                 "content",
                 "baseLanguage",
                 "availableLocales",
-                "deletedAt"
+                "deletedAt",
+                "isRead"
               ]
             }
           },
@@ -39795,8 +41237,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -39952,7 +41394,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -40134,8 +41576,8 @@
               "authorId": {
                 "type": "string"
               },
-              "isEveryone": {
-                "type": "boolean"
+              "audience": {
+                "type": "string"
               },
               "status": {
                 "type": "string"
@@ -40288,7 +41730,7 @@
               "createdAt",
               "updatedAt",
               "authorId",
-              "isEveryone",
+              "audience",
               "status",
               "scheduledAt",
               "publishedAt",
@@ -40514,12 +41956,25 @@
               },
               "voiceMentorEnabled": {
                 "type": "boolean"
+              },
+              "voiceTtsProvider": {
+                "anyOf": [
+                  {
+                    "const": "cartesia",
+                    "type": "string"
+                  },
+                  {
+                    "const": "openaiCompatible",
+                    "type": "string"
+                  }
+                ]
               }
             },
             "required": [
               "enabled",
               "courseGenerationEnabled",
-              "voiceMentorEnabled"
+              "voiceMentorEnabled",
+              "voiceTtsProvider"
             ]
           }
         },
@@ -40600,6 +42055,50 @@
                   ]
                 }
               },
+              "aiCapabilities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "key": {
+                      "anyOf": [
+                        {
+                          "const": "aiMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "voiceMentor",
+                          "type": "string"
+                        },
+                        {
+                          "const": "courseGeneration",
+                          "type": "string"
+                        },
+                        {
+                          "const": "assetGeneration",
+                          "type": "string"
+                        }
+                      ]
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "const": "enabled",
+                          "type": "string"
+                        },
+                        {
+                          "const": "disabled",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "key",
+                    "status"
+                  ]
+                }
+              },
               "hasIssues": {
                 "type": "boolean"
               },
@@ -40611,6 +42110,7 @@
               "fullyConfigured",
               "partiallyConfigured",
               "notConfigured",
+              "aiCapabilities",
               "hasIssues",
               "isWarningDismissed"
             ]
@@ -46335,6 +47835,85 @@
           "data"
         ]
       },
+      "UpdateTenantBody": {
+        "additionalProperties": false,
+        "type": "object",
+        "properties": {
+          "name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "host": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "const": "active",
+                "type": "string"
+              },
+              {
+                "const": "inactive",
+                "type": "string"
+              }
+            ]
+          }
+        }
+      },
+      "UpdateTenantResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "host": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "active",
+                    "type": "string"
+                  },
+                  {
+                    "const": "inactive",
+                    "type": "string"
+                  }
+                ]
+              },
+              "isManaging": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "host",
+              "status",
+              "isManaging",
+              "createdAt",
+              "updatedAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "DeactivateTenantResponse": {
         "type": "object",
         "properties": {
@@ -47605,6 +49184,26 @@
                     },
                     {
                       "const": "view_announcement",
+                      "type": "string"
+                    },
+                    {
+                      "const": "enroll_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "start_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_learning_path",
+                      "type": "string"
+                    },
+                    {
+                      "const": "play_scorm",
+                      "type": "string"
+                    },
+                    {
+                      "const": "complete_scorm",
                       "type": "string"
                     }
                   ]

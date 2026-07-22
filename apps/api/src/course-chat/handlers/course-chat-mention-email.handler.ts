@@ -1,7 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 import { BaseEmailTemplate } from "@repo/email-templates";
+import {
+  ANNOUNCEMENT_EMAIL_TEMPLATES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 
+import { AnnouncementsRepository } from "src/announcements/announcements.repository";
 import { DatabasePg } from "src/common";
 import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
@@ -17,6 +24,10 @@ import { CourseChatRepository } from "src/course-chat/course-chat.repository";
 import { CourseChatUserMentionedEvent } from "src/events/course-chat/course-chat-user-mentioned.event";
 import { DB_ADMIN } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
+import { UserService } from "src/user/user.service";
+
+import { getLocalizedUserMentionContentAnnouncement } from "../chat-mention-localizations/chat-mention-content-localization";
+import { getLocalizedUserMentionTitleAnnouncement } from "../chat-mention-localizations/chat-mention-title-localization";
 
 type CourseChatMentionEmailEventType = CourseChatUserMentionedEvent;
 
@@ -29,7 +40,9 @@ export class CourseChatMentionEmailHandler
 {
   constructor(
     private readonly courseChatRepository: CourseChatRepository,
+    private readonly announcementRepository: AnnouncementsRepository,
     private readonly emailService: EmailService,
+    private readonly userService: UserService,
     private readonly tenantRunner: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
@@ -41,20 +54,42 @@ export class CourseChatMentionEmailHandler
   }
 
   private async handleUserMentioned(event: CourseChatUserMentionedEvent) {
-    const { tenantId, courseId, actorUserId, messageId, mentionedUserIds } =
+    const { tenantId, courseId, currentUser, messageId, mentionedUserIds } =
       event.courseChatUserMentionedData;
     const uniqueMentionedUserIds = Array.from(new Set(mentionedUserIds)).filter(
-      (mentionedUserId) => mentionedUserId !== actorUserId,
+      (mentionedUserId) => mentionedUserId !== currentUser.userId,
     );
-
     if (!uniqueMentionedUserIds.length) return;
 
     await this.tenantRunner.runWithTenant(tenantId, async () => {
-      const [message, recipients, tenantOrigin] = await Promise.all([
+      const [message, recipients, tenantOrigin, localizedCourseTitles] = await Promise.all([
         this.courseChatRepository.getMessageById(messageId),
         this.courseChatRepository.getMentionEmailRecipients(courseId, uniqueMentionedUserIds),
         resolveTenantOrigin(this.dbAdmin, tenantId),
+        this.courseChatRepository.getLocalizedCourseTitles(courseId),
       ]);
+
+      if (!localizedCourseTitles) return;
+
+      const mentioningUser = await this.userService.getUserById(currentUser.userId);
+      const mentioningUserFullName = mentioningUser.firstName + " " + mentioningUser.lastName;
+
+      await this.announcementRepository.createAnnouncement({
+        groupId: null,
+        title: getLocalizedUserMentionTitleAnnouncement(mentioningUserFullName),
+        content: getLocalizedUserMentionContentAnnouncement(localizedCourseTitles),
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [...Object.values(SUPPORTED_LANGUAGES)],
+        authorId: currentUser.userId,
+        status: ANNOUNCEMENT_STATUSES.PUBLISHED,
+        scheduledAt: null,
+        publishedAt: null,
+        sendEmail: false,
+        emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
+        sourceId: null,
+        usersToNotify: uniqueMentionedUserIds,
+      });
 
       if (!message || !recipients.length) return;
 

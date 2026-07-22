@@ -4,7 +4,7 @@ import { alias, type AnyPgColumn } from "drizzle-orm/pg-core";
 
 import { DatabasePg } from "src/common";
 import { setJsonbField } from "src/common/helpers/sqlHelpers";
-import { chapters, courses, lessons, questionsAndAnswers } from "src/storage/schema";
+import { chapters, courses, learningPaths, lessons, questionsAndAnswers } from "src/storage/schema";
 
 import { ENTITY_TYPE } from "./localization.types";
 
@@ -57,6 +57,15 @@ export class LocalizationService {
           })
           .from(questionsAndAnswers)
           .where(eq(questionsAndAnswers.id, entityId));
+        break;
+      case ENTITY_TYPE.LEARNING_PATH:
+        query = this.db
+          .select({
+            baseLanguage: sql<SupportedLanguages>`${learningPaths.baseLanguage}`,
+            availableLocales: sql<SupportedLanguages>`${learningPaths.availableLocales}`,
+          })
+          .from(learningPaths)
+          .where(eq(learningPaths.id, entityId));
         break;
       default:
         throw new Error("Invalid entity type");

@@ -5,6 +5,7 @@ import {
   COURSE_ENROLLMENT,
   COURSE_FEATURE,
   COURSE_FEATURE_ERROR_TRANSLATION_KEY,
+  COURSE_STATUSES,
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
@@ -237,9 +238,32 @@ describe("CourseController (e2e)", () => {
         totalSeconds: 120,
       });
 
+      const partialFullName = `${student.firstName} ${student.lastName.slice(0, 1)}`;
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/students-progress`)
+        .query({
+          language: SUPPORTED_LANGUAGES.EN,
+          perPage: 100,
+          search: partialFullName,
+        })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data).toEqual([
+            expect.objectContaining({
+              studentId: student.id,
+            }),
+          ]);
+        });
+
       await request(app.getHttpServer())
         .get(`/api/course/${course.id}/statistics/students-quiz-results`)
-        .query({ language: SUPPORTED_LANGUAGES.EN, perPage: 100 })
+        .query({
+          language: SUPPORTED_LANGUAGES.EN,
+          perPage: 100,
+          search: partialFullName,
+        })
         .set("Cookie", cookies)
         .expect(200)
         .expect(({ body }) => {
@@ -248,6 +272,19 @@ describe("CourseController (e2e)", () => {
               studentId: student.id,
               lessonId: quizLesson.id,
               quizScore: 80,
+            }),
+          ]);
+        });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/learning-time`)
+        .query({ perPage: 100, search: partialFullName })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.users).toEqual([
+            expect.objectContaining({
+              id: student.id,
             }),
           ]);
         });
@@ -303,6 +340,212 @@ describe("CourseController (e2e)", () => {
         .expect(200)
         .expect(({ body }) => {
           expect(body.data.users).toEqual([]);
+        });
+    });
+  });
+
+  describe("GET /api/course/:courseId/statistics/average-quiz-score", () => {
+    const createAverageQuizScoreFixture = async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const firstStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const secondStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const unenrolledStudent = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const deletedStudent = await userFactory.create({
+        role: SYSTEM_ROLE_SLUGS.STUDENT,
+        deletedAt: new Date().toISOString(),
+      });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        title: "Average quiz score course",
+        chapterCount: 1,
+      });
+      const chapter = await chapterFactory.create({
+        authorId: admin.id,
+        courseId: course.id,
+        title: "Average quiz score chapter",
+        displayOrder: 1,
+        lessonCount: 2,
+      });
+      const [firstQuiz, secondQuiz] = await db
+        .insert(lessons)
+        .values([
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "First quiz"),
+            description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+            thresholdScore: 0,
+            displayOrder: 1,
+          },
+          {
+            chapterId: chapter.id,
+            type: LESSON_TYPES.QUIZ,
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Second quiz"),
+            description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+            thresholdScore: 0,
+            displayOrder: 2,
+          },
+        ])
+        .returning();
+      const completedAt = new Date().toISOString();
+
+      await db.insert(studentCourses).values([
+        {
+          studentId: firstStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+        {
+          studentId: secondStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+        {
+          studentId: unenrolledStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.NOT_ENROLLED,
+        },
+        {
+          studentId: deletedStudent.id,
+          courseId: course.id,
+          status: COURSE_ENROLLMENT.ENROLLED,
+        },
+      ]);
+      await db.insert(studentLessonProgress).values([
+        {
+          studentId: firstStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 80,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: secondStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 100,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: firstStudent.id,
+          chapterId: chapter.id,
+          lessonId: secondQuiz.id,
+          quizScore: 50,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: unenrolledStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 20,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+        {
+          studentId: deletedStudent.id,
+          chapterId: chapter.id,
+          lessonId: firstQuiz.id,
+          quizScore: 40,
+          attempts: 1,
+          isStarted: true,
+          completedAt,
+        },
+      ]);
+
+      return {
+        admin,
+        course,
+        firstQuiz,
+        secondQuiz,
+        firstStudent,
+        secondStudent,
+      };
+    };
+
+    it("returns averages for active enrolled students only", async () => {
+      const { admin, course, firstQuiz, secondQuiz } = await createAverageQuizScoreFixture();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([
+            {
+              quizId: firstQuiz.id,
+              name: "First quiz",
+              averageScore: 90,
+              finishedCount: 2,
+              lessonOrder: 1,
+            },
+            {
+              quizId: secondQuiz.id,
+              name: "Second quiz",
+              averageScore: 50,
+              finishedCount: 1,
+              lessonOrder: 2,
+            },
+          ]);
+        });
+    });
+
+    it("filters averages by group membership", async () => {
+      const { admin, course, firstQuiz, secondQuiz, firstStudent } =
+        await createAverageQuizScoreFixture();
+      const group = await groupFactory.withMembers([firstStudent.id]).create();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, groupId: group.id })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([
+            {
+              quizId: firstQuiz.id,
+              name: "First quiz",
+              averageScore: 80,
+              finishedCount: 1,
+              lessonOrder: 1,
+            },
+            {
+              quizId: secondQuiz.id,
+              name: "Second quiz",
+              averageScore: 50,
+              finishedCount: 1,
+              lessonOrder: 2,
+            },
+          ]);
+        });
+    });
+
+    it("returns an empty list for an empty group filter", async () => {
+      const { admin, course } = await createAverageQuizScoreFixture();
+      const emptyGroup = await groupFactory.withMembers([]).create();
+      const cookies = await cookieFor(admin, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN, groupId: emptyGroup.id })
+        .set("Cookie", cookies)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.averageScoresPerQuiz).toEqual([]);
         });
     });
   });
@@ -1696,6 +1939,138 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("DELETE /api/course/deleteCourse/:id", () => {
+    it("deletes a draft course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/deleteCourse/${course.id}`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const deletedCourse = await db.select().from(courses).where(eq(courses.id, course.id));
+
+      expect(deletedCourse).toHaveLength(0);
+    });
+
+    it.each([COURSE_STATUSES.PUBLISHED, COURSE_STATUSES.PRIVATE])(
+      "rejects deleting a %s course",
+      async (status) => {
+        const admin = await userFactory
+          .withCredentials({ password })
+          .withAdminSettings(db)
+          .withAdminRole()
+          .create();
+        const cookies = await cookieFor(admin, app);
+        const category = await categoryFactory.create();
+        const course = await courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status,
+          thumbnailS3Key: null,
+        });
+
+        const response = await request(app.getHttpServer())
+          .delete(`/api/course/deleteCourse/${course.id}`)
+          .set("Cookie", cookies)
+          .expect(403);
+
+        expect(response.body.message).toBe("adminCoursesView.toast.deleteProtectedCourseFailed");
+
+        const [existingCourse] = await db.select().from(courses).where(eq(courses.id, course.id));
+
+        expect(existingCourse.id).toBe(course.id);
+      },
+    );
+  });
+
+  describe("DELETE /api/course/deleteManyCourses", () => {
+    it("deletes draft courses", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const draftCourses = await Promise.all([
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+        courseFactory.create({
+          authorId: admin.id,
+          categoryId: category.id,
+          status: COURSE_STATUSES.DRAFT,
+          thumbnailS3Key: null,
+        }),
+      ]);
+      const courseIds = draftCourses.map((course) => course.id);
+
+      await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: courseIds })
+        .set("Cookie", cookies)
+        .expect(200);
+
+      const deletedCourses = await db.select().from(courses).where(inArray(courses.id, courseIds));
+
+      expect(deletedCourses).toHaveLength(0);
+    });
+
+    it("rejects deleting a selection that includes a private course", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const cookies = await cookieFor(admin, app);
+      const category = await categoryFactory.create();
+      const draftCourse = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.DRAFT,
+        thumbnailS3Key: null,
+      });
+      const privateCourse = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        status: COURSE_STATUSES.PRIVATE,
+        thumbnailS3Key: null,
+      });
+      const courseIds = [draftCourse.id, privateCourse.id];
+
+      const response = await request(app.getHttpServer())
+        .delete("/api/course/deleteManyCourses")
+        .send({ ids: courseIds })
+        .set("Cookie", cookies)
+        .expect(403);
+
+      expect(response.body.message).toBe("adminCoursesView.toast.deleteProtectedCourseFailed");
+
+      const remainingCourses = await db
+        .select()
+        .from(courses)
+        .where(inArray(courses.id, courseIds));
+
+      expect(remainingCourses).toHaveLength(2);
+    });
+  });
+
   describe("GET /api/course/:courseId/students", () => {
     describe("when user is not logged in", () => {
       it("should return unauthorized", () => {
@@ -2767,7 +3142,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3059,7 +3434,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3133,7 +3508,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3214,7 +3589,7 @@ describe("CourseController (e2e)", () => {
             await db.insert(lessons).values({
               chapterId: chapter.id,
               type: LESSON_TYPES.QUIZ,
-              title: "Quiz",
+              title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
               thresholdScore: 0,
             });
 
@@ -3350,7 +3725,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3479,7 +3854,7 @@ describe("CourseController (e2e)", () => {
           await db.insert(lessons).values({
             chapterId: chapter.id,
             type: LESSON_TYPES.QUIZ,
-            title: "Quiz",
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
             thresholdScore: 0,
           });
 
@@ -3553,7 +3928,7 @@ describe("CourseController (e2e)", () => {
       await db.insert(lessons).values({
         chapterId: chapter.id,
         type: LESSON_TYPES.QUIZ,
-        title: "Quiz",
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
         thresholdScore: 0,
       });
 

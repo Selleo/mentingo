@@ -34,6 +34,7 @@ import {
   UUIDSchema,
   type UUIDType,
 } from "src/common";
+import { AllowPasswordChangeRequired } from "src/common/decorators/allow-password-change-required.decorator";
 import { Public } from "src/common/decorators/public.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -98,6 +99,8 @@ import {
 import {
   type BulkUserPasswordEmailBody,
   type BulkUserPasswordEmailResponse,
+  type BulkUserPasswordEmailsResponse,
+  bulkUserPasswordEmailsResponseSchema,
   bulkUserPasswordEmailResponseSchema,
   bulkUserPasswordEmailSchema,
 } from "./schemas/userPasswordEmail.schema";
@@ -337,6 +340,7 @@ export class UserController {
   }
 
   @Patch("change-password")
+  @AllowPasswordChangeRequired()
   @RequirePermission(PERMISSIONS.ACCOUNT_UPDATE_SELF)
   @Validate({
     response: nullResponse(),
@@ -426,6 +430,24 @@ export class UserController {
     @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<BulkUserPasswordEmailResponse>> {
     const result = await this.userPasswordEmailService.sendBulkPasswordResetEmails(
+      data.userIds,
+      currentUser,
+    );
+
+    return new BaseResponse(result);
+  }
+
+  @Post("bulk/password-email")
+  @RequirePermission(PERMISSIONS.USER_MANAGE)
+  @Validate({
+    request: [{ type: "body", schema: bulkUserPasswordEmailSchema }],
+    response: baseResponse(bulkUserPasswordEmailsResponseSchema),
+  })
+  async sendBulkPasswordEmails(
+    @Body() data: BulkUserPasswordEmailBody,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<BulkUserPasswordEmailsResponse>> {
+    const result = await this.userPasswordEmailService.sendBulkPasswordEmails(
       data.userIds,
       currentUser,
     );

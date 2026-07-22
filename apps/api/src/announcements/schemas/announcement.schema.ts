@@ -1,4 +1,4 @@
-import { ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { ANNOUNCEMENT_FEEDS, ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { createSelectSchema } from "drizzle-typebox";
 
@@ -6,6 +6,7 @@ import { announcements, userAnnouncements } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 export const announcementLanguageSchema = Type.Enum(SUPPORTED_LANGUAGES);
+export const announcementFeedSchema = Type.Enum(ANNOUNCEMENT_FEEDS);
 export const announcementStatusSchema = Type.Enum(ANNOUNCEMENT_STATUSES);
 
 export const baseAnnouncementSchema = Type.Composite([
@@ -28,7 +29,12 @@ export const baseAnnouncementSchema = Type.Composite([
 ]);
 
 export const announcementSchema = baseAnnouncementSchema;
-export const allAnnouncementsSchema = Type.Array(announcementSchema);
+export const allAnnouncementsSchema = Type.Array(
+  Type.Object({
+    ...announcementSchema.properties,
+    isRead: Type.Union([Type.Boolean(), Type.Null()]),
+  }),
+);
 
 export const userAnnouncementsSchema = omitTenantId(
   createSelectSchema(userAnnouncements, {

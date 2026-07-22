@@ -39,7 +39,6 @@ import type { CalendarEventListItem } from "./schemas/calendar-event-list.schema
 import type {
   CalendarEventStatus,
   CalendarEventSourceType,
-  LocalizedText,
   LiveTrainingResourceRelationshipType,
   SupportedLanguages,
 } from "@repo/shared";
@@ -89,9 +88,9 @@ export class CalendarRepository {
         groupId: groupCourses.groupId,
         dueDate: sql<string>`${groupCourses.dueDate}`,
         calendarEventId: groupCourses.calendarEventId,
-        courseTitle: sql<LocalizedText>`${courses.title}`,
-        courseBaseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-        courseAvailableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        courseTitle: courses.title,
+        courseBaseLanguage: courses.baseLanguage,
+        courseAvailableLocales: courses.availableLocales,
       })
       .from(groupCourses)
       .innerJoin(courses, eq(courses.id, groupCourses.courseId))

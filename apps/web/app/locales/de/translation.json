@@ -54,7 +54,9 @@
       "live_training": "Live-Schulung"
     },
     "error": {
-      "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen."
+      "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
+      "threadMustBeActive": "Der Thread muss aktiv sein.",
+      "aiJudgeConfigurationMissing": "Die AI-Judge-Konfiguration fehlt."
     },
     "loader": {
       "textSequence": {
@@ -484,97 +486,98 @@
       "courseTitleRequired": "Course title is required to create the course calendar event."
     }
   },
+
   "liveTrainingView": {
     "title": "Live-Schulung",
-    "description": "This page will contain the full Live-Schulung workspace.",
+    "description": "Diese Seite wird den vollständigen Arbeitsbereich für Live-Schulungen enthalten.",
     "errors": {
-      "idRequired": "Live-Schulung id is required."
+      "idRequired": "Live-Schulungs-ID ist erforderlich."
     },
     "status": {
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "ended": "Ended",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
+      "scheduled": "Geplant",
+      "active": "Aktiv",
+      "ended": "Beendet",
+      "cancelled": "Abgesagt",
+      "expired": "Abgelaufen"
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "In-person"
+      "offline": "Präsenz"
     },
     "visibility": {
-      "all": "All users",
-      "linked_courses": "Linked courses"
+      "all": "Alle Benutzer",
+      "linked_courses": "Verknüpfte Kurse"
     },
     "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "start": "Start session",
-      "join": "Join session",
-      "finish": "Finish session"
+      "edit": "Bearbeiten",
+      "delete": "Löschen",
+      "start": "Sitzung starten",
+      "join": "Sitzung beitreten",
+      "finish": "Sitzung beenden"
     },
     "stage": {
-      "preview": "Session preview",
-      "activeTitle": "Live session is active",
-      "waitingTitle": "Session is waiting",
-      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
-      "activeBadge": "Active",
-      "waitingBadge": "Waiting",
-      "participants": "Participants",
-      "viewerMic": "Viewer microphone",
-      "viewerCamera": "Viewer camera",
-      "scheduleTooltip": "Planned training time",
-      "timezoneTooltip": "Training timezone",
-      "maxParticipantsTooltip": "Maximum participants",
-      "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "preview": "Sitzungsvorschau",
+      "activeTitle": "Live-Sitzung ist aktiv",
+      "waitingTitle": "Sitzung wartet",
+      "runtimeDeferred": "Die Meeting-Laufzeit wird in einem späteren Schritt verbunden. Mediengeräte werden aus dieser Vorschau nicht gestartet.",
+      "activeBadge": "Aktiv",
+      "waitingBadge": "Wartend",
+      "participants": "Teilnehmer",
+      "viewerMic": "Zuschauermikrofon",
+      "viewerCamera": "Zuschauerkamera",
+      "scheduleTooltip": "Geplante Schulungszeit",
+      "timezoneTooltip": "Schulungszeitzone",
+      "maxParticipantsTooltip": "Maximale Teilnehmerzahl",
+      "locationTooltip": "Schulungsort",
+      "offlineTitle": "Präsenzschulung",
+      "locationMissing": "Ort wurde nicht festgelegt"
     },
     "sidebar": {
-      "lifecycle": "Session lifecycle",
+      "lifecycle": "Sitzungslebenszyklus",
       "status": "Status",
-      "participants": "Participants",
-      "peak": "Peak",
-      "people": "People",
-      "author": "Author",
+      "participants": "Teilnehmer",
+      "peak": "Höchststand",
+      "people": "Personen",
+      "author": "Autor",
       "host": "Host",
       "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
+      "noHosts": "Keine Hosts zugewiesen",
       "trainer": "Trainer",
-      "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
-      "unknownUser": "Unknown user",
-      "details": "Training details",
-      "maxParticipants": "Max participants",
-      "visibility": "Visibility",
-      "courses": "Linked courses",
-      "location": "Location",
-      "addHost": "Add",
-      "addHostHint": "Add host",
-      "removeHost": "Remove host {{name}}",
-      "addTrainer": "Add",
-      "addTrainerHint": "Add trainer",
-      "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people",
-      "noUserResults": "No users found",
-      "loadingUsers": "Loading users",
-      "loadMoreUsers": "Load more"
+      "trainers": "Trainer",
+      "noTrainers": "Keine Trainer zugewiesen",
+      "unknownUser": "Unbekannter Benutzer",
+      "details": "Schulungsdetails",
+      "maxParticipants": "Max. Teilnehmer",
+      "visibility": "Sichtbarkeit",
+      "courses": "Verknüpfte Kurse",
+      "location": "Ort",
+      "addHost": "Hinzufügen",
+      "addHostHint": "Host hinzufügen",
+      "removeHost": "Host {{name}} entfernen",
+      "addTrainer": "Hinzufügen",
+      "addTrainerHint": "Trainer hinzufügen",
+      "removeTrainer": "Trainer {{name}} entfernen",
+      "searchPeople": "Personen suchen",
+      "noUserResults": "Keine Benutzer gefunden",
+      "loadingUsers": "Benutzer werden geladen",
+      "loadMoreUsers": "Mehr laden"
     },
     "tabs": {
-      "overview": "Overview",
-      "files": "Files",
-      "sessions": "Sessions",
-      "settings": "Settings"
+      "overview": "Übersicht",
+      "files": "Dateien",
+      "sessions": "Sitzungen",
+      "settings": "Einstellungen"
     },
     "files": {
-      "title": "Live-Schulung files",
-      "description": "Materials are split by when students should use them.",
-      "beforeHeading": "Before training",
-      "beforeDescription": "Materials available before the training starts.",
-      "afterHeading": "After training",
-      "afterDescription": "Materials available after the training is finished.",
-      "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Datei hinzufügen",
+      "title": "Live-Schulungsdateien",
+      "description": "Materialien sind danach unterteilt, wann Teilnehmer sie verwenden sollen.",
+      "beforeHeading": "Vor der Schulung",
+      "beforeDescription": "Materialien, die vor Beginn der Schulung verfügbar sind.",
+      "afterHeading": "Nach der Schulung",
+      "afterDescription": "Materialien, die nach Abschluss der Schulung verfügbar sind.",
+      "empty": "Noch keine Dateien angehängt.",
+      "afterLocked": "Die Materialien werden nach Ende der Schulung freigeschaltet.",
+      "addFile": "Datei hochladen oder hierher ziehen",
       "download": "Herunterladen",
       "removeFile": "{{title}} entfernen",
       "sizeInMb": "{{size}} MB",
@@ -585,70 +588,70 @@
     },
     "meeting": {
       "previewLabel": "Live-Sitzung",
-      "waitingTitle": "Die Sitzung ist bereit zum Beitreten",
-      "activeTitle": "Die Sitzung ist aktiv",
-      "inSession": "In der Sitzung",
+      "waitingTitle": "Sitzung ist bereit zum Beitritt",
+      "activeTitle": "Sitzung ist aktiv",
+      "inSession": "In Sitzung",
       "roomTitle": "Live-Raum",
       "participants_one": "{{count}} Teilnehmer",
       "participants_other": "{{count}} Teilnehmer",
       "microphone": "Mikrofon",
       "camera": "Kamera",
-      "screenShare": "Bildschirm teilen",
+      "screenShare": "Bildschirm freigeben",
       "screen": "Bildschirm",
-      "presentOnStage": "Auf Bühne anzeigen",
+      "presentOnStage": "Auf der Bühne präsentieren",
       "leave": "Verlassen",
-      "finish": "Finish session",
-      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "finish": "Sitzung beenden",
+      "sessionEndedToast": "Ihre Sitzung {{trainingName}} ist beendet",
       "finishDialog": {
-        "title": "Finish session?",
-        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
-        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
-        "cancel": "Cancel",
-        "confirmEnd": "Finish session",
-        "confirmLeave": "Leave session"
+        "title": "Sitzung beenden?",
+        "lastHostDescription": "Sie sind der einzige Host in diesem Raum. Wenn Sie ihn verlassen, wird die Sitzung für alle beendet.",
+        "otherHostsDescription": "Andere Hosts sind noch in diesem Raum. Sie können ihn verlassen und die Sitzung wird fortgesetzt.",
+        "cancel": "Abbrechen",
+        "confirmEnd": "Sitzung beenden",
+        "confirmLeave": "Sitzung verlassen"
       },
-      "empty": "Warten auf Teilnehmer.",
+      "empty": "Warten auf Teilnehmer",
       "materials": "Materialien",
       "beforeMaterials": "Vorher",
       "afterMaterials": "Nachher",
       "noMaterials": "Keine Dateien"
     },
     "sessions": {
-      "title": "Sessions",
-      "description": "Each started session is stored separately with its attendance.",
-      "empty": "No sessions have been started yet.",
-      "activeParticipants_one": "{{count}} active participant",
-      "activeParticipants_other": "{{count}} active participants",
-      "uniqueParticipants_one": "{{count}} unique participant",
-      "uniqueParticipants_other": "{{count}} unique participants",
-      "peakParticipants": "Peak {{count}}",
-      "startedBy": "Started by",
-      "endedBy": "Ended by",
-      "notEnded": "Not ended",
-      "notAvailable": "N/A",
-      "endReason": "End reason",
-      "noEndReason": "No end reason",
+      "title": "Sitzungen",
+      "description": "Jede begonnene Sitzung wird separat mit ihrer Anwesenheit gespeichert.",
+      "empty": "Es wurden noch keine Sitzungen gestartet.",
+      "activeParticipants_one": "{{count}} aktiver Teilnehmer",
+      "activeParticipants_other": "{{count}} aktive Teilnehmer",
+      "uniqueParticipants_one": "{{count}} eindeutiger Teilnehmer",
+      "uniqueParticipants_other": "{{count}} eindeutige Teilnehmer",
+      "peakParticipants": "Höchststand {{count}}",
+      "startedBy": "Gestartet von",
+      "endedBy": "Beendet von",
+      "notEnded": "Nicht beendet",
+      "notAvailable": "N/V",
+      "endReason": "Beendigungsgrund",
+      "noEndReason": "Kein Beendigungsgrund",
       "status": {
-        "waiting": "Waiting",
-        "active": "Active",
-        "ended": "Ended",
-        "failed": "Failed"
+        "waiting": "Wartend",
+        "active": "Aktiv",
+        "ended": "Beendet",
+        "failed": "Fehlgeschlagen"
       },
       "roles": {
         "host": "Host",
-        "co_trainer": "Co-trainer",
+        "co_trainer": "Co-Trainer",
         "moderator": "Moderator",
-        "observer": "Observer",
+        "observer": "Beobachter",
         "admin": "Admin"
       },
       "attendance": {
-        "empty": "No attendance has been recorded for this session yet.",
-        "user": "User",
-        "role": "Role",
-        "totalTime": "Time attended",
-        "firstJoinedAt": "First joined",
-        "lastLeftAt": "Last left",
-        "joinCount": "Joins"
+        "empty": "Für diese Sitzung wurde noch keine Anwesenheit erfasst.",
+        "user": "Benutzer",
+        "role": "Rolle",
+        "totalTime": "Anwesenheitszeit",
+        "firstJoinedAt": "Zuerst beigetreten",
+        "lastLeftAt": "Zuletzt verlassen",
+        "joinCount": "Beitritte"
       },
       "toast": {
         "started": "Sitzung wurde gestartet.",
@@ -656,30 +659,30 @@
       }
     },
     "attendance": {
-      "title": "Attendance",
-      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+      "title": "Anwesenheit",
+      "description": "Anwesenheits- und Teilnehmerintervalle werden in der Laufzeit implementiert."
     },
     "settings": {
-      "title": "Settings",
-      "description": "Less frequently used session settings will live here."
+      "title": "Einstellungen",
+      "description": "Weniger häufig verwendete Sitzungseinstellungen finden Sie hier."
     },
     "boolean": {
-      "yes": "Yes",
-      "no": "No"
+      "yes": "Ja",
+      "no": "Nein"
     },
     "deleteDialog": {
       "title": "Live-Schulung löschen?",
-      "description": "Das Live-Schulung wird abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
-      "assignedToLessonsDescription": "Dieses Live-Schulung ist mit {{count}} Lektion verknüpft. Lösche zuerst die zugehörige Lektion, bevor du das Live-Schulung löschst.",
-      "assignedToLessonsDescription_plural": "Dieses Live-Schulung ist mit {{count}} Lektionen verknüpft. Lösche zuerst die zugehörigen Lektionen, bevor du das Live-Schulung löschst.",
+      "description": "Dadurch wird die Live-Schulung abgesagt und aus dem Kalender entfernt. Diese Aktion kann nicht rückgängig gemacht werden.",
+      "assignedToLessonsDescription": "Diese Live-Schulung ist mit {{count}} Lektion verknüpft. Löschen Sie zuerst die zugehörige Lektion, bevor Sie die Live-Schulung löschen.",
+      "assignedToLessonsDescription_plural": "Diese Live-Schulung ist mit {{count}} Lektionen verknüpft. Löschen Sie zuerst die zugehörigen Lektionen, bevor Sie die Live-Schulung löschen.",
       "toast": {
-        "success": "Live-Schulung wurde gelöscht."
+        "success": "Live-Schulung erfolgreich gelöscht."
       }
     },
     "edit": {
       "saveChanges": "Änderungen speichern",
       "toast": {
-        "success": "Live-Schulung wurde aktualisiert."
+        "success": "Live-Schulung erfolgreich aktualisiert."
       }
     }
   },
@@ -898,6 +901,19 @@
       "noPartiallyConfigured": "Keine teilweise konfigurierten Dienste.",
       "allConfigured": "Alle Umgebungsschlüssel sind korrekt konfiguriert.",
       "dismissWarning": "Zurückweisen",
+      "aiCapabilities": {
+        "title": "AI-Funktionen",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Kursgenerierung",
+          "assetGeneration": "Asset-Generierung"
+        },
+        "status": {
+          "enabled": "Aktiviert",
+          "disabled": "Deaktiviert"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe-Zahlung",
         "bunny": "Bunny CDN",
@@ -973,6 +989,11 @@
       "passwordCreatedSuccessfully": "Passwort erfolgreich erstellt"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Passwort ändern",
+    "subHeader": "Aus Sicherheitsgründen müssen Sie ein neues Passwort festlegen, bevor Sie fortfahren.",
+    "submit": "Passwort ändern"
+  },
   "passwordValidationDisplay": {
     "title": "Passwortanforderungen",
     "header": "Ihr Passwort muss Folgendes enthalten:",
@@ -1039,7 +1060,9 @@
       "passwordResetEmailsSent": "Passwort-Zurücksetzen-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
       "passwordResetEmailsError": "Passwort-Zurücksetzen-E-Mails konnten nicht gesendet werden",
       "passwordCreationEmailsSent": "Passwort-Erstellungs-E-Mails gesendet: {{sentCount}}. Übersprungen: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden"
+      "passwordCreationEmailsError": "Passwort-Erstellungs-E-Mails konnten nicht gesendet werden",
+      "passwordEmailsSent": "Passwort-E-Mails gesendet: {{sentCount}}. Zurücksetzen: {{passwordResetSentCount}}. Erstellung: {{passwordCreationSentCount}}. Übersprungen: {{skippedCount}}.",
+      "passwordEmailsError": "Passwort-E-Mails konnten nicht gesendet werden"
     },
     "field": {
       "description": "Beschreibung",
@@ -1237,7 +1260,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs erfolgreich gelöscht",
       "deleteCourseFailed": "Der Kurs konnte nicht gelöscht werden",
-      "deletePublishedCourseFailed": "Ein veröffentlichter Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
+      "deleteProtectedCourseFailed": "Ein veröffentlichter oder privater Kurs kann nicht gelöscht werden. Bitte setzen Sie den Status zunächst auf „Entwurf“.",
       "bulkCategoryUpdateSuccessfully": "Kurskategorien wurden erfolgreich aktualisiert",
       "bulkCategoryUpdateFailed": "Kurskategorien konnten nicht aktualisiert werden",
       "bulkCategoryUpdateForbidden": "Sie haben keine Berechtigung, einen oder mehrere ausgewählte Kurse zu aktualisieren.",
@@ -1457,6 +1480,7 @@
     "dropdown": {
       "roles": "Rollen",
       "groups": "Gruppen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
       "delete": "Löschen",
@@ -1467,6 +1491,7 @@
         "delete": "Möchten Sie diese Konten löschen?",
         "role": "Rollen ändern",
         "group": "Gruppen ändern",
+        "passwordEmail": "Passwort-E-Mail senden",
         "passwordReset": "Passwort-Zurücksetzen-E-Mail senden",
         "passwordCreation": "Passwort-Erstellungs-E-Mail erneut senden",
         "archive": "Benutzerkonten archivieren",
@@ -1478,6 +1503,7 @@
         "delete": "Löschen",
         "role": "Speichern",
         "group": "Speichern",
+        "passwordEmail": "Senden",
         "passwordReset": "Senden",
         "passwordCreation": "Senden",
         "archive": "Archiv",
@@ -1490,6 +1516,7 @@
         "confirmationForGroup_other": "Sie ändern die Gruppe für {{ count }} Benutzer in {{ group }}",
         "confirmationForRole_one": "Sie ändern die Rolle für einen Benutzer in {{ role }}.",
         "confirmationForRole_other": "Sie ändern die Rolle für {{ count }} Benutzer in {{ role }}",
+        "passwordEmail": "Senden Sie Passwort-E-Mails an ausgewählte Benutzer. Benutzer mit bestehendem Passwort erhalten eine Passwort-Zurücksetzen-E-Mail, Benutzer ohne Passwort erhalten eine Passwort-Erstellungs-E-Mail.",
         "passwordReset": "Senden Sie Passwort-Zurücksetzen-E-Mails an ausgewählte Benutzer mit bestehendem Passwort. Benutzer ohne Passwort werden übersprungen.",
         "passwordCreation": "Senden Sie Passwort-Erstellungs-E-Mails erneut an ausgewählte Benutzer ohne Passwort. Benutzer mit bestehendem Passwort werden übersprungen.",
         "archive": "Sind Sie sicher, dass Sie diese Konten archivieren möchten?",
@@ -1564,6 +1591,7 @@
     },
     "button": {
       "createUser": "Benutzer erstellen",
+      "passwordEmail": "Passwort-E-Mail senden",
       "passwordResetEmail": "Passwort-Zurücksetzen-E-Mail senden",
       "passwordCreationEmail": "Passwort-Erstellungs-E-Mail erneut senden"
     },
@@ -1813,7 +1841,6 @@
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
       },
       "lesson": {
-        "aiMentorRequiredContent": "AI-Mentor-Anweisungen und Abschlussbedingungen sind erforderlich.",
         "customTtsReferenceRequired": "Eine eigene TTS-Referenz ist im benutzerdefinierten Modus erforderlich.",
         "aiMentorCreateFailed": "AI-Mentor-Lektion konnte nicht erstellt werden.",
         "questionsRequired": "Mindestens eine Frage ist erforderlich.",
@@ -2085,8 +2112,6 @@
           "descriptionRequired": "Beschreibung ist erforderlich",
           "aiMentorInstructionsRequired": "Anweisungen für den AI-Mentor sind erforderlich",
           "aiMentorInstructionsMaxLength": "Die Anweisungen für den AI-Mentor sind zu lang (maximal 20.000 Zeichen).",
-          "completionConditionsRequired": "Abschlussbedingungen sind erforderlich",
-          "completionConditionsMaxLength": "Die Abschlussbedingungen sind zu lang (maximal 20.000 Zeichen).",
           "customTTSReferenceRequired": "Im benutzerdefinierten Modus ist eine benutzerdefinierte TTS-Referenz erforderlich",
           "taskDescriptionMaxLength": "Die Aufgabenbeschreibung ist zu lang (maximal {{ count }} Zeichen)",
           "passThresholdMin": "Der Erfolgsschwellenwert muss mindestens 1 betragen",
@@ -2161,7 +2186,6 @@
           "sentence": "Satz",
           "sourceUrl": "Quell-URL",
           "aiMentorInstructions": "Anweisungen für KI-Mentoren",
-          "completionConditions": "Abschlussbedingungen",
           "aiMentor": "KI-Mentor",
           "mentorName": "Name des Mentors",
           "taskDescription": "Aufgabenbeschreibung",
@@ -2187,11 +2211,84 @@
           "sourceUrl": "Geben Sie die Quell-URL ein...",
           "allowFullscreen": "Vollbild zulassen",
           "aiMentorInstructions": "Beschreiben Sie, wie sich der KI-Mentor während des Unterrichts verhalten soll ...",
-          "completionConditions": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen ...",
           "taskDescription": "Beschreiben Sie die Aufgabe, die der Teilnehmer erledigen muss ...",
           "passThreshold": "z. B. 70 %",
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
+        },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Konfiguriert",
+          "emptyDescription": "Legen Sie fest, wie die Antwort des Lernenden bewertet und wann die Lektion bestanden wird.",
+          "baseLanguageRequired": "Erstellen Sie die Bewertungsstruktur in der Basissprache des Kurses, bevor Sie sie übersetzen.",
+          "structureLockedTooltip": "Die Bewertungsstruktur kann nur in der Basissprache des Kurses geändert werden.",
+          "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
+          "configureWithAi": "Mit KI konfigurieren",
+          "configureManually": "Manuell konfigurieren",
+          "editAssessment": "Bewertung bearbeiten",
+          "dialogTitle": "AI Judge konfigurieren",
+          "dialogDescription": "Definieren Sie messbare Kriterien, genaue Bewertungshinweise und Fehler, die immer zum Nichtbestehen führen.",
+          "translationModeTitle": "Übersetzungsmodus",
+          "translationModeDescription": "Hier können Sie Bewertungstexte übersetzen. Punkte, Schwellenwert und Struktur werden in der Basissprache des Kurses verwaltet.",
+          "taskGoal": "Aufgabenziel",
+          "taskGoalPlaceholder": "Beschreiben Sie das messbare Ergebnis, das der Lernende erreichen soll...",
+          "passingThreshold": "Bestehensschwelle",
+          "criteria": "Bewertungskriterien",
+          "addFirstCriterion": "Erstes Kriterium hinzufügen",
+          "criterionNumber": "Kriterium {{number}}",
+          "untitledCriterion": "Unbenanntes Kriterium",
+          "complete": "Vollständig",
+          "needsDetails": "Details fehlen",
+          "criterionDescription": "Beschreiben Sie ein beobachtbares Verhalten des Lernenden.",
+          "criterionTitle": "Kriteriumsname",
+          "criterionTitlePlaceholder": "z. B. Erkennt die Bedürfnisse des Kunden",
+          "expectedBehavior": "Erwartetes Verhalten",
+          "expectedBehaviorPlaceholder": "Erklären Sie, was der Lernende sagen oder tun soll...",
+          "maxScore": "Maximale Punktzahl",
+          "score": "Punkte",
+          "scoringGuidance": "Bewertungshinweise",
+          "advancedScoring": "Erweiterte Bewertungshinweise",
+          "scoreLevelsCount": "{{count}} Punktestufen",
+          "scoreBadge": "{{score}} Pkt.",
+          "itemsCount": "{{count}} hinzugefügt",
+          "scoringSummary": "Bewertung",
+          "pointsRequired": "{{required}} von {{total}} Punkten zum Bestehen erforderlich",
+          "scoringGuidanceDescription": "Beschreiben Sie optional, wie eine genaue Punktzahl erreicht wird.",
+          "scoreDescription": "Was diese Punktzahl ergibt",
+          "scoreDescriptionPlaceholder": "Beschreiben Sie das beobachtbare Leistungsniveau...",
+          "acceptedExample": "Akzeptiertes Beispiel",
+          "examplePlaceholder": "Fügen Sie eine Beispielantwort hinzu...",
+          "addCriterion": "Kriterium hinzufügen",
+          "removeCriterion": "Kriterium entfernen",
+          "addScoreGuidance": "Bewertungshinweis hinzufügen",
+          "removeScoreGuidance": "Bewertungshinweis entfernen",
+          "noScoringGuidance": "Keine punktspezifischen Hinweise hinzugefügt.",
+          "blockingErrors": "Ausschlussfehler",
+          "blockingErrorsDescription": "Tritt einer dieser Fehler auf, gilt der Versuch unabhängig von der Punktzahl als nicht bestanden.",
+          "blockingErrorNumber": "Ausschlussfehler {{number}}",
+          "blockingErrorPlaceholder": "Beschreiben Sie den Fehler, der immer zum Nichtbestehen führt...",
+          "addBlockingError": "Ausschlussfehler hinzufügen",
+          "removeBlockingError": "Ausschlussfehler entfernen",
+          "noBlockingErrors": "Keine Ausschlussfehler konfiguriert.",
+          "applyConfiguration": "Konfiguration übernehmen",
+          "saveConfiguration": "Konfiguration speichern",
+          "saveTranslation": "Übersetzung speichern",
+          "configurationSavedSuccessfully": "Die AI-Judge-Konfiguration wurde gespeichert.",
+          "translationSavedSuccessfully": "Die AI-Judge-Übersetzung wurde gespeichert.",
+          "validation": {
+            "configurationRequired": "Konfiguriere den AI Judge, bevor du diese Lektion speicherst",
+            "taskGoalRequired": "Das Aufgabenziel ist erforderlich",
+            "thresholdRange": "Die Bestehensschwelle muss zwischen 1 und 100 liegen",
+            "titleRequired": "Der Kriteriumsname ist erforderlich",
+            "expectedBehaviorRequired": "Das erwartete Verhalten ist erforderlich",
+            "maxScoreRange": "Die maximale Punktzahl muss zwischen 1 und 5 liegen",
+            "scoreRange": "Die Punktzahl darf nicht negativ sein",
+            "scoreExceedsMaximum": "Die Punktzahl darf das Kriteriumsmaximum nicht überschreiten",
+            "scoreMustBeUnique": "Jede Hinweispunktzahl muss innerhalb des Kriteriums eindeutig sein",
+            "guidanceRequired": "Die Beschreibung des Bewertungshinweises ist erforderlich",
+            "completeGuidanceRequired": "Fügen Sie für dieses Kriterium eine Bewertungsanleitung hinzu",
+            "blockingErrorRequired": "Die Beschreibung des Ausschlussfehlers ist erforderlich"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2252,9 +2349,9 @@
           "aiMentorTypeTooltip": "Verhält sich wie eine Figur in einem Szenario, stellt aber während der Szene Fragen und hilft, Schlussfolgerungen zu ziehen.\nBeispiel: „Was würden Sie jetzt in der Rolle des Managers tun?“",
           "aiTeacherTypeTooltip": "Erklärt, lehrt und stellt Fragen – wie ein Lehrer.\nBeispiel: „In dieser Situation erhebt der Kunde einen Preiseinwand. Was sollten Sie antworten und warum?“",
           "aiRoleplayTypeTooltip": "Simuliert einen realistischen Charakter und eine realistische Situation – ohne den Charakter zu zerstören.\nBeispiel: „Dies ist das zweite Mal, dass Ihr Dienst ausgefallen ist. Was werden Sie dagegen tun?“",
-          "completionConditionsTooltip": "Listen Sie auf, was der Schüler erreichen muss, um diese Lektion zu bestehen. Geben Sie klare und messbare Punkte an. Die KI wird diese Liste verwenden, um den Fortschritt zu überprüfen. Sie können auch einen Schwellenwert für das Bestehen festlegen (z. B. einen Prozentsatz oder eine Mindestpunktzahl). Wenn keine Schwelle angegeben ist, müssen alle Bedingungen erfüllt sein, um die Lektion zu bestehen.",
           "passThresholdTooltip": "Legen Sie den Mindestprozentsatz (1-100 %) fest, der zum Bestehen erforderlich ist. Für keine Schwelle leer lassen.",
-          "voiceConfigFishAudioTooltip": "Der Sprachmodus verwendet Cartesia. Um eine benutzerdefinierte Stimme zu verwenden, öffnen Sie Cartesia, suchen Sie die gewünschte Stimme und kopieren Sie deren Stimmen-ID hierher.",
+          "voiceConfigCartesiaTooltip": "Die Sprachausgabe verwendet Cartesia. Wählen Sie Male oder Female, um die konfigurierte Stimmenzuordnung zu verwenden, oder wählen Sie Custom und geben Sie eine Cartesia-Voice-ID ein.",
+          "voiceConfigOpenAiCompatibleTooltip": "Die Sprachausgabe verwendet einen OpenAI-kompatiblen Text-to-Speech-Endpunkt. Male und Female verwenden OpenAI-Stimm-Presets. Wählen Sie Custom, um einen anderen von diesem Endpunkt unterstützten Stimmwert einzugeben.",
           "aiMentorPersonaTooltip": "Dies definiert die Persona der Lektion. Sie können einen Namen und einen Avatar für den KI-Mentor auswählen. Mit diesem Namen identifiziert sich die Persona und der ausgewählte Avatar wird im Unterricht angezeigt.",
           "suggestedExamples": "Empfohlene Beispiele",
           "charactersLeft": "Zeichen übrig",
@@ -2285,6 +2382,44 @@
               "problemSolving": "<ul><li>Der Student erkennt den Beitrag des Mitarbeiters an.</li><li>Der Student erläutert die Budgetsituation ehrlich.</li><li>Der Student schlägt eine nichtfinanzielle Alternative vor (z. B. Zusatzleistungen, Entwicklungsmöglichkeiten).</li><li>Der Student erklärt sich damit einverstanden, das Thema zu einem späteren Zeitpunkt noch einmal aufzugreifen.</li><li>Der Student pflegt einen respektvollen, unterstützenden Umgangston.</li></ul><strong>Grenzwert:</strong> mindestens 3 von 5 Bedingungen muss erfüllt werden.",
               "creativeTask": "<ul><li>Der Student präsentiert eine originelle Idee.</li><li>Der Student erklärt, wer die Zielgruppe ist.</li><li>Der Student beschreibt, wie der Service den Kunden einen Mehrwert bieten könnte.</li><li>Der Student identifiziert mögliche Herausforderungen.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen müssen erfüllt sein.)</em>",
               "knowledgeSharing": "<ul><li>Der Student beteiligt sich aktiv an der Konversation (stellt Fragen oder tauscht Überlegungen aus).</li><li>Der Student kann mindestens eine im Dialog erwähnte Zeitmanagementtechnik nennen.</li><li>Der Student drückt aus, wie er eine Technik in seiner Arbeit anwenden könnte.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen werden empfohlen, sind aber für das Bestehen nicht zwingend erforderlich.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Vergeben Sie 0 Punkte, wenn der Lernende keinen klaren, beobachtbaren Nachweis für dieses Verhalten liefert, es vermeidet oder ihm entgegenhandelt: {{expectedBehavior}} Das Fehlen des genauen Beispiels allein reicht nicht aus; bewerten Sie die Bedeutung der gesamten Antwort.",
+              "notMetExample": "Die Antwort enthält keine Aussage oder Handlung, die Folgendes zeigt: {{expectedBehavior}}",
+              "metDescription": "Vergeben Sie 1 Punkt, wenn der Lernende dieses Verhalten klar, relevant und kontextgerecht zeigt: {{expectedBehavior}} Gleichwertige Formulierungen sind gültig; das akzeptierte Beispiel muss nicht wörtlich wiederholt werden."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Welchen Budgetrahmen haben Sie für dieses Projekt vorgesehen?",
+                "1": "Sie haben ein Ziel von drei Monaten genannt. Ist dieser Starttermin verbindlich?",
+                "2": "Welche Auswirkungen hätte ein verspäteter Start auf Ihr Unternehmen?",
+                "3": "Es klingt so, als wären Liefersicherheit und klare Kommunikation Ihre größten Anliegen – stimmt das?",
+                "4": "Angesichts der Frist von drei Monaten und des begrenzten Budgets schlage ich ein stufenweises MVP mit wöchentlichen Fortschrittsbesprechungen vor."
+              },
+              "problemSolving": {
+                "0": "Ihre jüngste Arbeit hat wirklich etwas bewirkt, und ich verstehe, warum Sie das Thema Vergütung ansprechen.",
+                "1": "Im aktuellen Zyklus steht kein Budget für Gehaltserhöhungen zur Verfügung, und ich möchte das offen kommunizieren.",
+                "2": "Ich kann derzeit keine Gehaltserhöhung genehmigen, aber wir können ein Weiterbildungsbudget und zusätzliche Urlaubstage besprechen.",
+                "3": "Lassen Sie uns das Budget in drei Monaten erneut prüfen und dieses Gespräch heute schon einplanen.",
+                "4": "Ich verstehe, dass das enttäuschend ist, und schätze es, dass Sie offen mit mir darüber sprechen."
+              },
+              "creativeTask": {
+                "0": "Ich schlage einen Abonnementdienst vor, der Kunden monatliche Barrierefreiheitsprüfungen ihrer digitalen Produkte bietet.",
+                "1": "Der Dienst richtet sich an kleine E-Commerce-Teams ohne eigene Fachkraft für Barrierefreiheit.",
+                "2": "Er würde Compliance-Risiken reduzieren und Kunden helfen, durch den Abbau von Nutzungshürden die Konversion zu verbessern.",
+                "3": "Die Hauptrisiken sind die Verfügbarkeit von Fachkräften und uneinheitliche Kundendaten; deshalb würden wir mit einem begrenzten Pilotprojekt beginnen."
+              },
+              "knowledgeSharing": {
+                "0": "Welche dieser Techniken funktioniert am besten, wenn sich die Prioritäten im Laufe des Tages ändern?",
+                "1": "Eine der besprochenen Techniken ist Timeboxing.",
+                "2": "Ich reserviere jeden Morgen zwei konzentrierte Arbeitsblöcke für Aufgaben mit hoher Priorität und überprüfe sie am Ende der Woche."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Der Lernende macht eine Zusage zu Lieferzeit, Preis oder Umfang, die den genannten Einschränkungen des Kunden widerspricht.",
+              "problemSolving": "Der Lernende verwendet gegenüber dem Mitarbeiter respektlose, drohende oder diskriminierende Sprache.",
+              "creativeTask": "Der Lernende schlägt eine Dienstleistung vor, die eindeutig illegal, diskriminierend oder schädlich ist.",
+              "knowledgeSharing": "Der Lernende stellt erfundene oder unsichere Ratschläge als geprüfte Zeitmanagementtechnik dar."
             }
           },
           "betaTooltip": "Diese Funktionalität wird in einer Testversion bereitgestellt. Es kann Fehler enthalten oder nicht vollständig wie vorgesehen funktionieren. Die Nutzung erfolgt auf eigenes Risiko.",
@@ -2692,7 +2827,8 @@
       "passingThreshold": "Bestehensschwelle: {{threshold}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "score": "Punktzahl: {{score}} % ({{correct}} von {{questionsNumber}} Fragen)",
       "contentCantBeEmbedded": "Dieser Inhalt kann nicht eingebettet werden.",
-      "openInNewTab": "In neuem Tab öffnen"
+      "openInNewTab": "In neuem Tab öffnen",
+      "scale_1_5": "Frage vom Typ Skala 1 bis 5."
     },
     "aiMentor": {
       "title": "KI-Mentor-Sitzung",
@@ -2728,6 +2864,10 @@
       "body": "Bitte warten Sie einen Moment. Sobald es fertig ist, wird es hier angezeigt."
     },
     "videoProgress": {
+      "label": "Video-Fortschritt",
+      "completedSummary": "{{completed}} von {{total}} abgeschlossen",
+      "overviewAriaLabel": "Video-Fortschritt der Lektion",
+      "segmentAriaLabel": "Fortschritt von Video {{index}}: {{progress}} % angesehen",
       "errors": {
         "resourceNotFound": "Der Videofortschritt konnte für diese Lektion nicht gespeichert werden.",
         "unsupportedLessonType": "Videofortschritt ist nur für Inhaltslektionen verfügbar.",
@@ -2842,10 +2982,18 @@
           "thresholdLabel": "Bestehensschwelle",
           "thresholdValue": "{{requiredScore}}/{{maxScore}} erforderlich ({{threshold}}%)",
           "feedbackTitle": "Was verbessert werden kann",
+          "criticalErrorsTitle": "Was den Abschluss verhindert hat",
+          "criteriaTitle": "Bewertung nach Kriterien",
+          "criterionScore": "{{score}}/{{maxScore}} Pkt.",
+          "noFeedbackTitle": "Kein detailliertes Feedback verfügbar",
+          "noFeedbackDescription": "Diese Bewertung enthält keine bewerteten Kriterien und in Ihrem Versuch wurden keine kritischen Fehler erkannt.",
+          "loadingTitle": "Ihr Versuch wird geprüft",
+          "loadingDescription": "Das Gespräch wird mit den Kriterien der Lektion verglichen. Dies kann einen Moment dauern.",
           "openDetails": "Bewertungsdetails öffnen"
         },
         "voiceOverlay": {
           "headerEyebrow": "Sprach-Benutzeroberfläche",
+          "options": "Optionen",
           "exit": "Sprachmodus verlassen",
           "mute": "Stummschalten",
           "unmute": "Stummschaltung aufheben",
@@ -3249,7 +3397,8 @@
     "title": "Benachrichtigungen",
     "tabs": {
       "all": "Alle",
-      "adminAnnouncements": "Admin-Ankündigungen"
+      "adminAnnouncements": "Admin-Ankündigungen",
+      "system": "System"
     },
     "actions": {
       "refresh": "Aktualisieren",
@@ -3320,12 +3469,18 @@
       "error": "Beim Ändern des Login-Hintergrundbilds ist ein Fehler aufgetreten"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Die Dateiverarbeitung ist fehlgeschlagen. Versuchen Sie es mit einer anderen Datei oder laden Sie sie erneut hoch.",
+      "noExtractableText": "Aus dieser Datei konnte kein lesbarer Text extrahiert werden."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Datei-Upload fehlgeschlagen – ungültige Dateidaten",
       "fileEmpty": "Datei-Upload fehlgeschlagen – die Datei ist leer",
       "contentTypeMismatch": "Der Dateiinhaltstyp stimmt nicht mit dem bereitgestellten Inhaltstyp überein",
-      "invalidFileType": "Ungültiger Dateityp. Bitte laden Sie eine PNG- oder SVG-Datei hoch.",
+      "invalidFileType": "Ungültiger Dateityp.",
       "missingTenantContext": "Fehlender Mandantenkontext für den Datei-Upload",
       "presentationFileTooLarge": "Die Präsentation ist zu groß. Laden Sie eine Präsentation mit bis zu {{size}} {{unit}} hoch."
     },
@@ -3747,7 +3902,12 @@
       "complete_chapter": "Kapitel abgeschlossen",
       "expire_certificate": "Zertifikat abgelaufen",
       "reset_certificate": "Zertifikat zurückgesetzt",
-      "view_announcement": "Angezeigt"
+      "view_announcement": "Angezeigt",
+      "enroll_learning_path": "Lernpfad eingeschrieben",
+      "start_learning_path": "Lernpfad gestartet",
+      "complete_learning_path": "Lernpfad abgeschlossen",
+      "play_scorm": "SCORM gestartet",
+      "complete_scorm": "SCORM abgeschlossen"
     },
     "entity": {
       "course": "Kurs",
@@ -3766,6 +3926,8 @@
       "qa": "Q&A",
       "announcement": "Ankündigung",
       "live_training": "Live-Schulung",
+      "learning_path": "Lernpfad",
+      "scorm": "SCORM",
       "global_settings": "Einstellungen"
     },
     "table": {
@@ -4342,6 +4504,7 @@
     "error": {
       "unauthenticated": "Benutzer nicht authentifiziert",
       "invalidEmailOrPassword": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+      "invalidRefreshToken": "Ungültiges Aktualisierungstoken",
       "adminRoleRequired": "Administratorrolle erforderlich",
       "missingPermission": "Sie haben keine Berechtigung, auf diese Ressource zuzugreifen",
       "sessionRevoked": "Ihre Sitzung wurde widerrufen. Bitte aktualisieren Sie Ihre Sitzung."
@@ -4394,7 +4557,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren."
+      "invalidBlankAnswerId": "Das generierte Quiz enthält eine ungültige Lückenantwort-ID. Versuche, den Kurs erneut zu generieren.",
+      "invalidAiJudgeConfiguration": "Die generierte AI-Mentor-Lektion enthält eine ungültige Bewertungskonfiguration. Bitte generiere den Kurs erneut."
     }
   },
   "liveTraining": {

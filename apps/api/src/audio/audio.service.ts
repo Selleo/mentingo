@@ -109,7 +109,7 @@ export class AudioService implements OnModuleInit {
     return true;
   }
 
-  async stopAudio(sessionId: string) {
+  async stopAudio(sessionId: string, tenantId?: string) {
     const voiceAction = await this.getVoiceAction(sessionId);
     if (!voiceAction) {
       this.realtimePublisher.emitToRoom(VOICE_SOCKET_EVENT.STOP_AUDIO, sessionId, {
@@ -124,7 +124,10 @@ export class AudioService implements OnModuleInit {
       return;
     }
 
-    await this.queueService.enqueue(QUEUE_NAMES.AUDIO, voiceAction, { clientId: sessionId });
+    await this.queueService.enqueue(QUEUE_NAMES.AUDIO, voiceAction, {
+      clientId: sessionId,
+      tenantId,
+    });
   }
 
   async cancelAudio(sessionId: string) {

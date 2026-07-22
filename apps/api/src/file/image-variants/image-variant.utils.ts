@@ -4,8 +4,9 @@ import path from "node:path";
 import { prefixTenantStorageKey } from "src/file/utils/tenantStorageKey";
 
 import {
+  ALL_IMAGE_QUALITY_VALUES,
+  ALL_IMAGE_VARIANT_DEFINITIONS,
   IMAGE_QUALITY,
-  IMAGE_VARIANT_DEFINITIONS,
   IMAGE_VARIANT_CONTENT_TYPE,
   SUPPORTED_IMAGE_VARIANT_MIME_TYPE_SET,
 } from "./image-variant.constants";
@@ -16,6 +17,11 @@ import type { UUIDType } from "src/common";
 export const isSupportedImageVariantMimeType = (
   mimeType: string,
 ): mimeType is SupportedImageVariantMimeType => SUPPORTED_IMAGE_VARIANT_MIME_TYPE_SET.has(mimeType);
+
+const ALL_IMAGE_QUALITY_VALUE_SET = new Set<string>(ALL_IMAGE_QUALITY_VALUES);
+
+export const isImageQuality = (quality: string): quality is ImageQuality =>
+  ALL_IMAGE_QUALITY_VALUE_SET.has(quality);
 
 export const isImageVariantReference = (reference: string) => reference.includes("/variants/");
 
@@ -32,7 +38,7 @@ export const getImageVariantKey = (reference: string, quality: ImageQuality) => 
 };
 
 export const getAllImageVariantKeys = (reference: string) =>
-  IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
+  ALL_IMAGE_VARIANT_DEFINITIONS.map(({ quality }) => getImageVariantKey(reference, quality));
 
 export const getDefaultImageQuality = (): ImageQuality => IMAGE_QUALITY.XL;
 

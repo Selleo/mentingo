@@ -55,7 +55,9 @@
       "live_training": "Szkolenia na żywo"
     },
     "error": {
-      "somethingWentWrong": "Ups! Coś poszło nie tak."
+      "somethingWentWrong": "Ups! Coś poszło nie tak.",
+      "threadMustBeActive": "Wątek musi być aktywny.",
+      "aiJudgeConfigurationMissing": "Brakuje konfiguracji AI Judge."
     },
     "loader": {
       "textSequence": {
@@ -576,9 +578,9 @@
       "beforeDescription": "Materiały dostępne przed rozpoczęciem szkolenia.",
       "afterHeading": "Po szkoleniu",
       "afterDescription": "Materiały dostępne po zakończeniu szkolenia.",
+      "afterLocked": "Materiały zostaną odblokowane po zakończeniu szkolenia.",
       "empty": "Nie dodano jeszcze plików.",
-      "afterLocked": "Pliki po szkoleniu zostaną odblokowane po zakończeniu szkolenia.",
-      "addFile": "Dodaj plik",
+      "addFile": "Prześlij plik lub przeciągnij i upuść tutaj",
       "download": "Pobierz",
       "removeFile": "Usuń {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -1112,6 +1114,19 @@
       "noPartiallyConfigured": "Brak częściowo skonfigurowanych usług.",
       "allConfigured": "Wszystkie zmienne środowiskowe są poprawnie skonfigurowane.",
       "dismissWarning": "Odrzuć",
+      "aiCapabilities": {
+        "title": "Możliwości AI",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generowanie kursów",
+          "assetGeneration": "Generowanie assetów"
+        },
+        "status": {
+          "enabled": "Włączone",
+          "disabled": "Wyłączone"
+        }
+      },
       "serviceNames": {
         "stripe": "Płatności Stripe",
         "bunny": "Bunny CDN",
@@ -1197,6 +1212,11 @@
       "passwordCreatedSuccessfully": "Hasło zostało utworzone pomyślnie"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Zmień hasło",
+    "subHeader": "Ze względów bezpieczeństwa musisz ustawić nowe hasło, aby kontynuować.",
+    "submit": "Zmień hasło"
+  },
   "contentCreatorView": {
     "button": {
       "collapse": "Zwiń",
@@ -1253,7 +1273,9 @@
       "passwordResetEmailsSent": "Wysłano e-maile resetowania hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
       "passwordResetEmailsError": "Nie udało się wysłać e-maili resetowania hasła",
       "passwordCreationEmailsSent": "Wysłano e-maile utworzenia hasła: {{sentCount}}. Pominięto: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nie udało się wysłać e-maili utworzenia hasła"
+      "passwordCreationEmailsError": "Nie udało się wysłać e-maili utworzenia hasła",
+      "passwordEmailsSent": "Wysłano e-maile z hasłem: {{sentCount}}. Resetowanie: {{passwordResetSentCount}}. Utworzenie: {{passwordCreationSentCount}}. Pominięto: {{skippedCount}}.",
+      "passwordEmailsError": "Nie udało się wysłać e-maili z hasłem"
     },
     "field": {
       "description": "Opis",
@@ -1457,7 +1479,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurs został usunięty pomyślnie",
       "deleteCourseFailed": "Nie udało się usunąć kursu",
-      "deletePublishedCourseFailed": "Nie można usunąć opublikowanego kursu. Najpierw zmień jego status na Wersja Robocza.",
+      "deleteProtectedCourseFailed": "Nie można usunąć opublikowanego ani prywatnego kursu. Najpierw zmień jego status na Wersja Robocza.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kursów zostały zaktualizowane",
       "bulkCategoryUpdateFailed": "Nie udało się zaktualizować kategorii kursów",
       "bulkCategoryUpdateForbidden": "Nie masz uprawnień do aktualizacji co najmniej jednego z wybranych kursów.",
@@ -1737,6 +1759,7 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Grupy",
+      "passwordEmail": "Wyślij e-mail z hasłem",
       "passwordReset": "Wyślij e-mail resetowania hasła",
       "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
       "delete": "Usuń",
@@ -1747,6 +1770,7 @@
         "delete": "Czy chcesz usunąć te konta?",
         "role": "Modyfikuj role",
         "group": "Modyfikuj grupy",
+        "passwordEmail": "Wyślij e-mail z hasłem",
         "passwordReset": "Wyślij e-mail resetowania hasła",
         "passwordCreation": "Wyślij ponownie e-mail utworzenia hasła",
         "archive": "Archiwizuj konta użytkowników",
@@ -1758,6 +1782,7 @@
         "delete": "Usuń",
         "role": "Zapisz",
         "group": "Zapisz",
+        "passwordEmail": "Wyślij",
         "passwordReset": "Wyślij",
         "passwordCreation": "Wyślij",
         "archive": "Archiwizuj",
@@ -1774,6 +1799,7 @@
         "confirmationForRole_few": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_many": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
         "confirmationForRole_other": "Zmienisz rolę na {{ role }} dla {{ count }} użytkowników",
+        "passwordEmail": "Wyślij e-maile z hasłem do wybranych użytkowników. Użytkownicy z istniejącym hasłem otrzymają e-mail resetowania hasła, a użytkownicy bez hasła otrzymają e-mail utworzenia hasła.",
         "passwordReset": "Wyślij e-maile resetowania hasła do wybranych użytkowników z istniejącymi hasłami. Użytkownicy bez hasła zostaną pominięci.",
         "passwordCreation": "Wyślij ponownie e-maile utworzenia hasła do wybranych użytkowników bez hasła. Użytkownicy z istniejącym hasłem zostaną pominięci.",
         "archive": "Czy na pewno chcesz zarchiwizować te konta?",
@@ -1848,6 +1874,7 @@
     },
     "button": {
       "createUser": "Utwórz użytkownika",
+      "passwordEmail": "Wyślij e-mail z hasłem",
       "passwordResetEmail": "Wyślij e-mail resetowania hasła",
       "passwordCreationEmail": "Wyślij ponownie e-mail utworzenia hasła"
     },
@@ -2096,7 +2123,6 @@
         "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
       },
       "lesson": {
-        "aiMentorRequiredContent": "Instrukcje AI Mentora i warunki ukończenia są wymagane.",
         "customTtsReferenceRequired": "Własny wzorzec TTS jest wymagany w trybie niestandardowym.",
         "aiMentorCreateFailed": "Nie udało się utworzyć lekcji AI Mentora.",
         "questionsRequired": "Wymagane jest co najmniej jedno pytanie.",
@@ -2369,8 +2395,6 @@
           "descriptionRequired": "Opis jest wymagany",
           "aiMentorInstructionsRequired": "Instrukcje AI Mentora są wymagane",
           "aiMentorInstructionsMaxLength": "Instrukcje AI Mentora są zbyt długie (maks. 20000 znaków)",
-          "completionConditionsRequired": "Warunki zaliczenia są wymagane",
-          "completionConditionsMaxLength": "Warunki zaliczenia są zbyt długie (maks. 20000 znaków)",
           "customTTSReferenceRequired": "W trybie niestandardowym wymagany jest identyfikator Custom TTS",
           "taskDescriptionMaxLength": "Opis zadania jest zbyt długi (maks. {{ count }} znaków)",
           "passThresholdMin": "Próg zaliczenia musi wynosić co najmniej 1",
@@ -2449,7 +2473,6 @@
           "aiMentor": "AI Mentor",
           "mentorName": "Nazwa Mentora",
           "aiMentorInstructions": "Instrukcje AI Mentora",
-          "completionConditions": "Warunki zaliczenia",
           "taskDescription": "Opis zadania",
           "passThreshold": "Próg zaliczenia",
           "aiMentorTypes": "Typ AI Mentora",
@@ -2475,11 +2498,84 @@
           "sourceUrl": "Wprowadź adres URL źródła...",
           "allowFullscreen": "Zezwól na pełny ekran",
           "aiMentorInstructions": "Opisz jak AI Mentor powinien zachowywać się podczas lekcji...",
-          "completionConditions": "Wymień co student musi osiągnąć, aby zaliczyć tę lekcję...",
           "taskDescription": "Opisz zadanie, które uczestnik ma zrealizować w trakcie tej lekcji.",
           "aiMentorTypes": "Mentor",
           "customTTSReference": "Wpisz niestandardowy identyfikator TTS...",
           "passThreshold": "np. 70%"
+        },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Skonfigurowany",
+          "emptyDescription": "Określ, jak będzie oceniana odpowiedź ucznia i kiedy lekcja zostanie zaliczona.",
+          "baseLanguageRequired": "Utwórz strukturę oceny w języku bazowym kursu, zanim zaczniesz ją tłumaczyć.",
+          "structureLockedTooltip": "Strukturę oceny można zmieniać tylko w języku bazowym kursu.",
+          "summary": "{{criteria}} kryteria · łącznie {{score}} pkt · próg {{threshold}}% · {{blockingErrors}} błędy blokujące",
+          "configureWithAi": "Skonfiguruj z AI",
+          "configureManually": "Skonfiguruj ręcznie",
+          "editAssessment": "Edytuj ocenę",
+          "dialogTitle": "Skonfiguruj AI Judge",
+          "dialogDescription": "Ustaw mierzalne kryteria, dokładne wskazówki punktacji i błędy, które zawsze oznaczają niezaliczenie.",
+          "translationModeTitle": "Tryb tłumaczenia",
+          "translationModeDescription": "Tutaj możesz tłumaczyć tekst oceny. Punktacja, próg i struktura oceny są zarządzane w języku bazowym kursu.",
+          "taskGoal": "Cel zadania",
+          "taskGoalPlaceholder": "Opisz mierzalny efekt, który uczeń powinien osiągnąć...",
+          "passingThreshold": "Próg zaliczenia",
+          "criteria": "Kryteria oceny",
+          "addFirstCriterion": "Dodaj pierwsze kryterium",
+          "criterionNumber": "Kryterium {{number}}",
+          "untitledCriterion": "Kryterium bez nazwy",
+          "complete": "Gotowe",
+          "needsDetails": "Wymaga uzupełnienia",
+          "criterionDescription": "Opisz jedno obserwowalne zachowanie ucznia.",
+          "criterionTitle": "Nazwa kryterium",
+          "criterionTitlePlaceholder": "np. Rozpoznaje potrzeby klienta",
+          "expectedBehavior": "Oczekiwane zachowanie",
+          "expectedBehaviorPlaceholder": "Wyjaśnij, co uczeń powinien powiedzieć lub zrobić...",
+          "maxScore": "Maksymalna punktacja",
+          "score": "Punkty",
+          "scoringGuidance": "Wskazówki punktacji",
+          "advancedScoring": "Zaawansowane wskazówki punktacji",
+          "scoreLevelsCount": "Poziomy punktacji: {{count}}",
+          "scoreBadge": "{{score}} pkt",
+          "itemsCount": "Dodano: {{count}}",
+          "scoringSummary": "Punktacja",
+          "pointsRequired": "Do zaliczenia wymagane: {{required}} z {{total}} pkt",
+          "scoringGuidanceDescription": "Opcjonalnie opisz, jak wygląda odpowiedź na konkretną liczbę punktów.",
+          "scoreDescription": "Co daje tę punktację",
+          "scoreDescriptionPlaceholder": "Opisz obserwowalny poziom wykonania...",
+          "acceptedExample": "Akceptowany przykład",
+          "examplePlaceholder": "Dodaj jeden przykład odpowiedzi...",
+          "addCriterion": "Dodaj kryterium",
+          "removeCriterion": "Usuń kryterium",
+          "addScoreGuidance": "Dodaj wskazówkę punktacji",
+          "removeScoreGuidance": "Usuń wskazówkę punktacji",
+          "noScoringGuidance": "Nie dodano wskazówek dla konkretnych punktów.",
+          "blockingErrors": "Błędy blokujące",
+          "blockingErrorsDescription": "Wystąpienie któregokolwiek oznacza niezaliczenie niezależnie od wyniku.",
+          "blockingErrorNumber": "Błąd blokujący {{number}}",
+          "blockingErrorPlaceholder": "Opisz błąd, który zawsze oznacza niezaliczenie...",
+          "addBlockingError": "Dodaj błąd blokujący",
+          "removeBlockingError": "Usuń błąd blokujący",
+          "noBlockingErrors": "Nie skonfigurowano błędów blokujących.",
+          "applyConfiguration": "Zastosuj konfigurację",
+          "saveConfiguration": "Zapisz konfigurację",
+          "saveTranslation": "Zapisz tłumaczenie",
+          "configurationSavedSuccessfully": "Konfiguracja AI Judge została zapisana.",
+          "translationSavedSuccessfully": "Tłumaczenie AI Judge zostało zapisane.",
+          "validation": {
+            "configurationRequired": "Skonfiguruj AI Judge przed zapisaniem tej lekcji",
+            "taskGoalRequired": "Cel zadania jest wymagany",
+            "thresholdRange": "Próg zaliczenia musi wynosić od 1 do 100",
+            "titleRequired": "Nazwa kryterium jest wymagana",
+            "expectedBehaviorRequired": "Oczekiwane zachowanie jest wymagane",
+            "maxScoreRange": "Maksymalna punktacja musi wynosić od 1 do 5",
+            "scoreRange": "Punktacja nie może być ujemna",
+            "scoreExceedsMaximum": "Punktacja nie może przekraczać maksimum kryterium",
+            "scoreMustBeUnique": "Każda punktacja wskazówki musi być unikalna w kryterium",
+            "guidanceRequired": "Opis wskazówki punktacji jest wymagany",
+            "completeGuidanceRequired": "Dodaj wskazówki punktacji dla tego kryterium",
+            "blockingErrorRequired": "Opis błędu blokującego jest wymagany"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2518,7 +2614,7 @@
           "fillInTheBlanksText": "Uzupełnij luki (text)",
           "briefResponse": "Krótka odpowiedź",
           "detailedResponse": "Odpowiedź rozwinięta",
-          "scale1_5": "Skala 1 do 5",
+          "scale_1_5": "Skala 1 do 5",
           "updateAiMentorAvatarDescription": "Prześlij nowe zdjęcie dla AI Mentora lub usuń obecne.",
           "updateAiMentorAvatar": "Zaktualizuj avatar AI Mentora",
           "taskDescriptionTooltip": "Krótko opisz, co uczestnik powinien zrobić podczas rozmowy z AI mentorem.",
@@ -2541,9 +2637,9 @@
           "aiMentorTypeTooltip": "Zachowuje się jak postać w scenariuszu, ale w trakcie sceny zadaje pytania i pomaga wyciągać wnioski.\n Przykład: „Co zrobiłbyś teraz w roli menadżera?”",
           "aiTeacherTypeTooltip": "Tłumaczy, uczy i zadaje pytania - jak nauczyciel.\n Przykład: „W tej sytuacji klient zgłasza obiekcję cenową. Co powinieneś odpowiedzieć i dlaczego?”",
           "aiRoleplayTypeTooltip": " Symuluje realistyczną postać i sytuację – bez wychodzenia z roli.\n Przykład: „To już drugi raz, kiedy wasza usługa zawiodła. Co zamierzacie z tym zrobić?”",
-          "completionConditionsTooltip": "Wypisz, co student musi osiągnąć, aby zaliczyć lekcję. Podaj jasne i mierzalne punkty. AI wykorzysta tę listę do sprawdzania postępów. Możesz także określić próg zaliczenia (np. procentowy lub minimalna liczba spełnionych punktów). Jeśli próg nie zostanie podany, zaliczenie wymaga spełnienia wszystkich warunków.",
           "passThresholdTooltip": "Ustaw minimalny procent (1-100%) wymagany do zaliczenia. Zostaw puste, jeśli nie ma progu.",
-          "voiceConfigFishAudioTooltip": "Tryb głosowy korzysta z Cartesia. Aby użyć własnego głosu, wejdź do Cartesia, znajdź wybrany głos i skopiuj tutaj jego identyfikator.",
+          "voiceConfigCartesiaTooltip": "Audio głosu korzysta z Cartesia. Wybierz Male albo Female, aby użyć skonfigurowanego mapowania głosów, albo wybierz Custom i wpisz identyfikator głosu Cartesia.",
+          "voiceConfigOpenAiCompatibleTooltip": "Audio głosu korzysta z endpointu TTS zgodnego z OpenAI. Male i Female używają presetów głosów OpenAI. Wybierz Custom, aby wpisać inną wartość głosu obsługiwaną przez ten endpoint.",
           "aiMentorPersonaTooltip": "Tu określasz personę lekcji. Możesz wybrać imię i awatar dla AI Mentora. Persona będzie przedstawiać się tym imieniem, a wybrany awatar będzie wyświetlany podczas lekcji.",
           "suggestedExamples": "Sugerowane przykłady",
           "charactersLeft": "pozostałe znaki",
@@ -2574,6 +2670,44 @@
               "problemSolving": "<ul><li>Student uznaje wkład pracownika.</li><li>Student uczciwie wyjaśnia sytuację budżetową.</li><li>Student proponuje alternatywę niefinansową (np. dodatkowe korzyści, możliwość rozwoju).</li><li>Student zgadza się wrócić do tematu w późniejszym terminie.</li><li>Student utrzymuje szanujący, wspierający ton.</li></ul><strong>Próg:</strong> co najmniej 3 z 5 warunków musi być spełnionych.",
               "creativeTask": "<ul><li>Student przedstawia oryginalny pomysł.</li><li>Student wyjaśnia, kto jest grupą docelową.</li><li>Student opisuje, jak usługa mogłaby zapewnić wartość klientom.</li><li>Student identyfikuje potencjalne wyzwania.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki muszą być spełnione.)</em>",
               "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Przyznaj 0 punktów, gdy uczeń nie przedstawia jasnego, możliwego do zaobserwowania dowodu tego zachowania, unika go lub działa z nim sprzecznie: {{expectedBehavior}} Sam brak dokładnego przykładu nie wystarcza; oceniaj znaczenie całej wypowiedzi.",
+              "notMetExample": "Wypowiedź nie zawiera stwierdzenia ani działania, które pokazuje: {{expectedBehavior}}",
+              "metDescription": "Przyznaj 1 punkt, gdy uczeń wyraźnie prezentuje to zachowanie w sposób trafny i odpowiedni do kontekstu: {{expectedBehavior}} Równoważne sformułowania są poprawne; uczeń nie musi dosłownie powtarzać zaakceptowanego przykładu."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Jaki przedział budżetowy przeznaczyli Państwo na ten projekt?",
+                "1": "Wspomnieli Państwo o terminie trzech miesięcy. Czy jest to nieprzesuwalna data uruchomienia?",
+                "2": "Jaki wpływ na działalność firmy miałoby opóźnienie uruchomienia?",
+                "3": "Wygląda na to, że najważniejsze są pewność realizacji i jasna komunikacja — czy dobrze rozumiem?",
+                "4": "Biorąc pod uwagę trzymiesięczny termin i ograniczony budżet, proponuję etapowe MVP z cotygodniowymi przeglądami postępu."
+              },
+              "problemSolving": {
+                "0": "Twoja ostatnia praca miała realne znaczenie i rozumiem, dlaczego poruszasz kwestię wynagrodzenia.",
+                "1": "W obecnym cyklu nie ma budżetu na podwyżki i chcę powiedzieć o tym otwarcie.",
+                "2": "Nie mogę teraz zatwierdzić podwyżki, ale możemy omówić budżet rozwojowy i dodatkowy urlop.",
+                "3": "Wróćmy do budżetu za trzy miesiące i już dziś umówmy tę rozmowę.",
+                "4": "Rozumiem, że to rozczarowujące, i doceniam, że rozmawiasz o tym ze mną otwarcie."
+              },
+              "creativeTask": {
+                "0": "Proponuję usługę abonamentową, która zapewnia klientom comiesięczne przeglądy dostępności ich produktów cyfrowych.",
+                "1": "Usługa jest przeznaczona dla małych zespołów e-commerce bez własnego specjalisty ds. dostępności.",
+                "2": "Ograniczy ryzyko braku zgodności i pomoże klientom zwiększyć konwersję przez usuwanie barier użyteczności.",
+                "3": "Główne ryzyka to dostępność ekspertów i niespójne dane klientów, dlatego zaczęlibyśmy od ograniczonego pilotażu."
+              },
+              "knowledgeSharing": {
+                "0": "Która z tych technik działa najlepiej, gdy priorytety zmieniają się w ciągu dnia?",
+                "1": "Jedną z omawianych technik jest blokowanie czasu.",
+                "2": "Każdego ranka zarezerwuję dwa bloki skupionej pracy na najważniejsze zadania i pod koniec tygodnia ocenię rezultaty."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Uczeń zobowiązuje się do terminu, ceny lub zakresu sprzecznego z ograniczeniami wskazanymi przez klienta.",
+              "problemSolving": "Uczeń używa wobec pracownika języka obraźliwego, grożącego lub dyskryminującego.",
+              "creativeTask": "Uczeń proponuje usługę, która jest wyraźnie nielegalna, dyskryminująca lub szkodliwa.",
+              "knowledgeSharing": "Uczeń przedstawia zmyśloną lub niebezpieczną poradę jako sprawdzoną technikę zarządzania czasem."
             }
           },
           "betaTooltip": "Ta funkcjonalność jest udostępniana w wersji testowej. Może zawierać błędy lub działać w sposób nie w pełni poprawny i jest używana na własne ryzyko.",
@@ -2991,7 +3125,8 @@
       "passingThreshold": "Próg zaliczenia: {{threshold}}% ({{correct}} z {{questionsNumber}} pytań)",
       "score": "Wynik: {{score}}% ({{correct}} z {{questionsNumber}} pytań)",
       "contentCantBeEmbedded": "Treść nie może być osadzona",
-      "openInNewTab": "Otwórz w nowej karcie"
+      "openInNewTab": "Otwórz w nowej karcie",
+      "scale_1_5": "Pytanie typu skala (1-5)"
     },
     "aiMentor": {
       "title": "Sesja AI Mentora",
@@ -3027,6 +3162,10 @@
       "body": "Poczekaj chwilę. Pojawi się tutaj, gdy będzie gotowe."
     },
     "videoProgress": {
+      "label": "Postęp wideo",
+      "completedSummary": "Ukończono {{completed}} z {{total}}",
+      "overviewAriaLabel": "Postęp wideo w lekcji",
+      "segmentAriaLabel": "Postęp wideo {{index}}: obejrzano {{progress}}%",
       "errors": {
         "resourceNotFound": "Nie udało się zapisać postępu wideo dla tej lekcji.",
         "unsupportedLessonType": "Postęp wideo jest dostępny tylko dla lekcji z treścią.",
@@ -3141,10 +3280,18 @@
           "thresholdLabel": "Próg zaliczenia",
           "thresholdValue": "Wymagane {{requiredScore}}/{{maxScore}} ({{threshold}}%)",
           "feedbackTitle": "Co poprawić",
+          "criticalErrorsTitle": "Co uniemożliwiło zaliczenie",
+          "criteriaTitle": "Ocena według kryteriów",
+          "criterionScore": "{{score}}/{{maxScore}} pkt",
+          "noFeedbackTitle": "Brak szczegółowej informacji zwrotnej",
+          "noFeedbackDescription": "Ta ocena nie zawiera kryteriów punktowych, a w Twojej próbie nie wykryto błędów krytycznych.",
+          "loadingTitle": "Sprawdzamy Twoją próbę",
+          "loadingDescription": "Porównujemy rozmowę z kryteriami lekcji. Może to potrwać chwilę.",
           "openDetails": "Otwórz szczegóły oceny"
         },
         "voiceOverlay": {
           "headerEyebrow": "Interfejs głosowy",
+          "options": "Opcje",
           "exit": "Zamknij tryb głosowy",
           "mute": "Wycisz",
           "unmute": "Włącz mikrofon",
@@ -3608,7 +3755,8 @@
     "title": "Powiadomienia",
     "tabs": {
       "all": "Wszystkie",
-      "adminAnnouncements": "Ogłoszenia adminów"
+      "adminAnnouncements": "Ogłoszenia adminów",
+      "system": "Systemowe"
     },
     "actions": {
       "refresh": "Odśwież",
@@ -3665,12 +3813,18 @@
       "error": "Nie udało się zmienić obrazu tła logowania"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Przetwarzanie pliku nie powiodło się. Spróbuj przesłać inny plik lub prześlij go ponownie.",
+      "noExtractableText": "Nie udało się wyodrębnić czytelnego tekstu z tego pliku."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Nie udało się przesłać pliku - nieprawidłowe dane pliku",
       "fileEmpty": "Nie udało się przesłać pliku - plik jest pusty",
       "contentTypeMismatch": "Typ zawartości pliku nie odpowiada podanemu typowi",
-      "invalidFileType": "Nieprawidłowy typ pliku. Prześlij plik PNG lub SVG.",
+      "invalidFileType": "Nieprawidłowy typ pliku.",
       "missingTenantContext": "Brak kontekstu organizacji dla przesyłania pliku",
       "presentationFileTooLarge": "Prezentacja jest zbyt duża. Prześlij prezentację o rozmiarze do {{size}} {{unit}}."
     },
@@ -4328,6 +4482,7 @@
     "error": {
       "unauthenticated": "Użytkownik nie jest uwierzytelniony",
       "invalidEmailOrPassword": "Nieprawidłowy e-mail lub hasło",
+      "invalidRefreshToken": "Nieprawidłowy token odświeżania",
       "adminRoleRequired": "Wymagana rola administratora",
       "missingPermission": "Nie masz uprawnień do tego zasobu",
       "sessionRevoked": "Twoja sesja została unieważniona. Odśwież sesję."
@@ -4481,7 +4636,12 @@
       "complete_chapter": "Ukończono rozdział",
       "expire_certificate": "Certyfikat wygasł",
       "reset_certificate": "Certyfikat zresetowany",
-      "view_announcement": "Wyświetlono"
+      "view_announcement": "Wyświetlono",
+      "enroll_learning_path": "Zapisano do ścieżki",
+      "start_learning_path": "Rozpoczęto ścieżkę",
+      "complete_learning_path": "Ukończono ścieżkę",
+      "play_scorm": "Uruchomiono SCORM",
+      "complete_scorm": "Ukończono SCORM"
     },
     "entity": {
       "course": "Kurs",
@@ -4500,6 +4660,8 @@
       "qa": "Q&A",
       "announcement": "Ogłoszenie",
       "live_training": "Szkolenie na żywo",
+      "learning_path": "Ścieżka nauki",
+      "scorm": "SCORM",
       "global_settings": "Ustawienia"
     },
     "table": {
@@ -4515,7 +4677,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Wygenerowany quiz zawiera nieprawidłowy identyfikator pustego miejsca. Spróbuj ponownie wygenerować kurs."
+      "invalidBlankAnswerId": "Wygenerowany quiz zawiera nieprawidłowy identyfikator pustego miejsca. Spróbuj ponownie wygenerować kurs.",
+      "invalidAiJudgeConfiguration": "Wygenerowana lekcja AI Mentora zawiera nieprawidłową konfigurację oceny. Spróbuj ponownie wygenerować kurs."
     }
   },
   "liveTraining": {

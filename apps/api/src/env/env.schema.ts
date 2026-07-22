@@ -48,6 +48,17 @@ export const lumaConfiguredResponseSchema = Type.Object({
   enabled: Type.Boolean(),
   courseGenerationEnabled: Type.Boolean(),
   voiceMentorEnabled: Type.Boolean(),
+  voiceTtsProvider: Type.Union([Type.Literal("cartesia"), Type.Literal("openaiCompatible")]),
+});
+
+export const aiCapabilityMatrixItemSchema = Type.Object({
+  key: Type.Union([
+    Type.Literal("aiMentor"),
+    Type.Literal("voiceMentor"),
+    Type.Literal("courseGeneration"),
+    Type.Literal("assetGeneration"),
+  ]),
+  status: Type.Union([Type.Literal("enabled"), Type.Literal("disabled")]),
 });
 
 export const isEnvSetupResponseSchema = Type.Object({
@@ -64,6 +75,7 @@ export const isEnvSetupResponseSchema = Type.Object({
       missingKeys: Type.Array(Type.String()),
     }),
   ),
+  aiCapabilities: Type.Array(aiCapabilityMatrixItemSchema),
   hasIssues: Type.Boolean(),
   isWarningDismissed: Type.Boolean(),
 });

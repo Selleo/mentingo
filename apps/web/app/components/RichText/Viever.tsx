@@ -13,6 +13,7 @@ import {
 import { RICH_TEXT_VIEWER_VARIANT, type RichTextViewerVariant } from "./viewerTypes";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { VideoCoverageSnapshotChange } from "~/components/VideoPlayer/videoCoverage.types";
 
 type ViewerProps = {
   content: string;
@@ -25,6 +26,7 @@ type ViewerProps = {
     showCoverageMarkers?: boolean;
     lessonId?: string;
     language?: SupportedLanguages;
+    onSnapshotChange?: (change: VideoCoverageSnapshotChange) => void;
   };
 };
 

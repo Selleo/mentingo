@@ -54,7 +54,9 @@
       "live_training": "Živé školení"
     },
     "error": {
-      "somethingWentWrong": "Jejda! Něco se pokazilo."
+      "somethingWentWrong": "Jejda! Něco se pokazilo.",
+      "threadMustBeActive": "Vlákno musí být aktivní.",
+      "aiJudgeConfigurationMissing": "Konfigurace AI Judge chybí."
     },
     "loader": {
       "textSequence": {
@@ -486,95 +488,95 @@
   },
   "liveTrainingView": {
     "title": "Živé školení",
-    "description": "This page will contain the full Živé školení workspace.",
+    "description": "Tato stránka bude obsahovat celý pracovní prostor pro živé školení.",
     "errors": {
-      "idRequired": "Živé školení id is required."
+      "idRequired": "ID živého školení je vyžadováno."
     },
     "status": {
-      "scheduled": "Scheduled",
-      "active": "Active",
-      "ended": "Ended",
-      "cancelled": "Cancelled",
-      "expired": "Expired"
+      "scheduled": "Naplánováno",
+      "active": "Aktivní",
+      "ended": "Ukončeno",
+      "cancelled": "Zrušeno",
+      "expired": "Vypršelo"
     },
     "deliveryType": {
       "online": "Online",
-      "offline": "In-person"
+      "offline": "Osobně"
     },
     "visibility": {
-      "all": "All users",
-      "linked_courses": "Linked courses"
+      "all": "Všichni uživatelé",
+      "linked_courses": "Propojené kurzy"
     },
     "actions": {
-      "edit": "Edit",
-      "delete": "Delete",
-      "start": "Start session",
-      "join": "Join session",
-      "finish": "Finish session"
+      "edit": "Upravit",
+      "delete": "Smazat",
+      "start": "Zahájit relaci",
+      "join": "Připojit se k relaci",
+      "finish": "Ukončit relaci"
     },
     "stage": {
-      "preview": "Session preview",
-      "activeTitle": "Live session is active",
-      "waitingTitle": "Session is waiting",
-      "runtimeDeferred": "Meeting runtime will be connected in a later slice. Media devices are not started from this preview.",
-      "activeBadge": "Active",
-      "waitingBadge": "Waiting",
-      "participants": "Participants",
-      "viewerMic": "Viewer microphone",
-      "viewerCamera": "Viewer camera",
-      "scheduleTooltip": "Planned training time",
-      "timezoneTooltip": "Training timezone",
-      "maxParticipantsTooltip": "Maximum participants",
-      "locationTooltip": "Training location",
-      "offlineTitle": "Offline training",
-      "locationMissing": "Location has not been set."
+      "preview": "Náhled relace",
+      "activeTitle": "Živá relace je aktivní",
+      "waitingTitle": "Relace čeká",
+      "runtimeDeferred": "Doba trvání schůzky bude připojena v pozdějším kroku. Mediální zařízení se z tohoto náhledu nespouštějí.",
+      "activeBadge": "Aktivní",
+      "waitingBadge": "Čeká",
+      "participants": "Účastníci",
+      "viewerMic": "Mikrofon diváka",
+      "viewerCamera": "Kamera diváka",
+      "scheduleTooltip": "Plánovaný čas školení",
+      "timezoneTooltip": "Časové pásmo školení",
+      "maxParticipantsTooltip": "Maximum účastníků",
+      "locationTooltip": "Místo školení",
+      "offlineTitle": "Osobní školení",
+      "locationMissing": "Místo nebylo nastaveno"
     },
     "sidebar": {
-      "lifecycle": "Session lifecycle",
-      "status": "Status",
-      "participants": "Participants",
-      "peak": "Peak",
-      "people": "People",
-      "author": "Author",
-      "host": "Host",
-      "hosts": "Hosts",
-      "noHosts": "No hosts assigned.",
-      "trainer": "Trainer",
-      "trainers": "Trainers",
-      "noTrainers": "No trainers assigned.",
-      "unknownUser": "Unknown user",
-      "details": "Training details",
-      "maxParticipants": "Max participants",
-      "visibility": "Visibility",
-      "courses": "Linked courses",
-      "location": "Location",
-      "addHost": "Add",
-      "addHostHint": "Add host",
-      "removeHost": "Remove host {{name}}",
-      "addTrainer": "Add",
-      "addTrainerHint": "Add trainer",
-      "removeTrainer": "Remove trainer {{name}}",
-      "searchPeople": "Search people",
-      "noUserResults": "No users found",
-      "loadingUsers": "Loading users",
-      "loadMoreUsers": "Load more"
+      "lifecycle": "Životní cyklus relace",
+      "status": "Stav",
+      "participants": "Účastníci",
+      "peak": "Vrchol",
+      "people": "Lidé",
+      "author": "Autor",
+      "host": "Hostitel",
+      "hosts": "Hostitelé",
+      "noHosts": "Nejsou přiřazeni žádní hostitelé",
+      "trainer": "Školitel",
+      "trainers": "Školitelé",
+      "noTrainers": "Nejsou přiřazeni žádní školitelé",
+      "unknownUser": "Neznámý uživatel",
+      "details": "Podrobnosti o školení",
+      "maxParticipants": "Max. účastníků",
+      "visibility": "Viditelnost",
+      "courses": "Propojené kurzy",
+      "location": "Místo",
+      "addHost": "Přidat",
+      "addHostHint": "Přidat hostitele",
+      "removeHost": "Odebrat hostitele {{name}}",
+      "addTrainer": "Přidat",
+      "addTrainerHint": "Přidat školitele",
+      "removeTrainer": "Odebrat školitele {{name}}",
+      "searchPeople": "Hledat lidi",
+      "noUserResults": "Nebyli nalezeni žádní uživatelé",
+      "loadingUsers": "Načítání uživatelů",
+      "loadMoreUsers": "Načíst další"
     },
     "tabs": {
-      "overview": "Overview",
-      "files": "Files",
-      "sessions": "Sessions",
-      "settings": "Settings"
+      "overview": "Přehled",
+      "files": "Soubory",
+      "sessions": "Relace",
+      "settings": "Nastavení"
     },
     "files": {
-      "title": "Živé školení files",
-      "description": "Materials are split by when students should use them.",
-      "beforeHeading": "Before training",
-      "beforeDescription": "Materials available before the training starts.",
-      "afterHeading": "After training",
-      "afterDescription": "Materials available after the training is finished.",
-      "empty": "No files attached yet.",
-      "afterLocked": "Post-session files unlock when the training is finished.",
-      "addFile": "Přidat soubor",
+      "title": "Soubory živého školení",
+      "description": "Materiály jsou rozděleny podle toho, kdy by je měli studenti použít.",
+      "beforeHeading": "Před školením",
+      "beforeDescription": "Materiály dostupné před začátkem školení.",
+      "afterHeading": "Po školení",
+      "afterDescription": "Materiály dostupné po dokončení školení.",
+      "empty": "Zatím nejsou připojeny žádné soubory.",
+      "afterLocked": "Materiály budou odemčeny po skončení školení.",
+      "addFile": "Nahrajte soubor nebo jej přetáhněte sem",
       "download": "Stáhnout",
       "removeFile": "Odebrat {{title}}",
       "sizeInMb": "{{size}} MB",
@@ -584,108 +586,102 @@
       }
     },
     "meeting": {
-      "previewLabel": "Live session",
-      "waitingTitle": "Session je připravena k připojení",
-      "activeTitle": "Session je aktivní",
-      "inSession": "V session",
-      "roomTitle": "Live místnost",
+      "previewLabel": "Živá relace",
+      "waitingTitle": "Relace je připravena k připojení",
+      "activeTitle": "Relace je aktivní",
+      "inSession": "V relaci",
+      "roomTitle": "Živá místnost",
       "participants_one": "{{count}} účastník",
-      "participants_few": "{{count}} účastníci",
-      "participants_many": "{{count}} účastníků",
       "participants_other": "{{count}} účastníků",
       "microphone": "Mikrofon",
       "camera": "Kamera",
       "screenShare": "Sdílet obrazovku",
       "screen": "Obrazovka",
-      "presentOnStage": "Zobrazit na scéně",
-      "leave": "Odejít",
-      "finish": "Finish session",
-      "sessionEndedToast": "Your session {{trainingName}} has ended",
+      "presentOnStage": "Prezentovat na pódiu",
+      "leave": "Opustit",
+      "finish": "Ukončit relaci",
+      "sessionEndedToast": "Vaše relace {{trainingName}} skončila",
       "finishDialog": {
-        "title": "Finish session?",
-        "lastHostDescription": "You are the only host in this room. Leaving will end the session for everyone.",
-        "otherHostsDescription": "Other hosts are still in this room. You can leave and the session will continue.",
-        "cancel": "Cancel",
-        "confirmEnd": "Finish session",
-        "confirmLeave": "Leave session"
+        "title": "Ukončit relaci?",
+        "lastHostDescription": "Jste jediný hostitel v této místnosti. Pokud odejdete, relace skončí pro všechny.",
+        "otherHostsDescription": "V této místnosti jsou stále další hostitelé. Můžete odejít a relace bude pokračovat.",
+        "cancel": "Zrušit",
+        "confirmEnd": "Ukončit relaci",
+        "confirmLeave": "Opustit relaci"
       },
-      "empty": "Čeká se na účastníky.",
+      "empty": "Čeká se na účastníky",
       "materials": "Materiály",
       "beforeMaterials": "Před",
       "afterMaterials": "Po",
       "noMaterials": "Žádné soubory"
     },
     "sessions": {
-      "title": "Sessions",
-      "description": "Each started session is stored separately with its attendance.",
-      "empty": "No sessions have been started yet.",
-      "activeParticipants_one": "{{count}} active participant",
-      "activeParticipants_few": "{{count}} active participants",
-      "activeParticipants_many": "{{count}} active participants",
-      "activeParticipants_other": "{{count}} active participants",
-      "uniqueParticipants_one": "{{count}} unique participant",
-      "uniqueParticipants_few": "{{count}} unique participants",
-      "uniqueParticipants_many": "{{count}} unique participants",
-      "uniqueParticipants_other": "{{count}} unique participants",
-      "peakParticipants": "Peak {{count}}",
-      "startedBy": "Started by",
-      "endedBy": "Ended by",
-      "notEnded": "Not ended",
+      "title": "Relace",
+      "description": "Každá zahájená relace je uložena samostatně se svou docházkou.",
+      "empty": "Zatím nebyly zahájeny žádné relace.",
+      "activeParticipants_one": "{{count}} aktivní účastník",
+      "activeParticipants_other": "{{count}} aktivních účastníků",
+      "uniqueParticipants_one": "{{count}} unikátní účastník",
+      "uniqueParticipants_other": "{{count}} unikátních účastníků",
+      "peakParticipants": "Vrchol {{count}}",
+      "startedBy": "Zahájil(a)",
+      "endedBy": "Ukončil(a)",
+      "notEnded": "Neukončeno",
       "notAvailable": "N/A",
-      "endReason": "End reason",
-      "noEndReason": "No end reason",
+      "endReason": "Důvod ukončení",
+      "noEndReason": "Žádný důvod ukončení",
       "status": {
-        "waiting": "Waiting",
-        "active": "Active",
-        "ended": "Ended",
-        "failed": "Failed"
+        "waiting": "Čeká",
+        "active": "Aktivní",
+        "ended": "Ukončeno",
+        "failed": "Selhalo"
       },
       "roles": {
-        "host": "Host",
-        "co_trainer": "Co-trainer",
-        "moderator": "Moderator",
-        "observer": "Observer",
+        "host": "Hostitel",
+        "co_trainer": "Spoluškolitel",
+        "moderator": "Moderátor",
+        "observer": "Pozorovatel",
         "admin": "Admin"
       },
       "attendance": {
-        "empty": "No attendance has been recorded for this session yet.",
-        "user": "User",
+        "empty": "Pro tuto relaci zatím nebyla zaznamenána žádná docházka.",
+        "user": "Uživatel",
         "role": "Role",
-        "totalTime": "Time attended",
-        "firstJoinedAt": "First joined",
-        "lastLeftAt": "Last left",
-        "joinCount": "Joins"
+        "totalTime": "Čas účasti",
+        "firstJoinedAt": "Poprvé připojen(a)",
+        "lastLeftAt": "Naposledy odešel(la)",
+        "joinCount": "Připojení"
       },
       "toast": {
-        "started": "Session byla spuštěna.",
-        "ended": "Session byla ukončena."
+        "started": "Relace byla zahájena.",
+        "ended": "Relace byla ukončena."
       }
     },
     "attendance": {
-      "title": "Attendance",
-      "description": "Attendance and participant intervals will be implemented in the runtime slice."
+      "title": "Docházka",
+      "description": "Docházka a intervaly účastníků budou implementovány za běhu."
     },
     "settings": {
-      "title": "Settings",
-      "description": "Less frequently used session settings will live here."
+      "title": "Nastavení",
+      "description": "Zde najdete méně často používaná nastavení relace."
     },
     "boolean": {
-      "yes": "Yes",
-      "no": "No"
+      "yes": "Ano",
+      "no": "Ne"
     },
     "deleteDialog": {
-      "title": "Smazat Živé školení?",
-      "description": "Živé školení bude zrušen a odebrán z kalendáře. Tuto akci nelze vrátit zpět.",
-      "assignedToLessonsDescription": "Tento Živé školení je propojen s {{count}} lekcí. Nejdříve smažte související lekci a až potom Živé školení.",
-      "assignedToLessonsDescription_plural": "Tento Živé školení je propojen s {{count}} lekcemi. Nejdříve smažte související lekce a až potom Živé školení.",
+      "title": "Smazat živé školení?",
+      "description": "Tímto zrušíte živé školení a odstraníte ho z kalendáře. Tuto akci nelze vrátit zpět.",
+      "assignedToLessonsDescription": "Toto živé školení je propojeno s {{count}} lekcí. Před smazáním živého školení nejprve smažte související lekci.",
+      "assignedToLessonsDescription_plural": "Toto živé školení je propojeno s {{count}} lekcemi. Před smazáním živého školení nejprve smažte související lekce.",
       "toast": {
-        "success": "Živé školení byl smazán."
+        "success": "Živé školení bylo úspěšně smazáno."
       }
     },
     "edit": {
       "saveChanges": "Uložit změny",
       "toast": {
-        "success": "Živé školení byl aktualizován."
+        "success": "Živé školení bylo úspěšně aktualizováno."
       }
     }
   },
@@ -904,6 +900,19 @@
       "noPartiallyConfigured": "Žádné částečně nakonfigurované služby.",
       "allConfigured": "Všechny klíče prostředí jsou správně nakonfigurovány.",
       "dismissWarning": "Propustit",
+      "aiCapabilities": {
+        "title": "AI možnosti",
+        "names": {
+          "aiMentor": "AI Mentor",
+          "voiceMentor": "Voice Mentor",
+          "courseGeneration": "Generování kurzů",
+          "assetGeneration": "Generování assetů"
+        },
+        "status": {
+          "enabled": "Povoleno",
+          "disabled": "Zakázáno"
+        }
+      },
       "serviceNames": {
         "stripe": "Stripe Payment",
         "bunny": "Králíček CDN",
@@ -979,6 +988,11 @@
       "passwordCreatedSuccessfully": "Heslo bylo úspěšně vytvořeno"
     }
   },
+  "forcedPasswordChangeView": {
+    "header": "Změňte heslo",
+    "subHeader": "Z bezpečnostních důvodů musíte před pokračováním nastavit nové heslo.",
+    "submit": "Změnit heslo"
+  },
   "passwordValidationDisplay": {
     "title": "Požadavky na heslo",
     "header": "Vaše heslo musí obsahovat:",
@@ -1045,7 +1059,9 @@
       "passwordResetEmailsSent": "E-maily pro reset hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
       "passwordResetEmailsError": "Nepodařilo se odeslat e-maily pro reset hesla",
       "passwordCreationEmailsSent": "E-maily pro vytvoření hesla odeslány: {{sentCount}}. Přeskočeno: {{skippedCount}}.",
-      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla"
+      "passwordCreationEmailsError": "Nepodařilo se odeslat e-maily pro vytvoření hesla",
+      "passwordEmailsSent": "E-maily k heslu odeslány: {{sentCount}}. Reset: {{passwordResetSentCount}}. Vytvoření: {{passwordCreationSentCount}}. Přeskočeno: {{skippedCount}}.",
+      "passwordEmailsError": "Nepodařilo se odeslat e-maily k heslu"
     },
     "field": {
       "description": "Popis",
@@ -1243,7 +1259,7 @@
     "toast": {
       "deleteCourseSuccessfully": "Kurz byl úspěšně smazán",
       "deleteCourseFailed": "Kurz se nepodařilo smazat",
-      "deletePublishedCourseFailed": "Publikovaný kurz nelze smazat. Nejprve nastavte její stav na Koncept.",
+      "deleteProtectedCourseFailed": "Publikovaný ani soukromý kurz nelze smazat. Nejprve nastavte jeho stav na Koncept.",
       "bulkCategoryUpdateSuccessfully": "Kategorie kurzů byly úspěšně aktualizovány",
       "bulkCategoryUpdateFailed": "Nepodařilo se aktualizovat kategorie kurzů",
       "bulkCategoryUpdateForbidden": "Nemáte oprávnění aktualizovat jeden nebo více vybraných kurzů.",
@@ -1463,6 +1479,7 @@
     "dropdown": {
       "roles": "Role",
       "groups": "Skupiny",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordReset": "Odeslat e-mail pro reset hesla",
       "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
       "delete": "Vymazat",
@@ -1473,6 +1490,7 @@
         "delete": "Chcete tyto účty smazat?",
         "role": "Upravte role",
         "group": "Upravte skupiny",
+        "passwordEmail": "Odeslat e-mail k heslu",
         "passwordReset": "Odeslat e-mail pro reset hesla",
         "passwordCreation": "Znovu odeslat e-mail pro vytvoření hesla",
         "archive": "Archivovat uživatelské účty",
@@ -1484,6 +1502,7 @@
         "delete": "Vymazat",
         "role": "Uložit",
         "group": "Uložit",
+        "passwordEmail": "Odeslat",
         "passwordReset": "Odeslat",
         "passwordCreation": "Odeslat",
         "archive": "Archiv",
@@ -1496,6 +1515,7 @@
         "confirmationForGroup_other": "Změníte skupinu na {{ group }} pro {{ count }} uživatelů",
         "confirmationForRole_one": "Změníte roli na {{ role }} pro 1 uživatele.",
         "confirmationForRole_other": "Změníte roli na {{ role }} pro {{ count }} uživatelů",
+        "passwordEmail": "Odešlete e-maily k heslu vybraným uživatelům. Uživatelé s existujícím heslem dostanou e-mail pro reset hesla a uživatelé bez hesla dostanou e-mail pro vytvoření hesla.",
         "passwordReset": "Odešlete e-maily pro reset hesla vybraným uživatelům s existujícím heslem. Uživatelé bez hesla budou přeskočeni.",
         "passwordCreation": "Znovu odešlete e-maily pro vytvoření hesla vybraným uživatelům bez hesla. Uživatelé s existujícím heslem budou přeskočeni.",
         "archive": "Opravdu chcete tyto účty archivovat?",
@@ -1570,6 +1590,7 @@
     },
     "button": {
       "createUser": "Vytvořit uživatele",
+      "passwordEmail": "Odeslat e-mail k heslu",
       "passwordResetEmail": "Odeslat e-mail pro reset hesla",
       "passwordCreationEmail": "Znovu odeslat e-mail pro vytvoření hesla"
     },
@@ -1819,7 +1840,6 @@
         "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
       },
       "lesson": {
-        "aiMentorRequiredContent": "Pokyny pro AI Mentora a podmínky dokončení jsou povinné.",
         "customTtsReferenceRequired": "Vlastní reference TTS je v vlastním režimu povinná.",
         "aiMentorCreateFailed": "Lekci AI Mentora se nepodařilo vytvořit.",
         "questionsRequired": "Je vyžadována alespoň jedna otázka.",
@@ -2091,8 +2111,6 @@
           "descriptionRequired": "Popis je povinný",
           "aiMentorInstructionsRequired": "Jsou vyžadovány pokyny AI Mentor",
           "aiMentorInstructionsMaxLength": "Pokyny AI Mentor jsou příliš dlouhé (max. 20 000 znaků)",
-          "completionConditionsRequired": "Podmínky dokončení jsou povinné",
-          "completionConditionsMaxLength": "Podmínky dokončení jsou příliš dlouhé (max. 20 000 znaků)",
           "customTTSReferenceRequired": "V uživatelském režimu je vyžadována vlastní reference TTS",
           "taskDescriptionMaxLength": "Popis úkolu je příliš dlouhý (max. {{ count }} znaků)",
           "passThresholdMin": "Práh pro průchod musí být alespoň 1",
@@ -2167,7 +2185,6 @@
           "sentence": "Věta",
           "sourceUrl": "URL zdroje",
           "aiMentorInstructions": "Pokyny AI Mentor",
-          "completionConditions": "Podmínky dokončení",
           "aiMentor": "AI mentor",
           "mentorName": "Jméno mentora",
           "taskDescription": "Popis úkolu",
@@ -2193,11 +2210,84 @@
           "sourceUrl": "Zadejte zdrojovou URL...",
           "allowFullscreen": "Povolit celou obrazovku",
           "aiMentorInstructions": "Popište, jak by se měl AI Mentor chovat během lekce...",
-          "completionConditions": "Uveďte, čeho musí student dosáhnout, aby tuto lekci prošel...",
           "taskDescription": "Popište úkol, který musí účastník splnit...",
           "passThreshold": "např. 70 %",
           "customTTSReference": "Zadejte vlastní referenční ID TTS...",
           "aiMentorTypes": "Učitel"
+        },
+        "aiJudge": {
+          "cardTitle": "AI Judge",
+          "configured": "Nakonfigurováno",
+          "emptyDescription": "Určete, jak bude odpověď studenta hodnocena a kdy bude lekce splněna.",
+          "baseLanguageRequired": "Před překladem vytvořte strukturu hodnocení v základním jazyce kurzu.",
+          "structureLockedTooltip": "Strukturu hodnocení lze měnit pouze v základním jazyce kurzu.",
+          "summary": "{{criteria}} kritéria · celkem {{score}} bodů · {{threshold}} % pro splnění · {{blockingErrors}} blokující chyby",
+          "configureWithAi": "Nastavit pomocí AI",
+          "configureManually": "Nastavit ručně",
+          "editAssessment": "Upravit hodnocení",
+          "dialogTitle": "Nastavit AI Judge",
+          "dialogDescription": "Nastavte měřitelná kritéria, přesné pokyny k bodování a chyby, které vždy znamenají nesplnění.",
+          "translationModeTitle": "Režim překladu",
+          "translationModeDescription": "Zde můžete překládat text hodnocení. Body, práh a struktura se spravují v základním jazyce kurzu.",
+          "taskGoal": "Cíl úkolu",
+          "taskGoalPlaceholder": "Popište měřitelný výsledek, kterého má student dosáhnout...",
+          "passingThreshold": "Práh pro splnění",
+          "criteria": "Kritéria hodnocení",
+          "addFirstCriterion": "Přidat první kritérium",
+          "criterionNumber": "Kritérium {{number}}",
+          "untitledCriterion": "Kritérium bez názvu",
+          "complete": "Dokončeno",
+          "needsDetails": "Chybí podrobnosti",
+          "criterionDescription": "Popište jedno pozorovatelné chování studenta.",
+          "criterionTitle": "Název kritéria",
+          "criterionTitlePlaceholder": "např. Zjišťuje potřeby klienta",
+          "expectedBehavior": "Očekávané chování",
+          "expectedBehaviorPlaceholder": "Vysvětlete, co má student říci nebo udělat...",
+          "maxScore": "Maximální počet bodů",
+          "score": "Body",
+          "scoringGuidance": "Pokyny k bodování",
+          "advancedScoring": "Pokročilé pokyny k bodování",
+          "scoreLevelsCount": "Úrovně bodů: {{count}}",
+          "scoreBadge": "{{score}} b.",
+          "itemsCount": "Přidáno: {{count}}",
+          "scoringSummary": "Bodování",
+          "pointsRequired": "Pro splnění je třeba {{required}} z {{total}} bodů",
+          "scoringGuidanceDescription": "Volitelně popište, jak vypadá výkon pro konkrétní počet bodů.",
+          "scoreDescription": "Co získá tento počet bodů",
+          "scoreDescriptionPlaceholder": "Popište pozorovatelnou úroveň výkonu...",
+          "acceptedExample": "Přijatelný příklad",
+          "examplePlaceholder": "Přidejte jeden příklad odpovědi...",
+          "addCriterion": "Přidat kritérium",
+          "removeCriterion": "Odebrat kritérium",
+          "addScoreGuidance": "Přidat pokyn k bodování",
+          "removeScoreGuidance": "Odebrat pokyn k bodování",
+          "noScoringGuidance": "Nebyly přidány pokyny pro konkrétní body.",
+          "blockingErrors": "Blokující chyby",
+          "blockingErrorsDescription": "Pokud nastane některá z nich, student neuspěje bez ohledu na počet bodů.",
+          "blockingErrorNumber": "Blokující chyba {{number}}",
+          "blockingErrorPlaceholder": "Popište chybu, která vždy znamená nesplnění...",
+          "addBlockingError": "Přidat blokující chybu",
+          "removeBlockingError": "Odebrat blokující chybu",
+          "noBlockingErrors": "Nejsou nastaveny žádné blokující chyby.",
+          "applyConfiguration": "Použít konfiguraci",
+          "saveConfiguration": "Uložit konfiguraci",
+          "saveTranslation": "Uložit překlad",
+          "configurationSavedSuccessfully": "Konfigurace AI Judge byla uložena.",
+          "translationSavedSuccessfully": "Překlad AI Judge byl uložen.",
+          "validation": {
+            "configurationRequired": "Před uložením této lekce nakonfigurujte AI Judge",
+            "taskGoalRequired": "Cíl úkolu je povinný",
+            "thresholdRange": "Práh pro splnění musí být mezi 1 a 100",
+            "titleRequired": "Název kritéria je povinný",
+            "expectedBehaviorRequired": "Očekávané chování je povinné",
+            "maxScoreRange": "Maximální počet bodů musí být mezi 1 a 5",
+            "scoreRange": "Počet bodů nesmí být záporný",
+            "scoreExceedsMaximum": "Počet bodů nesmí překročit maximum kritéria",
+            "scoreMustBeUnique": "Každý počet bodů v pokynech musí být v kritériu jedinečný",
+            "guidanceRequired": "Popis pokynu k bodování je povinný",
+            "completeGuidanceRequired": "Přidejte pokyny k bodování pro toto kritérium",
+            "blockingErrorRequired": "Popis blokující chyby je povinný"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2234,7 +2324,7 @@
           "fillInTheBlanksText": "Doplňování mezer (text)",
           "briefResponse": "Krátká odpověď",
           "detailedResponse": "Volný text",
-          "scale1_5": "Stupnice 1 až 5",
+          "scale_1_5": "Stupnice 1 až 5",
           "selectQuestionType": "Vyberte typ otázky",
           "contentLessonDescription": "Text s multimédii (obrázky, videa, prezentace).",
           "quizLessonDescription": "Sada otázek pro ověření znalostí.",
@@ -2258,9 +2348,9 @@
           "aiMentorTypeTooltip": "Chová se jako postava ve scénáři, ale během scény klade otázky a pomáhá vyvozovat závěry.\nPříklad: \"Co byste teď dělal v roli manažera?\"",
           "aiTeacherTypeTooltip": "Vysvětluje, učí a klade otázky – jako učitel.\nPříklad: \"V této situaci klient vznese cenovou námitku. Co byste měli odpovědět a proč?\"",
           "aiRoleplayTypeTooltip": "Simuluje realistickou postavu a situaci – bez porušení charakteru.\nPříklad: \"Toto je podruhé, co vaše služba selhala. Co s tím hodláte dělat?\"",
-          "completionConditionsTooltip": "Uveďte, čeho musí student dosáhnout, aby tuto lekci absolvoval. Poskytněte jasné a měřitelné body. Umělá inteligence použije tento seznam ke kontrole pokroku. Můžete také definovat práh pro úspěšné zvládnutí (např. procento nebo minimální počet bodů k pokrytí). Pokud není uveden žádný práh, musí být splněny všechny podmínky pro úspěšné absolvování lekce.",
           "passThresholdTooltip": "Nastavte minimální procento (1–100 %), které je potřeba k úspěšnému zvládnutí. Nechte prázdné, pokud není nastaven žádný práh.",
-          "voiceConfigFishAudioTooltip": "Hlasový režim používá Cartesia. Pro vlastní hlas otevřete Cartesia, najděte požadovaný hlas a zkopírujte sem jeho voice ID.",
+          "voiceConfigCartesiaTooltip": "Hlasový výstup používá Cartesia. Vyberte Male nebo Female pro použití nakonfigurovaného mapování hlasů, nebo vyberte Custom a zadejte Cartesia voice ID.",
+          "voiceConfigOpenAiCompatibleTooltip": "Hlasový výstup používá OpenAI kompatibilní endpoint pro převod textu na řeč. Male a Female používají presety hlasů OpenAI. Vyberte Custom, pokud chcete zadat jinou hodnotu hlasu podporovanou tímto endpointem.",
           "aiMentorPersonaTooltip": "To definuje osobnost lekce. Můžete si vybrat jméno a avatar pro AI Mentora. Osoba se identifikuje tímto jménem a vybraný avatar se bude zobrazovat během lekcí.",
           "suggestedExamples": "Doporučené příklady",
           "charactersLeft": "zbývajících znaků",
@@ -2291,6 +2381,44 @@
               "problemSolving": "<ul><li>Student uznává příspěvek zaměstnance.</li><li>Student upřímně vysvětlí rozpočtovou situaci.</li><li>Student navrhne nefinanční alternativu (např. další výhody, možnost rozvoje).</li><li>Student souhlasí s tím, že se k tématu vrátí později.</li><li>Student zachovává uctivý a vstřícný tón</strong><strong>3li. Musí být splněno 5 podmínek.",
               "creativeTask": "<ul><li>Student předloží originální nápad.</li><li>Student vysvětlí, kdo je cílová skupina.</li><li>Student popíše, jak by služba mohla poskytnout hodnotu zákazníkům.</li><li>Student identifikuje potenciální výzvy.</li></ul><em>(Není definován žádný práh – musí být splněny všechny podmínky.)</em>",
               "knowledgeSharing": "<ul><li>Student se aktivně zapojuje do konverzace (klade otázky nebo sdílí úvahy).</li><li>Student umí vyjmenovat alespoň jednu techniku ​​řízení času zmíněnou v dialogu.</li><li>Student vyjádří, jak by mohl ve své práci použít jednu techniku.</li></ul><em>(Není definován žádný práh – všechny podmínky jsou doporučeny, ale nejsou povinné pro absolvování.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Přidělte 0 bodů, pokud student neposkytne jasný a pozorovatelný důkaz tohoto chování, vyhne se mu nebo jedná v rozporu s ním: {{expectedBehavior}} Samotná absence přesného příkladu nestačí; posuzujte význam celé odpovědi.",
+              "notMetExample": "Odpověď neobsahuje žádné tvrzení ani jednání, které prokazuje: {{expectedBehavior}}",
+              "metDescription": "Přidělte 1 bod, pokud student toto chování jasně prokáže relevantním způsobem odpovídajícím kontextu: {{expectedBehavior}} Rovnocenné formulace jsou platné; přijatý příklad není nutné opakovat doslovně."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "Jaký rozpočtový rozsah jste pro tento projekt vyčlenili?",
+                "1": "Zmínil jste cíl tří měsíců. Je toto datum spuštění pevné?",
+                "2": "Jaký dopad by mělo zpožděné spuštění na vaše podnikání?",
+                "3": "Zdá se, že největšími obavami jsou jistota dodání a jasná komunikace – chápu to správně?",
+                "4": "Vzhledem k tříměsíčnímu termínu a omezenému rozpočtu navrhuji postupné MVP s týdenními kontrolami pokroku."
+              },
+              "problemSolving": {
+                "0": "Vaše nedávná práce měla skutečný přínos a chápu, proč otevíráte otázku odměňování.",
+                "1": "V současném cyklu není rozpočet na zvýšení platů a chci o tom mluvit otevřeně.",
+                "2": "Zvýšení nyní nemohu schválit, ale můžeme probrat rozpočet na rozvoj a další dny volna.",
+                "3": "Za tři měsíce rozpočet znovu prověříme a tento rozhovor naplánujeme už dnes.",
+                "4": "Chápu, že je to zklamání, a oceňuji, že o tom se mnou mluvíte otevřeně."
+              },
+              "creativeTask": {
+                "0": "Navrhuji předplatitelskou službu, která zákazníkům poskytne měsíční kontroly přístupnosti jejich digitálních produktů.",
+                "1": "Služba je určena malým týmům elektronického obchodu bez interního specialisty na přístupnost.",
+                "2": "Snížila by riziko nesouladu a pomohla zákazníkům zvýšit konverzi odstraněním překážek použitelnosti.",
+                "3": "Hlavními riziky jsou dostupnost odborníků a nekonzistentní zákaznická data, proto bychom začali omezeným pilotním projektem."
+              },
+              "knowledgeSharing": {
+                "0": "Která z těchto technik funguje nejlépe, když se priority během dne mění?",
+                "1": "Jednou z technik, o kterých jsme mluvili, je blokování času.",
+                "2": "Každé ráno si vyhradím dva bloky soustředěné práce na úkoly s vysokou prioritou a na konci týdne je vyhodnotím."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "Student se zaváže k termínu dodání, ceně nebo rozsahu, který odporuje omezením uvedeným klientem.",
+              "problemSolving": "Student používá vůči zaměstnanci neuctivý, výhružný nebo diskriminační jazyk.",
+              "creativeTask": "Student navrhne službu, která je zjevně nezákonná, diskriminační nebo škodlivá.",
+              "knowledgeSharing": "Student prezentuje smyšlenou nebo nebezpečnou radu jako ověřenou techniku řízení času."
             }
           },
           "betaTooltip": "Tato funkce je poskytována v testovací verzi. Může obsahovat chyby nebo nemusí plně fungovat tak, jak bylo zamýšleno, a je používán na vaše vlastní riziko.",
@@ -2698,7 +2826,8 @@
       "passingThreshold": "Hranice pro splnění: {{threshold}}% ({{correct}} z {{questionsNumber}} otázek)",
       "score": "Skóre: {{score}}% ({{correct}} z {{questionsNumber}} otázek)",
       "contentCantBeEmbedded": "Tento obsah nelze vložit.",
-      "openInNewTab": "Otevřít na nové kartě"
+      "openInNewTab": "Otevřít na nové kartě",
+      "scale_1_5": "Otázka typu škála (1–5)"
     },
     "aiMentor": {
       "title": "Sezení AI Mentor",
@@ -2734,6 +2863,10 @@
       "body": "Počkejte prosím chvíli. Jakmile bude připraven, objeví se zde."
     },
     "videoProgress": {
+      "label": "Průběh videa",
+      "completedSummary": "Dokončeno {{completed}} z {{total}}",
+      "overviewAriaLabel": "Průběh videí v lekci",
+      "segmentAriaLabel": "Průběh videa {{index}}: zhlédnuto {{progress}} %",
       "errors": {
         "resourceNotFound": "Postup videa pro tuto lekci se nepodařilo uložit.",
         "unsupportedLessonType": "Postup videa je dostupný pouze pro obsahové lekce.",
@@ -2848,10 +2981,18 @@
           "thresholdLabel": "Hranice pro splnění",
           "thresholdValue": "Vyžadováno {{requiredScore}}/{{maxScore}} ({{threshold}}%)",
           "feedbackTitle": "Co zlepšit",
+          "criticalErrorsTitle": "Co zabránilo splnění",
+          "criteriaTitle": "Hodnocení podle kritérií",
+          "criterionScore": "{{score}}/{{maxScore}} b.",
+          "noFeedbackTitle": "Podrobná zpětná vazba není k dispozici",
+          "noFeedbackDescription": "Toto hodnocení neobsahuje bodovaná kritéria a ve vašem pokusu nebyly zjištěny žádné kritické chyby.",
+          "loadingTitle": "Kontrolujeme váš pokus",
+          "loadingDescription": "Porovnáváme konverzaci s kritérii lekce. Může to chvíli trvat.",
           "openDetails": "Otevřít podrobnosti hodnocení"
         },
         "voiceOverlay": {
           "headerEyebrow": "Hlasové uživatelské rozhraní",
+          "options": "Možnosti",
           "exit": "Ukončete hlasový režim",
           "mute": "Ztlumit",
           "unmute": "Zapnout mikrofon",
@@ -3257,7 +3398,8 @@
     "title": "Notifikace",
     "tabs": {
       "all": "Vše",
-      "adminAnnouncements": "Oznámení adminů"
+      "adminAnnouncements": "Oznámení adminů",
+      "system": "Systémová"
     },
     "actions": {
       "refresh": "Obnovit",
@@ -3328,12 +3470,18 @@
       "error": "Chyba při změně obrázku na pozadí přihlášení"
     }
   },
+  "ingestion": {
+    "error": {
+      "jobFailed": "Zpracování souboru se nezdařilo. Zkuste jiný soubor nebo jej nahrajte znovu.",
+      "noExtractableText": "Z tohoto souboru se nepodařilo extrahovat čitelný text."
+    }
+  },
   "files": {
     "toast": {
       "invalidData": "Nahrání souboru se nezdařilo – neplatná data souboru",
       "fileEmpty": "Nahrání souboru se nezdařilo – soubor je prázdný",
       "contentTypeMismatch": "Typ obsahu souboru neodpovídá poskytnutému typu obsahu",
-      "invalidFileType": "Neplatný typ souboru. Nahrajte soubor PNG nebo SVG.",
+      "invalidFileType": "Neplatný typ souboru.",
       "missingTenantContext": "Chybí kontext organizace pro nahrání souboru",
       "presentationFileTooLarge": "Prezentace je příliš velká. Nahrajte prezentaci o velikosti do {{size}} {{unit}}."
     },
@@ -3755,7 +3903,12 @@
       "complete_chapter": "Kapitola dokončena",
       "expire_certificate": "Certifikát vypršel",
       "reset_certificate": "Certifikát resetován",
-      "view_announcement": "Zobrazeno"
+      "view_announcement": "Zobrazeno",
+      "enroll_learning_path": "Zapsán do vzdělávací cesty",
+      "start_learning_path": "Vzdělávací cesta zahájena",
+      "complete_learning_path": "Vzdělávací cesta dokončena",
+      "play_scorm": "SCORM spuštěn",
+      "complete_scorm": "SCORM dokončen"
     },
     "entity": {
       "course": "Kurz",
@@ -3774,6 +3927,8 @@
       "qa": "Q&A",
       "announcement": "Oznámení",
       "live_training": "Živé školení",
+      "learning_path": "Vzdělávací cesta",
+      "scorm": "SCORM",
       "global_settings": "Nastavení"
     },
     "table": {
@@ -4350,6 +4505,7 @@
     "error": {
       "unauthenticated": "Uživatel není ověřen",
       "invalidEmailOrPassword": "Neplatný e-mail nebo heslo",
+      "invalidRefreshToken": "Neplatný obnovovací token",
       "adminRoleRequired": "Je vyžadována role správce",
       "missingPermission": "Nemáte oprávnění pro přístup k tomuto zdroji",
       "sessionRevoked": "Vaše relace byla odvolána. Obnovte prosím relaci."
@@ -4402,7 +4558,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu."
+      "invalidBlankAnswerId": "Vygenerovaný kvíz obsahuje neplatné ID odpovědi do mezery. Zkuste kurz vygenerovat znovu.",
+      "invalidAiJudgeConfiguration": "Vygenerovaná lekce AI Mentora obsahuje neplatnou konfiguraci hodnocení. Zkuste kurz vygenerovat znovu."
     }
   },
   "liveTraining": {

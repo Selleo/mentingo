@@ -20,7 +20,10 @@ import { UserPasswordEmailRepository } from "src/user/repositories/user-password
 
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { BulkUserPasswordEmailResponse } from "src/user/schemas/userPasswordEmail.schema";
+import type {
+  BulkUserPasswordEmailResponse,
+  BulkUserPasswordEmailsResponse,
+} from "src/user/schemas/userPasswordEmail.schema";
 import type {
   PreparedUserPasswordEmail,
   UserCreatePasswordTokenInsert,
@@ -70,6 +73,71 @@ export class UserPasswordEmailService {
         result,
         trx,
       );
+    });
+
+    return result;
+  }
+
+  async sendBulkPasswordEmails(
+    userIds: UUIDType[],
+    currentUser: CurrentUserType,
+  ): Promise<BulkUserPasswordEmailsResponse> {
+    const uniqueUserIds = this.getUniqueUserIds(userIds);
+
+    const recipients = await this.userPasswordEmailRepository.findRecipientsByIds(uniqueUserIds);
+
+    const tenantOrigin = await this.userPasswordEmailRepository.findTenantOrigin(
+      currentUser.tenantId,
+    );
+
+    const resetRecipients = recipients.filter(({ hasCredentials }) => hasCredentials);
+    const creationRecipients = recipients.filter(({ hasCredentials }) => !hasCredentials);
+
+    const preparedResetEmails = this.preparePasswordResetEmails(resetRecipients, tenantOrigin);
+    const preparedCreationEmails = this.preparePasswordCreationEmails(
+      creationRecipients,
+      tenantOrigin,
+    );
+
+    const passwordResetSentCount = preparedResetEmails.emails.length;
+    const passwordCreationSentCount = preparedCreationEmails.emails.length;
+    const sentCount = passwordResetSentCount + passwordCreationSentCount;
+
+    const result = {
+      sentCount,
+      skippedCount: uniqueUserIds.length - sentCount,
+      passwordResetSentCount,
+      passwordCreationSentCount,
+    };
+
+    if (!sentCount) return result;
+
+    await this.db.transaction(async (trx) => {
+      await this.userPasswordEmailRepository.insertResetTokens(preparedResetEmails.tokenRows, trx);
+      await this.userPasswordEmailRepository.replaceCreateTokens(
+        preparedCreationEmails.tokenRows,
+        trx,
+      );
+
+      if (passwordResetSentCount > 0) {
+        await this.publishPasswordEmailsEvent(
+          USER_PASSWORD_EMAIL_TYPES.RESET,
+          currentUser,
+          preparedResetEmails.emails,
+          { sentCount: passwordResetSentCount, skippedCount: 0 },
+          trx,
+        );
+      }
+
+      if (passwordCreationSentCount > 0) {
+        await this.publishPasswordEmailsEvent(
+          USER_PASSWORD_EMAIL_TYPES.CREATION,
+          currentUser,
+          preparedCreationEmails.emails,
+          { sentCount: passwordCreationSentCount, skippedCount: 0 },
+          trx,
+        );
+      }
     });
 
     return result;

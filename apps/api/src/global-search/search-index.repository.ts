@@ -328,9 +328,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
-          fieldExpression,
-        )}) AS ${sql.raw(lateralAlias)}(lang, value)`,
+        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(fieldExpression)}) AS ${sql.raw(
+          lateralAlias,
+        )}(lang, value)`,
         sql`true`,
       )
       .where(
@@ -368,9 +368,9 @@ export class SearchIndexRepository {
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .innerJoin(
-        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(
-          fieldExpression,
-        )}) AS ${sql.raw(lateralAlias)}(lang, value)`,
+        sql`LATERAL jsonb_each_text(${this.asLocalizedJsonbObject(fieldExpression)}) AS ${sql.raw(
+          lateralAlias,
+        )}(lang, value)`,
         sql`true`,
       )
       .where(

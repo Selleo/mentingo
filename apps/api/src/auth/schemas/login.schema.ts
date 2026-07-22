@@ -11,6 +11,7 @@ export const loginSchema = Type.Object({
 export const loginResponseSchema = Type.Object({
   ...baseUserResponseSchema.properties,
   shouldVerifyMFA: Type.Boolean(),
+  requiresPasswordChange: Type.Boolean(),
   onboardingStatus: userOnboardingStatusSchema,
   isManagingTenantAdmin: Type.Boolean(),
 });
