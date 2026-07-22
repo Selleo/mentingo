@@ -5,6 +5,7 @@ import { Button } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
 import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
+import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
 
 export const TABLE_OF_CONTENT_TABS = {
   TOC: "toc",
@@ -54,6 +55,8 @@ export default function TableOfContentTabs({
         {canShowStatistics && (
           <button
             type="button"
+            data-testid={COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB}
+            data-state={activeTab === TABLE_OF_CONTENT_TABS.STATISTICS ? "active" : "inactive"}
             onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.STATISTICS)}
             className={cn(
               "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",

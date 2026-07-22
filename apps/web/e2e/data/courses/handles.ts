@@ -153,6 +153,7 @@ export const COURSE_OVERVIEW_HANDLES = {
   ENROLL_BUTTON: "course-overview-enroll-button",
   LOGIN_ENROLL_LINK: "course-overview-login-enroll-link",
   START_LEARNING_BUTTON: "course-overview-start-learning-button",
+  DETAILS_BUTTON: "course-overview-details-button",
 } as const;
 
 const reactionHandleValue = (reaction: string) => reaction.codePointAt(0)?.toString(16) ?? reaction;

@@ -4721,21 +4721,30 @@ export class CourseService {
       throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
     }
 
-    const data = await this.getBetaCourseById(courseId, language, currentUser);
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
 
     await this.db.transaction(async (trx) => {
-      const chapterIds = data.chapters.map(({ id }) => id);
-      const lessonIds: UUIDType[] = [];
-      const questionIds: UUIDType[] = [];
+      const chapterRows = await trx
+        .select({ id: chapters.id })
+        .from(chapters)
+        .where(eq(chapters.courseId, courseId));
+      const chapterIds = chapterRows.map(({ id }) => id);
 
-      for (const chapter of data.chapters) {
-        for (const lesson of chapter.lessons ?? []) {
-          lessonIds.push(lesson.id);
-          if (lesson.type === LESSON_TYPES.QUIZ && lesson.questions) {
-            for (const q of lesson.questions) if (q.id) questionIds.push(q.id);
-          }
-        }
-      }
+      const lessonRows = chapterIds.length
+        ? await trx
+            .select({ id: lessons.id })
+            .from(lessons)
+            .where(inArray(lessons.chapterId, chapterIds))
+        : [];
+      const lessonIds = lessonRows.map(({ id }) => id);
+
+      const questionRows = lessonIds.length
+        ? await trx
+            .select({ id: questions.id })
+            .from(questions)
+            .where(inArray(questions.lessonId, lessonIds))
+        : [];
+      const questionIds = questionRows.map(({ id }) => id);
 
       if (chapterIds.length) {
         await trx
