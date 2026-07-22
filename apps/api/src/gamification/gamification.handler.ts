@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { and, eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -28,8 +28,8 @@ export class GamificationHandler {
     const userSettings = this.settingsService.getUserSettings(event.userId);
     const userLanguage = (await userSettings).language;
 
-    if (!event.resourceType) throw new BadRequestException("common.error");
-    if (!event.userId) throw new BadRequestException("common.error");
+    if (!event.resourceType) throw new Error("common.error");
+    if (!event.userId) throw new Error("common.error");
 
     const isFirstProcessing = await this.outboxRepository.markProcessedOrSkip(
       event.sourceId,

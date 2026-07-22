@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -51,7 +51,7 @@ export class AchievementsService {
       .where(eq(achievements.id, achievementId));
 
     if (!achievement) {
-      throw new BadRequestException("error");
+      throw new NotFoundException("error.common");
     }
 
     return achievement;
@@ -74,7 +74,6 @@ export class AchievementsService {
         id: achievements.id,
         key: achievements.key,
       });
-    if (!createdAchievement) throw new BadRequestException("error");
     return createdAchievement;
   }
 
@@ -119,7 +118,7 @@ export class AchievementsService {
       .returning();
 
     if (!updatedAchievement) {
-      throw new BadRequestException("error");
+      throw new NotFoundException("error.common");
     }
 
     return this.getAchievement(achievementId);
@@ -130,7 +129,7 @@ export class AchievementsService {
       .delete(achievements)
       .where(eq(achievements.id, achievementId))
       .returning({ id: achievements.id });
-    if (!deletedAchievement) throw new BadRequestException("common.error");
+    if (!deletedAchievement) throw new NotFoundException("common.error");
     return deletedAchievement;
   }
 
@@ -168,7 +167,6 @@ export class AchievementsService {
       .returning({
         id: achievementLevels.id,
       });
-    if (!createdLevel) throw new BadRequestException("error");
     return createdLevel;
   }
 
@@ -195,7 +193,7 @@ export class AchievementsService {
       .returning({
         id: achievementLevels.id,
       });
-    if (!updatedLevel) throw new BadRequestException("error");
+    if (!updatedLevel) throw new NotFoundException("error.common");
     return updatedLevel;
   }
 
@@ -211,7 +209,7 @@ export class AchievementsService {
         ),
       )
       .returning({ id: achievementLevels.id });
-    if (!deletedLevel) throw new BadRequestException("error");
+    if (!deletedLevel) throw new NotFoundException("error.common");
     return deletedLevel;
   }
 
@@ -241,7 +239,7 @@ export class AchievementsService {
     const achievement = await this.getAchievement(id);
 
     if (achievement.availableLocales.includes(language)) {
-      throw new BadRequestException({
+      throw new ConflictException({
         message: "adminAchievementView.toast.languageAlreadyExists",
       });
     }

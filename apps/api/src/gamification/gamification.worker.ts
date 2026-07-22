@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger, type OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Logger, type OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Worker } from "bullmq";
 
@@ -28,7 +28,7 @@ export class GamificationWorker implements OnModuleDestroy {
       "gamification-events",
       async (job: Job<GamificationEventPayload>) => {
         const event = job.data;
-        if (!event.resourceType) throw new BadRequestException("common.error");
+        if (!event.resourceType) throw new Error("common.error");
         await this.tenantRunner.runWithTenant(event.tenantId, async () => {
           this.logger.log(`Processing gamification event: ${event.actionType}`);
           await new Promise((resolve) => setTimeout(resolve, 500));

@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -17,7 +17,7 @@ export class GamificationService {
       .where(eq(userProgress.userId, currentUser.userId));
 
     if (!progress) {
-      throw new BadRequestException("common.error");
+      throw new NotFoundException("common.error");
     }
 
     return progress;
