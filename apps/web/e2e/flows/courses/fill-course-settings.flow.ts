@@ -4,13 +4,14 @@ import type { Page } from "@playwright/test";
 
 type FillCourseSettingsFlowInput = {
   title?: string;
+  currentCategoryTitle?: string;
   categoryTitle?: string;
   description?: string;
 };
 
 export const fillCourseSettingsFlow = async (
   page: Page,
-  { title, categoryTitle, description }: FillCourseSettingsFlowInput,
+  { title, currentCategoryTitle, categoryTitle, description }: FillCourseSettingsFlowInput,
 ) => {
   if (title !== undefined) {
     await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).click();
@@ -19,6 +20,10 @@ export const fillCourseSettingsFlow = async (
   }
 
   if (categoryTitle !== undefined) {
+    if (currentCategoryTitle !== undefined) {
+      await page.getByRole("button", { name: currentCategoryTitle }).click();
+    }
+
     await page.getByTestId(COURSE_SETTINGS_HANDLES.CATEGORY_SELECT).click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.categoryOption(categoryTitle)).click();
   }

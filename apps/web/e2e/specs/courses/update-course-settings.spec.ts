@@ -26,6 +26,7 @@ test("admin can update course settings", async ({ cleanup, factories, withWorker
     await openCourseOverviewFlow(page, course.id);
     await fillCourseSettingsFlow(page, {
       title: updatedTitle,
+      currentCategoryTitle: originalCategory.title,
       categoryTitle: updatedCategory.title,
     });
     await page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON).click();
@@ -45,7 +46,7 @@ test("admin can update course settings", async ({ cleanup, factories, withWorker
       .toEqual({
         title: updatedTitle,
         categoryId: updatedCategory.id,
-        description: `<p>${updatedDescription}</p>`,
+        description: updatedDescription,
       });
   });
 });

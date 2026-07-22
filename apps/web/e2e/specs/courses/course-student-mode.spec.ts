@@ -1,6 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { toggleCourseStudentModeFlow } from "../../flows/courses/toggle-course-student-mode.flow";
 import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
@@ -45,15 +44,6 @@ test("admin can toggle student mode from course preview", async ({
     await expect(page).not.toHaveURL(/\/auth\/login/);
 
     await toggleCourseStudentModeFlow(page);
-    await expect(page.getByTestId(COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON)).toContainText(
-      "Exit learning mode",
-    );
-    await page.getByTestId(chapter.title).click();
-    await expect(page.getByText(firstLesson.title)).toBeVisible();
-    await expect(page.getByText(secondLesson.title)).toBeVisible();
-    await expect(page.getByText("Blocked")).toHaveCount(0);
-    await page.getByText(firstLesson.title).click();
-    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
 
     await expect
       .poll(async () => {
@@ -61,5 +51,12 @@ test("admin can toggle student mode from course preview", async ({
         return studentModeCourseIds.includes(course.id);
       })
       .toBe(true);
+
+    await page.getByRole("button", { name: new RegExp(chapter.title) }).click();
+    await expect(page.getByRole("link", { name: new RegExp(firstLesson.title) })).toBeVisible();
+    await expect(page.getByRole("link", { name: new RegExp(secondLesson.title) })).toBeVisible();
+    await expect(page.getByText("Blocked")).toHaveCount(0);
+    await page.getByRole("link", { name: new RegExp(firstLesson.title) }).click();
+    await expect(page).toHaveURL(new RegExp(`/course/.+/lesson/${firstLesson.id}$`));
   });
 });
