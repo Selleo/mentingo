@@ -9,7 +9,7 @@ import { createE2ETest } from "../../../test/create-e2e-test";
 import { createCourseFactory } from "../../../test/factory/course.factory";
 import { createGroupFactory } from "../../../test/factory/group.factory";
 import { truncateTables } from "../../../test/helpers/test-helpers";
-import { CourseDueDateCalendarService } from "../course-due-date-calendar.service";
+import { CourseDueDateCalendarService } from "../services/course-due-date-calendar.service";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";

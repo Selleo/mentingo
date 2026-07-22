@@ -1,6 +1,6 @@
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
-import { CourseDueDateCalendarService } from "src/calendar/course-due-date-calendar.service";
+import { CourseDueDateCalendarService } from "src/calendar/services/course-due-date-calendar.service";
 import { GroupCourseDueDatesRemovedEvent, GroupCourseDueDatesSyncedEvent } from "src/events";
 
 type EventType = GroupCourseDueDatesSyncedEvent | GroupCourseDueDatesRemovedEvent;

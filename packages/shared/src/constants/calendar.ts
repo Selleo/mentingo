@@ -1,6 +1,7 @@
 export const CALENDAR_EVENT_SOURCE_TYPES = {
   LIVE_TRAINING: "live_training",
   COURSE_DUE_DATE: "course_due_date",
+  MICROSOFT_OUTLOOK: "microsoft_outlook",
 } as const;
 
 export type CalendarEventSourceType =
@@ -15,3 +16,42 @@ export const CALENDAR_EVENT_SOURCE_ROLES = {
 
 export type CalendarEventSourceRole =
   (typeof CALENDAR_EVENT_SOURCE_ROLES)[keyof typeof CALENDAR_EVENT_SOURCE_ROLES];
+
+export const MICROSOFT_CALENDAR_CONNECTION_STATUSES = {
+  SYNCING: "syncing",
+  CONNECTED: "connected",
+  ERROR: "error",
+  RECONNECT_REQUIRED: "reconnect_required",
+} as const;
+
+export type MicrosoftCalendarConnectionStatus =
+  (typeof MICROSOFT_CALENDAR_CONNECTION_STATUSES)[keyof typeof MICROSOFT_CALENDAR_CONNECTION_STATUSES];
+
+export const MICROSOFT_CALENDAR_PUBLIC_STATUSES = {
+  DISCONNECTED: "disconnected",
+  ...MICROSOFT_CALENDAR_CONNECTION_STATUSES,
+} as const;
+
+export type MicrosoftCalendarPublicStatus =
+  (typeof MICROSOFT_CALENDAR_PUBLIC_STATUSES)[keyof typeof MICROSOFT_CALENDAR_PUBLIC_STATUSES];
+
+export const OUTLOOK_EVENT_AVAILABILITIES = {
+  FREE: "free",
+  TENTATIVE: "tentative",
+  BUSY: "busy",
+  OUT_OF_OFFICE: "out_of_office",
+  WORKING_ELSEWHERE: "working_elsewhere",
+} as const;
+
+export type OutlookEventAvailability =
+  (typeof OUTLOOK_EVENT_AVAILABILITIES)[keyof typeof OUTLOOK_EVENT_AVAILABILITIES];
+
+export const OUTLOOK_EVENT_SENSITIVITIES = {
+  NORMAL: "normal",
+  PERSONAL: "personal",
+  PRIVATE: "private",
+  CONFIDENTIAL: "confidential",
+} as const;
+
+export type OutlookEventSensitivity =
+  (typeof OUTLOOK_EVENT_SENSITIVITIES)[keyof typeof OUTLOOK_EVENT_SENSITIVITIES];

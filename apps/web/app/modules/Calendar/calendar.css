@@ -218,6 +218,31 @@
   color: var(--warning-950);
 }
 
+.calendar-shell .fc .calendar-event--microsoft_outlook {
+  border-color: color-mix(in srgb, #0078d4 30%, white);
+  border-left-color: #0078d4;
+  background: #eef7fd;
+  color: #004578;
+}
+
+.calendar-shell .fc .calendar-event--microsoft_outlook:hover {
+  border-color: color-mix(in srgb, #0078d4 46%, white);
+  background: #dcedf8;
+  color: #00355d;
+}
+
+.calendar-event__microsoft-badge {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 0.1875rem;
+  background: white;
+  box-shadow: 0 0 0 1px rgb(0 120 212 / 0.16);
+}
+
 .calendar-shell .fc .fc-event-main {
   color: inherit;
 }

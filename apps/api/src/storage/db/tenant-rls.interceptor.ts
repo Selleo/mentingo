@@ -14,6 +14,8 @@ export class TenantRlsInterceptor implements NestInterceptor {
     "/api/certificates/share",
     "/api/certificates/share-image",
     "/api/live-training/livekit/webhook",
+    "/api/calendar/microsoft/notifications",
+    "/api/calendar/microsoft/lifecycle-notifications",
   ]);
 
   constructor(

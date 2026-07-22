@@ -12,6 +12,7 @@ export const QUEUE_NAMES = {
   SCORM_IMPORT: "scorm-import",
   COURSE_DUPLICATION: "course-duplication",
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
+  MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];

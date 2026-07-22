@@ -26,6 +26,7 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -104,6 +105,9 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  MicrosoftCalendarConnectionStatus,
+  OutlookEventAvailability,
+  OutlookEventSensitivity,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
@@ -488,6 +492,81 @@ export const calendarEvents = pgTable(
       table.tenantId,
       table.uid,
     ),
+  })),
+);
+
+export const microsoftCalendarConnections = pgTable(
+  "microsoft_calendar_connections",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    microsoftAccountId: text("microsoft_account_id").notNull(),
+    microsoftEmail: text("microsoft_email").notNull(),
+    refreshTokenCiphertext: text("refresh_token_ciphertext").notNull(),
+    refreshTokenIv: text("refresh_token_iv").notNull(),
+    refreshTokenTag: text("refresh_token_tag").notNull(),
+    refreshTokenEncryptedDek: text("refresh_token_encrypted_dek").notNull(),
+    refreshTokenEncryptedDekIv: text("refresh_token_encrypted_dek_iv").notNull(),
+    refreshTokenEncryptedDekTag: text("refresh_token_encrypted_dek_tag").notNull(),
+    status: text("status")
+      .$type<MicrosoftCalendarConnectionStatus>()
+      .notNull()
+      .default(MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING),
+    errorCode: text("error_code"),
+    deltaLink: text("delta_link"),
+    syncWindowStart: timestampWithTimezone({ name: "sync_window_start" }),
+    syncWindowEnd: timestampWithTimezone({ name: "sync_window_end" }),
+    windowBuiltAt: timestampWithTimezone({ name: "window_built_at" }),
+    lastSuccessfulSyncAt: timestampWithTimezone({ name: "last_successful_sync_at" }),
+    lastSyncCompletedAt: timestampWithTimezone({ name: "last_sync_completed_at" }),
+    subscriptionId: text("subscription_id"),
+    subscriptionClientState: text("subscription_client_state"),
+    subscriptionExpiresAt: timestampWithTimezone({ name: "subscription_expires_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("microsoft_calendar_connections", (table) => ({
+    tenantUserUniqueIdx: uniqueIndex("microsoft_calendar_connections_tenant_user_unique_idx").on(
+      table.tenantId,
+      table.userId,
+    ),
+    subscriptionIdx: index("microsoft_calendar_connections_subscription_idx").on(
+      table.subscriptionId,
+    ),
+  })),
+);
+
+export const microsoftCalendarEvents = pgTable(
+  "microsoft_calendar_events",
+  {
+    ...id,
+    ...timestamps,
+    connectionId: uuid("connection_id")
+      .references(() => microsoftCalendarConnections.id, { onDelete: "cascade" })
+      .notNull(),
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    microsoftEventId: text("microsoft_event_id").notNull(),
+    webLink: text("web_link"),
+    sensitivity: text("sensitivity").$type<OutlookEventSensitivity>().notNull(),
+    availability: text("availability").$type<OutlookEventAvailability>().notNull(),
+    isCancelled: boolean("is_cancelled").notNull().default(false),
+    tenantId,
+  },
+  withTenantIdIndex("microsoft_calendar_events", (table) => ({
+    calendarEventUniqueIdx: uniqueIndex("microsoft_calendar_events_calendar_event_unique_idx").on(
+      table.calendarEventId,
+    ),
+    connectionEventUniqueIdx: uniqueIndex(
+      "microsoft_calendar_events_tenant_connection_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.microsoftEventId),
+    ownerIdx: index("microsoft_calendar_events_tenant_user_idx").on(table.tenantId, table.userId),
   })),
 );
 

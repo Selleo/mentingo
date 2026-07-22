@@ -16,11 +16,13 @@ import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
 import { CalendarCourseDueDateEventDetailsDialog } from "./CalendarCourseDueDateEventDetailsDialog";
 import { CalendarEventDetailsSkeleton } from "./CalendarEventDetailsSkeleton";
 import { CalendarLiveTrainingEventDetailsDialog } from "./CalendarLiveTrainingEventDetailsDialog";
+import { CalendarOutlookEventDetailsDialog } from "./CalendarOutlookEventDetailsDialog";
 
 import type {
   CalendarEventDetails,
   CourseDueDateCalendarEventDetails,
   LiveTrainingCalendarEventDetails,
+  OutlookCalendarEventDetails,
 } from "../calendarEventDetails.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -42,6 +44,12 @@ const isCourseDueDateEventDetails = (
 ): eventDetails is CourseDueDateCalendarEventDetails =>
   eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE &&
   "courseDueDate" in eventDetails.payload;
+
+const isOutlookEventDetails = (
+  eventDetails: CalendarEventDetails,
+): eventDetails is OutlookCalendarEventDetails =>
+  eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK &&
+  "outlookCalendar" in eventDetails.payload;
 
 function CalendarEventDetailsLoadingDialog({
   open,
@@ -102,6 +110,13 @@ export function CalendarEventDetailsDialog({
       <CalendarCourseDueDateEventDetailsDialog
         open={open}
         eventDetails={courseDueDateEventDetails}
+        onOpenChange={onOpenChange}
+      />
+    ))
+    .when(isOutlookEventDetails, (outlookEventDetails) => (
+      <CalendarOutlookEventDetailsDialog
+        open={open}
+        eventDetails={outlookEventDetails}
         onOpenChange={onOpenChange}
       />
     ))

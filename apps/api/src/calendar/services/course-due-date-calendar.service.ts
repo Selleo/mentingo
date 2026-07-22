@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { CALENDAR_EVENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
 
-import { CalendarRepository } from "./calendar.repository";
+import { CalendarRepository } from "../repositories/calendar.repository";
 
-import type { CalendarEventInsert, GroupCourseDueDateRow } from "./calendar.types";
+import type { CalendarEventInsert, GroupCourseDueDateRow } from "../types/calendar.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()

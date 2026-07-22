@@ -358,12 +358,66 @@
     "qa": "Otázky a odpovědi",
     "tenants": "Organizace"
   },
+  "microsoftCalendar": {
+    "title": "Kalendář Microsoft",
+    "description": "Zobrazte svůj hlavní kalendář Outlook v Mentingu. Outlook zůstává zdrojem dat.",
+    "account": "Připojený účet",
+    "lastSync": "Poslední úspěšná synchronizace",
+    "status": {
+      "disconnected": "Odpojeno",
+      "syncing": "Synchronizace",
+      "connected": "Připojeno",
+      "error": "Vyžaduje pozornost",
+      "reconnect_required": "Je nutné znovu připojit"
+    },
+    "action": {
+      "connect": "Připojit Kalendář Microsoft",
+      "sync": "Synchronizovat nyní",
+      "reconnect": "Znovu připojit",
+      "replace": "Použít jiný účet",
+      "disconnect": "Odpojit",
+      "continue": "Pokračovat do Microsoftu"
+    },
+    "stale": {
+      "title": "Data kalendáře mohou být zastaralá",
+      "description": "Importované události zůstávají viditelné. Zkuste synchronizaci znovu nebo znovu připojte účet Microsoft."
+    },
+    "adminApproval": {
+      "title": "Je vyžadováno schválení správcem Microsoft",
+      "description": "Organizace musí schválit přístup ke kalendáři, než Mentingo synchronizuje události Outlook."
+    },
+    "disconnect": {
+      "title": "Odpojit Kalendář Microsoft?",
+      "description": "Importované události Outlook budou z Mentinga odstraněny. Kalendář Outlook se nezmění."
+    },
+    "replace": {
+      "title": "Připojit jiný účet Microsoft?",
+      "description": "Připojení účtu {{email}} a jeho importované události budou před synchronizací nového účtu odstraněny."
+    },
+    "toast": {
+      "syncQueued": "Synchronizace Kalendáře Microsoft byla zahájena.",
+      "syncFailed": "Kalendář Microsoft se nepodařilo synchronizovat.",
+      "disconnected": "Kalendář Microsoft byl odpojen.",
+      "disconnectFailed": "Kalendář Microsoft se nepodařilo odpojit."
+    },
+    "oauth": {
+      "connected": "Kalendář Microsoft se připojuje a byla zahájena první synchronizace.",
+      "replacement_required": "Před připojením jiného účtu Microsoft potvrďte změnu účtu.",
+      "admin_approval_required": "Přístup ke kalendáři vyžaduje schválení správcem Microsoft.",
+      "authorization_failed": "Autorizace Kalendáře Microsoft selhala. Zkuste to znovu."
+    }
+  },
   "calendarView": {
     "title": "Kalendář",
     "description": "Zobrazit naplánované vzdělávací události.",
     "loading": "Načítání událostí",
     "empty": "Žádné události k zobrazení",
     "today": "Dnes",
+    "legend": { "label": "Zdroje" },
+    "microsoft": {
+      "staleWarning": "Události Microsoft mohou být zastaralé. Připojte účet znovu nebo opakujte akci v nastavení účtu.",
+      "horizonNotice": "Události Microsoft se importují od 30 dnů zpětně do 6 měsíců dopředu, takže tento rozsah může být neúplný."
+    },
     "view": {
       "month": "Měsíc",
       "week": "Týden",
@@ -447,11 +501,13 @@
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Živé školení",
-        "goToCourse": "Přejít na kurz"
+        "goToCourse": "Přejít na kurz",
+        "openOutlook": "Otevřít v Outlooku"
       },
       "sourceType": {
         "liveTraining": "Živé školení",
-        "courseDueDate": "Termín kurzu"
+        "courseDueDate": "Termín kurzu",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Time",
@@ -461,7 +517,9 @@
         "people": "People",
         "dueDate": "Termín",
         "course": "Kurz",
-        "group": "Skupina"
+        "group": "Skupina",
+        "availability": "Dostupnost",
+        "privacy": "Soukromí"
       },
       "deliveryType": {
         "online": "Online",
@@ -473,6 +531,14 @@
         "ended": "Ended",
         "expired": "Expired"
       },
+      "availability": {
+        "free": "Volno",
+        "tentative": "Předběžně",
+        "busy": "Zaneprázdněn",
+        "out_of_office": "Mimo kancelář",
+        "working_elsewhere": "Pracuje jinde"
+      },
+      "privateEvent": "Podrobnosti této soukromé události Outlook jsou skryté.",
       "role": {
         "admin": "Admin",
         "author": "Author",
@@ -3133,6 +3199,7 @@
     },
     "tabs": {
       "account": "Účet",
+      "integrations": "Integrace",
       "organization": "Organizace",
       "platformCustomization": "Přizpůsobení platformy"
     },

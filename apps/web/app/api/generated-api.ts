@@ -7200,7 +7200,7 @@ export interface GetEventsResponse {
       /** @format uuid */
       id: string;
       uid: string;
-      sourceType: "live_training" | "course_due_date";
+      sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
       /** @format uuid */
       sourceId: string;
       title: string;
@@ -7235,6 +7235,13 @@ export interface GetEventsResponse {
               groupName: string;
               dueDate: string;
             };
+          }
+        | {
+            outlookCalendar: {
+              webLink: string | null;
+              isSensitive: boolean;
+              availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+            };
           };
     }[];
   };
@@ -7245,7 +7252,7 @@ export interface GetEventDetailsResponse {
     /** @format uuid */
     id: string;
     uid: string;
-    sourceType: "live_training" | "course_due_date";
+    sourceType: "live_training" | "course_due_date" | "microsoft_outlook";
     /** @format uuid */
     sourceId: string;
     title: string;
@@ -7321,8 +7328,51 @@ export interface GetEventDetailsResponse {
             groupName: string;
             dueDate: string;
           };
+        }
+      | {
+          outlookCalendar: {
+            webLink: string | null;
+            isSensitive: boolean;
+            availability: "free" | "tentative" | "busy" | "out_of_office" | "working_elsewhere";
+          };
         };
   };
+}
+
+export interface GetConnectionResponse {
+  data: {
+    available: boolean;
+    status: "disconnected" | "syncing" | "connected" | "error" | "reconnect_required";
+    accountEmail: string | null;
+    lastSuccessfulSyncAt: string | null;
+    subscriptionExpiresAt: string | null;
+    errorCode: string | null;
+    stale: boolean;
+  };
+}
+
+export type SyncResponse = null;
+
+export type DisconnectResponse = null;
+
+export interface NotificationsBody {
+  value?: {
+    subscriptionId?: string;
+    clientState?: string;
+    lifecycleEvent?: string;
+    [key: string]: any;
+  }[];
+  [key: string]: any;
+}
+
+export interface LifecycleNotificationsBody {
+  value?: {
+    subscriptionId?: string;
+    clientState?: string;
+    lifecycleEvent?: string;
+    [key: string]: any;
+  }[];
+  [key: string]: any;
 }
 
 import type {
@@ -15022,6 +15072,124 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "GET",
         query: query,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarControllerGetConnection
+     * @request GET:/api/calendar/microsoft/connection
+     */
+    microsoftCalendarControllerGetConnection: (params: RequestParams = {}) =>
+      this.request<GetConnectionResponse, any>({
+        path: `/api/calendar/microsoft/connection`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarControllerDisconnect
+     * @request DELETE:/api/calendar/microsoft/connection
+     */
+    microsoftCalendarControllerDisconnect: (params: RequestParams = {}) =>
+      this.request<DisconnectResponse, any>({
+        path: `/api/calendar/microsoft/connection`,
+        method: "DELETE",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarControllerSync
+     * @request POST:/api/calendar/microsoft/connection/sync
+     */
+    microsoftCalendarControllerSync: (params: RequestParams = {}) =>
+      this.request<SyncResponse, any>({
+        path: `/api/calendar/microsoft/connection/sync`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarControllerNotifications
+     * @request POST:/api/calendar/microsoft/notifications
+     */
+    microsoftCalendarControllerNotifications: (
+      data: NotificationsBody,
+      query?: {
+        validationToken?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/calendar/microsoft/notifications`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarControllerLifecycleNotifications
+     * @request POST:/api/calendar/microsoft/lifecycle-notifications
+     */
+    microsoftCalendarControllerLifecycleNotifications: (
+      data: LifecycleNotificationsBody,
+      query?: {
+        validationToken?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/calendar/microsoft/lifecycle-notifications`,
+        method: "POST",
+        query: query,
+        body: data,
+        type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarOAuthControllerConnect
+     * @request GET:/api/auth/microsoft-calendar
+     */
+    microsoftCalendarOAuthControllerConnect: (
+      query?: {
+        replace?: string;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft-calendar`,
+        method: "GET",
+        query: query,
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name MicrosoftCalendarOAuthControllerCallback
+     * @request GET:/api/auth/microsoft-calendar/callback
+     */
+    microsoftCalendarOAuthControllerCallback: (params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/auth/microsoft-calendar/callback`,
+        method: "GET",
         ...params,
       }),
   };

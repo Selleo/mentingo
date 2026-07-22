@@ -1198,6 +1198,20 @@
       "when": 1784541162859,
       "tag": "0170_rename_ai_mentor_name_translation_column",
       "breakpoints": true
+    },
+    {
+      "idx": 171,
+      "version": "7",
+      "when": 1784666076540,
+      "tag": "0171_add_microsoft_calendar_integration",
+      "breakpoints": true
+    },
+    {
+      "idx": 172,
+      "version": "7",
+      "when": 1784666101728,
+      "tag": "0172_enable_microsoft_calendar_rls",
+      "breakpoints": true
     }
   ]
 }

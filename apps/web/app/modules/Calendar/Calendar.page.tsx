@@ -9,9 +9,11 @@ import { useTranslation } from "react-i18next";
 
 import { currentUserQueryOptions } from "~/api/queries";
 import { useCalendarEvents } from "~/api/queries/calendar/useCalendarEvents";
+import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
 import { hasPermission } from "~/common/permissions/permission.utils";
+import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import { usePermissions } from "~/hooks/usePermissions";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -37,6 +39,7 @@ import type {
   DatesSetArg,
   DateSelectArg,
   EventClickArg,
+  EventContentArg,
   EventInput,
   EventMountArg,
 } from "@fullcalendar/core";
@@ -75,6 +78,7 @@ export default function CalendarPage() {
 
   const language = useLanguageStore((state) => state.language);
   const { data: globalSettings } = useGlobalSettings();
+  const { data: microsoftConnection } = useMicrosoftCalendarConnection();
   const { hasAccess: hasLiveTrainingCreateAccess } = usePermissions({
     required: PERMISSIONS.LIVE_TRAINING_CREATE,
   });
@@ -82,6 +86,17 @@ export default function CalendarPage() {
   const canCreateLiveTraining =
     Boolean(globalSettings?.liveTrainingEnabled) && hasLiveTrainingCreateAccess;
   const visibleRange = calendarState.visibleRange;
+  const showHorizonNotice = useMemo(() => {
+    if (!visibleRange || microsoftConnection?.status === "disconnected") return false;
+    const historyStart = new Date();
+    historyStart.setDate(historyStart.getDate() - 30);
+    const horizonEnd = new Date();
+    horizonEnd.setMonth(horizonEnd.getMonth() + 6);
+    return (
+      Date.parse(visibleRange.start) < historyStart.getTime() ||
+      Date.parse(visibleRange.end) > horizonEnd.getTime()
+    );
+  }, [microsoftConnection?.status, visibleRange]);
 
   const { data: events = [] } = useCalendarEvents(
     {
@@ -151,13 +166,80 @@ export default function CalendarPage() {
     eventInfo.el.dataset.testid = CALENDAR_HANDLES.event(eventInfo.event.id);
   };
 
+  const renderEventContent = (eventInfo: EventContentArg) => {
+    const sourceType = eventInfo.event.extendedProps.sourceType as string;
+    const isOutlook = sourceType === "microsoft_outlook";
+    let sourceLabelKey = "calendarView.details.sourceType.courseDueDate";
+    if (sourceType === "live_training") {
+      sourceLabelKey = "calendarView.details.sourceType.liveTraining";
+    }
+    if (isOutlook) {
+      sourceLabelKey = "calendarView.details.sourceType.microsoftOutlook";
+    }
+    const sourceLabel = t(sourceLabelKey);
+
+    return (
+      <span className="flex min-w-0 items-center gap-1.5">
+        {isOutlook ? (
+          <span className="calendar-event__microsoft-badge" aria-hidden="true">
+            <Icon name="Microsoft" className="size-2.5" />
+          </span>
+        ) : null}
+        <span className="sr-only">{sourceLabel}: </span>
+        <span className="truncate">{eventInfo.event.title}</span>
+      </span>
+    );
+  };
+
   return (
     <PageWrapper
       isBarebones
       className="flex h-[calc(100dvh-4rem)] flex-col overflow-hidden bg-neutral-50/50 p-4 md:p-6 2xl:h-dvh 3xl:p-8"
       data-testid={CALENDAR_HANDLES.PAGE}
     >
-      <section className="flex min-h-0 flex-1 flex-col">
+      <section className="flex min-h-0 flex-1 flex-col gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div
+            className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-medium text-neutral-600"
+            data-testid={CALENDAR_HANDLES.SOURCE_LEGEND}
+            aria-label={t("calendarView.legend.label")}
+          >
+            <span className="font-semibold text-neutral-800">{t("calendarView.legend.label")}</span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-primary-700" />
+              {t("calendarView.details.sourceType.liveTraining")}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-warning-600" />
+              {t("calendarView.details.sourceType.courseDueDate")}
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="size-2.5 rounded-sm bg-[#0078d4]" />
+              {t("calendarView.details.sourceType.microsoftOutlook")}
+            </span>
+          </div>
+        </div>
+
+        {microsoftConnection?.stale ? (
+          <div
+            role="status"
+            className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-950"
+            data-testid={CALENDAR_HANDLES.STALE_WARNING}
+          >
+            {t("calendarView.microsoft.staleWarning")}
+          </div>
+        ) : null}
+
+        {showHorizonNotice ? (
+          <div
+            role="status"
+            className="rounded-md border border-[#0078d4]/20 bg-[#f5faff] px-3 py-2 text-sm text-[#004578]"
+            data-testid={CALENDAR_HANDLES.HORIZON_NOTICE}
+          >
+            {t("calendarView.microsoft.horizonNotice")}
+          </div>
+        ) : null}
+
         <div className="calendar-shell min-h-0 flex-1">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -169,6 +251,7 @@ export default function CalendarPage() {
             eventClick={handleEventClick}
             dayCellDidMount={handleDayCellDidMount}
             eventDidMount={handleEventDidMount}
+            eventContent={renderEventContent}
             selectable={canCreateLiveTraining}
             selectMirror
             unselectAuto

@@ -20,11 +20,14 @@ import {
   liveTrainingMembers,
   liveTrainingSessions,
   liveTrainings,
+  microsoftCalendarEvents,
   resourceEntity,
   resources,
   users,
 } from "src/storage/schema";
 
+import type { CalendarEventDetails } from "../schemas/calendar-event-details.schema";
+import type { CalendarEventListItem } from "../schemas/calendar-event-list.schema";
 import type {
   CalendarEventListConditions,
   CalendarEventNormalizedRow,
@@ -33,9 +36,9 @@ import type {
   CourseDueDateCalendarEventUpsertInput,
   GroupCourseDueDateRow,
   LiveTrainingCalendarEventPayload,
-} from "./calendar.types";
-import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
-import type { CalendarEventListItem } from "./schemas/calendar-event-list.schema";
+  MicrosoftOutlookCalendarEventPayload,
+  MicrosoftOutlookCalendarEventRow,
+} from "../types/calendar.types";
 import type {
   CalendarEventStatus,
   CalendarEventSourceType,
@@ -74,6 +77,46 @@ export class CalendarRepository {
       .select()
       .from(courseDueDateEvents)
       .orderBy(courseDueDateEvents.startsAt);
+  }
+
+  async getMicrosoftCalendarEventRows(
+    conditions: CalendarEventListConditions,
+    language: SupportedLanguages,
+  ): Promise<MicrosoftOutlookCalendarEventRow[]> {
+    return this.db
+      .select({
+        id: calendarEvents.id,
+        uid: calendarEvents.uid,
+        sourceType: sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK}`,
+        sourceId: microsoftCalendarEvents.id,
+        title: this.localizationService.getLocalizedSqlField(
+          calendarEvents.title,
+          language,
+          calendarEvents,
+        ),
+        description: sql<string | null>`NULL`,
+        startsAt: sql<string>`${calendarEvents.startsAt}`,
+        endsAt: sql<string>`${calendarEvents.endsAt}`,
+        allDay: calendarEvents.allDay,
+        timezone: calendarEvents.timezone,
+        location: calendarEvents.location,
+        status: calendarEvents.status,
+        payload: sql<MicrosoftOutlookCalendarEventPayload>`
+          jsonb_build_object(
+            'outlookCalendar',
+            jsonb_build_object(
+              'webLink', ${microsoftCalendarEvents.webLink},
+              'isSensitive', ${microsoftCalendarEvents.sensitivity} IN ('private', 'confidential'),
+              'availability', ${microsoftCalendarEvents.availability}
+            )
+          )
+        `,
+        authorId: sql<UUIDType | null>`NULL`,
+      })
+      .from(microsoftCalendarEvents)
+      .innerJoin(calendarEvents, eq(calendarEvents.id, microsoftCalendarEvents.calendarEventId))
+      .where(and(...conditions))
+      .orderBy(calendarEvents.startsAt);
   }
 
   async getGroupCourseDueDateRows(
