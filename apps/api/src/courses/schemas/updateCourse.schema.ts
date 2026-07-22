@@ -2,6 +2,7 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
+import { courseLearningOutcomesSchema } from "./courseLearningOutcomes.schema";
 import { coursesStatusOptions } from "./courseQuery";
 
 export const updateCourseSchema = Type.Partial(
@@ -13,7 +14,7 @@ export const updateCourseSchema = Type.Partial(
       minimum: 0,
       maximum: 100,
     }),
-    learningOutcomes: Type.Optional(Type.Array(Type.String())),
+    learningOutcomes: Type.Optional(courseLearningOutcomesSchema),
     showAuthorSection: Type.Boolean(),
     status: coursesStatusOptions,
     priceInCents: Type.Integer(),

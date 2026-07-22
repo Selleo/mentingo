@@ -1,3 +1,4 @@
+import { MAX_COURSE_LEARNING_OUTCOMES, type SupportedLanguages } from "@repo/shared";
 import { Check, CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -7,15 +8,15 @@ import { cn } from "~/lib/utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
-import type { SupportedLanguages } from "@repo/shared";
-
 type CourseWhatYouWillLearnProps = {
   courseOutcomes?: string[];
   language: SupportedLanguages;
 };
 
+const limitOutcomes = (outcomes: string[]) => outcomes.slice(0, MAX_COURSE_LEARNING_OUTCOMES);
+
 const normalizeOutcomes = (outcomes: string[]) =>
-  outcomes.map((outcome) => outcome.trim()).filter(Boolean);
+  limitOutcomes(outcomes.map((outcome) => outcome.trim()).filter(Boolean));
 
 const areOutcomesEqual = (first: string[], second: string[]) =>
   first.length === second.length && first.every((outcome, index) => outcome === second[index]);
@@ -29,11 +30,11 @@ export default function CourseWhatYouWillLearn({
   const { mutateAsync: updateCourse, isPending } = useUpdateCourse();
 
   const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
-  const [outcomesDraft, setOutcomesDraft] = useState(courseOutcomes);
+  const [outcomesDraft, setOutcomesDraft] = useState(limitOutcomes(courseOutcomes));
   const [editingOutcomeIndex, setEditingOutcomeIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    setOutcomesDraft(courseOutcomes);
+    setOutcomesDraft(limitOutcomes(courseOutcomes));
   }, [courseOutcomes]);
 
   useEffect(() => {
@@ -68,6 +69,10 @@ export default function CourseWhatYouWillLearn({
 
   const addOutcome = () => {
     setOutcomesDraft((currentOutcomes) => {
+      if (currentOutcomes.length >= MAX_COURSE_LEARNING_OUTCOMES) {
+        return currentOutcomes;
+      }
+
       const nextOutcomes = [...currentOutcomes, ""];
       setEditingOutcomeIndex(nextOutcomes.length - 1);
 
@@ -103,17 +108,22 @@ export default function CourseWhatYouWillLearn({
         <span className="flex items-center justify-center rounded-full text-success-500">
           <CheckCircle2 className="size-8" />
         </span>
-        {t("modernCourseView.overview.whatYouWillLearn")}
+        <span className="min-w-0 flex-1">{t("modernCourseView.overview.whatYouWillLearn")}</span>
         {isAdminExperience && (
-          <button
-            type="button"
-            onClick={addOutcome}
-            disabled={isPending}
-            aria-label={t("modernCourseView.overview.addLearningOutcome")}
-            className="ml-auto rounded-lg p-1 transition-all hover:bg-white/20 disabled:opacity-50"
-          >
-            <Plus className="size-4 text-white" />
-          </button>
+          <>
+            <span className="text-sm font-medium text-white/80">
+              {outcomesDraft.length}/{MAX_COURSE_LEARNING_OUTCOMES}
+            </span>
+            <button
+              type="button"
+              onClick={addOutcome}
+              disabled={isPending || outcomesDraft.length >= MAX_COURSE_LEARNING_OUTCOMES}
+              aria-label={t("modernCourseView.overview.addLearningOutcome")}
+              className="rounded-lg p-1 transition-all hover:bg-white/20 disabled:opacity-50"
+            >
+              <Plus className="size-4 text-white" />
+            </button>
+          </>
         )}
       </h3>
 

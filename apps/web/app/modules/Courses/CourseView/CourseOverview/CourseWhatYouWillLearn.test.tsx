@@ -1,3 +1,4 @@
+import { MAX_COURSE_LEARNING_OUTCOMES } from "@repo/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -98,5 +99,20 @@ describe("CourseWhatYouWillLearn", () => {
     await user.tab();
 
     expect(updateCourse).not.toHaveBeenCalled();
+  });
+
+  it("limits a course to five learning outcomes", () => {
+    mockedIsAdminExperience = true;
+    const outcomes = Array.from(
+      { length: MAX_COURSE_LEARNING_OUTCOMES + 1 },
+      (_, index) => `Outcome ${index + 1}`,
+    );
+    mockedCourse = createCourse({ learningOutcomes: outcomes });
+
+    renderWith().render(<CourseWhatYouWillLearn courseOutcomes={outcomes} language="en" />);
+
+    expect(screen.getByText("5/5")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add learning outcome" })).toBeDisabled();
+    expect(screen.queryByText("Outcome 6")).not.toBeInTheDocument();
   });
 });

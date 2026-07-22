@@ -2,6 +2,7 @@ import { type Static, Type } from "@sinclair/typebox";
 
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
+import { courseLearningOutcomesSchema } from "./courseLearningOutcomes.schema";
 import { coursesStatusOptions } from "./courseQuery";
 
 export const baseCourseSchema = Type.Object({
@@ -15,7 +16,7 @@ export const baseCourseSchema = Type.Object({
       maximum: 100,
     }),
   ),
-  learningOutcomes: Type.Optional(Type.Array(Type.String())),
+  learningOutcomes: Type.Optional(courseLearningOutcomesSchema),
   priceInCents: Type.Optional(Type.Integer()),
   currency: Type.Optional(Type.String()),
   categoryId: Type.String({ format: "uuid" }),

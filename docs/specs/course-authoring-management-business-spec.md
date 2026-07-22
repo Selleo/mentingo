@@ -19,6 +19,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Choose supported course types where the tenant configuration allows them.
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
+- Add up to five concise learning outcomes so learners can quickly understand what the course delivers.
 - Review and edit the modern course overview in the user's interface language, including media, deadlines, certificates, author details, related author courses, curriculum, and statistics.
 - Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
 - Change course category and status individually or in bulk, including draft, private, and published states.
@@ -53,6 +54,8 @@ Course statistics are available only to users with the dedicated statistics perm
 
 Course administrators can select a trailer video in the same media editor used for the hero image. Mentingo uploads the video through the resumable video-upload flow, associates it with the course as its trailer, and refreshes course and catalog data after the media update completes.
 
+Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
+
 ## Key Technical Context
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
@@ -62,6 +65,7 @@ Course administrators can select a trailer video in the same media editor used f
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 - Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
+- The shared `MAX_COURSE_LEARNING_OUTCOMES` constant keeps the five-item UI and API validation rules aligned.
 - Trailer videos use the existing resumable video-upload integration and the course `trailer` relationship rather than a separate upload path.
 
 ## Test Evidence
@@ -71,3 +75,4 @@ Course administrators can select a trailer video in the same media editor used f
 - Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
 - Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, accessible keyboard dismissal for the description, deadline, and media dialogs, expanded lesson links to course lesson routes, and allowed trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.
+- Focused frontend and API schema tests verify that only five learning outcomes can be displayed or submitted and that the add action is disabled at the limit.

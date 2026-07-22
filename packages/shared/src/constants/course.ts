@@ -1,3 +1,5 @@
+export const MAX_COURSE_LEARNING_OUTCOMES = 5;
+
 export const COURSE_STATUSES = {
   DRAFT: "draft",
   PUBLISHED: "published",
