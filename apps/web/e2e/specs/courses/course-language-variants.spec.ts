@@ -1,6 +1,5 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_TAB_VALUES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { createCourseLanguageFlow } from "../../flows/courses/create-course-language.flow";
 import { deleteCourseLanguageFlow } from "../../flows/courses/delete-course-language.flow";
@@ -30,7 +29,7 @@ test("admin can create, update, and delete a course language variant", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.SETTINGS);
+    await openEditCoursePageFlow(page, course.id);
     await createCourseLanguageFlow(page, "de");
     await courseFactory.update(course.id, {
       language: "de",

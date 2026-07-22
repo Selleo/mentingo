@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Button } from "~/components/ui/button";
 import { CourseSettingsSwitches } from "~/modules/Admin/EditCourse/CourseSettings/components/CourseSettingsSwitches";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 type CourseSettingsDrawerProps = {
   onClose: () => void;
   title: string;
@@ -26,7 +28,10 @@ export default function CourseSettingsDrawer({
         onClick={onClose}
       />
 
-      <div className="fixed right-0 top-0 z-50 size-full bg-white shadow-2xl transition-transform sm:max-w-md">
+      <div
+        data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER}
+        className="fixed right-0 top-0 z-50 size-full bg-white shadow-2xl transition-transform sm:max-w-md"
+      >
         <div className="flex h-full flex-col">
           <div className="flex items-center justify-between border-b border-neutral-200 p-4 md:p-6">
             <div className="flex items-center gap-3">

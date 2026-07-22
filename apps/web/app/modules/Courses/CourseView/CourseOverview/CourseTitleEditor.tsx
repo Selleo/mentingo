@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 type CourseTitleEditorProps = {
   canEdit: boolean;
   disabled: boolean;
@@ -49,6 +51,7 @@ export default function CourseTitleEditor({
     return (
       <textarea
         ref={textareaRef}
+        data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
         value={title}
         disabled={disabled}
         onChange={(event) => {
@@ -80,6 +83,7 @@ export default function CourseTitleEditor({
       {canEdit ? (
         <button
           type="button"
+          data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
           onClick={onEdit}
           className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
         >

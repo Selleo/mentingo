@@ -147,6 +147,8 @@ export const SCORM_EXPORT_CARD_HANDLES = {
 
 export const COURSE_OVERVIEW_HANDLES = {
   STUDENT_MODE_BUTTON: "course-overview-student-mode-button",
+  SETTINGS_BUTTON: "course-overview-settings-button",
+  SETTINGS_DRAWER: "course-overview-settings-drawer",
   AUTHOR_TRANSFER_BUTTON: "course-overview-author-transfer-button",
   TRANSFER_OWNERSHIP_SELECT: "course-transfer-ownership-select",
   transferOwnershipOption: (userId: string) => `course-transfer-ownership-option-${userId}`,

@@ -1,7 +1,5 @@
 import { COURSE_SETTINGS_HANDLES } from "../../data/courses/handles";
 
-import { fillRichTextEditorFlow } from "./editor.flow";
-
 import type { Page } from "@playwright/test";
 
 type FillCourseSettingsFlowInput = {
@@ -15,7 +13,9 @@ export const fillCourseSettingsFlow = async (
   { title, categoryTitle, description }: FillCourseSettingsFlowInput,
 ) => {
   if (title !== undefined) {
+    await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).fill(title);
+    await page.getByTestId(COURSE_SETTINGS_HANDLES.TITLE_INPUT).press("Enter");
   }
 
   if (categoryTitle !== undefined) {
@@ -24,6 +24,7 @@ export const fillCourseSettingsFlow = async (
   }
 
   if (description !== undefined) {
-    await fillRichTextEditorFlow(page, COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR, description);
+    await page.getByTestId(COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR).fill(description);
+    await page.getByTestId(COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR).blur();
   }
 };

@@ -11,6 +11,8 @@ import {
 import { cn } from "~/lib/utils";
 import { formatDurationToHalfHour } from "~/modules/Courses/utils/formatDuration";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 type CategoryOption = {
   id: string;
   title: string;
@@ -61,6 +63,7 @@ export default function CourseCategoryEditor({
         >
           <SelectTrigger
             id="course-category"
+            data-testid={COURSE_SETTINGS_HANDLES.CATEGORY_SELECT}
             className="h-8 w-auto min-w-40 rounded-full border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-950 shadow-lg transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-white/70"
           >
             <SelectValue placeholder={categoryTitle} />
@@ -71,6 +74,7 @@ export default function CourseCategoryEditor({
               <SelectItem
                 key={category.id}
                 value={category.id}
+                data-testid={COURSE_SETTINGS_HANDLES.categoryOption(category.title)}
                 className="cursor-pointer focus:bg-neutral-100 focus:text-neutral-950"
               >
                 {category.title}

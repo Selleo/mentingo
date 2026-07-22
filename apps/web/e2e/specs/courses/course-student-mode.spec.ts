@@ -1,10 +1,9 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_OVERVIEW_HANDLES, COURSE_TAB_VALUES } from "../../data/courses/handles";
+import { COURSE_OVERVIEW_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openCoursePreviewFlow } from "../../flows/courses/open-course-preview.flow";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
 import { toggleCourseStudentModeFlow } from "../../flows/courses/toggle-course-student-mode.flow";
+import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 
 test("admin can toggle student mode from course preview", async ({
   cleanup,
@@ -41,8 +40,7 @@ test("admin can toggle student mode from course preview", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.SETTINGS);
-    await openCoursePreviewFlow(page);
+    await openCourseOverviewFlow(page, course.id);
     await expect(page).toHaveURL(/\/course\//);
     await expect(page).not.toHaveURL(/\/auth\/login/);
 

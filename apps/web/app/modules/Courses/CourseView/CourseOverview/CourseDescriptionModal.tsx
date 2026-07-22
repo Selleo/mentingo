@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
+import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseDescriptionModalProps = {
@@ -63,6 +64,7 @@ export default function CourseDescriptionModal({
             </h5>
             {isAdminExperience ? (
               <textarea
+                data-testid={COURSE_SETTINGS_HANDLES.DESCRIPTION_EDITOR}
                 value={courseDescription}
                 onChange={(event) => onChangeDescription(event.target.value)}
                 className="min-h-32 w-full rounded-lg border-2 border-neutral-200 p-3 leading-relaxed text-neutral-950 focus:border-primary-700 focus:outline-none"

@@ -15,6 +15,8 @@ import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+
 import CourseCategoryEditor from "./CourseCategoryEditor";
 import CourseDescriptionModal from "./CourseDescriptionModal";
 import CourseHeroImage from "./CourseHeroImage";
@@ -263,6 +265,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
           <>
             <Button
               variant="outline"
+              data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
               onClick={() => setShowSettingsDrawer(true)}
               className="absolute left-2 top-2 flex items-center gap-2  shadow-lg backdrop-blur-sm transition md:left-4 md:top-4 "
             >

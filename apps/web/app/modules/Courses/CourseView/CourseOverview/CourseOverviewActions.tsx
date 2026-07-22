@@ -37,7 +37,8 @@ export default function CourseOverviewActions({
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
   const { mutateAsync: enrollCourse, isPending: isEnrolling } = useEnrollCourse();
-  const { course, isAdminExperience } = useCourseAccessProvider();
+  const { course, isAdminExperience, canEditCourse, isCourseStudentModeActive } =
+    useCourseAccessProvider();
 
   const handleEnrollCourse = async () => {
     await enrollCourse({ id: course.id });
@@ -51,7 +52,7 @@ export default function CourseOverviewActions({
   };
 
   const renderPrimaryAction = () => {
-    if (isAdminExperience) {
+    if (isAdminExperience || (canEditCourse && isCourseStudentModeActive)) {
       return (
         <Button
           data-testid={COURSE_OVERVIEW_HANDLES.STUDENT_MODE_BUTTON}
@@ -61,7 +62,13 @@ export default function CourseOverviewActions({
         >
           <GraduationCap className="size-4" />
 
-          <span className="text-sm font-semibold">{t("modernCourseView.learningMode.enter")}</span>
+          <span className="text-sm font-semibold">
+            {t(
+              isCourseStudentModeActive
+                ? "modernCourseView.learningMode.exit"
+                : "modernCourseView.learningMode.enter",
+            )}
+          </span>
         </Button>
       );
     }

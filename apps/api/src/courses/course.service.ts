@@ -97,6 +97,10 @@ import { SettingsService } from "src/settings/settings.service";
 import { StatisticsRepository } from "src/statistics/repositories/statistics.repository";
 import {
   groupCourses,
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorStudentLessonProgress,
   categories,
   certificates,
@@ -4769,6 +4773,52 @@ export class CourseService {
             aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
           })
           .where(inArray(aiMentorLessons.lessonId, lessonIds));
+
+        const aiJudgeConfigurationRows = await trx
+          .select({ id: aiJudgeConfigurations.id })
+          .from(aiJudgeConfigurations)
+          .innerJoin(
+            aiMentorLessons,
+            eq(aiMentorLessons.id, aiJudgeConfigurations.aiMentorLessonId),
+          )
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
+        const aiJudgeConfigurationIds = aiJudgeConfigurationRows.map(({ id }) => id);
+
+        if (aiJudgeConfigurationIds.length) {
+          await trx
+            .update(aiJudgeConfigurations)
+            .set({ taskGoal: deleteJsonbField(aiJudgeConfigurations.taskGoal, language) })
+            .where(inArray(aiJudgeConfigurations.id, aiJudgeConfigurationIds));
+
+          const aiJudgeCriterionRows = await trx
+            .select({ id: aiJudgeCriteria.id })
+            .from(aiJudgeCriteria)
+            .where(inArray(aiJudgeCriteria.configurationId, aiJudgeConfigurationIds));
+          const aiJudgeCriterionIds = aiJudgeCriterionRows.map(({ id }) => id);
+
+          if (aiJudgeCriterionIds.length) {
+            await trx
+              .update(aiJudgeCriteria)
+              .set({
+                title: deleteJsonbField(aiJudgeCriteria.title, language),
+                expectedBehavior: deleteJsonbField(aiJudgeCriteria.expectedBehavior, language),
+              })
+              .where(inArray(aiJudgeCriteria.id, aiJudgeCriterionIds));
+
+            await trx
+              .update(aiJudgeScoreGuidance)
+              .set({
+                description: deleteJsonbField(aiJudgeScoreGuidance.description, language),
+                example: deleteJsonbField(aiJudgeScoreGuidance.example, language),
+              })
+              .where(inArray(aiJudgeScoreGuidance.criterionId, aiJudgeCriterionIds));
+          }
+
+          await trx
+            .update(aiJudgeBlockingErrors)
+            .set({ description: deleteJsonbField(aiJudgeBlockingErrors.description, language) })
+            .where(inArray(aiJudgeBlockingErrors.configurationId, aiJudgeConfigurationIds));
+        }
       }
 
       if (questionIds.length) {

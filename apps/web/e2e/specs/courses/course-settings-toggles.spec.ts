@@ -1,8 +1,8 @@
 import { USER_ROLE } from "~/config/userRoles";
 
-import { COURSE_SETTINGS_HANDLES, COURSE_TAB_VALUES } from "../../data/courses/handles";
+import { COURSE_OVERVIEW_HANDLES, COURSE_SETTINGS_HANDLES } from "../../data/courses/handles";
 import { expect, test } from "../../fixtures/test.fixture";
-import { openEditCoursePageFlow } from "../../flows/courses/open-edit-course-page.flow";
+import { openCourseOverviewFlow } from "../../flows/learning/open-course-overview.flow";
 
 test("admin can toggle course certificate and settings switches", async ({
   cleanup,
@@ -24,7 +24,10 @@ test("admin can toggle course certificate and settings switches", async ({
       await categoryFactory.delete(category.id);
     });
 
-    await openEditCoursePageFlow(page, course.id, COURSE_TAB_VALUES.SETTINGS);
+    await openCourseOverviewFlow(page, course.id);
+    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON).click();
+    await page.getByTestId(COURSE_OVERVIEW_HANDLES.SETTINGS_DRAWER).waitFor();
+
     await page.getByTestId(COURSE_SETTINGS_HANDLES.CERTIFICATE_SWITCH).click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.LESSON_SEQUENCE_SWITCH).click();
     await page.getByTestId(COURSE_SETTINGS_HANDLES.QUIZ_FEEDBACK_SWITCH).click();
