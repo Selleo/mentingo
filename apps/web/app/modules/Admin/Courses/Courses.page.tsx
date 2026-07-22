@@ -172,7 +172,6 @@ const Courses = () => {
               table,
               event,
               id: row.id,
-              idx: row.index,
               value: row.getIsSelected(),
               lastSelectedRowIndex,
               setLastSelectedRowIndex,

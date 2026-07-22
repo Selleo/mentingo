@@ -17,7 +17,7 @@ The main workflow starts in the admin group list. An administrator browses or se
 
 ## Feature Functions
 
-- Browse, search, sort, paginate, and select groups from the admin list.
+- Browse, search, sort, paginate, and select individual groups or a visible range from the admin list.
 - Create groups with a base language, name, and characteristic.
 - Edit group details in the selected language.
 - Add, remove, and switch group language variants while protecting the base language.
@@ -33,7 +33,7 @@ Localized group details also help multilingual organizations keep administrative
 
 ## How It Works
 
-Admins manage groups from `/admin/groups`. The list supports search, sorting, row selection, and bulk actions. Creating or editing a group uses a localized form, so the admin can maintain the group label and characteristic in the appropriate language.
+Admins manage groups from `/admin/groups`. The list supports search, sorting, row selection, and bulk actions. Holding Shift selects the visible range between two rows even after the list has been sorted. Creating or editing a group uses a localized form, so the admin can maintain the group label and characteristic in the appropriate language.
 
 Groups are reused outside the group section. User management can set a user's group membership, course enrollment can assign whole groups to courses, and enrolled-user views can show whether a learner is enrolled directly or through a group.
 
@@ -49,5 +49,5 @@ When group membership changes, Mentingo can apply the impact to group-enrolled c
 
 ## Test Evidence
 
-- Web E2E coverage verifies browsing, sorting, range selection, opening group details, creating valid groups, blocking invalid creation, canceling creation/editing, updating groups, and single or bulk deletion.
+- Web E2E coverage verifies browsing, sorting, range selection in the displayed row order, opening group details, creating valid groups, blocking invalid creation, canceling creation/editing, updating groups, and single or bulk deletion. A focused frontend test verifies range selection after sorting changes the relationship between source indexes and visible positions.
 - API E2E coverage verifies authentication and permission enforcement, listing, pagination, sorting, keyword filtering, details, user groups, creation with language metadata, localized updates and fallback, language add/base/delete rules, deletion, bulk deletion, and automatic enrollment impact when users are assigned to groups.

@@ -49,7 +49,6 @@ export const getCategoriesColumns = ({
             lastSelectedRowIndex,
             setLastSelectedRowIndex,
             id: row.id,
-            idx: row.index,
             value: row.getIsSelected(),
           });
         }}
