@@ -170,7 +170,11 @@ export default function TenantsPage() {
           />
         </div>
 
-        <div className={cn("relative", isPending && "shimmer-45")} aria-busy={isPending}>
+        <div
+          className={cn("relative", isPending && "shimmer-45")}
+          aria-busy={isPending}
+          data-testid={TENANTS_PAGE_HANDLES.TABLE_CONTAINER}
+        >
           <Table data-testid={TENANTS_PAGE_HANDLES.TABLE} className="border bg-neutral-50">
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (

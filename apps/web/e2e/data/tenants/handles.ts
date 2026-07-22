@@ -7,6 +7,7 @@ export const TENANTS_PAGE_HANDLES = {
   statusFilterOption: (status: "all" | "active" | "inactive") =>
     `tenants-page-status-filter-option-${status}`,
   TABLE: "tenants-page-table",
+  TABLE_CONTAINER: "tenants-page-table-container",
   TABLE_BODY: "tenants-page-table-body",
   SORT_LAST_ACTIVITY: "tenants-page-sort-last-activity",
   SORT_RECENT_ACTIVITY_COUNT: "tenants-page-sort-recent-activity-count",
