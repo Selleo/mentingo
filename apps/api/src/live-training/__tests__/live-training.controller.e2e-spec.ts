@@ -1,4 +1,7 @@
 import {
+  ANNOUNCEMENT_AUDIENCES,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
   CALENDAR_EVENT_STATUSES,
   CALENDAR_EVENT_SOURCE_TYPES,
   COURSE_ENROLLMENT,
@@ -18,6 +21,7 @@ import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  announcements,
   calendarEvents,
   liveLessons,
   liveTrainingLinks,
@@ -647,8 +651,9 @@ describe("LiveTrainingController (e2e)", () => {
     expect(createdNotifications).toHaveLength(0);
   });
 
-  it("sends live training emails only to students enrolled in a course with the linked live lesson", async () => {
+  it("notifies every enrolled user, including admins, only through the linked live lesson", async () => {
     const admin = await createAdmin();
+    const enrolledAdmin = await createAdmin();
     const enrolledStudent = await createStudent();
     const linkedCourseWithoutLiveLessonStudent = await createStudent();
     const unrelatedStudent = await createStudent();
@@ -665,6 +670,11 @@ describe("LiveTrainingController (e2e)", () => {
       {
         courseId: liveLessonCourse.id,
         studentId: enrolledStudent.id,
+        status: COURSE_ENROLLMENT.ENROLLED,
+      },
+      {
+        courseId: liveLessonCourse.id,
+        studentId: enrolledAdmin.id,
         status: COURSE_ENROLLMENT.ENROLLED,
       },
       {
@@ -722,9 +732,11 @@ describe("LiveTrainingController (e2e)", () => {
       .set("Cookie", await cookieFor(admin, app))
       .expect(201);
 
-    const startEmails = await waitForEmails(1);
+    const startEmails = await waitForEmails(2);
 
-    expect(startEmails.map((email) => email.to)).toEqual([enrolledStudent.email]);
+    expect(startEmails.map((email) => email.to)).toEqual(
+      expect.arrayContaining([enrolledStudent.email, enrolledAdmin.email]),
+    );
 
     emailAdapter.clearEmails();
 
@@ -734,15 +746,41 @@ describe("LiveTrainingController (e2e)", () => {
       .set("Cookie", await cookieFor(admin, app))
       .expect(201);
 
-    const endEmails = await waitForEmails(1);
+    const endEmails = await waitForEmails(2);
 
-    expect(endEmails.map((email) => email.to)).toEqual([enrolledStudent.email]);
+    expect(endEmails.map((email) => email.to)).toEqual(
+      expect.arrayContaining([enrolledStudent.email, enrolledAdmin.email]),
+    );
     expect([...startEmails, ...endEmails].map((email) => email.to)).not.toEqual(
       expect.arrayContaining([
         linkedCourseWithoutLiveLessonStudent.email,
         unrelatedStudent.email,
         admin.email,
       ]),
+    );
+
+    const liveTrainingAnnouncements = await db
+      .select()
+      .from(announcements)
+      .where(
+        and(
+          eq(announcements.sourceType, ANNOUNCEMENT_SOURCE_TYPES.LIVE_TRAINING),
+          eq(announcements.sourceId, liveTrainingId),
+          eq(announcements.status, ANNOUNCEMENT_STATUSES.PUBLISHED),
+        ),
+      );
+    const deliveredUserIds = await db
+      .select({ userId: userAnnouncements.userId })
+      .from(userAnnouncements);
+
+    expect(liveTrainingAnnouncements).toHaveLength(2);
+    expect(
+      liveTrainingAnnouncements.every(
+        ({ audience }) => audience === ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+      ),
+    ).toBe(true);
+    expect(new Set(deliveredUserIds.map(({ userId }) => userId))).toEqual(
+      new Set([enrolledStudent.id, enrolledAdmin.id]),
     );
   });
 });

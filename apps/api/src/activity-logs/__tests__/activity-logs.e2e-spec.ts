@@ -484,7 +484,7 @@ describe("Activity Logs E2E", () => {
       expect(viewLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.ANNOUNCEMENT);
       expect(viewLog.actorId).toBe(student.id);
       expect(viewLog.resourceId).toBe(announcement.id);
-      expect(viewMetadata.context?.audience).toBe("everyone");
+      expect(viewMetadata.context?.audience).toBe("all_users");
     });
   });
 

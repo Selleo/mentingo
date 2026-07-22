@@ -4928,7 +4928,7 @@ export interface GetAllAnnouncementsResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -4941,6 +4941,7 @@ export interface GetAllAnnouncementsResponse {
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     deletedAt: string | null;
+    isRead: boolean | null;
   }[];
   pagination: {
     totalItems: number;
@@ -4962,7 +4963,7 @@ export interface GetAnnouncementsForUserResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -5011,7 +5012,7 @@ export interface CreateAnnouncementResponse {
     createdAt: string;
     updatedAt: string;
     authorId: string;
-    isEveryone: boolean;
+    audience: string;
     status: string;
     scheduledAt: string | null;
     publishedAt: string | null;
@@ -12142,6 +12143,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     announcementsControllerGetAllAnnouncements: (
       query?: {
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        feed?: "all" | "admin_announcements" | "system";
         status?: "scheduled" | "published";
         /** @min 1 */
         page?: number;

@@ -1,0 +1,1 @@
+ALTER TABLE "announcements" DROP COLUMN IF EXISTS "is_everyone";

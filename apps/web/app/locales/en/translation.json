@@ -3475,7 +3475,8 @@
     "title": "Notifications",
     "tabs": {
       "all": "All",
-      "adminAnnouncements": "Admin announcements"
+      "adminAnnouncements": "Admin announcements",
+      "system": "System"
     },
     "actions": {
       "refresh": "Refresh",

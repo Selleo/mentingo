@@ -2324,7 +2324,16 @@
     "/api/user/onboarding-status/{page}": {
       "patch": {
         "operationId": "UserController_markOnboardingComplete",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "page",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -3383,23 +3392,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -3431,6 +3423,23 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
             }
           }
         ],
@@ -5575,15 +5584,6 @@
         "operationId": "CourseController_createLanguage",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -5615,6 +5615,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -5685,15 +5694,6 @@
         "operationId": "CourseController_generateTranslations",
         "parameters": [
           {
-            "name": "courseId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -5725,6 +5725,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "courseId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -6506,14 +6515,6 @@
             }
           },
           {
-            "name": "studentId",
-            "required": true,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -6545,6 +6546,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "studentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -7437,31 +7446,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "number"
-            }
-          },
-          {
-            "name": "sort",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -7493,6 +7477,31 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
@@ -7860,6 +7869,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -7875,6 +7892,14 @@
         "parameters": [
           {
             "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
             "required": true,
             "in": "query",
             "schema": {
@@ -9332,24 +9357,6 @@
         "operationId": "AnnouncementsController_getAllAnnouncements",
         "parameters": [
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -9383,6 +9390,27 @@
             }
           },
           {
+            "name": "feed",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_announcements",
+                  "type": "string"
+                },
+                {
+                  "const": "system",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -9397,6 +9425,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -9492,24 +9538,6 @@
             }
           },
           {
-            "name": "page",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
-            "name": "perPage",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "minimum": 1,
-              "type": "number"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -9540,6 +9568,24 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "perPage",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "type": "number"
             }
           }
         ],
@@ -11798,6 +11844,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "lang",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -11813,6 +11867,14 @@
         "parameters": [
           {
             "name": "certificateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
             "required": true,
             "in": "query",
             "schema": {
@@ -12248,15 +12310,6 @@
             }
           },
           {
-            "name": "scoId",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "format": "uuid",
-              "type": "string"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -12288,6 +12341,15 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "scoId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
             }
           }
         ],
@@ -13843,6 +13905,79 @@
             }
           },
           {
+            "name": "resourceType",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "user",
+                  "type": "string"
+                },
+                {
+                  "const": "course",
+                  "type": "string"
+                },
+                {
+                  "const": "chapter",
+                  "type": "string"
+                },
+                {
+                  "const": "lesson",
+                  "type": "string"
+                },
+                {
+                  "const": "announcement",
+                  "type": "string"
+                },
+                {
+                  "const": "group",
+                  "type": "string"
+                },
+                {
+                  "const": "settings",
+                  "type": "string"
+                },
+                {
+                  "const": "integration",
+                  "type": "string"
+                },
+                {
+                  "const": "category",
+                  "type": "string"
+                },
+                {
+                  "const": "qa",
+                  "type": "string"
+                },
+                {
+                  "const": "news",
+                  "type": "string"
+                },
+                {
+                  "const": "article",
+                  "type": "string"
+                },
+                {
+                  "const": "articleSection",
+                  "type": "string"
+                },
+                {
+                  "const": "live_training",
+                  "type": "string"
+                },
+                {
+                  "const": "learning_path",
+                  "type": "string"
+                },
+                {
+                  "const": "scorm",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "from",
             "required": false,
             "in": "query",
@@ -14082,79 +14217,6 @@
                       }
                     ]
                   }
-                }
-              ]
-            }
-          },
-          {
-            "name": "resourceType",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "anyOf": [
-                {
-                  "const": "user",
-                  "type": "string"
-                },
-                {
-                  "const": "course",
-                  "type": "string"
-                },
-                {
-                  "const": "chapter",
-                  "type": "string"
-                },
-                {
-                  "const": "lesson",
-                  "type": "string"
-                },
-                {
-                  "const": "announcement",
-                  "type": "string"
-                },
-                {
-                  "const": "group",
-                  "type": "string"
-                },
-                {
-                  "const": "settings",
-                  "type": "string"
-                },
-                {
-                  "const": "integration",
-                  "type": "string"
-                },
-                {
-                  "const": "category",
-                  "type": "string"
-                },
-                {
-                  "const": "qa",
-                  "type": "string"
-                },
-                {
-                  "const": "news",
-                  "type": "string"
-                },
-                {
-                  "const": "article",
-                  "type": "string"
-                },
-                {
-                  "const": "articleSection",
-                  "type": "string"
-                },
-                {
-                  "const": "live_training",
-                  "type": "string"
-                },
-                {
-                  "const": "learning_path",
-                  "type": "string"
-                },
-                {
-                  "const": "scorm",
-                  "type": "string"
                 }
               ]
             }
@@ -15281,14 +15343,6 @@
         "operationId": "ArticlesController_getArticleToc",
         "parameters": [
           {
-            "name": "isDraftMode",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -15320,6 +15374,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "isDraftMode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -15380,14 +15442,6 @@
             }
           },
           {
-            "name": "isDraftMode",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
             "name": "language",
             "required": false,
             "in": "query",
@@ -15419,6 +15473,14 @@
                   "type": "string"
                 }
               ]
+            }
+          },
+          {
+            "name": "isDraftMode",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
@@ -40695,8 +40757,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -40842,6 +40904,16 @@
                       "type": "null"
                     }
                   ]
+                },
+                "isRead": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -40849,7 +40921,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -40861,7 +40933,8 @@
                 "content",
                 "baseLanguage",
                 "availableLocales",
-                "deletedAt"
+                "deletedAt",
+                "isRead"
               ]
             }
           },
@@ -40935,8 +41008,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -41092,7 +41165,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -41274,8 +41347,8 @@
               "authorId": {
                 "type": "string"
               },
-              "isEveryone": {
-                "type": "boolean"
+              "audience": {
+                "type": "string"
               },
               "status": {
                 "type": "string"
@@ -41428,7 +41501,7 @@
               "createdAt",
               "updatedAt",
               "authorId",
-              "isEveryone",
+              "audience",
               "status",
               "scheduledAt",
               "publishedAt",
