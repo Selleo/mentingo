@@ -1,6 +1,6 @@
-import { COURSE_SETTINGS_HANDLES } from "../../data/courses/handles";
+import { expect, type Page } from "@playwright/test";
 
-import type { Page } from "@playwright/test";
+import { COURSE_SETTINGS_HANDLES } from "../../data/courses/handles";
 
 type FillCourseSettingsFlowInput = {
   title?: string;
@@ -20,6 +20,9 @@ export const fillCourseSettingsFlow = async (
     );
     await titleEditor.fill(title);
     await titleEditor.press("Enter");
+    await expect(
+      page.locator(`button[data-testid="${COURSE_SETTINGS_HANDLES.TITLE_INPUT}"]`),
+    ).toHaveText(title);
   }
 
   if (categoryTitle !== undefined) {
