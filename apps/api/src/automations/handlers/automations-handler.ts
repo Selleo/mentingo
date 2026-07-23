@@ -83,7 +83,7 @@ export class AutomationsHandler implements IEventHandler<AutomationEventTypes> {
     const uniqueAutomationIds = [...new Set(automationIds)];
     console.log("eventName", eventName);
     for (const automationId of uniqueAutomationIds) {
-      await this.automationRunnerService.startAutomation(automationId);
+      await this.automationRunnerService.startAutomation(automationId, event);
     }
   }
 }
