@@ -3478,7 +3478,8 @@
     "title": "Pranešimai",
     "tabs": {
       "all": "Visi",
-      "adminAnnouncements": "Administratoriaus skelbimai"
+      "adminAnnouncements": "Administratoriaus skelbimai",
+      "system": "Sistemos"
     },
     "actions": {
       "refresh": "Atnaujinti",

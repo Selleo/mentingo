@@ -3835,7 +3835,8 @@
     "title": "Powiadomienia",
     "tabs": {
       "all": "Wszystkie",
-      "adminAnnouncements": "Ogłoszenia adminów"
+      "adminAnnouncements": "Ogłoszenia adminów",
+      "system": "Systemowe"
     },
     "actions": {
       "refresh": "Odśwież",

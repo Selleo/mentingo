@@ -1,3 +1,5 @@
+-- Custom SQL migration file, put you code below! --
+
 DO $$
 DECLARE
   table_name text;

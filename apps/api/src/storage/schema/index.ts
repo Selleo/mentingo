@@ -28,6 +28,7 @@ import {
   COURSE_GENERATION_SYNC_STATUS,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
+  ANNOUNCEMENT_AUDIENCES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -111,6 +112,7 @@ import type {
   MicrosoftCalendarOutboundStatus,
   OutlookEventAvailability,
   OutlookEventSensitivity,
+  AnnouncementAudience,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
@@ -1809,7 +1811,10 @@ export const announcements = pgTable(
     authorId: uuid("author_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    isEveryone: boolean("is_everyone").notNull().default(false),
+    audience: text("audience")
+      .$type<AnnouncementAudience>()
+      .notNull()
+      .default(ANNOUNCEMENT_AUDIENCES.ALL_USERS),
     status: text("status")
       .$type<AnnouncementStatus>()
       .notNull()

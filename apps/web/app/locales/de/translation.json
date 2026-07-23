@@ -3477,7 +3477,8 @@
     "title": "Benachrichtigungen",
     "tabs": {
       "all": "Alle",
-      "adminAnnouncements": "Admin-Ankündigungen"
+      "adminAnnouncements": "Admin-Ankündigungen",
+      "system": "System"
     },
     "actions": {
       "refresh": "Aktualisieren",

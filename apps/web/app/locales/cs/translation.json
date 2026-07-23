@@ -3478,7 +3478,8 @@
     "title": "Notifikace",
     "tabs": {
       "all": "Vše",
-      "adminAnnouncements": "Oznámení adminů"
+      "adminAnnouncements": "Oznámení adminů",
+      "system": "Systémová"
     },
     "actions": {
       "refresh": "Obnovit",

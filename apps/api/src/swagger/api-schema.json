@@ -9353,6 +9353,27 @@
             }
           },
           {
+            "name": "feed",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "all",
+                  "type": "string"
+                },
+                {
+                  "const": "admin_announcements",
+                  "type": "string"
+                },
+                {
+                  "const": "system",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
             "name": "status",
             "required": false,
             "in": "query",
@@ -40719,8 +40740,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -40866,6 +40887,16 @@
                       "type": "null"
                     }
                   ]
+                },
+                "isRead": {
+                  "anyOf": [
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
@@ -40873,7 +40904,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -40885,7 +40916,8 @@
                 "content",
                 "baseLanguage",
                 "availableLocales",
-                "deletedAt"
+                "deletedAt",
+                "isRead"
               ]
             }
           },
@@ -40959,8 +40991,8 @@
                 "authorId": {
                   "type": "string"
                 },
-                "isEveryone": {
-                  "type": "boolean"
+                "audience": {
+                  "type": "string"
                 },
                 "status": {
                   "type": "string"
@@ -41116,7 +41148,7 @@
                 "createdAt",
                 "updatedAt",
                 "authorId",
-                "isEveryone",
+                "audience",
                 "status",
                 "scheduledAt",
                 "publishedAt",
@@ -41298,8 +41330,8 @@
               "authorId": {
                 "type": "string"
               },
-              "isEveryone": {
-                "type": "boolean"
+              "audience": {
+                "type": "string"
               },
               "status": {
                 "type": "string"
@@ -41452,7 +41484,7 @@
               "createdAt",
               "updatedAt",
               "authorId",
-              "isEveryone",
+              "audience",
               "status",
               "scheduledAt",
               "publishedAt",
