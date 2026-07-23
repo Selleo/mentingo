@@ -326,6 +326,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatyzacja",
     "settings": "Ustawienia",
     "logout": "Wyloguj",
     "panel": "Panel",
@@ -4834,30 +4835,6 @@
       "placeholdersDescription": "Przypisz każdą zmienną szablonu do danych dostarczanych przez trigger.",
       "selectVariable": "Wybierz zmienną triggera...",
       "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne."
-    },
-    "simulation": {
-      "title": "Wynik symulacji",
-      "statusSuccess": "Sukces",
-      "statusFailed": "Niepowodzenie",
-      "errorTitle": "Błąd symulacji",
-      "retry": "Ponów symulację",
-      "errorsTitle": "Wykryte problemy",
-      "readyToActivate": "Automatyzacja jest gotowa do aktywacji.",
-      "tabPreview": "Podgląd e-maila",
-      "tabEventData": "Dane zdarzenia",
-      "tabMappings": "Mapowania",
-      "from": "Od:",
-      "to": "Do:",
-      "subject": "Temat:",
-      "noEventData": "Brak danych zdarzenia — wybierz typ triggera.",
-      "availableVariables": "Dostępne zmienne zdarzenia",
-      "variableName": "Zmienna",
-      "variableLabel": "Opis",
-      "variableType": "Typ",
-      "placeholder": "Placeholder",
-      "mappedTo": "Zmapowane do",
-      "sampleValue": "Wartość próbna",
-      "unmapped": "Niezmapowane"
     }
   },
   "automationSteps": {

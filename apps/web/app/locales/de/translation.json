@@ -325,6 +325,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatisierungen",
     "settings": "Einstellungen",
     "logout": "Abmelden",
     "panel": "Panel",

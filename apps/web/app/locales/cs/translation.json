@@ -325,6 +325,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatizace",
     "settings": "Nastavení",
     "logout": "Odhlášení",
     "panel": "panel",

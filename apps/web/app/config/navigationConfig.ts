@@ -183,7 +183,7 @@ export const getNavigationConfig = (
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
         },
         {
-          label: "Automatyzacja", //t("navigationSideBar.automation"),
+          label: t("navigationSideBar.automation"),
           path: "admin/automation",
           iconName: "InProgress",
         },
