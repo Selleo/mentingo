@@ -5,6 +5,7 @@ import { aliasedTable } from "drizzle-orm/alias";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { LocalizationService } from "src/localization/localization.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
@@ -18,6 +19,7 @@ import {
   microsoftCalendarConnections,
   microsoftCalendarEvents,
   microsoftCalendarOutboundEvents,
+  settings,
   users,
 } from "src/storage/schema";
 
@@ -25,6 +27,7 @@ import type {
   MappedMicrosoftCalendarEvent,
   MicrosoftCalendarConnectionCreateInput,
   MicrosoftCalendarConnectionUpdate,
+  OutboundCandidate,
 } from "../types/microsoft-calendar.types";
 
 @Injectable()
@@ -32,6 +35,7 @@ export class MicrosoftCalendarRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   async getConnectionByUserId(userId: UUIDType) {
@@ -156,7 +160,11 @@ export class MicrosoftCalendarRepository {
       .where(eq(microsoftCalendarOutboundEvents.connectionId, connectionId));
   }
 
-  async listOutboundCandidates(connectionId: UUIDType, start: string, end: string) {
+  async listOutboundCandidates(
+    connectionId: UUIDType,
+    start: string,
+    end: string,
+  ): Promise<OutboundCandidate[]> {
     const [connection] = await this.db
       .select({ userId: microsoftCalendarConnections.userId })
       .from(microsoftCalendarConnections)
@@ -166,12 +174,21 @@ export class MicrosoftCalendarRepository {
 
     try {
       const liveTrainingAuthor = aliasedTable(users, "live_training_author");
+      const recipientLanguage = sql<string>`${settings.settings}->>'language'`;
       const liveTrainingCandidates = this.db
         .selectDistinct({
           calendarEventId: calendarEvents.id,
           uid: calendarEvents.uid,
-          title: calendarEvents.title,
-          description: calendarEvents.description,
+          title: this.localizationService.getLocalizedSqlField(
+            calendarEvents.title,
+            recipientLanguage,
+            calendarEvents,
+          ),
+          description: this.localizationService.getLocalizedSqlField(
+            calendarEvents.description,
+            recipientLanguage,
+            calendarEvents,
+          ),
           startsAt: calendarEvents.startsAt,
           endsAt: calendarEvents.endsAt,
           allDay: calendarEvents.allDay,
@@ -204,6 +221,7 @@ export class MicrosoftCalendarRepository {
             eq(users.id, groupUsers.userId),
           ),
         )
+        .leftJoin(settings, eq(settings.userId, users.id))
         .where(
           and(
             lt(calendarEvents.startsAt, end),
@@ -218,8 +236,16 @@ export class MicrosoftCalendarRepository {
         .selectDistinct({
           calendarEventId: calendarEvents.id,
           uid: calendarEvents.uid,
-          title: calendarEvents.title,
-          description: calendarEvents.description,
+          title: this.localizationService.getLocalizedSqlField(
+            calendarEvents.title,
+            recipientLanguage,
+            calendarEvents,
+          ),
+          description: this.localizationService.getLocalizedSqlField(
+            calendarEvents.description,
+            recipientLanguage,
+            calendarEvents,
+          ),
           startsAt: calendarEvents.startsAt,
           endsAt: calendarEvents.endsAt,
           allDay: calendarEvents.allDay,
@@ -228,10 +254,16 @@ export class MicrosoftCalendarRepository {
           sourceType: sql<"live_training" | "course_due_date">`'course_due_date'`,
           sourceId: groupCourses.courseId,
           recipientId: users.id,
-          groupName: sql<string | null>`${groups.name} ->> COALESCE(${groups.baseLanguage}, 'en')`,
-          courseTitle: sql<
-            string | null
-          >`${courses.title} ->> COALESCE(${courses.baseLanguage}, 'en')`,
+          groupName: this.localizationService.getLocalizedSqlField(
+            groups.name,
+            recipientLanguage,
+            groups,
+          ),
+          courseTitle: this.localizationService.getLocalizedSqlField(
+            courses.title,
+            recipientLanguage,
+            courses,
+          ),
         })
         .from(calendarEvents)
         .innerJoin(groupCourses, eq(groupCourses.calendarEventId, calendarEvents.id))
@@ -239,6 +271,7 @@ export class MicrosoftCalendarRepository {
         .innerJoin(courses, eq(courses.id, groupCourses.courseId))
         .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
         .innerJoin(users, or(eq(users.id, courses.authorId), eq(users.id, groupUsers.userId)))
+        .leftJoin(settings, eq(settings.userId, users.id))
         .where(
           and(
             lt(calendarEvents.startsAt, end),

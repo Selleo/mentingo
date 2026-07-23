@@ -193,7 +193,7 @@ export class MicrosoftCalendarService {
       await this.syncQueue.enqueueOutbound({
         tenantId: state.tenantId,
         connectionId: connection.id,
-        reason: "authorization",
+        reason: MICROSOFT_CALENDAR_SYNC_REASONS.AUTHORIZATION,
       });
     }
 
@@ -335,17 +335,12 @@ export class MicrosoftCalendarService {
         ...subscription,
       });
     } catch (error) {
-      const authenticationFailure =
-        error instanceof MicrosoftGraphError && error.authenticationFailure;
+      const authenticationFailure = this.isAuthenticationFailure(error);
       await this.repository.updateConnection(connection.id, {
-        status: authenticationFailure
-          ? MICROSOFT_CALENDAR_CONNECTION_STATUSES.RECONNECT_REQUIRED
-          : MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR,
+        status: this.getSyncStatus(authenticationFailure),
         errorCode: this.getSyncFailure(error),
         lastSyncCompletedAt: new Date().toISOString(),
       });
-
-      if (!authenticationFailure) throw error;
     }
   }
 
@@ -589,5 +584,15 @@ export class MicrosoftCalendarService {
     }
 
     return "sync_failed";
+  }
+
+  private isAuthenticationFailure(error: unknown) {
+    return error instanceof MicrosoftGraphError && error.authenticationFailure;
+  }
+
+  private getSyncStatus(authenticationFailure: boolean) {
+    if (authenticationFailure) return MICROSOFT_CALENDAR_CONNECTION_STATUSES.RECONNECT_REQUIRED;
+
+    return MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR;
   }
 }

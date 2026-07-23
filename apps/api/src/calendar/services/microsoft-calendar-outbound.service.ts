@@ -1,6 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { MICROSOFT_CALENDAR_OUTBOUND_STATUSES } from "@repo/shared";
+import { escape as escapeHtml } from "lodash";
 
+import {
+  MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES,
+  MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES,
+} from "../calendar.constants";
 import {
   MICROSOFT_MENTINGO_MARKER_PROPERTY,
   MicrosoftGraphApiClient,
@@ -31,35 +36,37 @@ export class MicrosoftCalendarOutboundService {
 
     try {
       const accessToken = await this.getAccessToken(connection);
+
       const calendarId = await this.ensureCalendar(
         connectionId,
         connection.outboundCalendarId,
         accessToken,
       );
+
       if (!calendarId) return;
 
       const { start, end } = this.buildWindow();
-      const candidates = (await this.repository.listOutboundCandidates(
-        connectionId,
-        start,
-        end,
-      )) as unknown as OutboundCandidate[];
+      const candidates = await this.repository.listOutboundCandidates(connectionId, start, end);
       const wanted = new Set<string>();
 
       for (const candidate of candidates) {
         const key = `${candidate.calendarEventId}:${candidate.recipientId}`;
+
         wanted.add(key);
+
         const mapping = await this.repository.getOutboundMapping(
           connectionId,
           candidate.calendarEventId,
           candidate.recipientId,
         );
+
         const payload = this.toGraphEvent(candidate);
 
         if (!mapping) {
           const event = await this.runGraphOperation("create event", () =>
             this.graph.createEvent(accessToken, calendarId, payload),
           );
+
           await this.repository.upsertOutboundMapping({
             connectionId,
             calendarEventId: candidate.calendarEventId,
@@ -77,6 +84,7 @@ export class MicrosoftCalendarOutboundService {
             const recreatedEvent = await this.runGraphOperation("recreate event", () =>
               this.graph.createEvent(accessToken, calendarId, payload),
             );
+
             await this.repository.upsertOutboundMapping({
               connectionId,
               calendarEventId: candidate.calendarEventId,
@@ -89,6 +97,7 @@ export class MicrosoftCalendarOutboundService {
 
       for (const mapping of await this.repository.listOutboundMappings(connectionId)) {
         if (wanted.has(`${mapping.calendarEventId}:${mapping.userId}`)) continue;
+
         try {
           await this.runGraphOperation("delete event", () =>
             this.graph.deleteEvent(accessToken, calendarId, mapping.microsoftEventId),
@@ -96,6 +105,7 @@ export class MicrosoftCalendarOutboundService {
         } catch (error) {
           if (!(error instanceof MicrosoftGraphError) || error.statusCode !== 404) throw error;
         }
+
         await this.repository.deleteOutboundMapping(mapping.id);
       }
 
@@ -107,14 +117,17 @@ export class MicrosoftCalendarOutboundService {
     } catch (error) {
       await this.repository.updateConnection(connectionId, {
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.ERROR,
-        outboundErrorCode:
-          error instanceof MicrosoftGraphError && error.authenticationFailure
-            ? "authorization_expired"
-            : "export_failed",
+        outboundErrorCode: this.getOutboundErrorCode(error),
       });
-      if (error instanceof MicrosoftGraphError && error.authenticationFailure) return;
-      throw error;
     }
+  }
+
+  private getOutboundErrorCode(error: unknown) {
+    if (error instanceof MicrosoftGraphError && error.authenticationFailure) {
+      return MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES.AUTHORIZATION_EXPIRED;
+    }
+
+    return MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES.EXPORT_FAILED;
   }
 
   private async ensureCalendar(
@@ -124,31 +137,36 @@ export class MicrosoftCalendarOutboundService {
   ) {
     if (calendarId) {
       const calendars = await this.graph.listCalendars(accessToken);
+
       if (calendars.some((calendar) => calendar.id === calendarId)) return calendarId;
+
       await this.repository.updateConnection(connectionId, {
         outboundSyncEnabled: false,
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
         outboundErrorCode: "calendar_deleted",
       });
+
       return null;
     }
 
     const calendars = await this.graph.listCalendars(accessToken);
+
     const existing = calendars.find(
       (calendar) => calendar.name === "Mentingo" && !calendar.isDefaultCalendar,
     );
     const calendar = existing ?? (await this.graph.createCalendar(accessToken));
+
     await this.repository.updateConnection(connectionId, { outboundCalendarId: calendar.id });
+
     return calendar.id;
   }
 
   private toGraphEvent(candidate: OutboundCandidate) {
-    const title = this.localized(candidate.title);
-    const description = this.localized(candidate.description);
+    const { title, description } = candidate;
     const body =
-      candidate.sourceType === "course_due_date"
-        ? `<p>${this.escape(description ?? "Mandatory course due date")}</p><p>Course: ${this.escape(candidate.courseTitle ?? title)}</p><p>Group: ${this.escape(candidate.groupName ?? "")}</p><p>This is informational. No action is required in Outlook.</p>`
-        : `<p>${this.escape(description ?? "Mentingo live training")}</p><p>This session is managed in Mentingo.</p>`;
+      candidate.sourceType === MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES.COURSE_DUE_DATE
+        ? `<p>${escapeHtml(description ?? "Mandatory course due date")}</p><p>Course: ${escapeHtml(candidate.courseTitle ?? title)}</p><p>Group: ${escapeHtml(candidate.groupName ?? "")}</p><p>This is informational. No action is required in Outlook.</p>`
+        : `<p>${escapeHtml(description ?? "Mentingo live training")}</p><p>This session is managed in Mentingo.</p>`;
 
     return {
       subject: title,
@@ -170,15 +188,18 @@ export class MicrosoftCalendarOutboundService {
   private async getAccessToken(
     connection: Awaited<ReturnType<MicrosoftCalendarRepository["getConnectionById"]>>,
   ) {
-    if (!connection) throw new Error("Microsoft Calendar connection not found");
+    if (!connection) throw new Error("microsoftCalendar.errors.connectionNotFound");
+
     const refreshToken = this.tokenEncryption.decrypt(connection);
     const token = await this.graph.refreshAccessToken(refreshToken);
+
     if (token.refresh_token && token.refresh_token !== refreshToken) {
       await this.repository.updateConnection(
         connection.id,
         this.tokenEncryption.encrypt(token.refresh_token),
       );
     }
+
     return token.access_token;
   }
 
@@ -203,20 +224,19 @@ export class MicrosoftCalendarOutboundService {
 
   private buildWindow() {
     const now = new Date();
+
     const start = new Date(now);
     start.setUTCDate(start.getUTCDate() - 30);
+
     const end = new Date(now);
     end.setUTCMonth(end.getUTCMonth() + 6);
-    return { start: start.toISOString(), end: end.toISOString() };
-  }
 
-  private localized(value: Record<string, string> | null) {
-    if (!value) return "Mentingo event";
-    return value.en ?? Object.values(value)[0] ?? "Mentingo event";
+    return { start: start.toISOString(), end: end.toISOString() };
   }
 
   private toGraphDateTime(value: string, timezone: string, allDay: boolean) {
     const date = new Date(value);
+
     if (!allDay) return value;
 
     const parts = new Intl.DateTimeFormat("en-US", {
@@ -225,17 +245,9 @@ export class MicrosoftCalendarOutboundService {
       month: "2-digit",
       day: "2-digit",
     }).formatToParts(date);
+
     const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
 
     return `${values.year}-${values.month}-${values.day}T00:00:00`;
-  }
-
-  private escape(value: string) {
-    return value.replace(
-      /[&<>"']/g,
-      (character) =>
-        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character] ??
-        character,
-    );
   }
 }

@@ -1,3 +1,4 @@
+import type { MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES } from "../calendar.constants";
 import type {
   MicrosoftCalendarConnectionStatus,
   MicrosoftCalendarOutboundStatus,
@@ -11,6 +12,7 @@ export type MicrosoftCalendarConnection = typeof microsoftCalendarConnections.$i
 
 export const MICROSOFT_CALENDAR_SYNC_REASONS = {
   INITIAL: "initial",
+  AUTHORIZATION: "authorization",
   MANUAL: "manual",
   WEBHOOK: "webhook",
   RECONCILIATION: "reconciliation",
@@ -46,19 +48,19 @@ export type MicrosoftCalendarSyncJobData = {
 export type MicrosoftCalendarOutboundJobData = {
   tenantId: UUIDType;
   connectionId: UUIDType;
-  reason: string;
+  reason: MicrosoftCalendarSyncReason;
 };
 
 export type OutboundCandidate = {
   calendarEventId: string;
-  title: Record<string, string> | null;
-  description: Record<string, string> | null;
+  title: string;
+  description: string;
   startsAt: string;
   endsAt: string;
   allDay: boolean;
   timezone: string;
   location: string | null;
-  sourceType: "live_training" | "course_due_date";
+  sourceType: (typeof MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES)[keyof typeof MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES];
   groupName: string | null;
   courseTitle: string | null;
   recipientId: string;

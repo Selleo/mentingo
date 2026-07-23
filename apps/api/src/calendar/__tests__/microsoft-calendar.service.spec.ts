@@ -236,4 +236,18 @@ describe("MicrosoftCalendarService synchronization", () => {
       expect.objectContaining({ subscriptionId: "subscription-2" }),
     );
   });
+
+  it("records non-authentication sync failures without rethrowing them", async () => {
+    graph.getDeltaPage.mockRejectedValue(new Error("Microsoft Graph unavailable"));
+
+    await expect(service.synchronizeConnection(connection().id, false)).resolves.toBeUndefined();
+
+    expect(repository.updateConnection).toHaveBeenLastCalledWith(
+      connection().id,
+      expect.objectContaining({
+        status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR,
+        errorCode: "sync_failed",
+      }),
+    );
+  });
 });

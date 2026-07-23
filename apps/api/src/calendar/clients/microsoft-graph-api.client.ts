@@ -1,3 +1,4 @@
+import { Client, GraphError } from "@microsoft/microsoft-graph-client";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
@@ -240,6 +241,13 @@ export class MicrosoftGraphApiClient {
     return this.graphRequest<T>("get", url, { accessToken, headers });
   }
 
+  private createGraphClient(accessToken: string) {
+    return Client.init({
+      authProvider: (done) => done(null, accessToken),
+      baseUrl: MICROSOFT_GRAPH,
+    });
+  }
+
   private async graphRequest<T>(
     method: "get" | "post" | "patch" | "delete",
     url: string,
@@ -250,16 +258,20 @@ export class MicrosoftGraphApiClient {
     },
   ): Promise<T> {
     try {
-      const response = await axios.request<T>({
-        method,
-        url,
-        data: options.data,
-        headers: {
-          Authorization: `Bearer ${options.accessToken}`,
-          ...options.headers,
-        },
-      });
-      return response.data;
+      const request = this.createGraphClient(options.accessToken)
+        .api(url)
+        .headers(options.headers ?? {});
+
+      switch (method) {
+        case "get":
+          return (await request.get()) as T;
+        case "post":
+          return (await request.post(options.data)) as T;
+        case "patch":
+          return (await request.patch(options.data)) as T;
+        case "delete":
+          return (await request.delete()) as T;
+      }
     } catch (error) {
       const mappedError = this.mapError(error);
       throw mappedError;
@@ -267,6 +279,32 @@ export class MicrosoftGraphApiClient {
   }
 
   private mapError(error: unknown): MicrosoftGraphError {
+    if (error instanceof GraphError) {
+      const response = error.body as MicrosoftGraphErrorResponse | undefined;
+
+      const { code: providerCode, message: providerMessage } = getProviderErrorDetails(response);
+
+      const errorCode = providerCode ?? error.code ?? undefined;
+      const message = providerMessage || error.message;
+
+      const authenticationFailure =
+        error.statusCode === 401 || errorCode === "InvalidAuthenticationToken";
+      const adminConsentRequired = isAdminConsentError(message);
+
+      const details = [
+        error.statusCode > 0 ? `status=${error.statusCode}` : null,
+        errorCode ? `code=${errorCode}` : null,
+        message ? `message=${message}` : null,
+      ].filter(Boolean);
+
+      return new MicrosoftGraphError(
+        `Microsoft Graph request failed${details.length ? ` (${details.join(", ")})` : ""}`,
+        authenticationFailure,
+        adminConsentRequired,
+        error.statusCode > 0 ? error.statusCode : undefined,
+      );
+    }
+
     if (!(error instanceof AxiosError)) return new MicrosoftGraphError("Microsoft Graph failed");
 
     const { code: errorCode, message: providerMessage } = getProviderErrorDetails(

@@ -11,3 +11,13 @@ export const MICROSOFT_CALENDAR_OAUTH_RESULTS = {
   AUTHORIZATION_FAILED: "authorization_failed",
   ADMIN_APPROVAL_REQUIRED: "admin_approval_required",
 } as const;
+
+export const MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES = {
+  AUTHORIZATION_EXPIRED: "authorization_expired",
+  EXPORT_FAILED: "export_failed",
+} as const;
+
+export const MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES = {
+  LIVE_TRAINING: "live_training",
+  COURSE_DUE_DATE: "course_due_date",
+} as const;
