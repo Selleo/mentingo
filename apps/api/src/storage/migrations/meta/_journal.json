@@ -1254,6 +1254,20 @@
       "when": 1785309941472,
       "tag": "0178_remove_category_archiving",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1785324909016,
+      "tag": "0179_add_email_notification_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1785325003866,
+      "tag": "0180_enable_email_notification_templates_rls",
+      "breakpoints": true
     }
   ]
 }

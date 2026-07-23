@@ -4725,11 +4725,12 @@ export class CourseService {
 
         if (!coursesForLanguage?.length) return;
 
-        const { text, html } = new OverdueCoursesEmail({
+        const emailTemplate = new OverdueCoursesEmail({
           courses: coursesForLanguage,
           coursesLink: this.buildAdminCoursesUrl(tenantHost),
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return this.emailService.sendEmailWithLogo(
           {
