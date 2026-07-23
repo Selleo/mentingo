@@ -85,11 +85,11 @@ export class AutomationStepsRepository {
       return true;
     });
   }
-
+  //.where(sql`${automationSteps.typeContext}::text LIKE ${`%${triggerName}%`}`);
   async findAutomationTriggerToRun(triggerName: string) {
     return this.db
       .select()
       .from(automationSteps)
-      .where(sql`${automationSteps.typeContext}::text LIKE ${`%${triggerName}%`}`);
+      .where(sql`${automationSteps.typeContext} ->> 'name' LIKE ${triggerName}`);
   }
 }

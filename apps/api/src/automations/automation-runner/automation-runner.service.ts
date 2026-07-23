@@ -4,7 +4,7 @@ import { AUTOMATION_TRIGGER_MAP } from "@repo/shared";
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
 import type { TriggerType } from "@repo/shared";
-import type { AutomationStep, typeContext } from "src/announcements/types/automations-source.types";
+import type { AutomationStep, TypeContext } from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
 
 @Injectable()
@@ -46,7 +46,7 @@ export class AutomationRunnerService {
         break;
 
       case "action":
-        const trigger = AUTOMATION_TRIGGER_MAP[eventName as TriggerType];
+        const trigger = AUTOMATION_TRIGGER_MAP[eventName];
 
         console.log("trigger event", trigger);
         console.log("values", trigger.providedVariables);
@@ -58,7 +58,7 @@ export class AutomationRunnerService {
     }
   }
 
-  private async handleAction(actionContext: typeContext) {
+  private async handleAction(actionContext: TypeContext) {
     switch (actionContext.name) {
       case "send_email":
         console.log("email sent");

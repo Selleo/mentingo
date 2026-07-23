@@ -107,7 +107,7 @@ import type {
   LiveTrainingVisibilityScope,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
-import type { typeContext } from "src/announcements/types/automations-source.types";
+import type { TypeContext } from "src/announcements/types/automations-source.types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -2515,7 +2515,7 @@ export const automationSteps = pgTable(
       .notNull(),
     parentId: uuid("parent_id"),
     type: automationTypeEnum("type").notNull(),
-    typeContext: jsonb("type_context").$type<typeContext>().notNull(),
+    typeContext: jsonb("type_context").$type<TypeContext>().notNull(),
   },
   withTenantIdIndex("automation_steps_index"),
 );
