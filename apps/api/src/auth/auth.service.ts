@@ -673,7 +673,7 @@ export class AuthService {
     email: string,
     oldTokenHash: string,
     createToken: string,
-    emailTemplate: { text: string; html: string },
+    emailTemplate: { text: Promise<string> | string; html: Promise<string> | string },
     expiryDate: Date,
     reminderCount: number,
   ) {
@@ -693,12 +693,14 @@ export class AuthService {
           userId,
         );
 
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+
         await this.emailService.sendEmailWithLogo(
           {
             to: email,
             subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-            text: emailTemplate.text,
-            html: emailTemplate.html,
+            text,
+            html,
           },
           { tenantId },
         );
@@ -878,7 +880,7 @@ export class AuthService {
         ...defaultEmailSettings,
       });
 
-      const { html, text } = magicLinkEmail;
+      const [text, html] = await Promise.all([magicLinkEmail.text, magicLinkEmail.html]);
 
       await this.emailService.sendEmailWithLogo(
         {

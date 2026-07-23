@@ -349,6 +349,7 @@
     "announcements": "Oznámení",
     "notifications": "Notifikace",
     "promotionCodes": "Propagační kódy",
+    "emailTemplates": "E-mailové šablony",
     "manage": "Spravovat",
     "ariaLabels": {
       "goToAvailableCourses": "Přejděte na dostupné kurzy"
@@ -3650,7 +3651,9 @@
     "activityLogs": "Log aktivit",
     "learningPaths": "Rozvojové cesty",
     "adminLearningPaths": "Rozvojové cesty",
-    "adminLearningPathEditor": "Editor rozvojové cesty"
+    "adminLearningPathEditor": "Editor rozvojové cesty",
+    "emailTemplates": "E-mailové šablony",
+    "editEmailTemplate": "Upravit e-mailovou šablonu"
   },
   "masterCourse": {
     "error": {
@@ -4433,6 +4436,211 @@
       "liveKitNotConfigured": "LiveKit není nakonfigurován.",
       "maxParticipantsReached": "Bylo dosaženo maximálního počtu účastníků.",
       "maxParallelSessionsReached": "Bylo dosaženo maximálního počtu aktivních relací Živé školení."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "E‑mailové šablony",
+      "edit": "Upravit"
+    },
+    "list": {
+      "title": "E‑mailové šablony",
+      "createButton": "Vytvořit novou",
+      "deleteSelected": "Smazat vybrané",
+      "searchPlaceholder": "Hledat podle názvu",
+      "statusFilter": "Stav",
+      "empty": "Zatím zde nejsou žádné šablony.",
+      "loading": "Načítání šablon...",
+      "loadFailed": "E‑mailové šablony se nepodařilo načíst.",
+      "status": {
+        "all": "Vše"
+      },
+      "columns": {
+        "name": "Název",
+        "status": "Stav",
+        "languages": "Jazyky",
+        "updatedAt": "Aktualizováno",
+        "selectAll": "Vybrat vše",
+        "selectRow": "Vybrat řádek"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Smazat e‑mailovou šablonu",
+      "titleMultiple": "Smazat e‑mailové šablony",
+      "descriptionSingle": "Opravdu chcete smazat tuto e‑mailovou šablonu? Tuto akci nelze vrátit zpět.",
+      "descriptionMultiple": "Opravdu chcete smazat {{count}} e‑mailových šablon? Tuto akci nelze vrátit zpět."
+    },
+    "status": {
+      "draft": "Koncept",
+      "published": "Publikováno",
+      "archived": "Archivováno"
+    },
+    "edit": {
+      "loadFailed": "Tuto e‑mailovou šablonu se nepodařilo načíst."
+    },
+    "form": {
+      "field": {
+        "name": "Název",
+        "subject": "Předmět",
+        "subjectHelp": "Doplňte předmět pro každý jazyk. Můžete použít proměnné jako {{user.first_name}}.",
+        "subjectPlaceholder": "např. Vítejte, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Název je povinný.",
+        "nameTooLong": "Název je příliš dlouhý.",
+        "localesRequired": "Vyberte alespoň jeden jazyk.",
+        "baseLanguageMissing": "Základní jazyk musí patřit mezi dostupné jazyky."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "E‑mailová šablona byla vytvořena.",
+      "createFailed": "E‑mailovou šablonu se nepodařilo vytvořit.",
+      "updatedSuccessfully": "E‑mailová šablona byla uložena.",
+      "updateFailed": "E‑mailovou šablonu se nepodařilo uložit.",
+      "publishedSuccessfully": "E‑mailová šablona byla publikována.",
+      "publishFailed": "E‑mailovou šablonu se nepodařilo publikovat.",
+      "publishBlocked": "Publikaci nelze provést — viz diagnostika níže.",
+      "archivedSuccessfully": "E‑mailová šablona byla archivována.",
+      "archiveFailed": "E‑mailovou šablonu se nepodařilo archivovat.",
+      "unarchivedSuccessfully": "E‑mailová šablona byla obnovena do stavu koncept.",
+      "unarchiveFailed": "E‑mailovou šablonu se nepodařilo obnovit z archivu.",
+      "previewFailed": "Náhled se nepodařilo vykreslit.",
+      "previewLanguageUnavailable": "Tento jazyk není pro tuto šablonu dostupný.",
+      "duplicatedSuccessfully": "E‑mailová šablona byla duplikována.",
+      "duplicateFailed": "E‑mailovou šablonu se nepodařilo duplikovat.",
+      "madeDraftSuccessfully": "E‑mailová šablona byla vrácena do konceptu.",
+      "makeDraftFailed": "E‑mailovou šablonu se nepodařilo vrátit do konceptu.",
+      "deletedSuccessfully": "E‑mailová šablona byla smazána.",
+      "deleteFailed": "E‑mailovou šablonu se nepodařilo smazat.",
+      "nameAlreadyExists": "E‑mailová šablona s tímto názvem již existuje.",
+      "testEmailSentSuccessfully": "Testovací e-mail odeslán.",
+      "testEmailSendFailed": "Nepodařilo se odeslat testovací e-mail."
+    },
+    "actions": {
+      "preview": "Náhled",
+      "duplicate": "Duplikovat",
+      "archive": "Archivovat",
+      "unarchive": "Odarchivovat",
+      "publish": "Publikovat",
+      "makeDraft": "Označit jako koncept",
+      "edit": "Upravit",
+      "rename": "Přejmenovat",
+      "sendTest": "Odeslat test"
+    },
+    "language": {
+      "label": "Jazyk",
+      "baseLanguage": "Výchozí",
+      "notAddedLanguages": "Jazyky k přidání",
+      "setBaseLanguage": "Nastavit jako výchozí",
+      "setBaseTitle": "Změnit výchozí jazyk",
+      "setBaseDescription": "Použít {{language}} jako výchozí jazyk pro tuto šablonu?",
+      "createTitle": "Přidat překlad",
+      "createDescription": "Přidat překlad této šablony v jazyce {{language}}?",
+      "deleteTitle": "Smazat překlad",
+      "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} chyba – před publikací je nutné opravit",
+      "errorsTitle_few": "{{count}} chyby – před publikací je nutné opravit",
+      "errorsTitle_many": "{{count}} chyb – před publikací je nutné opravit",
+      "errorsTitle_other": "{{count}} chyb – před publikací je nutné opravit",
+      "warningsTitle_one": "{{count}} upozornění – zkontrolujte před publikací",
+      "warningsTitle_few": "{{count}} upozornění – zkontrolujte před publikací",
+      "warningsTitle_many": "{{count}} upozornění – zkontrolujte před publikací",
+      "warningsTitle_other": "{{count}} upozornění – zkontrolujte před publikací",
+      "elementIndex": "Prvek {{index}}",
+      "reasons": {
+        "name_missing": "Název šablony je povinný",
+        "no_language_versions": "Přidejte alespoň jednu jazykovou verzi",
+        "subject_missing": "Předmět je pro výchozí jazyk povinný",
+        "body_missing": "Tělo e-mailu je prázdné",
+        "button_label_missing": "Popisek tlačítka je povinný",
+        "button_url_missing": "Cíl tlačítka je povinný",
+        "empty_translation": "Překlad je prázdný",
+        "invalid_url_protocol": "URL používá nepovolený protokol",
+        "unchanged_from_base": "Překlad je totožný se základním jazykem",
+        "footer_missing": "Chybí zápatí"
+      },
+      "nodeTypes": {
+        "heading": "Nadpis",
+        "paragraph": "Text",
+        "button": "Tlačítko",
+        "footer": "Zápatí",
+        "image": "Obrázek"
+      },
+      "blockedToast": {
+        "save": "Šablonu nelze uložit. Podívejte se do diagnostiky",
+        "publish": "Šablonu nelze publikovat. Podívejte se do diagnostiky"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Napište / pro otevření nabídky bloků",
+        "heading": "Nadpis {{level}}",
+        "htmlCode": "Kód HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Média",
+          "structure": "Struktura",
+          "interactive": "Interaktivní",
+          "footer": "Zápatí"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Odstavec prostého textu."
+        },
+        "heading1": {
+          "title": "Nadpis 1",
+          "description": "Velký nadpis sekce (H1)."
+        },
+        "heading2": {
+          "title": "Nadpis 2",
+          "description": "Střední nadpis sekce (H2)."
+        },
+        "heading3": {
+          "title": "Nadpis 3",
+          "description": "Malý nadpis sekce (H3)."
+        },
+        "image": {
+          "title": "Obrázek",
+          "description": "Obrázek na celou šířku."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Celé logo."
+        },
+        "section": {
+          "title": "Sekce",
+          "description": "Kontejner pro seskupení obsahu."
+        },
+        "columns": {
+          "title": "Sloupce",
+          "description": "Vícesloupcové rozvržení."
+        },
+        "divider": {
+          "title": "Oddělovač",
+          "description": "Vodorovná dělicí čára."
+        },
+        "spacer": {
+          "title": "Mezera",
+          "description": "Svislý odstup mezi bloky."
+        },
+        "button": {
+          "title": "Tlačítko",
+          "description": "Tlačítko výzvy k akci."
+        },
+        "footer": {
+          "title": "Zápatí",
+          "description": "Textový blok zápatí."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Nahrávání obrázku se nezdařilo. Zkuste to znovu.",
+      "tooLarge": "Obrázek je příliš velký. Maximální velikost je 10 MB.",
+      "invalidType": "Neplatný typ obrázku. Povoleno: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   }
 }

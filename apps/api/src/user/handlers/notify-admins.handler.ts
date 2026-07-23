@@ -57,11 +57,12 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           adminId,
         );
 
-        const { text, html } = new NewUserEmail({
+        const emailTemplate = new NewUserEmail({
           userName: `${firstName} ${lastName}`,
           profileLink: `${baseOrigin}/profile/${user.id}`,
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return this.emailService.sendEmailWithLogo(
           {
@@ -94,12 +95,13 @@ export class NotifyAdminsHandler implements IEventHandler<EventType> {
           adminId,
         );
 
-        const { text, html } = new FinishedCourseEmail({
+        const emailTemplate = new FinishedCourseEmail({
           userName,
           courseName: courseTitle,
           progressLink: `${baseOrigin}/course/${courseId}`,
           ...defaultEmailSettings,
         });
+        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         return this.emailService.sendEmailWithLogo(
           {

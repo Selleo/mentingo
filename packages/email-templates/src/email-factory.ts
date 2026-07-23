@@ -1,4 +1,4 @@
-import { render } from "@react-email/components";
+import { render } from "@react-email/render";
 import { EmailContent } from "./email-content";
 
 export function emailTemplateFactory<T extends unknown[]>(
@@ -15,11 +15,11 @@ export function emailTemplateFactory<T extends unknown[]>(
       return this.args;
     }
 
-    get text(): string {
+    get text(): Promise<string> {
       return render(template(...this.props), { plainText: true });
     }
 
-    get html(): string {
+    get html(): Promise<string> {
       return render(template(...this.props));
     }
   };

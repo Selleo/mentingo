@@ -349,6 +349,7 @@
     "announcements": "Skelbimai",
     "notifications": "Pranešimai",
     "promotionCodes": "Reklamos kodai",
+    "emailTemplates": "El. pašto šablonai",
     "manage": "Tvarkyti",
     "ariaLabels": {
       "goToAvailableCourses": "Eikite į galimus kursus"
@@ -3651,7 +3652,9 @@
     "activityLogs": "Veiklos žurnalas",
     "learningPaths": "Tobulėjimo keliai",
     "adminLearningPaths": "Tobulėjimo keliai",
-    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius"
+    "adminLearningPathEditor": "Tobulėjimo kelio redaktorius",
+    "emailTemplates": "El. pašto šablonai",
+    "editEmailTemplate": "Redaguoti el. pašto šabloną"
   },
   "masterCourse": {
     "error": {
@@ -4434,6 +4437,211 @@
       "liveKitNotConfigured": "LiveKit nėra sukonfigūruotas.",
       "maxParticipantsReached": "Pasiektas maksimalus dalyvių skaičius.",
       "maxParallelSessionsReached": "Pasiektas maksimalus aktyvių Tiesioginiai mokymai sesijų skaičius."
+    }
+  },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "El. laiškų šablonai",
+      "edit": "Redaguoti"
+    },
+    "list": {
+      "title": "El. laiškų šablonai",
+      "createButton": "Sukurti naują",
+      "deleteSelected": "Ištrinti pasirinktus",
+      "searchPlaceholder": "Ieškoti pagal pavadinimą",
+      "statusFilter": "Būsena",
+      "empty": "Šablonų dar nėra.",
+      "loading": "Kraunami šablonai...",
+      "loadFailed": "Nepavyko įkelti el. laiškų šablonų.",
+      "status": {
+        "all": "Visi"
+      },
+      "columns": {
+        "name": "Pavadinimas",
+        "status": "Būsena",
+        "languages": "Kalbos",
+        "updatedAt": "Atnaujinta",
+        "selectAll": "Pažymėti visus",
+        "selectRow": "Pažymėti eilutę"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Ištrinti el. laiško šabloną",
+      "titleMultiple": "Ištrinti el. laiškų šablonus",
+      "descriptionSingle": "Ar tikrai norite ištrinti šį el. laiško šabloną? Šio veiksmo atšaukti nebus galima.",
+      "descriptionMultiple": "Ar tikrai norite ištrinti {{count}} el. laiškų šablonus? Šio veiksmo atšaukti nebus galima."
+    },
+    "status": {
+      "draft": "Juodraštis",
+      "published": "Paskelbta",
+      "archived": "Suarchyvuota"
+    },
+    "edit": {
+      "loadFailed": "Nepavyko įkelti šio el. laiško šablono."
+    },
+    "form": {
+      "field": {
+        "name": "Pavadinimas",
+        "subject": "Temos eilutė",
+        "subjectHelp": "Užpildykite temą kiekvienai kalbai. Galite naudoti kintamuosius, pvz., {{user.first_name}}.",
+        "subjectPlaceholder": "pvz., Sveiki, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Pavadinimas privalomas.",
+        "nameTooLong": "Pavadinimas per ilgas.",
+        "localesRequired": "Pasirinkite bent vieną kalbą.",
+        "baseLanguageMissing": "Bazinė kalba turi būti tarp galimų kalbų."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "El. laiško šablonas sukurtas.",
+      "createFailed": "Nepavyko sukurti el. laiško šablono.",
+      "updatedSuccessfully": "El. laiško šablonas išsaugotas.",
+      "updateFailed": "Nepavyko išsaugoti el. laiško šablono.",
+      "publishedSuccessfully": "El. laiško šablonas paskelbtas.",
+      "publishFailed": "Nepavyko paskelbti el. laiško šablono.",
+      "publishBlocked": "Skelbti negalima — žr. diagnostiką žemiau.",
+      "archivedSuccessfully": "El. laiško šablonas suarchyvuotas.",
+      "archiveFailed": "Nepavyko suarchyvuoti el. laiško šablono.",
+      "unarchivedSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "unarchiveFailed": "Nepavyko atkurti šablono iš archyvo.",
+      "previewFailed": "Nepavyko sugeneruoti peržiūros.",
+      "previewLanguageUnavailable": "Ši kalba šiam šablonui nepasiekiama.",
+      "duplicatedSuccessfully": "El. laiško šablonas nukopijuotas.",
+      "duplicateFailed": "Nepavyko nukopijuoti el. laiško šablono.",
+      "madeDraftSuccessfully": "El. laiško šablonas grąžintas į juodraštį.",
+      "makeDraftFailed": "Nepavyko grąžinti el. laiško šablono į juodraštį.",
+      "deletedSuccessfully": "El. laiško šablonas ištrintas.",
+      "deleteFailed": "Nepavyko ištrinti el. laiško šablono.",
+      "nameAlreadyExists": "El. laiško šablonas tokiu pavadinimu jau egzistuoja.",
+      "testEmailSentSuccessfully": "Bandomasis el. laiškas išsiųstas.",
+      "testEmailSendFailed": "Nepavyko išsiųsti bandomojo el. laiško."
+    },
+    "actions": {
+      "preview": "Peržiūra",
+      "duplicate": "Kopijuoti",
+      "archive": "Archyvuoti",
+      "unarchive": "Išarchyvuoti",
+      "publish": "Skelbti",
+      "makeDraft": "Pažymėti kaip juodraštį",
+      "edit": "Redaguoti",
+      "rename": "Pervadinti",
+      "sendTest": "Siųsti testą"
+    },
+    "language": {
+      "label": "Kalba",
+      "baseLanguage": "Numatytoji",
+      "notAddedLanguages": "Kalbos, kurias galima pridėti",
+      "setBaseLanguage": "Nustatyti kaip numatytąją",
+      "setBaseTitle": "Pakeisti numatytąją kalbą",
+      "setBaseDescription": "Naudoti {{language}} kaip numatytąją šio šablono kalbą?",
+      "createTitle": "Pridėti vertimą",
+      "createDescription": "Pridėti šio šablono vertimą į {{language}}?",
+      "deleteTitle": "Ištrinti vertimą",
+      "deleteDescription": "Ištrinti vertimą {{language}}? Jo turinys bus pašalintas."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} klaida — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_few": "{{count}} klaidos — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_many": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
+      "errorsTitle_other": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
+      "warningsTitle_one": "{{count}} įspėjimas — peržiūrėkite prieš skelbdami",
+      "warningsTitle_few": "{{count}} įspėjimai — peržiūrėkite prieš skelbdami",
+      "warningsTitle_many": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
+      "warningsTitle_other": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
+      "elementIndex": "Elementas {{index}}",
+      "reasons": {
+        "name_missing": "Šablono pavadinimas privalomas",
+        "no_language_versions": "Pridėkite bent vieną kalbos versiją",
+        "subject_missing": "Numatytosios kalbos temai reikia turinio",
+        "body_missing": "El. laiško turinys tuščias",
+        "button_label_missing": "Mygtuko etiketė privaloma",
+        "button_url_missing": "Mygtuko paskirties adresas privalomas",
+        "empty_translation": "Vertimas tuščias",
+        "invalid_url_protocol": "URL naudoja neleistiną protokolą",
+        "unchanged_from_base": "Vertimas identiškas bazinei kalbai",
+        "footer_missing": "Trūksta poraštės"
+      },
+      "nodeTypes": {
+        "heading": "Antraštė",
+        "paragraph": "Tekstas",
+        "button": "Mygtukas",
+        "footer": "Poraštė",
+        "image": "Vaizdas"
+      },
+      "blockedToast": {
+        "save": "Šablono išsaugoti nepavyko. Žiūrėkite diagnostiką",
+        "publish": "Šablono paskelbti nepavyko. Žiūrėkite diagnostiką"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Įveskite /, kad atidarytumėte blokų meniu",
+        "heading": "Antraštė {{level}}",
+        "htmlCode": "HTML kodas…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Tekstas",
+          "media": "Medija",
+          "structure": "Struktūra",
+          "interactive": "Interaktyvūs",
+          "footer": "Poraštė"
+        },
+        "text": {
+          "title": "Tekstas",
+          "description": "Paprastojo teksto pastraipa."
+        },
+        "heading1": {
+          "title": "Antraštė 1",
+          "description": "Didelė sekcijos antraštė (H1)."
+        },
+        "heading2": {
+          "title": "Antraštė 2",
+          "description": "Vidutinė sekcijos antraštė (H2)."
+        },
+        "heading3": {
+          "title": "Antraštė 3",
+          "description": "Maža sekcijos antraštė (H3)."
+        },
+        "image": {
+          "title": "Vaizdas",
+          "description": "Viso pločio vaizdas."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Visas logotipas."
+        },
+        "section": {
+          "title": "Sekcija",
+          "description": "Turinio grupavimo konteineris."
+        },
+        "columns": {
+          "title": "Stulpeliai",
+          "description": "Kelių stulpelių išdėstymas."
+        },
+        "divider": {
+          "title": "Skirtukas",
+          "description": "Horizontali skiriamoji linija."
+        },
+        "spacer": {
+          "title": "Tarpas",
+          "description": "Vertikalus tarpas tarp blokų."
+        },
+        "button": {
+          "title": "Mygtukas",
+          "description": "Raginimo veikti mygtukas."
+        },
+        "footer": {
+          "title": "Poraštė",
+          "description": "Poraštės teksto blokas."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Paveikslo įkėlimas nepavyko. Bandykite dar kartą.",
+      "tooLarge": "Paveikslas per didelis. Maksimalus dydis yra 10 MB.",
+      "invalidType": "Netinkamas paveikslo tipas. Leidžiami: JPEG, PNG, GIF, WebP, BMP, TIFF."
     }
   }
 }

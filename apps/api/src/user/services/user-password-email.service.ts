@@ -51,7 +51,7 @@ export class UserPasswordEmailService {
       hasCredentials: true,
     });
 
-    const preparedResetEmails = this.preparePasswordResetEmails(recipients, tenantOrigin);
+    const preparedResetEmails = await this.preparePasswordResetEmails(recipients, tenantOrigin);
 
     const result = {
       sentCount: preparedResetEmails.emails.length,
@@ -89,7 +89,10 @@ export class UserPasswordEmailService {
       currentUser.tenantId,
     );
 
-    const preparedCreationEmails = this.preparePasswordCreationEmails(recipients, tenantOrigin);
+    const preparedCreationEmails = await this.preparePasswordCreationEmails(
+      recipients,
+      tenantOrigin,
+    );
 
     const result = {
       sentCount: preparedCreationEmails.emails.length,
@@ -128,7 +131,7 @@ export class UserPasswordEmailService {
       recipient.tenantId,
     );
 
-    const preparedResetEmails = this.preparePasswordResetEmails([recipient], tenantOrigin);
+    const preparedResetEmails = await this.preparePasswordResetEmails([recipient], tenantOrigin);
 
     await this.userPasswordEmailRepository.insertResetTokens(
       preparedResetEmails.tokenRows,
@@ -142,7 +145,7 @@ export class UserPasswordEmailService {
     return [...new Set(userIds)];
   }
 
-  private preparePasswordResetEmails(
+  private async preparePasswordResetEmails(
     recipients: UserPasswordEmailRecipient[],
     tenantOrigin: string,
   ) {
@@ -166,21 +169,22 @@ export class UserPasswordEmailService {
         resetLink: buildCreateNewPasswordLink(tenantOrigin, { resetToken }),
         ...recipient.defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       emails.push({
         userId: recipient.id,
         to: recipient.email,
         tenantId: recipient.tenantId,
         subject: getEmailSubject("passwordRecoveryEmail", recipient.defaultEmailSettings.language),
-        text: emailTemplate.text,
-        html: emailTemplate.html,
+        text,
+        html,
       });
     }
 
     return { tokenRows, emails };
   }
 
-  private preparePasswordCreationEmails(
+  private async preparePasswordCreationEmails(
     recipients: UserPasswordEmailRecipient[],
     tenantOrigin: string,
   ) {
@@ -204,14 +208,15 @@ export class UserPasswordEmailService {
         createPasswordLink: buildCreateNewPasswordLink(tenantOrigin, { createToken }),
         ...recipient.defaultEmailSettings,
       });
+      const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
       emails.push({
         userId: recipient.id,
         to: recipient.email,
         tenantId: recipient.tenantId,
         subject: getEmailSubject("passwordReminderEmail", recipient.defaultEmailSettings.language),
-        text: emailTemplate.text,
-        html: emailTemplate.html,
+        text,
+        html,
       });
     }
 
