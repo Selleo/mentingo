@@ -4591,6 +4591,7 @@
     "title": "Automatyzacje",
     "description": "Zarządzaj automatycznymi powiadomieniami email wysyłanymi w odpowiedzi na zdarzenia w platformie.",
     "createAutomation": "Utwórz automatyzację",
+    "openLogs": "Otwórz logi",
     "filters": {
       "searchPlaceholder": "Szukaj po nazwie lub opisie...",
       "all": "Wszystkie",
@@ -4666,6 +4667,46 @@
       "updateError": "Nie udało się zapisać automatyzacji.",
       "deleted": "Automatyzacja usunięta.",
       "deleteError": "Nie udało się usunąć automatyzacji."
+    }
+  },
+  "automationLogs": {
+    "title": "Logi automatyzacji",
+    "description": "Podgląd historii wykonań wszystkich automatyzacji. Kliknij wpis, aby zobaczyć szczegóły.",
+    "backToAutomations": "Powrót do automatyzacji",
+    "status": {
+      "sent": "Wysłano",
+      "skipped": "Pominięto",
+      "failed": "Błąd"
+    },
+    "filters": {
+      "searchPlaceholder": "Szukaj po nazwie, zdarzeniu lub odbiorcy...",
+      "all": "Wszystkie statusy",
+      "sent": "Wysłane",
+      "skipped": "Pominięte",
+      "failed": "Błędy"
+    },
+    "table": {
+      "automation": "Automatyzacja",
+      "status": "Status",
+      "emails": "E-maile",
+      "ranAt": "Uruchomiono",
+      "duration": "Czas trwania",
+      "details": "Szczegóły",
+      "empty": "Brak wpisów w logach."
+    },
+    "detail": {
+      "title": "Szczegóły logu",
+      "description": "Pełna informacja o tym uruchomieniu automatyzacji.",
+      "ranAt": "Uruchomiono",
+      "triggerEvent": "Zdarzenie wyzwalające",
+      "automation": "Automatyzacja",
+      "duration": "Czas trwania",
+      "recipient": "Odbiorca",
+      "template": "Szablon",
+      "language": "Język",
+      "skipReason": "Powód pominięcia",
+      "failReason": "Powód błędu",
+      "emailsTitle": "E-maile ({{count}})"
     }
   },
   "automationBuilder": {

@@ -4552,6 +4552,7 @@
     "title": "Automations",
     "description": "Manage automatic email notifications sent in response to platform events.",
     "createAutomation": "Create Automation",
+    "openLogs": "Open logs",
     "filters": {
       "searchPlaceholder": "Search by name or description...",
       "all": "All",
@@ -4627,6 +4628,46 @@
       "updateError": "Failed to save automation.",
       "deleted": "Automation deleted.",
       "deleteError": "Failed to delete automation."
+    }
+  },
+  "automationLogs": {
+    "title": "Automation Logs",
+    "description": "View the execution history of all automations. Click on an entry to see full details.",
+    "backToAutomations": "Back to automations",
+    "status": {
+      "sent": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by name, event, or recipient...",
+      "all": "All statuses",
+      "sent": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "table": {
+      "automation": "Automation",
+      "status": "Status",
+      "emails": "Emails",
+      "ranAt": "Ran at",
+      "duration": "Duration",
+      "details": "Details",
+      "empty": "No log entries found."
+    },
+    "detail": {
+      "title": "Log details",
+      "description": "Full information about this automation run.",
+      "ranAt": "Ran at",
+      "triggerEvent": "Trigger event",
+      "automation": "Automation",
+      "duration": "Duration",
+      "recipient": "Recipient",
+      "template": "Template",
+      "language": "Language",
+      "skipReason": "Reason for skipping",
+      "failReason": "Reason for failure",
+      "emailsTitle": "Emails ({{count}})"
     }
   },
   "automationBuilder": {

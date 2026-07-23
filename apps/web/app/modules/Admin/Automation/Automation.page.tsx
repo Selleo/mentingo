@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 
 import { AutomationDrawer } from "./components/AutomationDrawer";
 import { AutomationFilters, type StatusFilter } from "./components/AutomationFilters";
@@ -117,6 +118,16 @@ export default function AutomationPage() {
         onDelete={handleRequestDelete}
         onEdit={handleEdit}
       />
+
+      <div className="mt-4 flex justify-start">
+        <Button
+          variant="primary"
+          className="px-3 py-1.5 text-sm w-auto"
+          onClick={() => navigate("/admin/automation/logs")}
+        >
+          {t("automationView.openLogs")}
+        </Button>
+      </div>
 
       <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && handleCancelDelete()}>
         <AlertDialogContent>
