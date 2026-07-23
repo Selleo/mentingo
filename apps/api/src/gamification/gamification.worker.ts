@@ -28,7 +28,7 @@ export class GamificationWorker implements OnModuleDestroy {
       "gamification-events",
       async (job: Job<GamificationEventPayload>) => {
         const event = job.data;
-        if (!event.resourceType) throw new Error("common.error");
+        if (!event.resourceType) throw new Error("common.error.somethingWentWrong");
         await this.tenantRunner.runWithTenant(event.tenantId, async () => {
           this.logger.log(`Processing gamification event: ${event.actionType}`);
           await new Promise((resolve) => setTimeout(resolve, 500));

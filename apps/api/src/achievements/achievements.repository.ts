@@ -52,7 +52,8 @@ export class AchievementsRepository {
     type: "post" | "update",
     levelNumber?: number,
   ) {
-    if (!threshold) throw new BadRequestException("common.error");
+    if (!threshold)
+      throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
     const levels = await this.db
       .select()
       .from(achievementLevels)
@@ -61,24 +62,24 @@ export class AchievementsRepository {
     if (levels.length > 0) {
       if (type == "post") {
         if (levels[0].threshold >= threshold) {
-          throw new BadRequestException("common.error");
+          throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
         }
       } else if (type == "update") {
         const actualLevel = levels.findIndex((level) => level.levelNumber == levelNumber);
         if (actualLevel == 0) {
           if (levels[actualLevel + 1].threshold >= threshold) {
-            throw new BadRequestException("common.error");
+            throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
           }
         } else if (actualLevel == levels.length - 1) {
           if (levels[actualLevel - 1].threshold <= threshold) {
-            throw new BadRequestException("common.error");
+            throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
           }
         } else {
           if (
             levels[actualLevel - 1].threshold <= threshold ||
             levels[actualLevel + 1].threshold >= threshold
           ) {
-            throw new BadRequestException("common.error");
+            throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
           }
         }
       }

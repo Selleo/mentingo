@@ -17,7 +17,7 @@ export class GamificationService {
       .where(eq(userProgress.userId, currentUser.userId));
 
     if (!progress) {
-      throw new NotFoundException("common.error");
+      throw new NotFoundException("gamification.errors.userProgressNotFound");
     }
 
     return progress;

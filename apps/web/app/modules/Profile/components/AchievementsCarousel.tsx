@@ -1,7 +1,11 @@
-import { Trophy } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { Icon } from "~/components/Icon";
+import { Avatar, AvatarFallback } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   Carousel,
   CarouselContent,
@@ -10,7 +14,11 @@ import {
   CarouselPrevious,
 } from "~/components/ui/carousel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/ui/dialog";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
+
+import type { IconName } from "~/types/shared";
 
 type UserAchievement = {
   achievementId: string;
@@ -37,6 +45,10 @@ type AchievementsCarouselProps = {
 const containerClasses =
   "justify-between flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow";
 
+function formatDate(date: string, options: Intl.DateTimeFormatOptions): string {
+  return new Intl.DateTimeFormat("pl-PL", options).format(new Date(date));
+}
+
 function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[] {
   const achievementsMap = new Map<string, UserAchievement[]>();
 
@@ -58,6 +70,24 @@ function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[
   });
 }
 
+export function getTierIconName(levelNumber: number): IconName {
+  return `Tier${levelNumber}` as IconName;
+}
+
+const AchievementIcon = ({
+  levelNumber,
+  className,
+}: {
+  levelNumber: number;
+  className?: string;
+}) => (
+  <Avatar className={cn("flex items-center justify-center text-primary-600", className)}>
+    <AvatarFallback className="flex size-full items-center justify-center bg-transparent text-inherit">
+      <Icon name={getTierIconName(levelNumber)} className="h-full" />
+    </AvatarFallback>
+  </Avatar>
+);
+
 const AchievementHistoryDialog = ({
   achievement,
   open,
@@ -69,13 +99,16 @@ const AchievementHistoryDialog = ({
 }) => {
   const { t } = useTranslation();
 
+  if (!achievement) return;
+
   return (
     <Dialog open={open} onOpenChange={(value) => !value && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader className="items-center text-center">
-          <div className="mb-2 flex size-16 items-center justify-center rounded-full bg-primary-50 text-primary-600">
-            <Trophy className="size-8" />
-          </div>
+          <AchievementIcon
+            levelNumber={achievement.currentLevel.levelNumber}
+            className="mb-2 size-20"
+          />
 
           <DialogTitle className="text-xl">
             {achievement &&
@@ -85,24 +118,29 @@ const AchievementHistoryDialog = ({
           </DialogTitle>
         </DialogHeader>
 
-        <ul className="flex flex-col gap-2 pt-2">
-          {achievement?.history.map((level) => (
-            <li
-              key={level.levelId}
-              className="flex items-center justify-between rounded-md border border-neutral-100 px-3 py-2"
-            >
-              <span className="px-2.5 py-0.5 text-sm font-semibold text-primary-700">
-                {t("gamification.profile.dialog.level")}: {level.levelNumber}
-              </span>
+        <Separator />
 
-              <span className="text-sm text-neutral-600">
-                {level.earnedAt
-                  ? new Date(level.earnedAt).toLocaleString("pl-PL").slice(0, -3)
-                  : "—"}
-              </span>
-            </li>
-          ))}
-        </ul>
+        <ScrollArea className="max-h-72 pr-2">
+          <ul className="flex flex-col gap-2 pt-2">
+            {achievement?.history.map((level) => (
+              <li key={level.levelId}>
+                <Card className="border-neutral-100 shadow-none">
+                  <CardContent className="flex items-center justify-between px-3 py-2">
+                    <Badge className="rounded-full border-transparent bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
+                      {t("gamification.profile.dialog.level")}: {level.levelNumber}
+                    </Badge>
+
+                    <span className="text-sm text-neutral-600">
+                      {level.earnedAt
+                        ? formatDate(level.earnedAt, { dateStyle: "short", timeStyle: "short" })
+                        : "—"}
+                    </span>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
@@ -120,18 +158,16 @@ const AchievementCard = ({
   const hasHistory = achievement.history.length > 1;
 
   return (
-    <button
+    <Button
       type="button"
       disabled={!hasHistory}
       onClick={onClick}
       className={cn(
-        "flex h-full w-full flex-col items-center gap-2 rounded-lg border border-neutral-200 bg-white p-4 text-center",
+        "flex h-full w-full flex-col items-center justify-start gap-2 rounded-lg border border-neutral-200 bg-white p-4 text-center text-neutral-950 hover:opacity-100 disabled:opacity-100",
         hasHistory && "cursor-pointer transition-shadow hover:shadow-md",
       )}
     >
-      <div className="flex size-12 items-center justify-center rounded-full bg-primary-50 text-primary-600">
-        <Trophy className="size-6" />
-      </div>
+      <AchievementIcon levelNumber={achievement.currentLevel.levelNumber} className="size-32" />
 
       <span className="text-sm font-medium text-neutral-950">
         {t(`gamification.profile.${achievement.achievementKey}.name`, {
@@ -139,13 +175,13 @@ const AchievementCard = ({
         })}
       </span>
 
-      <span className="rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
+      <Badge className="rounded-full border-transparent bg-primary-100 px-2.5 py-0.5 text-xs font-semibold text-primary-700">
         {t("gamification.profile.dialog.level")}: {achievement.currentLevel.levelNumber}
-      </span>
+      </Badge>
 
       {achievement.currentLevel.earnedAt && (
         <span className="text-xs text-neutral-500">
-          {new Date(achievement.currentLevel.earnedAt).toLocaleDateString()}
+          {formatDate(achievement.currentLevel.earnedAt, { dateStyle: "short" })}
         </span>
       )}
 
@@ -154,7 +190,7 @@ const AchievementCard = ({
           {t("gamification.profile.showHistory")}
         </span>
       )}
-    </button>
+    </Button>
   );
 };
 
@@ -167,11 +203,15 @@ export const AchievementsCarousel = ({ achievements }: AchievementsCarouselProps
 
   if (!grouped.length) {
     return (
-      <div className={containerClasses}>
-        <h5 className="h5">{t("gamification.profile.header")}</h5>
+      <Card className={cn(containerClasses, "border-none shadow-none")}>
+        <CardContent className="flex flex-col gap-y-6 p-0">
+          <h5 className="h5">{t("gamification.profile.header")}</h5>
 
-        <p className="text-sm text-gray-600">{t("gamification.profile.zeroAchievementsHeader")}</p>
-      </div>
+          <span className="text-sm text-gray-600">
+            {t("gamification.profile.zeroAchievementsHeader")}
+          </span>
+        </CardContent>
+      </Card>
     );
   }
 

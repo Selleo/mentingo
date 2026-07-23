@@ -9,7 +9,7 @@ import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore"
 
 import { ApiClient } from "../api-client";
 import { queryClient } from "../queryClient";
-import { resetSocket } from "../socket";
+import { reconnectSocket } from "../socket";
 
 export function useLogoutUser() {
   const { toast } = useToast();
@@ -29,7 +29,7 @@ export function useLogoutUser() {
       return response.data;
     },
     onSuccess: async () => {
-      resetSocket();
+      reconnectSocket();
       await queryClient.cancelQueries();
       queryClient.clear();
 

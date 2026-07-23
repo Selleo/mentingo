@@ -1,4 +1,10 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { and, asc, eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -51,7 +57,7 @@ export class AchievementsService {
       .where(eq(achievements.id, achievementId));
 
     if (!achievement) {
-      throw new NotFoundException("error.common");
+      throw new NotFoundException("gamification.errors.achievementNotFound");
     }
 
     return achievement;
@@ -118,7 +124,7 @@ export class AchievementsService {
       .returning();
 
     if (!updatedAchievement) {
-      throw new NotFoundException("error.common");
+      throw new NotFoundException("gamification.errors.achievementNotFound");
     }
 
     return this.getAchievement(achievementId);
@@ -129,7 +135,7 @@ export class AchievementsService {
       .delete(achievements)
       .where(eq(achievements.id, achievementId))
       .returning({ id: achievements.id });
-    if (!deletedAchievement) throw new NotFoundException("common.error");
+    if (!deletedAchievement) throw new NotFoundException("gamification.errors.achievementNotFound");
     return deletedAchievement;
   }
 
@@ -156,6 +162,9 @@ export class AchievementsService {
     achievementId: UUIDType,
   ) {
     const nextLevel = (await this.achievementsRepository.getActualLevelNumber(achievementId)) + 1;
+    if (nextLevel > 5) {
+      throw new BadRequestException("gamification.errors.wrongAchievementLevel");
+    }
     await this.achievementsRepository.validateThreshold(
       achievementId,
       achievementLevelBody.threshold,
@@ -193,7 +202,7 @@ export class AchievementsService {
       .returning({
         id: achievementLevels.id,
       });
-    if (!updatedLevel) throw new NotFoundException("error.common");
+    if (!updatedLevel) throw new NotFoundException("gamification.errors.achievementLevelNotFound");
     return updatedLevel;
   }
 
@@ -209,7 +218,7 @@ export class AchievementsService {
         ),
       )
       .returning({ id: achievementLevels.id });
-    if (!deletedLevel) throw new NotFoundException("error.common");
+    if (!deletedLevel) throw new NotFoundException("gamification.errors.achievementLevelNotFound");
     return deletedLevel;
   }
 

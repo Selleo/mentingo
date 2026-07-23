@@ -4690,6 +4690,13 @@
       "dialog": {
         "level": "Level"
       }
+    },
+    "errors": {
+      "achievementNotFound": "Achievement doesn't exist",
+      "wrongAchievementLevel": "This achievement couldn't have next level",
+      "achievementLevelNotFound": "Achievement's level doesn't exist",
+      "wrongAchievementLevelThreshold": "Level's threshold can't be lower than previous or bigger than next",
+      "userProgressNotFound": "User's progress doesn't exist"
     }
   }
 }

@@ -36,7 +36,7 @@ export function releaseSocket(): void {
     socket = null;
   }
 }
-export function resetSocket(): void {
+export function reconnectSocket(): void {
   if (!socket) return;
 
   socket.disconnect();

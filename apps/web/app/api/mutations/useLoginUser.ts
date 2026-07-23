@@ -6,7 +6,7 @@ import { useAuthStore } from "~/modules/Auth/authStore";
 import { useCurrentUserStore } from "~/modules/common/store/useCurrentUserStore";
 
 import { ApiClient } from "../api-client";
-import { resetSocket } from "../socket";
+import { reconnectSocket } from "../socket";
 
 import { handleAuthSuccess } from "./helpers/handleAuthSuccess";
 
@@ -32,7 +32,7 @@ export function useLoginUser() {
       return response.data;
     },
     onSuccess: async ({ data }) => {
-      resetSocket();
+      reconnectSocket();
       await handleAuthSuccess({ user: data, setLoggedIn, setCurrentUser, setHasVerifiedMFA });
     },
     onError: (error: AxiosError) => {

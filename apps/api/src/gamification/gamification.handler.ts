@@ -28,8 +28,8 @@ export class GamificationHandler {
     const userSettings = this.settingsService.getUserSettings(event.userId);
     const userLanguage = (await userSettings).language;
 
-    if (!event.resourceType) throw new Error("common.error");
-    if (!event.userId) throw new Error("common.error");
+    if (!event.resourceType) throw new Error("common.error.somethingWentWrong");
+    if (!event.userId) throw new Error("common.error.somethingWentWrong");
 
     const isFirstProcessing = await this.outboxRepository.markProcessedOrSkip(
       event.sourceId,

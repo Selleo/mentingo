@@ -1,10 +1,12 @@
-import { Trophy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { acquireSocket, releaseSocket } from "~/api/socket";
+import { Icon } from "~/components/Icon";
 import { toast, useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
+
+import { getTierIconName } from "../Profile/components/AchievementsCarousel";
 
 export type GamificationNotification = {
   userAchievementId: string | null;
@@ -43,11 +45,10 @@ export function GamificationNotification() {
         <div className="flex items-center gap-2">
           <div
             className={cn(
-              "flex size-8 shrink-0 items-center justify-center rounded-full",
-              "bg-primary-50 text-primary-600",
+              "flex size-8 shrink-0 items-center justify-center rounded-full text-primary-600",
             )}
           >
-            <Trophy className="size-4" />
+            <Icon name={getTierIconName(next.level)} className="h-full" />
           </div>
           <div className="flex flex-col gap-1">
             <span className="text-sm font-medium text-neutral-950">{next.achievementName}</span>
