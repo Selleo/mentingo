@@ -1,9 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { AUTOMATION_TRIGGER_MAP } from "@repo/shared";
 
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
-import type { TriggerType } from "@repo/shared";
 import type { AutomationStep, TypeContext } from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
 
@@ -11,31 +9,31 @@ import type { UUIDType } from "src/common";
 export class AutomationRunnerService {
   constructor(private readonly automationStepsService: AutomationStepsService) {}
 
-  async startAutomation(automationId: UUIDType, eventName: TriggerType) {
+  async startAutomation(automationId: UUIDType) {
     const automationSteps = await this.automationStepsService.getAllAutomationSteps(automationId);
-    await this.executeAutomationSteps(automationSteps, eventName);
+    await this.executeAutomationSteps(automationSteps);
   }
-  private async executeAutomationSteps(steps: AutomationStep[], eventName: TriggerType) {
+  private async executeAutomationSteps(steps: AutomationStep[]) {
     const root = steps.find((step) => step.parentId === null);
 
     if (!root) {
       throw new BadRequestException("automationSteps.toast.stepTreeBuildFailed");
     }
 
-    await this.executeStep(root, steps, eventName);
+    await this.executeStep(root, steps);
   }
 
-  private async executeStep(step: AutomationStep, steps: AutomationStep[], eventName: TriggerType) {
-    await this.executeSingleStep(step, eventName);
+  private async executeStep(step: AutomationStep, steps: AutomationStep[]) {
+    await this.executeSingleStep(step);
 
     const children = steps.filter((child) => child.parentId === step.id);
 
     for (const child of children) {
-      await this.executeStep(child, steps, eventName);
+      await this.executeStep(child, steps);
     }
   }
 
-  private async executeSingleStep(step: AutomationStep, eventName: TriggerType) {
+  private async executeSingleStep(step: AutomationStep) {
     switch (step.type) {
       case "trigger":
         console.log("Trigger:", step.typeContext);
@@ -46,10 +44,7 @@ export class AutomationRunnerService {
         break;
 
       case "action":
-        const trigger = AUTOMATION_TRIGGER_MAP[eventName];
-
-        console.log("trigger event", trigger);
-        console.log("values", trigger.providedVariables);
+        this.handleAction(step.typeContext as TypeContext);
 
         break;
 
@@ -61,7 +56,14 @@ export class AutomationRunnerService {
   private async handleAction(actionContext: TypeContext) {
     switch (actionContext.name) {
       case "send_email":
-        console.log("email sent");
+        this.retrieveKeysForTemplate(actionContext);
     }
+  }
+  private async retrieveKeysForTemplate(actionContext: TypeContext) {
+    const variables = Object.fromEntries(
+      actionContext.providedVariables.map(({ key, value }) => [key, value]),
+    );
+    console.log("variables extracted", variables);
+    return variables;
   }
 }

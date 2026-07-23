@@ -25,7 +25,10 @@ export type AutomationStepRecordInput = {
 };
 export type TypeContext = {
   name: string;
-  [key: string]: unknown;
+  providedVariables: Array<{
+    key: string;
+    value: unknown;
+  }>;
 };
 export type AutomationStepUpdateInput = {
   type: AutomationType;

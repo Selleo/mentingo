@@ -27,7 +27,6 @@ import { AutomationRunnerService } from "../automation-runner/automation-runner.
 import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
 
 import type { IEventHandler } from "@nestjs/cqrs";
-import type { TriggerType } from "node_modules/@repo/shared/dist/index.cjs";
 
 export type AutomationEventTypes =
   | UserInviteEvent
@@ -84,7 +83,7 @@ export class AutomationsHandler implements IEventHandler<AutomationEventTypes> {
     const uniqueAutomationIds = [...new Set(automationIds)];
     console.log("eventName", eventName);
     for (const automationId of uniqueAutomationIds) {
-      await this.automationRunnerService.startAutomation(automationId, eventName as TriggerType);
+      await this.automationRunnerService.startAutomation(automationId);
     }
   }
 }
