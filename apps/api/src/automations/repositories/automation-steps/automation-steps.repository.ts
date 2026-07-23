@@ -4,6 +4,7 @@ import { eq, sql } from "drizzle-orm";
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 import { automationSteps } from "src/storage/schema";
+import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import type {
   AutomationStepBulkUpdate,
@@ -22,7 +23,7 @@ export class AutomationStepsRepository {
         parentId: input.parentId,
         automationId: input.automationId,
         type: input.type,
-        typeContext: input.typeContext,
+        typeContext: toJsonbBuildObject(input.typeContext),
       })
       .returning();
 
@@ -52,7 +53,7 @@ export class AutomationStepsRepository {
         parentId: input.parentId,
         automationId: input.automationId,
         type: input.type,
-        typeContext: input.typeContext,
+        typeContext: toJsonbBuildObject(input.typeContext),
       })
       .where(eq(automationSteps.id, stepId))
       .returning();
@@ -79,7 +80,7 @@ export class AutomationStepsRepository {
           parentId: step.parentId,
           automationId,
           type: step.type,
-          typeContext: sql`${JSON.stringify(step.typeContext)}::jsonb`,
+          typeContext: toJsonbBuildObject(step.typeContext),
         })),
       );
       return true;
