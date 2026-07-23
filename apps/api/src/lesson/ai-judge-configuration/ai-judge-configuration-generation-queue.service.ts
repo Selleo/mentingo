@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 
@@ -41,6 +41,33 @@ export class AiJudgeConfigurationGenerationQueueService {
     currentUser: CurrentUserType,
   ): Promise<StartAiJudgeGenerationResponse> {
     const prepared = await this.aiJudgeConfigurationGenerationService.prepare(input, currentUser);
+
+    return this.enqueue(prepared, currentUser);
+  }
+
+  async revise(
+    generationId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<StartAiJudgeGenerationResponse> {
+    const job = await this.getOwnedJob(generationId, currentUser);
+    const progress = this.getProgress(job);
+    if (progress.status !== AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION)
+      throw new BadRequestException("common.error.aiJudgeGenerationNotAwaitingRevision");
+
+    const prepared = this.aiJudgeConfigurationGenerationService.prepareRevision(
+      job.data.prepared,
+      progress.configuration,
+      progress.validation,
+      progress.attemptHistory,
+    );
+
+    return this.enqueue(prepared, currentUser);
+  }
+
+  private async enqueue(
+    prepared: AiJudgeConfigurationGenerationJobData["prepared"],
+    currentUser: CurrentUserType,
+  ): Promise<StartAiJudgeGenerationResponse> {
     const generationId = randomUUID() as UUIDType;
     const data: AiJudgeConfigurationGenerationJobData = {
       tenantId: currentUser.tenantId,
@@ -128,6 +155,10 @@ export class AiJudgeConfigurationGenerationQueueService {
     if (Value.Check(aiJudgeGenerationApplicationProgressEventSchema, job.progress))
       return job.progress as AiJudgeGenerationApplicationProgressEvent;
 
-    return { status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt: 1 };
+    return {
+      status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
+      attempt: 1,
+      attemptHistory: [],
+    };
   }
 }

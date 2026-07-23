@@ -1,10 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Sparkles } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
+import { BaseEditor } from "~/components/RichText/Editor";
 import { Button } from "~/components/ui/button";
-import { DialogFooter } from "~/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -13,10 +13,10 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Textarea } from "~/components/ui/textarea";
-import { cn } from "~/lib/utils";
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { aiJudgeGenerationBriefSchema } from "./aiJudgeConfiguration.schema";
+import { AI_JUDGE_GENERATION_MODE } from "./aiJudgeConfiguration.types";
 
 import type { AiJudgeGenerationMode, AiJudgeGenerationRequest } from "./aiJudgeConfiguration.types";
 
@@ -24,6 +24,13 @@ type AiJudgeGenerationBriefFormProps = {
   mode: AiJudgeGenerationMode;
   onGenerate: (request: AiJudgeGenerationRequest) => Promise<void> | void;
 };
+
+const IMPROVEMENT_SUGGESTIONS = [
+  "clearerCriteria",
+  "betterScoring",
+  "reduceOverlap",
+  "clarifyBlockingErrors",
+] as const;
 
 export const AiJudgeGenerationBriefForm = ({
   mode,
@@ -35,67 +42,111 @@ export const AiJudgeGenerationBriefForm = ({
     defaultValues: { instruction: "" },
   });
   const handleSubmit = form.handleSubmit(({ instruction }) =>
-    onGenerate({ mode, instruction: instruction.trim() }),
+    onGenerate({ mode, instruction: stripHtmlTags(instruction).trim() }),
   );
+  const generatedArtifacts = ["taskGoal", "criteria", "threshold", "blockingErrors"].map((item) =>
+    t(`adminCourseView.curriculum.lesson.aiJudge.generation.artifacts.${item}`),
+  );
+  const isImproveMode = mode === AI_JUDGE_GENERATION_MODE.IMPROVE;
+  const submitLabel = isImproveMode
+    ? t("adminCourseView.curriculum.lesson.aiJudge.generation.improveAssessment")
+    : t("adminCourseView.curriculum.lesson.aiJudge.generation.generateDraft");
+
+  const appendSuggestion = (suggestion: (typeof IMPROVEMENT_SUGGESTIONS)[number]) => {
+    const suggestionText = t(
+      `adminCourseView.curriculum.lesson.aiJudge.generation.suggestions.${suggestion}.instruction`,
+    );
+    const currentInstruction = form.getValues("instruction").trim();
+    const nextInstruction = currentInstruction
+      ? `${currentInstruction}<p>${suggestionText}</p>`
+      : `<p>${suggestionText}</p>`;
+    form.setValue("instruction", nextInstruction, { shouldDirty: true, shouldValidate: true });
+  };
 
   return (
     <Form {...form}>
       <form
-        className="space-y-5"
+        className="flex min-h-0 min-w-0 flex-col"
         onSubmit={(event) => {
           event.stopPropagation();
           void handleSubmit(event);
         }}
       >
-        <FormField
-          control={form.control}
-          name="instruction"
-          render={({ field, fieldState }) => (
-            <FormItem>
-              <FormLabel>
-                <span className="mr-1 text-error-600">*</span>
-                {t(`adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.fieldLabel`)}
-              </FormLabel>
-              <FormControl>
-                <Textarea
-                  {...field}
-                  className={cn("min-h-44 resize-y text-base leading-6", {
-                    "border-error-500": fieldState.invalid,
-                  })}
-                  placeholder={t(
-                    `adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.placeholder`,
+        <div className="mx-auto min-w-0 w-full max-w-3xl">
+          <FormField
+            control={form.control}
+            name="instruction"
+            render={({ field }) => (
+              <FormItem className="min-w-0">
+                <FormLabel className="text-base font-semibold text-neutral-950">
+                  {t(`adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.fieldLabel`)}
+                </FormLabel>
+                <p className="text-sm text-neutral-600">
+                  {t(
+                    `adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.fieldDescription`,
                   )}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                </p>
+                <FormControl>
+                  <BaseEditor
+                    content={field.value}
+                    onChange={field.onChange}
+                    ariaLabel={t(
+                      `adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.fieldLabel`,
+                    )}
+                    parentClassName="mt-3 flex h-52 min-h-0 min-w-0 flex-col"
+                    contentClassName="min-h-0 flex-1 overflow-y-auto"
+                    editorClassName="!min-h-0"
+                    placeholder={t(
+                      `adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.placeholder`,
+                    )}
+                  />
+                </FormControl>
+                <FormMessage />
 
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4">
-          <p className="text-sm font-semibold text-neutral-900">
-            {t("adminCourseView.curriculum.lesson.aiJudge.generation.willCreate")}
-          </p>
-          <ul className="mt-3 grid gap-2 text-sm text-neutral-700 sm:grid-cols-2">
-            {["taskGoal", "criteria", "threshold", "blockingErrors"].map((item) => (
-              <li key={item} className="flex items-start gap-2">
-                <Sparkles className="mt-0.5 size-4 shrink-0 text-primary-700" aria-hidden />
-                {t(`adminCourseView.curriculum.lesson.aiJudge.generation.artifacts.${item}`)}
-              </li>
-            ))}
-          </ul>
-        </div>
+                {isImproveMode && (
+                  <div className="grid grid-cols-1 gap-2 pt-1 sm:grid-cols-2">
+                    {IMPROVEMENT_SUGGESTIONS.map((suggestion) => (
+                      <Button
+                        key={suggestion}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="box-border min-w-0 justify-center px-4 text-center font-normal"
+                        onClick={() => appendSuggestion(suggestion)}
+                      >
+                        {t(
+                          `adminCourseView.curriculum.lesson.aiJudge.generation.suggestions.${suggestion}.label`,
+                        )}
+                      </Button>
+                    ))}
+                  </div>
+                )}
 
-        <DialogFooter>
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? (
-              <LoaderCircle className="mr-2 size-4 animate-spin" aria-hidden />
-            ) : (
-              <Sparkles className="mr-2 size-4" aria-hidden />
+                {!isImproveMode && (
+                  <div className="pt-1 text-xs text-neutral-500">
+                    <p className="font-medium text-neutral-700">
+                      {t("adminCourseView.curriculum.lesson.aiJudge.generation.willCreate")}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-2">
+                      {generatedArtifacts.map((artifact) => (
+                        <span key={artifact}>- {artifact}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end pt-3">
+                  <Button type="submit" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting && (
+                      <LoaderCircle className="mr-2 size-4 animate-spin" aria-hidden />
+                    )}
+                    {submitLabel}
+                  </Button>
+                </div>
+              </FormItem>
             )}
-            {t("adminCourseView.curriculum.lesson.aiJudge.generation.generateDraft")}
-          </Button>
-        </DialogFooter>
+          />
+        </div>
       </form>
     </Form>
   );

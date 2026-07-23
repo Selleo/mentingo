@@ -63,6 +63,20 @@ export class AiJudgeConfigurationGenerationController {
     );
   }
 
+  @Post("generations/:generationId/revise")
+  @Validate({
+    request: [{ type: "param", name: "generationId", schema: UUIDSchema }],
+    response: baseResponse(startAiJudgeGenerationResponseSchema),
+  })
+  async reviseGeneration(
+    @Param("generationId") generationId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
+  ): Promise<BaseResponse<StartAiJudgeGenerationResponse>> {
+    return new BaseResponse(
+      await this.aiJudgeConfigurationGenerationQueueService.revise(generationId, currentUser),
+    );
+  }
+
   @Post("generations/:generationId/cancel")
   @Validate({
     request: [{ type: "param", name: "generationId", schema: UUIDSchema }],

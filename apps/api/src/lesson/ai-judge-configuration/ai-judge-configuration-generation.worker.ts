@@ -1,6 +1,7 @@
 import { Injectable, Logger, type OnModuleDestroy } from "@nestjs/common";
 import { Worker } from "bullmq";
 
+import { AI_JUDGE_GENERATION_FAILURE_MESSAGE } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.constants";
 import { AI_JUDGE_GENERATION_STATUS } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
@@ -59,10 +60,12 @@ export class AiJudgeConfigurationGenerationWorker implements OnModuleDestroy {
           this.aiJudgeConfigurationGenerationQueueService.publishProgress(job, progress),
       });
     } catch (error) {
+      const currentProgress = this.aiJudgeConfigurationGenerationQueueService.getProgress(job);
       const failedProgress: AiJudgeGenerationApplicationProgressEvent = {
         status: AI_JUDGE_GENERATION_STATUS.FAILED,
-        attempt: this.aiJudgeConfigurationGenerationQueueService.getProgress(job).attempt,
-        message: error instanceof Error ? error.message : "Generation failed",
+        attempt: currentProgress.attempt,
+        attemptHistory: currentProgress.attemptHistory,
+        message: AI_JUDGE_GENERATION_FAILURE_MESSAGE,
       };
       await this.aiJudgeConfigurationGenerationQueueService.publishProgress(job, failedProgress);
       throw error;

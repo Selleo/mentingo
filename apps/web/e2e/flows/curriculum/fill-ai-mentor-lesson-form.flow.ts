@@ -30,6 +30,7 @@ export const fillAiMentorLessonFormFlow = async (
   await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
   await page
     .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_TASK_GOAL_INPUT)
+    .locator(".ProseMirror")
     .fill(input.taskGoal ?? "Complete the AI Mentor exercise.");
   await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_APPLY_BUTTON).click();
 };

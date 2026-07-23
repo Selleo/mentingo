@@ -1,4 +1,4 @@
-import { ChevronRight, CircleCheck, Scale, Sparkles } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,11 +7,13 @@ import { Card, CardContent } from "~/components/ui/card";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
+import { AI_JUDGE_GENERATION_MODE } from "./aiJudgeConfiguration.types";
 import { AiJudgeConfigurationDialog } from "./AiJudgeConfigurationDialog";
 
 import type {
   AiJudgeConfigurationDraft,
   AiJudgeGenerationMode,
+  AiJudgeValidationResult,
 } from "./aiJudgeConfiguration.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -25,6 +27,14 @@ type AiJudgeConfigurationCardProps = {
   isLoading?: boolean;
   isSaving?: boolean;
   onConfigureWithAi?: (mode: AiJudgeGenerationMode) => void;
+  editorOpen?: boolean;
+  onEditorOpenChange?: (open: boolean) => void;
+  onValidateConfiguration?: (value: AiJudgeConfigurationDraft) => Promise<AiJudgeValidationResult>;
+  onImproveWithAi?: (
+    value: AiJudgeConfigurationDraft,
+    validation?: AiJudgeValidationResult,
+  ) => void;
+  isValidating?: boolean;
   error?: string;
 };
 
@@ -38,10 +48,17 @@ export const AiJudgeConfigurationCard = ({
   isLoading = false,
   isSaving = false,
   onConfigureWithAi,
+  editorOpen,
+  onEditorOpenChange,
+  onValidateConfiguration,
+  onImproveWithAi,
+  isValidating,
   error,
 }: AiJudgeConfigurationCardProps) => {
   const { t } = useTranslation();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [internalEditorOpen, setInternalEditorOpen] = useState(false);
+  const isDialogOpen = editorOpen ?? internalEditorOpen;
+  const setIsDialogOpen = onEditorOpenChange ?? setInternalEditorOpen;
   const isConfigured = Boolean(value);
   const canOpenEditor = !isLoading && (language === baseLanguage || (isPersisted && isConfigured));
   const requiresBaseConfiguration = language !== baseLanguage && !isConfigured;
@@ -53,9 +70,6 @@ export const AiJudgeConfigurationCard = ({
     ? "adminCourseView.curriculum.lesson.aiJudge.editAssessment"
     : "adminCourseView.curriculum.lesson.aiJudge.configureManually";
   const isAiActionDisabled = language !== baseLanguage || isLoading;
-  const aiButtonLabelKey = isConfigured
-    ? "adminCourseView.curriculum.lesson.aiJudge.improveWithAi"
-    : "adminCourseView.curriculum.lesson.aiJudge.createWithAi";
 
   return (
     <>
@@ -66,41 +80,28 @@ export const AiJudgeConfigurationCard = ({
         })}
       >
         <CardContent className="p-0">
-          <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex min-w-0 items-start gap-4">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-700">
-                <Scale className="size-5" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold text-neutral-950">
-                    {t("adminCourseView.curriculum.lesson.aiJudge.cardTitle")}
-                  </h3>
-                  {isConfigured && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-success-50 px-2 py-0.5 text-xs font-medium text-success-800">
-                      <CircleCheck className="size-3.5" />
-                      {t("adminCourseView.curriculum.lesson.aiJudge.configured")}
-                    </span>
-                  )}
-                </div>
-                {value ? (
-                  <p className="mt-1 text-sm text-neutral-600">
-                    {t("adminCourseView.curriculum.lesson.aiJudge.summary", {
-                      criteria: value.criteria.length,
-                      score: totalScore,
-                      threshold: value.passingThresholdPercent,
-                      blockingErrors: value.blockingErrors.length,
-                    })}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-sm text-neutral-600">{t(emptyDescriptionKey)}</p>
-                )}
-                {error && <p className="mt-1 text-sm text-error-700">{error}</p>}
-              </div>
+          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h3 className="font-semibold text-neutral-950">
+                {t("adminCourseView.curriculum.lesson.aiJudge.cardTitle")}
+              </h3>
+              {value ? (
+                <p className="mt-1 text-sm text-neutral-600">
+                  {t("adminCourseView.curriculum.lesson.aiJudge.summary", {
+                    criteria: value.criteria.length,
+                    score: totalScore,
+                    threshold: value.passingThresholdPercent,
+                    blockingErrors: value.blockingErrors.length,
+                  })}
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-neutral-600">{t(emptyDescriptionKey)}</p>
+              )}
+              {error && <p className="mt-1 text-sm text-error-700">{error}</p>}
             </div>
 
             <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
-              {onConfigureWithAi && (
+              {!isConfigured && onConfigureWithAi && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <span
@@ -110,12 +111,12 @@ export const AiJudgeConfigurationCard = ({
                     >
                       <Button
                         type="button"
-                        variant={isConfigured ? "outline" : "default"}
+                        size="sm"
                         disabled={isAiActionDisabled}
-                        onClick={() => onConfigureWithAi(isConfigured ? "improve" : "create")}
+                        onClick={() => onConfigureWithAi(AI_JUDGE_GENERATION_MODE.CREATE)}
+                        className="h-9"
                       >
-                        <Sparkles className="mr-2 size-4" />
-                        {t(aiButtonLabelKey)}
+                        {t("adminCourseView.curriculum.lesson.aiJudge.createWithAi")}
                       </Button>
                     </span>
                   </TooltipTrigger>
@@ -141,14 +142,15 @@ export const AiJudgeConfigurationCard = ({
                   >
                     <Button
                       type="button"
-                      variant={isConfigured ? "default" : "link"}
+                      variant={isConfigured ? "outline" : "link"}
+                      size="sm"
                       data-testid="curriculum-ai-mentor-judge-configure-button"
                       disabled={!canOpenEditor}
                       onClick={() => setIsDialogOpen(true)}
-                      className={cn({ "px-2": !isConfigured })}
+                      className={cn("h-9 gap-1.5", { "px-1.5": !isConfigured })}
                     >
                       {t(editorButtonLabelKey)}
-                      {isConfigured && <ChevronRight className="ml-2 size-4" />}
+                      {isConfigured && <ChevronRight className="size-3.5" />}
                     </Button>
                   </span>
                 </TooltipTrigger>
@@ -178,6 +180,9 @@ export const AiJudgeConfigurationCard = ({
         baseLanguage={baseLanguage}
         isPersisted={isPersisted}
         isSaving={isSaving}
+        onValidateConfiguration={onValidateConfiguration}
+        onImproveWithAi={onImproveWithAi}
+        isValidating={isValidating}
       />
     </>
   );

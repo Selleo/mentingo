@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import {
@@ -8,11 +8,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { cn } from "~/lib/utils";
 
-import { AI_JUDGE_GENERATION_STATUS } from "./aiJudgeConfiguration.types";
+import { AI_JUDGE_GENERATION_MODE, AI_JUDGE_GENERATION_STATUS } from "./aiJudgeConfiguration.types";
 import { AiJudgeGenerationBriefForm } from "./AiJudgeGenerationBriefForm";
 import { AiJudgeGenerationProgressView } from "./AiJudgeGenerationProgressView";
-import { AiJudgeGenerationReviewView } from "./AiJudgeGenerationReviewView";
+import { AiJudgeGenerationQualityReviewFooter } from "./AiJudgeGenerationQualityReviewFooter";
+import { AiJudgeGenerationQualityReviewView } from "./AiJudgeGenerationQualityReviewView";
+import {
+  AiJudgeGenerationReviewFooter,
+  AiJudgeGenerationReviewView,
+} from "./AiJudgeGenerationReviewView";
 import { AiJudgeGenerationStageTracker } from "./AiJudgeGenerationStageTracker";
 import { AiJudgeGenerationTerminalView } from "./AiJudgeGenerationTerminalView";
 
@@ -32,8 +38,8 @@ type AiJudgeGenerationDialogProps = {
   onGenerate: (request: AiJudgeGenerationRequest) => Promise<void> | void;
   onCancel?: () => Promise<void> | void;
   onStopAndInspect?: () => Promise<void> | void;
-  onApplyDraft: (draft: AiJudgeConfigurationDraft) => Promise<void> | void;
-  onEditAssessment?: (draft: AiJudgeConfigurationDraft) => void;
+  onReviewAssessment: (draft: AiJudgeConfigurationDraft) => void;
+  onRevise: () => Promise<void> | void;
 };
 
 const isGenerationActive = (status: AiJudgeGenerationStatus) =>
@@ -49,14 +55,23 @@ export const AiJudgeGenerationDialog = ({
   onGenerate,
   onCancel,
   onStopAndInspect,
-  onApplyDraft,
-  onEditAssessment,
+  onReviewAssessment,
+  onRevise,
 }: AiJudgeGenerationDialogProps) => {
   const { t } = useTranslation();
+  const [isReviewingCurrentDraft, setIsReviewingCurrentDraft] = useState(false);
   const active = state ? isGenerationActive(state.status) : false;
+
+  useEffect(() => {
+    if (!open || state?.status !== AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION)
+      setIsReviewingCurrentDraft(false);
+  }, [open, state?.status]);
 
   const content = (() => {
     if (!state) return <AiJudgeGenerationBriefForm mode={mode} onGenerate={onGenerate} />;
+
+    if (isReviewingCurrentDraft)
+      return <AiJudgeGenerationReviewView state={state} mode={mode} isCurrentDraftReview />;
 
     switch (state.status) {
       case AI_JUDGE_GENERATION_STATUS.DRAFTING:
@@ -65,50 +80,75 @@ export const AiJudgeGenerationDialog = ({
         return (
           <AiJudgeGenerationProgressView
             state={state}
+            mode={mode}
             onCancel={onCancel}
             onStopAndInspect={onStopAndInspect}
           />
         );
+      case AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION:
+        return <AiJudgeGenerationQualityReviewView state={state} mode={mode} />;
       case AI_JUDGE_GENERATION_STATUS.COMPLETED:
       case AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW:
-        return (
-          <AiJudgeGenerationReviewView
-            state={state}
-            onApplyDraft={onApplyDraft}
-            onEditAssessment={onEditAssessment}
-          />
-        );
+        return <AiJudgeGenerationReviewView state={state} mode={mode} />;
       case AI_JUDGE_GENERATION_STATUS.FAILED:
       case AI_JUDGE_GENERATION_STATUS.CANCELLED:
         return <AiJudgeGenerationTerminalView state={state} onOpenChange={onOpenChange} />;
     }
   })();
+  const qualityReviewFooter = state?.status === AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION &&
+    !isReviewingCurrentDraft && (
+      <AiJudgeGenerationQualityReviewFooter
+        state={state}
+        onRevise={onRevise}
+        onContinue={() => setIsReviewingCurrentDraft(true)}
+      />
+    );
+  const shouldShowReviewFooter =
+    isReviewingCurrentDraft ||
+    state?.status === AI_JUDGE_GENERATION_STATUS.COMPLETED ||
+    state?.status === AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW;
+  const reviewFooter = shouldShowReviewFooter && state && (
+    <AiJudgeGenerationReviewFooter state={state} onReviewAssessment={onReviewAssessment} />
+  );
 
   return (
     <Dialog open={open} onOpenChange={active ? () => undefined : onOpenChange}>
       <DialogContent
-        className="flex max-h-[90dvh] w-[calc(100%-2rem)] max-w-3xl flex-col gap-0 overflow-hidden p-0"
+        variant="mobileDrawer"
+        {...(mode === AI_JUDGE_GENERATION_MODE.CREATE ? { "aria-describedby": undefined } : {})}
+        className={cn("!flex h-[88dvh] !flex-col sm:h-auto sm:max-h-[92dvh] sm:!max-w-none", {
+          "sm:w-[min(92vw,48rem)]": !state,
+          "sm:w-[min(92vw,52rem)]": Boolean(state),
+        })}
         noCloseButton={active}
       >
-        <DialogHeader className="px-6 pb-5 pt-6 pr-12">
-          <div className="mb-3 flex size-10 items-center justify-center rounded-lg border border-primary-200 bg-primary-50 text-primary-700">
-            <Sparkles className="size-5" aria-hidden />
-          </div>
-          <DialogTitle className="text-xl text-neutral-950">
+        <DialogHeader className="shrink-0 border-b border-neutral-200 px-5 py-4 pr-14 sm:px-6 sm:py-5">
+          <DialogTitle className="text-xl">
             {t(`adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.title`)}
           </DialogTitle>
-          <DialogDescription className="text-neutral-600">
-            {t(`adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.description`)}
-          </DialogDescription>
+          {mode !== AI_JUDGE_GENERATION_MODE.CREATE && (
+            <DialogDescription className="text-neutral-600">
+              {t(`adminCourseView.curriculum.lesson.aiJudge.generation.${mode}.description`)}
+            </DialogDescription>
+          )}
         </DialogHeader>
 
         {state && (
-          <div className="px-6">
-            <AiJudgeGenerationStageTracker status={state.status} />
+          <div className="shrink-0 border-b border-neutral-100 px-5 py-4 sm:px-6">
+            <AiJudgeGenerationStageTracker
+              status={isReviewingCurrentDraft ? AI_JUDGE_GENERATION_STATUS.COMPLETED : state.status}
+            />
           </div>
         )}
 
-        <div className="min-h-0 overflow-y-auto px-6 pb-6 pt-5">{content}</div>
+        <div
+          data-testid="ai-judge-generation-dialog-body"
+          className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 [-webkit-overflow-scrolling:touch] sm:px-6"
+        >
+          {content}
+        </div>
+        {qualityReviewFooter}
+        {reviewFooter}
       </DialogContent>
     </Dialog>
   );

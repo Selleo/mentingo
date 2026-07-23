@@ -1,3 +1,12 @@
+import { AI_JUDGE_GENERATION_MODE, AI_JUDGE_GENERATION_STATUS } from "@repo/shared";
+
+import type {
+  AiJudgeDraftChangeField,
+  AiJudgeDraftChangeType,
+  AiJudgeGenerationStatus as SharedAiJudgeGenerationStatus,
+} from "@repo/shared";
+import type { ValidateConfigurationResponse } from "~/api/generated-api";
+
 export type AiJudgeScoreGuidanceDraft = {
   id?: string;
   score: number;
@@ -26,26 +35,12 @@ export type AiJudgeConfigurationDraft = {
   blockingErrors: AiJudgeBlockingErrorDraft[];
 };
 
-export const AI_JUDGE_GENERATION_STATUS = {
-  DRAFTING: "drafting",
-  EVALUATING: "evaluating",
-  REVISING: "revising",
-  COMPLETED: "completed",
-  REQUIRES_REVIEW: "requires_review",
-  FAILED: "failed",
-  CANCELLED: "cancelled",
-} as const;
+export { AI_JUDGE_GENERATION_MODE, AI_JUDGE_GENERATION_STATUS };
 
-export type AiJudgeGenerationStatus =
-  (typeof AI_JUDGE_GENERATION_STATUS)[keyof typeof AI_JUDGE_GENERATION_STATUS];
-
-export const AI_JUDGE_GENERATION_MODE = {
-  CREATE: "create",
-  IMPROVE: "improve",
-} as const;
-
+export type AiJudgeGenerationStatus = SharedAiJudgeGenerationStatus;
 export type AiJudgeGenerationMode =
-  (typeof AI_JUDGE_GENERATION_MODE)[keyof typeof AI_JUDGE_GENERATION_MODE];
+  | typeof AI_JUDGE_GENERATION_MODE.CREATE
+  | typeof AI_JUDGE_GENERATION_MODE.IMPROVE;
 
 export const AI_JUDGE_GENERATION_CHECK_STATUS = {
   PENDING: "pending",
@@ -60,7 +55,31 @@ export type AiJudgeGenerationCheckStatus =
 export type AiJudgeGenerationCheck = {
   id: string;
   label: string;
+  detail?: string;
+  targetRef?: string;
+  targetScore?: number;
+  targetTypeLabel?: string;
+  targetLabel?: string;
   status: AiJudgeGenerationCheckStatus;
+};
+
+export type AiJudgeGenerationChange = {
+  type: AiJudgeDraftChangeType;
+  targetRef: string;
+  targetTypeLabel?: string;
+  targetLabel?: string;
+  score?: number;
+  field: AiJudgeDraftChangeField;
+  before?: string | number | null;
+  after?: string | number | null;
+};
+
+export type AiJudgeGenerationAttempt = {
+  attempt: number;
+  passed: boolean;
+  summary: string;
+  corrections: string[];
+  changes: AiJudgeGenerationChange[];
 };
 
 export type AiJudgeGenerationViewState = {
@@ -69,13 +88,16 @@ export type AiJudgeGenerationViewState = {
   maxAttempts: number;
   completedArtifacts: string[];
   evaluatorChecks: AiJudgeGenerationCheck[];
+  changes: AiJudgeGenerationChange[];
+  attemptHistory: AiJudgeGenerationAttempt[];
   currentCorrection?: string;
   remainingConcern?: string;
   draft?: AiJudgeConfigurationDraft;
-  errorMessage?: string;
 };
 
 export type AiJudgeGenerationRequest = {
   mode: AiJudgeGenerationMode;
   instruction: string;
 };
+
+export type AiJudgeValidationResult = ValidateConfigurationResponse["data"];

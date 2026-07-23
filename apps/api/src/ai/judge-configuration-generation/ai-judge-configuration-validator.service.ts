@@ -2,20 +2,25 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
-import { MAX_TOKENS } from "src/ai/ai.constants";
 import {
   AI_JUDGE_VALIDATION_SEVERITY,
   AI_JUDGE_VALIDATION_TARGET,
 } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 
-import { aiJudgeConfigurationValidatorModelResultSchema } from "./ai-judge-configuration-generation.schema";
+import { AI_JUDGE_CONFIGURATION_VALIDATOR_REASONING_EFFORT } from "./ai-judge-configuration-generation.constants";
+import {
+  aiJudgeConfigurationValidatorModelResultSchema,
+  aiJudgeConfigurationValidatorStructuredOutputSchema,
+} from "./ai-judge-configuration-generation.schema";
 
 import type {
   AiJudgeConfigurationValidationResult,
   AiJudgeConfigurationValidatorModelResult,
+  AiJudgeConfigurationValidatorStructuredOutput,
   AiJudgeValidationIssue,
   ReferencedAiJudgeConfiguration,
 } from "./ai-judge-configuration-generation.schema";
@@ -23,7 +28,10 @@ import type { ValidateAiJudgeConfigurationDraftInput } from "./ai-judge-configur
 
 @Injectable()
 export class AiJudgeConfigurationValidatorService {
-  constructor(private readonly promptService: PromptService) {}
+  constructor(
+    private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
+  ) {}
 
   async validate(
     input: ValidateAiJudgeConfigurationDraftInput,
@@ -61,27 +69,56 @@ export class AiJudgeConfigurationValidatorService {
     prompt: string,
   ): Promise<AiJudgeConfigurationValidatorModelResult> {
     await this.promptService.isNotEmpty(prompt);
-    const provider = await this.promptService.getOpenAI();
 
     try {
-      const { generateText, jsonSchema, Output } = await loadAiSdk();
-      const schema = jsonSchema<AiJudgeConfigurationValidatorModelResult>(
-        () => aiJudgeConfigurationValidatorModelResultSchema,
-      );
-      const { output } = await generateText({
-        model: provider(OPENAI_MODELS.BASIC),
-        output: Output.object({ schema }),
-        maxOutputTokens: MAX_TOKENS,
-        temperature: 0.1,
-        system,
-        prompt,
-        experimental_telemetry: { isEnabled: true },
-      });
+      const output = await this.aiRuntimeService.validateJudgeConfiguration(
+        {
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0,
+        },
+        async () => {
+          const provider = await this.promptService.getOpenAI();
+          const { generateText, jsonSchema, Output } = await loadAiSdk();
+          const schema = jsonSchema<AiJudgeConfigurationValidatorStructuredOutput>(
+            () => aiJudgeConfigurationValidatorStructuredOutputSchema,
+          );
 
-      if (!Value.Check(aiJudgeConfigurationValidatorModelResultSchema, output))
+          return generateText({
+            model: provider(OPENAI_MODELS.BASIC),
+            output: Output.object({ schema }),
+            providerOptions: {
+              openai: { reasoningEffort: AI_JUDGE_CONFIGURATION_VALIDATOR_REASONING_EFFORT },
+            },
+            temperature: 0,
+            system,
+            prompt,
+            experimental_telemetry: { isEnabled: true },
+          }).then((result) => result.output);
+        },
+      );
+
+      if (!Value.Check(aiJudgeConfigurationValidatorStructuredOutputSchema, output))
         throw new Error("Validator returned an invalid result structure");
 
-      return output;
+      const result = {
+        ...output,
+        issues: output.issues.map((issue) => {
+          const { field, ...target } = issue.target;
+
+          return {
+            ...issue,
+            target: field === null ? target : { ...target, field },
+          };
+        }),
+      };
+
+      if (!Value.Check(aiJudgeConfigurationValidatorModelResultSchema, result))
+        throw new Error("Validator returned an invalid result structure");
+
+      return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       updateActiveObservation({ level: "ERROR", statusMessage: message });
@@ -90,10 +127,24 @@ export class AiJudgeConfigurationValidatorService {
   }
 
   private buildPrompt(input: ValidateAiJudgeConfigurationDraftInput): string {
+    const totalMaxScore = input.configuration.criteria.reduce(
+      (total, criterion) => total + criterion.maxScore,
+      0,
+    );
     const payload = {
       creatorBrief: input.brief,
+      creatorInstruction: input.creatorInstruction,
       lessonContext: input.lessonContext,
       configuration: input.configuration,
+      scoringFacts: {
+        totalMaxScore,
+        passingThresholdPercent: input.configuration.passingThresholdPercent,
+        requiredScore: Math.ceil(
+          (totalMaxScore * input.configuration.passingThresholdPercent) / 100,
+        ),
+      },
+      appliedChanges: input.appliedChanges,
+      previousValidation: input.previousValidation,
     };
 
     return [

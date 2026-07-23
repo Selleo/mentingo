@@ -1,6 +1,7 @@
 import { SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { AiJudgeConfigurationGenerationWorkflowService } from "./ai-judge-configuration-generation-workflow.service";
+import { AI_JUDGE_GENERATION_FAILURE_MESSAGE } from "./ai-judge-configuration-generation.constants";
 
 import type {
   AiJudgeConfigurationValidationResult,
@@ -98,6 +99,13 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
     expect(result).toEqual({
       status: "completed",
       attempt: 1,
+      attemptHistory: [
+        {
+          attempt: 1,
+          changes: [],
+          validation: passedValidation,
+        },
+      ],
       configuration: {
         ...draft,
         criteria: draft.criteria.map(({ ref: _ref, ...criterion }) => criterion),
@@ -108,33 +116,73 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
     expect(progress.map(({ status }) => status)).toEqual(["drafting", "evaluating", "completed"]);
   });
 
-  it("sends semantic errors to focused repair and then reevaluates", async () => {
+  it("pauses after semantic errors so the creator can approve another attempt", async () => {
     const { generatorService, validatorService, service, progress, options } = createService();
     generatorService.generate.mockResolvedValue(draft);
-    validatorService.validate
-      .mockResolvedValueOnce(failedValidation)
-      .mockResolvedValueOnce(passedValidation);
+    validatorService.validate.mockResolvedValue(failedValidation);
 
     const result = await service.run(createInput, options);
 
-    expect(result.status).toBe("completed");
-    expect(result.attempt).toBe(2);
-    expect(generatorService.generate).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        mode: "repair",
-        currentConfiguration: draft,
-        blockingIssues: failedValidation.issues,
-      }),
-    );
+    expect(result.status).toBe("awaiting_revision");
+    expect(result.attempt).toBe(1);
+    expect(generatorService.generate).toHaveBeenCalledTimes(1);
     expect(progress.map(({ status }) => status)).toEqual([
       "drafting",
       "evaluating",
-      "revising",
-      "drafting",
-      "evaluating",
-      "completed",
+      "awaiting_revision",
     ]);
+  });
+
+  it("runs an approved repair as the next attempt with preserved history", async () => {
+    const { generatorService, validatorService, service, progress, options } = createService();
+    const repairedDraft = {
+      ...draft,
+      criteria: [
+        {
+          ...draft.criteria[0]!,
+          expectedBehavior: "Asks a focused question before proposing a solution.",
+        },
+      ],
+    };
+    generatorService.generate.mockResolvedValue(repairedDraft);
+    validatorService.validate.mockResolvedValue(passedValidation);
+    const firstAttempt = {
+      attempt: 1,
+      changes: [],
+      validation: failedValidation,
+    };
+
+    const result = await service.run(
+      {
+        mode: "repair",
+        language: SUPPORTED_LANGUAGES.EN,
+        lessonContext,
+        brief: createInput.brief,
+        currentConfiguration: draft,
+        blockingIssues: failedValidation.issues,
+      },
+      { ...options, attempt: 2, attemptHistory: [firstAttempt] },
+    );
+
+    expect(result).toMatchObject({
+      status: "completed",
+      attempt: 2,
+      attemptHistory: [firstAttempt, { attempt: 2, validation: passedValidation }],
+    });
+    expect(progress.map(({ status }) => status)).toEqual(["drafting", "evaluating", "completed"]);
+    expect(validatorService.validate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        configuration: repairedDraft,
+        previousValidation: failedValidation,
+        appliedChanges: [
+          expect.objectContaining({
+            targetRef: "C1",
+            field: "expectedBehavior",
+            after: "Asks a focused question before proposing a solution.",
+          }),
+        ],
+      }),
+    );
   });
 
   it("computes improvement changes from stable references", async () => {
@@ -185,6 +233,21 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
     expect(progress.find(({ status }) => status === "evaluating")).toMatchObject({
       changes: expect.any(Array),
     });
+    expect(validatorService.validate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creatorInstruction: "Make the assessment more specific.",
+        appliedChanges: expect.arrayContaining([
+          expect.objectContaining({
+            targetRef: "configuration",
+            field: "taskGoal",
+          }),
+          expect.objectContaining({
+            targetRef: "C1",
+            field: "expectedBehavior",
+          }),
+        ]),
+      }),
+    );
   });
 
   it("repairs deterministic scoring defects without invoking the semantic Validator", async () => {
@@ -201,29 +264,49 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
         },
       ],
     };
-    generatorService.generate.mockResolvedValueOnce(invalidDraft).mockResolvedValueOnce(draft);
+    generatorService.generate.mockResolvedValue(invalidDraft);
     validatorService.validate.mockResolvedValue(passedValidation);
 
-    await service.run(createInput, options);
+    const result = await service.run(createInput, options);
 
-    expect(validatorService.validate).toHaveBeenCalledTimes(1);
-    expect(generatorService.generate).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        mode: "repair",
-        blockingIssues: expect.arrayContaining([
-          expect.objectContaining({ code: "duplicate_guidance_score" }),
-          expect.objectContaining({ code: "missing_guidance_scores" }),
-        ]),
-      }),
-    );
+    expect(result.status).toBe("awaiting_revision");
+    expect(validatorService.validate).not.toHaveBeenCalled();
+    expect(generatorService.generate).toHaveBeenCalledTimes(1);
     expect(progress.map(({ status }) => status)).toEqual([
       "drafting",
-      "revising",
-      "drafting",
       "evaluating",
-      "completed",
+      "awaiting_revision",
     ]);
+  });
+
+  it("normalizes duplicate model references before publishing the draft", async () => {
+    const { generatorService, validatorService, service, progress, options } = createService();
+    const duplicateReferenceDraft: ReferencedAiJudgeConfiguration = {
+      ...draft,
+      blockingErrors: [
+        draft.blockingErrors[0]!,
+        { ref: "B1", description: "Promises an impossible deadline." },
+      ],
+    };
+    generatorService.generate.mockResolvedValue(duplicateReferenceDraft);
+    validatorService.validate.mockResolvedValue(passedValidation);
+
+    const result = await service.run(createInput, options);
+
+    expect(result).toMatchObject({
+      status: "completed",
+      configuration: {
+        blockingErrors: [
+          { description: "Invents contractual guarantees." },
+          { description: "Promises an impossible deadline." },
+        ],
+      },
+    });
+    expect(progress.find(({ status }) => status === "evaluating")).toMatchObject({
+      draft: {
+        blockingErrors: [{ ref: "B1" }, { ref: "B2" }],
+      },
+    });
   });
 
   it("returns the latest draft for creator review after the third semantic failure", async () => {
@@ -231,15 +314,24 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
     generatorService.generate.mockResolvedValue(draft);
     validatorService.validate.mockResolvedValue(failedValidation);
 
-    const result = await service.run(createInput, options);
+    const previousAttempts = [
+      { attempt: 1, changes: [], validation: failedValidation },
+      { attempt: 2, changes: [], validation: failedValidation },
+    ];
+    const result = await service.run(createInput, {
+      ...options,
+      attempt: 3,
+      attemptHistory: previousAttempts,
+    });
 
     expect(result).toMatchObject({
       status: "requires_review",
       attempt: 3,
       validation: failedValidation,
     });
-    expect(generatorService.generate).toHaveBeenCalledTimes(3);
-    expect(validatorService.validate).toHaveBeenCalledTimes(3);
+    expect(result.attemptHistory).toHaveLength(3);
+    expect(generatorService.generate).toHaveBeenCalledTimes(1);
+    expect(validatorService.validate).toHaveBeenCalledTimes(1);
     expect(progress.at(-1)?.status).toBe("requires_review");
   });
 
@@ -248,9 +340,29 @@ describe("AiJudgeConfigurationGenerationWorkflowService", () => {
 
     const result = await service.run(createInput, { ...options, isCancelled: () => true });
 
-    expect(result).toEqual({ status: "cancelled", attempt: 1, configuration: undefined });
+    expect(result).toEqual({
+      status: "cancelled",
+      attempt: 1,
+      attemptHistory: [],
+      configuration: undefined,
+    });
     expect(generatorService.generate).not.toHaveBeenCalled();
     expect(validatorService.validate).not.toHaveBeenCalled();
     expect(progress).toEqual([result]);
+  });
+
+  it("keeps provider diagnostics out of generation progress", async () => {
+    const { generatorService, service, options } = createService();
+    generatorService.generate.mockRejectedValue(
+      new Error("Invalid schema for response_format: missing example"),
+    );
+
+    await expect(service.run(createInput, options)).resolves.toEqual({
+      status: "failed",
+      attempt: 1,
+      attemptHistory: [],
+      message: AI_JUDGE_GENERATION_FAILURE_MESSAGE,
+      configuration: undefined,
+    });
   });
 });

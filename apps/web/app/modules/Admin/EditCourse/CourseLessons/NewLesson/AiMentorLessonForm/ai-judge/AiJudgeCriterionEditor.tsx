@@ -10,10 +10,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "~/components/ui/accordion";
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { Button } from "~/components/ui/button";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Textarea } from "~/components/ui/textarea";
 import { Tooltip, TooltipArrow, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
@@ -88,13 +88,17 @@ export const AiJudgeCriterionEditor = ({
   return (
     <AccordionItem
       value={accordionValue}
+      data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}`}
       className={cn("overflow-hidden rounded-lg border bg-white", {
         "border-error-500": hasError,
         "border-neutral-200": !hasError,
       })}
     >
       <div className="relative hover:bg-neutral-50">
-        <AccordionTrigger className="group w-full min-w-0 gap-3 py-3 pl-4 pr-3 text-left">
+        <AccordionTrigger
+          data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-toggle`}
+          className="group w-full min-w-0 gap-3 py-3 pl-4 pr-3 text-left"
+        >
           <span className="flex min-w-0 flex-1 items-center gap-3 pr-16">
             <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-50 text-sm font-semibold text-primary-700">
               {criterionIndex + 1}
@@ -163,6 +167,7 @@ export const AiJudgeCriterionEditor = ({
                 <FormControl>
                   <Input
                     {...field}
+                    data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-title-input`}
                     className={cn({ "border-error-500": fieldState.invalid })}
                     placeholder={t(
                       "adminCourseView.curriculum.lesson.aiJudge.criterionTitlePlaceholder",
@@ -178,12 +183,13 @@ export const AiJudgeCriterionEditor = ({
             name={`criteria.${criterionIndex}.maxScore`}
             render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel className="text-neutral-900">
+                <FormLabel className="whitespace-nowrap text-neutral-900">
                   {t("adminCourseView.curriculum.lesson.aiJudge.maxScore")}
                 </FormLabel>
                 <FormControl>
                   <Input
                     {...field}
+                    data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-max-score-input`}
                     type="number"
                     min={1}
                     max={AI_JUDGE_MAX_CRITERION_SCORE}
@@ -207,10 +213,10 @@ export const AiJudgeCriterionEditor = ({
                 {t("adminCourseView.curriculum.lesson.aiJudge.expectedBehavior")}
               </FormLabel>
               <FormControl>
-                <Textarea
+                <AutosizeTextarea
                   {...field}
+                  data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-expected-behavior-input`}
                   className={cn({ "border-error-500": fieldState.invalid })}
-                  rows={2}
                   placeholder={t(
                     "adminCourseView.curriculum.lesson.aiJudge.expectedBehaviorPlaceholder",
                   )}
@@ -223,7 +229,10 @@ export const AiJudgeCriterionEditor = ({
 
         <Accordion type="single" collapsible className="mt-4 border-t border-neutral-100 pt-1">
           <AccordionItem value="scoring-guidance" className="border-0">
-            <AccordionTrigger className="group rounded-md px-2 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50">
+            <AccordionTrigger
+              data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-scoring-guidance-toggle`}
+              className="group rounded-md px-2 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            >
               <span>
                 {t("adminCourseView.curriculum.lesson.aiJudge.advancedScoring")}
                 {guidance.fields.length > 0 && (
@@ -256,8 +265,10 @@ export const AiJudgeCriterionEditor = ({
                               {t("adminCourseView.curriculum.lesson.aiJudge.scoreDescription")}
                             </FormLabel>
                             <FormControl>
-                              <Input
+                              <AutosizeTextarea
                                 {...field}
+                                data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-score-${guidanceField.score}-description-input`}
+                                maxRows={4}
                                 className={cn({ "border-error-500": fieldState.invalid })}
                                 placeholder={t(
                                   "adminCourseView.curriculum.lesson.aiJudge.scoreDescriptionPlaceholder",
@@ -281,8 +292,10 @@ export const AiJudgeCriterionEditor = ({
                             </span>
                           </FormLabel>
                           <FormControl>
-                            <Input
+                            <AutosizeTextarea
                               {...field}
+                              data-testid={`curriculum-ai-mentor-judge-criterion-${criterionIndex}-score-${guidanceField.score}-example-input`}
+                              maxRows={4}
                               value={field.value ?? ""}
                               className={cn({ "border-error-500": fieldState.invalid })}
                               placeholder={t(

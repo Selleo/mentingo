@@ -16,7 +16,7 @@ Implementation decisions and their rationale are recorded incrementally in [`176
 - Do not expose learner level, language, Mentor type, attachments, or other additional-context controls in the creation dialog.
 - Automatically use the current lesson title, task description, AI Mentor instructions, Mentor type, and optional existing Judge configuration as generation context.
 - Generated output is always a reviewable draft. Generation never creates a lesson, saves a configuration, updates a published course, or applies changes automatically.
-- Use a bounded Generator/Validator loop with at most three Generator attempts. This is a narrow application workflow, not a generic multi-agent framework.
+- Use a bounded Generator/Validator loop with at most three Generator attempts. A failed quality check pauses the flow and requires creator approval before the next attempt. This is a narrow application workflow, not a generic multi-agent framework.
 - Allow the semantic Validator to run independently against any current configuration: a newly generated draft, unsaved manual edits, or an already persisted Judge configuration.
 - Allow creators to rerun the complete improvement flow later with the current configuration plus a new instruction. A prior generation brief is useful context during the active flow but is not required for future validation or improvement.
 - Keep model writes as complete configuration replacements. Do not ask the model to emit JSON Patch or executable field deltas; application code derives the actual delta and reattaches stable persisted IDs where items remain semantically the same.
@@ -24,7 +24,7 @@ Implementation decisions and their rationale are recorded incrementally in [`176
 - Use the same Generator service, model, structured-output schema, and model settings for create, improve, and the internal repair step. Compose one invariant base prompt with a small intent-specific YAML add-on.
 - Do not persist generation jobs, attempts, prompts, or Validator history in Postgres. Keep the active draft and progress in the current authoring flow.
 - Do not add a generic AI chat, partial JSON patches, autonomous publishing, negative scoring, or a visual agent graph.
-- Keep v1 generation in Mentingo Core. Preserve a provider-neutral service/API boundary for a future Luma capability, but do not add unused SDK types, mocked adapters, or dead fallback code now.
+- Implement and validate the complete Generator/Validator workflow in Mentingo Core first. After the Core workflow works end to end, add Luma and Luma SDK support through fixed capability-specific contracts; do not add unused SDK types, mocked adapters, or dead fallback code during the Core-first slices.
 - In the same branch, add automatic learner first-name personalization to text and voice AI Mentor conversations, including the welcome message.
 
 ## User Flow
@@ -34,9 +34,10 @@ AI Judge card
   -> Describe assessment
   -> Generate draft
   -> Validate quality
-  -> Revise when needed, up to 3 attempts
+  -> Review Validator findings
+  -> Approve revision when needed, up to 3 attempts
   -> Review in existing Judge editor
-  -> Apply to lesson form or save existing configuration
+  -> Review in the normal editor -> explicitly save
 ```
 
 ### Entry points
@@ -44,8 +45,7 @@ AI Judge card
 - An unconfigured AI Judge card shows:
   - Primary: **Create assessment with AI**.
   - Secondary: **Configure manually**.
-- A configured card keeps **Edit assessment** and adds **Improve with AI**.
-- A configured card also offers **Check quality with AI** as a secondary action. The same action is available inside the structured editor for unsaved manual changes.
+- A configured card keeps one **Review assessment** action. **Improve with AI** and **Check quality with AI** live inside the structured editor so the card is not overloaded.
 - AI structure actions remain visible but disabled with the existing base-language tooltip when the creator is editing a non-base language.
 - **Improve with AI** uses the currently displayed complete configuration as input but does not mutate the stored configuration until explicit Save.
 - **Check quality with AI** validates the currently displayed complete configuration without generating, applying, or saving changes.
@@ -53,13 +53,14 @@ AI Judge card
 ### Brief dialog
 
 - Use a centered dialog titled **Create assessment with AI** or **Improve assessment with AI**.
-- Show one required large textarea.
+- Show one required focused rich-text editor using the same Tiptap `BaseEditor` surface as AI Mentor instructions.
 - Prompt the creator to describe:
   - what the learner should achieve,
   - which observable behaviors demonstrate success,
   - which serious mistakes should prevent completion.
-- Include one compact explanation that AI creates the task goal, criteria, scores, exact-score guidance, passing threshold, and blocking errors.
-- Remove the mockup's level, language, type, attachment controls, and large “AI will create” side card.
+- For Improve, show the existing AI Mentor-style suggestion actions directly below the editor. They append a concrete improvement instruction without submitting automatically.
+- For Create, show one quiet inline list explaining that AI creates the task goal, criteria, scores, exact-score guidance, passing threshold, and blocking errors.
+- Remove the mockup's level, language, type, attachment controls, large “AI will create” side card, and redundant current-assessment preview.
 - Primary action: **Generate draft**. Closing the dialog before generation changes nothing.
 
 ### Generation progress
@@ -68,10 +69,12 @@ AI Judge card
   1. **Generating draft**
   2. **Quality check**
   3. **Ready**
-- Show the real attempt number, for example **Attempt 2 of 3**.
-- Before the first draft arrives, show a restrained animated loader and configuration skeleton.
+- Show the real draft number, for example **Draft 2 of 3**. A numbered draft is a complete Generator output followed by one quality check, not a retry counter for applying changes to the lesson form.
+- Before the first draft arrives, show a restrained loader and plain preview-pending copy rather than a decorative configuration skeleton.
 - While the Validator runs, show the current structurally valid draft preview.
-- When revision is required, show the concise creator-safe correction currently being addressed.
+- When revision is required, remain on the quality-check stage and state explicitly that the workflow is waiting for the creator's decision.
+- Group findings under the affected criterion or blocking-condition title. Replace temporary references in creator-facing copy, and show complete word-level inline diffs for actual changes. Keep attempt history only for improvement; omit it from initial creation.
+- Do not start the next Generator call automatically. Pin **Generate revised draft** and **Continue with this draft** in a non-scrolling footer. Explain that the first action spends the next Generator attempt, while the second advances the exact visible draft to Ready without applying or saving it.
 - Do not show raw prompts, model/provider names, tokens, chain-of-thought, hidden simulations, or invented percentage progress.
 - **Cancel** aborts the flow and returns to the brief.
 - **Stop and inspect current draft** becomes available after the first structurally valid draft exists.
@@ -83,16 +86,12 @@ AI Judge card
 - Reuse the current fields, accordions, Zod validation, exact-score guidance, examples, threshold calculation, blocking errors, and base-language behavior.
 - Show non-blocking Validator warnings in a compact section above the form.
 - Allow **Check quality with AI** at any time from this editor. It runs deterministic validation first, then the semantic Validator, and leaves every form value untouched.
-- Validator errors offer **Improve with AI**, which starts the bounded Generator/Validator loop with the current complete configuration and the latest blocking findings as context.
-- Actions:
-  - **Back to brief**
-  - **Improve with AI**
-  - **Apply configuration** for a new lesson
-  - **Save configuration** for an existing lesson
+- Validator errors offer **Improve with AI**, which starts generation immediately with the current complete configuration and Validator findings as its instruction. Do not ask the creator to restate the feedback.
+- Ready exposes only **Review assessment**, which stages the draft and opens the normal structured editor.
 - **Improve with AI** always sends the complete current draft plus the new creator instruction and, while the creation dialog remains active, the original brief and latest Validator findings.
 - Confirm before replacing manually edited generated content with the improved result.
-- For a new lesson, Apply only stages the configuration in React Hook Form; the ordinary lesson Save persists it atomically with the lesson.
-- For an existing lesson, Save uses the existing aggregate `PUT` and returns to the lesson editor without navigating away.
+- For a new lesson, the review transition stages the configuration in React Hook Form; the ordinary lesson Save persists it atomically with the lesson.
+- For an existing lesson, the creator reviews and saves through the existing aggregate `PUT`, which returns to the lesson editor without navigating away or saving unrelated lesson fields.
 
 ### Requires review
 
@@ -103,7 +102,7 @@ AI Judge card
   - Primary: **Review assessment**
   - Secondary: **Save as current draft** through the normal editor flow
   - Tertiary: **Return to brief and generate again**
-- Clearly state that nothing was saved or published automatically.
+- Clearly state that nothing was saved or published automatically before the normal editor save.
 
 ## Generator And Validator Design
 
@@ -111,13 +110,13 @@ AI Judge card
 
 1. Generator returns a complete configuration with temporary references.
 2. TypeBox and deterministic Judge-graph validation run first.
-3. Structurally invalid drafts skip the LLM Validator and return precise correction codes to the Generator.
+3. Structurally invalid drafts skip the LLM Validator and surface precise correction codes at the same creator decision checkpoint.
 4. The LLM Validator evaluates only structurally valid drafts.
-5. Validator warnings do not trigger revision. Only `severity: "error"` consumes another Generator attempt.
+5. Validator warnings do not trigger revision. Errors pause the flow; another Generator attempt is consumed only after creator approval.
 6. A passing validation completes the flow.
 7. A failing third attempt returns `requires_review` with the latest valid draft.
 
-The normal successful path costs two model calls: one Generator call and one Validator call. One revision costs four calls. The maximum semantic path costs six calls, while deterministic failures avoid unnecessary Validator calls.
+The normal successful path costs two model calls: one Generator call and one Validator call. Each approved revision adds up to two calls. The maximum semantic path costs six calls, while deterministic failures avoid unnecessary Validator calls and no retry spend occurs without creator approval.
 
 ### Generator responsibility
 
@@ -165,13 +164,13 @@ Independent validation does not require the original creator brief. When the bri
 ### Targeted findings and actual changes
 
 - Assign temporary references such as `C1`, `C2`, and `B1` to generated criteria and blocking errors.
-- Temporary references are orchestration identifiers, not database IDs, and are stripped before the final configuration reaches Apply/Save.
+- Temporary references are orchestration identifiers, not database IDs. They remain internal to reconciliation and are never rendered as creator-facing labels.
 - The Generator preserves references for existing items across revisions and assigns the next unused reference to new items.
 - Score-guidance findings use criterion reference plus exact score, such as `C2` and `score: 1`.
 - The Validator outputs recommendations, not executable deltas.
 - After the Generator revises a draft, application code compares consecutive referenced drafts and computes the actual before/after changes shown in the UI.
-- For persisted configurations, convert database IDs to compact temporary references before sending context to either model and retain an in-memory `reference -> persisted ID` lookup for the request.
-- Reattach an existing ID only when the corresponding node is semantically unchanged. New or materially changed criteria, guidance entries, and blocking errors remain ID-free so the existing aggregate save treats them as replacement rows rather than stale translations of the old meaning.
+- For persisted configurations, convert database IDs to compact temporary references before sending context to either model and retain a JSON-serializable `reference -> persisted ID` lookup with the generation job.
+- Treat a preserved reference as the identity of the same logical item, including when its wording or scoring content is improved. Reattach criterion and blocking-error IDs by reference and guidance IDs by criterion reference plus exact score. New references remain ID-free so the existing aggregate save creates them.
 - If generated improvement changes localized configuration-level text such as `taskGoal`, the Apply/Save path must clear or mark non-base translations as missing rather than silently retaining translations of the previous meaning.
 
 ```ts
@@ -236,13 +235,24 @@ There is no generation repository because the workflow does not persist data.
 - Keep Validator output deliberately small. Do not return full simulated conversations or rewritten configuration fields.
 - Extend `PROMPT_MAP` with explicit variable schemas for every new prompt. Keep large configuration/context payloads outside the YAML variables and pass them as delimited model input.
 
+### Provider sequencing and Luma boundary
+
+- Build and verify Generator, Validator, deterministic validation, orchestration, cancellation, and Core endpoints against the Core AI runtime before changing `mentingo-ai` or `@japro/luma-sdk`.
+- Keep the Core model-call services provider-neutral so Luma support can be added without changing orchestration behavior.
+- After the Core workflow is stable, add fixed Luma endpoints for Judge-configuration generation and validation with fixed Pydantic request/response contracts.
+- Regenerate the Luma OpenAPI contract and SDK, then add Luma-to-Core fallback through `AiRuntimeService`. Core resolves the Generator and Validator through separate public capabilities, and Luma maps each capability to its matching model domain.
+- Core remains responsible for prompts, the deterministic checks, the three-attempt loop, progress events, cancellation, and final reference stripping. Luma performs one fixed-schema Generator or Validator model call at a time.
+- Never expose an endpoint that accepts a caller-provided JSON Schema or generic `generateStructured<T>` contract. Messages may be dynamic, but each Luma endpoint's response schema is fixed and validated again in Core.
+
 ### API contract
 
-Expose the generation flow through the existing `AiController`:
+Expose the generation flow under the existing `/ai` API namespace through a focused AI Judge generation controller owned by `LessonModule`:
 
 ```text
 POST /ai/judge-configuration/generate
 POST /ai/judge-configuration/validate
+GET /ai/judge-configuration/generations/:generationId
+POST /ai/judge-configuration/generations/:generationId/cancel
 ```
 
 Input:
@@ -296,9 +306,14 @@ type ValidateAiJudgeConfigurationInput = {
 - Verify `lessonId` belongs to that course when supplied.
 - Derive the course base language server-side.
 - Do not trust a client-provided language for structural generation.
-- Stream typed progress events through the existing AI HTTP-streaming boundary; do not add WebSocket infrastructure.
+- The lesson-owned application service keeps authorization, base-language derivation, unsaved-form input, workflow execution, and ID reconciliation independent of transport.
+- The public generation endpoint prepares and enqueues the workflow in BullMQ, then returns a generated `generationId` immediately.
+- Store only the temporary current progress snapshot, latest valid draft, and terminal result in the BullMQ/Redis job with a short retention period; do not add Postgres generation-job or attempt-history tables.
+- Publish typed progress snapshots through Mentingo's existing authenticated per-user socket room. The WebSocket guard owns room membership; snapshot and cancellation endpoints independently verify tenant and actor ownership without revealing whether another user's job exists.
+- Expose a snapshot read endpoint for initial loading and reconnect recovery. Sockets are the realtime delivery channel, not the source of truth, because clients can connect late or miss events.
 - The independent validation endpoint is a normal structured request/response because it performs one deterministic check and at most one Validator call; it does not need generation progress streaming.
-- Abort the active model request when the client disconnects where supported.
+- Cancellation sets temporary job cancellation state and is checked between stages. Passing abort signals into active provider requests remains a separate provider-capability follow-up.
+- Expire completed, failed, and cancelled generation jobs automatically after the configured short retention window.
 - Never call the existing Judge persistence service from generation.
 - Validation is strictly non-mutating and never calls persistence.
 
@@ -315,7 +330,7 @@ type AiJudgeGenerationStatus =
   | "cancelled";
 ```
 
-Events may carry the current attempt, current structurally valid referenced draft, compact Validator result, application-computed change list, and final ID-free configuration. They must never carry raw prompts or hidden reasoning.
+The brief screen is local dialog state and is not a backend generation status. Internal workflow events may carry a temporary referenced draft, but the lesson application boundary reconciles it into a form-ready configuration before any HTTP snapshot or socket event is published. Socket and snapshot responses wrap the application event with `generationId`. They must never carry temporary references, raw prompts, or hidden reasoning.
 
 ## Frontend Plan
 
@@ -323,7 +338,7 @@ Keep the feature inside the existing `AiMentorLessonForm/ai-judge/` module:
 
 - `AiJudgeConfigurationGenerationDialog.tsx` — brief, progress, terminal, and requires-review views.
 - `AiJudgeConfigurationForm.tsx` — extract the existing reusable form body so manual and generated editing share one implementation.
-- `useAiJudgeConfigurationGenerationStream.ts` — centralized typed progress consumption and cancellation.
+- `useAiJudgeConfigurationGeneration.ts` — centralized generation start, snapshot recovery, authenticated socket progress consumption, and cancellation.
 - `useValidateAiJudgeConfiguration.ts` — independent non-mutating Validator mutation for generated, manually edited, or persisted configurations.
 - reuse existing Judge draft types, defaults, mappers, schema, criterion editor, save handlers, and card.
 
@@ -332,48 +347,79 @@ Rules:
 - Components must not parse raw stream frames or call an ad hoc endpoint directly.
 - Keep generation state local to the active dialog; do not place ephemeral drafts in a global store.
 - Keep the latest independent Validator result beside the active form draft and clear it when a relevant form field changes so stale findings are never presented as current.
-- Generation does not invalidate Judge queries because it does not persist anything.
+- Generation itself does not invalidate Judge queries. Applying a reviewed draft for an existing lesson uses the existing Judge persistence mutation and its query invalidation; applying to a new lesson remains form-only.
 - Existing Apply/Save mutations retain query invalidation and toast ownership.
 - Add all visible copy to every supported web locale.
 - Keep keyboard focus, dialog close behavior, reduced motion, error announcements, and disabled base-language actions accessible.
 
 ## Implementation Checklist
 
+## Langfuse Prompt Deployment Inventory
+
+Keep the following prompt IDs synchronized in Langfuse after this branch is ready. This list is authoritative for the scoped creator work and must be updated whenever a prompt source changes.
+
+### New prompts
+
+- `aiJudgeConfigurationGeneratorBase` — invariant structured assessment generation rules. Version 5 defaults criteria to three points, requires every score to represent distinct observable evidence, permits four or five points only for exceptional genuinely multi-level behavior, uses medium model reasoning to calibrate maxScore before writing guidance, and chooses round ten-point passing thresholds, normally 60%, 70%, or 80%.
+- `aiJudgeConfigurationGeneratorCreate` — first-draft generation policy.
+- `aiJudgeConfigurationGeneratorImprove` — creator-requested improvement policy. Version 3 requires exact preservation of unaffected fields and the smallest replacement needed instead of appended rationale or taxonomies.
+- `aiJudgeConfigurationGeneratorRepair` — internal Validator-driven repair policy. Version 5 requires the smallest finding-linked replacement, replaces incomplete fields fully, forbids copying Validator prose into rubric fields, and preserves the creator's original improvement instruction across every revision.
+- `aiJudgeConfigurationValidator` — semantic assessment quality review. Version 8 treats validation as a release gate rather than an editorial review: a usable, consistently scoreable rubric passes with no findings. It reports only high-confidence defects that can materially change scoring or pass/fail, rejects theoretical edge cases and stylistic refinements, evaluates later drafts against previous findings so resolved concerns are not reinvented, treats actual before/after changes as authoritative evidence, prevents ordinary omissions from being promoted into blocking errors, and names or summarizes the affected item instead of relying on a bare internal reference.
+- `learnerNameAddon` — shared, language-aware learner-name personalization for AI Mentor prompts.
+
+### Modified existing prompts
+
+- None in the current scoped implementation. Learner-name behavior is composed through the new `learnerNameAddon` instead of duplicating changes across the existing Mentor, Roleplay, Teacher, Welcome, and voice prompts.
+
+Generated prompt exports are build artifacts and are not separate Langfuse prompt entries.
+
 ### Backend
 
 - [x] Add generation request, referenced-draft, Validator-result, progress-event, and final-result TypeBox schemas derived from canonical identity-free Judge content schemas.
-- [ ] Add Generator base/create/improve/repair, Validator, and learner-personalization prompt templates with explicit variable schemas; regenerate prompt exports.
-- [ ] Implement Generator structured output with temporary references.
-- [ ] Implement Generator prompt composition with public create/improve modes and internal repair mode; do not add regenerate behavior.
+- [x] Add Generator base/create/improve/repair and Validator prompt templates with explicit variable schemas; regenerate prompt exports.
+- [x] Add the shared learner-personalization prompt template and variable schema; regenerate prompt exports.
+- [x] Implement Generator structured output with temporary references.
+- [x] Implement Generator prompt composition with public create/improve modes and internal repair mode; do not add regenerate behavior.
 - [x] Extract pure deterministic Judge content validation and reuse it in persistence.
-- [ ] Implement compact semantic Validator output.
-- [ ] Implement independent non-mutating validation with optional brief context.
-- [ ] Implement the three-attempt orchestration loop, warning/error policy, cancellation, and `requires_review` result.
-- [ ] Apply shared content validation to generated drafts, validate temporary-reference uniqueness and preservation, and strip references from the final draft.
-- [ ] Map persisted IDs to temporary references for model context and reattach IDs only to semantically unchanged nodes.
+- [x] Implement compact semantic Validator output and derive pass/fail in Core from issue severity.
+- [x] Implement independent non-mutating validation with optional brief context.
+- [x] Implement the transport-neutral three-attempt orchestration loop, warning/error policy, cooperative cancellation checks, and `requires_review` result.
+- [x] Connect BullMQ cancellation state to the workflow's cooperative cancellation boundary.
+- [ ] Pass provider abort signals into active Generator and Validator requests where supported.
+- [x] Apply shared content validation to generated drafts, validate temporary-reference uniqueness, and strip references from the final draft.
+- [x] Validate unique references and require new references to continue monotonically across revisions.
+- [x] Implement pure persisted-ID to temporary-reference mapping and stable-reference reconciliation for criteria, score guidance, and blocking errors.
+- [x] Wire the reference mapper and identity lookup into synchronous improve/validation application services.
+- [x] Serialize the identity lookup with generation jobs.
 - [ ] Invalidate or clear non-base translations for generated fields whose base-language meaning changed.
-- [ ] Compute actual revision changes in application code.
-- [ ] Add the typed generation-progress and independent-validation endpoints to `AiController` with course/lesson access validation.
-- [ ] Resolve the current learner first name through the thread and compose the personalization add-on for welcome, text, and voice generation.
-- [ ] Regenerate Swagger/client artifacts where the non-streaming request/result schemas are represented.
+- [x] Compute actual revision changes in application code and attach exact score targets where relevant.
+- [x] Add typed synchronous generation and independent-validation endpoints under `/ai/judge-configuration` with course/lesson access validation.
+- [x] Add generation job creation, snapshot, cancellation, and typed authenticated-user socket progress around the same application boundary.
+- [x] Add fixed Generator/Validator endpoints in `mentingo-ai`, regenerate and package `@japro/luma-sdk`, and add capability-routed Luma-to-Core fallback without exposing arbitrary schemas.
+- [x] Resolve the current learner first name through the thread and compose the personalization add-on for welcome, text, and voice generation.
+- [x] Regenerate Swagger/client artifacts for start, snapshot, cancel, and validation contracts.
 
 ### Frontend
 
-- [ ] Wire **Create assessment with AI**, **Improve with AI**, and **Check quality with AI** into the existing Judge card/editor.
-- [ ] Build the brief dialog without additional-context controls.
-- [ ] Build real drafting, evaluating, revising, completed, failed, cancelled, and requires-review states.
-- [ ] Show attempt count, current draft preview, targeted recommendation, and actual revision changes.
-- [ ] Show independent Validator findings without modifying form values and clear stale findings after relevant edits.
-- [ ] Add Cancel and Stop/inspect behavior.
-- [ ] Extract/reuse the structured Judge form for generated review.
-- [ ] Preserve new-lesson staging and existing-lesson direct-save behavior.
+- [x] Wire **Create assessment with AI**, **Improve with AI**, and **Check quality with AI** into the existing Judge card/editor.
+- [x] Build the presentational brief dialog without additional-context controls.
+- [x] Build typed presentational drafting, evaluating, revising, completed, failed, cancelled, and requires-review states.
+- [x] Mount the generation dialog in the AI Mentor lesson form and connect it to live job state.
+- [x] Show attempt count, current draft preview, targeted recommendation, and actual revision changes.
+- [x] Show independent Validator findings without modifying form values and clear stale findings after relevant edits.
+- [x] Add Cancel and Stop/inspect behavior.
+- [x] Reuse the structured Judge editor for generated review and follow-up editing.
+- [x] Open generated configurations in the existing structured editor for review, then reuse its explicit save path.
 - [ ] Confirm before discarding manually edited generated content.
-- [ ] Label every post-draft generation action **Improve with AI** and send the complete current draft.
-- [ ] Add translated UI copy and API errors to all supported locales.
+- [x] Label every post-draft generation action **Improve with AI** and send the complete current draft.
+- [x] Add translated UI copy and API errors to all supported locales.
+- [x] Give quality findings human-readable criterion/blocking-error targets, simplify the feedback/change/history hierarchy, prefer Continue over Revise, and autosize assessment text fields to a bounded height.
+- [x] Group findings and actual changes by human target, hide temporary references, render complete inline word diffs, remove redundant Ready actions, and limit task-goal formatting to bold and bullets.
+- [x] Reuse the bounded autosizing textarea in the learner AI Mentor composer and split stable AI Mentor lesson form sections into explicit presentational components.
 
 ### Documentation
 
-- [ ] Update `docs/specs/ai-mentor-lessons-business-spec.md` with the generation, quality-check, review, explicit-save, and learner-name personalization behavior after implementation.
+- [x] Update `docs/specs/ai-mentor-lessons-business-spec.md` with the background generation, reconnect recovery, cancellation, review, explicit-save, and learner-name personalization behavior.
 
 ## Tests And Validation
 
@@ -389,11 +435,11 @@ Rules:
 - Independent validation works with and without an original brief and never invokes Generator or persistence.
 - Independent validation evaluates unsaved form values rather than silently loading the stored configuration.
 - Generator/Validator malformed structured output fails safely.
-- Duplicate, unknown, or changed temporary references are rejected.
+- Duplicate references and non-monotonic new references are rejected; preserved references identify the same logical item even when its content is improved.
 - Score-guidance findings target the correct criterion and exact score.
 - Actual before/after changes are computed independently of Validator suggestions.
-- Final draft contains no temporary references or database IDs.
-- Full improvement output preserves persisted IDs for semantically unchanged nodes and replaces materially changed nodes.
+- Model-facing and transport drafts contain temporary references but never database IDs. The editable result contains no temporary references and reattaches applicable persisted IDs.
+- Full improvement output preserves persisted IDs for stable criterion and blocking-error references and for stable criterion-reference plus score guidance pairs.
 - Changed generated text does not retain stale non-base translations.
 - Cancellation and provider failure retain the latest structurally valid draft.
 - Generation never calls persistence or overwrites an existing configuration.
@@ -419,13 +465,13 @@ Rules:
 
 ### Validation commands
 
-- [ ] Focused API Jest suites for generation services and controller.
-- [ ] `pnpm --filter=api lint-tsc`
-- [ ] Focused web Vitest suites for generation state and form reuse.
+- [x] Focused API Jest suites for generation services and queue transport.
+- [x] `pnpm --filter=api lint-tsc`
+- [x] Focused web Vitest suites for generation state and form reuse.
 - [ ] Focused Playwright curriculum flow with deterministic generation fixtures.
-- [ ] `pnpm --filter=web lint-tsc`
+- [x] `pnpm --filter=web lint-tsc`
 - [ ] Prompt export regeneration check.
-- [ ] Swagger/client generation check.
+- [x] Swagger/client generation check.
 
 ## Non-goals
 
@@ -438,5 +484,6 @@ Rules:
 - Autonomous saving or publishing.
 - Negative-point penalties.
 - New realtime/WebSocket infrastructure.
-- Luma-backed Generator/Validator implementation in this PR.
+- Luma integration before the Core Generator/Validator workflow is working and validated.
+- Caller-provided structured-output schemas or a generic Luma structured-generation proxy.
 - Gender inference, gendered honorifics, or a learner-name personalization toggle in v1.

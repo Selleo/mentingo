@@ -35,6 +35,8 @@ const prepared = {
     brief: "Assess discovery skills.",
   },
   identities: { criteria: [], blockingErrors: [] },
+  attempt: 1,
+  attemptHistory: [],
 } as PreparedAiJudgeConfigurationGeneration;
 const input = {
   courseId: "00000000-0000-4000-8000-000000000004",
@@ -42,6 +44,17 @@ const input = {
   lessonContext: { aiMentorType: "roleplay" },
   brief: "Assess discovery skills.",
 } as const;
+const generatedConfiguration = {
+  taskGoal: "The learner discovers the customer's needs.",
+  passingThresholdPercent: 70,
+  criteria: [],
+  blockingErrors: [],
+};
+const failedValidation = {
+  passed: false,
+  summary: "The task goal needs more detail.",
+  issues: [],
+};
 
 describe("AiJudgeConfigurationGenerationQueueService", () => {
   let aiJudgeConfigurationGenerationQueueService: AiJudgeConfigurationGenerationQueueService;
@@ -56,7 +69,11 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
       id: generationId,
       name: AI_JUDGE_CONFIGURATION_GENERATION_JOB_NAME,
       data: { tenantId, userId, prepared, cancelRequested: false },
-      progress: { status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt: 1 },
+      progress: {
+        status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
+        attempt: 1,
+        attemptHistory: [],
+      },
       updateData: jest.fn(),
       updateProgress: jest.fn(),
     } as unknown as jest.Mocked<Job<AiJudgeConfigurationGenerationJobData>>;
@@ -69,6 +86,11 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
     } as unknown as jest.Mocked<QueueService>;
     aiJudgeConfigurationGenerationService = {
       prepare: jest.fn().mockResolvedValue(prepared),
+      prepareRevision: jest.fn().mockReturnValue({
+        ...prepared,
+        attempt: 2,
+        attemptHistory: [{ attempt: 1, changes: [], validation: failedValidation }],
+      }),
       execute: jest.fn(),
     } as unknown as jest.Mocked<AiJudgeConfigurationGenerationService>;
     realtimePublisher = {
@@ -110,7 +132,11 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
       aiJudgeConfigurationGenerationQueueService.getSnapshot(generationId, currentUser),
     ).resolves.toEqual({
       generationId,
-      progress: { status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt: 1 },
+      progress: {
+        status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
+        attempt: 1,
+        attemptHistory: [],
+      },
     });
   });
 
@@ -124,22 +150,55 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
     expect(job.updateData).toHaveBeenCalledWith({ ...job.data, cancelRequested: true });
   });
 
+  it("starts the next attempt only after the creator approves Validator feedback", async () => {
+    const progress = {
+      status: AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION,
+      attempt: 1,
+      configuration: generatedConfiguration,
+      validation: failedValidation,
+      attemptHistory: [{ attempt: 1, changes: [], validation: failedValidation }],
+    };
+    job.progress = progress;
+
+    await expect(
+      aiJudgeConfigurationGenerationQueueService.revise(generationId, currentUser),
+    ).resolves.toEqual({ generationId: expect.any(String) });
+    expect(aiJudgeConfigurationGenerationService.prepareRevision).toHaveBeenCalledWith(
+      prepared,
+      generatedConfiguration,
+      failedValidation,
+      progress.attemptHistory,
+    );
+    expect(globalQueueService.enqueue).toHaveBeenCalledWith(
+      QUEUE_NAMES.AI_JUDGE_CONFIGURATION_GENERATION,
+      AI_JUDGE_CONFIGURATION_GENERATION_JOB_NAME,
+      expect.objectContaining({ prepared: expect.objectContaining({ attempt: 2 }) }),
+      expect.objectContaining({ attempts: 1 }),
+    );
+  });
+
   it("stores and publishes application progress to the authenticated user room", async () => {
     await aiJudgeConfigurationGenerationQueueService.publishProgress(job, {
       status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
       attempt: 1,
+      attemptHistory: [],
     });
 
     expect(job.updateProgress).toHaveBeenCalledWith({
       status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
       attempt: 1,
+      attemptHistory: [],
     });
     expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
       AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS.PROGRESS,
       getUserRoomKey(userId),
       {
         generationId,
-        progress: { status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt: 1 },
+        progress: {
+          status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
+          attempt: 1,
+          attemptHistory: [],
+        },
       },
     );
   });

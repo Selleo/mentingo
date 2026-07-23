@@ -1,4 +1,5 @@
 import {
+  AI_JUDGE_DRAFT_CHANGE_FIELD,
   AI_JUDGE_DRAFT_CHANGE_TYPE,
   AI_JUDGE_VALIDATION_TARGET,
 } from "./ai-judge-configuration-generation.types";
@@ -10,6 +11,11 @@ import type {
 
 type ChangeValue = string | number | null | undefined;
 
+const normalizeComparableValue = (value: ChangeValue) => {
+  if (typeof value !== "string") return value;
+  return value.trim().replace(/\s+/g, " ");
+};
+
 export const diffAiJudgeConfigurationDrafts = (
   before: ReferencedAiJudgeConfiguration,
   after: ReferencedAiJudgeConfiguration,
@@ -19,14 +25,14 @@ export const diffAiJudgeConfigurationDrafts = (
   addChangedValue(
     changes,
     AI_JUDGE_VALIDATION_TARGET.CONFIGURATION,
-    "taskGoal",
+    AI_JUDGE_DRAFT_CHANGE_FIELD.TASK_GOAL,
     before.taskGoal,
     after.taskGoal,
   );
   addChangedValue(
     changes,
     AI_JUDGE_VALIDATION_TARGET.CONFIGURATION,
-    "passingThresholdPercent",
+    AI_JUDGE_DRAFT_CHANGE_FIELD.PASSING_THRESHOLD_PERCENT,
     before.passingThresholdPercent,
     after.passingThresholdPercent,
   );
@@ -50,24 +56,30 @@ const addCriterionChanges = (
       changes.push({
         type: AI_JUDGE_DRAFT_CHANGE_TYPE.ADDED,
         targetRef: criterion.ref,
-        field: "criterion",
+        field: AI_JUDGE_DRAFT_CHANGE_FIELD.CRITERION,
         after: criterion.title,
       });
       continue;
     }
 
-    addChangedValue(changes, criterion.ref, "title", previousCriterion.title, criterion.title);
     addChangedValue(
       changes,
       criterion.ref,
-      "expectedBehavior",
+      AI_JUDGE_DRAFT_CHANGE_FIELD.TITLE,
+      previousCriterion.title,
+      criterion.title,
+    );
+    addChangedValue(
+      changes,
+      criterion.ref,
+      AI_JUDGE_DRAFT_CHANGE_FIELD.EXPECTED_BEHAVIOR,
       previousCriterion.expectedBehavior,
       criterion.expectedBehavior,
     );
     addChangedValue(
       changes,
       criterion.ref,
-      "maxScore",
+      AI_JUDGE_DRAFT_CHANGE_FIELD.MAX_SCORE,
       previousCriterion.maxScore,
       criterion.maxScore,
     );
@@ -79,7 +91,7 @@ const addCriterionChanges = (
     changes.push({
       type: AI_JUDGE_DRAFT_CHANGE_TYPE.REMOVED,
       targetRef: criterion.ref,
-      field: "criterion",
+      field: AI_JUDGE_DRAFT_CHANGE_FIELD.CRITERION,
       before: criterion.title,
     });
   }
@@ -103,7 +115,7 @@ const addScoreGuidanceChanges = (
         type: AI_JUDGE_DRAFT_CHANGE_TYPE.ADDED,
         targetRef: criterionRef,
         score: guidance.score,
-        field: "scoreGuidance",
+        field: AI_JUDGE_DRAFT_CHANGE_FIELD.SCORE_GUIDANCE,
         after: guidance.description,
       });
       continue;
@@ -112,7 +124,7 @@ const addScoreGuidanceChanges = (
     addChangedValue(
       changes,
       criterionRef,
-      "description",
+      AI_JUDGE_DRAFT_CHANGE_FIELD.DESCRIPTION,
       previousGuidance.description,
       guidance.description,
       guidance.score,
@@ -120,7 +132,7 @@ const addScoreGuidanceChanges = (
     addChangedValue(
       changes,
       criterionRef,
-      "example",
+      AI_JUDGE_DRAFT_CHANGE_FIELD.EXAMPLE,
       previousGuidance.example ?? null,
       guidance.example ?? null,
       guidance.score,
@@ -133,7 +145,7 @@ const addScoreGuidanceChanges = (
       type: AI_JUDGE_DRAFT_CHANGE_TYPE.REMOVED,
       targetRef: criterionRef,
       score: guidance.score,
-      field: "scoreGuidance",
+      field: AI_JUDGE_DRAFT_CHANGE_FIELD.SCORE_GUIDANCE,
       before: guidance.description,
     });
   }
@@ -153,7 +165,7 @@ const addBlockingErrorChanges = (
       changes.push({
         type: AI_JUDGE_DRAFT_CHANGE_TYPE.ADDED,
         targetRef: blockingError.ref,
-        field: "blockingError",
+        field: AI_JUDGE_DRAFT_CHANGE_FIELD.BLOCKING_ERROR,
         after: blockingError.description,
       });
       continue;
@@ -162,7 +174,7 @@ const addBlockingErrorChanges = (
     addChangedValue(
       changes,
       blockingError.ref,
-      "description",
+      AI_JUDGE_DRAFT_CHANGE_FIELD.DESCRIPTION,
       previousError.description,
       blockingError.description,
     );
@@ -173,7 +185,7 @@ const addBlockingErrorChanges = (
     changes.push({
       type: AI_JUDGE_DRAFT_CHANGE_TYPE.REMOVED,
       targetRef: blockingError.ref,
-      field: "blockingError",
+      field: AI_JUDGE_DRAFT_CHANGE_FIELD.BLOCKING_ERROR,
       before: blockingError.description,
     });
   }
@@ -182,12 +194,12 @@ const addBlockingErrorChanges = (
 const addChangedValue = (
   changes: AiJudgeDraftChange[],
   targetRef: AiJudgeDraftChange["targetRef"],
-  field: string,
+  field: AiJudgeDraftChange["field"],
   before: ChangeValue,
   after: ChangeValue,
   score?: number,
 ) => {
-  if (before === after) return;
+  if (normalizeComparableValue(before) === normalizeComparableValue(after)) return;
   changes.push({
     type: AI_JUDGE_DRAFT_CHANGE_TYPE.CHANGED,
     targetRef,

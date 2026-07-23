@@ -99,6 +99,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
       return {
         status: AI_JUDGE_GENERATION_STATUS.COMPLETED,
         attempt: 1,
+        attemptHistory: [],
         configuration: currentConfiguration,
         validation: passedValidation,
       };
@@ -139,6 +140,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
         return {
           status: AI_JUDGE_GENERATION_STATUS.COMPLETED,
           attempt: 1,
+          attemptHistory: [],
           configuration: currentConfiguration,
           validation: passedValidation,
         };
@@ -161,6 +163,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
       expect.objectContaining({
         mode: "improve",
         language: SUPPORTED_LANGUAGES.PL,
+        creatorInstruction: "Make the criterion observable.",
         currentConfiguration: expect.objectContaining({
           criteria: [expect.objectContaining({ ref: "C1" })],
           blockingErrors: [expect.objectContaining({ ref: "B1" })],
@@ -187,12 +190,14 @@ describe("AiJudgeConfigurationGenerationService", () => {
         await options?.reportProgress?.({
           status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
           attempt: 1,
+          attemptHistory: [],
           draft: referencedDraft,
         });
 
         return {
           status: AI_JUDGE_GENERATION_STATUS.COMPLETED,
           attempt: 1,
+          attemptHistory: [],
           configuration: currentConfiguration,
           validation: passedValidation,
         };
@@ -215,6 +220,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
     expect(reportProgress).toHaveBeenCalledWith({
       status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
       attempt: 1,
+      attemptHistory: [],
       draft: expect.objectContaining({
         criteria: [expect.objectContaining({ id: criterionId })],
         blockingErrors: [expect.objectContaining({ id: blockingErrorId })],

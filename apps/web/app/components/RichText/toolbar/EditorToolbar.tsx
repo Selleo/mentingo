@@ -37,6 +37,7 @@ type EditorToolbarProps = {
   acceptedFileTypes: readonly string[];
   assetLibrary?: AssetLibraryConfig;
   showTableControls?: boolean;
+  limitedFormatting?: boolean;
 };
 
 type ToolbarButtonProps = {
@@ -87,6 +88,7 @@ const EditorToolbar = ({
   acceptedFileTypes,
   assetLibrary,
   showTableControls = false,
+  limitedFormatting = false,
 }: EditorToolbarProps) => {
   const { t } = useTranslation();
 
@@ -112,14 +114,16 @@ const EditorToolbar = ({
 
   return (
     <Toolbar
-      className="m-0 flex items-center justify-between overflow-x-scroll p-2"
+      className="m-0 flex w-full max-w-full items-center justify-between overflow-x-auto p-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       aria-label="Formatting options"
     >
       <TooltipProvider>
-        <ToggleGroup className="flex flex-row items-center gap-x-2" type="multiple">
-          <ToolbarSection>
-            <FormatType editor={editor} />
-          </ToolbarSection>
+        <ToggleGroup className="flex shrink-0 flex-row items-center gap-x-2" type="multiple">
+          {!limitedFormatting && (
+            <ToolbarSection>
+              <FormatType editor={editor} />
+            </ToolbarSection>
+          )}
 
           <ToolbarSection>
             <ToolbarIconButton
@@ -128,24 +132,28 @@ const EditorToolbar = ({
               isActive={editor.isActive("bold")}
               onClick={handleToggle(() => editor.chain().focus().toggleBold().run())}
             />
-            <ToolbarIconButton
-              icon={Italic}
-              tooltip={t("richTextEditor.toolbar.italic.tooltip")}
-              isActive={editor.isActive("italic")}
-              onClick={handleToggle(() => editor.chain().focus().toggleItalic().run())}
-            />
-            <ToolbarIconButton
-              icon={Strikethrough}
-              tooltip={t("richTextEditor.toolbar.strikethrough.tooltip")}
-              isActive={editor.isActive("strike")}
-              onClick={handleToggle(() => editor.chain().focus().toggleStrike().run())}
-            />
-            <ToolbarIconButton
-              icon={Link2}
-              tooltip={t("richTextEditor.toolbar.link.tooltip")}
-              isActive={editor.isActive("link")}
-              onClick={handleLink}
-            />
+            {!limitedFormatting && (
+              <>
+                <ToolbarIconButton
+                  icon={Italic}
+                  tooltip={t("richTextEditor.toolbar.italic.tooltip")}
+                  isActive={editor.isActive("italic")}
+                  onClick={handleToggle(() => editor.chain().focus().toggleItalic().run())}
+                />
+                <ToolbarIconButton
+                  icon={Strikethrough}
+                  tooltip={t("richTextEditor.toolbar.strikethrough.tooltip")}
+                  isActive={editor.isActive("strike")}
+                  onClick={handleToggle(() => editor.chain().focus().toggleStrike().run())}
+                />
+                <ToolbarIconButton
+                  icon={Link2}
+                  tooltip={t("richTextEditor.toolbar.link.tooltip")}
+                  isActive={editor.isActive("link")}
+                  onClick={handleLink}
+                />
+              </>
+            )}
           </ToolbarSection>
 
           <ToolbarSection>
@@ -155,39 +163,45 @@ const EditorToolbar = ({
               isActive={editor.isActive("bulletList")}
               onClick={handleToggle(() => editor.chain().focus().toggleBulletList().run())}
             />
-            <ToolbarIconButton
-              icon={ListOrdered}
-              tooltip={t("richTextEditor.toolbar.orderedList.tooltip")}
-              isActive={editor.isActive("orderedList")}
-              onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
-            />
-            <ToolbarIconButton
-              icon={CheckSquare}
-              tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
-              isActive={editor.isActive("taskList")}
-              onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
-            />
+            {!limitedFormatting && (
+              <>
+                <ToolbarIconButton
+                  icon={ListOrdered}
+                  tooltip={t("richTextEditor.toolbar.orderedList.tooltip")}
+                  isActive={editor.isActive("orderedList")}
+                  onClick={handleToggle(() => editor.chain().focus().toggleOrderedList().run())}
+                />
+                <ToolbarIconButton
+                  icon={CheckSquare}
+                  tooltip={t("richTextEditor.toolbar.taskList.tooltip")}
+                  isActive={editor.isActive("taskList")}
+                  onClick={handleToggle(() => editor.chain().focus().toggleTaskList().run())}
+                />
+              </>
+            )}
           </ToolbarSection>
 
-          <ToolbarSection>
-            <ToolbarIconButton
-              icon={Quote}
-              tooltip={t("richTextEditor.toolbar.blockquote.tooltip")}
-              isActive={editor.isActive("blockquote")}
-              onClick={handleToggle(() => editor.chain().focus().toggleBlockquote().run())}
-            />
-            <ToolbarIconButton
-              icon={Code}
-              tooltip={t("richTextEditor.toolbar.codeBlock.tooltip")}
-              isActive={editor.isActive("codeBlock")}
-              onClick={handleToggle(() => editor.chain().focus().toggleCodeBlock().run())}
-            />
-            <ToolbarIconButton
-              icon={Minus}
-              tooltip={t("richTextEditor.toolbar.horizontalRule.tooltip")}
-              onClick={handleToggle(() => editor.chain().focus().setHorizontalRule().run())}
-            />
-          </ToolbarSection>
+          {!limitedFormatting && (
+            <ToolbarSection>
+              <ToolbarIconButton
+                icon={Quote}
+                tooltip={t("richTextEditor.toolbar.blockquote.tooltip")}
+                isActive={editor.isActive("blockquote")}
+                onClick={handleToggle(() => editor.chain().focus().toggleBlockquote().run())}
+              />
+              <ToolbarIconButton
+                icon={Code}
+                tooltip={t("richTextEditor.toolbar.codeBlock.tooltip")}
+                isActive={editor.isActive("codeBlock")}
+                onClick={handleToggle(() => editor.chain().focus().toggleCodeBlock().run())}
+              />
+              <ToolbarIconButton
+                icon={Minus}
+                tooltip={t("richTextEditor.toolbar.horizontalRule.tooltip")}
+                onClick={handleToggle(() => editor.chain().focus().setHorizontalRule().run())}
+              />
+            </ToolbarSection>
+          )}
 
           {showTableControls && (
             <ToolbarSection>
@@ -206,25 +220,27 @@ const EditorToolbar = ({
             </ToolbarSection>
           )}
         </ToggleGroup>
-        <ToggleGroup
-          className="invisible flex flex-row items-center gap-x-2 sm:visible"
-          type="multiple"
-        >
-          <ToolbarSection>
-            <ToolbarIconButton
-              icon={Undo}
-              tooltip={t("richTextEditor.toolbar.undo.tooltip")}
-              disabled={!editor.can().chain().focus().undo().run()}
-              onClick={handleToggle(() => editor.chain().focus().undo().run())}
-            />
-            <ToolbarIconButton
-              icon={Redo}
-              tooltip={t("richTextEditor.toolbar.redo.tooltip")}
-              disabled={!editor.can().chain().focus().redo().run()}
-              onClick={handleToggle(() => editor.chain().focus().redo().run())}
-            />
-          </ToolbarSection>
-        </ToggleGroup>
+        {!limitedFormatting && (
+          <ToggleGroup
+            className="hidden shrink-0 flex-row items-center gap-x-2 sm:flex"
+            type="multiple"
+          >
+            <ToolbarSection>
+              <ToolbarIconButton
+                icon={Undo}
+                tooltip={t("richTextEditor.toolbar.undo.tooltip")}
+                disabled={!editor.can().chain().focus().undo().run()}
+                onClick={handleToggle(() => editor.chain().focus().undo().run())}
+              />
+              <ToolbarIconButton
+                icon={Redo}
+                tooltip={t("richTextEditor.toolbar.redo.tooltip")}
+                disabled={!editor.can().chain().focus().redo().run()}
+                onClick={handleToggle(() => editor.chain().focus().redo().run())}
+              />
+            </ToolbarSection>
+          </ToggleGroup>
+        )}
       </TooltipProvider>
       <InsertLinkDialog
         open={isLinkDialogOpen}

@@ -5,6 +5,7 @@ import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { AiJudgeConfigurationGeneratorService } from "./ai-judge-configuration-generator.service";
 
 import type { ReferencedAiJudgeConfiguration } from "./ai-judge-configuration-generation.schema";
+import type { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import type { PromptService } from "src/ai/services/prompt.service";
 
 jest.mock("@langfuse/tracing", () => ({
@@ -30,8 +31,12 @@ const configuration: ReferencedAiJudgeConfiguration = {
       expectedBehavior: "Asks a question before proposing a solution.",
       maxScore: 1,
       scoreGuidance: [
-        { score: 0, description: "Does not investigate the objection." },
-        { score: 1, description: "Clarifies the reason for the objection." },
+        { score: 0, description: "Does not investigate the objection.", example: null },
+        {
+          score: 1,
+          description: "Clarifies the reason for the objection.",
+          example: "What is driving the concern?",
+        },
       ],
     },
   ],
@@ -46,8 +51,8 @@ const readPayload = (prompt: string) => {
 };
 
 describe("AiJudgeConfigurationGeneratorService", () => {
-  const createService = () => {
-    const generateText = jest.fn().mockResolvedValue({ output: configuration });
+  const createService = (output: ReferencedAiJudgeConfiguration = configuration) => {
+    const generateText = jest.fn().mockResolvedValue({ output });
     jest.mocked(loadAiSdk).mockResolvedValue({
       generateText,
       jsonSchema: jest.fn((schema) => schema),
@@ -61,8 +66,14 @@ describe("AiJudgeConfigurationGeneratorService", () => {
       isNotEmpty: jest.fn().mockResolvedValue(undefined),
       getOpenAI: jest.fn().mockResolvedValue(jest.fn().mockReturnValue("MODEL")),
     };
+    const aiRuntimeService = {
+      generateJudgeConfiguration: jest.fn((_input, generateCoreConfiguration) =>
+        generateCoreConfiguration(),
+      ),
+    };
     const service = new AiJudgeConfigurationGeneratorService(
       promptService as unknown as PromptService,
+      aiRuntimeService as unknown as AiRuntimeService,
     );
 
     return { generateText, promptService, service };
@@ -85,14 +96,15 @@ describe("AiJudgeConfigurationGeneratorService", () => {
       "aiJudgeConfigurationGeneratorCreate",
       {},
     );
-    const [{ system, prompt }] = generateText.mock.calls[0];
+    const [{ system, prompt, providerOptions }] = generateText.mock.calls[0];
     expect(system).toBe("BASE\n\nMODE:aiJudgeConfigurationGeneratorCreate");
+    expect(providerOptions).toEqual({ openai: { reasoningEffort: "medium" } });
     expect(readPayload(prompt)).toEqual({
       mode: "create",
       creatorBrief: "Assess whether the learner can handle a price objection.",
       lessonContext,
     });
-    expect(result).toBe(configuration);
+    expect(result).toEqual(configuration);
   });
 
   it("passes the complete current draft and creator intent to improve mode", async () => {
@@ -122,6 +134,22 @@ describe("AiJudgeConfigurationGeneratorService", () => {
       currentConfiguration: configuration,
       latestValidation,
     });
+  });
+
+  it("normalizes generated passing thresholds to a round ten-point increment", async () => {
+    const { service } = createService({
+      ...configuration,
+      passingThresholdPercent: 67,
+    });
+
+    const result = await service.generate({
+      mode: "create",
+      language: SUPPORTED_LANGUAGES.EN,
+      lessonContext,
+      brief: "Assess whether the learner can handle a price objection.",
+    });
+
+    expect(result.passingThresholdPercent).toBe(70);
   });
 
   it("uses internal repair instructions with targeted blocking issues", async () => {

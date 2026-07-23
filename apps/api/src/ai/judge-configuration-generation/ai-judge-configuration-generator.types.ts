@@ -11,6 +11,7 @@ type AiJudgeConfigurationGeneratorContext = {
   language: SupportedLanguages;
   lessonContext: AiJudgeGenerationLessonContext;
   brief?: string;
+  creatorInstruction?: string;
 };
 
 export type CreateAiJudgeConfigurationDraftInput = AiJudgeConfigurationGeneratorContext & {

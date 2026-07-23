@@ -12,6 +12,7 @@ import type {
   BetaCreateLessonBody,
   BetaCreateLiveTrainingLessonBody,
   BetaCreateQuizLessonBody,
+  BetaUpdateAiMentorLessonBody,
   BetaUpdateLessonBody,
   BetaUpdateQuizLessonBody,
   CreateEmbedLessonBody,
@@ -193,6 +194,10 @@ export class CurriculumFactory {
     });
 
     return this.findLessonInCourse(courseId, input.chapterId, response.data.data.id);
+  }
+
+  async updateAiMentorLesson(lessonId: string, data: BetaUpdateAiMentorLessonBody) {
+    await this.apiClient.api.lessonControllerBetaUpdateAiMentorLesson(data, { id: lessonId });
   }
 
   async createLiveTrainingLesson(

@@ -1,41 +1,14 @@
-export const AI_JUDGE_GENERATION_MODE = {
-  CREATE: "create",
-  IMPROVE: "improve",
-  REPAIR: "repair",
-} as const;
+export {
+  AI_JUDGE_DRAFT_CHANGE_TYPE,
+  AI_JUDGE_DRAFT_CHANGE_FIELD,
+  AI_JUDGE_GENERATION_MAX_ATTEMPTS,
+  AI_JUDGE_GENERATION_MODE,
+  AI_JUDGE_GENERATION_STATUS,
+  AI_JUDGE_VALIDATION_SEVERITY,
+  AI_JUDGE_VALIDATION_TARGET,
+} from "@repo/shared";
 
-export type AiJudgeGenerationMode =
-  (typeof AI_JUDGE_GENERATION_MODE)[keyof typeof AI_JUDGE_GENERATION_MODE];
-
-export const AI_JUDGE_GENERATION_STATUS = {
-  DRAFTING: "drafting",
-  EVALUATING: "evaluating",
-  REVISING: "revising",
-  COMPLETED: "completed",
-  REQUIRES_REVIEW: "requires_review",
-  FAILED: "failed",
-  CANCELLED: "cancelled",
-} as const;
-
-export const AI_JUDGE_VALIDATION_SEVERITY = {
-  ERROR: "error",
-  WARNING: "warning",
-} as const;
-
-export const AI_JUDGE_VALIDATION_TARGET = {
-  CONFIGURATION: "configuration",
-  CRITERION: "criterion",
-  SCORE_GUIDANCE: "scoreGuidance",
-  BLOCKING_ERROR: "blockingError",
-} as const;
-
-export const AI_JUDGE_DRAFT_CHANGE_TYPE = {
-  ADDED: "added",
-  REMOVED: "removed",
-  CHANGED: "changed",
-} as const;
-
-export const AI_JUDGE_GENERATION_MAX_ATTEMPTS = 3;
+export type { AiJudgeGenerationMode } from "@repo/shared";
 
 export const AI_JUDGE_CRITERION_REF_PATTERN = "^C[1-9][0-9]*$";
 export const AI_JUDGE_BLOCKING_ERROR_REF_PATTERN = "^B[1-9][0-9]*$";

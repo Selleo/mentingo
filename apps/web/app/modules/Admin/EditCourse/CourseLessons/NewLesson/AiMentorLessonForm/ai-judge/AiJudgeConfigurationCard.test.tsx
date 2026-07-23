@@ -1,10 +1,12 @@
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TooltipProvider } from "~/components/ui/tooltip";
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
+import { AI_JUDGE_GENERATION_MODE } from "./aiJudgeConfiguration.types";
 import { AiJudgeConfigurationCard } from "./AiJudgeConfigurationCard";
 
 import type { AiJudgeConfigurationDraft } from "./aiJudgeConfiguration.types";
@@ -39,23 +41,26 @@ const renderCard = (props: Partial<React.ComponentProps<typeof AiJudgeConfigurat
   );
 
 describe("AiJudgeConfigurationCard", () => {
-  it("makes AI the primary empty-state action and keeps manual setup quiet", async () => {
+  beforeEach(async () => {
+    await i18next.changeLanguage("en");
+  });
+
+  it("makes AI creation the compact primary empty-state action", async () => {
     const user = userEvent.setup();
     const onConfigureWithAi = vi.fn();
     renderCard({ onConfigureWithAi });
 
-    const aiAction = screen.getByRole("button", { name: "Create assessment with AI" });
+    const aiAction = screen.getByRole("button", { name: "Create with AI" });
     const manualAction = screen.getByRole("button", { name: "Configure manually" });
 
-    expect(aiAction).toHaveClass("bg-primary-700");
+    expect(aiAction).toHaveClass("h-9", "bg-primary-700");
     expect(manualAction).toHaveClass("text-primary");
 
     await user.click(aiAction);
-    expect(onConfigureWithAi).toHaveBeenCalledWith("create");
+    expect(onConfigureWithAi).toHaveBeenCalledWith(AI_JUDGE_GENERATION_MODE.CREATE);
   });
 
-  it("makes editing primary and improvement secondary for an existing assessment", async () => {
-    const user = userEvent.setup();
+  it("keeps improvement inside the editor for an existing assessment", () => {
     const onConfigureWithAi = vi.fn();
     renderCard({
       value: configuredAssessment,
@@ -63,18 +68,16 @@ describe("AiJudgeConfigurationCard", () => {
       onConfigureWithAi,
     });
 
-    expect(screen.getByRole("button", { name: "Edit assessment" })).toHaveClass("bg-primary-700");
-    expect(screen.getByRole("button", { name: "Improve with AI" })).toHaveClass("border");
-
-    await user.click(screen.getByRole("button", { name: "Improve with AI" }));
-    expect(onConfigureWithAi).toHaveBeenCalledWith("improve");
+    expect(screen.getByRole("button", { name: "Edit assessment" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Improve with AI" })).not.toBeInTheDocument();
+    expect(onConfigureWithAi).not.toHaveBeenCalled();
   });
 
   it("keeps AI creation visible but disabled outside the base language", async () => {
     const user = userEvent.setup();
     renderCard({ language: "pl", baseLanguage: "en" });
 
-    const aiAction = screen.getByRole("button", { name: "Create assessment with AI" });
+    const aiAction = screen.getByRole("button", { name: "Create with AI" });
     expect(aiAction).toBeVisible();
     expect(aiAction).toBeDisabled();
 

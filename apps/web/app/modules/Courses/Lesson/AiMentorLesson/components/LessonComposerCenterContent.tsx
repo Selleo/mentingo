@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useLayoutEffect, useRef } from "react";
 
+import { AutosizeTextarea } from "~/components/ui/autosize-textarea";
 import { VoiceLevelBars } from "~/modules/Voice/components/VoiceLevelBars";
 
 import type { ChangeEvent } from "react";
@@ -24,27 +24,6 @@ export function LessonComposerCenterContent({
   onSubmit,
   textInputTestId,
 }: LessonComposerCenterContentProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useLayoutEffect(() => {
-    if (isVoiceMode) return;
-
-    const el = textareaRef.current;
-    if (!el) return;
-
-    const resize = () => {
-      el.style.height = "auto";
-      el.style.height = `${el.scrollHeight}px`;
-    };
-
-    resize();
-    el.addEventListener("input", resize);
-
-    return () => {
-      el.removeEventListener("input", resize);
-    };
-  }, [input, isVoiceMode]);
-
   return (
     <div className="flex w-full flex-col min-w-0">
       <AnimatePresence initial={false} mode="wait">
@@ -60,25 +39,29 @@ export function LessonComposerCenterContent({
             <VoiceLevelBars voiceLevel={voiceLevel} />
           </motion.div>
         ) : (
-          <motion.textarea
+          <motion.div
             key="text-content"
-            ref={textareaRef}
-            data-testid={textInputTestId}
-            value={input}
-            onChange={onInputChange}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                onSubmit();
-              }
-            }}
-            placeholder={placeholder}
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="h-auto max-h-28 w-full max-w-full resize-none overflow-y-auto overflow-x-hidden border-none bg-transparent py-1.5 text-base font-normal text-gray-600 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
-          />
+            className="w-full min-w-0"
+          >
+            <AutosizeTextarea
+              data-testid={textInputTestId}
+              value={input}
+              maxRows={5}
+              onChange={onInputChange}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  onSubmit();
+                }
+              }}
+              placeholder={placeholder}
+              className="h-auto min-h-0 w-full max-w-full overflow-x-hidden border-none bg-transparent px-0 py-1.5 text-base font-normal text-gray-600 shadow-none focus:outline-none focus:ring-0 disabled:opacity-50"
+            />
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

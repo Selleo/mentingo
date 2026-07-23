@@ -1,5 +1,8 @@
 import { diffAiJudgeConfigurationDrafts } from "./ai-judge-configuration-diff";
-import { validateAiJudgeReferenceTransition } from "./ai-judge-configuration-draft";
+import {
+  normalizeDuplicateAiJudgeConfigurationReferences,
+  validateAiJudgeReferenceTransition,
+} from "./ai-judge-configuration-draft";
 import {
   reconcileAiJudgeConfigurationDraft,
   referenceAiJudgeConfiguration,
@@ -169,6 +172,30 @@ describe("AI Judge configuration references", () => {
     ).toThrow("duplicate criterion references");
   });
 
+  it("reassigns duplicate model references without changing assessment content", () => {
+    const referenced = referenceAiJudgeConfiguration(configuration).configuration;
+    const firstCriterion = referenced.criteria[0];
+    const firstBlockingError = referenced.blockingErrors[0];
+    if (!firstCriterion || !firstBlockingError) throw new Error("Expected Judge fixtures");
+
+    const normalized = normalizeDuplicateAiJudgeConfigurationReferences(
+      {
+        ...referenced,
+        criteria: [firstCriterion, { ...firstCriterion, title: "Follow-up" }],
+        blockingErrors: [
+          firstBlockingError,
+          { ...firstBlockingError, description: "Promises an impossible deadline" },
+        ],
+      },
+      referenced,
+    );
+
+    expect(normalized.criteria.map(({ ref }) => ref)).toEqual(["C1", "C3"]);
+    expect(normalized.blockingErrors.map(({ ref }) => ref)).toEqual(["B1", "B2"]);
+    expect(normalized.criteria[1]?.title).toBe("Follow-up");
+    expect(normalized.blockingErrors[1]?.description).toBe("Promises an impossible deadline");
+  });
+
   it("requires create references to start at one without gaps", () => {
     const referenced = referenceAiJudgeConfiguration(configuration).configuration;
     const firstCriterion = referenced.criteria[0];
@@ -221,6 +248,42 @@ describe("AI Judge configuration diff", () => {
     };
 
     expect(diffAiJudgeConfigurationDrafts(before, after)).toEqual([]);
+  });
+
+  it("ignores whitespace-only text changes but preserves meaningful wording changes", () => {
+    const before = referenceAiJudgeConfiguration(configuration).configuration;
+    const firstCriterion = before.criteria[0];
+    if (!firstCriterion) throw new Error("Expected criterion fixture");
+
+    const whitespaceOnly: ReferencedAiJudgeConfiguration = {
+      ...before,
+      taskGoal: `  ${before.taskGoal}  `,
+      criteria: [
+        {
+          ...firstCriterion,
+          expectedBehavior: "Asks   what the customer\nneeds",
+        },
+        ...before.criteria.slice(1),
+      ],
+    };
+    expect(diffAiJudgeConfigurationDrafts(before, whitespaceOnly)).toEqual([]);
+
+    const meaningfulChange: ReferencedAiJudgeConfiguration = {
+      ...before,
+      criteria: [
+        {
+          ...firstCriterion,
+          expectedBehavior: "Asks what the customer explicitly needs",
+        },
+        ...before.criteria.slice(1),
+      ],
+    };
+    expect(diffAiJudgeConfigurationDrafts(before, meaningfulChange)).toEqual([
+      expect.objectContaining({
+        targetRef: "C1",
+        field: "expectedBehavior",
+      }),
+    ]);
   });
 
   it("reports exact configuration, criterion, guidance, and blocking-error changes", () => {

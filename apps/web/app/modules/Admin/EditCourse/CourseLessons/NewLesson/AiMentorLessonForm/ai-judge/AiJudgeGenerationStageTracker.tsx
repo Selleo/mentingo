@@ -11,6 +11,7 @@ const getActiveStep = (status: AiJudgeGenerationStatus) => {
   if (status === AI_JUDGE_GENERATION_STATUS.COMPLETED) return 3;
   if (
     status === AI_JUDGE_GENERATION_STATUS.EVALUATING ||
+    status === AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION ||
     status === AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW
   )
     return 2;
@@ -38,7 +39,7 @@ export const AiJudgeGenerationStageTracker = ({ status }: { status: AiJudgeGener
         const isActive = activeStep === step && !isComplete;
 
         return (
-          <li key={label} className="flex min-w-0 items-center gap-2">
+          <li key={label} className="flex min-w-0 items-center justify-center gap-2 text-center">
             <span
               className={cn(
                 "flex size-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold",

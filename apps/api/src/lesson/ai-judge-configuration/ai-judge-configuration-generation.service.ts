@@ -22,6 +22,7 @@ import type {
 import type { SupportedLanguages } from "@repo/shared";
 import type {
   AiJudgeConfigurationValidationResult,
+  AiJudgeGenerationAttempt,
   AiJudgeGenerationApplicationProgressEvent,
   AiJudgeGenerationProgressEvent,
   GenerateAiJudgeConfigurationInput,
@@ -70,6 +71,8 @@ export class AiJudgeConfigurationGenerationService {
     const result = await this.aiJudgeConfigurationGenerationWorkflowService.run(
       prepared.workflowInput,
       {
+        attempt: prepared.attempt,
+        attemptHistory: prepared.attemptHistory,
         isCancelled: options.isCancelled,
         onDraft: (draft) => {
           latestDraft = draft;
@@ -122,6 +125,8 @@ export class AiJudgeConfigurationGenerationService {
           brief: input.brief,
         },
         identities: { criteria: [], blockingErrors: [] },
+        attempt: 1,
+        attemptHistory: [],
       };
     }
 
@@ -133,11 +138,38 @@ export class AiJudgeConfigurationGenerationService {
         language,
         lessonContext: input.lessonContext,
         instruction: input.instruction,
+        creatorInstruction: input.instruction,
         currentConfiguration: referenced.configuration,
         brief: input.brief,
         latestValidation: input.latestValidation,
       },
       identities: referenced.identities,
+      attempt: 1,
+      attemptHistory: [],
+    };
+  }
+
+  prepareRevision(
+    previous: PreparedAiJudgeConfigurationGeneration,
+    configuration: Parameters<typeof referenceAiJudgeConfiguration>[0],
+    validation: AiJudgeConfigurationValidationResult,
+    attemptHistory: AiJudgeGenerationAttempt[],
+  ): PreparedAiJudgeConfigurationGeneration {
+    const referenced = referenceAiJudgeConfiguration(configuration);
+
+    return {
+      workflowInput: {
+        mode: AI_JUDGE_GENERATION_MODE.REPAIR,
+        language: previous.workflowInput.language,
+        lessonContext: previous.workflowInput.lessonContext,
+        brief: previous.workflowInput.brief,
+        creatorInstruction: previous.workflowInput.creatorInstruction,
+        currentConfiguration: referenced.configuration,
+        blockingIssues: validation.issues,
+      },
+      identities: referenced.identities,
+      attempt: attemptHistory.length + 1,
+      attemptHistory,
     };
   }
 
@@ -169,6 +201,7 @@ export class AiJudgeConfigurationGenerationService {
           draft: reconcileAiJudgeConfigurationDraft(progress.draft, identities),
         };
       case AI_JUDGE_GENERATION_STATUS.COMPLETED:
+      case AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION:
       case AI_JUDGE_GENERATION_STATUS.REQUIRES_REVIEW:
       case AI_JUDGE_GENERATION_STATUS.FAILED:
       case AI_JUDGE_GENERATION_STATUS.CANCELLED:

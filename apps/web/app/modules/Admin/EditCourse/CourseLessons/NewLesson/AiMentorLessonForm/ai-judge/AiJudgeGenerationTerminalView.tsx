@@ -33,10 +33,9 @@ export const AiJudgeGenerationTerminalView = ({
             {t(`adminCourseView.curriculum.lesson.aiJudge.generation.status.${state.status}`)}
           </p>
           <p className="mt-1 text-sm text-neutral-600">
-            {state.errorMessage ??
-              t(
-                `adminCourseView.curriculum.lesson.aiJudge.generation.statusDescription.${state.status}`,
-              )}
+            {t(
+              `adminCourseView.curriculum.lesson.aiJudge.generation.statusDescription.${state.status}`,
+            )}
           </p>
         </div>
       </div>

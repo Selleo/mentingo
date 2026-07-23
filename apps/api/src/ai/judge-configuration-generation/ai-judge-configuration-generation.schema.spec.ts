@@ -2,6 +2,7 @@ import { Value } from "@sinclair/typebox/value";
 
 import {
   aiJudgeConfigurationValidatorModelResultSchema,
+  aiJudgeConfigurationValidatorStructuredOutputSchema,
   aiJudgeConfigurationValidationResultSchema,
   aiJudgeGenerationApplicationResultSchema,
   aiJudgeGenerationProgressEventSchema,
@@ -9,6 +10,7 @@ import {
   aiJudgeGenerationSnapshotSchema,
   generateAiJudgeConfigurationInputSchema,
   referencedAiJudgeConfigurationSchema,
+  referencedAiJudgeConfigurationStructuredOutputSchema,
   validateAiJudgeConfigurationInputSchema,
 } from "./ai-judge-configuration-generation.schema";
 
@@ -132,6 +134,76 @@ describe("AI Judge configuration generation schemas", () => {
     ).toBe(false);
   });
 
+  it("requires nullable optional values to be present in strict model output", () => {
+    expect(
+      Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, referencedConfiguration),
+    ).toBe(false);
+    expect(
+      Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, {
+        ...referencedConfiguration,
+        criteria: referencedConfiguration.criteria.map((criterion) => ({
+          ...criterion,
+          scoreGuidance: criterion.scoreGuidance.map((guidance) => ({
+            ...guidance,
+            example: guidance.example ?? null,
+          })),
+        })),
+      }),
+    ).toBe(true);
+
+    const { passed: _passed, ...modelResult } = validation;
+    expect(Value.Check(aiJudgeConfigurationValidatorStructuredOutputSchema, modelResult)).toBe(
+      true,
+    );
+    expect(
+      Value.Check(aiJudgeConfigurationValidatorStructuredOutputSchema, {
+        ...modelResult,
+        issues: modelResult.issues.map((issue) => ({
+          ...issue,
+          target: { ...issue.target, field: undefined },
+        })),
+      }),
+    ).toBe(false);
+  });
+
+  it("does not force generated assessment prose to end at a character boundary", () => {
+    const structuredConfiguration = {
+      ...referencedConfiguration,
+      criteria: referencedConfiguration.criteria.map((criterion) => ({
+        ...criterion,
+        scoreGuidance: criterion.scoreGuidance.map((guidance) => ({
+          ...guidance,
+          example: guidance.example ?? null,
+        })),
+      })),
+    };
+
+    expect(
+      Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, {
+        ...structuredConfiguration,
+        taskGoal: "x".repeat(321),
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, {
+        ...structuredConfiguration,
+        criteria: structuredConfiguration.criteria.map((criterion) => ({
+          ...criterion,
+          scoreGuidance: criterion.scoreGuidance.map((guidance) => ({
+            ...guidance,
+            description: "x".repeat(281),
+          })),
+        })),
+      }),
+    ).toBe(true);
+    expect(
+      Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, {
+        ...structuredConfiguration,
+        blockingErrors: [{ ref: "B1", description: "x".repeat(361) }],
+      }),
+    ).toBe(true);
+  });
+
   it("uses target-specific Validator finding shapes", () => {
     expect(Value.Check(aiJudgeConfigurationValidationResultSchema, validation)).toBe(true);
     expect(
@@ -154,6 +226,21 @@ describe("AI Judge configuration generation schemas", () => {
     expect(Value.Check(aiJudgeConfigurationValidatorModelResultSchema, validation)).toBe(false);
   });
 
+  it("limits Validator output to three actionable findings", () => {
+    const { passed: _passed, ...modelResult } = validation;
+    const repeatedIssues = Array.from({ length: 4 }, (_, index) => ({
+      ...modelResult.issues[0],
+      code: `finding_${index}`,
+    }));
+
+    expect(
+      Value.Check(aiJudgeConfigurationValidatorModelResultSchema, {
+        ...modelResult,
+        issues: repeatedIssues,
+      }),
+    ).toBe(false);
+  });
+
   it("accepts independent validation without an original brief", () => {
     expect(
       Value.Check(validateAiJudgeConfigurationInputSchema, {
@@ -169,6 +256,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationProgressEventSchema, {
         status: "evaluating",
         attempt: 1,
+        attemptHistory: [],
         draft: referencedConfiguration,
       }),
     ).toBe(true);
@@ -176,6 +264,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationProgressEventSchema, {
         status: "revising",
         attempt: 1,
+        attemptHistory: [],
         draft: referencedConfiguration,
         validation,
       }),
@@ -184,6 +273,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationProgressEventSchema, {
         status: "requires_review",
         attempt: 2,
+        attemptHistory: [],
         configuration,
         validation,
       }),
@@ -195,6 +285,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationResultSchema, {
         status: "completed",
         attempt: 2,
+        attemptHistory: [],
         configuration,
         validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
       }),
@@ -203,6 +294,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationResultSchema, {
         status: "completed",
         attempt: 2,
+        attemptHistory: [],
         configuration: referencedConfiguration,
         validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
       }),
@@ -234,6 +326,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationApplicationResultSchema, {
         status: "completed",
         attempt: 1,
+        attemptHistory: [],
         configuration: configurationWithIds,
         validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
       }),
@@ -242,6 +335,7 @@ describe("AI Judge configuration generation schemas", () => {
       Value.Check(aiJudgeGenerationResultSchema, {
         status: "completed",
         attempt: 1,
+        attemptHistory: [],
         configuration: configurationWithIds,
         validation: { passed: true, summary: "The rubric is coherent.", issues: [] },
       }),
@@ -255,6 +349,7 @@ describe("AI Judge configuration generation schemas", () => {
         progress: {
           status: "drafting",
           attempt: 1,
+          attemptHistory: [],
         },
       }),
     ).toBe(true);

@@ -95,6 +95,22 @@ const basePlugins = [
 
 export const baseEditorPlugins = [...basePlugins];
 
+export const boldBulletEditorPlugins = [
+  StarterKit.configure({
+    blockquote: false,
+    code: false,
+    codeBlock: false,
+    dropcursor: false,
+    gapcursor: false,
+    hardBreak: false,
+    heading: false,
+    horizontalRule: false,
+    italic: false,
+    orderedList: false,
+    strike: false,
+  }),
+];
+
 const tablePlugins = [
   Table.configure({
     resizable: true,

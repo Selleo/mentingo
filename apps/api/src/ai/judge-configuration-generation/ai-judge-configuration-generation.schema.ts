@@ -14,6 +14,7 @@ import {
   AI_JUDGE_BLOCKING_ERROR_REF_PATTERN,
   AI_JUDGE_CRITERION_REF_PATTERN,
   AI_JUDGE_DRAFT_CHANGE_TYPE,
+  AI_JUDGE_DRAFT_CHANGE_FIELD,
   AI_JUDGE_GENERATION_MAX_ATTEMPTS,
   AI_JUDGE_GENERATION_MODE,
   AI_JUDGE_GENERATION_STATUS,
@@ -24,6 +25,15 @@ import {
 import type { Static } from "@sinclair/typebox";
 
 const nonEmptyTextSchema = Type.String({ minLength: 1 });
+const generatedTaskGoalSchema = Type.String({ minLength: 1 });
+const generatedCriterionTitleSchema = Type.String({ minLength: 1, maxLength: 80 });
+const generatedExpectedBehaviorSchema = Type.String({ minLength: 1 });
+const generatedGuidanceDescriptionSchema = Type.String({ minLength: 1 });
+const generatedGuidanceExampleSchema = Type.String({ minLength: 1 });
+const generatedBlockingErrorSchema = Type.String({ minLength: 1 });
+const validatorSummarySchema = Type.String({ minLength: 1, maxLength: 180 });
+const validatorMessageSchema = Type.String({ minLength: 1, maxLength: 160 });
+const validatorCorrectionSchema = Type.String({ minLength: 1, maxLength: 220 });
 const attemptSchema = Type.Integer({ minimum: 1, maximum: AI_JUDGE_GENERATION_MAX_ATTEMPTS });
 
 export const aiJudgeCriterionRefSchema = Type.String({
@@ -49,11 +59,49 @@ const referencedBlockingErrorSchema = Type.Object(
   { additionalProperties: false },
 );
 
+const referencedScoreGuidanceStructuredOutputSchema = Type.Object(
+  {
+    score: aiJudgeScoreGuidanceContentSchema.properties.score,
+    description: generatedGuidanceDescriptionSchema,
+    example: Type.Union([generatedGuidanceExampleSchema, Type.Null()]),
+  },
+  { additionalProperties: false },
+);
+
+const referencedCriterionStructuredOutputSchema = Type.Object(
+  {
+    ref: aiJudgeCriterionRefSchema,
+    title: generatedCriterionTitleSchema,
+    expectedBehavior: generatedExpectedBehaviorSchema,
+    maxScore: aiJudgeCriterionContentSchema.properties.maxScore,
+    scoreGuidance: Type.Array(referencedScoreGuidanceStructuredOutputSchema, { minItems: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+const referencedBlockingErrorStructuredOutputSchema = Type.Object(
+  {
+    ref: aiJudgeBlockingErrorRefSchema,
+    description: generatedBlockingErrorSchema,
+  },
+  { additionalProperties: false },
+);
+
 export const referencedAiJudgeConfigurationSchema = Type.Object(
   {
     ...aiJudgeConfigurationContentSchema.properties,
     criteria: Type.Array(referencedCriterionSchema),
     blockingErrors: Type.Array(referencedBlockingErrorSchema),
+  },
+  { additionalProperties: false },
+);
+
+export const referencedAiJudgeConfigurationStructuredOutputSchema = Type.Object(
+  {
+    ...aiJudgeConfigurationContentSchema.properties,
+    taskGoal: generatedTaskGoalSchema,
+    criteria: Type.Array(referencedCriterionStructuredOutputSchema),
+    blockingErrors: Type.Array(referencedBlockingErrorStructuredOutputSchema),
   },
   { additionalProperties: false },
 );
@@ -130,8 +178,64 @@ export const aiJudgeValidationIssueSchema = Type.Object(
 
 export const aiJudgeConfigurationValidatorModelResultSchema = Type.Object(
   {
-    summary: nonEmptyTextSchema,
-    issues: Type.Array(aiJudgeValidationIssueSchema),
+    summary: validatorSummarySchema,
+    issues: Type.Array(aiJudgeValidationIssueSchema, { maxItems: 3 }),
+  },
+  { additionalProperties: false },
+);
+
+const structuredOutputFieldSchema = Type.Union([nonEmptyTextSchema, Type.Null()]);
+const structuredOutputValidationTargetSchema = Type.Union([
+  Type.Object(
+    {
+      type: Type.Literal(AI_JUDGE_VALIDATION_TARGET.CONFIGURATION),
+      field: structuredOutputFieldSchema,
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(AI_JUDGE_VALIDATION_TARGET.CRITERION),
+      ref: aiJudgeCriterionRefSchema,
+      field: structuredOutputFieldSchema,
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(AI_JUDGE_VALIDATION_TARGET.SCORE_GUIDANCE),
+      ref: aiJudgeCriterionRefSchema,
+      score: aiJudgeScoreGuidanceContentSchema.properties.score,
+      field: structuredOutputFieldSchema,
+    },
+    { additionalProperties: false },
+  ),
+  Type.Object(
+    {
+      type: Type.Literal(AI_JUDGE_VALIDATION_TARGET.BLOCKING_ERROR),
+      ref: aiJudgeBlockingErrorRefSchema,
+      field: structuredOutputFieldSchema,
+    },
+    { additionalProperties: false },
+  ),
+]);
+
+export const aiJudgeConfigurationValidatorStructuredOutputSchema = Type.Object(
+  {
+    summary: validatorSummarySchema,
+    issues: Type.Array(
+      Type.Object(
+        {
+          code: nonEmptyTextSchema,
+          severity: Type.Enum(AI_JUDGE_VALIDATION_SEVERITY),
+          target: structuredOutputValidationTargetSchema,
+          message: validatorMessageSchema,
+          correction: validatorCorrectionSchema,
+        },
+        { additionalProperties: false },
+      ),
+      { maxItems: 3 },
+    ),
   },
   { additionalProperties: false },
 );
@@ -186,17 +290,31 @@ export const aiJudgeDraftChangeSchema = Type.Object(
       Type.Literal(AI_JUDGE_VALIDATION_TARGET.CONFIGURATION),
     ]),
     score: Type.Optional(aiJudgeScoreGuidanceContentSchema.properties.score),
-    field: nonEmptyTextSchema,
+    field: Type.Enum(AI_JUDGE_DRAFT_CHANGE_FIELD),
     before: Type.Optional(draftChangeValueSchema),
     after: Type.Optional(draftChangeValueSchema),
   },
   { additionalProperties: false },
 );
 
+export const aiJudgeGenerationAttemptSchema = Type.Object(
+  {
+    attempt: attemptSchema,
+    changes: Type.Array(aiJudgeDraftChangeSchema),
+    validation: aiJudgeConfigurationValidationResultSchema,
+  },
+  { additionalProperties: false },
+);
+
+const attemptHistoryProperties = {
+  attemptHistory: Type.Array(aiJudgeGenerationAttemptSchema),
+};
+
 const draftingEventSchema = Type.Object(
   {
     status: Type.Literal(AI_JUDGE_GENERATION_STATUS.DRAFTING),
     attempt: attemptSchema,
+    ...attemptHistoryProperties,
   },
   { additionalProperties: false },
 );
@@ -206,6 +324,7 @@ const evaluatingEventSchema = Type.Object(
     status: Type.Literal(AI_JUDGE_GENERATION_STATUS.EVALUATING),
     attempt: attemptSchema,
     draft: referencedAiJudgeConfigurationSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -217,6 +336,19 @@ const revisingEventSchema = Type.Object(
     attempt: attemptSchema,
     draft: referencedAiJudgeConfigurationSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+const awaitingRevisionEventSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION),
+    attempt: attemptSchema,
+    configuration: generatedAiJudgeConfigurationSchema,
+    validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -228,6 +360,7 @@ const completedEventSchema = Type.Object(
     attempt: attemptSchema,
     configuration: generatedAiJudgeConfigurationSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -239,6 +372,7 @@ const requiresReviewEventSchema = Type.Object(
     attempt: Type.Literal(AI_JUDGE_GENERATION_MAX_ATTEMPTS),
     configuration: generatedAiJudgeConfigurationSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -250,6 +384,7 @@ const failedEventSchema = Type.Object(
     attempt: attemptSchema,
     message: nonEmptyTextSchema,
     configuration: Type.Optional(generatedAiJudgeConfigurationSchema),
+    ...attemptHistoryProperties,
   },
   { additionalProperties: false },
 );
@@ -259,6 +394,7 @@ const cancelledEventSchema = Type.Object(
     status: Type.Literal(AI_JUDGE_GENERATION_STATUS.CANCELLED),
     attempt: attemptSchema,
     configuration: Type.Optional(generatedAiJudgeConfigurationSchema),
+    ...attemptHistoryProperties,
   },
   { additionalProperties: false },
 );
@@ -267,6 +403,7 @@ export const aiJudgeGenerationProgressEventSchema = Type.Union([
   draftingEventSchema,
   evaluatingEventSchema,
   revisingEventSchema,
+  awaitingRevisionEventSchema,
   completedEventSchema,
   requiresReviewEventSchema,
   failedEventSchema,
@@ -274,6 +411,7 @@ export const aiJudgeGenerationProgressEventSchema = Type.Union([
 ]);
 
 export const aiJudgeGenerationResultSchema = Type.Union([
+  awaitingRevisionEventSchema,
   completedEventSchema,
   requiresReviewEventSchema,
   failedEventSchema,
@@ -286,6 +424,19 @@ const completedApplicationResultSchema = Type.Object(
     attempt: attemptSchema,
     configuration: aiJudgeConfigurationInputSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
+    changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
+  },
+  { additionalProperties: false },
+);
+
+const awaitingRevisionApplicationResultSchema = Type.Object(
+  {
+    status: Type.Literal(AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION),
+    attempt: attemptSchema,
+    configuration: aiJudgeConfigurationInputSchema,
+    validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -297,6 +448,7 @@ const requiresReviewApplicationResultSchema = Type.Object(
     attempt: Type.Literal(AI_JUDGE_GENERATION_MAX_ATTEMPTS),
     configuration: aiJudgeConfigurationInputSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -308,6 +460,7 @@ const failedApplicationResultSchema = Type.Object(
     attempt: attemptSchema,
     message: nonEmptyTextSchema,
     configuration: Type.Optional(aiJudgeConfigurationInputSchema),
+    ...attemptHistoryProperties,
   },
   { additionalProperties: false },
 );
@@ -317,11 +470,13 @@ const cancelledApplicationResultSchema = Type.Object(
     status: Type.Literal(AI_JUDGE_GENERATION_STATUS.CANCELLED),
     attempt: attemptSchema,
     configuration: Type.Optional(aiJudgeConfigurationInputSchema),
+    ...attemptHistoryProperties,
   },
   { additionalProperties: false },
 );
 
 export const aiJudgeGenerationApplicationResultSchema = Type.Union([
+  awaitingRevisionApplicationResultSchema,
   completedApplicationResultSchema,
   requiresReviewApplicationResultSchema,
   failedApplicationResultSchema,
@@ -333,6 +488,7 @@ const evaluatingApplicationEventSchema = Type.Object(
     status: Type.Literal(AI_JUDGE_GENERATION_STATUS.EVALUATING),
     attempt: attemptSchema,
     draft: aiJudgeConfigurationInputSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -344,6 +500,7 @@ const revisingApplicationEventSchema = Type.Object(
     attempt: attemptSchema,
     draft: aiJudgeConfigurationInputSchema,
     validation: aiJudgeConfigurationValidationResultSchema,
+    ...attemptHistoryProperties,
     changes: Type.Optional(Type.Array(aiJudgeDraftChangeSchema)),
   },
   { additionalProperties: false },
@@ -353,6 +510,7 @@ export const aiJudgeGenerationApplicationProgressEventSchema = Type.Union([
   draftingEventSchema,
   evaluatingApplicationEventSchema,
   revisingApplicationEventSchema,
+  awaitingRevisionApplicationResultSchema,
   completedApplicationResultSchema,
   requiresReviewApplicationResultSchema,
   failedApplicationResultSchema,
@@ -387,6 +545,9 @@ export type AiJudgeValidationIssue = Static<typeof aiJudgeValidationIssueSchema>
 export type AiJudgeConfigurationValidatorModelResult = Static<
   typeof aiJudgeConfigurationValidatorModelResultSchema
 >;
+export type AiJudgeConfigurationValidatorStructuredOutput = Static<
+  typeof aiJudgeConfigurationValidatorStructuredOutputSchema
+>;
 export type AiJudgeConfigurationValidationResult = Static<
   typeof aiJudgeConfigurationValidationResultSchema
 >;
@@ -397,6 +558,7 @@ export type ValidateAiJudgeConfigurationInput = Static<
   typeof validateAiJudgeConfigurationInputSchema
 >;
 export type AiJudgeDraftChange = Static<typeof aiJudgeDraftChangeSchema>;
+export type AiJudgeGenerationAttempt = Static<typeof aiJudgeGenerationAttemptSchema>;
 export type AiJudgeGenerationProgressEvent = Static<typeof aiJudgeGenerationProgressEventSchema>;
 export type AiJudgeGenerationResult = Static<typeof aiJudgeGenerationResultSchema>;
 export type AiJudgeGenerationApplicationResult = Static<

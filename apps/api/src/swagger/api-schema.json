@@ -7388,6 +7388,33 @@
         }
       }
     },
+    "/api/ai/judge-configuration/generations/{generationId}/revise": {
+      "post": {
+        "operationId": "AiJudgeConfigurationGenerationController_reviseGeneration",
+        "parameters": [
+          {
+            "name": "generationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviseGenerationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ai/judge-configuration/generations/{generationId}/cancel": {
       "post": {
         "operationId": "AiJudgeConfigurationGenerationController_cancelGeneration",
@@ -36677,9 +36704,11 @@
                   },
                   "summary": {
                     "minLength": 1,
+                    "maxLength": 180,
                     "type": "string"
                   },
                   "issues": {
+                    "maxItems": 3,
                     "type": "array",
                     "items": {
                       "additionalProperties": false,
@@ -36875,11 +36904,303 @@
                         "minimum": 1,
                         "maximum": 3,
                         "type": "integer"
+                      },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
                       }
                     },
                     "required": [
                       "status",
-                      "attempt"
+                      "attempt",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -37005,6 +37326,297 @@
                           "blockingErrors"
                         ]
                       },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
+                      },
                       "changes": {
                         "type": "array",
                         "items": {
@@ -37048,8 +37660,48 @@
                               "type": "integer"
                             },
                             "field": {
-                              "minLength": 1,
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "const": "taskGoal",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "passingThresholdPercent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "title",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "expectedBehavior",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "maxScore",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "description",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "example",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "before": {
                               "anyOf": [
@@ -37089,7 +37741,8 @@
                     "required": [
                       "status",
                       "attempt",
-                      "draft"
+                      "draft",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -37224,9 +37877,11 @@
                           },
                           "summary": {
                             "minLength": 1,
+                            "maxLength": 180,
                             "type": "string"
                           },
                           "issues": {
+                            "maxItems": 3,
                             "type": "array",
                             "items": {
                               "additionalProperties": false,
@@ -37365,6 +38020,297 @@
                           "issues"
                         ]
                       },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
+                      },
                       "changes": {
                         "type": "array",
                         "items": {
@@ -37408,8 +38354,48 @@
                               "type": "integer"
                             },
                             "field": {
-                              "minLength": 1,
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "const": "taskGoal",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "passingThresholdPercent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "title",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "expectedBehavior",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "maxScore",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "description",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "example",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "before": {
                               "anyOf": [
@@ -37450,7 +38436,703 @@
                       "status",
                       "attempt",
                       "draft",
-                      "validation"
+                      "validation",
+                      "attemptHistory"
+                    ]
+                  },
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "const": "awaiting_revision",
+                        "type": "string"
+                      },
+                      "attempt": {
+                        "minimum": 1,
+                        "maximum": 3,
+                        "type": "integer"
+                      },
+                      "configuration": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "taskGoal": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "passingThresholdPercent": {
+                            "minimum": 0,
+                            "maximum": 100,
+                            "type": "integer"
+                          },
+                          "criteria": {
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "expectedBehavior": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "maxScore": {
+                                  "minimum": 1,
+                                  "maximum": 5,
+                                  "type": "integer"
+                                },
+                                "scoreGuidance": {
+                                  "minItems": 1,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "id": {
+                                        "format": "uuid",
+                                        "type": "string"
+                                      },
+                                      "score": {
+                                        "minimum": 0,
+                                        "type": "integer"
+                                      },
+                                      "description": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "example": {
+                                        "anyOf": [
+                                          {
+                                            "minLength": 1,
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "null"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "score",
+                                      "description"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "title",
+                                "expectedBehavior",
+                                "maxScore",
+                                "scoreGuidance"
+                              ]
+                            }
+                          },
+                          "blockingErrors": {
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "format": "uuid",
+                                  "type": "string"
+                                },
+                                "description": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "description"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "taskGoal",
+                          "passingThresholdPercent",
+                          "criteria",
+                          "blockingErrors"
+                        ]
+                      },
+                      "validation": {
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "passed": {
+                            "type": "boolean"
+                          },
+                          "summary": {
+                            "minLength": 1,
+                            "maxLength": 180,
+                            "type": "string"
+                          },
+                          "issues": {
+                            "maxItems": 3,
+                            "type": "array",
+                            "items": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "code": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "severity": {
+                                  "anyOf": [
+                                    {
+                                      "const": "error",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "warning",
+                                      "type": "string"
+                                    }
+                                  ]
+                                },
+                                "target": {
+                                  "anyOf": [
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "configuration",
+                                          "type": "string"
+                                        },
+                                        "field": {
+                                          "minLength": 1,
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "criterion",
+                                          "type": "string"
+                                        },
+                                        "ref": {
+                                          "pattern": "^C[1-9][0-9]*$",
+                                          "type": "string"
+                                        },
+                                        "field": {
+                                          "minLength": 1,
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "ref"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "scoreGuidance",
+                                          "type": "string"
+                                        },
+                                        "ref": {
+                                          "pattern": "^C[1-9][0-9]*$",
+                                          "type": "string"
+                                        },
+                                        "score": {
+                                          "minimum": 0,
+                                          "type": "integer"
+                                        },
+                                        "field": {
+                                          "minLength": 1,
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "ref",
+                                        "score"
+                                      ]
+                                    },
+                                    {
+                                      "additionalProperties": false,
+                                      "type": "object",
+                                      "properties": {
+                                        "type": {
+                                          "const": "blockingError",
+                                          "type": "string"
+                                        },
+                                        "ref": {
+                                          "pattern": "^B[1-9][0-9]*$",
+                                          "type": "string"
+                                        },
+                                        "field": {
+                                          "minLength": 1,
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "type",
+                                        "ref"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "message": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "correction": {
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "code",
+                                "severity",
+                                "target",
+                                "message",
+                                "correction"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "passed",
+                          "summary",
+                          "issues"
+                        ]
+                      },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
+                      },
+                      "changes": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "anyOf": [
+                                {
+                                  "const": "added",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "removed",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "changed",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "targetRef": {
+                              "anyOf": [
+                                {
+                                  "pattern": "^C[1-9][0-9]*$",
+                                  "type": "string"
+                                },
+                                {
+                                  "pattern": "^B[1-9][0-9]*$",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "configuration",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "score": {
+                              "minimum": 0,
+                              "type": "integer"
+                            },
+                            "field": {
+                              "anyOf": [
+                                {
+                                  "const": "taskGoal",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "passingThresholdPercent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "title",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "expectedBehavior",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "maxScore",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "description",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "example",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                }
+                              ]
+                            },
+                            "before": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "after": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "type",
+                            "targetRef",
+                            "field"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "status",
+                      "attempt",
+                      "configuration",
+                      "validation",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -37585,9 +39267,11 @@
                           },
                           "summary": {
                             "minLength": 1,
+                            "maxLength": 180,
                             "type": "string"
                           },
                           "issues": {
+                            "maxItems": 3,
                             "type": "array",
                             "items": {
                               "additionalProperties": false,
@@ -37726,6 +39410,297 @@
                           "issues"
                         ]
                       },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
+                      },
                       "changes": {
                         "type": "array",
                         "items": {
@@ -37769,8 +39744,48 @@
                               "type": "integer"
                             },
                             "field": {
-                              "minLength": 1,
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "const": "taskGoal",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "passingThresholdPercent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "title",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "expectedBehavior",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "maxScore",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "description",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "example",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "before": {
                               "anyOf": [
@@ -37811,7 +39826,8 @@
                       "status",
                       "attempt",
                       "configuration",
-                      "validation"
+                      "validation",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -37945,9 +39961,11 @@
                           },
                           "summary": {
                             "minLength": 1,
+                            "maxLength": 180,
                             "type": "string"
                           },
                           "issues": {
+                            "maxItems": 3,
                             "type": "array",
                             "items": {
                               "additionalProperties": false,
@@ -38086,6 +40104,297 @@
                           "issues"
                         ]
                       },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
+                      },
                       "changes": {
                         "type": "array",
                         "items": {
@@ -38129,8 +40438,48 @@
                               "type": "integer"
                             },
                             "field": {
-                              "minLength": 1,
-                              "type": "string"
+                              "anyOf": [
+                                {
+                                  "const": "taskGoal",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "passingThresholdPercent",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "criterion",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "title",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "expectedBehavior",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "maxScore",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "scoreGuidance",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "description",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "example",
+                                  "type": "string"
+                                },
+                                {
+                                  "const": "blockingError",
+                                  "type": "string"
+                                }
+                              ]
                             },
                             "before": {
                               "anyOf": [
@@ -38171,7 +40520,8 @@
                       "status",
                       "attempt",
                       "configuration",
-                      "validation"
+                      "validation",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -38300,12 +40650,304 @@
                           "criteria",
                           "blockingErrors"
                         ]
+                      },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
                       }
                     },
                     "required": [
                       "status",
                       "attempt",
-                      "message"
+                      "message",
+                      "attemptHistory"
                     ]
                   },
                   {
@@ -38430,11 +41072,303 @@
                           "criteria",
                           "blockingErrors"
                         ]
+                      },
+                      "attemptHistory": {
+                        "type": "array",
+                        "items": {
+                          "additionalProperties": false,
+                          "type": "object",
+                          "properties": {
+                            "attempt": {
+                              "minimum": 1,
+                              "maximum": 3,
+                              "type": "integer"
+                            },
+                            "changes": {
+                              "type": "array",
+                              "items": {
+                                "additionalProperties": false,
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "anyOf": [
+                                      {
+                                        "const": "added",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "removed",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "changed",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "targetRef": {
+                                    "anyOf": [
+                                      {
+                                        "pattern": "^C[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "pattern": "^B[1-9][0-9]*$",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "configuration",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "score": {
+                                    "minimum": 0,
+                                    "type": "integer"
+                                  },
+                                  "field": {
+                                    "anyOf": [
+                                      {
+                                        "const": "taskGoal",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "passingThresholdPercent",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "criterion",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "title",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "expectedBehavior",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "maxScore",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "scoreGuidance",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "description",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "example",
+                                        "type": "string"
+                                      },
+                                      {
+                                        "const": "blockingError",
+                                        "type": "string"
+                                      }
+                                    ]
+                                  },
+                                  "before": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  },
+                                  "after": {
+                                    "anyOf": [
+                                      {
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "number"
+                                      },
+                                      {
+                                        "type": "null"
+                                      }
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "targetRef",
+                                  "field"
+                                ]
+                              }
+                            },
+                            "validation": {
+                              "additionalProperties": false,
+                              "type": "object",
+                              "properties": {
+                                "passed": {
+                                  "type": "boolean"
+                                },
+                                "summary": {
+                                  "minLength": 1,
+                                  "maxLength": 180,
+                                  "type": "string"
+                                },
+                                "issues": {
+                                  "maxItems": 3,
+                                  "type": "array",
+                                  "items": {
+                                    "additionalProperties": false,
+                                    "type": "object",
+                                    "properties": {
+                                      "code": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "severity": {
+                                        "anyOf": [
+                                          {
+                                            "const": "error",
+                                            "type": "string"
+                                          },
+                                          {
+                                            "const": "warning",
+                                            "type": "string"
+                                          }
+                                        ]
+                                      },
+                                      "target": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "configuration",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "criterion",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "scoreGuidance",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^C[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "score": {
+                                                "minimum": 0,
+                                                "type": "integer"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref",
+                                              "score"
+                                            ]
+                                          },
+                                          {
+                                            "additionalProperties": false,
+                                            "type": "object",
+                                            "properties": {
+                                              "type": {
+                                                "const": "blockingError",
+                                                "type": "string"
+                                              },
+                                              "ref": {
+                                                "pattern": "^B[1-9][0-9]*$",
+                                                "type": "string"
+                                              },
+                                              "field": {
+                                                "minLength": 1,
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "type",
+                                              "ref"
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      "message": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      },
+                                      "correction": {
+                                        "minLength": 1,
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "code",
+                                      "severity",
+                                      "target",
+                                      "message",
+                                      "correction"
+                                    ]
+                                  }
+                                }
+                              },
+                              "required": [
+                                "passed",
+                                "summary",
+                                "issues"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "attempt",
+                            "changes",
+                            "validation"
+                          ]
+                        }
                       }
                     },
                     "required": [
                       "status",
-                      "attempt"
+                      "attempt",
+                      "attemptHistory"
                     ]
                   }
                 ]
@@ -38443,6 +41377,27 @@
             "required": [
               "generationId",
               "progress"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReviseGenerationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "generationId": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "generationId"
             ]
           }
         },
@@ -38655,9 +41610,11 @@
               },
               "summary": {
                 "minLength": 1,
+                "maxLength": 180,
                 "type": "string"
               },
               "issues": {
+                "maxItems": 3,
                 "type": "array",
                 "items": {
                   "additionalProperties": false,

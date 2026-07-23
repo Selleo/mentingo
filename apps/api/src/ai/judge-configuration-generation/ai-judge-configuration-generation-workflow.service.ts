@@ -1,11 +1,13 @@
 import { observe, updateActiveObservation } from "@langfuse/tracing";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 import { diffAiJudgeConfigurationDrafts } from "./ai-judge-configuration-diff";
 import {
   getDeterministicAiJudgeConfigurationValidation,
+  normalizeDuplicateAiJudgeConfigurationReferences,
   stripAiJudgeConfigurationReferences,
 } from "./ai-judge-configuration-draft";
+import { AI_JUDGE_GENERATION_FAILURE_MESSAGE } from "./ai-judge-configuration-generation.constants";
 import {
   AI_JUDGE_GENERATION_MAX_ATTEMPTS,
   AI_JUDGE_GENERATION_MODE,
@@ -16,26 +18,28 @@ import { AiJudgeConfigurationValidatorService } from "./ai-judge-configuration-v
 
 import type {
   AiJudgeConfigurationGenerationWorkflowOptions,
-  StartAiJudgeConfigurationGenerationInput,
+  RunAiJudgeConfigurationGenerationInput,
 } from "./ai-judge-configuration-generation-workflow.types";
 import type {
   AiJudgeConfigurationValidationResult,
   AiJudgeDraftChange,
+  AiJudgeGenerationAttempt,
   AiJudgeGenerationProgressEvent,
   AiJudgeGenerationResult,
   ReferencedAiJudgeConfiguration,
 } from "./ai-judge-configuration-generation.schema";
-import type { GenerateAiJudgeConfigurationDraftInput } from "./ai-judge-configuration-generator.types";
 
 @Injectable()
 export class AiJudgeConfigurationGenerationWorkflowService {
+  private readonly logger = new Logger(AiJudgeConfigurationGenerationWorkflowService.name);
+
   constructor(
     private readonly aiJudgeConfigurationGeneratorService: AiJudgeConfigurationGeneratorService,
     private readonly aiJudgeConfigurationValidatorService: AiJudgeConfigurationValidatorService,
   ) {}
 
   async run(
-    input: StartAiJudgeConfigurationGenerationInput,
+    input: RunAiJudgeConfigurationGenerationInput,
     options: AiJudgeConfigurationGenerationWorkflowOptions = {},
   ): Promise<AiJudgeGenerationResult> {
     return observe(
@@ -50,91 +54,131 @@ export class AiJudgeConfigurationGenerationWorkflowService {
   }
 
   private async runAttempts(
-    input: StartAiJudgeConfigurationGenerationInput,
+    input: RunAiJudgeConfigurationGenerationInput,
     options: AiJudgeConfigurationGenerationWorkflowOptions,
   ): Promise<AiJudgeGenerationResult> {
-    let generatorInput: GenerateAiJudgeConfigurationDraftInput = input;
+    const attempt = options.attempt ?? 1;
+    const attemptHistory = options.attemptHistory ?? [];
     let latestDraft: ReferencedAiJudgeConfiguration | undefined;
+    const cancelledBeforeAttempt = await this.getCancelledResult(
+      attempt,
+      latestDraft,
+      attemptHistory,
+      options,
+    );
+    if (cancelledBeforeAttempt) return this.report(cancelledBeforeAttempt, options);
+
+    await this.report(
+      { status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt, attemptHistory },
+      options,
+    );
+
+    const previousDraft = this.getInitialDraft(input);
     let latestChanges: AiJudgeDraftChange[] | undefined;
-
-    for (let attempt = 1; attempt <= AI_JUDGE_GENERATION_MAX_ATTEMPTS; attempt += 1) {
-      const cancelledBeforeAttempt = await this.getCancelledResult(attempt, latestDraft, options);
-      if (cancelledBeforeAttempt) return this.report(cancelledBeforeAttempt, options);
-
-      await this.report({ status: AI_JUDGE_GENERATION_STATUS.DRAFTING, attempt }, options);
-
-      const previousDraft = latestDraft ?? this.getInitialDraft(input);
-      try {
-        latestDraft = await this.aiJudgeConfigurationGeneratorService.generate(generatorInput);
-        await options.onDraft?.(latestDraft);
-        latestChanges = previousDraft
-          ? diffAiJudgeConfigurationDrafts(previousDraft, latestDraft)
-          : undefined;
-      } catch (error) {
-        return this.report(this.createFailedResult(attempt, latestDraft, error), options);
-      }
-
-      const cancelledAfterDraft = await this.getCancelledResult(attempt, latestDraft, options);
-      if (cancelledAfterDraft) return this.report(cancelledAfterDraft, options);
-
-      const deterministicValidation = getDeterministicAiJudgeConfigurationValidation(
-        previousDraft,
-        latestDraft,
+    try {
+      const generatedDraft = await this.aiJudgeConfigurationGeneratorService.generate(input);
+      latestDraft = normalizeDuplicateAiJudgeConfigurationReferences(generatedDraft, previousDraft);
+      await options.onDraft?.(latestDraft);
+      latestChanges = previousDraft
+        ? diffAiJudgeConfigurationDrafts(previousDraft, latestDraft)
+        : undefined;
+    } catch (error) {
+      return this.report(
+        this.createFailedResult(attempt, latestDraft, attemptHistory, error),
+        options,
       );
-      let validation: AiJudgeConfigurationValidationResult;
+    }
 
-      if (deterministicValidation) validation = deterministicValidation;
-      else {
-        await this.report(this.createEvaluatingEvent(attempt, latestDraft, latestChanges), options);
-        validation = await this.aiJudgeConfigurationValidatorService.validate({
-          language: input.language,
-          lessonContext: input.lessonContext,
-          configuration: latestDraft,
-          brief: input.brief,
-        });
+    const cancelledAfterDraft = await this.getCancelledResult(
+      attempt,
+      latestDraft,
+      attemptHistory,
+      options,
+    );
+    if (cancelledAfterDraft) return this.report(cancelledAfterDraft, options);
 
-        const cancelledAfterValidation = await this.getCancelledResult(
+    await this.report(
+      this.createEvaluatingEvent(attempt, latestDraft, attemptHistory, latestChanges),
+      options,
+    );
+    const deterministicValidation = getDeterministicAiJudgeConfigurationValidation(
+      previousDraft,
+      latestDraft,
+    );
+    const validation =
+      deterministicValidation ??
+      (await this.aiJudgeConfigurationValidatorService.validate({
+        language: input.language,
+        lessonContext: input.lessonContext,
+        configuration: latestDraft,
+        brief: input.brief,
+        creatorInstruction: this.getCreatorInstruction(input),
+        appliedChanges: latestChanges,
+        previousValidation: attemptHistory.at(-1)?.validation,
+      }));
+
+    const cancelledAfterValidation = await this.getCancelledResult(
+      attempt,
+      latestDraft,
+      attemptHistory,
+      options,
+    );
+    if (cancelledAfterValidation) return this.report(cancelledAfterValidation, options);
+
+    const completedAttempt = this.createAttempt(attempt, validation, latestChanges);
+    const nextAttemptHistory = [...attemptHistory, completedAttempt];
+
+    if (validation.passed)
+      return this.report(
+        this.createCompletedResult(
           attempt,
           latestDraft,
-          options,
-        );
-        if (cancelledAfterValidation) return this.report(cancelledAfterValidation, options);
-      }
+          validation,
+          nextAttemptHistory,
+          latestChanges,
+        ),
+        options,
+      );
 
-      if (validation.passed) {
-        return this.report(
-          this.createCompletedResult(attempt, latestDraft, validation, latestChanges),
-          options,
-        );
-      }
+    const terminalResult = this.getRequiresReviewResult(
+      attempt,
+      latestDraft,
+      validation,
+      nextAttemptHistory,
+      latestChanges,
+    );
+    if (terminalResult) return this.report(terminalResult, options);
 
-      const terminalResult = this.getRequiresReviewResult(
+    return this.report(
+      this.createAwaitingRevisionResult(
         attempt,
         latestDraft,
         validation,
+        nextAttemptHistory,
         latestChanges,
-      );
-      if (terminalResult) return this.report(terminalResult, options);
-
-      await this.report(
-        this.createRevisingEvent(attempt, latestDraft, validation, latestChanges),
-        options,
-      );
-      generatorInput = this.createRepairInput(input, latestDraft, validation);
-    }
-
-    throw new Error("AI Judge generation attempts exhausted without a terminal result");
+      ),
+      options,
+    );
   }
 
   private createFailedResult(
     attempt: number,
     latestDraft: ReferencedAiJudgeConfiguration | undefined,
+    attemptHistory: AiJudgeGenerationAttempt[],
     error: unknown,
   ): AiJudgeGenerationResult {
+    const message = error instanceof Error ? error.message : "Unknown generation error";
+    const stack = error instanceof Error ? error.stack : undefined;
+    this.logger.error(
+      `AI Judge configuration generation attempt ${attempt} failed: ${message}`,
+      stack,
+    );
+
     return {
       status: AI_JUDGE_GENERATION_STATUS.FAILED,
       attempt,
-      message: error instanceof Error ? error.message : "Generation failed",
+      message: AI_JUDGE_GENERATION_FAILURE_MESSAGE,
+      attemptHistory,
       configuration: latestDraft ? stripAiJudgeConfigurationReferences(latestDraft) : undefined,
     };
   }
@@ -142,12 +186,14 @@ export class AiJudgeConfigurationGenerationWorkflowService {
   private createEvaluatingEvent(
     attempt: number,
     draft: ReferencedAiJudgeConfiguration,
+    attemptHistory: AiJudgeGenerationAttempt[],
     changes?: AiJudgeDraftChange[],
   ): AiJudgeGenerationProgressEvent {
     return {
       status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
       attempt,
       draft,
+      attemptHistory,
       ...(changes ? { changes } : {}),
     };
   }
@@ -156,6 +202,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
     attempt: number,
     draft: ReferencedAiJudgeConfiguration,
     validation: AiJudgeConfigurationValidationResult,
+    attemptHistory: AiJudgeGenerationAttempt[],
     changes?: AiJudgeDraftChange[],
   ): AiJudgeGenerationResult {
     return {
@@ -163,44 +210,38 @@ export class AiJudgeConfigurationGenerationWorkflowService {
       attempt,
       configuration: stripAiJudgeConfigurationReferences(draft),
       validation,
-      ...(changes ? { changes } : {}),
-    };
-  }
-
-  private createRevisingEvent(
-    attempt: number,
-    draft: ReferencedAiJudgeConfiguration,
-    validation: AiJudgeConfigurationValidationResult,
-    changes?: AiJudgeDraftChange[],
-  ): AiJudgeGenerationProgressEvent {
-    return {
-      status: AI_JUDGE_GENERATION_STATUS.REVISING,
-      attempt,
-      draft,
-      validation,
+      attemptHistory,
       ...(changes ? { changes } : {}),
     };
   }
 
   private getInitialDraft(
-    input: StartAiJudgeConfigurationGenerationInput,
+    input: RunAiJudgeConfigurationGenerationInput,
   ): ReferencedAiJudgeConfiguration | undefined {
-    if (input.mode === AI_JUDGE_GENERATION_MODE.IMPROVE) return input.currentConfiguration;
+    if (input.mode !== AI_JUDGE_GENERATION_MODE.CREATE) return input.currentConfiguration;
     return undefined;
   }
 
-  private createRepairInput(
-    originalInput: StartAiJudgeConfigurationGenerationInput,
-    currentConfiguration: ReferencedAiJudgeConfiguration,
+  private getCreatorInstruction(input: RunAiJudgeConfigurationGenerationInput): string | undefined {
+    if (input.creatorInstruction) return input.creatorInstruction;
+    if (input.mode === AI_JUDGE_GENERATION_MODE.IMPROVE) return input.instruction;
+    return undefined;
+  }
+
+  private createAwaitingRevisionResult(
+    attempt: number,
+    draft: ReferencedAiJudgeConfiguration,
     validation: AiJudgeConfigurationValidationResult,
-  ): GenerateAiJudgeConfigurationDraftInput {
+    attemptHistory: AiJudgeGenerationAttempt[],
+    changes?: AiJudgeDraftChange[],
+  ): AiJudgeGenerationResult {
     return {
-      mode: AI_JUDGE_GENERATION_MODE.REPAIR,
-      language: originalInput.language,
-      lessonContext: originalInput.lessonContext,
-      brief: originalInput.brief,
-      currentConfiguration,
-      blockingIssues: validation.issues,
+      status: AI_JUDGE_GENERATION_STATUS.AWAITING_REVISION,
+      attempt,
+      configuration: stripAiJudgeConfigurationReferences(draft),
+      validation,
+      attemptHistory,
+      ...(changes ? { changes } : {}),
     };
   }
 
@@ -208,6 +249,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
     attempt: number,
     draft: ReferencedAiJudgeConfiguration,
     validation: AiJudgeConfigurationValidationResult,
+    attemptHistory: AiJudgeGenerationAttempt[],
     changes?: AiJudgeDraftChange[],
   ): AiJudgeGenerationResult | undefined {
     if (attempt < AI_JUDGE_GENERATION_MAX_ATTEMPTS) return undefined;
@@ -217,6 +259,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
       attempt: AI_JUDGE_GENERATION_MAX_ATTEMPTS,
       configuration: stripAiJudgeConfigurationReferences(draft),
       validation,
+      attemptHistory,
       ...(changes ? { changes } : {}),
     };
   }
@@ -224,6 +267,7 @@ export class AiJudgeConfigurationGenerationWorkflowService {
   private async getCancelledResult(
     attempt: number,
     latestDraft: ReferencedAiJudgeConfiguration | undefined,
+    attemptHistory: AiJudgeGenerationAttempt[],
     options: AiJudgeConfigurationGenerationWorkflowOptions,
   ): Promise<AiJudgeGenerationResult | undefined> {
     if (!(await options.isCancelled?.())) return undefined;
@@ -231,7 +275,20 @@ export class AiJudgeConfigurationGenerationWorkflowService {
     return {
       status: AI_JUDGE_GENERATION_STATUS.CANCELLED,
       attempt,
+      attemptHistory,
       configuration: latestDraft ? stripAiJudgeConfigurationReferences(latestDraft) : undefined,
+    };
+  }
+
+  private createAttempt(
+    attempt: number,
+    validation: AiJudgeConfigurationValidationResult,
+    changes?: AiJudgeDraftChange[],
+  ): AiJudgeGenerationAttempt {
+    return {
+      attempt,
+      changes: changes ?? [],
+      validation,
     };
   }
 

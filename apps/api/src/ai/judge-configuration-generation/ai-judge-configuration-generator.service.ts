@@ -2,13 +2,17 @@ import { observe, updateActiveObservation } from "@langfuse/tracing";
 import { Injectable } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
-import { MAX_TOKENS } from "src/ai/ai.constants";
+import { AiRuntimeService } from "src/ai/services/ai-runtime.service";
 import { PromptService } from "src/ai/services/prompt.service";
 import { loadAiSdk } from "src/ai/utils/ai-esm";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
 
-import { AI_JUDGE_GENERATION_MODE_PROMPT_ID } from "./ai-judge-configuration-generation.constants";
-import { referencedAiJudgeConfigurationSchema } from "./ai-judge-configuration-generation.schema";
+import {
+  AI_JUDGE_GENERATION_MODE_PROMPT_ID,
+  AI_JUDGE_CONFIGURATION_GENERATOR_REASONING_EFFORT,
+  AI_JUDGE_GENERATED_THRESHOLD_STEP,
+} from "./ai-judge-configuration-generation.constants";
+import { referencedAiJudgeConfigurationStructuredOutputSchema } from "./ai-judge-configuration-generation.schema";
 import { AI_JUDGE_GENERATION_MODE } from "./ai-judge-configuration-generation.types";
 
 import type { ReferencedAiJudgeConfiguration } from "./ai-judge-configuration-generation.schema";
@@ -16,7 +20,10 @@ import type { GenerateAiJudgeConfigurationDraftInput } from "./ai-judge-configur
 
 @Injectable()
 export class AiJudgeConfigurationGeneratorService {
-  constructor(private readonly promptService: PromptService) {}
+  constructor(
+    private readonly promptService: PromptService,
+    private readonly aiRuntimeService: AiRuntimeService,
+  ) {}
 
   async generate(
     input: GenerateAiJudgeConfigurationDraftInput,
@@ -49,27 +56,56 @@ export class AiJudgeConfigurationGeneratorService {
     prompt: string,
   ): Promise<ReferencedAiJudgeConfiguration> {
     await this.promptService.isNotEmpty(prompt);
-    const provider = await this.promptService.getOpenAI();
 
     try {
-      const { generateText, jsonSchema, Output } = await loadAiSdk();
-      const schema = jsonSchema<ReferencedAiJudgeConfiguration>(
-        () => referencedAiJudgeConfigurationSchema,
-      );
-      const { output } = await generateText({
-        model: provider(OPENAI_MODELS.BASIC),
-        output: Output.object({ schema }),
-        maxOutputTokens: MAX_TOKENS,
-        temperature: 0.3,
-        system,
-        prompt,
-        experimental_telemetry: { isEnabled: true },
-      });
+      const result = await this.aiRuntimeService.generateJudgeConfiguration(
+        {
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0,
+        },
+        async () => {
+          const provider = await this.promptService.getOpenAI();
+          const { generateText, jsonSchema, Output } = await loadAiSdk();
+          const schema = jsonSchema<ReferencedAiJudgeConfiguration>(
+            () => referencedAiJudgeConfigurationStructuredOutputSchema,
+          );
 
-      if (!Value.Check(referencedAiJudgeConfigurationSchema, output))
+          const generation = await generateText({
+            model: provider(OPENAI_MODELS.BASIC),
+            output: Output.object({ schema }),
+            providerOptions: {
+              openai: { reasoningEffort: AI_JUDGE_CONFIGURATION_GENERATOR_REASONING_EFFORT },
+            },
+            temperature: 0,
+            system,
+            prompt,
+            experimental_telemetry: { isEnabled: true },
+          });
+
+          try {
+            return generation.output;
+          } catch (error) {
+            const outputTokens = generation.usage.outputTokens ?? "unknown";
+            const message = error instanceof Error ? error.message : "No structured output";
+            throw new Error(
+              `${message} Finish reason: ${generation.finishReason}; output tokens: ${outputTokens}.`,
+            );
+          }
+        },
+      );
+
+      if (!Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, result))
         throw new Error("Generator returned an invalid configuration structure");
 
-      return output;
+      return {
+        ...result,
+        passingThresholdPercent:
+          Math.round(result.passingThresholdPercent / AI_JUDGE_GENERATED_THRESHOLD_STEP) *
+          AI_JUDGE_GENERATED_THRESHOLD_STEP,
+      };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       updateActiveObservation({ level: "ERROR", statusMessage: message });
@@ -102,6 +138,7 @@ export class AiJudgeConfigurationGeneratorService {
         payload = {
           mode: input.mode,
           originalBrief: input.brief,
+          creatorInstruction: input.creatorInstruction,
           lessonContext: input.lessonContext,
           currentConfiguration: input.currentConfiguration,
           blockingIssues: input.blockingIssues,

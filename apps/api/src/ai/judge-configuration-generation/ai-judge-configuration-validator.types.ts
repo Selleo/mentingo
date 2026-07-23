@@ -1,5 +1,7 @@
 import type { SupportedLanguages } from "@repo/shared";
 import type {
+  AiJudgeConfigurationValidationResult,
+  AiJudgeDraftChange,
   AiJudgeGenerationLessonContext,
   ReferencedAiJudgeConfiguration,
 } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
@@ -9,4 +11,7 @@ export type ValidateAiJudgeConfigurationDraftInput = {
   lessonContext: AiJudgeGenerationLessonContext;
   configuration: ReferencedAiJudgeConfiguration;
   brief?: string;
+  creatorInstruction?: string;
+  appliedChanges?: AiJudgeDraftChange[];
+  previousValidation?: AiJudgeConfigurationValidationResult;
 };

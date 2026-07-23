@@ -24,6 +24,23 @@ export const stripAiJudgeConfigurationReferences = (
   ),
 });
 
+export const normalizeDuplicateAiJudgeConfigurationReferences = (
+  configuration: ReferencedAiJudgeConfiguration,
+  previousConfiguration?: ReferencedAiJudgeConfiguration,
+): ReferencedAiJudgeConfiguration => ({
+  ...configuration,
+  criteria: normalizeDuplicateReferences(
+    configuration.criteria,
+    "C",
+    previousConfiguration?.criteria.map(({ ref }) => ref),
+  ),
+  blockingErrors: normalizeDuplicateReferences(
+    configuration.blockingErrors,
+    "B",
+    previousConfiguration?.blockingErrors.map(({ ref }) => ref),
+  ),
+});
+
 export const validateReferencedAiJudgeConfiguration = (
   configuration: ReferencedAiJudgeConfiguration,
 ): AiJudgeValidationIssue[] => [
@@ -141,6 +158,34 @@ const validateNewReferences = (
       correction: `Use ${expectedReferences.join(", ")} for the new ${isCriterion ? "criteria" : "blocking errors"} and preserve references belonging to existing items.`,
     },
   ];
+};
+
+const normalizeDuplicateReferences = <T extends { ref: string }>(
+  items: T[],
+  prefix: "C" | "B",
+  reservedReferences: string[] = [],
+): T[] => {
+  const usedReferences = new Set<string>();
+  let nextReferenceNumber = [...items.map(({ ref }) => ref), ...reservedReferences].reduce(
+    (highest, ref) => Math.max(highest, Number(ref.slice(1))),
+    0,
+  );
+
+  return items.map((item) => {
+    if (!usedReferences.has(item.ref)) {
+      usedReferences.add(item.ref);
+      return item;
+    }
+
+    let nextReference: string;
+    do {
+      nextReferenceNumber += 1;
+      nextReference = `${prefix}${nextReferenceNumber}`;
+    } while (usedReferences.has(nextReference));
+
+    usedReferences.add(nextReference);
+    return { ...item, ref: nextReference };
+  });
 };
 
 const mapContentIssue = (

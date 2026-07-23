@@ -1,15 +1,21 @@
 import type {
+  AiJudgeGenerationAttempt,
   AiJudgeGenerationProgressEvent,
   ReferencedAiJudgeConfiguration,
 } from "./ai-judge-configuration-generation.schema";
 import type {
   CreateAiJudgeConfigurationDraftInput,
   ImproveAiJudgeConfigurationDraftInput,
+  RepairAiJudgeConfigurationDraftInput,
 } from "./ai-judge-configuration-generator.types";
 
 export type StartAiJudgeConfigurationGenerationInput =
   | CreateAiJudgeConfigurationDraftInput
   | ImproveAiJudgeConfigurationDraftInput;
+
+export type RunAiJudgeConfigurationGenerationInput =
+  | StartAiJudgeConfigurationGenerationInput
+  | RepairAiJudgeConfigurationDraftInput;
 
 export type AiJudgeGenerationProgressReporter = (
   progress: AiJudgeGenerationProgressEvent,
@@ -25,4 +31,6 @@ export type AiJudgeConfigurationGenerationWorkflowOptions = {
   reportProgress?: AiJudgeGenerationProgressReporter;
   isCancelled?: AiJudgeGenerationCancellationCheck;
   onDraft?: AiJudgeGenerationDraftObserver;
+  attempt?: number;
+  attemptHistory?: AiJudgeGenerationAttempt[];
 };

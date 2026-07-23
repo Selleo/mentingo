@@ -1,5 +1,6 @@
-import type { StartAiJudgeConfigurationGenerationInput } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.types";
+import type { RunAiJudgeConfigurationGenerationInput } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.types";
 import type {
+  AiJudgeGenerationAttempt,
   AiJudgeGenerationApplicationProgressEvent,
   AiJudgeGenerationApplicationResult,
   GenerateAiJudgeConfigurationInput,
@@ -13,8 +14,10 @@ export type AiJudgeGenerationExecutionOptions = {
 };
 
 export type PreparedAiJudgeConfigurationGeneration = {
-  workflowInput: StartAiJudgeConfigurationGenerationInput;
+  workflowInput: RunAiJudgeConfigurationGenerationInput;
   identities: AiJudgeConfigurationIdentityMap;
+  attempt: number;
+  attemptHistory: AiJudgeGenerationAttempt[];
 };
 
 export type GenerateAiJudgeConfigurationApplicationInput = GenerateAiJudgeConfigurationInput;
