@@ -27,4 +27,11 @@ export class AutomationLogsRepository {
   async getAll() {
     return this.db.select().from(automationLogs);
   }
+
+  async GetByAutomationId(automationId: UUIDType) {
+    return this.db
+      .select()
+      .from(automationLogs)
+      .where(eq(automationLogs.automationId, automationId));
+  }
 }
