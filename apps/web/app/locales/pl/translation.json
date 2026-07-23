@@ -4721,7 +4721,8 @@
       "exportJson": "Eksportuj jako JSON",
       "delete": "Usuń automatyzację",
       "savedJustNow": "Zapisano właśnie",
-      "savedMinutesAgo": "Zapisano {{count}} min temu"
+      "savedMinutesAgo": "Zapisano {{count}} min temu",
+      "simulationRequiredTooltip": "Uruchom symulację i upewnij się, że przejdzie pomyślnie, aby aktywować automatyzację"
     },
     "sidebar": {
       "title": "Kroki",
@@ -4765,6 +4766,7 @@
       "emptyDescription": "Przeciągnij trigger lub akcję z panelu bocznego, aby rozpocząć.",
       "emptyDescriptionTrigger": "Przeciągnij trigger z panelu bocznego, aby rozpocząć budowanie automatyzacji.",
       "removeNode": "Usuń węzeł",
+      "simulationFailed": "Symulacja wykryła błędy w tym węźle",
       "deleteNodeDialogTitle": "Usuń węzeł",
       "deleteNodeDialogDescription": "Czy na pewno chcesz usunąć ten węzeł? Tej operacji nie można cofnąć.",
       "deleteNodeDialogCancel": "Anuluj",
@@ -4832,6 +4834,30 @@
       "placeholdersDescription": "Przypisz każdą zmienną szablonu do danych dostarczanych przez trigger.",
       "selectVariable": "Wybierz zmienną triggera...",
       "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne."
+    },
+    "simulation": {
+      "title": "Wynik symulacji",
+      "statusSuccess": "Sukces",
+      "statusFailed": "Niepowodzenie",
+      "errorTitle": "Błąd symulacji",
+      "retry": "Ponów symulację",
+      "errorsTitle": "Wykryte problemy",
+      "readyToActivate": "Automatyzacja jest gotowa do aktywacji.",
+      "tabPreview": "Podgląd e-maila",
+      "tabEventData": "Dane zdarzenia",
+      "tabMappings": "Mapowania",
+      "from": "Od:",
+      "to": "Do:",
+      "subject": "Temat:",
+      "noEventData": "Brak danych zdarzenia — wybierz typ triggera.",
+      "availableVariables": "Dostępne zmienne zdarzenia",
+      "variableName": "Zmienna",
+      "variableLabel": "Opis",
+      "variableType": "Typ",
+      "placeholder": "Placeholder",
+      "mappedTo": "Zmapowane do",
+      "sampleValue": "Wartość próbna",
+      "unmapped": "Niezmapowane"
     }
   },
   "automationSteps": {

@@ -4560,7 +4560,8 @@
       "exportJson": "Als JSON exportieren",
       "delete": "Automatisierung löschen",
       "savedJustNow": "Gerade gespeichert",
-      "savedMinutesAgo": "Vor {{count}} Min. gespeichert"
+      "savedMinutesAgo": "Vor {{count}} Min. gespeichert",
+      "simulationRequiredTooltip": "Führen Sie eine Simulation durch und stellen Sie sicher, dass sie erfolgreich ist, um die Automatisierung zu aktivieren"
     },
     "sidebar": {
       "title": "Schritte",
@@ -4605,6 +4606,11 @@
       "emptyDescription": "Ziehen Sie eine Bedingung oder Aktion von der Seitenleiste, um zu beginnen.",
       "emptyDescriptionTrigger": "Ziehen Sie einen Trigger von der Seitenleiste, um mit dem Aufbau Ihrer Automatisierung zu beginnen.",
       "removeNode": "Knoten entfernen",
+      "simulationFailed": "Simulation hat Fehler an diesem Knoten erkannt",
+      "deleteNodeDialogTitle": "Knoten entfernen",
+      "deleteNodeDialogDescription": "Möchten Sie diesen Knoten wirklich entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+      "deleteNodeDialogCancel": "Abbrechen",
+      "deleteNodeDialogConfirm": "Entfernen",
       "addChild": "Unterschritt hinzufügen",
       "zoomIn": "Vergrößern",
       "zoomOut": "Verkleinern",
@@ -4652,6 +4658,43 @@
       "minutesBeforePlaceholder": "z.B. 60",
       "daysInactive": "Tage Inaktivität",
       "daysInactivePlaceholder": "z.B. 14"
+    },
+    "editAction": {
+      "title": "Aktion bearbeiten",
+      "sendEmail": "E-Mail senden",
+      "emailTemplate": "E-Mail-Vorlage",
+      "selectTemplate": "Vorlage auswählen...",
+      "language": "Sprache",
+      "placeholders": "Vorlagenvariablen",
+      "selectTemplateFirst": "Wählen Sie eine E-Mail-Vorlage, um verfügbare Variablen anzuzeigen.",
+      "noPlaceholders": "Diese Vorlage hat keine Variablen zum Ausfüllen.",
+      "placeholdersDescription": "Ordnen Sie jede Vorlagenvariable einer vom Trigger bereitgestellten Variable zu.",
+      "selectVariable": "Trigger-Variable auswählen...",
+      "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen."
+    },
+    "simulation": {
+      "title": "Simulationsergebnis",
+      "statusSuccess": "Erfolg",
+      "statusFailed": "Fehlgeschlagen",
+      "errorTitle": "Simulationsfehler",
+      "retry": "Simulation wiederholen",
+      "errorsTitle": "Erkannte Probleme",
+      "readyToActivate": "Automatisierung ist bereit zur Aktivierung.",
+      "tabPreview": "E-Mail-Vorschau",
+      "tabEventData": "Ereignisdaten",
+      "tabMappings": "Zuordnungen",
+      "from": "Von:",
+      "to": "An:",
+      "subject": "Betreff:",
+      "noEventData": "Keine Ereignisdaten — wählen Sie einen Trigger-Typ.",
+      "availableVariables": "Verfügbare Ereignisvariablen",
+      "variableName": "Variable",
+      "variableLabel": "Beschreibung",
+      "variableType": "Typ",
+      "placeholder": "Platzhalter",
+      "mappedTo": "Zugeordnet zu",
+      "sampleValue": "Beispielwert",
+      "unmapped": "Nicht zugeordnet"
     }
   },
   "automationSteps": {

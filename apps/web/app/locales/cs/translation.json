@@ -4561,7 +4561,8 @@
       "exportJson": "Exportovat jako JSON",
       "delete": "Smazat automatizaci",
       "savedJustNow": "Právě uloženo",
-      "savedMinutesAgo": "Uloženo před {{count}} min"
+      "savedMinutesAgo": "Uloženo před {{count}} min",
+      "simulationRequiredTooltip": "Spusťte simulaci a ujistěte se, že proběhne úspěšně, abyste mohli aktivovat automatizaci"
     },
     "sidebar": {
       "title": "Kroky",
@@ -4605,6 +4606,11 @@
       "emptyDescription": "Přetáhněte trigger nebo akci z postranního panelu pro začátek.",
       "emptyDescriptionTrigger": "Přetáhněte trigger z postranního panelu pro zahájení tvorby automatizace.",
       "removeNode": "Odstranit uzel",
+      "simulationFailed": "Simulace zjistila chyby na tomto uzlu",
+      "deleteNodeDialogTitle": "Odstranit uzel",
+      "deleteNodeDialogDescription": "Opravdu chcete odstranit tento uzel? Tuto akci nelze vrátit zpět.",
+      "deleteNodeDialogCancel": "Zrušit",
+      "deleteNodeDialogConfirm": "Odstranit",
       "addChild": "Přidat podřízený krok",
       "zoomIn": "Přiblížit",
       "zoomOut": "Oddálit",
@@ -4651,6 +4657,43 @@
       "minutesBeforePlaceholder": "např. 60",
       "daysInactive": "Dní neaktivity",
       "daysInactivePlaceholder": "např. 14"
+    },
+    "editAction": {
+      "title": "Upravit akci",
+      "sendEmail": "Odeslat e-mail",
+      "emailTemplate": "Šablona e-mailu",
+      "selectTemplate": "Vyberte šablonu...",
+      "language": "Jazyk",
+      "placeholders": "Proměnné šablony",
+      "selectTemplateFirst": "Vyberte šablonu e-mailu pro zobrazení dostupných proměnných.",
+      "noPlaceholders": "Tato šablona nemá proměnné k vyplnění.",
+      "placeholdersDescription": "Přiřaďte každou proměnnou šablony k datům poskytovaným triggerem.",
+      "selectVariable": "Vyberte proměnnou triggeru...",
+      "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných."
+    },
+    "simulation": {
+      "title": "Výsledek simulace",
+      "statusSuccess": "Úspěch",
+      "statusFailed": "Neúspěch",
+      "errorTitle": "Chyba simulace",
+      "retry": "Opakovat simulaci",
+      "errorsTitle": "Zjištěné problémy",
+      "readyToActivate": "Automatizace je připravena k aktivaci.",
+      "tabPreview": "Náhled e-mailu",
+      "tabEventData": "Data události",
+      "tabMappings": "Mapování",
+      "from": "Od:",
+      "to": "Komu:",
+      "subject": "Předmět:",
+      "noEventData": "Žádná data události — vyberte typ triggeru.",
+      "availableVariables": "Dostupné proměnné události",
+      "variableName": "Proměnná",
+      "variableLabel": "Popis",
+      "variableType": "Typ",
+      "placeholder": "Placeholder",
+      "mappedTo": "Mapováno na",
+      "sampleValue": "Ukázková hodnota",
+      "unmapped": "Nemapováno"
     }
   },
   "automationSteps": {

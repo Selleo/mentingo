@@ -4562,7 +4562,8 @@
       "exportJson": "Eksportuoti kaip JSON",
       "delete": "Ištrinti automatizavimą",
       "savedJustNow": "Ką tik išsaugota",
-      "savedMinutesAgo": "Išsaugota prieš {{count}} min."
+      "savedMinutesAgo": "Išsaugota prieš {{count}} min.",
+      "simulationRequiredTooltip": "Paleiskite simuliaciją ir įsitikinkite, kad ji sėkminga, kad galėtumėte aktyvuoti automatizavimą"
     },
     "sidebar": {
       "title": "Žingsniai",
@@ -4607,6 +4608,11 @@
       "emptyDescription": "Vilkite sąlygą arba veiksmą iš šoninės juostos, kad pradėtumėte.",
       "emptyDescriptionTrigger": "Vilkite trigerį iš šoninės juostos, kad pradėtumėte kurti automatizavimą.",
       "removeNode": "Pašalinti mazgą",
+      "simulationFailed": "Simuliacija aptiko klaidų šiame mazge",
+      "deleteNodeDialogTitle": "Pašalinti mazgą",
+      "deleteNodeDialogDescription": "Ar tikrai norite pašalinti šį mazgą? Šio veiksmo negalima atšaukti.",
+      "deleteNodeDialogCancel": "Atšaukti",
+      "deleteNodeDialogConfirm": "Pašalinti",
       "addChild": "Pridėti antrinį žingsnį",
       "zoomIn": "Priartinti",
       "zoomOut": "Atitolinti",
@@ -4654,6 +4660,43 @@
       "minutesBeforePlaceholder": "pvz. 60",
       "daysInactive": "Neaktyvumo dienų",
       "daysInactivePlaceholder": "pvz. 14"
+    },
+    "editAction": {
+      "title": "Redaguoti veiksmą",
+      "sendEmail": "Siųsti el. laišką",
+      "emailTemplate": "El. laiško šablonas",
+      "selectTemplate": "Pasirinkite šabloną...",
+      "language": "Kalba",
+      "placeholders": "Šablono kintamieji",
+      "selectTemplateFirst": "Pasirinkite el. laiško šabloną, kad pamatytumėte galimus kintamuosius.",
+      "noPlaceholders": "Šis šablonas neturi kintamųjų, kuriuos reikėtų užpildyti.",
+      "placeholdersDescription": "Priskirkite kiekvieną šablono kintamąjį trigerio teikiamiems duomenims.",
+      "selectVariable": "Pasirinkite trigerio kintamąjį...",
+      "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius."
+    },
+    "simulation": {
+      "title": "Simuliacijos rezultatas",
+      "statusSuccess": "Sėkmė",
+      "statusFailed": "Nepavyko",
+      "errorTitle": "Simuliacijos klaida",
+      "retry": "Pakartoti simuliaciją",
+      "errorsTitle": "Aptiktos problemos",
+      "readyToActivate": "Automatizavimas paruoštas aktyvavimui.",
+      "tabPreview": "El. laiško peržiūra",
+      "tabEventData": "Įvykio duomenys",
+      "tabMappings": "Susiejimai",
+      "from": "Nuo:",
+      "to": "Kam:",
+      "subject": "Tema:",
+      "noEventData": "Nėra įvykio duomenų — pasirinkite trigerio tipą.",
+      "availableVariables": "Galimi įvykio kintamieji",
+      "variableName": "Kintamasis",
+      "variableLabel": "Aprašymas",
+      "variableType": "Tipas",
+      "placeholder": "Placeholder",
+      "mappedTo": "Susieta su",
+      "sampleValue": "Pavyzdinė reikšmė",
+      "unmapped": "Nesusieta"
     }
   },
   "automationSteps": {

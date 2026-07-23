@@ -4682,7 +4682,8 @@
       "exportJson": "Export as JSON",
       "delete": "Delete automation",
       "savedJustNow": "Saved just now",
-      "savedMinutesAgo": "Saved {{count}} min ago"
+      "savedMinutesAgo": "Saved {{count}} min ago",
+      "simulationRequiredTooltip": "Run a simulation and ensure it passes before activating the automation"
     },
     "sidebar": {
       "title": "Steps",
@@ -4726,6 +4727,7 @@
       "emptyDescription": "Drag a trigger or action from the sidebar to get started.",
       "emptyDescriptionTrigger": "Drag a trigger from the sidebar to start building your automation.",
       "removeNode": "Remove node",
+      "simulationFailed": "Simulation detected errors on this node",
       "deleteNodeDialogTitle": "Remove node",
       "deleteNodeDialogDescription": "Are you sure you want to remove this node? This action cannot be undone.",
       "deleteNodeDialogCancel": "Cancel",
@@ -4793,6 +4795,30 @@
       "placeholdersDescription": "Map each template placeholder to a variable provided by the trigger.",
       "selectVariable": "Select trigger variable...",
       "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables."
+    },
+    "simulation": {
+      "title": "Simulation Result",
+      "statusSuccess": "Success",
+      "statusFailed": "Failed",
+      "errorTitle": "Simulation Error",
+      "retry": "Retry Simulation",
+      "errorsTitle": "Detected Issues",
+      "readyToActivate": "Automation is ready to activate.",
+      "tabPreview": "Email Preview",
+      "tabEventData": "Event Data",
+      "tabMappings": "Mappings",
+      "from": "From:",
+      "to": "To:",
+      "subject": "Subject:",
+      "noEventData": "No event data — select a trigger type.",
+      "availableVariables": "Available Event Variables",
+      "variableName": "Variable",
+      "variableLabel": "Label",
+      "variableType": "Type",
+      "placeholder": "Placeholder",
+      "mappedTo": "Mapped to",
+      "sampleValue": "Sample Value",
+      "unmapped": "Unmapped"
     }
   },
   "automationSteps": {
