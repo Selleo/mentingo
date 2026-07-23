@@ -2,7 +2,7 @@ import { Test } from "@nestjs/testing";
 
 import { DB } from "src/storage/db/db.providers";
 
-import { AutomationLogsRepository } from "./automation-logs.repository";
+import { AutomationLogsRepository } from "./automation-logs";
 
 import type { TestingModule } from "@nestjs/testing";
 
