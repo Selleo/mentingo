@@ -2519,33 +2519,22 @@ export const automationSteps = pgTable(
   },
   withTenantIdIndex("automation_steps_index"),
 );
+export const automationLogStatusEnum = pgEnum("automation_log_status", [
+  "success",
+  "failed",
+  "skipped",
+]);
 
-// export const automationActions = pgTable(
-//   "automation_actions",
-//   {
-//     ...id,
-//     ...timestamps,
-//     tenantId,
-//     name: varchar("name", { length: 50 }).notNull(),
-//   },
-//   withTenantIdIndex("automation_actions_index"),
-// );
-
-// export const automationConditions = pgTable(
-//   "automation_conditions",
-//   {
-//     ...id,
-//     ...timestamps,
-//     tenantId,
-//     name: varchar("name", { length: 50 }).notNull(),
-//   },
-//   withTenantIdIndex("automation_condition_index"),
-// );
-
-// export const automationTriggers = pgTable("automation_triggers", {
-//   ...id,
-//   ...timestamps,
-//   tenantId,
-//   name: varchar("name", { length: 50 }).notNull(),
-//   context: jsonb("context").notNull(),
-// });
+export const automationLogs = pgTable("automation_logs", {
+  ...id,
+  ...timestamps,
+  tenantId,
+  automationId: uuid("automation_id")
+    .references(() => automations.id, { onDelete: "cascade" })
+    .notNull(),
+  automationName: varchar("automation_name").notNull(),
+  eventName: varchar("event_name").notNull(),
+  errorName: varchar("error_name"),
+  status: automationLogStatusEnum("status").notNull(),
+  emailAddresses: jsonb("email_addresses").$type<string[]>().notNull().default([]),
+});

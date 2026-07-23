@@ -30,6 +30,7 @@ export type TypeContext = {
     value: unknown;
   }>;
 };
+
 export type AutomationStepUpdateInput = {
   type: AutomationType;
   typeContext: TypeContext;
