@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES, TENANT_STATUSES } from "@repo/shared";
+import { ACTIVITY_LOG_ACTION_TYPES, SUPPORTED_LANGUAGES, TENANT_STATUSES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -13,10 +13,37 @@ export const tenantResponseSchema = Type.Object({
   updatedAt: Type.String(),
 });
 
+export const tenantListSortFields = ["lastActivity", "activityCountLast14Days"] as const;
+
+export const tenantListSortSchema = Type.Union([
+  ...tenantListSortFields.map((field) => Type.Literal(field)),
+  ...tenantListSortFields.map((field) => Type.Literal(`-${field}`)),
+]);
+
 export const tenantsListItemSchema = Type.Intersect([
   tenantResponseSchema,
   Type.Object({
     isCurrentTenant: Type.Boolean(),
+    lastActivity: Type.Union([
+      Type.Object({
+        occurredAt: Type.String(),
+        actorEmail: Type.String({ format: "email" }),
+      }),
+      Type.Null(),
+    ]),
+    recentActivities: Type.Array(
+      Type.Object({
+        id: UUIDSchema,
+        occurredAt: Type.String(),
+        actorEmail: Type.String({ format: "email" }),
+        actionType: Type.Enum(ACTIVITY_LOG_ACTION_TYPES),
+      }),
+      { maxItems: 5 },
+    ),
+    activityCountLast14Days: Type.Integer({ minimum: 0 }),
+    activityTrendPercentage: Type.Union([Type.Integer(), Type.Null()]),
+    activeUsersLast14Days: Type.Integer({ minimum: 0 }),
+    totalUsers: Type.Integer({ minimum: 0 }),
   }),
 ]);
 
@@ -26,6 +53,8 @@ export const listTenantsQuerySchema = Type.Object({
   page: Type.Optional(Type.Number({ minimum: 1 })),
   perPage: Type.Optional(Type.Number({ minimum: 1 })),
   search: Type.Optional(Type.String()),
+  status: Type.Optional(Type.Enum(TENANT_STATUSES)),
+  sort: Type.Optional(tenantListSortSchema),
 });
 
 export const createTenantSchema = Type.Object(

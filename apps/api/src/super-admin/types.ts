@@ -8,6 +8,7 @@ import type {
   createTenantSchema,
   listTenantsQuerySchema,
   supportAdminUsersSchema,
+  tenantListSortSchema,
   tenantsListItemSchema,
   tenantResponseSchema,
   tenantsListSchema,
@@ -22,6 +23,7 @@ export type UpdateTenantBody = Static<typeof updateTenantSchema>;
 export type CreateSupportSessionBody = Static<typeof createSupportSessionSchema>;
 export type CreateSupportSessionResponse = Static<typeof createSupportSessionResponseSchema>;
 export type ListTenantsQuery = Static<typeof listTenantsQuerySchema>;
+export type TenantListSort = Static<typeof tenantListSortSchema>;
 export type { ListSupportAdminUsersQuery };
 export type TenantResponse = Static<typeof tenantResponseSchema>;
 export type TenantsListItemResponse = Static<typeof tenantsListItemSchema>;
@@ -32,11 +34,14 @@ export type FindAllTenantsParams = {
   page: number;
   perPage: number;
   search?: string;
+  status?: TenantStatus;
+  sort?: TenantListSort;
   currentTenantId: string;
 };
 
 export type CountAllTenantsParams = {
   search?: string;
+  status?: TenantStatus;
 };
 
 export type CreateTenantRecord = {
