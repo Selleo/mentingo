@@ -51,6 +51,7 @@ export default function AutomationBuilderPage() {
   const reset = useBuilderStore((s) => s.reset);
   const setAutomationName = useBuilderStore((s) => s.setAutomationName);
   const setActive = useBuilderStore((s) => s.setActive);
+  const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
 
   // Load automation data from API when editing existing automation
   const { data: automation } = useAutomationById(automationId);
@@ -74,6 +75,10 @@ export default function AutomationBuilderPage() {
           config: node.config,
         });
       }
+
+      // Read simulationPassed from trigger node's config
+      const triggerNode = automation.nodes.find((n) => n.kind === "trigger");
+      setSimulationPassed(triggerNode?.config?.simulationPassed === true);
     }
   }, [automation]);
 

@@ -67,5 +67,6 @@ export interface BuilderState {
   selectedNodeId: string | null;
   automationName: string;
   isActive: boolean;
+  simulationPassed: boolean;
   lastSavedAt: string | null;
 }

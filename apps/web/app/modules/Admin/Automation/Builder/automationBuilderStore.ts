@@ -12,6 +12,7 @@ interface BuilderActions {
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
   setAutomationName: (name: string) => void;
   setActive: (active: boolean) => void;
+  setSimulationPassed: (passed: boolean) => void;
   markSaved: () => void;
   reset: () => void;
 }
@@ -21,6 +22,7 @@ const initialState: BuilderState = {
   selectedNodeId: null,
   automationName: "New Automation",
   isActive: false,
+  simulationPassed: false,
   lastSavedAt: null,
 };
 
@@ -83,6 +85,8 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
   setAutomationName: (name) => set({ automationName: name }),
 
   setActive: (active) => set({ isActive: active }),
+
+  setSimulationPassed: (passed) => set({ simulationPassed: passed }),
 
   markSaved: () => set({ lastSavedAt: new Date().toISOString() }),
 

@@ -1,5 +1,6 @@
 import { useNavigate } from "@remix-run/react";
 import { ArrowLeft, Loader2, Play, Save, Trash2 } from "lucide-react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
@@ -39,9 +40,12 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
 
   const automationName = useBuilderStore((s) => s.automationName);
   const isActive = useBuilderStore((s) => s.isActive);
+  const simulationPassed = useBuilderStore((s) => s.simulationPassed);
   const lastSavedAt = useBuilderStore((s) => s.lastSavedAt);
   const nodes = useBuilderStore((s) => s.nodes);
   const setActive = useBuilderStore((s) => s.setActive);
+  const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
+  const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
   const markSaved = useBuilderStore((s) => s.markSaved);
 
   const updateAutomation = useUpdateAutomation();
@@ -108,7 +112,64 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
     runSimulation(nodes);
   };
 
+  // Simulation must pass before activating (draft → active).
+  // Deactivating (active → draft) is always allowed.
+  const simulationJustPassed =
+    simulationState.type === "success" && simulationState.result.overallStatus === "success";
+
+  const canActivate = simulationPassed || simulationJustPassed;
+
+  // Persist per-node simulation status into each node's typeContext when simulation completes
+  useEffect(() => {
+    if (simulationState.type !== "success") return;
+    if (automationId === "new") return;
+
+    const { result } = simulationState;
+
+    // Update each real node's config with its simulation status
+    for (const nodeResult of result.nodeResults) {
+      // Skip virtual nodes (e.g. "missing-trigger", "missing-action")
+      const existingNode = nodes.find((n) => n.id === nodeResult.nodeId);
+      if (!existingNode) continue;
+
+      updateNodeConfig(nodeResult.nodeId, {
+        simulationStatus: nodeResult.status,
+      });
+    }
+
+    // Mark overall simulation passed on the trigger
+    const passed = result.overallStatus === "success";
+    setSimulationPassed(passed);
+
+    const triggerNode = nodes.find((n) => n.kind === "trigger");
+    if (triggerNode) {
+      updateNodeConfig(triggerNode.id, { simulationPassed: passed });
+    }
+
+    // Save steps with updated configs
+    // Use setTimeout to let store updates settle
+    setTimeout(() => {
+      const currentNodes = useBuilderStore.getState().nodes;
+      const positionedNodes = computeTreePositions(currentNodes);
+      const automationNodes: AutomationNode[] = positionedNodes.map((n: BuilderNode) => ({
+        id: n.id,
+        kind: n.kind,
+        type: n.type,
+        label: n.label,
+        parentId: n.parentId,
+        children: n.children,
+        config: n.config,
+        position: n.position,
+      }));
+      const steps = nodesToSteps(automationNodes, automationId);
+      updateAutomation.mutate({ automationId, body: {}, steps });
+    }, 0);
+  }, [simulationState]);
+
   const handleToggleActive = (active: boolean) => {
+    // Block activation when simulation hasn't passed
+    if (active && !canActivate) return;
+
     setActive(active);
 
     // Persist status change immediately if saved automation
@@ -208,7 +269,22 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
                 ? t("automationBuilder.header.active")
                 : t("automationBuilder.header.draft")}
             </span>
-            <Switch checked={isActive} onCheckedChange={handleToggleActive} />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="inline-flex">
+                  <Switch
+                    checked={isActive}
+                    onCheckedChange={handleToggleActive}
+                    disabled={!isActive && !canActivate}
+                  />
+                </span>
+              </TooltipTrigger>
+              {!isActive && !canActivate && (
+                <TooltipContent side="bottom">
+                  {t("automationBuilder.header.simulationRequiredTooltip")}
+                </TooltipContent>
+              )}
+            </Tooltip>
           </div>
 
           <Separator orientation="vertical" className="h-6" />
