@@ -5,9 +5,11 @@ import { automationSteps } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 import type { AutomationStatus, AutomationType } from "./automations.types";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { LocalizedText } from "node_modules/@repo/shared/dist/index.cjs";
 import type { Static } from "node_modules/@sinclair/typebox/build/cjs/type";
 import type { UUIDType } from "src/common";
+import type { automationLogs } from "src/storage/schema";
 
 export type AutomationRecordInput = {
   name: LocalizedText;
@@ -47,6 +49,8 @@ export type AutomationStepBulkUpdate = {
 export type AutomationActionStep = {
   typeContext: TypeContext;
 };
+export type AutomationLogRecord = InferSelectModel<typeof automationLogs>;
+export type AutomationLogRecordInput = InferInsertModel<typeof automationLogs>;
 
 export const AutomationStepSchema = Type.Omit(omitTenantId(createSelectSchema(automationSteps)), [
   "createdAt",
