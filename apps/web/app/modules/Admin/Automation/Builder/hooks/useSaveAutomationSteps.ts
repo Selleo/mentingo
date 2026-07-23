@@ -5,6 +5,7 @@ import { useUpdateAutomation } from "~/api/mutations/admin/useUpdateAutomation";
 import { nodesToSteps } from "~/api/queries/admin/automation.utils";
 
 import { useBuilderStore } from "../automationBuilderStore";
+import { computeTreePositions } from "../utils/computeTreePositions";
 
 import type { BuilderNode } from "../automationBuilder.types";
 import type { AutomationNode } from "~/api/queries/admin/automation.types";
@@ -22,7 +23,10 @@ export function useSaveAutomationSteps() {
 
     const nodes = useBuilderStore.getState().nodes;
 
-    const automationNodes: AutomationNode[] = nodes.map((n: BuilderNode) => ({
+    // Compute tree-based positions before saving
+    const positionedNodes = computeTreePositions(nodes);
+
+    const automationNodes: AutomationNode[] = positionedNodes.map((n: BuilderNode) => ({
       id: n.id,
       kind: n.kind,
       type: n.type,

@@ -9,6 +9,7 @@ interface BuilderActions {
   selectNode: (nodeId: string | null) => void;
   updateNodeConfig: (nodeId: string, config: Record<string, unknown>) => void;
   updateNodeType: (nodeId: string, type: TriggerType | ActionType, label: string) => void;
+  updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
   setAutomationName: (name: string) => void;
   setActive: (active: boolean) => void;
   markSaved: () => void;
@@ -72,6 +73,11 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
   updateNodeType: (nodeId, type, label) =>
     set((state) => ({
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, type, label, config: {} } : n)),
+    })),
+
+  updateNodePosition: (nodeId, position) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
     })),
 
   setAutomationName: (name) => set({ automationName: name }),
