@@ -14,56 +14,13 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
+import { getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
 import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
 import { useSaveAutomationSteps } from "../hooks/useSaveAutomationSteps";
 
-import type { BuilderNode, TriggerType } from "../automationBuilder.types";
+import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBuilder.types";
 import type { FC } from "react";
-
-// ─── Trigger variable definitions ────────────────────────────────────────────
-// Each trigger type provides a set of variables that can be used to fill placeholders
-
-const TRIGGER_VARIABLES: Record<TriggerType, string[]> = {
-  user_invited: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
-  users_imported_invite: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
-  user_password_reminder: ["email", "userId", "createPasswordLink"],
-  user_welcome: ["email", "userId", "coursesLink", "origin"],
-  user_first_login: ["userId", "name", "coursesUrl"],
-  users_assigned_to_course: [
-    "courseId",
-    "courseName",
-    "courseLink",
-    "formatedCourseDueDate",
-    "studentIds",
-  ],
-  users_short_inactivity: ["userId", "email", "courseName", "courseLink"],
-  users_long_inactivity: ["userId", "email", "courseName", "courseLink"],
-  user_chapter_finished: [
-    "userId",
-    "courseId",
-    "chapterId",
-    "chapterName",
-    "courseName",
-    "courseLink",
-  ],
-  user_course_finished: ["userId", "courseId", "courseName", "buttonLink", "hasCertificate"],
-  user_registered: ["userId", "userName", "email", "profileLink"],
-  user_password_created: ["userId", "email"],
-  course_completed: ["userId", "courseId", "courseName", "userName", "progressLink"],
-  certificate_expiration_warning: ["userId", "courseName", "courseLink", "expiresAt"],
-  certificate_archived: ["userId", "courseName", "courseLink"],
-  announcement_published: ["title", "content", "buttonLink"],
-  course_chat_user_mentioned: ["userId", "courseName", "courseLink", "mentionedBy"],
-  course_due_date_reminder: [
-    "userId",
-    "courseId",
-    "courseName",
-    "courseLink",
-    "dueDate",
-    "daysBeforeDueDate",
-  ],
-};
 
 // ─── Supported languages ─────────────────────────────────────────────────────
 
@@ -103,10 +60,11 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
     (node.config.placeholderValues as Record<string, string>) ?? {},
   );
 
-  // Get available trigger variables for select options
-  const triggerVariables = useMemo(() => {
+  // Get available trigger variables from the shared step definition
+  const triggerVariables: PayloadVariable[] = useMemo(() => {
     if (!triggerType) return [];
-    return TRIGGER_VARIABLES[triggerType] ?? [];
+    const def = getStepDefinition(triggerType);
+    return def?.providedVariables ?? [];
   }, [triggerType]);
 
   // Get placeholders from selected template
@@ -252,8 +210,8 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
                       </SelectTrigger>
                       <SelectContent>
                         {triggerVariables.map((variable) => (
-                          <SelectItem key={variable} value={variable}>
-                            {`{{${variable}}}`}
+                          <SelectItem key={variable.key} value={variable.key}>
+                            {variable.labelKey} ({`{{${variable.key}}}`})
                           </SelectItem>
                         ))}
                       </SelectContent>
