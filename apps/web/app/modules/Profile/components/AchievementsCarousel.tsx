@@ -45,8 +45,8 @@ type AchievementsCarouselProps = {
 const containerClasses =
   "justify-between flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow";
 
-function formatDate(date: string, options: Intl.DateTimeFormatOptions): string {
-  return new Intl.DateTimeFormat("pl-PL", options).format(new Date(date));
+function formatDate(date: string, options: Intl.DateTimeFormatOptions, language: string): string {
+  return new Intl.DateTimeFormat(language, options).format(new Date(date));
 }
 
 function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[] {
@@ -97,7 +97,7 @@ const AchievementHistoryDialog = ({
   open: boolean;
   onClose: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (!achievement) return;
 
@@ -132,7 +132,11 @@ const AchievementHistoryDialog = ({
 
                     <span className="text-sm text-neutral-600">
                       {level.earnedAt
-                        ? formatDate(level.earnedAt, { dateStyle: "short", timeStyle: "short" })
+                        ? formatDate(
+                            level.earnedAt,
+                            { dateStyle: "short", timeStyle: "short" },
+                            i18n.language,
+                          )
                         : "—"}
                     </span>
                   </CardContent>
@@ -153,7 +157,7 @@ const AchievementCard = ({
   achievement: GroupedAchievement;
   onClick: () => void;
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const hasHistory = achievement.history.length > 1;
 
@@ -181,7 +185,7 @@ const AchievementCard = ({
 
       {achievement.currentLevel.earnedAt && (
         <span className="text-xs text-neutral-500">
-          {formatDate(achievement.currentLevel.earnedAt, { dateStyle: "short" })}
+          {formatDate(achievement.currentLevel.earnedAt, { dateStyle: "short" }, i18n.language)}
         </span>
       )}
 
