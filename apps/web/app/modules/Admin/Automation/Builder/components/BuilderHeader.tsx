@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { ArrowLeft, Play, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Play, Save, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
@@ -20,6 +20,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { cn } from "~/lib/utils";
 
 import { useBuilderStore } from "../automationBuilderStore";
+import { useMockSimulation } from "../hooks/useSimulation";
+import { computeTreePositions } from "../utils/computeTreePositions";
+
+import { SimulationPanel } from "./SimulationPanel";
 
 import type { BuilderNode } from "../automationBuilder.types";
 import type { FC } from "react";
@@ -43,6 +47,9 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   const updateAutomation = useUpdateAutomation();
   const deleteAutomation = useDeleteAutomation();
 
+  const { simulationState, isSimulating, panelOpen, runSimulation, closePanel, retry } =
+    useMockSimulation();
+
   const handleBack = () => {
     navigate("/admin/automation");
   };
@@ -53,8 +60,11 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
     const lang = i18n.language || "pl";
     const status: AutomationStatus = isActive ? "enabled" : "draft";
 
+    // Compute tree-based positions before saving
+    const positionedNodes = computeTreePositions(nodes);
+
     // Convert builder nodes to backend step format
-    const automationNodes: AutomationNode[] = nodes.map((n: BuilderNode) => ({
+    const automationNodes: AutomationNode[] = positionedNodes.map((n: BuilderNode) => ({
       id: n.id,
       kind: n.kind,
       type: n.type,
@@ -94,7 +104,8 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   };
 
   const handleSimulate = () => {
-    console.log("Simulate automation:", automationId);
+    if (automationId === "new") return;
+    runSimulation(nodes);
   };
 
   const handleToggleActive = (active: boolean) => {
@@ -147,7 +158,9 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{automationName}</BreadcrumbPage>
+                <BreadcrumbPage className="text-base font-semibold text-foreground">
+                  {automationName}
+                </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -168,8 +181,17 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
             {t("automationBuilder.header.save")}
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleSimulate}>
-            <Play className="mr-1.5 size-4" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleSimulate}
+            disabled={isSimulating || automationId === "new"}
+          >
+            {isSimulating ? (
+              <Loader2 className="mr-1.5 size-4 animate-spin" />
+            ) : (
+              <Play className="mr-1.5 size-4" />
+            )}
             {t("automationBuilder.header.simulate")}
           </Button>
 
@@ -207,6 +229,13 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
           </Tooltip>
         </div>
       </header>
+
+      <SimulationPanel
+        open={panelOpen}
+        onClose={closePanel}
+        state={simulationState}
+        onRetry={() => retry(nodes)}
+      />
     </TooltipProvider>
   );
 };
