@@ -150,7 +150,7 @@ test("admin can change theme colors and see them after reload", async ({
       });
 
     await page.reload();
-    await page.getByTestId(SETTINGS_PAGE_HANDLES.PLATFORM_CUSTOMIZATION_TAB).click();
+    await openPlatformCustomizationSettings(page);
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.THEME_PRIMARY_INPUT)).toHaveValue(
       targetPrimary,
     );

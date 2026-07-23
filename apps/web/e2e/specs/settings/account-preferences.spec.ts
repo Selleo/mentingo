@@ -31,6 +31,7 @@ test("password form blocks submit for missing current password weak password and
 test("admin can generate an integration API key", async ({ apiClient, withWorkerPage }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     await openSettingsPageFlow(page);
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB).click();
 
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_CARD)).toBeVisible();
     await page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_GENERATE).click();
@@ -58,6 +59,7 @@ test("admin with an existing integration API key must confirm before rotating it
     const originalPrefix = generatedKey.data.data.metadata.keyPrefix;
 
     await openSettingsPageFlow(page);
+    await page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATIONS_TAB).click();
 
     await page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_OVERRIDE).click();
     await expect(page.getByTestId(SETTINGS_PAGE_HANDLES.INTEGRATION_API_KEY_GENERATED)).toHaveCount(
