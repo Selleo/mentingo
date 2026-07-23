@@ -41,6 +41,7 @@ export class MicrosoftCalendarSyncWorker implements OnModuleDestroy {
         ? this.microsoftCalendarService.synchronizeConnection(
             job.data.connectionId,
             job.data.fullSync,
+            job.data.reason,
           )
         : this.outboundService.reconcileConnection(job.data.connectionId),
     );

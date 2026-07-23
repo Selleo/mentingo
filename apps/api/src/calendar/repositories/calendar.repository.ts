@@ -20,7 +20,7 @@ import {
   liveTrainingMembers,
   liveTrainingSessions,
   liveTrainings,
-  microsoftCalendarEvents,
+  calendarExternalEvents,
   resourceEntity,
   resources,
   users,
@@ -88,7 +88,7 @@ export class CalendarRepository {
         id: calendarEvents.id,
         uid: calendarEvents.uid,
         sourceType: sql<CalendarEventSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK}`,
-        sourceId: microsoftCalendarEvents.id,
+        sourceId: calendarExternalEvents.id,
         title: this.localizationService.getLocalizedSqlField(
           calendarEvents.title,
           language,
@@ -105,16 +105,16 @@ export class CalendarRepository {
           jsonb_build_object(
             'outlookCalendar',
             jsonb_build_object(
-              'webLink', ${microsoftCalendarEvents.webLink},
-              'isSensitive', ${microsoftCalendarEvents.sensitivity} IN ('private', 'confidential'),
-              'availability', ${microsoftCalendarEvents.availability}
+              'webLink', ${calendarExternalEvents.webLink},
+              'isSensitive', ${calendarExternalEvents.sensitivity} IN ('private', 'confidential'),
+              'availability', ${calendarExternalEvents.availability}
             )
           )
         `,
         authorId: sql<UUIDType | null>`NULL`,
       })
-      .from(microsoftCalendarEvents)
-      .innerJoin(calendarEvents, eq(calendarEvents.id, microsoftCalendarEvents.calendarEventId))
+      .from(calendarExternalEvents)
+      .innerJoin(calendarEvents, eq(calendarEvents.id, calendarExternalEvents.calendarEventId))
       .where(and(...conditions))
       .orderBy(calendarEvents.startsAt);
   }

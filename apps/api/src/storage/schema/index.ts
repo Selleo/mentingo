@@ -94,6 +94,7 @@ import type {
   CertificateArchiveReason,
   CertificateStatus,
   CalendarEventStatus,
+  CalendarProvider,
   AnnouncementEmailTemplate,
   AnnouncementSourceType,
   AnnouncementStatus,
@@ -497,16 +498,17 @@ export const calendarEvents = pgTable(
   })),
 );
 
-export const microsoftCalendarConnections = pgTable(
-  "microsoft_calendar_connections",
+export const calendarConnections = pgTable(
+  "calendar_connections",
   {
     ...id,
     ...timestamps,
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    microsoftAccountId: text("microsoft_account_id").notNull(),
-    microsoftEmail: text("microsoft_email").notNull(),
+    provider: text("provider").$type<CalendarProvider>().notNull(),
+    accountId: text("account_id").notNull(),
+    accountEmail: text("account_email").notNull(),
     refreshTokenCiphertext: text("refresh_token_ciphertext").notNull(),
     refreshTokenIv: text("refresh_token_iv").notNull(),
     refreshTokenTag: text("refresh_token_tag").notNull(),
@@ -518,7 +520,7 @@ export const microsoftCalendarConnections = pgTable(
       .notNull()
       .default(MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING),
     errorCode: text("error_code"),
-    deltaLink: text("delta_link"),
+    syncCursor: text("sync_cursor"),
     syncWindowStart: timestampWithTimezone({ name: "sync_window_start" }),
     syncWindowEnd: timestampWithTimezone({ name: "sync_window_end" }),
     windowBuiltAt: timestampWithTimezone({ name: "window_built_at" }),
@@ -537,24 +539,21 @@ export const microsoftCalendarConnections = pgTable(
     lastOutboundSyncAt: timestampWithTimezone({ name: "last_outbound_sync_at" }),
     tenantId,
   },
-  withTenantIdIndex("microsoft_calendar_connections", (table) => ({
-    tenantUserUniqueIdx: uniqueIndex("microsoft_calendar_connections_tenant_user_unique_idx").on(
-      table.tenantId,
-      table.userId,
-    ),
-    subscriptionIdx: index("microsoft_calendar_connections_subscription_idx").on(
-      table.subscriptionId,
-    ),
+  withTenantIdIndex("calendar_connections", (table) => ({
+    tenantUserProviderUniqueIdx: uniqueIndex(
+      "calendar_connections_tenant_user_provider_unique_idx",
+    ).on(table.tenantId, table.userId, table.provider),
+    subscriptionIdx: index("calendar_connections_subscription_idx").on(table.subscriptionId),
   })),
 );
 
-export const microsoftCalendarOutboundEvents = pgTable(
-  "microsoft_calendar_outbound_events",
+export const calendarOutboundEvents = pgTable(
+  "calendar_outbound_events",
   {
     ...id,
     ...timestamps,
     connectionId: uuid("connection_id")
-      .references(() => microsoftCalendarConnections.id, { onDelete: "cascade" })
+      .references(() => calendarConnections.id, { onDelete: "cascade" })
       .notNull(),
     calendarEventId: uuid("calendar_event_id")
       .references(() => calendarEvents.id, { onDelete: "cascade" })
@@ -562,30 +561,33 @@ export const microsoftCalendarOutboundEvents = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    microsoftEventId: text("microsoft_event_id").notNull(),
+    externalEventId: text("external_event_id").notNull(),
     tenantId,
   },
-  withTenantIdIndex("microsoft_calendar_outbound_events", (table) => ({
-    recipientUniqueIdx: uniqueIndex(
-      "microsoft_calendar_outbound_events_connection_event_user_unique_idx",
-    ).on(table.tenantId, table.connectionId, table.calendarEventId, table.userId),
+  withTenantIdIndex("calendar_outbound_events", (table) => ({
+    recipientUniqueIdx: uniqueIndex("calendar_outbound_events_connection_event_user_unique_idx").on(
+      table.tenantId,
+      table.connectionId,
+      table.calendarEventId,
+      table.userId,
+    ),
     microsoftEventUniqueIdx: uniqueIndex(
-      "microsoft_calendar_outbound_events_connection_microsoft_event_unique_idx",
-    ).on(table.tenantId, table.connectionId, table.microsoftEventId),
-    eventIdx: index("microsoft_calendar_outbound_events_calendar_event_idx").on(
+      "calendar_outbound_events_connection_external_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.externalEventId),
+    eventIdx: index("calendar_outbound_events_calendar_event_idx").on(
       table.tenantId,
       table.calendarEventId,
     ),
   })),
 );
 
-export const microsoftCalendarEvents = pgTable(
-  "microsoft_calendar_events",
+export const calendarExternalEvents = pgTable(
+  "calendar_external_events",
   {
     ...id,
     ...timestamps,
     connectionId: uuid("connection_id")
-      .references(() => microsoftCalendarConnections.id, { onDelete: "cascade" })
+      .references(() => calendarConnections.id, { onDelete: "cascade" })
       .notNull(),
     calendarEventId: uuid("calendar_event_id")
       .references(() => calendarEvents.id, { onDelete: "cascade" })
@@ -593,21 +595,21 @@ export const microsoftCalendarEvents = pgTable(
     userId: uuid("user_id")
       .references(() => users.id, { onDelete: "cascade" })
       .notNull(),
-    microsoftEventId: text("microsoft_event_id").notNull(),
+    externalEventId: text("external_event_id").notNull(),
     webLink: text("web_link"),
     sensitivity: text("sensitivity").$type<OutlookEventSensitivity>().notNull(),
     availability: text("availability").$type<OutlookEventAvailability>().notNull(),
     isCancelled: boolean("is_cancelled").notNull().default(false),
     tenantId,
   },
-  withTenantIdIndex("microsoft_calendar_events", (table) => ({
-    calendarEventUniqueIdx: uniqueIndex("microsoft_calendar_events_calendar_event_unique_idx").on(
+  withTenantIdIndex("calendar_external_events", (table) => ({
+    calendarEventUniqueIdx: uniqueIndex("calendar_external_events_calendar_event_unique_idx").on(
       table.calendarEventId,
     ),
     connectionEventUniqueIdx: uniqueIndex(
-      "microsoft_calendar_events_tenant_connection_event_unique_idx",
-    ).on(table.tenantId, table.connectionId, table.microsoftEventId),
-    ownerIdx: index("microsoft_calendar_events_tenant_user_idx").on(table.tenantId, table.userId),
+      "calendar_external_events_tenant_connection_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.externalEventId),
+    ownerIdx: index("calendar_external_events_tenant_user_idx").on(table.tenantId, table.userId),
   })),
 );
 

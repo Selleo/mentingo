@@ -398,7 +398,7 @@
       "description": "Připojení účtu {{email}} a jeho importované události budou před synchronizací nového účtu odstraněny."
     },
     "outbound": {
-      "title": "Synchronizovat události Mentingo s Outlook",
+      "title": "Synchronizovat události Mentingo",
       "description": "Exportujte živá školení a termíny kurzů do samostatného kalendáře Mentingo v Outlooku.",
       "reauthorize": "Zapnutí vyžaduje oprávnění Microsoftu zapisovat události kalendáře.",
       "enable": "Povolit export",

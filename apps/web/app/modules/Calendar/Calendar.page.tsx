@@ -5,7 +5,7 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import { redirect } from "@remix-run/react";
 import { PERMISSIONS } from "@repo/shared";
 import { RefreshCw } from "lucide-react";
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useSyncMicrosoftCalendar } from "~/api/mutations/calendar/useSyncMicrosoftCalendar";
@@ -35,6 +35,7 @@ import {
   getVisibleRangeFromDatesSet,
   initialCalendarState,
 } from "./calendar.reducer";
+import { CALENDAR_VIEWS, useCalendarViewStore } from "./calendarView.store";
 import { CalendarCreateLiveTrainingDialog } from "./components/CalendarCreateLiveTrainingDialog";
 import { CalendarEventDetailsDialog } from "./components/CalendarEventDetailsDialog";
 
@@ -56,6 +57,28 @@ export const links: LinksFunction = () => [{ rel: "stylesheet", href: calendarSt
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.calendar");
 
 const getBrowserTimezone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const getFullCalendarView = (view: (typeof CALENDAR_VIEWS)[keyof typeof CALENDAR_VIEWS]) => {
+  switch (view) {
+    case CALENDAR_VIEWS.WEEK:
+      return "timeGridWeek" as const;
+    case CALENDAR_VIEWS.DAY:
+      return "timeGridDay" as const;
+    case CALENDAR_VIEWS.MONTH:
+      return "dayGridMonth" as const;
+  }
+};
+
+const getCalendarView = (viewType: string) => {
+  switch (viewType) {
+    case "timeGridWeek":
+      return CALENDAR_VIEWS.WEEK;
+    case "timeGridDay":
+      return CALENDAR_VIEWS.DAY;
+    default:
+      return CALENDAR_VIEWS.MONTH;
+  }
+};
 
 export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
   const currentUserResponse = await queryClient.ensureQueryData(currentUserQueryOptions);
@@ -79,8 +102,17 @@ export const clientLoader = async ({ request }: ClientLoaderFunctionArgs) => {
 export default function CalendarPage() {
   const { t } = useTranslation();
   const [calendarState, dispatchCalendarAction] = useReducer(calendarReducer, initialCalendarState);
+  const calendarRef = useRef<FullCalendar>(null);
 
   const language = useLanguageStore((state) => state.language);
+  const calendarView = useCalendarViewStore((state) => state.view);
+  const setCalendarView = useCalendarViewStore((state) => state.setView);
+
+  useEffect(() => {
+    const api = calendarRef.current?.getApi();
+    const nextView = getFullCalendarView(calendarView);
+    if (api && api.view.type !== nextView) api.changeView(nextView);
+  }, [calendarView]);
   const { data: globalSettings } = useGlobalSettings();
   const { data: microsoftConnection } = useMicrosoftCalendarConnection();
   const { mutateAsync: syncCalendar, isPending: isSyncPending } = useSyncMicrosoftCalendar();
@@ -134,6 +166,7 @@ export default function CalendarPage() {
   );
 
   const handleDatesSet = (dateInfo: DatesSetArg) => {
+    setCalendarView(getCalendarView(dateInfo.view.type));
     dispatchCalendarAction({
       type: CALENDAR_ACTION_TYPES.VISIBLE_RANGE_CHANGED,
       range: getVisibleRangeFromDatesSet(dateInfo),
@@ -266,8 +299,9 @@ export default function CalendarPage() {
 
         <div className="calendar-shell min-h-0 flex-1">
           <FullCalendar
+            ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
+            initialView={getFullCalendarView(calendarView)}
             events={calendarEvents}
             datesSet={handleDatesSet}
             dateClick={handleDateClick}

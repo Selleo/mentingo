@@ -34,6 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Switch } from "~/components/ui/switch";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
@@ -150,8 +151,8 @@ export function MicrosoftCalendarCard() {
     );
   };
 
-  const toggleOutboundSync = async () => {
-    await setOutboundSync(!connection.outboundSyncEnabled);
+  const toggleOutboundSync = async (enabled: boolean) => {
+    await setOutboundSync(enabled);
   };
 
   return (
@@ -218,27 +219,27 @@ export function MicrosoftCalendarCard() {
               </dd>
             </div>
           </dl>
-          <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
-            <div>
-              <p className="text-sm font-semibold">{t("microsoftCalendar.outbound.title")}</p>
-              <p className="mt-1 text-sm text-neutral-600">
-                {t("microsoftCalendar.outbound.description")}
-              </p>
+          <div className="flex items-center justify-between gap-4 rounded-lg border p-4">
+            <div className="min-w-0">
+              <label
+                htmlFor="microsoft-calendar-outbound-switch"
+                className="text-sm font-semibold text-neutral-950"
+              >
+                {t("microsoftCalendar.outbound.title")}
+              </label>
               {!connection.outboundSyncEnabled && connection.status !== "disconnected" ? (
-                <p className="mt-2 text-xs text-neutral-500">
+                <p className="mt-1 text-xs text-neutral-500">
                   {t("microsoftCalendar.outbound.reauthorize")}
                 </p>
               ) : null}
             </div>
-            <Button
-              variant={connection.outboundSyncEnabled ? "outline" : "default"}
+            <Switch
+              id="microsoft-calendar-outbound-switch"
+              checked={connection.outboundSyncEnabled}
               disabled={isOutboundPending || reconnectRequired}
-              onClick={toggleOutboundSync}
-            >
-              {connection.outboundSyncEnabled
-                ? t("microsoftCalendar.outbound.disable")
-                : t("microsoftCalendar.outbound.enable")}
-            </Button>
+              onCheckedChange={toggleOutboundSync}
+              aria-label={t("microsoftCalendar.outbound.title")}
+            />
           </div>
         </CardContent>
       )}

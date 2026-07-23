@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { LIVE_TRAINING_LINK_ENTITY_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  CALENDAR_PROVIDERS,
+  LIVE_TRAINING_LINK_ENTITY_TYPES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { and, eq, gt, inArray, isNotNull, isNull, lt, notInArray, or, sql } from "drizzle-orm";
 import { aliasedTable } from "drizzle-orm/alias";
 
@@ -16,9 +20,9 @@ import {
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
-  microsoftCalendarConnections,
-  microsoftCalendarEvents,
-  microsoftCalendarOutboundEvents,
+  calendarConnections,
+  calendarExternalEvents,
+  calendarOutboundEvents,
   settings,
   users,
 } from "src/storage/schema";
@@ -41,8 +45,13 @@ export class MicrosoftCalendarRepository {
   async getConnectionByUserId(userId: UUIDType) {
     const [connection] = await this.db
       .select()
-      .from(microsoftCalendarConnections)
-      .where(eq(microsoftCalendarConnections.userId, userId))
+      .from(calendarConnections)
+      .where(
+        and(
+          eq(calendarConnections.userId, userId),
+          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
+        ),
+      )
       .limit(1);
     return connection ?? null;
   }
@@ -60,8 +69,8 @@ export class MicrosoftCalendarRepository {
   async getConnectionById(connectionId: UUIDType) {
     const [connection] = await this.db
       .select()
-      .from(microsoftCalendarConnections)
-      .where(eq(microsoftCalendarConnections.id, connectionId))
+      .from(calendarConnections)
+      .where(eq(calendarConnections.id, connectionId))
       .limit(1);
     return connection ?? null;
   }
@@ -69,19 +78,25 @@ export class MicrosoftCalendarRepository {
   async getConnectionBySubscriptionId(subscriptionId: string) {
     const [connection] = await this.dbAdmin
       .select()
-      .from(microsoftCalendarConnections)
-      .where(eq(microsoftCalendarConnections.subscriptionId, subscriptionId))
+      .from(calendarConnections)
+      .where(
+        and(
+          eq(calendarConnections.subscriptionId, subscriptionId),
+          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
+        ),
+      )
       .limit(1);
     return connection ?? null;
   }
 
   async createConnection(input: MicrosoftCalendarConnectionCreateInput) {
     const [connection] = await this.db
-      .insert(microsoftCalendarConnections)
+      .insert(calendarConnections)
       .values({
         userId: input.userId,
-        microsoftAccountId: input.microsoftAccountId,
-        microsoftEmail: input.microsoftEmail,
+        provider: input.provider,
+        accountId: input.accountId,
+        accountEmail: input.accountEmail,
         ...input.encryptedRefreshToken,
       })
       .returning();
@@ -90,9 +105,9 @@ export class MicrosoftCalendarRepository {
 
   async updateConnection(connectionId: UUIDType, update: MicrosoftCalendarConnectionUpdate) {
     const [connection] = await this.db
-      .update(microsoftCalendarConnections)
+      .update(calendarConnections)
       .set(update)
-      .where(eq(microsoftCalendarConnections.id, connectionId))
+      .where(eq(calendarConnections.id, connectionId))
       .returning();
     return connection ?? null;
   }
@@ -100,11 +115,12 @@ export class MicrosoftCalendarRepository {
   async listConnectionsForReconciliation() {
     return this.db
       .select()
-      .from(microsoftCalendarConnections)
+      .from(calendarConnections)
       .where(
         or(
-          eq(microsoftCalendarConnections.status, "connected"),
-          eq(microsoftCalendarConnections.status, "error"),
+          eq(calendarConnections.status, "connected"),
+          eq(calendarConnections.status, "error"),
+          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
         ),
       );
   }
@@ -112,19 +128,24 @@ export class MicrosoftCalendarRepository {
   async listOutboundConnections() {
     return this.db
       .select()
-      .from(microsoftCalendarConnections)
-      .where(eq(microsoftCalendarConnections.outboundSyncEnabled, true));
+      .from(calendarConnections)
+      .where(
+        and(
+          eq(calendarConnections.outboundSyncEnabled, true),
+          eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
+        ),
+      );
   }
 
   async getOutboundMapping(connectionId: UUIDType, calendarEventId: UUIDType, userId: UUIDType) {
     const [mapping] = await this.db
       .select()
-      .from(microsoftCalendarOutboundEvents)
+      .from(calendarOutboundEvents)
       .where(
         and(
-          eq(microsoftCalendarOutboundEvents.connectionId, connectionId),
-          eq(microsoftCalendarOutboundEvents.calendarEventId, calendarEventId),
-          eq(microsoftCalendarOutboundEvents.userId, userId),
+          eq(calendarOutboundEvents.connectionId, connectionId),
+          eq(calendarOutboundEvents.calendarEventId, calendarEventId),
+          eq(calendarOutboundEvents.userId, userId),
         ),
       )
       .limit(1);
@@ -135,19 +156,19 @@ export class MicrosoftCalendarRepository {
     connectionId: UUIDType;
     calendarEventId: UUIDType;
     userId: UUIDType;
-    microsoftEventId: string;
+    externalEventId: string;
   }) {
     const [mapping] = await this.db
-      .insert(microsoftCalendarOutboundEvents)
+      .insert(calendarOutboundEvents)
       .values(input)
       .onConflictDoUpdate({
         target: [
-          microsoftCalendarOutboundEvents.tenantId,
-          microsoftCalendarOutboundEvents.connectionId,
-          microsoftCalendarOutboundEvents.calendarEventId,
-          microsoftCalendarOutboundEvents.userId,
+          calendarOutboundEvents.tenantId,
+          calendarOutboundEvents.connectionId,
+          calendarOutboundEvents.calendarEventId,
+          calendarOutboundEvents.userId,
         ],
-        set: { microsoftEventId: input.microsoftEventId, updatedAt: new Date().toISOString() },
+        set: { externalEventId: input.externalEventId, updatedAt: new Date().toISOString() },
       })
       .returning();
     return mapping;
@@ -156,8 +177,8 @@ export class MicrosoftCalendarRepository {
   async listOutboundMappings(connectionId: UUIDType) {
     return this.db
       .select()
-      .from(microsoftCalendarOutboundEvents)
-      .where(eq(microsoftCalendarOutboundEvents.connectionId, connectionId));
+      .from(calendarOutboundEvents)
+      .where(eq(calendarOutboundEvents.connectionId, connectionId));
   }
 
   async listOutboundCandidates(
@@ -166,9 +187,9 @@ export class MicrosoftCalendarRepository {
     end: string,
   ): Promise<OutboundCandidate[]> {
     const [connection] = await this.db
-      .select({ userId: microsoftCalendarConnections.userId })
-      .from(microsoftCalendarConnections)
-      .where(eq(microsoftCalendarConnections.id, connectionId))
+      .select({ userId: calendarConnections.userId })
+      .from(calendarConnections)
+      .where(eq(calendarConnections.id, connectionId))
       .limit(1);
     if (!connection) return [];
 
@@ -296,31 +317,26 @@ export class MicrosoftCalendarRepository {
   }
 
   async deleteOutboundMapping(id: UUIDType) {
-    await this.db
-      .delete(microsoftCalendarOutboundEvents)
-      .where(eq(microsoftCalendarOutboundEvents.id, id));
+    await this.db.delete(calendarOutboundEvents).where(eq(calendarOutboundEvents.id, id));
   }
 
   async listConnectionsNeedingSubscriptionRenewal(renewBefore: string) {
     return this.db
       .select()
-      .from(microsoftCalendarConnections)
+      .from(calendarConnections)
       .where(
         and(
+          or(eq(calendarConnections.status, "connected"), eq(calendarConnections.status, "error")),
           or(
-            eq(microsoftCalendarConnections.status, "connected"),
-            eq(microsoftCalendarConnections.status, "error"),
-          ),
-          or(
-            sql`${microsoftCalendarConnections.subscriptionExpiresAt} IS NULL`,
-            lt(microsoftCalendarConnections.subscriptionExpiresAt, renewBefore),
+            sql`${calendarConnections.subscriptionExpiresAt} IS NULL`,
+            lt(calendarConnections.subscriptionExpiresAt, renewBefore),
           ),
         ),
       );
   }
 
   async upsertEvent(connectionId: UUIDType, userId: UUIDType, event: MappedMicrosoftCalendarEvent) {
-    const uid = `microsoft-outlook:${userId}:${event.microsoftEventId}`;
+    const uid = `microsoft-outlook:${userId}:${event.externalEventId}`;
 
     return this.db.transaction(async (trx) => {
       const [calendarEvent] = await trx
@@ -356,12 +372,12 @@ export class MicrosoftCalendarRepository {
         .returning({ id: calendarEvents.id });
 
       const [externalEvent] = await trx
-        .insert(microsoftCalendarEvents)
+        .insert(calendarExternalEvents)
         .values({
           connectionId,
           calendarEventId: calendarEvent.id,
           userId,
-          microsoftEventId: event.microsoftEventId,
+          externalEventId: event.externalEventId,
           webLink: event.webLink,
           sensitivity: event.sensitivity,
           availability: event.availability,
@@ -369,9 +385,9 @@ export class MicrosoftCalendarRepository {
         })
         .onConflictDoUpdate({
           target: [
-            microsoftCalendarEvents.tenantId,
-            microsoftCalendarEvents.connectionId,
-            microsoftCalendarEvents.microsoftEventId,
+            calendarExternalEvents.tenantId,
+            calendarExternalEvents.connectionId,
+            calendarExternalEvents.externalEventId,
           ],
           set: {
             calendarEventId: calendarEvent.id,
@@ -387,16 +403,16 @@ export class MicrosoftCalendarRepository {
     });
   }
 
-  async removeEvents(connectionId: UUIDType, microsoftEventIds: string[]) {
-    if (!microsoftEventIds.length) return;
+  async removeEvents(connectionId: UUIDType, externalEventIds: string[]) {
+    if (!externalEventIds.length) return;
 
     const rows = await this.db
-      .select({ calendarEventId: microsoftCalendarEvents.calendarEventId })
-      .from(microsoftCalendarEvents)
+      .select({ calendarEventId: calendarExternalEvents.calendarEventId })
+      .from(calendarExternalEvents)
       .where(
         and(
-          eq(microsoftCalendarEvents.connectionId, connectionId),
-          inArray(microsoftCalendarEvents.microsoftEventId, microsoftEventIds),
+          eq(calendarExternalEvents.connectionId, connectionId),
+          inArray(calendarExternalEvents.externalEventId, externalEventIds),
         ),
       );
 
@@ -413,14 +429,14 @@ export class MicrosoftCalendarRepository {
   async removeEventsMissingFromFullSync(connectionId: UUIDType, seenEventIds: string[]) {
     const condition = seenEventIds.length
       ? and(
-          eq(microsoftCalendarEvents.connectionId, connectionId),
-          notInArray(microsoftCalendarEvents.microsoftEventId, seenEventIds),
+          eq(calendarExternalEvents.connectionId, connectionId),
+          notInArray(calendarExternalEvents.externalEventId, seenEventIds),
         )
-      : eq(microsoftCalendarEvents.connectionId, connectionId);
+      : eq(calendarExternalEvents.connectionId, connectionId);
 
     const rows = await this.db
-      .select({ calendarEventId: microsoftCalendarEvents.calendarEventId })
-      .from(microsoftCalendarEvents)
+      .select({ calendarEventId: calendarExternalEvents.calendarEventId })
+      .from(calendarExternalEvents)
       .where(condition);
 
     if (rows.length) {
@@ -435,9 +451,9 @@ export class MicrosoftCalendarRepository {
 
   async deleteConnectionAndEvents(connectionId: UUIDType) {
     const rows = await this.db
-      .select({ calendarEventId: microsoftCalendarEvents.calendarEventId })
-      .from(microsoftCalendarEvents)
-      .where(eq(microsoftCalendarEvents.connectionId, connectionId));
+      .select({ calendarEventId: calendarExternalEvents.calendarEventId })
+      .from(calendarExternalEvents)
+      .where(eq(calendarExternalEvents.connectionId, connectionId));
 
     await this.db.transaction(async (trx) => {
       if (rows.length) {
@@ -449,9 +465,7 @@ export class MicrosoftCalendarRepository {
         );
       }
 
-      await trx
-        .delete(microsoftCalendarConnections)
-        .where(eq(microsoftCalendarConnections.id, connectionId));
+      await trx.delete(calendarConnections).where(eq(calendarConnections.id, connectionId));
     });
   }
 }

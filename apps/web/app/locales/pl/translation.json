@@ -402,7 +402,7 @@
       "description": "Połączenie konta {{email}} i jego wydarzenia zostaną usunięte przed synchronizacją nowego konta."
     },
     "outbound": {
-      "title": "Synchronizuj wydarzenia Mentingo z Outlook",
+      "title": "Synchronizuj wydarzenia Mentingo",
       "description": "Eksportuj szkolenia na żywo i terminy kursów do osobnego kalendarza Mentingo w Outlook.",
       "reauthorize": "Włączenie wymaga zgody Microsoft na zapisywanie wydarzeń.",
       "enable": "Włącz eksport",

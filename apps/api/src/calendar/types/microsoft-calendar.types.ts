@@ -6,9 +6,9 @@ import type {
   OutlookEventSensitivity,
 } from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { microsoftCalendarConnections } from "src/storage/schema";
+import type { calendarConnections } from "src/storage/schema";
 
-export type MicrosoftCalendarConnection = typeof microsoftCalendarConnections.$inferSelect;
+export type MicrosoftCalendarConnection = typeof calendarConnections.$inferSelect;
 
 export const MICROSOFT_CALENDAR_SYNC_REASONS = {
   INITIAL: "initial",
@@ -33,8 +33,9 @@ export type EncryptedMicrosoftRefreshToken = {
 
 export type MicrosoftCalendarConnectionCreateInput = {
   userId: UUIDType;
-  microsoftAccountId: string;
-  microsoftEmail: string;
+  provider: "microsoft";
+  accountId: string;
+  accountEmail: string;
   encryptedRefreshToken: EncryptedMicrosoftRefreshToken;
 };
 
@@ -150,7 +151,7 @@ export type MicrosoftGraphNotificationBody = {
 };
 
 export type MappedMicrosoftCalendarEvent = {
-  microsoftEventId: string;
+  externalEventId: string;
   title: string;
   startsAt: string;
   endsAt: string;
@@ -164,11 +165,11 @@ export type MappedMicrosoftCalendarEvent = {
 };
 
 export type MicrosoftCalendarConnectionUpdate = Partial<{
-  microsoftAccountId: string;
-  microsoftEmail: string;
+  accountId: string;
+  accountEmail: string;
   status: MicrosoftCalendarConnectionStatus;
   errorCode: string | null;
-  deltaLink: string | null;
+  syncCursor: string | null;
   syncWindowStart: string | null;
   syncWindowEnd: string | null;
   windowBuiltAt: string | null;

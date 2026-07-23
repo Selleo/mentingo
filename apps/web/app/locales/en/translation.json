@@ -399,7 +399,7 @@
       "description": "The connection for {{email}} and its imported events will be removed before the new account is synchronized."
     },
     "outbound": {
-      "title": "Sync Mentingo events to Outlook",
+      "title": "Sync Mentingo events",
       "description": "Export live trainings and course due dates to a separate Mentingo calendar in Outlook.",
       "reauthorize": "Enabling this requires Microsoft permission to write calendar events.",
       "enable": "Enable export",

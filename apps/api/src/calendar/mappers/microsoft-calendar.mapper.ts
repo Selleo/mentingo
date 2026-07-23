@@ -48,7 +48,7 @@ export const mapMicrosoftGraphEvent = (
     sensitivity === OUTLOOK_EVENT_SENSITIVITIES.CONFIDENTIAL;
 
   return {
-    microsoftEventId: event.id,
+    externalEventId: event.id,
     title: isSensitive ? "Private event" : event.subject?.trim() || "Untitled event",
     startsAt: normalizeGraphDateTime(event.start.dateTime),
     endsAt: normalizeGraphDateTime(event.end.dateTime),

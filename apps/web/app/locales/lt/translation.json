@@ -398,7 +398,7 @@
       "description": "Paskyros {{email}} ryšys ir importuoti įvykiai bus pašalinti prieš sinchronizuojant naują paskyrą."
     },
     "outbound": {
-      "title": "Sinchronizuoti Mentingo įvykius su Outlook",
+      "title": "Sinchronizuoti Mentingo įvykius",
       "description": "Eksportuokite tiesioginius mokymus ir kursų terminus į atskirą Mentingo kalendorių Outlook.",
       "reauthorize": "Įjungus reikia Microsoft leidimo įrašyti kalendoriaus įvykius.",
       "enable": "Įjungti eksportą",

@@ -23,7 +23,7 @@ import {
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
-  microsoftCalendarEvents,
+  calendarExternalEvents,
   studentCourses,
 } from "src/storage/schema";
 
@@ -109,8 +109,8 @@ export class CalendarService {
   ): Promise<CalendarEventListItem[]> {
     const conditions = [
       isNull(calendarEvents.deletedAt),
-      eq(microsoftCalendarEvents.userId, currentUser.userId),
-      eq(microsoftCalendarEvents.isCancelled, false),
+      eq(calendarExternalEvents.userId, currentUser.userId),
+      eq(calendarExternalEvents.isCancelled, false),
       lt(calendarEvents.startsAt, query.end),
       gt(calendarEvents.endsAt, query.start),
     ];
@@ -127,8 +127,8 @@ export class CalendarService {
       [
         isNull(calendarEvents.deletedAt),
         eq(calendarEvents.id, eventId),
-        eq(microsoftCalendarEvents.userId, currentUser.userId),
-        eq(microsoftCalendarEvents.isCancelled, false),
+        eq(calendarExternalEvents.userId, currentUser.userId),
+        eq(calendarExternalEvents.isCancelled, false),
       ],
       language,
     );

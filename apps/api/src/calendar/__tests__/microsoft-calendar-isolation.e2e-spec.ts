@@ -1,4 +1,5 @@
 import {
+  CALENDAR_PROVIDERS,
   CALENDAR_EVENT_SOURCE_TYPES,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   PERMISSIONS,
@@ -8,11 +9,7 @@ import {
 
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import {
-  calendarEvents,
-  microsoftCalendarConnections,
-  microsoftCalendarEvents,
-} from "src/storage/schema";
+import { calendarEvents, calendarConnections, calendarExternalEvents } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createUserFactory } from "../../../test/factory/user.factory";
@@ -90,11 +87,12 @@ describe("Microsoft Outlook calendar isolation (e2e)", () => {
 
   const createConnection = async (userId: UUIDType, email: string) => {
     const [connection] = await db
-      .insert(microsoftCalendarConnections)
+      .insert(calendarConnections)
       .values({
         userId,
-        microsoftAccountId: `microsoft-${userId}`,
-        microsoftEmail: email,
+        provider: CALENDAR_PROVIDERS.MICROSOFT,
+        accountId: `microsoft-${userId}`,
+        accountEmail: email,
         refreshTokenCiphertext: "ciphertext",
         refreshTokenIv: "iv",
         refreshTokenTag: "tag",
@@ -103,7 +101,7 @@ describe("Microsoft Outlook calendar isolation (e2e)", () => {
         refreshTokenEncryptedDekTag: "dek-tag",
         status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED,
       })
-      .returning({ id: microsoftCalendarConnections.id });
+      .returning({ id: calendarConnections.id });
     return connection.id;
   };
 
@@ -130,11 +128,11 @@ describe("Microsoft Outlook calendar isolation (e2e)", () => {
       })
       .returning({ id: calendarEvents.id });
 
-    await db.insert(microsoftCalendarEvents).values({
+    await db.insert(calendarExternalEvents).values({
       connectionId,
       calendarEventId: calendarEvent.id,
       userId,
-      microsoftEventId: `microsoft-${calendarEvent.id}`,
+      externalEventId: `microsoft-${calendarEvent.id}`,
       webLink: "https://outlook.office.com/calendar/item/1",
       sensitivity: "normal",
       availability: "busy",

@@ -398,7 +398,7 @@
       "description": "Die Verbindung für {{email}} und deren importierte Termine werden vor der Synchronisierung des neuen Kontos entfernt."
     },
     "outbound": {
-      "title": "Mentingo-Ereignisse mit Outlook synchronisieren",
+      "title": "Mentingo-Ereignisse synchronisieren",
       "description": "Live-Schulungen und Kursfristen in einen separaten Mentingo-Kalender in Outlook exportieren.",
       "reauthorize": "Dafür benötigt Microsoft die Berechtigung, Kalenderereignisse zu schreiben.",
       "enable": "Export aktivieren",

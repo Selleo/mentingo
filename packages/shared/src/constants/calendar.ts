@@ -4,6 +4,12 @@ export const CALENDAR_EVENT_SOURCE_TYPES = {
   MICROSOFT_OUTLOOK: "microsoft_outlook",
 } as const;
 
+export const CALENDAR_PROVIDERS = {
+  MICROSOFT: "microsoft",
+} as const;
+
+export type CalendarProvider = (typeof CALENDAR_PROVIDERS)[keyof typeof CALENDAR_PROVIDERS];
+
 export type CalendarEventSourceType =
   (typeof CALENDAR_EVENT_SOURCE_TYPES)[keyof typeof CALENDAR_EVENT_SOURCE_TYPES];
 

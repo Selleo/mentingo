@@ -22,7 +22,7 @@ describe("mapMicrosoftGraphEvent", () => {
       mapMicrosoftGraphEvent(event({ showAs: "workingElsewhere", isCancelled: true })),
     ).toEqual(
       expect.objectContaining({
-        microsoftEventId: "event-1",
+        externalEventId: "event-1",
         title: "Planning session",
         startsAt: "2026-07-22T09:00:00.000Z",
         endsAt: "2026-07-22T10:00:00.000Z",

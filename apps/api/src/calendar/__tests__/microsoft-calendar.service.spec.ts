@@ -1,7 +1,8 @@
-import { MICROSOFT_CALENDAR_CONNECTION_STATUSES } from "@repo/shared";
+import { CALENDAR_PROVIDERS, MICROSOFT_CALENDAR_CONNECTION_STATUSES } from "@repo/shared";
 
 import { MicrosoftGraphError } from "../clients/microsoft-graph-api.client";
 import { MicrosoftCalendarService } from "../services/microsoft-calendar.service";
+import { MICROSOFT_CALENDAR_SYNC_REASONS } from "../types/microsoft-calendar.types";
 
 import type { MicrosoftCalendarConnection } from "../types/microsoft-calendar.types";
 
@@ -10,11 +11,12 @@ const connection = (overrides: Partial<MicrosoftCalendarConnection> = {}) =>
     id: "f83a0c69-0271-47e3-a052-958924c8d68b",
     tenantId: "a4d63c7f-018b-4c8c-8b29-04ab4e94a67e",
     userId: "07dde027-268e-4a98-b740-f28ac979614f",
-    microsoftAccountId: "microsoft-user",
-    microsoftEmail: "calendar@example.com",
+    provider: CALENDAR_PROVIDERS.MICROSOFT,
+    accountId: "microsoft-user",
+    accountEmail: "calendar@example.com",
     status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED,
     errorCode: null,
-    deltaLink: "delta-1",
+    syncCursor: "delta-1",
     syncWindowStart: "2026-06-01T00:00:00.000Z",
     syncWindowEnd: "2027-01-01T00:00:00.000Z",
     windowBuiltAt: new Date().toISOString(),
@@ -23,6 +25,10 @@ const connection = (overrides: Partial<MicrosoftCalendarConnection> = {}) =>
     subscriptionId: "subscription-1",
     subscriptionClientState: "client-state",
     subscriptionExpiresAt: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+    outboundSyncEnabled: true,
+    outboundStatus: "connected",
+    outboundErrorCode: null,
+    lastOutboundSyncAt: null,
     refreshTokenCiphertext: "ciphertext",
     refreshTokenIv: "iv",
     refreshTokenTag: "tag",
@@ -37,6 +43,7 @@ const connection = (overrides: Partial<MicrosoftCalendarConnection> = {}) =>
 describe("MicrosoftCalendarService synchronization", () => {
   const repository = {
     getConnectionById: jest.fn(),
+    getConnectionByUserId: jest.fn(),
     getConnectionBySubscriptionId: jest.fn(),
     updateConnection: jest.fn(),
     upsertEvent: jest.fn(),
@@ -75,6 +82,7 @@ describe("MicrosoftCalendarService synchronization", () => {
     jest.clearAllMocks();
     syncQueue.enqueue.mockClear();
     repository.getConnectionById.mockResolvedValue(connection());
+    repository.getConnectionByUserId.mockResolvedValue(connection());
     repository.updateConnection.mockResolvedValue(connection());
     tokenEncryption.decrypt.mockReturnValue("refresh-token");
     graph.refreshAccessToken.mockResolvedValue({ access_token: "access-token" });
@@ -143,15 +151,30 @@ describe("MicrosoftCalendarService synchronization", () => {
     expect(repository.upsertEvent).toHaveBeenCalledWith(
       connection().id,
       connection().userId,
-      expect.objectContaining({ microsoftEventId: "event-1" }),
+      expect.objectContaining({ externalEventId: "event-1" }),
     );
     expect(repository.removeEvents).toHaveBeenCalledWith(connection().id, ["event-removed"]);
     expect(repository.updateConnection).toHaveBeenLastCalledWith(
       connection().id,
       expect.objectContaining({
         status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED,
-        deltaLink: "delta-final",
+        syncCursor: "delta-final",
       }),
+    );
+  });
+
+  it("does not let webhook syncs start the manual sync cooldown", async () => {
+    graph.getDeltaPage.mockResolvedValue({ value: [], "@odata.deltaLink": "delta-final" });
+
+    await service.synchronizeConnection(
+      connection().id,
+      false,
+      MICROSOFT_CALENDAR_SYNC_REASONS.WEBHOOK,
+    );
+
+    expect(repository.updateConnection).toHaveBeenLastCalledWith(
+      connection().id,
+      expect.not.objectContaining({ lastSyncCompletedAt: expect.anything() }),
     );
   });
 

@@ -71,12 +71,12 @@ export class MicrosoftCalendarOutboundService {
             connectionId,
             calendarEventId: candidate.calendarEventId,
             userId: candidate.recipientId,
-            microsoftEventId: event.id,
+            externalEventId: event.id,
           });
         } else {
           try {
             await this.runGraphOperation("update event", () =>
-              this.graph.updateEvent(accessToken, calendarId, mapping.microsoftEventId, payload),
+              this.graph.updateEvent(accessToken, calendarId, mapping.externalEventId, payload),
             );
           } catch (error) {
             if (!(error instanceof MicrosoftGraphError) || error.statusCode !== 404) throw error;
@@ -89,7 +89,7 @@ export class MicrosoftCalendarOutboundService {
               connectionId,
               calendarEventId: candidate.calendarEventId,
               userId: candidate.recipientId,
-              microsoftEventId: recreatedEvent.id,
+              externalEventId: recreatedEvent.id,
             });
           }
         }
@@ -100,7 +100,7 @@ export class MicrosoftCalendarOutboundService {
 
         try {
           await this.runGraphOperation("delete event", () =>
-            this.graph.deleteEvent(accessToken, calendarId, mapping.microsoftEventId),
+            this.graph.deleteEvent(accessToken, calendarId, mapping.externalEventId),
           );
         } catch (error) {
           if (!(error instanceof MicrosoftGraphError) || error.statusCode !== 404) throw error;
