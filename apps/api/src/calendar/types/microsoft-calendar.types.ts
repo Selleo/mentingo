@@ -1,5 +1,6 @@
 import type {
   MicrosoftCalendarConnectionStatus,
+  MicrosoftCalendarOutboundStatus,
   OutlookEventAvailability,
   OutlookEventSensitivity,
 } from "@repo/shared";
@@ -42,12 +43,34 @@ export type MicrosoftCalendarSyncJobData = {
   reason: MicrosoftCalendarSyncReason;
 };
 
+export type MicrosoftCalendarOutboundJobData = {
+  tenantId: UUIDType;
+  connectionId: UUIDType;
+  reason: string;
+};
+
+export type OutboundCandidate = {
+  calendarEventId: string;
+  title: Record<string, string> | null;
+  description: Record<string, string> | null;
+  startsAt: string;
+  endsAt: string;
+  allDay: boolean;
+  timezone: string;
+  location: string | null;
+  sourceType: "live_training" | "course_due_date";
+  groupName: string | null;
+  courseTitle: string | null;
+  recipientId: string;
+};
+
 export type MicrosoftCalendarOAuthState = {
   tenantId: UUIDType;
   userId: UUIDType;
   purpose: "microsoft_calendar";
   nonce: string;
   replace: boolean;
+  outboundSync?: boolean;
   origin: string;
   iat: number;
   exp: number;
@@ -84,6 +107,23 @@ export type MicrosoftGraphEvent = {
   webLink?: string | null;
   sensitivity?: "normal" | "personal" | "private" | "confidential" | "unknown";
   "@removed"?: { reason?: string };
+  singleValueExtendedProperties?: Array<{ id: string; value?: string }>;
+};
+
+export type MicrosoftGraphCalendar = {
+  id: string;
+  name?: string | null;
+  isDefaultCalendar?: boolean;
+};
+
+export type MicrosoftGraphOutboundEvent = {
+  subject: string;
+  body: { contentType: "HTML"; content: string };
+  start: MicrosoftGraphDateTime;
+  end: MicrosoftGraphDateTime;
+  isAllDay: boolean;
+  location?: { displayName: string };
+  singleValueExtendedProperties: Array<{ id: string; value: string }>;
 };
 
 export type MicrosoftGraphDeltaPage = {
@@ -135,5 +175,10 @@ export type MicrosoftCalendarConnectionUpdate = Partial<{
   subscriptionId: string | null;
   subscriptionClientState: string | null;
   subscriptionExpiresAt: string | null;
+  outboundSyncEnabled: boolean;
+  outboundStatus: MicrosoftCalendarOutboundStatus;
+  outboundCalendarId: string | null;
+  outboundErrorCode: string | null;
+  lastOutboundSyncAt: string | null;
 }> &
   Partial<EncryptedMicrosoftRefreshToken>;

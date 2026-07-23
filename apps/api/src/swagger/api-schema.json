@@ -15929,6 +15929,33 @@
         }
       }
     },
+    "/api/calendar/microsoft/connection/outbound": {
+      "post": {
+        "operationId": "MicrosoftCalendarController_updateOutbound",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOutboundBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOutboundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/calendar/microsoft/notifications": {
       "post": {
         "operationId": "MicrosoftCalendarController_notifications",
@@ -15995,6 +16022,14 @@
         "parameters": [
           {
             "name": "replace",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outbound",
             "required": false,
             "in": "query",
             "schema": {
@@ -53037,6 +53072,42 @@
               },
               "stale": {
                 "type": "boolean"
+              },
+              "outboundSyncEnabled": {
+                "type": "boolean"
+              },
+              "outboundStatus": {
+                "type": "string"
+              },
+              "outboundCalendarId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "outboundErrorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastOutboundSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               }
             },
             "required": [
@@ -53046,7 +53117,12 @@
               "lastSuccessfulSyncAt",
               "subscriptionExpiresAt",
               "errorCode",
-              "stale"
+              "stale",
+              "outboundSyncEnabled",
+              "outboundStatus",
+              "outboundCalendarId",
+              "outboundErrorCode",
+              "lastOutboundSyncAt"
             ]
           }
         },
@@ -53056,6 +53132,43 @@
       },
       "SyncResponse": {
         "type": "null"
+      },
+      "UpdateOutboundBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "UpdateOutboundResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "authorizationUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "authorizationUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
       },
       "DisconnectResponse": {
         "type": "null"

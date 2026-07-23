@@ -401,11 +401,21 @@
       "title": "Połączyć inne konto Microsoft?",
       "description": "Połączenie konta {{email}} i jego wydarzenia zostaną usunięte przed synchronizacją nowego konta."
     },
+    "outbound": {
+      "title": "Synchronizuj wydarzenia Mentingo z Outlook",
+      "description": "Eksportuj szkolenia na żywo i terminy kursów do osobnego kalendarza Mentingo w Outlook.",
+      "reauthorize": "Włączenie wymaga zgody Microsoft na zapisywanie wydarzeń.",
+      "enable": "Włącz eksport",
+      "disable": "Wyłącz eksport"
+    },
     "toast": {
       "syncQueued": "Rozpoczęto synchronizację Kalendarza Microsoft.",
       "syncFailed": "Nie udało się zsynchronizować Kalendarza Microsoft.",
       "disconnected": "Kalendarz Microsoft został rozłączony.",
-      "disconnectFailed": "Nie udało się rozłączyć Kalendarza Microsoft."
+      "disconnectFailed": "Nie udało się rozłączyć Kalendarza Microsoft.",
+      "outboundEnabled": "Wydarzenia Mentingo będą eksportowane do Outlook.",
+      "outboundDisabled": "Eksport wydarzeń Mentingo został wyłączony.",
+      "outboundFailed": "Nie udało się wyeksportować wydarzeń Mentingo."
     },
     "oauth": {
       "connected": "Trwa łączenie Kalendarza Microsoft i rozpoczęła się pierwsza synchronizacja.",

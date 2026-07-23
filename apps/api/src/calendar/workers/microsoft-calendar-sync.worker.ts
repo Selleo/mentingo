@@ -4,20 +4,25 @@ import { Worker } from "bullmq";
 import { QUEUE_NAMES, QueueService } from "src/queue";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
+import { MicrosoftCalendarOutboundService } from "../services/microsoft-calendar-outbound.service";
 import { MicrosoftCalendarService } from "../services/microsoft-calendar.service";
 
-import type { MicrosoftCalendarSyncJobData } from "../types/microsoft-calendar.types";
+import type {
+  MicrosoftCalendarOutboundJobData,
+  MicrosoftCalendarSyncJobData,
+} from "../types/microsoft-calendar.types";
 
 @Injectable()
 export class MicrosoftCalendarSyncWorker implements OnModuleDestroy {
-  private readonly worker: Worker<MicrosoftCalendarSyncJobData>;
+  private readonly worker: Worker<MicrosoftCalendarSyncJobData | MicrosoftCalendarOutboundJobData>;
 
   constructor(
     queueService: QueueService,
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly microsoftCalendarService: MicrosoftCalendarService,
+    private readonly outboundService: MicrosoftCalendarOutboundService,
   ) {
-    this.worker = new Worker<MicrosoftCalendarSyncJobData>(
+    this.worker = new Worker<MicrosoftCalendarSyncJobData | MicrosoftCalendarOutboundJobData>(
       QUEUE_NAMES.MICROSOFT_CALENDAR_SYNC,
       (job) => this.processJob(job),
       {
@@ -27,9 +32,17 @@ export class MicrosoftCalendarSyncWorker implements OnModuleDestroy {
     );
   }
 
-  private async processJob(job: { id?: string; data: MicrosoftCalendarSyncJobData }) {
+  private async processJob(job: {
+    id?: string;
+    data: MicrosoftCalendarSyncJobData | MicrosoftCalendarOutboundJobData;
+  }) {
     return this.tenantRunner.runWithTenant(job.data.tenantId, () =>
-      this.microsoftCalendarService.synchronizeConnection(job.data.connectionId, job.data.fullSync),
+      "fullSync" in job.data
+        ? this.microsoftCalendarService.synchronizeConnection(
+            job.data.connectionId,
+            job.data.fullSync,
+          )
+        : this.outboundService.reconcileConnection(job.data.connectionId),
     );
   }
 

@@ -11,10 +11,20 @@ export const microsoftCalendarConnectionSchema = Type.Object({
   subscriptionExpiresAt: Type.Union([Type.String(), Type.Null()]),
   errorCode: Type.Union([Type.String(), Type.Null()]),
   stale: Type.Boolean(),
+  outboundSyncEnabled: Type.Boolean(),
+  outboundStatus: Type.String(),
+  outboundCalendarId: Type.Union([Type.String(), Type.Null()]),
+  outboundErrorCode: Type.Union([Type.String(), Type.Null()]),
+  lastOutboundSyncAt: Type.Union([Type.String(), Type.Null()]),
 });
 
 export const microsoftCalendarConnectionResponseSchema = baseResponse(
   microsoftCalendarConnectionSchema,
+);
+
+export const microsoftCalendarOutboundUpdateSchema = Type.Object({ enabled: Type.Boolean() });
+export const microsoftCalendarOutboundUpdateResponseSchema = baseResponse(
+  Type.Object({ authorizationUrl: Type.Union([Type.String(), Type.Null()]) }),
 );
 
 export const microsoftGraphNotificationBodySchema = Type.Object(

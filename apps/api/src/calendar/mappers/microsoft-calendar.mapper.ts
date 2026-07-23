@@ -5,6 +5,8 @@ import {
   type OutlookEventSensitivity,
 } from "@repo/shared";
 
+import { MICROSOFT_MENTINGO_MARKER_PROPERTY } from "../clients/microsoft-graph-api.client";
+
 import type {
   MappedMicrosoftCalendarEvent,
   MicrosoftGraphEvent,
@@ -31,6 +33,13 @@ export const mapMicrosoftGraphEvent = (
   event: MicrosoftGraphEvent,
 ): MappedMicrosoftCalendarEvent | null => {
   if (event["@removed"] || !event.start?.dateTime || !event.end?.dateTime) return null;
+  if (
+    event.singleValueExtendedProperties?.some(
+      (property) => property.id === MICROSOFT_MENTINGO_MARKER_PROPERTY && property.value === "true",
+    )
+  ) {
+    return null;
+  }
 
   const sensitivity =
     SENSITIVITY_MAP[event.sensitivity ?? "normal"] ?? OUTLOOK_EVENT_SENSITIVITIES.NORMAL;

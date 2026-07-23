@@ -7,13 +7,18 @@ import { EnvService } from "src/env/services/env.service";
 import type {
   MicrosoftGraphDeltaPage,
   MicrosoftGraphProfile,
+  MicrosoftGraphCalendar,
+  MicrosoftGraphEvent,
+  MicrosoftGraphOutboundEvent,
   MicrosoftGraphSubscription,
   MicrosoftTokenResponse,
 } from "../types/microsoft-calendar.types";
 
 const MICROSOFT_AUTHORITY = "https://login.microsoftonline.com/common/oauth2/v2.0";
 const MICROSOFT_GRAPH = "https://graph.microsoft.com/v1.0";
-const MICROSOFT_CALENDAR_SCOPES = ["User.Read", "Calendars.Read", "offline_access"];
+export const MICROSOFT_MENTINGO_MARKER_PROPERTY =
+  "String {8f1c0f91-9f8a-4f2e-9e2e-4c454e54494e} Name MentingoManaged";
+const MICROSOFT_CALENDAR_SCOPES = ["User.Read", "Calendars.ReadWrite", "offline_access"];
 
 type MicrosoftGraphErrorResponse = {
   error?: string | { code?: string; message?: string };
@@ -97,6 +102,54 @@ export class MicrosoftGraphApiClient {
     });
   }
 
+  async listCalendars(accessToken: string): Promise<MicrosoftGraphCalendar[]> {
+    const response = await this.graphGet<{ value: MicrosoftGraphCalendar[] }>(
+      `${MICROSOFT_GRAPH}/me/calendars?$select=id,name,isDefaultCalendar`,
+      accessToken,
+    );
+    return response.value;
+  }
+
+  async createCalendar(accessToken: string, name = "Mentingo"): Promise<MicrosoftGraphCalendar> {
+    return this.graphRequest<MicrosoftGraphCalendar>("post", `${MICROSOFT_GRAPH}/me/calendars`, {
+      accessToken,
+      data: { name },
+    });
+  }
+
+  async createEvent(
+    accessToken: string,
+    calendarId: string,
+    event: MicrosoftGraphOutboundEvent,
+  ): Promise<MicrosoftGraphEvent> {
+    return this.graphRequest<MicrosoftGraphEvent>(
+      "post",
+      `${MICROSOFT_GRAPH}/me/calendars/${encodeURIComponent(calendarId)}/events`,
+      { accessToken, data: event },
+    );
+  }
+
+  async updateEvent(
+    accessToken: string,
+    calendarId: string,
+    eventId: string,
+    event: MicrosoftGraphOutboundEvent,
+  ): Promise<void> {
+    await this.graphRequest<void>(
+      "patch",
+      `${MICROSOFT_GRAPH}/me/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+      { accessToken, data: event },
+    );
+  }
+
+  async deleteEvent(accessToken: string, calendarId: string, eventId: string): Promise<void> {
+    await this.graphRequest<void>(
+      "delete",
+      `${MICROSOFT_GRAPH}/me/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`,
+      { accessToken },
+    );
+  }
+
   buildInitialDeltaUrl(start: string, end: string): string {
     const url = new URL(`${MICROSOFT_GRAPH}/me/calendarView/delta`);
 
@@ -104,7 +157,11 @@ export class MicrosoftGraphApiClient {
     url.searchParams.set("endDateTime", end);
     url.searchParams.set(
       "$select",
-      "id,subject,start,end,isAllDay,location,isCancelled,showAs,webLink,sensitivity",
+      "id,subject,start,end,isAllDay,location,isCancelled,showAs,webLink,sensitivity,singleValueExtendedProperties",
+    );
+    url.searchParams.set(
+      "$expand",
+      `singleValueExtendedProperties($filter=id eq '${MICROSOFT_MENTINGO_MARKER_PROPERTY}')`,
     );
 
     return url.toString();

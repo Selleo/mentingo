@@ -27,6 +27,7 @@ import {
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
+  MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {
@@ -106,6 +107,7 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
   MicrosoftCalendarConnectionStatus,
+  MicrosoftCalendarOutboundStatus,
   OutlookEventAvailability,
   OutlookEventSensitivity,
 } from "@repo/shared";
@@ -525,6 +527,14 @@ export const microsoftCalendarConnections = pgTable(
     subscriptionId: text("subscription_id"),
     subscriptionClientState: text("subscription_client_state"),
     subscriptionExpiresAt: timestampWithTimezone({ name: "subscription_expires_at" }),
+    outboundSyncEnabled: boolean("outbound_sync_enabled").notNull().default(false),
+    outboundStatus: text("outbound_status")
+      .$type<MicrosoftCalendarOutboundStatus>()
+      .notNull()
+      .default(MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED),
+    outboundCalendarId: text("outbound_calendar_id"),
+    outboundErrorCode: text("outbound_error_code"),
+    lastOutboundSyncAt: timestampWithTimezone({ name: "last_outbound_sync_at" }),
     tenantId,
   },
   withTenantIdIndex("microsoft_calendar_connections", (table) => ({
@@ -534,6 +544,37 @@ export const microsoftCalendarConnections = pgTable(
     ),
     subscriptionIdx: index("microsoft_calendar_connections_subscription_idx").on(
       table.subscriptionId,
+    ),
+  })),
+);
+
+export const microsoftCalendarOutboundEvents = pgTable(
+  "microsoft_calendar_outbound_events",
+  {
+    ...id,
+    ...timestamps,
+    connectionId: uuid("connection_id")
+      .references(() => microsoftCalendarConnections.id, { onDelete: "cascade" })
+      .notNull(),
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    microsoftEventId: text("microsoft_event_id").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("microsoft_calendar_outbound_events", (table) => ({
+    recipientUniqueIdx: uniqueIndex(
+      "microsoft_calendar_outbound_events_connection_event_user_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.calendarEventId, table.userId),
+    microsoftEventUniqueIdx: uniqueIndex(
+      "microsoft_calendar_outbound_events_connection_microsoft_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.microsoftEventId),
+    eventIdx: index("microsoft_calendar_outbound_events_calendar_event_idx").on(
+      table.tenantId,
+      table.calendarEventId,
     ),
   })),
 );

@@ -13,6 +13,8 @@ import { CurrentUserType } from "src/common/types/current-user.type";
 import { MICROSOFT_CALENDAR_OAUTH_RESULTS } from "./calendar.constants";
 import {
   microsoftCalendarConnectionResponseSchema,
+  microsoftCalendarOutboundUpdateResponseSchema,
+  microsoftCalendarOutboundUpdateSchema,
   microsoftGraphNotificationBodySchema,
   microsoftGraphValidationTokenSchema,
 } from "./schemas/microsoft-calendar-connection.schema";
@@ -42,6 +44,21 @@ export class MicrosoftCalendarController {
   async sync(@CurrentUser() currentUser: CurrentUserType): Promise<null> {
     await this.microsoftCalendarService.requestManualSync(currentUser);
     return null;
+  }
+
+  @Post("connection/outbound")
+  @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
+  @Validate({
+    request: [{ type: "body", schema: microsoftCalendarOutboundUpdateSchema }],
+    response: microsoftCalendarOutboundUpdateResponseSchema,
+  })
+  async updateOutbound(
+    @Body() body: { enabled: boolean },
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    return new BaseResponse(
+      await this.microsoftCalendarService.setOutboundSync(currentUser, body.enabled),
+    );
   }
 
   @Delete("connection")
@@ -120,16 +137,21 @@ export class MicrosoftCalendarOAuthController {
   @Get()
   @RequirePermission(PERMISSIONS.ACCOUNT_READ_SELF)
   @Validate({
-    request: [{ type: "query", name: "replace", schema: Type.Optional(Type.String()) }],
+    request: [
+      { type: "query", name: "replace", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "outbound", schema: Type.Optional(Type.String()) },
+    ],
   })
   async connect(
     @Query("replace") replace: string | undefined,
+    @Query("outbound") outbound: string | undefined,
     @CurrentUser() currentUser: CurrentUserType,
     @Res() response: Response,
   ) {
     const authorizationUrl = await this.microsoftCalendarService.getAuthorizationUrl(
       currentUser,
       replace === "true",
+      outbound === "true",
     );
 
     response.redirect(authorizationUrl);

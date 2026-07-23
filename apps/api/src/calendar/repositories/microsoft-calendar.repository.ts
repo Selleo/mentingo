@@ -1,14 +1,23 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
-import { and, eq, inArray, isNull, lt, notInArray, or, sql } from "drizzle-orm";
+import { LIVE_TRAINING_LINK_ENTITY_TYPES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import { and, eq, gt, inArray, isNotNull, isNull, lt, notInArray, or, sql } from "drizzle-orm";
+import { aliasedTable } from "drizzle-orm/alias";
 
 import { DatabasePg, type UUIDType } from "src/common";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
+  courses,
+  groupCourses,
+  groupUsers,
+  groups,
+  liveTrainingLinks,
+  liveTrainingMembers,
+  liveTrainings,
   microsoftCalendarConnections,
   microsoftCalendarEvents,
+  microsoftCalendarOutboundEvents,
   users,
 } from "src/storage/schema";
 
@@ -94,6 +103,169 @@ export class MicrosoftCalendarRepository {
           eq(microsoftCalendarConnections.status, "error"),
         ),
       );
+  }
+
+  async listOutboundConnections() {
+    return this.db
+      .select()
+      .from(microsoftCalendarConnections)
+      .where(eq(microsoftCalendarConnections.outboundSyncEnabled, true));
+  }
+
+  async getOutboundMapping(connectionId: UUIDType, calendarEventId: UUIDType, userId: UUIDType) {
+    const [mapping] = await this.db
+      .select()
+      .from(microsoftCalendarOutboundEvents)
+      .where(
+        and(
+          eq(microsoftCalendarOutboundEvents.connectionId, connectionId),
+          eq(microsoftCalendarOutboundEvents.calendarEventId, calendarEventId),
+          eq(microsoftCalendarOutboundEvents.userId, userId),
+        ),
+      )
+      .limit(1);
+    return mapping ?? null;
+  }
+
+  async upsertOutboundMapping(input: {
+    connectionId: UUIDType;
+    calendarEventId: UUIDType;
+    userId: UUIDType;
+    microsoftEventId: string;
+  }) {
+    const [mapping] = await this.db
+      .insert(microsoftCalendarOutboundEvents)
+      .values(input)
+      .onConflictDoUpdate({
+        target: [
+          microsoftCalendarOutboundEvents.tenantId,
+          microsoftCalendarOutboundEvents.connectionId,
+          microsoftCalendarOutboundEvents.calendarEventId,
+          microsoftCalendarOutboundEvents.userId,
+        ],
+        set: { microsoftEventId: input.microsoftEventId, updatedAt: new Date().toISOString() },
+      })
+      .returning();
+    return mapping;
+  }
+
+  async listOutboundMappings(connectionId: UUIDType) {
+    return this.db
+      .select()
+      .from(microsoftCalendarOutboundEvents)
+      .where(eq(microsoftCalendarOutboundEvents.connectionId, connectionId));
+  }
+
+  async listOutboundCandidates(connectionId: UUIDType, start: string, end: string) {
+    const [connection] = await this.db
+      .select({ userId: microsoftCalendarConnections.userId })
+      .from(microsoftCalendarConnections)
+      .where(eq(microsoftCalendarConnections.id, connectionId))
+      .limit(1);
+    if (!connection) return [];
+
+    try {
+      const liveTrainingAuthor = aliasedTable(users, "live_training_author");
+      const liveTrainingCandidates = this.db
+        .selectDistinct({
+          calendarEventId: calendarEvents.id,
+          uid: calendarEvents.uid,
+          title: calendarEvents.title,
+          description: calendarEvents.description,
+          startsAt: calendarEvents.startsAt,
+          endsAt: calendarEvents.endsAt,
+          allDay: calendarEvents.allDay,
+          timezone: calendarEvents.timezone,
+          location: calendarEvents.location,
+          sourceType: sql<"live_training" | "course_due_date">`'live_training'`,
+          sourceId: liveTrainings.id,
+          recipientId: users.id,
+          groupName: sql<string | null>`NULL::text`,
+          courseTitle: sql<string | null>`NULL::text`,
+        })
+        .from(calendarEvents)
+        .innerJoin(liveTrainings, eq(liveTrainings.calendarEventId, calendarEvents.id))
+        .innerJoin(liveTrainingAuthor, eq(liveTrainingAuthor.id, liveTrainings.authorId))
+        .leftJoin(liveTrainingMembers, eq(liveTrainingMembers.liveTrainingId, liveTrainings.id))
+        .leftJoin(liveTrainingLinks, eq(liveTrainingLinks.liveTrainingId, liveTrainings.id))
+        .leftJoin(
+          groupCourses,
+          and(
+            eq(groupCourses.courseId, liveTrainingLinks.entityId),
+            eq(liveTrainingLinks.entityType, LIVE_TRAINING_LINK_ENTITY_TYPES.COURSE),
+          ),
+        )
+        .leftJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+        .innerJoin(
+          users,
+          or(
+            eq(users.id, liveTrainingAuthor.id),
+            eq(users.id, liveTrainingMembers.userId),
+            eq(users.id, groupUsers.userId),
+          ),
+        )
+        .where(
+          and(
+            lt(calendarEvents.startsAt, end),
+            gt(calendarEvents.endsAt, start),
+            isNull(calendarEvents.deletedAt),
+            isNull(liveTrainings.deletedAt),
+            eq(users.id, connection.userId),
+          ),
+        );
+
+      const courseDueDateCandidates = this.db
+        .selectDistinct({
+          calendarEventId: calendarEvents.id,
+          uid: calendarEvents.uid,
+          title: calendarEvents.title,
+          description: calendarEvents.description,
+          startsAt: calendarEvents.startsAt,
+          endsAt: calendarEvents.endsAt,
+          allDay: calendarEvents.allDay,
+          timezone: calendarEvents.timezone,
+          location: calendarEvents.location,
+          sourceType: sql<"live_training" | "course_due_date">`'course_due_date'`,
+          sourceId: groupCourses.courseId,
+          recipientId: users.id,
+          groupName: sql<string | null>`${groups.name} ->> COALESCE(${groups.baseLanguage}, 'en')`,
+          courseTitle: sql<
+            string | null
+          >`${courses.title} ->> COALESCE(${courses.baseLanguage}, 'en')`,
+        })
+        .from(calendarEvents)
+        .innerJoin(groupCourses, eq(groupCourses.calendarEventId, calendarEvents.id))
+        .innerJoin(groups, eq(groups.id, groupCourses.groupId))
+        .innerJoin(courses, eq(courses.id, groupCourses.courseId))
+        .innerJoin(groupUsers, eq(groupUsers.groupId, groupCourses.groupId))
+        .innerJoin(users, or(eq(users.id, courses.authorId), eq(users.id, groupUsers.userId)))
+        .where(
+          and(
+            lt(calendarEvents.startsAt, end),
+            gt(calendarEvents.endsAt, start),
+            isNull(calendarEvents.deletedAt),
+            eq(groupCourses.isMandatory, true),
+            isNotNull(groupCourses.dueDate),
+            eq(users.id, connection.userId),
+          ),
+        );
+
+      const [liveTrainingRows, courseDueDateRows] = await Promise.all([
+        liveTrainingCandidates,
+        courseDueDateCandidates,
+      ]);
+
+      return [...liveTrainingRows, ...courseDueDateRows];
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to load Microsoft outbound candidates: ${message}`);
+    }
+  }
+
+  async deleteOutboundMapping(id: UUIDType) {
+    await this.db
+      .delete(microsoftCalendarOutboundEvents)
+      .where(eq(microsoftCalendarOutboundEvents.id, id));
   }
 
   async listConnectionsNeedingSubscriptionRenewal(renewBefore: string) {

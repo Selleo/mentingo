@@ -24,6 +24,17 @@ export const MICROSOFT_CALENDAR_CONNECTION_STATUSES = {
   RECONNECT_REQUIRED: "reconnect_required",
 } as const;
 
+export const MICROSOFT_CALENDAR_OUTBOUND_STATUSES = {
+  DISABLED: "disabled",
+  QUEUED: "queued",
+  SYNCING: "syncing",
+  CONNECTED: "connected",
+  ERROR: "error",
+} as const;
+
+export type MicrosoftCalendarOutboundStatus =
+  (typeof MICROSOFT_CALENDAR_OUTBOUND_STATUSES)[keyof typeof MICROSOFT_CALENDAR_OUTBOUND_STATUSES];
+
 export type MicrosoftCalendarConnectionStatus =
   (typeof MICROSOFT_CALENDAR_CONNECTION_STATUSES)[keyof typeof MICROSOFT_CALENDAR_CONNECTION_STATUSES];
 

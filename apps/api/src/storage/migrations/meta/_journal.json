@@ -1212,6 +1212,20 @@
       "when": 1784666101728,
       "tag": "0172_enable_microsoft_calendar_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 173,
+      "version": "7",
+      "when": 1784794232385,
+      "tag": "0173_microsoft_calendar_outbound_sync",
+      "breakpoints": true
+    },
+    {
+      "idx": 174,
+      "version": "7",
+      "when": 1784794684794,
+      "tag": "0174_enable_microsoft_calendar_outbound_rls",
+      "breakpoints": true
     }
   ]
 }

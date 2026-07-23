@@ -398,11 +398,21 @@
       "title": "Connect a different Microsoft account?",
       "description": "The connection for {{email}} and its imported events will be removed before the new account is synchronized."
     },
+    "outbound": {
+      "title": "Sync Mentingo events to Outlook",
+      "description": "Export live trainings and course due dates to a separate Mentingo calendar in Outlook.",
+      "reauthorize": "Enabling this requires Microsoft permission to write calendar events.",
+      "enable": "Enable export",
+      "disable": "Disable export"
+    },
     "toast": {
       "syncQueued": "Microsoft Calendar sync has started.",
       "syncFailed": "Microsoft Calendar could not be synchronized.",
       "disconnected": "Microsoft Calendar has been disconnected.",
-      "disconnectFailed": "Microsoft Calendar could not be disconnected."
+      "disconnectFailed": "Microsoft Calendar could not be disconnected.",
+      "outboundEnabled": "Mentingo events will be exported to Outlook.",
+      "outboundDisabled": "Mentingo event export has been disabled.",
+      "outboundFailed": "Mentingo events could not be exported."
     },
     "oauth": {
       "connected": "Microsoft Calendar is connecting and the first sync has started.",

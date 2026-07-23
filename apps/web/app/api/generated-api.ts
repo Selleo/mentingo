@@ -7348,10 +7348,25 @@ export interface GetConnectionResponse {
     subscriptionExpiresAt: string | null;
     errorCode: string | null;
     stale: boolean;
+    outboundSyncEnabled: boolean;
+    outboundStatus: string;
+    outboundCalendarId: string | null;
+    outboundErrorCode: string | null;
+    lastOutboundSyncAt: string | null;
   };
 }
 
 export type SyncResponse = null;
+
+export interface UpdateOutboundBody {
+  enabled: boolean;
+}
+
+export interface UpdateOutboundResponse {
+  data: {
+    authorizationUrl: string | null;
+  };
+}
 
 export type DisconnectResponse = null;
 
@@ -15120,6 +15135,25 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     /**
      * No description
      *
+     * @name MicrosoftCalendarControllerUpdateOutbound
+     * @request POST:/api/calendar/microsoft/connection/outbound
+     */
+    microsoftCalendarControllerUpdateOutbound: (
+      data: UpdateOutboundBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateOutboundResponse, any>({
+        path: `/api/calendar/microsoft/connection/outbound`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
      * @name MicrosoftCalendarControllerNotifications
      * @request POST:/api/calendar/microsoft/notifications
      */
@@ -15170,6 +15204,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     microsoftCalendarOAuthControllerConnect: (
       query?: {
         replace?: string;
+        outbound?: string;
       },
       params: RequestParams = {},
     ) =>

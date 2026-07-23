@@ -397,11 +397,21 @@
       "title": "Připojit jiný účet Microsoft?",
       "description": "Připojení účtu {{email}} a jeho importované události budou před synchronizací nového účtu odstraněny."
     },
+    "outbound": {
+      "title": "Synchronizovat události Mentingo s Outlook",
+      "description": "Exportujte živá školení a termíny kurzů do samostatného kalendáře Mentingo v Outlooku.",
+      "reauthorize": "Zapnutí vyžaduje oprávnění Microsoftu zapisovat události kalendáře.",
+      "enable": "Povolit export",
+      "disable": "Zakázat export"
+    },
     "toast": {
       "syncQueued": "Synchronizace Kalendáře Microsoft byla zahájena.",
       "syncFailed": "Kalendář Microsoft se nepodařilo synchronizovat.",
       "disconnected": "Kalendář Microsoft byl odpojen.",
-      "disconnectFailed": "Kalendář Microsoft se nepodařilo odpojit."
+      "disconnectFailed": "Kalendář Microsoft se nepodařilo odpojit.",
+      "outboundEnabled": "Události Mentingo se budou exportovat do Outlooku.",
+      "outboundDisabled": "Export událostí Mentingo byl zakázán.",
+      "outboundFailed": "Události Mentingo se nepodařilo exportovat."
     },
     "oauth": {
       "connected": "Kalendář Microsoft se připojuje a byla zahájena první synchronizace.",

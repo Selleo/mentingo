@@ -10,6 +10,7 @@ import {
 } from "@nestjs/common";
 import {
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
+  MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   MICROSOFT_CALENDAR_PUBLIC_STATUSES,
 } from "@repo/shared";
 
@@ -73,6 +74,11 @@ export class MicrosoftCalendarService {
         subscriptionExpiresAt: null,
         errorCode: null,
         stale: false,
+        outboundSyncEnabled: false,
+        outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
+        outboundCalendarId: null,
+        outboundErrorCode: null,
+        lastOutboundSyncAt: null,
       };
     }
 
@@ -86,10 +92,15 @@ export class MicrosoftCalendarService {
       stale:
         connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR ||
         connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.RECONNECT_REQUIRED,
+      outboundSyncEnabled: connection.outboundSyncEnabled,
+      outboundStatus: connection.outboundStatus,
+      outboundCalendarId: connection.outboundCalendarId,
+      outboundErrorCode: connection.outboundErrorCode,
+      lastOutboundSyncAt: connection.lastOutboundSyncAt,
     };
   }
 
-  async getAuthorizationUrl(currentUser: CurrentUserType, replace: boolean) {
+  async getAuthorizationUrl(currentUser: CurrentUserType, replace: boolean, outboundSync = false) {
     if (!(await this.graph.isConfigured())) {
       throw new ForbiddenException("microsoftCalendar.errors.unavailable");
     }
@@ -102,6 +113,7 @@ export class MicrosoftCalendarService {
       purpose: "microsoft_calendar",
       nonce: crypto.randomBytes(24).toString("base64url"),
       replace,
+      outboundSync,
       origin,
     });
 
@@ -154,6 +166,12 @@ export class MicrosoftCalendarService {
             errorCode: null,
             deltaLink: null,
             windowBuiltAt: null,
+            outboundSyncEnabled: state.outboundSync || existing.outboundSyncEnabled,
+            outboundStatus:
+              state.outboundSync || existing.outboundSyncEnabled
+                ? MICROSOFT_CALENDAR_OUTBOUND_STATUSES.QUEUED
+                : MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
+            outboundErrorCode: null,
           })
         : await this.repository.createConnection({
             userId: state.userId,
@@ -171,7 +189,35 @@ export class MicrosoftCalendarService {
       reason: MICROSOFT_CALENDAR_SYNC_REASONS.INITIAL,
     });
 
+    if (connection.outboundSyncEnabled) {
+      await this.syncQueue.enqueueOutbound({
+        tenantId: state.tenantId,
+        connectionId: connection.id,
+        reason: "authorization",
+      });
+    }
+
     return { origin: state.origin, result: MICROSOFT_CALENDAR_OAUTH_RESULTS.CONNECTED };
+  }
+
+  async setOutboundSync(currentUser: CurrentUserType, enabled: boolean) {
+    const connection = await this.repository.getConnectionByUserId(currentUser.userId);
+    if (!connection) throw new NotFoundException("microsoftCalendar.errors.connectionNotFound");
+
+    if (!enabled) {
+      await this.repository.updateConnection(connection.id, {
+        outboundSyncEnabled: false,
+        outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
+        outboundErrorCode: null,
+      });
+      return { authorizationUrl: null };
+    }
+
+    if (!connection.outboundSyncEnabled) {
+      return { authorizationUrl: await this.getAuthorizationUrl(currentUser, false, true) };
+    }
+
+    return { authorizationUrl: null };
   }
 
   async handleAuthorizationFailure(stateValue: string, error: unknown) {
@@ -231,6 +277,14 @@ export class MicrosoftCalendarService {
       fullSync: false,
       reason: MICROSOFT_CALENDAR_SYNC_REASONS.MANUAL,
     });
+
+    if (connection.outboundSyncEnabled) {
+      await this.syncQueue.enqueueOutbound({
+        tenantId: currentUser.tenantId,
+        connectionId: connection.id,
+        reason: MICROSOFT_CALENDAR_SYNC_REASONS.MANUAL,
+      });
+    }
   }
 
   async disconnect(currentUser: CurrentUserType) {

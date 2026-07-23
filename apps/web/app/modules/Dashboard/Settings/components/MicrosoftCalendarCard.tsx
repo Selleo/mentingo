@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDisconnectMicrosoftCalendar } from "~/api/mutations/calendar/useDisconnectMicrosoftCalendar";
+import { useSetMicrosoftCalendarOutboundSync } from "~/api/mutations/calendar/useSetMicrosoftCalendarOutboundSync";
 import { useSyncMicrosoftCalendar } from "~/api/mutations/calendar/useSyncMicrosoftCalendar";
 import { useMicrosoftCalendarConnection } from "~/api/queries/calendar/useMicrosoftCalendarConnection";
 import { Icon } from "~/components/Icon";
@@ -65,6 +66,8 @@ export function MicrosoftCalendarCard() {
   const { mutateAsync: syncCalendar, isPending: isSyncPending } = useSyncMicrosoftCalendar();
   const { mutateAsync: disconnectCalendar, isPending: isDisconnectPending } =
     useDisconnectMicrosoftCalendar();
+  const { mutateAsync: setOutboundSync, isPending: isOutboundPending } =
+    useSetMicrosoftCalendarOutboundSync();
 
   useEffect(() => {
     const result = searchParams.get("microsoftCalendar");
@@ -98,6 +101,7 @@ export function MicrosoftCalendarCard() {
   const startAuthorization = (replace = false) => {
     const url = new URL(`${baseUrl}/api/auth/microsoft-calendar`);
     url.searchParams.set("replace", String(replace));
+    url.searchParams.set("outbound", "true");
     window.location.assign(url.toString());
   };
 
@@ -144,6 +148,10 @@ export function MicrosoftCalendarCard() {
         {t("microsoftCalendar.action.sync")}
       </Button>
     );
+  };
+
+  const toggleOutboundSync = async () => {
+    await setOutboundSync(!connection.outboundSyncEnabled);
   };
 
   return (
@@ -210,6 +218,28 @@ export function MicrosoftCalendarCard() {
               </dd>
             </div>
           </dl>
+          <div className="flex items-start justify-between gap-4 rounded-lg border p-4">
+            <div>
+              <p className="text-sm font-semibold">{t("microsoftCalendar.outbound.title")}</p>
+              <p className="mt-1 text-sm text-neutral-600">
+                {t("microsoftCalendar.outbound.description")}
+              </p>
+              {!connection.outboundSyncEnabled && connection.status !== "disconnected" ? (
+                <p className="mt-2 text-xs text-neutral-500">
+                  {t("microsoftCalendar.outbound.reauthorize")}
+                </p>
+              ) : null}
+            </div>
+            <Button
+              variant={connection.outboundSyncEnabled ? "outline" : "default"}
+              disabled={isOutboundPending || reconnectRequired}
+              onClick={toggleOutboundSync}
+            >
+              {connection.outboundSyncEnabled
+                ? t("microsoftCalendar.outbound.disable")
+                : t("microsoftCalendar.outbound.enable")}
+            </Button>
+          </div>
         </CardContent>
       )}
 

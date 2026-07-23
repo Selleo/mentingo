@@ -1,5 +1,6 @@
 import { OUTLOOK_EVENT_AVAILABILITIES, OUTLOOK_EVENT_SENSITIVITIES } from "@repo/shared";
 
+import { MICROSOFT_MENTINGO_MARKER_PROPERTY } from "../clients/microsoft-graph-api.client";
 import { mapMicrosoftGraphEvent } from "../mappers/microsoft-calendar.mapper";
 
 import type { MicrosoftGraphEvent } from "../types/microsoft-calendar.types";
@@ -63,5 +64,17 @@ describe("mapMicrosoftGraphEvent", () => {
 
   it("returns null for delta tombstones", () => {
     expect(mapMicrosoftGraphEvent(event({ "@removed": { reason: "deleted" } }))).toBeNull();
+  });
+
+  it("excludes Mentingo-managed Outlook copies from inbound import", () => {
+    expect(
+      mapMicrosoftGraphEvent(
+        event({
+          singleValueExtendedProperties: [
+            { id: MICROSOFT_MENTINGO_MARKER_PROPERTY, value: "true" },
+          ],
+        }),
+      ),
+    ).toBeNull();
   });
 });

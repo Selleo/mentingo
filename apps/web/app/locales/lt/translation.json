@@ -397,11 +397,21 @@
       "title": "Prijungti kitą Microsoft paskyrą?",
       "description": "Paskyros {{email}} ryšys ir importuoti įvykiai bus pašalinti prieš sinchronizuojant naują paskyrą."
     },
+    "outbound": {
+      "title": "Sinchronizuoti Mentingo įvykius su Outlook",
+      "description": "Eksportuokite tiesioginius mokymus ir kursų terminus į atskirą Mentingo kalendorių Outlook.",
+      "reauthorize": "Įjungus reikia Microsoft leidimo įrašyti kalendoriaus įvykius.",
+      "enable": "Įjungti eksportą",
+      "disable": "Išjungti eksportą"
+    },
     "toast": {
       "syncQueued": "Microsoft kalendoriaus sinchronizavimas pradėtas.",
       "syncFailed": "Nepavyko sinchronizuoti Microsoft kalendoriaus.",
       "disconnected": "Microsoft kalendorius atjungtas.",
-      "disconnectFailed": "Nepavyko atjungti Microsoft kalendoriaus."
+      "disconnectFailed": "Nepavyko atjungti Microsoft kalendoriaus.",
+      "outboundEnabled": "Mentingo įvykiai bus eksportuojami į Outlook.",
+      "outboundDisabled": "Mentingo įvykių eksportas išjungtas.",
+      "outboundFailed": "Nepavyko eksportuoti Mentingo įvykių."
     },
     "oauth": {
       "connected": "Microsoft kalendorius jungiamas ir pradėtas pirmasis sinchronizavimas.",

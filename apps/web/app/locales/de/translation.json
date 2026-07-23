@@ -397,11 +397,21 @@
       "title": "Anderes Microsoft-Konto verbinden?",
       "description": "Die Verbindung für {{email}} und deren importierte Termine werden vor der Synchronisierung des neuen Kontos entfernt."
     },
+    "outbound": {
+      "title": "Mentingo-Ereignisse mit Outlook synchronisieren",
+      "description": "Live-Schulungen und Kursfristen in einen separaten Mentingo-Kalender in Outlook exportieren.",
+      "reauthorize": "Dafür benötigt Microsoft die Berechtigung, Kalenderereignisse zu schreiben.",
+      "enable": "Export aktivieren",
+      "disable": "Export deaktivieren"
+    },
     "toast": {
       "syncQueued": "Die Microsoft-Kalender-Synchronisierung wurde gestartet.",
       "syncFailed": "Der Microsoft-Kalender konnte nicht synchronisiert werden.",
       "disconnected": "Der Microsoft-Kalender wurde getrennt.",
-      "disconnectFailed": "Der Microsoft-Kalender konnte nicht getrennt werden."
+      "disconnectFailed": "Der Microsoft-Kalender konnte nicht getrennt werden.",
+      "outboundEnabled": "Mentingo-Ereignisse werden nach Outlook exportiert.",
+      "outboundDisabled": "Der Export von Mentingo-Ereignissen wurde deaktiviert.",
+      "outboundFailed": "Mentingo-Ereignisse konnten nicht exportiert werden."
     },
     "oauth": {
       "connected": "Der Microsoft-Kalender wird verbunden und die erste Synchronisierung wurde gestartet.",

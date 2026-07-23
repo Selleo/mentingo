@@ -33,6 +33,16 @@ export class MicrosoftCalendarCron {
           }),
         { batchSize: MICROSOFT_CALENDAR_SYNC_BATCH_SIZE },
       );
+      await processInBatches(
+        connections.filter((connection) => connection.outboundSyncEnabled),
+        (connection) =>
+          this.syncQueue.enqueueOutbound({
+            tenantId,
+            connectionId: connection.id,
+            reason: MICROSOFT_CALENDAR_SYNC_REASONS.RECONCILIATION,
+          }),
+        { batchSize: MICROSOFT_CALENDAR_SYNC_BATCH_SIZE },
+      );
     });
   }
 
