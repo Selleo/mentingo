@@ -2,7 +2,9 @@ import { Test } from "@nestjs/testing";
 
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
+import { AutomationDataResolverService } from "./automation-data-resolver.service";
 import { AutomationRunnerService } from "./automation-runner.service";
+import { AutomationTemplateService } from "./automation-template.service";
 
 import type { TestingModule } from "@nestjs/testing";
 
@@ -15,6 +17,14 @@ describe("AutomationRunnerService", () => {
         AutomationRunnerService,
         {
           provide: AutomationStepsService,
+          useValue: {},
+        },
+        {
+          provide: AutomationDataResolverService,
+          useValue: {},
+        },
+        {
+          provide: AutomationTemplateService,
           useValue: {},
         },
       ],
