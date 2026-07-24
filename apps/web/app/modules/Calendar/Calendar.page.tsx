@@ -3,7 +3,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import { redirect } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { CALENDAR_EVENT_SOURCE_TYPES, PERMISSIONS } from "@repo/shared";
 import { RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useReducer, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -105,8 +105,7 @@ export default function CalendarPage() {
   const calendarRef = useRef<FullCalendar>(null);
 
   const language = useLanguageStore((state) => state.language);
-  const calendarView = useCalendarViewStore((state) => state.view);
-  const setCalendarView = useCalendarViewStore((state) => state.setView);
+  const { view: calendarView, setView: setCalendarView } = useCalendarViewStore();
 
   useEffect(() => {
     const api = calendarRef.current?.getApi();
@@ -208,9 +207,9 @@ export default function CalendarPage() {
 
   const renderEventContent = (eventInfo: EventContentArg) => {
     const sourceType = eventInfo.event.extendedProps.sourceType as string;
-    const isOutlook = sourceType === "microsoft_outlook";
+    const isOutlook = sourceType === CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK;
     let sourceLabelKey = "calendarView.details.sourceType.courseDueDate";
-    if (sourceType === "live_training") {
+    if (sourceType === CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING) {
       sourceLabelKey = "calendarView.details.sourceType.liveTraining";
     }
     if (isOutlook) {
@@ -220,11 +219,11 @@ export default function CalendarPage() {
 
     return (
       <span className="flex min-w-0 items-center gap-1.5">
-        {isOutlook ? (
+        {isOutlook && (
           <span className="calendar-event__microsoft-badge" aria-hidden="true">
             <Icon name="Microsoft" className="size-2.5" />
           </span>
-        ) : null}
+        )}
         <span className="sr-only">{sourceLabel}: </span>
         <span className="truncate">{eventInfo.event.title}</span>
       </span>

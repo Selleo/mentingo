@@ -9,10 +9,8 @@ import { MicrosoftGraphApiClient } from "./clients/microsoft-graph-api.client";
 import { CourseDueDateCalendarHandler } from "./handlers/course-due-date-calendar.handler";
 import { MicrosoftCalendarOutboundHandler } from "./handlers/microsoft-calendar-outbound.handler";
 import { MicrosoftCalendarUserLifecycleHandler } from "./handlers/microsoft-calendar-user-lifecycle.handler";
-import {
-  MicrosoftCalendarController,
-  MicrosoftCalendarOAuthController,
-} from "./microsoft-calendar.controller";
+import { MicrosoftCalendarOAuthController } from "./microsoft-calendar-oauth.controller";
+import { MicrosoftCalendarController } from "./microsoft-calendar.controller";
 import { CalendarRepository } from "./repositories/calendar.repository";
 import { MicrosoftCalendarRepository } from "./repositories/microsoft-calendar.repository";
 import { CalendarService } from "./services/calendar.service";

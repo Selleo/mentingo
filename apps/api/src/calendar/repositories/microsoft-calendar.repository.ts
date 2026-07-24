@@ -1,7 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import {
+  CALENDAR_EVENT_SOURCE_TYPES,
+  CALENDAR_EVENT_STATUSES,
   CALENDAR_PROVIDERS,
   LIVE_TRAINING_LINK_ENTITY_TYPES,
+  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
 import { and, eq, gt, inArray, isNotNull, isNull, lt, notInArray, or, sql } from "drizzle-orm";
@@ -31,6 +34,7 @@ import type {
   MappedMicrosoftCalendarEvent,
   MicrosoftCalendarConnectionCreateInput,
   MicrosoftCalendarConnectionUpdate,
+  MicrosoftCalendarOutboundSourceType,
   OutboundCandidate,
 } from "../types/microsoft-calendar.types";
 
@@ -38,7 +42,7 @@ import type {
 export class MicrosoftCalendarRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
-    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    @Inject(DB_ADMIN) private readonly databaseAdmin: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -76,7 +80,7 @@ export class MicrosoftCalendarRepository {
   }
 
   async getConnectionBySubscriptionId(subscriptionId: string) {
-    const [connection] = await this.dbAdmin
+    const [connection] = await this.databaseAdmin
       .select()
       .from(calendarConnections)
       .where(
@@ -118,8 +122,8 @@ export class MicrosoftCalendarRepository {
       .from(calendarConnections)
       .where(
         or(
-          eq(calendarConnections.status, "connected"),
-          eq(calendarConnections.status, "error"),
+          eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED),
+          eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR),
           eq(calendarConnections.provider, CALENDAR_PROVIDERS.MICROSOFT),
         ),
       );
@@ -215,7 +219,7 @@ export class MicrosoftCalendarRepository {
           allDay: calendarEvents.allDay,
           timezone: calendarEvents.timezone,
           location: calendarEvents.location,
-          sourceType: sql<"live_training" | "course_due_date">`'live_training'`,
+          sourceType: sql<MicrosoftCalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.LIVE_TRAINING}`,
           sourceId: liveTrainings.id,
           recipientId: users.id,
           groupName: sql<string | null>`NULL::text`,
@@ -272,7 +276,7 @@ export class MicrosoftCalendarRepository {
           allDay: calendarEvents.allDay,
           timezone: calendarEvents.timezone,
           location: calendarEvents.location,
-          sourceType: sql<"live_training" | "course_due_date">`'course_due_date'`,
+          sourceType: sql<MicrosoftCalendarOutboundSourceType>`${CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE}`,
           sourceId: groupCourses.courseId,
           recipientId: users.id,
           groupName: this.localizationService.getLocalizedSqlField(
@@ -326,7 +330,10 @@ export class MicrosoftCalendarRepository {
       .from(calendarConnections)
       .where(
         and(
-          or(eq(calendarConnections.status, "connected"), eq(calendarConnections.status, "error")),
+          or(
+            eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED),
+            eq(calendarConnections.status, MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR),
+          ),
           or(
             sql`${calendarConnections.subscriptionExpiresAt} IS NULL`,
             lt(calendarConnections.subscriptionExpiresAt, renewBefore),
@@ -352,7 +359,9 @@ export class MicrosoftCalendarRepository {
           allDay: event.allDay,
           timezone: event.timezone,
           location: event.location,
-          status: event.isCancelled ? "cancelled" : "scheduled",
+          status: event.isCancelled
+            ? CALENDAR_EVENT_STATUSES.CANCELLED
+            : CALENDAR_EVENT_STATUSES.SCHEDULED,
         })
         .onConflictDoUpdate({
           target: [calendarEvents.tenantId, calendarEvents.uid],
@@ -364,7 +373,9 @@ export class MicrosoftCalendarRepository {
             allDay: event.allDay,
             timezone: event.timezone,
             location: event.location,
-            status: event.isCancelled ? "cancelled" : "scheduled",
+            status: event.isCancelled
+              ? CALENDAR_EVENT_STATUSES.CANCELLED
+              : CALENDAR_EVENT_STATUSES.SCHEDULED,
             deletedAt: null,
             sequence: sql`${calendarEvents.sequence} + 1`,
           },

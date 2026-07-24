@@ -23,6 +23,8 @@ import { TenantStateService } from "src/storage/db/tenant-state.service";
 
 import {
   MANUAL_SYNC_COOLDOWN_MS,
+  MICROSOFT_CALENDAR_LIFECYCLE_EVENTS,
+  MICROSOFT_CALENDAR_OAUTH_PURPOSE,
   MICROSOFT_CALENDAR_OAUTH_RESULTS,
   SUBSCRIPTION_LIFETIME_DAYS,
   SUBSCRIPTION_RENEWAL_WINDOW_MS,
@@ -52,19 +54,19 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 @Injectable()
 export class MicrosoftCalendarService {
   constructor(
-    private readonly repository: MicrosoftCalendarRepository,
-    private readonly graph: MicrosoftGraphApiClient,
-    private readonly tokenEncryption: MicrosoftCalendarTokenEncryptionService,
-    private readonly syncQueue: MicrosoftCalendarSyncQueueService,
-    private readonly tenantState: TenantStateService,
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly microsoftGraphApiClient: MicrosoftGraphApiClient,
+    private readonly microsoftCalendarTokenEncryptionService: MicrosoftCalendarTokenEncryptionService,
+    private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
+    private readonly tenantStateService: TenantStateService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
   async getConnection(currentUser: CurrentUserType) {
     const [available, connection] = await Promise.all([
-      this.graph.isConfigured(),
-      this.repository.getConnectionByUserId(currentUser.userId),
+      this.microsoftGraphApiClient.isConfigured(),
+      this.microsoftCalendarRepository.getConnectionByUserId(currentUser.userId),
     ]);
 
     if (!connection) {
@@ -103,37 +105,37 @@ export class MicrosoftCalendarService {
   }
 
   async getAuthorizationUrl(currentUser: CurrentUserType, replace: boolean, outboundSync = false) {
-    if (!(await this.graph.isConfigured())) {
+    if (!(await this.microsoftGraphApiClient.isConfigured())) {
       throw new ForbiddenException("microsoftCalendar.errors.unavailable");
     }
 
     const origin = await resolveTenantOrigin(this.dbAdmin, currentUser.tenantId);
 
-    const state = await this.tenantState.signMicrosoftCalendar({
+    const state = await this.tenantStateService.signMicrosoftCalendar({
       tenantId: currentUser.tenantId,
       userId: currentUser.userId,
-      purpose: "microsoft_calendar",
+      purpose: MICROSOFT_CALENDAR_OAUTH_PURPOSE,
       nonce: crypto.randomBytes(24).toString("base64url"),
       replace,
       outboundSync,
       origin,
     });
 
-    return this.graph.getAuthorizationUrl(state, this.getCallbackUrl(origin));
+    return this.microsoftGraphApiClient.getAuthorizationUrl(state, this.getCallbackUrl(origin));
   }
 
   async completeAuthorization(input: { code: string; state: string }) {
-    const state = await this.tenantState.verifyMicrosoftCalendar(input.state);
+    const state = await this.tenantStateService.verifyMicrosoftCalendar(input.state);
     if (!state) {
       throw new UnauthorizedException("microsoftCalendar.errors.invalidState");
     }
 
-    const user = await this.repository.getActiveUserById(state.userId);
+    const user = await this.microsoftCalendarRepository.getActiveUserById(state.userId);
     if (!user) {
       throw new UnauthorizedException("microsoftCalendar.errors.invalidState");
     }
 
-    const token = await this.graph.exchangeAuthorizationCode(
+    const token = await this.microsoftGraphApiClient.exchangeAuthorizationCode(
       input.code,
       this.getCallbackUrl(state.origin),
     );
@@ -141,9 +143,9 @@ export class MicrosoftCalendarService {
       throw new UnauthorizedException("microsoftCalendar.errors.refreshTokenMissing");
     }
 
-    const profile = await this.graph.getProfile(token.access_token);
+    const profile = await this.microsoftGraphApiClient.getProfile(token.access_token);
     const email = profile.mail || profile.userPrincipalName;
-    const existing = await this.repository.getConnectionByUserId(state.userId);
+    const existing = await this.microsoftCalendarRepository.getConnectionByUserId(state.userId);
 
     if (existing && existing.accountId !== profile.id && !state.replace) {
       return {
@@ -156,11 +158,13 @@ export class MicrosoftCalendarService {
       await this.disconnectConnection(existing);
     }
 
-    const encryptedRefreshToken = this.tokenEncryption.encrypt(token.refresh_token);
+    const encryptedRefreshToken = this.microsoftCalendarTokenEncryptionService.encrypt(
+      token.refresh_token,
+    );
 
     const connection =
       existing && existing.accountId === profile.id
-        ? await this.repository.updateConnection(existing.id, {
+        ? await this.microsoftCalendarRepository.updateConnection(existing.id, {
             accountId: profile.id,
             accountEmail: email,
             ...encryptedRefreshToken,
@@ -175,7 +179,7 @@ export class MicrosoftCalendarService {
                 : MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
             outboundErrorCode: null,
           })
-        : await this.repository.createConnection({
+        : await this.microsoftCalendarRepository.createConnection({
             userId: state.userId,
             provider: CALENDAR_PROVIDERS.MICROSOFT,
             accountId: profile.id,
@@ -185,7 +189,7 @@ export class MicrosoftCalendarService {
 
     if (!connection) throw new NotFoundException("microsoftCalendar.errors.connectionNotFound");
 
-    await this.syncQueue.enqueue({
+    await this.microsoftCalendarSyncQueueService.enqueue({
       tenantId: state.tenantId,
       connectionId: connection.id,
       fullSync: true,
@@ -193,7 +197,7 @@ export class MicrosoftCalendarService {
     });
 
     if (connection.outboundSyncEnabled) {
-      await this.syncQueue.enqueueOutbound({
+      await this.microsoftCalendarSyncQueueService.enqueueOutbound({
         tenantId: state.tenantId,
         connectionId: connection.id,
         reason: MICROSOFT_CALENDAR_SYNC_REASONS.AUTHORIZATION,
@@ -204,11 +208,13 @@ export class MicrosoftCalendarService {
   }
 
   async setOutboundSync(currentUser: CurrentUserType, enabled: boolean) {
-    const connection = await this.repository.getConnectionByUserId(currentUser.userId);
+    const connection = await this.microsoftCalendarRepository.getConnectionByUserId(
+      currentUser.userId,
+    );
     if (!connection) throw new NotFoundException("microsoftCalendar.errors.connectionNotFound");
 
     if (!enabled) {
-      await this.repository.updateConnection(connection.id, {
+      await this.microsoftCalendarRepository.updateConnection(connection.id, {
         outboundSyncEnabled: false,
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
         outboundErrorCode: null,
@@ -224,7 +230,7 @@ export class MicrosoftCalendarService {
   }
 
   async handleAuthorizationFailure(stateValue: string, error: unknown) {
-    const state = await this.tenantState.verifyMicrosoftCalendar(stateValue);
+    const state = await this.tenantStateService.verifyMicrosoftCalendar(stateValue);
 
     if (!state) return null;
 
@@ -232,10 +238,10 @@ export class MicrosoftCalendarService {
       (error instanceof MicrosoftGraphError && error.adminConsentRequired) ||
       this.isAdminConsentError(error instanceof Error ? error.message : String(error ?? ""));
 
-    const existing = await this.repository.getConnectionByUserId(state.userId);
+    const existing = await this.microsoftCalendarRepository.getConnectionByUserId(state.userId);
 
     if (existing) {
-      await this.repository.updateConnection(existing.id, {
+      await this.microsoftCalendarRepository.updateConnection(existing.id, {
         status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR,
         errorCode: adminConsentRequired
           ? MICROSOFT_CALENDAR_OAUTH_RESULTS.ADMIN_APPROVAL_REQUIRED
@@ -252,7 +258,9 @@ export class MicrosoftCalendarService {
   }
 
   async requestManualSync(currentUser: CurrentUserType) {
-    const connection = await this.repository.getConnectionByUserId(currentUser.userId);
+    const connection = await this.microsoftCalendarRepository.getConnectionByUserId(
+      currentUser.userId,
+    );
 
     if (!connection) throw new NotFoundException("microsoftCalendar.errors.connectionNotFound");
 
@@ -269,12 +277,12 @@ export class MicrosoftCalendarService {
       throw new ConflictException("microsoftCalendar.errors.syncCooldown");
     }
 
-    await this.repository.updateConnection(connection.id, {
+    await this.microsoftCalendarRepository.updateConnection(connection.id, {
       status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING,
       errorCode: null,
     });
 
-    await this.syncQueue.enqueue({
+    await this.microsoftCalendarSyncQueueService.enqueue({
       tenantId: currentUser.tenantId,
       connectionId: connection.id,
       fullSync: false,
@@ -282,7 +290,7 @@ export class MicrosoftCalendarService {
     });
 
     if (connection.outboundSyncEnabled) {
-      await this.syncQueue.enqueueOutbound({
+      await this.microsoftCalendarSyncQueueService.enqueueOutbound({
         tenantId: currentUser.tenantId,
         connectionId: connection.id,
         reason: MICROSOFT_CALENDAR_SYNC_REASONS.MANUAL,
@@ -291,12 +299,14 @@ export class MicrosoftCalendarService {
   }
 
   async disconnect(currentUser: CurrentUserType) {
-    const connection = await this.repository.getConnectionByUserId(currentUser.userId);
+    const connection = await this.microsoftCalendarRepository.getConnectionByUserId(
+      currentUser.userId,
+    );
     if (connection) await this.disconnectConnection(connection);
   }
 
   async disconnectUser(userId: UUIDType) {
-    const connection = await this.repository.getConnectionByUserId(userId);
+    const connection = await this.microsoftCalendarRepository.getConnectionByUserId(userId);
     if (connection) await this.disconnectConnection(connection);
   }
 
@@ -309,10 +319,10 @@ export class MicrosoftCalendarService {
     forceFullSync: boolean,
     reason: MicrosoftCalendarSyncReason = MICROSOFT_CALENDAR_SYNC_REASONS.RECONCILIATION,
   ) {
-    const connection = await this.repository.getConnectionById(connectionId);
+    const connection = await this.microsoftCalendarRepository.getConnectionById(connectionId);
     if (!connection) return;
 
-    await this.repository.updateConnection(connection.id, {
+    await this.microsoftCalendarRepository.updateConnection(connection.id, {
       status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING,
       errorCode: null,
     });
@@ -324,13 +334,16 @@ export class MicrosoftCalendarService {
 
       if (!finalDeltaLink) throw new Error("Microsoft delta response did not include a delta link");
       if (shouldRebuildWindow) {
-        await this.repository.removeEventsMissingFromFullSync(connection.id, seenEventIds);
+        await this.microsoftCalendarRepository.removeEventsMissingFromFullSync(
+          connection.id,
+          seenEventIds,
+        );
       }
 
       const subscription = await this.ensureSubscription(connection, accessToken);
       const completedAt = new Date().toISOString();
 
-      await this.repository.updateConnection(connection.id, {
+      await this.microsoftCalendarRepository.updateConnection(connection.id, {
         status: MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED,
         errorCode: null,
         syncCursor: finalDeltaLink,
@@ -345,7 +358,7 @@ export class MicrosoftCalendarService {
       });
     } catch (error) {
       const authenticationFailure = this.isAuthenticationFailure(error);
-      await this.repository.updateConnection(connection.id, {
+      await this.microsoftCalendarRepository.updateConnection(connection.id, {
         status: this.getSyncStatus(authenticationFailure),
         errorCode: this.getSyncFailure(error),
         ...(reason === MICROSOFT_CALENDAR_SYNC_REASONS.MANUAL
@@ -364,19 +377,22 @@ export class MicrosoftCalendarService {
     const window = shouldRebuildWindow ? this.buildSyncWindow() : null;
 
     let nextUrl = shouldRebuildWindow
-      ? this.graph.buildInitialDeltaUrl(window!.start, window!.end)
+      ? this.microsoftGraphApiClient.buildInitialDeltaUrl(window!.start, window!.end)
       : connection.syncCursor;
 
     if (!nextUrl) {
       const fallbackWindow = this.buildSyncWindow();
-      nextUrl = this.graph.buildInitialDeltaUrl(fallbackWindow.start, fallbackWindow.end);
+      nextUrl = this.microsoftGraphApiClient.buildInitialDeltaUrl(
+        fallbackWindow.start,
+        fallbackWindow.end,
+      );
     }
 
     const seenEventIds: string[] = [];
     let finalDeltaLink: string | undefined;
 
     while (nextUrl) {
-      const page = await this.graph.getDeltaPage(nextUrl, accessToken);
+      const page = await this.microsoftGraphApiClient.getDeltaPage(nextUrl, accessToken);
       await this.applyDeltaPage(connection, page.value, seenEventIds);
       finalDeltaLink = page["@odata.deltaLink"] ?? finalDeltaLink;
       nextUrl = page["@odata.nextLink"] ?? "";
@@ -388,7 +404,7 @@ export class MicrosoftCalendarService {
   async processNotification(notification: MicrosoftGraphNotification, lifecycle: boolean) {
     if (!notification.subscriptionId || !notification.clientState) return false;
 
-    const connection = await this.repository.getConnectionBySubscriptionId(
+    const connection = await this.microsoftCalendarRepository.getConnectionBySubscriptionId(
       notification.subscriptionId,
     );
 
@@ -407,19 +423,21 @@ export class MicrosoftCalendarService {
   ) {
     const fullSync =
       lifecycle &&
-      (notification.lifecycleEvent === "missed" ||
-        notification.lifecycleEvent === "subscriptionRemoved");
+      (notification.lifecycleEvent === MICROSOFT_CALENDAR_LIFECYCLE_EVENTS.MISSED ||
+        notification.lifecycleEvent === MICROSOFT_CALENDAR_LIFECYCLE_EVENTS.SUBSCRIPTION_REMOVED);
 
-    await this.tenantRunner.runWithTenant(connection.tenantId, async () => {
-      if (notification.lifecycleEvent === "subscriptionRemoved") {
-        await this.repository.updateConnection(connection.id, {
+    await this.tenantDbRunnerService.runWithTenant(connection.tenantId, async () => {
+      if (
+        notification.lifecycleEvent === MICROSOFT_CALENDAR_LIFECYCLE_EVENTS.SUBSCRIPTION_REMOVED
+      ) {
+        await this.microsoftCalendarRepository.updateConnection(connection.id, {
           subscriptionId: null,
           subscriptionClientState: null,
           subscriptionExpiresAt: null,
         });
       }
 
-      await this.syncQueue.enqueue({
+      await this.microsoftCalendarSyncQueueService.enqueue({
         tenantId: connection.tenantId,
         connectionId: connection.id,
         fullSync,
@@ -447,20 +465,20 @@ export class MicrosoftCalendarService {
       if (!event) continue;
 
       seenEventIds.push(event.externalEventId);
-      await this.repository.upsertEvent(connection.id, connection.userId, event);
+      await this.microsoftCalendarRepository.upsertEvent(connection.id, connection.userId, event);
     }
 
-    await this.repository.removeEvents(connection.id, removedIds);
+    await this.microsoftCalendarRepository.removeEvents(connection.id, removedIds);
   }
 
   private async getAccessToken(connection: MicrosoftCalendarConnection) {
-    const refreshToken = this.tokenEncryption.decrypt(connection);
-    const token = await this.graph.refreshAccessToken(refreshToken);
+    const refreshToken = this.microsoftCalendarTokenEncryptionService.decrypt(connection);
+    const token = await this.microsoftGraphApiClient.refreshAccessToken(refreshToken);
 
     if (token.refresh_token && token.refresh_token !== refreshToken) {
-      await this.repository.updateConnection(
+      await this.microsoftCalendarRepository.updateConnection(
         connection.id,
-        this.tokenEncryption.encrypt(token.refresh_token),
+        this.microsoftCalendarTokenEncryptionService.encrypt(token.refresh_token),
       );
     }
 
@@ -482,7 +500,7 @@ export class MicrosoftCalendarService {
 
     if (connection.subscriptionId) {
       try {
-        const subscription = await this.graph.renewSubscription(
+        const subscription = await this.microsoftGraphApiClient.renewSubscription(
           accessToken,
           connection.subscriptionId,
           expirationDateTime,
@@ -508,7 +526,7 @@ export class MicrosoftCalendarService {
 
     const clientState = crypto.randomBytes(32).toString("base64url");
 
-    const subscription = await this.graph.createSubscription(
+    const subscription = await this.microsoftGraphApiClient.createSubscription(
       accessToken,
       `${origin}/api/calendar/microsoft/notifications`,
       `${origin}/api/calendar/microsoft/lifecycle-notifications`,
@@ -525,14 +543,18 @@ export class MicrosoftCalendarService {
 
   private async disconnectConnection(connection: MicrosoftCalendarConnection) {
     try {
-      const accessToken = await this.getAccessToken(connection);
       if (connection.subscriptionId) {
-        await this.graph.deleteSubscription(accessToken, connection.subscriptionId);
+        const accessToken = await this.getAccessToken(connection);
+        await this.microsoftGraphApiClient.deleteSubscription(
+          accessToken,
+          connection.subscriptionId,
+        );
       }
     } catch (error) {
-      // Connection cleanup is authoritative even when Graph is unavailable.
+      // The local connection must still be removed when the remote subscription is already gone
+      // or Microsoft Graph is temporarily unavailable.
     }
-    await this.repository.deleteConnectionAndEvents(connection.id);
+    await this.microsoftCalendarRepository.deleteConnectionAndEvents(connection.id);
   }
 
   private shouldRebuildWindow(connection: MicrosoftCalendarConnection) {

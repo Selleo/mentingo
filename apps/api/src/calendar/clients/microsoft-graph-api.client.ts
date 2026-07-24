@@ -5,6 +5,11 @@ import axios, { AxiosError } from "axios";
 
 import { EnvService } from "src/env/services/env.service";
 
+import {
+  MICROSOFT_CALENDAR_DEFAULT_MARKER_PROPERTY,
+  MICROSOFT_CALENDAR_NAME,
+} from "../calendar.constants";
+
 import type {
   MicrosoftGraphDeltaPage,
   MicrosoftGraphProfile,
@@ -17,8 +22,7 @@ import type {
 
 const MICROSOFT_AUTHORITY = "https://login.microsoftonline.com/common/oauth2/v2.0";
 const MICROSOFT_GRAPH = "https://graph.microsoft.com/v1.0";
-export const MICROSOFT_MENTINGO_MARKER_PROPERTY =
-  "String {8f1c0f91-9f8a-4f2e-9e2e-4c454e54494e} Name MentingoManaged";
+export const MICROSOFT_MENTINGO_MARKER_PROPERTY = MICROSOFT_CALENDAR_DEFAULT_MARKER_PROPERTY;
 const MICROSOFT_CALENDAR_SCOPES = ["User.Read", "Calendars.ReadWrite", "offline_access"];
 
 type MicrosoftGraphErrorResponse = {
@@ -40,6 +44,7 @@ const getProviderErrorDetails = (data: unknown) => {
   return { code, message };
 };
 
+// Microsoft returns these phrases/codes when the tenant administrator must grant consent for the calendar permissions requested by the application.
 const isAdminConsentError = (message: string) =>
   ["admin approval", "admin consent", "aadsts65001", "aadsts90094"].some((term) =>
     message.toLowerCase().includes(term),
@@ -111,7 +116,10 @@ export class MicrosoftGraphApiClient {
     return response.value;
   }
 
-  async createCalendar(accessToken: string, name = "Mentingo"): Promise<MicrosoftGraphCalendar> {
+  async createCalendar(
+    accessToken: string,
+    name = MICROSOFT_CALENDAR_NAME,
+  ): Promise<MicrosoftGraphCalendar> {
     return this.graphRequest<MicrosoftGraphCalendar>("post", `${MICROSOFT_GRAPH}/me/calendars`, {
       accessToken,
       data: { name },
@@ -162,10 +170,14 @@ export class MicrosoftGraphApiClient {
     );
     url.searchParams.set(
       "$expand",
-      `singleValueExtendedProperties($filter=id eq '${MICROSOFT_MENTINGO_MARKER_PROPERTY}')`,
+      `singleValueExtendedProperties($filter=id eq '${this.getMarkerProperty()}')`,
     );
 
     return url.toString();
+  }
+
+  getManagedEventMarkerProperty() {
+    return this.getMarkerProperty();
   }
 
   async createSubscription(
@@ -334,13 +346,25 @@ export class MicrosoftGraphApiClient {
 
   private async getConfiguration() {
     const [clientId, clientSecret] = await Promise.all([
-      this.getConfigValue("MICROSOFT_CLIENT_ID", "microsoft_authorization.MICROSOFT_CLIENT_ID"),
       this.getConfigValue(
-        "MICROSOFT_CLIENT_SECRET",
-        "microsoft_authorization.MICROSOFT_CLIENT_SECRET",
+        "MICROSOFT_CALENDAR_CLIENT_ID",
+        "microsoft_authorization.MICROSOFT_CALENDAR_CLIENT_ID",
+      ),
+      this.getConfigValue(
+        "MICROSOFT_CALENDAR_CLIENT_SECRET",
+        "microsoft_authorization.MICROSOFT_CALENDAR_CLIENT_SECRET",
       ),
     ]);
+
     return { clientId, clientSecret };
+  }
+
+  private getMarkerProperty() {
+    return (
+      this.configService.get<string>(
+        "microsoft_authorization.MICROSOFT_MENTINGO_MARKER_PROPERTY",
+      ) ?? MICROSOFT_CALENDAR_DEFAULT_MARKER_PROPERTY
+    );
   }
 
   private async getRequiredConfiguration() {

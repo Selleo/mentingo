@@ -1,3 +1,4 @@
+import { MICROSOFT_CALENDAR_CONNECTION_STATUSES } from "@repo/shared";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { ApiClient } from "~/api/api-client";
@@ -10,7 +11,8 @@ export const microsoftCalendarConnectionQueryOptions = queryOptions({
     const response = await ApiClient.api.microsoftCalendarControllerGetConnection();
     return response.data.data;
   },
-  refetchInterval: (query) => (query.state.data?.status === "syncing" ? 3_000 : false),
+  refetchInterval: (query) =>
+    query.state.data?.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING ? 3_000 : false,
 });
 
 export function useMicrosoftCalendarConnection() {

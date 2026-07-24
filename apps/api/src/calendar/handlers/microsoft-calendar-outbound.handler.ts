@@ -31,17 +31,17 @@ const OUTBOUND_QUEUE_BATCH_SIZE = 25;
 )
 export class MicrosoftCalendarOutboundHandler implements IEventHandler<CalendarOutboundEvent> {
   constructor(
-    private readonly repository: MicrosoftCalendarRepository,
-    private readonly syncQueue: MicrosoftCalendarSyncQueueService,
+    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
   ) {}
 
   async handle(_event: CalendarOutboundEvent) {
-    const connections = await this.repository.listOutboundConnections();
+    const connections = await this.microsoftCalendarRepository.listOutboundConnections();
 
     await processInBatches(
       connections,
       (connection) =>
-        this.syncQueue.enqueueOutbound({
+        this.microsoftCalendarSyncQueueService.enqueueOutbound({
           tenantId: connection.tenantId,
           connectionId: connection.id,
           reason: MICROSOFT_CALENDAR_SYNC_REASONS.RECONCILIATION,

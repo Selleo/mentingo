@@ -3,11 +3,11 @@ import { MICROSOFT_CALENDAR_OUTBOUND_STATUSES } from "@repo/shared";
 import { escape as escapeHtml } from "lodash";
 
 import {
+  MICROSOFT_CALENDAR_NAME,
   MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES,
   MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES,
 } from "../calendar.constants";
 import {
-  MICROSOFT_MENTINGO_MARKER_PROPERTY,
   MicrosoftGraphApiClient,
   MicrosoftGraphError,
 } from "../clients/microsoft-graph-api.client";
@@ -20,16 +20,16 @@ import type { OutboundCandidate } from "../types/microsoft-calendar.types";
 @Injectable()
 export class MicrosoftCalendarOutboundService {
   constructor(
-    private readonly repository: MicrosoftCalendarRepository,
-    private readonly graph: MicrosoftGraphApiClient,
-    private readonly tokenEncryption: MicrosoftCalendarTokenEncryptionService,
+    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly microsoftGraphApiClient: MicrosoftGraphApiClient,
+    private readonly microsoftCalendarTokenEncryptionService: MicrosoftCalendarTokenEncryptionService,
   ) {}
 
   async reconcileConnection(connectionId: string) {
-    const connection = await this.repository.getConnectionById(connectionId);
+    const connection = await this.microsoftCalendarRepository.getConnectionById(connectionId);
     if (!connection || !connection.outboundSyncEnabled) return;
 
-    await this.repository.updateConnection(connectionId, {
+    await this.microsoftCalendarRepository.updateConnection(connectionId, {
       outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.SYNCING,
       outboundErrorCode: null,
     });
@@ -46,7 +46,11 @@ export class MicrosoftCalendarOutboundService {
       if (!calendarId) return;
 
       const { start, end } = this.buildWindow();
-      const candidates = await this.repository.listOutboundCandidates(connectionId, start, end);
+      const candidates = await this.microsoftCalendarRepository.listOutboundCandidates(
+        connectionId,
+        start,
+        end,
+      );
       const wanted = new Set<string>();
 
       for (const candidate of candidates) {
@@ -54,7 +58,7 @@ export class MicrosoftCalendarOutboundService {
 
         wanted.add(key);
 
-        const mapping = await this.repository.getOutboundMapping(
+        const mapping = await this.microsoftCalendarRepository.getOutboundMapping(
           connectionId,
           candidate.calendarEventId,
           candidate.recipientId,
@@ -64,10 +68,10 @@ export class MicrosoftCalendarOutboundService {
 
         if (!mapping) {
           const event = await this.runGraphOperation("create event", () =>
-            this.graph.createEvent(accessToken, calendarId, payload),
+            this.microsoftGraphApiClient.createEvent(accessToken, calendarId, payload),
           );
 
-          await this.repository.upsertOutboundMapping({
+          await this.microsoftCalendarRepository.upsertOutboundMapping({
             connectionId,
             calendarEventId: candidate.calendarEventId,
             userId: candidate.recipientId,
@@ -76,16 +80,21 @@ export class MicrosoftCalendarOutboundService {
         } else {
           try {
             await this.runGraphOperation("update event", () =>
-              this.graph.updateEvent(accessToken, calendarId, mapping.externalEventId, payload),
+              this.microsoftGraphApiClient.updateEvent(
+                accessToken,
+                calendarId,
+                mapping.externalEventId,
+                payload,
+              ),
             );
           } catch (error) {
             if (!(error instanceof MicrosoftGraphError) || error.statusCode !== 404) throw error;
 
             const recreatedEvent = await this.runGraphOperation("recreate event", () =>
-              this.graph.createEvent(accessToken, calendarId, payload),
+              this.microsoftGraphApiClient.createEvent(accessToken, calendarId, payload),
             );
 
-            await this.repository.upsertOutboundMapping({
+            await this.microsoftCalendarRepository.upsertOutboundMapping({
               connectionId,
               calendarEventId: candidate.calendarEventId,
               userId: candidate.recipientId,
@@ -95,27 +104,33 @@ export class MicrosoftCalendarOutboundService {
         }
       }
 
-      for (const mapping of await this.repository.listOutboundMappings(connectionId)) {
+      for (const mapping of await this.microsoftCalendarRepository.listOutboundMappings(
+        connectionId,
+      )) {
         if (wanted.has(`${mapping.calendarEventId}:${mapping.userId}`)) continue;
 
         try {
           await this.runGraphOperation("delete event", () =>
-            this.graph.deleteEvent(accessToken, calendarId, mapping.externalEventId),
+            this.microsoftGraphApiClient.deleteEvent(
+              accessToken,
+              calendarId,
+              mapping.externalEventId,
+            ),
           );
         } catch (error) {
           if (!(error instanceof MicrosoftGraphError) || error.statusCode !== 404) throw error;
         }
 
-        await this.repository.deleteOutboundMapping(mapping.id);
+        await this.microsoftCalendarRepository.deleteOutboundMapping(mapping.id);
       }
 
-      await this.repository.updateConnection(connectionId, {
+      await this.microsoftCalendarRepository.updateConnection(connectionId, {
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.CONNECTED,
         lastOutboundSyncAt: new Date().toISOString(),
         outboundErrorCode: null,
       });
     } catch (error) {
-      await this.repository.updateConnection(connectionId, {
+      await this.microsoftCalendarRepository.updateConnection(connectionId, {
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.ERROR,
         outboundErrorCode: this.getOutboundErrorCode(error),
       });
@@ -136,27 +151,29 @@ export class MicrosoftCalendarOutboundService {
     accessToken: string,
   ) {
     if (calendarId) {
-      const calendars = await this.graph.listCalendars(accessToken);
+      const calendars = await this.microsoftGraphApiClient.listCalendars(accessToken);
 
       if (calendars.some((calendar) => calendar.id === calendarId)) return calendarId;
 
-      await this.repository.updateConnection(connectionId, {
+      await this.microsoftCalendarRepository.updateConnection(connectionId, {
         outboundSyncEnabled: false,
         outboundStatus: MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED,
-        outboundErrorCode: "calendar_deleted",
+        outboundErrorCode: MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES.CALENDAR_DELETED,
       });
 
       return null;
     }
 
-    const calendars = await this.graph.listCalendars(accessToken);
+    const calendars = await this.microsoftGraphApiClient.listCalendars(accessToken);
 
     const existing = calendars.find(
-      (calendar) => calendar.name === "Mentingo" && !calendar.isDefaultCalendar,
+      (calendar) => calendar.name === MICROSOFT_CALENDAR_NAME && !calendar.isDefaultCalendar,
     );
-    const calendar = existing ?? (await this.graph.createCalendar(accessToken));
+    const calendar = existing ?? (await this.microsoftGraphApiClient.createCalendar(accessToken));
 
-    await this.repository.updateConnection(connectionId, { outboundCalendarId: calendar.id });
+    await this.microsoftCalendarRepository.updateConnection(connectionId, {
+      outboundCalendarId: calendar.id,
+    });
 
     return calendar.id;
   }
@@ -181,7 +198,9 @@ export class MicrosoftCalendarOutboundService {
       },
       isAllDay: candidate.allDay,
       ...(candidate.location ? { location: { displayName: candidate.location } } : {}),
-      singleValueExtendedProperties: [{ id: MICROSOFT_MENTINGO_MARKER_PROPERTY, value: "true" }],
+      singleValueExtendedProperties: [
+        { id: this.microsoftGraphApiClient.getManagedEventMarkerProperty(), value: "true" },
+      ],
     };
   }
 
@@ -190,13 +209,13 @@ export class MicrosoftCalendarOutboundService {
   ) {
     if (!connection) throw new Error("microsoftCalendar.errors.connectionNotFound");
 
-    const refreshToken = this.tokenEncryption.decrypt(connection);
-    const token = await this.graph.refreshAccessToken(refreshToken);
+    const refreshToken = this.microsoftCalendarTokenEncryptionService.decrypt(connection);
+    const token = await this.microsoftGraphApiClient.refreshAccessToken(refreshToken);
 
     if (token.refresh_token && token.refresh_token !== refreshToken) {
-      await this.repository.updateConnection(
+      await this.microsoftCalendarRepository.updateConnection(
         connection.id,
-        this.tokenEncryption.encrypt(token.refresh_token),
+        this.microsoftCalendarTokenEncryptionService.encrypt(token.refresh_token),
       );
     }
 

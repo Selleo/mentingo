@@ -13,19 +13,19 @@ const MICROSOFT_CALENDAR_SYNC_BATCH_SIZE = 25;
 @Injectable()
 export class MicrosoftCalendarCron {
   constructor(
-    private readonly tenantRunner: TenantDbRunnerService,
-    private readonly repository: MicrosoftCalendarRepository,
-    private readonly syncQueue: MicrosoftCalendarSyncQueueService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
+    private readonly microsoftCalendarRepository: MicrosoftCalendarRepository,
+    private readonly microsoftCalendarSyncQueueService: MicrosoftCalendarSyncQueueService,
   ) {}
 
   @Cron(CronExpression.EVERY_6_HOURS)
   async reconcile() {
-    await this.tenantRunner.runForEachTenant(async (tenantId) => {
-      const connections = await this.repository.listConnectionsForReconciliation();
+    await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
+      const connections = await this.microsoftCalendarRepository.listConnectionsForReconciliation();
       await processInBatches(
         connections,
         (connection) =>
-          this.syncQueue.enqueue({
+          this.microsoftCalendarSyncQueueService.enqueue({
             tenantId,
             connectionId: connection.id,
             fullSync: false,
@@ -36,7 +36,7 @@ export class MicrosoftCalendarCron {
       await processInBatches(
         connections.filter((connection) => connection.outboundSyncEnabled),
         (connection) =>
-          this.syncQueue.enqueueOutbound({
+          this.microsoftCalendarSyncQueueService.enqueueOutbound({
             tenantId,
             connectionId: connection.id,
             reason: MICROSOFT_CALENDAR_SYNC_REASONS.RECONCILIATION,
@@ -50,14 +50,16 @@ export class MicrosoftCalendarCron {
   async renewSubscriptions() {
     const renewBefore = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString();
 
-    await this.tenantRunner.runForEachTenant(async (tenantId) => {
+    await this.tenantDbRunnerService.runForEachTenant(async (tenantId) => {
       const connections =
-        await this.repository.listConnectionsNeedingSubscriptionRenewal(renewBefore);
+        await this.microsoftCalendarRepository.listConnectionsNeedingSubscriptionRenewal(
+          renewBefore,
+        );
 
       await processInBatches(
         connections,
         (connection) =>
-          this.syncQueue.enqueue({
+          this.microsoftCalendarSyncQueueService.enqueue({
             tenantId,
             connectionId: connection.id,
             fullSync: false,

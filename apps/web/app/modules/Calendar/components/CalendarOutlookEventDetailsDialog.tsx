@@ -1,3 +1,4 @@
+import { CALENDAR_EVENT_STATUSES } from "@repo/shared";
 import { CalendarClock, ExternalLink, MapPin, Shield, Signal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -59,11 +60,11 @@ export function CalendarOutlookEventDetailsDialog({
           <Badge variant="outline" fontWeight="normal">
             {t(`calendarView.details.availability.${outlook.availability}`)}
           </Badge>
-          {eventDetails.status === "cancelled" ? (
+          {eventDetails.status === CALENDAR_EVENT_STATUSES.CANCELLED && (
             <Badge variant="outline" className="border-neutral-300 text-neutral-600">
               {t("calendarView.details.status.cancelled")}
             </Badge>
-          ) : null}
+          )}
         </div>
 
         <div className="grid gap-3">

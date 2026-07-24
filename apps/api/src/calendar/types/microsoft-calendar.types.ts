@@ -1,4 +1,11 @@
-import type { MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES } from "../calendar.constants";
+import type {
+  MICROSOFT_CALENDAR_GRAPH_SENSITIVITIES,
+  MICROSOFT_CALENDAR_GRAPH_SHOW_AS,
+  MICROSOFT_CALENDAR_LIFECYCLE_EVENTS,
+  MICROSOFT_CALENDAR_OAUTH_PURPOSE,
+  MicrosoftCalendarOutboundErrorCode,
+  MicrosoftCalendarOutboundSourceType,
+} from "../calendar.constants";
 import type {
   MicrosoftCalendarConnectionStatus,
   MicrosoftCalendarOutboundStatus,
@@ -61,7 +68,7 @@ export type OutboundCandidate = {
   allDay: boolean;
   timezone: string;
   location: string | null;
-  sourceType: (typeof MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES)[keyof typeof MICROSOFT_CALENDAR_OUTBOUND_SOURCE_TYPES];
+  sourceType: MicrosoftCalendarOutboundSourceType;
   groupName: string | null;
   courseTitle: string | null;
   recipientId: string;
@@ -70,7 +77,7 @@ export type OutboundCandidate = {
 export type MicrosoftCalendarOAuthState = {
   tenantId: UUIDType;
   userId: UUIDType;
-  purpose: "microsoft_calendar";
+  purpose: typeof MICROSOFT_CALENDAR_OAUTH_PURPOSE;
   nonce: string;
   replace: boolean;
   outboundSync?: boolean;
@@ -106,9 +113,9 @@ export type MicrosoftGraphEvent = {
   isAllDay?: boolean;
   location?: { displayName?: string | null } | null;
   isCancelled?: boolean;
-  showAs?: "free" | "tentative" | "busy" | "oof" | "workingElsewhere" | "unknown";
+  showAs?: (typeof MICROSOFT_CALENDAR_GRAPH_SHOW_AS)[keyof typeof MICROSOFT_CALENDAR_GRAPH_SHOW_AS];
   webLink?: string | null;
-  sensitivity?: "normal" | "personal" | "private" | "confidential" | "unknown";
+  sensitivity?: (typeof MICROSOFT_CALENDAR_GRAPH_SENSITIVITIES)[keyof typeof MICROSOFT_CALENDAR_GRAPH_SENSITIVITIES];
   "@removed"?: { reason?: string };
   singleValueExtendedProperties?: Array<{ id: string; value?: string }>;
 };
@@ -143,7 +150,7 @@ export type MicrosoftGraphSubscription = {
 export type MicrosoftGraphNotification = {
   subscriptionId?: string;
   clientState?: string;
-  lifecycleEvent?: "missed" | "reauthorizationRequired" | "subscriptionRemoved";
+  lifecycleEvent?: (typeof MICROSOFT_CALENDAR_LIFECYCLE_EVENTS)[keyof typeof MICROSOFT_CALENDAR_LIFECYCLE_EVENTS];
 };
 
 export type MicrosoftGraphNotificationBody = {
@@ -181,7 +188,7 @@ export type MicrosoftCalendarConnectionUpdate = Partial<{
   outboundSyncEnabled: boolean;
   outboundStatus: MicrosoftCalendarOutboundStatus;
   outboundCalendarId: string | null;
-  outboundErrorCode: string | null;
+  outboundErrorCode: MicrosoftCalendarOutboundErrorCode | null;
   lastOutboundSyncAt: string | null;
 }> &
   Partial<EncryptedMicrosoftRefreshToken>;

@@ -8,6 +8,13 @@ export const CALENDAR_PROVIDERS = {
   MICROSOFT: "microsoft",
 } as const;
 
+export const MICROSOFT_CALENDAR_OAUTH_RESULTS = {
+  CONNECTED: "connected",
+  REPLACEMENT_REQUIRED: "replacement_required",
+  AUTHORIZATION_FAILED: "authorization_failed",
+  ADMIN_APPROVAL_REQUIRED: "admin_approval_required",
+} as const;
+
 export type CalendarProvider = (typeof CALENDAR_PROVIDERS)[keyof typeof CALENDAR_PROVIDERS];
 
 export type CalendarEventSourceType =

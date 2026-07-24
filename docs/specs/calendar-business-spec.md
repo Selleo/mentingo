@@ -64,6 +64,7 @@ Outlook events are stored as normalized calendar records and remain read-only. D
 - Tenant row-level security and owner filtering prevent users, including tenant administrators, from reading another user's imported Outlook events.
 - BullMQ handles initial, incremental, webhook-triggered, lifecycle, and reconciliation sync work. Microsoft subscriptions are renewed before expiry and recreated if Microsoft no longer recognizes them.
 - Outbound mappings are isolated from imported Outlook mappings and are keyed per tenant, connection, Mentingo event, and recipient; BullMQ retries Graph work without blocking local calendar changes.
+- The managed-event marker used to distinguish Mentingo-owned Outlook copies is configurable per deployment so installations can choose their own Microsoft Graph extended-property identifier.
 
 ## Test Evidence
 

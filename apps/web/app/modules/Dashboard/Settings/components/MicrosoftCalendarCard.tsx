@@ -1,5 +1,9 @@
 import { useSearchParams } from "@remix-run/react";
 import {
+  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
+  MICROSOFT_CALENDAR_OAUTH_RESULTS,
+} from "@repo/shared";
+import {
   AlertTriangle,
   ArrowLeftRight,
   ArrowRight,
@@ -74,7 +78,7 @@ export function MicrosoftCalendarCard() {
     const result = searchParams.get("microsoftCalendar");
     if (!result) return;
 
-    const isSuccess = result === "connected";
+    const isSuccess = result === MICROSOFT_CALENDAR_OAUTH_RESULTS.CONNECTED;
     toast({
       variant: isSuccess ? "default" : "destructive",
       description: t(`microsoftCalendar.oauth.${result}`, {
@@ -89,9 +93,11 @@ export function MicrosoftCalendarCard() {
   if (isLoading || !connection?.available) return null;
 
   const isDisconnected = connection.status === "disconnected";
-  const isSyncing = connection.status === "syncing";
-  const reconnectRequired = connection.status === "reconnect_required";
-  const hasError = connection.status === "error" || reconnectRequired;
+  const isSyncing = connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING;
+  const reconnectRequired =
+    connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.RECONNECT_REQUIRED;
+  const hasError =
+    connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.ERROR || reconnectRequired;
   let errorTitle = t("microsoftCalendar.stale.title");
   let errorDescription = t("microsoftCalendar.stale.description");
   if (connection.errorCode === "admin_approval_required") {
@@ -178,12 +184,12 @@ export function MicrosoftCalendarCard() {
             variant="outline"
             className={cn(
               "capitalize",
-              connection.status === "connected" &&
+              connection.status === MICROSOFT_CALENDAR_CONNECTION_STATUSES.CONNECTED &&
                 "border-[#0078d4]/30 bg-[#e8f3fb] text-[#005a9e]",
               hasError && "border-error-200 bg-error-50 text-error-800",
             )}
           >
-            {isSyncing ? <RefreshCw className="mr-1.5 size-3 animate-spin" /> : null}
+            {isSyncing && <RefreshCw className="mr-1.5 size-3 animate-spin" />}
             {t(`microsoftCalendar.status.${connection.status}`)}
           </Badge>
         </div>

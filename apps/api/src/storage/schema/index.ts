@@ -116,6 +116,7 @@ import type {
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
+import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
@@ -537,7 +538,9 @@ export const calendarConnections = pgTable(
       .notNull()
       .default(MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED),
     outboundCalendarId: text("outbound_calendar_id"),
-    outboundErrorCode: text("outbound_error_code"),
+    outboundErrorCode: text(
+      "outbound_error_code",
+    ).$type<MicrosoftCalendarOutboundErrorCode | null>(),
     lastOutboundSyncAt: timestampWithTimezone({ name: "last_outbound_sync_at" }),
     tenantId,
   },

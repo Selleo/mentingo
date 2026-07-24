@@ -18,7 +18,7 @@ export class MicrosoftCalendarSyncWorker implements OnModuleDestroy {
 
   constructor(
     queueService: QueueService,
-    private readonly tenantRunner: TenantDbRunnerService,
+    private readonly tenantDbRunnerService: TenantDbRunnerService,
     private readonly microsoftCalendarService: MicrosoftCalendarService,
     private readonly outboundService: MicrosoftCalendarOutboundService,
   ) {
@@ -36,7 +36,7 @@ export class MicrosoftCalendarSyncWorker implements OnModuleDestroy {
     id?: string;
     data: MicrosoftCalendarSyncJobData | MicrosoftCalendarOutboundJobData;
   }) {
-    return this.tenantRunner.runWithTenant(job.data.tenantId, () =>
+    return this.tenantDbRunnerService.runWithTenant(job.data.tenantId, () =>
       "fullSync" in job.data
         ? this.microsoftCalendarService.synchronizeConnection(
             job.data.connectionId,

@@ -10,6 +10,7 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
   LocalizedText,
+  OutlookEventAvailability,
   SupportedLanguages,
 } from "@repo/shared";
 import type { Static } from "@sinclair/typebox";
@@ -38,7 +39,7 @@ export type MicrosoftOutlookCalendarEventPayload = {
   outlookCalendar: {
     webLink: string | null;
     isSensitive: boolean;
-    availability: import("@repo/shared").OutlookEventAvailability;
+    availability: OutlookEventAvailability;
   };
 };
 

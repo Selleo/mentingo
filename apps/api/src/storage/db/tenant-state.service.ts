@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { MICROSOFT_CALENDAR_OAUTH_PURPOSE } from "src/calendar/calendar.constants";
 import { EnvService } from "src/env/services/env.service";
 
 import type { MicrosoftCalendarOAuthState } from "src/calendar/types/microsoft-calendar.types";
@@ -61,7 +62,7 @@ export class TenantStateService {
     const payload = await this.verifyPayload<MicrosoftCalendarOAuthState>(state);
     if (
       !payload ||
-      payload.purpose !== "microsoft_calendar" ||
+      payload.purpose !== MICROSOFT_CALENDAR_OAUTH_PURPOSE ||
       !payload.userId ||
       !payload.nonce ||
       !payload.origin
