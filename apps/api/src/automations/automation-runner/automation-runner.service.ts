@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
+import { AutomationLogsRepository } from "../repositories/automation-logs/automation-logs";
 
 import type { AutomationEventTypes } from "../handlers/automations-handler";
 import type { AutomationStep, TypeContext } from "src/announcements/types/automations-source.types";
@@ -8,7 +9,10 @@ import type { UUIDType } from "src/common";
 
 @Injectable()
 export class AutomationRunnerService {
-  constructor(private readonly automationStepsService: AutomationStepsService) {}
+  constructor(
+    private readonly automationStepsService: AutomationStepsService,
+    private readonly automationLogRepository: AutomationLogsRepository,
+  ) {}
 
   async startAutomation(automationId: UUIDType, event: AutomationEventTypes) {
     const automationSteps = await this.automationStepsService.getAllAutomationSteps(automationId);
@@ -50,7 +54,13 @@ export class AutomationRunnerService {
 
       case "action":
         this.handleAction(step.typeContext as TypeContext, event);
-
+        const typeCtx = step.typeContext as TypeContext;
+        this.automationLogRepository.create({
+          status: "success",
+          automationId: step.automationId,
+          automationName: "automationName",
+          eventName: typeCtx.name,
+        });
         break;
 
       default:

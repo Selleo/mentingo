@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AutomationLogsController } from "./automation-logs/automation-logs.controller";
 import { AutomationRunnerService } from "./automation-runner/automation-runner.service";
 import { AutomationStepsController } from "./automations-steps/automations-steps.controller";
 import { AutomationStepsService } from "./automations-steps/automations-steps.service";
@@ -20,7 +21,12 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationRunnerService,
     AutomationLogsRepository,
   ],
-  controllers: [AutomationsController, AutomationStepsController],
-  exports: [AutomationsService, AutomationRunnerService, AutomationStepsService],
+  controllers: [AutomationsController, AutomationStepsController, AutomationLogsController],
+  exports: [
+    AutomationsService,
+    AutomationRunnerService,
+    AutomationStepsService,
+    AutomationLogsRepository,
+  ],
 })
 export class AutomationsModule {}
