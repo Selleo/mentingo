@@ -2391,6 +2391,37 @@
               "scoreGuidance": "Úroveň hodnocení",
               "blockingError": "Blokující chyba"
             },
+            "deterministicValidation": {
+              "summary": "Strukturu hodnocení je třeba opravit.",
+              "guidance_score_out_of_range": {
+                "message": "Jedna úroveň hodnocení je mimo povolený rozsah kritéria.",
+                "correction": "Každá úroveň hodnocení musí být mezi nulou a maximálním počtem bodů kritéria."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kritérium obsahuje stejnou úroveň hodnocení více než jednou.",
+                "correction": "Pro každou úroveň hodnocení ponechte právě jedno pravidlo."
+              },
+              "missing_guidance_scores": {
+                "message": "V kritériu chybí jedna nebo více požadovaných úrovní hodnocení.",
+                "correction": "Přidejte jedno pravidlo pro každou úroveň od nuly po maximum."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Dvě kritéria nelze spolehlivě rozlišit.",
+                "correction": "Každé kritérium ponechte jako samostatnou položku hodnocení."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Dvě blokující chyby nelze spolehlivě rozlišit.",
+                "correction": "Každou blokující chybu ponechte jako samostatnou položku hodnocení."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Nové kritérium se nepodařilo spolehlivě přiřadit.",
+                "correction": "Zachovejte stávající kritéria a přidejte nové jako samostatnou položku."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Novou blokující chybu se nepodařilo spolehlivě přiřadit.",
+                "correction": "Zachovejte stávající blokující chyby a přidejte novou jako samostatnou položku."
+              }
+            },
             "keepCurrentDraft": "Ponechat aktuální návrh",
             "applySuggestedImprovements": "Použít navržená vylepšení",
             "completedArtifacts": "Dosud připraveno",

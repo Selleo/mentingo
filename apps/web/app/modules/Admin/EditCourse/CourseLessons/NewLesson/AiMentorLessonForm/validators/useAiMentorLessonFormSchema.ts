@@ -6,7 +6,7 @@ import {
 } from "@repo/shared";
 import { z } from "zod";
 
-import { aiJudgeConfigurationSchema } from "../ai-judge/aiJudgeConfiguration.schema";
+import { aiJudgeConfigurationSchema } from "../AiJudge/aiJudgeConfiguration.schema";
 import {
   MAX_AI_MENTOR_TEXT_LENGTH,
   MAX_MB_PER_FILE,

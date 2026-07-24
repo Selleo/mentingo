@@ -15,7 +15,7 @@ import { AiJudgeConfigurationGenerationService } from "./ai-judge-configuration-
 
 import type { AiJudgeConfigurationGenerationJobData } from "./ai-judge-configuration-generation.types";
 import type { Job } from "bullmq";
-import type { AiJudgeGenerationApplicationProgressEvent } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
+import type { AiJudgeGenerationApplicationProgressEvent } from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 
 @Injectable()
 export class AiJudgeConfigurationGenerationWorker implements OnModuleDestroy {
@@ -56,6 +56,8 @@ export class AiJudgeConfigurationGenerationWorker implements OnModuleDestroy {
       return await this.aiJudgeConfigurationGenerationService.execute(job.data.prepared, {
         isCancelled: () =>
           this.aiJudgeConfigurationGenerationQueueService.isCancellationRequested(job.id),
+        onReferencedDraft: (draft) =>
+          this.aiJudgeConfigurationGenerationQueueService.storeReferencedDraft(job, draft),
         reportProgress: (progress) =>
           this.aiJudgeConfigurationGenerationQueueService.publishProgress(job, progress),
       });

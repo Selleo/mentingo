@@ -11,7 +11,7 @@ import {
   validateAiJudgeConfigurationInputSchema,
   GenerateAiJudgeConfigurationInput,
   ValidateAiJudgeConfigurationInput,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
@@ -25,7 +25,7 @@ import type {
   AiJudgeGenerationSnapshot,
   CancelAiJudgeGenerationResponse,
   StartAiJudgeGenerationResponse,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 
 @Controller("ai/judge-configuration")
 @RequirePermission(PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN)

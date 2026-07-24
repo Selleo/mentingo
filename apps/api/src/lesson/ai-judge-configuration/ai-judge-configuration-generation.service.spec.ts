@@ -5,13 +5,13 @@ import { AI_JUDGE_GENERATION_STATUS } from "src/ai/judge-configuration-generatio
 import { AiJudgeConfigurationGenerationService } from "./ai-judge-configuration-generation.service";
 
 import type { AiJudgeConfigurationService } from "./ai-judge-configuration.service";
-import type { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.service";
-import type { AiJudgeConfigurationGenerationWorkflowOptions } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.types";
 import type {
   AiJudgeConfigurationValidationResult,
   ReferencedAiJudgeConfiguration,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
-import type { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/ai-judge-configuration-validator.service";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
+import type { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
+import type { AiJudgeConfigurationGenerationWorkflowOptions } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.types";
+import type { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -184,6 +184,7 @@ describe("AiJudgeConfigurationGenerationService", () => {
 
   it("reconciles temporary references before reporting progress", async () => {
     const reportProgress = jest.fn();
+    const onReferencedDraft = jest.fn();
     aiJudgeConfigurationGenerationWorkflowService.run.mockImplementation(
       async (_input, options) => {
         await options?.onDraft?.(referencedDraft);
@@ -214,9 +215,10 @@ describe("AiJudgeConfigurationGenerationService", () => {
         currentConfiguration,
       },
       currentUser,
-      { reportProgress },
+      { onReferencedDraft, reportProgress },
     );
 
+    expect(onReferencedDraft).toHaveBeenCalledWith(referencedDraft);
     expect(reportProgress).toHaveBeenCalledWith({
       status: AI_JUDGE_GENERATION_STATUS.EVALUATING,
       attempt: 1,
@@ -226,6 +228,77 @@ describe("AiJudgeConfigurationGenerationService", () => {
         blockingErrors: [expect.objectContaining({ id: blockingErrorId })],
       }),
     });
+  });
+
+  it("preserves referenced criterion identities when preparing a reordered repair", () => {
+    const prepared = aiJudgeConfigurationGenerationService.prepareRevision(
+      {
+        workflowInput: {
+          mode: "improve",
+          language: SUPPORTED_LANGUAGES.PL,
+          lessonContext,
+          instruction: "Improve the assessment.",
+          currentConfiguration: referencedDraft,
+        },
+        identities: {
+          criteria: [
+            {
+              ref: "C1",
+              id: criterionId,
+              scoreGuidance: [
+                { score: 0, id: guidanceZeroId },
+                { score: 1, id: guidanceOneId },
+              ],
+            },
+          ],
+          blockingErrors: [{ ref: "B1", id: blockingErrorId }],
+        },
+        attempt: 1,
+        attemptHistory: [],
+      },
+      {
+        ...referencedDraft,
+        criteria: [
+          {
+            ref: "C2",
+            title: "Recommendation",
+            expectedBehavior: "Offers a suitable next step.",
+            maxScore: 1,
+            scoreGuidance: [
+              { score: 0, description: "Does not offer a next step." },
+              { score: 1, description: "Offers a suitable next step." },
+            ],
+          },
+          referencedDraft.criteria[0]!,
+        ],
+      },
+      {
+        passed: false,
+        summary: "Recommendation needs clarification.",
+        issues: [
+          {
+            code: "criterion_needs_clarification",
+            severity: "error",
+            target: { type: "criterion", ref: "C2" },
+            message: "C2 is too broad.",
+            correction: "Clarify the behavior assessed by C2.",
+          },
+        ],
+      },
+      [{ attempt: 1, changes: [], validation: passedValidation }],
+    );
+
+    expect(prepared.workflowInput).toMatchObject({
+      mode: "repair",
+      currentConfiguration: {
+        criteria: [
+          expect.objectContaining({ ref: "C2", title: "Recommendation" }),
+          expect.objectContaining({ ref: "C1", title: "Clarifies the objection" }),
+        ],
+      },
+      blockingIssues: [expect.objectContaining({ target: { type: "criterion", ref: "C2" } })],
+    });
+    expect(prepared.identities.criteria[0]?.ref).toBe("C1");
   });
 
   it("returns deterministic findings without calling the semantic Validator", async () => {

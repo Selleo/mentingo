@@ -1,5 +1,6 @@
 import { NotFoundException } from "@nestjs/common";
 import { AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS } from "@repo/shared";
+import { v5 as uuidv5 } from "uuid";
 
 import { AI_JUDGE_GENERATION_STATUS } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
 import { getUserRoomKey } from "src/file/utils/userRoom";
@@ -47,6 +48,11 @@ const input = {
 const generatedConfiguration = {
   taskGoal: "The learner discovers the customer's needs.",
   passingThresholdPercent: 70,
+  criteria: [],
+  blockingErrors: [],
+};
+const referencedDraft = {
+  ...generatedConfiguration,
   criteria: [],
   blockingErrors: [],
 };
@@ -127,6 +133,11 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
 
   it("returns drafting while the worker has not published its first snapshot", async () => {
     job.progress = 0;
+    job.data.prepared = {
+      ...prepared,
+      attempt: 2,
+      attemptHistory: [{ attempt: 1, changes: [], validation: failedValidation }],
+    };
 
     await expect(
       aiJudgeConfigurationGenerationQueueService.getSnapshot(generationId, currentUser),
@@ -134,8 +145,8 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
       generationId,
       progress: {
         status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
-        attempt: 1,
-        attemptHistory: [],
+        attempt: 2,
+        attemptHistory: [{ attempt: 1, changes: [], validation: failedValidation }],
       },
     });
   });
@@ -158,23 +169,27 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
       validation: failedValidation,
       attemptHistory: [{ attempt: 1, changes: [], validation: failedValidation }],
     };
-    job.progress = progress;
+    job.progress = { progress, referencedDraft };
 
     await expect(
       aiJudgeConfigurationGenerationQueueService.revise(generationId, currentUser),
     ).resolves.toEqual({ generationId: expect.any(String) });
     expect(aiJudgeConfigurationGenerationService.prepareRevision).toHaveBeenCalledWith(
       prepared,
-      generatedConfiguration,
+      referencedDraft,
       failedValidation,
       progress.attemptHistory,
     );
+    const expectedRevisionGenerationId = uuidv5("revision-2", generationId);
     expect(globalQueueService.enqueue).toHaveBeenCalledWith(
       QUEUE_NAMES.AI_JUDGE_CONFIGURATION_GENERATION,
       AI_JUDGE_CONFIGURATION_GENERATION_JOB_NAME,
       expect.objectContaining({ prepared: expect.objectContaining({ attempt: 2 }) }),
-      expect.objectContaining({ attempts: 1 }),
+      expect.objectContaining({ attempts: 1, jobId: expectedRevisionGenerationId }),
     );
+    await expect(
+      aiJudgeConfigurationGenerationQueueService.revise(generationId, currentUser),
+    ).resolves.toEqual({ generationId: expectedRevisionGenerationId });
   });
 
   it("stores and publishes application progress to the authenticated user room", async () => {
@@ -185,9 +200,11 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
     });
 
     expect(job.updateProgress).toHaveBeenCalledWith({
-      status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
-      attempt: 1,
-      attemptHistory: [],
+      progress: {
+        status: AI_JUDGE_GENERATION_STATUS.DRAFTING,
+        attempt: 1,
+        attemptHistory: [],
+      },
     });
     expect(realtimePublisher.emitToRoom).toHaveBeenCalledWith(
       AI_JUDGE_CONFIGURATION_GENERATION_SOCKET_EVENTS.PROGRESS,
@@ -211,5 +228,14 @@ describe("AiJudgeConfigurationGenerationQueueService", () => {
     await expect(
       aiJudgeConfigurationGenerationQueueService.isCancellationRequested(job.id),
     ).resolves.toBe(true);
+  });
+
+  it("stores the referenced draft separately from public progress", async () => {
+    await aiJudgeConfigurationGenerationQueueService.storeReferencedDraft(job, referencedDraft);
+
+    expect(job.updateProgress).toHaveBeenCalledWith({
+      progress: job.progress,
+      referencedDraft,
+    });
   });
 });

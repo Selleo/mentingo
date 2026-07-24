@@ -2451,6 +2451,37 @@
               "scoreGuidance": "Score guidance",
               "blockingError": "Blocking error"
             },
+            "deterministicValidation": {
+              "summary": "The assessment structure needs correction.",
+              "guidance_score_out_of_range": {
+                "message": "A scoring level is outside the criterion's allowed range.",
+                "correction": "Keep every scoring level between zero and the criterion's maximum score."
+              },
+              "duplicate_guidance_score": {
+                "message": "A criterion contains the same scoring level more than once.",
+                "correction": "Keep exactly one guidance item for every scoring level."
+              },
+              "missing_guidance_scores": {
+                "message": "A criterion is missing one or more required scoring levels.",
+                "correction": "Add one guidance item for every scoring level from zero through the maximum."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Two criteria cannot be distinguished reliably.",
+                "correction": "Keep every criterion as a distinct assessment item."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Two blocking errors cannot be distinguished reliably.",
+                "correction": "Keep every blocking error as a distinct assessment item."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "A new criterion could not be matched reliably.",
+                "correction": "Keep existing criteria stable and add the new criterion as a distinct item."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "A new blocking error could not be matched reliably.",
+                "correction": "Keep existing blocking errors stable and add the new error as a distinct item."
+              }
+            },
             "keepCurrentDraft": "Keep current draft",
             "applySuggestedImprovements": "Apply suggested improvements",
             "completedArtifacts": "Prepared so far",

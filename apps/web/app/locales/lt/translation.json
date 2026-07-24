@@ -2392,6 +2392,37 @@
               "scoreGuidance": "Vertinimo lygis",
               "blockingError": "Blokuojanti klaida"
             },
+            "deterministicValidation": {
+              "summary": "Vertinimo struktūrą reikia pataisyti.",
+              "guidance_score_out_of_range": {
+                "message": "Vienas vertinimo lygis nepatenka į leistiną kriterijaus intervalą.",
+                "correction": "Kiekvienas vertinimo lygis turi būti nuo nulio iki didžiausio kriterijaus balo."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kriterijuje tas pats vertinimo lygis pateiktas daugiau nei vieną kartą.",
+                "correction": "Kiekvienam vertinimo lygiui palikite tik vieną vertinimo taisyklę."
+              },
+              "missing_guidance_scores": {
+                "message": "Kriterijuje trūksta vieno ar daugiau privalomų vertinimo lygių.",
+                "correction": "Pridėkite po vieną taisyklę kiekvienam lygiui nuo nulio iki didžiausio balo."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Dviejų kriterijų negalima patikimai atskirti.",
+                "correction": "Kiekvieną kriterijų palikite kaip atskirą vertinimo elementą."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Dviejų blokuojančių klaidų negalima patikimai atskirti.",
+                "correction": "Kiekvieną blokuojančią klaidą palikite kaip atskirą vertinimo elementą."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Naujo kriterijaus nepavyko patikimai susieti.",
+                "correction": "Išlaikykite esamus kriterijus ir pridėkite naują kaip atskirą elementą."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Naujos blokuojančios klaidos nepavyko patikimai susieti.",
+                "correction": "Išlaikykite esamas blokuojančias klaidas ir pridėkite naują kaip atskirą elementą."
+              }
+            },
             "keepCurrentDraft": "Palikti dabartinį juodraštį",
             "applySuggestedImprovements": "Pritaikyti siūlomus patobulinimus",
             "completedArtifacts": "Jau paruošta",

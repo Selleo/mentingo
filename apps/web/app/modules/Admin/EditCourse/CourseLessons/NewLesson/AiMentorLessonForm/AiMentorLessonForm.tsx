@@ -38,19 +38,19 @@ import {
   getAiJudgeGenerationMode,
   getLatestAiJudgeValidation,
   INITIAL_AI_JUDGE_AUTHORING_STATE,
-} from "./ai-judge/aiJudgeAuthoring.reducer";
+} from "./AiJudge/aiJudgeAuthoring.reducer";
 import {
   mapAiJudgeConfigurationDraftToBaseInput,
   mapAiJudgeConfigurationDraftToTranslationInput,
   mapAiJudgeConfigurationResponseToDraft,
-} from "./ai-judge/aiJudgeConfiguration.mappers";
+} from "./AiJudge/aiJudgeConfiguration.mappers";
 import {
   AI_JUDGE_GENERATION_MODE,
   AI_JUDGE_GENERATION_STATUS,
-} from "./ai-judge/aiJudgeConfiguration.types";
-import { AiJudgeConfigurationCard } from "./ai-judge/AiJudgeConfigurationCard";
-import { AiJudgeGenerationDialog } from "./ai-judge/AiJudgeGenerationDialog";
-import { useAiJudgeConfigurationGeneration } from "./ai-judge/useAiJudgeConfigurationGeneration";
+} from "./AiJudge/aiJudgeConfiguration.types";
+import { AiJudgeConfigurationCard } from "./AiJudge/AiJudgeConfigurationCard";
+import { AiJudgeGenerationDialog } from "./AiJudge/AiJudgeGenerationDialog";
+import { useAiJudgeConfigurationGeneration } from "./AiJudge/useAiJudgeConfigurationGeneration";
 import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import {
   AiMentorInstructionsField,
@@ -66,7 +66,7 @@ import type {
   AiJudgeGenerationMode,
   AiJudgeGenerationRequest,
   AiJudgeValidationResult,
-} from "./ai-judge/aiJudgeConfiguration.types";
+} from "./AiJudge/aiJudgeConfiguration.types";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -140,6 +140,7 @@ const AiMentorLessonForm = ({
     reviseGeneration: reviseAiJudgeConfigurationGeneration,
     resetGeneration: resetAiJudgeConfigurationGeneration,
     isStarting: isStartingAiJudgeConfigurationGeneration,
+    isRevising: isRevisingAiJudgeConfigurationGeneration,
   } = useAiJudgeConfigurationGeneration();
   const { mutateAsync: validateAiJudgeConfiguration, isPending: isValidatingAiJudgeConfiguration } =
     useValidateAiJudgeConfiguration();
@@ -209,6 +210,8 @@ const AiMentorLessonForm = ({
   ) => {
     if (lessonToEdit) {
       await saveStagedAiJudgeConfiguration(configuration);
+      hasStagedAiJudgeConfigurationRef.current = false;
+      form.resetField("aiJudgeConfiguration", { defaultValue: configuration });
       return;
     }
 
@@ -550,6 +553,7 @@ const AiMentorLessonForm = ({
                 onGenerate={handleGenerateAiJudgeConfiguration}
                 onCancel={handleCancelAiJudgeConfigurationGeneration}
                 onRevise={reviseAiJudgeConfigurationGeneration}
+                isRevising={isRevisingAiJudgeConfigurationGeneration}
                 onStopAndInspect={handleStopAndInspectAiJudgeConfiguration}
                 onReviewAssessment={handleEditGeneratedAiJudgeConfiguration}
               />

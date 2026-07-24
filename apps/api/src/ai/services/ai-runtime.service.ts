@@ -20,7 +20,7 @@ import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
 import {
   aiJudgeConfigurationValidatorStructuredOutputSchema,
   referencedAiJudgeConfigurationStructuredOutputSchema,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
 import { aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
@@ -34,7 +34,7 @@ import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-config
 import type {
   AiJudgeConfigurationValidatorStructuredOutput,
   ReferencedAiJudgeConfiguration,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 
 @Injectable()
 export class AiRuntimeService {

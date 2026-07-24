@@ -2451,6 +2451,37 @@
               "scoreGuidance": "Nivel de puntuación",
               "blockingError": "Error bloqueante"
             },
+            "deterministicValidation": {
+              "summary": "La estructura de la evaluación necesita correcciones.",
+              "guidance_score_out_of_range": {
+                "message": "Un nivel de puntuación está fuera del rango permitido del criterio.",
+                "correction": "Mantén cada nivel entre cero y la puntuación máxima del criterio."
+              },
+              "duplicate_guidance_score": {
+                "message": "Un criterio contiene el mismo nivel de puntuación más de una vez.",
+                "correction": "Mantén exactamente una regla para cada nivel de puntuación."
+              },
+              "missing_guidance_scores": {
+                "message": "A un criterio le faltan uno o más niveles de puntuación obligatorios.",
+                "correction": "Añade una regla para cada nivel desde cero hasta la puntuación máxima."
+              },
+              "duplicate_criterion_ref": {
+                "message": "No se pueden distinguir de forma fiable dos criterios.",
+                "correction": "Mantén cada criterio como un elemento de evaluación independiente."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "No se pueden distinguir de forma fiable dos errores bloqueantes.",
+                "correction": "Mantén cada error bloqueante como un elemento de evaluación independiente."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "No se pudo asociar de forma fiable un criterio nuevo.",
+                "correction": "Mantén estables los criterios existentes y añade el nuevo como un elemento independiente."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "No se pudo asociar de forma fiable un error bloqueante nuevo.",
+                "correction": "Mantén estables los errores existentes y añade el nuevo como un elemento independiente."
+              }
+            },
             "keepCurrentDraft": "Conservar el borrador actual",
             "applySuggestedImprovements": "Aplicar mejoras sugeridas",
             "completedArtifacts": "Preparado hasta ahora",

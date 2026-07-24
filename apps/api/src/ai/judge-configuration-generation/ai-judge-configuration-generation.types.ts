@@ -10,5 +10,4 @@ export {
 
 export type { AiJudgeGenerationMode } from "@repo/shared";
 
-export const AI_JUDGE_CRITERION_REF_PATTERN = "^C[1-9][0-9]*$";
-export const AI_JUDGE_BLOCKING_ERROR_REF_PATTERN = "^B[1-9][0-9]*$";
+export type AiJudgeReferencePrefix = "C" | "B";

@@ -1,16 +1,16 @@
 import { Injectable } from "@nestjs/common";
 
-import { getDeterministicAiJudgeConfigurationValidation } from "src/ai/judge-configuration-generation/ai-judge-configuration-draft";
-import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation-workflow.service";
 import {
   AI_JUDGE_GENERATION_MODE,
   AI_JUDGE_GENERATION_STATUS,
 } from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.types";
+import { AiJudgeConfigurationGenerationWorkflowService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-generation-workflow.service";
+import { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/services/ai-judge-configuration-validator.service";
+import { getDeterministicAiJudgeConfigurationValidation } from "src/ai/judge-configuration-generation/utils/ai-judge-configuration-draft";
 import {
   reconcileAiJudgeConfigurationDraft,
   referenceAiJudgeConfiguration,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-references";
-import { AiJudgeConfigurationValidatorService } from "src/ai/judge-configuration-generation/ai-judge-configuration-validator.service";
+} from "src/ai/judge-configuration-generation/utils/ai-judge-configuration-references";
 
 import { AiJudgeConfigurationService } from "./ai-judge-configuration.service";
 
@@ -28,8 +28,8 @@ import type {
   GenerateAiJudgeConfigurationInput,
   ReferencedAiJudgeConfiguration,
   ValidateAiJudgeConfigurationInput,
-} from "src/ai/judge-configuration-generation/ai-judge-configuration-generation.schema";
-import type { AiJudgeConfigurationIdentityMap } from "src/ai/judge-configuration-generation/ai-judge-configuration-references.types";
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
+import type { AiJudgeConfigurationIdentityMap } from "src/ai/judge-configuration-generation/utils/ai-judge-configuration-references.types";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
@@ -74,8 +74,9 @@ export class AiJudgeConfigurationGenerationService {
         attempt: prepared.attempt,
         attemptHistory: prepared.attemptHistory,
         isCancelled: options.isCancelled,
-        onDraft: (draft) => {
+        onDraft: async (draft) => {
           latestDraft = draft;
+          await options.onReferencedDraft?.(draft);
         },
         reportProgress: async (progress) => {
           await options.reportProgress?.(
@@ -151,12 +152,10 @@ export class AiJudgeConfigurationGenerationService {
 
   prepareRevision(
     previous: PreparedAiJudgeConfigurationGeneration,
-    configuration: Parameters<typeof referenceAiJudgeConfiguration>[0],
+    referencedConfiguration: ReferencedAiJudgeConfiguration,
     validation: AiJudgeConfigurationValidationResult,
     attemptHistory: AiJudgeGenerationAttempt[],
   ): PreparedAiJudgeConfigurationGeneration {
-    const referenced = referenceAiJudgeConfiguration(configuration);
-
     return {
       workflowInput: {
         mode: AI_JUDGE_GENERATION_MODE.REPAIR,
@@ -164,10 +163,10 @@ export class AiJudgeConfigurationGenerationService {
         lessonContext: previous.workflowInput.lessonContext,
         brief: previous.workflowInput.brief,
         creatorInstruction: previous.workflowInput.creatorInstruction,
-        currentConfiguration: referenced.configuration,
+        currentConfiguration: referencedConfiguration,
         blockingIssues: validation.issues,
       },
-      identities: referenced.identities,
+      identities: previous.identities,
       attempt: attemptHistory.length + 1,
       attemptHistory,
     };

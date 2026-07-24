@@ -2391,6 +2391,37 @@
               "scoreGuidance": "Bewertungsstufe",
               "blockingError": "Blockierender Fehler"
             },
+            "deterministicValidation": {
+              "summary": "Die Bewertungsstruktur muss korrigiert werden.",
+              "guidance_score_out_of_range": {
+                "message": "Eine Bewertungsstufe liegt außerhalb des zulässigen Bereichs des Kriteriums.",
+                "correction": "Jede Bewertungsstufe muss zwischen null und der Höchstpunktzahl des Kriteriums liegen."
+              },
+              "duplicate_guidance_score": {
+                "message": "Ein Kriterium enthält dieselbe Bewertungsstufe mehrfach.",
+                "correction": "Behalten Sie für jede Bewertungsstufe genau einen Bewertungshinweis bei."
+              },
+              "missing_guidance_scores": {
+                "message": "Bei einem Kriterium fehlen eine oder mehrere erforderliche Bewertungsstufen.",
+                "correction": "Fügen Sie für jede Bewertungsstufe von null bis zur Höchstpunktzahl einen Hinweis hinzu."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Zwei Kriterien können nicht zuverlässig unterschieden werden.",
+                "correction": "Behalten Sie jedes Kriterium als eigenständigen Bewertungspunkt bei."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Zwei blockierende Fehler können nicht zuverlässig unterschieden werden.",
+                "correction": "Behalten Sie jeden blockierenden Fehler als eigenständigen Bewertungspunkt bei."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Ein neues Kriterium konnte nicht zuverlässig zugeordnet werden.",
+                "correction": "Lassen Sie bestehende Kriterien unverändert und fügen Sie das neue Kriterium als eigenen Punkt hinzu."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Ein neuer blockierender Fehler konnte nicht zuverlässig zugeordnet werden.",
+                "correction": "Lassen Sie bestehende blockierende Fehler unverändert und fügen Sie den neuen Fehler als eigenen Punkt hinzu."
+              }
+            },
             "keepCurrentDraft": "Aktuellen Entwurf behalten",
             "applySuggestedImprovements": "Vorgeschlagene Verbesserungen anwenden",
             "completedArtifacts": "Bisher vorbereitet",

@@ -203,4 +203,44 @@ describe("useAiMentorLessonForm suggestions", () => {
     expect(mocks.updateAiMentorLesson).toHaveBeenCalledOnce();
     expect(saveStagedAiJudgeConfiguration).not.toHaveBeenCalled();
   });
+
+  it("does not restore an earlier staged draft after the edited assessment was saved", async () => {
+    const saveStagedAiJudgeConfiguration = vi.fn().mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useAiMentorLessonForm({
+        chapterToEdit,
+        lessonToEdit,
+        setContentTypeToDisplay: vi.fn(),
+        language: "en",
+        baseLanguage: "en",
+        onSaveStagedAiJudgeConfiguration: saveStagedAiJudgeConfiguration,
+      }),
+    );
+    const generatedConfiguration = {
+      taskGoal: "Complete the discovery call",
+      passingThresholdPercent: 60,
+      criteria: [],
+      blockingErrors: [],
+    };
+    const editedConfiguration = {
+      ...generatedConfiguration,
+      taskGoal: "Discover the customer's priorities and agree a next step",
+    };
+
+    act(() => {
+      result.current.form.setValue("aiJudgeConfiguration", generatedConfiguration, {
+        shouldDirty: true,
+      });
+      result.current.form.resetField("aiJudgeConfiguration", {
+        defaultValue: editedConfiguration,
+      });
+    });
+
+    await act(async () => {
+      await result.current.onSubmit(result.current.form.getValues());
+    });
+
+    expect(result.current.form.getValues("aiJudgeConfiguration")).toEqual(editedConfiguration);
+    expect(saveStagedAiJudgeConfiguration).not.toHaveBeenCalled();
+  });
 });

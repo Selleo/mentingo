@@ -2680,6 +2680,37 @@
               "scoreGuidance": "Poziom punktacji",
               "blockingError": "Błąd blokujący"
             },
+            "deterministicValidation": {
+              "summary": "Struktura oceny wymaga poprawy.",
+              "guidance_score_out_of_range": {
+                "message": "Jeden z poziomów punktacji wykracza poza dozwolony zakres kryterium.",
+                "correction": "Każdy poziom punktacji musi mieścić się między zerem a maksymalną punktacją kryterium."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kryterium zawiera ten sam poziom punktacji więcej niż raz.",
+                "correction": "Zachowaj dokładnie jedną zasadę oceniania dla każdego poziomu punktacji."
+              },
+              "missing_guidance_scores": {
+                "message": "W kryterium brakuje co najmniej jednego wymaganego poziomu punktacji.",
+                "correction": "Dodaj jedną zasadę oceniania dla każdego poziomu od zera do maksymalnej punktacji."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Nie można jednoznacznie rozróżnić dwóch kryteriów.",
+                "correction": "Każde kryterium powinno być odrębnym elementem oceny."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Nie można jednoznacznie rozróżnić dwóch błędów blokujących.",
+                "correction": "Każdy błąd blokujący powinien być odrębnym elementem oceny."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Nie udało się jednoznacznie dopasować nowego kryterium.",
+                "correction": "Zachowaj istniejące kryteria i dodaj nowe jako odrębny element."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Nie udało się jednoznacznie dopasować nowego błędu blokującego.",
+                "correction": "Zachowaj istniejące błędy blokujące i dodaj nowy jako odrębny element."
+              }
+            },
             "keepCurrentDraft": "Zachowaj aktualny draft",
             "applySuggestedImprovements": "Zastosuj sugerowane poprawki",
             "completedArtifacts": "Dotychczas przygotowano",
