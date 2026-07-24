@@ -160,13 +160,13 @@ function NewsPage() {
             <div data-testid={NEWS_PAGE_HANDLES.ITEM_LIST}>
               <NewsItem {...firstNews} isBig className="mb-6" />
 
-              {moreNews.length ? (
+              {moreNews.length && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                   {moreNews.map((news: (typeof displayedNews)[number]) => (
                     <NewsItem key={news.id} {...news} />
                   ))}
                 </div>
-              ) : null}
+              )}
             </div>
           ) : (
             <div className="flex items-center justify-center h-full">
@@ -216,7 +216,7 @@ function NewsPage() {
         >
           {renderNewsContent()}
 
-          {totalItems > 0 ? (
+          {totalItems > 0 && (
             <Pagination
               className="border-t"
               totalItems={totalItems}
@@ -228,7 +228,7 @@ function NewsPage() {
               canChangeItemsPerPage={false}
               onPageChange={changePage}
             />
-          ) : null}
+          )}
         </PageWrapper>
       )}
     </ContentAccessGuard>

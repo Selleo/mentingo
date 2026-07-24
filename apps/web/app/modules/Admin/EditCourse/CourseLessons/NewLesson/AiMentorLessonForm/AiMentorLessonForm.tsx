@@ -524,7 +524,7 @@ const AiMentorLessonForm = ({
                 name="type"
               ></FormField>
 
-              {canConfigureVoiceMentor ? (
+              {canConfigureVoiceMentor && (
                 <div className="mb-4 rounded-lg border border-input bg-background p-4">
                   <div className="mb-4">
                     <div className="flex items-center gap-1">
@@ -636,7 +636,7 @@ const AiMentorLessonForm = ({
                     </div>
                   </div>
                 </div>
-              ) : null}
+              )}
 
               <div className="mb-4">
                 <div className="mb-2 flex items-center gap-2">

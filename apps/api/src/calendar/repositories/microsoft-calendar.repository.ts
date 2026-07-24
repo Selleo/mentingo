@@ -30,11 +30,11 @@ import {
   users,
 } from "src/storage/schema";
 
+import type { MicrosoftCalendarOutboundSourceType } from "../calendar.constants";
 import type {
   MappedMicrosoftCalendarEvent,
   MicrosoftCalendarConnectionCreateInput,
   MicrosoftCalendarConnectionUpdate,
-  MicrosoftCalendarOutboundSourceType,
   OutboundCandidate,
 } from "../types/microsoft-calendar.types";
 

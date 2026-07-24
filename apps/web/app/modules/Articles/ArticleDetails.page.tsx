@@ -131,7 +131,7 @@ export default function ArticleDetailsPage() {
             </div>
           </div>
 
-          {headerImageUrl ? (
+          {headerImageUrl && (
             <div className="overflow-hidden bg-white rounded-t-3xl mt-2 pb-6">
               <img
                 src={headerImageUrl}
@@ -139,15 +139,15 @@ export default function ArticleDetailsPage() {
                 className="h-[380px] w-full object-cover md:h-[480px] rounded-3xl"
               />
             </div>
-          ) : null}
+          )}
 
-          {contentWithIds || article.content ? (
+          {(contentWithIds || article.content) && (
             <Viewer
               variant="content"
               content={contentWithIds || article.content}
               className="mt-4"
             />
-          ) : null}
+          )}
 
           <div className="mx-auto w-full border-b border-primary-100" />
 

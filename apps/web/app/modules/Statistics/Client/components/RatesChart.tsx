@@ -114,16 +114,18 @@ export const RatesChart = ({ isLoading = false, resourceName, chartData }: Rates
           >
             <Customized
               component={() => {
-                return isEmptyChart ? (
-                  <Text
-                    x={0}
-                    textAnchor="middle"
-                    verticalAnchor="middle"
-                    className="h5 md:h3 translate-x-1/2 translate-y-1/2 fill-primary-950"
-                  >
-                    {t("clientStatisticsView.other.noDataAvailable")}
-                  </Text>
-                ) : null;
+                return (
+                  isEmptyChart && (
+                    <Text
+                      x={0}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      className="h5 md:h3 translate-x-1/2 translate-y-1/2 fill-primary-950"
+                    >
+                      {t("clientStatisticsView.other.noDataAvailable")}
+                    </Text>
+                  )
+                );
               }}
             />
             <CartesianGrid horizontal={true} vertical={false} />

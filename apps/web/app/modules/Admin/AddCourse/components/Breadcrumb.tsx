@@ -38,12 +38,12 @@ const Breadcrumb = ({ backTo = "/admin/courses", currentLabel }: BreadcrumbProps
       <BreadcrumbItem className="body-base-md text-neutral-950">
         {t("adminCourseView.settings.breadcrumbs.createNew")}
       </BreadcrumbItem>
-      {currentLabel ? (
+      {currentLabel && (
         <>
           <BreadcrumbSeparator />
           <BreadcrumbItem className="body-base-md text-neutral-950">{currentLabel}</BreadcrumbItem>
         </>
-      ) : null}
+      )}
     </BreadcrumbList>
   );
 };

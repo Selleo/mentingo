@@ -257,7 +257,7 @@ export default function CalendarPage() {
               {t("calendarView.details.sourceType.microsoftOutlook")}
             </span>
           </div>
-          {canSyncMicrosoftCalendar ? (
+          {canSyncMicrosoftCalendar && (
             <Button
               variant="outline"
               disabled={microsoftConnection?.status === "syncing" || isSyncPending}
@@ -273,10 +273,10 @@ export default function CalendarPage() {
               />
               {t("microsoftCalendar.action.sync")}
             </Button>
-          ) : null}
+          )}
         </div>
 
-        {microsoftConnection?.stale ? (
+        {microsoftConnection?.stale && (
           <div
             role="status"
             className="rounded-md border border-warning-200 bg-warning-50 px-3 py-2 text-sm text-warning-950"
@@ -284,9 +284,9 @@ export default function CalendarPage() {
           >
             {t("calendarView.microsoft.staleWarning")}
           </div>
-        ) : null}
+        )}
 
-        {showHorizonNotice ? (
+        {showHorizonNotice && (
           <div
             role="status"
             className="rounded-md border border-[#0078d4]/20 bg-[#f5faff] px-3 py-2 text-sm text-[#004578]"
@@ -294,7 +294,7 @@ export default function CalendarPage() {
           >
             {t("calendarView.microsoft.horizonNotice")}
           </div>
-        ) : null}
+        )}
 
         <div className="calendar-shell min-h-0 flex-1">
           <FullCalendar

@@ -81,6 +81,19 @@ module.exports = {
         "@typescript-eslint/no-import-type-side-effects": "error",
         "react/prop-types": "off",
         "react/display-name": "off",
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector:
+              "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXElement']",
+            message: "Use && instead of a JSX ternary with null as the alternate.",
+          },
+          {
+            selector:
+              "ConditionalExpression[alternate.type='Literal'][alternate.value=null][consequent.type='JSXFragment']",
+            message: "Use && instead of a JSX ternary with null as the alternate.",
+          },
+        ],
       },
     },
 

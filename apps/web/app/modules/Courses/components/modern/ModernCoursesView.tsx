@@ -95,7 +95,7 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
   }
 
   if (!courses.length) {
-    return rowRef ? <div ref={rowRef as Ref<HTMLDivElement>} className="h-px" /> : null;
+    return rowRef && <div ref={rowRef as Ref<HTMLDivElement>} className="h-px" />;
   }
 
   return (

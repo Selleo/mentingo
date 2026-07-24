@@ -233,11 +233,11 @@ export function MicrosoftCalendarCard() {
               >
                 {t("microsoftCalendar.outbound.title")}
               </label>
-              {!connection.outboundSyncEnabled && connection.status !== "disconnected" ? (
+              {!connection.outboundSyncEnabled && connection.status !== "disconnected" && (
                 <p className="mt-1 text-xs text-neutral-500">
                   {t("microsoftCalendar.outbound.reauthorize")}
                 </p>
-              ) : null}
+              )}
             </div>
             <Switch
               id="microsoft-calendar-outbound-switch"

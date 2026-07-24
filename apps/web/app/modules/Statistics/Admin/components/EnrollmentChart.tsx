@@ -110,16 +110,18 @@ export const EnrollmentChart = ({ data, isLoading = false }: EnrollmentChartProp
           <BarChart accessibilityLayer data={parsedData} margin={{ left: -28 }} barCategoryGap={12}>
             <Customized
               component={() => {
-                return isEmptyChart ? (
-                  <Text
-                    x={0}
-                    textAnchor="middle"
-                    verticalAnchor="middle"
-                    className="h5 md:h3 translate-x-1/2 translate-y-1/2 fill-primary-950"
-                  >
-                    {t("enrollmentChartView.other.noData")}
-                  </Text>
-                ) : null;
+                return (
+                  isEmptyChart && (
+                    <Text
+                      x={0}
+                      textAnchor="middle"
+                      verticalAnchor="middle"
+                      className="h5 md:h3 translate-x-1/2 translate-y-1/2 fill-primary-950"
+                    >
+                      {t("enrollmentChartView.other.noData")}
+                    </Text>
+                  )
+                );
               }}
             />
             <CartesianGrid horizontal={true} vertical={false} />

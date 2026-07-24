@@ -91,24 +91,24 @@ export function CalendarOutlookEventDetailsDialog({
             value={t(`calendarView.details.availability.${outlook.availability}`)}
           />
 
-          {eventDetails.location ? (
+          {eventDetails.location && (
             <CalendarEventMetaRow
               icon={<MapPin className="size-4" />}
               label={t("calendarView.details.field.location")}
               value={eventDetails.location}
             />
-          ) : null}
+          )}
 
-          {outlook.isSensitive ? (
+          {outlook.isSensitive && (
             <CalendarEventMetaRow
               icon={<Shield className="size-4" />}
               label={t("calendarView.details.field.privacy")}
               value={t("calendarView.details.privateEvent")}
             />
-          ) : null}
+          )}
         </div>
 
-        {outlook.webLink ? (
+        {outlook.webLink && (
           <div className="border-t border-neutral-200 pt-4">
             <Button
               asChild
@@ -121,7 +121,7 @@ export function CalendarOutlookEventDetailsDialog({
               </a>
             </Button>
           </div>
-        ) : null}
+        )}
       </div>
     </>
   );

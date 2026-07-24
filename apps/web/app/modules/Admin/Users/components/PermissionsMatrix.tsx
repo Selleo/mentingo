@@ -68,7 +68,7 @@ export const PermissionsMatrix = ({
 
   return (
     <div className="space-y-3">
-      {title ? <h3 className="h5 text-neutral-950">{title}</h3> : null}
+      {title && <h3 className="h5 text-neutral-950">{title}</h3>}
       <div className="max-h-[70vh] overflow-auto rounded-lg border">
         <table className="w-full caption-bottom bg-background text-sm">
           <thead className="[&_tr]:border-b">
