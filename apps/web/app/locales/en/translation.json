@@ -4636,6 +4636,7 @@
     "description": "View the execution history of all automations. Click on an entry to see full details.",
     "backToAutomations": "Back to automations",
     "status": {
+      "success": "Success",
       "sent": "Sent",
       "skipped": "Skipped",
       "failed": "Failed"
@@ -4643,6 +4644,7 @@
     "filters": {
       "searchPlaceholder": "Search by name, event, or recipient...",
       "all": "All statuses",
+      "success": "Success",
       "sent": "Sent",
       "skipped": "Skipped",
       "failed": "Failed"
@@ -4651,6 +4653,7 @@
       "automation": "Automation",
       "status": "Status",
       "emails": "Emails",
+      "recipients": "recipients",
       "ranAt": "Ran at",
       "duration": "Duration",
       "details": "Details",
@@ -4662,6 +4665,9 @@
       "ranAt": "Ran at",
       "triggerEvent": "Trigger event",
       "automation": "Automation",
+      "status": "Status",
+      "error": "Error",
+      "noEmails": "No email recipients.",
       "duration": "Duration",
       "recipient": "Recipient",
       "template": "Template",
@@ -4684,7 +4690,21 @@
       "delete": "Delete automation",
       "savedJustNow": "Saved just now",
       "savedMinutesAgo": "Saved {{count}} min ago",
-      "simulationRequiredTooltip": "Run a simulation and ensure it passes before activating the automation"
+      "simulationRequiredTooltip": "Run a simulation and ensure it passes before activating the automation",
+      "unsavedChangesTooltip": "Save changes before activating the automation",
+      "leaveDialog": {
+        "title": "Unsaved changes",
+        "description": "You have unsaved changes. Would you like to save before leaving?",
+        "saveAndLeave": "Save and leave",
+        "leaveWithoutSaving": "Leave without saving",
+        "cancel": "Cancel"
+      },
+      "deleteDialog": {
+        "title": "Delete automation",
+        "description": "Are you sure you want to delete this automation? This action cannot be undone.",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+      }
     },
     "sidebar": {
       "title": "Steps",

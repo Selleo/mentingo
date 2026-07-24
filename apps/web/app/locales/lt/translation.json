@@ -4564,7 +4564,21 @@
       "delete": "Ištrinti automatizavimą",
       "savedJustNow": "Ką tik išsaugota",
       "savedMinutesAgo": "Išsaugota prieš {{count}} min.",
-      "simulationRequiredTooltip": "Paleiskite simuliaciją ir įsitikinkite, kad ji sėkminga, kad galėtumėte aktyvuoti automatizavimą"
+      "simulationRequiredTooltip": "Paleiskite simuliaciją ir įsitikinkite, kad ji sėkminga, kad galėtumėte aktyvuoti automatizavimą",
+      "unsavedChangesTooltip": "Išsaugokite pakeitimus prieš aktyvuodami automatizavimą",
+      "leaveDialog": {
+        "title": "Neišsaugoti pakeitimai",
+        "description": "Turite neišsaugotų pakeitimų. Ar norite išsaugoti prieš išeidami?",
+        "saveAndLeave": "Išsaugoti ir išeiti",
+        "leaveWithoutSaving": "Išeiti be išsaugojimo",
+        "cancel": "Atšaukti"
+      },
+      "deleteDialog": {
+        "title": "Ištrinti automatizavimą",
+        "description": "Ar tikrai norite ištrinti šį automatizavimą? Šio veiksmo negalima atšaukti.",
+        "confirm": "Ištrinti",
+        "cancel": "Atšaukti"
+      }
     },
     "sidebar": {
       "title": "Žingsniai",

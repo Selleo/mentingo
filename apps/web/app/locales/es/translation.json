@@ -4634,7 +4634,21 @@
       "delete": "Eliminar automatización",
       "savedJustNow": "Guardado justo ahora",
       "savedMinutesAgo": "Guardado hace {{count}} min",
-      "simulationRequiredTooltip": "Ejecute una simulación y asegúrese de que pase correctamente para activar la automatización"
+      "simulationRequiredTooltip": "Ejecute una simulación y asegúrese de que pase correctamente para activar la automatización",
+      "unsavedChangesTooltip": "Guarde los cambios antes de activar la automatización",
+      "leaveDialog": {
+        "title": "Cambios sin guardar",
+        "description": "Tiene cambios sin guardar. ¿Desea guardar antes de salir?",
+        "saveAndLeave": "Guardar y salir",
+        "leaveWithoutSaving": "Salir sin guardar",
+        "cancel": "Cancelar"
+      },
+      "deleteDialog": {
+        "title": "Eliminar automatización",
+        "description": "¿Está seguro de que desea eliminar esta automatización? Esta acción no se puede deshacer.",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+      }
     },
     "sidebar": {
       "title": "Pasos",

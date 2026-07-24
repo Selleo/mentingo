@@ -4562,7 +4562,21 @@
       "delete": "Automatisierung löschen",
       "savedJustNow": "Gerade gespeichert",
       "savedMinutesAgo": "Vor {{count}} Min. gespeichert",
-      "simulationRequiredTooltip": "Führen Sie eine Simulation durch und stellen Sie sicher, dass sie erfolgreich ist, um die Automatisierung zu aktivieren"
+      "simulationRequiredTooltip": "Führen Sie eine Simulation durch und stellen Sie sicher, dass sie erfolgreich ist, um die Automatisierung zu aktivieren",
+      "unsavedChangesTooltip": "Speichern Sie Änderungen, bevor Sie die Automatisierung aktivieren",
+      "leaveDialog": {
+        "title": "Nicht gespeicherte Änderungen",
+        "description": "Sie haben nicht gespeicherte Änderungen. Möchten Sie vor dem Verlassen speichern?",
+        "saveAndLeave": "Speichern und verlassen",
+        "leaveWithoutSaving": "Ohne Speichern verlassen",
+        "cancel": "Abbrechen"
+      },
+      "deleteDialog": {
+        "title": "Automatisierung löschen",
+        "description": "Sind Sie sicher, dass Sie diese Automatisierung löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
+        "confirm": "Löschen",
+        "cancel": "Abbrechen"
+      }
     },
     "sidebar": {
       "title": "Schritte",

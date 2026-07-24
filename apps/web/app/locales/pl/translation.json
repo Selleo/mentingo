@@ -4675,6 +4675,7 @@
     "description": "Podgląd historii wykonań wszystkich automatyzacji. Kliknij wpis, aby zobaczyć szczegóły.",
     "backToAutomations": "Powrót do automatyzacji",
     "status": {
+      "success": "Sukces",
       "sent": "Wysłano",
       "skipped": "Pominięto",
       "failed": "Błąd"
@@ -4682,6 +4683,7 @@
     "filters": {
       "searchPlaceholder": "Szukaj po nazwie, zdarzeniu lub odbiorcy...",
       "all": "Wszystkie statusy",
+      "success": "Sukces",
       "sent": "Wysłane",
       "skipped": "Pominięte",
       "failed": "Błędy"
@@ -4690,6 +4692,7 @@
       "automation": "Automatyzacja",
       "status": "Status",
       "emails": "E-maile",
+      "recipients": "odbiorców",
       "ranAt": "Uruchomiono",
       "duration": "Czas trwania",
       "details": "Szczegóły",
@@ -4701,6 +4704,9 @@
       "ranAt": "Uruchomiono",
       "triggerEvent": "Zdarzenie wyzwalające",
       "automation": "Automatyzacja",
+      "status": "Status",
+      "error": "Błąd",
+      "noEmails": "Brak odbiorców e-mail.",
       "duration": "Czas trwania",
       "recipient": "Odbiorca",
       "template": "Szablon",
@@ -4723,7 +4729,21 @@
       "delete": "Usuń automatyzację",
       "savedJustNow": "Zapisano właśnie",
       "savedMinutesAgo": "Zapisano {{count}} min temu",
-      "simulationRequiredTooltip": "Uruchom symulację i upewnij się, że przejdzie pomyślnie, aby aktywować automatyzację"
+      "simulationRequiredTooltip": "Uruchom symulację i upewnij się, że przejdzie pomyślnie, aby aktywować automatyzację",
+      "unsavedChangesTooltip": "Zapisz zmiany przed aktywacją automatyzacji",
+      "leaveDialog": {
+        "title": "Niezapisane zmiany",
+        "description": "Masz niezapisane zmiany. Czy chcesz zapisać przed wyjściem?",
+        "saveAndLeave": "Zapisz i wyjdź",
+        "leaveWithoutSaving": "Wyjdź bez zapisywania",
+        "cancel": "Anuluj"
+      },
+      "deleteDialog": {
+        "title": "Usuń automatyzację",
+        "description": "Czy na pewno chcesz usunąć tę automatyzację? Tej operacji nie można cofnąć.",
+        "confirm": "Usuń",
+        "cancel": "Anuluj"
+      }
     },
     "sidebar": {
       "title": "Kroki",
