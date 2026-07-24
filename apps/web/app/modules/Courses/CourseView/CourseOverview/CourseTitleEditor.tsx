@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
 
+import type { ReactNode } from "react";
+
 type CourseTitleEditorProps = {
   canEdit: boolean;
   disabled: boolean;
@@ -10,6 +12,7 @@ type CourseTitleEditorProps = {
   onChange: (title: string) => void;
   onEdit: () => void;
   onSave: () => Promise<void>;
+  placeholder: string;
   title: string;
 };
 
@@ -26,6 +29,7 @@ export default function CourseTitleEditor({
   onChange,
   onEdit,
   onSave,
+  placeholder,
   title,
 }: CourseTitleEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -47,11 +51,14 @@ export default function CourseTitleEditor({
     resizeTextareaToContent(textareaRef.current);
   }, [isEditing, title]);
 
+  let titleContent: ReactNode = title;
+
   if (isEditing) {
-    return (
+    titleContent = (
       <textarea
         ref={textareaRef}
         data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
+        placeholder={placeholder}
         value={title}
         disabled={disabled}
         onChange={(event) => {
@@ -72,26 +79,26 @@ export default function CourseTitleEditor({
             onCancel();
           }
         }}
-        className="relative z-10 mb-4 w-full resize-none overflow-hidden rounded-lg bg-transparent p-2 text-2xl font-bold leading-tight text-white backdrop-blur-lg focus:outline-none focus:ring-2 focus:ring-white md:text-3xl lg:text-4xl"
+        className="block w-full resize-none overflow-hidden rounded-lg border-2 border-transparent bg-transparent p-2 text-left backdrop-blur-lg placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white"
         rows={1}
       />
+    );
+  } else if (canEdit) {
+    titleContent = (
+      <button
+        type="button"
+        data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
+        onClick={onEdit}
+        className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
+      >
+        {title ? title : <span className="text-neutral-200">{placeholder}</span>}
+      </button>
     );
   }
 
   return (
     <h1 className="relative z-10 mb-4 text-xl font-bold leading-snug text-white md:text-3xl md:leading-tight lg:text-4xl">
-      {canEdit ? (
-        <button
-          type="button"
-          data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
-          onClick={onEdit}
-          className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
-        >
-          {title}
-        </button>
-      ) : (
-        title
-      )}
+      {titleContent}
     </h1>
   );
 }

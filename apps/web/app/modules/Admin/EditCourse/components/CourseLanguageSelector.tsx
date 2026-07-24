@@ -20,6 +20,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 
 import { EDIT_COURSE_PAGE_HANDLES } from "../../../../../e2e/data/courses/handles";
 
@@ -40,6 +41,7 @@ type LanguageSelectorProps = {
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
   isAIConfigured: boolean;
+  tooltipIconClassName?: string;
 };
 
 export const CourseLanguageSelector = ({
@@ -48,6 +50,7 @@ export const CourseLanguageSelector = ({
   onChange,
   setOpenGenerateTranslationModal,
   isAIConfigured,
+  tooltipIconClassName,
 }: LanguageSelectorProps) => {
   const { t } = useTranslation();
 
@@ -82,6 +85,10 @@ export const CourseLanguageSelector = ({
     if (!(course && languageToDelete)) return;
 
     await deleteLanguage({ courseId: course.id, language: languageToDelete });
+
+    if (course.baseLanguage) {
+      onChange(course.baseLanguage);
+    }
   };
 
   return (
@@ -90,7 +97,10 @@ export const CourseLanguageSelector = ({
         <Tooltip>
           <TooltipTrigger asChild>
             <span>
-              <Icon name="Info" className="h-auto w-6 cursor-default text-neutral-800" />
+              <Icon
+                name="Info"
+                className={cn("h-auto w-6 cursor-default text-neutral-800", tooltipIconClassName)}
+              />
             </span>
           </TooltipTrigger>
           <TooltipContent

@@ -4610,6 +4610,8 @@
     },
     "overview": {
       "courseSettings": "Kurso nustatymai",
+      "settingsDescription": "Tvarkykite šio kurso nustatymus.",
+      "titlePlaceholder": "Įveskite kurso pavadinimą...",
       "editMedia": "Redaguoti mediją",
       "continueLearning": "Tęsti mokymąsi",
       "courseDetails": "Kurso informacija",
@@ -4702,6 +4704,8 @@
       "title": "Turinys",
       "statistics": "Statistika",
       "edit": "Redaguoti turinį",
+      "missingTranslationsTitle": "Trūksta vertimų",
+      "missingTranslationsDescription": "Kai kurių skyrių ar pamokų pavadinimai rodomi numatytąja kalba.",
       "completedChapters_one": "Baigtas {{count}} skyrius",
       "completedChapters_few": "Baigti {{count}} skyriai",
       "completedChapters_other": "Baigta {{count}} skyrių",

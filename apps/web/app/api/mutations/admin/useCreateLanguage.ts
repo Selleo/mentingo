@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
+import { COURSE_VIEW_QUERY_KEY } from "~/api/queries/useCourse";
 import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
@@ -29,7 +30,10 @@ export function useCreateLanguage() {
     onSuccess: async () => {
       toast({ description: t("adminCourseView.createLanguage.success") });
 
-      await queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [COURSE_QUERY_KEY] }),
+        queryClient.invalidateQueries({ queryKey: COURSE_VIEW_QUERY_KEY }),
+      ]);
     },
     onError: (error) => {
       toast({

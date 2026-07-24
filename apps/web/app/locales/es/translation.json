@@ -4687,6 +4687,8 @@
     },
     "overview": {
       "courseSettings": "Configuración del curso",
+      "settingsDescription": "Gestiona la configuración de este curso.",
+      "titlePlaceholder": "Introduce el título del curso...",
       "editMedia": "Editar contenido multimedia",
       "continueLearning": "Continuar aprendiendo",
       "courseDetails": "Detalles del curso",
@@ -4777,6 +4779,8 @@
       "title": "Índice",
       "statistics": "Estadísticas",
       "edit": "Editar contenido",
+      "missingTranslationsTitle": "Faltan traducciones",
+      "missingTranslationsDescription": "Algunos títulos de capítulos o lecciones se muestran en el idioma predeterminado.",
       "completedChapters_one": "{{count}} capítulo completado",
       "completedChapters_other": "{{count}} capítulos completados",
       "lessons_one": "{{count}} lección",

@@ -4608,6 +4608,8 @@
     },
     "overview": {
       "courseSettings": "Kurseinstellungen",
+      "settingsDescription": "Verwalten Sie die Einstellungen für diesen Kurs.",
+      "titlePlaceholder": "Kurstitel eingeben...",
       "editMedia": "Medien bearbeiten",
       "continueLearning": "Weiterlernen",
       "courseDetails": "Kursdetails",
@@ -4698,6 +4700,8 @@
       "title": "Inhaltsverzeichnis",
       "statistics": "Statistiken",
       "edit": "Inhalt bearbeiten",
+      "missingTranslationsTitle": "Fehlende Übersetzungen",
+      "missingTranslationsDescription": "Einige Kapitel- oder Lektionstitel werden in der Standardsprache angezeigt.",
       "completedChapters_one": "{{count}} abgeschlossenes Kapitel",
       "completedChapters_other": "{{count}} abgeschlossene Kapitel",
       "lessons_one": "{{count}} Lektion",

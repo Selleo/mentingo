@@ -4728,6 +4728,8 @@
     },
     "overview": {
       "courseSettings": "Ustawienia kursu",
+      "settingsDescription": "Zarządzaj ustawieniami tego kursu.",
+      "titlePlaceholder": "Wprowadź tytuł kursu...",
       "editMedia": "Edytuj multimedia",
       "continueLearning": "Kontynuuj naukę",
       "courseDetails": "Szczegóły kursu",
@@ -4821,6 +4823,8 @@
       "title": "Spis treści",
       "statistics": "Statystyki",
       "edit": "Edytuj treść",
+      "missingTranslationsTitle": "Brakujące tłumaczenia",
+      "missingTranslationsDescription": "Niektóre tytuły rozdziałów lub lekcji są wyświetlane w języku domyślnym.",
       "completedChapters_one": "{{count}} ukończony rozdział",
       "completedChapters_few": "{{count}} ukończone rozdziały",
       "completedChapters_many": "{{count}} ukończonych rozdziałów",

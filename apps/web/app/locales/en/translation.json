@@ -4689,6 +4689,8 @@
     },
     "overview": {
       "courseSettings": "Course settings",
+      "settingsDescription": "Manage settings for this course.",
+      "titlePlaceholder": "Enter course title...",
       "editMedia": "Edit media",
       "continueLearning": "Continue learning",
       "courseDetails": "Course details",
@@ -4779,6 +4781,8 @@
       "title": "Table of contents",
       "statistics": "Statistics",
       "edit": "Edit content",
+      "missingTranslationsTitle": "Missing translations",
+      "missingTranslationsDescription": "Some chapter or lesson titles are shown in the default language.",
       "completedChapters_one": "{{count}} completed chapter",
       "completedChapters_other": "{{count}} completed chapters",
       "lessons_one": "{{count}} lesson",

@@ -1,7 +1,8 @@
-import { Edit2 } from "lucide-react";
+import { CircleAlert, Edit2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
 
 import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -20,6 +21,7 @@ type TableOfContentTabsProps = {
   canEditContent: boolean;
   canShowChat: boolean;
   canShowStatistics: boolean;
+  hasMissingCurriculumTranslations: boolean;
   onEditContent: () => void;
   onTabChange: (tab: TableOfContentTab) => void;
 };
@@ -29,6 +31,7 @@ export default function TableOfContentTabs({
   canEditContent,
   canShowChat,
   canShowStatistics,
+  hasMissingCurriculumTranslations,
   onEditContent,
   onTabChange,
 }: TableOfContentTabsProps) {
@@ -91,10 +94,42 @@ export default function TableOfContentTabs({
         )}
       </div>
       {canEditContent && (
-        <Button variant="primary" onClick={onEditContent} className="mb-3 flex items-center gap-2">
-          <Edit2 className="size-4" />
-          <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
-        </Button>
+        <div className="mb-3 flex items-center gap-2">
+          {hasMissingCurriculumTranslations && (
+            <TooltipProvider delayDuration={0}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-10 text-warning-800 hover:text-warning-800 hover:bg-warning-50"
+                    aria-label={t("modernCourseView.contents.missingTranslationsTitle")}
+                  >
+                    <CircleAlert className="size-7" aria-hidden />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent
+                  side="top"
+                  sideOffset={8}
+                  className="w-96 max-w-[calc(100vw-2rem)] p-4"
+                >
+                  <p className="text-sm font-semibold">
+                    {t("modernCourseView.contents.missingTranslationsTitle")}
+                  </p>
+                  <p className="mt-2 text-sm leading-5">
+                    {t("modernCourseView.contents.missingTranslationsDescription")}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
+
+          <Button variant="primary" onClick={onEditContent} className="flex items-center gap-2">
+            <Edit2 className="size-4" />
+            <span className="text-sm font-semibold">{t("modernCourseView.contents.edit")}</span>
+          </Button>
+        </div>
       )}
     </div>
   );

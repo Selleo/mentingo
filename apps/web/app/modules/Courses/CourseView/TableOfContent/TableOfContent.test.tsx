@@ -8,6 +8,7 @@ import { TableOfContent } from "./TableOfContent";
 
 const { courseAccessState, currentUserState } = vi.hoisted(() => ({
   courseAccessState: {
+    hasMissingCurriculumTranslations: false,
     isAdminExperience: true,
     isCourseStudentModeActive: false,
   },
@@ -29,7 +30,11 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({
 
 vi.mock("../../context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
-    course: { id: "course-1", enrolled: false },
+    course: {
+      id: "course-1",
+      enrolled: false,
+      hasMissingCurriculumTranslations: courseAccessState.hasMissingCurriculumTranslations,
+    },
     isAdminExperience: courseAccessState.isAdminExperience,
     isCourseStudentModeActive: courseAccessState.isCourseStudentModeActive,
   }),
@@ -45,6 +50,7 @@ vi.mock("./ChapterList", () => ({
 
 describe("TableOfContent", () => {
   beforeEach(() => {
+    courseAccessState.hasMissingCurriculumTranslations = false;
     courseAccessState.isAdminExperience = true;
     courseAccessState.isCourseStudentModeActive = false;
     currentUserState.permissions = ["course.statistics"];

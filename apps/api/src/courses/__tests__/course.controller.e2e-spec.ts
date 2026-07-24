@@ -26,6 +26,7 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   categories,
+  chapters,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -3020,6 +3021,113 @@ describe("CourseController (e2e)", () => {
 
       expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
     });
+
+    it("uses exact course text for an editor while keeping category fallback", async () => {
+      const author = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
+      const category = await categoryFactory.create({ title: "English category" });
+      const course = await courseFactory.create({
+        authorId: author.id,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+        categoryId: category.id,
+        description: "English description",
+        status: "published",
+        thumbnailS3Key: null,
+        title: "English title",
+      });
+      const chapter = await chapterFactory.create({
+        authorId: author.id,
+        courseId: course.id,
+        displayOrder: 1,
+        lessonCount: 1,
+        title: "English chapter",
+      });
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.EMBED,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "English lesson"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
+          displayOrder: 1,
+        })
+        .returning();
+
+      const editorResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(editorResponse.body.data).toEqual(
+        expect.objectContaining({
+          title: "",
+          description: "",
+          category: "English category",
+          learningOutcomes: [],
+          hasMissingCurriculumTranslations: true,
+        }),
+      );
+
+      const studentResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(student, app))
+        .expect(200);
+
+      expect(studentResponse.body.data).toEqual(
+        expect.objectContaining({
+          title: "English title",
+          description: "English description",
+          category: "English category",
+          hasMissingCurriculumTranslations: false,
+        }),
+      );
+
+      await db
+        .update(chapters)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            [SUPPORTED_LANGUAGES.EN]: "English chapter",
+            [SUPPORTED_LANGUAGES.PL]: "Polski rozdział",
+          }),
+        })
+        .where(eq(chapters.id, chapter.id));
+
+      const missingLessonTranslationResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(missingLessonTranslationResponse.body.data.hasMissingCurriculumTranslations).toBe(
+        true,
+      );
+
+      await db
+        .update(lessons)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            [SUPPORTED_LANGUAGES.EN]: "English lesson",
+            [SUPPORTED_LANGUAGES.PL]: "Polska lekcja",
+          }),
+        })
+        .where(eq(lessons.id, lesson.id));
+
+      const translatedEditorResponse = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(translatedEditorResponse.body.data.hasMissingCurriculumTranslations).toBe(false);
+    });
   });
 
   describe("GET /api/course/content-creator-courses", () => {
@@ -5235,11 +5343,15 @@ describe("CourseController (e2e)", () => {
       },
     );
 
-    it("returns localized category name in course details with base-language fallback", async () => {
+    it("returns localized category names with base-language fallback", async () => {
       const admin = await userFactory
         .withCredentials({ password })
         .withAdminSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const student = await userFactory
+        .withCredentials({ password })
+        .withUserSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const suffix = Date.now();
       const englishCategoryTitle = `Details Category English ${suffix}`;
       const lithuanianCategoryTitle = `Detali Kategorija Lietuviu ${suffix}`;
@@ -5275,6 +5387,15 @@ describe("CourseController (e2e)", () => {
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.DE })
         .set("Cookie", cookie)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.data.category).toBe(englishCategoryTitle);
+        });
+
+      await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.DE })
+        .set("Cookie", await cookieFor(student, app))
         .expect(200)
         .expect(({ body }) => {
           expect(body.data.category).toBe(englishCategoryTitle);

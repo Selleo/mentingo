@@ -26175,6 +26175,9 @@
               "hasCertificate": {
                 "type": "boolean"
               },
+              "hasMissingCurriculumTranslations": {
+                "type": "boolean"
+              },
               "id": {
                 "format": "uuid",
                 "type": "string"
@@ -26360,6 +26363,7 @@
               "courseChapterCount",
               "currency",
               "description",
+              "hasMissingCurriculumTranslations",
               "id",
               "status",
               "originType",

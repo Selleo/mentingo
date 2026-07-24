@@ -4609,6 +4609,8 @@
     },
     "overview": {
       "courseSettings": "Nastavení kurzu",
+      "settingsDescription": "Spravujte nastavení tohoto kurzu.",
+      "titlePlaceholder": "Zadejte název kurzu...",
       "editMedia": "Upravit média",
       "continueLearning": "Pokračovat ve studiu",
       "courseDetails": "Podrobnosti kurzu",
@@ -4701,6 +4703,8 @@
       "title": "Obsah",
       "statistics": "Statistiky",
       "edit": "Upravit obsah",
+      "missingTranslationsTitle": "Chybějící překlady",
+      "missingTranslationsDescription": "Některé názvy kapitol nebo lekcí se zobrazují ve výchozím jazyce.",
       "completedChapters_one": "{{count}} dokončená kapitola",
       "completedChapters_few": "{{count}} dokončené kapitoly",
       "completedChapters_other": "{{count}} dokončených kapitol",

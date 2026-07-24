@@ -1,4 +1,4 @@
-import { Award, Check, Clock, Users, X } from "lucide-react";
+import { Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Button } from "~/components/ui/button";
@@ -136,10 +136,6 @@ export default function AuthorModal({
                       <div className="flex items-center gap-1">
                         <Users className="size-3" />
                         <span>{course.enrolledParticipantCount}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Award className="size-3 text-warning-500" />
-                        <span>4.8</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="size-3" />

@@ -86,6 +86,7 @@ export function TableOfContent() {
           canEditContent={isAdminExperience}
           canShowChat={canShowChat}
           canShowStatistics={canShowStatistics}
+          hasMissingCurriculumTranslations={course.hasMissingCurriculumTranslations}
           onEditContent={navigateToCourseEditor}
           onTabChange={setActiveTab}
         />

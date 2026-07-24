@@ -2087,6 +2087,7 @@ export interface GetCourseResponse {
     enrolled?: boolean;
     hasFreeChapter?: boolean;
     hasCertificate?: boolean;
+    hasMissingCurriculumTranslations: boolean;
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";

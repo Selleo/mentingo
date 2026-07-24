@@ -44,13 +44,14 @@ export default function CourseCategoryEditor({
   onEdit,
 }: CourseCategoryEditorProps) {
   const { t } = useTranslation();
+  const hasSelectedCategory = categories.some((category) => category.id === categoryId);
 
   return (
     <div className="mb-3 flex flex-wrap items-center gap-3">
       {canEdit && isEditing ? (
         <Select
           open={isEditing}
-          value={categoryId}
+          value={hasSelectedCategory ? categoryId : ""}
           disabled={disabled}
           onValueChange={(selectedCategoryId) => {
             void onChange(selectedCategoryId);
@@ -64,7 +65,7 @@ export default function CourseCategoryEditor({
           <SelectTrigger
             id="course-category"
             data-testid={COURSE_SETTINGS_HANDLES.CATEGORY_SELECT}
-            className="h-8 w-auto min-w-40 rounded-full border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-950 shadow-lg transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-white/70"
+            className="h-8 w-auto min-w-40 rounded-full border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-950 shadow-lg transition-colors hover:bg-neutral-50 focus:ring-2 focus:ring-white/70 data-[placeholder]:text-neutral-400"
           >
             <SelectValue placeholder={categoryTitle} />
           </SelectTrigger>
@@ -92,10 +93,12 @@ export default function CourseCategoryEditor({
             }
           }}
           className={cn(
-            "rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm transition-all duration-200",
+            "rounded-full border border-white/30 bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm transition-all duration-200",
             {
               "cursor-pointer outline-2 outline-dashed outline-transparent hover:bg-white/30 hover:outline-white focus-visible:bg-white/30 focus-visible:outline-white":
                 canEdit,
+              "text-neutral-200": !hasSelectedCategory,
+              "text-white": hasSelectedCategory,
             },
           )}
         >

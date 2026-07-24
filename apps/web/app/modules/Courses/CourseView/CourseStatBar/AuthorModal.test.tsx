@@ -31,7 +31,7 @@ describe("AuthorModal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("renders other courses with enrolled students, hardcoded rating, and half-hour duration", () => {
+  it("renders other courses with enrolled students and half-hour duration", () => {
     renderWith().render(
       <AuthorModal
         author={{
@@ -63,7 +63,6 @@ describe("AuthorModal", () => {
     expect(screen.getByText("Advanced React")).toBeInTheDocument();
     expect(screen.getByText("Frontend")).toBeInTheDocument();
     expect(screen.getByText("42")).toBeInTheDocument();
-    expect(screen.getByText("4.8")).toBeInTheDocument();
     expect(screen.getByText("1 h 30 min")).toBeInTheDocument();
   });
 

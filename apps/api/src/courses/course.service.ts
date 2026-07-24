@@ -1290,10 +1290,30 @@ export class CourseService {
       })
       .otherwise((value) => value);
 
+    const [courseAccess] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, id));
+
+    if (!courseAccess) throw new NotFoundException("Course not found");
+
+    const canManageCourses =
+      hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE) ||
+      hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE_OWN);
+    const canEditCourse =
+      hasPermission(userPermissions, PERMISSIONS.USER_MANAGE) ||
+      (canManageCourses && userId === courseAccess.authorId);
+    const isCourseStudentModeActive = userId
+      ? await this.isCourseStudentModeEnabled(id, userId)
+      : false;
+    const shouldUseExactLanguage = canEditCourse && !isCourseStudentModeActive;
+
     const [course] = await this.db
       .select({
         id: courses.id,
-        title: this.localizationService.getLocalizedSqlField(courses.title, language),
+        title: shouldUseExactLanguage
+          ? this.localizationService.getFieldByLanguage(courses.title, language)
+          : this.localizationService.getLocalizedSqlField(courses.title, language),
         thumbnailS3Key: sql<string>`${courses.thumbnailS3Key}`,
         category: this.localizationService.getLocalizedSqlField(
           categories.title,
@@ -1302,7 +1322,9 @@ export class CourseService {
         ),
         showAuthorSection: courses.showAuthorSection,
         thumbnailPositionY: courses.thumbnailPositionY,
-        description: this.localizationService.getLocalizedSqlField(courses.description, language),
+        description: shouldUseExactLanguage
+          ? this.localizationService.getFieldByLanguage(courses.description, language)
+          : this.localizationService.getLocalizedSqlField(courses.description, language),
         learningOutcomes: this.getLocalizedLearningOutcomes(language),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
@@ -1343,11 +1365,12 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
+    if (!course) throw new NotFoundException("Course not found");
+
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
     const isAdmin = hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE);
 
-    if (!course) throw new NotFoundException("Course not found");
     if (
       !isAdmin &&
       userId !== course.authorId &&
@@ -1360,6 +1383,18 @@ export class CourseService {
       .select({
         id: chapters.id,
         title: this.localizationService.getLocalizedSqlField(chapters.title, language),
+        hasMissingTranslation: sql<boolean>`
+          BTRIM(${this.localizationService.getFieldByLanguage(chapters.title, language)}) = ''
+          OR EXISTS (
+            SELECT 1
+            FROM ${lessons}
+            WHERE ${lessons.chapterId} = ${chapters.id}
+              AND BTRIM(${this.localizationService.getFieldByLanguage(
+                lessons.title,
+                language,
+              )}) = ''
+          )
+        `,
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -1469,14 +1504,21 @@ export class CourseService {
 
     const durationHierarchy = await this.computeCourseDurationHierarchy(id, language);
 
-    const chaptersWithDuration = courseChapterList.map((chapter) => ({
-      ...chapter,
-      estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
-      lessons: chapter.lessons.map((lesson) => ({
-        ...lesson,
-        estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
-      })),
-    }));
+    const hasMissingCurriculumTranslations =
+      shouldUseExactLanguage &&
+      language !== course.baseLanguage &&
+      courseChapterList.some((chapter) => chapter.hasMissingTranslation);
+
+    const chaptersWithDuration = courseChapterList.map(
+      ({ hasMissingTranslation: _hasMissingTranslation, ...chapter }) => ({
+        ...chapter,
+        estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
+        lessons: chapter.lessons.map((lesson) => ({
+          ...lesson,
+          estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
+        })),
+      }),
+    );
 
     const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
       course.thumbnailS3Key,
@@ -1488,6 +1530,7 @@ export class CourseService {
       ...course,
       thumbnailUrl: thumbnailUrl ?? undefined,
       estimatedDurationSeconds: durationHierarchy.totalSeconds,
+      hasMissingCurriculumTranslations,
 
       trailerUrl,
       chapters: chaptersWithDuration,

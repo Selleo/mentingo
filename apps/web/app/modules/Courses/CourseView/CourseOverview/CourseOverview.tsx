@@ -5,17 +5,31 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
+import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMissingTranslations";
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
 import { useCategories } from "~/api/queries";
+import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
 import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
 
-import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
+import {
+  COURSE_LANGUAGE_DIALOG_HANDLES,
+  COURSE_OVERVIEW_HANDLES,
+} from "../../../../../e2e/data/courses/handles";
 
 import CourseCategoryEditor from "./CourseCategoryEditor";
 import CourseDescriptionModal from "./CourseDescriptionModal";
@@ -30,9 +44,17 @@ import type { SupportedLanguages } from "@repo/shared";
 
 type CourseHeroProps = {
   language: SupportedLanguages;
+  onLanguageChange: (language: SupportedLanguages) => void;
+  openGenerateTranslationModal: boolean;
+  setOpenGenerateTranslationModal: (open: boolean) => void;
 };
 
-export default function CourseOverview({ language }: CourseHeroProps) {
+export default function CourseOverview({
+  language,
+  onLanguageChange,
+  openGenerateTranslationModal,
+  setOpenGenerateTranslationModal,
+}: CourseHeroProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { course, isAdminExperience, isCourseStudentModeActive, isPreviewMode } =
@@ -47,6 +69,9 @@ export default function CourseOverview({ language }: CourseHeroProps) {
   const { mutateAsync: updateCourse, isPending: isUpdatingCourse } = useUpdateCourse();
   const { mutateAsync: updateCourseMedia, isPending: isUpdatingMedia } = useUpdateCourseMedia();
   const { mutateAsync: initVideoUpload, isPending: isInitializingTrailer } = useInitVideoUpload();
+  const { mutateAsync: generateTranslations, isPending: isGeneratingTranslations } =
+    useGenerateMissingTranslations();
+  const { data: isAIConfigured } = useAIConfigured();
   const { getSessionForFile, uploadVideo, isUploading: isUploadingTrailer } = useTusVideoUpload();
 
   const savedImagePosition = course.thumbnailPositionY ?? 50;
@@ -182,6 +207,11 @@ export default function CourseOverview({ language }: CourseHeroProps) {
     setShowDescriptionModal(true);
   };
 
+  const handleGenerateTranslations = async () => {
+    await generateTranslations({ courseId: course.id, language });
+    setOpenGenerateTranslationModal(false);
+  };
+
   const handleCancelTitleEdit = () => {
     setCourseTitle(course.title);
     setIsEditingTitle(false);
@@ -263,30 +293,48 @@ export default function CourseOverview({ language }: CourseHeroProps) {
       >
         {isAdminExperience && (
           <>
-            <Button
-              variant="outline"
-              data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
-              onClick={() => setShowSettingsDrawer(true)}
-              className="absolute left-2 top-2 flex items-center gap-2  shadow-lg backdrop-blur-sm transition md:left-4 md:top-4 "
-            >
-              <Settings className="size-4 text-primary-700" />
+            <div className="absolute left-2 top-2 flex items-center gap-2 md:left-4 md:top-4">
+              <Button
+                variant="outline"
+                data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
+                onClick={() => setShowSettingsDrawer(true)}
+                className="flex items-center gap-2 shadow-lg backdrop-blur-sm transition"
+              >
+                <Settings className="size-4 text-primary-700" />
 
-              <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
-                {t("modernCourseView.overview.courseSettings")}
-              </span>
-            </Button>
+                <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
+                  {t("modernCourseView.overview.courseSettings")}
+                </span>
+              </Button>
 
-            <Button
-              variant="outline"
-              onClick={openMediaModal}
-              className="absolute right-2 top-2 flex items-center gap-2  shadow-lg backdrop-blur-sm transition  md:right-4 md:top-4 "
-            >
-              <Upload className="size-4 text-primary-700" />
+              <Button
+                variant="outline"
+                onClick={openMediaModal}
+                data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
+                className="flex items-center gap-2 shadow-lg backdrop-blur-sm transition"
+              >
+                <Upload className="size-4 text-primary-700" />
 
-              <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
-                {t("modernCourseView.overview.editMedia")}
-              </span>
-            </Button>
+                <span className="hidden text-sm font-semibold text-neutral-950 sm:inline">
+                  {t("modernCourseView.overview.editMedia")}
+                </span>
+              </Button>
+            </div>
+
+            <div className="absolute right-2 top-2 md:right-4 md:top-4">
+              <CourseLanguageSelector
+                courseLanguage={language}
+                course={{
+                  id: course.id,
+                  baseLanguage: course.baseLanguage,
+                  availableLocales: course.availableLocales,
+                }}
+                isAIConfigured={isAIConfigured?.enabled ?? false}
+                onChange={onLanguageChange}
+                setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+                tooltipIconClassName="text-white"
+              />
+            </div>
           </>
         )}
 
@@ -314,6 +362,7 @@ export default function CourseOverview({ language }: CourseHeroProps) {
               onChange={setCourseTitle}
               onEdit={() => setIsEditingTitle(true)}
               onSave={handleSaveCourseTitle}
+              placeholder={t("modernCourseView.overview.titlePlaceholder")}
             />
 
             <CourseOverviewActions
@@ -343,6 +392,40 @@ export default function CourseOverview({ language }: CourseHeroProps) {
         />
       )}
 
+      <Dialog open={openGenerateTranslationModal} onOpenChange={setOpenGenerateTranslationModal}>
+        <DialogContent data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_DIALOG}>
+          <DialogTitle>{t("adminCourseView.common.generateMissingTranslations")}</DialogTitle>
+          <DialogDescription>
+            {t("adminCourseView.common.generateMissingTranslationsDescription")}
+          </DialogDescription>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button
+                data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CANCEL_BUTTON}
+                variant="outline"
+              >
+                {t("contentCreatorView.button.cancel")}
+              </Button>
+            </DialogClose>
+            <Button
+              data-testid={COURSE_LANGUAGE_DIALOG_HANDLES.GENERATE_CONFIRM_BUTTON}
+              type="button"
+              onClick={handleGenerateTranslations}
+              disabled={isGeneratingTranslations}
+            >
+              {isGeneratingTranslations ? (
+                <span className="flex items-center gap-2">
+                  <span className="size-4 animate-spin rounded-full border-2 border-t-2 border-gray-300 border-t-gray-900" />
+                  {t("contentCreatorView.button.confirm")}
+                </span>
+              ) : (
+                t("contentCreatorView.button.confirm")
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {showDescriptionModal && (
         <CourseDescriptionModal
           courseDescription={courseDescription}
@@ -352,13 +435,12 @@ export default function CourseOverview({ language }: CourseHeroProps) {
         />
       )}
 
-      {showSettingsDrawer && (
-        <CourseSettingsDrawer
-          onClose={() => setShowSettingsDrawer(false)}
-          title={t("modernCourseView.overview.courseSettings")}
-          courseId={course.id}
-        />
-      )}
+      <CourseSettingsDrawer
+        courseId={course.id}
+        onOpenChange={setShowSettingsDrawer}
+        open={showSettingsDrawer}
+        title={t("modernCourseView.overview.courseSettings")}
+      />
     </section>
   );
 }

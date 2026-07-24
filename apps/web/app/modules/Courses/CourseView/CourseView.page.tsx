@@ -1,7 +1,7 @@
 import { redirect, useNavigate, useParams, useSearchParams } from "@remix-run/react";
 import { ACCESS_GUARD, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { courseLookupQueryOptions, useCourse } from "~/api/queries";
@@ -13,6 +13,7 @@ import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOv
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
+import { buildCourseRedirectPath } from "./courseRedirect.utils";
 import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
 import { LearningModeBannerNew } from "./LearningModeBanner";
 import { TableOfContent } from "./TableOfContent/TableOfContent";
@@ -61,8 +62,7 @@ export const clientLoader = async ({
   const { status, slug } = lookupCourse;
 
   if (status === "redirect" && slug) {
-    const redirectUrl = new URL(`/course/${slug}`, request.url);
-    throw redirect(`${redirectUrl.pathname}${redirectUrl.search ?? ""}`, 302);
+    throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
 
   return null;
@@ -74,12 +74,27 @@ export default function CourseViewPage() {
   const navigate = useNavigate();
 
   const { language: defaultLanguage } = useLanguageStore();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [openGenerateTranslationModal, setOpenGenerateTranslationModal] = useState(false);
   const previewLanguage = searchParams.get("language");
   const language =
     previewLanguage && isSupportedLanguage(previewLanguage) ? previewLanguage : defaultLanguage;
 
   const { data: course, error } = useCourse(id, language);
+
+  const handleCourseLanguageChange = useCallback(
+    (nextLanguage: SupportedLanguages) => {
+      setSearchParams(
+        (currentSearchParams) => {
+          const nextSearchParams = new URLSearchParams(currentSearchParams);
+          nextSearchParams.set("language", nextLanguage);
+          return nextSearchParams;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
 
   useEffect(() => {
     if (isAxiosError(error) && error.response?.status === 404) {
@@ -97,6 +112,12 @@ export default function CourseViewPage() {
     navigate(`${url.pathname}${url.search ?? ""}`, { replace: true });
   }, [course?.slug, id, navigate]);
 
+  useEffect(() => {
+    if (course && !course.availableLocales.includes(language)) {
+      handleCourseLanguageChange(course.baseLanguage);
+    }
+  }, [course, handleCourseLanguageChange, language]);
+
   if (!course) return null;
   const breadcrumbs = [
     {
@@ -112,7 +133,12 @@ export default function CourseViewPage() {
         <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBannerNew />}>
           <div className="flex w-full max-w-full flex-col">
             <div className="flex flex-col gap-y-6 overflow-hidden">
-              <CourseOverview language={language} />
+              <CourseOverview
+                language={language}
+                onLanguageChange={handleCourseLanguageChange}
+                openGenerateTranslationModal={openGenerateTranslationModal}
+                setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+              />
               <CourseStatBar language={language} />
               <TableOfContent />
             </div>
