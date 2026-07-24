@@ -74,6 +74,7 @@ export class AutomationStepsService {
     if (!isConnected) {
       throw new BadRequestException("automationSteps.toast.treeNotConnected");
     }
+
     const res = await this.automationStepsRepository.replaceAutomationStepTree(automationId, input);
     if (!res) {
       throw new BadRequestException("automationSteps.toast.bulkInsertFailed");

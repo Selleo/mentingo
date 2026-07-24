@@ -23,6 +23,7 @@ import {
   UserWelcomeEvent,
 } from "src/events";
 
+import { AutomationRunnerService } from "../automation-runner/automation-runner.service";
 import { AutomationStepsRepository } from "../repositories/automation-steps/automation-steps.repository";
 
 import type { IEventHandler } from "@nestjs/cqrs";
@@ -71,11 +72,18 @@ export const AutomationEvents = [
 @Injectable()
 @EventsHandler(...AutomationEvents)
 export class AutomationsHandler implements IEventHandler<AutomationEventTypes> {
-  constructor(private readonly automationStepsRepository: AutomationStepsRepository) {}
+  constructor(
+    private readonly automationStepsRepository: AutomationStepsRepository,
+    private readonly automationRunnerService: AutomationRunnerService,
+  ) {}
   async handle(event: AutomationEventTypes) {
     const eventName = AutomationEventNames[event.constructor.name];
-    console.log(eventName);
-    const automation = await this.automationStepsRepository.findAutomationTriggerToRun(eventName);
-    console.log(automation);
+    const triggers = await this.automationStepsRepository.findAutomationTriggerToRun(eventName);
+    const automationIds = triggers.map((step) => step.automationId);
+    const uniqueAutomationIds = [...new Set(automationIds)];
+
+    for (const automationId of uniqueAutomationIds) {
+      await this.automationRunnerService.startAutomation(automationId, event);
+    }
   }
 }

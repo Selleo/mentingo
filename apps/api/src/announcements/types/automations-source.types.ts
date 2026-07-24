@@ -5,9 +5,11 @@ import { automationSteps } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
 import type { AutomationStatus, AutomationType } from "./automations.types";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type { LocalizedText } from "node_modules/@repo/shared/dist/index.cjs";
 import type { Static } from "node_modules/@sinclair/typebox/build/cjs/type";
 import type { UUIDType } from "src/common";
+import type { automationLogs } from "src/storage/schema";
 
 export type AutomationRecordInput = {
   name: LocalizedText;
@@ -21,15 +23,43 @@ export type AutomationStepRecordInput = {
   parentId: UUIDType | null;
   automationId: UUIDType;
   type: AutomationType;
-  typeContext: typeContext;
+  typeContext: TypeContext;
 };
-export type typeContext = {
+export type TypeContext = {
   name: string;
-  [key: string]: unknown;
+  providedVariables: Array<{
+    key: string;
+    value: unknown;
+  }>;
 };
+
+/**
+ * Extended context for the `send_email` action step.
+ * `templateId` references a user-created email template.
+ * `variableMapping` maps template placeholders to trigger-provided variable keys.
+ *
+ * Example:
+ * ```
+ * {
+ *   name: "send_email",
+ *   templateId: "uuid-of-user-template",
+ *   variableMapping: {
+ *     "{{recipient_name}}": "userFirstName",
+ *     "{{course_title}}": "courseName",
+ *     "{{link}}": "courseUrl"
+ *   },
+ *   providedVariables: [...]
+ * }
+ * ```
+ */
+export type SendEmailActionContext = TypeContext & {
+  templateId: string;
+  variableMapping: Record<string, string>;
+};
+
 export type AutomationStepUpdateInput = {
   type: AutomationType;
-  typeContext: typeContext;
+  typeContext: TypeContext;
 };
 
 export type AutomationStepBulkUpdate = {
@@ -37,8 +67,14 @@ export type AutomationStepBulkUpdate = {
   parentId: UUIDType | null;
   automationId: UUIDType;
   type: AutomationType;
-  typeContext: typeContext;
+  typeContext: TypeContext;
 };
+
+export type AutomationActionStep = {
+  typeContext: TypeContext;
+};
+export type AutomationLogRecord = InferSelectModel<typeof automationLogs>;
+export type AutomationLogRecordInput = InferInsertModel<typeof automationLogs>;
 
 export const AutomationStepSchema = Type.Omit(omitTenantId(createSelectSchema(automationSteps)), [
   "createdAt",
