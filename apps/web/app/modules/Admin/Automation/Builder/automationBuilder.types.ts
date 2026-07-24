@@ -69,4 +69,5 @@ export interface BuilderState {
   isActive: boolean;
   simulationPassed: boolean;
   lastSavedAt: string | null;
+  isDirty: boolean;
 }

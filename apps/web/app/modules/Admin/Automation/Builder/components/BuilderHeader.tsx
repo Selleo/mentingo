@@ -1,11 +1,21 @@
 import { useNavigate } from "@remix-run/react";
 import { ArrowLeft, Loader2, Play, Save, Trash2 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
 import { useUpdateAutomation } from "~/api/mutations/admin/useUpdateAutomation";
 import { nodesToSteps } from "~/api/queries/admin/automation.utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -42,19 +52,38 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   const isActive = useBuilderStore((s) => s.isActive);
   const simulationPassed = useBuilderStore((s) => s.simulationPassed);
   const lastSavedAt = useBuilderStore((s) => s.lastSavedAt);
+  const isDirty = useBuilderStore((s) => s.isDirty);
   const nodes = useBuilderStore((s) => s.nodes);
   const setActive = useBuilderStore((s) => s.setActive);
   const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
-  const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
+  const updateNodeConfigSilent = useBuilderStore((s) => s.updateNodeConfigSilent);
   const markSaved = useBuilderStore((s) => s.markSaved);
 
   const updateAutomation = useUpdateAutomation();
   const deleteAutomation = useDeleteAutomation();
 
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const { simulationState, isSimulating, panelOpen, runSimulation, closePanel, retry } =
     useSimulation();
 
   const handleBack = () => {
+    if (isDirty) {
+      setShowLeaveDialog(true);
+    } else {
+      navigate("/admin/automation");
+    }
+  };
+
+  const handleSaveAndLeave = () => {
+    handleSave();
+    setShowLeaveDialog(false);
+    navigate("/admin/automation");
+  };
+
+  const handleLeaveWithoutSaving = () => {
+    setShowLeaveDialog(false);
     navigate("/admin/automation");
   };
 
@@ -98,8 +127,13 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
     );
   };
 
-  const handleDelete = () => {
+  const handleDeleteRequest = () => {
     if (automationId === "new") return;
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    setShowDeleteDialog(false);
     deleteAutomation.mutate(automationId, {
       onSuccess: () => {
         navigate("/admin/automation");
@@ -119,6 +153,9 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
 
   const canActivate = simulationPassed || simulationJustPassed;
 
+  // When graph is dirty, toggle is forced to draft and disabled
+  const toggleDisabled = isDirty || (!isActive && !canActivate);
+
   // Persist per-node simulation status into each node's typeContext when simulation completes
   useEffect(() => {
     if (simulationState.type !== "success") return;
@@ -132,7 +169,7 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
       const existingNode = nodes.find((n) => n.id === nodeResult.nodeId);
       if (!existingNode) continue;
 
-      updateNodeConfig(nodeResult.nodeId, {
+      updateNodeConfigSilent(nodeResult.nodeId, {
         simulationStatus: nodeResult.status,
       });
     }
@@ -143,7 +180,7 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
 
     const triggerNode = nodes.find((n) => n.kind === "trigger");
     if (triggerNode) {
-      updateNodeConfig(triggerNode.id, { simulationPassed: passed });
+      updateNodeConfigSilent(triggerNode.id, { simulationPassed: passed });
     }
 
     // Save steps with updated configs
@@ -162,13 +199,20 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
         position: n.position,
       }));
       const steps = nodesToSteps(automationNodes, automationId);
-      updateAutomation.mutate({ automationId, body: {}, steps });
+      updateAutomation.mutate(
+        { automationId, body: {}, steps },
+        {
+          onSuccess: () => {
+            markSaved();
+          },
+        },
+      );
     }, 0);
   }, [simulationState]);
 
   const handleToggleActive = (active: boolean) => {
-    // Block activation when simulation hasn't passed
-    if (active && !canActivate) return;
+    // Block activation when graph is dirty or simulation hasn't passed
+    if (active && (isDirty || !canActivate)) return;
 
     setActive(active);
 
@@ -180,6 +224,12 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
         body: { status },
       });
     }
+  };
+
+  const getToggleTooltip = () => {
+    if (isDirty) return t("automationBuilder.header.unsavedChangesTooltip");
+    if (!isActive && !canActivate) return t("automationBuilder.header.simulationRequiredTooltip");
+    return null;
   };
 
   const formatSavedTime = () => {
@@ -275,14 +325,12 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
                   <Switch
                     checked={isActive}
                     onCheckedChange={handleToggleActive}
-                    disabled={!isActive && !canActivate}
+                    disabled={toggleDisabled}
                   />
                 </span>
               </TooltipTrigger>
-              {!isActive && !canActivate && (
-                <TooltipContent side="bottom">
-                  {t("automationBuilder.header.simulationRequiredTooltip")}
-                </TooltipContent>
+              {getToggleTooltip() && (
+                <TooltipContent side="bottom">{getToggleTooltip()}</TooltipContent>
               )}
             </Tooltip>
           </div>
@@ -294,7 +342,7 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={handleDelete}
+                onClick={handleDeleteRequest}
                 disabled={deleteAutomation.isPending || automationId === "new"}
               >
                 <Trash2 className="mr-1.5 size-4" />
@@ -312,6 +360,52 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
         state={simulationState}
         onRetry={() => retry(nodes)}
       />
+
+      {/* Leave confirmation dialog */}
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("automationBuilder.header.leaveDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationBuilder.header.leaveDialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("automationBuilder.header.leaveDialog.cancel")}
+            </AlertDialogCancel>
+            <Button variant="outline" onClick={handleLeaveWithoutSaving}>
+              {t("automationBuilder.header.leaveDialog.leaveWithoutSaving")}
+            </Button>
+            <AlertDialogAction onClick={handleSaveAndLeave}>
+              {t("automationBuilder.header.leaveDialog.saveAndLeave")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete confirmation dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("automationBuilder.header.deleteDialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationBuilder.header.deleteDialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("automationBuilder.header.deleteDialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {t("automationBuilder.header.deleteDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 };

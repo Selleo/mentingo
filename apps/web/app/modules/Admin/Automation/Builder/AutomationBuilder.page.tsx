@@ -48,6 +48,7 @@ export default function AutomationBuilderPage() {
 
   const addNode = useBuilderStore((s) => s.addNode);
   const addChildNode = useBuilderStore((s) => s.addChildNode);
+  const loadNodes = useBuilderStore((s) => s.loadNodes);
   const reset = useBuilderStore((s) => s.reset);
   const setAutomationName = useBuilderStore((s) => s.setAutomationName);
   const setActive = useBuilderStore((s) => s.setActive);
@@ -62,19 +63,18 @@ export default function AutomationBuilderPage() {
       setAutomationName(automation.name);
       setActive(automation.status === "enabled");
 
-      // Load nodes into store
-      for (const node of automation.nodes) {
-        addNode({
-          id: node.id,
-          kind: node.kind as BuilderNode["kind"],
-          type: node.type as BuilderNode["type"],
-          label: node.label,
-          parentId: node.parentId,
-          children: node.children,
-          position: node.position,
-          config: node.config,
-        });
-      }
+      // Load nodes into store without marking dirty
+      const builderNodes: BuilderNode[] = automation.nodes.map((node) => ({
+        id: node.id,
+        kind: node.kind as BuilderNode["kind"],
+        type: node.type as BuilderNode["type"],
+        label: node.label,
+        parentId: node.parentId,
+        children: node.children,
+        position: node.position,
+        config: node.config,
+      }));
+      loadNodes(builderNodes);
 
       // Read simulationPassed from trigger node's config
       const triggerNode = automation.nodes.find((n) => n.kind === "trigger");
