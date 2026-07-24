@@ -5,6 +5,7 @@ import { CourseChatModule } from "src/course-chat/course-chat.module";
 import { CourseModule } from "src/courses/course.module";
 import { UserModule } from "src/user/user.module";
 
+import { AutomationLogsController } from "./automation-logs/automation-logs.controller";
 import { AutomationDataResolverService } from "./automation-runner/automation-data-resolver.service";
 import { AutomationRunnerService } from "./automation-runner/automation-runner.service";
 import { AutomationTemplateService } from "./automation-runner/automation-template.service";
@@ -35,7 +36,7 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationTemplateService,
     AutomationLogsRepository,
   ],
-  controllers: [AutomationsController, AutomationStepsController],
+  controllers: [AutomationsController, AutomationStepsController, AutomationLogsController],
   exports: [AutomationsService, AutomationRunnerService, AutomationStepsService],
 })
 export class AutomationsModule {}

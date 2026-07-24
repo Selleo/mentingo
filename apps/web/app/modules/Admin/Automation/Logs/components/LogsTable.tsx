@@ -45,7 +45,6 @@ export const LogsTable: FC<LogsTableProps> = ({ logs, onOpenDetail }) => {
             <TableHead>{t("automationLogs.table.status")}</TableHead>
             <TableHead>{t("automationLogs.table.emails")}</TableHead>
             <TableHead>{t("automationLogs.table.ranAt")}</TableHead>
-            <TableHead>{t("automationLogs.table.duration")}</TableHead>
             <TableHead className="w-12">
               <span className="sr-only">{t("automationLogs.table.details")}</span>
             </TableHead>
@@ -57,7 +56,7 @@ export const LogsTable: FC<LogsTableProps> = ({ logs, onOpenDetail }) => {
           ))}
           {logs.length === 0 && (
             <TableRow>
-              <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+              <TableCell colSpan={5} className="py-12 text-center text-muted-foreground">
                 {t("automationLogs.table.empty")}
               </TableCell>
             </TableRow>

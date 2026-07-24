@@ -1,9 +1,9 @@
 import { useNavigate } from "@remix-run/react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
+import { useAutomationLogs } from "~/api/queries/admin/useAutomationLogs";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -13,43 +13,45 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
-import { MOCK_AUTOMATION_LOGS } from "./automationLogs.mock";
 import { LogDetailContent } from "./components/LogDetailContent";
 import { LogsFilters } from "./components/LogsFilters";
 import { LogsTable } from "./components/LogsTable";
 
-import type { AutomationLogEntry, EmailStatus, LogStatusFilter } from "./automationLogs.types";
+import type { AutomationLogEntry, AutomationLogRecord, LogStatusFilter } from "./automationLogs.types";
 
-function getOverallStatus(log: AutomationLogEntry): EmailStatus {
-  const failedCount = log.emails.filter((e) => e.status === "failed").length;
-  const skippedCount = log.emails.filter((e) => e.status === "skipped").length;
-  const sentCount = log.emails.filter((e) => e.status === "sent").length;
-
-  return match({ failedCount, skippedCount, sentCount })
-    .when(({ failedCount }) => failedCount > 0, () => "failed" as const)
-    .when(({ skippedCount, sentCount }) => skippedCount > 0 && sentCount === 0, () => "skipped" as const)
-    .otherwise(() => "sent" as const);
+function recordToEntry(record: AutomationLogRecord): AutomationLogEntry {
+  return {
+    id: record.id,
+    automationName: record.automationName,
+    automationId: record.automationId,
+    ranAt: record.createdAt,
+    triggerEvent: record.eventName,
+    status: record.status,
+    errorName: record.errorName,
+    emailAddresses: record.emailAddresses,
+  };
 }
 
 export default function AutomationLogsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { data: logRecords = [], isLoading } = useAutomationLogs();
+
   const [selectedLog, setSelectedLog] = useState<AutomationLogEntry | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<LogStatusFilter>("All");
 
-  const filteredLogs = MOCK_AUTOMATION_LOGS.filter((log) => {
+  const logs = logRecords.map(recordToEntry);
+
+  const filteredLogs = logs.filter((log) => {
     const matchesSearch =
       log.automationName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       log.triggerEvent.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      log.emails.some(
-        (e) =>
-          e.recipientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          e.recipientEmail.toLowerCase().includes(searchTerm.toLowerCase()),
+      log.emailAddresses.some((email) =>
+        email.toLowerCase().includes(searchTerm.toLowerCase()),
       );
 
-    const matchesStatus =
-      statusFilter === "All" || getOverallStatus(log) === statusFilter;
+    const matchesStatus = statusFilter === "All" || log.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
@@ -75,9 +77,15 @@ export default function AutomationLogsPage() {
         onStatusFilterChange={setStatusFilter}
       />
 
-      <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
-        <LogsTable logs={filteredLogs} onOpenDetail={setSelectedLog} />
-      </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <div className="rounded-lg border bg-background shadow-sm overflow-hidden">
+          <LogsTable logs={filteredLogs} onOpenDetail={setSelectedLog} />
+        </div>
+      )}
 
       <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
         <DialogContent className="max-w-lg">

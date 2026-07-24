@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from "@nestjs/common";
 
-import { UUIDType } from "src/common";
+import { BaseResponse, UUIDType } from "src/common";
 
 import { AutomationLogsRepository } from "../repositories/automation-logs/automation-logs";
 
@@ -8,8 +8,15 @@ import { AutomationLogsRepository } from "../repositories/automation-logs/automa
 export class AutomationLogsController {
   constructor(private readonly automationLogsRepository: AutomationLogsRepository) {}
 
+  @Get()
+  async getAll() {
+    const logs = await this.automationLogsRepository.getAll();
+    return new BaseResponse(logs);
+  }
+
   @Get("automation/:automationId")
   async getByAutomationId(@Param("automationId") automationId: UUIDType) {
-    return this.automationLogsRepository.GetByAutomationId(automationId);
+    const logs = await this.automationLogsRepository.GetByAutomationId(automationId);
+    return new BaseResponse(logs);
   }
 }

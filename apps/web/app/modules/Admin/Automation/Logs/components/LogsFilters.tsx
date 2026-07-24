@@ -30,7 +30,7 @@ export const LogsFilters: FC<LogsFiltersProps> = ({
 
   const statusOptions: { value: LogStatusFilter; labelKey: string }[] = [
     { value: "All", labelKey: "automationLogs.filters.all" },
-    { value: "sent", labelKey: "automationLogs.filters.sent" },
+    { value: "success", labelKey: "automationLogs.filters.success" },
     { value: "skipped", labelKey: "automationLogs.filters.skipped" },
     { value: "failed", labelKey: "automationLogs.filters.failed" },
   ];

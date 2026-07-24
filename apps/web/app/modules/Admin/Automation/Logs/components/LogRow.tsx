@@ -1,6 +1,5 @@
 import { Eye } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { match } from "ts-pattern";
 
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -8,7 +7,7 @@ import { TableCell, TableRow } from "~/components/ui/table";
 
 import { LogStatusBadge } from "./LogStatusBadge";
 
-import type { AutomationLogEntry, EmailStatus } from "../automationLogs.types";
+import type { AutomationLogEntry } from "../automationLogs.types";
 import type { FC } from "react";
 
 interface LogRowProps {
@@ -29,15 +28,6 @@ export const LogRow: FC<LogRowProps> = ({ log, onOpenDetail }) => {
     }).format(new Date(dateString));
   };
 
-  const sentCount = log.emails.filter((e) => e.status === "sent").length;
-  const skippedCount = log.emails.filter((e) => e.status === "skipped").length;
-  const failedCount = log.emails.filter((e) => e.status === "failed").length;
-
-  const overallStatus: EmailStatus = match({ failedCount, skippedCount, sentCount })
-    .when(({ failedCount }) => failedCount > 0, () => "failed" as const)
-    .when(({ skippedCount, sentCount }) => skippedCount > 0 && sentCount === 0, () => "skipped" as const)
-    .otherwise(() => "sent" as const);
-
   return (
     <TableRow>
       <TableCell>
@@ -49,29 +39,16 @@ export const LogRow: FC<LogRowProps> = ({ log, onOpenDetail }) => {
         </div>
       </TableCell>
       <TableCell>
-        <LogStatusBadge status={overallStatus} />
+        <LogStatusBadge status={log.status} />
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1.5">
-          {sentCount > 0 && (
-            <Badge variant="success" className="text-xs">
-              {sentCount} {t("automationLogs.status.sent").toLowerCase()}
-            </Badge>
-          )}
-          {skippedCount > 0 && (
-            <Badge variant="inProgress" className="text-xs">
-              {skippedCount} {t("automationLogs.status.skipped").toLowerCase()}
-            </Badge>
-          )}
-          {failedCount > 0 && (
-            <Badge variant="destructive" className="text-xs">
-              {failedCount} {t("automationLogs.status.failed").toLowerCase()}
-            </Badge>
-          )}
+          <Badge variant="outline" className="text-xs">
+            {log.emailAddresses.length} {t("automationLogs.table.recipients")}
+          </Badge>
         </div>
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">{formatDate(log.ranAt)}</TableCell>
-      <TableCell className="text-sm text-muted-foreground">{log.duration}</TableCell>
       <TableCell className="text-right">
         <Button
           variant="ghost"
