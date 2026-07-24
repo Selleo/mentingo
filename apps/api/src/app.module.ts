@@ -25,7 +25,6 @@ import { AuthModule } from "./auth/auth.module";
 import { GoogleStrategy } from "./auth/strategy/google.strategy";
 import { MicrosoftStrategy } from "./auth/strategy/microsoft.strategy";
 import { SlackStrategy } from "./auth/strategy/slack.strategy";
-import { AutomationRunnerService } from "./automations/automation-runner/automation-runner.service";
 import { AutomationsModule } from "./automations/automations.module";
 import { BunnyStreamModule } from "./bunny/bunnyStream.module";
 import { CacheModule } from "./cache/cache.module";
@@ -227,7 +226,6 @@ import type { RedisClient } from "src/redis";
     MicrosoftStrategy,
     AppStartupService,
     ...(process.env.SLACK_OAUTH_ENABLED === "true" ? [SlackStrategy] : []),
-    AutomationRunnerService,
   ],
 })
 export class AppModule {}
