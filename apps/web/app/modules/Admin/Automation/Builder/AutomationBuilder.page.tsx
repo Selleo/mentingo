@@ -1,6 +1,6 @@
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useParams } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useAutomationById } from "~/api/queries/admin/useAutomationById";
@@ -56,9 +56,16 @@ export default function AutomationBuilderPage() {
 
   // Load automation data from API when editing existing automation
   const { data: automation } = useAutomationById(automationId);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    if (automation) {
+    // Reset loaded flag when automation ID changes (navigating to a different automation)
+    hasLoadedRef.current = false;
+  }, [automationId]);
+
+  useEffect(() => {
+    if (automation && !hasLoadedRef.current) {
+      hasLoadedRef.current = true;
       reset();
       setAutomationName(automation.name);
       setActive(automation.status === "enabled");
