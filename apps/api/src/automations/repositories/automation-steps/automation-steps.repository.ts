@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, getTableColumns, sql } from "drizzle-orm";
 
+import { AutomationStatus } from "src/announcements/types/automations.types";
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
-import { automationSteps } from "src/storage/schema";
+import { automations, automationSteps } from "src/storage/schema";
 import { toJsonbBuildObject } from "src/utils/jsonb";
 
 import type {
@@ -89,8 +90,14 @@ export class AutomationStepsRepository {
   //.where(sql`${automationSteps.typeContext}::text LIKE ${`%${triggerName}%`}`);
   async findAutomationTriggerToRun(triggerName: string) {
     return this.db
-      .select()
+      .select({ ...getTableColumns(automationSteps) })
       .from(automationSteps)
-      .where(sql`${automationSteps.typeContext} ->> 'name' LIKE ${triggerName}`);
+      .innerJoin(automations, eq(automationSteps.automationId, automations.id))
+      .where(
+        and(
+          sql`${automationSteps.typeContext} ->> 'name' LIKE ${triggerName}`,
+          eq(automations.status, AutomationStatus.Enabled),
+        ),
+      );
   }
 }
