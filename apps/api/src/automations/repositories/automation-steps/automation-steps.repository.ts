@@ -87,7 +87,7 @@ export class AutomationStepsRepository {
       return true;
     });
   }
-  //.where(sql`${automationSteps.typeContext}::text LIKE ${`%${triggerName}%`}`);
+
   async findAutomationTriggerToRun(triggerName: string) {
     return this.db
       .select({ ...getTableColumns(automationSteps) })
