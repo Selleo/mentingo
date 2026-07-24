@@ -1,5 +1,7 @@
 import { Test } from "@nestjs/testing";
 
+import { AutomationLogsRepository } from "../repositories/automation-logs/automation-logs";
+
 import { AutomationLogsController } from "./automation-logs.controller";
 
 import type { TestingModule } from "@nestjs/testing";
@@ -7,9 +9,8 @@ import type { TestingModule } from "@nestjs/testing";
 describe("AutomationLogsController", () => {
   let controller: AutomationLogsController;
 
-  const automationLogsServiceMock = {
-    getByAutomationId: jest.fn(),
-    create: jest.fn(),
+  const automationLogsRepositoryMock = {
+    GetByAutomationId: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -17,13 +18,13 @@ describe("AutomationLogsController", () => {
       controllers: [AutomationLogsController],
       providers: [
         {
-          provide: AutomationLogsService,
-          useValue: automationLogsServiceMock,
+          provide: AutomationLogsRepository,
+          useValue: automationLogsRepositoryMock,
         },
       ],
     }).compile();
 
-    controller = module.get<AutomationLogsController>(AutomationLogsController);
+    controller = module.get(AutomationLogsController);
   });
 
   afterEach(() => {
