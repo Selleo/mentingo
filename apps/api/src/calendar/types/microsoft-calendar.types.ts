@@ -7,6 +7,7 @@ import type {
   MicrosoftCalendarOutboundSourceType,
 } from "../calendar.constants";
 import type {
+  CALENDAR_PROVIDERS,
   MicrosoftCalendarConnectionStatus,
   MicrosoftCalendarOutboundStatus,
   OutlookEventAvailability,
@@ -40,7 +41,7 @@ export type EncryptedMicrosoftRefreshToken = {
 
 export type MicrosoftCalendarConnectionCreateInput = {
   userId: UUIDType;
-  provider: "microsoft";
+  provider: typeof CALENDAR_PROVIDERS.MICROSOFT;
   accountId: string;
   accountEmail: string;
   encryptedRefreshToken: EncryptedMicrosoftRefreshToken;

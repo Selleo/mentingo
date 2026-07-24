@@ -25,6 +25,7 @@ import {
   MANUAL_SYNC_COOLDOWN_MS,
   MICROSOFT_CALENDAR_LIFECYCLE_EVENTS,
   MICROSOFT_CALENDAR_OAUTH_PURPOSE,
+  MICROSOFT_CALENDAR_SYNC_ERROR_CODES,
   MICROSOFT_CALENDAR_OAUTH_RESULTS,
   SUBSCRIPTION_LIFETIME_DAYS,
   SUBSCRIPTION_RENEWAL_WINDOW_MS,
@@ -613,10 +614,10 @@ export class MicrosoftCalendarService {
     }
 
     if (error instanceof MicrosoftGraphError && error.authenticationFailure) {
-      return "authorization_expired";
+      return MICROSOFT_CALENDAR_SYNC_ERROR_CODES.AUTHORIZATION_EXPIRED;
     }
 
-    return "sync_failed";
+    return MICROSOFT_CALENDAR_SYNC_ERROR_CODES.SYNC_FAILED;
   }
 
   private isAuthenticationFailure(error: unknown) {

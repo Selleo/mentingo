@@ -55,3 +55,8 @@ export const MICROSOFT_CALENDAR_OUTBOUND_ERROR_CODES = {
   EXPORT_FAILED: "export_failed",
   CALENDAR_DELETED: "calendar_deleted",
 } as const;
+
+export const MICROSOFT_CALENDAR_SYNC_ERROR_CODES = {
+  AUTHORIZATION_EXPIRED: "authorization_expired",
+  SYNC_FAILED: "sync_failed",
+} as const;
