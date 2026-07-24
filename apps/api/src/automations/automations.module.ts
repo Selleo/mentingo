@@ -6,7 +6,7 @@ import { AutomationStepsService } from "./automations-steps/automations-steps.se
 import { AutomationsController } from "./automations.controller";
 import { AutomationsService } from "./automations.service";
 import { AutomationsHandler } from "./handlers/automations-handler";
-import { AutomationLogs } from "./repositories/automation-logs/automation-logs";
+import { AutomationLogsRepository } from "./repositories/automation-logs/automation-logs";
 import { AutomationStepsRepository } from "./repositories/automation-steps/automation-steps.repository";
 import { AutomationsRepository } from "./repositories/automations/automations.repository";
 
@@ -18,7 +18,7 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationStepsRepository,
     AutomationsHandler,
     AutomationRunnerService,
-    AutomationLogs,
+    AutomationLogsRepository,
   ],
   controllers: [AutomationsController, AutomationStepsController],
   exports: [AutomationsService, AutomationRunnerService, AutomationStepsService],
