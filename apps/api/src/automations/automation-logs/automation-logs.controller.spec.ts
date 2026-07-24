@@ -1,7 +1,6 @@
 import { Test } from "@nestjs/testing";
 
 import { AutomationLogsController } from "./automation-logs.controller";
-import { AutomationLogsService } from "./automation-logs.service";
 
 import type { TestingModule } from "@nestjs/testing";
 
