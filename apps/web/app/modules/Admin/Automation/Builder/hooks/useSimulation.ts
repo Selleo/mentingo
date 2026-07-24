@@ -1,13 +1,10 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 
 import { getStepDefinition } from "../automationBuilder.types";
 import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
 
 import type { BuilderNode } from "../automationBuilder.types";
 import type { SimulationPanelState, SimulationResult } from "../components/SimulationPanel";
-
-// ─── Mock simulation delay (ms) ─────────────────────────────────────────────
-const SIMULATION_DELAY = 1500;
 
 // ─── Sample data for template variable substitution ──────────────────────────
 const SAMPLE_VALUES: Record<string, string> = {
@@ -39,30 +36,17 @@ const SAMPLE_VALUES: Record<string, string> = {
 };
 
 /**
- * Mock simulation hook — performs client-side validation of the builder node tree
+ * Simulation hook — performs client-side validation of the builder node tree
  * and produces a SimulationResult with sample data. No backend calls.
  */
-export function useMockSimulation() {
+export function useSimulation() {
   const [simulationState, setSimulationState] = useState<SimulationPanelState>({ type: "idle" });
-  const [isSimulating, setIsSimulating] = useState(false);
   const [panelOpen, setPanelOpen] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const runSimulation = useCallback((nodes: BuilderNode[]) => {
-    // Cancel any in-progress mock timer
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-
-    setIsSimulating(true);
-    setSimulationState({ type: "loading" });
-
-    timerRef.current = setTimeout(() => {
-      const result = buildMockResult(nodes);
-      setSimulationState({ type: "success", result });
-      setIsSimulating(false);
-      setPanelOpen(true);
-    }, SIMULATION_DELAY);
+    const result = buildSimulationResult(nodes);
+    setSimulationState({ type: "success", result });
+    setPanelOpen(true);
   }, []);
 
   const closePanel = useCallback(() => {
@@ -78,7 +62,7 @@ export function useMockSimulation() {
 
   return {
     simulationState,
-    isSimulating,
+    isSimulating: false,
     panelOpen,
     runSimulation,
     closePanel,
@@ -86,9 +70,9 @@ export function useMockSimulation() {
   };
 }
 
-// ─── Mock result builder ─────────────────────────────────────────────────────
+// ─── Simulation result builder ───────────────────────────────────────────────
 
-function buildMockResult(nodes: BuilderNode[]): SimulationResult {
+function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
   const triggerNode = nodes.find((n) => n.kind === "trigger");
   const actionNodes = nodes.filter((n) => n.kind === "action");
 

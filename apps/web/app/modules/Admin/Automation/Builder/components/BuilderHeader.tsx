@@ -21,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/comp
 import { cn } from "~/lib/utils";
 
 import { useBuilderStore } from "../automationBuilderStore";
-import { useMockSimulation } from "../hooks/useSimulation";
+import { useSimulation } from "../hooks/useSimulation";
 import { computeTreePositions } from "../utils/computeTreePositions";
 
 import { SimulationPanel } from "./SimulationPanel";
@@ -52,7 +52,7 @@ export const BuilderHeader: FC<BuilderHeaderProps> = ({ automationId }) => {
   const deleteAutomation = useDeleteAutomation();
 
   const { simulationState, isSimulating, panelOpen, runSimulation, closePanel, retry } =
-    useMockSimulation();
+    useSimulation();
 
   const handleBack = () => {
     navigate("/admin/automation");
