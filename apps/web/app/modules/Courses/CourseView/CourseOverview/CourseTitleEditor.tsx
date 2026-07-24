@@ -1,3 +1,4 @@
+import { Pencil } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -14,11 +15,6 @@ type CourseTitleEditorProps = {
   onSave: () => Promise<void>;
   placeholder: string;
   title: string;
-};
-
-const resizeTextareaToContent = (textarea: HTMLTextAreaElement) => {
-  textarea.style.height = "auto";
-  textarea.style.height = `${textarea.scrollHeight}px`;
 };
 
 export default function CourseTitleEditor({
@@ -45,43 +41,42 @@ export default function CourseTitleEditor({
     textarea.setSelectionRange(titleEnd, titleEnd);
   }, [isEditing]);
 
-  useEffect(() => {
-    if (!isEditing || !textareaRef.current) return;
-
-    resizeTextareaToContent(textareaRef.current);
-  }, [isEditing, title]);
-
   let titleContent: ReactNode = title;
 
   if (isEditing) {
     titleContent = (
-      <textarea
-        ref={textareaRef}
-        data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
-        placeholder={placeholder}
-        value={title}
-        disabled={disabled}
-        onChange={(event) => {
-          resizeTextareaToContent(event.currentTarget);
-          onChange(event.target.value);
-        }}
-        onBlur={() => {
-          onSave();
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            event.preventDefault();
-            event.currentTarget.blur();
-            return;
-          }
+      <span className="grid w-full">
+        <span
+          aria-hidden
+          className="invisible col-start-1 row-start-1 whitespace-pre-wrap break-words border-2 p-2"
+        >
+          {title || placeholder}
+        </span>
+        <textarea
+          ref={textareaRef}
+          data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
+          placeholder={placeholder}
+          value={title}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.value)}
+          onBlur={() => {
+            onSave();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              event.preventDefault();
+              event.currentTarget.blur();
+              return;
+            }
 
-          if (event.key === "Escape") {
-            onCancel();
-          }
-        }}
-        className="block w-full resize-none overflow-hidden rounded-lg border-2 border-transparent bg-transparent p-2 text-left backdrop-blur-lg placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white"
-        rows={1}
-      />
+            if (event.key === "Escape") {
+              onCancel();
+            }
+          }}
+          className="col-start-1 row-start-1 block size-full resize-none overflow-hidden rounded-lg border-2 border-transparent bg-transparent p-2 text-left backdrop-blur-lg placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white"
+          rows={1}
+        />
+      </span>
     );
   } else if (canEdit) {
     titleContent = (
@@ -89,9 +84,12 @@ export default function CourseTitleEditor({
         type="button"
         data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
         onClick={onEdit}
-        className="w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
+        className="flex w-full items-start gap-2 rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
       >
-        {title ? title : <span className="text-neutral-200">{placeholder}</span>}
+        <span className="min-w-0 flex-1">
+          {title ? title : <span className="text-neutral-200">{placeholder}</span>}
+        </span>
+        <Pencil aria-hidden className="mt-1 size-4 shrink-0 text-white/80 md:size-5" />
       </button>
     );
   }

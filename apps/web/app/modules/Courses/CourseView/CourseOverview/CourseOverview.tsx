@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { ENTITY_TYPES } from "@repo/shared";
+import { ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,9 +9,10 @@ import useGenerateMissingTranslations from "~/api/mutations/admin/useGenerateMis
 import { useInitVideoUpload } from "~/api/mutations/admin/useInitVideoUpload";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { useUpdateCourseMedia } from "~/api/mutations/admin/useUpdateCourseMedia";
-import { useCategories } from "~/api/queries";
+import { useCategories, useCurrentUser } from "~/api/queries";
 import { useAIConfigured } from "~/api/queries/useAIConfigured";
 import CardPlaceholder from "~/assets/placeholders/card-placeholder.jpg";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -60,10 +61,15 @@ export default function CourseOverview({
   const { course, isAdminExperience, isCourseStudentModeActive, isPreviewMode } =
     useCourseAccessProvider();
 
+  const { data: currentUser } = useCurrentUser();
   const { data: categories = [] } = useCategories({
     language,
     archived: false,
   });
+  const canManageCategories = hasPermission(
+    currentUser?.permissions ?? [],
+    PERMISSIONS.CATEGORY_MANAGE,
+  );
   const { mutate: toggleLearningMode, isPending: isTogglingLearningMode } =
     useToggleCourseStudentMode(course.id);
   const { mutateAsync: updateCourse, isPending: isUpdatingCourse } = useUpdateCourse();
@@ -345,6 +351,7 @@ export default function CourseOverview({
               categoryTitle={selectedCategoryTitle}
               categories={categories}
               canEdit={isAdminExperience}
+              canManageCategories={canManageCategories}
               disabled={isUpdatingCourse}
               durationSeconds={course.estimatedDurationSeconds}
               isEditing={isEditingCategory}

@@ -103,7 +103,7 @@ export default function TableOfContentTabs({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="size-10 text-warning-800 hover:text-warning-800 hover:bg-warning-50"
+                    className="size-10 text-warning-800 hover:text-warning-800 hover:bg-white"
                     aria-label={t("modernCourseView.contents.missingTranslationsTitle")}
                   >
                     <CircleAlert className="size-7" aria-hidden />

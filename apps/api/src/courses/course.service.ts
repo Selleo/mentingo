@@ -631,7 +631,7 @@ export class CourseService {
     });
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     return {
@@ -1286,7 +1286,7 @@ export class CourseService {
       await this.courseSlugService.getCourseIdBySlug(idOrSlug, language),
     )
       .with({ type: "notFound" }, () => {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       })
       .otherwise((value) => value);
 
@@ -1295,7 +1295,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, id));
 
-    if (!courseAccess) throw new NotFoundException("Course not found");
+    if (!courseAccess) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const canManageCourses =
       hasPermission(userPermissions, PERMISSIONS.COURSE_UPDATE) ||
@@ -1365,7 +1365,7 @@ export class CourseService {
       )
       .where(eq(courses.id, id));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const isEnrolled = !!course.enrolled;
     const NON_PUBLIC_STATUSES = ["draft", "private"];
@@ -1547,7 +1547,7 @@ export class CourseService {
     const lookupResult = await this.courseSlugService.getCourseIdBySlug(idOrSlug, language);
 
     if (lookupResult.type === "notFound") {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const courseId = lookupResult.courseId;
@@ -1573,7 +1573,7 @@ export class CourseService {
       .limit(1);
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const isEnrolled = !!course.enrolled;
@@ -1587,11 +1587,11 @@ export class CourseService {
         NON_PUBLIC_STATUSES.includes(course.status) &&
         !isEnrolled
       ) {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     } else {
       if (NON_PUBLIC_STATUSES.includes(course.status)) {
-        throw new NotFoundException("Course not found");
+        throw new NotFoundException("adminCourseView.errors.notFound.course");
       }
     }
 
@@ -1642,7 +1642,7 @@ export class CourseService {
       .innerJoin(categories, eq(courses.categoryId, categories.id))
       .where(and(eq(courses.id, id)));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
       throw new ForbiddenException("You do not have permission to edit this course");
@@ -1912,7 +1912,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const { language: resolvedLanguage } = await this.localizationService.getBaseLanguage(
@@ -1965,7 +1965,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (settings.lessonSequenceEnabled !== undefined) {
@@ -2072,7 +2072,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const certificateSignatureUrl = course.settings.certificateSignature
@@ -2227,7 +2227,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, id));
 
-    if (!existingCourse) throw new NotFoundException("Course not found");
+    if (!existingCourse) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
       throw new ForbiddenException("You don't have permission to update course");
@@ -2310,7 +2310,7 @@ export class CourseService {
         }
 
         if (!existingCourse) {
-          throw new NotFoundException("Course not found");
+          throw new NotFoundException("adminCourseView.errors.notFound.course");
         }
 
         if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
@@ -2330,7 +2330,7 @@ export class CourseService {
             .where(eq(categories.id, updateCourseBody.categoryId));
 
           if (!category) {
-            throw new NotFoundException("Category not found");
+            throw new NotFoundException("adminCourseView.errors.notFound.category");
           }
         }
 
@@ -2675,7 +2675,7 @@ export class CourseService {
       .where(eq(courses.id, courseId));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
@@ -2725,7 +2725,7 @@ export class CourseService {
       )
       .where(and(eq(courses.id, id)));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (course.userDeletedAt) {
       throw new NotFoundException("User not found");
@@ -2766,7 +2766,7 @@ export class CourseService {
 
     const courseExists = await this.db.select().from(courses).where(eq(courses.id, courseId));
 
-    if (!courseExists.length) throw new NotFoundException(`Course ${courseId} not found`);
+    if (!courseExists.length) throw new NotFoundException("adminCourseView.errors.notFound.course");
     if (!studentIds.length) throw new BadRequestException("Student ids not found");
 
     const existingStudentsEnrollments = await this.db
@@ -2861,7 +2861,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException(`Course ${courseId} not found`);
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     const groupExists = await this.db.select().from(groups).where(inArray(groups.id, groupIds));
     if (!groupExists.length) throw new NotFoundException("Groups not found");
@@ -3381,7 +3381,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.LEARNING_MODE_USE)) {
       throw new ForbiddenException("You don't have permission to change student mode");
@@ -3461,7 +3461,7 @@ export class CourseService {
     const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     if (!hasPermission(currentUser.permissions, PERMISSIONS.COURSE_DELETE)) {
@@ -4681,7 +4681,7 @@ export class CourseService {
       .from(courses)
       .where(eq(courses.id, courseId));
 
-    if (!course) throw new NotFoundException("Course not found");
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     return {
       ...course,
@@ -5302,7 +5302,7 @@ export class CourseService {
       .limit(1);
 
     if (!course) {
-      throw new NotFoundException("Course not found");
+      throw new NotFoundException("adminCourseView.errors.notFound.course");
     }
 
     const [currentAuthor] = await this.db

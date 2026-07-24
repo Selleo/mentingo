@@ -25,6 +25,23 @@ describe("ProgressStatCard", () => {
     expect(screen.getByText("33%")).toBeInTheDocument();
   });
 
+  it("shows a finished message instead of zero remaining time for a completed course", () => {
+    renderWith().render(
+      <ProgressStatCard
+        completedChapterCount={3}
+        courseChapterCount={3}
+        isAdminExperience={false}
+        onEnterLearningMode={vi.fn()}
+        timeLeftSeconds={0}
+      />,
+    );
+
+    expect(screen.getByText("Course finished")).toBeInTheDocument();
+    expect(screen.queryByText("0 min")).not.toBeInTheDocument();
+    expect(screen.queryByText("remaining")).not.toBeInTheDocument();
+    expect(screen.getByText("100%")).toBeInTheDocument();
+  });
+
   it("lets admins enter learning mode instead of showing learner progress details", async () => {
     const user = userEvent.setup();
     const onEnterLearningMode = vi.fn();

@@ -1,6 +1,8 @@
-import { Clock } from "lucide-react";
+import { Link } from "@remix-run/react";
+import { Clock, Pencil, Settings } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -20,6 +22,7 @@ type CategoryOption = {
 
 type CourseCategoryEditorProps = {
   canEdit: boolean;
+  canManageCategories: boolean;
   categories: CategoryOption[];
   categoryId: string;
   categoryTitle: string;
@@ -33,6 +36,7 @@ type CourseCategoryEditorProps = {
 
 export default function CourseCategoryEditor({
   canEdit,
+  canManageCategories,
   categories,
   categoryId,
   categoryTitle,
@@ -81,6 +85,22 @@ export default function CourseCategoryEditor({
                 {category.title}
               </SelectItem>
             ))}
+
+            {canManageCategories && (
+              <div className="mt-1 border-t border-neutral-200 pt-1">
+                <Button
+                  asChild
+                  variant="ghost"
+                  size="sm"
+                  className="h-auto w-full justify-start rounded-sm px-2 py-1.5 text-sm"
+                >
+                  <Link to="/admin/categories">
+                    <Settings className="mr-2 size-4" />
+                    {t("modernCourseView.overview.manageCategories")}
+                  </Link>
+                </Button>
+              </div>
+            )}
           </SelectContent>
         </Select>
       ) : (
@@ -102,7 +122,10 @@ export default function CourseCategoryEditor({
             },
           )}
         >
-          {categoryTitle}
+          <span className="flex items-center gap-1.5">
+            {categoryTitle}
+            {canEdit && <Pencil aria-hidden className="size-3 shrink-0 text-white/80" />}
+          </span>
         </button>
       )}
 

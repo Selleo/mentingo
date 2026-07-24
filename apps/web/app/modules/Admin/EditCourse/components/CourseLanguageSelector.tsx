@@ -106,12 +106,14 @@ export const CourseLanguageSelector = ({
           <TooltipContent
             side="top"
             align="center"
-            className="max-w-xs whitespace-pre-line break-words rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+            className="max-w-xs whitespace-pre-line break-words rounded border-neutral-200 bg-white px-2 py-1 text-sm shadow-md"
           >
-            {t("adminCourseView.createLanguage.editConstraints", {
-              baseLanguage: t(baseLanguageTranslationKey ?? ""),
-            })}
-            <TooltipArrow className="fill-black" />
+            <span className="text-neutral-950">
+              {t("adminCourseView.createLanguage.editConstraints", {
+                baseLanguage: t(baseLanguageTranslationKey ?? ""),
+              })}
+            </span>
+            <TooltipArrow className="fill-white" />
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

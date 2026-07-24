@@ -4608,6 +4608,7 @@
     },
     "overview": {
       "courseSettings": "Kurseinstellungen",
+      "manageCategories": "Kategorien verwalten",
       "settingsDescription": "Verwalten Sie die Einstellungen für diesen Kurs.",
       "titlePlaceholder": "Kurstitel eingeben...",
       "editMedia": "Medien bearbeiten",
@@ -4652,6 +4653,7 @@
     "stats": {
       "yourProgress": "Dein Fortschritt",
       "remaining": "verbleibend",
+      "courseFinished": "Kurs abgeschlossen",
       "chapterProgress_one": "{{completed}} / {{total}} Kapitel",
       "chapterProgress_other": "{{completed}} / {{total}} Kapitel",
       "duration": {

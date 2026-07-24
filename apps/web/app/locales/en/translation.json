@@ -4689,6 +4689,7 @@
     },
     "overview": {
       "courseSettings": "Course settings",
+      "manageCategories": "Manage categories",
       "settingsDescription": "Manage settings for this course.",
       "titlePlaceholder": "Enter course title...",
       "editMedia": "Edit media",
@@ -4733,6 +4734,7 @@
     "stats": {
       "yourProgress": "Your progress",
       "remaining": "remaining",
+      "courseFinished": "Course finished",
       "chapterProgress_one": "{{completed}} / {{total}} chapter",
       "chapterProgress_other": "{{completed}} / {{total}} chapters",
       "duration": {

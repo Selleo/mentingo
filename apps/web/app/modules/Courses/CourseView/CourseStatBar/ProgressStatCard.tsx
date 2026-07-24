@@ -22,6 +22,9 @@ export default function ProgressStatCard({
   const { t } = useTranslation();
   const progressPercentage =
     courseChapterCount > 0 ? Math.round((completedChapterCount / courseChapterCount) * 100) : 0;
+  const isCourseFinished =
+    !isAdminExperience && courseChapterCount > 0 && completedChapterCount >= courseChapterCount;
+  const timeLeftLabel = isAdminExperience ? 0 : formatDuration(timeLeftSeconds, t);
 
   return (
     <div className="group relative flex h-full items-center overflow-hidden rounded-2xl bg-white p-4 shadow-lg">
@@ -40,14 +43,20 @@ export default function ProgressStatCard({
           </p>
 
           <div className="mb-1.5">
-            <div className="flex items-baseline gap-1">
+            {isCourseFinished ? (
               <span className="whitespace-nowrap text-xl font-bold text-neutral-950">
-                {isAdminExperience ? 0 : formatDuration(timeLeftSeconds, t)}
+                {t("modernCourseView.stats.courseFinished")}
               </span>
-              <span className="whitespace-nowrap text-sm text-neutral-800">
-                {t("modernCourseView.stats.remaining")}
-              </span>
-            </div>
+            ) : (
+              <div className="flex items-baseline gap-1">
+                <span className="whitespace-nowrap text-xl font-bold text-neutral-950">
+                  {timeLeftLabel}
+                </span>
+                <span className="whitespace-nowrap text-sm text-neutral-800">
+                  {t("modernCourseView.stats.remaining")}
+                </span>
+              </div>
+            )}
           </div>
 
           {!isAdminExperience && (

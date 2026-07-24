@@ -19,6 +19,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Choose supported course types where the tenant configuration allows them.
 - Browse, filter, and open manageable courses from the admin course list.
 - Update course title, description, category, thumbnail, and related metadata.
+- Open category management directly from the course category selector when permitted.
 - Add up to five concise learning outcomes so learners can quickly understand what the course delivers.
 - Review and edit localized course metadata in the selected course language from the modern overview, including the title, description, category, learning outcomes, and curriculum titles.
 - Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
@@ -54,7 +55,7 @@ Course administrators can switch the active course language from the modern over
 
 While editing, course-level localized fields such as the title, description, and learning outcomes use the selected course language exactly, so administrators can identify and complete translation gaps. Learners retain base-language fallback behavior, and an administrator using Learning Mode receives the same fallback behavior as a learner.
 
-The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language.
+The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language. Administrators with category-management access can also open the tenant's category administration page directly from the bottom of the selector.
 
 If a chapter or lesson title is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. Its tooltip explains that learners will temporarily see the default-language content, keeping the overview uncluttered while still making curriculum translation gaps discoverable.
 
@@ -71,6 +72,7 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
+- The category-management shortcut is shown only with `PERMISSIONS.CATEGORY_MANAGE` and uses the tenant-relative `/admin/categories` route.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 - Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
 - The modern overview stores the selected course language in the URL so course content, media edits, and metadata updates stay aligned with the active translation.
@@ -92,3 +94,4 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Focused API and component coverage verifies that missing chapter or lesson translations produce the administrator-only warning tooltip and that completed translations remove it.
 - Focused frontend coverage verifies that redirects to language-specific course addresses preserve the selected course language instead of falling back to the default language.
 - Focused component coverage verifies that the category selector renders the localized and default-language fallback titles returned by the API.
+- Focused component coverage verifies that permitted users receive the category-management shortcut and other course editors do not.

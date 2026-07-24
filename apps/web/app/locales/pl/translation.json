@@ -4728,6 +4728,7 @@
     },
     "overview": {
       "courseSettings": "Ustawienia kursu",
+      "manageCategories": "Zarządzaj kategoriami",
       "settingsDescription": "Zarządzaj ustawieniami tego kursu.",
       "titlePlaceholder": "Wprowadź tytuł kursu...",
       "editMedia": "Edytuj multimedia",
@@ -4772,6 +4773,7 @@
     "stats": {
       "yourProgress": "Twój postęp",
       "remaining": "pozostało",
+      "courseFinished": "Kurs ukończony",
       "chapterProgress_one": "{{completed}} / {{total}} rozdział",
       "chapterProgress_few": "{{completed}} / {{total}} rozdziały",
       "chapterProgress_many": "{{completed}} / {{total}} rozdziałów",

@@ -119,7 +119,7 @@ export default function CourseWhatYouWillLearn({
               onClick={addOutcome}
               disabled={isPending || outcomesDraft.length >= MAX_COURSE_LEARNING_OUTCOMES}
               aria-label={t("modernCourseView.overview.addLearningOutcome")}
-              className="rounded-lg p-1 transition-all hover:bg-white/20 disabled:opacity-50"
+              className="rounded-lg border border-white/30 bg-white/15 p-1.5 shadow-sm transition-all hover:bg-white/25 disabled:opacity-50"
             >
               <Plus className="size-4 text-white" />
             </button>

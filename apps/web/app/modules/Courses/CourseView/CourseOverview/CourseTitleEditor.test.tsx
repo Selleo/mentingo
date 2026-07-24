@@ -19,8 +19,10 @@ describe("CourseTitleEditor", () => {
     render(<CourseTitleEditor {...defaultProps} isEditing={false} />);
 
     const placeholder = screen.getByText("Enter course title...");
+    const editButton = screen.getByRole("button", { name: "Enter course title..." });
 
-    expect(screen.getByRole("button", { name: "Enter course title..." })).toBeInTheDocument();
+    expect(editButton).toBeInTheDocument();
+    expect(editButton.querySelector("svg")).toBeInTheDocument();
     expect(placeholder).toHaveClass("text-neutral-200");
   });
 
@@ -30,7 +32,7 @@ describe("CourseTitleEditor", () => {
     expect(screen.getByPlaceholderText("Enter course title...")).toBeInTheDocument();
   });
 
-  it("keeps the same title container and spacing while entering edit mode", () => {
+  it("keeps the same title box model while entering edit mode", () => {
     const { rerender } = render(
       <CourseTitleEditor {...defaultProps} title="Course title" isEditing={false} />,
     );
@@ -38,14 +40,17 @@ describe("CourseTitleEditor", () => {
     const button = screen.getByRole("button", { name: "Course title" });
     const titleContainerClassName = button.parentElement?.className;
 
-    expect(button).toHaveClass("border-2", "p-2");
+    expect(button).toHaveClass("flex", "border-2", "p-2");
 
     rerender(<CourseTitleEditor {...defaultProps} title="Course title" isEditing />);
 
     const textarea = screen.getByDisplayValue("Course title");
+    const sizeMirror = textarea.previousElementSibling;
 
-    expect(textarea.parentElement?.tagName).toBe("H1");
-    expect(textarea.parentElement?.className).toBe(titleContainerClassName);
-    expect(textarea).toHaveClass("border-2", "p-2");
+    expect(textarea.parentElement?.parentElement?.tagName).toBe("H1");
+    expect(textarea.parentElement?.parentElement?.className).toBe(titleContainerClassName);
+    expect(textarea).toHaveClass("block", "border-2", "p-2");
+    expect(sizeMirror).toHaveClass("invisible", "border-2", "p-2");
+    expect(sizeMirror).toHaveTextContent("Course title");
   });
 });

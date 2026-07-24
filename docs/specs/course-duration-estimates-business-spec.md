@@ -18,6 +18,7 @@ Course duration estimates help learners and course managers understand the expec
 - Recalculate estimates from current course content instead of relying on a fixed duration.
 - Support localized lesson descriptions when estimating reading time.
 - Display hour and minute units in the learner's interface language.
+- Confirm course completion in the progress card instead of showing zero remaining time.
 
 ## End-User Value
 
@@ -25,7 +26,7 @@ Learners get a clearer expectation of the effort required, while L&D teams can p
 
 ## How It Works
 
-When Mentingo prepares course data, it evaluates the lessons in each course, estimates the time needed for reading and interactive resources, and adds those estimates together. Course-list responses expose the result in minutes. The frontend turns that number into a localized label using language-specific hour and minute abbreviations.
+When Mentingo prepares course data, it evaluates the lessons in each course, estimates the time needed for reading and interactive resources, and adds those estimates together. Course-list responses expose the result in minutes. The frontend turns that number into a localized label using language-specific hour and minute abbreviations. After the learner completes every chapter, the progress card replaces the zero-time estimate with a localized course-finished message.
 
 ## Key Technical Context
 
@@ -34,9 +35,11 @@ When Mentingo prepares course data, it evaluates the lessons in each course, est
 - Hierarchical estimates retain seconds internally for lesson and chapter calculations, while course-list estimates are rounded up to whole minutes.
 - The API no longer constructs an English formatted duration label for these course-list estimates.
 - Shared course duration formatters receive the active interface translator and are used across course overview, progress, chapter, and statistics surfaces.
+- The course overview determines completion from completed chapters and provides the finished message in every supported interface language.
 
 ## Test Evidence
 
 - Course controller E2E coverage verifies that content creator course responses use a calculated one-minute estimate instead of a fixed duration.
 - The duration calculation has API coverage for lesson and chapter hierarchy values.
+- Progress-card component coverage verifies both remaining-time presentation and the completed-course message.
 - Dedicated frontend E2E coverage for localized duration presentation was not identified.

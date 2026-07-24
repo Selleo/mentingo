@@ -4610,6 +4610,7 @@
     },
     "overview": {
       "courseSettings": "Kurso nustatymai",
+      "manageCategories": "Tvarkyti kategorijas",
       "settingsDescription": "Tvarkykite šio kurso nustatymus.",
       "titlePlaceholder": "Įveskite kurso pavadinimą...",
       "editMedia": "Redaguoti mediją",
@@ -4654,6 +4655,7 @@
     "stats": {
       "yourProgress": "Jūsų pažanga",
       "remaining": "liko",
+      "courseFinished": "Kursas baigtas",
       "chapterProgress_one": "{{completed}} / {{total}} skyrius",
       "chapterProgress_few": "{{completed}} / {{total}} skyriai",
       "chapterProgress_other": "{{completed}} / {{total}} skyrių",
