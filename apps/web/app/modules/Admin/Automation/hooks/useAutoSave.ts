@@ -2,10 +2,6 @@ import { useCallback, useEffect, useRef } from "react";
 
 const DEFAULT_DELAY_MS = 400;
 
-/**
- * Debounced auto-save hook. Calls `onSave` with the latest payload after
- * `delayMs` of inactivity. Cleans up pending timers on unmount.
- */
 export function useAutoSave<T>(onSave: (payload: T) => void, delayMs = DEFAULT_DELAY_MS) {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSaveRef = useRef(onSave);
