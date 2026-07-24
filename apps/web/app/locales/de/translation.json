@@ -4609,6 +4609,13 @@
       "dialog": {
         "level": "Level"
       }
+    },
+    "errors": {
+      "achievementNotFound": "Errungenschaft existiert nicht",
+      "wrongAchievementLevel": "Für diese Errungenschaft kann es keine weitere Stufe geben",
+      "achievementLevelNotFound": "Die Stufe der Errungenschaft existiert nicht",
+      "wrongAchievementLevelThreshold": "Der Schwellenwert der Stufe darf weder niedriger als der vorherige noch höher als der nächste sein",
+      "userProgressNotFound": "Der Fortschritt des Benutzers existiert nicht"
     }
   }
 }

@@ -4610,6 +4610,13 @@
       "dialog": {
         "level": "Úroveň"
       }
+    },
+    "errors": {
+      "achievementNotFound": "Úspěch neexistuje",
+      "wrongAchievementLevel": "Tento úspěch nemůže mít další úroveň",
+      "achievementLevelNotFound": "Úroveň úspěchu neexistuje",
+      "wrongAchievementLevelThreshold": "Prahová hodnota úrovně nemůže být nižší než předchozí ani vyšší než následující",
+      "userProgressNotFound": "Postup uživatele neexistuje"
     }
   }
 }

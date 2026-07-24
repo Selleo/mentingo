@@ -4611,6 +4611,13 @@
       "dialog": {
         "level": "Lygis"
       }
+    },
+    "errors": {
+      "achievementNotFound": "Pasiekimas neegzistuoja",
+      "wrongAchievementLevel": "Šis pasiekimas negali turėti kito lygio",
+      "achievementLevelNotFound": "Pasiekimo lygis neegzistuoja",
+      "wrongAchievementLevelThreshold": "Lygio riba negali būti mažesnė už ankstesnę ar didesnė už kitą",
+      "userProgressNotFound": "Naudotojo progresas neegzistuoja"
     }
   }
 }

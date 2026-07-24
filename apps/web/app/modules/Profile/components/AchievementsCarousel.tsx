@@ -201,7 +201,7 @@ const AchievementCard = ({
 export const AchievementsCarousel = ({ achievements }: AchievementsCarouselProps) => {
   const { t } = useTranslation();
 
-  const grouped = useMemo(() => groupAchievements(achievements), [achievements]);
+  const grouped = useMemo(() => groupAchievements(achievements), [achievements]).reverse();
 
   const [selected, setSelected] = useState<GroupedAchievement | null>(null);
 
