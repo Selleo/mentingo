@@ -16,6 +16,7 @@
       "clearAll": "Išvalyti viską",
       "validate": "Patvirtinti",
       "edit": "Redaguoti",
+      "delete": "Ištrinti",
       "uploading": "Įkeliama...",
       "sending": "Siunčiama..."
     },
@@ -4441,16 +4442,28 @@
       "host": "Šeimininkas",
       "status": "Būsena",
       "managing": "Valdymas",
+      "lastActivity": "Paskutinė veikla",
+      "activityCountLast14Days": "Veiklos\n(per paskutines 14 dienų)",
+      "activeUsersLast14Days": "Aktyvūs naudotojai\n(per paskutines 14 dienų)",
+      "activeUsersValue": "{{active}} / {{total}} naudotojų",
+      "recentActivities": "Naujausios veiklos",
       "loading": "Įkeliamos organizacijos...",
       "empty": "Organizacijų nerasta.",
       "yes": "Taip",
       "no": "Nr",
       "edit": "Redaguoti",
+      "delete": "Ištrinti",
       "actions": {
         "title": "Veiksmai",
         "enterSupportMode": "Įjunkite palaikymo režimą",
-        "impersonateAdmin": "Apsimesti administratoriumi"
+        "impersonateAdmin": "Įeiti kaip administratorius"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Veiklos nėra",
+      "increase": "Veikla padidėjo {{percentage}}%",
+      "decrease": "Veikla sumažėjo {{percentage}}%",
+      "unchanged": "Veikla nepakito"
     },
     "supportModePopover": {
       "searchPlaceholder": "Ieškoti pagal vardą arba el. paštą...",
@@ -4461,6 +4474,10 @@
     "status": {
       "active": "Aktyvus",
       "inactive": "Neaktyvus"
+    },
+    "deleteDialog": {
+      "title": "Ištrinti {{name}}?",
+      "description": "Organizacija ir visi jos naudotojai, mokymosi turinys, veikla bei nustatymai bus ištrinti visam laikui. Šio veiksmo atšaukti negalima."
     },
     "create": {
       "title": "Sukurti organizaciją",
@@ -4491,7 +4508,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacija sėkmingai sukurta",
-      "tenantUpdatedSuccessfully": "Organizacija sėkmingai atnaujinta"
+      "tenantUpdatedSuccessfully": "Organizacija sėkmingai atnaujinta",
+      "tenantDeletedSuccessfully": "Organizacija ištrinta visam laikui"
     }
   },
   "superAdminTenants": {
@@ -4500,7 +4518,8 @@
       "notFound": "Organizacija nerasta",
       "invalidHost": "Netinkamas organizacijos prieglobos URL",
       "managingTenantRequired": "Reikalingas valdančios organizacijos administratorius",
-      "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas"
+      "currentTenantSupportNotAllowed": "Palaikymo režimas dabartinei organizacijai nepasiekiamas",
+      "currentTenantDeleteNotAllowed": "Dabartinės valdančiosios organizacijos ištrinti negalima"
     }
   },
   "auth": {

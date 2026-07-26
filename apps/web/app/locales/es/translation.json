@@ -16,6 +16,7 @@
       "clearAll": "Borrar todo",
       "validate": "Validar",
       "edit": "Editar",
+      "delete": "Eliminar",
       "uploading": "Subiendo...",
       "sending": "Enviando..."
     },
@@ -4376,16 +4377,28 @@
       "host": "Anfitrión",
       "status": "Estado",
       "managing": "Gestionando",
+      "lastActivity": "Última actividad",
+      "activityCountLast14Days": "Actividades\n(últimos 14 días)",
+      "activeUsersLast14Days": "Usuarios activos\n(últimos 14 días)",
+      "activeUsersValue": "{{active}} / {{total}} usuarios",
+      "recentActivities": "Actividad reciente",
       "loading": "Cargando organizaciones...",
       "empty": "No se encontraron organizaciones.",
       "yes": "Sí",
       "no": "No",
       "edit": "Editar",
+      "delete": "Eliminar",
       "actions": {
         "title": "Acciones",
         "enterSupportMode": "Ingrese al modo de soporte",
-        "impersonateAdmin": "Suplantar administrador"
+        "impersonateAdmin": "Entrar como administrador"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Sin actividad",
+      "increase": "La actividad aumentó un {{percentage}}%",
+      "decrease": "La actividad disminuyó un {{percentage}}%",
+      "unchanged": "La actividad no cambió"
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
@@ -4396,6 +4409,10 @@
     "status": {
       "active": "Activo",
       "inactive": "Inactivo"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar {{name}}?",
+      "description": "Esto elimina permanentemente la organización y todos sus usuarios, contenido de aprendizaje, actividad y configuración. Esta acción no se puede deshacer."
     },
     "create": {
       "title": "Crear organización",
@@ -4426,7 +4443,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organización creada exitosamente",
-      "tenantUpdatedSuccessfully": "Organización actualizada con éxito"
+      "tenantUpdatedSuccessfully": "Organización actualizada con éxito",
+      "tenantDeletedSuccessfully": "Organización eliminada permanentemente"
     }
   },
   "superAdminTenants": {
@@ -4435,7 +4453,8 @@
       "notFound": "Organización no encontrada",
       "invalidHost": "URL del host de la organización no válida",
       "managingTenantRequired": "Se requiere administrador de la organización gestora",
-      "currentTenantSupportNotAllowed": "El modo de soporte no está disponible para la organización actual"
+      "currentTenantSupportNotAllowed": "El modo de soporte no está disponible para la organización actual",
+      "currentTenantDeleteNotAllowed": "No se puede eliminar la organización gestora actual"
     }
   },
   "auth": {

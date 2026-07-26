@@ -16,6 +16,7 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
+      "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
       "sending": "Wysyłanie..."
@@ -4417,16 +4418,28 @@
       "host": "Host",
       "status": "Status",
       "managing": "Zarządzający",
+      "lastActivity": "Ostatnia aktywność",
+      "activityCountLast14Days": "Aktywności\n(ostatnie 14 dni)",
+      "activeUsersLast14Days": "Aktywni użytkownicy\n(ostatnie 14 dni)",
+      "activeUsersValue": "{{active}} / {{total}} użytkowników",
+      "recentActivities": "Ostatnie aktywności",
       "loading": "Ładowanie organizacji...",
       "empty": "Nie znaleziono organizacji.",
       "yes": "Tak",
       "no": "Nie",
       "edit": "Edytuj",
+      "delete": "Usuń",
       "actions": {
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
-        "impersonateAdmin": "Wejdź w rolę administratora"
+        "impersonateAdmin": "Wejdź jako admin"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Brak aktywności",
+      "increase": "Aktywność wzrosła o {{percentage}}%",
+      "decrease": "Aktywność spadła o {{percentage}}%",
+      "unchanged": "Aktywność bez zmian"
     },
     "supportModePopover": {
       "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
@@ -4437,6 +4450,10 @@
     "status": {
       "active": "Aktywny",
       "inactive": "Nieaktywny"
+    },
+    "deleteDialog": {
+      "title": "Usunąć {{name}}?",
+      "description": "Spowoduje to trwałe usunięcie organizacji wraz ze wszystkimi użytkownikami, treściami szkoleniowymi, aktywnością i ustawieniami. Tej operacji nie można cofnąć."
     },
     "create": {
       "title": "Utwórz organizację",
@@ -4467,7 +4484,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacja została utworzona pomyślnie",
-      "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie"
+      "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie",
+      "tenantDeletedSuccessfully": "Organizacja została trwale usunięta"
     }
   },
   "superAdminTenants": {
@@ -4476,7 +4494,8 @@
       "notFound": "Nie znaleziono organizacji",
       "invalidHost": "Nieprawidłowy adres URL hosta organizacji",
       "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji",
-      "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji"
+      "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji",
+      "currentTenantDeleteNotAllowed": "Nie można usunąć bieżącej organizacji zarządzającej"
     }
   },
   "auth": {

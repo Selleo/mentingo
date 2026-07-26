@@ -13674,6 +13674,48 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "activityCountLast14Days",
+                  "type": "string"
+                },
+                {
+                  "const": "-lastActivity",
+                  "type": "string"
+                },
+                {
+                  "const": "-activityCountLast14Days",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "anyOf": [
+                {
+                  "const": "active",
+                  "type": "string"
+                },
+                {
+                  "const": "inactive",
+                  "type": "string"
+                }
+              ]
+            }
           }
         ],
         "responses": {
@@ -13772,6 +13814,25 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "TenantsController_deleteTenantById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
           }
         }
       }
@@ -48566,10 +48627,195 @@
                   "properties": {
                     "isCurrentTenant": {
                       "type": "boolean"
+                    },
+                    "lastActivity": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "properties": {
+                            "occurredAt": {
+                              "type": "string"
+                            },
+                            "actorEmail": {
+                              "format": "email",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "occurredAt",
+                            "actorEmail"
+                          ]
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "recentActivities": {
+                      "maxItems": 5,
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "occurredAt": {
+                            "type": "string"
+                          },
+                          "actorEmail": {
+                            "format": "email",
+                            "type": "string"
+                          },
+                          "actionType": {
+                            "anyOf": [
+                              {
+                                "const": "create",
+                                "type": "string"
+                              },
+                              {
+                                "const": "update",
+                                "type": "string"
+                              },
+                              {
+                                "const": "bulk_course_category_update",
+                                "type": "string"
+                              },
+                              {
+                                "const": "bulk_course_status_update",
+                                "type": "string"
+                              },
+                              {
+                                "const": "delete",
+                                "type": "string"
+                              },
+                              {
+                                "const": "login",
+                                "type": "string"
+                              },
+                              {
+                                "const": "login_failed",
+                                "type": "string"
+                              },
+                              {
+                                "const": "logout",
+                                "type": "string"
+                              },
+                              {
+                                "const": "enroll_course",
+                                "type": "string"
+                              },
+                              {
+                                "const": "unenroll_course",
+                                "type": "string"
+                              },
+                              {
+                                "const": "start_course",
+                                "type": "string"
+                              },
+                              {
+                                "const": "group_assignment",
+                                "type": "string"
+                              },
+                              {
+                                "const": "users_import",
+                                "type": "string"
+                              },
+                              {
+                                "const": "send_password_reset_email",
+                                "type": "string"
+                              },
+                              {
+                                "const": "resend_password_creation_email",
+                                "type": "string"
+                              },
+                              {
+                                "const": "complete_lesson",
+                                "type": "string"
+                              },
+                              {
+                                "const": "complete_course",
+                                "type": "string"
+                              },
+                              {
+                                "const": "complete_chapter",
+                                "type": "string"
+                              },
+                              {
+                                "const": "expire_certificate",
+                                "type": "string"
+                              },
+                              {
+                                "const": "reset_certificate",
+                                "type": "string"
+                              },
+                              {
+                                "const": "view_announcement",
+                                "type": "string"
+                              },
+                              {
+                                "const": "enroll_learning_path",
+                                "type": "string"
+                              },
+                              {
+                                "const": "start_learning_path",
+                                "type": "string"
+                              },
+                              {
+                                "const": "complete_learning_path",
+                                "type": "string"
+                              },
+                              {
+                                "const": "play_scorm",
+                                "type": "string"
+                              },
+                              {
+                                "const": "complete_scorm",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "occurredAt",
+                          "actorEmail",
+                          "actionType"
+                        ]
+                      }
+                    },
+                    "activityCountLast14Days": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "activityTrendPercentage": {
+                      "anyOf": [
+                        {
+                          "type": "integer"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "activeUsersLast14Days": {
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "totalUsers": {
+                      "minimum": 0,
+                      "type": "integer"
                     }
                   },
                   "required": [
-                    "isCurrentTenant"
+                    "isCurrentTenant",
+                    "lastActivity",
+                    "recentActivities",
+                    "activityCountLast14Days",
+                    "activityTrendPercentage",
+                    "activeUsersLast14Days",
+                    "totalUsers"
                   ]
                 }
               ]

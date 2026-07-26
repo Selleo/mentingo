@@ -6512,6 +6512,53 @@ export interface FindAllTenantsResponse {
     updatedAt: string;
   } & {
     isCurrentTenant: boolean;
+    lastActivity: {
+      occurredAt: string;
+      /** @format email */
+      actorEmail: string;
+    } | null;
+    /** @maxItems 5 */
+    recentActivities: {
+      /** @format uuid */
+      id: string;
+      occurredAt: string;
+      /** @format email */
+      actorEmail: string;
+      actionType:
+        | "create"
+        | "update"
+        | "bulk_course_category_update"
+        | "bulk_course_status_update"
+        | "delete"
+        | "login"
+        | "login_failed"
+        | "logout"
+        | "enroll_course"
+        | "unenroll_course"
+        | "start_course"
+        | "group_assignment"
+        | "users_import"
+        | "send_password_reset_email"
+        | "resend_password_creation_email"
+        | "complete_lesson"
+        | "complete_course"
+        | "complete_chapter"
+        | "expire_certificate"
+        | "reset_certificate"
+        | "view_announcement"
+        | "enroll_learning_path"
+        | "start_learning_path"
+        | "complete_learning_path"
+        | "play_scorm"
+        | "complete_scorm";
+    }[];
+    /** @min 0 */
+    activityCountLast14Days: number;
+    activityTrendPercentage: number | null;
+    /** @min 0 */
+    activeUsersLast14Days: number;
+    /** @min 0 */
+    totalUsers: number;
   })[];
   pagination: {
     totalItems: number;
@@ -14120,6 +14167,12 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         /** @min 1 */
         perPage?: number;
         search?: string;
+        sort?:
+          | "lastActivity"
+          | "activityCountLast14Days"
+          | "-lastActivity"
+          | "-activityCountLast14Days";
+        status?: "active" | "inactive";
       },
       params: RequestParams = {},
     ) =>
@@ -14178,6 +14231,19 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name TenantsControllerDeleteTenantById
+     * @request DELETE:/api/super-admin/tenants/{id}
+     */
+    tenantsControllerDeleteTenantById: (id: string, params: RequestParams = {}) =>
+      this.request<void, any>({
+        path: `/api/super-admin/tenants/${id}`,
+        method: "DELETE",
         ...params,
       }),
 

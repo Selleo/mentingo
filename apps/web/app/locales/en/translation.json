@@ -16,6 +16,7 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
+      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending..."
     },
@@ -4378,16 +4379,28 @@
       "host": "Host",
       "status": "Status",
       "managing": "Managing",
+      "lastActivity": "Last activity",
+      "activityCountLast14Days": "Activities\n(last 14 days)",
+      "activeUsersLast14Days": "Active users\n(last 14 days)",
+      "activeUsersValue": "{{active}} / {{total}} users",
+      "recentActivities": "Recent activities",
       "loading": "Loading organizations...",
       "empty": "No organizations found.",
       "yes": "Yes",
       "no": "No",
       "edit": "Edit",
+      "delete": "Delete",
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Impersonate admin"
+        "impersonateAdmin": "Enter as admin"
       }
+    },
+    "activityTrend": {
+      "noActivity": "No activity",
+      "increase": "Activity increased by {{percentage}}%",
+      "decrease": "Activity decreased by {{percentage}}%",
+      "unchanged": "Activity was unchanged"
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
@@ -4398,6 +4411,10 @@
     "status": {
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "deleteDialog": {
+      "title": "Delete {{name}}?",
+      "description": "This permanently deletes the organization and all of its users, learning content, activity, and settings. This action cannot be undone."
     },
     "create": {
       "title": "Create Organization",
@@ -4428,7 +4445,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organization created successfully",
-      "tenantUpdatedSuccessfully": "Organization updated successfully"
+      "tenantUpdatedSuccessfully": "Organization updated successfully",
+      "tenantDeletedSuccessfully": "Organization deleted permanently"
     }
   },
   "superAdminTenants": {
@@ -4437,7 +4455,8 @@
       "notFound": "Organization not found",
       "invalidHost": "Invalid organization host URL",
       "managingTenantRequired": "Managing organization admin required",
-      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization"
+      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization",
+      "currentTenantDeleteNotAllowed": "The current managing organization cannot be deleted"
     }
   },
   "auth": {

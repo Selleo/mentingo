@@ -16,6 +16,7 @@
       "clearAll": "Vymazat vše",
       "validate": "Ověřit",
       "edit": "Upravit",
+      "delete": "Smazat",
       "uploading": "Nahrávání...",
       "sending": "Odesílání..."
     },
@@ -4440,16 +4441,28 @@
       "host": "Hostitel",
       "status": "Postavení",
       "managing": "Správa",
+      "lastActivity": "Poslední aktivita",
+      "activityCountLast14Days": "Aktivity\n(posledních 14 dní)",
+      "activeUsersLast14Days": "Aktivní uživatelé\n(posledních 14 dní)",
+      "activeUsersValue": "{{active}} / {{total}} uživatelů",
+      "recentActivities": "Poslední aktivity",
       "loading": "Načítání organizací...",
       "empty": "Nebyly nalezeny žádné organizace.",
       "yes": "Ano",
       "no": "Žádný",
       "edit": "Upravit",
+      "delete": "Smazat",
       "actions": {
         "title": "Akce",
         "enterSupportMode": "Vstupte do režimu podpory",
-        "impersonateAdmin": "Vydávat se za admina"
+        "impersonateAdmin": "Vstoupit jako administrátor"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Žádná aktivita",
+      "increase": "Aktivita vzrostla o {{percentage}}%",
+      "decrease": "Aktivita klesla o {{percentage}}%",
+      "unchanged": "Aktivita beze změny"
     },
     "supportModePopover": {
       "searchPlaceholder": "Hledat podle jména nebo e-mailu...",
@@ -4460,6 +4473,10 @@
     "status": {
       "active": "Aktivní",
       "inactive": "Neaktivní"
+    },
+    "deleteDialog": {
+      "title": "Smazat {{name}}?",
+      "description": "Organizace a všichni její uživatelé, vzdělávací obsah, aktivita a nastavení budou trvale odstraněni. Tuto akci nelze vrátit zpět."
     },
     "create": {
       "title": "Vytvořit organizaci",
@@ -4490,7 +4507,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizace byla úspěšně vytvořena",
-      "tenantUpdatedSuccessfully": "Organizace byla úspěšně aktualizována"
+      "tenantUpdatedSuccessfully": "Organizace byla úspěšně aktualizována",
+      "tenantDeletedSuccessfully": "Organizace byla trvale odstraněna"
     }
   },
   "superAdminTenants": {
@@ -4499,7 +4517,8 @@
       "notFound": "Organizace nenalezena",
       "invalidHost": "Neplatná adresa URL hostitele organizace",
       "managingTenantRequired": "Je vyžadován správce spravující organizaci",
-      "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici"
+      "currentTenantSupportNotAllowed": "Režim podpory není pro aktuální organizaci k dispozici",
+      "currentTenantDeleteNotAllowed": "Aktuální spravující organizaci nelze odstranit"
     }
   },
   "auth": {
