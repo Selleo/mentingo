@@ -41,6 +41,9 @@ type LanguageSelectorProps = {
   onChange: (language: SupportedLanguages) => void;
   setOpenGenerateTranslationModal: (open: boolean) => void;
   isAIConfigured: boolean;
+  className?: string;
+  compactOnMobile?: boolean;
+  selectTriggerClassName?: string;
   tooltipIconClassName?: string;
 };
 
@@ -50,6 +53,9 @@ export const CourseLanguageSelector = ({
   onChange,
   setOpenGenerateTranslationModal,
   isAIConfigured,
+  className,
+  compactOnMobile,
+  selectTriggerClassName,
   tooltipIconClassName,
 }: LanguageSelectorProps) => {
   const { t } = useTranslation();
@@ -71,6 +77,7 @@ export const CourseLanguageSelector = ({
   const baseLanguageTranslationKey = courseLanguages.find(
     (item) => item.key === course?.baseLanguage,
   )?.translationKey;
+  const selectedLanguage = courseLanguages.find((item) => item.key === courseLanguage);
 
   const handleLanguageChange = (key: SupportedLanguages) => {
     if (!(course?.availableLocales?.includes(key) ?? false)) {
@@ -92,7 +99,7 @@ export const CourseLanguageSelector = ({
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <TooltipProvider delayDuration={0}>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -121,9 +128,28 @@ export const CourseLanguageSelector = ({
       <Select value={courseLanguage} onValueChange={handleLanguageChange}>
         <SelectTrigger
           data-testid={EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT}
-          className="min-w-[200px]"
+          className={cn("min-w-[200px]", selectTriggerClassName)}
+          aria-label={
+            compactOnMobile && selectedLanguage ? t(selectedLanguage.translationKey) : undefined
+          }
         >
-          <SelectValue />
+          {compactOnMobile && selectedLanguage ? (
+            <SelectValue>
+              <span className="flex min-w-0 items-center gap-2">
+                <Icon name={selectedLanguage.iconName} className="size-4 shrink-0" />
+                <span className="hidden truncate font-semibold sm:inline">
+                  {t(selectedLanguage.translationKey)}
+                </span>
+                {course?.baseLanguage === selectedLanguage.key && (
+                  <span className="hidden rounded bg-neutral-200 px-2 text-[11px] font-medium text-neutral-700 sm:inline">
+                    {t("adminCourseView.common.baseLanguage")}
+                  </span>
+                )}
+              </span>
+            </SelectValue>
+          ) : (
+            <SelectValue />
+          )}
         </SelectTrigger>
         <SelectContent>
           {addedItems.map((item) => (

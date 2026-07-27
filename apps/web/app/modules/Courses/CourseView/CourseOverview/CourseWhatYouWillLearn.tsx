@@ -103,15 +103,17 @@ export default function CourseWhatYouWillLearn({
   };
 
   return (
-    <aside className="absolute bottom-8 right-8 z-10 hidden w-[30%] max-w-[520px] rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
-      <h3 className="mb-4 flex items-center gap-3 font-gothic text-2xl font-bold text-white">
+    <aside className="absolute bottom-8 right-8 z-10 hidden w-[34%] max-w-[600px] rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
+      <h3 className="mb-4 flex items-center gap-3 font-gothic text-xl font-bold text-white xl:text-2xl">
         <span className="flex items-center justify-center rounded-full text-success-500">
           <CheckCircle2 className="size-8" />
         </span>
-        <span className="min-w-0 flex-1">{t("modernCourseView.overview.whatYouWillLearn")}</span>
+        <span className="min-w-0 flex-1 whitespace-nowrap">
+          {t("modernCourseView.overview.whatYouWillMaster")}
+        </span>
         {isAdminExperience && (
           <>
-            <span className="text-sm font-medium text-white/80">
+            <span className="text-lg font-medium text-white/80">
               {outcomesDraft.length}/{MAX_COURSE_LEARNING_OUTCOMES}
             </span>
             <button
@@ -135,8 +137,21 @@ export default function CourseWhatYouWillLearn({
         )}
 
         {outcomesDraft.map((outcome, index) => (
-          <div key={index} className="group/outcome flex items-start gap-3">
-            <span className="mt-1 flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white">
+          <div
+            key={index}
+            className={cn("group/outcome flex gap-3", {
+              "items-center": editingOutcomeIndex === index,
+              "items-start": editingOutcomeIndex !== index,
+            })}
+          >
+            <span
+              className={cn(
+                "flex size-5 shrink-0 items-center justify-center rounded-full bg-success-500 text-white",
+                {
+                  "mt-1": editingOutcomeIndex !== index,
+                },
+              )}
+            >
               <Check className="size-3" strokeWidth={3} />
             </span>
 

@@ -2230,7 +2230,7 @@ export class CourseService {
     if (!existingCourse) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
-      throw new ForbiddenException("You don't have permission to update course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const previousCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
@@ -2245,7 +2245,7 @@ export class CourseService {
         );
         thumbnailS3Key = uploadResult.fileKey;
       } catch {
-        throw new ConflictException("Failed to upload course image");
+        throw new ConflictException("adminCourseView.errors.media.imageUploadFailed");
       }
     }
 
@@ -2258,7 +2258,9 @@ export class CourseService {
       .where(eq(courses.id, id))
       .returning();
 
-    if (!updatedCourse) throw new ConflictException("Failed to update course media");
+    if (!updatedCourse) {
+      throw new ConflictException("adminCourseView.errors.media.updateFailed");
+    }
 
     const updatedCourseSnapshot = await this.buildCourseActivitySnapshot(id, language);
 
@@ -2314,7 +2316,7 @@ export class CourseService {
         }
 
         if (!canUpdateCourseByAuthor(currentUser, existingCourse.authorId)) {
-          throw new ForbiddenException("You don't have permission to update course");
+          throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
         }
 
         const previousSnapshot = await this.buildCourseActivitySnapshot(
@@ -2679,7 +2681,7 @@ export class CourseService {
     }
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
-      throw new ForbiddenException("You don't have permission to update course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const existingTrailerResources = await this.db
@@ -4765,7 +4767,7 @@ export class CourseService {
     );
 
     if (!availableLocales.includes(language) || baseLanguage === language) {
-      throw new BadRequestException({ message: "adminCourseView.toast.invalidLanguageToDelete" });
+      throw new BadRequestException("adminCourseView.toast.invalidLanguageToDelete");
     }
 
     await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);

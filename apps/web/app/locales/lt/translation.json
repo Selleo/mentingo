@@ -1837,6 +1837,13 @@
         "chapter": "Skyrius nerastas.",
         "lesson": "Pamoka nerasta."
       },
+      "forbidden": {
+        "updateCourse": "Neturite leidimo atnaujinti šio kurso."
+      },
+      "media": {
+        "imageUploadFailed": "Nepavyko įkelti kurso paveikslėlio.",
+        "updateFailed": "Nepavyko atnaujinti kurso medijos."
+      },
       "create": {
         "courseFailed": "Nepavyko sukurti kurso.",
         "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."
@@ -4639,7 +4646,7 @@
       "aboutCourse": "Apie šį kursą",
       "description": "Aprašymas",
       "descriptionPlaceholder": "Įveskite kurso aprašymą...",
-      "whatYouWillLearn": "Ko išmoksite",
+      "whatYouWillMaster": "Ką įvaldysite",
       "noLearningOutcomes": "Mokymosi rezultatai dar nepridėti.",
       "learningOutcomePlaceholder": "Pridėkite mokymosi rezultatą...",
       "addLearningOutcome": "Pridėti mokymosi rezultatą",

@@ -79,7 +79,7 @@ export default function CourseDescriptionModal({
           {course.learningOutcomes && course.learningOutcomes.length > 0 && (
             <div className="mb-6">
               <h5 className="mb-4 text-lg font-bold text-neutral-950">
-                {t("modernCourseView.overview.whatYouWillLearn")}
+                {t("modernCourseView.overview.whatYouWillMaster")}
               </h5>
               <ul className="space-y-3">
                 {course.learningOutcomes.map((outcome) => (

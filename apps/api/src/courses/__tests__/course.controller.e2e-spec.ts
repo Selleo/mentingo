@@ -1669,6 +1669,54 @@ describe("CourseController (e2e)", () => {
       });
       expect(response.status).toBe(200);
     });
+
+    it("returns a translation key when a content creator updates another author's media", async () => {
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const otherAuthor = await userFactory
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const course = await courseFactory.create({
+        authorId: otherAuthor.id,
+        thumbnailS3Key: null,
+      });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", await cookieFor(contentCreator, app))
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .expect(403);
+
+      expect(response.body.message).toBe("adminCourseView.errors.forbidden.updateCourse");
+    });
+
+    it("returns a translation key when the course image upload fails", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({ authorId: admin.id, thumbnailS3Key: null });
+
+      mockFileService.uploadFile.mockRejectedValueOnce(new Error("Upload failed"));
+      jest.spyOn(FileGuard, "getFileType").mockResolvedValueOnce({ ext: "png", mime: "image/png" });
+
+      const response = await request(app.getHttpServer())
+        .patch(`/api/course/${course.id}/media`)
+        .set("Cookie", await cookieFor(admin, app))
+        .field("language", SUPPORTED_LANGUAGES.EN)
+        .field("thumbnailPositionY", "35")
+        .attach("image", validPngBuffer, {
+          filename: "thumbnail.png",
+          contentType: "image/png",
+        })
+        .expect(409);
+
+      expect(response.body.message).toBe("adminCourseView.errors.media.imageUploadFailed");
+    });
   });
 
   describe("PATCH /api/course/bulk/status", () => {

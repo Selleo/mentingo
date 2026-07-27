@@ -20,6 +20,33 @@ vi.mock("~/api/mutations/admin/useDeleteCourseLanguage", () => ({
 }));
 
 describe("CourseLanguageSelector", () => {
+  it("shows an accessible flag-only value on small screens", () => {
+    renderWith().render(
+      <CourseLanguageSelector
+        courseLanguage="pl"
+        course={{
+          id: "course-1",
+          baseLanguage: "en",
+          availableLocales: ["en", "pl"],
+        }}
+        isAIConfigured={false}
+        onChange={vi.fn()}
+        setOpenGenerateTranslationModal={vi.fn()}
+        className="shrink-0"
+        compactOnMobile
+        selectTriggerClassName="w-14 min-w-14 px-2 sm:w-auto sm:min-w-[200px] sm:px-3"
+      />,
+    );
+
+    const languageSelect = screen.getByTestId(EDIT_COURSE_PAGE_HANDLES.LANGUAGE_SELECT);
+
+    expect(languageSelect.parentElement).toHaveClass("shrink-0");
+    expect(languageSelect).toHaveClass("w-14", "min-w-14", "sm:w-auto", "sm:min-w-[200px]");
+    expect(languageSelect).toHaveAccessibleName("Polish");
+    expect(screen.getByText("Polish")).toHaveClass("hidden", "sm:inline");
+    expect(screen.getByTestId(EDIT_COURSE_PAGE_HANDLES.DELETE_LANGUAGE_BUTTON)).toBeInTheDocument();
+  });
+
   it("returns to the base language after deleting the active translation", async () => {
     const user = userEvent.setup();
     const onChange = vi.fn();

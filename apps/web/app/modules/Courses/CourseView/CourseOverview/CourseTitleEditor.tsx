@@ -84,12 +84,15 @@ export default function CourseTitleEditor({
         type="button"
         data-testid={COURSE_SETTINGS_HANDLES.TITLE_INPUT}
         onClick={onEdit}
-        className="flex w-full items-start gap-2 rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
+        className="inline-block max-w-full rounded-lg border-2 border-dashed border-transparent p-2 text-left transition-colors duration-200 hover:border-white"
       >
-        <span className="min-w-0 flex-1">
+        <span className="break-words">
           {title ? title : <span className="text-neutral-200">{placeholder}</span>}
+          <Pencil
+            aria-hidden
+            className="relative -top-1 ml-3 inline-block size-4 align-middle text-white/80 md:size-7"
+          />
         </span>
-        <Pencil aria-hidden className="mt-1 size-4 shrink-0 text-white/80 md:size-5" />
       </button>
     );
   }

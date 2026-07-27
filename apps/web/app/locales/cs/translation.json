@@ -1837,6 +1837,13 @@
         "chapter": "Kapitola nenalezena.",
         "lesson": "Lekce nenalezena."
       },
+      "forbidden": {
+        "updateCourse": "Nemáte oprávnění aktualizovat tento kurz."
+      },
+      "media": {
+        "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
+        "updateFailed": "Nepodařilo se aktualizovat média kurzu."
+      },
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
         "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."
@@ -4638,7 +4645,7 @@
       "aboutCourse": "O tomto kurzu",
       "description": "Popis",
       "descriptionPlaceholder": "Zadejte popis kurzu...",
-      "whatYouWillLearn": "Co se naučíte",
+      "whatYouWillMaster": "Co si osvojíte",
       "noLearningOutcomes": "Zatím nebyly přidány žádné výsledky učení.",
       "learningOutcomePlaceholder": "Přidejte výsledek učení...",
       "addLearningOutcome": "Přidat výsledek učení",

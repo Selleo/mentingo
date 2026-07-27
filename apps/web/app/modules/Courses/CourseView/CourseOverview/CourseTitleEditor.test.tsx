@@ -22,14 +22,17 @@ describe("CourseTitleEditor", () => {
     const editButton = screen.getByRole("button", { name: "Enter course title..." });
 
     expect(editButton).toBeInTheDocument();
-    expect(editButton.querySelector("svg")).toBeInTheDocument();
+    expect(editButton).toHaveClass("inline-block", "max-w-full");
+    expect(editButton).not.toHaveClass("w-full");
+    expect(editButton.querySelector("svg")).toHaveClass("-top-0.5", "ml-3", "align-middle");
     expect(placeholder).toHaveClass("text-neutral-200");
   });
 
-  it("uses the localized placeholder in the title input", () => {
-    render(<CourseTitleEditor {...defaultProps} isEditing />);
+  it("hides the edit pencil and uses the localized placeholder in edit mode", () => {
+    const { container } = render(<CourseTitleEditor {...defaultProps} isEditing />);
 
     expect(screen.getByPlaceholderText("Enter course title...")).toBeInTheDocument();
+    expect(container.querySelector("svg")).not.toBeInTheDocument();
   });
 
   it("keeps the same title box model while entering edit mode", () => {
@@ -40,7 +43,7 @@ describe("CourseTitleEditor", () => {
     const button = screen.getByRole("button", { name: "Course title" });
     const titleContainerClassName = button.parentElement?.className;
 
-    expect(button).toHaveClass("flex", "border-2", "p-2");
+    expect(button).toHaveClass("inline-block", "border-2", "p-2");
 
     rerender(<CourseTitleEditor {...defaultProps} title="Course title" isEditing />);
 

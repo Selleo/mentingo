@@ -298,13 +298,13 @@ export default function CourseOverview({
         imagePosition={course.thumbnailPositionY}
       >
         {isAdminExperience && (
-          <>
-            <div className="absolute left-2 top-2 flex items-center gap-2 md:left-4 md:top-4">
+          <div className="absolute inset-x-2 top-2 z-20 flex items-start justify-between gap-2 md:inset-x-4 md:top-4">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
                 onClick={() => setShowSettingsDrawer(true)}
-                className="flex items-center gap-2 shadow-lg backdrop-blur-sm transition"
+                className="flex shrink-0 items-center gap-2 shadow-lg backdrop-blur-sm transition"
               >
                 <Settings className="size-4 text-primary-700" />
 
@@ -317,7 +317,7 @@ export default function CourseOverview({
                 variant="outline"
                 onClick={openMediaModal}
                 data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
-                className="flex items-center gap-2 shadow-lg backdrop-blur-sm transition"
+                className="flex shrink-0 items-center gap-2 shadow-lg backdrop-blur-sm transition"
               >
                 <Upload className="size-4 text-primary-700" />
 
@@ -327,21 +327,22 @@ export default function CourseOverview({
               </Button>
             </div>
 
-            <div className="absolute right-2 top-2 md:right-4 md:top-4">
-              <CourseLanguageSelector
-                courseLanguage={language}
-                course={{
-                  id: course.id,
-                  baseLanguage: course.baseLanguage,
-                  availableLocales: course.availableLocales,
-                }}
-                isAIConfigured={isAIConfigured?.enabled ?? false}
-                onChange={onLanguageChange}
-                setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
-                tooltipIconClassName="text-white"
-              />
-            </div>
-          </>
+            <CourseLanguageSelector
+              courseLanguage={language}
+              course={{
+                id: course.id,
+                baseLanguage: course.baseLanguage,
+                availableLocales: course.availableLocales,
+              }}
+              isAIConfigured={isAIConfigured?.enabled ?? false}
+              onChange={onLanguageChange}
+              setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
+              className="shrink-0"
+              compactOnMobile
+              selectTriggerClassName="w-14 min-w-14 px-2 sm:w-auto sm:min-w-[200px] sm:px-3"
+              tooltipIconClassName="text-white"
+            />
+          </div>
         )}
 
         <div className="absolute inset-x-0 bottom-0 z-10 p-6 lg:p-8">

@@ -2120,6 +2120,13 @@
         "chapter": "Nie znaleziono rozdziału.",
         "lesson": "Nie znaleziono lekcji."
       },
+      "forbidden": {
+        "updateCourse": "Nie masz uprawnień do aktualizacji tego kursu."
+      },
+      "media": {
+        "imageUploadFailed": "Nie udało się przesłać obrazu kursu.",
+        "updateFailed": "Nie udało się zaktualizować multimediów kursu."
+      },
       "create": {
         "courseFailed": "Nie udało się utworzyć kursu.",
         "stripeProductFailed": "Nie udało się utworzyć produktu płatności dla kursu."
@@ -4757,7 +4764,7 @@
       "aboutCourse": "O tym kursie",
       "description": "Opis",
       "descriptionPlaceholder": "Wprowadź opis kursu...",
-      "whatYouWillLearn": "Czego się nauczysz",
+      "whatYouWillMaster": "Co opanujesz",
       "noLearningOutcomes": "Nie dodano jeszcze efektów nauki.",
       "learningOutcomePlaceholder": "Dodaj efekt nauki...",
       "addLearningOutcome": "Dodaj efekt nauki",

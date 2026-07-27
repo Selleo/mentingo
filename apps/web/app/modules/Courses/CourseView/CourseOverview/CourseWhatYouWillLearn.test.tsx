@@ -56,7 +56,7 @@ describe("CourseWhatYouWillLearn", () => {
       <CourseWhatYouWillLearn courseOutcomes={["Clean data", "Build dashboards"]} language="en" />,
     );
 
-    expect(screen.getByText("What you'll learn")).toBeInTheDocument();
+    expect(screen.getByText("What you'll master")).toBeInTheDocument();
     expect(screen.getByText("Clean data")).toBeInTheDocument();
     expect(screen.getByText("Build dashboards")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Add learning outcome" })).not.toBeInTheDocument();
@@ -72,6 +72,8 @@ describe("CourseWhatYouWillLearn", () => {
     await user.click(screen.getByRole("button", { name: "Add learning outcome" }));
 
     const input = screen.getByPlaceholderText("Add a learning outcome...");
+    expect(input.parentElement).toHaveClass("items-center");
+
     await user.type(input, "  Nowy efekt nauki  ");
     await user.tab();
 

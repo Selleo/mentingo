@@ -49,11 +49,17 @@ When a managing-tenant administrator shares a master course, Mentingo creates a 
 
 Course mutations are permission-gated. Full course administrators can manage courses according to their permissions, while content creators rely on own-course update permissions for courses they own. In the admin course list, permitted users can select multiple courses and use the bulk-edit menu to change their category, change their status, or delete draft courses in one governed workflow. Private and published courses must be moved back to draft before deletion is allowed. Language operations respect supported-language and base-language rules.
 
+When a course editor lacks update access or a course image/media update fails, Mentingo returns a translatable error identifier so the interface can explain the failure in the user's active language instead of exposing a fixed English backend message.
+
 The modern course overview uses the active interface language for learner and administrator controls. English, Polish, German, Spanish, Czech, and Lithuanian users see localized learning-mode guidance, course actions, media controls, deadlines, certificates, author information, related author courses, curriculum labels, lesson statuses, and summary statistics. The author modal can also show other published courses by the same author with practical catalog context such as enrolled learner count and estimated course duration.
 
 Course administrators can switch the active course language from the modern overview next to the media editor. Selecting an existing language reloads the overview in that translation and preserves the selection while Mentingo resolves the language-specific course address. Selecting a new language starts the language-creation flow and can offer AI-assisted translation generation, while deleting the active translation returns the overview to the base language.
 
+On small screens, the overview keeps course actions and language controls in one compact row. The language selector shows only the active language flag until the small-screen breakpoint, then restores the language name, while keeping its information and delete actions accessible.
+
 While editing, course-level localized fields such as the title, description, and learning outcomes use the selected course language exactly, so administrators can identify and complete translation gaps. Learners retain base-language fallback behavior, and an administrator using Learning Mode receives the same fallback behavior as a learner.
+
+The course title keeps its edit affordance directly beside the displayed text, making the action easy to associate with the title regardless of its length. Once editing starts, the pencil is removed so the focused title field becomes the single active control.
 
 The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language. Administrators with category-management access can also open the tenant's category administration page directly from the bottom of the selector.
 
@@ -63,7 +69,7 @@ Course statistics are available only to users with the dedicated statistics perm
 
 Course administrators can select a trailer video in the same media editor used for the hero image. Mentingo uploads the video through the resumable video-upload flow, associates it with the course as its trailer, and refreshes course and catalog data after the media update completes.
 
-Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
+Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. The learner-facing heading presents these outcomes as “What you'll master” in every supported interface language. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
 
 ## Key Technical Context
 
@@ -95,3 +101,5 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Focused frontend coverage verifies that redirects to language-specific course addresses preserve the selected course language instead of falling back to the default language.
 - Focused component coverage verifies that the category selector renders the localized and default-language fallback titles returned by the API.
 - Focused component coverage verifies that permitted users receive the category-management shortcut and other course editors do not.
+- Focused component coverage verifies that the course-title pencil follows the displayed title and is hidden while the title field is being edited.
+- Focused component coverage verifies that the course language selector uses an accessible flag-only value on small screens, restores the language name at the small-screen breakpoint, and preserves its deletion behavior.

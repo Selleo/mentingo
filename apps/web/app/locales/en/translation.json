@@ -1898,6 +1898,13 @@
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
       },
+      "forbidden": {
+        "updateCourse": "You do not have permission to update this course."
+      },
+      "media": {
+        "imageUploadFailed": "Failed to upload the course image.",
+        "updateFailed": "Failed to update course media."
+      },
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."
@@ -4718,7 +4725,7 @@
       "aboutCourse": "About this course",
       "description": "Description",
       "descriptionPlaceholder": "Enter course description...",
-      "whatYouWillLearn": "What you'll learn",
+      "whatYouWillMaster": "What you'll master",
       "noLearningOutcomes": "No learning outcomes added yet.",
       "learningOutcomePlaceholder": "Add a learning outcome...",
       "addLearningOutcome": "Add learning outcome",
