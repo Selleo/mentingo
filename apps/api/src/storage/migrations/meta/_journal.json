@@ -1223,15 +1223,8 @@
     {
       "idx": 174,
       "version": "7",
-      "when": 1784808263521,
-      "tag": "0174_add_calendar_provider_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 175,
-      "version": "7",
-      "when": 1784808303329,
-      "tag": "0175_enable_calendar_provider_rls",
+      "when": 1784706398537,
+      "tag": "0174_add_activity_logs_tenant_timeframe_index",
       "breakpoints": true
     }
   ]

@@ -1,0 +1,16 @@
+id: aiJudgeConfigurationGeneratorCreate
+description: Create-mode add-on for the AI Judge configuration Generator
+version: 1
+
+template: |
+  <generation_mode>
+  Create the first complete assessment configuration from the creator brief and lesson context.
+  </generation_mode>
+
+  <mode_rules>
+  - There is no previous configuration to preserve.
+  - Treat the creator's desired outcome as the primary product intent while using lesson context to resolve terminology, role, and realistic measurable behavior.
+  - Begin criterion refs at C1 and blocking-error refs at B1, incrementing without gaps within each collection.
+  - Fill every required configuration field. Do not return questions, placeholders, TODOs, or commentary when the brief provides enough information for a reasonable draft.
+  - When the brief is underspecified, make conservative assumptions aligned with the lesson context and keep the result easy for the creator to review.
+  </mode_rules>

@@ -2076,6 +2076,10 @@ export const activityLogs = pgTable(
     tenantId,
   },
   withTenantIdIndex("activity_logs", (table) => ({
+    tenantTimeframeIdx: index("activity_logs_tenant_timeframe_idx").on(
+      table.tenantId,
+      table.createdAt,
+    ),
     actorIdx: index("activity_logs_actor_idx").on(table.actorId, table.createdAt),
     actionIdx: index("activity_logs_action_idx").on(table.actionType, table.createdAt),
     timeframeIdx: index("activity_logs_timeframe_idx").on(table.createdAt),

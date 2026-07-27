@@ -1,4 +1,4 @@
-import type { AiJudgeConfigurationDraft } from "../ai-judge/aiJudgeConfiguration.types";
+import type { AiJudgeConfigurationDraft } from "../AiJudge/aiJudgeConfiguration.types";
 
 const LIST_ITEM_PATTERN = /<li>(.*?)<\/li>/gis;
 

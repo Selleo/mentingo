@@ -10,9 +10,8 @@ const scoreSchema = Type.Integer({ minimum: 0 });
 const maxScoreSchema = Type.Integer({ minimum: 1, maximum: AI_JUDGE_MAX_CRITERION_SCORE });
 const passingThresholdSchema = Type.Integer({ minimum: 0, maximum: 100 });
 
-const aiJudgeScoreGuidanceInputSchema = Type.Object(
+export const aiJudgeScoreGuidanceContentSchema = Type.Object(
   {
-    id: Type.Optional(UUIDSchema),
     score: scoreSchema,
     description: nonEmptyTextSchema,
     example: Type.Optional(Type.Union([nonEmptyTextSchema, Type.Null()])),
@@ -20,26 +19,56 @@ const aiJudgeScoreGuidanceInputSchema = Type.Object(
   { additionalProperties: false },
 );
 
-const aiJudgeCriterionInputSchema = Type.Object(
+export const aiJudgeCriterionContentSchema = Type.Object(
   {
-    id: Type.Optional(UUIDSchema),
     title: nonEmptyTextSchema,
     expectedBehavior: nonEmptyTextSchema,
     maxScore: maxScoreSchema,
+    scoreGuidance: Type.Array(aiJudgeScoreGuidanceContentSchema, { minItems: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export const aiJudgeBlockingErrorContentSchema = Type.Object(
+  { description: nonEmptyTextSchema },
+  { additionalProperties: false },
+);
+
+export const aiJudgeConfigurationContentSchema = Type.Object(
+  {
+    taskGoal: nonEmptyTextSchema,
+    passingThresholdPercent: passingThresholdSchema,
+    criteria: Type.Array(aiJudgeCriterionContentSchema),
+    blockingErrors: Type.Array(aiJudgeBlockingErrorContentSchema),
+  },
+  { additionalProperties: false },
+);
+
+const aiJudgeScoreGuidanceInputSchema = Type.Object(
+  {
+    id: Type.Optional(UUIDSchema),
+    ...aiJudgeScoreGuidanceContentSchema.properties,
+  },
+  { additionalProperties: false },
+);
+
+const aiJudgeCriterionInputSchema = Type.Object(
+  {
+    id: Type.Optional(UUIDSchema),
+    ...aiJudgeCriterionContentSchema.properties,
     scoreGuidance: Type.Array(aiJudgeScoreGuidanceInputSchema, { minItems: 1 }),
   },
   { additionalProperties: false },
 );
 
 const aiJudgeBlockingErrorInputSchema = Type.Object(
-  { id: Type.Optional(UUIDSchema), description: nonEmptyTextSchema },
+  { id: Type.Optional(UUIDSchema), ...aiJudgeBlockingErrorContentSchema.properties },
   { additionalProperties: false },
 );
 
 export const aiJudgeConfigurationInputSchema = Type.Object(
   {
-    taskGoal: nonEmptyTextSchema,
-    passingThresholdPercent: passingThresholdSchema,
+    ...aiJudgeConfigurationContentSchema.properties,
     criteria: Type.Array(aiJudgeCriterionInputSchema),
     blockingErrors: Type.Array(aiJudgeBlockingErrorInputSchema),
   },
@@ -117,6 +146,10 @@ export const updateAiJudgeConfigurationTranslationSchema = Type.Object(
 );
 
 export type AiJudgeConfigurationInput = Static<typeof aiJudgeConfigurationInputSchema>;
+export type AiJudgeScoreGuidanceContent = Static<typeof aiJudgeScoreGuidanceContentSchema>;
+export type AiJudgeCriterionContent = Static<typeof aiJudgeCriterionContentSchema>;
+export type AiJudgeBlockingErrorContent = Static<typeof aiJudgeBlockingErrorContentSchema>;
+export type AiJudgeConfigurationContent = Static<typeof aiJudgeConfigurationContentSchema>;
 export type AiJudgeCriterionInput = AiJudgeConfigurationInput["criteria"][number];
 export type AiJudgeScoreGuidanceInput = AiJudgeCriterionInput["scoreGuidance"][number];
 export type AiJudgeBlockingErrorInput = AiJudgeConfigurationInput["blockingErrors"][number];

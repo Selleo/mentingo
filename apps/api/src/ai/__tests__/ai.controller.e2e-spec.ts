@@ -134,6 +134,7 @@ describe("AiController (e2e)", () => {
       expect(polishLesson.instructions).toBe("Polish mentor instructions");
       expect(polishLesson.name).toBe("Polish mentor");
       expect(fallbackLesson.instructions).toBe("English mentor instructions");
+      expect(polishLesson.learnerFirstName).toBe(threadOwner.firstName);
     });
   });
 

@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "activity_logs_tenant_timeframe_idx" ON "activity_logs" USING btree ("tenant_id","created_at");

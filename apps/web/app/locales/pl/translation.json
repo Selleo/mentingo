@@ -16,6 +16,7 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
+      "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
       "sending": "Wysyłanie..."
@@ -57,7 +58,8 @@
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak.",
       "threadMustBeActive": "Wątek musi być aktywny.",
-      "aiJudgeConfigurationMissing": "Brakuje konfiguracji AI Judge."
+      "aiJudgeConfigurationMissing": "Brakuje konfiguracji warunków zaliczenia.",
+      "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
     },
     "loader": {
       "textSequence": {
@@ -2583,16 +2585,27 @@
           "passThreshold": "np. 70%"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Warunki zaliczenia",
           "configured": "Skonfigurowany",
           "emptyDescription": "Określ, jak będzie oceniana odpowiedź ucznia i kiedy lekcja zostanie zaliczona.",
           "baseLanguageRequired": "Utwórz strukturę oceny w języku bazowym kursu, zanim zaczniesz ją tłumaczyć.",
           "structureLockedTooltip": "Strukturę oceny można zmieniać tylko w języku bazowym kursu.",
           "summary": "{{criteria}} kryteria · łącznie {{score}} pkt · próg {{threshold}}% · {{blockingErrors}} błędy blokujące",
           "configureWithAi": "Skonfiguruj z AI",
+          "createWithAi": "Utwórz z AI",
+          "improveWithAi": "Ulepsz z AI",
+          "checkQualityWithAi": "Sprawdź jakość z AI",
+          "checkingQuality": "Sprawdzanie jakości...",
+          "checkingQualityDescription": "Sprawdzamy cel zadania, kryteria, wskazówki punktacji i błędy blokujące.",
+          "aiAssistance": "Pomoc AI",
+          "qualityCheckResult": "Kontrola jakości",
+          "qualityCheckResultDescription": "Przejrzyj uwagi do oceny, zanim zdecydujesz, co zmienić.",
+          "qualityCheckPassed": "Nie są wymagane żadne zmiany. Możesz dalej edytować lub zapisać ocenę.",
+          "qualityCheckPassedWithSuggestions": "Ocena jest gotowa do użycia. Zastosuj opcjonalne poprawki lub kontynuuj bez zmian.",
+          "qualityCheckNeedsChanges": "Przejrzyj uwagi lub pozwól AI ulepszyć ocenę na ich podstawie.",
           "configureManually": "Skonfiguruj ręcznie",
           "editAssessment": "Edytuj ocenę",
-          "dialogTitle": "Skonfiguruj AI Judge",
+          "dialogTitle": "Skonfiguruj warunki zaliczenia",
           "dialogDescription": "Ustaw mierzalne kryteria, dokładne wskazówki punktacji i błędy, które zawsze oznaczają niezaliczenie.",
           "translationModeTitle": "Tryb tłumaczenia",
           "translationModeDescription": "Tutaj możesz tłumaczyć tekst oceny. Punktacja, próg i struktura oceny są zarządzane w języku bazowym kursu.",
@@ -2605,23 +2618,23 @@
           "untitledCriterion": "Kryterium bez nazwy",
           "complete": "Gotowe",
           "needsDetails": "Wymaga uzupełnienia",
-          "criterionDescription": "Opisz jedno obserwowalne zachowanie ucznia.",
+          "criterionDescription": "Opisz jedno mierzalne zachowanie ucznia.",
           "criterionTitle": "Nazwa kryterium",
           "criterionTitlePlaceholder": "np. Rozpoznaje potrzeby klienta",
           "expectedBehavior": "Oczekiwane zachowanie",
           "expectedBehaviorPlaceholder": "Wyjaśnij, co uczeń powinien powiedzieć lub zrobić...",
-          "maxScore": "Maksymalna punktacja",
+          "maxScore": "Maks. pkt",
           "score": "Punkty",
-          "scoringGuidance": "Wskazówki punktacji",
-          "advancedScoring": "Zaawansowane wskazówki punktacji",
+          "scoringGuidance": "Zasady oceniania",
+          "advancedScoring": "Zasady oceniania",
           "scoreLevelsCount": "Poziomy punktacji: {{count}}",
           "scoreBadge": "{{score}} pkt",
           "itemsCount": "Dodano: {{count}}",
           "scoringSummary": "Punktacja",
           "pointsRequired": "Do zaliczenia wymagane: {{required}} z {{total}} pkt",
           "scoringGuidanceDescription": "Opcjonalnie opisz, jak wygląda odpowiedź na konkretną liczbę punktów.",
-          "scoreDescription": "Co daje tę punktację",
-          "scoreDescriptionPlaceholder": "Opisz obserwowalny poziom wykonania...",
+          "scoreDescription": "Co uczeń robi, aby zdobyć te punkty",
+          "scoreDescriptionPlaceholder": "Opisz mierzalny poziom wykonania...",
           "acceptedExample": "Akceptowany przykład",
           "examplePlaceholder": "Dodaj jeden przykład odpowiedzi...",
           "addCriterion": "Dodaj kryterium",
@@ -2639,12 +2652,165 @@
           "applyConfiguration": "Zastosuj konfigurację",
           "saveConfiguration": "Zapisz konfigurację",
           "saveTranslation": "Zapisz tłumaczenie",
-          "configurationSavedSuccessfully": "Konfiguracja AI Judge została zapisana.",
-          "translationSavedSuccessfully": "Tłumaczenie AI Judge zostało zapisane.",
+          "configurationSavedSuccessfully": "Konfiguracja zapisana.",
+          "translationSavedSuccessfully": "Tłumaczenie warunków zaliczenia zostało zapisane.",
+          "generation": {
+            "create": {
+              "title": "Utwórz ocenę z AI",
+              "description": "Opisz, co powinna osiągnąć dobra odpowiedź ucznia. Draft możesz sprawdzić i edytować przed zastosowaniem.",
+              "fieldLabel": "Co powinien wykazać uczeń?",
+              "fieldDescription": "Skup się na mierzalnym rezultacie. AI utworzy na tej podstawie pełną ocenę.",
+              "placeholder": "Np. uczeń powinien rozpoznać potrzeby klienta, zaproponować właściwy kolejny krok i profesjonalnie odpowiedzieć na obiekcje."
+            },
+            "improve": {
+              "title": "Ulepsz ocenę z AI",
+              "description": "Wskaż, co ma być jaśniejsze lub bardziej precyzyjne. Obecna ocena będzie punktem wyjścia.",
+              "fieldLabel": "Co należy poprawić?",
+              "fieldDescription": "Opisz oczekiwany efekt. Pozostała treść oceny nie zostanie zmieniona.",
+              "placeholder": "Np. kryteria powinny być bardziej mierzalne i lepiej rozróżniać odpowiedź częściową od pełnej."
+            },
+            "instructionRequired": "Opisz, co AI ma utworzyć lub poprawić",
+            "willCreate": "AI wygeneruje",
+            "artifacts": {
+              "taskGoal": "Mierzalny cel zadania",
+              "criteria": "Kryteria ze wskazówkami punktacji",
+              "threshold": "Próg zaliczenia",
+              "blockingErrors": "Błędy blokujące, jeśli są potrzebne"
+            },
+            "generateDraft": "Wygeneruj draft",
+            "improveAssessment": "Popraw ocenę",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Jaśniejsze kryteria",
+                "instruction": "Spraw, aby kryteria oceny były jaśniejsze i bezpośrednio mierzalne."
+              },
+              "betterScoring": {
+                "label": "Lepsza punktacja",
+                "instruction": "Wyraźniej pokaż różnice między kolejnymi poziomami punktacji."
+              },
+              "reduceOverlap": {
+                "label": "Usuń nakładanie",
+                "instruction": "Usuń nakładanie się kryteriów, aby każde oceniało odrębne zachowanie."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Doprecyzuj błędy blokujące",
+                "instruction": "Doprecyzuj, jakie zachowania powodują każdy błąd blokujący."
+              }
+            },
+            "progressLabel": "Postęp generowania oceny",
+            "stages": {
+              "draft": "Generowanie draftu",
+              "qualityCheck": "Kontrola jakości",
+              "ready": "Gotowe"
+            },
+            "status": {
+              "drafting": "Tworzymy ocenę",
+              "evaluating": "Sprawdzamy jakość oceny",
+              "revising": "Poprawiamy draft",
+              "awaiting_revision": "Kontrola jakości wymaga decyzji",
+              "completed": "Ocena jest gotowa",
+              "requires_review": "Draft wymaga Twojej decyzji",
+              "failed": "Nie udało się zakończyć generowania",
+              "cancelled": "Generowanie anulowane"
+            },
+            "statusDescription": {
+              "drafting": "Przygotowujemy cel, kryteria, punktację i błędy blokujące.",
+              "evaluating": "Sprawdzamy mierzalność kryteriów i spójność punktacji.",
+              "revising": "Wprowadzamy najnowszą poprawkę z kontroli jakości.",
+              "awaiting_revision": "Przejrzyj uwagi przed rozpoczęciem kolejnej próby generowania.",
+              "completed": "Draft przeszedł kontrolę jakości.",
+              "requires_review": "Zachowaliśmy najnowszy draft, aby można było zdecydować o zmianach.",
+              "failed": "Spróbuj ponownie lub skonfiguruj ocenę ręcznie.",
+              "cancelled": "Nie zastosowano żadnych zmian w ocenie."
+            },
+            "attempt": "Draft {{attempt}} z {{maxAttempts}}",
+            "attemptNumber": "Draft {{attempt}}",
+            "attemptHistory": "Historia draftów",
+            "viewDetails": "Pokaż szczegóły",
+            "attemptPassed": "Kontrola jakości zaliczona",
+            "attemptNeedsRevision": "Kontrola jakości wykryła problemy",
+            "initialDraftCreated": "Utworzono pierwszy draft.",
+            "changesInAttempt": "Co AI zmieniło w tym drafcie",
+            "qualityFeedback": "Co wykazała późniejsza kontrola jakości",
+            "currentDraft": "Aktualny draft",
+            "draftPreviewPending": "Podgląd draftu pojawi się tutaj po zakończeniu generowania.",
+            "qualityCheckLabel": "Kontrola jakości",
+            "qualityDecisionTitle_one": "{{count}} sugerowana poprawka",
+            "qualityDecisionTitle_few": "{{count}} sugerowane poprawki",
+            "qualityDecisionTitle_many": "{{count}} sugerowanych poprawek",
+            "qualityDecisionTitle_other": "{{count}} sugerowanych poprawek",
+            "feedbackNotApplied": "Jeszcze niezastosowane",
+            "qualityDecisionDescription": "Przejrzyj sugestie lub kontynuuj z obecną konfiguracją.",
+            "suggestedImprovements": "Sugerowane poprawki",
+            "beforeChange": "Poprzednia ocena",
+            "afterChange": "Obecny draft",
+            "showMoreFindings": "Pokaż jeszcze {{count}} uwag",
+            "showFewerFindings": "Pokaż mniej uwag",
+            "showMoreChanges": "Pokaż jeszcze {{count}} zmian",
+            "showFewerChanges": "Pokaż mniej zmian",
+            "reviewExactChanges": "Co zmieniła AI ({{count}})",
+            "exactChangesDescription": "Opcjonalnie: porównaj wygenerowaną konfigurację z wersją początkową.",
+            "waitingForDecision": "Użyj obecnego draftu lub utwórz kolejny na podstawie powyższych uwag.",
+            "useCurrentDraft": "Kontynuuj",
+            "applyImprovements": "Popraw",
+            "target": {
+              "assessment": "Warunki zaliczenia",
+              "criterion": "Kryterium",
+              "scoreGuidance": "Poziom punktacji",
+              "blockingError": "Błąd blokujący"
+            },
+            "deterministicValidation": {
+              "summary": "Struktura oceny wymaga poprawy.",
+              "guidance_score_out_of_range": {
+                "message": "Jeden z poziomów punktacji wykracza poza dozwolony zakres kryterium.",
+                "correction": "Każdy poziom punktacji musi mieścić się między zerem a maksymalną punktacją kryterium."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kryterium zawiera ten sam poziom punktacji więcej niż raz.",
+                "correction": "Zachowaj dokładnie jedną zasadę oceniania dla każdego poziomu punktacji."
+              },
+              "missing_guidance_scores": {
+                "message": "W kryterium brakuje co najmniej jednego wymaganego poziomu punktacji.",
+                "correction": "Dodaj jedną zasadę oceniania dla każdego poziomu od zera do maksymalnej punktacji."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Nie można jednoznacznie rozróżnić dwóch kryteriów.",
+                "correction": "Każde kryterium powinno być odrębnym elementem oceny."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Nie można jednoznacznie rozróżnić dwóch błędów blokujących.",
+                "correction": "Każdy błąd blokujący powinien być odrębnym elementem oceny."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Nie udało się jednoznacznie dopasować nowego kryterium.",
+                "correction": "Zachowaj istniejące kryteria i dodaj nowe jako odrębny element."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Nie udało się jednoznacznie dopasować nowego błędu blokującego.",
+                "correction": "Zachowaj istniejące błędy blokujące i dodaj nowy jako odrębny element."
+              }
+            },
+            "keepCurrentDraft": "Zachowaj aktualny draft",
+            "applySuggestedImprovements": "Zastosuj sugerowane poprawki",
+            "completedArtifacts": "Dotychczas przygotowano",
+            "changedInRevision": "Zmieniono w tej poprawce",
+            "stopAndInspect": "Przerwij i przejrzyj obecny draft",
+            "cancel": "Anuluj generowanie",
+            "draftSummary": "{{criteria}} kryteria · {{score}} pkt łącznie · próg {{threshold}}% · {{blockingErrors}} błędy blokujące",
+            "review": {
+              "completedTitle": "Draft przeszedł kontrolę jakości",
+              "completedDescription": "Sprawdź ocenę przed zastosowaniem jej w formularzu lekcji.",
+              "currentDraftTitle": "Obecny draft jest gotowy do przeglądu",
+              "currentDraftDescription": "Uwagi do jakości nie zostały zastosowane. Przejrzyj draft, w razie potrzeby go edytuj, a następnie zastosuj w formularzu lekcji.",
+              "requiresReviewTitle": "Draft wymaga Twojej decyzji",
+              "notSaved": "Nic nie zostało automatycznie zapisane ani opublikowane."
+            },
+            "reviewAssessment": "Przejrzyj ocenę"
+          },
           "validation": {
-            "configurationRequired": "Skonfiguruj AI Judge przed zapisaniem tej lekcji",
+            "configurationRequired": "Skonfiguruj warunki zaliczenia przed zapisaniem tej lekcji",
             "taskGoalRequired": "Cel zadania jest wymagany",
-            "thresholdRange": "Próg zaliczenia musi wynosić od 1 do 100",
+            "thresholdRange": "Próg zaliczenia musi wynosić od 0 do 100",
             "titleRequired": "Nazwa kryterium jest wymagana",
             "expectedBehaviorRequired": "Oczekiwane zachowanie jest wymagane",
             "maxScoreRange": "Maksymalna punktacja musi wynosić od 1 do 5",
@@ -2751,7 +2917,7 @@
               "knowledgeSharing": "<ul><li>Student aktywnie uczestniczy w rozmowie (zadaje pytania lub dzieli się refleksjami).</li><li>Student potrafi wymienić co najmniej jedną technikę zarządzania czasem wspomnianą w dialogu.</li><li>Student wyraża, jak mógłby zastosować jedną technikę w swojej pracy.</li></ul><em>(Brak zdefiniowanego progu - wszystkie warunki są zalecane, ale nie obowiązkowe do zaliczenia.)</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Przyznaj 0 punktów, gdy uczeń nie przedstawia jasnego, możliwego do zaobserwowania dowodu tego zachowania, unika go lub działa z nim sprzecznie: {{expectedBehavior}} Sam brak dokładnego przykładu nie wystarcza; oceniaj znaczenie całej wypowiedzi.",
+              "notMetDescription": "Przyznaj 0 punktów, gdy uczeń nie przedstawia jasnego, mierzalnego dowodu tego zachowania, unika go lub działa z nim sprzecznie: {{expectedBehavior}} Sam brak dokładnego przykładu nie wystarcza; oceniaj znaczenie całej wypowiedzi.",
               "notMetExample": "Wypowiedź nie zawiera stwierdzenia ani działania, które pokazuje: {{expectedBehavior}}",
               "metDescription": "Przyznaj 1 punkt, gdy uczeń wyraźnie prezentuje to zachowanie w sposób trafny i odpowiedni do kontekstu: {{expectedBehavior}} Równoważne sformułowania są poprawne; uczeń nie musi dosłownie powtarzać zaakceptowanego przykładu."
             },
@@ -4496,16 +4662,28 @@
       "host": "Host",
       "status": "Status",
       "managing": "Zarządzający",
+      "lastActivity": "Ostatnia aktywność",
+      "activityCountLast14Days": "Aktywności\n(ostatnie 14 dni)",
+      "activeUsersLast14Days": "Aktywni użytkownicy\n(ostatnie 14 dni)",
+      "activeUsersValue": "{{active}} / {{total}} użytkowników",
+      "recentActivities": "Ostatnie aktywności",
       "loading": "Ładowanie organizacji...",
       "empty": "Nie znaleziono organizacji.",
       "yes": "Tak",
       "no": "Nie",
       "edit": "Edytuj",
+      "delete": "Usuń",
       "actions": {
         "title": "Akcje",
         "enterSupportMode": "Wejdź w tryb wsparcia",
-        "impersonateAdmin": "Wejdź w rolę administratora"
+        "impersonateAdmin": "Wejdź jako admin"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Brak aktywności",
+      "increase": "Aktywność wzrosła o {{percentage}}%",
+      "decrease": "Aktywność spadła o {{percentage}}%",
+      "unchanged": "Aktywność bez zmian"
     },
     "supportModePopover": {
       "searchPlaceholder": "Szukaj po nazwie lub e-mailu...",
@@ -4516,6 +4694,10 @@
     "status": {
       "active": "Aktywny",
       "inactive": "Nieaktywny"
+    },
+    "deleteDialog": {
+      "title": "Usunąć {{name}}?",
+      "description": "Spowoduje to trwałe usunięcie organizacji wraz ze wszystkimi użytkownikami, treściami szkoleniowymi, aktywnością i ustawieniami. Tej operacji nie można cofnąć."
     },
     "create": {
       "title": "Utwórz organizację",
@@ -4546,7 +4728,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organizacja została utworzona pomyślnie",
-      "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie"
+      "tenantUpdatedSuccessfully": "Organizacja została zaktualizowana pomyślnie",
+      "tenantDeletedSuccessfully": "Organizacja została trwale usunięta"
     }
   },
   "superAdminTenants": {
@@ -4555,7 +4738,8 @@
       "notFound": "Nie znaleziono organizacji",
       "invalidHost": "Nieprawidłowy adres URL hosta organizacji",
       "managingTenantRequired": "Wymagane uprawnienia administratora zarządzającej organizacji",
-      "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji"
+      "currentTenantSupportNotAllowed": "Tryb wsparcia nie jest dostępny dla bieżącej organizacji",
+      "currentTenantDeleteNotAllowed": "Nie można usunąć bieżącej organizacji zarządzającej"
     }
   },
   "auth": {
