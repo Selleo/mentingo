@@ -33,6 +33,7 @@ export * from "./constants/registrationForm";
 export * from "./constants/resourceLibrary";
 export * from "./constants/scorm";
 export * from "./constants/sessionRevocation";
+export * from "./constants/socket";
 export * from "./constants/supportMode";
 export * from "./constants/tenant";
 export * from "./constants/theme";

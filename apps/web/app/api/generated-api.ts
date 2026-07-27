@@ -4086,6 +4086,1411 @@ export interface UpdateTranslationsResponse {
   };
 }
 
+export type GenerateBody =
+  | {
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      lessonId?: string;
+      lessonContext: {
+        title?: string;
+        taskDescription?: string;
+        aiMentorInstructions?: string;
+        aiMentorType: "mentor" | "teacher" | "roleplay";
+      };
+      mode: "create";
+      /** @minLength 1 */
+      brief: string;
+    }
+  | {
+      /** @format uuid */
+      courseId: string;
+      /** @format uuid */
+      lessonId?: string;
+      lessonContext: {
+        title?: string;
+        taskDescription?: string;
+        aiMentorInstructions?: string;
+        aiMentorType: "mentor" | "teacher" | "roleplay";
+      };
+      mode: "improve";
+      /** @minLength 1 */
+      instruction: string;
+      /** @minLength 1 */
+      brief?: string;
+      currentConfiguration: {
+        /** @minLength 1 */
+        taskGoal: string;
+        /**
+         * @min 0
+         * @max 100
+         */
+        passingThresholdPercent: number;
+        criteria: {
+          /** @format uuid */
+          id?: string;
+          /** @minLength 1 */
+          title: string;
+          /** @minLength 1 */
+          expectedBehavior: string;
+          /**
+           * @min 1
+           * @max 5
+           */
+          maxScore: number;
+          /** @minItems 1 */
+          scoreGuidance: {
+            /** @format uuid */
+            id?: string;
+            /** @min 0 */
+            score: number;
+            /** @minLength 1 */
+            description: string;
+            example?: string | null;
+          }[];
+        }[];
+        blockingErrors: {
+          /** @format uuid */
+          id?: string;
+          /** @minLength 1 */
+          description: string;
+        }[];
+      };
+      latestValidation?: {
+        passed: boolean;
+        /** @minLength 1 */
+        summary: string;
+        /** @maxItems 3 */
+        issues: {
+          /** @minLength 1 */
+          code: string;
+          severity: "error" | "warning";
+          target:
+            | {
+                type: "configuration";
+                /** @minLength 1 */
+                field?: string;
+              }
+            | {
+                type: "criterion";
+                /** @pattern ^C[1-9][0-9]*$ */
+                ref: string;
+                /** @minLength 1 */
+                field?: string;
+              }
+            | {
+                type: "scoreGuidance";
+                /** @pattern ^C[1-9][0-9]*$ */
+                ref: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                field?: string;
+              }
+            | {
+                type: "blockingError";
+                /** @pattern ^B[1-9][0-9]*$ */
+                ref: string;
+                /** @minLength 1 */
+                field?: string;
+              };
+          /** @minLength 1 */
+          message: string;
+          /** @minLength 1 */
+          correction: string;
+        }[];
+      };
+    };
+
+export interface GenerateResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+  };
+}
+
+export interface GetGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    progress:
+      | {
+          status: "drafting";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        }
+      | {
+          status: "evaluating";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          draft: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            field:
+              | "taskGoal"
+              | "passingThresholdPercent"
+              | "criterion"
+              | "title"
+              | "expectedBehavior"
+              | "maxScore"
+              | "scoreGuidance"
+              | "description"
+              | "example"
+              | "blockingError";
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "revising";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          draft: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            field:
+              | "taskGoal"
+              | "passingThresholdPercent"
+              | "criterion"
+              | "title"
+              | "expectedBehavior"
+              | "maxScore"
+              | "scoreGuidance"
+              | "description"
+              | "example"
+              | "blockingError";
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "awaiting_revision";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            field:
+              | "taskGoal"
+              | "passingThresholdPercent"
+              | "criterion"
+              | "title"
+              | "expectedBehavior"
+              | "maxScore"
+              | "scoreGuidance"
+              | "description"
+              | "example"
+              | "blockingError";
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "completed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            field:
+              | "taskGoal"
+              | "passingThresholdPercent"
+              | "criterion"
+              | "title"
+              | "expectedBehavior"
+              | "maxScore"
+              | "scoreGuidance"
+              | "description"
+              | "example"
+              | "blockingError";
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "requires_review";
+          attempt: 3;
+          configuration: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          validation: {
+            passed: boolean;
+            /** @minLength 1 */
+            summary: string;
+            /** @maxItems 3 */
+            issues: {
+              /** @minLength 1 */
+              code: string;
+              severity: "error" | "warning";
+              target:
+                | {
+                    type: "configuration";
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "criterion";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "scoreGuidance";
+                    /** @pattern ^C[1-9][0-9]*$ */
+                    ref: string;
+                    /** @min 0 */
+                    score: number;
+                    /** @minLength 1 */
+                    field?: string;
+                  }
+                | {
+                    type: "blockingError";
+                    /** @pattern ^B[1-9][0-9]*$ */
+                    ref: string;
+                    /** @minLength 1 */
+                    field?: string;
+                  };
+              /** @minLength 1 */
+              message: string;
+              /** @minLength 1 */
+              correction: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+          changes?: {
+            type: "added" | "removed" | "changed";
+            targetRef: string | "configuration";
+            /** @min 0 */
+            score?: number;
+            field:
+              | "taskGoal"
+              | "passingThresholdPercent"
+              | "criterion"
+              | "title"
+              | "expectedBehavior"
+              | "maxScore"
+              | "scoreGuidance"
+              | "description"
+              | "example"
+              | "blockingError";
+            before?: string | number | null;
+            after?: string | number | null;
+          }[];
+        }
+      | {
+          status: "failed";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          /** @minLength 1 */
+          message: string;
+          configuration?: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        }
+      | {
+          status: "cancelled";
+          /**
+           * @min 1
+           * @max 3
+           */
+          attempt: number;
+          configuration?: {
+            /** @minLength 1 */
+            taskGoal: string;
+            /**
+             * @min 0
+             * @max 100
+             */
+            passingThresholdPercent: number;
+            criteria: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              title: string;
+              /** @minLength 1 */
+              expectedBehavior: string;
+              /**
+               * @min 1
+               * @max 5
+               */
+              maxScore: number;
+              /** @minItems 1 */
+              scoreGuidance: {
+                /** @format uuid */
+                id?: string;
+                /** @min 0 */
+                score: number;
+                /** @minLength 1 */
+                description: string;
+                example?: string | null;
+              }[];
+            }[];
+            blockingErrors: {
+              /** @format uuid */
+              id?: string;
+              /** @minLength 1 */
+              description: string;
+            }[];
+          };
+          attemptHistory: {
+            /**
+             * @min 1
+             * @max 3
+             */
+            attempt: number;
+            changes: {
+              type: "added" | "removed" | "changed";
+              targetRef: string | "configuration";
+              /** @min 0 */
+              score?: number;
+              field:
+                | "taskGoal"
+                | "passingThresholdPercent"
+                | "criterion"
+                | "title"
+                | "expectedBehavior"
+                | "maxScore"
+                | "scoreGuidance"
+                | "description"
+                | "example"
+                | "blockingError";
+              before?: string | number | null;
+              after?: string | number | null;
+            }[];
+            validation: {
+              passed: boolean;
+              /** @minLength 1 */
+              summary: string;
+              /** @maxItems 3 */
+              issues: {
+                /** @minLength 1 */
+                code: string;
+                severity: "error" | "warning";
+                target:
+                  | {
+                      type: "configuration";
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "criterion";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "scoreGuidance";
+                      /** @pattern ^C[1-9][0-9]*$ */
+                      ref: string;
+                      /** @min 0 */
+                      score: number;
+                      /** @minLength 1 */
+                      field?: string;
+                    }
+                  | {
+                      type: "blockingError";
+                      /** @pattern ^B[1-9][0-9]*$ */
+                      ref: string;
+                      /** @minLength 1 */
+                      field?: string;
+                    };
+                /** @minLength 1 */
+                message: string;
+                /** @minLength 1 */
+                correction: string;
+              }[];
+            };
+          }[];
+        };
+  };
+}
+
+export interface ReviseGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+  };
+}
+
+export interface CancelGenerationResponse {
+  data: {
+    /** @format uuid */
+    generationId: string;
+    cancellationRequested: true;
+  };
+}
+
+export interface ValidateConfigurationBody {
+  /** @format uuid */
+  courseId: string;
+  /** @format uuid */
+  lessonId?: string;
+  lessonContext: {
+    title?: string;
+    taskDescription?: string;
+    aiMentorInstructions?: string;
+    aiMentorType: "mentor" | "teacher" | "roleplay";
+  };
+  /** @minLength 1 */
+  brief?: string;
+  configuration: {
+    /** @minLength 1 */
+    taskGoal: string;
+    /**
+     * @min 0
+     * @max 100
+     */
+    passingThresholdPercent: number;
+    criteria: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      title: string;
+      /** @minLength 1 */
+      expectedBehavior: string;
+      /**
+       * @min 1
+       * @max 5
+       */
+      maxScore: number;
+      /** @minItems 1 */
+      scoreGuidance: {
+        /** @format uuid */
+        id?: string;
+        /** @min 0 */
+        score: number;
+        /** @minLength 1 */
+        description: string;
+        example?: string | null;
+      }[];
+    }[];
+    blockingErrors: {
+      /** @format uuid */
+      id?: string;
+      /** @minLength 1 */
+      description: string;
+    }[];
+  };
+}
+
+export interface ValidateConfigurationResponse {
+  data: {
+    passed: boolean;
+    /** @minLength 1 */
+    summary: string;
+    /** @maxItems 3 */
+    issues: {
+      /** @minLength 1 */
+      code: string;
+      severity: "error" | "warning";
+      target:
+        | {
+            type: "configuration";
+            /** @minLength 1 */
+            field?: string;
+          }
+        | {
+            type: "criterion";
+            /** @pattern ^C[1-9][0-9]*$ */
+            ref: string;
+            /** @minLength 1 */
+            field?: string;
+          }
+        | {
+            type: "scoreGuidance";
+            /** @pattern ^C[1-9][0-9]*$ */
+            ref: string;
+            /** @min 0 */
+            score: number;
+            /** @minLength 1 */
+            field?: string;
+          }
+        | {
+            type: "blockingError";
+            /** @pattern ^B[1-9][0-9]*$ */
+            ref: string;
+            /** @minLength 1 */
+            field?: string;
+          };
+      /** @minLength 1 */
+      message: string;
+      /** @minLength 1 */
+      correction: string;
+    }[];
+  };
+}
+
 export interface MarkLessonAsCompletedResponse {
   data: {
     message: string;
@@ -11266,6 +12671,95 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<UpdateTranslationsResponse, any>({
         path: `/api/lesson/${lessonId}/ai-judge-configuration/translations/${language}`,
         method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerGenerate
+     * @request POST:/api/ai/judge-configuration/generate
+     */
+    aiJudgeConfigurationGenerationControllerGenerate: (
+      data: GenerateBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<GenerateResponse, any>({
+        path: `/api/ai/judge-configuration/generate`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerGetGeneration
+     * @request GET:/api/ai/judge-configuration/generations/{generationId}
+     */
+    aiJudgeConfigurationGenerationControllerGetGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<GetGenerationResponse, any>({
+        path: `/api/ai/judge-configuration/generations/${generationId}`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerReviseGeneration
+     * @request POST:/api/ai/judge-configuration/generations/{generationId}/revise
+     */
+    aiJudgeConfigurationGenerationControllerReviseGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReviseGenerationResponse, any>({
+        path: `/api/ai/judge-configuration/generations/${generationId}/revise`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerCancelGeneration
+     * @request POST:/api/ai/judge-configuration/generations/{generationId}/cancel
+     */
+    aiJudgeConfigurationGenerationControllerCancelGeneration: (
+      generationId: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<CancelGenerationResponse, any>({
+        path: `/api/ai/judge-configuration/generations/${generationId}/cancel`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiJudgeConfigurationGenerationControllerValidateConfiguration
+     * @request POST:/api/ai/judge-configuration/validate
+     */
+    aiJudgeConfigurationGenerationControllerValidateConfiguration: (
+      data: ValidateConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ValidateConfigurationResponse, any>({
+        path: `/api/ai/judge-configuration/validate`,
+        method: "POST",
         body: data,
         type: ContentType.Json,
         format: "json",

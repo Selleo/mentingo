@@ -1,15 +1,67 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TooltipProvider } from "~/components/ui/tooltip";
+import i18next from "~/utils/mocks/i18next.mock";
 import { renderWith } from "~/utils/testUtils";
 
 import { AiJudgeConfigurationDialog } from "./AiJudgeConfigurationDialog";
 
+import type {
+  AiJudgeConfigurationDraft,
+  AiJudgeValidationResult,
+} from "./aiJudgeConfiguration.types";
 import type { FormEvent } from "react";
 
+vi.mock("~/components/RichText/Editor", () => ({
+  BoldBulletEditor: ({
+    content,
+    onChange,
+    ariaLabel,
+    placeholder,
+  }: {
+    content?: string;
+    onChange: (value: string) => void;
+    ariaLabel?: string;
+    placeholder?: string;
+  }) => (
+    <textarea
+      aria-label={ariaLabel}
+      placeholder={placeholder}
+      value={content ?? ""}
+      onChange={(event) => onChange(event.target.value)}
+    />
+  ),
+}));
+
 describe("AiJudgeConfigurationDialog criterion accordion", () => {
+  beforeEach(async () => {
+    await i18next.changeLanguage("en");
+  });
+
+  it("uses the bounded mobile drawer shell and a full-width threshold control", () => {
+    renderWith().render(
+      <TooltipProvider>
+        <AiJudgeConfigurationDialog
+          open
+          onOpenChange={vi.fn()}
+          onSaveBaseConfiguration={vi.fn()}
+          onSaveTranslation={vi.fn()}
+          language="en"
+          baseLanguage="en"
+          isPersisted={false}
+        />
+      </TooltipProvider>,
+    );
+
+    expect(screen.getByRole("dialog")).toHaveClass("h-[85dvh]");
+    expect(screen.getByLabelText("Passing threshold").parentElement).toHaveClass(
+      "w-full",
+      "sm:w-24",
+    );
+  });
+
   it("applies a new-lesson configuration without submitting the outer lesson form", async () => {
     const user = userEvent.setup();
     const onApply = vi.fn();
@@ -79,7 +131,7 @@ describe("AiJudgeConfigurationDialog criterion accordion", () => {
     expect(titleInput).not.toBeVisible();
     expect(titleInput).toHaveValue("Discovery");
 
-    fireEvent.change(screen.getByLabelText("Task goal"), {
+    fireEvent.change(screen.getByRole("textbox", { name: "Task goal" }), {
       target: { value: "Trigger an unrelated RHF watch rerender" },
     });
 
@@ -186,5 +238,106 @@ describe("AiJudgeConfigurationDialog criterion accordion", () => {
     expect(screen.getByText("Criterion title")).toHaveClass("text-neutral-900");
     expect(screen.getByText("Criterion title is required")).toBeVisible();
     expect(screen.getByText("Blocking errors").closest("details")).toHaveAttribute("open");
+  });
+
+  it("shows independent quality findings in a dedicated result dialog", async () => {
+    const user = userEvent.setup();
+    const validation = {
+      passed: false,
+      summary: "The task goal needs a more observable outcome.",
+      issues: [
+        {
+          code: "goal_not_measurable",
+          severity: "error",
+          target: { type: "configuration", field: "taskGoal" },
+          message: "The goal is too broad.",
+          correction: "Describe what the learner must demonstrate.",
+        },
+      ],
+    };
+    const onValidateConfiguration = vi.fn().mockResolvedValue(validation);
+    const onImproveWithAi = vi.fn();
+    const configuration = {
+      taskGoal: "Handle the conversation",
+      passingThresholdPercent: 70,
+      criteria: [],
+      blockingErrors: [],
+    };
+
+    renderWith().render(
+      <TooltipProvider>
+        <AiJudgeConfigurationDialog
+          open
+          onOpenChange={vi.fn()}
+          value={configuration}
+          onSaveBaseConfiguration={vi.fn()}
+          onSaveTranslation={vi.fn()}
+          onValidateConfiguration={onValidateConfiguration}
+          onImproveWithAi={onImproveWithAi}
+          language="en"
+          baseLanguage="en"
+          isPersisted={false}
+        />
+      </TooltipProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "AI assistance" }));
+    await user.click(screen.getByRole("menuitem", { name: "Check quality with AI" }));
+
+    expect(await screen.findByText("The task goal needs a more observable outcome.")).toBeVisible();
+    expect(screen.getByText("Describe what the learner must demonstrate.")).toBeVisible();
+
+    expect(screen.getByRole("dialog", { name: "Quality check" })).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Improve with AI" }));
+
+    expect(onImproveWithAi).toHaveBeenCalledWith(configuration, validation);
+    expect(screen.queryByRole("dialog", { name: "Quality check" })).not.toBeInTheDocument();
+  });
+
+  it("opens quality progress in a dialog and cancels the active request", async () => {
+    const user = userEvent.setup();
+    let requestSignal: AbortSignal | undefined;
+    const onValidateConfiguration = vi.fn(
+      (_configuration: AiJudgeConfigurationDraft, signal?: AbortSignal) =>
+        new Promise<AiJudgeValidationResult>((_, reject) => {
+          requestSignal = signal;
+          signal?.addEventListener("abort", () =>
+            reject(new DOMException("Aborted", "AbortError")),
+          );
+        }),
+    );
+
+    renderWith().render(
+      <TooltipProvider>
+        <AiJudgeConfigurationDialog
+          open
+          onOpenChange={vi.fn()}
+          value={{
+            taskGoal: "Handle the conversation",
+            passingThresholdPercent: 70,
+            criteria: [],
+            blockingErrors: [],
+          }}
+          onSaveBaseConfiguration={vi.fn()}
+          onSaveTranslation={vi.fn()}
+          onValidateConfiguration={onValidateConfiguration}
+          language="en"
+          baseLanguage="en"
+          isPersisted={false}
+        />
+      </TooltipProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "AI assistance" }));
+    await user.click(screen.getByRole("menuitem", { name: "Check quality with AI" }));
+
+    const qualityDialog = screen.getByRole("dialog", { name: "Quality check" });
+    expect(within(qualityDialog).getByText("Checking quality...")).toBeVisible();
+
+    await user.click(within(qualityDialog).getByRole("button", { name: "Cancel" }));
+
+    expect(requestSignal?.aborted).toBe(true);
+    await waitFor(() => expect(screen.queryByText("Checking quality...")).not.toBeInTheDocument());
   });
 });

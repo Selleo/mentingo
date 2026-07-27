@@ -8,7 +8,7 @@ import { RICH_TEXT_HANDLES } from "../../../e2e/data/common/handles";
 
 import { detectPresentationProvider } from "./extensions/utils/presentation";
 import { extractUrlFromClipboard } from "./extensions/utils/video";
-import { baseEditorPlugins, getContentEditorPlugins } from "./plugins";
+import { baseEditorPlugins, boldBulletEditorPlugins, getContentEditorPlugins } from "./plugins";
 import { defaultClasses } from "./styles";
 import EditorToolbar from "./toolbar/EditorToolbar";
 
@@ -16,6 +16,7 @@ import type { AssetLibraryConfig } from "./components/AssetLibraryDialog";
 
 export const RICH_TEXT_EDITOR_VARIANT = {
   BASE: "base",
+  BOLD_BULLET: "bold_bullet",
   CONTENT: "content",
 } as const;
 
@@ -29,6 +30,7 @@ type EditorProps = {
   onCtrlSave?: (editor: TiptapEditor | null) => void;
   uploadProgress?: number | null;
   placeholder?: string;
+  ariaLabel?: string;
   id?: string;
   parentClassName?: string;
   contentClassName?: string;
@@ -42,9 +44,21 @@ type EditorProps = {
 
 const EMPTY_EDITOR_MIN_HEIGHT_CLASS = "min-h-[240px]";
 
+const getEditorExtensions = (variant: RichTextEditorVariant) => {
+  switch (variant) {
+    case RICH_TEXT_EDITOR_VARIANT.BASE:
+      return baseEditorPlugins;
+    case RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET:
+      return boldBulletEditorPlugins;
+    case RICH_TEXT_EDITOR_VARIANT.CONTENT:
+      return getContentEditorPlugins();
+  }
+};
+
 const Editor = ({
   content,
   placeholder,
+  ariaLabel,
   onChange,
   onUpload,
   onCtrlSave,
@@ -60,11 +74,7 @@ const Editor = ({
   const editorRef = useRef<TiptapEditor | null>(null);
   const lastEmittedContentRef = useRef(content ?? "");
 
-  const extensions = useMemo(
-    () =>
-      variant === RICH_TEXT_EDITOR_VARIANT.BASE ? baseEditorPlugins : getContentEditorPlugins(),
-    [variant],
-  );
+  const extensions = useMemo(() => getEditorExtensions(variant), [variant]);
 
   const handleDrop = useCallback(
     async (event: DragEvent) => {
@@ -165,6 +175,9 @@ const Editor = ({
       handleKeyDown,
       handlePaste: (_view, event) => handlePaste(event),
       attributes: {
+        ...(ariaLabel ? { "aria-label": ariaLabel } : {}),
+        role: "textbox",
+        "aria-multiline": "true",
         class: cn(
           "prose prose-xs sm:prose dark:prose-invert focus:outline-none max-w-full p-4 !max-w-full",
           EMPTY_EDITOR_MIN_HEIGHT_CLASS,
@@ -205,7 +218,7 @@ const Editor = ({
     <div
       data-testid={RICH_TEXT_HANDLES.ROOT}
       className={cn(
-        "prose w-full max-w-none overflow-hidden rounded-lg border border-neutral-300 bg-background dark:prose-invert [&_.ProseMirror]:leading-tight",
+        "prose relative min-w-0 w-full max-w-none overflow-hidden rounded-lg bg-background after:pointer-events-none after:absolute after:inset-0 after:z-[2] after:rounded-lg after:ring-1 after:ring-inset after:ring-neutral-300 after:content-[''] dark:prose-invert [&_.ProseMirror]:leading-tight",
         parentClassName,
       )}
     >
@@ -214,6 +227,7 @@ const Editor = ({
         acceptedFileTypes={acceptedFileTypes}
         assetLibrary={assetLibrary}
         showTableControls={variant === RICH_TEXT_EDITOR_VARIANT.CONTENT}
+        limitedFormatting={variant === RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET}
       />
       <EditorContent
         data-testid={RICH_TEXT_HANDLES.CONTENT}
@@ -228,6 +242,10 @@ const Editor = ({
 
 export const BaseEditor = (props: Omit<EditorProps, "variant">) => (
   <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.BASE} />
+);
+
+export const BoldBulletEditor = (props: Omit<EditorProps, "variant">) => (
+  <Editor {...props} variant={RICH_TEXT_EDITOR_VARIANT.BOLD_BULLET} />
 );
 
 export const ContentEditor = (props: Omit<EditorProps, "variant">) => (

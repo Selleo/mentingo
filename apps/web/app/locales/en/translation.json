@@ -57,7 +57,8 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong.",
       "threadMustBeActive": "The thread must be active.",
-      "aiJudgeConfigurationMissing": "The AI Judge configuration is missing."
+      "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
+      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },
     "loader": {
       "textSequence": {
@@ -2278,16 +2279,27 @@
           "aiMentorTypes": "Mentor"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Completion conditions",
           "configured": "Configured",
           "emptyDescription": "Define how the learner's response will be assessed and when the lesson is passed.",
           "baseLanguageRequired": "Create the assessment structure in the course base language before translating it.",
           "structureLockedTooltip": "Assessment structure can only be changed in the course base language.",
           "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
           "configureWithAi": "Configure with AI",
+          "createWithAi": "Create with AI",
+          "improveWithAi": "Improve with AI",
+          "checkQualityWithAi": "Check quality with AI",
+          "checkingQuality": "Checking quality...",
+          "checkingQualityDescription": "Reviewing the task goal, criteria, scoring guidance, and blocking errors.",
+          "aiAssistance": "AI assistance",
+          "qualityCheckResult": "Quality check",
+          "qualityCheckResultDescription": "Review the assessment findings before deciding what to change.",
+          "qualityCheckPassed": "No changes are required. You can continue editing or save the assessment.",
+          "qualityCheckPassedWithSuggestions": "The assessment is usable. Apply these optional improvements or continue as-is.",
+          "qualityCheckNeedsChanges": "Review the findings or let AI improve the assessment using this feedback.",
           "configureManually": "Configure manually",
           "editAssessment": "Edit assessment",
-          "dialogTitle": "Configure AI Judge",
+          "dialogTitle": "Configure completion conditions",
           "dialogDescription": "Set measurable criteria, exact scoring guidance, and errors that always fail the attempt.",
           "translationModeTitle": "Translation mode",
           "translationModeDescription": "You can translate assessment text here. Scores, thresholds, and assessment structure are managed in the course base language.",
@@ -2300,23 +2312,23 @@
           "untitledCriterion": "Untitled criterion",
           "complete": "Complete",
           "needsDetails": "Needs details",
-          "criterionDescription": "Describe one observable learner behavior.",
+          "criterionDescription": "Describe one measurable learner behavior.",
           "criterionTitle": "Criterion title",
           "criterionTitlePlaceholder": "e.g. Discovers the client's needs",
           "expectedBehavior": "Expected behavior",
           "expectedBehaviorPlaceholder": "Explain what the learner should say or do...",
-          "maxScore": "Maximum score",
+          "maxScore": "Max points",
           "score": "Score",
-          "scoringGuidance": "Scoring guidance",
-          "advancedScoring": "Advanced scoring guidance",
+          "scoringGuidance": "Scoring guidelines",
+          "advancedScoring": "Scoring guidelines",
           "scoreLevelsCount": "{{count}} score levels",
           "scoreBadge": "{{score}} pts",
           "itemsCount": "{{count}} added",
           "scoringSummary": "Scoring",
           "pointsRequired": "{{required}} of {{total}} points required to pass",
           "scoringGuidanceDescription": "Optionally explain what an exact score looks like.",
-          "scoreDescription": "What earns this score",
-          "scoreDescriptionPlaceholder": "Describe the observable level of performance...",
+          "scoreDescription": "What the learner does to earn this score",
+          "scoreDescriptionPlaceholder": "Describe the measurable level of performance...",
           "acceptedExample": "Accepted example",
           "examplePlaceholder": "Add one example response...",
           "addCriterion": "Add criterion",
@@ -2334,12 +2346,163 @@
           "applyConfiguration": "Apply configuration",
           "saveConfiguration": "Save configuration",
           "saveTranslation": "Save translation",
-          "configurationSavedSuccessfully": "AI Judge configuration saved successfully.",
-          "translationSavedSuccessfully": "AI Judge translation saved successfully.",
+          "configurationSavedSuccessfully": "Configuration saved.",
+          "translationSavedSuccessfully": "Completion conditions translation saved successfully.",
+          "generation": {
+            "create": {
+              "title": "Create assessment with AI",
+              "description": "Describe what a good learner response should achieve. You can review and edit the draft before applying it.",
+              "fieldLabel": "What should the learner demonstrate?",
+              "fieldDescription": "Focus on the measurable outcome. AI will turn it into a complete assessment.",
+              "placeholder": "For example: The learner should discover the client's needs, propose a suitable next step, and respond professionally to objections."
+            },
+            "improve": {
+              "title": "Improve assessment with AI",
+              "description": "Tell AI what should be clearer or more precise. Your current assessment will be used as the starting point.",
+              "fieldLabel": "What should be improved?",
+              "fieldDescription": "Describe the outcome you want. Unrelated assessment content will be preserved.",
+              "placeholder": "For example: Make the criteria more measurable and distinguish partial from full-score responses more clearly."
+            },
+            "instructionRequired": "Describe what you want AI to create or improve",
+            "willCreate": "AI will generate",
+            "artifacts": {
+              "taskGoal": "A measurable task goal",
+              "criteria": "Criteria with score guidance",
+              "threshold": "A passing threshold",
+              "blockingErrors": "Blocking errors, when relevant"
+            },
+            "generateDraft": "Generate draft",
+            "improveAssessment": "Improve assessment",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Clearer criteria",
+                "instruction": "Make the assessment criteria clearer and directly measurable."
+              },
+              "betterScoring": {
+                "label": "Better scoring",
+                "instruction": "Make adjacent scoring levels easier to distinguish consistently."
+              },
+              "reduceOverlap": {
+                "label": "Reduce overlap",
+                "instruction": "Remove overlap between criteria so each one assesses a distinct behavior."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Clarify blocking errors",
+                "instruction": "Clarify exactly which behaviors trigger each blocking error."
+              }
+            },
+            "progressLabel": "Assessment generation progress",
+            "stages": {
+              "draft": "Generating draft",
+              "qualityCheck": "Quality check",
+              "ready": "Ready"
+            },
+            "status": {
+              "drafting": "Generating the assessment",
+              "evaluating": "Checking assessment quality",
+              "revising": "Improving the draft",
+              "awaiting_revision": "Quality check needs your decision",
+              "completed": "Assessment is ready",
+              "requires_review": "Draft requires your decision",
+              "failed": "Generation could not be completed",
+              "cancelled": "Generation cancelled"
+            },
+            "statusDescription": {
+              "drafting": "Preparing the task goal, criteria, scoring, and blocking errors.",
+              "evaluating": "Checking whether the criteria are measurable and the scoring is coherent.",
+              "revising": "Applying the latest quality-check correction.",
+              "awaiting_revision": "Review the findings before starting another generation attempt.",
+              "completed": "The draft passed the quality check.",
+              "requires_review": "The latest draft was kept so you can decide what to change.",
+              "failed": "Try again or configure the assessment manually.",
+              "cancelled": "No assessment changes were applied."
+            },
+            "attempt": "Draft {{attempt}} of {{maxAttempts}}",
+            "attemptNumber": "Draft {{attempt}}",
+            "attemptHistory": "Draft history",
+            "viewDetails": "View details",
+            "attemptPassed": "Passed quality check",
+            "attemptNeedsRevision": "Quality check found issues",
+            "initialDraftCreated": "Initial draft created.",
+            "changesInAttempt": "What AI changed in this draft",
+            "qualityFeedback": "What the quality check found afterward",
+            "currentDraft": "Current draft",
+            "draftPreviewPending": "The draft preview will appear here when generation is complete.",
+            "qualityCheckLabel": "Quality check",
+            "qualityDecisionTitle_one": "{{count}} improvement suggested",
+            "qualityDecisionTitle_other": "{{count}} improvements suggested",
+            "feedbackNotApplied": "Not applied yet",
+            "qualityDecisionDescription": "Review the suggestions or continue with this assessment.",
+            "suggestedImprovements": "Suggested improvements",
+            "beforeChange": "Previous assessment",
+            "afterChange": "Current draft",
+            "showMoreFindings": "Show {{count}} more findings",
+            "showFewerFindings": "Show fewer findings",
+            "showMoreChanges": "Show {{count}} more changes",
+            "showFewerChanges": "Show fewer changes",
+            "reviewExactChanges": "What AI changed ({{count}})",
+            "exactChangesDescription": "Optional detail: compare the generated assessment with the version you started from.",
+            "waitingForDecision": "Use the current draft, or create another draft using the quality feedback above.",
+            "useCurrentDraft": "Continue",
+            "applyImprovements": "Revise",
+            "target": {
+              "assessment": "Completion conditions",
+              "criterion": "Criterion",
+              "scoreGuidance": "Score guidance",
+              "blockingError": "Blocking error"
+            },
+            "deterministicValidation": {
+              "summary": "The assessment structure needs correction.",
+              "guidance_score_out_of_range": {
+                "message": "A scoring level is outside the criterion's allowed range.",
+                "correction": "Keep every scoring level between zero and the criterion's maximum score."
+              },
+              "duplicate_guidance_score": {
+                "message": "A criterion contains the same scoring level more than once.",
+                "correction": "Keep exactly one guidance item for every scoring level."
+              },
+              "missing_guidance_scores": {
+                "message": "A criterion is missing one or more required scoring levels.",
+                "correction": "Add one guidance item for every scoring level from zero through the maximum."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Two criteria cannot be distinguished reliably.",
+                "correction": "Keep every criterion as a distinct assessment item."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Two blocking errors cannot be distinguished reliably.",
+                "correction": "Keep every blocking error as a distinct assessment item."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "A new criterion could not be matched reliably.",
+                "correction": "Keep existing criteria stable and add the new criterion as a distinct item."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "A new blocking error could not be matched reliably.",
+                "correction": "Keep existing blocking errors stable and add the new error as a distinct item."
+              }
+            },
+            "keepCurrentDraft": "Keep current draft",
+            "applySuggestedImprovements": "Apply suggested improvements",
+            "completedArtifacts": "Prepared so far",
+            "changedInRevision": "Changed in this revision",
+            "stopAndInspect": "Stop and inspect current draft",
+            "cancel": "Cancel generation",
+            "draftSummary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
+            "review": {
+              "completedTitle": "Draft passed the quality check",
+              "completedDescription": "Review the assessment before applying it to the lesson form.",
+              "currentDraftTitle": "Current draft is ready for review",
+              "currentDraftDescription": "The quality feedback remains unapplied. Review the draft, edit it if needed, then apply it to the lesson form.",
+              "requiresReviewTitle": "Draft requires your decision",
+              "notSaved": "Nothing has been saved or published automatically."
+            },
+            "reviewAssessment": "Review assessment"
+          },
           "validation": {
-            "configurationRequired": "Configure the AI Judge before saving this lesson",
+            "configurationRequired": "Configure completion conditions before saving this lesson",
             "taskGoalRequired": "Task goal is required",
-            "thresholdRange": "Passing threshold must be between 1 and 100",
+            "thresholdRange": "Passing threshold must be between 0 and 100",
             "titleRequired": "Criterion title is required",
             "expectedBehaviorRequired": "Expected behavior is required",
             "maxScoreRange": "Maximum score must be between 1 and 5",
@@ -2445,7 +2608,7 @@
               "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined - all conditions recommended, but not mandatory for passing.)</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Award 0 points when the learner provides no clear, observable evidence of this behavior, avoids it, or acts contrary to it: {{expectedBehavior}} The absence of the exact example alone is not enough; judge the meaning of the entire response.",
+              "notMetDescription": "Award 0 points when the learner provides no clear, measurable evidence of this behavior, avoids it, or acts contrary to it: {{expectedBehavior}} The absence of the exact example alone is not enough; judge the meaning of the entire response.",
               "notMetExample": "The response contains no statement or action that demonstrates: {{expectedBehavior}}",
               "metDescription": "Award 1 point when the learner clearly demonstrates this behavior in a relevant, context-appropriate way: {{expectedBehavior}} Equivalent wording is valid; the learner does not need to repeat the accepted example verbatim."
             },

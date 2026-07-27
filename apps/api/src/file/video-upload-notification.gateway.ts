@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
+import { USER_SOCKET_EVENTS } from "@repo/shared";
 import { Server } from "socket.io";
 
 import { getUserRoomKey } from "src/file/utils/userRoom";
@@ -58,7 +59,7 @@ export class VideoUploadNotificationGateway implements OnGatewayInit, OnModuleIn
   }
 
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage("join:user")
+  @SubscribeMessage(USER_SOCKET_EVENTS.JOIN)
   async handleJoinUser(@ConnectedSocket() client: AuthenticatedSocket) {
     const userId = client.data.user.userId;
 
@@ -68,7 +69,7 @@ export class VideoUploadNotificationGateway implements OnGatewayInit, OnModuleIn
   }
 
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage("leave:user")
+  @SubscribeMessage(USER_SOCKET_EVENTS.LEAVE)
   async handleLeaveUser(@ConnectedSocket() client: AuthenticatedSocket) {
     const userId = client.data.user.userId;
 

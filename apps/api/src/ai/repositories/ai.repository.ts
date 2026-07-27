@@ -41,6 +41,7 @@ import type {
 } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { AiMentorPromptContext } from "src/ai/ai-prompt.types";
 import type {
   AiJudgeBlockingErrorJudgementWrite,
   AiJudgeCriterionJudgementWrite,
@@ -49,7 +50,6 @@ import type {
 } from "src/ai/judge-configuration/judge-configuration.types";
 import type {
   AiMentorGroupsBody,
-  AiMentorLessonBody,
   ThreadBody,
   ThreadMessageBody,
   UpdateThreadBody,
@@ -233,7 +233,7 @@ export class AiRepository {
   async findMentorLessonByThreadId(
     threadId: UUIDType,
     language: SupportedLanguages,
-  ): Promise<AiMentorLessonBody> {
+  ): Promise<AiMentorPromptContext> {
     const [lesson] = await this.db
       .select({
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
@@ -243,9 +243,11 @@ export class AiRepository {
         ),
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
         name: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
+        learnerFirstName: users.firstName,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .innerJoin(users, eq(users.id, aiMentorThreads.userId))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))

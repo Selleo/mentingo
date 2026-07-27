@@ -57,7 +57,8 @@
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko.",
       "threadMustBeActive": "Pokalbio gija turi būti aktyvi.",
-      "aiJudgeConfigurationMissing": "Trūksta AI Judge konfigūracijos."
+      "aiJudgeConfigurationMissing": "Trūksta baigimo sąlygų konfigūracijos.",
+      "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
     },
     "loader": {
       "textSequence": {
@@ -2217,16 +2218,27 @@
           "aiMentorTypes": "Mentorė"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Baigimo sąlygos",
           "configured": "Sukonfigūruota",
           "emptyDescription": "Nustatykite, kaip bus vertinamas mokinio atsakymas ir kada pamoka bus išlaikyta.",
           "baseLanguageRequired": "Prieš versdami sukurkite vertinimo struktūrą pagrindine kurso kalba.",
           "structureLockedTooltip": "Vertinimo struktūrą galima keisti tik pagrindine kurso kalba.",
           "summary": "{{criteria}} kriterijai · iš viso {{score}} taškų · {{threshold}} % išlaikymui · {{blockingErrors}} blokuojančios klaidos",
           "configureWithAi": "Konfigūruoti su AI",
+          "createWithAi": "Kurti su DI",
+          "improveWithAi": "Tobulinti su DI",
+          "checkQualityWithAi": "Patikrinti kokybę su DI",
+          "checkingQuality": "Tikrinama kokybė...",
+          "checkingQualityDescription": "Tikrinamas užduoties tikslas, kriterijai, vertinimo gairės ir blokuojančios klaidos.",
+          "aiAssistance": "DI pagalba",
+          "qualityCheckResult": "Kokybės patikra",
+          "qualityCheckResultDescription": "Peržiūrėkite vertinimo pastabas prieš nuspręsdami, ką keisti.",
+          "qualityCheckPassed": "Pakeitimų nereikia. Galite toliau redaguoti arba išsaugoti vertinimą.",
+          "qualityCheckPassedWithSuggestions": "Vertinimą galima naudoti. Pritaikykite pasirenkamus patobulinimus arba tęskite be pakeitimų.",
+          "qualityCheckNeedsChanges": "Peržiūrėkite pastabas arba leiskite DI patobulinti vertinimą pagal jas.",
           "configureManually": "Konfigūruoti rankiniu būdu",
           "editAssessment": "Redaguoti vertinimą",
-          "dialogTitle": "Konfigūruoti AI Judge",
+          "dialogTitle": "Konfigūruoti baigimo sąlygas",
           "dialogDescription": "Nustatykite išmatuojamus kriterijus, tikslias vertinimo gaires ir klaidas, kurios visada reiškia neišlaikymą.",
           "translationModeTitle": "Vertimo režimas",
           "translationModeDescription": "Čia galite versti vertinimo tekstą. Taškai, slenkstis ir struktūra tvarkomi pagrindine kurso kalba.",
@@ -2239,23 +2251,23 @@
           "untitledCriterion": "Kriterijus be pavadinimo",
           "complete": "Užbaigta",
           "needsDetails": "Trūksta informacijos",
-          "criterionDescription": "Aprašykite vieną stebimą mokinio elgesį.",
+          "criterionDescription": "Aprašykite vieną pamatuojamą mokinio elgesį.",
           "criterionTitle": "Kriterijaus pavadinimas",
           "criterionTitlePlaceholder": "pvz., Išsiaiškina kliento poreikius",
           "expectedBehavior": "Laukiamas elgesys",
           "expectedBehaviorPlaceholder": "Paaiškinkite, ką mokinys turėtų pasakyti ar padaryti...",
-          "maxScore": "Didžiausias balas",
+          "maxScore": "Maks. taškų",
           "score": "Balas",
           "scoringGuidance": "Vertinimo gairės",
-          "advancedScoring": "Išplėstinės vertinimo gairės",
+          "advancedScoring": "Vertinimo gairės",
           "scoreLevelsCount": "Balų lygių: {{count}}",
           "scoreBadge": "{{score}} tšk.",
           "itemsCount": "Pridėta: {{count}}",
           "scoringSummary": "Vertinimas",
           "pointsRequired": "Išlaikymui reikia {{required}} iš {{total}} taškų",
           "scoringGuidanceDescription": "Pasirinktinai aprašykite, kaip atrodo konkretus balas.",
-          "scoreDescription": "Kas suteikia šį balą",
-          "scoreDescriptionPlaceholder": "Aprašykite stebimą atlikimo lygį...",
+          "scoreDescription": "Ką besimokantysis daro, kad gautų šį balą",
+          "scoreDescriptionPlaceholder": "Aprašykite pamatuojamą atlikimo lygį...",
           "acceptedExample": "Priimtinas pavyzdys",
           "examplePlaceholder": "Pridėkite vieną atsakymo pavyzdį...",
           "addCriterion": "Pridėti kriterijų",
@@ -2273,12 +2285,165 @@
           "applyConfiguration": "Taikyti konfigūraciją",
           "saveConfiguration": "Išsaugoti konfigūraciją",
           "saveTranslation": "Išsaugoti vertimą",
-          "configurationSavedSuccessfully": "AI Judge konfigūracija išsaugota.",
-          "translationSavedSuccessfully": "AI Judge vertimas išsaugotas.",
+          "configurationSavedSuccessfully": "Konfigūracija išsaugota.",
+          "translationSavedSuccessfully": "Baigimo sąlygų vertimas išsaugotas.",
+          "generation": {
+            "create": {
+              "title": "Kurti vertinimą su DI",
+              "description": "Aprašykite, ką turi pasiekti geras besimokančiojo atsakymas. Juodraštį galėsite peržiūrėti ir redaguoti prieš pritaikydami.",
+              "fieldLabel": "Ką turi pademonstruoti besimokantysis?",
+              "fieldDescription": "Sutelkite dėmesį į pamatuojamą rezultatą. DI pavers jį išsamiu vertinimu.",
+              "placeholder": "Pavyzdžiui: išsiaiškinti kliento poreikius, pasiūlyti tinkamą kitą žingsnį ir profesionaliai atsakyti į prieštaravimus."
+            },
+            "improve": {
+              "title": "Tobulinti vertinimą su DI",
+              "description": "Nurodykite, kas turi būti aiškiau ar tiksliau. Dabartinis vertinimas bus atspirties taškas.",
+              "fieldLabel": "Ką reikėtų patobulinti?",
+              "fieldDescription": "Aprašykite norimą rezultatą. Likęs vertinimo turinys bus išsaugotas.",
+              "placeholder": "Pavyzdžiui: padaryti kriterijus labiau pamatuojamus ir aiškiau atskirti dalinį bei pilną atsakymą."
+            },
+            "instructionRequired": "Aprašykite, ką DI turi sukurti ar patobulinti",
+            "willCreate": "DI sugeneruos",
+            "artifacts": {
+              "taskGoal": "Pamatuojamas užduoties tikslas",
+              "criteria": "Kriterijai su vertinimo gairėmis",
+              "threshold": "Išlaikymo riba",
+              "blockingErrors": "Blokuojančios klaidos, kai aktualu"
+            },
+            "generateDraft": "Generuoti juodraštį",
+            "improveAssessment": "Patobulinti vertinimą",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Aiškesni kriterijai",
+                "instruction": "Padarykite vertinimo kriterijus aiškesnius ir tiesiogiai pamatuojamus."
+              },
+              "betterScoring": {
+                "label": "Geresnis vertinimas",
+                "instruction": "Padėkite nuosekliai atskirti gretimus balų lygius."
+              },
+              "reduceOverlap": {
+                "label": "Mažinti persidengimą",
+                "instruction": "Pašalinkite kriterijų persidengimą, kad kiekvienas vertintų atskirą elgesį."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Patikslinti blokuojančias klaidas",
+                "instruction": "Patikslinkite, koks elgesys suaktyvina kiekvieną blokuojančią klaidą."
+              }
+            },
+            "progressLabel": "Vertinimo generavimo eiga",
+            "stages": {
+              "draft": "Generuojamas juodraštis",
+              "qualityCheck": "Kokybės patikra",
+              "ready": "Paruošta"
+            },
+            "status": {
+              "drafting": "Kuriamas vertinimas",
+              "evaluating": "Tikrinama kokybė",
+              "revising": "Tobulinamas juodraštis",
+              "awaiting_revision": "Kokybės patikrai reikia jūsų sprendimo",
+              "completed": "Vertinimas paruoštas",
+              "requires_review": "Juodraščiui reikia jūsų sprendimo",
+              "failed": "Generavimo nepavyko užbaigti",
+              "cancelled": "Generavimas atšauktas"
+            },
+            "statusDescription": {
+              "drafting": "Ruošiami tikslas, kriterijai, balai ir blokuojančios klaidos.",
+              "evaluating": "Tikrinama, ar kriterijai pamatuojami, o balai nuoseklūs.",
+              "revising": "Pritaikomas naujausias kokybės patikros pataisymas.",
+              "awaiting_revision": "Peržiūrėkite pastabas prieš pradėdami kitą generavimo bandymą.",
+              "completed": "Juodraštis praėjo kokybės patikrą.",
+              "requires_review": "Naujausias juodraštis išsaugotas jūsų sprendimui.",
+              "failed": "Bandykite dar kartą arba konfigūruokite vertinimą rankiniu būdu.",
+              "cancelled": "Vertinimo pakeitimai nebuvo pritaikyti."
+            },
+            "attempt": "Juodraštis {{attempt}} iš {{maxAttempts}}",
+            "attemptNumber": "Juodraštis {{attempt}}",
+            "attemptHistory": "Juodraščių istorija",
+            "viewDetails": "Rodyti išsamią informaciją",
+            "attemptPassed": "Kokybės patikra sėkminga",
+            "attemptNeedsRevision": "Kokybės patikra aptiko problemų",
+            "initialDraftCreated": "Pradinis juodraštis sukurtas.",
+            "changesInAttempt": "Ką DI pakeitė šiame juodraštyje",
+            "qualityFeedback": "Ką po to nustatė kokybės patikra",
+            "currentDraft": "Dabartinis juodraštis",
+            "draftPreviewPending": "Juodraščio peržiūra čia pasirodys baigus generavimą.",
+            "qualityCheckLabel": "Kokybės patikra",
+            "qualityDecisionTitle_one": "Siūlomas {{count}} patobulinimas",
+            "qualityDecisionTitle_few": "Siūlomi {{count}} patobulinimai",
+            "qualityDecisionTitle_many": "Siūloma {{count}} patobulinimų",
+            "qualityDecisionTitle_other": "Siūloma {{count}} patobulinimų",
+            "feedbackNotApplied": "Dar nepritaikyta",
+            "qualityDecisionDescription": "Peržiūrėkite pasiūlymus arba tęskite su šiuo vertinimu.",
+            "suggestedImprovements": "Siūlomi patobulinimai",
+            "beforeChange": "Ankstesnis vertinimas",
+            "afterChange": "Dabartinis juodraštis",
+            "showMoreFindings": "Rodyti dar {{count}} pastabas",
+            "showFewerFindings": "Rodyti mažiau pastabų",
+            "showMoreChanges": "Rodyti dar {{count}} pakeitimus",
+            "showFewerChanges": "Rodyti mažiau pakeitimų",
+            "reviewExactChanges": "Ką pakeitė AI ({{count}})",
+            "exactChangesDescription": "Pasirinktinai: palyginkite sugeneruotą vertinimą su pradine versija.",
+            "waitingForDecision": "Naudokite dabartinį juodraštį arba sukurkite kitą pagal aukščiau pateiktas pastabas.",
+            "useCurrentDraft": "Tęsti",
+            "applyImprovements": "Patobulinti",
+            "target": {
+              "assessment": "Baigimo sąlygos",
+              "criterion": "Kriterijus",
+              "scoreGuidance": "Vertinimo lygis",
+              "blockingError": "Blokuojanti klaida"
+            },
+            "deterministicValidation": {
+              "summary": "Vertinimo struktūrą reikia pataisyti.",
+              "guidance_score_out_of_range": {
+                "message": "Vienas vertinimo lygis nepatenka į leistiną kriterijaus intervalą.",
+                "correction": "Kiekvienas vertinimo lygis turi būti nuo nulio iki didžiausio kriterijaus balo."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kriterijuje tas pats vertinimo lygis pateiktas daugiau nei vieną kartą.",
+                "correction": "Kiekvienam vertinimo lygiui palikite tik vieną vertinimo taisyklę."
+              },
+              "missing_guidance_scores": {
+                "message": "Kriterijuje trūksta vieno ar daugiau privalomų vertinimo lygių.",
+                "correction": "Pridėkite po vieną taisyklę kiekvienam lygiui nuo nulio iki didžiausio balo."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Dviejų kriterijų negalima patikimai atskirti.",
+                "correction": "Kiekvieną kriterijų palikite kaip atskirą vertinimo elementą."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Dviejų blokuojančių klaidų negalima patikimai atskirti.",
+                "correction": "Kiekvieną blokuojančią klaidą palikite kaip atskirą vertinimo elementą."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Naujo kriterijaus nepavyko patikimai susieti.",
+                "correction": "Išlaikykite esamus kriterijus ir pridėkite naują kaip atskirą elementą."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Naujos blokuojančios klaidos nepavyko patikimai susieti.",
+                "correction": "Išlaikykite esamas blokuojančias klaidas ir pridėkite naują kaip atskirą elementą."
+              }
+            },
+            "keepCurrentDraft": "Palikti dabartinį juodraštį",
+            "applySuggestedImprovements": "Pritaikyti siūlomus patobulinimus",
+            "completedArtifacts": "Jau paruošta",
+            "changedInRevision": "Pakeista šiame pataisyme",
+            "stopAndInspect": "Stabdyti ir peržiūrėti dabartinį juodraštį",
+            "cancel": "Atšaukti generavimą",
+            "draftSummary": "{{criteria}} kriterijai · {{score}} balų · išlaikymui {{threshold}}% · {{blockingErrors}} blokuojančios klaidos",
+            "review": {
+              "completedTitle": "Juodraštis praėjo kokybės patikrą",
+              "completedDescription": "Peržiūrėkite vertinimą prieš pritaikydami jį pamokos formoje.",
+              "currentDraftTitle": "Dabartinis juodraštis paruoštas peržiūrai",
+              "currentDraftDescription": "Kokybės pastabos nepritaikytos. Peržiūrėkite ir, jei reikia, pakoreguokite juodraštį prieš pritaikydami jį pamokai.",
+              "requiresReviewTitle": "Juodraščiui reikia jūsų sprendimo",
+              "notSaved": "Niekas nebuvo automatiškai išsaugota ar paskelbta."
+            },
+            "reviewAssessment": "Peržiūrėti vertinimą"
+          },
           "validation": {
-            "configurationRequired": "Prieš išsaugodami šią pamoką sukonfigūruokite AI Judge",
+            "configurationRequired": "Prieš išsaugodami šią pamoką sukonfigūruokite baigimo sąlygas",
             "taskGoalRequired": "Užduoties tikslas yra privalomas",
-            "thresholdRange": "Išlaikymo slenkstis turi būti nuo 1 iki 100",
+            "thresholdRange": "Išlaikymo slenkstis turi būti nuo 0 iki 100",
             "titleRequired": "Kriterijaus pavadinimas yra privalomas",
             "expectedBehaviorRequired": "Laukiamas elgesys yra privalomas",
             "maxScoreRange": "Didžiausias balas turi būti nuo 1 iki 5",
@@ -2384,7 +2549,7 @@
               "knowledgeSharing": "<ul><li>Mokinys aktyviai įsitraukia į pokalbį (užduoda klausimus ar dalijasi pamąstymais).</li><li>Mokinys gali įvardyti bent vieną dialoge paminėtą laiko valdymo techniką.</li><li>Mokinys išsako, kaip vieną techniką galėtų pritaikyti savo darbe.</li></ul><em>(Nėra apibrėžtos slenksčio – visos sąlygos rekomenduojamos, bet neprivalomos išlaikyti.)</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Skirkite 0 taškų, kai besimokantysis nepateikia aiškaus, stebimo šio elgesio įrodymo, jo vengia arba elgiasi priešingai: {{expectedBehavior}} Vien tai, kad nepanaudotas tikslus pavyzdys, nėra pakankama priežastis; vertinkite visos reakcijos prasmę.",
+              "notMetDescription": "Skirkite 0 taškų, kai besimokantysis nepateikia aiškaus, pamatuojamo šio elgesio įrodymo, jo vengia arba elgiasi priešingai: {{expectedBehavior}} Vien tai, kad nepanaudotas tikslus pavyzdys, nėra pakankama priežastis; vertinkite visos reakcijos prasmę.",
               "notMetExample": "Atsakyme nėra teiginio ar veiksmo, kuris parodytų: {{expectedBehavior}}",
               "metDescription": "Skirkite 1 tašką, kai besimokantysis aiškiai parodo šį elgesį tinkamai ir atsižvelgdamas į kontekstą: {{expectedBehavior}} Lygiavertės formuluotės yra tinkamos; priimto pavyzdžio nereikia kartoti pažodžiui."
             },

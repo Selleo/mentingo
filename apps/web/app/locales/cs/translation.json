@@ -57,7 +57,8 @@
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo.",
       "threadMustBeActive": "Vlákno musí být aktivní.",
-      "aiJudgeConfigurationMissing": "Konfigurace AI Judge chybí."
+      "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
+      "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
     },
     "loader": {
       "textSequence": {
@@ -2217,16 +2218,27 @@
           "aiMentorTypes": "Učitel"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Podmínky dokončení",
           "configured": "Nakonfigurováno",
           "emptyDescription": "Určete, jak bude odpověď studenta hodnocena a kdy bude lekce splněna.",
           "baseLanguageRequired": "Před překladem vytvořte strukturu hodnocení v základním jazyce kurzu.",
           "structureLockedTooltip": "Strukturu hodnocení lze měnit pouze v základním jazyce kurzu.",
           "summary": "{{criteria}} kritéria · celkem {{score}} bodů · {{threshold}} % pro splnění · {{blockingErrors}} blokující chyby",
           "configureWithAi": "Nastavit pomocí AI",
+          "createWithAi": "Vytvořit s AI",
+          "improveWithAi": "Vylepšit pomocí AI",
+          "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
+          "checkingQuality": "Kontrola kvality...",
+          "checkingQualityDescription": "Kontroluje se cíl úkolu, kritéria, pokyny k bodování a blokující chyby.",
+          "aiAssistance": "Pomoc AI",
+          "qualityCheckResult": "Kontrola kvality",
+          "qualityCheckResultDescription": "Než se rozhodnete, co změnit, projděte si zjištění k hodnocení.",
+          "qualityCheckPassed": "Nejsou potřeba žádné změny. Můžete pokračovat v úpravách nebo hodnocení uložit.",
+          "qualityCheckPassedWithSuggestions": "Hodnocení je použitelné. Použijte volitelná vylepšení nebo pokračujte beze změn.",
+          "qualityCheckNeedsChanges": "Projděte si zjištění nebo nechte AI hodnocení podle této zpětné vazby vylepšit.",
           "configureManually": "Nastavit ručně",
           "editAssessment": "Upravit hodnocení",
-          "dialogTitle": "Nastavit AI Judge",
+          "dialogTitle": "Nastavit podmínky dokončení",
           "dialogDescription": "Nastavte měřitelná kritéria, přesné pokyny k bodování a chyby, které vždy znamenají nesplnění.",
           "translationModeTitle": "Režim překladu",
           "translationModeDescription": "Zde můžete překládat text hodnocení. Body, práh a struktura se spravují v základním jazyce kurzu.",
@@ -2239,23 +2251,23 @@
           "untitledCriterion": "Kritérium bez názvu",
           "complete": "Dokončeno",
           "needsDetails": "Chybí podrobnosti",
-          "criterionDescription": "Popište jedno pozorovatelné chování studenta.",
+          "criterionDescription": "Popište jedno měřitelné chování studenta.",
           "criterionTitle": "Název kritéria",
           "criterionTitlePlaceholder": "např. Zjišťuje potřeby klienta",
           "expectedBehavior": "Očekávané chování",
           "expectedBehaviorPlaceholder": "Vysvětlete, co má student říci nebo udělat...",
-          "maxScore": "Maximální počet bodů",
+          "maxScore": "Max. bodů",
           "score": "Body",
-          "scoringGuidance": "Pokyny k bodování",
-          "advancedScoring": "Pokročilé pokyny k bodování",
+          "scoringGuidance": "Pravidla hodnocení",
+          "advancedScoring": "Pravidla hodnocení",
           "scoreLevelsCount": "Úrovně bodů: {{count}}",
           "scoreBadge": "{{score}} b.",
           "itemsCount": "Přidáno: {{count}}",
           "scoringSummary": "Bodování",
           "pointsRequired": "Pro splnění je třeba {{required}} z {{total}} bodů",
           "scoringGuidanceDescription": "Volitelně popište, jak vypadá výkon pro konkrétní počet bodů.",
-          "scoreDescription": "Co získá tento počet bodů",
-          "scoreDescriptionPlaceholder": "Popište pozorovatelnou úroveň výkonu...",
+          "scoreDescription": "Co student udělá pro tento počet bodů",
+          "scoreDescriptionPlaceholder": "Popište měřitelnou úroveň výkonu...",
           "acceptedExample": "Přijatelný příklad",
           "examplePlaceholder": "Přidejte jeden příklad odpovědi...",
           "addCriterion": "Přidat kritérium",
@@ -2273,12 +2285,164 @@
           "applyConfiguration": "Použít konfiguraci",
           "saveConfiguration": "Uložit konfiguraci",
           "saveTranslation": "Uložit překlad",
-          "configurationSavedSuccessfully": "Konfigurace AI Judge byla uložena.",
-          "translationSavedSuccessfully": "Překlad AI Judge byl uložen.",
+          "configurationSavedSuccessfully": "Konfigurace uložena.",
+          "translationSavedSuccessfully": "Překlad podmínek dokončení byl uložen.",
+          "generation": {
+            "create": {
+              "title": "Vytvořit hodnocení pomocí AI",
+              "description": "Popište, čeho má dobrá odpověď dosáhnout. Návrh můžete před použitím zkontrolovat a upravit.",
+              "fieldLabel": "Co má student prokázat?",
+              "fieldDescription": "Zaměřte se na měřitelný výsledek. AI z něj vytvoří úplné hodnocení.",
+              "placeholder": "Například: zjistit potřeby klienta, navrhnout vhodný další krok a profesionálně reagovat na námitky."
+            },
+            "improve": {
+              "title": "Vylepšit hodnocení pomocí AI",
+              "description": "Popište, co má být jasnější nebo přesnější. Současné hodnocení bude výchozím bodem.",
+              "fieldLabel": "Co se má zlepšit?",
+              "fieldDescription": "Popište požadovaný výsledek. Ostatní obsah hodnocení zůstane zachován.",
+              "placeholder": "Například: zpřesnit měřitelná kritéria a lépe rozlišit částečnou a plnou odpověď."
+            },
+            "instructionRequired": "Popište, co má AI vytvořit nebo zlepšit",
+            "willCreate": "AI vygeneruje",
+            "artifacts": {
+              "taskGoal": "Měřitelný cíl úkolu",
+              "criteria": "Kritéria s pokyny k bodování",
+              "threshold": "Hranici pro splnění",
+              "blockingErrors": "Blokující chyby, pokud jsou relevantní"
+            },
+            "generateDraft": "Vygenerovat návrh",
+            "improveAssessment": "Vylepšit hodnocení",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Jasnější kritéria",
+                "instruction": "Zpřesněte kritéria tak, aby byla přímo měřitelná."
+              },
+              "betterScoring": {
+                "label": "Lepší bodování",
+                "instruction": "Usnadněte konzistentní rozlišení sousedních úrovní bodování."
+              },
+              "reduceOverlap": {
+                "label": "Omezit překryv",
+                "instruction": "Odstraňte překryv kritérií, aby každé hodnotilo jiné chování."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Upřesnit blokující chyby",
+                "instruction": "Upřesněte chování, které spouští každou blokující chybu."
+              }
+            },
+            "progressLabel": "Průběh generování hodnocení",
+            "stages": {
+              "draft": "Generování návrhu",
+              "qualityCheck": "Kontrola kvality",
+              "ready": "Hotovo"
+            },
+            "status": {
+              "drafting": "Vytváříme hodnocení",
+              "evaluating": "Kontrolujeme kvalitu",
+              "revising": "Vylepšujeme návrh",
+              "awaiting_revision": "Kontrola kvality čeká na vaše rozhodnutí",
+              "completed": "Hodnocení je připraveno",
+              "requires_review": "Návrh vyžaduje vaše rozhodnutí",
+              "failed": "Generování se nepodařilo dokončit",
+              "cancelled": "Generování zrušeno"
+            },
+            "statusDescription": {
+              "drafting": "Připravujeme cíl, kritéria, bodování a blokující chyby.",
+              "evaluating": "Kontrolujeme měřitelnost kritérií a konzistenci bodování.",
+              "revising": "Používáme nejnovější opravu z kontroly kvality.",
+              "awaiting_revision": "Před spuštěním dalšího pokusu si projděte zjištění.",
+              "completed": "Návrh prošel kontrolou kvality.",
+              "requires_review": "Poslední návrh jsme zachovali pro vaše rozhodnutí.",
+              "failed": "Zkuste to znovu nebo nastavte hodnocení ručně.",
+              "cancelled": "Nebyly použity žádné změny hodnocení."
+            },
+            "attempt": "Návrh {{attempt}} z {{maxAttempts}}",
+            "attemptNumber": "Návrh {{attempt}}",
+            "attemptHistory": "Historie návrhů",
+            "viewDetails": "Zobrazit podrobnosti",
+            "attemptPassed": "Kontrola kvality úspěšná",
+            "attemptNeedsRevision": "Kontrola kvality našla problémy",
+            "initialDraftCreated": "Počáteční návrh vytvořen.",
+            "changesInAttempt": "Co AI změnila v tomto návrhu",
+            "qualityFeedback": "Co následná kontrola kvality zjistila",
+            "currentDraft": "Aktuální návrh",
+            "draftPreviewPending": "Náhled návrhu se zde zobrazí po dokončení generování.",
+            "qualityCheckLabel": "Kontrola kvality",
+            "qualityDecisionTitle_one": "Navrženo {{count}} vylepšení",
+            "qualityDecisionTitle_few": "Navržena {{count}} vylepšení",
+            "qualityDecisionTitle_other": "Navrženo {{count}} vylepšení",
+            "feedbackNotApplied": "Zatím nepoužito",
+            "qualityDecisionDescription": "Projděte návrhy nebo pokračujte s tímto hodnocením.",
+            "suggestedImprovements": "Navržená vylepšení",
+            "beforeChange": "Předchozí hodnocení",
+            "afterChange": "Aktuální návrh",
+            "showMoreFindings": "Zobrazit dalších {{count}} zjištění",
+            "showFewerFindings": "Zobrazit méně zjištění",
+            "showMoreChanges": "Zobrazit dalších {{count}} změn",
+            "showFewerChanges": "Zobrazit méně změn",
+            "reviewExactChanges": "Co AI změnila ({{count}})",
+            "exactChangesDescription": "Volitelně: porovnejte vygenerované hodnocení s výchozí verzí.",
+            "waitingForDecision": "Použijte aktuální návrh nebo vytvořte další podle zpětné vazby výše.",
+            "useCurrentDraft": "Pokračovat",
+            "applyImprovements": "Upravit",
+            "target": {
+              "assessment": "Podmínky dokončení",
+              "criterion": "Kritérium",
+              "scoreGuidance": "Úroveň hodnocení",
+              "blockingError": "Blokující chyba"
+            },
+            "deterministicValidation": {
+              "summary": "Strukturu hodnocení je třeba opravit.",
+              "guidance_score_out_of_range": {
+                "message": "Jedna úroveň hodnocení je mimo povolený rozsah kritéria.",
+                "correction": "Každá úroveň hodnocení musí být mezi nulou a maximálním počtem bodů kritéria."
+              },
+              "duplicate_guidance_score": {
+                "message": "Kritérium obsahuje stejnou úroveň hodnocení více než jednou.",
+                "correction": "Pro každou úroveň hodnocení ponechte právě jedno pravidlo."
+              },
+              "missing_guidance_scores": {
+                "message": "V kritériu chybí jedna nebo více požadovaných úrovní hodnocení.",
+                "correction": "Přidejte jedno pravidlo pro každou úroveň od nuly po maximum."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Dvě kritéria nelze spolehlivě rozlišit.",
+                "correction": "Každé kritérium ponechte jako samostatnou položku hodnocení."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Dvě blokující chyby nelze spolehlivě rozlišit.",
+                "correction": "Každou blokující chybu ponechte jako samostatnou položku hodnocení."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Nové kritérium se nepodařilo spolehlivě přiřadit.",
+                "correction": "Zachovejte stávající kritéria a přidejte nové jako samostatnou položku."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Novou blokující chybu se nepodařilo spolehlivě přiřadit.",
+                "correction": "Zachovejte stávající blokující chyby a přidejte novou jako samostatnou položku."
+              }
+            },
+            "keepCurrentDraft": "Ponechat aktuální návrh",
+            "applySuggestedImprovements": "Použít navržená vylepšení",
+            "completedArtifacts": "Dosud připraveno",
+            "changedInRevision": "Změněno v této revizi",
+            "stopAndInspect": "Zastavit a zkontrolovat aktuální návrh",
+            "cancel": "Zrušit generování",
+            "draftSummary": "{{criteria}} kritérií · {{score}} bodů · {{threshold}}% pro splnění · {{blockingErrors}} blokujících chyb",
+            "review": {
+              "completedTitle": "Návrh prošel kontrolou kvality",
+              "completedDescription": "Před použitím ve formuláři lekce hodnocení zkontrolujte.",
+              "currentDraftTitle": "Aktuální návrh je připraven ke kontrole",
+              "currentDraftDescription": "Zpětná vazba ke kvalitě nebyla použita. Návrh zkontrolujte, případně upravte a poté jej použijte v lekci.",
+              "requiresReviewTitle": "Návrh vyžaduje vaše rozhodnutí",
+              "notSaved": "Nic nebylo automaticky uloženo ani zveřejněno."
+            },
+            "reviewAssessment": "Zkontrolovat hodnocení"
+          },
           "validation": {
-            "configurationRequired": "Před uložením této lekce nakonfigurujte AI Judge",
+            "configurationRequired": "Před uložením této lekce nakonfigurujte podmínky dokončení",
             "taskGoalRequired": "Cíl úkolu je povinný",
-            "thresholdRange": "Práh pro splnění musí být mezi 1 a 100",
+            "thresholdRange": "Práh pro splnění musí být mezi 0 a 100",
             "titleRequired": "Název kritéria je povinný",
             "expectedBehaviorRequired": "Očekávané chování je povinné",
             "maxScoreRange": "Maximální počet bodů musí být mezi 1 a 5",
@@ -2384,7 +2548,7 @@
               "knowledgeSharing": "<ul><li>Student se aktivně zapojuje do konverzace (klade otázky nebo sdílí úvahy).</li><li>Student umí vyjmenovat alespoň jednu techniku ​​řízení času zmíněnou v dialogu.</li><li>Student vyjádří, jak by mohl ve své práci použít jednu techniku.</li></ul><em>(Není definován žádný práh – všechny podmínky jsou doporučeny, ale nejsou povinné pro absolvování.)</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Přidělte 0 bodů, pokud student neposkytne jasný a pozorovatelný důkaz tohoto chování, vyhne se mu nebo jedná v rozporu s ním: {{expectedBehavior}} Samotná absence přesného příkladu nestačí; posuzujte význam celé odpovědi.",
+              "notMetDescription": "Přidělte 0 bodů, pokud student neposkytne jasný a měřitelný důkaz tohoto chování, vyhne se mu nebo jedná v rozporu s ním: {{expectedBehavior}} Samotná absence přesného příkladu nestačí; posuzujte význam celé odpovědi.",
               "notMetExample": "Odpověď neobsahuje žádné tvrzení ani jednání, které prokazuje: {{expectedBehavior}}",
               "metDescription": "Přidělte 1 bod, pokud student toto chování jasně prokáže relevantním způsobem odpovídajícím kontextu: {{expectedBehavior}} Rovnocenné formulace jsou platné; přijatý příklad není nutné opakovat doslovně."
             },

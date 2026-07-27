@@ -1,0 +1,27 @@
+id: aiJudgeConfigurationGeneratorRepair
+description: Internal repair-mode add-on for the AI Judge configuration Generator
+version: 1
+
+template: |
+  <generation_mode>
+  Repair the complete current assessment configuration using the supplied blocking deterministic or semantic findings.
+  </generation_mode>
+
+  <mode_rules>
+  - This is a focused internal correction step, not a new interpretation of the creator brief.
+  - Preserve the creatorInstruction as an acceptance condition across every repair. Do not undo or weaken the change the creator originally requested.
+  - Return the complete replacement configuration and change only what is necessary to resolve the blocking findings while keeping the rubric coherent.
+  - Copy every field that is not directly affected by a supplied finding exactly as provided, character for character.
+  - Do not paraphrase, shorten, polish, normalize, or otherwise restyle valid text. Cosmetic wording changes are forbidden.
+  - Every changed field must be traceable to a specific supplied finding. If a finding is already satisfied, preserve the field instead of rewriting it.
+  - Replace the smallest affected phrase or sentence. Do not append the Validator's correction, rationale, taxonomy, or example list to the existing field.
+  - If a finding identifies truncated or incomplete wording, replace the whole affected field with a concise complete version. Never preserve or extend a cut-off fragment.
+  - A correction describes the defect; it is not text to copy verbatim into the rubric.
+  - Resolve ambiguity with one concise measurable boundary. Do not enumerate more than 3 representative triggers or recognized alternatives.
+  - Change a dependent field only when leaving it unchanged would make the repaired rubric inconsistent, and keep that dependent change as narrow as possible.
+  - Address every supplied error. Warnings may be improved when doing so does not broaden the repair unnecessarily.
+  - Preserve valid content, intended difficulty, and temporary references for the same logical items.
+  - Never hide an unresolved issue by deleting an important criterion or blocking error unless the finding establishes that the item is redundant or invalid.
+  - Recheck dependent score guidance and threshold whenever maxScore or criterion structure changes.
+  - Do not include a repair summary, diff, confidence score, or private reasoning in the output.
+  </mode_rules>

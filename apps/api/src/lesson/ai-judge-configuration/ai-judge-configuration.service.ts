@@ -17,6 +17,7 @@ import type {
   UpdateAiJudgeConfigurationTranslationBody,
 } from "./ai-judge-configuration.schema";
 import type {
+  AiJudgeGenerationAuthoringContext,
   AiJudgeScoreGuidanceLanguageRead,
   AiMentorLessonContext,
   ConfiguredAiJudgeLessonContext,
@@ -73,6 +74,32 @@ export class AiJudgeConfigurationService {
       );
 
     return this.buildResponse({ ...context, configurationId }, context.baseLanguage);
+  }
+
+  async prepareGenerationAuthoringContext(
+    courseId: UUIDType,
+    lessonId: UUIDType | undefined,
+    currentUser: CurrentUserType,
+  ): Promise<AiJudgeGenerationAuthoringContext> {
+    if (lessonId) {
+      const context = await this.prepareStructuralWrite(lessonId, currentUser);
+      if (context.courseId !== courseId)
+        throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+
+      return { courseId: context.courseId, baseLanguage: context.baseLanguage };
+    }
+
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabled(
+      courseId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
+
+    const context = await this.aiJudgeConfigurationRepository.findCourseAuthoringContext(courseId);
+    if (!context) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    return context;
   }
 
   async updateTranslations(

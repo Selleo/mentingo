@@ -1,7 +1,19 @@
 import { AI_JUDGE_MAX_CRITERION_SCORE } from "@repo/shared";
 import { z } from "zod";
 
+import { stripHtmlTags } from "~/utils/stripHtmlTags";
+
 import type { TFunction } from "i18next";
+
+export const aiJudgeGenerationBriefSchema = (t: TFunction) =>
+  z.object({
+    instruction: z
+      .string()
+      .refine(
+        (value) => stripHtmlTags(value).trim().length > 0,
+        t("adminCourseView.curriculum.lesson.aiJudge.generation.instructionRequired"),
+      ),
+  });
 
 export const aiJudgeConfigurationSchema = (t: TFunction) =>
   z
@@ -9,12 +21,14 @@ export const aiJudgeConfigurationSchema = (t: TFunction) =>
       id: z.string().optional(),
       taskGoal: z
         .string()
-        .trim()
-        .min(1, t("adminCourseView.curriculum.lesson.aiJudge.validation.taskGoalRequired")),
+        .refine(
+          (value) => stripHtmlTags(value).trim().length > 0,
+          t("adminCourseView.curriculum.lesson.aiJudge.validation.taskGoalRequired"),
+        ),
       passingThresholdPercent: z.coerce
         .number()
         .int()
-        .min(1, t("adminCourseView.curriculum.lesson.aiJudge.validation.thresholdRange"))
+        .min(0, t("adminCourseView.curriculum.lesson.aiJudge.validation.thresholdRange"))
         .max(100, t("adminCourseView.curriculum.lesson.aiJudge.validation.thresholdRange")),
       criteria: z.array(
         z

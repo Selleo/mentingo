@@ -3,6 +3,8 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { DatabasePg, type UUIDType } from "src/common";
 import { DB } from "src/storage/db/db.providers";
 
+import { validateAiJudgeConfigurationContent } from "./ai-judge-configuration-content-validator";
+import { AI_JUDGE_CONTENT_VALIDATION_CODE } from "./ai-judge-configuration-content-validator.types";
 import { AiJudgeConfigurationRepository } from "./ai-judge-configuration.repository";
 
 import type {
@@ -11,6 +13,15 @@ import type {
 } from "./ai-judge-configuration.schema";
 import type { AiJudgeConfigurationGraph } from "./ai-judge-configuration.types";
 import type { SupportedLanguages } from "@repo/shared";
+
+const contentValidationErrorKeys = {
+  [AI_JUDGE_CONTENT_VALIDATION_CODE.GUIDANCE_SCORE_OUT_OF_RANGE]:
+    "aiJudgeConfiguration.errors.guidanceExceedsMaximum",
+  [AI_JUDGE_CONTENT_VALIDATION_CODE.DUPLICATE_GUIDANCE_SCORE]:
+    "aiJudgeConfiguration.errors.duplicateGuidanceScore",
+  [AI_JUDGE_CONTENT_VALIDATION_CODE.MISSING_GUIDANCE_SCORES]:
+    "adminCourseView.curriculum.lesson.aiJudge.validation.completeGuidanceRequired",
+} as const;
 
 @Injectable()
 export class AiJudgeConfigurationGraphService {
@@ -252,29 +263,11 @@ export class AiJudgeConfigurationGraphService {
     this.assertUniqueIds(data.criteria.flatMap(({ id }) => (id ? [id] : [])));
     this.assertUniqueIds(data.blockingErrors.flatMap(({ id }) => (id ? [id] : [])));
 
-    for (const criterion of data.criteria) {
-      const scores = new Set<number>();
+    for (const criterion of data.criteria)
       this.assertUniqueIds(criterion.scoreGuidance.flatMap(({ id }) => (id ? [id] : [])));
 
-      for (const guidance of criterion.scoreGuidance) {
-        if (guidance.score > criterion.maxScore)
-          throw new BadRequestException("aiJudgeConfiguration.errors.guidanceExceedsMaximum");
-        if (scores.has(guidance.score))
-          throw new BadRequestException("aiJudgeConfiguration.errors.duplicateGuidanceScore");
-        scores.add(guidance.score);
-      }
-
-      const hasEveryScore = Array.from(
-        { length: criterion.maxScore + 1 },
-        (_, score) => score,
-      ).every((score) => scores.has(score));
-
-      if (scores.size !== criterion.maxScore + 1 || !hasEveryScore) {
-        throw new BadRequestException(
-          "adminCourseView.curriculum.lesson.aiJudge.validation.completeGuidanceRequired",
-        );
-      }
-    }
+    const [contentIssue] = validateAiJudgeConfigurationContent(data);
+    if (contentIssue) throw new BadRequestException(contentValidationErrorKeys[contentIssue.code]);
   }
 
   private validateCreateInput(data: AiJudgeConfigurationInput) {

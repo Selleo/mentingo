@@ -25,6 +25,7 @@ import type {
   AiJudgeBlockingErrorLanguageRead,
   AiJudgeConfigurationLanguageRead,
   AiJudgeCriterionLanguageRead,
+  AiJudgeGenerationAuthoringContext,
   AiJudgeLessonContext,
   AiJudgeScoreGuidanceLanguageRead,
 } from "./ai-judge-configuration.types";
@@ -41,6 +42,7 @@ export class AiJudgeConfigurationRepository {
   async findLessonContext(lessonId: UUIDType): Promise<AiJudgeLessonContext | undefined> {
     const [context] = await this.db
       .select({
+        courseId: courses.id,
         lessonId: lessons.id,
         lessonType: lessons.type,
         aiMentorLessonId: aiMentorLessons.id,
@@ -57,6 +59,20 @@ export class AiJudgeConfigurationRepository {
         eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
       )
       .where(eq(lessons.id, lessonId));
+
+    return context;
+  }
+
+  async findCourseAuthoringContext(
+    courseId: UUIDType,
+  ): Promise<AiJudgeGenerationAuthoringContext | undefined> {
+    const [context] = await this.db
+      .select({
+        courseId: courses.id,
+        baseLanguage: courses.baseLanguage,
+      })
+      .from(courses)
+      .where(eq(courses.id, courseId));
 
     return context;
   }
