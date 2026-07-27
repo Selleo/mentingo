@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import { getStepDefinition } from "../automationBuilder.types";
 import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
@@ -40,14 +41,18 @@ const SAMPLE_VALUES: Record<string, string> = {
  * and produces a SimulationResult with sample data. No backend calls.
  */
 export function useSimulation() {
+  const { t } = useTranslation();
   const [simulationState, setSimulationState] = useState<SimulationPanelState>({ type: "idle" });
   const [panelOpen, setPanelOpen] = useState(false);
 
-  const runSimulation = useCallback((nodes: BuilderNode[]) => {
-    const result = buildSimulationResult(nodes);
-    setSimulationState({ type: "success", result });
-    setPanelOpen(true);
-  }, []);
+  const runSimulation = useCallback(
+    (nodes: BuilderNode[]) => {
+      const result = buildSimulationResult(nodes, t);
+      setSimulationState({ type: "success", result });
+      setPanelOpen(true);
+    },
+    [t],
+  );
 
   const closePanel = useCallback(() => {
     setPanelOpen(false);
@@ -72,7 +77,10 @@ export function useSimulation() {
 
 // ─── Simulation result builder ───────────────────────────────────────────────
 
-function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
+function buildSimulationResult(
+  nodes: BuilderNode[],
+  t: (key: string, options?: Record<string, string>) => string,
+): SimulationResult {
   const triggerNode = nodes.find((n) => n.kind === "trigger");
   const actionNodes = nodes.filter((n) => n.kind === "action");
 
@@ -85,15 +93,15 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
     if (!triggerNode.type) {
       triggerErrors.push({
         nodeId: triggerNode.id,
-        nodeName: triggerNode.label || "Zdarzenie startowe",
+        nodeName: triggerNode.label || t("automationBuilder.simulation.errors.triggerNodeName"),
         field: "type",
-        description: "Wybierz typ zdarzenia startowego",
+        description: t("automationBuilder.simulation.errors.selectTriggerType"),
       });
     }
 
     nodeResults.push({
       nodeId: triggerNode.id,
-      nodeName: triggerNode.label || "Zdarzenie startowe",
+      nodeName: triggerNode.label || t("automationBuilder.simulation.errors.triggerNodeName"),
       kind: "trigger",
       status: triggerErrors.length > 0 ? "invalid" : "valid",
       errors: triggerErrors,
@@ -102,15 +110,15 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
     // No trigger at all — report as a global error on a virtual node
     nodeResults.push({
       nodeId: "missing-trigger",
-      nodeName: "Zdarzenie startowe",
+      nodeName: t("automationBuilder.simulation.errors.triggerNodeName"),
       kind: "trigger",
       status: "invalid",
       errors: [
         {
           nodeId: "missing-trigger",
-          nodeName: "Zdarzenie startowe",
+          nodeName: t("automationBuilder.simulation.errors.triggerNodeName"),
           field: "trigger",
-          description: "Dodaj co najmniej jeden węzeł triggera",
+          description: t("automationBuilder.simulation.errors.addTriggerNode"),
         },
       ],
     });
@@ -123,18 +131,18 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
     if (!action.config.emailTemplate) {
       actionErrors.push({
         nodeId: action.id,
-        nodeName: action.label || "Wyślij e-mail",
+        nodeName: action.label || t("automationBuilder.simulation.errors.actionNodeName"),
         field: "emailTemplate",
-        description: "Wybierz opublikowany szablon e-mail",
+        description: t("automationBuilder.simulation.errors.selectEmailTemplate"),
       });
     }
 
     if (!action.config.language) {
       actionErrors.push({
         nodeId: action.id,
-        nodeName: action.label || "Wyślij e-mail",
+        nodeName: action.label || t("automationBuilder.simulation.errors.actionNodeName"),
         field: "language",
-        description: "Wybierz język szablonu e-mail",
+        description: t("automationBuilder.simulation.errors.selectLanguage"),
       });
     }
 
@@ -142,7 +150,7 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
     const placeholderValues = (action.config.placeholderValues as Record<string, string>) ?? {};
     const selectedTemplateId = action.config.emailTemplate as string | undefined;
     const templateDef = selectedTemplateId
-      ? EMAIL_TEMPLATES.find((t) => t.id === selectedTemplateId)
+      ? EMAIL_TEMPLATES.find((tmpl) => tmpl.id === selectedTemplateId)
       : undefined;
 
     if (templateDef) {
@@ -152,9 +160,11 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
         for (const placeholder of unmappedPlaceholders) {
           actionErrors.push({
             nodeId: action.id,
-            nodeName: action.label || "Wyślij e-mail",
+            nodeName: action.label || t("automationBuilder.simulation.errors.actionNodeName"),
             field: `placeholderValues.${placeholder}`,
-            description: `Placeholder {{${placeholder}}} nie jest zmapowany — przypisz zmienną zdarzenia`,
+            description: t("automationBuilder.simulation.errors.unmappedPlaceholder", {
+              placeholder,
+            }),
           });
         }
       }
@@ -162,7 +172,7 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
 
     nodeResults.push({
       nodeId: action.id,
-      nodeName: action.label || "Wyślij e-mail",
+      nodeName: action.label || t("automationBuilder.simulation.errors.actionNodeName"),
       kind: "action",
       status: actionErrors.length > 0 ? "invalid" : "valid",
       errors: actionErrors,
@@ -172,15 +182,15 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
   if (actionNodes.length === 0) {
     nodeResults.push({
       nodeId: "missing-action",
-      nodeName: "Akcja",
+      nodeName: t("automationBuilder.simulation.errors.actionLabel"),
       kind: "action",
       status: "invalid",
       errors: [
         {
           nodeId: "missing-action",
-          nodeName: "Akcja",
+          nodeName: t("automationBuilder.simulation.errors.actionLabel"),
           field: "action",
-          description: "Dodaj co najmniej jeden węzeł akcji (np. Wyślij e-mail)",
+          description: t("automationBuilder.simulation.errors.addActionNode"),
         },
       ],
     });
@@ -193,7 +203,7 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
   const eventData: SimulationResult["eventData"] = (triggerDef?.providedVariables ?? []).map(
     (v) => ({
       key: v.key,
-      label: v.labelKey,
+      label: t(v.labelKey),
       dataType: v.dataType ?? "string",
     }),
   );
@@ -217,26 +227,26 @@ function buildSimulationResult(nodes: BuilderNode[]): SimulationResult {
   if (overallStatus === "success") {
     for (const action of actionNodes) {
       const values = (action.config.placeholderValues as Record<string, string>) ?? {};
-      const courseName = SAMPLE_VALUES[values.courseName ?? "course_name"] ?? "Szkolenie BHP 2025";
+      const courseName = SAMPLE_VALUES[values.courseName ?? "course_name"] ?? "Sample Course 2025";
       const courseLink =
         SAMPLE_VALUES[values.courseLink ?? "course_url"] ??
         "https://app.mentingo.com/courses/abc123";
 
       emailPreviews.push({
         nodeId: action.id,
-        nodeName: action.label || "Wyślij e-mail",
-        subject: `Zostałeś przypisany do kursu: ${courseName}`,
+        nodeName: action.label || t("automationBuilder.simulation.errors.actionNodeName"),
+        subject: t("automationBuilder.simulation.preview.subject", { courseName }),
         senderAddress: "noreply@mentingo.com",
         recipientAddress: "jan.kowalski@example.com",
         htmlBody: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
-            <h2 style="color: #1a1a1a;">Cześć Jan!</h2>
+            <h2 style="color: #1a1a1a;">${t("automationBuilder.simulation.preview.greeting", { name: "Jan" })}</h2>
             <p style="color: #4a4a4a; line-height: 1.6;">
-              Zostałeś przypisany do nowego kursu: <strong>${courseName}</strong>.
+              ${t("automationBuilder.simulation.preview.assignedToCourse", { courseName })}
             </p>
             <a href="${courseLink}"
                style="display: inline-block; background: #2563eb; color: #fff; padding: 12px 24px; border-radius: 6px; text-decoration: none; margin-top: 16px;">
-              Przejdź do kursu
+              ${t("automationBuilder.simulation.preview.goToCourse")}
             </a>
             <p style="color: #888; font-size: 12px; margin-top: 32px;">
               Mentingo Learning Platform

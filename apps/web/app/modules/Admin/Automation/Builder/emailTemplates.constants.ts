@@ -7,7 +7,14 @@ export interface EmailTemplateDefinition {
   placeholders: string[];
 }
 
+export const DEFAULT_EMAIL_TEMPLATE_ID = "default_email";
+
 export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
+  {
+    id: DEFAULT_EMAIL_TEMPLATE_ID,
+    labelKey: "automationBuilder.editAction.templates.defaultEmail",
+    placeholders: [],
+  },
   {
     id: "user_invite",
     labelKey: "automationBuilder.editAction.templates.userInvite",

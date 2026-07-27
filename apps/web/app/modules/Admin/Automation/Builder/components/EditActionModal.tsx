@@ -16,7 +16,7 @@ import { Separator } from "~/components/ui/separator";
 
 import { getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
-import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
+import { DEFAULT_EMAIL_TEMPLATE_ID, EMAIL_TEMPLATES } from "../emailTemplates.constants";
 import { useSaveAutomationSteps } from "../hooks/useSaveAutomationSteps";
 
 import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBuilder.types";
@@ -66,6 +66,8 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
     const def = getStepDefinition(triggerType);
     return def?.providedVariables ?? [];
   }, [triggerType]);
+
+  const isDefaultTemplate = selectedTemplate === DEFAULT_EMAIL_TEMPLATE_ID;
 
   // Get placeholders from selected template
   const templatePlaceholders = useMemo(() => {
@@ -174,19 +176,25 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
               {t("automationBuilder.editAction.placeholders")}
             </h3>
 
-            {!selectedTemplate && (
+            {isDefaultTemplate && (
+              <p className="text-sm text-muted-foreground">
+                {t("automationBuilder.editAction.defaultEmailNoMapping")}
+              </p>
+            )}
+
+            {!isDefaultTemplate && !selectedTemplate && (
               <p className="text-sm text-muted-foreground">
                 {t("automationBuilder.editAction.selectTemplateFirst")}
               </p>
             )}
 
-            {selectedTemplate && templatePlaceholders.length === 0 && (
+            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 {t("automationBuilder.editAction.noPlaceholders")}
               </p>
             )}
 
-            {selectedTemplate && templatePlaceholders.length > 0 && (
+            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length > 0 && (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   {t("automationBuilder.editAction.placeholdersDescription")}
@@ -211,7 +219,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
                       <SelectContent>
                         {triggerVariables.map((variable) => (
                           <SelectItem key={variable.key} value={variable.key}>
-                            {variable.labelKey} ({`{{${variable.key}}}`})
+                            {t(variable.labelKey)} ({`{{${variable.key}}}`})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -221,7 +229,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
               </div>
             )}
 
-            {selectedTemplate && triggerVariables.length === 0 && (
+            {!isDefaultTemplate && selectedTemplate && triggerVariables.length === 0 && (
               <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
                 <p className="text-xs text-amber-700">
                   {t("automationBuilder.editAction.noTriggerVariables")}

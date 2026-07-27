@@ -84,10 +84,10 @@ const USER_INVITED_TRIGGER: AutomationStepDefinition = {
   icon: "user-plus",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "inviteLink", labelKey: "Link aktywacyjny" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "inviteLink", labelKey: "automationBuilder.variables.inviteLink" },
   ],
 };
 
@@ -98,10 +98,10 @@ const USERS_IMPORTED_INVITE_TRIGGER: AutomationStepDefinition = {
   icon: "upload",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "inviteLink", labelKey: "Link do rejestracji" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "inviteLink", labelKey: "automationBuilder.variables.inviteLinkRegistration" },
   ],
 };
 
@@ -112,10 +112,10 @@ const USER_PASSWORD_REMINDER_TRIGGER: AutomationStepDefinition = {
   icon: "key",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "resetPasswordLink", labelKey: "Link do resetu hasła" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "resetPasswordLink", labelKey: "automationBuilder.variables.resetPasswordLink" },
   ],
 };
 
@@ -126,10 +126,10 @@ const USER_WELCOME_TRIGGER: AutomationStepDefinition = {
   icon: "sparkles",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "platformUrl", labelKey: "Link do platformy" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "platformUrl", labelKey: "automationBuilder.variables.platformUrl" },
   ],
 };
 
@@ -140,10 +140,10 @@ const USER_FIRST_LOGIN_TRIGGER: AutomationStepDefinition = {
   icon: "log-in",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "loginDate", labelKey: "Data pierwszego zalogowania" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "loginDate", labelKey: "automationBuilder.variables.loginDate" },
   ],
 };
 
@@ -154,12 +154,12 @@ const USERS_ASSIGNED_TO_COURSE_TRIGGER: AutomationStepDefinition = {
   icon: "book-open",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "courseUrl", labelKey: "Link do kursu" },
-    { key: "dueDate", labelKey: "Termin ukończenia" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl" },
+    { key: "dueDate", labelKey: "automationBuilder.variables.dueDate" },
   ],
 };
 
@@ -170,12 +170,12 @@ const USERS_SHORT_INACTIVITY_TRIGGER: AutomationStepDefinition = {
   icon: "user-x",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "courseUrl", labelKey: "Link do kursu" },
-    { key: "daysInactive", labelKey: "Liczba dni nieaktywności" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl" },
+    { key: "daysInactive", labelKey: "automationBuilder.variables.daysInactive" },
   ],
 };
 
@@ -186,12 +186,12 @@ const USERS_LONG_INACTIVITY_TRIGGER: AutomationStepDefinition = {
   icon: "user-x",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "courseUrl", labelKey: "Link do kursu" },
-    { key: "daysInactive", labelKey: "Liczba dni nieaktywności" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl" },
+    { key: "daysInactive", labelKey: "automationBuilder.variables.daysInactive" },
   ],
 };
 
@@ -202,12 +202,12 @@ const USER_CHAPTER_FINISHED_TRIGGER: AutomationStepDefinition = {
   icon: "check-circle",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "chapterName", labelKey: "Nazwa rozdziału" },
-    { key: "courseUrl", labelKey: "Link do kursu" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "chapterName", labelKey: "automationBuilder.variables.chapterName" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl" },
   ],
 };
 
@@ -218,12 +218,12 @@ const USER_COURSE_FINISHED_TRIGGER: AutomationStepDefinition = {
   icon: "graduation-cap",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "finishedAt", labelKey: "Data ukończenia" },
-    { key: "certificateUrl", labelKey: "Link do certyfikatu" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "finishedAt", labelKey: "automationBuilder.variables.finishedAt" },
+    { key: "certificateUrl", labelKey: "automationBuilder.variables.certificateUrl" },
   ],
 };
 const USER_REGISTERED_TRIGGER: AutomationStepDefinition = {
@@ -233,10 +233,10 @@ const USER_REGISTERED_TRIGGER: AutomationStepDefinition = {
   icon: "user-check",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "registrationDate", labelKey: "Data rejestracji" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "registrationDate", labelKey: "automationBuilder.variables.registrationDate" },
   ],
 };
 
@@ -247,10 +247,10 @@ const USER_PASSWORD_CREATED_TRIGGER: AutomationStepDefinition = {
   icon: "shield",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "createdAt", labelKey: "Data utworzenia" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "createdAt", labelKey: "automationBuilder.variables.createdAt" },
   ],
 };
 
@@ -261,11 +261,11 @@ const COURSE_COMPLETED_TRIGGER: AutomationStepDefinition = {
   icon: "trophy",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "finishedAt", labelKey: "Data ukończenia" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "finishedAt", labelKey: "automationBuilder.variables.finishedAt" },
   ],
 };
 
@@ -276,12 +276,12 @@ const CERTIFICATE_EXPIRATION_WARNING_TRIGGER: AutomationStepDefinition = {
   icon: "award",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "certificateName", labelKey: "Nazwa certyfikatu" },
-    { key: "expirationDate", labelKey: "Data wygaśnięcia" },
-    { key: "daysLeft", labelKey: "Liczba dni do wygaśnięcia" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "certificateName", labelKey: "automationBuilder.variables.certificateName" },
+    { key: "expirationDate", labelKey: "automationBuilder.variables.expirationDate" },
+    { key: "daysLeft", labelKey: "automationBuilder.variables.daysLeftExpiration" },
   ],
 };
 
@@ -292,11 +292,11 @@ const CERTIFICATE_ARCHIVED_TRIGGER: AutomationStepDefinition = {
   icon: "archive",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "certificateName", labelKey: "Nazwa certyfikatu" },
-    { key: "archivedAt", labelKey: "Data archiwizacji" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "certificateName", labelKey: "automationBuilder.variables.certificateName" },
+    { key: "archivedAt", labelKey: "automationBuilder.variables.archivedAt" },
   ],
 };
 
@@ -307,11 +307,11 @@ const ANNOUNCEMENT_PUBLISHED_TRIGGER: AutomationStepDefinition = {
   icon: "megaphone",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię odbiorcy" },
-    { key: "userLastName", labelKey: "Nazwisko odbiorcy" },
-    { key: "announcementTitle", labelKey: "Tytuł ogłoszenia" },
-    { key: "announcementContent", labelKey: "Treść ogłoszenia" },
-    { key: "announcementUrl", labelKey: "Link do ogłoszenia" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.recipientFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.recipientLastName" },
+    { key: "announcementTitle", labelKey: "automationBuilder.variables.announcementTitle" },
+    { key: "announcementContent", labelKey: "automationBuilder.variables.announcementContent" },
+    { key: "announcementUrl", labelKey: "automationBuilder.variables.announcementUrl" },
   ],
 };
 
@@ -322,12 +322,12 @@ const COURSE_CHAT_USER_MENTIONED_TRIGGER: AutomationStepDefinition = {
   icon: "at-sign",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię oznaczonego" },
-    { key: "userLastName", labelKey: "Nazwisko oznaczonego" },
-    { key: "authorFullName", labelKey: "Imię i nazwisko autora" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "messageContent", labelKey: "Treść wiadomości" },
-    { key: "chatUrl", labelKey: "Link do wiadomości" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.mentionedFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.mentionedLastName" },
+    { key: "authorFullName", labelKey: "automationBuilder.variables.authorFullName" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "messageContent", labelKey: "automationBuilder.variables.messageContent" },
+    { key: "chatUrl", labelKey: "automationBuilder.variables.chatUrl" },
   ],
 };
 
@@ -338,13 +338,13 @@ const COURSE_DUE_DATE_REMINDER_TRIGGER: AutomationStepDefinition = {
   icon: "calendar-clock",
   color: "blue",
   providedVariables: [
-    { key: "userFirstName", labelKey: "Imię użytkownika" },
-    { key: "userLastName", labelKey: "Nazwisko użytkownika" },
-    { key: "userEmail", labelKey: "Adres e-mail" },
-    { key: "courseName", labelKey: "Nazwa kursu" },
-    { key: "dueDate", labelKey: "Termin ukończenia" },
-    { key: "daysLeft", labelKey: "Liczba dni do końca" },
-    { key: "courseUrl", labelKey: "Link do kursu" },
+    { key: "userFirstName", labelKey: "automationBuilder.variables.userFirstName" },
+    { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
+    { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
+    { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
+    { key: "dueDate", labelKey: "automationBuilder.variables.dueDate" },
+    { key: "daysLeft", labelKey: "automationBuilder.variables.daysLeft" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl" },
   ],
 };
 // ==========================================
