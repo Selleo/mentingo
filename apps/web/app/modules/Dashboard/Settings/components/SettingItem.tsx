@@ -52,7 +52,7 @@ export function SettingItem({
             <Label htmlFor={id} className="body-base-md">
               {label}
             </Label>
-            {tooltip && !disabled ? (
+            {tooltip && !disabled && (
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -74,7 +74,7 @@ export function SettingItem({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            ) : null}
+            )}
           </div>
           <p className="body-sm-md text-muted-foreground">{description}</p>
         </div>

@@ -21,13 +21,15 @@ const RemixStub = createRemixStub([
   },
 ]);
 
-describe("Login page", () => {
+describe("Environment page", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  it("renders without crashing", () => {
+  it("renders the Microsoft Calendar environment fields", () => {
     renderWith({ withQuery: true }).render(<RemixStub />);
     expect(screen.getByRole("heading", { name: "Environment Variables" }));
+    expect(screen.getByLabelText("Microsoft Calendar Client ID"));
+    expect(screen.getByLabelText("Microsoft Calendar Client Secret"));
   });
 });

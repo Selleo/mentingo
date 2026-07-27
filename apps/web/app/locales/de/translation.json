@@ -360,12 +360,79 @@
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen"
   },
+  "microsoftCalendar": {
+    "title": "Microsoft-Kalender",
+    "description": "Zeigen Sie Ihren primären Outlook-Kalender in Mentingo an. Outlook bleibt die Datenquelle.",
+    "account": "Verbundenes Konto",
+    "lastSync": "Letzte erfolgreiche Synchronisierung",
+    "status": {
+      "disconnected": "Getrennt",
+      "syncing": "Wird synchronisiert",
+      "connected": "Verbunden",
+      "error": "Aktion erforderlich",
+      "reconnect_required": "Erneute Verbindung erforderlich"
+    },
+    "action": {
+      "connect": "Microsoft-Kalender verbinden",
+      "sync": "Jetzt synchronisieren",
+      "reconnect": "Erneut verbinden",
+      "replace": "Anderes Konto verwenden",
+      "disconnect": "Trennen",
+      "continue": "Weiter zu Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Bitte warten Sie, bevor Sie eine weitere Synchronisierung starten."
+    },
+    "stale": {
+      "title": "Kalenderdaten sind möglicherweise veraltet",
+      "description": "Importierte Termine bleiben sichtbar. Synchronisieren Sie erneut oder verbinden Sie Ihr Microsoft-Konto neu."
+    },
+    "adminApproval": {
+      "title": "Genehmigung durch Microsoft-Administrator erforderlich",
+      "description": "Ihre Organisation muss den Kalenderzugriff genehmigen, bevor Mentingo Outlook-Termine synchronisieren kann."
+    },
+    "disconnect": {
+      "title": "Microsoft-Kalender trennen?",
+      "description": "Importierte Outlook-Termine werden aus Mentingo entfernt. Ihr Outlook-Kalender bleibt unverändert."
+    },
+    "replace": {
+      "title": "Anderes Microsoft-Konto verbinden?",
+      "description": "Die Verbindung für {{email}} und deren importierte Termine werden vor der Synchronisierung des neuen Kontos entfernt."
+    },
+    "outbound": {
+      "title": "Mentingo-Ereignisse synchronisieren",
+      "description": "Live-Schulungen und Kursfristen in einen separaten Mentingo-Kalender in Outlook exportieren.",
+      "reauthorize": "Dafür benötigt Microsoft die Berechtigung, Kalenderereignisse zu schreiben.",
+      "enable": "Export aktivieren",
+      "disable": "Export deaktivieren"
+    },
+    "toast": {
+      "syncQueued": "Die Microsoft-Kalender-Synchronisierung wurde gestartet.",
+      "syncFailed": "Der Microsoft-Kalender konnte nicht synchronisiert werden.",
+      "disconnected": "Der Microsoft-Kalender wurde getrennt.",
+      "disconnectFailed": "Der Microsoft-Kalender konnte nicht getrennt werden.",
+      "outboundEnabled": "Mentingo-Ereignisse werden nach Outlook exportiert.",
+      "outboundDisabled": "Der Export von Mentingo-Ereignissen wurde deaktiviert.",
+      "outboundFailed": "Mentingo-Ereignisse konnten nicht exportiert werden."
+    },
+    "oauth": {
+      "connected": "Der Microsoft-Kalender wird verbunden und die erste Synchronisierung wurde gestartet.",
+      "replacement_required": "Bestätigen Sie den Kontowechsel, bevor Sie ein anderes Microsoft-Konto verbinden.",
+      "admin_approval_required": "Für den Kalenderzugriff ist die Genehmigung eines Microsoft-Administrators erforderlich.",
+      "authorization_failed": "Die Autorisierung des Microsoft-Kalenders ist fehlgeschlagen. Versuchen Sie es erneut."
+    }
+  },
   "calendarView": {
     "title": "Kalender",
     "description": "Geplante Lernereignisse anzeigen.",
     "loading": "Ereignisse werden geladen",
     "empty": "Keine Ereignisse zum Anzeigen",
     "today": "Heute",
+    "legend": { "label": "Quellen" },
+    "microsoft": {
+      "staleWarning": "Microsoft-Termine sind möglicherweise veraltet. Verbinden Sie das Konto neu oder versuchen Sie es in den Kontoeinstellungen erneut.",
+      "horizonNotice": "Microsoft-Termine werden von 30 Tagen in der Vergangenheit bis 6 Monate im Voraus importiert; dieser Zeitraum kann unvollständig sein."
+    },
     "view": {
       "month": "Monat",
       "week": "Woche",
@@ -449,11 +516,13 @@
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live-Schulung",
-        "goToCourse": "Zum Kurs"
+        "goToCourse": "Zum Kurs",
+        "openOutlook": "In Outlook öffnen"
       },
       "sourceType": {
         "liveTraining": "Live-Schulung",
-        "courseDueDate": "Kursfrist"
+        "courseDueDate": "Kursfrist",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Time",
@@ -463,7 +532,9 @@
         "people": "People",
         "dueDate": "Fälligkeitsdatum",
         "course": "Kurs",
-        "group": "Gruppe"
+        "group": "Gruppe",
+        "availability": "Verfügbarkeit",
+        "privacy": "Datenschutz"
       },
       "deliveryType": {
         "online": "Online",
@@ -475,6 +546,14 @@
         "ended": "Ended",
         "expired": "Expired"
       },
+      "availability": {
+        "free": "Frei",
+        "tentative": "Mit Vorbehalt",
+        "busy": "Beschäftigt",
+        "out_of_office": "Außer Haus",
+        "working_elsewhere": "Arbeitet anderswo"
+      },
+      "privateEvent": "Details dieses privaten Outlook-Termins sind ausgeblendet.",
       "role": {
         "admin": "Admin",
         "author": "Author",
@@ -1617,6 +1696,12 @@
       },
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft-Client-Geheimnis"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft-Kalender-Client-ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft-Kalender-Client-Geheimnis"
       },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth aktiviert (wahr/falsch)"
@@ -3296,6 +3381,7 @@
     },
     "tabs": {
       "account": "Konto",
+      "integrations": "Integrationen",
       "organization": "Organisation",
       "platformCustomization": "Plattformanpassung"
     },

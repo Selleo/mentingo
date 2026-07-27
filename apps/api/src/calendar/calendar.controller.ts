@@ -8,7 +8,6 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
-import { CalendarService } from "./calendar.service";
 import {
   calendarEventDetailsResponseSchema,
   type CalendarEventDetails,
@@ -21,6 +20,7 @@ import {
   getCalendarEventsQuerySchema,
   type GetCalendarEventsQuery,
 } from "./schemas/get-calendar-events-query.schema";
+import { CalendarService } from "./services/calendar.service";
 
 @UseGuards(PermissionsGuard)
 @Controller("calendar")

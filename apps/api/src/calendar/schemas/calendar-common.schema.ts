@@ -7,6 +7,7 @@ import {
   LIVE_TRAINING_SESSION_STATUSES,
   LIVE_TRAINING_STATUSES,
   LIVE_TRAINING_VISIBILITY_SCOPES,
+  OUTLOOK_EVENT_AVAILABILITIES,
 } from "@repo/shared";
 import { Type, type Static } from "@sinclair/typebox";
 
@@ -43,6 +44,13 @@ export const calendarEventPayloadSchema = Type.Union([
   }),
   Type.Object({
     courseDueDate: calendarEventCourseDueDatePayloadSchema,
+  }),
+  Type.Object({
+    outlookCalendar: Type.Object({
+      webLink: Type.Union([Type.String(), Type.Null()]),
+      isSensitive: Type.Boolean(),
+      availability: Type.Enum(OUTLOOK_EVENT_AVAILABILITIES),
+    }),
   }),
 ]);
 
@@ -119,6 +127,13 @@ export const calendarEventDetailsPayloadSchema = Type.Union([
     liveTraining: calendarEventLiveTrainingDetailsPayloadSchema,
   }),
   calendarEventCourseDueDateDetailsSchema,
+  Type.Object({
+    outlookCalendar: Type.Object({
+      webLink: Type.Union([Type.String(), Type.Null()]),
+      isSensitive: Type.Boolean(),
+      availability: Type.Enum(OUTLOOK_EVENT_AVAILABILITIES),
+    }),
+  }),
 ]);
 
 export const calendarEventListItemSchema = Type.Object({

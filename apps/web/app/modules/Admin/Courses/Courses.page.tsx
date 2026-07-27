@@ -262,11 +262,11 @@ const Courses = () => {
       accessorKey: "originType",
       header: t("adminCoursesView.field.sharedCourse"),
       cell: ({ row }) =>
-        coursesWithOriginBadge.includes(row.original.originType) ? (
+        coursesWithOriginBadge.includes(row.original.originType) && (
           <Badge variant="secondaryWithOutline" className="w-max">
             {t("adminCourseView.sharedCourse.badgeExported")}
           </Badge>
-        ) : null,
+        ),
     },
     {
       accessorKey: "createdAt",

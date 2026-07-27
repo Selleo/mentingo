@@ -1226,6 +1226,20 @@
       "when": 1784706398537,
       "tag": "0174_add_activity_logs_tenant_timeframe_index",
       "breakpoints": true
+    },
+    {
+      "idx": 175,
+      "version": "7",
+      "when": 1785140637082,
+      "tag": "0175_add_calendar_provider_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 176,
+      "version": "7",
+      "when": 1785140655153,
+      "tag": "0176_enable_calendar_provider_rls",
+      "breakpoints": true
     }
   ]
 }

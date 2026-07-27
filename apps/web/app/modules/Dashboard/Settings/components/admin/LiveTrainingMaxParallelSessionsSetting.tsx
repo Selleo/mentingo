@@ -55,7 +55,7 @@ export function LiveTrainingMaxParallelSessionsSetting({
           onBlur={() => setCurrentValue(String(normalizedValue))}
           className="h-9"
         />
-        {isDirty ? (
+        {isDirty && (
           <Button
             type="button"
             size="sm"
@@ -65,7 +65,7 @@ export function LiveTrainingMaxParallelSessionsSetting({
           >
             {t("common.button.save")}
           </Button>
-        ) : null}
+        )}
       </div>
     </div>
   );

@@ -74,13 +74,13 @@ export const CourseThumbnailUploadField = ({
           }}
         />
       </div>
-      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
-      {imageUrl && onClear ? (
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
+      {imageUrl && onClear && (
         <Button type="button" variant="outline" className="mt-4" onClick={onClear}>
           <Trash2 className="mr-2 size-4" />
           {t("adminCourseView.settings.button.removeThumbnail")}
         </Button>
-      ) : null}
+      )}
     </div>
   );
 };

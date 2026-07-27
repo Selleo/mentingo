@@ -134,13 +134,13 @@ export const ScormPackageUploadField = ({
           </div>
         )}
       </div>
-      {importNotice ? (
+      {importNotice && (
         <div className="mt-3 flex items-start gap-2 rounded-lg border border-primary-100 bg-primary-50 px-3 py-2 text-primary-900">
           <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
           <p className="body-sm">{importNotice}</p>
         </div>
-      ) : null}
-      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+      )}
+      {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
     </div>
   );
 };

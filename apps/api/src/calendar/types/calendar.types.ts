@@ -1,3 +1,4 @@
+import type { microsoftCalendarConnectionSchema } from "../schemas/microsoft-calendar-connection.schema";
 import type {
   CalendarEventSourceRole,
   CalendarEventSourceType,
@@ -9,11 +10,15 @@ import type {
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
   LocalizedText,
+  OutlookEventAvailability,
   SupportedLanguages,
 } from "@repo/shared";
+import type { Static } from "@sinclair/typebox";
 import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { calendarEvents } from "src/storage/schema";
+
+export type MicrosoftCalendarConnectionResponse = Static<typeof microsoftCalendarConnectionSchema>;
 
 export type CalendarEventListConditions = SQL[];
 
@@ -27,7 +32,16 @@ export type CourseDueDateCalendarEventUpsertInput = {
 
 export type CalendarEventSourcePayload =
   | LiveTrainingCalendarEventPayload
-  | CourseDueDateCalendarEventPayload;
+  | CourseDueDateCalendarEventPayload
+  | MicrosoftOutlookCalendarEventPayload;
+
+export type MicrosoftOutlookCalendarEventPayload = {
+  outlookCalendar: {
+    webLink: string | null;
+    isSensitive: boolean;
+    availability: OutlookEventAvailability;
+  };
+};
 
 export type LiveTrainingCalendarEventPayload = {
   liveTraining: {
@@ -69,6 +83,10 @@ export type CalendarEventNormalizedRow = {
   status: CalendarEventStatus;
   payload: CalendarEventSourcePayload;
   authorId: UUIDType | null;
+};
+
+export type MicrosoftOutlookCalendarEventRow = Omit<CalendarEventNormalizedRow, "payload"> & {
+  payload: MicrosoftOutlookCalendarEventPayload;
 };
 
 export type CalendarEventLinkedCourse = {
