@@ -9,14 +9,14 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "dev": "email dev -p 3001 --dir ./src/templates",
     "export": "email export --dir ./src/templates"
   },
   "dependencies": {
-    "@react-email/components": "^0.0.17",
+    "@react-email/components": "^0.5.1",
+    "@react-email/render": "^1.3.4",
+    "@repo/shared": "workspace:*",
     "react": "^18.2.0",
-    "react-email": "^2.1.4",
-    "@repo/shared": "workspace:*"
+    "react-email": "^4.0.4"
   },
   "devDependencies": {
     "@babel/generator": "^7.24.7",

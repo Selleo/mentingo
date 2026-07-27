@@ -14,7 +14,8 @@ import ModernCourseCard from "./ModernCourseCard";
 import type { GetAvailableCoursesResponse, GetStudentCoursesResponse } from "~/api/generated-api";
 
 type CourseCarouselCourse =
-  GetAvailableCoursesResponse["data"][number] | GetStudentCoursesResponse["data"][number];
+  | GetAvailableCoursesResponse["data"][number]
+  | GetStudentCoursesResponse["data"][number];
 
 const WATCHED_SLIDE_INTERSECTION_THRESHOLD = 0.25;
 const WATCHED_SLIDE_FALLBACK_DELAY_MS = 400;
