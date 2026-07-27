@@ -1697,6 +1697,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft-Client-Geheimnis"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft-Kalender-Client-ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft-Kalender-Client-Geheimnis"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth aktiviert (wahr/falsch)"
       },

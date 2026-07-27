@@ -1696,6 +1696,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "„Microsoft“ kliento paslaptis"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "„Microsoft“ kalendoriaus kliento ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "„Microsoft“ kalendoriaus kliento paslaptis"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "„Microsoft OAuth“ įgalinta (teisinga / klaidinga)"
       },

@@ -1696,6 +1696,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Tajný klíč klienta Microsoft"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "ID klienta kalendáře Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Tajný klíč klienta kalendáře Microsoft"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth povoleno (pravda/nepravda)"
       },

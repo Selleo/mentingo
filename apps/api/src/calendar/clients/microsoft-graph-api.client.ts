@@ -345,16 +345,14 @@ export class MicrosoftGraphApiClient {
   }
 
   private async getConfiguration() {
-    const [clientId, clientSecret] = await Promise.all([
-      this.getConfigValue(
-        "MICROSOFT_CALENDAR_CLIENT_ID",
-        "microsoft_authorization.MICROSOFT_CALENDAR_CLIENT_ID",
+    const [clientId, clientSecret] = await Promise.all(
+      ["MICROSOFT_CALENDAR_CLIENT_ID", "MICROSOFT_CALENDAR_CLIENT_SECRET"].map((envName) =>
+        this.envService
+          .getEnv(envName)
+          .then(({ value }) => value)
+          .catch(() => undefined),
       ),
-      this.getConfigValue(
-        "MICROSOFT_CALENDAR_CLIENT_SECRET",
-        "microsoft_authorization.MICROSOFT_CALENDAR_CLIENT_SECRET",
-      ),
-    ]);
+    );
 
     return { clientId, clientSecret };
   }
@@ -374,12 +372,5 @@ export class MicrosoftGraphApiClient {
       throw new MicrosoftGraphError("Microsoft Calendar is not configured");
 
     return configuration as { clientId: string; clientSecret: string };
-  }
-
-  private async getConfigValue(envName: string, configName: string): Promise<string | undefined> {
-    return this.envService
-      .getEnv(envName)
-      .then(({ value }) => value)
-      .catch(() => this.configService.get<string>(configName));
   }
 }

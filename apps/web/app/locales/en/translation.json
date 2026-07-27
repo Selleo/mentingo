@@ -1759,6 +1759,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft Client Secret"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft Calendar Client ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft Calendar Client Secret"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Enabled (true/false)"
       },

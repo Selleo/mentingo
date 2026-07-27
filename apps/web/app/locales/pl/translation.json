@@ -1980,6 +1980,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft Client Secret"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Identyfikator klienta kalendarza Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Klucz tajny klienta kalendarza Microsoft"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Enabled (true/false)"
       },
