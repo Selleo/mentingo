@@ -86,6 +86,7 @@ export const PERMISSIONS = {
   TENANT_MANAGE: "tenant.manage",
   COURSE_AI_GENERATION: "course.ai_generation",
   ACTIVITY_LOG_READ: "activity_log.read",
+  AUTOMATION_MANAGE: "automation.manage",
 } as const;
 
 export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
@@ -264,6 +265,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionKey[]> = {
     PERMISSIONS.TENANT_MANAGE,
     PERMISSIONS.COURSE_EXPORT,
     PERMISSIONS.ACTIVITY_LOG_READ,
+    PERMISSIONS.AUTOMATION_MANAGE,
   ],
 };
 

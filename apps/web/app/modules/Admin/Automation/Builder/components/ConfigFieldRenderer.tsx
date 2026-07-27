@@ -1,21 +1,17 @@
+import { useTranslation } from "react-i18next";
+
 import { Input } from "~/components/ui/input";
-import MultipleSelector, { type Option } from "~/components/ui/multiselect";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import MultipleSelector from "~/components/ui/multiselect";
+import { Textarea } from "~/components/ui/textarea";
 
 import type { StepConfigField } from "../automationBuilder.types";
 import type { FC } from "react";
+import type { Option } from "~/components/ui/multiselect";
 
 interface ConfigFieldRendererProps {
   field: StepConfigField;
   value: unknown;
   onChange: (value: unknown) => void;
-  t: (key: string) => string;
   dynamicOptions?: Record<string, Option[]>;
 }
 
@@ -23,9 +19,9 @@ export const ConfigFieldRenderer: FC<ConfigFieldRendererProps> = ({
   field,
   value,
   onChange,
-  t,
   dynamicOptions,
 }) => {
+  const { t } = useTranslation();
   const placeholder = field.placeholderKey ? t(field.placeholderKey) : undefined;
 
   const options: Option[] =
@@ -39,28 +35,19 @@ export const ConfigFieldRenderer: FC<ConfigFieldRendererProps> = ({
 
   switch (field.type) {
     case "select": {
+      const selectedOption = options.filter((opt) => opt.value === value);
+
       return (
-        <Select value={(value as string) ?? ""} onValueChange={(val) => onChange(val)}>
-          <SelectTrigger>
-            <SelectValue placeholder={placeholder ?? t("courses.select")} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                <span className="flex items-center gap-2">
-                  {opt.imageUrl && (
-                    <img
-                      src={opt.imageUrl}
-                      alt=""
-                      className="size-5 shrink-0 rounded object-cover"
-                    />
-                  )}
-                  <span className="truncate">{opt.label}</span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <MultipleSelector
+          value={selectedOption}
+          options={options}
+          placeholder={placeholder ?? t("courses.select")}
+          maxSelected={1}
+          onChange={(selected) => {
+            onChange(selected[0]?.value ?? "");
+          }}
+          className="min-h-10 w-full"
+        />
       );
     }
 
@@ -86,7 +73,6 @@ export const ConfigFieldRenderer: FC<ConfigFieldRendererProps> = ({
         <Input
           type="number"
           min={0}
-          className="w-full rounded-md border px-3 py-2 text-sm"
           placeholder={placeholder}
           value={value !== undefined && value !== null ? String(value) : ""}
           onChange={(e) => {
@@ -100,36 +86,20 @@ export const ConfigFieldRenderer: FC<ConfigFieldRendererProps> = ({
       return (
         <Input
           type="text"
-          className="w-full rounded-md border px-3 py-2 text-sm"
           placeholder={placeholder}
           value={(value as string) ?? ""}
           onChange={(e) => onChange(e.target.value)}
         />
       );
 
-    case "emailTemplateSelect":
+    case "textarea":
       return (
-        <Select value={(value as string) ?? ""} onValueChange={(val) => onChange(val)}>
-          <SelectTrigger>
-            <SelectValue placeholder={placeholder ?? t("emailTemplates.select")} />
-          </SelectTrigger>
-          <SelectContent>
-            {options.map((opt) => (
-              <SelectItem key={opt.value} value={opt.value}>
-                <span className="flex items-center gap-2">
-                  {opt.imageUrl && (
-                    <img
-                      src={opt.imageUrl}
-                      alt=""
-                      className="size-5 shrink-0 rounded object-cover"
-                    />
-                  )}
-                  <span className="truncate">{opt.label}</span>
-                </span>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Textarea
+          rows={4}
+          placeholder={placeholder}
+          value={(value as string) ?? ""}
+          onChange={(e) => onChange(e.target.value)}
+        />
       );
 
     default:

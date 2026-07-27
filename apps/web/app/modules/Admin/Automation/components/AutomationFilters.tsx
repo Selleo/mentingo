@@ -46,6 +46,7 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder={t("automationView.filters.searchPlaceholder")}
           className="pl-9"
+          data-testid="automation-page-search-input"
         />
       </div>
 
@@ -53,7 +54,7 @@ export const AutomationFilters: FC<AutomationFiltersProps> = ({
         value={statusFilter}
         onValueChange={(value) => onStatusFilterChange(value as StatusFilter)}
       >
-        <SelectTrigger className="w-full sm:w-[180px]">
+        <SelectTrigger className="w-full sm:w-[180px]" data-testid="automation-page-status-filter">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

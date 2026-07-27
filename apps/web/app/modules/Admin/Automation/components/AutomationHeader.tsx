@@ -20,7 +20,7 @@ export const AutomationHeader: FC<AutomationHeaderProps> = ({ onCreate }) => {
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">{t("automationView.description")}</p>
       </div>
-      <Button onClick={onCreate}>
+      <Button onClick={onCreate} data-testid="automation-page-create-button">
         <Plus className="mr-2 size-4" />
         {t("automationView.createAutomation")}
       </Button>

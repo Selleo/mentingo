@@ -8,10 +8,16 @@ interface BuilderActions {
   removeNode: (nodeId: string) => void;
   selectNode: (nodeId: string | null) => void;
   updateNodeConfig: (nodeId: string, config: Record<string, unknown>) => void;
+  /** Update node config without marking as user edit (e.g. simulation results) */
+  updateNodeConfigSilent: (nodeId: string, config: Record<string, unknown>) => void;
   updateNodeType: (nodeId: string, type: TriggerType | ActionType, label: string) => void;
+  updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;
   setAutomationName: (name: string) => void;
   setActive: (active: boolean) => void;
+  setSimulationPassed: (passed: boolean) => void;
+  loadNodes: (nodes: BuilderNode[]) => void;
   markSaved: () => void;
+  markDirty: () => void;
   reset: () => void;
 }
 
@@ -20,7 +26,9 @@ const initialState: BuilderState = {
   selectedNodeId: null,
   automationName: "New Automation",
   isActive: false,
+  simulationPassed: false,
   lastSavedAt: null,
+  isDirty: false,
 };
 
 export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
@@ -29,6 +37,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
   addNode: (node) =>
     set((state) => ({
       nodes: [...state.nodes, node],
+      isDirty: true,
+      isActive: false,
+      simulationPassed: false,
     })),
 
   addChildNode: (parentId, node) =>
@@ -36,6 +47,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       nodes: state.nodes
         .map((n) => (n.id === parentId ? { ...n, children: [...n.children, node.id] } : n))
         .concat({ ...node, parentId }),
+      isDirty: true,
+      isActive: false,
+      simulationPassed: false,
     })),
 
   removeNode: (nodeId) =>
@@ -57,6 +71,9 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       return {
         nodes: removeRecursive(nodeId, state.nodes),
         selectedNodeId: state.selectedNodeId === nodeId ? null : state.selectedNodeId,
+        isDirty: true,
+        isActive: false,
+        simulationPassed: false,
       };
     }),
 
@@ -67,18 +84,42 @@ export const useBuilderStore = create<BuilderState & BuilderActions>((set) => ({
       nodes: state.nodes.map((n) =>
         n.id === nodeId ? { ...n, config: { ...n.config, ...config } } : n,
       ),
+      isDirty: true,
+      isActive: false,
+      simulationPassed: false,
+    })),
+
+  updateNodeConfigSilent: (nodeId, config) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) =>
+        n.id === nodeId ? { ...n, config: { ...n.config, ...config } } : n,
+      ),
     })),
 
   updateNodeType: (nodeId, type, label) =>
     set((state) => ({
       nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, type, label, config: {} } : n)),
+      isDirty: true,
+      isActive: false,
+      simulationPassed: false,
+    })),
+
+  updateNodePosition: (nodeId, position) =>
+    set((state) => ({
+      nodes: state.nodes.map((n) => (n.id === nodeId ? { ...n, position } : n)),
     })),
 
   setAutomationName: (name) => set({ automationName: name }),
 
   setActive: (active) => set({ isActive: active }),
 
-  markSaved: () => set({ lastSavedAt: new Date().toISOString() }),
+  setSimulationPassed: (passed) => set({ simulationPassed: passed }),
+
+  loadNodes: (nodes) => set({ nodes, isDirty: false }),
+
+  markSaved: () => set({ lastSavedAt: new Date().toISOString(), isDirty: false }),
+
+  markDirty: () => set({ isDirty: true }),
 
   reset: () => set(initialState),
 }));

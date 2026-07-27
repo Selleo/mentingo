@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useUsersEnrolledQuery } from "../../../../../../app/api/queries/admin/useUsersEnrolled";
 
@@ -72,28 +72,6 @@ export function useCourseUsers({
       };
     });
   }, [filteredStudents]);
-
-  useEffect(() => {
-    if (!courseId) {
-      console.log("[useCourseUsersOptions] Brak wybranego courseId.");
-      return;
-    }
-
-    if (isLoading) {
-      console.log(`[useCourseUsersOptions] Ładowanie danych dla kursu ${courseId}...`);
-      return;
-    }
-
-    console.log(
-      `[useCourseUsersOptions] Zmiana filtrów/danych | Tryb: "${mode}" | Kurs: ${courseId}`,
-      {
-        rawTotalCount: data?.data?.length ?? 0,
-        filteredCount: filteredStudents.length,
-        filteredStudents,
-        options,
-      },
-    );
-  }, [courseId, mode, inactiveDaysThreshold, data, filteredStudents, options, isLoading]);
 
   return {
     options,

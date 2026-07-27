@@ -138,6 +138,9 @@ export const routeAccessConfig = createRouteConfig({
   "admin/automation": {
     anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
   },
+  "admin/automation/logs": {
+    anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
+  },
   "admin/automation/:id/builder": {
     anyOf: [PERMISSIONS.USER_MANAGE, PERMISSIONS.AUTOMATION_MANAGE],
   },

@@ -326,6 +326,7 @@
     }
   },
   "navigationSideBar": {
+    "automation": "Automatyzacja",
     "settings": "Ustawienia",
     "logout": "Wyloguj",
     "panel": "Panel",
@@ -4591,6 +4592,7 @@
     "title": "Automatyzacje",
     "description": "Zarządzaj automatycznymi powiadomieniami email wysyłanymi w odpowiedzi na zdarzenia w platformie.",
     "createAutomation": "Utwórz automatyzację",
+    "openLogs": "Otwórz logi",
     "filters": {
       "searchPlaceholder": "Szukaj po nazwie lub opisie...",
       "all": "Wszystkie",
@@ -4668,6 +4670,52 @@
       "deleteError": "Nie udało się usunąć automatyzacji."
     }
   },
+  "automationLogs": {
+    "title": "Logi automatyzacji",
+    "description": "Podgląd historii wykonań wszystkich automatyzacji. Kliknij wpis, aby zobaczyć szczegóły.",
+    "backToAutomations": "Powrót do automatyzacji",
+    "status": {
+      "success": "Sukces",
+      "sent": "Wysłano",
+      "skipped": "Pominięto",
+      "failed": "Błąd"
+    },
+    "filters": {
+      "searchPlaceholder": "Szukaj po nazwie, zdarzeniu lub odbiorcy...",
+      "all": "Wszystkie statusy",
+      "success": "Sukces",
+      "sent": "Wysłane",
+      "skipped": "Pominięte",
+      "failed": "Błędy"
+    },
+    "table": {
+      "automation": "Automatyzacja",
+      "status": "Status",
+      "emails": "E-maile",
+      "recipients": "odbiorców",
+      "ranAt": "Uruchomiono",
+      "duration": "Czas trwania",
+      "details": "Szczegóły",
+      "empty": "Brak wpisów w logach."
+    },
+    "detail": {
+      "title": "Szczegóły logu",
+      "description": "Pełna informacja o tym uruchomieniu automatyzacji.",
+      "ranAt": "Uruchomiono",
+      "triggerEvent": "Zdarzenie wyzwalające",
+      "automation": "Automatyzacja",
+      "status": "Status",
+      "error": "Błąd",
+      "noEmails": "Brak odbiorców e-mail.",
+      "duration": "Czas trwania",
+      "recipient": "Odbiorca",
+      "template": "Szablon",
+      "language": "Język",
+      "skipReason": "Powód pominięcia",
+      "failReason": "Powód błędu",
+      "emailsTitle": "E-maile ({{count}})"
+    }
+  },
   "automationBuilder": {
     "header": {
       "back": "Powrót do automatyzacji",
@@ -4680,7 +4728,23 @@
       "exportJson": "Eksportuj jako JSON",
       "delete": "Usuń automatyzację",
       "savedJustNow": "Zapisano właśnie",
-      "savedMinutesAgo": "Zapisano {{count}} min temu"
+      "savedMinutesAgo": "Zapisano {{count}} min temu",
+      "simulationRequiredTooltip": "Uruchom symulację i upewnij się, że przejdzie pomyślnie, aby aktywować automatyzację",
+      "invalidNodesTooltip": "Napraw wszystkie błędne węzły przed aktywacją automatyzacji",
+      "unsavedChangesTooltip": "Zapisz zmiany przed aktywacją automatyzacji",
+      "leaveDialog": {
+        "title": "Niezapisane zmiany",
+        "description": "Masz niezapisane zmiany. Czy chcesz zapisać przed wyjściem?",
+        "saveAndLeave": "Zapisz i wyjdź",
+        "leaveWithoutSaving": "Wyjdź bez zapisywania",
+        "cancel": "Anuluj"
+      },
+      "deleteDialog": {
+        "title": "Usuń automatyzację",
+        "description": "Czy na pewno chcesz usunąć tę automatyzację? Tej operacji nie można cofnąć.",
+        "confirm": "Usuń",
+        "cancel": "Anuluj"
+      }
     },
     "sidebar": {
       "title": "Kroki",
@@ -4724,6 +4788,7 @@
       "emptyDescription": "Przeciągnij trigger lub akcję z panelu bocznego, aby rozpocząć.",
       "emptyDescriptionTrigger": "Przeciągnij trigger z panelu bocznego, aby rozpocząć budowanie automatyzacji.",
       "removeNode": "Usuń węzeł",
+      "simulationFailed": "Symulacja wykryła błędy w tym węźle",
       "deleteNodeDialogTitle": "Usuń węzeł",
       "deleteNodeDialogDescription": "Czy na pewno chcesz usunąć ten węzeł? Tej operacji nie można cofnąć.",
       "deleteNodeDialogCancel": "Anuluj",
@@ -4790,7 +4855,101 @@
       "noPlaceholders": "Ten szablon nie posiada zmiennych do uzupełnienia.",
       "placeholdersDescription": "Przypisz każdą zmienną szablonu do danych dostarczanych przez trigger.",
       "selectVariable": "Wybierz zmienną triggera...",
-      "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne."
+      "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne.",
+      "defaultEmailNoMapping": "Domyślny szablon email nie wymaga mapowania zmiennych.",
+      "templates": {
+        "defaultEmail": "Domyślny email",
+        "userInvite": "Zaproszenie użytkownika",
+        "welcome": "Powitanie",
+        "userFirstLogin": "Pierwsze logowanie",
+        "userAssignedToCourse": "Użytkownik przypisany do kursu",
+        "userShortInactivity": "Krótka nieaktywność",
+        "userLongInactivity": "Długa nieaktywność",
+        "userFinishedChapter": "Ukończony rozdział",
+        "userFinishedCourse": "Ukończony kurs",
+        "createPasswordReminder": "Przypomnienie o utworzeniu hasła",
+        "certificateExpirationWarning": "Ostrzeżenie o wygaśnięciu certyfikatu",
+        "certificateExpired": "Certyfikat wygasł",
+        "announcement": "Ogłoszenie",
+        "courseDueDateReminder": "Przypomnienie o terminie kursu",
+        "newUser": "Nowy użytkownik",
+        "finishedCourse": "Ukończony kurs"
+      }
+    },
+    "variables": {
+      "userFirstName": "Imię użytkownika",
+      "userLastName": "Nazwisko użytkownika",
+      "userEmail": "Adres e-mail",
+      "inviteLink": "Link aktywacyjny",
+      "inviteLinkRegistration": "Link do rejestracji",
+      "resetPasswordLink": "Link do resetu hasła",
+      "platformUrl": "Link do platformy",
+      "loginDate": "Data pierwszego zalogowania",
+      "courseName": "Nazwa kursu",
+      "courseUrl": "Link do kursu",
+      "dueDate": "Termin ukończenia",
+      "daysInactive": "Liczba dni nieaktywności",
+      "chapterName": "Nazwa rozdziału",
+      "finishedAt": "Data ukończenia",
+      "certificateUrl": "Link do certyfikatu",
+      "registrationDate": "Data rejestracji",
+      "createdAt": "Data utworzenia",
+      "daysLeft": "Liczba dni do końca",
+      "daysLeftExpiration": "Liczba dni do wygaśnięcia",
+      "certificateName": "Nazwa certyfikatu",
+      "expirationDate": "Data wygaśnięcia",
+      "archivedAt": "Data archiwizacji",
+      "recipientFirstName": "Imię odbiorcy",
+      "recipientLastName": "Nazwisko odbiorcy",
+      "announcementTitle": "Tytuł ogłoszenia",
+      "announcementContent": "Treść ogłoszenia",
+      "announcementUrl": "Link do ogłoszenia",
+      "mentionedFirstName": "Imię oznaczonego",
+      "mentionedLastName": "Nazwisko oznaczonego",
+      "authorFullName": "Imię i nazwisko autora",
+      "messageContent": "Treść wiadomości",
+      "chatUrl": "Link do wiadomości"
+    },
+    "simulation": {
+      "title": "Wynik symulacji",
+      "statusSuccess": "Sukces",
+      "statusFailed": "Niepowodzenie",
+      "errorTitle": "Błąd symulacji",
+      "retry": "Ponów symulację",
+      "errorsTitle": "Wykryte problemy",
+      "readyToActivate": "Automatyzacja jest gotowa do aktywacji.",
+      "tabPreview": "Podgląd e-maila",
+      "tabEventData": "Dane zdarzenia",
+      "tabMappings": "Mapowania",
+      "from": "Od:",
+      "to": "Do:",
+      "subject": "Temat:",
+      "noEventData": "Brak danych zdarzenia — wybierz typ triggera.",
+      "availableVariables": "Dostępne zmienne zdarzenia",
+      "variableName": "Zmienna",
+      "variableLabel": "Opis",
+      "variableType": "Typ",
+      "placeholder": "Placeholder",
+      "mappedTo": "Zmapowane do",
+      "sampleValue": "Wartość próbna",
+      "unmapped": "Niezmapowane",
+      "errors": {
+        "triggerNodeName": "Zdarzenie startowe",
+        "selectTriggerType": "Wybierz typ zdarzenia startowego",
+        "addTriggerNode": "Dodaj co najmniej jeden węzeł triggera",
+        "actionNodeName": "Wyślij e-mail",
+        "actionLabel": "Akcja",
+        "selectEmailTemplate": "Wybierz opublikowany szablon e-mail",
+        "selectLanguage": "Wybierz język szablonu e-mail",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} nie jest zmapowany — przypisz zmienną zdarzenia",
+        "addActionNode": "Dodaj co najmniej jeden węzeł akcji (np. Wyślij e-mail)"
+      },
+      "preview": {
+        "subject": "Zostałeś przypisany do kursu: {{courseName}}",
+        "greeting": "Cześć {{name}}!",
+        "assignedToCourse": "Zostałeś przypisany do nowego kursu: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Przejdź do kursu"
+      }
     }
   },
   "automationSteps": {

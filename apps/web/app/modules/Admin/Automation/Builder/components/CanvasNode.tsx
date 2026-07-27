@@ -1,5 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
-import { Plus, Trash2 } from "lucide-react";
+import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -126,6 +126,18 @@ export const CanvasNode: FC<CanvasNodeProps> = ({ node, onAddChild }) => {
             {BLOCK_ICON_MAP[node.type]}
           </span>
           <span className="flex-1 truncate text-sm font-medium">{node.label}</span>
+          {node.config.simulationStatus === "invalid" && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="flex size-5 shrink-0 items-center justify-center">
+                  <AlertCircle className="size-4 text-destructive" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                {t("automationBuilder.canvas.simulationFailed")}
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

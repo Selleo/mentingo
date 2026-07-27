@@ -1,16 +1,19 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 
 import {
   AutomationRecordInput,
   AutomationRecordUpdateInput,
 } from "src/announcements/types/automations-source.types";
 import { BaseResponse, UUIDType } from "src/common";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
 import { AutomationsService } from "./automations.service";
 
 import type { AutomationStatus } from "src/announcements/types/automations.types";
 
+@RequirePermission(PERMISSIONS.AUTOMATION_MANAGE)
 @Controller("automations")
 export class AutomationsController {
   constructor(private readonly automationsService: AutomationsService) {}

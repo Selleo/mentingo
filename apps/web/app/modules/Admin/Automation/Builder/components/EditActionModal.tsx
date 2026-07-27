@@ -14,143 +14,13 @@ import {
 } from "~/components/ui/select";
 import { Separator } from "~/components/ui/separator";
 
+import { getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
+import { DEFAULT_EMAIL_TEMPLATE_ID, EMAIL_TEMPLATES } from "../emailTemplates.constants";
 import { useSaveAutomationSteps } from "../hooks/useSaveAutomationSteps";
 
-import type { BuilderNode, TriggerType } from "../automationBuilder.types";
+import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBuilder.types";
 import type { FC } from "react";
-
-// ─── Email template definitions with their placeholders ──────────────────────
-
-//-----------------------------Placeholder definitions for email templates-----------------------------
-
-interface EmailTemplateDefinition {
-  id: string;
-  labelKey: string;
-  placeholders: string[];
-}
-
-const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
-  {
-    id: "user_invite",
-    labelKey: "automationBuilder.editAction.templates.userInvite",
-    placeholders: ["invitedByUserName", "createPasswordLink"],
-  },
-  {
-    id: "welcome",
-    labelKey: "automationBuilder.editAction.templates.welcome",
-    placeholders: ["coursesLink"],
-  },
-  {
-    id: "user_first_login",
-    labelKey: "automationBuilder.editAction.templates.userFirstLogin",
-    placeholders: ["name", "coursesUrl"],
-  },
-  {
-    id: "user_assigned_to_course",
-    labelKey: "automationBuilder.editAction.templates.userAssignedToCourse",
-    placeholders: ["courseName", "courseLink", "formatedCourseDueDate"],
-  },
-  {
-    id: "user_short_inactivity",
-    labelKey: "automationBuilder.editAction.templates.userShortInactivity",
-    placeholders: ["courseName", "courseLink"],
-  },
-  {
-    id: "user_long_inactivity",
-    labelKey: "automationBuilder.editAction.templates.userLongInactivity",
-    placeholders: ["courseName", "courseLink"],
-  },
-  {
-    id: "user_finished_chapter",
-    labelKey: "automationBuilder.editAction.templates.userFinishedChapter",
-    placeholders: ["chapterName", "courseName", "courseLink"],
-  },
-  {
-    id: "user_finished_course",
-    labelKey: "automationBuilder.editAction.templates.userFinishedCourse",
-    placeholders: ["courseName", "buttonLink", "hasCertificate"],
-  },
-  {
-    id: "create_password_reminder",
-    labelKey: "automationBuilder.editAction.templates.createPasswordReminder",
-    placeholders: ["createPasswordLink"],
-  },
-  {
-    id: "certificate_expiration_warning",
-    labelKey: "automationBuilder.editAction.templates.certificateExpirationWarning",
-    placeholders: ["courseName", "courseLink", "expiresAt"],
-  },
-  {
-    id: "certificate_expired",
-    labelKey: "automationBuilder.editAction.templates.certificateExpired",
-    placeholders: ["courseName", "courseLink"],
-  },
-  {
-    id: "announcement",
-    labelKey: "automationBuilder.editAction.templates.announcement",
-    placeholders: ["title", "content", "buttonLink"],
-  },
-  {
-    id: "course_due_date_reminder",
-    labelKey: "automationBuilder.editAction.templates.courseDueDateReminder",
-    placeholders: ["courseName", "courseLink", "dueDate", "daysBeforeDueDate"],
-  },
-  {
-    id: "new_user",
-    labelKey: "automationBuilder.editAction.templates.newUser",
-    placeholders: ["userName", "profileLink"],
-  },
-  {
-    id: "finished_course",
-    labelKey: "automationBuilder.editAction.templates.finishedCourse",
-    placeholders: ["userName", "courseName", "progressLink"],
-  },
-];
-
-// ─── Trigger variable definitions ────────────────────────────────────────────
-// Each trigger type provides a set of variables that can be used to fill placeholders
-
-const TRIGGER_VARIABLES: Record<TriggerType, string[]> = {
-  user_invited: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
-  users_imported_invite: ["email", "userId", "invitedByUserName", "createPasswordLink", "origin"],
-  user_password_reminder: ["email", "userId", "createPasswordLink"],
-  user_welcome: ["email", "userId", "coursesLink", "origin"],
-  user_first_login: ["userId", "name", "coursesUrl"],
-  users_assigned_to_course: [
-    "courseId",
-    "courseName",
-    "courseLink",
-    "formatedCourseDueDate",
-    "studentIds",
-  ],
-  users_short_inactivity: ["userId", "email", "courseName", "courseLink"],
-  users_long_inactivity: ["userId", "email", "courseName", "courseLink"],
-  user_chapter_finished: [
-    "userId",
-    "courseId",
-    "chapterId",
-    "chapterName",
-    "courseName",
-    "courseLink",
-  ],
-  user_course_finished: ["userId", "courseId", "courseName", "buttonLink", "hasCertificate"],
-  user_registered: ["userId", "userName", "email", "profileLink"],
-  user_password_created: ["userId", "email"],
-  course_completed: ["userId", "courseId", "courseName", "userName", "progressLink"],
-  certificate_expiration_warning: ["userId", "courseName", "courseLink", "expiresAt"],
-  certificate_archived: ["userId", "courseName", "courseLink"],
-  announcement_published: ["title", "content", "buttonLink"],
-  course_chat_user_mentioned: ["userId", "courseName", "courseLink", "mentionedBy"],
-  course_due_date_reminder: [
-    "userId",
-    "courseId",
-    "courseName",
-    "courseLink",
-    "dueDate",
-    "daysBeforeDueDate",
-  ],
-};
 
 // ─── Supported languages ─────────────────────────────────────────────────────
 
@@ -190,11 +60,14 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
     (node.config.placeholderValues as Record<string, string>) ?? {},
   );
 
-  // Get available trigger variables for select options
-  const triggerVariables = useMemo(() => {
+  // Get available trigger variables from the shared step definition
+  const triggerVariables: PayloadVariable[] = useMemo(() => {
     if (!triggerType) return [];
-    return TRIGGER_VARIABLES[triggerType] ?? [];
+    const def = getStepDefinition(triggerType);
+    return def?.providedVariables ?? [];
   }, [triggerType]);
+
+  const isDefaultTemplate = selectedTemplate === DEFAULT_EMAIL_TEMPLATE_ID;
 
   // Get placeholders from selected template
   const templatePlaceholders = useMemo(() => {
@@ -303,19 +176,25 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
               {t("automationBuilder.editAction.placeholders")}
             </h3>
 
-            {!selectedTemplate && (
+            {isDefaultTemplate && (
+              <p className="text-sm text-muted-foreground">
+                {t("automationBuilder.editAction.defaultEmailNoMapping")}
+              </p>
+            )}
+
+            {!isDefaultTemplate && !selectedTemplate && (
               <p className="text-sm text-muted-foreground">
                 {t("automationBuilder.editAction.selectTemplateFirst")}
               </p>
             )}
 
-            {selectedTemplate && templatePlaceholders.length === 0 && (
+            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 {t("automationBuilder.editAction.noPlaceholders")}
               </p>
             )}
 
-            {selectedTemplate && templatePlaceholders.length > 0 && (
+            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length > 0 && (
               <div className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   {t("automationBuilder.editAction.placeholdersDescription")}
@@ -339,8 +218,8 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
                       </SelectTrigger>
                       <SelectContent>
                         {triggerVariables.map((variable) => (
-                          <SelectItem key={variable} value={variable}>
-                            {`{{${variable}}}`}
+                          <SelectItem key={variable.key} value={variable.key}>
+                            {t(variable.labelKey)} ({`{{${variable.key}}}`})
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -350,7 +229,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
               </div>
             )}
 
-            {selectedTemplate && triggerVariables.length === 0 && (
+            {!isDefaultTemplate && selectedTemplate && triggerVariables.length === 0 && (
               <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
                 <p className="text-xs text-amber-700">
                   {t("automationBuilder.editAction.noTriggerVariables")}

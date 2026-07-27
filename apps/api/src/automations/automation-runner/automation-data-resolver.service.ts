@@ -205,7 +205,6 @@ export class AutomationDataResolverService {
   ): Promise<AutomationResolvedRecipient[]> {
     const { userId } = event.userFirstLogin;
     const user = await this.userService.getUserById(userId, this.dbAdmin);
-    //const baseOrigin = await resolveTenantOrigin(this.dbAdmin, user.tenantId);
 
     return [
       {
@@ -402,8 +401,6 @@ export class AutomationDataResolverService {
     const { courseId, userName, courseTitle } = event.courseCompletionData;
     const tenantId = await this.getCourseTenantId(courseId);
 
-    // CourseCompletedEvent carries userName as "FirstName LastName" but no userId/email.
-    // Look up the student by matching the concatenated name on the most recent completion.
     const completedStudent = await this.getLastCompletedStudentForCourse(courseId);
 
     const nameParts = userName.split(" ");

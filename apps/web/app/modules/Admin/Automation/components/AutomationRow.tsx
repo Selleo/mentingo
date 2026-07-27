@@ -28,7 +28,7 @@ export const AutomationRow: FC<AutomationRowProps> = ({ automation, onOpenDrawer
   };
 
   return (
-    <TableRow>
+    <TableRow data-testid={`automation-page-row-${automation.id}`}>
       <TableCell>
         <div className="flex flex-col">
           <span className="text-sm font-semibold">{automation.name}</span>

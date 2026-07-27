@@ -76,6 +76,7 @@ export const routes: (
           route("categories/:id", "modules/Admin/Categories/Category.page.tsx");
           route("categories/new", "modules/Admin/Categories/CreateNewCategory.page.tsx");
           route("automation", "modules/Admin/Automation/Automation.page.tsx");
+          route("automation/logs", "modules/Admin/Automation/Logs/AutomationLogs.page.tsx");
           route(
             "automation/:id/builder",
             "modules/Admin/Automation/Builder/AutomationBuilder.page.tsx",

@@ -1,4 +1,5 @@
 import { ArticleFactory } from "./article.factory";
+import { AutomationFactory } from "./automation.factory";
 import { CategoryFactory } from "./category.factory";
 import { CourseFactory } from "./course.factory";
 import { CurriculumFactory } from "./curriculum.factory";
@@ -14,6 +15,7 @@ import type { FixtureApiClient } from "../utils/api-client";
 
 export type FixtureFactories = {
   createArticleFactory: () => ArticleFactory;
+  createAutomationFactory: () => AutomationFactory;
   createCategoryFactory: () => CategoryFactory;
   createCourseFactory: () => CourseFactory;
   createCurriculumFactory: () => CurriculumFactory;
@@ -28,6 +30,7 @@ export type FixtureFactories = {
 
 export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFactories => {
   let articleFactory: ArticleFactory | undefined;
+  let automationFactory: AutomationFactory | undefined;
   let categoryFactory: CategoryFactory | undefined;
   let courseFactory: CourseFactory | undefined;
   let curriculumFactory: CurriculumFactory | undefined;
@@ -43,6 +46,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
     createArticleFactory: () => {
       articleFactory ??= new ArticleFactory(apiClient);
       return articleFactory;
+    },
+    createAutomationFactory: () => {
+      automationFactory ??= new AutomationFactory(apiClient);
+      return automationFactory;
     },
     createCategoryFactory: () => {
       categoryFactory ??= new CategoryFactory(apiClient);
@@ -88,6 +95,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
 };
 
 export { ArticleFactory } from "./article.factory";
+export { AutomationFactory } from "./automation.factory";
 export { CategoryFactory } from "./category.factory";
 export { CourseFactory } from "./course.factory";
 export { CurriculumFactory } from "./curriculum.factory";

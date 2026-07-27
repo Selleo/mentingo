@@ -15882,6 +15882,37 @@
           }
         }
       }
+    },
+    "/api/automation-logs": {
+      "get": {
+        "operationId": "AutomationLogsController_getAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/automation-logs/automation/{automationId}": {
+      "get": {
+        "operationId": "AutomationLogsController_getByAutomationId",
+        "parameters": [
+          {
+            "name": "automationId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
