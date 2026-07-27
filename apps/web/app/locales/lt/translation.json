@@ -4687,7 +4687,60 @@
       "noPlaceholders": "Šis šablonas neturi kintamųjų, kuriuos reikėtų užpildyti.",
       "placeholdersDescription": "Priskirkite kiekvieną šablono kintamąjį trigerio teikiamiems duomenims.",
       "selectVariable": "Pasirinkite trigerio kintamąjį...",
-      "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius."
+      "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius.",
+      "defaultEmailNoMapping": "Numatytasis el. pašto šablonas nereikalauja kintamųjų susiejimo.",
+      "templates": {
+        "defaultEmail": "Numatytasis el. laiškas",
+        "userInvite": "Vartotojo pakvietimas",
+        "welcome": "Pasisveikinimas",
+        "userFirstLogin": "Pirmas prisijungimas",
+        "userAssignedToCourse": "Vartotojas priskirtas kursui",
+        "userShortInactivity": "Trumpas neaktyvumas",
+        "userLongInactivity": "Ilgas neaktyvumas",
+        "userFinishedChapter": "Skyrius baigtas",
+        "userFinishedCourse": "Kursas baigtas",
+        "createPasswordReminder": "Slaptažodžio sukūrimo priminimas",
+        "certificateExpirationWarning": "Sertifikato galiojimo pabaigos įspėjimas",
+        "certificateExpired": "Sertifikatas nebegalioja",
+        "announcement": "Pranešimas",
+        "courseDueDateReminder": "Kurso termino priminimas",
+        "newUser": "Naujas vartotojas",
+        "finishedCourse": "Baigtas kursas"
+      }
+    },
+    "variables": {
+      "userFirstName": "Vartotojo vardas",
+      "userLastName": "Vartotojo pavardė",
+      "userEmail": "El. pašto adresas",
+      "inviteLink": "Aktyvavimo nuoroda",
+      "inviteLinkRegistration": "Registracijos nuoroda",
+      "resetPasswordLink": "Slaptažodžio atkūrimo nuoroda",
+      "platformUrl": "Platformos nuoroda",
+      "loginDate": "Pirmo prisijungimo data",
+      "courseName": "Kurso pavadinimas",
+      "courseUrl": "Kurso nuoroda",
+      "dueDate": "Terminas",
+      "daysInactive": "Neaktyvumo dienų skaičius",
+      "chapterName": "Skyriaus pavadinimas",
+      "finishedAt": "Baigimo data",
+      "certificateUrl": "Sertifikato nuoroda",
+      "registrationDate": "Registracijos data",
+      "createdAt": "Sukūrimo data",
+      "daysLeft": "Likusios dienos",
+      "daysLeftExpiration": "Dienų iki galiojimo pabaigos",
+      "certificateName": "Sertifikato pavadinimas",
+      "expirationDate": "Galiojimo pabaigos data",
+      "archivedAt": "Archyvavimo data",
+      "recipientFirstName": "Gavėjo vardas",
+      "recipientLastName": "Gavėjo pavardė",
+      "announcementTitle": "Skelbimo pavadinimas",
+      "announcementContent": "Skelbimo turinys",
+      "announcementUrl": "Skelbimo nuoroda",
+      "mentionedFirstName": "Paminėto vartotojo vardas",
+      "mentionedLastName": "Paminėto vartotojo pavardė",
+      "authorFullName": "Autoriaus vardas ir pavardė",
+      "messageContent": "Žinutės turinys",
+      "chatUrl": "Žinutės nuoroda"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -4711,7 +4764,24 @@
       "placeholder": "Placeholder",
       "mappedTo": "Susieta su",
       "sampleValue": "Pavyzdinė reikšmė",
-      "unmapped": "Nesusieta"
+      "unmapped": "Nesusieta",
+      "errors": {
+        "triggerNodeName": "Pradinis įvykis",
+        "selectTriggerType": "Pasirinkite pradinio įvykio tipą",
+        "addTriggerNode": "Pridėkite bent vieną trigerio mazgą",
+        "actionNodeName": "Siųsti el. laišką",
+        "actionLabel": "Veiksmas",
+        "selectEmailTemplate": "Pasirinkite paskelbtą el. laiško šabloną",
+        "selectLanguage": "Pasirinkite el. laiško šablono kalbą",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} nesusietas — priskirkite įvykio kintamąjį",
+        "addActionNode": "Pridėkite bent vieną veiksmo mazgą (pvz. Siųsti el. laišką)"
+      },
+      "preview": {
+        "subject": "Jums priskirtas kursas: {{courseName}}",
+        "greeting": "Sveiki {{name}}!",
+        "assignedToCourse": "Jums priskirtas naujas kursas: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Eiti į kursą"
+      }
     }
   },
   "automationSteps": {

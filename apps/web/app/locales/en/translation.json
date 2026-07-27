@@ -4815,7 +4815,60 @@
       "noPlaceholders": "This template has no placeholders to fill.",
       "placeholdersDescription": "Map each template placeholder to a variable provided by the trigger.",
       "selectVariable": "Select trigger variable...",
-      "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables."
+      "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables.",
+      "defaultEmailNoMapping": "The default email template does not require any placeholder mapping.",
+      "templates": {
+        "defaultEmail": "Default Email",
+        "userInvite": "User Invite",
+        "welcome": "Welcome",
+        "userFirstLogin": "First Login",
+        "userAssignedToCourse": "User Assigned to Course",
+        "userShortInactivity": "Short Inactivity",
+        "userLongInactivity": "Long Inactivity",
+        "userFinishedChapter": "Chapter Finished",
+        "userFinishedCourse": "Course Finished",
+        "createPasswordReminder": "Create Password Reminder",
+        "certificateExpirationWarning": "Certificate Expiration Warning",
+        "certificateExpired": "Certificate Expired",
+        "announcement": "Announcement",
+        "courseDueDateReminder": "Course Due Date Reminder",
+        "newUser": "New User",
+        "finishedCourse": "Finished Course"
+      }
+    },
+    "variables": {
+      "userFirstName": "User first name",
+      "userLastName": "User last name",
+      "userEmail": "Email address",
+      "inviteLink": "Activation link",
+      "inviteLinkRegistration": "Registration link",
+      "resetPasswordLink": "Password reset link",
+      "platformUrl": "Platform link",
+      "loginDate": "First login date",
+      "courseName": "Course name",
+      "courseUrl": "Course link",
+      "dueDate": "Due date",
+      "daysInactive": "Days of inactivity",
+      "chapterName": "Chapter name",
+      "finishedAt": "Completion date",
+      "certificateUrl": "Certificate link",
+      "registrationDate": "Registration date",
+      "createdAt": "Creation date",
+      "daysLeft": "Days remaining",
+      "daysLeftExpiration": "Days until expiration",
+      "certificateName": "Certificate name",
+      "expirationDate": "Expiration date",
+      "archivedAt": "Archive date",
+      "recipientFirstName": "Recipient first name",
+      "recipientLastName": "Recipient last name",
+      "announcementTitle": "Announcement title",
+      "announcementContent": "Announcement content",
+      "announcementUrl": "Announcement link",
+      "mentionedFirstName": "Mentioned user first name",
+      "mentionedLastName": "Mentioned user last name",
+      "authorFullName": "Author full name",
+      "messageContent": "Message content",
+      "chatUrl": "Message link"
     },
     "simulation": {
       "title": "Simulation Result",
@@ -4839,7 +4892,24 @@
       "placeholder": "Placeholder",
       "mappedTo": "Mapped to",
       "sampleValue": "Sample Value",
-      "unmapped": "Unmapped"
+      "unmapped": "Unmapped",
+      "errors": {
+        "triggerNodeName": "Start event",
+        "selectTriggerType": "Select a start event type",
+        "addTriggerNode": "Add at least one trigger node",
+        "actionNodeName": "Send email",
+        "actionLabel": "Action",
+        "selectEmailTemplate": "Select a published email template",
+        "selectLanguage": "Select the email template language",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} is not mapped — assign an event variable",
+        "addActionNode": "Add at least one action node (e.g. Send email)"
+      },
+      "preview": {
+        "subject": "You have been assigned to course: {{courseName}}",
+        "greeting": "Hi {{name}}!",
+        "assignedToCourse": "You have been assigned to a new course: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Go to course"
+      }
     }
   },
   "automationSteps": {

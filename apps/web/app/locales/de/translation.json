@@ -4685,7 +4685,60 @@
       "noPlaceholders": "Diese Vorlage hat keine Variablen zum Ausfüllen.",
       "placeholdersDescription": "Ordnen Sie jede Vorlagenvariable einer vom Trigger bereitgestellten Variable zu.",
       "selectVariable": "Trigger-Variable auswählen...",
-      "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen."
+      "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen.",
+      "defaultEmailNoMapping": "Die Standard-E-Mail-Vorlage erfordert keine Platzhalterzuordnung.",
+      "templates": {
+        "defaultEmail": "Standard-E-Mail",
+        "userInvite": "Benutzereinladung",
+        "welcome": "Willkommen",
+        "userFirstLogin": "Erste Anmeldung",
+        "userAssignedToCourse": "Benutzer dem Kurs zugewiesen",
+        "userShortInactivity": "Kurze Inaktivität",
+        "userLongInactivity": "Lange Inaktivität",
+        "userFinishedChapter": "Kapitel abgeschlossen",
+        "userFinishedCourse": "Kurs abgeschlossen",
+        "createPasswordReminder": "Passwort-Erstellungserinnerung",
+        "certificateExpirationWarning": "Zertifikat-Ablaufwarnung",
+        "certificateExpired": "Zertifikat abgelaufen",
+        "announcement": "Ankündigung",
+        "courseDueDateReminder": "Kurs-Fälligkeitserinnerung",
+        "newUser": "Neuer Benutzer",
+        "finishedCourse": "Kurs abgeschlossen"
+      }
+    },
+    "variables": {
+      "userFirstName": "Vorname des Benutzers",
+      "userLastName": "Nachname des Benutzers",
+      "userEmail": "E-Mail-Adresse",
+      "inviteLink": "Aktivierungslink",
+      "inviteLinkRegistration": "Registrierungslink",
+      "resetPasswordLink": "Link zum Passwort-Reset",
+      "platformUrl": "Plattform-Link",
+      "loginDate": "Datum der ersten Anmeldung",
+      "courseName": "Kursname",
+      "courseUrl": "Kurs-Link",
+      "dueDate": "Fälligkeitsdatum",
+      "daysInactive": "Tage der Inaktivität",
+      "chapterName": "Kapitelname",
+      "finishedAt": "Abschlussdatum",
+      "certificateUrl": "Zertifikat-Link",
+      "registrationDate": "Registrierungsdatum",
+      "createdAt": "Erstellungsdatum",
+      "daysLeft": "Verbleibende Tage",
+      "daysLeftExpiration": "Tage bis zum Ablauf",
+      "certificateName": "Zertifikatname",
+      "expirationDate": "Ablaufdatum",
+      "archivedAt": "Archivierungsdatum",
+      "recipientFirstName": "Vorname des Empfängers",
+      "recipientLastName": "Nachname des Empfängers",
+      "announcementTitle": "Ankündigungstitel",
+      "announcementContent": "Ankündigungsinhalt",
+      "announcementUrl": "Ankündigungs-Link",
+      "mentionedFirstName": "Vorname des erwähnten Benutzers",
+      "mentionedLastName": "Nachname des erwähnten Benutzers",
+      "authorFullName": "Vollständiger Name des Autors",
+      "messageContent": "Nachrichteninhalt",
+      "chatUrl": "Nachrichtenlink"
     },
     "simulation": {
       "title": "Simulationsergebnis",
@@ -4709,7 +4762,24 @@
       "placeholder": "Platzhalter",
       "mappedTo": "Zugeordnet zu",
       "sampleValue": "Beispielwert",
-      "unmapped": "Nicht zugeordnet"
+      "unmapped": "Nicht zugeordnet",
+      "errors": {
+        "triggerNodeName": "Startereignis",
+        "selectTriggerType": "Wählen Sie einen Startereignis-Typ",
+        "addTriggerNode": "Fügen Sie mindestens einen Trigger-Knoten hinzu",
+        "actionNodeName": "E-Mail senden",
+        "actionLabel": "Aktion",
+        "selectEmailTemplate": "Wählen Sie eine veröffentlichte E-Mail-Vorlage",
+        "selectLanguage": "Wählen Sie die Sprache der E-Mail-Vorlage",
+        "unmappedPlaceholder": "Platzhalter {{placeholder}} ist nicht zugeordnet — weisen Sie eine Ereignisvariable zu",
+        "addActionNode": "Fügen Sie mindestens einen Aktionsknoten hinzu (z.B. E-Mail senden)"
+      },
+      "preview": {
+        "subject": "Sie wurden einem Kurs zugewiesen: {{courseName}}",
+        "greeting": "Hallo {{name}}!",
+        "assignedToCourse": "Sie wurden einem neuen Kurs zugewiesen: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Zum Kurs"
+      }
     }
   },
   "automationSteps": {

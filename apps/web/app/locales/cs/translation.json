@@ -4684,7 +4684,60 @@
       "noPlaceholders": "Tato šablona nemá proměnné k vyplnění.",
       "placeholdersDescription": "Přiřaďte každou proměnnou šablony k datům poskytovaným triggerem.",
       "selectVariable": "Vyberte proměnnou triggeru...",
-      "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných."
+      "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných.",
+      "defaultEmailNoMapping": "Výchozí e-mailová šablona nevyžaduje žádné mapování proměnných.",
+      "templates": {
+        "defaultEmail": "Výchozí e-mail",
+        "userInvite": "Pozvání uživatele",
+        "welcome": "Uvítání",
+        "userFirstLogin": "První přihlášení",
+        "userAssignedToCourse": "Uživatel přiřazen ke kurzu",
+        "userShortInactivity": "Krátká neaktivita",
+        "userLongInactivity": "Dlouhá neaktivita",
+        "userFinishedChapter": "Kapitola dokončena",
+        "userFinishedCourse": "Kurz dokončen",
+        "createPasswordReminder": "Připomenutí vytvoření hesla",
+        "certificateExpirationWarning": "Upozornění na vypršení certifikátu",
+        "certificateExpired": "Certifikát vypršel",
+        "announcement": "Oznámení",
+        "courseDueDateReminder": "Připomenutí termínu kurzu",
+        "newUser": "Nový uživatel",
+        "finishedCourse": "Dokončený kurz"
+      }
+    },
+    "variables": {
+      "userFirstName": "Jméno uživatele",
+      "userLastName": "Příjmení uživatele",
+      "userEmail": "E-mailová adresa",
+      "inviteLink": "Aktivační odkaz",
+      "inviteLinkRegistration": "Registrační odkaz",
+      "resetPasswordLink": "Odkaz pro reset hesla",
+      "platformUrl": "Odkaz na platformu",
+      "loginDate": "Datum prvního přihlášení",
+      "courseName": "Název kurzu",
+      "courseUrl": "Odkaz na kurz",
+      "dueDate": "Termín dokončení",
+      "daysInactive": "Počet dní neaktivity",
+      "chapterName": "Název kapitoly",
+      "finishedAt": "Datum dokončení",
+      "certificateUrl": "Odkaz na certifikát",
+      "registrationDate": "Datum registrace",
+      "createdAt": "Datum vytvoření",
+      "daysLeft": "Zbývající dny",
+      "daysLeftExpiration": "Dní do vypršení",
+      "certificateName": "Název certifikátu",
+      "expirationDate": "Datum vypršení",
+      "archivedAt": "Datum archivace",
+      "recipientFirstName": "Jméno příjemce",
+      "recipientLastName": "Příjmení příjemce",
+      "announcementTitle": "Název oznámení",
+      "announcementContent": "Obsah oznámení",
+      "announcementUrl": "Odkaz na oznámení",
+      "mentionedFirstName": "Jméno zmíněného uživatele",
+      "mentionedLastName": "Příjmení zmíněného uživatele",
+      "authorFullName": "Celé jméno autora",
+      "messageContent": "Obsah zprávy",
+      "chatUrl": "Odkaz na zprávu"
     },
     "simulation": {
       "title": "Výsledek simulace",
@@ -4708,7 +4761,24 @@
       "placeholder": "Placeholder",
       "mappedTo": "Mapováno na",
       "sampleValue": "Ukázková hodnota",
-      "unmapped": "Nemapováno"
+      "unmapped": "Nemapováno",
+      "errors": {
+        "triggerNodeName": "Startovní událost",
+        "selectTriggerType": "Vyberte typ startovní události",
+        "addTriggerNode": "Přidejte alespoň jeden trigger uzel",
+        "actionNodeName": "Odeslat e-mail",
+        "actionLabel": "Akce",
+        "selectEmailTemplate": "Vyberte publikovanou šablonu e-mailu",
+        "selectLanguage": "Vyberte jazyk šablony e-mailu",
+        "unmappedPlaceholder": "Placeholder {{placeholder}} není namapován — přiřaďte proměnnou události",
+        "addActionNode": "Přidejte alespoň jeden uzel akce (např. Odeslat e-mail)"
+      },
+      "preview": {
+        "subject": "Byli jste přiřazeni ke kurzu: {{courseName}}",
+        "greeting": "Ahoj {{name}}!",
+        "assignedToCourse": "Byli jste přiřazeni k novému kurzu: <strong>{{courseName}}</strong>.",
+        "goToCourse": "Přejít na kurz"
+      }
     }
   },
   "automationSteps": {
