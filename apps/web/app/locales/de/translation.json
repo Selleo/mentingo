@@ -4563,6 +4563,7 @@
       "savedJustNow": "Gerade gespeichert",
       "savedMinutesAgo": "Vor {{count}} Min. gespeichert",
       "simulationRequiredTooltip": "Führen Sie eine Simulation durch und stellen Sie sicher, dass sie erfolgreich ist, um die Automatisierung zu aktivieren",
+      "invalidNodesTooltip": "Beheben Sie alle fehlerhaften Knoten, bevor Sie die Automatisierung aktivieren",
       "unsavedChangesTooltip": "Speichern Sie Änderungen, bevor Sie die Automatisierung aktivieren",
       "leaveDialog": {
         "title": "Nicht gespeicherte Änderungen",

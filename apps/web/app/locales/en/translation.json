@@ -4691,6 +4691,7 @@
       "savedJustNow": "Saved just now",
       "savedMinutesAgo": "Saved {{count}} min ago",
       "simulationRequiredTooltip": "Run a simulation and ensure it passes before activating the automation",
+      "invalidNodesTooltip": "Fix all invalid nodes before activating the automation",
       "unsavedChangesTooltip": "Save changes before activating the automation",
       "leaveDialog": {
         "title": "Unsaved changes",

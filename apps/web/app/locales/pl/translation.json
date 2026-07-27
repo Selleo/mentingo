@@ -4730,6 +4730,7 @@
       "savedJustNow": "Zapisano właśnie",
       "savedMinutesAgo": "Zapisano {{count}} min temu",
       "simulationRequiredTooltip": "Uruchom symulację i upewnij się, że przejdzie pomyślnie, aby aktywować automatyzację",
+      "invalidNodesTooltip": "Napraw wszystkie błędne węzły przed aktywacją automatyzacji",
       "unsavedChangesTooltip": "Zapisz zmiany przed aktywacją automatyzacji",
       "leaveDialog": {
         "title": "Niezapisane zmiany",

@@ -4564,6 +4564,7 @@
       "savedJustNow": "Právě uloženo",
       "savedMinutesAgo": "Uloženo před {{count}} min",
       "simulationRequiredTooltip": "Spusťte simulaci a ujistěte se, že proběhne úspěšně, abyste mohli aktivovat automatizaci",
+      "invalidNodesTooltip": "Opravte všechny chybné uzly před aktivací automatizace",
       "unsavedChangesTooltip": "Uložte změny před aktivací automatizace",
       "leaveDialog": {
         "title": "Neuložené změny",

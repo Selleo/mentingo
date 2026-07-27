@@ -4635,6 +4635,7 @@
       "savedJustNow": "Guardado justo ahora",
       "savedMinutesAgo": "Guardado hace {{count}} min",
       "simulationRequiredTooltip": "Ejecute una simulación y asegúrese de que pase correctamente para activar la automatización",
+      "invalidNodesTooltip": "Corrija todos los nodos inválidos antes de activar la automatización",
       "unsavedChangesTooltip": "Guarde los cambios antes de activar la automatización",
       "leaveDialog": {
         "title": "Cambios sin guardar",

@@ -68,7 +68,6 @@ export default function AutomationBuilderPage() {
       hasLoadedRef.current = true;
       reset();
       setAutomationName(automation.name);
-      setActive(automation.status === "enabled");
 
       // Load nodes into store without marking dirty
       const builderNodes: BuilderNode[] = automation.nodes.map((node) => ({
@@ -85,7 +84,18 @@ export default function AutomationBuilderPage() {
 
       // Read simulationPassed from trigger node's config
       const triggerNode = automation.nodes.find((n) => n.kind === "trigger");
-      setSimulationPassed(triggerNode?.config?.simulationPassed === true);
+      const savedSimulationPassed = triggerNode?.config?.simulationPassed === true;
+
+      // If any node has invalid simulation status, override both flags
+      const hasInvalidNodes = builderNodes.some((n) => n.config?.simulationStatus === "invalid");
+
+      if (hasInvalidNodes) {
+        setSimulationPassed(false);
+        setActive(false);
+      } else {
+        setSimulationPassed(savedSimulationPassed);
+        setActive(automation.status === "enabled");
+      }
     }
   }, [automation]);
 

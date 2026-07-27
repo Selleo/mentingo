@@ -4565,6 +4565,7 @@
       "savedJustNow": "Ką tik išsaugota",
       "savedMinutesAgo": "Išsaugota prieš {{count}} min.",
       "simulationRequiredTooltip": "Paleiskite simuliaciją ir įsitikinkite, kad ji sėkminga, kad galėtumėte aktyvuoti automatizavimą",
+      "invalidNodesTooltip": "Ištaisykite visus klaidingus mazgus prieš aktyvuodami automatizavimą",
       "unsavedChangesTooltip": "Išsaugokite pakeitimus prieš aktyvuodami automatizavimą",
       "leaveDialog": {
         "title": "Neišsaugoti pakeitimai",

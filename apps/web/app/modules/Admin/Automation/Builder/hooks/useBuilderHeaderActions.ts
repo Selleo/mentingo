@@ -146,12 +146,14 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   const simulationJustPassed =
     simulationState.type === "success" && simulationState.result.overallStatus === "success";
 
-  const canActivate = simulationPassed || simulationJustPassed;
-  const toggleDisabled = isDirty || (!isActive && !canActivate);
+  const hasInvalidNodes = nodes.some((n) => n.config?.simulationStatus === "invalid");
+
+  const canActivate = !hasInvalidNodes && (simulationPassed || simulationJustPassed);
+  const toggleDisabled = isDirty || hasInvalidNodes || (!isActive && !canActivate);
 
   const handleToggleActive = useCallback(
     (active: boolean) => {
-      if (active && (useBuilderStore.getState().isDirty || !canActivate)) return;
+      if (active && (useBuilderStore.getState().isDirty || !canActivate || hasInvalidNodes)) return;
 
       setActive(active);
 
@@ -160,16 +162,17 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
         updateAutomation.mutate({ automationId, body: { status } });
       }
     },
-    [automationId, canActivate, setActive, updateAutomation],
+    [automationId, canActivate, hasInvalidNodes, setActive, updateAutomation],
   );
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
   const getToggleTooltip = useCallback((): string | null => {
     if (isDirty) return t("automationBuilder.header.unsavedChangesTooltip");
+    if (hasInvalidNodes) return t("automationBuilder.header.invalidNodesTooltip");
     if (!isActive && !canActivate) return t("automationBuilder.header.simulationRequiredTooltip");
     return null;
-  }, [isDirty, isActive, canActivate, t]);
+  }, [isDirty, isActive, canActivate, hasInvalidNodes, t]);
 
   const formatSavedTime = useCallback((): string | null => {
     if (!lastSavedAt) return null;
