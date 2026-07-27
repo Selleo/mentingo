@@ -1146,15 +1146,8 @@
     {
       "idx": 163,
       "version": "7",
-      "when": 1784704260230,
-      "tag": "0163_orange_sabra",
-      "breakpoints": true
-    },
-    {
-      "idx": 164,
-      "version": "7",
-      "when": 1784812486100,
-      "tag": "0164_add_automation_logs_table",
+      "when": 1785155133225,
+      "tag": "0163_add_automation_log table",
       "breakpoints": true
     }
   ]

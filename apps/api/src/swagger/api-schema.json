@@ -16984,6 +16984,10 @@
                     {
                       "const": "activity_log.read",
                       "type": "string"
+                    },
+                    {
+                      "const": "automation.manage",
+                      "type": "string"
                     }
                   ]
                 }

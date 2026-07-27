@@ -17,6 +17,8 @@ CREATE TABLE IF NOT EXISTS "automation_logs" (
 	"email_addresses" jsonb DEFAULT '[]'::jsonb NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "automation_steps" ALTER COLUMN "type_context" DROP DEFAULT;--> statement-breakpoint
+ALTER TABLE "automation_steps" ALTER COLUMN "type_context" SET NOT NULL;--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "automation_logs" ADD CONSTRAINT "automation_logs_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
