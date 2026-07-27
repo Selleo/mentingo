@@ -33,7 +33,7 @@ describe("CourseMediaModal", () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it("lets an administrator select or drop a hero image", async () => {
+  it("lets an administrator select a hero image", async () => {
     const user = userEvent.setup();
     const onImageSelection = vi.fn();
     const imageInputRef = createRef<HTMLInputElement>();

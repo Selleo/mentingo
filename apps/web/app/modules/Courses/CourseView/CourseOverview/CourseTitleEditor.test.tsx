@@ -24,7 +24,7 @@ describe("CourseTitleEditor", () => {
     expect(editButton).toBeInTheDocument();
     expect(editButton).toHaveClass("inline-block", "max-w-full");
     expect(editButton).not.toHaveClass("w-full");
-    expect(editButton.querySelector("svg")).toHaveClass("-top-0.5", "ml-3", "align-middle");
+    expect(editButton.querySelector("svg")).toHaveClass("-top-1", "ml-3", "align-middle");
     expect(placeholder).toHaveClass("text-neutral-200");
   });
 

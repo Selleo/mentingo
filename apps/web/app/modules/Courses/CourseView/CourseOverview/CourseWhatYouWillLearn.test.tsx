@@ -103,6 +103,82 @@ describe("CourseWhatYouWillLearn", () => {
     expect(updateCourse).not.toHaveBeenCalled();
   });
 
+  it("updates an existing learning outcome", async () => {
+    const user = userEvent.setup();
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse({ learningOutcomes: ["Existing outcome"] });
+
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={["Existing outcome"]} language="en" />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Existing outcome" }));
+
+    const input = screen.getByDisplayValue("Existing outcome");
+    await user.clear(input);
+    await user.type(input, "Updated outcome");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => {
+      expect(updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          language: "en",
+          learningOutcomes: ["Updated outcome"],
+        },
+      });
+    });
+  });
+
+  it("removes a learning outcome", async () => {
+    const user = userEvent.setup();
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse({ learningOutcomes: ["Outcome to remove", "Outcome to keep"] });
+
+    renderWith().render(
+      <CourseWhatYouWillLearn
+        courseOutcomes={["Outcome to remove", "Outcome to keep"]}
+        language="en"
+      />,
+    );
+
+    await user.click(screen.getAllByRole("button", { name: "Remove learning outcome" })[0]);
+
+    await waitFor(() => {
+      expect(updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          language: "en",
+          learningOutcomes: ["Outcome to keep"],
+        },
+      });
+    });
+  });
+
+  it("removes an outcome saved with an empty value", async () => {
+    const user = userEvent.setup();
+    mockedIsAdminExperience = true;
+    mockedCourse = createCourse({ learningOutcomes: ["Outcome to clear"] });
+
+    renderWith().render(
+      <CourseWhatYouWillLearn courseOutcomes={["Outcome to clear"]} language="en" />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Outcome to clear" }));
+    await user.clear(screen.getByDisplayValue("Outcome to clear"));
+    await user.tab();
+
+    await waitFor(() => {
+      expect(updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          language: "en",
+          learningOutcomes: [],
+        },
+      });
+    });
+  });
+
   it("limits a course to five learning outcomes", () => {
     mockedIsAdminExperience = true;
     const outcomes = Array.from(
