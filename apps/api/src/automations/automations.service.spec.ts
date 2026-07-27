@@ -1,6 +1,8 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
+import { AutomationStatus } from "src/announcements/types/automations.types";
+
 import { AutomationsService } from "./automations.service";
 import { AutomationsRepository } from "./repositories/automations/automations.repository";
 
@@ -54,7 +56,11 @@ describe("AutomationsService", () => {
     it("delegates to repository and returns created automation", async () => {
       repository.createAutomation.mockResolvedValue(mockAutomation as any);
 
-      const input = { name: { pl: "Test" }, description: { pl: "Opis" }, status: "draft" as const };
+      const input = {
+        name: { pl: "Test" },
+        description: { pl: "Opis" },
+        status: AutomationStatus.Draft,
+      };
       const result = await service.createAutomation(input);
 
       expect(repository.createAutomation).toHaveBeenCalledWith(input);
@@ -112,16 +118,16 @@ describe("AutomationsService", () => {
     it("returns updated id on success", async () => {
       repository.changeStatus.mockResolvedValue(automationId);
 
-      const result = await service.updateStatus(automationId, "enabled" as any);
+      const result = await service.updateStatus(automationId, AutomationStatus.Enabled);
 
-      expect(repository.changeStatus).toHaveBeenCalledWith(automationId, "enabled");
+      expect(repository.changeStatus).toHaveBeenCalledWith(automationId, AutomationStatus.Enabled);
       expect(result).toBe(automationId);
     });
 
     it("throws BadRequestException when status change fails", async () => {
       repository.changeStatus.mockResolvedValue(undefined as any);
 
-      await expect(service.updateStatus(automationId, "enabled" as any)).rejects.toThrow(
+      await expect(service.updateStatus(automationId, AutomationStatus.Enabled)).rejects.toThrow(
         BadRequestException,
       );
     });

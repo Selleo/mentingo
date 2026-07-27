@@ -1,5 +1,6 @@
 import { Test } from "@nestjs/testing";
 
+import { AutomationStatus } from "src/announcements/types/automations.types";
 import { BaseResponse } from "src/common";
 
 import { AutomationsController } from "./automations.controller";
@@ -76,7 +77,11 @@ describe("AutomationsController", () => {
     it("delegates to service and wraps response", async () => {
       service.createAutomation.mockResolvedValue(mockAutomation as any);
 
-      const input = { name: { pl: "Test" }, description: { pl: "" }, status: "draft" as const };
+      const input = {
+        name: { pl: "Test" },
+        description: { pl: "" },
+        status: AutomationStatus.Draft,
+      };
       const result = await controller.createAutomation(input);
 
       expect(service.createAutomation).toHaveBeenCalledWith(input);
@@ -88,9 +93,11 @@ describe("AutomationsController", () => {
     it("calls updateStatus with id and status", async () => {
       service.updateStatus.mockResolvedValue(automationId);
 
-      const result = await controller.updateStatus(automationId, { status: "enabled" as any });
+      const result = await controller.updateStatus(automationId, {
+        status: AutomationStatus.Enabled,
+      });
 
-      expect(service.updateStatus).toHaveBeenCalledWith(automationId, "enabled");
+      expect(service.updateStatus).toHaveBeenCalledWith(automationId, AutomationStatus.Enabled);
       expect(result).toBeInstanceOf(BaseResponse);
       expect(result.data).toEqual({ id: automationId });
     });

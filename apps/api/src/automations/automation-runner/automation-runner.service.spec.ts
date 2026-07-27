@@ -9,7 +9,6 @@ import { AutomationTemplateService } from "./automation-template.service";
 
 import type { AutomationResolvedRecipient } from "./automation-data-resolver.types";
 import type { TestingModule } from "@nestjs/testing";
-import type { AutomationStep } from "src/announcements/types/automations-source.types";
 import type { UUIDType } from "src/common";
 
 describe("AutomationRunnerService", () => {
@@ -30,6 +29,18 @@ describe("AutomationRunnerService", () => {
       },
     },
   ];
+
+  const makeStep = (overrides: Record<string, unknown>) => ({
+    id: "step-id",
+    parentId: null,
+    automationId,
+    type: "trigger",
+    typeContext: { name: "user_invited", providedVariables: [] },
+    createdAt: "2025-01-01",
+    updatedAt: "2025-01-01",
+    tenantId: "tenant-1",
+    ...overrides,
+  });
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,7 +70,6 @@ describe("AutomationRunnerService", () => {
     service = module.get(AutomationRunnerService);
     stepsService = module.get(AutomationStepsService);
     dataResolver = module.get(AutomationDataResolverService);
-    templateService = module.get(AutomationTemplateService);
   });
 
   afterEach(() => {
@@ -80,44 +90,35 @@ describe("AutomationRunnerService", () => {
     });
 
     it("executes steps when recipients are resolved", async () => {
-      const steps: AutomationStep[] = [
-        {
-          id: "trigger-1" as UUIDType,
-          parentId: null,
-          automationId,
-          type: "trigger",
-          typeContext: { name: "user_invited", providedVariables: [] },
-        },
-        {
-          id: "action-1" as UUIDType,
-          parentId: "trigger-1" as UUIDType,
-          automationId,
+      const steps = [
+        makeStep({ id: "trigger-1", type: "trigger" }),
+        makeStep({
+          id: "action-1",
+          parentId: "trigger-1",
           type: "action",
           typeContext: { name: "send_email", providedVariables: [] },
-        },
+        }),
       ];
 
-      stepsService.getAllAutomationSteps.mockResolvedValue(steps);
+      stepsService.getAllAutomationSteps.mockResolvedValue(steps as any);
       dataResolver.resolve.mockResolvedValue(mockRecipients);
 
       const mockEvent = { constructor: { name: "UserInviteEvent" } } as any;
 
-      // Should not throw — the runner executes the tree
       await expect(service.startAutomation(automationId, mockEvent)).resolves.not.toThrow();
     });
 
     it("throws when step tree has no root", async () => {
-      const steps: AutomationStep[] = [
-        {
-          id: "child" as UUIDType,
-          parentId: "nonexistent" as UUIDType,
-          automationId,
+      const steps = [
+        makeStep({
+          id: "child",
+          parentId: "nonexistent",
           type: "action",
           typeContext: { name: "send_email", providedVariables: [] },
-        },
+        }),
       ];
 
-      stepsService.getAllAutomationSteps.mockResolvedValue(steps);
+      stepsService.getAllAutomationSteps.mockResolvedValue(steps as any);
       dataResolver.resolve.mockResolvedValue(mockRecipients);
 
       const mockEvent = { constructor: { name: "UserInviteEvent" } } as any;
@@ -128,17 +129,9 @@ describe("AutomationRunnerService", () => {
     });
 
     it("throws for unknown step type", async () => {
-      const steps: AutomationStep[] = [
-        {
-          id: "root" as UUIDType,
-          parentId: null,
-          automationId,
-          type: "unknown_type" as any,
-          typeContext: { name: "something", providedVariables: [] },
-        },
-      ];
+      const steps = [makeStep({ id: "root", type: "unknown_type" })];
 
-      stepsService.getAllAutomationSteps.mockResolvedValue(steps);
+      stepsService.getAllAutomationSteps.mockResolvedValue(steps as any);
       dataResolver.resolve.mockResolvedValue(mockRecipients);
 
       const mockEvent = { constructor: { name: "UserInviteEvent" } } as any;
@@ -149,36 +142,27 @@ describe("AutomationRunnerService", () => {
     });
 
     it("executes child actions after parent trigger", async () => {
-      const steps: AutomationStep[] = [
-        {
-          id: "trigger" as UUIDType,
-          parentId: null,
-          automationId,
-          type: "trigger",
-          typeContext: { name: "user_invited", providedVariables: [] },
-        },
-        {
-          id: "action-a" as UUIDType,
-          parentId: "trigger" as UUIDType,
-          automationId,
+      const steps = [
+        makeStep({ id: "trigger", type: "trigger" }),
+        makeStep({
+          id: "action-a",
+          parentId: "trigger",
           type: "action",
           typeContext: { name: "send_email", providedVariables: [] },
-        },
-        {
-          id: "action-b" as UUIDType,
-          parentId: "trigger" as UUIDType,
-          automationId,
+        }),
+        makeStep({
+          id: "action-b",
+          parentId: "trigger",
           type: "action",
           typeContext: { name: "send_email", providedVariables: [] },
-        },
+        }),
       ];
 
-      stepsService.getAllAutomationSteps.mockResolvedValue(steps);
+      stepsService.getAllAutomationSteps.mockResolvedValue(steps as any);
       dataResolver.resolve.mockResolvedValue(mockRecipients);
 
       const mockEvent = { constructor: { name: "UserInviteEvent" } } as any;
 
-      // Both action children should be executed without error
       await expect(service.startAutomation(automationId, mockEvent)).resolves.not.toThrow();
     });
   });

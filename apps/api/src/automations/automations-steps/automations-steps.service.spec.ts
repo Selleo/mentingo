@@ -132,22 +132,32 @@ describe("AutomationStepsService", () => {
 
   describe("updateAutomationStep", () => {
     it("updates when ids match and step exists", async () => {
-      const existingStep = {
-        id: "step-1",
+      const rootStep = {
+        id: "root-1",
         parentId: null,
         automationId,
         type: "trigger",
       };
+      const existingStep = {
+        id: "step-1",
+        parentId: "root-1" as UUIDType,
+        automationId,
+        type: "action",
+      };
 
-      repository.getAutomationStepById.mockResolvedValue(existingStep as any);
-      repository.getAllAutomationStepsByAutomationId.mockResolvedValue([existingStep] as any);
+      repository.getAutomationStepById.mockResolvedValueOnce(existingStep as any);
+      repository.getAutomationStepById.mockResolvedValueOnce(rootStep as any);
+      repository.getAllAutomationStepsByAutomationId.mockResolvedValue([
+        rootStep,
+        existingStep,
+      ] as any);
       repository.updateAutomationStep.mockResolvedValue("step-1" as UUIDType);
 
       const input = {
-        parentId: null,
+        parentId: "root-1" as UUIDType,
         automationId,
-        type: "trigger" as const,
-        typeContext: { name: "user_welcome", providedVariables: [] },
+        type: "action" as const,
+        typeContext: { name: "send_email", providedVariables: [] },
       };
 
       const result = await service.updateAutomationStep("step-1" as UUIDType, input);
