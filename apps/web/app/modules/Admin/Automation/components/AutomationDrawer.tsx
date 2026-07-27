@@ -181,7 +181,12 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
               {t("automationView.drawer.flowManagement")}
             </p>
 
-            <Button variant="outline" className="w-full" onClick={() => onEdit(automation.id)}>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => onEdit(automation.id)}
+              data-testid="automation-drawer-open-builder-button"
+            >
               {t("automationView.drawer.openBuilder")}
             </Button>
 
@@ -230,6 +235,7 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
             size="sm"
             className="w-full"
             onClick={() => onDelete(automation.id)}
+            data-testid="automation-drawer-delete-button"
           >
             <Trash2 className="mr-2 size-4" /> {t("automationView.drawer.delete")}
           </Button>

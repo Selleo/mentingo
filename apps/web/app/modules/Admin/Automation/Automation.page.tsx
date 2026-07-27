@@ -90,7 +90,7 @@ export default function AutomationPage() {
   });
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8" data-testid="automation-page">
       <AutomationHeader onCreate={handleCreate} />
 
       <div className="mt-8">
@@ -124,13 +124,14 @@ export default function AutomationPage() {
           variant="primary"
           className="px-3 py-1.5 text-sm w-auto"
           onClick={() => navigate("/admin/automation/logs")}
+          data-testid="automation-page-open-logs-button"
         >
           {t("automationView.openLogs")}
         </Button>
       </div>
 
       <AlertDialog open={!!deleteTargetId} onOpenChange={(open) => !open && handleCancelDelete()}>
-        <AlertDialogContent>
+        <AlertDialogContent data-testid="automation-page-delete-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>{t("automationView.deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -138,12 +139,16 @@ export default function AutomationPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDelete}>
+            <AlertDialogCancel
+              onClick={handleCancelDelete}
+              data-testid="automation-page-delete-dialog-cancel"
+            >
               {t("automationView.deleteDialog.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              data-testid="automation-page-delete-dialog-confirm"
             >
               {t("automationView.deleteDialog.confirm")}
             </AlertDialogAction>
