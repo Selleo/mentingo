@@ -1,12 +1,15 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from "@nestjs/common";
+import { PERMISSIONS } from "@repo/shared";
 
 import { AutomationStepRecordInput } from "src/announcements/types/automations-source.types";
 import { BaseResponse, UUIDType } from "src/common";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 
 import { AutomationStepsService } from "./automations-steps.service";
 
 import type { AutomationStepBulkUpdate } from "src/announcements/types/automations-source.types";
 
+@RequirePermission(PERMISSIONS.AUTOMATION_MANAGE)
 @Controller("automation-steps")
 export class AutomationStepsController {
   constructor(private readonly automationStepsService: AutomationStepsService) {}
