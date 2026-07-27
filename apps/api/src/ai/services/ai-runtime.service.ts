@@ -3,18 +3,24 @@ import {
   AiCapabilityProvider,
   createLumaClient,
   type AiRuntimeConfiguration,
+  type GenerateAiJudgeConfigurationOptions,
   type GenerateTranslationsOptions,
   type GenerateTranslationsResponse,
   type MentorChatOptions,
   type MentorJudgeOptions,
   type TranscribeDictationOptions,
   type TranscribeDictationResponse,
+  type ValidateAiJudgeConfigurationOptions,
 } from "@japro/luma-sdk";
 import { Injectable, Logger } from "@nestjs/common";
 import { Value } from "@sinclair/typebox/value";
 
 import { LUMA_CONFIGURATION_CACHE_TTL_MS } from "src/ai/ai-runtime.constants";
 import { AI_RUNTIME_SOURCES } from "src/ai/ai-runtime.types";
+import {
+  aiJudgeConfigurationValidatorStructuredOutputSchema,
+  referencedAiJudgeConfigurationStructuredOutputSchema,
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 import { loadAiSdk, loadOpenAiSdk } from "src/ai/utils/ai-esm";
 import { aiJudgeJudgementSchema } from "src/ai/utils/ai.schema";
 import { OPENAI_MODELS } from "src/ai/utils/ai.type";
@@ -25,6 +31,10 @@ import type { OpenAIProvider } from "@ai-sdk/openai";
 import type { AiMentorChatStreamResult, AiStreamTextResult } from "src/ai/ai-chat.types";
 import type { AiRuntimeSource } from "src/ai/ai-runtime.types";
 import type { AiJudgeModelResult } from "src/ai/judge-configuration/judge-configuration.types";
+import type {
+  AiJudgeConfigurationValidatorStructuredOutput,
+  ReferencedAiJudgeConfiguration,
+} from "src/ai/judge-configuration-generation/schemas/ai-judge-configuration-generation.schema";
 
 @Injectable()
 export class AiRuntimeService {
@@ -183,6 +193,60 @@ export class AiRuntimeService {
     }
 
     return generateCoreTranslations();
+  }
+
+  async generateJudgeConfiguration(
+    input: GenerateAiJudgeConfigurationOptions,
+    generateCoreConfiguration: () => Promise<ReferencedAiJudgeConfiguration>,
+  ): Promise<ReferencedAiJudgeConfiguration> {
+    if (
+      (await this.resolveSource(AiCapability.AiJudgeConfigurationGenerator)) ===
+      AI_RUNTIME_SOURCES.LUMA
+    ) {
+      try {
+        const luma = await this.getLumaClient();
+        const result = await luma.ai.generateJudgeConfiguration(input);
+        if (!Value.Check(referencedAiJudgeConfigurationStructuredOutputSchema, result))
+          throw new Error("Luma AI Judge configuration generator returned an invalid result");
+
+        return result;
+      } catch (error) {
+        this.logger.warn(
+          `Luma AI Judge configuration generation failed; falling back to core generation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return generateCoreConfiguration();
+  }
+
+  async validateJudgeConfiguration(
+    input: ValidateAiJudgeConfigurationOptions,
+    validateCoreConfiguration: () => Promise<AiJudgeConfigurationValidatorStructuredOutput>,
+  ): Promise<AiJudgeConfigurationValidatorStructuredOutput> {
+    if (
+      (await this.resolveSource(AiCapability.AiJudgeConfigurationValidator)) ===
+      AI_RUNTIME_SOURCES.LUMA
+    ) {
+      try {
+        const luma = await this.getLumaClient();
+        const result = await luma.ai.validateJudgeConfiguration(input);
+        if (!Value.Check(aiJudgeConfigurationValidatorStructuredOutputSchema, result))
+          throw new Error("Luma AI Judge configuration validator returned an invalid result");
+
+        return result;
+      } catch (error) {
+        this.logger.warn(
+          `Luma AI Judge configuration validation failed; falling back to core validation: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+      }
+    }
+
+    return validateCoreConfiguration();
   }
 
   async transcribeDictation(

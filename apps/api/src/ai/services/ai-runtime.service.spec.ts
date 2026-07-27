@@ -14,6 +14,34 @@ describe("AiRuntimeService", () => {
     ],
     temperature: 0.2,
   };
+  const authoringInput = {
+    messages: [
+      { role: "system" as const, content: "Author the rubric." },
+      { role: "user" as const, content: "Assess discovery skills." },
+    ],
+    temperature: 0,
+  };
+  const generatedConfiguration = {
+    taskGoal: "The learner uncovers the customer's needs.",
+    passingThresholdPercent: 70,
+    criteria: [
+      {
+        ref: "C1",
+        title: "Discovers needs",
+        expectedBehavior: "Asks questions about the customer's situation.",
+        maxScore: 1,
+        scoreGuidance: [
+          { score: 0, description: "Does not ask a discovery question.", example: null },
+          {
+            score: 1,
+            description: "Asks a relevant discovery question.",
+            example: "What are you trying to improve?",
+          },
+        ],
+      },
+    ],
+    blockingErrors: [],
+  };
 
   it("uses the Core Judge fallback with the structured result contract", async () => {
     const service = new AiRuntimeService({} as EnvService);
@@ -120,5 +148,80 @@ describe("AiRuntimeService", () => {
     expect(getLumaClient).toHaveBeenCalledTimes(1);
     expect(judgeCore).toHaveBeenCalledTimes(1);
     expect(result).toEqual(coreResult);
+  });
+
+  it("uses Luma for AI Judge configuration generation", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const generateCore = jest.fn();
+    const generateJudgeConfiguration = jest.fn().mockResolvedValue(generatedConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { generateJudgeConfiguration } }),
+    });
+
+    const result = await service.generateJudgeConfiguration(authoringInput, generateCore);
+
+    expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiJudgeConfigurationGenerator);
+    expect(generateJudgeConfiguration).toHaveBeenCalledWith(authoringInput);
+    expect(generateCore).not.toHaveBeenCalled();
+    expect(result).toEqual(generatedConfiguration);
+  });
+
+  it("falls back to Core when Luma AI Judge configuration generation fails", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const coreConfiguration = { ...generatedConfiguration, passingThresholdPercent: 80 };
+    const generateCore = jest.fn().mockResolvedValue(coreConfiguration);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({
+        ai: { generateJudgeConfiguration: jest.fn().mockRejectedValue(new Error("offline")) },
+      }),
+    });
+
+    await expect(service.generateJudgeConfiguration(authoringInput, generateCore)).resolves.toEqual(
+      coreConfiguration,
+    );
+    expect(generateCore).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses Luma for AI Judge configuration validation", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const validation = { summary: "The rubric is ready.", issues: [] };
+    const validateCore = jest.fn();
+    const validateJudgeConfiguration = jest.fn().mockResolvedValue(validation);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({ ai: { validateJudgeConfiguration } }),
+    });
+
+    const result = await service.validateJudgeConfiguration(authoringInput, validateCore);
+
+    expect(service.resolveSource).toHaveBeenCalledWith(AiCapability.AiJudgeConfigurationValidator);
+    expect(validateJudgeConfiguration).toHaveBeenCalledWith(authoringInput);
+    expect(validateCore).not.toHaveBeenCalled();
+    expect(result).toEqual(validation);
+  });
+
+  it("falls back to Core when Luma AI Judge configuration validation is invalid", async () => {
+    const service = new AiRuntimeService({} as EnvService);
+    const coreValidation = { summary: "Core validation result.", issues: [] };
+    const validateCore = jest.fn().mockResolvedValue(coreValidation);
+    jest.spyOn(service, "resolveSource").mockResolvedValue(AI_RUNTIME_SOURCES.LUMA);
+    Object.defineProperty(service, "getLumaClient", {
+      configurable: true,
+      value: jest.fn().mockResolvedValue({
+        ai: {
+          validateJudgeConfiguration: jest.fn().mockResolvedValue({ summary: "Missing issues" }),
+        },
+      }),
+    });
+
+    await expect(service.validateJudgeConfiguration(authoringInput, validateCore)).resolves.toEqual(
+      coreValidation,
+    );
+    expect(validateCore).toHaveBeenCalledTimes(1);
   });
 });

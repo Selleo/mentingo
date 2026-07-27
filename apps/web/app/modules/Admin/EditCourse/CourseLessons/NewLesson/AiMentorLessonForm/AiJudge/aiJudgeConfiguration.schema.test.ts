@@ -52,6 +52,20 @@ describe("aiJudgeConfigurationSchema", () => {
     expect(aiJudgeConfigurationSchema(t).safeParse(createValidConfiguration()).success).toBe(true);
   });
 
+  it("accepts the API-supported zero passing threshold", () => {
+    const configuration = createValidConfiguration();
+    configuration.passingThresholdPercent = 0;
+
+    expect(aiJudgeConfigurationSchema(t).safeParse(configuration).success).toBe(true);
+  });
+
+  it("rejects a task goal containing only empty rich-text markup", () => {
+    const configuration = createValidConfiguration();
+    configuration.taskGoal = "<p><br></p>";
+
+    expect(aiJudgeConfigurationSchema(t).safeParse(configuration).success).toBe(false);
+  });
+
   it("allows a configuration without criteria while it is being drafted", () => {
     const configuration = createValidConfiguration();
     configuration.criteria = [];

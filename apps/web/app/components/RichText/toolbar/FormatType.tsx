@@ -71,7 +71,7 @@ export function FormatType({ editor }: FormatTypeProps) {
 
   return (
     <Select onValueChange={onChange} defaultValue={value()} value={value()}>
-      <SelectTrigger className="invisible h-8 w-[120px] sm:visible">
+      <SelectTrigger className="h-8 w-[104px] sm:w-[120px]">
         <SelectValue placeholder={t("richTextEditor.toolbar.format.placeholder")} />
       </SelectTrigger>
       <SelectContent>

@@ -15,6 +15,10 @@ import { ResourceLibraryModule } from "src/resource-library/resource-library.mod
 import { SettingsModule } from "src/settings/settings.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
+import { AiJudgeConfigurationGenerationQueueService } from "./ai-judge-configuration/ai-judge-configuration-generation-queue.service";
+import { AiJudgeConfigurationGenerationController } from "./ai-judge-configuration/ai-judge-configuration-generation.controller";
+import { AiJudgeConfigurationGenerationService } from "./ai-judge-configuration/ai-judge-configuration-generation.service";
+import { AiJudgeConfigurationGenerationWorker } from "./ai-judge-configuration/ai-judge-configuration-generation.worker";
 import { AiJudgeConfigurationGraphService } from "./ai-judge-configuration/ai-judge-configuration-graph.service";
 import { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration/ai-judge-configuration-translation.service";
 import { AiJudgeConfigurationController } from "./ai-judge-configuration/ai-judge-configuration.controller";
@@ -43,9 +47,16 @@ import { LessonService } from "./services/lesson.service";
     LessonVideoProgressModule,
     forwardRef(() => CourseModule),
   ],
-  controllers: [LessonController, AiJudgeConfigurationController],
+  controllers: [
+    LessonController,
+    AiJudgeConfigurationController,
+    AiJudgeConfigurationGenerationController,
+  ],
   providers: [
     AiJudgeConfigurationRepository,
+    AiJudgeConfigurationGenerationQueueService,
+    AiJudgeConfigurationGenerationService,
+    AiJudgeConfigurationGenerationWorker,
     AiJudgeConfigurationGraphService,
     AiJudgeConfigurationService,
     AiJudgeConfigurationTranslationService,

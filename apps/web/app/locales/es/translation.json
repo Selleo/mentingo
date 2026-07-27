@@ -57,7 +57,8 @@
     "error": {
       "somethingWentWrong": "¡Ups! Algo salió mal.",
       "threadMustBeActive": "El hilo debe estar activo.",
-      "aiJudgeConfigurationMissing": "Falta la configuración de AI Judge."
+      "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
+      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },
     "loader": {
       "textSequence": {
@@ -2286,16 +2287,27 @@
           "aiMentorTypes": "Mentor"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Condiciones de finalización",
           "configured": "Configurado",
           "emptyDescription": "Define cómo se evaluará la respuesta del participante y cuándo se aprobará la lección.",
           "baseLanguageRequired": "Crea la estructura de evaluación en el idioma base del curso antes de traducirla.",
           "structureLockedTooltip": "La estructura de evaluación solo se puede cambiar en el idioma base del curso.",
           "summary": "{{criteria}} criterios · {{score}} puntos totales · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
           "configureWithAi": "Configurar con IA",
+          "createWithAi": "Crear con IA",
+          "improveWithAi": "Mejorar con IA",
+          "checkQualityWithAi": "Comprobar la calidad con IA",
+          "checkingQuality": "Comprobando la calidad...",
+          "checkingQualityDescription": "Revisando el objetivo, los criterios, las pautas de puntuación y los errores bloqueantes.",
+          "aiAssistance": "Asistencia de IA",
+          "qualityCheckResult": "Control de calidad",
+          "qualityCheckResultDescription": "Revisa los hallazgos de la evaluación antes de decidir qué cambiar.",
+          "qualityCheckPassed": "No se requieren cambios. Puedes seguir editando o guardar la evaluación.",
+          "qualityCheckPassedWithSuggestions": "La evaluación es utilizable. Aplica estas mejoras opcionales o continúa sin cambios.",
+          "qualityCheckNeedsChanges": "Revisa los hallazgos o deja que la IA mejore la evaluación con estos comentarios.",
           "configureManually": "Configurar manualmente",
           "editAssessment": "Editar evaluación",
-          "dialogTitle": "Configurar AI Judge",
+          "dialogTitle": "Configurar condiciones de finalización",
           "dialogDescription": "Define criterios medibles, pautas de puntuación exactas y errores que siempre suspenden el intento.",
           "translationModeTitle": "Modo de traducción",
           "translationModeDescription": "Aquí puedes traducir el texto de la evaluación. Las puntuaciones, los umbrales y la estructura se gestionan en el idioma base del curso.",
@@ -2308,23 +2320,23 @@
           "untitledCriterion": "Criterio sin título",
           "complete": "Completo",
           "needsDetails": "Faltan detalles",
-          "criterionDescription": "Describe un comportamiento observable del participante.",
+          "criterionDescription": "Describe un comportamiento medible del participante.",
           "criterionTitle": "Título del criterio",
           "criterionTitlePlaceholder": "p. ej., descubre las necesidades del cliente",
           "expectedBehavior": "Comportamiento esperado",
           "expectedBehaviorPlaceholder": "Explica qué debe decir o hacer el participante...",
-          "maxScore": "Puntuación máxima",
+          "maxScore": "Puntos máx.",
           "score": "Puntuación",
           "scoringGuidance": "Pautas de puntuación",
-          "advancedScoring": "Pautas avanzadas de puntuación",
+          "advancedScoring": "Pautas de puntuación",
           "scoreLevelsCount": "{{count}} niveles de puntuación",
           "scoreBadge": "{{score}} pts",
           "itemsCount": "{{count}} añadidos",
           "scoringSummary": "Puntuación",
           "pointsRequired": "Se requieren {{required}} de {{total}} puntos para aprobar",
           "scoringGuidanceDescription": "Explica opcionalmente cómo es una respuesta para cada puntuación exacta.",
-          "scoreDescription": "Qué obtiene esta puntuación",
-          "scoreDescriptionPlaceholder": "Describe el nivel observable de rendimiento...",
+          "scoreDescription": "Qué hace el alumno para obtener esta puntuación",
+          "scoreDescriptionPlaceholder": "Describe el nivel medible de rendimiento...",
           "acceptedExample": "Ejemplo aceptado",
           "examplePlaceholder": "Añade un ejemplo de respuesta...",
           "addCriterion": "Añadir criterio",
@@ -2342,12 +2354,163 @@
           "applyConfiguration": "Aplicar configuración",
           "saveConfiguration": "Guardar configuración",
           "saveTranslation": "Guardar traducción",
-          "configurationSavedSuccessfully": "La configuración de AI Judge se ha guardado.",
-          "translationSavedSuccessfully": "La traducción de AI Judge se ha guardado.",
+          "configurationSavedSuccessfully": "Configuración guardada.",
+          "translationSavedSuccessfully": "La traducción de las condiciones de finalización se ha guardado.",
+          "generation": {
+            "create": {
+              "title": "Crear evaluación con IA",
+              "description": "Describe qué debe lograr una buena respuesta. Podrás revisar y editar el borrador antes de aplicarlo.",
+              "fieldLabel": "¿Qué debe demostrar el alumno?",
+              "fieldDescription": "Céntrate en el resultado medible. La IA lo convertirá en una evaluación completa.",
+              "placeholder": "Por ejemplo: descubrir las necesidades del cliente, proponer el siguiente paso y responder profesionalmente a las objeciones."
+            },
+            "improve": {
+              "title": "Mejorar evaluación con IA",
+              "description": "Indica qué debe ser más claro o preciso. La evaluación actual será el punto de partida.",
+              "fieldLabel": "¿Qué debe mejorarse?",
+              "fieldDescription": "Describe el resultado deseado. El resto de la evaluación se conservará.",
+              "placeholder": "Por ejemplo: hacer los criterios más medibles y diferenciar mejor las respuestas parciales y completas."
+            },
+            "instructionRequired": "Describe qué debe crear o mejorar la IA",
+            "willCreate": "La IA generará",
+            "artifacts": {
+              "taskGoal": "Un objetivo medible",
+              "criteria": "Criterios con guía de puntuación",
+              "threshold": "Un umbral de aprobación",
+              "blockingErrors": "Errores bloqueantes, cuando proceda"
+            },
+            "generateDraft": "Generar borrador",
+            "improveAssessment": "Mejorar evaluación",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Criterios más claros",
+                "instruction": "Haz que los criterios sean más claros y directamente medibles."
+              },
+              "betterScoring": {
+                "label": "Mejor puntuación",
+                "instruction": "Facilita la distinción coherente entre niveles de puntuación contiguos."
+              },
+              "reduceOverlap": {
+                "label": "Reducir solapamiento",
+                "instruction": "Elimina el solapamiento para que cada criterio evalúe una conducta distinta."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Aclarar errores bloqueantes",
+                "instruction": "Aclara qué conductas activan cada error bloqueante."
+              }
+            },
+            "progressLabel": "Progreso de generación de la evaluación",
+            "stages": {
+              "draft": "Generando borrador",
+              "qualityCheck": "Control de calidad",
+              "ready": "Listo"
+            },
+            "status": {
+              "drafting": "Generando la evaluación",
+              "evaluating": "Comprobando la calidad",
+              "revising": "Mejorando el borrador",
+              "awaiting_revision": "El control de calidad requiere tu decisión",
+              "completed": "La evaluación está lista",
+              "requires_review": "El borrador requiere tu decisión",
+              "failed": "No se pudo completar la generación",
+              "cancelled": "Generación cancelada"
+            },
+            "statusDescription": {
+              "drafting": "Preparando el objetivo, los criterios, la puntuación y los errores bloqueantes.",
+              "evaluating": "Comprobando que los criterios sean medibles y la puntuación coherente.",
+              "revising": "Aplicando la última corrección del control de calidad.",
+              "awaiting_revision": "Revisa los hallazgos antes de iniciar otro intento de generación.",
+              "completed": "El borrador superó el control de calidad.",
+              "requires_review": "Se conservó el último borrador para que decidas qué cambiar.",
+              "failed": "Inténtalo de nuevo o configura la evaluación manualmente.",
+              "cancelled": "No se aplicaron cambios a la evaluación."
+            },
+            "attempt": "Borrador {{attempt}} de {{maxAttempts}}",
+            "attemptNumber": "Borrador {{attempt}}",
+            "attemptHistory": "Historial de borradores",
+            "viewDetails": "Ver detalles",
+            "attemptPassed": "Control de calidad superado",
+            "attemptNeedsRevision": "El control de calidad encontró problemas",
+            "initialDraftCreated": "Borrador inicial creado.",
+            "changesInAttempt": "Lo que la IA cambió en este borrador",
+            "qualityFeedback": "Lo que detectó después el control de calidad",
+            "currentDraft": "Borrador actual",
+            "draftPreviewPending": "La vista previa del borrador aparecerá aquí cuando termine la generación.",
+            "qualityCheckLabel": "Control de calidad",
+            "qualityDecisionTitle_one": "{{count}} mejora sugerida",
+            "qualityDecisionTitle_other": "{{count}} mejoras sugeridas",
+            "feedbackNotApplied": "Aún no aplicados",
+            "qualityDecisionDescription": "Revisa las sugerencias o continúa con esta evaluación.",
+            "suggestedImprovements": "Mejoras sugeridas",
+            "beforeChange": "Evaluación anterior",
+            "afterChange": "Borrador actual",
+            "showMoreFindings": "Mostrar {{count}} observaciones más",
+            "showFewerFindings": "Mostrar menos observaciones",
+            "showMoreChanges": "Mostrar {{count}} cambios más",
+            "showFewerChanges": "Mostrar menos cambios",
+            "reviewExactChanges": "Qué cambió la IA ({{count}})",
+            "exactChangesDescription": "Detalle opcional: compara la evaluación generada con la versión inicial.",
+            "waitingForDecision": "Usa el borrador actual o crea otro usando los comentarios de calidad anteriores.",
+            "useCurrentDraft": "Continuar",
+            "applyImprovements": "Revisar",
+            "target": {
+              "assessment": "Condiciones de finalización",
+              "criterion": "Criterio",
+              "scoreGuidance": "Nivel de puntuación",
+              "blockingError": "Error bloqueante"
+            },
+            "deterministicValidation": {
+              "summary": "La estructura de la evaluación necesita correcciones.",
+              "guidance_score_out_of_range": {
+                "message": "Un nivel de puntuación está fuera del rango permitido del criterio.",
+                "correction": "Mantén cada nivel entre cero y la puntuación máxima del criterio."
+              },
+              "duplicate_guidance_score": {
+                "message": "Un criterio contiene el mismo nivel de puntuación más de una vez.",
+                "correction": "Mantén exactamente una regla para cada nivel de puntuación."
+              },
+              "missing_guidance_scores": {
+                "message": "A un criterio le faltan uno o más niveles de puntuación obligatorios.",
+                "correction": "Añade una regla para cada nivel desde cero hasta la puntuación máxima."
+              },
+              "duplicate_criterion_ref": {
+                "message": "No se pueden distinguir de forma fiable dos criterios.",
+                "correction": "Mantén cada criterio como un elemento de evaluación independiente."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "No se pueden distinguir de forma fiable dos errores bloqueantes.",
+                "correction": "Mantén cada error bloqueante como un elemento de evaluación independiente."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "No se pudo asociar de forma fiable un criterio nuevo.",
+                "correction": "Mantén estables los criterios existentes y añade el nuevo como un elemento independiente."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "No se pudo asociar de forma fiable un error bloqueante nuevo.",
+                "correction": "Mantén estables los errores existentes y añade el nuevo como un elemento independiente."
+              }
+            },
+            "keepCurrentDraft": "Conservar el borrador actual",
+            "applySuggestedImprovements": "Aplicar mejoras sugeridas",
+            "completedArtifacts": "Preparado hasta ahora",
+            "changedInRevision": "Cambios en esta revisión",
+            "stopAndInspect": "Detener y revisar el borrador actual",
+            "cancel": "Cancelar generación",
+            "draftSummary": "{{criteria}} criterios · {{score}} puntos · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
+            "review": {
+              "completedTitle": "El borrador superó el control de calidad",
+              "completedDescription": "Revisa la evaluación antes de aplicarla al formulario de la lección.",
+              "currentDraftTitle": "El borrador actual está listo para revisar",
+              "currentDraftDescription": "Los comentarios de calidad no se han aplicado. Revisa y edita el borrador si es necesario antes de aplicarlo.",
+              "requiresReviewTitle": "El borrador requiere tu decisión",
+              "notSaved": "Nada se ha guardado ni publicado automáticamente."
+            },
+            "reviewAssessment": "Revisar evaluación"
+          },
           "validation": {
-            "configurationRequired": "Configura AI Judge antes de guardar esta lección",
+            "configurationRequired": "Configura las condiciones de finalización antes de guardar esta lección",
             "taskGoalRequired": "El objetivo de la tarea es obligatorio",
-            "thresholdRange": "El umbral de aprobación debe estar entre 1 y 100",
+            "thresholdRange": "El umbral de aprobación debe estar entre 0 y 100",
             "titleRequired": "El título del criterio es obligatorio",
             "expectedBehaviorRequired": "El comportamiento esperado es obligatorio",
             "maxScoreRange": "La puntuación máxima debe estar entre 1 y 5",
@@ -2453,7 +2616,7 @@
               "knowledgeSharing": "<ul><li>El estudiante participa activamente en la conversación (hace preguntas o comparte reflexiones).</li><li>El estudiante puede nombrar al menos una técnica de gestión del tiempo mencionada en el diálogo.</li><li>El estudiante expresa cómo podría aplicar una técnica en su trabajo.</li></ul><em>(No hay umbral definido; todas las condiciones se recomiendan, pero no son obligatorias para aprobar).</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Otorgue 0 puntos cuando el alumno no aporte evidencia clara y observable de este comportamiento, lo evite o actúe en sentido contrario: {{expectedBehavior}} La ausencia del ejemplo exacto no es suficiente; evalúe el significado de toda la respuesta.",
+              "notMetDescription": "Otorgue 0 puntos cuando el alumno no aporte evidencia clara y medible de este comportamiento, lo evite o actúe en sentido contrario: {{expectedBehavior}} La ausencia del ejemplo exacto no es suficiente; evalúe el significado de toda la respuesta.",
               "notMetExample": "La respuesta no contiene ninguna afirmación ni acción que demuestre: {{expectedBehavior}}",
               "metDescription": "Otorgue 1 punto cuando el alumno demuestre claramente este comportamiento de forma relevante y adecuada al contexto: {{expectedBehavior}} Se aceptan formulaciones equivalentes; no es necesario repetir literalmente el ejemplo aceptado."
             },
