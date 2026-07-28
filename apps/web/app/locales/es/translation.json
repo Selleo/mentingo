@@ -58,6 +58,7 @@
     "error": {
       "somethingWentWrong": "¡Ups! Algo salió mal.",
       "threadMustBeActive": "El hilo debe estar activo.",
+      "aiMentorConfigurationIncomplete": "La configuración de AI Mentor está incompleta.",
       "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
       "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },

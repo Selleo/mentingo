@@ -58,6 +58,7 @@
     "error": {
       "somethingWentWrong": "Jejda! Něco se pokazilo.",
       "threadMustBeActive": "Vlákno musí být aktivní.",
+      "aiMentorConfigurationIncomplete": "Konfigurace AI mentora není úplná.",
       "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
       "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
     },

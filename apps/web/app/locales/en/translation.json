@@ -58,6 +58,7 @@
     "error": {
       "somethingWentWrong": "Oops! Something went wrong.",
       "threadMustBeActive": "The thread must be active.",
+      "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
       "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },

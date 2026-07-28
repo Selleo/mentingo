@@ -1,4 +1,4 @@
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { AI_MENTOR_ROLEPLAY_DIFFICULTY, AI_MENTOR_TYPE, SUPPORTED_LANGUAGES } from "@repo/shared";
 
 import { AI_JUDGE_GENERATION_FAILURE_MESSAGE } from "../ai-judge-configuration-generation.constants";
 
@@ -19,7 +19,14 @@ jest.mock("@langfuse/tracing", () => ({
 
 const lessonContext = {
   title: "Handle a price objection",
-  aiMentorType: "roleplay",
+  aiMentorConfiguration: {
+    type: AI_MENTOR_TYPE.ROLEPLAY,
+    scenario: "A buyer challenges the price of the proposed solution.",
+    aiRole: "Skeptical buyer",
+    learnerRole: "Sales representative",
+    characterGoal: "Understand whether the proposal justifies its price.",
+    difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+  },
 } as const;
 
 const draft: ReferencedAiJudgeConfiguration = {

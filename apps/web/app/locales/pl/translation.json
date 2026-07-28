@@ -59,6 +59,7 @@
     "error": {
       "somethingWentWrong": "Ups! Coś poszło nie tak.",
       "threadMustBeActive": "Wątek musi być aktywny.",
+      "aiMentorConfigurationIncomplete": "Konfiguracja Mentora AI jest niekompletna.",
       "aiJudgeConfigurationMissing": "Brakuje konfiguracji warunków zaliczenia.",
       "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
     },

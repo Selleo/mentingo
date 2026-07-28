@@ -2,7 +2,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
-import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
@@ -144,9 +144,11 @@ export class PromptService implements OnModuleInit {
 
     const lesson = await this.aiRepository.findMentorLessonByThreadId(data.threadId, userLanguage);
 
-    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
+    if (!lesson) {
+      throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+    }
 
-    const mode = (lesson.type ?? DEFAULT_AI_MENTOR_TYPE).toLowerCase();
+    const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
 
     const securityAndRagBlock = await this.loadPrompt("securityAndRagBlock", {
       language: userLanguage,
@@ -157,27 +159,39 @@ export class PromptService implements OnModuleInit {
       language: userLanguage,
     });
 
-    let promptChoice;
-
-    switch (mode) {
-      case "teacher":
-        promptChoice = promptTemplates.teacherPrompt.id;
-        break;
-      case "roleplay":
-        promptChoice = promptTemplates.roleplayPrompt.id;
-        break;
-      case "mentor":
-      default:
-        promptChoice = promptTemplates.mentorPrompt.id;
-    }
-
-    const mentorPrompt = await this.loadPrompt(promptChoice, {
+    const commonPromptVariables = {
       lessonTitle: lesson.title,
       name: lesson.name,
-      lessonInstructions: lesson.instructions,
+      openingInstruction: lesson.openingInstruction ?? "",
+      additionalInstructions: lesson.additionalInstructions ?? "",
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
-      securityAndRagBlock: securityAndRagBlock,
-    });
+      securityAndRagBlock,
+    };
+
+    let mentorPrompt: string;
+
+    if (lesson.type === AI_MENTOR_TYPE.TEACHER && lesson.teachingStyle) {
+      mentorPrompt = await this.loadPrompt("teacherPrompt", {
+        ...commonPromptVariables,
+        taskGoal: lesson.taskGoal,
+        expertise: lesson.expertise,
+        contentScope: lesson.contentScope,
+        teachingStyle: lesson.teachingStyle,
+        feedbackGuidance: lesson.feedbackGuidance ?? "",
+      });
+    } else if (lesson.type === AI_MENTOR_TYPE.ROLEPLAY && lesson.difficulty) {
+      mentorPrompt = await this.loadPrompt("roleplayPrompt", {
+        ...commonPromptVariables,
+        scenario: lesson.scenario,
+        aiRole: lesson.aiRole,
+        learnerRole: lesson.learnerRole,
+        characterGoal: lesson.characterGoal,
+        difficulty: lesson.difficulty,
+        factsAndConstraints: lesson.factsAndConstraints ?? "",
+      });
+    } else {
+      throw new BadRequestException("common.error.aiMentorConfigurationIncomplete");
+    }
 
     const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
 

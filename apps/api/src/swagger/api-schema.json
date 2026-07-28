@@ -7614,6 +7614,173 @@
         }
       }
     },
+    "/api/lesson/{lessonId}/ai-mentor-configuration": {
+      "get": {
+        "operationId": "AiMentorConfigurationController_getAiMentorConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAiMentorConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "AiMentorConfigurationController_replaceAiMentorConfiguration",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceAiMentorConfigurationBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplaceAiMentorConfigurationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/lesson/{lessonId}/ai-mentor-configuration/translations/{language}": {
+      "patch": {
+        "operationId": "AiMentorConfigurationController_updateAiMentorConfigurationTranslations",
+        "parameters": [
+          {
+            "name": "lessonId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "default": "en",
+              "anyOf": [
+                {
+                  "const": "en",
+                  "type": "string"
+                },
+                {
+                  "const": "pl",
+                  "type": "string"
+                },
+                {
+                  "const": "de",
+                  "type": "string"
+                },
+                {
+                  "const": "lt",
+                  "type": "string"
+                },
+                {
+                  "const": "cs",
+                  "type": "string"
+                },
+                {
+                  "const": "es",
+                  "type": "string"
+                }
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAiMentorConfigurationTranslationsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateAiMentorConfigurationTranslationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/studentLessonProgress": {
       "post": {
         "operationId": "StudentLessonProgressController_markLessonAsCompleted",
@@ -27602,25 +27769,6 @@
                                     "format": "uuid",
                                     "type": "string"
                                   },
-                                  "aiMentorInstructions": {
-                                    "type": "string"
-                                  },
-                                  "type": {
-                                    "anyOf": [
-                                      {
-                                        "const": "mentor",
-                                        "type": "string"
-                                      },
-                                      {
-                                        "const": "teacher",
-                                        "type": "string"
-                                      },
-                                      {
-                                        "const": "roleplay",
-                                        "type": "string"
-                                      }
-                                    ]
-                                  },
                                   "name": {
                                     "type": "string"
                                   },
@@ -27672,8 +27820,6 @@
                                 "required": [
                                   "id",
                                   "lessonId",
-                                  "aiMentorInstructions",
-                                  "type",
                                   "name",
                                   "avatarReference",
                                   "voiceMode",
@@ -30800,25 +30946,6 @@
                               "format": "uuid",
                               "type": "string"
                             },
-                            "aiMentorInstructions": {
-                              "type": "string"
-                            },
-                            "type": {
-                              "anyOf": [
-                                {
-                                  "const": "mentor",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "teacher",
-                                  "type": "string"
-                                },
-                                {
-                                  "const": "roleplay",
-                                  "type": "string"
-                                }
-                              ]
-                            },
                             "name": {
                               "type": "string"
                             },
@@ -30870,8 +30997,6 @@
                           "required": [
                             "id",
                             "lessonId",
-                            "aiMentorInstructions",
-                            "type",
                             "name",
                             "avatarReference",
                             "voiceMode",
@@ -31315,25 +31440,6 @@
                                   "format": "uuid",
                                   "type": "string"
                                 },
-                                "aiMentorInstructions": {
-                                  "type": "string"
-                                },
-                                "type": {
-                                  "anyOf": [
-                                    {
-                                      "const": "mentor",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "teacher",
-                                      "type": "string"
-                                    },
-                                    {
-                                      "const": "roleplay",
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "name": {
                                   "type": "string"
                                 },
@@ -31385,8 +31491,6 @@
                               "required": [
                                 "id",
                                 "lessonId",
-                                "aiMentorInstructions",
-                                "type",
                                 "name",
                                 "avatarReference",
                                 "voiceMode",
@@ -33379,25 +33483,6 @@
                         "format": "uuid",
                         "type": "string"
                       },
-                      "aiMentorInstructions": {
-                        "type": "string"
-                      },
-                      "type": {
-                        "anyOf": [
-                          {
-                            "const": "mentor",
-                            "type": "string"
-                          },
-                          {
-                            "const": "teacher",
-                            "type": "string"
-                          },
-                          {
-                            "const": "roleplay",
-                            "type": "string"
-                          }
-                        ]
-                      },
                       "name": {
                         "type": "string"
                       },
@@ -33449,8 +33534,6 @@
                     "required": [
                       "id",
                       "lessonId",
-                      "aiMentorInstructions",
-                      "type",
                       "name",
                       "avatarReference",
                       "voiceMode",
@@ -34242,8 +34325,170 @@
               "displayOrder": {
                 "type": "number"
               },
-              "aiMentorInstructions": {
-                "type": "string"
+              "aiMentorConfiguration": {
+                "anyOf": [
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "teacher",
+                        "type": "string"
+                      },
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "expertise": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "contentScope": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "teachingStyle": {
+                        "anyOf": [
+                          {
+                            "const": "explain_and_practice",
+                            "type": "string"
+                          },
+                          {
+                            "const": "guided_discovery",
+                            "type": "string"
+                          },
+                          {
+                            "const": "socratic",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "feedbackGuidance": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "openingInstruction": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "additionalInstructions": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "taskGoal",
+                      "expertise",
+                      "contentScope",
+                      "teachingStyle"
+                    ]
+                  },
+                  {
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "roleplay",
+                        "type": "string"
+                      },
+                      "scenario": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "aiRole": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "learnerRole": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "characterGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "difficulty": {
+                        "anyOf": [
+                          {
+                            "const": "cooperative",
+                            "type": "string"
+                          },
+                          {
+                            "const": "realistic",
+                            "type": "string"
+                          },
+                          {
+                            "const": "challenging",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "factsAndConstraints": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "openingInstruction": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "additionalInstructions": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "scenario",
+                      "aiRole",
+                      "learnerRole",
+                      "characterGoal",
+                      "difficulty"
+                    ]
+                  }
+                ]
               },
               "aiJudgeConfiguration": {
                 "additionalProperties": false,
@@ -34355,22 +34600,6 @@
                   "blockingErrors"
                 ]
               },
-              "type": {
-                "anyOf": [
-                  {
-                    "const": "mentor",
-                    "type": "string"
-                  },
-                  {
-                    "const": "teacher",
-                    "type": "string"
-                  },
-                  {
-                    "const": "roleplay",
-                    "type": "string"
-                  }
-                ]
-              },
               "name": {
                 "type": "string"
               },
@@ -34411,9 +34640,8 @@
             },
             "required": [
               "chapterId",
-              "aiMentorInstructions",
-              "aiJudgeConfiguration",
-              "type"
+              "aiMentorConfiguration",
+              "aiJudgeConfiguration"
             ]
           }
         ]
@@ -34735,25 +34963,6 @@
               {
                 "type": "object",
                 "properties": {
-                  "aiMentorInstructions": {
-                    "type": "string"
-                  },
-                  "type": {
-                    "anyOf": [
-                      {
-                        "const": "mentor",
-                        "type": "string"
-                      },
-                      {
-                        "const": "teacher",
-                        "type": "string"
-                      },
-                      {
-                        "const": "roleplay",
-                        "type": "string"
-                      }
-                    ]
-                  },
                   "name": {
                     "type": "string"
                   },
@@ -34791,11 +35000,7 @@
                       }
                     ]
                   }
-                },
-                "required": [
-                  "aiMentorInstructions",
-                  "type"
-                ]
+                }
               }
             ]
           },
@@ -35851,25 +36056,6 @@
                             "format": "uuid",
                             "type": "string"
                           },
-                          "aiMentorInstructions": {
-                            "type": "string"
-                          },
-                          "type": {
-                            "anyOf": [
-                              {
-                                "const": "mentor",
-                                "type": "string"
-                              },
-                              {
-                                "const": "teacher",
-                                "type": "string"
-                              },
-                              {
-                                "const": "roleplay",
-                                "type": "string"
-                              }
-                            ]
-                          },
                           "name": {
                             "type": "string"
                           },
@@ -35921,8 +36107,6 @@
                         "required": [
                           "id",
                           "lessonId",
-                          "aiMentorInstructions",
-                          "type",
                           "name",
                           "avatarReference",
                           "voiceMode",
@@ -37386,28 +37570,174 @@
                   "taskDescription": {
                     "type": "string"
                   },
-                  "aiMentorInstructions": {
-                    "type": "string"
-                  },
-                  "aiMentorType": {
+                  "aiMentorConfiguration": {
                     "anyOf": [
                       {
-                        "const": "mentor",
-                        "type": "string"
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          "taskGoal": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "expertise": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "contentScope": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "teachingStyle": {
+                            "anyOf": [
+                              {
+                                "const": "explain_and_practice",
+                                "type": "string"
+                              },
+                              {
+                                "const": "guided_discovery",
+                                "type": "string"
+                              },
+                              {
+                                "const": "socratic",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "feedbackGuidance": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "openingInstruction": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "additionalInstructions": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "taskGoal",
+                          "expertise",
+                          "contentScope",
+                          "teachingStyle"
+                        ]
                       },
                       {
-                        "const": "teacher",
-                        "type": "string"
-                      },
-                      {
-                        "const": "roleplay",
-                        "type": "string"
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "roleplay",
+                            "type": "string"
+                          },
+                          "scenario": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "aiRole": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "learnerRole": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "characterGoal": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "difficulty": {
+                            "anyOf": [
+                              {
+                                "const": "cooperative",
+                                "type": "string"
+                              },
+                              {
+                                "const": "realistic",
+                                "type": "string"
+                              },
+                              {
+                                "const": "challenging",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "factsAndConstraints": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "openingInstruction": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "additionalInstructions": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "scenario",
+                          "aiRole",
+                          "learnerRole",
+                          "characterGoal",
+                          "difficulty"
+                        ]
                       }
                     ]
                   }
                 },
                 "required": [
-                  "aiMentorType"
+                  "aiMentorConfiguration"
                 ]
               },
               "mode": {
@@ -37448,28 +37778,174 @@
                   "taskDescription": {
                     "type": "string"
                   },
-                  "aiMentorInstructions": {
-                    "type": "string"
-                  },
-                  "aiMentorType": {
+                  "aiMentorConfiguration": {
                     "anyOf": [
                       {
-                        "const": "mentor",
-                        "type": "string"
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "teacher",
+                            "type": "string"
+                          },
+                          "taskGoal": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "expertise": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "contentScope": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "teachingStyle": {
+                            "anyOf": [
+                              {
+                                "const": "explain_and_practice",
+                                "type": "string"
+                              },
+                              {
+                                "const": "guided_discovery",
+                                "type": "string"
+                              },
+                              {
+                                "const": "socratic",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "feedbackGuidance": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "openingInstruction": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "additionalInstructions": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "taskGoal",
+                          "expertise",
+                          "contentScope",
+                          "teachingStyle"
+                        ]
                       },
                       {
-                        "const": "teacher",
-                        "type": "string"
-                      },
-                      {
-                        "const": "roleplay",
-                        "type": "string"
+                        "additionalProperties": false,
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "const": "roleplay",
+                            "type": "string"
+                          },
+                          "scenario": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "aiRole": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "learnerRole": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "characterGoal": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "difficulty": {
+                            "anyOf": [
+                              {
+                                "const": "cooperative",
+                                "type": "string"
+                              },
+                              {
+                                "const": "realistic",
+                                "type": "string"
+                              },
+                              {
+                                "const": "challenging",
+                                "type": "string"
+                              }
+                            ]
+                          },
+                          "factsAndConstraints": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "openingInstruction": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "additionalInstructions": {
+                            "anyOf": [
+                              {
+                                "minLength": 1,
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "scenario",
+                          "aiRole",
+                          "learnerRole",
+                          "characterGoal",
+                          "difficulty"
+                        ]
                       }
                     ]
                   }
                 },
                 "required": [
-                  "aiMentorType"
+                  "aiMentorConfiguration"
                 ]
               },
               "mode": {
@@ -42352,28 +42828,174 @@
               "taskDescription": {
                 "type": "string"
               },
-              "aiMentorInstructions": {
-                "type": "string"
-              },
-              "aiMentorType": {
+              "aiMentorConfiguration": {
                 "anyOf": [
                   {
-                    "const": "mentor",
-                    "type": "string"
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "teacher",
+                        "type": "string"
+                      },
+                      "taskGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "expertise": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "contentScope": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "teachingStyle": {
+                        "anyOf": [
+                          {
+                            "const": "explain_and_practice",
+                            "type": "string"
+                          },
+                          {
+                            "const": "guided_discovery",
+                            "type": "string"
+                          },
+                          {
+                            "const": "socratic",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "feedbackGuidance": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "openingInstruction": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "additionalInstructions": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "taskGoal",
+                      "expertise",
+                      "contentScope",
+                      "teachingStyle"
+                    ]
                   },
                   {
-                    "const": "teacher",
-                    "type": "string"
-                  },
-                  {
-                    "const": "roleplay",
-                    "type": "string"
+                    "additionalProperties": false,
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "const": "roleplay",
+                        "type": "string"
+                      },
+                      "scenario": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "aiRole": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "learnerRole": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "characterGoal": {
+                        "minLength": 1,
+                        "type": "string"
+                      },
+                      "difficulty": {
+                        "anyOf": [
+                          {
+                            "const": "cooperative",
+                            "type": "string"
+                          },
+                          {
+                            "const": "realistic",
+                            "type": "string"
+                          },
+                          {
+                            "const": "challenging",
+                            "type": "string"
+                          }
+                        ]
+                      },
+                      "factsAndConstraints": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "openingInstruction": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "additionalInstructions": {
+                        "anyOf": [
+                          {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "scenario",
+                      "aiRole",
+                      "learnerRole",
+                      "characterGoal",
+                      "difficulty"
+                    ]
                   }
                 ]
               }
             },
             "required": [
-              "aiMentorType"
+              "aiMentorConfiguration"
             ]
           },
           "brief": {
@@ -42650,6 +43272,1461 @@
               "passed",
               "summary",
               "issues"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "GetAiMentorConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  "taskGoal": {
+                    "type": "string"
+                  },
+                  "expertise": {
+                    "type": "string"
+                  },
+                  "contentScope": {
+                    "type": "string"
+                  },
+                  "teachingStyle": {
+                    "anyOf": [
+                      {
+                        "const": "explain_and_practice",
+                        "type": "string"
+                      },
+                      {
+                        "const": "guided_discovery",
+                        "type": "string"
+                      },
+                      {
+                        "const": "socratic",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "feedbackGuidance": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "taskGoal",
+                  "expertise",
+                  "contentScope",
+                  "teachingStyle",
+                  "feedbackGuidance",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "roleplay",
+                    "type": "string"
+                  },
+                  "scenario": {
+                    "type": "string"
+                  },
+                  "aiRole": {
+                    "type": "string"
+                  },
+                  "learnerRole": {
+                    "type": "string"
+                  },
+                  "characterGoal": {
+                    "type": "string"
+                  },
+                  "difficulty": {
+                    "anyOf": [
+                      {
+                        "const": "cooperative",
+                        "type": "string"
+                      },
+                      {
+                        "const": "realistic",
+                        "type": "string"
+                      },
+                      {
+                        "const": "challenging",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "factsAndConstraints": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "scenario",
+                  "aiRole",
+                  "learnerRole",
+                  "characterGoal",
+                  "difficulty",
+                  "factsAndConstraints",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "ReplaceAiMentorConfigurationBody": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "teacher",
+                "type": "string"
+              },
+              "taskGoal": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "expertise": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "contentScope": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "teachingStyle": {
+                "anyOf": [
+                  {
+                    "const": "explain_and_practice",
+                    "type": "string"
+                  },
+                  {
+                    "const": "guided_discovery",
+                    "type": "string"
+                  },
+                  {
+                    "const": "socratic",
+                    "type": "string"
+                  }
+                ]
+              },
+              "feedbackGuidance": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "openingInstruction": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "additionalInstructions": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "taskGoal",
+              "expertise",
+              "contentScope",
+              "teachingStyle"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "roleplay",
+                "type": "string"
+              },
+              "scenario": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "aiRole": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "learnerRole": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "characterGoal": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "difficulty": {
+                "anyOf": [
+                  {
+                    "const": "cooperative",
+                    "type": "string"
+                  },
+                  {
+                    "const": "realistic",
+                    "type": "string"
+                  },
+                  {
+                    "const": "challenging",
+                    "type": "string"
+                  }
+                ]
+              },
+              "factsAndConstraints": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "openingInstruction": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "additionalInstructions": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "scenario",
+              "aiRole",
+              "learnerRole",
+              "characterGoal",
+              "difficulty"
+            ]
+          }
+        ]
+      },
+      "ReplaceAiMentorConfigurationResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  "taskGoal": {
+                    "type": "string"
+                  },
+                  "expertise": {
+                    "type": "string"
+                  },
+                  "contentScope": {
+                    "type": "string"
+                  },
+                  "teachingStyle": {
+                    "anyOf": [
+                      {
+                        "const": "explain_and_practice",
+                        "type": "string"
+                      },
+                      {
+                        "const": "guided_discovery",
+                        "type": "string"
+                      },
+                      {
+                        "const": "socratic",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "feedbackGuidance": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "taskGoal",
+                  "expertise",
+                  "contentScope",
+                  "teachingStyle",
+                  "feedbackGuidance",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "roleplay",
+                    "type": "string"
+                  },
+                  "scenario": {
+                    "type": "string"
+                  },
+                  "aiRole": {
+                    "type": "string"
+                  },
+                  "learnerRole": {
+                    "type": "string"
+                  },
+                  "characterGoal": {
+                    "type": "string"
+                  },
+                  "difficulty": {
+                    "anyOf": [
+                      {
+                        "const": "cooperative",
+                        "type": "string"
+                      },
+                      {
+                        "const": "realistic",
+                        "type": "string"
+                      },
+                      {
+                        "const": "challenging",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "factsAndConstraints": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "scenario",
+                  "aiRole",
+                  "learnerRole",
+                  "characterGoal",
+                  "difficulty",
+                  "factsAndConstraints",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              }
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "UpdateAiMentorConfigurationTranslationsBody": {
+        "anyOf": [
+          {
+            "additionalProperties": false,
+            "minProperties": 2,
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "teacher",
+                "type": "string"
+              },
+              "taskGoal": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "expertise": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "contentScope": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "feedbackGuidance": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "openingInstruction": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "additionalInstructions": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          {
+            "additionalProperties": false,
+            "minProperties": 2,
+            "type": "object",
+            "properties": {
+              "type": {
+                "const": "roleplay",
+                "type": "string"
+              },
+              "scenario": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "aiRole": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "learnerRole": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "characterGoal": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "factsAndConstraints": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "openingInstruction": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "additionalInstructions": {
+                "anyOf": [
+                  {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "UpdateAiMentorConfigurationTranslationsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "teacher",
+                    "type": "string"
+                  },
+                  "taskGoal": {
+                    "type": "string"
+                  },
+                  "expertise": {
+                    "type": "string"
+                  },
+                  "contentScope": {
+                    "type": "string"
+                  },
+                  "teachingStyle": {
+                    "anyOf": [
+                      {
+                        "const": "explain_and_practice",
+                        "type": "string"
+                      },
+                      {
+                        "const": "guided_discovery",
+                        "type": "string"
+                      },
+                      {
+                        "const": "socratic",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "feedbackGuidance": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "taskGoal",
+                  "expertise",
+                  "contentScope",
+                  "teachingStyle",
+                  "feedbackGuidance",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              },
+              {
+                "additionalProperties": false,
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "aiMentorLessonId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "needsConfiguration": {
+                    "type": "boolean"
+                  },
+                  "hasMissingTranslations": {
+                    "type": "boolean"
+                  },
+                  "language": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "baseLanguage": {
+                    "default": "en",
+                    "anyOf": [
+                      {
+                        "const": "en",
+                        "type": "string"
+                      },
+                      {
+                        "const": "pl",
+                        "type": "string"
+                      },
+                      {
+                        "const": "de",
+                        "type": "string"
+                      },
+                      {
+                        "const": "lt",
+                        "type": "string"
+                      },
+                      {
+                        "const": "cs",
+                        "type": "string"
+                      },
+                      {
+                        "const": "es",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "availableLocales": {
+                    "type": "array",
+                    "items": {
+                      "default": "en",
+                      "anyOf": [
+                        {
+                          "const": "en",
+                          "type": "string"
+                        },
+                        {
+                          "const": "pl",
+                          "type": "string"
+                        },
+                        {
+                          "const": "de",
+                          "type": "string"
+                        },
+                        {
+                          "const": "lt",
+                          "type": "string"
+                        },
+                        {
+                          "const": "cs",
+                          "type": "string"
+                        },
+                        {
+                          "const": "es",
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "type": {
+                    "const": "roleplay",
+                    "type": "string"
+                  },
+                  "scenario": {
+                    "type": "string"
+                  },
+                  "aiRole": {
+                    "type": "string"
+                  },
+                  "learnerRole": {
+                    "type": "string"
+                  },
+                  "characterGoal": {
+                    "type": "string"
+                  },
+                  "difficulty": {
+                    "anyOf": [
+                      {
+                        "const": "cooperative",
+                        "type": "string"
+                      },
+                      {
+                        "const": "realistic",
+                        "type": "string"
+                      },
+                      {
+                        "const": "challenging",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "factsAndConstraints": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "openingInstruction": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "additionalInstructions": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "aiMentorLessonId",
+                  "needsConfiguration",
+                  "hasMissingTranslations",
+                  "language",
+                  "baseLanguage",
+                  "availableLocales",
+                  "type",
+                  "scenario",
+                  "aiRole",
+                  "learnerRole",
+                  "characterGoal",
+                  "difficulty",
+                  "factsAndConstraints",
+                  "openingInstruction",
+                  "additionalInstructions"
+                ]
+              }
             ]
           }
         },

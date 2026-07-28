@@ -58,6 +58,7 @@
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
       "threadMustBeActive": "Der Thread muss aktiv sein.",
+      "aiMentorConfigurationIncomplete": "Die Konfiguration des KI-Mentors ist unvollständig.",
       "aiJudgeConfigurationMissing": "Die Konfiguration der Abschlussbedingungen fehlt.",
       "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
     },

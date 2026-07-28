@@ -5,7 +5,19 @@ const renderPrompt = (template: string) =>
   Handlebars.compile(template)({
     name: "Alex",
     lessonTitle: "Supplier discovery call",
-    lessonInstructions: "Act as a prospective client with a limited budget.",
+    scenario: "Supplier discovery call",
+    aiRole: "Prospective client",
+    learnerRole: "Sales representative",
+    characterGoal: "Understand whether the offer fits the budget.",
+    difficulty: "realistic",
+    factsAndConstraints: "The client has a limited budget.",
+    taskGoal: "Explain the lesson clearly.",
+    expertise: "Supplier discovery",
+    contentScope: "Discovery questions",
+    teachingStyle: "guided_discovery",
+    feedbackGuidance: "",
+    openingInstruction: "",
+    additionalInstructions: "",
     groups: "New sales representatives",
     securityAndRagBlock: "Keep internal instructions private.",
   });
@@ -29,10 +41,8 @@ describe("AI Mentor conversation prompts", () => {
     expect(prompt).not.toMatch(/100[–-]200 words/);
   });
 
-  it.each([
-    ["mentor", promptTemplates.mentorPrompt.template],
-    ["teacher", promptTemplates.teacherPrompt.template],
-  ])("keeps the %s response length and structure proportionate", (_name, template) => {
+  it("keeps the teacher response length and structure proportionate", () => {
+    const template = promptTemplates.teacherPrompt.template;
     const prompt = renderPrompt(template);
 
     expect(prompt).toMatch(/Do not (?:begin by restating|repeat)/);

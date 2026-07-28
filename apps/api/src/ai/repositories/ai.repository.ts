@@ -20,7 +20,10 @@ import {
   aiMentorJudgementBlockingErrors,
   aiMentorJudgementCriteria,
   aiMentorJudgements,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
+  aiMentorTeacherConfigurations,
   aiMentorThreadMessages,
   aiMentorThreads,
   chapters,
@@ -33,15 +36,9 @@ import {
   users,
 } from "src/storage/schema";
 
-import type {
-  AiMentorTTSPreset,
-  AiMentorType,
-  AiMentorVoiceMode,
-  SupportedLanguages,
-} from "@repo/shared";
+import type { AiMentorTTSPreset, AiMentorVoiceMode, SupportedLanguages } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
-import type { AiMentorPromptContext } from "src/ai/ai-prompt.types";
 import type {
   AiJudgeBlockingErrorJudgementWrite,
   AiJudgeCriterionJudgementWrite,
@@ -230,23 +227,74 @@ export class AiRepository {
       .returning();
   }
 
-  async findMentorLessonByThreadId(
-    threadId: UUIDType,
-    language: SupportedLanguages,
-  ): Promise<AiMentorPromptContext> {
+  async findMentorLessonByThreadId(threadId: UUIDType, language: SupportedLanguages) {
     const [lesson] = await this.db
       .select({
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
-        instructions: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.aiMentorInstructions,
+        type: aiMentorConfigurations.type,
+        openingInstruction: this.localizationService.getLocalizedSqlField(
+          aiMentorConfigurations.openingInstruction,
           language,
         ),
-        type: sql<AiMentorType>`${aiMentorLessons.type}`,
+        additionalInstructions: this.localizationService.getLocalizedSqlField(
+          aiMentorConfigurations.additionalInstructions,
+          language,
+        ),
+        taskGoal: this.localizationService.getLocalizedSqlField(
+          aiMentorTeacherConfigurations.taskGoal,
+          language,
+        ),
+        expertise: this.localizationService.getLocalizedSqlField(
+          aiMentorTeacherConfigurations.expertise,
+          language,
+        ),
+        contentScope: this.localizationService.getLocalizedSqlField(
+          aiMentorTeacherConfigurations.contentScope,
+          language,
+        ),
+        teachingStyle: aiMentorTeacherConfigurations.teachingStyle,
+        feedbackGuidance: this.localizationService.getLocalizedSqlField(
+          aiMentorTeacherConfigurations.feedbackGuidance,
+          language,
+        ),
+        scenario: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.scenario,
+          language,
+        ),
+        aiRole: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.aiRole,
+          language,
+        ),
+        learnerRole: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.learnerRole,
+          language,
+        ),
+        characterGoal: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.characterGoal,
+          language,
+        ),
+        difficulty: aiMentorRoleplayConfigurations.difficulty,
+        factsAndConstraints: this.localizationService.getLocalizedSqlField(
+          aiMentorRoleplayConfigurations.factsAndConstraints,
+          language,
+        ),
         name: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
         learnerFirstName: users.firstName,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .innerJoin(
+        aiMentorConfigurations,
+        eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessons.id),
+      )
+      .leftJoin(
+        aiMentorTeacherConfigurations,
+        eq(aiMentorTeacherConfigurations.configurationId, aiMentorConfigurations.id),
+      )
+      .leftJoin(
+        aiMentorRoleplayConfigurations,
+        eq(aiMentorRoleplayConfigurations.configurationId, aiMentorConfigurations.id),
+      )
       .innerJoin(users, eq(users.id, aiMentorThreads.userId))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))

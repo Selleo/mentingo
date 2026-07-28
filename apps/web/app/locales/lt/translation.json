@@ -58,6 +58,7 @@
     "error": {
       "somethingWentWrong": "Oi! Kažkas nutiko.",
       "threadMustBeActive": "Pokalbio gija turi būti aktyvi.",
+      "aiMentorConfigurationIncomplete": "AI mentoriaus konfigūracija yra neužbaigta.",
       "aiJudgeConfigurationMissing": "Trūksta baigimo sąlygų konfigūracijos.",
       "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
     },
