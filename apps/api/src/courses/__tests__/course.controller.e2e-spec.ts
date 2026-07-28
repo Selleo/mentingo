@@ -18,6 +18,7 @@ import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseService } from "src/courses/course.service";
 import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -1721,7 +1722,7 @@ describe("CourseController (e2e)", () => {
     });
   });
 
-  describe("PATCH /api/course/:id", () => {
+  describe("course update events", () => {
     it("emits course update events when only modern overview fields change", async () => {
       const admin = await userFactory
         .withCredentials({ password })
@@ -1733,67 +1734,49 @@ describe("CourseController (e2e)", () => {
         thumbnailPositionY: 50,
         showAuthorSection: true,
       });
-      const accessToken = app.get(JwtService).sign({
+      const currentUser = {
         userId: admin.id,
         email: admin.email,
         roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
         permissions: Object.values(PERMISSIONS),
         tenantId: admin.tenantId,
-      });
+      };
 
       const publishSpy = jest
         .spyOn(app.get(OutboxPublisher), "publish")
         .mockResolvedValue(undefined);
 
-      const updates = [
+      await app.get(CourseService).updateCourse(
+        course.id,
         {
-          body: { learningOutcomes: ["Build reliable reports"] },
-          field: "learningOutcomes",
-          expectedPreviousValue: [],
-          expectedUpdatedValue: ["Build reliable reports"],
+          language: SUPPORTED_LANGUAGES.EN,
+          learningOutcomes: ["Build reliable reports"],
+          showAuthorSection: false,
+          thumbnailPositionY: 75,
         },
-        {
-          body: { showAuthorSection: false },
-          field: "showAuthorSection",
-          expectedPreviousValue: true,
-          expectedUpdatedValue: false,
-        },
-        {
-          body: { thumbnailPositionY: 75 },
-          field: "thumbnailPositionY",
-          expectedPreviousValue: 50,
-          expectedUpdatedValue: 75,
-        },
-      ] as const;
+        currentUser,
+        true,
+      );
 
-      for (const update of updates) {
-        publishSpy.mockClear();
+      expect(publishSpy).toHaveBeenCalledTimes(1);
 
-        await request(app.getHttpServer())
-          .patch(`/api/course/${course.id}`)
-          .set("Cookie", `access_token=${accessToken}`)
-          .send({
-            language: SUPPORTED_LANGUAGES.EN,
-            ...update.body,
-          })
-          .expect(200);
+      const [event] = publishSpy.mock.calls[0];
 
-        expect(publishSpy).toHaveBeenCalledTimes(1);
-
-        const [event] = publishSpy.mock.calls[0];
-
-        expect(event).toBeInstanceOf(UpdateCourseEvent);
-        expect((event as UpdateCourseEvent).courseUpdateData.previousCourseData).toEqual(
-          expect.objectContaining({
-            [update.field]: update.expectedPreviousValue,
-          }),
-        );
-        expect((event as UpdateCourseEvent).courseUpdateData.updatedCourseData).toEqual(
-          expect.objectContaining({
-            [update.field]: update.expectedUpdatedValue,
-          }),
-        );
-      }
+      expect(event).toBeInstanceOf(UpdateCourseEvent);
+      expect((event as UpdateCourseEvent).courseUpdateData.previousCourseData).toEqual(
+        expect.objectContaining({
+          learningOutcomes: [],
+          showAuthorSection: true,
+          thumbnailPositionY: 50,
+        }),
+      );
+      expect((event as UpdateCourseEvent).courseUpdateData.updatedCourseData).toEqual(
+        expect.objectContaining({
+          learningOutcomes: ["Build reliable reports"],
+          showAuthorSection: false,
+          thumbnailPositionY: 75,
+        }),
+      );
 
       publishSpy.mockRestore();
     });
