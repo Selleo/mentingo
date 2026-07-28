@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { EventsHandler, type IEventHandler } from "@nestjs/cqrs";
 
+import { processInBatches } from "src/common/utils/processInBatches";
 import {
   EnrollUserToGroupEvent,
   LearningPathCourseAddedEvent,
@@ -8,13 +9,16 @@ import {
   LearningPathCourseSyncEvent,
   LessonCompletedEvent,
   UserCourseFinishedEvent,
+  BulkAssignUsersToGroupsEvent,
 } from "src/events";
+import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { LearningPathCourseSyncService } from "../services/learning-path-course-sync.service";
 
 type EventType =
   | EnrollUserToGroupEvent
+  | BulkAssignUsersToGroupsEvent
   | LearningPathCourseAddedEvent
   | LearningPathCourseRemovedEvent
   | LearningPathCourseSyncEvent
@@ -23,6 +27,7 @@ type EventType =
 
 const LearningPathCourseEvents = [
   EnrollUserToGroupEvent,
+  BulkAssignUsersToGroupsEvent,
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
@@ -41,6 +46,10 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
   async handle(event: EventType) {
     if (event instanceof EnrollUserToGroupEvent) {
       return this.handleEnrollUserToGroup(event);
+    }
+
+    if (event instanceof BulkAssignUsersToGroupsEvent) {
+      return this.handleBulkAssignUsersToGroups(event);
     }
 
     if (event instanceof LearningPathCourseAddedEvent) {
@@ -71,6 +80,28 @@ export class LearningPathCourseSyncHandler implements IEventHandler<EventType> {
         userId,
         actor.tenantId,
         actor,
+      );
+    });
+  }
+
+  private async handleBulkAssignUsersToGroups(event: BulkAssignUsersToGroupsEvent) {
+    const { actor, tenantId, updates } = event.bulkAssignUsersToGroupsData;
+
+    const assignments = updates.flatMap(({ userId, groupIdsToAssign }) =>
+      groupIdsToAssign.map((groupId) => ({ groupId, userId })),
+    );
+
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
+      await processInBatches(
+        assignments,
+        ({ groupId, userId }) =>
+          this.syncService.syncLearningPathEnrollmentsForGroupMember(
+            groupId,
+            userId,
+            tenantId,
+            actor,
+          ),
+        { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
       );
     });
   }

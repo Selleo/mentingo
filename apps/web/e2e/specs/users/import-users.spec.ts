@@ -21,8 +21,16 @@ test("admin can import users from csv and assign existing groups", async ({
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
+    const categoryFactory = factories.createCategoryFactory();
+    const courseFactory = factories.createCourseFactory();
+    const enrollmentFactory = factories.createEnrollmentFactory();
     const groupFactory = factories.createGroupFactory();
     const prefix = `import-users-success-${Date.now()}`;
+    const category = await categoryFactory.create(`Import users ${prefix}`);
+    const course = await courseFactory.create({
+      title: `${prefix}-course`,
+      categoryId: category.id,
+    });
     const groupOne = await groupFactory.create({ name: `${prefix}-group-one` });
     const groupTwo = await groupFactory.create({ name: `${prefix}-group-two` });
     const importedStudentEmail = `${prefix}-student@example.com`;
@@ -34,6 +42,10 @@ test("admin can import users from csv and assign existing groups", async ({
       GROUP_TWO: groupTwo.name,
     });
 
+    cleanup.add(async () => {
+      await courseFactory.delete(course.id);
+      await categoryFactory.delete(category.id);
+    });
     cleanup.add(async () => {
       await groupFactory.delete(groupOne.id);
     });
@@ -56,6 +68,8 @@ test("admin can import users from csv and assign existing groups", async ({
       await userFactory.deleteMany(importedUserIds);
     });
     cleanup.add(importFile.cleanup);
+
+    await enrollmentFactory.enrollGroups(course.id, [{ id: groupOne.id, isMandatory: false }]);
 
     await openUsersPageFlow(page);
     await openImportUsersModalFlow(page);
@@ -86,6 +100,18 @@ test("admin can import users from csv and assign existing groups", async ({
           creatorUser.groups.some((group) => group.id === groupOne.id) &&
           creatorUser.groups.some((group) => group.id === groupTwo.id)
         );
+      })
+      .toBe(true);
+
+    await expect
+      .poll(async () => {
+        const importedStudent = await userFactory.getByEmail(importedStudentEmail);
+
+        if (!importedStudent) return false;
+
+        const enrolledUser = await enrollmentFactory.getUser(course.id, importedStudent.id);
+
+        return enrolledUser?.isEnrolledByGroup === true;
       })
       .toBe(true);
 

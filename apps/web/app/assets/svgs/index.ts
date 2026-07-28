@@ -27,7 +27,7 @@ export { default as StatusIllustration } from "./status-illustration.svg?react";
 export { default as TrashIcon } from "./trash-icon.svg?react";
 export { default as UploadIllustration } from "./upload-illustration.svg?react";
 export { default as UploadImageIcon } from "./upload-image.svg?react";
-export { default as User } from "./user.svg?react";
+export { Building, User, Users } from "lucide-react";
 export { default as Warning } from "./warning.svg?react";
 export { default as Admin } from "./admin.svg?react";
 export { default as Hat } from "./hat.svg?react";

@@ -54,6 +54,7 @@ export * from "./group/update-group.event";
 export * from "./group/delete-group.event";
 export * from "./group/enroll-user-to-group.event";
 export * from "./group/enroll-group-to-course.event";
+export * from "./group/bulk-assign-users-to-groups.event";
 export * from "./course/enroll-course.event";
 export * from "./learning-path/learning-path-course-added.event";
 export * from "./learning-path/learning-path-course-sync.event";

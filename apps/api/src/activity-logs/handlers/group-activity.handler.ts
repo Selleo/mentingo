@@ -7,7 +7,9 @@ import {
   EnrollGroupToCourseEvent,
   EnrollUserToGroupEvent,
   UpdateGroupEvent,
+  BulkAssignUsersToGroupsEvent,
 } from "src/events";
+import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
 
 import { ActivityLogsService } from "../activity-logs.service";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "../types";
@@ -18,6 +20,7 @@ type GroupEventType =
   | UpdateGroupEvent
   | DeleteGroupEvent
   | EnrollUserToGroupEvent
+  | BulkAssignUsersToGroupsEvent
   | EnrollGroupToCourseEvent;
 
 const GroupActivityEvents = [
@@ -25,6 +28,7 @@ const GroupActivityEvents = [
   UpdateGroupEvent,
   DeleteGroupEvent,
   EnrollUserToGroupEvent,
+  BulkAssignUsersToGroupsEvent,
   EnrollGroupToCourseEvent,
 ] as const;
 
@@ -38,6 +42,8 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
     if (event instanceof UpdateGroupEvent) return await this.handleUpdate(event);
     if (event instanceof DeleteGroupEvent) return await this.handleDelete(event);
     if (event instanceof EnrollUserToGroupEvent) return await this.handleEnrollUser(event);
+    if (event instanceof BulkAssignUsersToGroupsEvent)
+      return await this.handleBulkAssignUsersToGroups(event);
     if (event instanceof EnrollGroupToCourseEvent)
       return await this.handleEnrollGroupToCourse(event);
   }
@@ -96,6 +102,26 @@ export class GroupActivityHandler implements IEventHandler<GroupEventType> {
       resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
       resourceId: event.enrollmentData.groupId,
       context: { userId: event.enrollmentData.userId },
+    });
+  }
+
+  private async handleBulkAssignUsersToGroups(event: BulkAssignUsersToGroupsEvent) {
+    const { actor, source, updates, tenantId, requestedCount, updatedCount, skippedCount } =
+      event.bulkAssignUsersToGroupsData;
+
+    if (source !== BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.BULK_EDIT || updatedCount === 0) return;
+
+    await this.activityLogsService.recordActivity({
+      actor,
+      tenantId,
+      operation: ACTIVITY_LOG_ACTION_TYPES.GROUP_ASSIGNMENT,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.GROUP,
+      context: {
+        requestedCount: String(requestedCount),
+        updatedCount: String(updatedCount),
+        skippedCount: String(skippedCount),
+        memberships: JSON.stringify(updates),
+      },
     });
   }
 
