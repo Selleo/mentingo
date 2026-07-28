@@ -1392,7 +1392,7 @@ export const studentChapterProgress = pgTable(
       .references(() => courses.id)
       .notNull(),
     chapterId: uuid("chapter_id")
-      .references(() => chapters.id)
+      .references(() => chapters.id, { onDelete: "cascade" })
       .notNull(),
     completedLessonCount: integer("completed_lesson_count").default(0).notNull(),
     completedAt: timestamp("completed_at", {
