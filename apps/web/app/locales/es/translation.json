@@ -4800,6 +4800,7 @@
       "openBuilder": "Abrir editor de pasos",
       "pause": "Pausar",
       "activate": "Activar",
+      "simulationRequiredTooltip": "La automatización debe pasar primero una simulación",
       "archive": "Archivar",
       "save": "Guardar cambios",
       "cancel": "Cancelar",
@@ -4959,6 +4960,7 @@
       "emailTemplate": "Plantilla de correo",
       "selectTemplate": "Selecciona una plantilla...",
       "language": "Idioma",
+      "userDefaultLanguage": "Idioma predeterminado del usuario",
       "placeholders": "Variables de la plantilla",
       "selectTemplateFirst": "Selecciona una plantilla de correo para ver las variables disponibles.",
       "noPlaceholders": "Esta plantilla no tiene variables para completar.",
@@ -4966,6 +4968,9 @@
       "selectVariable": "Selecciona variable del disparador...",
       "noTriggerVariables": "No hay disparador conectado a esta acción. Añade un disparador primero para mapear variables.",
       "defaultEmailNoMapping": "La plantilla de correo predeterminada no requiere mapeo de variables.",
+      "defaultTemplatesGroup": "Plantillas del sistema",
+      "customTemplatesGroup": "Plantillas personalizadas",
+      "noCustomTemplates": "No hay plantillas personalizadas publicadas disponibles.",
       "templates": {
         "defaultEmail": "Correo predeterminado",
         "userInvite": "Invitación de usuario",
@@ -5017,7 +5022,13 @@
       "mentionedLastName": "Apellido del usuario mencionado",
       "authorFullName": "Nombre completo del autor",
       "messageContent": "Contenido del mensaje",
-      "chatUrl": "Enlace al mensaje"
+      "chatUrl": "Enlace al mensaje",
+      "invitedByUserName": "Invitado por (nombre)",
+      "hasCertificate": "Tiene certificado",
+      "archiveReason": "Motivo de archivo",
+      "profileLink": "Enlace al perfil del usuario",
+      "progressLink": "Enlace al progreso del curso",
+      "userName": "Nombre completo"
     },
     "simulation": {
       "title": "Resultado de la simulación",
@@ -5057,7 +5068,29 @@
         "subject": "Has sido asignado al curso: {{courseName}}",
         "greeting": "¡Hola {{name}}!",
         "assignedToCourse": "Has sido asignado a un nuevo curso: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Ir al curso"
+        "goToCourse": "Ir al curso",
+        "unavailable": "Vista previa no disponible",
+        "loadFailed": "No se pudo cargar la vista previa de la plantilla.",
+        "label": "Vista previa",
+        "systemTemplateNote": "Plantilla del sistema <strong>{{templateLabel}}</strong> — el contenido predeterminado se genera automáticamente durante el envío.",
+        "emailDescription": "Este correo electrónico se enviará con el contenido correspondiente al trigger seleccionado y las variables mapeadas.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Juan",
+        "lastName": "García",
+        "fullName": "Juan García",
+        "email": "juan.garcia@example.com",
+        "courseName": "Formación en Seguridad Laboral 2025",
+        "chapterName": "Capítulo 1: Introducción",
+        "certificateName": "Certificado de Seguridad",
+        "announcementTitle": "Nueva formación disponible",
+        "announcementContent": "Le invitamos a una nueva formación...",
+        "authorFullName": "María López",
+        "messageContent": "¡Oye, mira esto!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "María López"
       }
     }
   },

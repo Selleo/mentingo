@@ -1,3 +1,4 @@
+import { STEP_DEFINITIONS } from "@repo/shared";
 import {
   Archive,
   AtSign,
@@ -23,11 +24,9 @@ import {
 import type { ReactNode } from "react";
 
 /**
- * Shared icon map for automation blocks.
- * Keyed by the `icon` field from step definitions (sidebar) and by `type` (canvas).
+ * Maps icon slug (from step definition `icon` field) to its React element.
  */
-export const BLOCK_ICON_MAP: Record<string, ReactNode> = {
-  // By icon slug (used in sidebar/picker)
+const ICON_SLUG_MAP: Record<string, ReactNode> = {
   "user-plus": <UserPlus className="size-4" />,
   upload: <Upload className="size-4" />,
   key: <Key className="size-4" />,
@@ -47,26 +46,17 @@ export const BLOCK_ICON_MAP: Record<string, ReactNode> = {
   "at-sign": <AtSign className="size-4" />,
   "calendar-clock": <CalendarClock className="size-4" />,
   mail: <Mail className="size-4" />,
+};
 
-  // By node type (used in canvas)
-  user_invited: <UserPlus className="size-4" />,
-  users_imported_invite: <Upload className="size-4" />,
-  user_password_reminder: <Key className="size-4" />,
-  user_password_changed: <Lock className="size-4" />,
-  user_welcome: <Sparkles className="size-4" />,
-  user_first_login: <LogIn className="size-4" />,
-  users_assigned_to_course: <BookOpen className="size-4" />,
-  users_short_inactivity: <UserX className="size-4" />,
-  users_long_inactivity: <UserX className="size-4" />,
-  user_chapter_finished: <CheckCircle className="size-4" />,
-  user_course_finished: <GraduationCap className="size-4" />,
-  user_registered: <UserCheck className="size-4" />,
-  user_password_created: <Shield className="size-4" />,
-  course_completed: <Trophy className="size-4" />,
-  certificate_expiration_warning: <Award className="size-4" />,
-  certificate_archived: <Archive className="size-4" />,
-  announcement_published: <Megaphone className="size-4" />,
-  course_chat_user_mentioned: <AtSign className="size-4" />,
-  course_due_date_reminder: <CalendarClock className="size-4" />,
-  send_email: <Mail className="size-4" />,
+/**
+ * Unified icon map keyed by BOTH icon slug (for sidebar/picker)
+ * and node type (for canvas nodes). Derived from the shared STEP_DEFINITIONS
+ * so new node types are automatically included.
+ */
+export const BLOCK_ICON_MAP: Record<string, ReactNode> = {
+  // Base icon slug entries
+  ...ICON_SLUG_MAP,
+
+  // Derive node-type entries from shared definitions
+  ...Object.fromEntries(STEP_DEFINITIONS.map((def) => [def.type, ICON_SLUG_MAP[def.icon]])),
 };

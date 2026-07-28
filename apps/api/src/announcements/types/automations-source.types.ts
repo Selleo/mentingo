@@ -54,6 +54,7 @@ export type TypeContext = {
  */
 export type SendEmailActionContext = TypeContext & {
   templateId: string;
+  language?: string;
   variableMapping: Record<string, string>;
 };
 

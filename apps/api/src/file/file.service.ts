@@ -82,7 +82,10 @@ import type {
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { ImageQuality } from "src/file/image-variants/image-variant.types";
+import type {
+  ImageQuality,
+  ImageVariantCreationOptions,
+} from "src/file/image-variants/image-variant.types";
 import type {
   UploadResourceParams,
   CreateResourceForEntityParams,
@@ -196,7 +199,7 @@ export class FileService {
     file: Express.Multer.File,
     resource: string,
     tenantId?: UUIDType,
-    options?: { skipVariants?: boolean },
+    options?: { skipVariants?: boolean } & ImageVariantCreationOptions,
   ): Promise<UploadFileResult> {
     if (file.size === 0) {
       throw new BadRequestException("files.toast.fileEmpty");
@@ -230,6 +233,10 @@ export class FileService {
           resource,
           mimeType: file.mimetype,
           tenantId,
+          options: {
+            variantDefinitions: options?.variantDefinitions,
+            resizeMode: options?.resizeMode,
+          },
         });
 
     if (imageVariantResult) {

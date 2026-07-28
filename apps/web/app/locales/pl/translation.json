@@ -4846,6 +4846,7 @@
       "openBuilder": "Otwórz kreator kroków",
       "pause": "Wstrzymaj",
       "activate": "Uruchom",
+      "simulationRequiredTooltip": "Automatyzacja musi najpierw przejść symulację",
       "archive": "Archiwizuj",
       "save": "Zapisz zmiany",
       "cancel": "Anuluj",
@@ -5058,6 +5059,7 @@
       "emailTemplate": "Szablon email",
       "selectTemplate": "Wybierz szablon...",
       "language": "Język",
+      "userDefaultLanguage": "Domyślny język użytkownika",
       "placeholders": "Zmienne szablonu",
       "selectTemplateFirst": "Wybierz szablon email, aby zobaczyć dostępne zmienne.",
       "noPlaceholders": "Ten szablon nie posiada zmiennych do uzupełnienia.",
@@ -5065,6 +5067,9 @@
       "selectVariable": "Wybierz zmienną triggera...",
       "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne.",
       "defaultEmailNoMapping": "Domyślny szablon email nie wymaga mapowania zmiennych.",
+      "defaultTemplatesGroup": "Szablony systemowe",
+      "customTemplatesGroup": "Szablony niestandardowe",
+      "noCustomTemplates": "Brak opublikowanych szablonów niestandardowych.",
       "templates": {
         "defaultEmail": "Domyślny email",
         "userInvite": "Zaproszenie użytkownika",
@@ -5116,7 +5121,13 @@
       "mentionedLastName": "Nazwisko oznaczonego",
       "authorFullName": "Imię i nazwisko autora",
       "messageContent": "Treść wiadomości",
-      "chatUrl": "Link do wiadomości"
+      "chatUrl": "Link do wiadomości",
+      "invitedByUserName": "Zaproszony przez (imię)",
+      "hasCertificate": "Posiada certyfikat",
+      "archiveReason": "Powód archiwizacji",
+      "profileLink": "Link do profilu użytkownika",
+      "progressLink": "Link do postępu kursu",
+      "userName": "Imię i nazwisko"
     },
     "simulation": {
       "title": "Wynik symulacji",
@@ -5156,7 +5167,29 @@
         "subject": "Zostałeś przypisany do kursu: {{courseName}}",
         "greeting": "Cześć {{name}}!",
         "assignedToCourse": "Zostałeś przypisany do nowego kursu: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Przejdź do kursu"
+        "goToCourse": "Przejdź do kursu",
+        "unavailable": "Podgląd niedostępny",
+        "loadFailed": "Nie udało się załadować podglądu szablonu.",
+        "label": "Podgląd",
+        "systemTemplateNote": "Szablon systemowy <strong>{{templateLabel}}</strong> — domyślna treść generowana automatycznie podczas wysyłki.",
+        "emailDescription": "Ten e-mail zostanie wysłany z treścią odpowiednią dla wybranego triggera i zmapowanych zmiennych.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Jan",
+        "lastName": "Kowalski",
+        "fullName": "Jan Kowalski",
+        "email": "jan.kowalski@example.com",
+        "courseName": "Szkolenie BHP 2025",
+        "chapterName": "Rozdział 1: Wprowadzenie",
+        "certificateName": "Certyfikat BHP",
+        "announcementTitle": "Nowe szkolenie dostępne",
+        "announcementContent": "Zapraszamy na nowe szkolenie...",
+        "authorFullName": "Anna Nowak",
+        "messageContent": "Hej, sprawdź to!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Anna Nowak"
       }
     }
   },

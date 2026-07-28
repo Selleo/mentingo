@@ -4726,6 +4726,7 @@
       "openBuilder": "Otevřít editor kroků",
       "pause": "Pozastavit",
       "activate": "Aktivovat",
+      "simulationRequiredTooltip": "Automatizace musí nejprve projít simulací",
       "archive": "Archivovat",
       "save": "Uložit změny",
       "cancel": "Zrušit",
@@ -4888,6 +4889,7 @@
       "emailTemplate": "Šablona e-mailu",
       "selectTemplate": "Vyberte šablonu...",
       "language": "Jazyk",
+      "userDefaultLanguage": "Výchozí jazyk uživatele",
       "placeholders": "Proměnné šablony",
       "selectTemplateFirst": "Vyberte šablonu e-mailu pro zobrazení dostupných proměnných.",
       "noPlaceholders": "Tato šablona nemá proměnné k vyplnění.",
@@ -4895,6 +4897,9 @@
       "selectVariable": "Vyberte proměnnou triggeru...",
       "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných.",
       "defaultEmailNoMapping": "Výchozí e-mailová šablona nevyžaduje žádné mapování proměnných.",
+      "defaultTemplatesGroup": "Systémové šablony",
+      "customTemplatesGroup": "Vlastní šablony",
+      "noCustomTemplates": "Nejsou k dispozici žádné publikované vlastní šablony.",
       "templates": {
         "defaultEmail": "Výchozí e-mail",
         "userInvite": "Pozvání uživatele",
@@ -4946,7 +4951,13 @@
       "mentionedLastName": "Příjmení zmíněného uživatele",
       "authorFullName": "Celé jméno autora",
       "messageContent": "Obsah zprávy",
-      "chatUrl": "Odkaz na zprávu"
+      "chatUrl": "Odkaz na zprávu",
+      "invitedByUserName": "Pozván/a (jméno)",
+      "hasCertificate": "Má certifikát",
+      "archiveReason": "Důvod archivace",
+      "profileLink": "Odkaz na profil uživatele",
+      "progressLink": "Odkaz na průběh kurzu",
+      "userName": "Celé jméno"
     },
     "simulation": {
       "title": "Výsledek simulace",
@@ -4986,7 +4997,29 @@
         "subject": "Byli jste přiřazeni ke kurzu: {{courseName}}",
         "greeting": "Ahoj {{name}}!",
         "assignedToCourse": "Byli jste přiřazeni k novému kurzu: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Přejít na kurz"
+        "goToCourse": "Přejít na kurz",
+        "unavailable": "Náhled není k dispozici",
+        "loadFailed": "Nepodařilo se načíst náhled šablony.",
+        "label": "Náhled",
+        "systemTemplateNote": "Systémová šablona <strong>{{templateLabel}}</strong> — výchozí obsah je generován automaticky při odeslání.",
+        "emailDescription": "Tento e-mail bude odeslán s obsahem odpovídajícím vybranému triggeru a namapovaným proměnným.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Jan",
+        "lastName": "Novák",
+        "fullName": "Jan Novák",
+        "email": "jan.novak@example.com",
+        "courseName": "Školení BOZP 2025",
+        "chapterName": "Kapitola 1: Úvod",
+        "certificateName": "Certifikát BOZP",
+        "announcementTitle": "Nové školení k dispozici",
+        "announcementContent": "Zveme vás na nové školení...",
+        "authorFullName": "Eva Nováková",
+        "messageContent": "Hej, podívej se na to!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Eva Nováková"
       }
     }
   },

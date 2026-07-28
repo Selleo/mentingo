@@ -4803,6 +4803,7 @@
       "openBuilder": "Open step builder",
       "pause": "Pause",
       "activate": "Activate",
+      "simulationRequiredTooltip": "The automation must pass a simulation first",
       "archive": "Archive",
       "save": "Save changes",
       "cancel": "Cancel",
@@ -5015,6 +5016,7 @@
       "emailTemplate": "Email template",
       "selectTemplate": "Select a template...",
       "language": "Language",
+      "userDefaultLanguage": "User's default language",
       "placeholders": "Template placeholders",
       "selectTemplateFirst": "Select an email template to see available placeholders.",
       "noPlaceholders": "This template has no placeholders to fill.",
@@ -5022,6 +5024,9 @@
       "selectVariable": "Select trigger variable...",
       "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables.",
       "defaultEmailNoMapping": "The default email template does not require any placeholder mapping.",
+      "defaultTemplatesGroup": "System templates",
+      "customTemplatesGroup": "Custom templates",
+      "noCustomTemplates": "No published custom templates available.",
       "templates": {
         "defaultEmail": "Default Email",
         "userInvite": "User Invite",
@@ -5073,7 +5078,13 @@
       "mentionedLastName": "Mentioned user last name",
       "authorFullName": "Author full name",
       "messageContent": "Message content",
-      "chatUrl": "Message link"
+      "chatUrl": "Message link",
+      "invitedByUserName": "Invited by (name)",
+      "hasCertificate": "Has certificate",
+      "archiveReason": "Archive reason",
+      "profileLink": "User profile link",
+      "progressLink": "Course progress link",
+      "userName": "Full name"
     },
     "simulation": {
       "title": "Simulation Result",
@@ -5113,7 +5124,29 @@
         "subject": "You have been assigned to course: {{courseName}}",
         "greeting": "Hi {{name}}!",
         "assignedToCourse": "You have been assigned to a new course: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Go to course"
+        "goToCourse": "Go to course",
+        "unavailable": "Preview unavailable",
+        "loadFailed": "Could not load the template preview.",
+        "label": "Preview",
+        "systemTemplateNote": "System template <strong>{{templateLabel}}</strong> — default content is generated automatically during delivery.",
+        "emailDescription": "This email will be sent with content matching the selected trigger and mapped variables.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "John",
+        "lastName": "Smith",
+        "fullName": "John Smith",
+        "email": "john.smith@example.com",
+        "courseName": "Health & Safety Training 2025",
+        "chapterName": "Chapter 1: Introduction",
+        "certificateName": "H&S Certificate",
+        "announcementTitle": "New training available",
+        "announcementContent": "We invite you to a new training course...",
+        "authorFullName": "Jane Doe",
+        "messageContent": "Hey, check this out!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Jane Doe"
       }
     }
   },

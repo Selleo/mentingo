@@ -4727,6 +4727,7 @@
       "openBuilder": "Atidaryti žingsnių kūrimo priemonę",
       "pause": "Pristabdyti",
       "activate": "Aktyvuoti",
+      "simulationRequiredTooltip": "Automatizavimas pirmiausia turi praeiti simuliaciją",
       "archive": "Archyvuoti",
       "save": "Išsaugoti pakeitimus",
       "cancel": "Atšaukti",
@@ -4891,6 +4892,7 @@
       "emailTemplate": "El. laiško šablonas",
       "selectTemplate": "Pasirinkite šabloną...",
       "language": "Kalba",
+      "userDefaultLanguage": "Numatytoji vartotojo kalba",
       "placeholders": "Šablono kintamieji",
       "selectTemplateFirst": "Pasirinkite el. laiško šabloną, kad pamatytumėte galimus kintamuosius.",
       "noPlaceholders": "Šis šablonas neturi kintamųjų, kuriuos reikėtų užpildyti.",
@@ -4898,6 +4900,9 @@
       "selectVariable": "Pasirinkite trigerio kintamąjį...",
       "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius.",
       "defaultEmailNoMapping": "Numatytasis el. pašto šablonas nereikalauja kintamųjų susiejimo.",
+      "defaultTemplatesGroup": "Sistemos šablonai",
+      "customTemplatesGroup": "Pasirinktiniai šablonai",
+      "noCustomTemplates": "Nėra paskelbtų pasirinktinių šablonų.",
       "templates": {
         "defaultEmail": "Numatytasis el. laiškas",
         "userInvite": "Vartotojo pakvietimas",
@@ -4949,7 +4954,13 @@
       "mentionedLastName": "Paminėto vartotojo pavardė",
       "authorFullName": "Autoriaus vardas ir pavardė",
       "messageContent": "Žinutės turinys",
-      "chatUrl": "Žinutės nuoroda"
+      "chatUrl": "Žinutės nuoroda",
+      "invitedByUserName": "Pakvietė (vardas)",
+      "hasCertificate": "Turi sertifikatą",
+      "archiveReason": "Archyvavimo priežastis",
+      "profileLink": "Vartotojo profilio nuoroda",
+      "progressLink": "Kurso pažangos nuoroda",
+      "userName": "Vardas ir pavardė"
     },
     "simulation": {
       "title": "Simuliacijos rezultatas",
@@ -4989,7 +5000,29 @@
         "subject": "Jums priskirtas kursas: {{courseName}}",
         "greeting": "Sveiki {{name}}!",
         "assignedToCourse": "Jums priskirtas naujas kursas: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Eiti į kursą"
+        "goToCourse": "Eiti į kursą",
+        "unavailable": "Peržiūra nepasiekiama",
+        "loadFailed": "Nepavyko įkelti šablono peržiūros.",
+        "label": "Peržiūra",
+        "systemTemplateNote": "Sistemos šablonas <strong>{{templateLabel}}</strong> — numatytasis turinys generuojamas automatiškai siuntimo metu.",
+        "emailDescription": "Šis el. laiškas bus išsiųstas su turiniu, atitinkančiu pasirinktą trigerį ir susietas kintamuosius.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Jonas",
+        "lastName": "Jonaitis",
+        "fullName": "Jonas Jonaitis",
+        "email": "jonas.jonaitis@example.com",
+        "courseName": "Darbo saugos mokymai 2025",
+        "chapterName": "1 skyrius: Įvadas",
+        "certificateName": "Darbo saugos sertifikatas",
+        "announcementTitle": "Nauji mokymai prieinami",
+        "announcementContent": "Kviečiame į naujus mokymus...",
+        "authorFullName": "Ona Onaitė",
+        "messageContent": "Ei, pažiūrėk!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Ona Onaitė"
       }
     }
   },

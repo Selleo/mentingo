@@ -1,5 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from "@nestjs/common";
+import { PERMISSIONS, SUPPORTED_LANGUAGES, SupportedLanguages } from "@repo/shared";
 
 import {
   AutomationRecordInput,
@@ -9,6 +9,7 @@ import { BaseResponse, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
+import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
 import { AutomationsService } from "./automations.service";
 
 import type { AutomationStatus } from "src/announcements/types/automations.types";
@@ -16,12 +17,29 @@ import type { AutomationStatus } from "src/announcements/types/automations.types
 @RequirePermission(PERMISSIONS.AUTOMATION_MANAGE)
 @Controller("automations")
 export class AutomationsController {
-  constructor(private readonly automationsService: AutomationsService) {}
+  constructor(
+    private readonly automationsService: AutomationsService,
+    private readonly systemTemplatePreviewService: AutomationSystemTemplatePreviewService,
+  ) {}
 
   @Get()
   async getAllAutomations(@CurrentUser("tenantId") tenantId: UUIDType) {
     const automations = await this.automationsService.getAllAutomations(tenantId);
     return new BaseResponse(automations);
+  }
+
+  @Get("system-template-preview/:templateId")
+  async previewSystemTemplate(
+    @Param("templateId") templateId: string,
+    @Query("language") language?: SupportedLanguages,
+  ) {
+    const resolvedLanguage = language ?? SUPPORTED_LANGUAGES.PL;
+    const preview = await this.systemTemplatePreviewService.renderPreview(
+      templateId,
+      resolvedLanguage,
+    );
+
+    return new BaseResponse(preview ?? { subject: "", html: "" });
   }
 
   @Get(":id")

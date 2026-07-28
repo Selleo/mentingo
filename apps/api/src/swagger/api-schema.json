@@ -16240,6 +16240,34 @@
         }
       }
     },
+    "/api/automations/system-template-preview/{templateId}": {
+      "get": {
+        "operationId": "AutomationsController_previewSystemTemplate",
+        "parameters": [
+          {
+            "name": "templateId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "language",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/automations/{id}": {
       "get": {
         "operationId": "AutomationsController_getAutomationById",

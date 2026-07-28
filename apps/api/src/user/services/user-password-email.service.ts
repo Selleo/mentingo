@@ -93,8 +93,11 @@ export class UserPasswordEmailService {
     const resetRecipients = recipients.filter(({ hasCredentials }) => hasCredentials);
     const creationRecipients = recipients.filter(({ hasCredentials }) => !hasCredentials);
 
-    const preparedResetEmails = this.preparePasswordResetEmails(resetRecipients, tenantOrigin);
-    const preparedCreationEmails = this.preparePasswordCreationEmails(
+    const preparedResetEmails = await this.preparePasswordResetEmails(
+      resetRecipients,
+      tenantOrigin,
+    );
+    const preparedCreationEmails = await this.preparePasswordCreationEmails(
       creationRecipients,
       tenantOrigin,
     );

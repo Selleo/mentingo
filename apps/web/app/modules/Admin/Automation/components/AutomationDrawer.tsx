@@ -22,6 +22,8 @@ import {
   SheetTitle,
 } from "~/components/ui/sheet";
 import { Textarea } from "~/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
+import { toast as showToast } from "~/components/ui/use-toast";
 
 import { useAutoSave } from "../hooks/useAutoSave";
 
@@ -59,6 +61,7 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState<AutomationStatus>("draft");
+  const [showSimulationWarning, setShowSimulationWarning] = useState(false);
   const prevAutomationId = useRef<string | null>(null);
 
   const triggerAutoSave = useAutoSave<{
@@ -120,6 +123,15 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
   };
 
   const toggleActivation = () => {
+    if (isDraft) {
+      setShowSimulationWarning(true);
+      showToast({
+        description: t("automationView.drawer.simulationRequiredTooltip"),
+        variant: "default",
+        duration: 3000,
+      });
+      return;
+    }
     const nextStatus: AutomationStatus = status === "enabled" ? "disabled" : "enabled";
     setStatus(nextStatus);
     updateAutomation.mutate({
@@ -191,26 +203,37 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
             </Button>
 
             <div className="grid grid-cols-2 gap-3">
-              <Button
-                variant="outline"
-                className={
-                  status === "enabled"
-                    ? "border-warning-200 bg-warning-50 text-warning-700 hover:bg-warning-100"
-                    : "border-success-200 bg-success-50 text-success-700 hover:bg-success-100"
-                }
-                onClick={toggleActivation}
-                disabled={status === "archived" || isDraft}
-              >
-                {status === "enabled" ? (
-                  <>
-                    <Square className="mr-2 size-4" /> {t("automationView.drawer.pause")}
-                  </>
-                ) : (
-                  <>
-                    <Play className="mr-2 size-4" /> {t("automationView.drawer.activate")}
-                  </>
-                )}
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex">
+                      <Button
+                        variant="outline"
+                        className={
+                          "w-full border-success-200 bg-success-50 text-success-700 hover:bg-success-100"
+                        }
+                        onClick={toggleActivation}
+                        disabled={status === "archived"}
+                      >
+                        {status === "enabled" ? (
+                          <>
+                            <Square className="mr-2 size-4" /> {t("automationView.drawer.pause")}
+                          </>
+                        ) : (
+                          <>
+                            <Play className="mr-2 size-4" /> {t("automationView.drawer.activate")}
+                          </>
+                        )}
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {isDraft && (
+                    <TooltipContent side="top">
+                      {t("automationView.drawer.simulationRequiredTooltip")}
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
 
               <Button
                 variant="outline"
@@ -226,6 +249,12 @@ export const AutomationDrawer: FC<AutomationDrawerProps> = ({
                 <Archive className="mr-2 size-4" /> {t("automationView.drawer.archive")}
               </Button>
             </div>
+
+            {showSimulationWarning && isDraft && (
+              <p className="text-xs text-amber-600">
+                {t("automationView.drawer.simulationRequiredTooltip")}
+              </p>
+            )}
           </div>
 
           <Separator />

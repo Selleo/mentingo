@@ -4721,6 +4721,7 @@
       "openBuilder": "Schrittersteller öffnen",
       "pause": "Pausieren",
       "activate": "Aktivieren",
+      "simulationRequiredTooltip": "Die Automatisierung muss zuerst eine Simulation bestehen",
       "archive": "Archivieren",
       "save": "Änderungen speichern",
       "cancel": "Abbrechen",
@@ -4885,6 +4886,7 @@
       "emailTemplate": "E-Mail-Vorlage",
       "selectTemplate": "Vorlage auswählen...",
       "language": "Sprache",
+      "userDefaultLanguage": "Standardsprache des Benutzers",
       "placeholders": "Vorlagenvariablen",
       "selectTemplateFirst": "Wählen Sie eine E-Mail-Vorlage, um verfügbare Variablen anzuzeigen.",
       "noPlaceholders": "Diese Vorlage hat keine Variablen zum Ausfüllen.",
@@ -4892,6 +4894,9 @@
       "selectVariable": "Trigger-Variable auswählen...",
       "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen.",
       "defaultEmailNoMapping": "Die Standard-E-Mail-Vorlage erfordert keine Platzhalterzuordnung.",
+      "defaultTemplatesGroup": "Systemvorlagen",
+      "customTemplatesGroup": "Benutzerdefinierte Vorlagen",
+      "noCustomTemplates": "Keine veröffentlichten benutzerdefinierten Vorlagen verfügbar.",
       "templates": {
         "defaultEmail": "Standard-E-Mail",
         "userInvite": "Benutzereinladung",
@@ -4943,7 +4948,13 @@
       "mentionedLastName": "Nachname des erwähnten Benutzers",
       "authorFullName": "Vollständiger Name des Autors",
       "messageContent": "Nachrichteninhalt",
-      "chatUrl": "Nachrichtenlink"
+      "chatUrl": "Nachrichtenlink",
+      "invitedByUserName": "Eingeladen von (Name)",
+      "hasCertificate": "Hat Zertifikat",
+      "archiveReason": "Archivierungsgrund",
+      "profileLink": "Benutzerprofil-Link",
+      "progressLink": "Kursfortschritt-Link",
+      "userName": "Vollständiger Name"
     },
     "simulation": {
       "title": "Simulationsergebnis",
@@ -4983,7 +4994,29 @@
         "subject": "Sie wurden einem Kurs zugewiesen: {{courseName}}",
         "greeting": "Hallo {{name}}!",
         "assignedToCourse": "Sie wurden einem neuen Kurs zugewiesen: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Zum Kurs"
+        "goToCourse": "Zum Kurs",
+        "unavailable": "Vorschau nicht verfügbar",
+        "loadFailed": "Die Vorschau der Vorlage konnte nicht geladen werden.",
+        "label": "Vorschau",
+        "systemTemplateNote": "Systemvorlage <strong>{{templateLabel}}</strong> — der Standardinhalt wird beim Versand automatisch generiert.",
+        "emailDescription": "Diese E-Mail wird mit dem Inhalt gesendet, der zum ausgewählten Trigger und den zugeordneten Variablen passt.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Max",
+        "lastName": "Mustermann",
+        "fullName": "Max Mustermann",
+        "email": "max.mustermann@example.com",
+        "courseName": "Arbeitssicherheit Schulung 2025",
+        "chapterName": "Kapitel 1: Einführung",
+        "certificateName": "Arbeitssicherheit Zertifikat",
+        "announcementTitle": "Neue Schulung verfügbar",
+        "announcementContent": "Wir laden Sie zu einer neuen Schulung ein...",
+        "authorFullName": "Erika Musterfrau",
+        "messageContent": "Hey, schau dir das an!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Erika Musterfrau"
       }
     }
   },

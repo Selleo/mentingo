@@ -1,10 +1,15 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
+import { EmailService } from "src/common/emails/emails.service";
+import { SettingsService } from "src/settings/settings.service";
+import { DB_ADMIN } from "src/storage/db/db.providers";
+
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
 import { AutomationDataResolverService } from "./automation-data-resolver.service";
 import { AutomationRunnerService } from "./automation-runner.service";
+import { AutomationSystemTemplateRendererService } from "./automation-system-template-renderer.service";
 import { AutomationTemplateService } from "./automation-template.service";
 
 import type { AutomationResolvedRecipient } from "./automation-data-resolver.types";
@@ -63,6 +68,32 @@ describe("AutomationRunnerService", () => {
           useValue: {
             getTemplate: jest.fn(),
           },
+        },
+        {
+          provide: AutomationSystemTemplateRendererService,
+          useValue: {
+            render: jest.fn().mockResolvedValue({
+              subject: "Test Subject",
+              text: "Test text",
+              html: "<p>Test html</p>",
+            }),
+          },
+        },
+        {
+          provide: EmailService,
+          useValue: {
+            sendEmailWithLogo: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: SettingsService,
+          useValue: {
+            getUserSettings: jest.fn().mockResolvedValue({ language: "en" }),
+          },
+        },
+        {
+          provide: DB_ADMIN,
+          useValue: {},
         },
       ],
     }).compile();

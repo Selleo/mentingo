@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle2, Mail, Variable, X } from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2, Mail, Variable, X } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -25,59 +25,16 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 
+import type {
+  EmailPreview,
+  EventDataField,
+  PlaceholderMappingEntry,
+  SimulationPanelState,
+  SimulationResult,
+} from "../simulation.types";
 import type { FC } from "react";
 
-// ─── Simulation Result Types ─────────────────────────────────────────────────
-
-interface ValidationError {
-  nodeId: string;
-  nodeName: string;
-  field: string;
-  description: string;
-}
-
-interface EventDataField {
-  key: string;
-  label: string;
-  dataType: "string" | "number" | "date" | "url";
-}
-
-interface PlaceholderMappingEntry {
-  placeholder: string;
-  mappedVariable: string | null;
-  sampleValue: string | null;
-}
-
-interface EmailPreview {
-  nodeId: string;
-  nodeName: string;
-  subject: string;
-  senderAddress: string;
-  htmlBody: string;
-  recipientAddress: string;
-}
-
-interface NodeValidationResult {
-  nodeId: string;
-  nodeName: string;
-  kind: "trigger" | "action";
-  status: "valid" | "invalid";
-  errors: ValidationError[];
-}
-
-export interface SimulationResult {
-  overallStatus: "success" | "failed";
-  nodeResults: NodeValidationResult[];
-  eventData: EventDataField[];
-  placeholderMappings: Record<string, PlaceholderMappingEntry[]>;
-  emailPreviews: EmailPreview[];
-}
-
-export type SimulationPanelState =
-  | { type: "idle" }
-  | { type: "loading" }
-  | { type: "success"; result: SimulationResult }
-  | { type: "error"; message: string };
+export type { SimulationPanelState, SimulationResult };
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
@@ -91,7 +48,7 @@ interface SimulationPanelProps {
 export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state, onRetry }) => {
   const { t } = useTranslation();
 
-  if (state.type === "idle" || state.type === "loading") {
+  if (state.type === "idle") {
     return null;
   }
 
@@ -113,6 +70,8 @@ export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state
 
         {/* Content */}
         <div className="flex-1 overflow-hidden">
+          {state.type === "loading" && <LoadingView />}
+
           {state.type === "error" && <ErrorView message={state.message} onRetry={onRetry} />}
 
           {state.type === "success" && state.result.overallStatus === "failed" && (
@@ -160,6 +119,19 @@ const StatusBadge: FC<{ status: "success" | "failed" }> = ({ status }) => {
         </>
       )}
     </Badge>
+  );
+};
+
+const LoadingView: FC = () => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
+      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">
+        {t("automationBuilder.simulation.loading", "Generowanie podglądu...")}
+      </p>
+    </div>
   );
 };
 

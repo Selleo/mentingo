@@ -3,6 +3,7 @@ import { Test } from "@nestjs/testing";
 import { AutomationStatus } from "src/announcements/types/automations.types";
 import { BaseResponse } from "src/common";
 
+import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
 import { AutomationsController } from "./automations.controller";
 import { AutomationsService } from "./automations.service";
 
@@ -36,6 +37,12 @@ describe("AutomationsController", () => {
             updateAutomation: jest.fn(),
             updateStatus: jest.fn(),
             deleteAutomation: jest.fn(),
+          },
+        },
+        {
+          provide: AutomationSystemTemplatePreviewService,
+          useValue: {
+            renderPreview: jest.fn(),
           },
         },
       ],
