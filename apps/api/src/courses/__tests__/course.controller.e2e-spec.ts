@@ -1733,6 +1733,13 @@ describe("CourseController (e2e)", () => {
         thumbnailPositionY: 50,
         showAuthorSection: true,
       });
+      const accessToken = app.get(JwtService).sign({
+        userId: admin.id,
+        email: admin.email,
+        roleSlugs: [SYSTEM_ROLE_SLUGS.ADMIN],
+        permissions: Object.values(PERMISSIONS),
+        tenantId: admin.tenantId,
+      });
 
       const publishSpy = jest
         .spyOn(app.get(OutboxPublisher), "publish")
@@ -1760,12 +1767,11 @@ describe("CourseController (e2e)", () => {
       ] as const;
 
       for (const update of updates) {
-        const cookies = await cookieFor(admin, app);
         publishSpy.mockClear();
 
         await request(app.getHttpServer())
           .patch(`/api/course/${course.id}`)
-          .set("Cookie", cookies)
+          .set("Cookie", `access_token=${accessToken}`)
           .send({
             language: SUPPORTED_LANGUAGES.EN,
             ...update.body,
