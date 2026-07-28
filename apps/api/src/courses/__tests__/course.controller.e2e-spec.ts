@@ -1733,7 +1733,16 @@ describe("CourseController (e2e)", () => {
         thumbnailPositionY: 50,
         showAuthorSection: true,
       });
-      const cookies = await cookieFor(admin, app);
+      const authenticatedAgent = request.agent(app.getHttpServer());
+
+      await authenticatedAgent
+        .post("/api/auth/login")
+        .send({
+          email: admin.email,
+          password: admin.credentials?.password,
+        })
+        .expect(201);
+
       const publishSpy = jest
         .spyOn(app.get(OutboxPublisher), "publish")
         .mockResolvedValue(undefined);
@@ -1762,9 +1771,8 @@ describe("CourseController (e2e)", () => {
       for (const update of updates) {
         publishSpy.mockClear();
 
-        await request(app.getHttpServer())
+        await authenticatedAgent
           .patch(`/api/course/${course.id}`)
-          .set("Cookie", cookies)
           .send({
             language: SUPPORTED_LANGUAGES.EN,
             ...update.body,
