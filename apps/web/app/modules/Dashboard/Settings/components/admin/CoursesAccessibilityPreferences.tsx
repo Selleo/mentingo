@@ -66,29 +66,46 @@ export default function CoursesAccessibilityPreferences({
           }}
           className="flex flex-col gap-4 sm:flex-row sm:gap-10 sm:justify-center"
         >
-          {Object.values(COURSE_LIST_LAYOUT_VARIANT).map((layout) => (
-            <Label key={layout} htmlFor={layout} className="w-full cursor-pointer sm:flex-1">
-              <RadioGroupItem value={layout} id={layout} className="sr-only" />
-              <div
-                className={cn("border-2 rounded-lg p-3 transition-colors", {
-                  "border-primary bg-primary/5": currentLayout === layout,
-                  "border-neutral-200 hover:border-neutral-300": currentLayout !== layout,
-                })}
-              >
-                <p className="text-base font-bold mb-1">
-                  {layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
-                    ? t("adminPreferences.field.courseListLayoutClassic")
-                    : t("adminPreferences.field.courseListLayoutModern")}
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
-                    ? t("adminPreferences.field.courseListLayoutClassicDescription")
-                    : t("adminPreferences.field.courseListLayoutModernDescription")}
-                </p>
-                <CourseListLayoutPreview type={layout} />
-              </div>
-            </Label>
-          ))}
+          {Object.values(COURSE_LIST_LAYOUT_VARIANT).map((layout) => {
+            const isSelected = currentLayout === layout;
+            const title =
+              layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
+                ? t("adminPreferences.field.courseListLayoutClassic")
+                : t("adminPreferences.field.courseListLayoutModern");
+            const description =
+              layout === COURSE_LIST_LAYOUT_VARIANT.CLASSIC
+                ? t("adminPreferences.field.courseListLayoutClassicDescription")
+                : t("adminPreferences.field.courseListLayoutModernDescription");
+
+            return (
+              <Label key={layout} htmlFor={layout} className="w-full cursor-pointer sm:flex-1">
+                <div
+                  className={cn(
+                    "rounded-lg border-2 bg-white p-3 transition-all hover:border-primary-200 hover:bg-primary-50/30",
+                    {
+                      "border-primary-600 bg-primary-100 ring-1 ring-primary-200": isSelected,
+                      "border-neutral-200": !isSelected,
+                    },
+                  )}
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="mb-1 text-base font-bold">{title}</p>
+                      <p className="text-sm text-muted-foreground">{description}</p>
+                    </div>
+                    <RadioGroupItem
+                      value={layout}
+                      id={layout}
+                      className={cn("mt-0.5 size-5 shrink-0 border-neutral-300 bg-white", {
+                        "border-primary-700 text-primary-700": isSelected,
+                      })}
+                    />
+                  </div>
+                  <CourseListLayoutPreview type={layout} />
+                </div>
+              </Label>
+            );
+          })}
         </RadioGroup>
       </div>
       <SettingItem
