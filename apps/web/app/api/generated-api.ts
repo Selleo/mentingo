@@ -4113,7 +4113,7 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorConfiguration:
+        aiMentorConfiguration?:
           | {
               type: "teacher";
               /** @minLength 1 */
@@ -4155,7 +4155,7 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorConfiguration:
+        aiMentorConfiguration?:
           | {
               type: "teacher";
               /** @minLength 1 */
@@ -5510,7 +5510,7 @@ export interface ValidateConfigurationBody {
   lessonContext: {
     title?: string;
     taskDescription?: string;
-    aiMentorConfiguration:
+    aiMentorConfiguration?:
       | {
           type: "teacher";
           /** @minLength 1 */

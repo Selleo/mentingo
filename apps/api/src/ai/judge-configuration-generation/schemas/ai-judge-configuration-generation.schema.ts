@@ -116,7 +116,7 @@ export const aiJudgeGenerationLessonContextSchema = Type.Object(
   {
     title: Type.Optional(Type.String()),
     taskDescription: Type.Optional(Type.String()),
-    aiMentorConfiguration: aiMentorConfigurationContentSchema,
+    aiMentorConfiguration: Type.Optional(aiMentorConfigurationContentSchema),
   },
   { additionalProperties: false },
 );
@@ -548,7 +548,7 @@ export type GeneratedAiJudgeConfiguration = Static<typeof generatedAiJudgeConfig
 export type AiJudgeGenerationLessonContext = {
   title?: string;
   taskDescription?: string;
-  aiMentorConfiguration: AiMentorConfigurationContent;
+  aiMentorConfiguration?: AiMentorConfigurationContent;
 };
 export type AiJudgeValidationIssue = Static<typeof aiJudgeValidationIssueSchema>;
 export type AiJudgeConfigurationValidatorModelResult = Static<

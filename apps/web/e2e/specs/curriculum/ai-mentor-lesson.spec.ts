@@ -152,7 +152,7 @@ test("admin can create and preview an AI mentor lesson", async ({
       title: lessonTitle,
       name: "Ada",
       description: formattedDescriptionText,
-      instructions: "Ask concise questions.",
+      scenario: "Practice a concise discovery conversation.",
     });
     const descriptionEditor = page
       .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT)
@@ -183,13 +183,18 @@ test("admin can create and preview an AI mentor lesson", async ({
     expect(savedLesson.description).toContain("<strong>");
 
     await openExistingLessonFlow(page, chapter.id, lessonId);
+    await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
+    await expect(page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_SCENARIO_INPUT)).toHaveValue(
+      "Practice a concise discovery conversation.",
+    );
+    await page.getByRole("button", { name: "Cancel" }).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.PREVIEW_BUTTON).click();
     await expect(page.getByText("Ada").first()).toBeVisible();
     await expect(page.getByText(formattedDescriptionText).first()).toBeVisible();
   });
 });
 
-test("admin can save and reopen a complete manual AI Judge configuration", async ({
+test("admin can save and reopen complete Teacher and AI Judge configurations", async ({
   cleanup,
   factories,
   withWorkerPage,
@@ -220,11 +225,18 @@ test("admin can save and reopen a complete manual AI Judge configuration", async
       AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT,
       "Practice a discovery conversation.",
     );
-    await fillRichTextEditorFlow(
-      page,
-      AI_MENTOR_LESSON_FORM_HANDLES.INSTRUCTIONS_INPUT,
-      "Act as a customer and answer only what the learner asks.",
-    );
+    await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
+    await page.getByRole("radio", { name: /Teacher/ }).click();
+    await page
+      .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT)
+      .fill("Teach a structured discovery conversation.");
+    await page
+      .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_EXPERTISE_INPUT)
+      .fill("Sales discovery coach");
+    await page
+      .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONTENT_SCOPE_INPUT)
+      .fill("SPIN discovery questions and relevant next steps.");
+    await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_APPLY_BUTTON).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
     await fillAiJudgeConfigurationFlow(page, baseJudgeConfiguration);
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_APPLY_BUTTON).click();
@@ -236,6 +248,14 @@ test("admin can save and reopen a complete manual AI Judge configuration", async
     )!.id;
 
     await openExistingLessonFlow(page, chapter.id, lessonId);
+    await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
+    await expect(
+      page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_TASK_GOAL_INPUT),
+    ).toHaveValue("Teach a structured discovery conversation.");
+    await expect(
+      page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_EXPERTISE_INPUT),
+    ).toHaveValue("Sales discovery coach");
+    await page.getByRole("button", { name: "Cancel" }).click();
     await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
     await expectJudgeConfigurationInDialog(page, baseJudgeConfiguration);
   });
@@ -298,13 +318,22 @@ test("admin can complete AI Judge translations and refresh course translation st
       language: "de",
       title: "Deutsche KI-Mentor-Lektion",
       description: "<p>Deutsche Lektionsbeschreibung</p>",
-      aiMentorInstructions: "<p>Führe ein realistisches Kundengespräch.</p>",
-      type: "mentor",
       name: "Ada",
       voiceMode: "preset",
       ttsPreset: "female",
       customTtsReference: null,
     });
+    await apiClient.api.aiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations(
+      lesson.id,
+      "de",
+      {
+        type: "roleplay",
+        scenario: "Führe ein realistisches Kundengespräch.",
+        aiRole: "Kunde",
+        learnerRole: "Vertriebsmitarbeiter",
+        characterGoal: "Erreiche ein realistisches Ergebnis.",
+      },
+    );
 
     const beforeTranslation = await apiClient.api.courseControllerHasMissingTranslations({
       id: course.id,

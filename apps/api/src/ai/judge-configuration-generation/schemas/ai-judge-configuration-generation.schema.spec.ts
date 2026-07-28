@@ -136,6 +136,20 @@ describe("AI Judge configuration generation schemas", () => {
     ).toBe(false);
   });
 
+  it("accepts lesson context before Mentor behavior is configured", () => {
+    expect(
+      Value.Check(generateAiJudgeConfigurationInputSchema, {
+        courseId,
+        lessonContext: {
+          title: "Handle a difficult sales objection",
+          taskDescription: "Respond to the customer's concern and agree on a next step.",
+        },
+        mode: "create",
+        brief: "Assess objection handling.",
+      }),
+    ).toBe(true);
+  });
+
   it("requires complete configuration context for improve requests", () => {
     expect(
       Value.Check(generateAiJudgeConfigurationInputSchema, {

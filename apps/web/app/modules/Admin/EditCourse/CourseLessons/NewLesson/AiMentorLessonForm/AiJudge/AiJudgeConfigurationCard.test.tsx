@@ -48,6 +48,7 @@ const renderCard = (props: AiJudgeConfigurationCardOverrides = {}) =>
         language="en"
         baseLanguage="en"
         isPersisted={false}
+        isAiMentorConfigured
         onConfigureWithAi={vi.fn()}
         {...props}
       />
@@ -84,6 +85,22 @@ describe("AiJudgeConfigurationCard", () => {
 
     expect(screen.getByRole("button", { name: "Edit assessment" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Improve with AI" })).not.toBeInTheDocument();
+    expect(onConfigureWithAi).not.toHaveBeenCalled();
+  });
+
+  it("blocks AI creation until AI Mentor behavior is configured", async () => {
+    const user = userEvent.setup();
+    const onConfigureWithAi = vi.fn();
+    renderCard({ isAiMentorConfigured: false, onConfigureWithAi });
+
+    const aiAction = screen.getByRole("button", { name: "Create with AI" });
+    expect(aiAction).toBeDisabled();
+
+    await user.hover(aiAction.parentElement!);
+    const tooltipCopies = await screen.findAllByText(
+      "Configure AI Mentor behavior before creating completion conditions with AI.",
+    );
+    expect(tooltipCopies.some((element) => element.getAttribute("role") !== "tooltip")).toBe(true);
     expect(onConfigureWithAi).not.toHaveBeenCalled();
   });
 

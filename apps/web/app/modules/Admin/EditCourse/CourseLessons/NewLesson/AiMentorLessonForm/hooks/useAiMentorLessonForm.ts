@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@remix-run/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
@@ -10,12 +10,6 @@ import { useUpdateAiMentorLesson } from "~/api/mutations/admin/useUpdateAiMentor
 import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { queryClient } from "~/api/queryClient";
-import {
-  type SuggestionType,
-  SUGGESTION_EXAMPLES,
-  SUGGESTION_SCORE_GUIDANCE,
-} from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
-import { createSuggestedAiJudgeConfiguration } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentorSuggestion.helpers";
 import {
   type Chapter,
   ContentTypes,
@@ -30,6 +24,7 @@ import {
 } from "./useAiMentorLessonForm.helpers";
 
 import type { AiJudgeConfigurationDraft } from "../AiJudge/aiJudgeConfiguration.types";
+import type { AiMentorConfigurationDraft } from "../AiMentorConfiguration/aiMentorConfiguration.types";
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -40,6 +35,7 @@ type AiMentorLessonFormProps = {
   setOpenChapter?: (chapterId: string) => void;
   language: SupportedLanguages;
   baseLanguage: SupportedLanguages;
+  onSaveStagedAiMentorConfiguration?: (configuration: AiMentorConfigurationDraft) => Promise<void>;
   onSaveStagedAiJudgeConfiguration?: (configuration: AiJudgeConfigurationDraft) => Promise<void>;
 };
 
@@ -50,12 +46,11 @@ export const useAiMentorLessonForm = ({
   setOpenChapter,
   language,
   baseLanguage,
+  onSaveStagedAiMentorConfiguration,
   onSaveStagedAiJudgeConfiguration,
 }: AiMentorLessonFormProps) => {
   const { id: courseId } = useParams();
   const { t } = useTranslation();
-  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
-  const [selectedSuggestion, setSelectedSuggestion] = useState<SuggestionType | null>(null);
   const { mutateAsync: createAiMentorLesson } = useCreateAiMentorLesson();
   const { mutateAsync: updateAiMentorLesson } = useUpdateAiMentorLesson();
   const { mutateAsync: deleteAiMentorLesson } = useDeleteLesson();
@@ -63,11 +58,12 @@ export const useAiMentorLessonForm = ({
   const lessonFormScopeRef = useRef<LessonFormScope | null>(null);
 
   const form = useForm<AiMentorLessonFormValues>({
-    resolver: zodResolver(aiMentorLessonFormSchema(t)),
+    resolver: zodResolver(aiMentorLessonFormSchema(t, !lessonToEdit)),
     defaultValues: getAiMentorLessonFormDefaultValues(lessonToEdit),
   });
 
-  const { register, reset, setValue, watch } = form;
+  const { register, reset } = form;
+  register("aiMentorConfiguration");
   register("aiJudgeConfiguration");
 
   useEffect(() => {
@@ -85,66 +81,10 @@ export const useAiMentorLessonForm = ({
     lessonFormScopeRef.current = nextScope;
   }, [language, lessonToEdit, reset]);
 
-  const handleSuggestionClick = (suggestionType: SuggestionType) => {
-    const currentInstructions = watch("aiMentorInstructions");
-    const currentJudgeConfiguration = watch("aiJudgeConfiguration");
-    const hasContent =
-      Boolean(currentInstructions?.trim()) || currentJudgeConfiguration !== undefined;
-
-    if (hasContent) {
-      setSelectedSuggestion(suggestionType);
-      setIsConfirmDialogOpen(true);
-    } else {
-      applySuggestion(suggestionType);
-    }
-  };
-
-  const applySuggestion = (suggestionType: SuggestionType) => {
-    const suggestion = SUGGESTION_EXAMPLES[suggestionType];
-    setValue("aiMentorInstructions", t(suggestion.instructions));
-
-    if (language === baseLanguage) {
-      setValue(
-        "aiJudgeConfiguration",
-        createSuggestedAiJudgeConfiguration(
-          t(suggestion.assessmentCriteria),
-          suggestion.passingThresholdPercent,
-          {
-            notMetDescription: (expectedBehavior) =>
-              t(SUGGESTION_SCORE_GUIDANCE.notMetDescription, { expectedBehavior }),
-            notMetExample: (expectedBehavior) =>
-              t(SUGGESTION_SCORE_GUIDANCE.notMetExample, { expectedBehavior }),
-            metDescription: (expectedBehavior) =>
-              t(SUGGESTION_SCORE_GUIDANCE.metDescription, { expectedBehavior }),
-            acceptedExamples: Array.from({ length: suggestion.criteriaCount }, (_, index) =>
-              t(`${suggestion.acceptedExamplesPrefix}.${index}`),
-            ),
-          },
-          [t(suggestion.blockingError)],
-        ),
-        { shouldDirty: true, shouldValidate: true },
-      );
-    }
-
-    setIsConfirmDialogOpen(false);
-    setSelectedSuggestion(null);
-  };
-
-  const onConfirmOverwrite = () => {
-    if (selectedSuggestion) {
-      applySuggestion(selectedSuggestion);
-    }
-  };
-
-  const onCancelOverwrite = () => {
-    setIsConfirmDialogOpen(false);
-    setSelectedSuggestion(null);
-  };
-
   const onSubmit = async (values: AiMentorLessonFormValues, file?: File | null) => {
     if (!chapterToEdit) return;
 
-    const { aiJudgeConfiguration, ...lessonValues } = values;
+    const { aiJudgeConfiguration, aiMentorConfiguration, ...lessonValues } = values;
 
     const normalizedVoiceValues = {
       voiceMode: lessonValues.voiceMode,
@@ -160,6 +100,15 @@ export const useAiMentorLessonForm = ({
         });
 
         if (
+          aiMentorConfiguration &&
+          form.formState.dirtyFields.aiMentorConfiguration &&
+          language === baseLanguage &&
+          onSaveStagedAiMentorConfiguration
+        ) {
+          await onSaveStagedAiMentorConfiguration(aiMentorConfiguration);
+        }
+
+        if (
           aiJudgeConfiguration &&
           form.formState.dirtyFields.aiJudgeConfiguration &&
           language === baseLanguage &&
@@ -172,11 +121,14 @@ export const useAiMentorLessonForm = ({
           await uploadAvatar({ lessonId: lessonToEdit?.id, file });
         }
       } else {
+        if (!aiMentorConfiguration || !aiJudgeConfiguration) return;
+
         await createAiMentorLesson({
           data: {
             ...lessonValues,
             ...normalizedVoiceValues,
             chapterId: chapterToEdit.id,
+            aiMentorConfiguration,
             aiJudgeConfiguration,
           },
         });
@@ -215,11 +167,5 @@ export const useAiMentorLessonForm = ({
     form,
     onSubmit,
     onDelete,
-    handleSuggestionClick,
-    isConfirmDialogOpen,
-    setIsConfirmDialogOpen,
-    onConfirmOverwrite,
-    onCancelOverwrite,
-    selectedSuggestion,
   };
 };

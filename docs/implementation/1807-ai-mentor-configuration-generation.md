@@ -140,17 +140,14 @@ Keep the interaction structurally familiar instead of introducing a second autho
 
 - Reuse the compact `Card` shell, neutral/error border states, responsive text/action layout, and
   absence of decorative shadow from `AiJudgeConfigurationCard`.
-- Reuse the AI-first empty state: one primary creation action and one quiet manual link.
+- Reuse the compact empty state, but expose only one manual configuration action in the first
+  frontend slice.
 - Reuse the configured state: a plain-language summary and one outline review action with a
-  chevron. AI improvement and quality checking stay inside the editor.
+  chevron.
 - Reuse `DialogContent variant="mobileDrawer"` with a bounded viewport, fixed header and footer,
   independently scrolling body, safe-area footer padding, and a desktop maximum width.
-- Reuse the footer hierarchy: AI assistance on the left, then `Cancel`, then the primary save
-  action. On mobile, AI assistance occupies its own full-width row.
-- Reuse the separate generation dialog and its three stages: `Draft`, `Quality check`, `Ready`.
-  Prevent closing while generation or revision is active.
-- Reuse the existing quality-finding presentation and `InlineTextDiff` treatment for reviewable
-  generated changes.
+- Use a simple footer with `Cancel` and the primary save action. AI assistance is deferred to the
+  separate AI-generation slice.
 
 The AI Mentor dialog should be narrower than the nested Judge editor:
 `sm:w-[min(96vw,52rem)] sm:!max-w-none`, with the same approximately `85dvh` bounded height.
@@ -165,7 +162,7 @@ buttons with one compact `AI Mentor behavior` card.
 AI Mentor behavior
 Choose how the AI should guide or interact with the learner.
 
-[ Create with AI ]    Configure manually
+[ Configure AI Mentor ]
 ```
 
 Once configured:
@@ -179,17 +176,16 @@ Teacher · GDPR trainer · Guided discovery
 
 Card rules:
 
-- Empty primary action: `Create with AI`.
-- Empty quiet action: `Configure manually`.
+- Empty primary action: `Configure AI Mentor`.
 - Teacher summary: `Teacher · {expertise} · {teaching style}`.
 - Roleplay summary: `Roleplay · {AI role} · {difficulty}`.
 - Fall back to the type plus the first meaningful configured value; never show placeholder
   fragments in the summary.
 - If saved configuration fails validation, use the existing error-border pattern and replace the
   summary with a short repair message.
-- Do not add badges, a type picker, quality status, or multiple AI buttons to the card.
-- In a non-base language, disable `Create with AI` with the same explanatory tooltip behavior as
-  AI Judge. Permit review only when a saved base configuration exists.
+- Do not add badges, a type picker, quality status, or AI buttons to the card. Teacher/Roleplay
+  selection belongs inside the configuration dialog.
+- In a non-base language, permit review only when a saved base configuration exists.
 
 ### Single Configuration Dialog
 
@@ -220,10 +216,10 @@ fields, followed by one collapsed `Fine-tune behavior (optional)` section.
 
 Visible core fields:
 
-1. `Task goal` — full-width bounded textarea; the concrete outcome the Teacher should help the
-   learner achieve.
-2. `Expertise` — short input; the subject or professional perspective the Teacher represents.
-3. `Content scope` — full-width bounded textarea; what the Teacher may teach and what it should
+1. `Expertise` — short input; the subject or professional perspective the Teacher represents.
+2. `Task goal` — full-width bounded rich-text editor; the concrete outcome the Teacher should help
+   the learner achieve.
+3. `Content scope` — full-width bounded rich-text editor; what the Teacher may teach and what it should
    avoid.
 4. `Teaching style` — three radio-card options with a one-line explanation:
    `Explain and practice`, `Guided discovery`, `Socratic`.
@@ -239,24 +235,24 @@ Configure AI Mentor
 
 Mentor mode        [ Teacher ✓ ] [ Roleplay ]
 
-Task goal          [                                  ]
 Expertise          [                                  ]
+Task goal          [                                  ]
 Content scope      [                                  ]
 Teaching style     [ Explain ] [ Guided ] [ Socratic ]
 
 › Fine-tune behavior (optional)
 
-AI assistance      Cancel                 Save configuration
+                         Cancel           Save configuration
 ```
 
 #### Roleplay Hierarchy
 
 Visible core fields:
 
-1. `Scenario` — leading full-width bounded textarea; the situation being practiced.
-2. `AI role` and `Learner role` — short inputs, stacked on mobile and side-by-side from the small
+1. `AI role` and `Learner role` — short inputs, stacked on mobile and side-by-side from the small
    breakpoint.
-3. `Character goal` — full-width bounded textarea; what the AI character is trying to accomplish.
+2. `Scenario` — full-width bounded rich-text editor; the situation being practiced.
+3. `Character goal` — full-width bounded rich-text editor; what the AI character is trying to accomplish.
 4. `Difficulty` — three radio-card options with a one-line explanation:
    `Cooperative`, `Realistic`, `Challenging`.
 
@@ -271,21 +267,22 @@ Configure AI Mentor
 
 Mentor mode        [ Teacher ] [ Roleplay ✓ ]
 
-Scenario           [                                  ]
 AI role            [                 ]
 Learner role       [                 ]
+Scenario           [                                  ]
 Character goal     [                                  ]
 Difficulty         [ Cooperative ] [ Realistic ] [ Challenging ]
 
 › Fine-tune behavior (optional)
 
-AI assistance      Cancel                 Save configuration
+                         Cancel           Save configuration
 ```
 
 Field rules:
 
-- Use plain inputs and autosizing, height-bounded textareas; these fields describe prompt
-  structure and do not need rich-text formatting.
+- Use plain inputs for short roles and expertise. Use bounded rich-text editors for the longer
+  prompt fields, including optional fine-tuning fields, so creators can structure guidance with
+  emphasis and lists.
 - Keep helper copy to one sentence beneath the label and use examples as optional placeholders,
   not prefilled values.
 - Mark optional fields in labels. Do not mark every core field `Required`; communicate that once in
@@ -297,7 +294,6 @@ Field rules:
 
 Dialog footer:
 
-- AI assistance dropdown: `Improve with AI`, then `Check quality`.
 - `Cancel`.
 - Primary `Apply configuration` for a new unsaved lesson or `Save configuration` for an existing
   lesson.
@@ -309,6 +305,7 @@ Type switching:
 - Once type-specific values exist, request confirmation before clearing them.
 - After confirmation, reset to the new mode's empty defaults. Do not retain hidden stale fields or
   mechanically copy semantically unrelated values.
+- Layer the replacement confirmation above the configuration dialog with a distinct dark overlay.
 - A future `Convert with AI` action may prepare a reviewable replacement, but automatic conversion
   is outside the initial delivery.
 
@@ -322,8 +319,9 @@ Translation mode:
 
 ### AI Generation And Review
 
-The empty-card `Create with AI` action opens a separate generation drawer rather than the manual
-editor.
+This is a separate later slice. Do not expose `Create with AI`, `Improve with AI`, `Check quality`,
+or generation-progress UI in the initial manual frontend implementation. When implemented, the
+empty-card `Create with AI` action opens a separate generation drawer rather than the manual editor.
 
 Initial state:
 
@@ -1049,7 +1047,7 @@ structured Teacher/Roleplay payload.
       subtype after a type change; do not add freshness revision metadata.
 - [x] Update runtime, master-course, generated-course import, translation, backend factories, and
       seeds to consume structured configuration.
-- [ ] Update frontend preview, form, and E2E factories to consume structured configuration.
+- [x] Update frontend preview, form, and E2E factories to consume structured configuration.
 
 ### AI Generation
 
@@ -1112,31 +1110,45 @@ structured Teacher/Roleplay payload.
 
 ### Frontend
 
-- [ ] Reuse the AI Judge card hierarchy for the empty, configured, invalid, and non-base-language
+- [x] Reuse the AI Judge card hierarchy for the empty, configured, invalid, and non-base-language
       `AI Mentor behavior` states.
-- [ ] Add the single bounded mobile-drawer configuration dialog with a fixed header and footer.
-- [ ] Add the accessible Teacher/Roleplay radio-card selector.
-- [ ] Add Teacher core fields in the agreed order, led by `Task goal`, plus the collapsed optional
+- [x] Expose one quiet manual `Configure manually` action in the empty state; do not add AI actions in
+      this slice.
+- [x] Add the single bounded mobile-drawer configuration dialog with a fixed header and footer.
+- [x] Move the Teacher/Roleplay selector into the dialog as an accessible radio-card group; do not
+      retain a standalone type selector in the lesson form.
+- [x] Add Teacher core fields in the agreed order, led by `Expertise`, plus the collapsed optional
       refinement fields.
-- [ ] Add Roleplay core fields in the agreed order, led by `Scenario`, plus the collapsed optional
+- [x] Add Roleplay core fields in the agreed order, led by `AI role` and `Learner role`, plus the collapsed optional
       refinement fields.
-- [ ] Add type-switch replacement confirmation.
-- [ ] Add translation-mode locking and missing-translation warnings.
+- [x] Use bounded rich-text editors for long core and fine-tuning fields.
+- [x] Add type-switch replacement confirmation with a clear modal overlay and discard stale
+      mode-specific form state.
+- [x] Add four one-time scenario examples outside the dialog that fill task description, Mentor
+      behavior, fine-tuning guidance, and Judge completion conditions, with overwrite confirmation
+      when authored content already exists.
+- [x] Keep Judge `Create with AI` visible but disabled with an explanatory tooltip until Mentor
+      behavior is configured.
+- [x] Add translation-mode locking and missing-translation warnings.
+- [x] Use a manual-only footer with `Cancel` and `Apply configuration`/`Save configuration`.
+- [x] Synchronize successful existing-lesson saves with React Hook Form defaults.
+- [x] Regenerate the web client after API contract changes.
+- [x] Add all visible strings to every supported locale.
+
+### Frontend AI Generation — Later Slice
+
 - [ ] Add the brief-first AI creation dialog with mode selection and the reused
       `Draft` → `Quality check` → `Ready` progression.
 - [ ] Add mode-specific improvement shortcuts and improve/validate/revise/review flows using
       generated API hooks.
 - [ ] Stage generated drafts without saving them.
-- [ ] Synchronize successful existing-lesson saves with React Hook Form defaults.
 - [ ] Keep AI actions disabled outside the base language with an explanatory tooltip.
-- [ ] Regenerate the web client after API contract changes.
-- [ ] Add all visible strings to every supported locale.
 
 ### Documentation
 
-- [ ] Update `docs/specs/ai-mentor-lessons-business-spec.md` with the accepted behavior.
-- [ ] Document the legacy Mentor conversion and cleanup phase.
-- [ ] Keep this checklist synchronized with actual implementation progress.
+- [x] Update `docs/specs/ai-mentor-lessons-business-spec.md` with the accepted behavior.
+- [x] Document the legacy Mentor conversion and cleanup phase.
+- [x] Keep this checklist synchronized with actual implementation progress.
 
 ## Edge Cases
 

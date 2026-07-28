@@ -2598,6 +2598,150 @@
           "customTTSReference": "Wpisz niestandardowy identyfikator TTS...",
           "passThreshold": "np. 70%"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Zachowanie Mentora AI",
+          "emptyDescription": "Wybierz, jak AI ma prowadzić uczestnika lub z nim współpracować.",
+          "baseLanguageRequired": "Najpierw skonfiguruj zachowanie Mentora AI w języku bazowym kursu.",
+          "incompleteDescription": "Ta konfiguracja wymaga uzupełnienia kilku informacji.",
+          "configureManually": "Skonfiguruj ręcznie",
+          "reviewConfiguration": "Sprawdź konfigurację",
+          "dialogTitle": "Konfiguracja Mentora AI",
+          "dialogDescription": "Wybierz tryb i określ zachowanie, którego doświadczy uczestnik.",
+          "optional": "(opcjonalne)",
+          "fineTuneBehavior": "Dostosuj zachowanie (opcjonalne)",
+          "translationModeTitle": "Tryb tłumaczenia",
+          "translationModeDescription": "Przetłumacz tutaj pola tekstowe. Tryb, styl nauczania i poziom trudności są zarządzane w języku bazowym.",
+          "structureLockedTooltip": "Strukturę Mentora AI można zmienić tylko w języku bazowym kursu.",
+          "applyConfiguration": "Zastosuj konfigurację",
+          "saveConfiguration": "Zapisz konfigurację",
+          "saveTranslation": "Zapisz tłumaczenie",
+          "configurationSaved": "Konfiguracja Mentora AI została zapisana.",
+          "translationSaved": "Tłumaczenie Mentora AI zostało zapisane.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Tryb Mentora",
+            "teacher": {
+              "label": "Nauczyciel",
+              "description": "Wyjaśnia zagadnienia i prowadzi ćwiczenia."
+            },
+            "roleplay": {
+              "label": "Odgrywanie roli",
+              "description": "Odgrywa uczestnika scenariusza ćwiczeniowego."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Zacznij od scenariusza",
+            "scenarioSimulation": {
+              "taskDescription": "Przećwicz rozpoznawanie potrzeb klienta oprogramowania i zaproponowanie oferty zgodnej z jego ograniczeniami.",
+              "aiRole": "Potencjalny klient usług programistycznych",
+              "learnerRole": "Przedstawiciel handlowy",
+              "characterGoal": "Wybrać dostawcę, który spełni wymagania dotyczące terminu, budżetu i komunikacji.",
+              "factsAndConstraints": "Aplikacja musi być gotowa w ciągu trzech miesięcy. Budżet jest ograniczony, a jasna i regularna komunikacja jest wymagana.",
+              "openingInstruction": "Przedstaw się jako klient oceniający dostawców oprogramowania i zapytaj, jak uczestnik może Ci pomóc."
+            },
+            "problemSolving": {
+              "taskDescription": "Przećwicz konstruktywne prowadzenie rozmowy z pracownikiem proszącym o podwyżkę.",
+              "aiRole": "Pracownik proszący o podwyżkę",
+              "learnerRole": "Menedżer",
+              "characterGoal": "Zostać wysłuchanym i uzgodnić wiarygodną alternatywę lub dalszy plan.",
+              "factsAndConstraints": "Pracownik wniósł ostatnio istotny wkład, ale firma obecnie nie ma budżetu na podwyżki.",
+              "openingInstruction": "Rozpocznij od przedstawienia swoich ostatnich osiągnięć i poproś o rozmowę na temat podwyżki."
+            },
+            "creativeTask": {
+              "taskDescription": "Opracuj i dopracuj oryginalny pomysł na nową usługę dla klientów.",
+              "taskGoal": "Pomóż uczestnikowi opracować i dopracować oryginalny pomysł na usługę.",
+              "expertise": "Trener innowacji usługowych",
+              "feedbackGuidance": "Wspieraj oryginalność i praktyczną wartość. Zadawaj konkretne pytania uzupełniające i wskazuj ważne luki, nie przejmując pomysłu.",
+              "openingInstruction": "Poproś uczestnika o przedstawienie wstępnego pomysłu na usługę i wskazanie, komu miałaby pomóc."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Poznaj praktyczne techniki zarządzania czasem i zaplanuj zastosowanie jednej z nich w pracy.",
+              "taskGoal": "Pomóż uczestnikowi zrozumieć i zastosować praktyczne techniki zarządzania czasem.",
+              "expertise": "Trener zarządzania czasem",
+              "feedbackGuidance": "Delikatnie koryguj nieporozumienia i łącz informację zwrotną z konkretnym, realistycznym zastosowaniem w pracy.",
+              "openingInstruction": "Przedstaw jedną praktyczną technikę zarządzania czasem, a następnie zapytaj, jak uczestnik obecnie organizuje swoją pracę."
+            }
+          },
+          "taskGoal": {
+            "label": "Cel zadania",
+            "placeholder": "Co Nauczyciel ma pomóc zrozumieć lub przećwiczyć?"
+          },
+          "expertise": {
+            "label": "Specjalizacja",
+            "placeholder": "Na przykład: trener zgodności z RODO"
+          },
+          "contentScope": {
+            "label": "Zakres treści",
+            "placeholder": "Co Nauczyciel może omawiać, a czego powinien unikać?"
+          },
+          "teachingStyle": {
+            "label": "Styl nauczania",
+            "explain_and_practice": {
+              "label": "Wyjaśnij i przećwicz",
+              "description": "Jasno wyjaśniaj, a następnie utrwalaj wiedzę ćwiczeniami."
+            },
+            "guided_discovery": {
+              "label": "Odkrywanie z przewodnikiem",
+              "description": "Prowadź uczestnika krok po kroku do wniosków."
+            },
+            "socratic": {
+              "label": "Sokratejski",
+              "description": "Pogłębiaj rozumowanie za pomocą trafnych pytań."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Wskazówki dotyczące informacji zwrotnej",
+            "placeholder": "Jak Nauczyciel ma korygować lub wzmacniać odpowiedzi?"
+          },
+          "scenario": {
+            "label": "Scenariusz",
+            "placeholder": "Opisz sytuację, którą uczestnik będzie ćwiczyć."
+          },
+          "aiRole": { "label": "Rola AI", "placeholder": "Na przykład: niezdecydowany klient" },
+          "learnerRole": {
+            "label": "Rola uczestnika",
+            "placeholder": "Na przykład: przedstawiciel handlowy"
+          },
+          "characterGoal": {
+            "label": "Cel postaci",
+            "placeholder": "Co postać AI próbuje osiągnąć?"
+          },
+          "difficulty": {
+            "label": "Poziom trudności",
+            "cooperative": {
+              "label": "Współpracujący",
+              "description": "Pomocny i skłonny posuwać rozmowę naprzód."
+            },
+            "realistic": {
+              "label": "Realistyczny",
+              "description": "Naturalny opór i wiarygodne reakcje."
+            },
+            "challenging": {
+              "label": "Wymagający",
+              "description": "Stanowczy opór wymagający dobrej odpowiedzi."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakty i ograniczenia",
+            "placeholder": "Dodaj budżety, terminy, zasady lub fakty, które muszą pozostać prawdziwe."
+          },
+          "openingInstruction": {
+            "label": "Instrukcja otwarcia",
+            "placeholder": "Jak ma rozpocząć się jednorazowa wiadomość powitalna?"
+          },
+          "additionalInstructions": {
+            "label": "Dodatkowe instrukcje",
+            "placeholder": "Dodaj nietypowe zachowanie, którego nie opisują pola powyżej."
+          },
+          "typeChange": {
+            "title": "Zmienić tryb Mentora?",
+            "description": "Zmiana na {{type}} wyczyści pola właściwe dla obecnego trybu. Instrukcje otwarcia i dodatkowe zostaną zachowane."
+          },
+          "validation": {
+            "required": "To pole jest wymagane.",
+            "configurationRequired": "Skonfiguruj zachowanie Mentora AI przed zapisaniem lekcji."
+          }
+        },
         "aiJudge": {
           "cardTitle": "Warunki zaliczenia",
           "configured": "Skonfigurowany",
@@ -2607,6 +2751,7 @@
           "summary": "{{criteria}} kryteria · łącznie {{score}} pkt · próg {{threshold}}% · {{blockingErrors}} błędy blokujące",
           "configureWithAi": "Skonfiguruj z AI",
           "createWithAi": "Utwórz z AI",
+          "aiMentorConfigurationRequiredTooltip": "Skonfiguruj zachowanie AI Mentora przed utworzeniem warunków ukończenia z pomocą AI.",
           "improveWithAi": "Ulepsz z AI",
           "checkQualityWithAi": "Sprawdź jakość z AI",
           "checkingQuality": "Sprawdzanie jakości...",

@@ -4,10 +4,13 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useReplaceAiJudgeConfiguration } from "~/api/mutations/admin/useReplaceAiJudgeConfiguration";
+import { useReplaceAiMentorConfiguration } from "~/api/mutations/admin/useReplaceAiMentorConfiguration";
 import { useUpdateAiJudgeConfigurationTranslation } from "~/api/mutations/admin/useUpdateAiJudgeConfigurationTranslation";
+import { useUpdateAiMentorConfigurationTranslation } from "~/api/mutations/admin/useUpdateAiMentorConfigurationTranslation";
 import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
 import { useValidateAiJudgeConfiguration } from "~/api/mutations/admin/useValidateAiJudgeConfiguration";
 import { useAiJudgeConfiguration } from "~/api/queries/admin/useAiJudgeConfiguration";
+import { useAiMentorConfiguration } from "~/api/queries/admin/useAiMentorConfiguration";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
 import { useLumaConfigured } from "~/api/queries/useLumaConfigured";
 import { queryClient } from "~/api/queryClient";
@@ -51,15 +54,23 @@ import {
 import { AiJudgeConfigurationCard } from "./AiJudge/AiJudgeConfigurationCard";
 import { AiJudgeGenerationDialog } from "./AiJudge/AiJudgeGenerationDialog";
 import { useAiJudgeConfigurationGeneration } from "./AiJudge/useAiJudgeConfigurationGeneration";
-import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import {
-  AiMentorInstructionsField,
-  AiMentorSuggestionExamples,
-} from "./components/AiMentorInstructionsFields";
+  mapAiMentorConfigurationDraftToBaseInput,
+  mapAiMentorConfigurationDraftToTranslationInput,
+  mapAiMentorConfigurationResponseToDraft,
+} from "./AiMentorConfiguration/aiMentorConfiguration.mappers";
+import { AiMentorConfigurationCard } from "./AiMentorConfiguration/AiMentorConfigurationCard";
+import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import { AiMentorScenarioFields } from "./components/AiMentorScenarioFields";
+import { AiMentorScenarioTemplateSelect } from "./components/AiMentorScenarioTemplateSelect";
 import { AiMentorVoiceConfigurationFields } from "./components/AiMentorVoiceConfigurationFields";
 import { useAiMentorLessonForm } from "./hooks/useAiMentorLessonForm";
 import UpdateAiAvatarModal from "./UpdateAiAvatarModal";
+import {
+  buildAiMentorScenarioTemplateDraft,
+  type AiMentorScenarioTemplate,
+} from "./utils/AiMentorScenarioTemplate.helpers";
+import { stripHtmlTags } from "./validators/useAiMentorLessonFormSchema";
 
 import type {
   AiJudgeConfigurationDraft,
@@ -67,6 +78,7 @@ import type {
   AiJudgeGenerationRequest,
   AiJudgeValidationResult,
 } from "./AiJudge/aiJudgeConfiguration.types";
+import type { AiMentorConfigurationDraft } from "./AiMentorConfiguration/aiMentorConfiguration.types";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -89,6 +101,16 @@ const AiMentorLessonForm = ({
 }: AiMentorLessonProps) => {
   const { mutateAsync: replaceAiJudgeConfiguration, isPending: isReplacingAiJudgeConfiguration } =
     useReplaceAiJudgeConfiguration();
+  const { mutateAsync: replaceAiMentorConfiguration, isPending: isReplacingAiMentorConfiguration } =
+    useReplaceAiMentorConfiguration();
+  const saveStagedAiMentorConfiguration = async (configuration: AiMentorConfigurationDraft) => {
+    if (!lessonToEdit) return;
+
+    await replaceAiMentorConfiguration({
+      lessonId: lessonToEdit.id,
+      data: mapAiMentorConfigurationDraftToBaseInput(configuration),
+    });
+  };
   const saveStagedAiJudgeConfiguration = async (configuration: AiJudgeConfigurationDraft) => {
     if (!lessonToEdit) return;
 
@@ -99,21 +121,13 @@ const AiMentorLessonForm = ({
     });
   };
 
-  const {
-    form,
-    onSubmit,
-    onDelete,
-    handleSuggestionClick,
-    isConfirmDialogOpen,
-    setIsConfirmDialogOpen,
-    onConfirmOverwrite,
-    onCancelOverwrite,
-  } = useAiMentorLessonForm({
+  const { form, onSubmit, onDelete } = useAiMentorLessonForm({
     chapterToEdit,
     lessonToEdit,
     setContentTypeToDisplay,
     language,
     baseLanguage,
+    onSaveStagedAiMentorConfiguration: saveStagedAiMentorConfiguration,
     onSaveStagedAiJudgeConfiguration: saveStagedAiJudgeConfiguration,
   });
 
@@ -123,6 +137,8 @@ const AiMentorLessonForm = ({
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAvatarDialogOpen, setIsAvatarDialogOpen] = useState(false);
+  const [pendingScenarioTemplate, setPendingScenarioTemplate] =
+    useState<AiMentorScenarioTemplate | null>(null);
   const [aiJudgeAuthoringState, dispatchAiJudgeAuthoring] = useReducer(
     aiJudgeAuthoringReducer,
     INITIAL_AI_JUDGE_AUTHORING_STATE,
@@ -149,9 +165,15 @@ const AiMentorLessonForm = ({
     mutateAsync: updateAiJudgeConfigurationTranslation,
     isPending: isUpdatingAiJudgeConfigurationTranslation,
   } = useUpdateAiJudgeConfigurationTranslation();
+  const {
+    mutateAsync: updateAiMentorConfigurationTranslation,
+    isPending: isUpdatingAiMentorConfigurationTranslation,
+  } = useUpdateAiMentorConfigurationTranslation();
   const lessonId = lessonToEdit?.id ?? "";
   const { data: savedAiJudgeConfiguration, isLoading: isAiJudgeConfigurationLoading } =
     useAiJudgeConfiguration(lessonId, language);
+  const { data: savedAiMentorConfiguration, isLoading: isAiMentorConfigurationLoading } =
+    useAiMentorConfiguration(lessonId, language);
 
   const [avatarPreview, setAvatarPreview] = useState<string | null>(
     lessonToEdit?.avatarReferenceUrl ?? null,
@@ -166,8 +188,17 @@ const AiMentorLessonForm = ({
       : "adminCourseView.curriculum.lesson.other.voiceConfigCartesiaTooltip";
 
   const objectUrlRef = useRef<string | null>(null);
+  const hasStagedAiMentorConfigurationRef = useRef(false);
   const hasStagedAiJudgeConfigurationRef = useRef(false);
+  const stagedAiMentorConfiguration = form.watch("aiMentorConfiguration");
   const stagedAiJudgeConfiguration = form.watch("aiJudgeConfiguration");
+  const persistedAiMentorConfiguration = useMemo(
+    () =>
+      savedAiMentorConfiguration
+        ? mapAiMentorConfigurationResponseToDraft(savedAiMentorConfiguration)
+        : undefined,
+    [savedAiMentorConfiguration],
+  );
   const persistedAiJudgeConfiguration = useMemo(
     () =>
       savedAiJudgeConfiguration
@@ -175,12 +206,63 @@ const AiMentorLessonForm = ({
         : undefined,
     [savedAiJudgeConfiguration],
   );
+  const aiMentorConfiguration = stagedAiMentorConfiguration ?? persistedAiMentorConfiguration;
   const aiJudgeConfiguration = stagedAiJudgeConfiguration ?? persistedAiJudgeConfiguration;
+  const isAiMentorConfigurationDirty = Boolean(form.formState.dirtyFields.aiMentorConfiguration);
   const isAiJudgeConfigurationDirty = Boolean(form.formState.dirtyFields.aiJudgeConfiguration);
 
+  const applyScenarioTemplate = (template: AiMentorScenarioTemplate) => {
+    const draft = buildAiMentorScenarioTemplateDraft(template, t);
+    hasStagedAiMentorConfigurationRef.current = true;
+    hasStagedAiJudgeConfigurationRef.current = true;
+    form.setValue("description", draft.taskDescription, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("aiMentorConfiguration", draft.aiMentorConfiguration, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue("aiJudgeConfiguration", draft.aiJudgeConfiguration, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setPendingScenarioTemplate(null);
+  };
+
+  const handleScenarioTemplateSelect = (template: AiMentorScenarioTemplate) => {
+    const hasExistingContent =
+      Boolean(stripHtmlTags(form.getValues("description") ?? "")) ||
+      Boolean(form.getValues("aiMentorConfiguration")) ||
+      Boolean(form.getValues("aiJudgeConfiguration"));
+
+    if (hasExistingContent) {
+      setPendingScenarioTemplate(template);
+      return;
+    }
+
+    applyScenarioTemplate(template);
+  };
+
   useEffect(() => {
+    hasStagedAiMentorConfigurationRef.current = false;
     hasStagedAiJudgeConfigurationRef.current = false;
   }, [language, lessonToEdit?.id]);
+
+  useEffect(() => {
+    if (
+      !lessonToEdit ||
+      !persistedAiMentorConfiguration ||
+      isAiMentorConfigurationDirty ||
+      hasStagedAiMentorConfigurationRef.current
+    )
+      return;
+
+    form.setValue("aiMentorConfiguration", persistedAiMentorConfiguration, {
+      shouldDirty: false,
+      shouldValidate: false,
+    });
+  }, [form, isAiMentorConfigurationDirty, lessonToEdit, persistedAiMentorConfiguration]);
 
   useEffect(() => {
     if (
@@ -201,9 +283,42 @@ const AiMentorLessonForm = ({
     lessonToEdit &&
       language !== baseLanguage &&
       (!lessonToEdit.title.trim() ||
-        !lessonToEdit.aiMentor?.aiMentorInstructions.trim() ||
+        savedAiMentorConfiguration?.hasMissingTranslations ||
         savedAiJudgeConfiguration?.hasMissingTranslations),
   );
+
+  const handleAiMentorBaseConfigurationSave = async (configuration: AiMentorConfigurationDraft) => {
+    const normalizedConfiguration = mapAiMentorConfigurationDraftToBaseInput(configuration);
+
+    if (lessonToEdit) {
+      await replaceAiMentorConfiguration({
+        lessonId: lessonToEdit.id,
+        data: normalizedConfiguration,
+      });
+      hasStagedAiMentorConfigurationRef.current = false;
+      form.resetField("aiMentorConfiguration", {
+        defaultValue: normalizedConfiguration,
+      });
+      return;
+    }
+
+    hasStagedAiMentorConfigurationRef.current = true;
+    form.setValue("aiMentorConfiguration", normalizedConfiguration, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleAiMentorTranslationSave = async (configuration: AiMentorConfigurationDraft) => {
+    if (!lessonToEdit) return;
+
+    await updateAiMentorConfigurationTranslation({
+      courseId: id,
+      lessonId: lessonToEdit.id,
+      language,
+      data: mapAiMentorConfigurationDraftToTranslationInput(configuration),
+    });
+  };
 
   const handleAiJudgeBaseConfigurationSave = async (
     configuration: NonNullable<typeof aiJudgeConfiguration>,
@@ -255,21 +370,28 @@ const AiMentorLessonForm = ({
     openAiJudgeGeneration(mode);
   };
 
-  const getAiJudgeLessonContext = () => ({
-    title: form.getValues("title") || undefined,
-    taskDescription: form.getValues("description") || undefined,
-    aiMentorInstructions: form.getValues("aiMentorInstructions") || undefined,
-    aiMentorType: form.getValues("type"),
-  });
+  const getAiJudgeLessonContext = () => {
+    const configuration = form.getValues("aiMentorConfiguration");
+
+    return {
+      title: form.getValues("title") || undefined,
+      taskDescription: form.getValues("description") || undefined,
+      ...(configuration && {
+        aiMentorConfiguration: mapAiMentorConfigurationDraftToBaseInput(configuration),
+      }),
+    };
+  };
 
   const handleGenerateAiJudgeConfiguration = async ({
     mode,
     instruction,
   }: AiJudgeGenerationRequest) => {
+    const lessonContext = getAiJudgeLessonContext();
+
     const commonInput = {
       courseId: id,
       lessonId: lessonToEdit?.id,
-      lessonContext: getAiJudgeLessonContext(),
+      lessonContext,
     };
 
     if (mode === AI_JUDGE_GENERATION_MODE.CREATE) {
@@ -292,19 +414,22 @@ const AiMentorLessonForm = ({
     });
   };
 
-  const handleValidateAiJudgeConfiguration = (
+  const handleValidateAiJudgeConfiguration = async (
     configuration: AiJudgeConfigurationDraft,
     signal?: AbortSignal,
-  ) =>
-    validateAiJudgeConfiguration({
+  ) => {
+    const lessonContext = getAiJudgeLessonContext();
+
+    return validateAiJudgeConfiguration({
       data: {
         courseId: id,
         lessonId: lessonToEdit?.id,
-        lessonContext: getAiJudgeLessonContext(),
+        lessonContext,
         configuration: mapAiJudgeConfigurationDraftToBaseInput(configuration),
       },
       signal,
     });
+  };
 
   const stageGeneratedAiJudgeConfiguration = (configuration: AiJudgeConfigurationDraft) => {
     hasStagedAiJudgeConfigurationRef.current = true;
@@ -318,6 +443,9 @@ const AiMentorLessonForm = ({
     configuration: AiJudgeConfigurationDraft,
     validation?: AiJudgeValidationResult,
   ) => {
+    const lessonContext = getAiJudgeLessonContext();
+    if (!lessonContext) return;
+
     stageGeneratedAiJudgeConfiguration(configuration);
     openAiJudgeGeneration(AI_JUDGE_GENERATION_MODE.IMPROVE, validation);
 
@@ -327,7 +455,7 @@ const AiMentorLessonForm = ({
     void startAiJudgeConfigurationGeneration({
       courseId: id,
       lessonId: lessonToEdit?.id,
-      lessonContext: getAiJudgeLessonContext(),
+      lessonContext,
       mode: AI_JUDGE_GENERATION_MODE.IMPROVE,
       instruction: instruction || validation.summary,
       currentConfiguration: mapAiJudgeConfigurationDraftToBaseInput(configuration),
@@ -515,11 +643,34 @@ const AiMentorLessonForm = ({
 
               <AiMentorScenarioFields control={form.control} />
 
+              {language === baseLanguage && (
+                <AiMentorScenarioTemplateSelect onSelect={handleScenarioTemplateSelect} />
+              )}
+
               {canConfigureVoiceMentor && (
                 <AiMentorVoiceConfigurationFields form={form} tooltipKey={voiceConfigTooltipKey} />
               )}
 
-              <AiMentorInstructionsField control={form.control} />
+              <AiMentorConfigurationCard
+                value={aiMentorConfiguration}
+                onSaveBaseConfiguration={handleAiMentorBaseConfigurationSave}
+                onSaveTranslation={handleAiMentorTranslationSave}
+                language={language}
+                baseLanguage={baseLanguage}
+                isPersisted={Boolean(lessonToEdit)}
+                isLoading={Boolean(lessonToEdit) && isAiMentorConfigurationLoading}
+                isSaving={
+                  isReplacingAiMentorConfiguration || isUpdatingAiMentorConfigurationTranslation
+                }
+                needsConfiguration={savedAiMentorConfiguration?.needsConfiguration}
+                error={
+                  form.formState.errors.aiMentorConfiguration
+                    ? t(
+                        "adminCourseView.curriculum.lesson.aiMentorConfiguration.validation.configurationRequired",
+                      )
+                    : undefined
+                }
+              />
               <AiJudgeConfigurationCard
                 value={aiJudgeConfiguration}
                 onSaveBaseConfiguration={handleAiJudgeBaseConfigurationSave}
@@ -531,6 +682,7 @@ const AiMentorLessonForm = ({
                 isSaving={
                   isReplacingAiJudgeConfiguration || isUpdatingAiJudgeConfigurationTranslation
                 }
+                isAiMentorConfigured={Boolean(aiMentorConfiguration)}
                 onConfigureWithAi={handleConfigureAiJudgeWithAi}
                 editorOpen={isAiJudgeEditorOpen}
                 onEditorOpenChange={handleAiJudgeEditorOpenChange}
@@ -557,7 +709,6 @@ const AiMentorLessonForm = ({
                 onStopAndInspect={handleStopAndInspectAiJudgeConfiguration}
                 onReviewAssessment={handleEditGeneratedAiJudgeConfiguration}
               />
-              <AiMentorSuggestionExamples onSuggestionClick={handleSuggestionClick} />
               {lessonToEdit && (
                 <div className="mb-6">
                   <MultiFileUploadForm lessonId={lessonToEdit.id} />
@@ -601,7 +752,12 @@ const AiMentorLessonForm = ({
             contentType={DeleteContentType.AI_MENTOR}
           />
 
-          <Dialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+          <Dialog
+            open={Boolean(pendingScenarioTemplate)}
+            onOpenChange={(open) => {
+              if (!open) setPendingScenarioTemplate(null);
+            }}
+          >
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>
@@ -612,15 +768,22 @@ const AiMentorLessonForm = ({
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="outline" onClick={onCancelOverwrite}>
+                <Button variant="outline" onClick={() => setPendingScenarioTemplate(null)}>
                   {t("common.button.cancel")}
                 </Button>
-                <Button onClick={onConfirmOverwrite} className="bg-primary-700">
+                <Button
+                  data-testid="curriculum-ai-mentor-scenario-template-confirm"
+                  onClick={() => {
+                    if (pendingScenarioTemplate) applyScenarioTemplate(pendingScenarioTemplate);
+                  }}
+                  className="bg-primary-700"
+                >
                   {t("clientStatisticsView.button.continue")}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
           <UpdateAiAvatarModal
             open={isAvatarDialogOpen}
             onOpenChange={(open) => {
