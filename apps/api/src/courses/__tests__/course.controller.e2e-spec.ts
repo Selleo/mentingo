@@ -1733,7 +1733,6 @@ describe("CourseController (e2e)", () => {
         thumbnailPositionY: 50,
         showAuthorSection: true,
       });
-      const cookies = await cookieFor(admin, app);
 
       const publishSpy = jest
         .spyOn(app.get(OutboxPublisher), "publish")
@@ -1761,6 +1760,7 @@ describe("CourseController (e2e)", () => {
       ] as const;
 
       for (const update of updates) {
+        const cookies = await cookieFor(admin, app);
         publishSpy.mockClear();
 
         await request(app.getHttpServer())
