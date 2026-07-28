@@ -1,4 +1,3 @@
-import { AI_MENTOR_TYPE } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
 import { UUIDSchema } from "src/common";
@@ -9,6 +8,7 @@ import {
   aiJudgeCriterionContentSchema,
   aiJudgeScoreGuidanceContentSchema,
 } from "src/lesson/ai-judge-configuration/ai-judge-configuration.schema";
+import { aiMentorConfigurationContentSchema } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 
 import {
   AI_JUDGE_BLOCKING_ERROR_REF_PATTERN,
@@ -26,6 +26,7 @@ import {
 } from "../ai-judge-configuration-generation.types";
 
 import type { Static } from "@sinclair/typebox";
+import type { AiMentorConfigurationContent } from "src/lesson/ai-mentor-configuration/schemas/ai-mentor-configuration.schema";
 
 const nonEmptyTextSchema = Type.String({ minLength: 1 });
 const generatedTaskGoalSchema = Type.String({ minLength: 1 });
@@ -115,8 +116,7 @@ export const aiJudgeGenerationLessonContextSchema = Type.Object(
   {
     title: Type.Optional(Type.String()),
     taskDescription: Type.Optional(Type.String()),
-    aiMentorInstructions: Type.Optional(Type.String()),
-    aiMentorType: Type.Enum(AI_MENTOR_TYPE),
+    aiMentorConfiguration: aiMentorConfigurationContentSchema,
   },
   { additionalProperties: false },
 );
@@ -545,7 +545,11 @@ export const cancelAiJudgeGenerationResponseSchema = Type.Object(
 
 export type ReferencedAiJudgeConfiguration = Static<typeof referencedAiJudgeConfigurationSchema>;
 export type GeneratedAiJudgeConfiguration = Static<typeof generatedAiJudgeConfigurationSchema>;
-export type AiJudgeGenerationLessonContext = Static<typeof aiJudgeGenerationLessonContextSchema>;
+export type AiJudgeGenerationLessonContext = {
+  title?: string;
+  taskDescription?: string;
+  aiMentorConfiguration: AiMentorConfigurationContent;
+};
 export type AiJudgeValidationIssue = Static<typeof aiJudgeValidationIssueSchema>;
 export type AiJudgeConfigurationValidatorModelResult = Static<
   typeof aiJudgeConfigurationValidatorModelResultSchema

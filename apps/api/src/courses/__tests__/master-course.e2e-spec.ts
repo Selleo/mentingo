@@ -1,7 +1,12 @@
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
-import { LESSON_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import {
+  AI_MENTOR_ROLEPLAY_DIFFICULTY,
+  AI_MENTOR_TYPE,
+  LESSON_TYPES,
+  SYSTEM_ROLE_SLUGS,
+} from "@repo/shared";
 import { and, asc, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
@@ -18,7 +23,9 @@ import {
   aiJudgeConfigurations,
   aiJudgeCriteria,
   aiJudgeScoreGuidance,
+  aiMentorConfigurations,
   aiMentorLessons,
+  aiMentorRoleplayConfigurations,
   categories,
   chapters,
   courses,
@@ -914,12 +921,25 @@ describe("Master course export and sync (e2e)", () => {
             .insert(aiMentorLessons)
             .values({
               lessonId: sourceLessonId,
-              aiMentorInstructions: buildJsonbFieldWithMultipleEntries({
+            })
+            .returning({ id: aiMentorLessons.id });
+
+          const [sourceMentorConfiguration] = await db
+            .insert(aiMentorConfigurations)
+            .values({
+              aiMentorLessonId: sourceAiMentor.id,
+              type: AI_MENTOR_TYPE.ROLEPLAY,
+              additionalInstructions: buildJsonbFieldWithMultipleEntries({
                 en: "Run a discovery conversation",
                 pl: "Przeprowadz rozmowe discovery",
               }),
             })
-            .returning({ id: aiMentorLessons.id });
+            .returning({ id: aiMentorConfigurations.id });
+
+          await db.insert(aiMentorRoleplayConfigurations).values({
+            configurationId: sourceMentorConfiguration.id,
+            difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+          });
 
           const [sourceConfiguration] = await db
             .insert(aiJudgeConfigurations)

@@ -9,12 +9,32 @@ export const judgePromptSchema = Type.Object({
   assessmentConfiguration: Type.String(),
 });
 
-export const aiPromptSchema = Type.Object({
+const commonAiMentorPromptProperties = {
   lessonTitle: Type.String(),
-  lessonInstructions: Type.String(),
   securityAndRagBlock: Type.String(),
   name: Type.String(),
+  openingInstruction: Type.String(),
+  additionalInstructions: Type.String(),
   groups: Type.Optional(Type.Array(Type.String())),
+};
+
+export const teacherPromptSchema = Type.Object({
+  ...commonAiMentorPromptProperties,
+  taskGoal: Type.String(),
+  expertise: Type.String(),
+  contentScope: Type.String(),
+  teachingStyle: Type.String(),
+  feedbackGuidance: Type.String(),
+});
+
+export const roleplayPromptSchema = Type.Object({
+  ...commonAiMentorPromptProperties,
+  scenario: Type.String(),
+  aiRole: Type.String(),
+  learnerRole: Type.String(),
+  characterGoal: Type.String(),
+  difficulty: Type.String(),
+  factsAndConstraints: Type.String(),
 });
 
 export const summaryPromptSchema = Type.Object({
@@ -64,9 +84,8 @@ export const aiJudgeConfigurationValidatorSchema = Type.Object(
 
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
-  mentorPrompt: aiPromptSchema,
-  roleplayPrompt: aiPromptSchema,
-  teacherPrompt: aiPromptSchema,
+  roleplayPrompt: roleplayPromptSchema,
+  teacherPrompt: teacherPromptSchema,
   summaryPrompt: summaryPromptSchema,
   welcomePrompt: welcomePromptSchema,
   securityAndRagBlock: securityAndRagBlockSchema,

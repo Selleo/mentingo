@@ -2167,8 +2167,6 @@ export interface GetBetaCourseByIdResponse {
           id: string;
           /** @format uuid */
           lessonId: string;
-          aiMentorInstructions: string;
-          type: "mentor" | "teacher" | "roleplay";
           name: string;
           avatarReference: string | null;
           voiceMode: "preset" | "custom";
@@ -2851,8 +2849,6 @@ export type BetaCreateChapterBody = {
       id: string;
       /** @format uuid */
       lessonId: string;
-      aiMentorInstructions: string;
-      type: "mentor" | "teacher" | "roleplay";
       name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
@@ -2937,8 +2933,6 @@ export type UpdateChapterBody = ({
       id: string;
       /** @format uuid */
       lessonId: string;
-      aiMentorInstructions: string;
-      type: "mentor" | "teacher" | "roleplay";
       name: string;
       avatarReference: string | null;
       voiceMode: "preset" | "custom";
@@ -3271,8 +3265,6 @@ export type BetaCreateLessonBody = {
     id: string;
     /** @format uuid */
     lessonId: string;
-    aiMentorInstructions: string;
-    type: "mentor" | "teacher" | "roleplay";
     name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
@@ -3464,7 +3456,35 @@ export type BetaCreateAiMentorLessonBody = {
   /** @format uuid */
   chapterId: string;
   displayOrder?: number;
-  aiMentorInstructions: string;
+  aiMentorConfiguration:
+    | {
+        type: "teacher";
+        /** @minLength 1 */
+        taskGoal: string;
+        /** @minLength 1 */
+        expertise: string;
+        /** @minLength 1 */
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      }
+    | {
+        type: "roleplay";
+        /** @minLength 1 */
+        scenario: string;
+        /** @minLength 1 */
+        aiRole: string;
+        /** @minLength 1 */
+        learnerRole: string;
+        /** @minLength 1 */
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints?: string | null;
+        openingInstruction?: string | null;
+        additionalInstructions?: string | null;
+      };
   aiJudgeConfiguration: {
     /** @minLength 1 */
     taskGoal: string;
@@ -3503,7 +3523,6 @@ export type BetaCreateAiMentorLessonBody = {
       description: string;
     }[];
   };
-  type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
@@ -3565,8 +3584,6 @@ export type BetaUpdateAiMentorLessonBody = ({
   liveTrainingId?: string | null;
   updatedAt?: string;
 } & {
-  aiMentorInstructions: string;
-  type: "mentor" | "teacher" | "roleplay";
   name?: string;
   voiceMode?: "preset" | "custom";
   ttsPreset?: "male" | "female";
@@ -3757,8 +3774,6 @@ export type BetaUpdateLessonBody = ({
     id: string;
     /** @format uuid */
     lessonId: string;
-    aiMentorInstructions: string;
-    type: "mentor" | "teacher" | "roleplay";
     name: string;
     avatarReference: string | null;
     voiceMode: "preset" | "custom";
@@ -4092,8 +4107,35 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorInstructions?: string;
-        aiMentorType: "mentor" | "teacher" | "roleplay";
+        aiMentorConfiguration:
+          | {
+              type: "teacher";
+              /** @minLength 1 */
+              taskGoal: string;
+              /** @minLength 1 */
+              expertise: string;
+              /** @minLength 1 */
+              contentScope: string;
+              teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+              feedbackGuidance?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            }
+          | {
+              type: "roleplay";
+              /** @minLength 1 */
+              scenario: string;
+              /** @minLength 1 */
+              aiRole: string;
+              /** @minLength 1 */
+              learnerRole: string;
+              /** @minLength 1 */
+              characterGoal: string;
+              difficulty: "cooperative" | "realistic" | "challenging";
+              factsAndConstraints?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            };
       };
       mode: "create";
       /** @minLength 1 */
@@ -4107,8 +4149,35 @@ export type GenerateBody =
       lessonContext: {
         title?: string;
         taskDescription?: string;
-        aiMentorInstructions?: string;
-        aiMentorType: "mentor" | "teacher" | "roleplay";
+        aiMentorConfiguration:
+          | {
+              type: "teacher";
+              /** @minLength 1 */
+              taskGoal: string;
+              /** @minLength 1 */
+              expertise: string;
+              /** @minLength 1 */
+              contentScope: string;
+              teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+              feedbackGuidance?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            }
+          | {
+              type: "roleplay";
+              /** @minLength 1 */
+              scenario: string;
+              /** @minLength 1 */
+              aiRole: string;
+              /** @minLength 1 */
+              learnerRole: string;
+              /** @minLength 1 */
+              characterGoal: string;
+              difficulty: "cooperative" | "realistic" | "challenging";
+              factsAndConstraints?: string | null;
+              openingInstruction?: string | null;
+              additionalInstructions?: string | null;
+            };
       };
       mode: "improve";
       /** @minLength 1 */
@@ -5435,8 +5504,35 @@ export interface ValidateConfigurationBody {
   lessonContext: {
     title?: string;
     taskDescription?: string;
-    aiMentorInstructions?: string;
-    aiMentorType: "mentor" | "teacher" | "roleplay";
+    aiMentorConfiguration:
+      | {
+          type: "teacher";
+          /** @minLength 1 */
+          taskGoal: string;
+          /** @minLength 1 */
+          expertise: string;
+          /** @minLength 1 */
+          contentScope: string;
+          teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+          feedbackGuidance?: string | null;
+          openingInstruction?: string | null;
+          additionalInstructions?: string | null;
+        }
+      | {
+          type: "roleplay";
+          /** @minLength 1 */
+          scenario: string;
+          /** @minLength 1 */
+          aiRole: string;
+          /** @minLength 1 */
+          learnerRole: string;
+          /** @minLength 1 */
+          characterGoal: string;
+          difficulty: "cooperative" | "realistic" | "challenging";
+          factsAndConstraints?: string | null;
+          openingInstruction?: string | null;
+          additionalInstructions?: string | null;
+        };
   };
   /** @minLength 1 */
   brief?: string;
@@ -5528,6 +5624,205 @@ export interface ValidateConfigurationResponse {
       correction: string;
     }[];
   };
+}
+
+export interface GetAiMentorConfigurationResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
+}
+
+export type ReplaceAiMentorConfigurationBody =
+  | {
+      type: "teacher";
+      /** @minLength 1 */
+      taskGoal: string;
+      /** @minLength 1 */
+      expertise: string;
+      /** @minLength 1 */
+      contentScope: string;
+      teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+      feedbackGuidance?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    }
+  | {
+      type: "roleplay";
+      /** @minLength 1 */
+      scenario: string;
+      /** @minLength 1 */
+      aiRole: string;
+      /** @minLength 1 */
+      learnerRole: string;
+      /** @minLength 1 */
+      characterGoal: string;
+      difficulty: "cooperative" | "realistic" | "challenging";
+      factsAndConstraints?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    };
+
+export interface ReplaceAiMentorConfigurationResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
+}
+
+export type UpdateAiMentorConfigurationTranslationsBody =
+  | {
+      type: "teacher";
+      /** @minLength 1 */
+      taskGoal?: string;
+      /** @minLength 1 */
+      expertise?: string;
+      /** @minLength 1 */
+      contentScope?: string;
+      feedbackGuidance?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    }
+  | {
+      type: "roleplay";
+      /** @minLength 1 */
+      scenario?: string;
+      /** @minLength 1 */
+      aiRole?: string;
+      /** @minLength 1 */
+      learnerRole?: string;
+      /** @minLength 1 */
+      characterGoal?: string;
+      factsAndConstraints?: string | null;
+      openingInstruction?: string | null;
+      additionalInstructions?: string | null;
+    };
+
+export interface UpdateAiMentorConfigurationTranslationsResponse {
+  data:
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "teacher";
+        taskGoal: string;
+        expertise: string;
+        contentScope: string;
+        teachingStyle: "explain_and_practice" | "guided_discovery" | "socratic";
+        feedbackGuidance: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      }
+    | {
+        /** @format uuid */
+        id: string;
+        /** @format uuid */
+        aiMentorLessonId: string;
+        needsConfiguration: boolean;
+        hasMissingTranslations: boolean;
+        /** @default "en" */
+        language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        /** @default "en" */
+        baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
+        type: "roleplay";
+        scenario: string;
+        aiRole: string;
+        learnerRole: string;
+        characterGoal: string;
+        difficulty: "cooperative" | "realistic" | "challenging";
+        factsAndConstraints: string | null;
+        openingInstruction: string | null;
+        additionalInstructions: string | null;
+      };
 }
 
 export interface MarkLessonAsCompletedResponse {
@@ -12860,6 +13155,69 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       this.request<ValidateConfigurationResponse, any>({
         path: `/api/ai/judge-configuration/validate`,
         method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationControllerGetAiMentorConfiguration
+     * @request GET:/api/lesson/{lessonId}/ai-mentor-configuration
+     */
+    aiMentorConfigurationControllerGetAiMentorConfiguration: (
+      lessonId: string,
+      query?: {
+        /** @default "en" */
+        language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<GetAiMentorConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationControllerReplaceAiMentorConfiguration
+     * @request PUT:/api/lesson/{lessonId}/ai-mentor-configuration
+     */
+    aiMentorConfigurationControllerReplaceAiMentorConfiguration: (
+      lessonId: string,
+      data: ReplaceAiMentorConfigurationBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<ReplaceAiMentorConfigurationResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration`,
+        method: "PUT",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @name AiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations
+     * @request PATCH:/api/lesson/{lessonId}/ai-mentor-configuration/translations/{language}
+     */
+    aiMentorConfigurationControllerUpdateAiMentorConfigurationTranslations: (
+      lessonId: string,
+      language: "en" | "pl" | "de" | "lt" | "cs" | "es",
+      data: UpdateAiMentorConfigurationTranslationsBody,
+      params: RequestParams = {},
+    ) =>
+      this.request<UpdateAiMentorConfigurationTranslationsResponse, any>({
+        path: `/api/lesson/${lessonId}/ai-mentor-configuration/translations/${language}`,
+        method: "PATCH",
         body: data,
         type: ContentType.Json,
         format: "json",

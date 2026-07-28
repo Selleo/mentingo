@@ -99,10 +99,8 @@ export type LessonActivityLogSnapshot = {
   lessonResources?: LessonActivityLogResource[];
   questions?: LessonActivityLogQuestion[];
   aiMentor?: {
-    aiMentorInstructions?: string | null;
     name?: string | null;
     avatarReference?: string | null;
-    type?: string | null;
     voiceMode?: string | null;
     ttsPreset?: string | null;
     customTtsReference?: string | null;

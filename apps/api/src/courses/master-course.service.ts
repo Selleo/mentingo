@@ -10,6 +10,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
+  AI_MENTOR_TYPE,
   COURSE_ORIGIN_TYPES,
   ENTITY_TYPES,
   LESSON_TYPES,
@@ -326,6 +327,7 @@ export class MasterCourseService {
     });
 
     await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
+    await this.syncAiMentorConfigurations(sourceSnapshot, aiMentorMap);
     await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, params.tenantId);
     await this.syncScormPackages({
       exportId: params.targetCourseId,
@@ -637,6 +639,7 @@ export class MasterCourseService {
         resourceCollection,
       });
       await this.syncAiJudgeConfigurations(sourceSnapshot, aiMentorMap);
+      await this.syncAiMentorConfigurations(sourceSnapshot, aiMentorMap);
       await this.syncAiMentorContexts(sourceSnapshot, aiMentorMap, exportLink.targetTenantId);
       await this.syncScormPackages({
         exportId: exportLink.id,
@@ -1218,10 +1221,8 @@ export class MasterCourseService {
       if (!existingAiMentor) {
         const targetAiMentorId = await this.masterCourseRepository.createAiMentor({
           lessonId: mappedLessonId,
-          aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
           name: sourceAiMentor.name,
           avatarReference,
-          type: sourceAiMentor.type,
           voiceMode: sourceAiMentor.voiceMode,
           ttsPreset: sourceAiMentor.ttsPreset,
           customTtsReference,
@@ -1231,10 +1232,8 @@ export class MasterCourseService {
       }
 
       await this.masterCourseRepository.updateAiMentor(existingAiMentor.id, {
-        aiMentorInstructions: sourceAiMentor.aiMentorInstructions,
         name: sourceAiMentor.name,
         avatarReference,
-        type: sourceAiMentor.type,
         voiceMode: sourceAiMentor.voiceMode,
         ttsPreset: sourceAiMentor.ttsPreset,
         customTtsReference,
@@ -1243,6 +1242,87 @@ export class MasterCourseService {
     }
 
     return aiMentorMap;
+  }
+
+  private async syncAiMentorConfigurations(
+    sourceSnapshot: SourceSnapshot,
+    aiMentorMap: Map<UUIDType, UUIDType>,
+  ) {
+    const teacherByConfigurationId = new Map(
+      sourceSnapshot.aiMentorTeacherConfigurations.map((configuration) => [
+        configuration.configurationId,
+        configuration,
+      ]),
+    );
+    const roleplayByConfigurationId = new Map(
+      sourceSnapshot.aiMentorRoleplayConfigurations.map((configuration) => [
+        configuration.configurationId,
+        configuration,
+      ]),
+    );
+
+    for (const sourceConfiguration of sourceSnapshot.aiMentorConfigurations) {
+      const targetAiMentorLessonId = aiMentorMap.get(sourceConfiguration.aiMentorLessonId);
+      if (!targetAiMentorLessonId) continue;
+
+      await this.db.transaction(async (transaction) => {
+        const existingConfiguration =
+          await this.masterCourseRepository.findAiMentorConfigurationByAiMentorLessonId(
+            targetAiMentorLessonId,
+            transaction,
+          );
+        const rootValues = this.omitCopiedRowFields(sourceConfiguration, [
+          "id",
+          "createdAt",
+          "updatedAt",
+          "tenantId",
+          "aiMentorLessonId",
+        ] as const);
+        const targetConfigurationId = existingConfiguration
+          ? existingConfiguration.id
+          : await this.masterCourseRepository.createAiMentorConfiguration(
+              { ...rootValues, aiMentorLessonId: targetAiMentorLessonId },
+              transaction,
+            );
+
+        if (existingConfiguration)
+          await this.masterCourseRepository.updateAiMentorConfiguration(
+            targetConfigurationId,
+            rootValues,
+            transaction,
+          );
+
+        const sourceTeacher = teacherByConfigurationId.get(sourceConfiguration.id);
+        const sourceRoleplay = roleplayByConfigurationId.get(sourceConfiguration.id);
+        const teacher =
+          sourceConfiguration.type === AI_MENTOR_TYPE.TEACHER && sourceTeacher
+            ? this.omitCopiedRowFields(sourceTeacher, [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "tenantId",
+                "configurationId",
+              ] as const)
+            : null;
+        const roleplay =
+          sourceConfiguration.type === AI_MENTOR_TYPE.ROLEPLAY && sourceRoleplay
+            ? this.omitCopiedRowFields(sourceRoleplay, [
+                "id",
+                "createdAt",
+                "updatedAt",
+                "tenantId",
+                "configurationId",
+              ] as const)
+            : null;
+
+        await this.masterCourseRepository.replaceAiMentorConfigurationSubtype(
+          targetConfigurationId,
+          teacher,
+          roleplay,
+          transaction,
+        );
+      });
+    }
   }
 
   private async syncAiJudgeConfigurations(

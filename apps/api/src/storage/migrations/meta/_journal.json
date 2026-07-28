@@ -1254,6 +1254,34 @@
       "when": 1785309941472,
       "tag": "0178_remove_category_archiving",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1785153121334,
+      "tag": "0179_add_ai_mentor_configuration_tables",
+      "breakpoints": true
+    },
+    {
+      "idx": 180,
+      "version": "7",
+      "when": 1785153140729,
+      "tag": "0180_enable_ai_mentor_configuration_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 181,
+      "version": "7",
+      "when": 1785153988477,
+      "tag": "0181_backfill_ai_mentor_configurations",
+      "breakpoints": true
+    },
+    {
+      "idx": 182,
+      "version": "7",
+      "when": 1785155002370,
+      "tag": "0182_drop_legacy_ai_mentor_configuration_columns",
+      "breakpoints": true
     }
   ]
 }
