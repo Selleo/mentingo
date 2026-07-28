@@ -13,6 +13,7 @@ import {
   SYSTEM_ROLE_SLUGS,
 } from "@repo/shared";
 import AdmZip from "adm-zip";
+import * as cookie from "cookie";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import request from "supertest";
 
@@ -1733,15 +1734,28 @@ describe("CourseController (e2e)", () => {
         thumbnailPositionY: 50,
         showAuthorSection: true,
       });
-      const authenticatedAgent = request.agent(app.getHttpServer());
-
-      await authenticatedAgent
+      const loginResponse = await request(app.getHttpServer())
         .post("/api/auth/login")
         .send({
           email: admin.email,
           password: admin.credentials?.password,
         })
         .expect(201);
+      const setCookieHeader = loginResponse.headers["set-cookie"];
+      const loginCookies = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+      const accessTokenCookie = loginCookies.find((cookieString) =>
+        cookieString.startsWith("access_token="),
+      );
+
+      if (!accessTokenCookie) {
+        throw new Error("Expected login response to include an access token cookie");
+      }
+
+      const accessToken = cookie.parse(accessTokenCookie).access_token;
+
+      if (!accessToken) {
+        throw new Error("Expected access token cookie to contain a token");
+      }
 
       const publishSpy = jest
         .spyOn(app.get(OutboxPublisher), "publish")
@@ -1771,8 +1785,9 @@ describe("CourseController (e2e)", () => {
       for (const update of updates) {
         publishSpy.mockClear();
 
-        await authenticatedAgent
+        await request(app.getHttpServer())
           .patch(`/api/course/${course.id}`)
+          .set("Authorization", `Bearer ${accessToken}`)
           .send({
             language: SUPPORTED_LANGUAGES.EN,
             ...update.body,
