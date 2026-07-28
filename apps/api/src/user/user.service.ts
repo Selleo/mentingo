@@ -51,7 +51,7 @@ import {
   userLacksAnyPermissionsCondition as buildUserLacksAnyPermissionsCondition,
 } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
-import { CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
+import { ArchiveUsersEvent, CreateUserEvent, DeleteUserEvent, UpdateUserEvent } from "src/events";
 import { UserInviteEvent } from "src/events/user/user-invite.event";
 import { UserPasswordReminderEvent } from "src/events/user/user-password-reminder.event";
 import { FileService } from "src/file/file.service";
@@ -1003,6 +1003,8 @@ export class UserService {
       .set({ archived: true })
       .where(inArray(users.id, usersToArchiveIds))
       .returning();
+
+    await this.outboxPublisher.publish(new ArchiveUsersEvent(usersToArchiveIds));
 
     return {
       archivedUsersCount: archivedUsers.length,

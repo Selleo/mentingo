@@ -3,7 +3,10 @@ import crypto from "crypto";
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { MICROSOFT_CALENDAR_OAUTH_PURPOSE } from "src/calendar/calendar.constants";
 import { EnvService } from "src/env/services/env.service";
+
+import type { MicrosoftCalendarOAuthState } from "src/calendar/types/microsoft-calendar.types";
 
 type TenantStatePayload = {
   tenantId: string;
@@ -29,10 +32,14 @@ export class TenantStateService {
       exp: now + this.STATE_TTL_MS,
     };
 
-    const body = this.base64UrlEncode(JSON.stringify(payload));
-    const signature = this.base64UrlEncode(await this.hashHmac(body));
+    return this.signPayload(payload);
+  }
 
-    return `${body}.${signature}`;
+  async signMicrosoftCalendar(
+    payload: Omit<MicrosoftCalendarOAuthState, "iat" | "exp">,
+  ): Promise<string> {
+    const now = Date.now();
+    return this.signPayload({ ...payload, iat: now, exp: now + this.STATE_TTL_MS });
   }
 
   async verify(state: string): Promise<string | null> {
@@ -43,12 +50,44 @@ export class TenantStateService {
     const expectedSig = this.base64UrlEncode(await this.hashHmac(body));
     if (!this.timingSafeEqual(signature, expectedSig)) return null;
 
-    const payload = this.safeParsePayload(body);
+    const payload = this.safeParsePayload<TenantStatePayload>(body);
     if (!payload) return null;
 
     if (payload.exp < Date.now()) return null;
 
     return payload.tenantId;
+  }
+
+  async verifyMicrosoftCalendar(state: string): Promise<MicrosoftCalendarOAuthState | null> {
+    const payload = await this.verifyPayload<MicrosoftCalendarOAuthState>(state);
+    if (
+      !payload ||
+      payload.purpose !== MICROSOFT_CALENDAR_OAUTH_PURPOSE ||
+      !payload.userId ||
+      !payload.nonce ||
+      !payload.origin
+    ) {
+      return null;
+    }
+    return payload;
+  }
+
+  private async signPayload(payload: TenantStatePayload | MicrosoftCalendarOAuthState) {
+    const body = this.base64UrlEncode(JSON.stringify(payload));
+    const signature = this.base64UrlEncode(await this.hashHmac(body));
+    return `${body}.${signature}`;
+  }
+
+  private async verifyPayload<T extends TenantStatePayload>(state: string): Promise<T | null> {
+    const [body, signature] = state.split(".");
+    if (!body || !signature) return null;
+
+    const expectedSig = this.base64UrlEncode(await this.hashHmac(body));
+    if (!this.timingSafeEqual(signature, expectedSig)) return null;
+
+    const payload = this.safeParsePayload<T>(body);
+    if (!payload || payload.exp < Date.now()) return null;
+    return payload;
   }
 
   private async getSecret(): Promise<string> {
@@ -70,12 +109,12 @@ export class TenantStateService {
     return buffer.toString("base64url");
   }
 
-  private safeParsePayload(body: string): TenantStatePayload | null {
+  private safeParsePayload<T extends TenantStatePayload>(body: string): T | null {
     try {
       const json = Buffer.from(body.replace(/-/g, "+").replace(/_/g, "/"), "base64").toString(
         "utf8",
       );
-      const payload = JSON.parse(json) as TenantStatePayload;
+      const payload = JSON.parse(json) as T;
 
       if (!payload?.tenantId || !payload?.iat || !payload?.exp) return null;
 

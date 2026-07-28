@@ -16133,6 +16133,181 @@
           }
         }
       }
+    },
+    "/api/calendar/microsoft/connection": {
+      "get": {
+        "operationId": "MicrosoftCalendarController_getConnection",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConnectionResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "MicrosoftCalendarController_disconnect",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DisconnectResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/microsoft/connection/sync": {
+      "post": {
+        "operationId": "MicrosoftCalendarController_sync",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/microsoft/connection/outbound": {
+      "post": {
+        "operationId": "MicrosoftCalendarController_updateOutbound",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOutboundBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateOutboundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/calendar/microsoft/notifications": {
+      "post": {
+        "operationId": "MicrosoftCalendarController_notifications",
+        "parameters": [
+          {
+            "name": "validationToken",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/calendar/microsoft/lifecycle-notifications": {
+      "post": {
+        "operationId": "MicrosoftCalendarController_lifecycleNotifications",
+        "parameters": [
+          {
+            "name": "validationToken",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LifecycleNotificationsBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft-calendar": {
+      "get": {
+        "operationId": "MicrosoftCalendarOAuthController_connect",
+        "parameters": [
+          {
+            "name": "replace",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "outbound",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/api/auth/microsoft-calendar/callback": {
+      "get": {
+        "operationId": "MicrosoftCalendarOAuthController_callback",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
     }
   },
   "info": {
@@ -57854,6 +58029,10 @@
                         {
                           "const": "course_due_date",
                           "type": "string"
+                        },
+                        {
+                          "const": "microsoft_outlook",
+                          "type": "string"
                         }
                       ]
                     },
@@ -58061,6 +58240,61 @@
                           "required": [
                             "courseDueDate"
                           ]
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "outlookCalendar": {
+                              "type": "object",
+                              "properties": {
+                                "webLink": {
+                                  "anyOf": [
+                                    {
+                                      "type": "string"
+                                    },
+                                    {
+                                      "type": "null"
+                                    }
+                                  ]
+                                },
+                                "isSensitive": {
+                                  "type": "boolean"
+                                },
+                                "availability": {
+                                  "anyOf": [
+                                    {
+                                      "const": "free",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "tentative",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "busy",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "out_of_office",
+                                      "type": "string"
+                                    },
+                                    {
+                                      "const": "working_elsewhere",
+                                      "type": "string"
+                                    }
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "webLink",
+                                "isSensitive",
+                                "availability"
+                              ]
+                            }
+                          },
+                          "required": [
+                            "outlookCalendar"
+                          ]
                         }
                       ]
                     }
@@ -58113,6 +58347,10 @@
                   },
                   {
                     "const": "course_due_date",
+                    "type": "string"
+                  },
+                  {
+                    "const": "microsoft_outlook",
                     "type": "string"
                   }
                 ]
@@ -58585,6 +58823,61 @@
                     "required": [
                       "courseDueDate"
                     ]
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "outlookCalendar": {
+                        "type": "object",
+                        "properties": {
+                          "webLink": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "isSensitive": {
+                            "type": "boolean"
+                          },
+                          "availability": {
+                            "anyOf": [
+                              {
+                                "const": "free",
+                                "type": "string"
+                              },
+                              {
+                                "const": "tentative",
+                                "type": "string"
+                              },
+                              {
+                                "const": "busy",
+                                "type": "string"
+                              },
+                              {
+                                "const": "out_of_office",
+                                "type": "string"
+                              },
+                              {
+                                "const": "working_elsewhere",
+                                "type": "string"
+                              }
+                            ]
+                          }
+                        },
+                        "required": [
+                          "webLink",
+                          "isSensitive",
+                          "availability"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "outlookCalendar"
+                    ]
                   }
                 ]
               }
@@ -58609,6 +58902,230 @@
         "required": [
           "data"
         ]
+      },
+      "GetConnectionResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "available": {
+                "type": "boolean"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "const": "disconnected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "syncing",
+                    "type": "string"
+                  },
+                  {
+                    "const": "connected",
+                    "type": "string"
+                  },
+                  {
+                    "const": "error",
+                    "type": "string"
+                  },
+                  {
+                    "const": "reconnect_required",
+                    "type": "string"
+                  }
+                ]
+              },
+              "accountEmail": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastSuccessfulSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "subscriptionExpiresAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "errorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "stale": {
+                "type": "boolean"
+              },
+              "outboundSyncEnabled": {
+                "type": "boolean"
+              },
+              "outboundStatus": {
+                "type": "string"
+              },
+              "outboundCalendarId": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "outboundErrorCode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "lastOutboundSyncAt": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "available",
+              "status",
+              "accountEmail",
+              "lastSuccessfulSyncAt",
+              "subscriptionExpiresAt",
+              "errorCode",
+              "stale",
+              "outboundSyncEnabled",
+              "outboundStatus",
+              "outboundCalendarId",
+              "outboundErrorCode",
+              "lastOutboundSyncAt"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SyncResponse": {
+        "type": "null"
+      },
+      "UpdateOutboundBody": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ]
+      },
+      "UpdateOutboundResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "authorizationUrl": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "authorizationUrl"
+            ]
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "DisconnectResponse": {
+        "type": "null"
+      },
+      "NotificationsBody": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": {
+              "additionalProperties": true,
+              "type": "object",
+              "properties": {
+                "subscriptionId": {
+                  "type": "string"
+                },
+                "clientState": {
+                  "type": "string"
+                },
+                "lifecycleEvent": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "LifecycleNotificationsBody": {
+        "additionalProperties": true,
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "array",
+            "items": {
+              "additionalProperties": true,
+              "type": "object",
+              "properties": {
+                "subscriptionId": {
+                  "type": "string"
+                },
+                "clientState": {
+                  "type": "string"
+                },
+                "lifecycleEvent": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

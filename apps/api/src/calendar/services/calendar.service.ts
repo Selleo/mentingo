@@ -23,11 +23,18 @@ import {
   liveTrainingLinks,
   liveTrainingMembers,
   liveTrainings,
+  calendarExternalEvents,
   studentCourses,
 } from "src/storage/schema";
 
-import { CalendarRepository } from "./calendar.repository";
+import { CalendarRepository } from "../repositories/calendar.repository";
 
+import type { CalendarEventDetails } from "../schemas/calendar-event-details.schema";
+import type {
+  CalendarEventList,
+  CalendarEventListItem,
+} from "../schemas/calendar-event-list.schema";
+import type { GetCalendarEventsQuery } from "../schemas/get-calendar-events-query.schema";
 import type {
   CalendarEventLinkedCourse,
   CalendarEventMaterialRow,
@@ -35,13 +42,7 @@ import type {
   CalendarEventHostRow,
   LiveTrainingCalendarEventPayload,
   LiveTrainingListItemPayload,
-} from "./calendar.types";
-import type { CalendarEventDetails } from "./schemas/calendar-event-details.schema";
-import type {
-  CalendarEventList,
-  CalendarEventListItem,
-} from "./schemas/calendar-event-list.schema";
-import type { GetCalendarEventsQuery } from "./schemas/get-calendar-events-query.schema";
+} from "../types/calendar.types";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -86,6 +87,7 @@ export class CalendarService {
     return Promise.all([
       this.getLiveTrainingEvents(query, currentUser),
       this.getCourseDueDateEvents(query, currentUser),
+      this.getMicrosoftOutlookEvents(query, currentUser),
     ]);
   }
 
@@ -97,7 +99,41 @@ export class CalendarService {
     return Promise.all([
       this.getLiveTrainingEventDetails(eventId, language, currentUser),
       this.getCourseDueDateEventDetails(eventId, language, currentUser),
+      this.getMicrosoftOutlookEventDetails(eventId, language, currentUser),
     ]);
+  }
+
+  private async getMicrosoftOutlookEvents(
+    query: GetCalendarEventsQuery,
+    currentUser: CurrentUserType,
+  ): Promise<CalendarEventListItem[]> {
+    const conditions = [
+      isNull(calendarEvents.deletedAt),
+      eq(calendarExternalEvents.userId, currentUser.userId),
+      eq(calendarExternalEvents.isCancelled, false),
+      lt(calendarEvents.startsAt, query.end),
+      gt(calendarEvents.endsAt, query.start),
+    ];
+
+    return this.calendarRepository.getMicrosoftCalendarEventRows(conditions, query.language);
+  }
+
+  private async getMicrosoftOutlookEventDetails(
+    eventId: UUIDType,
+    language: SupportedLanguages,
+    currentUser: CurrentUserType,
+  ): Promise<CalendarEventDetails | null> {
+    const [event] = await this.calendarRepository.getMicrosoftCalendarEventRows(
+      [
+        isNull(calendarEvents.deletedAt),
+        eq(calendarEvents.id, eventId),
+        eq(calendarExternalEvents.userId, currentUser.userId),
+        eq(calendarExternalEvents.isCancelled, false),
+      ],
+      language,
+    );
+
+    return event ?? null;
   }
 
   private async getCourseDueDateEvents(

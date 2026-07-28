@@ -29,7 +29,7 @@ export function CourseGenerationProgressStrip({
 
   return (
     <AnimatePresence initial={false}>
-      {visible ? (
+      {visible && (
         <motion.section
           data-testid={COURSE_GENERATION_HANDLES.PROGRESS_STRIP}
           key="generation-progress-strip"
@@ -79,7 +79,7 @@ export function CourseGenerationProgressStrip({
             </div>
           </div>
         </motion.section>
-      ) : null}
+      )}
     </AnimatePresence>
   );
 }

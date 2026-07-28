@@ -361,12 +361,81 @@
     "tenants": "Organizations",
     "activityLogs": "Activity Logs"
   },
+  "microsoftCalendar": {
+    "title": "Microsoft Calendar",
+    "description": "Bring your primary Outlook calendar into Mentingo. Outlook remains the source of truth.",
+    "account": "Connected account",
+    "lastSync": "Last successful sync",
+    "status": {
+      "disconnected": "Disconnected",
+      "syncing": "Syncing",
+      "connected": "Connected",
+      "error": "Needs attention",
+      "reconnect_required": "Reconnect required"
+    },
+    "action": {
+      "connect": "Connect Microsoft Calendar",
+      "sync": "Sync now",
+      "reconnect": "Reconnect",
+      "replace": "Use another account",
+      "disconnect": "Disconnect",
+      "continue": "Continue to Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Please wait before starting another sync."
+    },
+    "stale": {
+      "title": "Calendar data may be out of date",
+      "description": "Your imported events remain visible. Try syncing again or reconnect your Microsoft account."
+    },
+    "adminApproval": {
+      "title": "Microsoft administrator approval required",
+      "description": "Your organization must approve calendar access before Mentingo can synchronize Outlook events."
+    },
+    "disconnect": {
+      "title": "Disconnect Microsoft Calendar?",
+      "description": "This removes imported Outlook events from Mentingo. Your Outlook calendar is not changed."
+    },
+    "replace": {
+      "title": "Connect a different Microsoft account?",
+      "description": "The connection for {{email}} and its imported events will be removed before the new account is synchronized."
+    },
+    "outbound": {
+      "title": "Sync Mentingo events",
+      "description": "Export live trainings and course due dates to a separate Mentingo calendar in Outlook.",
+      "reauthorize": "Enabling this requires Microsoft permission to write calendar events.",
+      "enable": "Enable export",
+      "disable": "Disable export"
+    },
+    "toast": {
+      "syncQueued": "Microsoft Calendar sync has started.",
+      "syncFailed": "Microsoft Calendar could not be synchronized.",
+      "disconnected": "Microsoft Calendar has been disconnected.",
+      "disconnectFailed": "Microsoft Calendar could not be disconnected.",
+      "outboundEnabled": "Mentingo events will be exported to Outlook.",
+      "outboundDisabled": "Mentingo event export has been disabled.",
+      "outboundFailed": "Mentingo events could not be exported."
+    },
+    "oauth": {
+      "connected": "Microsoft Calendar is connecting and the first sync has started.",
+      "replacement_required": "Confirm account replacement before connecting a different Microsoft account.",
+      "admin_approval_required": "Microsoft administrator approval is required for calendar access.",
+      "authorization_failed": "Microsoft Calendar authorization failed. Please try again."
+    }
+  },
   "calendarView": {
     "title": "Calendar",
     "description": "View scheduled learning events.",
     "loading": "Loading events",
     "empty": "No events to display",
     "today": "Today",
+    "legend": {
+      "label": "Sources"
+    },
+    "microsoft": {
+      "staleWarning": "Microsoft events may be out of date. Reconnect or retry from Account settings.",
+      "horizonNotice": "Microsoft events are imported from 30 days ago through 6 months ahead, so this range may be incomplete."
+    },
     "view": {
       "month": "Month",
       "week": "Week",
@@ -450,11 +519,13 @@
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training",
-        "goToCourse": "Go to course"
+        "goToCourse": "Go to course",
+        "openOutlook": "Open in Outlook"
       },
       "sourceType": {
         "liveTraining": "Live Training",
-        "courseDueDate": "Course due date"
+        "courseDueDate": "Course due date",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Time",
@@ -464,7 +535,9 @@
         "people": "People",
         "dueDate": "Due date",
         "course": "Course",
-        "group": "Group"
+        "group": "Group",
+        "availability": "Availability",
+        "privacy": "Privacy"
       },
       "deliveryType": {
         "online": "Online",
@@ -476,6 +549,14 @@
         "ended": "Ended",
         "expired": "Expired"
       },
+      "availability": {
+        "free": "Free",
+        "tentative": "Tentative",
+        "busy": "Busy",
+        "out_of_office": "Out of office",
+        "working_elsewhere": "Working elsewhere"
+      },
+      "privateEvent": "Details are hidden for this private Outlook event.",
       "role": {
         "admin": "Admin",
         "author": "Author",
@@ -1677,6 +1758,12 @@
       },
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft Client Secret"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft Calendar Client ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft Calendar Client Secret"
       },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Enabled (true/false)"
@@ -3364,6 +3451,7 @@
     },
     "tabs": {
       "account": "Account",
+      "integrations": "Integrations",
       "organization": "Organization",
       "platformCustomization": "Platform Customization"
     },

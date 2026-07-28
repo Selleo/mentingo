@@ -56,14 +56,14 @@ function NewsItem({
           {summary}
         </p>
         <div className="flex items-center gap-6">
-          {date ? (
+          {date && (
             <div className="flex items-center gap-2">
               <Icon name="Calendar" className="text-white" />
               <p className="text-sm font-normal leading-5 text-white opacity-80">
                 {formatDate(new Date(date), "d MMMM yyyy")}
               </p>
             </div>
-          ) : null}
+          )}
           <div className="flex items-center gap-2">
             <Icon name="User" className="size-4 text-white" />
             <p className="text-sm font-normal leading-5 text-white opacity-80">{authorName}</p>

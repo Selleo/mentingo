@@ -7,6 +7,14 @@ export const SECRET_METADATA = {
     labelKey: "adminEnvsView.form.MICROSOFT_CLIENT_SECRET.label",
     placeholderKey: "adminEnvsView.form.placeholder",
   },
+  MICROSOFT_CALENDAR_CLIENT_ID: {
+    labelKey: "adminEnvsView.form.MICROSOFT_CALENDAR_CLIENT_ID.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
+  MICROSOFT_CALENDAR_CLIENT_SECRET: {
+    labelKey: "adminEnvsView.form.MICROSOFT_CALENDAR_CLIENT_SECRET.label",
+    placeholderKey: "adminEnvsView.form.placeholder",
+  },
   MICROSOFT_OAUTH_ENABLED: {
     labelKey: "adminEnvsView.form.MICROSOFT_OAUTH_ENABLED.label",
     placeholderKey: "adminEnvsView.form.placeholder",

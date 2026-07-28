@@ -361,12 +361,69 @@
     "tenants": "Organizaciones",
     "activityLogs": "Registros de actividad"
   },
+  "microsoftCalendar": {
+    "title": "Calendario de Microsoft",
+    "description": "Consulta tu calendario principal de Outlook en Mentingo. Outlook sigue siendo la fuente de datos.",
+    "account": "Cuenta conectada",
+    "lastSync": "Última sincronización correcta",
+    "status": {
+      "disconnected": "Desconectado",
+      "syncing": "Sincronizando",
+      "connected": "Conectado",
+      "error": "Requiere atención",
+      "reconnect_required": "Es necesario volver a conectar"
+    },
+    "action": {
+      "connect": "Conectar Calendario de Microsoft",
+      "sync": "Sincronizar ahora",
+      "reconnect": "Volver a conectar",
+      "replace": "Usar otra cuenta",
+      "disconnect": "Desconectar",
+      "continue": "Continuar a Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Espera antes de iniciar otra sincronización."
+    },
+    "stale": {
+      "title": "Los datos del calendario pueden estar desactualizados",
+      "description": "Los eventos importados siguen visibles. Vuelve a sincronizar o conecta de nuevo tu cuenta Microsoft."
+    },
+    "adminApproval": {
+      "title": "Se requiere la aprobación del administrador de Microsoft",
+      "description": "Tu organización debe aprobar el acceso al calendario antes de que Mentingo pueda sincronizar eventos de Outlook."
+    },
+    "disconnect": {
+      "title": "¿Desconectar Calendario de Microsoft?",
+      "description": "Los eventos de Outlook importados se eliminarán de Mentingo. Tu calendario de Outlook no cambiará."
+    },
+    "replace": {
+      "title": "¿Conectar otra cuenta Microsoft?",
+      "description": "La conexión de {{email}} y sus eventos importados se eliminarán antes de sincronizar la nueva cuenta."
+    },
+    "toast": {
+      "syncQueued": "La sincronización del Calendario de Microsoft ha comenzado.",
+      "syncFailed": "No se pudo sincronizar el Calendario de Microsoft.",
+      "disconnected": "El Calendario de Microsoft se ha desconectado.",
+      "disconnectFailed": "No se pudo desconectar el Calendario de Microsoft."
+    },
+    "oauth": {
+      "connected": "El Calendario de Microsoft se está conectando y ha comenzado la primera sincronización.",
+      "replacement_required": "Confirma el cambio de cuenta antes de conectar otra cuenta Microsoft.",
+      "admin_approval_required": "Se requiere la aprobación del administrador de Microsoft para acceder al calendario.",
+      "authorization_failed": "La autorización del Calendario de Microsoft ha fallado. Inténtalo de nuevo."
+    }
+  },
   "calendarView": {
     "title": "Calendario",
     "description": "Consulta los eventos de aprendizaje programados.",
     "loading": "Cargando eventos",
     "empty": "No hay eventos para mostrar",
     "today": "Hoy",
+    "legend": { "label": "Fuentes" },
+    "microsoft": {
+      "staleWarning": "Los eventos de Microsoft pueden estar desactualizados. Vuelve a conectar o reintenta desde los ajustes de la cuenta.",
+      "horizonNotice": "Los eventos de Microsoft se importan desde 30 días atrás hasta 6 meses adelante, por lo que este intervalo puede estar incompleto."
+    },
     "view": {
       "month": "Mes",
       "week": "Semana",
@@ -450,11 +507,13 @@
       "action": {
         "edit": "Editar evento",
         "goToLiveTraining": "Ir a la formación en vivo",
-        "goToCourse": "Ir al curso"
+        "goToCourse": "Ir al curso",
+        "openOutlook": "Abrir en Outlook"
       },
       "sourceType": {
         "liveTraining": "Formación en vivo",
-        "courseDueDate": "Fecha límite del curso"
+        "courseDueDate": "Fecha límite del curso",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Hora",
@@ -464,7 +523,9 @@
         "people": "Personas",
         "dueDate": "Fecha límite",
         "course": "Curso",
-        "group": "Grupo"
+        "group": "Grupo",
+        "availability": "Disponibilidad",
+        "privacy": "Privacidad"
       },
       "deliveryType": {
         "online": "En línea",
@@ -476,6 +537,14 @@
         "ended": "Terminado",
         "expired": "Caducado"
       },
+      "availability": {
+        "free": "Libre",
+        "tentative": "Provisional",
+        "busy": "Ocupado",
+        "out_of_office": "Fuera de la oficina",
+        "working_elsewhere": "Trabajando en otro lugar"
+      },
+      "privateEvent": "Los detalles de este evento privado de Outlook están ocultos.",
       "role": {
         "admin": "Administrador",
         "author": "Autor",
@@ -1677,6 +1746,12 @@
       },
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Secreto del cliente de Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "ID de cliente del calendario de Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Secreto de cliente del calendario de Microsoft"
       },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Habilitado (verdadero/falso)"
@@ -3363,6 +3438,7 @@
     },
     "tabs": {
       "account": "Cuenta",
+      "integrations": "Integraciones",
       "organization": "Organización",
       "platformCustomization": "Personalización de la plataforma"
     },

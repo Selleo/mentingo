@@ -26,6 +26,8 @@ import {
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   COURSE_GENERATION_SYNC_STATUS,
+  MICROSOFT_CALENDAR_CONNECTION_STATUSES,
+  MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
@@ -93,6 +95,7 @@ import type {
   CertificateArchiveReason,
   CertificateStatus,
   CalendarEventStatus,
+  CalendarProvider,
   AnnouncementEmailTemplate,
   AnnouncementSourceType,
   AnnouncementStatus,
@@ -105,10 +108,15 @@ import type {
   LiveTrainingSessionStatus,
   LiveTrainingStatus,
   LiveTrainingVisibilityScope,
+  MicrosoftCalendarConnectionStatus,
+  MicrosoftCalendarOutboundStatus,
+  OutlookEventAvailability,
+  OutlookEventSensitivity,
   AnnouncementAudience,
 } from "@repo/shared";
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
+import type { MicrosoftCalendarOutboundErrorCode } from "src/calendar/calendar.constants";
 import type { ActivityHistory, AllSettings } from "src/common/types";
 import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
 import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
@@ -502,6 +510,123 @@ export const calendarEvents = pgTable(
       table.tenantId,
       table.uid,
     ),
+  })),
+);
+
+export const calendarConnections = pgTable(
+  "calendar_connections",
+  {
+    ...id,
+    ...timestamps,
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    provider: text("provider").$type<CalendarProvider>().notNull(),
+    accountId: text("account_id").notNull(),
+    accountEmail: text("account_email").notNull(),
+    refreshTokenCiphertext: text("refresh_token_ciphertext").notNull(),
+    refreshTokenIv: text("refresh_token_iv").notNull(),
+    refreshTokenTag: text("refresh_token_tag").notNull(),
+    refreshTokenEncryptedDek: text("refresh_token_encrypted_dek").notNull(),
+    refreshTokenEncryptedDekIv: text("refresh_token_encrypted_dek_iv").notNull(),
+    refreshTokenEncryptedDekTag: text("refresh_token_encrypted_dek_tag").notNull(),
+    status: text("status")
+      .$type<MicrosoftCalendarConnectionStatus>()
+      .notNull()
+      .default(MICROSOFT_CALENDAR_CONNECTION_STATUSES.SYNCING),
+    errorCode: text("error_code"),
+    syncCursor: text("sync_cursor"),
+    syncWindowStart: timestampWithTimezone({ name: "sync_window_start" }),
+    syncWindowEnd: timestampWithTimezone({ name: "sync_window_end" }),
+    windowBuiltAt: timestampWithTimezone({ name: "window_built_at" }),
+    lastSuccessfulSyncAt: timestampWithTimezone({ name: "last_successful_sync_at" }),
+    lastSyncCompletedAt: timestampWithTimezone({ name: "last_sync_completed_at" }),
+    subscriptionId: text("subscription_id"),
+    subscriptionClientState: text("subscription_client_state"),
+    subscriptionExpiresAt: timestampWithTimezone({ name: "subscription_expires_at" }),
+    outboundSyncEnabled: boolean("outbound_sync_enabled").notNull().default(false),
+    outboundStatus: text("outbound_status")
+      .$type<MicrosoftCalendarOutboundStatus>()
+      .notNull()
+      .default(MICROSOFT_CALENDAR_OUTBOUND_STATUSES.DISABLED),
+    outboundCalendarId: text("outbound_calendar_id"),
+    outboundErrorCode: text(
+      "outbound_error_code",
+    ).$type<MicrosoftCalendarOutboundErrorCode | null>(),
+    lastOutboundSyncAt: timestampWithTimezone({ name: "last_outbound_sync_at" }),
+    tenantId,
+  },
+  withTenantIdIndex("calendar_connections", (table) => ({
+    tenantUserProviderUniqueIdx: uniqueIndex(
+      "calendar_connections_tenant_user_provider_unique_idx",
+    ).on(table.tenantId, table.userId, table.provider),
+    subscriptionIdx: index("calendar_connections_subscription_idx").on(table.subscriptionId),
+  })),
+);
+
+export const calendarOutboundEvents = pgTable(
+  "calendar_outbound_events",
+  {
+    ...id,
+    ...timestamps,
+    connectionId: uuid("connection_id")
+      .references(() => calendarConnections.id, { onDelete: "cascade" })
+      .notNull(),
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    externalEventId: text("external_event_id").notNull(),
+    tenantId,
+  },
+  withTenantIdIndex("calendar_outbound_events", (table) => ({
+    recipientUniqueIdx: uniqueIndex("calendar_outbound_events_connection_event_user_unique_idx").on(
+      table.tenantId,
+      table.connectionId,
+      table.calendarEventId,
+      table.userId,
+    ),
+    microsoftEventUniqueIdx: uniqueIndex(
+      "calendar_outbound_events_connection_external_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.externalEventId),
+    eventIdx: index("calendar_outbound_events_calendar_event_idx").on(
+      table.tenantId,
+      table.calendarEventId,
+    ),
+  })),
+);
+
+export const calendarExternalEvents = pgTable(
+  "calendar_external_events",
+  {
+    ...id,
+    ...timestamps,
+    connectionId: uuid("connection_id")
+      .references(() => calendarConnections.id, { onDelete: "cascade" })
+      .notNull(),
+    calendarEventId: uuid("calendar_event_id")
+      .references(() => calendarEvents.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+    externalEventId: text("external_event_id").notNull(),
+    webLink: text("web_link"),
+    sensitivity: text("sensitivity").$type<OutlookEventSensitivity>().notNull(),
+    availability: text("availability").$type<OutlookEventAvailability>().notNull(),
+    isCancelled: boolean("is_cancelled").notNull().default(false),
+    tenantId,
+  },
+  withTenantIdIndex("calendar_external_events", (table) => ({
+    calendarEventUniqueIdx: uniqueIndex("calendar_external_events_calendar_event_unique_idx").on(
+      table.calendarEventId,
+    ),
+    connectionEventUniqueIdx: uniqueIndex(
+      "calendar_external_events_tenant_connection_event_unique_idx",
+    ).on(table.tenantId, table.connectionId, table.externalEventId),
+    ownerIdx: index("calendar_external_events_tenant_user_idx").on(table.tenantId, table.userId),
   })),
 );
 

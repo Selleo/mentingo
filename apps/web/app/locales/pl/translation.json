@@ -364,12 +364,79 @@
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju"
   },
+  "microsoftCalendar": {
+    "title": "Kalendarz Microsoft",
+    "description": "Wyświetlaj główny kalendarz Outlook w Mentingo. Outlook pozostaje źródłem danych.",
+    "account": "Połączone konto",
+    "lastSync": "Ostatnia udana synchronizacja",
+    "status": {
+      "disconnected": "Rozłączono",
+      "syncing": "Synchronizowanie",
+      "connected": "Połączono",
+      "error": "Wymaga uwagi",
+      "reconnect_required": "Wymagane ponowne połączenie"
+    },
+    "action": {
+      "connect": "Połącz Kalendarz Microsoft",
+      "sync": "Synchronizuj teraz",
+      "reconnect": "Połącz ponownie",
+      "replace": "Użyj innego konta",
+      "disconnect": "Rozłącz",
+      "continue": "Przejdź do Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Przed rozpoczęciem kolejnej synchronizacji poczekaj chwilę."
+    },
+    "stale": {
+      "title": "Dane kalendarza mogą być nieaktualne",
+      "description": "Zaimportowane wydarzenia pozostają widoczne. Spróbuj ponownie zsynchronizować lub połączyć konto."
+    },
+    "adminApproval": {
+      "title": "Wymagana zgoda administratora Microsoft",
+      "description": "Organizacja musi zatwierdzić dostęp do kalendarza, zanim Mentingo zsynchronizuje wydarzenia Outlook."
+    },
+    "disconnect": {
+      "title": "Rozłączyć Kalendarz Microsoft?",
+      "description": "Zaimportowane wydarzenia Outlook zostaną usunięte z Mentingo. Kalendarz Outlook nie ulegnie zmianie."
+    },
+    "replace": {
+      "title": "Połączyć inne konto Microsoft?",
+      "description": "Połączenie konta {{email}} i jego wydarzenia zostaną usunięte przed synchronizacją nowego konta."
+    },
+    "outbound": {
+      "title": "Synchronizuj wydarzenia Mentingo",
+      "description": "Eksportuj szkolenia na żywo i terminy kursów do osobnego kalendarza Mentingo w Outlook.",
+      "reauthorize": "Włączenie wymaga zgody Microsoft na zapisywanie wydarzeń.",
+      "enable": "Włącz eksport",
+      "disable": "Wyłącz eksport"
+    },
+    "toast": {
+      "syncQueued": "Rozpoczęto synchronizację Kalendarza Microsoft.",
+      "syncFailed": "Nie udało się zsynchronizować Kalendarza Microsoft.",
+      "disconnected": "Kalendarz Microsoft został rozłączony.",
+      "disconnectFailed": "Nie udało się rozłączyć Kalendarza Microsoft.",
+      "outboundEnabled": "Wydarzenia Mentingo będą eksportowane do Outlook.",
+      "outboundDisabled": "Eksport wydarzeń Mentingo został wyłączony.",
+      "outboundFailed": "Nie udało się wyeksportować wydarzeń Mentingo."
+    },
+    "oauth": {
+      "connected": "Trwa łączenie Kalendarza Microsoft i rozpoczęła się pierwsza synchronizacja.",
+      "replacement_required": "Potwierdź zmianę konta przed połączeniem innego konta Microsoft.",
+      "admin_approval_required": "Dostęp do kalendarza wymaga zgody administratora Microsoft.",
+      "authorization_failed": "Autoryzacja Kalendarza Microsoft nie powiodła się. Spróbuj ponownie."
+    }
+  },
   "calendarView": {
     "title": "Kalendarz",
     "description": "Przeglądaj zaplanowane wydarzenia edukacyjne.",
     "loading": "Ładowanie wydarzeń",
     "empty": "Brak wydarzeń do wyświetlenia",
     "today": "Dzisiaj",
+    "legend": { "label": "Źródła" },
+    "microsoft": {
+      "staleWarning": "Wydarzenia Microsoft mogą być nieaktualne. Połącz konto ponownie lub ponów próbę w ustawieniach konta.",
+      "horizonNotice": "Wydarzenia Microsoft są importowane od 30 dni wstecz do 6 miesięcy naprzód, więc ten zakres może być niepełny."
+    },
     "view": {
       "month": "Miesiąc",
       "week": "Tydzień",
@@ -453,11 +520,13 @@
       "action": {
         "edit": "Edytuj wydarzenie",
         "goToLiveTraining": "Przejdź do szkolenia na żywo",
-        "goToCourse": "Przejdź do kursu"
+        "goToCourse": "Przejdź do kursu",
+        "openOutlook": "Otwórz w Outlook"
       },
       "sourceType": {
         "liveTraining": "Szkolenie na żywo",
-        "courseDueDate": "Termin kursu"
+        "courseDueDate": "Termin kursu",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Czas",
@@ -467,7 +536,9 @@
         "people": "Osoby",
         "dueDate": "Termin",
         "course": "Kurs",
-        "group": "Grupa"
+        "group": "Grupa",
+        "availability": "Dostępność",
+        "privacy": "Prywatność"
       },
       "deliveryType": {
         "online": "Online",
@@ -479,6 +550,14 @@
         "ended": "Zakończone",
         "expired": "Wygasłe"
       },
+      "availability": {
+        "free": "Wolny",
+        "tentative": "Wstępnie",
+        "busy": "Zajęty",
+        "out_of_office": "Poza biurem",
+        "working_elsewhere": "Praca w innym miejscu"
+      },
+      "privateEvent": "Szczegóły tego prywatnego wydarzenia Outlook są ukryte.",
       "role": {
         "admin": "Admin",
         "author": "Autor",
@@ -1900,6 +1979,12 @@
       },
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft Client Secret"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Identyfikator klienta kalendarza Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Klucz tajny klienta kalendarza Microsoft"
       },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Enabled (true/false)"
@@ -3606,6 +3691,7 @@
     },
     "tabs": {
       "account": "Konto",
+      "integrations": "Integracje",
       "organization": "Organizacja",
       "platformCustomization": "Dostosowanie Platformy"
     },

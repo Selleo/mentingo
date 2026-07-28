@@ -1,1 +1,0 @@
-ALTER TABLE "courses" ADD COLUMN "duration_estimates" jsonb DEFAULT '{}'::jsonb NOT NULL;

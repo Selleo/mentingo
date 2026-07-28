@@ -39,13 +39,13 @@ export default function ErrorPage({
       <div className="relative flex size-96 flex-col items-center justify-center rounded-full border border-neutral-200 bg-white/80 p-10 text-center shadow-xl backdrop-blur-md dark:border-neutral-800 bg-background">
         <Icon name="Blocked" className="size-10 mb-6 text-primary-700" />
         <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">{title}</h1>
-        {description ? (
+        {description && (
           <p className="mt-3 px-4 text-sm text-neutral-600 dark:text-neutral-300">{description}</p>
-        ) : null}
+        )}
 
-        {children ? <div className="mt-3 w-full px-4">{children}</div> : null}
+        {children && <div className="mt-3 w-full px-4">{children}</div>}
 
-        {showAction ? (
+        {showAction && (
           <div className="mt-6">
             {onAction ? (
               <Button onClick={onAction}>{actionLabel}</Button>
@@ -55,7 +55,7 @@ export default function ErrorPage({
               </Link>
             )}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

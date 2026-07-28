@@ -127,13 +127,13 @@ export function LiveTrainingLessonForm({
                         {t("adminCourseView.curriculum.lesson.liveTraining.linkedDescription")}
                       </p>
                     </div>
-                    {linkedLiveTrainingId ? (
+                    {linkedLiveTrainingId && (
                       <Button asChild type="button" variant="outline" className="gap-2">
                         <Link to={`/live-training/${linkedLiveTrainingId}`}>
                           {t("adminCourseView.curriculum.lesson.liveTraining.openLiveTraining")}
                         </Link>
                       </Button>
-                    ) : null}
+                    )}
                   </div>
                 </section>
               )}
@@ -151,13 +151,13 @@ export function LiveTrainingLessonForm({
                         )}
                       </p>
                     </div>
-                    {linkedLiveTrainingId ? (
+                    {linkedLiveTrainingId && (
                       <Button asChild type="button" variant="outline" className="gap-2">
                         <Link to={`/live-training/${linkedLiveTrainingId}`}>
                           {t("adminCourseView.curriculum.lesson.liveTraining.openBaseLiveTraining")}
                         </Link>
                       </Button>
-                    ) : null}
+                    )}
                   </div>
                 </section>
               )}

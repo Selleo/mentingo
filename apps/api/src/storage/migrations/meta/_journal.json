@@ -1230,15 +1230,15 @@
     {
       "idx": 175,
       "version": "7",
-      "when": 1785067604307,
-      "tag": "0175_add_course_overview_fields",
+      "when": 1785140637082,
+      "tag": "0175_add_calendar_provider_schema",
       "breakpoints": true
     },
     {
       "idx": 176,
       "version": "7",
-      "when": 1785156854261,
-      "tag": "0176_cache_course_duration_estimates",
+      "when": 1785140655153,
+      "tag": "0176_enable_calendar_provider_rls",
       "breakpoints": true
     }
   ]
