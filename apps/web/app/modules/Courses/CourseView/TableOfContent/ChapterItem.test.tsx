@@ -9,10 +9,25 @@ import ChapterItem from "./ChapterItem";
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type Chapter = GetCourseResponse["data"]["chapters"][number];
+type ChapterWithLessonAccess = Omit<Chapter, "lessons"> & {
+  lessons: Array<Chapter["lessons"][number] & { hasAccess: boolean }>;
+};
 
 const onToggle = vi.fn();
 
-const createChapter = (overrides: Partial<Chapter> = {}): Chapter =>
+vi.mock("~/api/queries", () => ({
+  useCurrentUser: () => ({ data: { id: "user-1" } }),
+}));
+
+vi.mock("~/modules/Courses/context/CourseAccessProvider", () => ({
+  useCourseAccessProvider: () => ({
+    course: { enrolled: true },
+    isCourseStudentModeActive: false,
+    isPreviewMode: false,
+  }),
+}));
+
+const createChapter = (overrides: Partial<ChapterWithLessonAccess> = {}): ChapterWithLessonAccess =>
   ({
     id: "chapter-1",
     title: "Statistical Analysis",
@@ -27,6 +42,7 @@ const createChapter = (overrides: Partial<Chapter> = {}): Chapter =>
         type: "content",
         displayOrder: 1,
         quizQuestionCount: null,
+        hasAccess: true,
       },
       {
         id: "lesson-2",
@@ -35,6 +51,7 @@ const createChapter = (overrides: Partial<Chapter> = {}): Chapter =>
         type: "content",
         displayOrder: 2,
         quizQuestionCount: null,
+        hasAccess: true,
       },
       {
         id: "lesson-3",
@@ -43,10 +60,11 @@ const createChapter = (overrides: Partial<Chapter> = {}): Chapter =>
         type: "content",
         displayOrder: 3,
         quizQuestionCount: null,
+        hasAccess: true,
       },
     ],
     ...overrides,
-  }) as Chapter;
+  }) as ChapterWithLessonAccess;
 
 describe("ChapterItem", () => {
   it("shows active lesson progress for the current student chapter", () => {

@@ -1,7 +1,10 @@
 import { Pencil } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { COURSE_SETTINGS_HANDLES } from "../../../../../e2e/data/courses/handles";
+import {
+  COURSE_OVERVIEW_HANDLES,
+  COURSE_SETTINGS_HANDLES,
+} from "../../../../../e2e/data/courses/handles";
 
 import type { ReactNode } from "react";
 
@@ -98,7 +101,10 @@ export default function CourseTitleEditor({
   }
 
   return (
-    <h1 className="relative z-10 mb-4 text-xl font-bold leading-snug text-white md:text-3xl md:leading-tight lg:text-4xl">
+    <h1
+      data-testid={COURSE_OVERVIEW_HANDLES.HERO_TITLE}
+      className="relative z-10 mb-4 min-w-0 max-w-full text-lg font-bold leading-snug text-white min-[360px]:text-xl md:text-3xl md:leading-tight lg:text-4xl"
+    >
       {titleContent}
     </h1>
   );

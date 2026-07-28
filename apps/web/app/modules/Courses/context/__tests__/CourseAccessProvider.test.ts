@@ -1,6 +1,7 @@
+import { PERMISSIONS } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
-import { resolveCourseExperienceState } from "../CourseAccessProvider";
+import { canUpdateCourseByAuthor, resolveCourseExperienceState } from "../CourseAccessProvider";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
@@ -75,14 +76,14 @@ describe("resolveCourseExperienceState", () => {
     expect(state.isEffectiveStudentExperience).toBe(false);
   });
 
-  it("uses the admin experience when the user can manage all users", () => {
+  it("uses the admin experience for users who can update any course", () => {
     const state = resolveCourseExperienceState({
       course: createCourse(),
       forcePreviewMode: false,
       currentUserId: "admin-1",
       canUseLearningMode: true,
       canUpdateLearningProgress: true,
-      canManageUsers: true,
+      canEditCourse: true,
       activeLearningModeCourseIds: [],
     });
 
@@ -90,14 +91,14 @@ describe("resolveCourseExperienceState", () => {
     expect(state.isAdminExperience).toBe(true);
   });
 
-  it("uses the admin experience for course authors with course manage permissions", () => {
+  it("uses the admin experience for course authors with own-course update access", () => {
     const state = resolveCourseExperienceState({
       course: createCourse(),
       forcePreviewMode: false,
       currentUserId: "author-1",
       canUseLearningMode: true,
       canUpdateLearningProgress: true,
-      canManageCourses: true,
+      canEditCourse: true,
       activeLearningModeCourseIds: [],
     });
 
@@ -112,12 +113,51 @@ describe("resolveCourseExperienceState", () => {
       currentUserId: "admin-1",
       canUseLearningMode: true,
       canUpdateLearningProgress: true,
-      canManageUsers: true,
+      canEditCourse: true,
       activeLearningModeCourseIds: ["course-1"],
     });
 
     expect(state.canEditCourse).toBe(true);
     expect(state.isCourseStudentModeActive).toBe(true);
     expect(state.isAdminExperience).toBe(false);
+  });
+});
+
+describe("canUpdateCourseByAuthor", () => {
+  it("allows COURSE_UPDATE users to edit courses owned by someone else", () => {
+    expect(
+      canUpdateCourseByAuthor({
+        authorId: "author-1",
+        currentUserId: "admin-1",
+        permissions: [PERMISSIONS.COURSE_UPDATE],
+      }),
+    ).toBe(true);
+  });
+
+  it("allows COURSE_UPDATE_OWN users to edit only their own courses", () => {
+    expect(
+      canUpdateCourseByAuthor({
+        authorId: "author-1",
+        currentUserId: "author-1",
+        permissions: [PERMISSIONS.COURSE_UPDATE_OWN],
+      }),
+    ).toBe(true);
+    expect(
+      canUpdateCourseByAuthor({
+        authorId: "author-1",
+        currentUserId: "content-creator-2",
+        permissions: [PERMISSIONS.COURSE_UPDATE_OWN],
+      }),
+    ).toBe(false);
+  });
+
+  it("does not treat USER_MANAGE as course update access", () => {
+    expect(
+      canUpdateCourseByAuthor({
+        authorId: "author-1",
+        currentUserId: "admin-1",
+        permissions: [PERMISSIONS.USER_MANAGE],
+      }),
+    ).toBe(false);
   });
 });

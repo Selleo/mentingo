@@ -1,8 +1,8 @@
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type PermissionKey } from "@repo/shared";
 import { createContext, useContext, useMemo } from "react";
 
 import { useCurrentUser } from "~/api/queries";
-import { hasAnyPermission, hasPermission } from "~/common/permissions/permission.utils";
+import { hasPermission } from "~/common/permissions/permission.utils";
 
 import type { PropsWithChildren } from "react";
 import type { GetCourseResponse } from "~/api/generated-api";
@@ -22,9 +22,14 @@ type CourseExperienceResolverParams = {
   currentUserId?: string;
   canUseLearningMode: boolean;
   canUpdateLearningProgress: boolean;
-  canManageUsers?: boolean;
-  canManageCourses?: boolean;
+  canEditCourse?: boolean;
   activeLearningModeCourseIds: string[];
+};
+
+type CourseUpdateAccessParams = {
+  authorId: string;
+  currentUserId?: string;
+  permissions: readonly PermissionKey[];
 };
 
 const CourseExperienceContext = createContext<CourseExperienceContextValue | null>(null);
@@ -34,21 +39,30 @@ type CourseAccessProviderProps = PropsWithChildren<{
   forcePreviewMode?: boolean;
 }>;
 
+export function canUpdateCourseByAuthor({
+  authorId,
+  currentUserId,
+  permissions,
+}: CourseUpdateAccessParams): boolean {
+  const canUpdateAnyCourse = hasPermission(permissions, PERMISSIONS.COURSE_UPDATE);
+  const canUpdateOwnCourse = hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN);
+
+  return canUpdateAnyCourse || (canUpdateOwnCourse && currentUserId === authorId);
+}
+
 export function resolveCourseExperienceState({
   course,
   forcePreviewMode,
   currentUserId,
   canUseLearningMode,
   canUpdateLearningProgress,
-  canManageUsers = false,
-  canManageCourses = false,
+  canEditCourse = false,
   activeLearningModeCourseIds,
 }: CourseExperienceResolverParams): CourseExperienceContextValue {
   const isCourseStudentModeActive =
     !forcePreviewMode && canUseLearningMode && activeLearningModeCourseIds.includes(course.id);
 
   const isCourseAuthor = currentUserId === course.authorId;
-  const canEditCourse = canManageUsers || (canManageCourses && isCourseAuthor);
 
   const canLearnByEnrollment =
     canUpdateLearningProgress && !isCourseAuthor && Boolean(course.enrolled);
@@ -87,11 +101,11 @@ export function CourseAccessProvider({
     permissions,
     PERMISSIONS.LEARNING_PROGRESS_UPDATE,
   );
-  const canManageUsers = hasPermission(permissions, PERMISSIONS.USER_MANAGE);
-  const canManageCourses = hasAnyPermission(permissions, [
-    PERMISSIONS.COURSE_UPDATE,
-    PERMISSIONS.COURSE_UPDATE_OWN,
-  ]);
+  const canEditCourse = canUpdateCourseByAuthor({
+    authorId: course.authorId,
+    currentUserId: currentUser?.id,
+    permissions,
+  });
 
   const value = useMemo(() => {
     return resolveCourseExperienceState({
@@ -100,8 +114,7 @@ export function CourseAccessProvider({
       currentUserId: currentUser?.id,
       canUseLearningMode,
       canUpdateLearningProgress,
-      canManageUsers,
-      canManageCourses,
+      canEditCourse,
       activeLearningModeCourseIds: currentUser?.studentModeCourseIds ?? [],
     });
   }, [
@@ -111,8 +124,7 @@ export function CourseAccessProvider({
     forcePreviewMode,
     canUseLearningMode,
     canUpdateLearningProgress,
-    canManageUsers,
-    canManageCourses,
+    canEditCourse,
   ]);
 
   return (

@@ -9,6 +9,7 @@ import { Switch } from "~/components/ui/switch";
 export type GroupDeadline = {
   deadline: string;
   id: string;
+  isMandatory: boolean;
   name: string;
 };
 

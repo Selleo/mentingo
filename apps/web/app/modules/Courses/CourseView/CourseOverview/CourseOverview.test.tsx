@@ -240,6 +240,10 @@ describe("CourseOverview", () => {
           image: expect.objectContaining({ name: "course-image.jpg" }),
         },
       });
+      expect(URL.createObjectURL).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "course-image.jpg" }),
+      );
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:course-image");
     });
   });
 });

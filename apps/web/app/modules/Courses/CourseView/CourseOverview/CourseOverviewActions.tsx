@@ -122,7 +122,10 @@ export default function CourseOverviewActions({
   };
 
   return (
-    <div className="hidden flex-wrap items-center gap-3 md:flex">
+    <div
+      data-testid={COURSE_OVERVIEW_HANDLES.ACTIONS}
+      className="flex flex-wrap items-center gap-2 sm:gap-3"
+    >
       {renderPrimaryAction()}
 
       <Button

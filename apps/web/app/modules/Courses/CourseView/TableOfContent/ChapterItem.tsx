@@ -11,9 +11,12 @@ import LessonItem from "./LessonItem";
 import type { GetCourseResponse } from "~/api/generated-api";
 
 type Chapter = GetCourseResponse["data"]["chapters"][number];
+type ChapterWithLessonAccess = Omit<Chapter, "lessons"> & {
+  lessons: Array<Chapter["lessons"][number] & { hasAccess: boolean }>;
+};
 
 type ChapterItemProps = {
-  chapter: Chapter;
+  chapter: ChapterWithLessonAccess;
   chapterNumber: number;
   courseSlug: string;
   isAdminExperience: boolean;
@@ -192,6 +195,7 @@ export default function ChapterItem({
                   isCompleted={isCompleted}
                   isCurrent={isCurrent}
                   isLast={lessonIndex === chapter.lessons.length - 1}
+                  isFreemiumChapter={Boolean(chapter.isFreemium)}
                   lesson={lesson}
                 />
               ))}

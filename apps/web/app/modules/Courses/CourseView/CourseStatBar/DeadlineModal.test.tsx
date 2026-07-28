@@ -14,7 +14,9 @@ describe("DeadlineModal", () => {
     renderWith().render(
       <DeadlineModal
         deadlineEnabledDraft
-        groupDeadlines={[{ id: "group-1", name: "Sales", deadline: "2026-08-01" }]}
+        groupDeadlines={[
+          { id: "group-1", name: "Sales", deadline: "2026-08-01", isMandatory: true },
+        ]}
         isSaving={false}
         onChangeGroupDeadlines={vi.fn()}
         onClose={onClose}
@@ -35,7 +37,9 @@ describe("DeadlineModal", () => {
     renderWith().render(
       <DeadlineModal
         deadlineEnabledDraft
-        groupDeadlines={[{ id: "group-1", name: "Sales", deadline: "2026-08-01" }]}
+        groupDeadlines={[
+          { id: "group-1", name: "Sales", deadline: "2026-08-01", isMandatory: true },
+        ]}
         isSaving={false}
         onChangeGroupDeadlines={vi.fn()}
         onClose={vi.fn()}

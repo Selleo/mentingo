@@ -74,7 +74,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
   const { data: otherCourses = [] } = useContentCreatorCourses(
     course.authorId,
     {
-      scope: "available",
+      scope: "all",
       excludeCourseId: course.id,
       language,
     },
@@ -95,6 +95,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     setGroupDeadlines(
       groups.map((group) => ({
         id: group.id,
+        isMandatory: Boolean(group.isMandatory),
         name: group.name,
         deadline: group.dueDate?.slice(0, 10) ?? "",
       })),
@@ -155,7 +156,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       {
         groups: groupDeadlines.map((group) => ({
           id: group.id,
-          isMandatory: deadlineEnabledDraft,
+          isMandatory: group.isMandatory,
           dueDate:
             deadlineEnabledDraft && group.deadline ? new Date(group.deadline).toISOString() : null,
         })),

@@ -77,7 +77,7 @@ export function useUpdateCourseSettings() {
         description,
       });
     },
-    onError: (error: unknown, { data, showToast = true }) => {
+    onError: (error, { data, showToast = true }) => {
       if (!showToast) return;
 
       const changedValues = Object.keys(data).filter(

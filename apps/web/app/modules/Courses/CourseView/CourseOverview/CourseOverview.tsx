@@ -23,6 +23,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
+import { cn } from "~/lib/utils";
+import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
 import { CourseLanguageSelector } from "~/modules/Admin/EditCourse/components/CourseLanguageSelector";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 import { navigateToNextLesson } from "~/modules/Courses/utils/navigateToNextLesson";
@@ -88,7 +90,6 @@ export default function CourseOverview({
   const [heroImagePositionDraft, setHeroImagePositionDraft] = useState(savedImagePosition);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [selectedTrailerFile, setSelectedTrailerFile] = useState<File | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState(imageUrl);
   const [courseTitle, setCourseTitle] = useState(course.title);
   const [courseDescription, setCourseDescription] = useState(course.description);
   const [selectedCategoryId, setSelectedCategoryId] = useState(course.categoryId ?? "");
@@ -98,26 +99,14 @@ export default function CourseOverview({
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
 
+  const selectedImagePreviewUrl = useObjectUrl(selectedImageFile);
+  const imagePreviewUrl = selectedImagePreviewUrl ?? imageUrl;
   const selectedCategoryTitle =
     categories.find((category) => category.id === selectedCategoryId)?.title ?? course.category;
 
   useEffect(() => {
     setHeroImagePositionDraft(savedImagePosition);
   }, [savedImagePosition]);
-
-  useEffect(() => {
-    if (!selectedImageFile) {
-      setImagePreviewUrl(imageUrl);
-    }
-  }, [imageUrl, selectedImageFile]);
-
-  useEffect(() => {
-    return () => {
-      if (imagePreviewUrl.startsWith("blob:")) {
-        URL.revokeObjectURL(imagePreviewUrl);
-      }
-    };
-  }, [imagePreviewUrl]);
 
   useEffect(() => {
     setCourseTitle(course.title);
@@ -134,7 +123,6 @@ export default function CourseOverview({
   const resetMediaDraft = () => {
     setSelectedImageFile(null);
     setSelectedTrailerFile(null);
-    setImagePreviewUrl(imageUrl);
     setHeroImagePositionDraft(savedImagePosition);
 
     if (imageInputRef.current) {
@@ -148,7 +136,6 @@ export default function CourseOverview({
 
   const handleImageSelection = (file: File) => {
     setSelectedImageFile(file);
-    setImagePreviewUrl(URL.createObjectURL(file));
   };
 
   const handleTrailerSelection = (file: File) => {
@@ -291,7 +278,10 @@ export default function CourseOverview({
   };
 
   return (
-    <section className="mb-4 overflow-hidden rounded-2xl bg-white shadow-lg md:mb-6">
+    <section
+      data-testid={COURSE_OVERVIEW_HANDLES.HERO}
+      className="mb-4 w-full min-w-0 max-w-full overflow-hidden rounded-2xl bg-white shadow-lg md:mb-6"
+    >
       <CourseHeroImage
         alt={course.title}
         imageUrl={imageUrl}
@@ -304,7 +294,7 @@ export default function CourseOverview({
                 variant="outline"
                 data-testid={COURSE_OVERVIEW_HANDLES.SETTINGS_BUTTON}
                 onClick={() => setShowSettingsDrawer(true)}
-                className="flex shrink-0 items-center gap-2 shadow-lg backdrop-blur-sm transition"
+                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-lg backdrop-blur-sm transition sm:w-auto sm:px-4"
               >
                 <Settings className="size-4 text-primary-700" />
 
@@ -317,7 +307,7 @@ export default function CourseOverview({
                 variant="outline"
                 onClick={openMediaModal}
                 data-testid={COURSE_OVERVIEW_HANDLES.EDIT_MEDIA_BUTTON}
-                className="flex shrink-0 items-center gap-2 shadow-lg backdrop-blur-sm transition"
+                className="flex size-10 shrink-0 items-center gap-2 p-0 shadow-lg backdrop-blur-sm transition sm:w-auto sm:px-4"
               >
                 <Upload className="size-4 text-primary-700" />
 
@@ -337,16 +327,24 @@ export default function CourseOverview({
               isAIConfigured={isAIConfigured?.enabled ?? false}
               onChange={onLanguageChange}
               setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
-              className="shrink-0"
+              className="min-w-0 shrink-0 gap-1 sm:gap-2"
               compactOnMobile
-              selectTriggerClassName="w-14 min-w-14 px-2 sm:w-auto sm:min-w-[200px] sm:px-3"
-              tooltipIconClassName="text-white"
+              selectTriggerClassName="w-12 min-w-12 px-1.5 min-[360px]:w-14 min-[360px]:min-w-14 min-[360px]:px-2 sm:w-auto sm:min-w-[200px] sm:px-3"
+              tooltipIconClassName="hidden text-white min-[360px]:block"
             />
           </div>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 z-10 p-6 lg:p-8">
-          <div className="lg:max-w-[62%]">
+        <div
+          className={cn(
+            "relative z-10 flex flex-col justify-end px-4 pb-6 sm:px-6 sm:pb-6 lg:px-8 lg:pb-8",
+            isAdminExperience ? "pt-28 sm:pt-24 lg:pt-8" : "pt-6",
+          )}
+        >
+          <div
+            data-testid={COURSE_OVERVIEW_HANDLES.HERO_CONTENT}
+            className="min-w-0 max-w-full lg:max-w-[62%]"
+          >
             <CourseCategoryEditor
               categoryId={selectedCategoryId}
               categoryTitle={selectedCategoryTitle}

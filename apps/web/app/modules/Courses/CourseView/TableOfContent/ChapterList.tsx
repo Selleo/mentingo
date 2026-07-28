@@ -1,7 +1,11 @@
 import { Check, ChevronDown } from "lucide-react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useLessonsSequence } from "~/hooks/useLessonsSequence";
+
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
+import { getChaptersWithAccess } from "../../utils";
 import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
 import ChapterItem from "./ChapterItem";
@@ -27,27 +31,30 @@ export default function ChapterList({
   showAllChapters,
 }: ChapterListProps) {
   const { t } = useTranslation();
-  const { course, isAdminExperience } = useCourseAccessProvider();
+  const { course, isAdminExperience, isPreviewMode } = useCourseAccessProvider();
+  const { sequenceEnabled } = useLessonsSequence(course.id);
+  const shouldEnforceSequence = sequenceEnabled && !isPreviewMode;
+  const chapters = useMemo(
+    () => getChaptersWithAccess(course.chapters, shouldEnforceSequence),
+    [course.chapters, shouldEnforceSequence],
+  );
 
-  const completedChapters = course.chapters.filter(
+  const completedChapters = chapters.filter(
     (chapter) => chapter.chapterProgress === CHAPTER_PROGRESS_STATUSES.COMPLETED,
   );
-  const activeChapters = course.chapters
-    .filter(
-      (chapter) =>
-        isAdminExperience || chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
-    )
-    .filter((chapter, _idx, chapters) => {
-      if (isMobile && !isAdminExperience && !showAllChapters) {
-        const currentIndex = chapters.findIndex(
-          (item) => item.chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS,
-        );
-        const chapterIndex = chapters.indexOf(chapter);
-        return chapterIndex >= currentIndex && chapterIndex <= currentIndex + 1;
-      }
-
-      return true;
-    });
+  const activeChapters = chapters.filter(
+    (chapter) =>
+      isAdminExperience || chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
+  );
+  const shouldLimitVisibleChapters = isMobile && !isAdminExperience && !showAllChapters;
+  const currentChapterIndex = activeChapters.findIndex(
+    (chapter) => chapter.chapterProgress === CHAPTER_PROGRESS_STATUSES.IN_PROGRESS,
+  );
+  const firstVisibleChapterIndex = currentChapterIndex === -1 ? 0 : currentChapterIndex;
+  const visibleActiveChapters = shouldLimitVisibleChapters
+    ? activeChapters.slice(firstVisibleChapterIndex, firstVisibleChapterIndex + 2)
+    : activeChapters;
+  const hiddenChapterCount = activeChapters.length - visibleActiveChapters.length;
 
   return (
     <div className="relative">
@@ -87,7 +94,7 @@ export default function ChapterList({
             <ChapterItem
               key={chapter.id}
               chapter={chapter}
-              chapterNumber={course.chapters.indexOf(chapter) + 1}
+              chapterNumber={chapters.indexOf(chapter) + 1}
               courseSlug={course.slug}
               isAdminExperience={isAdminExperience}
               isExpanded={expandedChapters.includes(chapter.id)}
@@ -95,11 +102,11 @@ export default function ChapterList({
             />
           ))}
 
-        {activeChapters.map((chapter) => (
+        {visibleActiveChapters.map((chapter) => (
           <ChapterItem
             key={chapter.id}
             chapter={chapter}
-            chapterNumber={course.chapters.indexOf(chapter) + 1}
+            chapterNumber={chapters.indexOf(chapter) + 1}
             courseSlug={course.slug}
             isAdminExperience={isAdminExperience}
             isExpanded={expandedChapters.includes(chapter.id)}
@@ -107,28 +114,20 @@ export default function ChapterList({
           />
         ))}
 
-        {isMobile &&
-          !isAdminExperience &&
-          !showAllChapters &&
-          course.chapters.filter(
-            (chapter) => chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
-          ).length > 2 && (
-            <div className="relative mt-6">
-              <button
-                type="button"
-                onClick={onShowAllChapters}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-6 py-4 font-semibold text-primary-700 transition-all hover:border-primary-700 hover:bg-neutral-100"
-              >
-                <ChevronDown className="size-5" />
-                {t("modernCourseView.contents.showAllChapters", {
-                  count:
-                    course.chapters.filter(
-                      (chapter) => chapter.chapterProgress !== CHAPTER_PROGRESS_STATUSES.COMPLETED,
-                    ).length - 2,
-                })}
-              </button>
-            </div>
-          )}
+        {shouldLimitVisibleChapters && hiddenChapterCount > 0 && (
+          <div className="relative mt-6">
+            <button
+              type="button"
+              onClick={onShowAllChapters}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 px-6 py-4 font-semibold text-primary-700 transition-all hover:border-primary-700 hover:bg-neutral-100"
+            >
+              <ChevronDown className="size-5" />
+              {t("modernCourseView.contents.showAllChapters", {
+                count: hiddenChapterCount,
+              })}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

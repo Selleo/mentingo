@@ -74,6 +74,7 @@ export const createCourseFactory = (db: DatabasePg) => {
             SUPPORTED_LANGUAGES.EN,
             course.learningOutcomes[SUPPORTED_LANGUAGES.EN] ?? [],
           ),
+          durationEstimates: sql`'{}'::jsonb`,
           categoryId,
           authorId,
         })
@@ -98,6 +99,7 @@ export const createCourseFactory = (db: DatabasePg) => {
       thumbnailS3Key: faker.system.directoryPath(),
       thumbnailPositionY: 50,
       learningOutcomes: {},
+      durationEstimates: {},
       showAuthorSection: true,
       status: "published",
       hasCertificate: false,

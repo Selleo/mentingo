@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
 import { cn } from "~/lib/utils";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 
 type CourseWhatYouWillLearnProps = {
@@ -103,7 +104,10 @@ export default function CourseWhatYouWillLearn({
   };
 
   return (
-    <aside className="absolute bottom-8 right-8 z-10 hidden w-[34%] max-w-[600px] rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block">
+    <aside
+      data-testid={COURSE_OVERVIEW_HANDLES.LEARNING_OUTCOMES}
+      className="absolute bottom-8 right-8 z-10 hidden w-[34%] max-w-[600px] rounded-2xl bg-black/15 p-4 backdrop-blur-[2px] lg:block"
+    >
       <h3 className="mb-4 flex items-center gap-3 font-gothic text-xl font-bold text-white xl:text-2xl">
         <span className="flex items-center justify-center rounded-full text-success-500">
           <CheckCircle2 className="size-8" />

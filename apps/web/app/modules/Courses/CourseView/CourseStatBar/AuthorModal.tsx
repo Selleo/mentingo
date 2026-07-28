@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react";
 import { Check, Clock, Users, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -23,6 +24,7 @@ type OtherCourse = {
   estimatedDurationFormatted?: string | null;
   estimatedDurationMinutes?: number | null;
   id: string;
+  slug: string;
   title: string;
 };
 
@@ -120,9 +122,11 @@ export default function AuthorModal({
               </h4>
               <div className="max-h-96 space-y-3 overflow-y-auto pr-2">
                 {otherCourses.map((course) => (
-                  <div
+                  <Link
                     key={course.id}
-                    className="group cursor-pointer rounded-xl border border-neutral-200  p-4 transition-all hover:border-primary-700 hover:shadow-md"
+                    to={`/course/${course.slug}`}
+                    onClick={onClose}
+                    className="group block cursor-pointer rounded-xl border border-neutral-200 p-4 transition-all hover:border-primary-700 hover:shadow-md"
                   >
                     <div className="mb-2">
                       <h5 className="mb-1 font-bold leading-snug text-neutral-950 transition-colors group-hover:text-primary-700">
@@ -146,7 +150,7 @@ export default function AuthorModal({
                         </span>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>

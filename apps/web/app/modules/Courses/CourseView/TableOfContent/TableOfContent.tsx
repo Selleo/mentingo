@@ -44,6 +44,7 @@ export function TableOfContent() {
   );
   const canShowStatistics =
     !isCourseStudentModeActive && hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
+  const shouldShowTabs = isAdminExperience || canShowChat || canShowStatistics;
 
   const toggleChapter = (id: string) => {
     setExpandedChapters((prev) =>
@@ -80,7 +81,7 @@ export function TableOfContent() {
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
-      {(isAdminExperience || canShowChat || canShowStatistics) && (
+      {shouldShowTabs && (
         <TableOfContentTabs
           activeTab={activeTab}
           canEditContent={isAdminExperience}
@@ -92,7 +93,7 @@ export function TableOfContent() {
         />
       )}
 
-      {!isAdminExperience && !canShowChat && !isMobile && (
+      {!shouldShowTabs && (
         <div className="mb-4 md:mb-6">
           <h2 className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
             {t("modernCourseView.contents.title")}

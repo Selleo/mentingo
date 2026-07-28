@@ -110,6 +110,8 @@ import type {
 import type { ActivityLogActionType, ActivityLogMetadata } from "src/activity-logs/types";
 import type { AiJudgeCriterionStatus } from "src/ai/judge-configuration/judge-configuration.types";
 import type { ActivityHistory, AllSettings } from "src/common/types";
+import type { CourseLearningOutcomesByLanguage } from "src/courses/types/course-learning-outcomes.types";
+import type { CourseDurationEstimatesByLanguage } from "src/courses/types/duration";
 import type { ResourceMetadata } from "src/file/types/resource-metadata.type";
 
 export const users = pgTable(
@@ -316,7 +318,11 @@ export const courses = pgTable(
     currency: varchar("currency").notNull().default("usd"),
     chapterCount: integer("chapter_count").notNull().default(0),
     learningOutcomes: jsonb("learning_outcomes")
-      .$type<Partial<Record<SupportedLanguages, string[]>>>()
+      .$type<CourseLearningOutcomesByLanguage>()
+      .default({})
+      .notNull(),
+    durationEstimates: jsonb("duration_estimates")
+      .$type<CourseDurationEstimatesByLanguage>()
       .default({})
       .notNull(),
     courseType: courseTypeEnum("course_type")

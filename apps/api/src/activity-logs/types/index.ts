@@ -121,6 +121,9 @@ export type CourseActivityLogSnapshot = {
   categoryId?: UUIDType | null;
   authorId?: UUIDType | null;
   thumbnailS3Key?: string | null;
+  thumbnailPositionY?: number;
+  learningOutcomes?: string[];
+  showAuthorSection?: boolean;
   baseLanguage?: string;
   availableLocales?: string[];
   settings?: Record<string, unknown>;

@@ -16,6 +16,7 @@ import {
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
+  SUPPORTED_LANGUAGES,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -683,7 +684,27 @@ export class CourseService {
     return trailers[courseId] ?? null;
   }
 
-  private getLocalizedLearningOutcomes(language: SupportedLanguages) {
+  private getLocalizedLearningOutcomes(
+    language: SupportedLanguages,
+    useBaseLanguageFallback = false,
+  ) {
+    if (useBaseLanguageFallback) {
+      return sql<string[]>`
+        ARRAY(
+          SELECT jsonb_array_elements_text(
+            CASE
+              WHEN jsonb_typeof(${courses.learningOutcomes}->${language}) = 'array'
+                AND jsonb_array_length(${courses.learningOutcomes}->${language}) > 0
+                THEN ${courses.learningOutcomes}->${language}
+              WHEN jsonb_typeof(${courses.learningOutcomes}->${courses.baseLanguage}) = 'array'
+                THEN ${courses.learningOutcomes}->${courses.baseLanguage}
+              ELSE '[]'::jsonb
+            END
+          )
+        )
+      `;
+    }
+
     return sql<string[]>`
       ARRAY(
         SELECT jsonb_array_elements_text(
@@ -903,6 +924,92 @@ export class CourseService {
     return estimates;
   }
 
+  private async getCourseDurationEstimates(
+    courseIds: UUIDType[],
+    language: SupportedLanguages | undefined,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<DurationEstimatesByCourse> {
+    if (!courseIds.length) return {};
+
+    const durationLanguage = language ?? SUPPORTED_LANGUAGES.EN;
+    const courseRows = await dbInstance
+      .select({
+        id: courses.id,
+        durationEstimates: courses.durationEstimates,
+        sourceSignature: sql<string>`
+          CONCAT_WS(
+            '|',
+            ${courses.baseLanguage},
+            ARRAY_TO_STRING(${courses.availableLocales}, ','),
+            COUNT(DISTINCT ${chapters.id})::text,
+            COALESCE(MAX(${chapters.updatedAt})::text, ''),
+            COUNT(DISTINCT ${lessons.id})::text,
+            COALESCE(MAX(${lessons.updatedAt})::text, ''),
+            COUNT(DISTINCT ${questions.id})::text,
+            COALESCE(MAX(${questions.updatedAt})::text, '')
+          )
+        `,
+      })
+      .from(courses)
+      .leftJoin(chapters, eq(chapters.courseId, courses.id))
+      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .leftJoin(questions, eq(questions.lessonId, lessons.id))
+      .where(inArray(courses.id, courseIds))
+      .groupBy(courses.id);
+
+    const estimates: DurationEstimatesByCourse = {};
+    const staleRows = courseRows.filter((course) => {
+      const cachedEstimate = course.durationEstimates[durationLanguage];
+
+      if (cachedEstimate?.sourceSignature !== course.sourceSignature) return true;
+
+      estimates[course.id] = { totalMinutes: cachedEstimate.totalMinutes };
+      return false;
+    });
+
+    if (!staleRows.length) return estimates;
+
+    const computedEstimates = await this.computeCourseDurationEstimates(
+      staleRows.map(({ id }) => id),
+      durationLanguage,
+      dbInstance,
+    );
+
+    await Promise.all(
+      staleRows.map(async ({ id, sourceSignature }) => {
+        const estimate = computedEstimates[id] ?? { totalMinutes: 0 };
+
+        estimates[id] = estimate;
+
+        await dbInstance
+          .update(courses)
+          .set({
+            durationEstimates: sql`
+              (
+                CASE
+                  WHEN JSONB_TYPEOF(${courses.durationEstimates}) = 'object'
+                    THEN ${courses.durationEstimates}
+                  ELSE '{}'::jsonb
+                END
+              ) || JSONB_BUILD_OBJECT(
+                ${durationLanguage}::text,
+                JSONB_BUILD_OBJECT(
+                  'totalMinutes',
+                  ${estimate.totalMinutes}::int,
+                  'sourceSignature',
+                  ${sourceSignature}::text
+                )
+              )
+            `,
+            updatedAt: sql`${courses.updatedAt}`,
+          })
+          .where(eq(courses.id, id));
+      }),
+    );
+
+    return estimates;
+  }
+
   private async getAvailableCoursesConditions(
     trx: DatabasePg,
     query: CoursesQuery,
@@ -1070,7 +1177,7 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.getCourseDurationEstimates(courseIds, language, trx);
       const dataWithDuration = dataWithSlugs.map((item) => {
         const duration = durationEstimates[item.id];
         return {
@@ -1161,7 +1268,7 @@ export class CourseService {
           ...getTableColumns(courses),
           title: this.localizationService.getLocalizedSqlField(courses.title, language),
           description: this.localizationService.getLocalizedSqlField(courses.description, language),
-          learningOutcomes: this.getLocalizedLearningOutcomes(language),
+          learningOutcomes: this.getLocalizedLearningOutcomes(language, true),
           thumbnailUrl: sql<string>`${courses.thumbnailS3Key}`,
           author: sql<string>`CONCAT(${users.firstName} || ' ' || ${users.lastName})`,
           authorEmail: sql<string>`${users.email}`,
@@ -1238,7 +1345,7 @@ export class CourseService {
 
       const trailerUrls = await this.getCourseTrailerUrls(courseIds);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-      const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.getCourseDurationEstimates(courseIds, language, trx);
 
       const coursesWithSignedUrls = await Promise.all(
         coursesRows.map(async (course) => {
@@ -1325,7 +1432,7 @@ export class CourseService {
         description: shouldUseExactLanguage
           ? this.localizationService.getFieldByLanguage(courses.description, language)
           : this.localizationService.getLocalizedSqlField(courses.description, language),
-        learningOutcomes: this.getLocalizedLearningOutcomes(language),
+        learningOutcomes: this.getLocalizedLearningOutcomes(language, true),
         courseChapterCount: courses.chapterCount,
         completedChapterCount: sql<number>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN COALESCE(${studentCourses.finishedChapterCount}, 0) ELSE 0 END`,
         enrolled: sql<boolean>`CASE WHEN ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED} THEN TRUE ELSE FALSE END`,
@@ -1645,7 +1752,7 @@ export class CourseService {
     if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
 
     if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
-      throw new ForbiddenException("You do not have permission to edit this course");
+      throw new ForbiddenException("adminCourseView.errors.forbidden.updateCourse");
     }
 
     const courseChapterList = await this.db
@@ -1752,6 +1859,10 @@ export class CourseService {
     language: SupportedLanguages;
   }): Promise<AllCoursesForContentCreatorResponse> {
     const conditions = [eq(courses.status, "published"), eq(courses.authorId, authorId)];
+
+    if (excludeCourseId) {
+      conditions.push(ne(courses.id, excludeCourseId));
+    }
 
     if (scope === COURSE_ENROLLMENT_SCOPES.ENROLLED) {
       conditions.push(
@@ -1881,7 +1992,7 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
-    const durationEstimates = await this.computeCourseDurationEstimates(courseIds, language);
+    const durationEstimates = await this.getCourseDurationEstimates(courseIds, language);
 
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
@@ -4676,6 +4787,9 @@ export class CourseService {
         categoryId: courses.categoryId,
         authorId: courses.authorId,
         thumbnailS3Key: courses.thumbnailS3Key,
+        thumbnailPositionY: courses.thumbnailPositionY,
+        learningOutcomes: this.getLocalizedLearningOutcomes(resolvedLanguage),
+        showAuthorSection: courses.showAuthorSection,
         settings: courses.settings,
         stripeProductId: courses.stripeProductId,
         stripePriceId: courses.stripePriceId,

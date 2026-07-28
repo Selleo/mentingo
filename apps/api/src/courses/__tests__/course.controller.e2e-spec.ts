@@ -18,10 +18,12 @@ import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { FileGuard } from "src/file/guards/file.guard";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
@@ -1719,6 +1721,77 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("PATCH /api/course/:id", () => {
+    it("emits course update events when only modern overview fields change", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        thumbnailPositionY: 50,
+        showAuthorSection: true,
+      });
+      const cookies = await cookieFor(admin, app);
+      const publishSpy = jest
+        .spyOn(app.get(OutboxPublisher), "publish")
+        .mockResolvedValue(undefined);
+
+      const updates = [
+        {
+          body: { learningOutcomes: ["Build reliable reports"] },
+          field: "learningOutcomes",
+          expectedPreviousValue: [],
+          expectedUpdatedValue: ["Build reliable reports"],
+        },
+        {
+          body: { showAuthorSection: false },
+          field: "showAuthorSection",
+          expectedPreviousValue: true,
+          expectedUpdatedValue: false,
+        },
+        {
+          body: { thumbnailPositionY: 75 },
+          field: "thumbnailPositionY",
+          expectedPreviousValue: 50,
+          expectedUpdatedValue: 75,
+        },
+      ] as const;
+
+      for (const update of updates) {
+        publishSpy.mockClear();
+
+        await request(app.getHttpServer())
+          .patch(`/api/course/${course.id}`)
+          .set("Cookie", cookies)
+          .send({
+            language: SUPPORTED_LANGUAGES.EN,
+            ...update.body,
+          })
+          .expect(200);
+
+        expect(publishSpy).toHaveBeenCalledTimes(1);
+
+        const [event] = publishSpy.mock.calls[0];
+
+        expect(event).toBeInstanceOf(UpdateCourseEvent);
+        expect((event as UpdateCourseEvent).courseUpdateData.previousCourseData).toEqual(
+          expect.objectContaining({
+            [update.field]: update.expectedPreviousValue,
+          }),
+        );
+        expect((event as UpdateCourseEvent).courseUpdateData.updatedCourseData).toEqual(
+          expect.objectContaining({
+            [update.field]: update.expectedUpdatedValue,
+          }),
+        );
+      }
+
+      publishSpy.mockRestore();
+    });
+  });
+
   describe("PATCH /api/course/bulk/status", () => {
     it("updates statuses for selected courses", async () => {
       const admin = await userFactory
@@ -3070,7 +3143,7 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data.learningOutcomes).toEqual(["Polski efekt"]);
     });
 
-    it("uses exact course text for an editor while keeping category fallback", async () => {
+    it("uses exact title and description for an editor while keeping overview fallbacks", async () => {
       const author = await userFactory
         .withCredentials({ password })
         .withContentCreatorSettings(db)
@@ -3085,6 +3158,9 @@ describe("CourseController (e2e)", () => {
         availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
         categoryId: category.id,
         description: "English description",
+        learningOutcomes: {
+          [SUPPORTED_LANGUAGES.EN]: ["English outcome"],
+        },
         status: "published",
         thumbnailS3Key: null,
         title: "English title",
@@ -3118,7 +3194,7 @@ describe("CourseController (e2e)", () => {
           title: "",
           description: "",
           category: "English category",
-          learningOutcomes: [],
+          learningOutcomes: ["English outcome"],
           hasMissingCurriculumTranslations: true,
         }),
       );
@@ -3134,9 +3210,40 @@ describe("CourseController (e2e)", () => {
           title: "English title",
           description: "English description",
           category: "English category",
+          learningOutcomes: ["English outcome"],
           hasMissingCurriculumTranslations: false,
         }),
       );
+
+      await db
+        .update(courses)
+        .set({
+          learningOutcomes: sql`${courses.learningOutcomes} || jsonb_build_object(
+            ${SUPPORTED_LANGUAGES.PL}::text,
+            '[]'::jsonb
+          )`,
+        })
+        .where(eq(courses.id, course.id));
+
+      const editorResponseWithEmptyTranslation = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(author, app))
+        .expect(200);
+
+      expect(editorResponseWithEmptyTranslation.body.data.learningOutcomes).toEqual([
+        "English outcome",
+      ]);
+
+      const studentResponseWithEmptyTranslation = await request(app.getHttpServer())
+        .get("/api/course")
+        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", await cookieFor(student, app))
+        .expect(200);
+
+      expect(studentResponseWithEmptyTranslation.body.data.learningOutcomes).toEqual([
+        "English outcome",
+      ]);
 
       await db
         .update(chapters)
@@ -3299,7 +3406,7 @@ describe("CourseController (e2e)", () => {
       expect(response.body.data[0].enrolled).toBe(false);
     });
 
-    it("excludes specified course", async () => {
+    it("excludes specified course when scope is ALL", async () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
@@ -3324,7 +3431,7 @@ describe("CourseController (e2e)", () => {
 
       const response = await request(app.getHttpServer())
         .get(
-          `/api/course/content-creator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=available`,
+          `/api/course/content-creator-courses?authorId=${contentCreator.id}&excludeCourseId=${courseToExclude.id}&scope=all`,
         )
         .set("Cookie", cookies)
         .expect(200);
@@ -3451,7 +3558,7 @@ describe("CourseController (e2e)", () => {
       expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(2);
     });
 
-    it("returns real duration estimate for content creator courses instead of a fixed 30 minute block", async () => {
+    it("caches and refreshes the duration estimate for content creator courses", async () => {
       const student = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
@@ -3472,13 +3579,16 @@ describe("CourseController (e2e)", () => {
         lessonCount: 1,
       });
 
-      await db.insert(lessons).values({
-        chapterId: chapter.id,
-        type: LESSON_TYPES.CONTENT,
-        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short content lesson"),
-        description: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short readable lesson content."),
-        displayOrder: 1,
-      });
+      const [lesson] = await db
+        .insert(lessons)
+        .values({
+          chapterId: chapter.id,
+          type: LESSON_TYPES.CONTENT,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short content lesson"),
+          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Short readable lesson content."),
+          displayOrder: 1,
+        })
+        .returning();
 
       const response = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
@@ -3490,6 +3600,50 @@ describe("CourseController (e2e)", () => {
           id: course.id,
           estimatedDurationMinutes: 1,
         }),
+      );
+
+      const [courseWithCachedEstimate] = await db
+        .select({ durationEstimates: courses.durationEstimates })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(courseWithCachedEstimate.durationEstimates).toEqual({
+        en: {
+          totalMinutes: 1,
+          sourceSignature: expect.any(String),
+        },
+      });
+
+      await db
+        .update(lessons)
+        .set({
+          description: buildJsonbField(
+            SUPPORTED_LANGUAGES.EN,
+            Array.from({ length: 500 }, () => "word").join(" "),
+          ),
+        })
+        .where(eq(lessons.id, lesson.id));
+
+      const refreshedResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(refreshedResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 3,
+        }),
+      );
+
+      const [courseWithRefreshedEstimate] = await db
+        .select({ durationEstimates: courses.durationEstimates })
+        .from(courses)
+        .where(eq(courses.id, course.id));
+
+      expect(courseWithRefreshedEstimate.durationEstimates.en?.totalMinutes).toBe(3);
+      expect(courseWithRefreshedEstimate.durationEstimates.en?.sourceSignature).not.toBe(
+        courseWithCachedEstimate.durationEstimates.en?.sourceSignature,
       );
     });
   });

@@ -134,4 +134,18 @@ describe("CourseOverviewActions", () => {
 
     expect(onContinueLearning).toHaveBeenCalledOnce();
   });
+
+  it("keeps course actions available on small screens", () => {
+    currentUser = { id: "user-1" };
+    course = { enrolled: true, id: "course-1" };
+
+    renderActions();
+
+    const actions = screen.getByTestId(COURSE_OVERVIEW_HANDLES.ACTIONS);
+
+    expect(actions).toHaveClass("flex", "flex-wrap");
+    expect(actions).not.toHaveClass("hidden");
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeVisible();
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON)).toBeVisible();
+  });
 });

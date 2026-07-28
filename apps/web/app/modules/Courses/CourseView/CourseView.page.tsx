@@ -131,8 +131,8 @@ export default function CourseViewPage() {
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <CourseAccessProvider course={course}>
         <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBannerNew />}>
-          <div className="flex w-full max-w-full flex-col">
-            <div className="flex flex-col gap-y-6 overflow-hidden">
+          <div className="flex w-full min-w-0 max-w-full flex-col">
+            <div className="flex min-w-0 flex-col gap-y-6 overflow-hidden">
               <CourseOverview
                 language={language}
                 onLanguageChange={handleCourseLanguageChange}

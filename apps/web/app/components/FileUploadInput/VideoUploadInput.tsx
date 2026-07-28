@@ -1,9 +1,9 @@
 import { ALLOWED_VIDEO_FILE_TYPES } from "@repo/shared";
 import { Play } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
+import { useObjectUrl } from "~/modules/Admin/AddCourse/hooks/useObjectUrl";
 
 import type { RefObject } from "react";
 
@@ -31,24 +31,8 @@ const VideoUploadInput = ({
   className,
 }: VideoUploadInputProps) => {
   const { t } = useTranslation();
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const previewUrl = useObjectUrl(file);
   const isDisabled = isUploading || disabled;
-
-  useEffect(() => {
-    if (!file || typeof URL.createObjectURL !== "function") {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const nextPreviewUrl = URL.createObjectURL(file);
-    setPreviewUrl(nextPreviewUrl);
-
-    return () => {
-      if (typeof URL.revokeObjectURL === "function") {
-        URL.revokeObjectURL(nextPreviewUrl);
-      }
-    };
-  }, [file]);
 
   return (
     <div

@@ -1,13 +1,18 @@
 import { Link } from "@remix-run/react";
+import { LESSON_TYPES } from "@repo/shared";
 
+import { useCurrentUser } from "~/api/queries";
 import { cn } from "~/lib/utils";
+import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
 
 import LessonStatusIcon from "./LessonStatusIcon";
 import LessonTypeIcon from "./LessonTypeIcon";
 
 import type { GetCourseResponse } from "~/api/generated-api";
 
-type CourseLesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number];
+type CourseLesson = GetCourseResponse["data"]["chapters"][number]["lessons"][number] & {
+  hasAccess: boolean;
+};
 
 type LessonItemProps = {
   courseSlug: string;
@@ -15,6 +20,7 @@ type LessonItemProps = {
   isCompleted: boolean;
   isCurrent: boolean;
   isLast: boolean;
+  isFreemiumChapter: boolean;
   lesson: CourseLesson;
 };
 
@@ -42,27 +48,54 @@ export default function LessonItem({
   isCompleted,
   isCurrent,
   isLast,
+  isFreemiumChapter,
   lesson,
 }: LessonItemProps) {
+  const { data: currentUser } = useCurrentUser();
+  const { course, isCourseStudentModeActive, isPreviewMode } = useCourseAccessProvider();
+  const isPublicVisitor = !currentUser;
+  const hasPublicVisitorAccess =
+    isPublicVisitor && isFreemiumChapter && lesson.type === LESSON_TYPES.CONTENT;
+  const hasCourseLearningAccess =
+    hasPublicVisitorAccess ||
+    (!isPublicVisitor &&
+      (isFreemiumChapter || Boolean(course.enrolled) || isCourseStudentModeActive));
+  const canOpenLesson =
+    (isPreviewMode && !isPublicVisitor) || (hasCourseLearningAccess && lesson.hasAccess);
+  const lessonStatus = canOpenLesson ? lesson.status : "blocked";
+  const lessonContent = (
+    <>
+      <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg md:size-8">
+        <LessonTypeIcon type={lesson.type} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-base font-medium leading-relaxed text-neutral-950 transition-colors group-hover/lesson:text-primary-700 md:text-sm">
+          {lesson.title}
+        </p>
+      </div>
+      {!isAdminExperience && <LessonStatusIcon status={lessonStatus} />}
+    </>
+  );
+  const lessonClassName = cn(
+    "flex items-center gap-3 py-4 transition-all group/lesson md:py-3",
+    {
+      "cursor-pointer": canOpenLesson,
+      "cursor-not-allowed opacity-50": !canOpenLesson,
+    },
+    canOpenLesson && getLessonHoverStyle({ isCompleted, isCurrent }),
+  );
+
   return (
     <div>
-      <Link
-        to={`/course/${courseSlug}/lesson/${lesson.id}`}
-        className={cn(
-          "flex cursor-pointer items-center gap-3 py-4 transition-all group/lesson md:py-3",
-          getLessonHoverStyle({ isCompleted, isCurrent }),
-        )}
-      >
-        <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg md:size-8">
-          <LessonTypeIcon type={lesson.type} />
+      {canOpenLesson ? (
+        <Link to={`/course/${courseSlug}/lesson/${lesson.id}`} className={lessonClassName}>
+          {lessonContent}
+        </Link>
+      ) : (
+        <div aria-disabled="true" className={lessonClassName}>
+          {lessonContent}
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="text-base font-medium leading-relaxed text-neutral-950 transition-colors group-hover/lesson:text-primary-700 md:text-sm">
-            {lesson.title}
-          </p>
-        </div>
-        {!isAdminExperience && <LessonStatusIcon status={lesson.status} />}
-      </Link>
+      )}
       {!isLast && <div className="ml-12 border-t border-neutral-200 md:ml-11" />}
     </div>
   );

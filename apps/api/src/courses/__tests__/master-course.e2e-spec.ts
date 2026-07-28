@@ -353,6 +353,12 @@ describe("Master course export and sync (e2e)", () => {
             en: "Master Source Description",
             pl: "Opis kursu zrodlowego master",
           }),
+          learningOutcomes: {
+            en: ["Understand the source course"],
+            pl: ["Zrozumiec kurs zrodlowy"],
+          },
+          showAuthorSection: false,
+          thumbnailPositionY: 72,
           availableLocales: ["en", "pl"],
         })
         .where(eq(courses.id, sourceCourse.id));
@@ -568,6 +574,9 @@ describe("Master course export and sync (e2e)", () => {
         .select({
           title: courses.title,
           description: courses.description,
+          learningOutcomes: courses.learningOutcomes,
+          showAuthorSection: courses.showAuthorSection,
+          thumbnailPositionY: courses.thumbnailPositionY,
           status: courses.status,
           priceInCents: courses.priceInCents,
           currency: courses.currency,
@@ -590,6 +599,12 @@ describe("Master course export and sync (e2e)", () => {
         en: "Master Source Description",
         pl: "Opis kursu zrodlowego master",
       });
+      expect(targetCourse.learningOutcomes).toEqual({
+        en: ["Understand the source course"],
+        pl: ["Zrozumiec kurs zrodlowy"],
+      });
+      expect(targetCourse.showAuthorSection).toBe(false);
+      expect(targetCourse.thumbnailPositionY).toBe(72);
       expect(targetCourse.status).toBe("draft");
       expect(targetCourse.priceInCents).toBe(0);
       expect(targetCourse.currency).toBe("eur");
@@ -684,7 +699,7 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
-  it("preserves the target course status when source updates are synced", async () => {
+  it("syncs course overview fields while preserving the target course status", async () => {
     const { sourceCourseId, targetCourseId } = await setupAndExport();
     const updatedTitle = "Updated Master Source Course";
 
@@ -699,6 +714,12 @@ describe("Master course export and sync (e2e)", () => {
             en: updatedTitle,
             pl: "Kurs zrodlowy master",
           }),
+          learningOutcomes: {
+            en: ["Apply the updated course"],
+            pl: ["Zastosowac zaktualizowany kurs"],
+          },
+          showAuthorSection: true,
+          thumbnailPositionY: 28,
         })
         .where(eq(courses.id, sourceCourseId)),
     );
@@ -720,7 +741,13 @@ describe("Master course export and sync (e2e)", () => {
 
     const syncedTargetCourse = await runAsTenant(targetTenantId, async () => {
       const [targetCourse] = await db
-        .select({ title: courses.title, status: courses.status })
+        .select({
+          title: courses.title,
+          learningOutcomes: courses.learningOutcomes,
+          showAuthorSection: courses.showAuthorSection,
+          thumbnailPositionY: courses.thumbnailPositionY,
+          status: courses.status,
+        })
         .from(courses)
         .where(eq(courses.id, targetCourseId))
         .limit(1);
@@ -729,6 +756,12 @@ describe("Master course export and sync (e2e)", () => {
     });
 
     expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.learningOutcomes).toEqual({
+      en: ["Apply the updated course"],
+      pl: ["Zastosowac zaktualizowany kurs"],
+    });
+    expect(syncedTargetCourse?.showAuthorSection).toBe(true);
+    expect(syncedTargetCourse?.thumbnailPositionY).toBe(28);
     expect(syncedTargetCourse?.status).toBe("published");
   });
 

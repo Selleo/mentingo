@@ -1,3 +1,4 @@
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 export type CourseDurationHierarchy = {
@@ -14,6 +15,14 @@ export type CourseDurationSummary = {
 export type CourseDurationMinutes = {
   totalMinutes: number;
 };
+
+export type CourseDurationEstimateCacheEntry = CourseDurationMinutes & {
+  sourceSignature: string;
+};
+
+export type CourseDurationEstimatesByLanguage = Partial<
+  Record<SupportedLanguages, CourseDurationEstimateCacheEntry>
+>;
 
 export type DurationEstimatesByCourse = Record<UUIDType, CourseDurationMinutes>;
 
