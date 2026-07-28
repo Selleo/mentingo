@@ -14,6 +14,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import {
+  AI_MENTOR_FILE_TYPES_MAP,
   MAX_MB_PER_FILE,
   MAX_NUM_OF_FILES,
 } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/AiMentorLesson.constants";
@@ -21,7 +22,6 @@ import { FileLoader } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/A
 import { UploadFileCard } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/components/UploadFileCard";
 
 import { AI_MENTOR_LESSON_FORM_HANDLES } from "../../../../../../../../e2e/data/curriculum/handles";
-import { FILE_TYPES_MAP } from "../utils/AiMentor.constants";
 import {
   type AiMentorLessonContextValues,
   aiMentorLessonFileSchema,
@@ -130,7 +130,7 @@ export function MultiFileUploadForm({ lessonId }: { lessonId: string }) {
               files.map((item, idx) => (
                 <UploadFileCard
                   name={item.name}
-                  meta={FILE_TYPES_MAP[item.type] ?? item.type ?? "File"}
+                  meta={AI_MENTOR_FILE_TYPES_MAP[item.type] ?? item.type ?? "File"}
                   key={`${item.name} - ${item.type} - ${item.size}`}
                   onRemove={() => removeWhere({ fileName: item.name, fileSize: item.size })}
                   error={idx >= MAX_NUM_OF_FILES}

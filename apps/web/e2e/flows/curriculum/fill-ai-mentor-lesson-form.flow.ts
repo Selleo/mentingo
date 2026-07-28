@@ -7,7 +7,10 @@ type FillAiMentorLessonFormInput = {
   title: string;
   name: string;
   description: string;
-  instructions: string;
+  scenario: string;
+  aiRole?: string;
+  learnerRole?: string;
+  characterGoal?: string;
   taskGoal?: string;
 };
 
@@ -22,11 +25,18 @@ export const fillAiMentorLessonFormFlow = async (
     AI_MENTOR_LESSON_FORM_HANDLES.DESCRIPTION_INPUT,
     input.description,
   );
-  await fillRichTextEditorFlow(
-    page,
-    AI_MENTOR_LESSON_FORM_HANDLES.INSTRUCTIONS_INPUT,
-    input.instructions,
-  );
+  await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_BUTTON).click();
+  await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_SCENARIO_INPUT).fill(input.scenario);
+  await page
+    .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_AI_ROLE_INPUT)
+    .fill(input.aiRole ?? "Customer");
+  await page
+    .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_LEARNER_ROLE_INPUT)
+    .fill(input.learnerRole ?? "Employee");
+  await page
+    .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CHARACTER_GOAL_INPUT)
+    .fill(input.characterGoal ?? "Reach a realistic agreement.");
+  await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.MENTOR_CONFIGURATION_APPLY_BUTTON).click();
   await page.getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_CONFIGURE_BUTTON).click();
   await page
     .getByTestId(AI_MENTOR_LESSON_FORM_HANDLES.JUDGE_TASK_GOAL_INPUT)

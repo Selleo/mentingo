@@ -36970,10 +36970,7 @@
                       }
                     ]
                   }
-                },
-                "required": [
-                  "aiMentorConfiguration"
-                ]
+                }
               },
               "mode": {
                 "const": "create",
@@ -37178,10 +37175,7 @@
                       }
                     ]
                   }
-                },
-                "required": [
-                  "aiMentorConfiguration"
-                ]
+                }
               },
               "mode": {
                 "const": "improve",
@@ -42228,10 +42222,7 @@
                   }
                 ]
               }
-            },
-            "required": [
-              "aiMentorConfiguration"
-            ]
+            }
           },
           "brief": {
             "minLength": 1,

@@ -2367,6 +2367,153 @@
           "customTTSReference": "Enter custom TTS reference ID...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "AI Mentor behavior",
+          "emptyDescription": "Choose how the AI should guide or interact with the learner.",
+          "baseLanguageRequired": "Configure AI Mentor behavior in the course base language before translating it.",
+          "incompleteDescription": "This configuration needs a few details before it can be edited or translated.",
+          "configureManually": "Configure manually",
+          "reviewConfiguration": "Review configuration",
+          "dialogTitle": "Configure AI Mentor",
+          "dialogDescription": "Choose a mode and define the behavior learners should experience.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Fine-tune behavior (optional)",
+          "translationModeTitle": "Translation mode",
+          "translationModeDescription": "Translate the text fields here. Mode, teaching style, and difficulty are managed in the course base language.",
+          "structureLockedTooltip": "AI Mentor structure can only be changed in the course base language.",
+          "applyConfiguration": "Apply configuration",
+          "saveConfiguration": "Save configuration",
+          "saveTranslation": "Save translation",
+          "configurationSaved": "AI Mentor configuration saved.",
+          "translationSaved": "AI Mentor translation saved.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor mode",
+            "teacher": {
+              "label": "Teacher",
+              "description": "Explains concepts and guides practice."
+            },
+            "roleplay": {
+              "label": "Roleplay",
+              "description": "Acts as a participant in a practice scenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Start from a scenario",
+            "scenarioSimulation": {
+              "taskDescription": "Practice discovering a software client's needs and proposing an offer that fits their constraints.",
+              "aiRole": "Prospective software client",
+              "learnerRole": "Sales representative",
+              "characterGoal": "Choose a supplier who can meet the timeline, budget, and communication requirements.",
+              "factsAndConstraints": "The application must be ready within three months. The budget is limited, and clear, regular communication is required.",
+              "openingInstruction": "Introduce yourself as a client evaluating software suppliers and ask how the learner can help."
+            },
+            "problemSolving": {
+              "taskDescription": "Practice handling an employee's salary increase request constructively.",
+              "aiRole": "Employee requesting a salary increase",
+              "learnerRole": "Manager",
+              "characterGoal": "Be heard and reach a credible alternative or follow-up plan.",
+              "factsAndConstraints": "The employee has made meaningful recent contributions, but the company currently has no budget for salary increases.",
+              "openingInstruction": "Open by explaining your recent contributions and asking to discuss a salary increase."
+            },
+            "creativeTask": {
+              "taskDescription": "Develop and refine an original idea for a new customer service.",
+              "taskGoal": "Help the learner develop and refine an original service idea.",
+              "expertise": "Service innovation coach",
+              "feedbackGuidance": "Encourage originality and practical value. Ask focused follow-up questions and point out important gaps without taking over the idea.",
+              "openingInstruction": "Invite the learner to share their initial service idea and who it would help."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Learn practical time-management techniques and plan how to apply one at work.",
+              "taskGoal": "Help the learner understand and apply practical time-management techniques.",
+              "expertise": "Time-management coach",
+              "feedbackGuidance": "Correct misconceptions gently and connect feedback to a concrete, realistic workplace application.",
+              "openingInstruction": "Introduce one practical time-management technique, then ask how the learner currently organizes their work."
+            }
+          },
+          "taskGoal": {
+            "label": "Task goal",
+            "placeholder": "What should the Teacher help the learner understand or practice?"
+          },
+          "expertise": {
+            "label": "Expertise",
+            "placeholder": "For example: GDPR compliance trainer"
+          },
+          "contentScope": {
+            "label": "Content scope",
+            "placeholder": "What may the Teacher cover, and what should it avoid?"
+          },
+          "teachingStyle": {
+            "label": "Teaching style",
+            "explain_and_practice": {
+              "label": "Explain and practice",
+              "description": "Explain clearly, then reinforce with practice."
+            },
+            "guided_discovery": {
+              "label": "Guided discovery",
+              "description": "Help the learner reach conclusions step by step."
+            },
+            "socratic": {
+              "label": "Socratic",
+              "description": "Use focused questions to deepen reasoning."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback guidance",
+            "placeholder": "How should the Teacher correct or reinforce the learner?"
+          },
+          "scenario": {
+            "label": "Scenario",
+            "placeholder": "Describe the situation the learner will practice."
+          },
+          "aiRole": {
+            "label": "AI role",
+            "placeholder": "For example: Hesitant customer"
+          },
+          "learnerRole": {
+            "label": "Learner role",
+            "placeholder": "For example: Sales representative"
+          },
+          "characterGoal": {
+            "label": "Character goal",
+            "placeholder": "What is the AI character trying to achieve?"
+          },
+          "difficulty": {
+            "label": "Difficulty",
+            "cooperative": {
+              "label": "Cooperative",
+              "description": "Helpful and willing to move the conversation forward."
+            },
+            "realistic": {
+              "label": "Realistic",
+              "description": "Natural resistance and believable reactions."
+            },
+            "challenging": {
+              "label": "Challenging",
+              "description": "Firm resistance that requires a strong response."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Facts and constraints",
+            "placeholder": "Add budgets, deadlines, policies, authority, or facts that must remain true."
+          },
+          "openingInstruction": {
+            "label": "Opening instruction",
+            "placeholder": "How should the one-time welcome message begin?"
+          },
+          "additionalInstructions": {
+            "label": "Additional instructions",
+            "placeholder": "Add exceptional behavior not covered by the fields above."
+          },
+          "typeChange": {
+            "title": "Change Mentor mode?",
+            "description": "Switching to {{type}} clears the current mode-specific fields. Opening and additional instructions are preserved."
+          },
+          "validation": {
+            "required": "This field is required.",
+            "configurationRequired": "Configure AI Mentor behavior before saving the lesson."
+          }
+        },
         "aiJudge": {
           "cardTitle": "Completion conditions",
           "configured": "Configured",
@@ -2376,6 +2523,7 @@
           "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
           "configureWithAi": "Configure with AI",
           "createWithAi": "Create with AI",
+          "aiMentorConfigurationRequiredTooltip": "Configure AI Mentor behavior before creating completion conditions with AI.",
           "improveWithAi": "Improve with AI",
           "checkQualityWithAi": "Check quality with AI",
           "checkingQuality": "Checking quality...",

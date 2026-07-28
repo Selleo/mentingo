@@ -2305,6 +2305,150 @@
           "customTTSReference": "Geben Sie die benutzerdefinierte TTS-Referenz-ID ein...",
           "aiMentorTypes": "Mentor"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Verhalten des KI-Mentors",
+          "emptyDescription": "Legen Sie fest, wie die KI den Lernenden anleiten oder mit ihm interagieren soll.",
+          "baseLanguageRequired": "Konfigurieren Sie das Verhalten des KI-Mentors zuerst in der Basissprache des Kurses.",
+          "incompleteDescription": "Für diese Konfiguration fehlen noch einige Angaben.",
+          "configureManually": "Manuell konfigurieren",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "dialogTitle": "KI-Mentor konfigurieren",
+          "dialogDescription": "Wählen Sie einen Modus und definieren Sie das gewünschte Lernerlebnis.",
+          "optional": "(optional)",
+          "fineTuneBehavior": "Verhalten feinabstimmen (optional)",
+          "translationModeTitle": "Übersetzungsmodus",
+          "translationModeDescription": "Übersetzen Sie hier die Textfelder. Modus, Lehrstil und Schwierigkeitsgrad werden in der Basissprache verwaltet.",
+          "structureLockedTooltip": "Die Struktur des KI-Mentors kann nur in der Basissprache geändert werden.",
+          "applyConfiguration": "Konfiguration übernehmen",
+          "saveConfiguration": "Konfiguration speichern",
+          "saveTranslation": "Übersetzung speichern",
+          "configurationSaved": "KI-Mentor-Konfiguration gespeichert.",
+          "translationSaved": "KI-Mentor-Übersetzung gespeichert.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Mentor-Modus",
+            "teacher": {
+              "label": "Lehrer",
+              "description": "Erklärt Konzepte und begleitet Übungen."
+            },
+            "roleplay": {
+              "label": "Rollenspiel",
+              "description": "Übernimmt eine Rolle in einem Übungsszenario."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Mit einem Szenario beginnen",
+            "scenarioSimulation": {
+              "taskDescription": "Üben Sie, den Bedarf eines Softwarekunden zu ermitteln und ein passendes Angebot vorzuschlagen.",
+              "aiRole": "Potenzieller Softwarekunde",
+              "learnerRole": "Vertriebsmitarbeiter",
+              "characterGoal": "Einen Anbieter wählen, der Termin-, Budget- und Kommunikationsanforderungen erfüllt.",
+              "factsAndConstraints": "Die Anwendung muss innerhalb von drei Monaten fertig sein. Das Budget ist begrenzt, und eine klare, regelmäßige Kommunikation ist erforderlich.",
+              "openingInstruction": "Stellen Sie sich als Kunde vor, der Softwareanbieter bewertet, und fragen Sie, wie der Lernende helfen kann."
+            },
+            "problemSolving": {
+              "taskDescription": "Üben Sie den konstruktiven Umgang mit dem Wunsch eines Mitarbeiters nach einer Gehaltserhöhung.",
+              "aiRole": "Mitarbeiter mit Gehaltswunsch",
+              "learnerRole": "Führungskraft",
+              "characterGoal": "Gehört werden und eine glaubwürdige Alternative oder einen Folgeplan vereinbaren.",
+              "factsAndConstraints": "Der Mitarbeiter hat zuletzt wichtige Beiträge geleistet, aber das Unternehmen hat derzeit kein Budget für Gehaltserhöhungen.",
+              "openingInstruction": "Beginnen Sie mit Ihren jüngsten Beiträgen und bitten Sie um ein Gespräch über eine Gehaltserhöhung."
+            },
+            "creativeTask": {
+              "taskDescription": "Entwickeln und verfeinern Sie eine originelle Idee für einen neuen Kundenservice.",
+              "taskGoal": "Helfen Sie dem Lernenden, eine originelle Serviceidee zu entwickeln und zu verfeinern.",
+              "expertise": "Coach für Serviceinnovation",
+              "feedbackGuidance": "Fördern Sie Originalität und praktischen Nutzen. Stellen Sie gezielte Rückfragen und weisen Sie auf wichtige Lücken hin, ohne die Idee zu übernehmen.",
+              "openingInstruction": "Bitten Sie den Lernenden, seine erste Serviceidee vorzustellen und zu erklären, wem sie helfen soll."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Lernen Sie praktische Zeitmanagementmethoden und planen Sie deren Anwendung im Arbeitsalltag.",
+              "taskGoal": "Helfen Sie dem Lernenden, praktische Zeitmanagementmethoden zu verstehen und anzuwenden.",
+              "expertise": "Zeitmanagement-Coach",
+              "feedbackGuidance": "Korrigieren Sie Missverständnisse behutsam und verbinden Sie das Feedback mit einer konkreten, realistischen Anwendung am Arbeitsplatz.",
+              "openingInstruction": "Stellen Sie eine praktische Zeitmanagementmethode vor und fragen Sie dann, wie der Lernende seine Arbeit derzeit organisiert."
+            }
+          },
+          "taskGoal": {
+            "label": "Aufgabenziel",
+            "placeholder": "Was soll der Lehrer erklären oder üben helfen?"
+          },
+          "expertise": {
+            "label": "Fachgebiet",
+            "placeholder": "Zum Beispiel: Trainer für DSGVO-Compliance"
+          },
+          "contentScope": {
+            "label": "Inhaltsrahmen",
+            "placeholder": "Was darf der Lehrer behandeln und was soll er vermeiden?"
+          },
+          "teachingStyle": {
+            "label": "Lehrstil",
+            "explain_and_practice": {
+              "label": "Erklären und üben",
+              "description": "Klar erklären und anschließend mit Übungen festigen."
+            },
+            "guided_discovery": {
+              "label": "Geführtes Entdecken",
+              "description": "Den Lernenden schrittweise zu Schlussfolgerungen führen."
+            },
+            "socratic": {
+              "label": "Sokratisch",
+              "description": "Mit gezielten Fragen das Denken vertiefen."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Feedback-Vorgaben",
+            "placeholder": "Wie soll der Lehrer korrigieren oder bestärken?"
+          },
+          "scenario": {
+            "label": "Szenario",
+            "placeholder": "Beschreiben Sie die Übungssituation."
+          },
+          "aiRole": { "label": "Rolle der KI", "placeholder": "Zum Beispiel: Zögernder Kunde" },
+          "learnerRole": {
+            "label": "Rolle des Lernenden",
+            "placeholder": "Zum Beispiel: Vertriebsmitarbeiter"
+          },
+          "characterGoal": {
+            "label": "Ziel der Figur",
+            "placeholder": "Was möchte die KI-Figur erreichen?"
+          },
+          "difficulty": {
+            "label": "Schwierigkeitsgrad",
+            "cooperative": {
+              "label": "Kooperativ",
+              "description": "Hilfsbereit und bereit, das Gespräch voranzubringen."
+            },
+            "realistic": {
+              "label": "Realistisch",
+              "description": "Natürlicher Widerstand und glaubwürdige Reaktionen."
+            },
+            "challenging": {
+              "label": "Anspruchsvoll",
+              "description": "Deutlicher Widerstand, der eine starke Reaktion verlangt."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakten und Einschränkungen",
+            "placeholder": "Budgets, Fristen, Richtlinien oder unveränderliche Fakten."
+          },
+          "openingInstruction": {
+            "label": "Eröffnungsanweisung",
+            "placeholder": "Wie soll die einmalige Begrüßung beginnen?"
+          },
+          "additionalInstructions": {
+            "label": "Zusätzliche Anweisungen",
+            "placeholder": "Ergänzen Sie besonderes Verhalten, das oben nicht abgedeckt ist."
+          },
+          "typeChange": {
+            "title": "Mentor-Modus ändern?",
+            "description": "Beim Wechsel zu {{type}} werden die modusspezifischen Felder geleert. Eröffnungs- und Zusatzanweisungen bleiben erhalten."
+          },
+          "validation": {
+            "required": "Dieses Feld ist erforderlich.",
+            "configurationRequired": "Konfigurieren Sie das Verhalten des KI-Mentors, bevor Sie die Lektion speichern."
+          }
+        },
         "aiJudge": {
           "cardTitle": "Abschlussbedingungen",
           "configured": "Konfiguriert",
@@ -2314,6 +2458,7 @@
           "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
           "configureWithAi": "Mit KI konfigurieren",
           "createWithAi": "Mit KI erstellen",
+          "aiMentorConfigurationRequiredTooltip": "Konfigurieren Sie zuerst das Verhalten des AI Mentors, bevor Sie Abschlussbedingungen mit KI erstellen.",
           "improveWithAi": "Mit KI verbessern",
           "checkQualityWithAi": "Qualität mit KI prüfen",
           "checkingQuality": "Qualität wird geprüft...",

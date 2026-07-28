@@ -2304,6 +2304,150 @@
           "customTTSReference": "Zadejte vlastní referenční ID TTS...",
           "aiMentorTypes": "Učitel"
         },
+        "aiMentorConfiguration": {
+          "cardTitle": "Chování AI Mentora",
+          "emptyDescription": "Zvolte, jak má AI studenta vést nebo s ním komunikovat.",
+          "baseLanguageRequired": "Nejprve nakonfigurujte chování AI Mentora v základním jazyce kurzu.",
+          "incompleteDescription": "Tato konfigurace vyžaduje doplnění několika údajů.",
+          "configureManually": "Nastavit ručně",
+          "reviewConfiguration": "Zkontrolovat konfiguraci",
+          "dialogTitle": "Nastavení AI Mentora",
+          "dialogDescription": "Zvolte režim a definujte chování, které má student zažít.",
+          "optional": "(volitelné)",
+          "fineTuneBehavior": "Doladit chování (volitelné)",
+          "translationModeTitle": "Režim překladu",
+          "translationModeDescription": "Zde přeložte textová pole. Režim, styl výuky a obtížnost se spravují v základním jazyce.",
+          "structureLockedTooltip": "Strukturu AI Mentora lze měnit pouze v základním jazyce kurzu.",
+          "applyConfiguration": "Použít konfiguraci",
+          "saveConfiguration": "Uložit konfiguraci",
+          "saveTranslation": "Uložit překlad",
+          "configurationSaved": "Konfigurace AI Mentora byla uložena.",
+          "translationSaved": "Překlad AI Mentora byl uložen.",
+          "summary": "{{type}} · {{detail}} · {{behavior}}",
+          "mode": {
+            "label": "Režim Mentora",
+            "teacher": {
+              "label": "Učitel",
+              "description": "Vysvětluje pojmy a vede procvičování."
+            },
+            "roleplay": {
+              "label": "Hraní rolí",
+              "description": "Vystupuje jako účastník cvičného scénáře."
+            }
+          },
+          "scenarioTemplates": {
+            "label": "Začít scénářem",
+            "scenarioSimulation": {
+              "taskDescription": "Procvičte zjišťování potřeb softwarového klienta a návrh nabídky odpovídající jeho omezením.",
+              "aiRole": "Potenciální klient softwarových služeb",
+              "learnerRole": "Obchodní zástupce",
+              "characterGoal": "Vybrat dodavatele, který splní požadavky na termín, rozpočet a komunikaci.",
+              "factsAndConstraints": "Aplikace musí být hotová do tří měsíců. Rozpočet je omezený a je vyžadována jasná a pravidelná komunikace.",
+              "openingInstruction": "Představte se jako klient, který hodnotí dodavatele softwaru, a zeptejte se, jak vám může student pomoci."
+            },
+            "problemSolving": {
+              "taskDescription": "Procvičte konstruktivní vedení rozhovoru se zaměstnancem žádajícím o zvýšení platu.",
+              "aiRole": "Zaměstnanec žádající o zvýšení platu",
+              "learnerRole": "Manažer",
+              "characterGoal": "Být vyslechnut a dohodnout věrohodnou alternativu nebo další postup.",
+              "factsAndConstraints": "Zaměstnanec v poslední době významně přispěl, ale společnost nyní nemá rozpočet na zvyšování platů.",
+              "openingInstruction": "Začněte popisem svých nedávných přínosů a požádejte o rozhovor o zvýšení platu."
+            },
+            "creativeTask": {
+              "taskDescription": "Vytvořte a rozpracujte originální nápad na novou službu pro zákazníky.",
+              "taskGoal": "Pomozte studentovi vytvořit a rozpracovat originální nápad na službu.",
+              "expertise": "Kouč inovací služeb",
+              "feedbackGuidance": "Podporujte originalitu a praktickou hodnotu. Pokládejte cílené doplňující otázky a upozorňujte na důležité mezery, aniž byste nápad převzali.",
+              "openingInstruction": "Vyzvěte studenta, aby představil svůj počáteční nápad na službu a komu by měla pomoci."
+            },
+            "knowledgeSharing": {
+              "taskDescription": "Naučte se praktické techniky řízení času a naplánujte jejich využití v práci.",
+              "taskGoal": "Pomozte studentovi pochopit a používat praktické techniky řízení času.",
+              "expertise": "Kouč řízení času",
+              "feedbackGuidance": "Jemně opravujte nedorozumění a propojujte zpětnou vazbu s konkrétním a realistickým využitím na pracovišti.",
+              "openingInstruction": "Představte jednu praktickou techniku řízení času a poté se zeptejte, jak si student nyní organizuje práci."
+            }
+          },
+          "taskGoal": {
+            "label": "Cíl úkolu",
+            "placeholder": "Co má Učitel pomoci pochopit nebo procvičit?"
+          },
+          "expertise": {
+            "label": "Odbornost",
+            "placeholder": "Například: školitel souladu s GDPR"
+          },
+          "contentScope": {
+            "label": "Rozsah obsahu",
+            "placeholder": "Co smí Učitel probírat a čemu se má vyhnout?"
+          },
+          "teachingStyle": {
+            "label": "Styl výuky",
+            "explain_and_practice": {
+              "label": "Vysvětlení a procvičení",
+              "description": "Jasně vysvětlit a poté upevnit procvičováním."
+            },
+            "guided_discovery": {
+              "label": "Řízené objevování",
+              "description": "Vést studenta krok za krokem k závěrům."
+            },
+            "socratic": {
+              "label": "Sokratovský",
+              "description": "Prohlubovat uvažování cílenými otázkami."
+            }
+          },
+          "feedbackGuidance": {
+            "label": "Pokyny ke zpětné vazbě",
+            "placeholder": "Jak má Učitel studenta opravovat nebo podporovat?"
+          },
+          "scenario": {
+            "label": "Scénář",
+            "placeholder": "Popište situaci, kterou bude student procvičovat."
+          },
+          "aiRole": { "label": "Role AI", "placeholder": "Například: váhající zákazník" },
+          "learnerRole": {
+            "label": "Role studenta",
+            "placeholder": "Například: obchodní zástupce"
+          },
+          "characterGoal": {
+            "label": "Cíl postavy",
+            "placeholder": "Čeho se postava AI snaží dosáhnout?"
+          },
+          "difficulty": {
+            "label": "Obtížnost",
+            "cooperative": {
+              "label": "Spolupracující",
+              "description": "Ochotný pomoci a posouvat rozhovor vpřed."
+            },
+            "realistic": {
+              "label": "Realistická",
+              "description": "Přirozený odpor a věrohodné reakce."
+            },
+            "challenging": {
+              "label": "Náročná",
+              "description": "Pevný odpor vyžadující kvalitní reakci."
+            }
+          },
+          "factsAndConstraints": {
+            "label": "Fakta a omezení",
+            "placeholder": "Přidejte rozpočty, termíny, pravidla nebo fakta, která se nesmí změnit."
+          },
+          "openingInstruction": {
+            "label": "Pokyn k zahájení",
+            "placeholder": "Jak má začít jednorázová uvítací zpráva?"
+          },
+          "additionalInstructions": {
+            "label": "Další pokyny",
+            "placeholder": "Přidejte zvláštní chování, které není popsáno výše."
+          },
+          "typeChange": {
+            "title": "Změnit režim Mentora?",
+            "description": "Přepnutím na {{type}} se vymažou pole aktuálního režimu. Úvodní a další pokyny zůstanou zachovány."
+          },
+          "validation": {
+            "required": "Toto pole je povinné.",
+            "configurationRequired": "Před uložením lekce nastavte chování AI Mentora."
+          }
+        },
         "aiJudge": {
           "cardTitle": "Podmínky dokončení",
           "configured": "Nakonfigurováno",
@@ -2313,6 +2457,7 @@
           "summary": "{{criteria}} kritéria · celkem {{score}} bodů · {{threshold}} % pro splnění · {{blockingErrors}} blokující chyby",
           "configureWithAi": "Nastavit pomocí AI",
           "createWithAi": "Vytvořit s AI",
+          "aiMentorConfigurationRequiredTooltip": "Než vytvoříte podmínky dokončení pomocí AI, nejprve nakonfigurujte chování AI Mentora.",
           "improveWithAi": "Vylepšit pomocí AI",
           "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
           "checkingQuality": "Kontrola kvality...",
