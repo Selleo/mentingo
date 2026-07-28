@@ -27,7 +27,7 @@ type CourseExperienceResolverParams = {
 };
 
 type CourseUpdateAccessParams = {
-  authorId: string;
+  authorId?: string;
   currentUserId?: string;
   permissions: readonly PermissionKey[];
 };
@@ -46,8 +46,9 @@ export function canUpdateCourseByAuthor({
 }: CourseUpdateAccessParams): boolean {
   const canUpdateAnyCourse = hasPermission(permissions, PERMISSIONS.COURSE_UPDATE);
   const canUpdateOwnCourse = hasPermission(permissions, PERMISSIONS.COURSE_UPDATE_OWN);
+  const isCourseAuthor = Boolean(authorId && currentUserId && currentUserId === authorId);
 
-  return canUpdateAnyCourse || (canUpdateOwnCourse && currentUserId === authorId);
+  return canUpdateAnyCourse || (canUpdateOwnCourse && isCourseAuthor);
 }
 
 export function resolveCourseExperienceState({

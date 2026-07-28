@@ -101,7 +101,7 @@ vi.mock(
   "~/modules/Admin/EditCourse/CourseSettings/components/CertificateValidityImpactDialog",
   () => ({
     CertificateValidityImpactDialog: ({ open }: { open: boolean }) =>
-      open ? <div>Validity impact dialog</div> : null,
+      open && <div>Validity impact dialog</div>,
   }),
 );
 

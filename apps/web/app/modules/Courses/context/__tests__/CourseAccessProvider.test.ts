@@ -160,4 +160,14 @@ describe("canUpdateCourseByAuthor", () => {
       }),
     ).toBe(false);
   });
+
+  it("does not grant own-course update access when the author is missing", () => {
+    expect(
+      canUpdateCourseByAuthor({
+        authorId: undefined,
+        currentUserId: "content-creator-1",
+        permissions: [PERMISSIONS.COURSE_UPDATE_OWN],
+      }),
+    ).toBe(false);
+  });
 });
