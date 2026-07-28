@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 
+import { AutomationStepType } from "src/announcements/types/automations.types";
+
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
 import { AutomationDataResolverService } from "./automation-data-resolver.service";
@@ -67,15 +69,16 @@ export class AutomationRunnerService {
 
   private async executeSingleStep(step: AutomationStep, recipients: AutomationResolvedRecipient[]) {
     switch (step.type) {
-      case "trigger":
+      case AutomationStepType.Trigger:
         this.logger.debug(`Trigger: ${JSON.stringify(step.typeContext)}`);
         break;
 
-      case "condition":
+      case AutomationStepType.Condition:
         this.logger.debug(`Condition: ${JSON.stringify(step.typeContext)}`);
         break;
 
-      case "action":
+      case AutomationStepType.Action:
+        console.log("action worked");
         await this.handleAction(step.typeContext as TypeContext, recipients);
         break;
 

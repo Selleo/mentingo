@@ -32,6 +32,12 @@ export const automationTypes = ["action", "condition", "trigger"] as const;
 
 export type AutomationType = (typeof automationTypes)[number];
 
+export const AutomationStepType = {
+  Action: "action",
+  Condition: "condition",
+  Trigger: "trigger",
+} as const;
+
 export const AutomationEventNames: Record<AutomationEventTypes["constructor"]["name"], string> = {
   [UserInviteEvent.name]: "user_invited",
   [UsersImportInviteEmailsEvent.name]: "users_imported_invite",
