@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
 
-import { DatabasePg } from "src/common";
+import { type UUIDType, DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
@@ -22,7 +22,6 @@ import type {
   SendEmailActionContext,
   TypeContext,
 } from "src/announcements/types/automations-source.types";
-import type { UUIDType } from "src/common";
 
 /** Sentinel value — resolve language from the recipient's user settings */
 const USER_DEFAULT_LANGUAGE = "user_default";
@@ -118,7 +117,21 @@ export class AutomationRunnerService {
     actionContext: SendEmailActionContext,
     recipients: AutomationResolvedRecipient[],
   ) {
-    const { templateId, language, variableMapping } = actionContext;
+    // Normalize shape: frontend stores values inside `config`, but the runner
+    // type expects them at the top level. Support both shapes for robustness.
+    const config = (actionContext as unknown as { config?: Record<string, unknown> }).config;
+    const templateId = actionContext.templateId ?? (config?.emailTemplate as string | undefined);
+    const language = actionContext.language ?? (config?.language as string | undefined);
+    const variableMapping =
+      actionContext.variableMapping ??
+      (config?.placeholderValues as Record<string, string> | undefined) ??
+      {};
+
+    if (!templateId) {
+      this.logger.error("Email template not found: templateId is missing from action context");
+      return;
+    }
+
     const isUserDefault = language === USER_DEFAULT_LANGUAGE;
 
     if (isSystemTemplateId(templateId)) {
