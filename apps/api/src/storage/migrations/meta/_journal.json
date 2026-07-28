@@ -1240,6 +1240,13 @@
       "when": 1785140655153,
       "tag": "0176_enable_calendar_provider_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 177,
+      "version": "7",
+      "when": 1785232631220,
+      "tag": "0177_add_course_overview_fields_and_duration_estimates",
+      "breakpoints": true
     }
   ]
 }
