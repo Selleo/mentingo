@@ -7,6 +7,8 @@ import type { UUIDType } from "src/common";
  * Each resolver method returns an array of these (one per recipient).
  */
 export type AutomationResolvedRecipient = {
+  /** Recipient user ID — used for resolving per-user settings (e.g. language) */
+  userId?: UUIDType;
   /** Recipient email — used as the `to` address */
   userEmail: string;
   /** Tenant scope for branding / origin resolution */

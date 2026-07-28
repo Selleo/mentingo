@@ -1,9 +1,13 @@
 import { Injectable, Logger } from "@nestjs/common";
 
+import { EmailNotificationTemplatesService } from "src/email-notification-templates/email-templates.service";
+import { renderTemplateContent } from "src/email-notification-templates/utils/renderTemplateContent";
+
+import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 
 /**
- * Represents a user-created email template stored in the database.
+ * Represents a resolved email template ready for placeholder substitution.
  */
 export type AutomationEmailTemplate = {
   id: UUIDType;
@@ -14,43 +18,57 @@ export type AutomationEmailTemplate = {
 };
 
 /**
- * Service responsible for fetching user-created email templates.
- *
- * TODO: Replace mock implementation with actual database queries
- * once the email templates entity/table is created.
+ * Service responsible for fetching user-created email templates
+ * from the database and rendering them for automation execution.
  */
 @Injectable()
 export class AutomationTemplateService {
   private readonly logger = new Logger(AutomationTemplateService.name);
 
+  constructor(private readonly emailTemplatesService: EmailNotificationTemplatesService) {}
+
   /**
-   * Fetches a user-created email template by ID.
+   * Fetches a user-created email template by ID and renders it to HTML
+   * for the given language. Placeholders ({{variable}}) are preserved in
+   * the rendered output so the runner can substitute them with actual values.
    *
    * @param templateId - UUID of the template to fetch
-   * @returns The template or null if not found
-   *
-   * TODO: Replace with actual repository call, e.g.:
-   * ```
-   * return this.automationTemplatesRepository.getById(templateId);
-   * ```
+   * @param language - Language to render the template in (defaults to template's base language)
+   * @returns The rendered template with subject and body, or null if not found
    */
-  async getTemplate(templateId: UUIDType): Promise<AutomationEmailTemplate | null> {
+  async getTemplate(
+    templateId: UUIDType,
+    language?: SupportedLanguages,
+  ): Promise<AutomationEmailTemplate | null> {
     this.logger.debug(`Fetching email template: ${templateId}`);
 
-    // ──────────────────────────────────────────────────────────────────
-    // MOCK: Return a placeholder template for development/testing.
-    // Replace this with a real database lookup when the templates
-    // table/entity is ready.
-    // ──────────────────────────────────────────────────────────────────
-    return {
-      id: templateId,
-      subject: "Mock template subject — {{recipient_name}}",
-      body: `
-        <h1>Hello {{recipient_name}}</h1>
-        <p>This is a mock automation email template.</p>
-        <p>Course: {{course_title}}</p>
-        <a href="{{link}}">Click here</a>
-      `.trim(),
-    };
+    try {
+      const template = await this.emailTemplatesService.getTemplateById(templateId);
+
+      if (!template) {
+        this.logger.warn(`Email template not found: ${templateId}`);
+        return null;
+      }
+
+      const resolvedLanguage = language ?? template.baseLanguage;
+
+      // Render the template to HTML while preserving {{variable}} placeholders
+      const rendered = await renderTemplateContent({
+        blocks: template.blocks,
+        strings: template.strings,
+        subject: template.subject,
+        language: resolvedLanguage,
+        baseLanguage: template.baseLanguage,
+      });
+
+      return {
+        id: templateId,
+        subject: rendered.subject,
+        body: rendered.html,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch/render email template ${templateId}`, error);
+      return null;
+    }
   }
 }

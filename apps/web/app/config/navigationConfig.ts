@@ -161,6 +161,7 @@ export const getNavigationConfig = (
           PERMISSIONS.GROUP_MANAGE,
           PERMISSIONS.CATEGORY_MANAGE,
           PERMISSIONS.BILLING_MANAGE,
+          PERMISSIONS.EMAIL_TEMPLATE_MANAGE,
         ],
       },
       items: [
@@ -181,6 +182,11 @@ export const getNavigationConfig = (
           path: "admin/categories",
           iconName: "Category",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
+        },
+        {
+          label: t("navigationSideBar.emailTemplates", "Email templates"),
+          path: "admin/email-templates",
+          iconName: "Email",
         },
         {
           label: t("navigationSideBar.automation"),

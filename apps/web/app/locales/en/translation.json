@@ -350,6 +350,7 @@
     "announcements": "Announcements",
     "notifications": "Notifications",
     "promotionCodes": "Promotion Codes",
+    "emailTemplates": "Email templates",
     "manage": "Manage",
     "ariaLabels": {
       "goToAvailableCourses": "Go to available courses"
@@ -3761,7 +3762,9 @@
     "tenants": "Organizations",
     "learningPaths": "Development Paths",
     "adminLearningPaths": "Development Paths",
-    "adminLearningPathEditor": "Development Path Editor"
+    "adminLearningPathEditor": "Development Path Editor",
+    "emailTemplates": "Email templates",
+    "editEmailTemplate": "Edit email template"
   },
   "learningPathsView": {
     "title": "Development Paths",
@@ -4549,6 +4552,207 @@
       "maxParallelSessionsReached": "The maximum number of active Live Training sessions has been reached."
     }
   },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Email templates",
+      "edit": "Edit"
+    },
+    "list": {
+      "title": "Email templates",
+      "createButton": "Create new",
+      "deleteSelected": "Delete selected",
+      "searchPlaceholder": "Search by name",
+      "statusFilter": "Status",
+      "empty": "No email templates yet.",
+      "loading": "Loading templates...",
+      "loadFailed": "Could not load email templates.",
+      "status": {
+        "all": "All"
+      },
+      "columns": {
+        "name": "Name",
+        "status": "Status",
+        "languages": "Languages",
+        "updatedAt": "Updated at",
+        "selectAll": "Select all",
+        "selectRow": "Select row"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Delete email template",
+      "titleMultiple": "Delete email templates",
+      "descriptionSingle": "Are you sure you want to delete this email template? This action cannot be undone.",
+      "descriptionMultiple": "Are you sure you want to delete {{count}} email templates? This action cannot be undone."
+    },
+    "status": {
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "edit": {
+      "loadFailed": "Could not load this email template."
+    },
+    "form": {
+      "field": {
+        "name": "Name",
+        "subject": "Subject line",
+        "subjectHelp": "Fill in the subject for each language. Variables like {{user.first_name}} can be used.",
+        "subjectPlaceholder": "e.g. Welcome, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "Name is required.",
+        "nameTooLong": "Name is too long.",
+        "localesRequired": "Choose at least one language.",
+        "baseLanguageMissing": "Base language must be one of the available languages."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Email template created.",
+      "createFailed": "Failed to create email template.",
+      "updatedSuccessfully": "Email template saved.",
+      "updateFailed": "Failed to save email template.",
+      "publishedSuccessfully": "Email template published.",
+      "publishFailed": "Failed to publish email template.",
+      "publishBlocked": "Cannot publish — see the diagnostics below.",
+      "archivedSuccessfully": "Email template archived.",
+      "archiveFailed": "Failed to archive email template.",
+      "unarchivedSuccessfully": "Email template restored to draft.",
+      "unarchiveFailed": "Failed to unarchive email template.",
+      "previewFailed": "Failed to render preview.",
+      "previewLanguageUnavailable": "This language is not available for this template.",
+      "duplicatedSuccessfully": "Email template duplicated.",
+      "duplicateFailed": "Failed to duplicate email template.",
+      "madeDraftSuccessfully": "Email template reverted to draft.",
+      "makeDraftFailed": "Failed to revert email template to draft.",
+      "deletedSuccessfully": "Email template deleted.",
+      "deleteFailed": "Failed to delete email template.",
+      "nameAlreadyExists": "An email template with this name already exists.",
+      "testEmailSentSuccessfully": "Test email sent.",
+      "testEmailSendFailed": "Failed to send test email."
+    },
+    "actions": {
+      "preview": "Preview",
+      "duplicate": "Duplicate",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "publish": "Publish",
+      "makeDraft": "Make draft",
+      "edit": "Edit",
+      "rename": "Rename",
+      "sendTest": "Send test"
+    },
+    "language": {
+      "label": "Language",
+      "baseLanguage": "Default",
+      "notAddedLanguages": "Languages to add",
+      "setBaseLanguage": "Set as default",
+      "setBaseTitle": "Change default language",
+      "setBaseDescription": "Use {{language}} as the default language for this template?",
+      "createTitle": "Add translation",
+      "createDescription": "Add a translation for this template in {{language}}?",
+      "deleteTitle": "Delete translation",
+      "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} error — must be fixed before publishing",
+      "errorsTitle_other": "{{count}} errors — must be fixed before publishing",
+      "warningsTitle_one": "{{count}} warning — review before publishing",
+      "warningsTitle_other": "{{count}} warnings — review before publishing",
+      "elementIndex": "Element {{index}}",
+      "reasons": {
+        "name_missing": "Template name is required",
+        "no_language_versions": "Add at least one language version",
+        "subject_missing": "Subject line is required for the default language",
+        "body_missing": "Email body is empty",
+        "button_label_missing": "Button label is required",
+        "button_url_missing": "Button redirect target is required",
+        "empty_translation": "Translation is empty",
+        "invalid_url_protocol": "URL uses a disallowed protocol",
+        "unchanged_from_base": "Translation is identical to the base language",
+        "footer_missing": "Footer is missing"
+      },
+      "nodeTypes": {
+        "heading": "Heading",
+        "paragraph": "Text",
+        "button": "Button",
+        "footer": "Footer",
+        "image": "Image"
+      },
+      "blockedToast": {
+        "save": "Cannot save template. See diagnostics",
+        "publish": "Cannot publish template. See diagnostics"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Type / to open the block menu",
+        "heading": "Heading {{level}}",
+        "htmlCode": "HTML code…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Text",
+          "media": "Media",
+          "structure": "Structure",
+          "interactive": "Interactive",
+          "footer": "Footer"
+        },
+        "text": {
+          "title": "Text",
+          "description": "Plain text paragraph."
+        },
+        "heading1": {
+          "title": "Heading 1",
+          "description": "Large section heading (H1)."
+        },
+        "heading2": {
+          "title": "Heading 2",
+          "description": "Medium section heading (H2)."
+        },
+        "heading3": {
+          "title": "Heading 3",
+          "description": "Small section heading (H3)."
+        },
+        "image": {
+          "title": "Image",
+          "description": "Full-width image."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Full logo."
+        },
+        "section": {
+          "title": "Section",
+          "description": "Grouped content container."
+        },
+        "columns": {
+          "title": "Columns",
+          "description": "Multi-column layout."
+        },
+        "divider": {
+          "title": "Divider",
+          "description": "Horizontal divider line."
+        },
+        "spacer": {
+          "title": "Spacer",
+          "description": "Vertical spacing between blocks."
+        },
+        "button": {
+          "title": "Button",
+          "description": "Call-to-action button."
+        },
+        "footer": {
+          "title": "Footer",
+          "description": "Footer text block."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Image upload failed. Please try again.",
+      "tooLarge": "Image is too large. Maximum size is 10 MB.",
+      "invalidType": "Invalid image type. Allowed: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
   "automationView": {
     "title": "Automations",
     "description": "Manage automatic email notifications sent in response to platform events.",
@@ -4599,6 +4803,7 @@
       "openBuilder": "Open step builder",
       "pause": "Pause",
       "activate": "Activate",
+      "simulationRequiredTooltip": "The automation must pass a simulation first",
       "archive": "Archive",
       "save": "Save changes",
       "cancel": "Cancel",
@@ -4811,6 +5016,7 @@
       "emailTemplate": "Email template",
       "selectTemplate": "Select a template...",
       "language": "Language",
+      "userDefaultLanguage": "User's default language",
       "placeholders": "Template placeholders",
       "selectTemplateFirst": "Select an email template to see available placeholders.",
       "noPlaceholders": "This template has no placeholders to fill.",
@@ -4818,6 +5024,9 @@
       "selectVariable": "Select trigger variable...",
       "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables.",
       "defaultEmailNoMapping": "The default email template does not require any placeholder mapping.",
+      "defaultTemplatesGroup": "System templates",
+      "customTemplatesGroup": "Custom templates",
+      "noCustomTemplates": "No published custom templates available.",
       "templates": {
         "defaultEmail": "Default Email",
         "userInvite": "User Invite",
@@ -4869,7 +5078,13 @@
       "mentionedLastName": "Mentioned user last name",
       "authorFullName": "Author full name",
       "messageContent": "Message content",
-      "chatUrl": "Message link"
+      "chatUrl": "Message link",
+      "invitedByUserName": "Invited by (name)",
+      "hasCertificate": "Has certificate",
+      "archiveReason": "Archive reason",
+      "profileLink": "User profile link",
+      "progressLink": "Course progress link",
+      "userName": "Full name"
     },
     "simulation": {
       "title": "Simulation Result",
@@ -4909,7 +5124,29 @@
         "subject": "You have been assigned to course: {{courseName}}",
         "greeting": "Hi {{name}}!",
         "assignedToCourse": "You have been assigned to a new course: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Go to course"
+        "goToCourse": "Go to course",
+        "unavailable": "Preview unavailable",
+        "loadFailed": "Could not load the template preview.",
+        "label": "Preview",
+        "systemTemplateNote": "System template <strong>{{templateLabel}}</strong> — default content is generated automatically during delivery.",
+        "emailDescription": "This email will be sent with content matching the selected trigger and mapped variables.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "John",
+        "lastName": "Smith",
+        "fullName": "John Smith",
+        "email": "john.smith@example.com",
+        "courseName": "Health & Safety Training 2025",
+        "chapterName": "Chapter 1: Introduction",
+        "certificateName": "H&S Certificate",
+        "announcementTitle": "New training available",
+        "announcementContent": "We invite you to a new training course...",
+        "authorFullName": "Jane Doe",
+        "messageContent": "Hey, check this out!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "Jane Doe"
       }
     }
   },

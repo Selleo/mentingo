@@ -1132,22 +1132,22 @@
     {
       "idx": 161,
       "version": "7",
-      "when": 1783673985611,
-      "tag": "0161_add_require_password_change_field",
+      "when": 1783686442464,
+      "tag": "0161_add_email_notification_templates",
       "breakpoints": true
     },
     {
       "idx": 162,
       "version": "7",
-      "when": 1784276448089,
-      "tag": "0162_add_adjusted_automation_tables",
+      "when": 1784187081034,
+      "tag": "0162_email_templates_tenant_scoped_name_unique",
       "breakpoints": true
     },
     {
       "idx": 163,
       "version": "7",
-      "when": 1785155133225,
-      "tag": "0163_add_automation_log table",
+      "when": 1785222302944,
+      "tag": "0164_add_automation_tables_and_automation_logs",
       "breakpoints": true
     }
   ]

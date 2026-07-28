@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -8,7 +8,9 @@ import { Label } from "~/components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
@@ -20,11 +22,23 @@ import { DEFAULT_EMAIL_TEMPLATE_ID, EMAIL_TEMPLATES } from "../emailTemplates.co
 import { useSaveAutomationSteps } from "../hooks/useSaveAutomationSteps";
 
 import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBuilder.types";
+import type { AutomationEmailTemplateOption } from "../hooks/useEmailTemplatesForAutomation";
 import type { FC } from "react";
 
-// ─── Supported languages ─────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
 
-const LANGUAGE_OPTIONS = [
+/** Prefix to distinguish custom (DB) template IDs from default ones in the select */
+const CUSTOM_TEMPLATE_PREFIX = "custom:";
+
+/** Sentinel value — email will be sent in the recipient's preferred language from their settings */
+const USER_DEFAULT_LANGUAGE = "user_default";
+
+type LanguageOption =
+  | { value: string; labelKey: string; label?: undefined }
+  | { value: string; label: string; labelKey?: undefined };
+
+const LANGUAGE_OPTIONS: LanguageOption[] = [
+  { value: USER_DEFAULT_LANGUAGE, labelKey: "automationBuilder.editAction.userDefaultLanguage" },
   { value: "en", label: "English" },
   { value: "pl", label: "Polski" },
   { value: "de", label: "Deutsch" },
@@ -39,9 +53,17 @@ interface EditActionModalProps {
   open: boolean;
   onClose: () => void;
   node: BuilderNode;
+  customTemplates: AutomationEmailTemplateOption[];
+  isLoadingCustomTemplates: boolean;
 }
 
-export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node }) => {
+export const EditActionModal: FC<EditActionModalProps> = ({
+  open,
+  onClose,
+  node,
+  customTemplates,
+  isLoadingCustomTemplates,
+}) => {
   const { t } = useTranslation();
   const updateNodeConfig = useBuilderStore((s) => s.updateNodeConfig);
   const nodes = useBuilderStore((s) => s.nodes);
@@ -54,7 +76,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
     (node.config.emailTemplate as string) ?? "",
   );
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
-    (node.config.language as string) ?? "en",
+    (node.config.language as string) ?? "user_default",
   );
   const [placeholderValues, setPlaceholderValues] = useState<Record<string, string>>(
     (node.config.placeholderValues as Record<string, string>) ?? {},
@@ -68,12 +90,18 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
   }, [triggerType]);
 
   const isDefaultTemplate = selectedTemplate === DEFAULT_EMAIL_TEMPLATE_ID;
+  const isCustomTemplate = selectedTemplate.startsWith(CUSTOM_TEMPLATE_PREFIX);
 
-  // Get placeholders from selected template
+  // Get placeholders from selected template (default or custom)
   const templatePlaceholders = useMemo(() => {
+    if (isCustomTemplate) {
+      const customId = selectedTemplate.slice(CUSTOM_TEMPLATE_PREFIX.length);
+      const custom = customTemplates.find((t) => t.id === customId);
+      return custom?.placeholders ?? [];
+    }
     const template = EMAIL_TEMPLATES.find((t) => t.id === selectedTemplate);
     return template?.placeholders ?? [];
-  }, [selectedTemplate]);
+  }, [selectedTemplate, isCustomTemplate, customTemplates]);
 
   const handleTemplateChange = useCallback((value: string) => {
     setSelectedTemplate(value);
@@ -142,11 +170,43 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
                     <SelectValue placeholder={t("automationBuilder.editAction.selectTemplate")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {EMAIL_TEMPLATES.map((template) => (
-                      <SelectItem key={template.id} value={template.id}>
-                        {t(template.labelKey)}
-                      </SelectItem>
-                    ))}
+                    {/* Default system templates */}
+                    <SelectGroup>
+                      <SelectLabel>
+                        {t("automationBuilder.editAction.defaultTemplatesGroup")}
+                      </SelectLabel>
+                      {EMAIL_TEMPLATES.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {t(template.labelKey)}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+
+                    {/* Custom templates from DB */}
+                    <SelectGroup>
+                      <SelectLabel>
+                        {t("automationBuilder.editAction.customTemplatesGroup")}
+                      </SelectLabel>
+                      {isLoadingCustomTemplates && (
+                        <div className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground">
+                          <Loader2 className="size-3 animate-spin" />
+                          {t("common.other.loading")}
+                        </div>
+                      )}
+                      {!isLoadingCustomTemplates && customTemplates.length === 0 && (
+                        <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                          {t("automationBuilder.editAction.noCustomTemplates")}
+                        </div>
+                      )}
+                      {customTemplates.map((template) => (
+                        <SelectItem
+                          key={template.id}
+                          value={`${CUSTOM_TEMPLATE_PREFIX}${template.id}`}
+                        >
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
@@ -161,7 +221,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({ open, onClose, node 
                   <SelectContent>
                     {LANGUAGE_OPTIONS.map((lang) => (
                       <SelectItem key={lang.value} value={lang.value}>
-                        {lang.label}
+                        {lang.labelKey ? t(lang.labelKey) : lang.label}
                       </SelectItem>
                     ))}
                   </SelectContent>

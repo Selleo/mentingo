@@ -64,6 +64,7 @@ export const RESOURCE_CATEGORIES = {
   COURSE: "course",
   GLOBAL_SETTINGS: "global_settings",
   LIVE_TRAINING: "live_training",
+  EMAIL_TEMPLATE_IMAGE: "email_template_image",
 } as const;
 
 export type ResourceCategory = (typeof RESOURCE_CATEGORIES)[keyof typeof RESOURCE_CATEGORIES];

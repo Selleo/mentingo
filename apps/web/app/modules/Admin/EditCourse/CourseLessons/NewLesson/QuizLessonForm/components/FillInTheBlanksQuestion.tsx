@@ -114,7 +114,8 @@ const FillInTheBlanksQuestion = ({
 
   function containsButtonForOption(option: QuestionOption) {
     const currentValue = form.getValues(`questions.${questionIndex}.description`) as
-      string | undefined;
+      | string
+      | undefined;
     const optionId = getOptionId(option);
     const buttons = parseFillBlankButtons(currentValue);
 

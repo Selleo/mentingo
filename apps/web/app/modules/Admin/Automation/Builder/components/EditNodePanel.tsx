@@ -26,6 +26,7 @@ import { cn } from "~/lib/utils";
 
 import { TRIGGER_DEFINITIONS, getStepDefinition } from "../automationBuilder.types";
 import { useBuilderStore } from "../automationBuilderStore";
+import { useEmailTemplatesForAutomation } from "../hooks/useEmailTemplatesForAutomation";
 
 import { EditActionModal } from "./EditActionModal";
 
@@ -45,6 +46,10 @@ export const EditNodePanel: FC = () => {
   const removeNode = useBuilderStore((s) => s.removeNode);
 
   const [editActionNode, setEditActionNode] = useState<BuilderNode | null>(null);
+
+  // Fetch custom email templates - always called (stable hook count)
+  const { templates: customTemplates, isLoading: isLoadingCustomTemplates } =
+    useEmailTemplatesForAutomation();
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
   const stepDefinition = selectedNode ? getStepDefinition(selectedNode.type) : undefined;
@@ -235,9 +240,12 @@ export const EditNodePanel: FC = () => {
 
       {editActionNode && (
         <EditActionModal
+          key={editActionNode.id}
           open={Boolean(editActionNode)}
           onClose={() => setEditActionNode(null)}
           node={editActionNode}
+          customTemplates={customTemplates}
+          isLoadingCustomTemplates={isLoadingCustomTemplates}
         />
       )}
     </>

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { useUsersEnrolledQuery } from "../../../../../../app/api/queries/admin/useUsersEnrolled";
+import { useUsersEnrolledQuery } from "~/api/queries/admin/useUsersEnrolled";
 
 import type { GetStudentsWithEnrollmentDateResponse } from "~/api/generated-api";
 import type { Option } from "~/components/ui/multiselect";

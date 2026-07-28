@@ -1,13 +1,18 @@
 import { forwardRef, Module } from "@nestjs/common";
 
 import { AnnouncementsModule } from "src/announcements/announcements.module";
+import { EmailModule } from "src/common/emails/emails.module";
 import { CourseChatModule } from "src/course-chat/course-chat.module";
 import { CourseModule } from "src/courses/course.module";
+import { EmailNotificationTemplatesModule } from "src/email-notification-templates/email-templates.module";
+import { SettingsModule } from "src/settings/settings.module";
 import { UserModule } from "src/user/user.module";
 
 import { AutomationLogsController } from "./automation-logs/automation-logs.controller";
 import { AutomationDataResolverService } from "./automation-runner/automation-data-resolver.service";
 import { AutomationRunnerService } from "./automation-runner/automation-runner.service";
+import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
+import { AutomationSystemTemplateRendererService } from "./automation-runner/automation-system-template-renderer.service";
 import { AutomationTemplateService } from "./automation-runner/automation-template.service";
 import { AutomationStepsController } from "./automations-steps/automations-steps.controller";
 import { AutomationStepsService } from "./automations-steps/automations-steps.service";
@@ -24,6 +29,9 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     forwardRef(() => CourseModule),
     forwardRef(() => AnnouncementsModule),
     forwardRef(() => CourseChatModule),
+    EmailNotificationTemplatesModule,
+    EmailModule,
+    SettingsModule,
   ],
   providers: [
     AutomationsRepository,
@@ -34,6 +42,8 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationRunnerService,
     AutomationDataResolverService,
     AutomationTemplateService,
+    AutomationSystemTemplatePreviewService,
+    AutomationSystemTemplateRendererService,
     AutomationLogsRepository,
   ],
   controllers: [AutomationsController, AutomationStepsController, AutomationLogsController],

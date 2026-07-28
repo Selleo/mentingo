@@ -350,6 +350,7 @@
     "announcements": "Anuncios",
     "notifications": "Notificaciones",
     "promotionCodes": "Códigos de promoción",
+    "emailTemplates": "Plantillas de correo electrónico",
     "manage": "Administrar",
     "ariaLabels": {
       "goToAvailableCourses": "Ir a cursos disponibles"
@@ -3759,7 +3760,9 @@
     "tenants": "Organizaciones",
     "learningPaths": "Rutas de desarrollo",
     "adminLearningPaths": "Rutas de desarrollo",
-    "adminLearningPathEditor": "Editor de ruta de desarrollo"
+    "adminLearningPathEditor": "Editor de ruta de desarrollo",
+    "emailTemplates": "Plantillas de correo electrónico",
+    "editEmailTemplate": "Editar plantilla de correo electrónico"
   },
   "learningPathsView": {
     "title": "Rutas de desarrollo",
@@ -4547,6 +4550,207 @@
       "maxParallelSessionsReached": "Se alcanzó el número máximo de sesiones de formación en vivo activas."
     }
   },
+  "emailTemplates": {
+    "breadcrumbs": {
+      "list": "Plantillas de correo",
+      "edit": "Editar"
+    },
+    "list": {
+      "title": "Plantillas de correo",
+      "createButton": "Crear nueva",
+      "deleteSelected": "Eliminar seleccionadas",
+      "searchPlaceholder": "Buscar por nombre",
+      "statusFilter": "Estado",
+      "empty": "Aún no hay plantillas de correo.",
+      "loading": "Cargando plantillas...",
+      "loadFailed": "No se pudieron cargar las plantillas de correo.",
+      "status": {
+        "all": "Todas"
+      },
+      "columns": {
+        "name": "Nombre",
+        "status": "Estado",
+        "languages": "Idiomas",
+        "updatedAt": "Actualizada",
+        "selectAll": "Seleccionar todo",
+        "selectRow": "Seleccionar fila"
+      }
+    },
+    "deleteModal": {
+      "titleSingle": "Eliminar plantilla de correo",
+      "titleMultiple": "Eliminar plantillas de correo",
+      "descriptionSingle": "¿Seguro que quieres eliminar esta plantilla de correo? Esta acción no se puede deshacer.",
+      "descriptionMultiple": "¿Seguro que quieres eliminar {{count}} plantillas de correo? Esta acción no se puede deshacer."
+    },
+    "status": {
+      "draft": "Borrador",
+      "published": "Publicada",
+      "archived": "Archivada"
+    },
+    "edit": {
+      "loadFailed": "No se pudo cargar esta plantilla de correo."
+    },
+    "form": {
+      "field": {
+        "name": "Nombre",
+        "subject": "Asunto",
+        "subjectHelp": "Rellena el asunto para cada idioma. Puedes usar variables como {{user.first_name}}.",
+        "subjectPlaceholder": "p. ej. Bienvenido, {{user.first_name}}"
+      },
+      "errors": {
+        "nameRequired": "El nombre es obligatorio.",
+        "nameTooLong": "El nombre es demasiado largo.",
+        "localesRequired": "Elige al menos un idioma.",
+        "baseLanguageMissing": "El idioma base debe estar entre los idiomas disponibles."
+      }
+    },
+    "toast": {
+      "createdSuccessfully": "Plantilla de correo creada.",
+      "createFailed": "No se pudo crear la plantilla de correo.",
+      "updatedSuccessfully": "Plantilla de correo guardada.",
+      "updateFailed": "No se pudo guardar la plantilla de correo.",
+      "publishedSuccessfully": "Plantilla de correo publicada.",
+      "publishFailed": "No se pudo publicar la plantilla de correo.",
+      "publishBlocked": "No se puede publicar — revisa la diagnóstica de abajo.",
+      "archivedSuccessfully": "Plantilla de correo archivada.",
+      "archiveFailed": "No se pudo archivar la plantilla de correo.",
+      "unarchivedSuccessfully": "Plantilla de correo restaurada como borrador.",
+      "unarchiveFailed": "No se pudo desarchivar la plantilla de correo.",
+      "previewFailed": "No se pudo generar la vista previa.",
+      "previewLanguageUnavailable": "Este idioma no está disponible para esta plantilla.",
+      "duplicatedSuccessfully": "Plantilla de correo duplicada.",
+      "duplicateFailed": "No se pudo duplicar la plantilla de correo.",
+      "madeDraftSuccessfully": "Plantilla de correo revertida a borrador.",
+      "makeDraftFailed": "No se pudo revertir la plantilla de correo a borrador.",
+      "deletedSuccessfully": "Plantilla de correo eliminada.",
+      "deleteFailed": "No se pudo eliminar la plantilla de correo.",
+      "nameAlreadyExists": "Ya existe una plantilla de correo con este nombre.",
+      "testEmailSentSuccessfully": "Correo de prueba enviado.",
+      "testEmailSendFailed": "No se pudo enviar el correo de prueba."
+    },
+    "actions": {
+      "preview": "Vista previa",
+      "duplicate": "Duplicar",
+      "archive": "Archivar",
+      "unarchive": "Desarchivar",
+      "publish": "Publicar",
+      "makeDraft": "Marcar como borrador",
+      "edit": "Editar",
+      "rename": "Renombrar",
+      "sendTest": "Enviar prueba"
+    },
+    "language": {
+      "label": "Idioma",
+      "baseLanguage": "Predeterminado",
+      "notAddedLanguages": "Idiomas para añadir",
+      "setBaseLanguage": "Establecer como predeterminado",
+      "setBaseTitle": "Cambiar idioma predeterminado",
+      "setBaseDescription": "¿Usar {{language}} como idioma predeterminado para esta plantilla?",
+      "createTitle": "Añadir traducción",
+      "createDescription": "¿Añadir una traducción de esta plantilla en {{language}}?",
+      "deleteTitle": "Eliminar traducción",
+      "deleteDescription": "¿Eliminar la traducción {{language}}? Su contenido se perderá."
+    },
+    "publishDiagnostics": {
+      "errorsTitle_one": "{{count}} error — debe corregirse antes de publicar",
+      "errorsTitle_other": "{{count}} errores — deben corregirse antes de publicar",
+      "warningsTitle_one": "{{count}} advertencia — revísala antes de publicar",
+      "warningsTitle_other": "{{count}} advertencias — revísalas antes de publicar",
+      "elementIndex": "Elemento {{index}}",
+      "reasons": {
+        "name_missing": "El nombre de la plantilla es obligatorio",
+        "no_language_versions": "Añade al menos una versión de idioma",
+        "subject_missing": "El asunto es obligatorio para el idioma predeterminado",
+        "body_missing": "El cuerpo del correo está vacío",
+        "button_label_missing": "El texto del botón es obligatorio",
+        "button_url_missing": "El destino del botón es obligatorio",
+        "empty_translation": "La traducción está vacía",
+        "invalid_url_protocol": "La URL usa un protocolo no permitido",
+        "unchanged_from_base": "La traducción es idéntica al idioma base",
+        "footer_missing": "Falta el pie de página"
+      },
+      "nodeTypes": {
+        "heading": "Encabezado",
+        "paragraph": "Texto",
+        "button": "Botón",
+        "footer": "Pie de página",
+        "image": "Imagen"
+      },
+      "blockedToast": {
+        "save": "No se puede guardar la plantilla. Consulta el diagnóstico",
+        "publish": "No se puede publicar la plantilla. Consulta el diagnóstico"
+      }
+    },
+    "builder": {
+      "placeholder": {
+        "writeSomethingOrSlash": "Escribe / para abrir el menú de bloques",
+        "heading": "Encabezado {{level}}",
+        "htmlCode": "Código HTML…"
+      },
+      "blocks": {
+        "groups": {
+          "text": "Texto",
+          "media": "Multimedia",
+          "structure": "Estructura",
+          "interactive": "Interactivo",
+          "footer": "Pie de página"
+        },
+        "text": {
+          "title": "Texto",
+          "description": "Párrafo de texto sin formato."
+        },
+        "heading1": {
+          "title": "Encabezado 1",
+          "description": "Encabezado grande de sección (H1)."
+        },
+        "heading2": {
+          "title": "Encabezado 2",
+          "description": "Encabezado mediano de sección (H2)."
+        },
+        "heading3": {
+          "title": "Encabezado 3",
+          "description": "Encabezado pequeño de sección (H3)."
+        },
+        "image": {
+          "title": "Imagen",
+          "description": "Imagen a ancho completo."
+        },
+        "logoHeader": {
+          "title": "Logo",
+          "description": "Logo completo."
+        },
+        "section": {
+          "title": "Sección",
+          "description": "Contenedor de contenido agrupado."
+        },
+        "columns": {
+          "title": "Columnas",
+          "description": "Diseño de varias columnas."
+        },
+        "divider": {
+          "title": "Divisor",
+          "description": "Línea divisoria horizontal."
+        },
+        "spacer": {
+          "title": "Espaciador",
+          "description": "Espacio vertical entre bloques."
+        },
+        "button": {
+          "title": "Botón",
+          "description": "Botón de llamada a la acción."
+        },
+        "footer": {
+          "title": "Pie de página",
+          "description": "Bloque de texto del pie de página."
+        }
+      }
+    },
+    "image": {
+      "uploadFailed": "Error al subir la imagen. Por favor, inténtelo de nuevo.",
+      "tooLarge": "La imagen es demasiado grande. El tamaño máximo es 10 MB.",
+      "invalidType": "Tipo de imagen no válido. Permitidos: JPEG, PNG, GIF, WebP, BMP, TIFF."
+    }
+  },
   "automationView": {
     "title": "Automatizaciones",
     "description": "Gestione las notificaciones automáticas por correo electrónico enviadas en respuesta a eventos de la plataforma.",
@@ -4596,6 +4800,7 @@
       "openBuilder": "Abrir editor de pasos",
       "pause": "Pausar",
       "activate": "Activar",
+      "simulationRequiredTooltip": "La automatización debe pasar primero una simulación",
       "archive": "Archivar",
       "save": "Guardar cambios",
       "cancel": "Cancelar",
@@ -4755,6 +4960,7 @@
       "emailTemplate": "Plantilla de correo",
       "selectTemplate": "Selecciona una plantilla...",
       "language": "Idioma",
+      "userDefaultLanguage": "Idioma predeterminado del usuario",
       "placeholders": "Variables de la plantilla",
       "selectTemplateFirst": "Selecciona una plantilla de correo para ver las variables disponibles.",
       "noPlaceholders": "Esta plantilla no tiene variables para completar.",
@@ -4762,6 +4968,9 @@
       "selectVariable": "Selecciona variable del disparador...",
       "noTriggerVariables": "No hay disparador conectado a esta acción. Añade un disparador primero para mapear variables.",
       "defaultEmailNoMapping": "La plantilla de correo predeterminada no requiere mapeo de variables.",
+      "defaultTemplatesGroup": "Plantillas del sistema",
+      "customTemplatesGroup": "Plantillas personalizadas",
+      "noCustomTemplates": "No hay plantillas personalizadas publicadas disponibles.",
       "templates": {
         "defaultEmail": "Correo predeterminado",
         "userInvite": "Invitación de usuario",
@@ -4813,7 +5022,13 @@
       "mentionedLastName": "Apellido del usuario mencionado",
       "authorFullName": "Nombre completo del autor",
       "messageContent": "Contenido del mensaje",
-      "chatUrl": "Enlace al mensaje"
+      "chatUrl": "Enlace al mensaje",
+      "invitedByUserName": "Invitado por (nombre)",
+      "hasCertificate": "Tiene certificado",
+      "archiveReason": "Motivo de archivo",
+      "profileLink": "Enlace al perfil del usuario",
+      "progressLink": "Enlace al progreso del curso",
+      "userName": "Nombre completo"
     },
     "simulation": {
       "title": "Resultado de la simulación",
@@ -4853,7 +5068,29 @@
         "subject": "Has sido asignado al curso: {{courseName}}",
         "greeting": "¡Hola {{name}}!",
         "assignedToCourse": "Has sido asignado a un nuevo curso: <strong>{{courseName}}</strong>.",
-        "goToCourse": "Ir al curso"
+        "goToCourse": "Ir al curso",
+        "unavailable": "Vista previa no disponible",
+        "loadFailed": "No se pudo cargar la vista previa de la plantilla.",
+        "label": "Vista previa",
+        "systemTemplateNote": "Plantilla del sistema <strong>{{templateLabel}}</strong> — el contenido predeterminado se genera automáticamente durante el envío.",
+        "emailDescription": "Este correo electrónico se enviará con el contenido correspondiente al trigger seleccionado y las variables mapeadas.",
+        "platformName": "Mentingo Learning Platform"
+      },
+      "sampleData": {
+        "firstName": "Juan",
+        "lastName": "García",
+        "fullName": "Juan García",
+        "email": "juan.garcia@example.com",
+        "courseName": "Formación en Seguridad Laboral 2025",
+        "chapterName": "Capítulo 1: Introducción",
+        "certificateName": "Certificado de Seguridad",
+        "announcementTitle": "Nueva formación disponible",
+        "announcementContent": "Le invitamos a una nueva formación...",
+        "authorFullName": "María López",
+        "messageContent": "¡Oye, mira esto!",
+        "daysLeft": "30",
+        "daysInactive": "14",
+        "invitedByUserName": "María López"
       }
     }
   },

@@ -111,13 +111,14 @@ export class AutomationDataResolverService {
   // ─── Individual resolvers ──────────────────────────────────────────
 
   private async resolveUserInvite(event: UserInviteEvent): Promise<AutomationResolvedRecipient[]> {
-    const { email, userId, tenantId, token } = event.userInvite;
+    const { email, userId, tenantId, token, invitedByUserName } = event.userInvite;
     const user = await this.getUserSafe(userId);
     const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
     const inviteLink = `${origin}/create-password?createToken=${token}`;
 
     return [
       {
+        userId,
         userEmail: email,
         tenantId,
         variables: {
@@ -125,6 +126,7 @@ export class AutomationDataResolverService {
           userLastName: user?.lastName ?? "",
           userEmail: email,
           inviteLink,
+          invitedByUserName: invitedByUserName ?? "Admin",
         },
       },
     ];
@@ -133,7 +135,7 @@ export class AutomationDataResolverService {
   private async resolveUsersImportInvite(
     event: UsersImportInviteEmailsEvent,
   ): Promise<AutomationResolvedRecipient[]> {
-    const { tenantId, recipients } = event.usersImportInviteEmails;
+    const { tenantId, recipients, invitedByUserName } = event.usersImportInviteEmails;
     const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
 
     const results: AutomationResolvedRecipient[] = [];
@@ -143,6 +145,7 @@ export class AutomationDataResolverService {
       const inviteLink = `${origin}/create-password?createToken=${recipient.token}`;
 
       results.push({
+        userId: recipient.userId,
         userEmail: recipient.email,
         tenantId,
         variables: {
@@ -150,6 +153,7 @@ export class AutomationDataResolverService {
           userLastName: user?.lastName ?? "",
           userEmail: recipient.email,
           inviteLink,
+          invitedByUserName: invitedByUserName ?? "Admin",
         },
       });
     }
@@ -167,6 +171,7 @@ export class AutomationDataResolverService {
 
     return [
       {
+        userId,
         userEmail: email,
         tenantId,
         variables: {
@@ -188,6 +193,7 @@ export class AutomationDataResolverService {
 
     return [
       {
+        userId,
         userEmail: email,
         tenantId,
         variables: {
@@ -205,9 +211,11 @@ export class AutomationDataResolverService {
   ): Promise<AutomationResolvedRecipient[]> {
     const { userId } = event.userFirstLogin;
     const user = await this.userService.getUserById(userId, this.dbAdmin);
+    const origin = await resolveTenantOrigin(this.dbAdmin, user.tenantId);
 
     return [
       {
+        userId,
         userEmail: user.email,
         tenantId: user.tenantId,
         variables: {
@@ -215,6 +223,7 @@ export class AutomationDataResolverService {
           userLastName: user.lastName,
           userEmail: user.email,
           loginDate: new Date().toISOString(),
+          platformUrl: `${origin}/courses`,
         },
       },
     ];
@@ -240,6 +249,7 @@ export class AutomationDataResolverService {
         if (!user) continue;
 
         results.push({
+          userId: studentId,
           userEmail: user.email,
           tenantId,
           variables: {
@@ -311,6 +321,7 @@ export class AutomationDataResolverService {
 
       return [
         {
+          userId,
           userEmail: user.email,
           tenantId,
           variables: {
@@ -340,6 +351,7 @@ export class AutomationDataResolverService {
 
       return [
         {
+          userId,
           userEmail: user.email,
           tenantId,
           variables: {
@@ -349,6 +361,8 @@ export class AutomationDataResolverService {
             courseName: courseName ?? "",
             finishedAt: new Date().toISOString(),
             certificateUrl,
+            hasCertificate: String(hasCertificate ?? false),
+            courseUrl: `${origin}/course/${courseId}`,
           },
         },
       ];
@@ -360,9 +374,11 @@ export class AutomationDataResolverService {
   ): Promise<AutomationResolvedRecipient[]> {
     const { id, firstName, lastName, email } = event.user;
     const tenantId = await this.getUserTenantId(id);
+    const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
 
     return [
       {
+        userId: id,
         userEmail: email,
         tenantId,
         variables: {
@@ -370,6 +386,8 @@ export class AutomationDataResolverService {
           userLastName: lastName,
           userEmail: email,
           registrationDate: new Date().toISOString(),
+          profileLink: `${origin}/admin/users/${id}`,
+          userName: [firstName, lastName].filter(Boolean).join(" "),
         },
       },
     ];
@@ -383,6 +401,7 @@ export class AutomationDataResolverService {
 
     return [
       {
+        userId: id,
         userEmail: email,
         tenantId,
         variables: {
@@ -400,6 +419,7 @@ export class AutomationDataResolverService {
   ): Promise<AutomationResolvedRecipient[]> {
     const { courseId, userName, courseTitle } = event.courseCompletionData;
     const tenantId = await this.getCourseTenantId(courseId);
+    const origin = await resolveTenantOrigin(this.dbAdmin, tenantId);
 
     const completedStudent = await this.getLastCompletedStudentForCourse(courseId);
 
@@ -417,6 +437,8 @@ export class AutomationDataResolverService {
           userEmail: completedStudent?.email ?? "",
           courseName: courseTitle,
           finishedAt: new Date().toISOString(),
+          userName,
+          progressLink: `${origin}/admin/courses/${courseId}/progress`,
         },
       },
     ];
@@ -433,6 +455,7 @@ export class AutomationDataResolverService {
       const user = await this.getUserSafe(cert.userId);
 
       results.push({
+        userId: cert.userId,
         userEmail: cert.userEmail,
         tenantId: cert.tenantId,
         variables: {
@@ -442,6 +465,7 @@ export class AutomationDataResolverService {
           certificateName: cert.courseName,
           expirationDate: cert.expiresAt,
           daysLeft: "",
+          courseUrl: cert.courseLink,
         },
       });
     }
@@ -452,7 +476,7 @@ export class AutomationDataResolverService {
   private async resolveCertificateArchived(
     event: CertificateArchivedEmailEvent,
   ): Promise<AutomationResolvedRecipient[]> {
-    const { certificates } = event.certificateArchivedEmailData;
+    const { certificates, reason } = event.certificateArchivedEmailData;
 
     const results: AutomationResolvedRecipient[] = [];
 
@@ -460,6 +484,7 @@ export class AutomationDataResolverService {
       const user = await this.getUserSafe(cert.userId);
 
       results.push({
+        userId: cert.userId,
         userEmail: cert.userEmail,
         tenantId: cert.tenantId,
         variables: {
@@ -468,6 +493,8 @@ export class AutomationDataResolverService {
           userEmail: cert.userEmail,
           certificateName: cert.courseName,
           archivedAt: new Date().toISOString(),
+          courseUrl: cert.courseLink,
+          archiveReason: reason ?? "expired",
         },
       });
     }
@@ -500,6 +527,7 @@ export class AutomationDataResolverService {
       const user = await this.getUserSafe(recipient.id);
 
       results.push({
+        userId: recipient.id,
         userEmail: recipient.email,
         tenantId,
         variables: {
@@ -538,6 +566,7 @@ export class AutomationDataResolverService {
         if (!user) continue;
 
         results.push({
+          userId: mentionedUserId,
           userEmail: user.email,
           tenantId,
           variables: {
@@ -566,6 +595,7 @@ export class AutomationDataResolverService {
       const user = await this.getUserSafe(r.studentId);
 
       results.push({
+        userId: r.studentId,
         userEmail: r.studentEmail,
         tenantId: r.tenantId,
         variables: {

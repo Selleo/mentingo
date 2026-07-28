@@ -1,5 +1,5 @@
 import { useNavigate } from "@remix-run/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
@@ -9,6 +9,7 @@ import { useBuilderStore } from "../automationBuilderStore";
 
 import { useSaveAutomationSteps } from "./useSaveAutomationSteps";
 import { useSimulation } from "./useSimulation";
+import { useSimulationPersistence } from "./useSimulationPersistence";
 
 import type { AutomationStatus } from "~/api/queries/admin/automation.types";
 
@@ -27,8 +28,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   const isDirty = useBuilderStore((s) => s.isDirty);
   const nodes = useBuilderStore((s) => s.nodes);
   const setActive = useBuilderStore((s) => s.setActive);
-  const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
-  const updateNodeConfigSilent = useBuilderStore((s) => s.updateNodeConfigSilent);
 
   const updateAutomation = useUpdateAutomation();
   const deleteAutomation = useDeleteAutomation();
@@ -40,13 +39,8 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   const { simulationState, isSimulating, panelOpen, runSimulation, closePanel, retry } =
     useSimulation();
 
-  // Stable refs for effect dependencies that should not re-trigger
-  const saveStepsRef = useRef(saveSteps);
-  saveStepsRef.current = saveSteps;
-  const updateNodeConfigSilentRef = useRef(updateNodeConfigSilent);
-  updateNodeConfigSilentRef.current = updateNodeConfigSilent;
-  const setSimulationPassedRef = useRef(setSimulationPassed);
-  setSimulationPassedRef.current = setSimulationPassed;
+  // Persist simulation results to node configs and save to backend
+  useSimulationPersistence(simulationState, automationId);
 
   // ─── Save ──────────────────────────────────────────────────────────────────
 
@@ -57,8 +51,8 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     const { automationName: name, isActive: active } = useBuilderStore.getState();
     const status: AutomationStatus = active ? "enabled" : "draft";
 
-    saveStepsRef.current({ name: { [lang]: name }, status });
-  }, [automationId, i18n.language]);
+    saveSteps({ name: { [lang]: name }, status });
+  }, [automationId, i18n.language, saveSteps]);
 
   // ─── Navigation ────────────────────────────────────────────────────────────
 
@@ -109,37 +103,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     const currentNodes = useBuilderStore.getState().nodes;
     retry(currentNodes);
   }, [retry]);
-
-  // Persist per-node simulation results and auto-save when simulation completes
-  useEffect(() => {
-    if (simulationState.type !== "success") return;
-    if (automationId === "new") return;
-
-    const { result } = simulationState;
-    const currentNodes = useBuilderStore.getState().nodes;
-
-    for (const nodeResult of result.nodeResults) {
-      const existingNode = currentNodes.find((n) => n.id === nodeResult.nodeId);
-      if (!existingNode) continue;
-
-      updateNodeConfigSilentRef.current(nodeResult.nodeId, {
-        simulationStatus: nodeResult.status,
-      });
-    }
-
-    const passed = result.overallStatus === "success";
-    setSimulationPassedRef.current(passed);
-
-    const triggerNode = currentNodes.find((n) => n.kind === "trigger");
-    if (triggerNode) {
-      updateNodeConfigSilentRef.current(triggerNode.id, { simulationPassed: passed });
-    }
-
-    // Let store updates settle, then persist
-    setTimeout(() => {
-      saveStepsRef.current({});
-    }, 0);
-  }, [simulationState, automationId]);
 
   // ─── Toggle active/draft ───────────────────────────────────────────────────
 

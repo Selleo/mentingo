@@ -88,6 +88,7 @@ const USER_INVITED_TRIGGER: AutomationStepDefinition = {
     { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "inviteLink", labelKey: "automationBuilder.variables.inviteLink" },
+    { key: "invitedByUserName", labelKey: "automationBuilder.variables.invitedByUserName" },
   ],
 };
 
@@ -102,6 +103,7 @@ const USERS_IMPORTED_INVITE_TRIGGER: AutomationStepDefinition = {
     { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "inviteLink", labelKey: "automationBuilder.variables.inviteLinkRegistration" },
+    { key: "invitedByUserName", labelKey: "automationBuilder.variables.invitedByUserName" },
   ],
 };
 
@@ -144,6 +146,7 @@ const USER_FIRST_LOGIN_TRIGGER: AutomationStepDefinition = {
     { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "loginDate", labelKey: "automationBuilder.variables.loginDate" },
+    { key: "platformUrl", labelKey: "automationBuilder.variables.platformUrl", dataType: "url" },
   ],
 };
 
@@ -224,6 +227,8 @@ const USER_COURSE_FINISHED_TRIGGER: AutomationStepDefinition = {
     { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
     { key: "finishedAt", labelKey: "automationBuilder.variables.finishedAt" },
     { key: "certificateUrl", labelKey: "automationBuilder.variables.certificateUrl" },
+    { key: "hasCertificate", labelKey: "automationBuilder.variables.hasCertificate" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl", dataType: "url" },
   ],
 };
 const USER_REGISTERED_TRIGGER: AutomationStepDefinition = {
@@ -237,6 +242,8 @@ const USER_REGISTERED_TRIGGER: AutomationStepDefinition = {
     { key: "userLastName", labelKey: "automationBuilder.variables.userLastName" },
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "registrationDate", labelKey: "automationBuilder.variables.registrationDate" },
+    { key: "profileLink", labelKey: "automationBuilder.variables.profileLink", dataType: "url" },
+    { key: "userName", labelKey: "automationBuilder.variables.userName" },
   ],
 };
 
@@ -266,6 +273,8 @@ const COURSE_COMPLETED_TRIGGER: AutomationStepDefinition = {
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "courseName", labelKey: "automationBuilder.variables.courseName" },
     { key: "finishedAt", labelKey: "automationBuilder.variables.finishedAt" },
+    { key: "userName", labelKey: "automationBuilder.variables.userName" },
+    { key: "progressLink", labelKey: "automationBuilder.variables.progressLink", dataType: "url" },
   ],
 };
 
@@ -282,6 +291,7 @@ const CERTIFICATE_EXPIRATION_WARNING_TRIGGER: AutomationStepDefinition = {
     { key: "certificateName", labelKey: "automationBuilder.variables.certificateName" },
     { key: "expirationDate", labelKey: "automationBuilder.variables.expirationDate" },
     { key: "daysLeft", labelKey: "automationBuilder.variables.daysLeftExpiration" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl", dataType: "url" },
   ],
 };
 
@@ -297,6 +307,8 @@ const CERTIFICATE_ARCHIVED_TRIGGER: AutomationStepDefinition = {
     { key: "userEmail", labelKey: "automationBuilder.variables.userEmail" },
     { key: "certificateName", labelKey: "automationBuilder.variables.certificateName" },
     { key: "archivedAt", labelKey: "automationBuilder.variables.archivedAt" },
+    { key: "courseUrl", labelKey: "automationBuilder.variables.courseUrl", dataType: "url" },
+    { key: "archiveReason", labelKey: "automationBuilder.variables.archiveReason" },
   ],
 };
 
