@@ -8,15 +8,14 @@ import type { Page } from "@playwright/test";
 type UpdateCategoryTitleFlowInput = {
   categoryId: string;
   title?: string;
-  archived?: boolean;
 };
 
 export const updateCategoryTitleFlow = async (
   page: Page,
-  { categoryId, title, archived }: UpdateCategoryTitleFlowInput,
+  { categoryId, title }: UpdateCategoryTitleFlowInput,
 ) => {
   await page.goto(`/admin/categories/${categoryId}`);
   await page.getByTestId(CATEGORY_PAGE_HANDLES.PAGE).waitFor({ state: "visible" });
-  await fillCategoryFormFlow(page, { title, archived });
+  await fillCategoryFormFlow(page, { title });
   await saveCategoryFormFlow(page);
 };

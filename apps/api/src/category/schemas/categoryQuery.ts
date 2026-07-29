@@ -28,7 +28,6 @@ export type CategoryFilterFiled = Static<typeof categoryFilterFiled>;
 export const categoryFilterSchema = Type.Object({
   title: Type.Optional(Type.String()),
   state: Type.Optional(Type.String()),
-  archived: Type.Optional(Type.String()),
   creationDateRange: Type.Optional(
     Type.Tuple([Type.String({ format: "date-time" }), Type.String({ format: "date-time" })]),
   ),
