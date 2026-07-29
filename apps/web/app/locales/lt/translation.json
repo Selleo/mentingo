@@ -1922,6 +1922,7 @@
         "chapter": "Skyrius nerastas.",
         "lesson": "Pamoka nerasta."
       },
+      "statisticsAccessForbidden": "Neturite teisės peržiūrėti šio kurso statistikos.",
       "create": {
         "courseFailed": "Nepavyko sukurti kurso.",
         "stripeProductFailed": "Nepavyko sukurti kurso mokėjimo produkto."

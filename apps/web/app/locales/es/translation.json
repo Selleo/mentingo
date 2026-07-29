@@ -1973,6 +1973,7 @@
         "chapter": "Capítulo no encontrado.",
         "lesson": "Lección no encontrada."
       },
+      "statisticsAccessForbidden": "No tienes permiso para ver las estadísticas de este curso.",
       "create": {
         "courseFailed": "No se pudo crear el curso.",
         "stripeProductFailed": "No se pudo crear el producto de pago del curso."

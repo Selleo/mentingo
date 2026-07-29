@@ -1985,6 +1985,7 @@
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
       },
+      "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."

@@ -1922,6 +1922,7 @@
         "chapter": "Kapitola nenalezena.",
         "lesson": "Lekce nenalezena."
       },
+      "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
         "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."

@@ -891,7 +891,9 @@ export class CourseController {
   async getCourseStatistics(
     @Param("courseId") courseId: UUIDType,
     @Query("groupId") groupId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<BaseResponse<CourseStatisticsResponse>> {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = { groupId };
 
     const data = await this.courseService.getCourseStatistics(courseId, query);
@@ -921,7 +923,9 @@ export class CourseController {
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: LearningTimeStatisticsSortOptions,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = { userId, groupId, page, perPage, sort, searchQuery };
     const data = await this.learningTimeService.getLearningTimeStatistics(courseId, query);
 
@@ -940,7 +944,9 @@ export class CourseController {
   async getCourseLearningStatisticsFilterOptions(
     @Param("courseId") courseId: UUIDType,
     @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const data = await this.learningTimeService.getFilterOptions(courseId, language);
 
     return new BaseResponse(data);
@@ -960,7 +966,9 @@ export class CourseController {
     @Param("courseId") courseId: UUIDType,
     @Query("groupId") groupId: UUIDType,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = { groupId };
 
     const averageQuizScores = await this.courseService.getAverageQuizScoreForCourse(
@@ -998,7 +1006,9 @@ export class CourseController {
     @Query("groupId") groupId: UUIDType,
     @Query("sort") sort: SortCourseStudentProgressionOptions,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<AllStudentCourseProgressionResponse>> {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = {
       courseId,
       page,
@@ -1042,7 +1052,9 @@ export class CourseController {
     @Query("search") searchQuery: string,
     @Query("sort") sort: SortCourseStudentQuizResultsOptions,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<AllStudentQuizResultsResponse>> {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = {
       courseId,
       page,
@@ -1087,7 +1099,9 @@ export class CourseController {
     @Query("search") searchQuery: string,
     @Query("sort") sort: SortCourseStudentAiMentorResultsOptions,
     @Query("language") language: SupportedLanguages,
+    @CurrentUser() currentUser: CurrentUserType,
   ): Promise<PaginatedResponse<AllStudentAiMentorResultsResponse>> {
+    await this.courseService.assertCanViewCourseStatistics(courseId, currentUser);
     const query = {
       courseId,
       page,
