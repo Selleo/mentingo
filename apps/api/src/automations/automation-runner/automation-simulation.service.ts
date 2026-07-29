@@ -15,8 +15,6 @@ import type {
   ValidationError,
 } from "./automation-simulation.types";
 
-const CUSTOM_TEMPLATE_PREFIX = "custom:";
-
 const SYSTEM_TEMPLATE_PLACEHOLDERS: Record<string, string[]> = {
   user_invite: ["invitedByUserName", "createPasswordLink"],
   welcome: ["coursesLink"],
@@ -144,7 +142,7 @@ export class AutomationSimulationService {
       }
 
       const selectedTemplate = action.config.emailTemplate as string | undefined;
-      if (selectedTemplate && !selectedTemplate.startsWith(CUSTOM_TEMPLATE_PREFIX)) {
+      if (selectedTemplate && selectedTemplate in SYSTEM_TEMPLATE_PLACEHOLDERS) {
         const templatePlaceholders = SYSTEM_TEMPLATE_PLACEHOLDERS[selectedTemplate] ?? [];
         const placeholderValues = (action.config.placeholderValues as Record<string, string>) ?? {};
 
@@ -223,7 +221,9 @@ export class AutomationSimulationService {
     const previewLanguage = selectedLanguage === "user_default" ? "en" : selectedLanguage;
     const placeholderValues = (action.config.placeholderValues as Record<string, string>) ?? {};
 
-    const isCustomTemplate = selectedTemplate?.startsWith(CUSTOM_TEMPLATE_PREFIX) ?? false;
+    const isCustomTemplate = selectedTemplate
+      ? !(selectedTemplate in SYSTEM_TEMPLATE_PLACEHOLDERS) && selectedTemplate !== "default_email"
+      : false;
     const recipientEmail = isCustomTemplate
       ? (sampleValues["user_email"] ?? sampleValues["userEmail"] ?? "jan.kowalski@example.com")
       : (sampleValues["userEmail"] ?? "jan.kowalski@example.com");
@@ -232,10 +232,9 @@ export class AutomationSimulationService {
     let htmlBody = this.buildFallbackHtml(selectedTemplate ?? "default_email");
 
     try {
-      if (isCustomTemplate) {
-        const customId = selectedTemplate!.slice(CUSTOM_TEMPLATE_PREFIX.length);
+      if (isCustomTemplate && selectedTemplate) {
         const preview = await this.renderCustomTemplatePreview(
-          customId,
+          selectedTemplate,
           previewLanguage,
           placeholderValues,
           sampleValues,

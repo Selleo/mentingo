@@ -9,13 +9,9 @@ import type {
   SimulationResult,
 } from "../simulation.types";
 
-const CUSTOM_TEMPLATE_PREFIX = "custom:";
-
 function isSystemTemplateId(templateId: string): boolean {
   return (
-    templateId !== DEFAULT_EMAIL_TEMPLATE_ID &&
-    !templateId.startsWith(CUSTOM_TEMPLATE_PREFIX) &&
-    EMAIL_TEMPLATES.some((t) => t.id === templateId)
+    templateId !== DEFAULT_EMAIL_TEMPLATE_ID && EMAIL_TEMPLATES.some((t) => t.id === templateId)
   );
 }
 

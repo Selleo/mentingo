@@ -25,8 +25,6 @@ import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBui
 import type { AutomationEmailTemplateOption } from "../hooks/useEmailTemplatesForAutomation";
 import type { FC } from "react";
 
-const CUSTOM_TEMPLATE_PREFIX = "custom:";
-
 const USER_DEFAULT_LANGUAGE = "user_default";
 
 type LanguageOption =
@@ -83,16 +81,13 @@ export const EditActionModal: FC<EditActionModalProps> = ({
   }, [triggerType]);
 
   const isDefaultTemplate = selectedTemplate === DEFAULT_EMAIL_TEMPLATE_ID;
-  const isCustomTemplate = selectedTemplate.startsWith(CUSTOM_TEMPLATE_PREFIX);
   const isSystemTemplate =
-    !isDefaultTemplate &&
-    !isCustomTemplate &&
-    EMAIL_TEMPLATES.some((t) => t.id === selectedTemplate);
+    !isDefaultTemplate && EMAIL_TEMPLATES.some((t) => t.id === selectedTemplate);
+  const isCustomTemplate = !isDefaultTemplate && !isSystemTemplate && !!selectedTemplate;
 
   const templatePlaceholders = useMemo(() => {
     if (isCustomTemplate) {
-      const customId = selectedTemplate.slice(CUSTOM_TEMPLATE_PREFIX.length);
-      const custom = customTemplates.find((t) => t.id === customId);
+      const custom = customTemplates.find((t) => t.id === selectedTemplate);
       return custom?.placeholders ?? [];
     }
     const template = EMAIL_TEMPLATES.find((t) => t.id === selectedTemplate);
@@ -189,10 +184,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({
                         </div>
                       )}
                       {customTemplates.map((template) => (
-                        <SelectItem
-                          key={template.id}
-                          value={`${CUSTOM_TEMPLATE_PREFIX}${template.id}`}
-                        >
+                        <SelectItem key={template.id} value={template.id}>
                           {template.name}
                         </SelectItem>
                       ))}

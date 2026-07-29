@@ -130,13 +130,17 @@ export class AutomationRunnerService {
       return;
     }
 
+    const cleanTemplateId = templateId.startsWith("custom:")
+      ? templateId.slice("custom:".length)
+      : templateId;
+
     const isUserDefault = language === USER_DEFAULT_LANGUAGE;
 
-    if (isSystemTemplateId(templateId)) {
-      await this.handleSystemTemplateEmail(templateId, recipients, isUserDefault, language);
+    if (isSystemTemplateId(cleanTemplateId)) {
+      await this.handleSystemTemplateEmail(cleanTemplateId, recipients, isUserDefault, language);
     } else {
       await this.handleCustomTemplateEmail(
-        templateId,
+        cleanTemplateId,
         recipients,
         isUserDefault,
         language,
