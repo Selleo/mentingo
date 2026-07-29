@@ -686,8 +686,9 @@ export class SettingsService {
         throw new BadRequestException("dashboardHome.error.requiredWidgetMissing");
       }
 
-      const allowedWidths: readonly number[] = DASHBOARD_WIDGETS[widget.id].allowedWidths;
       updatedSettings.dashboard.widgets.forEach((widget) => {
+        const allowedWidths: readonly number[] = DASHBOARD_WIDGETS[widget.id].allowedWidths;
+
         if (!allowedWidths.includes(widget.width)) {
           throw new BadRequestException("dashboardHome.error.invalidWidgetWidth");
         }
