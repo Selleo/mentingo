@@ -1244,8 +1244,15 @@
     {
       "idx": 177,
       "version": "7",
-      "when": 1785232631220,
-      "tag": "0177_add_course_overview_fields_and_duration_estimates",
+      "when": 1785267507015,
+      "tag": "0177_delete_student_chapter_progress_with_chapter",
+      "breakpoints": true
+    },
+    {
+      "idx": 178,
+      "version": "7",
+      "when": 1785317019083,
+      "tag": "0178_add_course_overview_fields_and_duration_estimates",
       "breakpoints": true
     }
   ]

@@ -1,6 +1,6 @@
 {
-  "id": "36761ef5-85cb-4242-a5b3-57abfaeaf2a4",
-  "prevId": "6a1df1fa-019b-4218-81bc-0bf8382f9b04",
+  "id": "891ac37d-cf90-40d0-a1a5-6e2993bbc076",
+  "prevId": "36761ef5-85cb-4242-a5b3-57abfaeaf2a4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -4480,6 +4480,13 @@
           "notNull": true,
           "default": "'draft'"
         },
+        "thumbnail_position_y": {
+          "name": "thumbnail_position_y",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 50
+        },
         "has_certificate": {
           "name": "has_certificate",
           "type": "boolean",
@@ -4494,6 +4501,13 @@
           "notNull": true,
           "default": 0
         },
+        "show_author_section": {
+          "name": "show_author_section",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
         "currency": {
           "name": "currency",
           "type": "varchar",
@@ -4507,6 +4521,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
+        },
+        "learning_outcomes": {
+          "name": "learning_outcomes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
+        },
+        "duration_estimates": {
+          "name": "duration_estimates",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'::jsonb"
         },
         "course_type": {
           "name": "course_type",

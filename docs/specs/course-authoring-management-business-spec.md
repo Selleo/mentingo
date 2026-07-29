@@ -29,6 +29,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Manage course pricing when Stripe pricing is configured.
 - Add, switch, delete, and generate course language variants directly from the modern course overview while editing media and metadata.
 - Manage course enrollment for users and groups from the course edit area.
+- Create, reorder, edit, and remove chapters while maintaining the course curriculum.
 - Transfer course ownership to another eligible user.
 - Delete draft courses individually or in bulk while protecting private and published courses.
 - Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
@@ -43,6 +44,8 @@ Operational controls reduce mistakes. Permissions distinguish full course manage
 ## How It Works
 
 Administrators start in the admin course list and open a course edit screen or create a new course. Course creation validates required metadata, then sends the user into the edit workflow where tabs expose curriculum, pricing when available, status, enrollment, and export areas. Course metadata and operational settings are managed from the modern course overview instead of a duplicate Settings tab in the legacy edit screen.
+
+While maintaining a course curriculum, authorized administrators can create, reorder, update, and remove chapters. Removing a chapter also removes the learner progress that belongs only to that chapter, so obsolete curriculum does not leave broken learner records behind.
 
 The edit experience adapts to course type, tenant configuration, integrations, available languages, and permissions. For example, pricing depends on Stripe configuration, AI/Luma-related tools depend on their configuration, SCORM courses hide unsupported admin features, and managing-tenant exports are shown only to eligible users.
 
@@ -78,6 +81,7 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
 - Main routes include `/admin/courses`, `/admin/beta-courses/new/standard`, and `/admin/beta-courses/:id`.
+- Chapter editing is provided by the curriculum area and `apps/api/src/chapter`; chapter deletion removes its related learner chapter-progress data in the same database operation.
 - Course create, update, bulk category update, bulk status update, settings, language, deletion, SCORM export, master export, enrollment, and ownership endpoints live in `apps/api/src/courses/course.controller.ts`.
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; course update snapshots detect learning outcomes, author-section visibility, and cover-image positioning, while both the create and update mappings copy those values to the target course. Copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`. Course Overview editor visibility follows the API update rule: `COURSE_UPDATE` applies to any course, while `COURSE_UPDATE_OWN` additionally requires matching the course author.
@@ -95,8 +99,8 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
-- Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, modern overview fields on initial export and later synchronization, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
-- Focused course API E2E coverage verifies that changing only learning outcomes, author-section visibility, or cover-image positioning emits a course update event with correct before-and-after snapshots.
+- Curriculum web E2E coverage verifies an administrator can create, update, reorder, and delete a chapter; chapter API E2E coverage verifies deletion also clears the chapter's learner progress.
+- Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
 - Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, accessible keyboard dismissal for the description, deadline, and media dialogs, preservation of each group's mandatory/optional assignment status when deadlines change, complete published-course loading plus modal-closing navigation from related-author course cards, expanded lesson links to course lesson routes, and allowed trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.
 - Focused component coverage verifies that deleting the active course translation returns the language selector to the base language.

@@ -16,14 +16,26 @@ test("admin can bulk update groups for selected users", async ({
 }) => {
   await withWorkerPage(USER_ROLE.admin, async ({ page }) => {
     const userFactory = factories.createUserFactory();
+    const categoryFactory = factories.createCategoryFactory();
+    const courseFactory = factories.createCourseFactory();
+    const enrollmentFactory = factories.createEnrollmentFactory();
     const groupFactory = factories.createGroupFactory();
     const prefix = `bulk-groups-${Date.now()}`;
+    const category = await categoryFactory.create(`Bulk groups ${prefix}`);
+    const course = await courseFactory.create({
+      title: `${prefix}-course`,
+      categoryId: category.id,
+    });
     const removableGroup = await groupFactory.create({ name: `${prefix}-remove` });
     const assignedGroup = await groupFactory.create({ name: `${prefix}-assign` });
     const users = await userFactory.createMany(2, (index) => ({
       email: `${prefix}-${index}@example.com`,
     }));
 
+    cleanup.add(async () => {
+      await courseFactory.delete(course.id);
+      await categoryFactory.delete(category.id);
+    });
     cleanup.add(async () => {
       await groupFactory.delete(assignedGroup.id);
     });
@@ -41,6 +53,7 @@ test("admin can bulk update groups for selected users", async ({
         }),
       ),
     );
+    await enrollmentFactory.enrollGroups(course.id, [{ id: assignedGroup.id, isMandatory: false }]);
 
     await openUsersPageFlow(page);
     await filterUsersFlow(page, { keyword: prefix });
@@ -73,6 +86,16 @@ test("admin can bulk update groups for selected users", async ({
             user.groups.some((group) => group.id === assignedGroup.id) &&
             user.groups.every((group) => group.id !== removableGroup.id),
         );
+      })
+      .toBe(true);
+
+    await expect
+      .poll(async () => {
+        const enrolledUsers = await Promise.all(
+          users.map((user) => enrollmentFactory.getUser(course.id, user.id)),
+        );
+
+        return enrolledUsers.every((user) => user?.isEnrolledByGroup === true);
       })
       .toBe(true);
   });
