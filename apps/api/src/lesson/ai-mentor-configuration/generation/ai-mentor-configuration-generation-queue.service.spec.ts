@@ -1,3 +1,4 @@
+import { NotFoundException } from "@nestjs/common";
 import {
   AI_MENTOR_CONFIGURATION_GENERATION_MODE,
   AI_MENTOR_CONFIGURATION_GENERATION_SOCKET_EVENTS,
@@ -6,6 +7,7 @@ import {
   AI_MENTOR_TYPE,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
+import { v5 as uuidv5 } from "uuid";
 
 import { getUserRoomKey } from "src/file/utils/userRoom";
 import { QUEUE_NAMES } from "src/queue";
@@ -23,10 +25,13 @@ import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { QueueService } from "src/queue";
 import type { RealtimePublisher } from "src/websocket/realtime.publisher";
 
-const currentUser = {
+const currentUser: CurrentUserType = {
   userId: "91f378d3-8021-4269-881d-4d896ee61d66",
   tenantId: "242359db-654d-4af2-93ee-71ac0ddb4d9f",
-} as CurrentUserType;
+  email: "creator@example.com",
+  roleSlugs: [],
+  permissions: [],
+};
 const generationId = "4eeb7cf8-c437-4a73-867d-d58e67827eb1";
 const teacherDraft = {
   type: AI_MENTOR_TYPE.TEACHER,
@@ -131,15 +136,64 @@ describe("AiMentorConfigurationGenerationQueueService", () => {
     );
   });
 
-  it("does not reveal another user's generation", async () => {
-    const { service } = createService();
-
-    await expect(
-      service.getSnapshot(generationId, {
+  it.each([
+    {
+      boundary: "user",
+      actor: {
         ...currentUser,
         userId: "4afc9eb9-435d-43ea-a543-e63b264d18f4",
-      }),
-    ).rejects.toMatchObject({ status: 404 });
+      } satisfies CurrentUserType,
+    },
+    {
+      boundary: "tenant",
+      actor: {
+        ...currentUser,
+        tenantId: "9f423252-c635-429a-af4e-148a03f37904",
+      } satisfies CurrentUserType,
+    },
+  ])("does not reveal or mutate another $boundary's generation", async ({ actor }) => {
+    const { generationService, job, service } = createService();
+
+    await expect(service.getSnapshot(generationId, actor)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    await expect(service.revise(generationId, actor)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    await expect(service.cancel(generationId, actor)).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    expect(generationService.prepareRevision).not.toHaveBeenCalled();
+    expect(job.updateData).not.toHaveBeenCalled();
+  });
+
+  it("returns only public progress in the owner snapshot", async () => {
+    const { job, service } = createService();
+    const progress = {
+      status: AI_MENTOR_CONFIGURATION_GENERATION_STATUS.EVALUATING,
+      attempt: 1,
+      attemptHistory: [],
+      draft: teacherDraft,
+    } as const;
+    job.progress = { progress, latestDraft: teacherDraft };
+
+    await expect(service.getSnapshot(generationId, currentUser)).resolves.toEqual({
+      generationId,
+      progress,
+    });
+  });
+
+  it("records an owner cancellation request without deleting the job or draft", async () => {
+    const { job, service } = createService();
+
+    await expect(service.cancel(generationId, currentUser)).resolves.toEqual({
+      generationId,
+      cancellationRequested: true,
+    });
+    expect(job.updateData).toHaveBeenCalledWith({
+      ...job.data,
+      cancelRequested: true,
+    });
   });
 
   it("stores the draft privately while publishing progress to the user room", async () => {
@@ -190,7 +244,9 @@ describe("AiMentorConfigurationGenerationQueueService", () => {
       QUEUE_NAMES.AI_MENTOR_CONFIGURATION_GENERATION,
       AI_MENTOR_CONFIGURATION_GENERATION_JOB_NAME,
       expect.objectContaining({ prepared: expect.objectContaining({ attempt: 2 }) }),
-      expect.objectContaining({ jobId: expect.any(String) }),
+      expect.objectContaining({
+        jobId: uuidv5("revision-2", generationId),
+      }),
     );
   });
 });

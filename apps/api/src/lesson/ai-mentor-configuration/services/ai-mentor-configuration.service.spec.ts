@@ -2,19 +2,22 @@ import { COURSE_FEATURE, ENTITY_TYPES, LESSON_TYPES, SUPPORTED_LANGUAGES } from 
 
 import { AiMentorConfigurationService } from "./ai-mentor-configuration.service";
 
+import type { AiMentorConfigurationGraphService } from "./ai-mentor-configuration-graph.service";
+import type { AiMentorConfigurationRepository } from "../repositories/ai-mentor-configuration.repository";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { CourseFeaturePolicyService } from "src/courses/course-feature-policy.service";
 import type { MasterCourseService } from "src/courses/master-course.service";
 import type { AdminLessonService } from "src/lesson/services/adminLesson.service";
-import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { AiMentorConfigurationRepository } from "../repositories/ai-mentor-configuration.repository";
-import type { AiMentorConfigurationGraphService } from "./ai-mentor-configuration-graph.service";
 
 const courseId = "4eeb7cf8-c437-4a73-867d-d58e67827eb1";
 const lessonId = "d223ef10-f19e-4af4-9dfc-55b60edc6fc1";
-const currentUser = {
+const currentUser: CurrentUserType = {
   userId: "91f378d3-8021-4269-881d-4d896ee61d66",
   tenantId: "242359db-654d-4af2-93ee-71ac0ddb4d9f",
-} as CurrentUserType;
+  email: "creator@example.com",
+  roleSlugs: [],
+  permissions: [],
+};
 
 describe("AiMentorConfigurationService generation authoring gate", () => {
   const createService = () => {
@@ -84,6 +87,30 @@ describe("AiMentorConfigurationService generation authoring gate", () => {
     );
   });
 
+  it("authorizes an existing AI Mentor lesson at lesson scope", async () => {
+    const {
+      adminLessonService,
+      courseFeaturePolicyService,
+      masterCourseService,
+      service,
+    } = createService();
+
+    await expect(
+      service.prepareGenerationAuthoringContext(courseId, lessonId, currentUser),
+    ).resolves.toEqual({ courseId, baseLanguage: SUPPORTED_LANGUAGES.EN });
+    expect(masterCourseService.assertCourseContentEditableByLessonId).toHaveBeenCalledWith(
+      lessonId,
+    );
+    expect(
+      courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId,
+    ).toHaveBeenCalledWith(lessonId, COURSE_FEATURE.CURRICULUM_EDITING);
+    expect(adminLessonService.validateAccess).toHaveBeenCalledWith(
+      ENTITY_TYPES.LESSON,
+      currentUser,
+      lessonId,
+    );
+  });
+
   it("authorizes an existing AI Mentor lesson and rejects a mismatched course", async () => {
     const { service } = createService();
 
@@ -94,5 +121,15 @@ describe("AiMentorConfigurationService generation authoring gate", () => {
         currentUser,
       ),
     ).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("stops before reading lesson context when lesson authorization fails", async () => {
+    const { adminLessonService, repository, service } = createService();
+    adminLessonService.validateAccess.mockRejectedValue(new Error("access denied"));
+
+    await expect(
+      service.prepareGenerationAuthoringContext(courseId, lessonId, currentUser),
+    ).rejects.toThrow("access denied");
+    expect(repository.findLessonContext).not.toHaveBeenCalled();
   });
 });

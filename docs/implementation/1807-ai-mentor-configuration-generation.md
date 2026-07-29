@@ -791,11 +791,12 @@ Before provider-parity integration:
 - Fall back to Core using the existing runtime-provider policy when Luma is unavailable or invalid.
 - Do not overload AI Judge capability keys with AI Mentor behavior generation.
 
-Issue #1807 generation ships Core-first behind the dedicated runtime/service boundary because the
-installed Luma SDK has no AI Mentor configuration generator or validator capability. This temporary
-provider limitation must be recorded in the business spec and release notes. Do not silently reuse
-AI Judge capability keys. When the upstream Luma SDK adds the dedicated capability, add provider
-routing and fallback without changing the web/API contract.
+Issue #1807 generation ships Core-first directly in its dedicated generator and validator services
+because the installed Luma SDK has no AI Mentor configuration generator or validator capability.
+This temporary provider limitation must be recorded in the business spec and release notes. Do not
+silently reuse AI Judge capability keys or add provider callbacks with unused inputs. When the
+upstream Luma SDK adds the dedicated capability, add provider routing and fallback without changing
+the web/API contract.
 
 Live conversation tool use also requires provider parity:
 
@@ -1115,6 +1116,20 @@ structured Teacher/Roleplay payload.
 - [x] Update current prompt schemas and regenerate prompt exports through the existing script.
 - [ ] Coordinate matching Langfuse prompt IDs, variables, and rollout so stale remote templates
       cannot override the new local contract.
+
+Production prompt rollout gate:
+
+- Local YAML remains the source of truth, but `PromptService` uses a successfully fetched Langfuse
+  prompt before the local generated fallback.
+- Before rollout in a Langfuse-enabled environment, inventory
+  `aiMentorConfigurationGeneratorBase`, `aiMentorConfigurationGeneratorCreate`,
+  `aiMentorConfigurationGeneratorImprove`, `aiMentorConfigurationGeneratorRepair`, and
+  `aiMentorConfigurationValidator`.
+- If any of those IDs exist remotely, publish content matching the local templates and variables
+  (`language` for the base and validator, no variables for the mode prompts), or remove/disable the
+  remote override. If the IDs do not exist remotely, the local fallback is the expected behavior.
+- Record the deployed Langfuse versions in the release checklist. Repository validation cannot
+  prove this external environment state.
 
 ### RAG Improvement — Final Slice
 
