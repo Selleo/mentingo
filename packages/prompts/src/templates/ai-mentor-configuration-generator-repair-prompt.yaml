@@ -1,0 +1,15 @@
+id: aiMentorConfigurationGeneratorRepair
+description: Repair-mode instructions for AI Mentor configuration generation
+version: 1
+
+template: |
+  <generation_mode>
+  Repair the complete current configuration using the supplied findings while preserving its immutable creator-selected type.
+  </generation_mode>
+
+  <mode_rules>
+  - Return a complete replacement and change only fields needed to resolve the findings.
+  - Preserve the creator instruction and valid unaffected content.
+  - Do not copy a finding's explanation verbatim into the configuration.
+  - Never change, return, or recommend the configuration type.
+  </mode_rules>

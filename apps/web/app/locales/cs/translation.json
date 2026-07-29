@@ -59,7 +59,8 @@
       "threadMustBeActive": "Vlákno musí být aktivní.",
       "aiMentorConfigurationIncomplete": "Konfigurace AI mentora není úplná.",
       "aiJudgeConfigurationMissing": "Konfigurace podmínek dokončení chybí.",
-      "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
+      "aiJudgeGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Toto generování nečeká na rozhodnutí o úpravě."
     },
     "loader": {
       "textSequence": {
@@ -2447,6 +2448,17 @@
             "required": "Toto pole je povinné.",
             "configurationRequired": "Před uložením lekce nastavte chování AI Mentora."
           }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Režim mentora",
+          "createWithAi": "Vytvořit pomocí AI",
+          "improveWithAi": "Vylepšit pomocí AI",
+          "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
+          "improveTypeLocked": "AI zlepší aktuální konfiguraci {{type}}. Režim nelze změnit.",
+          "create": { "title": "Vytvořit chování AI Mentora pomocí AI", "description": "Vyberte režim mentora a popište požadovaný zážitek.", "fieldLabel": "Co má AI vytvořit?", "fieldDescription": "AI vrátí úplný návrh pro vybraný režim.", "placeholder": "Popište požadované chování…", "submit": "Vygenerovat návrh" },
+          "improve": { "title": "Vylepšit chování AI Mentora pomocí AI", "description": "AI používá aktuální neuloženou konfiguraci a její režim.", "fieldLabel": "Co má AI vylepšit?", "fieldDescription": "Vybraný režim zůstává beze změny.", "placeholder": "Popište požadovanou změnu…", "submit": "Vylepšit návrh" },
+          "progressTitle": "Připravuje se návrh", "progressDescription": "AI vytváří a kontroluje konfiguraci.", "readyTitle": "Návrh je připraven k revizi", "revisionTitle": "Návrh vyžaduje vaše rozhodnutí", "failedTitle": "Návrh se nepodařilo vytvořit", "cancel": "Zrušit generování", "revise": "Upravit návrh", "review": "Zkontrolovat konfiguraci",
+          "quality": { "title": "Zkontrolovat kvalitu pomocí AI", "description": "AI zkontroluje aktuální neuloženou konfiguraci bez její změny.", "checking": "Kontroluje se aktuální konfigurace…", "improve": "Vylepšit pomocí AI" }
         },
         "aiJudge": {
           "cardTitle": "Podmínky dokončení",

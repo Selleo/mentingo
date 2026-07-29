@@ -60,7 +60,8 @@
       "threadMustBeActive": "Wątek musi być aktywny.",
       "aiMentorConfigurationIncomplete": "Konfiguracja Mentora AI jest niekompletna.",
       "aiJudgeConfigurationMissing": "Brakuje konfiguracji warunków zaliczenia.",
-      "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
+      "aiJudgeGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "To generowanie nie oczekuje na decyzję o poprawie."
     },
     "loader": {
       "textSequence": {
@@ -2735,6 +2736,17 @@
             "required": "To pole jest wymagane.",
             "configurationRequired": "Skonfiguruj zachowanie Mentora AI przed zapisaniem lekcji."
           }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Tryb mentora",
+          "createWithAi": "Utwórz z AI",
+          "improveWithAi": "Ulepsz z AI",
+          "checkQualityWithAi": "Sprawdź jakość z AI",
+          "improveTypeLocked": "AI ulepszy bieżącą konfigurację {{type}}. Nie może zmienić trybu.",
+          "create": { "title": "Utwórz zachowanie AI Mentora z AI", "description": "Wybierz tryb Mentora, a następnie opisz oczekiwane doświadczenie.", "fieldLabel": "Co ma utworzyć AI?", "fieldDescription": "AI zwróci kompletny szkic dla wybranego trybu.", "placeholder": "Opisz oczekiwane zachowanie…", "submit": "Wygeneruj szkic" },
+          "improve": { "title": "Ulepsz zachowanie AI Mentora z AI", "description": "AI używa bieżącej, niezapisanej konfiguracji i jej trybu.", "fieldLabel": "Co ma ulepszyć AI?", "fieldDescription": "Wybrany tryb pozostaje bez zmian.", "placeholder": "Opisz oczekiwaną zmianę…", "submit": "Ulepsz szkic" },
+          "progressTitle": "Przygotowywanie szkicu", "progressDescription": "AI generuje i sprawdza konfigurację.", "readyTitle": "Szkic gotowy do przeglądu", "revisionTitle": "Szkic wymaga decyzji", "failedTitle": "Nie udało się wygenerować szkicu", "cancel": "Anuluj generowanie", "revise": "Popraw szkic", "review": "Przejrzyj konfigurację",
+          "quality": { "title": "Sprawdź jakość z AI", "description": "AI sprawdza bieżącą niezapisaną konfigurację bez jej zmiany.", "checking": "Sprawdzanie bieżącej konfiguracji…", "improve": "Ulepsz z AI" }
         },
         "aiJudge": {
           "cardTitle": "Warunki zaliczenia",

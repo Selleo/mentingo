@@ -59,7 +59,8 @@
       "threadMustBeActive": "El hilo debe estar activo.",
       "aiMentorConfigurationIncomplete": "La configuración de AI Mentor está incompleta.",
       "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
-      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
+      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },
     "loader": {
       "textSequence": {
@@ -2497,6 +2498,43 @@
           "validation": {
             "required": "Este campo es obligatorio.",
             "configurationRequired": "Configura el comportamiento del mentor de IA antes de guardar la lección."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Modo del mentor",
+          "createWithAi": "Crear con IA",
+          "improveWithAi": "Mejorar con IA",
+          "checkQualityWithAi": "Comprobar calidad con IA",
+          "improveTypeLocked": "La IA mejorará la configuración {{type}} actual. No puede cambiar el modo.",
+          "create": {
+            "title": "Crear el comportamiento del mentor de IA con IA",
+            "description": "Elige el modo del mentor y describe la experiencia que quieres crear.",
+            "fieldLabel": "¿Qué debe crear la IA?",
+            "fieldDescription": "La IA devolverá un borrador completo para el modo seleccionado.",
+            "placeholder": "Por ejemplo: ayudar a nuevos responsables a practicar una conversación difícil.",
+            "submit": "Generar borrador"
+          },
+          "improve": {
+            "title": "Mejorar el comportamiento del mentor de IA con IA",
+            "description": "La IA usa la configuración actual sin guardar y su modo seleccionado.",
+            "fieldLabel": "¿Qué debe mejorar la IA?",
+            "fieldDescription": "Describe el resultado deseado. El modo seleccionado no cambiará.",
+            "placeholder": "Por ejemplo: hacer el escenario más realista y añadir restricciones claras.",
+            "submit": "Mejorar borrador"
+          },
+          "progressTitle": "Preparando el borrador",
+          "progressDescription": "La IA está generando y comprobando la configuración.",
+          "readyTitle": "Borrador listo para revisar",
+          "revisionTitle": "El borrador necesita una decisión",
+          "failedTitle": "No se pudo generar el borrador",
+          "cancel": "Cancelar generación",
+          "revise": "Revisar borrador",
+          "review": "Revisar configuración",
+          "quality": {
+            "title": "Comprobar calidad con IA",
+            "description": "La IA revisa la configuración actual sin guardarla ni cambiarla.",
+            "checking": "Comprobando la configuración actual…",
+            "improve": "Mejorar con IA"
           }
         },
         "aiJudge": {

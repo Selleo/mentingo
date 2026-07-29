@@ -82,6 +82,25 @@ export const aiJudgeConfigurationValidatorSchema = Type.Object(
   { additionalProperties: false },
 );
 
+export const aiMentorConfigurationGeneratorBaseSchema = Type.Object(
+  {
+    language: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export const aiMentorConfigurationGeneratorModeSchema = Type.Object(
+  {},
+  { additionalProperties: false },
+);
+
+export const aiMentorConfigurationValidatorSchema = Type.Object(
+  {
+    language: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   roleplayPrompt: roleplayPromptSchema,
@@ -97,4 +116,9 @@ export const PROMPT_MAP = {
   aiJudgeConfigurationGeneratorImprove: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationGeneratorRepair: aiJudgeConfigurationGeneratorModeSchema,
   aiJudgeConfigurationValidator: aiJudgeConfigurationValidatorSchema,
+  aiMentorConfigurationGeneratorBase: aiMentorConfigurationGeneratorBaseSchema,
+  aiMentorConfigurationGeneratorCreate: aiMentorConfigurationGeneratorModeSchema,
+  aiMentorConfigurationGeneratorImprove: aiMentorConfigurationGeneratorModeSchema,
+  aiMentorConfigurationGeneratorRepair: aiMentorConfigurationGeneratorModeSchema,
+  aiMentorConfigurationValidator: aiMentorConfigurationValidatorSchema,
 } satisfies Record<promptId, TSchema>;

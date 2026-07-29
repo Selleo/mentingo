@@ -1,5 +1,11 @@
 import { useParams } from "@remix-run/react";
-import { AI_JUDGE_GENERATION_MAX_ATTEMPTS, ALLOWED_EXTENSIONS } from "@repo/shared";
+import {
+  AI_JUDGE_GENERATION_MAX_ATTEMPTS,
+  AI_MENTOR_CONFIGURATION_GENERATION_MAX_ATTEMPTS,
+  AI_MENTOR_CONFIGURATION_GENERATION_STATUS,
+  AI_MENTOR_TYPE,
+  ALLOWED_EXTENSIONS,
+} from "@repo/shared";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -9,6 +15,7 @@ import { useUpdateAiJudgeConfigurationTranslation } from "~/api/mutations/admin/
 import { useUpdateAiMentorConfigurationTranslation } from "~/api/mutations/admin/useUpdateAiMentorConfigurationTranslation";
 import { useUploadAiMentorAvatar } from "~/api/mutations/admin/useUploadAiMentorAvatar";
 import { useValidateAiJudgeConfiguration } from "~/api/mutations/admin/useValidateAiJudgeConfiguration";
+import { useValidateAiMentorConfiguration } from "~/api/mutations/admin/useValidateAiMentorConfiguration";
 import { useAiJudgeConfiguration } from "~/api/queries/admin/useAiJudgeConfiguration";
 import { useAiMentorConfiguration } from "~/api/queries/admin/useAiMentorConfiguration";
 import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
@@ -60,6 +67,20 @@ import {
   mapAiMentorConfigurationResponseToDraft,
 } from "./AiMentorConfiguration/aiMentorConfiguration.mappers";
 import { AiMentorConfigurationCard } from "./AiMentorConfiguration/AiMentorConfigurationCard";
+import {
+  AI_MENTOR_AUTHORING_ACTION,
+  AI_MENTOR_AUTHORING_VIEW,
+  aiMentorAuthoringReducer,
+  INITIAL_AI_MENTOR_AUTHORING_STATE,
+} from "./AiMentorGeneration/aiMentorAuthoring.reducer";
+import {
+  getApplicableAiMentorGeneratedConfiguration,
+  mapAiMentorValidationToQualityResult,
+} from "./AiMentorGeneration/aiMentorGeneration.mappers";
+import { AI_MENTOR_GENERATION_MODE } from "./AiMentorGeneration/aiMentorGeneration.types";
+import { AiMentorGenerationDialog } from "./AiMentorGeneration/AiMentorGenerationDialog";
+import { AiMentorQualityCheckDialog } from "./AiMentorGeneration/AiMentorQualityCheckDialog";
+import { useAiMentorConfigurationGeneration } from "./AiMentorGeneration/useAiMentorConfigurationGeneration";
 import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import { AiMentorScenarioFields } from "./components/AiMentorScenarioFields";
 import { AiMentorScenarioTemplateSelect } from "./components/AiMentorScenarioTemplateSelect";
@@ -79,8 +100,14 @@ import type {
   AiJudgeValidationResult,
 } from "./AiJudge/aiJudgeConfiguration.types";
 import type { AiMentorConfigurationDraft } from "./AiMentorConfiguration/aiMentorConfiguration.types";
+import type {
+  AiMentorGenerationMode,
+  AiMentorGenerationRequest,
+  AiMentorGenerationViewState,
+  AiMentorValidationResult,
+} from "./AiMentorGeneration/aiMentorGeneration.types";
 import type { Chapter, Lesson } from "../../../EditCourse.types";
-import type { SupportedLanguages } from "@repo/shared";
+import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 
 type AiMentorLessonProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
@@ -148,7 +175,33 @@ const AiMentorLessonForm = ({
   const isAiJudgeEditorOpen = aiJudgeAuthoringState.view === AI_JUDGE_AUTHORING_VIEW.EDITOR;
   const isAiJudgeGenerationDialogOpen =
     aiJudgeAuthoringState.view === AI_JUDGE_AUTHORING_VIEW.GENERATION;
+  const [aiMentorAuthoringState, dispatchAiMentorAuthoring] = useReducer(
+    aiMentorAuthoringReducer,
+    INITIAL_AI_MENTOR_AUTHORING_STATE,
+  );
+  const [aiMentorGenerationType, setAiMentorGenerationType] = useState<AiMentorType>(
+    AI_MENTOR_TYPE.ROLEPLAY,
+  );
+  const [latestAiMentorValidation, setLatestAiMentorValidation] =
+    useState<AiMentorValidationResult>();
+  const aiMentorGenerationMode =
+    aiMentorAuthoringState.mode ?? AI_MENTOR_GENERATION_MODE.CREATE;
+  const isAiMentorEditorOpen =
+    aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.EDITOR;
+  const isAiMentorGenerationDialogOpen =
+    aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.GENERATION;
+  const isAiMentorQualityDialogOpen =
+    aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.QUALITY;
   const [previewOpen, setPreviewOpen] = useState(false);
+  const {
+    generationType: capturedAiMentorGenerationType,
+    state: aiMentorGenerationState,
+    startGeneration: startAiMentorConfigurationGeneration,
+    cancelGeneration: cancelAiMentorConfigurationGeneration,
+    reviseGeneration: reviseAiMentorConfigurationGeneration,
+    resetGeneration: resetAiMentorConfigurationGeneration,
+    isStarting: isStartingAiMentorConfigurationGeneration,
+  } = useAiMentorConfigurationGeneration();
   const {
     state: aiJudgeGenerationState,
     startGeneration: startAiJudgeConfigurationGeneration,
@@ -160,6 +213,10 @@ const AiMentorLessonForm = ({
   } = useAiJudgeConfigurationGeneration();
   const { mutateAsync: validateAiJudgeConfiguration, isPending: isValidatingAiJudgeConfiguration } =
     useValidateAiJudgeConfiguration();
+  const {
+    mutateAsync: validateAiMentorConfiguration,
+    isPending: isValidatingAiMentorConfiguration,
+  } = useValidateAiMentorConfiguration();
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
   const {
     mutateAsync: updateAiJudgeConfigurationTranslation,
@@ -319,6 +376,147 @@ const AiMentorLessonForm = ({
       data: mapAiMentorConfigurationDraftToTranslationInput(configuration),
     });
   };
+
+  const getAiMentorLessonContext = () => ({
+    title: form.getValues("title") || undefined,
+    taskDescription: form.getValues("description") || undefined,
+  });
+
+  const openAiMentorGeneration = (mode: AiMentorGenerationMode) => {
+    resetAiMentorConfigurationGeneration();
+    const currentConfiguration = form.getValues("aiMentorConfiguration");
+    setAiMentorGenerationType(currentConfiguration?.type ?? AI_MENTOR_TYPE.ROLEPLAY);
+    if (mode === AI_MENTOR_GENERATION_MODE.CREATE) setLatestAiMentorValidation(undefined);
+    dispatchAiMentorAuthoring({
+      type: AI_MENTOR_AUTHORING_ACTION.OPEN_GENERATION,
+      mode,
+    });
+  };
+
+  const handleGenerateAiMentorConfiguration = async (
+    request: AiMentorGenerationRequest,
+  ) => {
+    const commonInput = {
+      courseId: id,
+      lessonId: lessonToEdit?.id,
+      lessonContext: getAiMentorLessonContext(),
+    };
+
+    if (request.mode === AI_MENTOR_GENERATION_MODE.CREATE) {
+      await startAiMentorConfigurationGeneration({
+        ...commonInput,
+        mode: AI_MENTOR_GENERATION_MODE.CREATE,
+        configurationType: request.configurationType,
+        brief: request.brief,
+      });
+      return;
+    }
+
+    await startAiMentorConfigurationGeneration({
+      ...commonInput,
+      mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
+      instruction: request.instruction,
+      currentConfiguration: request.currentConfiguration,
+      ...(latestAiMentorValidation && { latestValidation: latestAiMentorValidation }),
+    });
+  };
+
+  const handleCheckAiMentorQuality = async () => {
+    const currentConfiguration = form.getValues("aiMentorConfiguration");
+    if (!currentConfiguration) return;
+
+    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_QUALITY });
+    try {
+      const validation = await validateAiMentorConfiguration({
+        data: {
+          courseId: id,
+          lessonId: lessonToEdit?.id,
+          lessonContext: getAiMentorLessonContext(),
+          configuration: currentConfiguration,
+        },
+      });
+      setLatestAiMentorValidation(validation);
+      dispatchAiMentorAuthoring({
+        type: AI_MENTOR_AUTHORING_ACTION.OPEN_QUALITY,
+        quality: mapAiMentorValidationToQualityResult(validation),
+      });
+    } catch {
+      dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
+    }
+  };
+
+  const stageGeneratedAiMentorConfiguration = (
+    configuration: AiMentorConfigurationDraft,
+  ) => {
+    hasStagedAiMentorConfigurationRef.current = true;
+    form.setValue("aiMentorConfiguration", configuration, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
+  const handleReviewAiMentorConfiguration = (state: AiMentorGenerationViewState) => {
+    const currentType =
+      form.getValues("aiMentorConfiguration")?.type ?? aiMentorGenerationType;
+    const configuration = getApplicableAiMentorGeneratedConfiguration(
+      state.draft,
+      capturedAiMentorGenerationType,
+      currentType,
+    );
+    if (!configuration) return;
+
+    stageGeneratedAiMentorConfiguration(configuration);
+    resetAiMentorConfigurationGeneration();
+    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR });
+  };
+
+  const handleCancelAiMentorConfigurationGeneration = async () => {
+    await cancelAiMentorConfigurationGeneration();
+    resetAiMentorConfigurationGeneration();
+    if (aiMentorGenerationMode === AI_MENTOR_GENERATION_MODE.IMPROVE) {
+      dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR });
+      return;
+    }
+    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
+  };
+
+  const handleAiMentorGenerationDialogOpenChange = (open: boolean) => {
+    if (open) return;
+    resetAiMentorConfigurationGeneration();
+    if (aiMentorGenerationMode === AI_MENTOR_GENERATION_MODE.IMPROVE) {
+      dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR });
+      return;
+    }
+    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
+  };
+
+  const handleAiMentorEditorOpenChange = (open: boolean) => {
+    dispatchAiMentorAuthoring({
+      type: open
+        ? AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR
+        : AI_MENTOR_AUTHORING_ACTION.CLOSE,
+    });
+  };
+
+  const handleImproveAiMentorAfterQualityCheck = () => {
+    dispatchAiMentorAuthoring({
+      type: AI_MENTOR_AUTHORING_ACTION.OPEN_GENERATION,
+      mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
+    });
+  };
+
+  const visibleAiMentorGenerationState =
+    aiMentorGenerationState ??
+    (isStartingAiMentorConfigurationGeneration
+      ? {
+          generationId: "",
+          status: AI_MENTOR_CONFIGURATION_GENERATION_STATUS.DRAFTING,
+          type: aiMentorGenerationType,
+          attempt: 1,
+          maxAttempts: AI_MENTOR_CONFIGURATION_GENERATION_MAX_ATTEMPTS,
+          changes: [],
+        }
+      : undefined);
 
   const handleAiJudgeBaseConfigurationSave = async (
     configuration: NonNullable<typeof aiJudgeConfiguration>,
@@ -663,6 +861,15 @@ const AiMentorLessonForm = ({
                   isReplacingAiMentorConfiguration || isUpdatingAiMentorConfigurationTranslation
                 }
                 needsConfiguration={savedAiMentorConfiguration?.needsConfiguration}
+                onCreateWithAi={() =>
+                  openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.CREATE)
+                }
+                onImproveWithAi={() =>
+                  openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.IMPROVE)
+                }
+                onCheckQuality={() => void handleCheckAiMentorQuality()}
+                editorOpen={isAiMentorEditorOpen}
+                onEditorOpenChange={handleAiMentorEditorOpenChange}
                 error={
                   form.formState.errors.aiMentorConfiguration
                     ? t(
@@ -670,6 +877,31 @@ const AiMentorLessonForm = ({
                       )
                     : undefined
                 }
+              />
+              <AiMentorGenerationDialog
+                open={isAiMentorGenerationDialogOpen}
+                onOpenChange={handleAiMentorGenerationDialogOpenChange}
+                mode={aiMentorGenerationMode}
+                selectedType={aiMentorGenerationType}
+                onSelectedTypeChange={setAiMentorGenerationType}
+                currentConfiguration={aiMentorConfiguration}
+                state={visibleAiMentorGenerationState}
+                onGenerate={handleGenerateAiMentorConfiguration}
+                onCancel={handleCancelAiMentorConfigurationGeneration}
+                onRevise={reviseAiMentorConfigurationGeneration}
+                onReview={handleReviewAiMentorConfiguration}
+              />
+              <AiMentorQualityCheckDialog
+                open={isAiMentorQualityDialogOpen}
+                isLoading={isValidatingAiMentorConfiguration}
+                result={aiMentorAuthoringState.quality}
+                onOpenChange={(open) => {
+                  if (!open)
+                    dispatchAiMentorAuthoring({
+                      type: AI_MENTOR_AUTHORING_ACTION.CLOSE,
+                    });
+                }}
+                onImprove={handleImproveAiMentorAfterQualityCheck}
               />
               <AiJudgeConfigurationCard
                 value={aiJudgeConfiguration}

@@ -142,6 +142,8 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   MENTOR_LEARNER_ROLE_INPUT: "curriculum-ai-mentor-configuration-learner-role-input",
   MENTOR_CHARACTER_GOAL_INPUT: "curriculum-ai-mentor-configuration-character-goal-input",
   MENTOR_CONFIGURATION_APPLY_BUTTON: "curriculum-ai-mentor-configuration-apply-button",
+  MENTOR_GENERATION_DIALOG: "curriculum-ai-mentor-generation-dialog",
+  MENTOR_GENERATION_MODE: "curriculum-ai-mentor-generation-mode",
   SAVE_BUTTON: "curriculum-ai-mentor-lesson-save-button",
   DELETE_BUTTON: "curriculum-ai-mentor-lesson-delete-button",
   CANCEL_BUTTON: "curriculum-ai-mentor-lesson-cancel-button",

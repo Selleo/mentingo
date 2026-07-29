@@ -31,6 +31,12 @@ configuration` group in the UI.
 - `additionalInstructions` is an optional advanced escape hatch, not the main authoring surface.
 - AI generation starts from one creator brief, returns a complete structured replacement, and
   never saves automatically.
+- The creator selects Teacher or Roleplay before generation. The selected type is trusted request
+  context: AI never infers, recommends, returns, or changes it.
+- Improve with AI and Check quality always use the current unsaved configuration and its current
+  creator-selected type.
+- A creator may manually switch type and then ask AI to update the configuration for that new type,
+  but AI itself cannot perform or propose the type change.
 - Generated and manually edited values use the same editor, validation rules, translation model,
   save path, and runtime compiler.
 - Replace generic `lessonInstructions` interpolation in Teacher and Roleplay runtime prompts with
@@ -325,7 +331,8 @@ empty-card `Create with AI` action opens a separate generation drawer rather tha
 
 Initial state:
 
-1. Choose `Teacher` or `Roleplay` using the same radio cards.
+1. The creator chooses `Teacher` or `Roleplay` using the same radio cards. This is a required
+   creator decision, not generated output.
 2. Enter one creator brief:
    - Teacher: `What should the Teacher help learners achieve?`
    - Roleplay: `Describe the practice scenario and who should participate.`
@@ -337,6 +344,7 @@ the generation step.
 Improvement state:
 
 - Lock the existing mode.
+- Use the current unsaved configuration and current creator-selected mode as the source of truth.
 - Ask what should be improved.
 - Offer concise, mode-specific shortcuts:
   - Teacher: `Clarify the task goal`, `Tighten content scope`, `Improve teaching approach`,
@@ -347,7 +355,11 @@ Improvement state:
 Generation and review:
 
 - Keep the Judge rhythm and labels: `Draft` → `Quality check` → `Ready`.
-- AI returns the selected mode's complete configuration, not a partial patch.
+- The model returns all fields for the selected mode, not a partial patch, but its strict output
+  schema omits `type`. The server reattaches the trusted creator-selected type after validation.
+- Improve and Check quality accept the current unsaved, potentially incomplete same-type draft so a
+  creator can manually switch type and ask AI to complete the new configuration. Opposite-type
+  fields remain invalid.
 - Show semantic quality findings first. Keep the generated field values or field-level changes in
   an optional review section ordered exactly like the manual editor.
 - Target findings by stable field names; list-item references are unnecessary because the
@@ -359,6 +371,10 @@ Generation and review:
 - Saving from that dialog is the only persistence action.
 - On an existing lesson, synchronize saved configuration back into the parent React Hook Form
   default value so a later lesson save cannot restore an older draft.
+- Check quality is non-mutating and evaluates the current unsaved configuration and current type,
+  not a persisted snapshot. Its findings may start Improve with AI using those same current values.
+- If the creator changes type while generation or quality review is open, mark the result stale and
+  prevent applying it. The creator must rerun the action for the current type.
 
 Do not add a separate live conversation tester in this scope. Existing lesson preview remains the
 place to experience the configured Mentor; a future inline preview would need explicit unsaved-draft
@@ -712,6 +728,8 @@ Generation inputs may contain:
 - Optional current AI Judge configuration for authoring-time alignment only.
 
 Generation must not receive a real learner's name, group membership, or thread history.
+Generation output must not contain the Teacher/Roleplay discriminator. The application service
+reattaches the trusted request type after validating the type-specific model payload.
 
 ### Generation And Validation
 
@@ -723,11 +741,15 @@ Generation must not receive a real learner's name, group membership, or thread h
 - Keep cancellation cooperative so the latest reviewable draft remains recoverable.
 - Separate deterministic validation from semantic AI validation.
 - Limit semantic results to three concise, high-confidence findings.
+- Validation targets may reference configurable fields only. They can never target, recommend, or
+  correct the creator-owned Teacher/Roleplay type.
 
 Deterministic checks:
 
 - Required text is non-empty after rich-text normalization.
 - Input contains fields only for the selected type.
+- Generated model output contains no type discriminator and cannot switch the creator-selected
+  Teacher/Roleplay type.
 - Teaching style and difficulty are valid structural values.
 - Text length limits are enforced.
 - Unsupported language and base-language structural writes are rejected.
@@ -769,8 +791,11 @@ Before provider-parity integration:
 - Fall back to Core using the existing runtime-provider policy when Luma is unavailable or invalid.
 - Do not overload AI Judge capability keys with AI Mentor behavior generation.
 
-If product wants Core-only delivery first, record that explicitly as a phased-release decision
-rather than silently bypassing tenant capability configuration.
+Issue #1807 generation ships Core-first behind the dedicated runtime/service boundary because the
+installed Luma SDK has no AI Mentor configuration generator or validator capability. This temporary
+provider limitation must be recorded in the business spec and release notes. Do not silently reuse
+AI Judge capability keys. When the upstream Luma SDK adds the dedicated capability, add provider
+routing and fallback without changing the web/API contract.
 
 Live conversation tool use also requires provider parity:
 
@@ -1051,16 +1076,22 @@ structured Teacher/Roleplay payload.
 
 ### AI Generation
 
-- [ ] Add authoritative generator and validator prompt templates under `packages/prompts`.
-- [ ] Regenerate prompt exports through the existing prompt generation script.
-- [ ] Add strict structured-output schemas and stable field targets.
-- [ ] Add Core generator and validator services.
-- [ ] Add deterministic validation before semantic validation.
-- [ ] Add background queue, worker, ownership checks, snapshots, progress events, cancellation, and
+- [x] Add authoritative generator and validator prompt templates under `packages/prompts`.
+- [x] Regenerate prompt exports through the existing prompt generation script.
+- [x] Add strict structured-output schemas and stable field targets.
+- [x] Keep Teacher/Roleplay type in trusted request/workflow state, omit it from model output, and
+      reattach it only after successful validation.
+- [x] Accept current unsaved, potentially incomplete same-type drafts for Improve and Check
+      quality; reject mixed Teacher/Roleplay fields.
+- [x] Add Core generator and validator services.
+- [x] Add deterministic validation before semantic validation.
+- [x] Add background queue, worker, ownership checks, snapshots, progress events, cancellation, and
       revision handling.
-- [ ] Add independent non-mutating validation of current unsaved values.
-- [ ] Add Luma SDK/capability integration or document the approved Core-first phase.
-- [ ] Keep provider diagnostics in server observability and return stable creator-facing failures.
+- [x] Add independent non-mutating validation of current unsaved values and current selected type.
+- [x] Implement Core-first generation directly in the generator and validator services, document
+      the temporary missing Luma capability, and avoid speculative provider callbacks with unused
+      inputs.
+- [x] Keep provider diagnostics in server observability and return stable creator-facing failures.
 
 ### Runtime
 
@@ -1080,7 +1111,7 @@ structured Teacher/Roleplay payload.
 - [x] Delete the obsolete Mentor prompt and runtime branch.
 - [x] Update welcome and learner-name wording for the structured configuration contract.
 - [ ] Update security/RAG prompt wording during the final tool-loop RAG slice.
-- [ ] Add AI Mentor configuration create/improve/repair and validator prompt templates.
+- [x] Add AI Mentor configuration create/improve/repair and validator prompt templates.
 - [x] Update current prompt schemas and regenerate prompt exports through the existing script.
 - [ ] Coordinate matching Langfuse prompt IDs, variables, and rollout so stale remote templates
       cannot override the new local contract.
@@ -1137,12 +1168,14 @@ structured Teacher/Roleplay payload.
 
 ### Frontend AI Generation — Later Slice
 
-- [ ] Add the brief-first AI creation dialog with mode selection and the reused
+- [x] Add the brief-first AI creation dialog with explicit creator-owned mode selection and the reused
       `Draft` → `Quality check` → `Ready` progression.
-- [ ] Add mode-specific improvement shortcuts and improve/validate/revise/review flows using
+- [x] Add mode-specific improvement shortcuts and improve/validate/revise/review flows using
       generated API hooks.
-- [ ] Stage generated drafts without saving them.
-- [ ] Keep AI actions disabled outside the base language with an explanatory tooltip.
+- [x] Stage generated drafts without saving them.
+- [x] Never map or apply type from an AI result; block applying a result if the current form type
+      differs from the type captured when the action started.
+- [x] Keep AI actions unavailable outside the base language.
 
 ### Documentation
 
@@ -1160,6 +1193,8 @@ structured Teacher/Roleplay payload.
 - Existing lesson: save configuration directly, then reset the parent form field default to the
   saved value.
 - Type switch with dirty fields: require confirmation and discard only mode-specific staged data.
+- Type switch during generation or after quality check: invalidate the open result and require a
+  fresh action for the current creator-selected type.
 - Translation missing: return empty authoring fields and backend-owned completeness status.
 - Non-base language: prevent changes to type, teaching style, difficulty, and field structure.
 - AI generation reconnect: restore the ownership-checked BullMQ snapshot and attempt history.
@@ -1213,6 +1248,8 @@ Backend unit tests:
   per-document caps.
 - Retrieved-source boundaries and exclusion of tool calls/results from learner-visible persistence.
 - Deterministic and semantic validation targeting.
+- Generator output cannot return or change Teacher/Roleplay type; the server reattaches the trusted
+  request type.
 - Queue ownership, revision idempotency, cancellation, and reconnect snapshots.
 - Legacy Mentor fallback and explicit conversion.
 
@@ -1239,6 +1276,8 @@ Frontend component/unit tests:
 - Mobile drawer sizing and fixed footer.
 - Translation structural locking and empty missing translations.
 - Creation and improvement generation/validation reducer transitions.
+- Current unsaved values and current selected type are used by Improve and Check quality.
+- A result created for a previous type cannot be applied after a creator-owned type switch.
 - Real active revision state and repeated-action locking.
 - Field-targeted findings and diffs.
 - Invalid optional field automatically opens the refinement section and receives focus.

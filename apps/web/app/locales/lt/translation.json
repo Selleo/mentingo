@@ -59,7 +59,8 @@
       "threadMustBeActive": "Pokalbio gija turi būti aktyvi.",
       "aiMentorConfigurationIncomplete": "AI mentoriaus konfigūracija yra neužbaigta.",
       "aiJudgeConfigurationMissing": "Trūksta baigimo sąlygų konfigūracijos.",
-      "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
+      "aiJudgeGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "Šis generavimas nelaukia sprendimo dėl taisymo."
     },
     "loader": {
       "textSequence": {
@@ -2447,6 +2448,17 @@
             "required": "Šis laukas privalomas.",
             "configurationRequired": "Prieš išsaugodami pamoką sukonfigūruokite AI mentoriaus elgseną."
           }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentoriaus režimas",
+          "createWithAi": "Kurti su DI",
+          "improveWithAi": "Tobulinti su DI",
+          "checkQualityWithAi": "Patikrinti kokybę su DI",
+          "improveTypeLocked": "DI pagerins dabartinę {{type}} konfigūraciją. Režimo pakeisti negalima.",
+          "create": { "title": "Sukurti DI mentoriaus elgesį su DI", "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.", "fieldLabel": "Ką DI turėtų sukurti?", "fieldDescription": "DI pateiks visą pasirinkto režimo juodraštį.", "placeholder": "Aprašykite norimą elgesį…", "submit": "Generuoti juodraštį" },
+          "improve": { "title": "Pagerinti DI mentoriaus elgesį su DI", "description": "DI naudoja dabartinę neišsaugotą konfigūraciją ir jos režimą.", "fieldLabel": "Ką DI turėtų pagerinti?", "fieldDescription": "Pasirinktas režimas nesikeičia.", "placeholder": "Aprašykite norimą pakeitimą…", "submit": "Pagerinti juodraštį" },
+          "progressTitle": "Ruošiamas juodraštis", "progressDescription": "DI generuoja ir tikrina konfigūraciją.", "readyTitle": "Juodraštis paruoštas peržiūrai", "revisionTitle": "Juodraščiui reikia jūsų sprendimo", "failedTitle": "Nepavyko sugeneruoti juodraščio", "cancel": "Atšaukti generavimą", "revise": "Taisyti juodraštį", "review": "Peržiūrėti konfigūraciją",
+          "quality": { "title": "Patikrinti kokybę su DI", "description": "DI tikrina dabartinę neišsaugotą konfigūraciją jos nekeisdamas.", "checking": "Tikrinama dabartinė konfigūracija…", "improve": "Pagerinti su DI" }
         },
         "aiJudge": {
           "cardTitle": "Baigimo sąlygos",
