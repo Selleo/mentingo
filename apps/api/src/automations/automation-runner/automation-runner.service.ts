@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable, Logger } from "@nestjs/common";
+import Handlebars from "handlebars";
 
+import { AutomationStepType } from "src/announcements/types/automations.types";
 import { type UUIDType, DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
-
-import { AutomationStepType } from "src/announcements/types/automations.types";
 
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
 
@@ -25,7 +25,6 @@ import type {
   TypeContext,
 } from "src/announcements/types/automations-source.types";
 
-/** Sentinel value — resolve language from the recipient's user settings */
 const USER_DEFAULT_LANGUAGE = "user_default";
 
 @Injectable()
@@ -120,8 +119,6 @@ export class AutomationRunnerService {
     actionContext: SendEmailActionContext,
     recipients: AutomationResolvedRecipient[],
   ) {
-    // Normalize shape: frontend stores values inside `config`, but the runner
-    // type expects them at the top level. Support both shapes for robustness.
     const config = (actionContext as unknown as { config?: Record<string, unknown> }).config;
     const templateId = actionContext.templateId ?? (config?.emailTemplate as string | undefined);
     const language = actionContext.language ?? (config?.language as string | undefined);
@@ -150,10 +147,6 @@ export class AutomationRunnerService {
     }
   }
 
-  /**
-   * Handles sending system (hardcoded) email templates.
-   * The system renderer maps resolved variables directly to typed template props.
-   */
   private async handleSystemTemplateEmail(
     templateId: string,
     recipients: AutomationResolvedRecipient[],
@@ -194,10 +187,6 @@ export class AutomationRunnerService {
     }
   }
 
-  /**
-   * Handles sending custom (user-created, DB-stored) email templates.
-   * Placeholders in the template are substituted using variableMapping.
-   */
   private async handleCustomTemplateEmail(
     templateId: string,
     recipients: AutomationResolvedRecipient[],
@@ -205,13 +194,11 @@ export class AutomationRunnerService {
     languageOverride?: string,
     variableMapping: Record<string, string> = {},
   ) {
-    // When language is fixed (not user_default), fetch template once for all recipients
     if (!isUserDefault) {
       const template = await this.templateService.getTemplate(
         templateId,
         languageOverride as SupportedLanguages | undefined,
       );
-
       if (!template) {
         this.logger.error(`Email template not found: ${templateId}`);
         return;
@@ -228,7 +215,6 @@ export class AutomationRunnerService {
           variableMapping,
           recipient.variables,
         );
-
         await this.emailService.sendEmailWithLogo(
           {
             to: recipient.userEmail,
@@ -244,7 +230,6 @@ export class AutomationRunnerService {
         );
       }
     } else {
-      // Resolve language per recipient from their user settings
       for (const recipient of recipients) {
         const recipientLanguage = await this.resolveRecipientLanguage(recipient.userId);
 
@@ -283,10 +268,6 @@ export class AutomationRunnerService {
     }
   }
 
-  /**
-   * Resolves the preferred language for a recipient from their user settings.
-   * Falls back to "en" if settings cannot be retrieved.
-   */
   private async resolveRecipientLanguage(userId?: UUIDType): Promise<SupportedLanguages> {
     if (!userId) return "en";
 
@@ -299,28 +280,19 @@ export class AutomationRunnerService {
     }
   }
 
-  /**
-   * Replaces placeholders in the template content using the user-defined
-   * variableMapping and the resolved recipient variables.
-   *
-   * `variableMapping` maps template placeholders (e.g. "{{recipient_name}}")
-   * to trigger variable keys (e.g. "userFirstName").
-   *
-   * The method finds each placeholder in the template and replaces it with
-   * the actual value from the resolved recipient data.
-   */
   private replacePlaceholders(
     templateContent: string,
     variableMapping: Record<string, string>,
     resolvedVariables: Record<string, string>,
   ): string {
-    let result = templateContent;
+    const context: Record<string, string> = {};
 
     for (const [placeholder, variableKey] of Object.entries(variableMapping)) {
-      const value = resolvedVariables[variableKey] ?? "";
-      result = result.replaceAll(placeholder, value);
+      const cleanKey = placeholder.replace(/^\{\{\s*|\s*\}\}$/g, "");
+      context[cleanKey] = resolvedVariables[variableKey] ?? "";
     }
 
-    return result;
+    const template = Handlebars.compile(templateContent, { noEscape: true });
+    return template(context);
   }
 }

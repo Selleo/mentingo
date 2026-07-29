@@ -36,8 +36,6 @@ import type { FC } from "react";
 
 export type { SimulationPanelState, SimulationResult };
 
-// ─── Component ───────────────────────────────────────────────────────────────
-
 interface SimulationPanelProps {
   open: boolean;
   onClose: () => void;
@@ -55,7 +53,6 @@ export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="flex h-[85vh] max-w-4xl flex-col gap-0 p-0" noCloseButton>
-        {/* Header */}
         <DialogHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
           <div className="flex items-center gap-3">
             <DialogTitle className="text-xl font-semibold">
@@ -68,7 +65,6 @@ export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state
           </Button>
         </DialogHeader>
 
-        {/* Content */}
         <div className="flex-1 overflow-hidden">
           {state.type === "loading" && <LoadingView />}
 
@@ -83,7 +79,6 @@ export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state
           )}
         </div>
 
-        {/* Footer */}
         <DialogFooter className="border-t px-6 py-4">
           <Button variant="outline" onClick={onClose}>
             {t("common.button.close", "Zamknij")}
@@ -93,8 +88,6 @@ export const SimulationPanel: FC<SimulationPanelProps> = ({ open, onClose, state
     </Dialog>
   );
 };
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
 
 const StatusBadge: FC<{ status: "success" | "failed" }> = ({ status }) => {
   const { t } = useTranslation();

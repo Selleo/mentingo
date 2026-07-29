@@ -4894,6 +4894,7 @@
       "selectVariable": "Trigger-Variable auswählen...",
       "noTriggerVariables": "Kein Trigger mit dieser Aktion verbunden. Fügen Sie zuerst einen Trigger hinzu, um Variablen zuzuordnen.",
       "defaultEmailNoMapping": "Die Standard-E-Mail-Vorlage erfordert keine Platzhalterzuordnung.",
+      "systemTemplateNoMapping": "Diese Systemvorlage verwendet automatisch Daten aus dem Trigger. Keine manuelle Zuordnung erforderlich.",
       "defaultTemplatesGroup": "Systemvorlagen",
       "customTemplatesGroup": "Benutzerdefinierte Vorlagen",
       "noCustomTemplates": "Keine veröffentlichten benutzerdefinierten Vorlagen verfügbar.",

@@ -34,7 +34,6 @@ describe("useCanvasControls", () => {
       const { result } = renderHook(() => useCanvasControls());
 
       act(() => {
-        // Call zoomIn enough times to exceed max
         for (let i = 0; i < 30; i++) {
           result.current.handleZoomIn();
         }
@@ -47,7 +46,6 @@ describe("useCanvasControls", () => {
       const { result } = renderHook(() => useCanvasControls());
 
       act(() => {
-        // Call zoomOut enough times to go below min
         for (let i = 0; i < 30; i++) {
           result.current.handleZoomOut();
         }

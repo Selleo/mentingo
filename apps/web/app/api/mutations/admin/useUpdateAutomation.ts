@@ -15,31 +15,20 @@ import type {
 interface UpdateAutomationInput {
   automationId: string;
   body: UpdateAutomationBody;
-  /** If provided, replaces the full step tree via PUT /automation-steps/:automationId/steps */
   steps?: AutomationStepBulkItem[];
 }
 
-/**
- * Updates an existing automation (name, description, status) and optionally
- * replaces the full step tree.
- *
- * Backend endpoints:
- *   PATCH /api/automations/:id  (metadata update)
- *   PUT /api/automation-steps/:automationId/steps  (bulk step replace)
- */
 export function useUpdateAutomation() {
   const { toast } = useToast();
   const { t } = useTranslation();
 
   return useMutation({
     mutationFn: async ({ automationId, body, steps }: UpdateAutomationInput) => {
-      // Update automation metadata
       const { data } = await ApiClient.instance.patch<{ data: unknown }>(
         `/api/automations/${automationId}`,
         body,
       );
 
-      // If steps provided, replace the full step tree
       if (steps && steps.length > 0) {
         await ApiClient.instance.put(`/api/automation-steps/${automationId}/steps`, steps);
       }

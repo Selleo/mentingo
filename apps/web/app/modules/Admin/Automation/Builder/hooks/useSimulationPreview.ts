@@ -4,8 +4,6 @@ import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-// ─── Custom template preview fetch ──────────────────────────────────────────
-
 export async function fetchCustomTemplatePreview(
   templateId: string,
   language: string,
@@ -44,8 +42,6 @@ export async function fetchCustomTemplatePreview(
   }
 }
 
-// ─── System template preview fetch ──────────────────────────────────────────
-
 export async function fetchSystemTemplatePreview(
   templateId: string,
   language: string,
@@ -69,8 +65,6 @@ export async function fetchSystemTemplatePreview(
     return buildFallbackPreview(templateId, t);
   }
 }
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function buildFallbackPreview(
   templateId: string,

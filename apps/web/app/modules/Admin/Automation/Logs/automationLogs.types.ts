@@ -1,9 +1,5 @@
 export type AutomationLogStatus = "success" | "failed" | "skipped";
 
-/**
- * Backend automation_logs record shape.
- * Maps directly to the database table columns.
- */
 export interface AutomationLogRecord {
   id: string;
   automationId: string;
@@ -16,9 +12,6 @@ export interface AutomationLogRecord {
   updatedAt: string;
 }
 
-/**
- * Frontend-friendly entry derived from AutomationLogRecord.
- */
 export interface AutomationLogEntry {
   id: string;
   automationName: string;

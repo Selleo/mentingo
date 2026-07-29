@@ -10,10 +10,6 @@ import { computeTreePositions } from "../utils/computeTreePositions";
 import type { BuilderNode } from "../automationBuilder.types";
 import type { AutomationNode } from "~/api/queries/admin/automation.types";
 
-/**
- * Converts the current builder node tree into positioned AutomationNode[]
- * and then into the step format expected by the backend.
- */
 export function buildStepsFromNodes(nodes: BuilderNode[], automationId: string) {
   const positionedNodes = computeTreePositions(nodes);
 
@@ -31,13 +27,6 @@ export function buildStepsFromNodes(nodes: BuilderNode[], automationId: string) 
   return nodesToSteps(automationNodes, automationId);
 }
 
-/**
- * Hook that saves the current step tree to the backend.
- * Used after any node config change (e.g. editing an action's email template).
- *
- * Optionally accepts a `body` to merge additional fields (name, status) into the
- * update call alongside the steps.
- */
 export function useSaveAutomationSteps() {
   const { id: automationId = "new" } = useParams<{ id: string }>();
   const updateAutomation = useUpdateAutomation();

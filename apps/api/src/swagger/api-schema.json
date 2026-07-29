@@ -16268,6 +16268,17 @@
         }
       }
     },
+    "/api/automations/simulate": {
+      "post": {
+        "operationId": "AutomationsController_runSimulation",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/automations/{id}": {
       "get": {
         "operationId": "AutomationsController_getAutomationById",

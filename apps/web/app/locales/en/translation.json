@@ -5024,6 +5024,7 @@
       "selectVariable": "Select trigger variable...",
       "noTriggerVariables": "No trigger is connected to this action. Add a trigger first to map variables.",
       "defaultEmailNoMapping": "The default email template does not require any placeholder mapping.",
+      "systemTemplateNoMapping": "This system template automatically uses data from the trigger. No manual mapping is required.",
       "defaultTemplatesGroup": "System templates",
       "customTemplatesGroup": "Custom templates",
       "noCustomTemplates": "No published custom templates available.",

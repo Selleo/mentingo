@@ -1,11 +1,6 @@
 import type { BuilderNode } from "../automationBuilder.types";
 
-/**
- * Layout constants for the tree position calculation.
- * NODE_WIDTH and HORIZONTAL_GAP control the X spacing between sibling branches.
- * VERTICAL_GAP controls the Y spacing between parent and child rows.
- */
-const NODE_WIDTH = 224; // matches the w-56 (14rem) card width
+const NODE_WIDTH = 224;
 const HORIZONTAL_GAP = 40;
 const VERTICAL_GAP = 150;
 
@@ -13,11 +8,6 @@ interface PositionMap {
   [nodeId: string]: { x: number; y: number };
 }
 
-/**
- * Computes the width (in pixels) of a subtree rooted at `nodeId`.
- * A leaf node occupies NODE_WIDTH. A parent occupies the sum of its children's
- * widths plus gaps between them.
- */
 function subtreeWidth(nodeId: string, nodesById: Map<string, BuilderNode>): number {
   const node = nodesById.get(nodeId);
   if (!node || node.children.length === 0) return NODE_WIDTH;
@@ -28,11 +18,6 @@ function subtreeWidth(nodeId: string, nodesById: Map<string, BuilderNode>): numb
   }, 0);
 }
 
-/**
- * Recursively assigns positions to `nodeId` and its descendants.
- * `centerX` is the horizontal center of the available space for this subtree.
- * `topY` is the top of this node's row.
- */
 function layoutSubtree(
   nodeId: string,
   centerX: number,
@@ -50,7 +35,6 @@ function layoutSubtree(
     return total + subtreeWidth(childId, nodesById) + (index > 0 ? HORIZONTAL_GAP : 0);
   }, 0);
 
-  // Start placing children from left edge of the bounding box centered on centerX
   let currentX = centerX - totalChildrenWidth / 2;
 
   for (const childId of node.children) {
@@ -61,12 +45,6 @@ function layoutSubtree(
   }
 }
 
-/**
- * Computes tree-layout positions for all nodes.
- * Returns a new array of BuilderNode with updated `position` fields.
- *
- * Multiple root nodes (parentId === null) are laid out side by side horizontally.
- */
 export function computeTreePositions(nodes: BuilderNode[]): BuilderNode[] {
   if (nodes.length === 0) return nodes;
 
@@ -75,12 +53,10 @@ export function computeTreePositions(nodes: BuilderNode[]): BuilderNode[] {
 
   const positions: PositionMap = {};
 
-  // Calculate total width for all root trees
   const totalRootsWidth = roots.reduce((total, root, index) => {
     return total + subtreeWidth(root.id, nodesById) + (index > 0 ? HORIZONTAL_GAP : 0);
   }, 0);
 
-  // Layout each root tree side by side
   let currentX = -totalRootsWidth / 2;
   for (const root of roots) {
     const rootWidth = subtreeWidth(root.id, nodesById);

@@ -20,7 +20,6 @@ export class AutomationStepsService {
 
   async createAutomationStep(input: AutomationStepRecordInput) {
     await this.validateStep(input);
-    //await this.validateTree(input);
     return this.automationStepsRepository.createAutomationStep(input);
   }
 

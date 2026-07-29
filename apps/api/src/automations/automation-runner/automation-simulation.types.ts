@@ -1,3 +1,20 @@
+import type { ActionType, NodeKind, TriggerType } from "@repo/shared";
+
+export interface SimulationNodeDto {
+  id: string;
+  kind: NodeKind;
+  type: TriggerType | ActionType;
+  label: string;
+  parentId: string | null;
+  children: string[];
+  config: Record<string, unknown>;
+}
+
+export interface RunSimulationBody {
+  nodes: SimulationNodeDto[];
+  language: string;
+}
+
 export interface ValidationError {
   nodeId: string;
   nodeName: string;
@@ -41,9 +58,3 @@ export interface SimulationResult {
   placeholderMappings: Record<string, PlaceholderMappingEntry[]>;
   emailPreviews: EmailPreview[];
 }
-
-export type SimulationPanelState =
-  | { type: "idle" }
-  | { type: "loading" }
-  | { type: "success"; result: SimulationResult }
-  | { type: "error"; message: string };

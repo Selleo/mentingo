@@ -4897,6 +4897,7 @@
       "selectVariable": "Vyberte proměnnou triggeru...",
       "noTriggerVariables": "K této akci není připojen žádný trigger. Nejprve přidejte trigger pro mapování proměnných.",
       "defaultEmailNoMapping": "Výchozí e-mailová šablona nevyžaduje žádné mapování proměnných.",
+      "systemTemplateNoMapping": "Tato systémová šablona automaticky používá data z triggeru. Ruční mapování není vyžadováno.",
       "defaultTemplatesGroup": "Systémové šablony",
       "customTemplatesGroup": "Vlastní šablony",
       "noCustomTemplates": "Nejsou k dispozici žádné publikované vlastní šablony.",

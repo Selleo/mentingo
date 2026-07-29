@@ -11,6 +11,7 @@ import { UserModule } from "src/user/user.module";
 import { AutomationLogsController } from "./automation-logs/automation-logs.controller";
 import { AutomationDataResolverService } from "./automation-runner/automation-data-resolver.service";
 import { AutomationRunnerService } from "./automation-runner/automation-runner.service";
+import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
 import { AutomationSystemTemplateRendererService } from "./automation-runner/automation-system-template-renderer.service";
 import { AutomationTemplateService } from "./automation-runner/automation-template.service";
@@ -42,6 +43,7 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationRunnerService,
     AutomationDataResolverService,
     AutomationTemplateService,
+    AutomationSimulationService,
     AutomationSystemTemplatePreviewService,
     AutomationSystemTemplateRendererService,
     AutomationLogsRepository,

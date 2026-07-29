@@ -22,8 +22,6 @@ import { CORS_ORIGIN } from "src/auth/consts";
 
 import type { SupportedLanguages } from "@repo/shared";
 
-// ─── Sample data translations ────────────────────────────────────────────────
-
 interface PreviewSampleData {
   userName: string;
   userFullName: string;
@@ -224,13 +222,6 @@ const SAMPLE_DATA: Record<SupportedLanguages, PreviewSampleData> = {
   },
 };
 
-// ─── Service ─────────────────────────────────────────────────────────────────
-
-/**
- * Renders system (default) email templates from `@repo/email-templates`
- * with sample placeholder data for automation simulation preview.
- * All sample text is localized to the requested language.
- */
 @Injectable()
 export class AutomationSystemTemplatePreviewService {
   async renderPreview(
@@ -457,10 +448,6 @@ export class AutomationSystemTemplatePreviewService {
     }
   }
 
-  /**
-   * Replace `cid:logo` and `cid:border-circle` with public asset URLs
-   * so the preview renders correctly in the browser.
-   */
   private replaceCidReferences(html: string): string {
     const logoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
     const borderCircleUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;

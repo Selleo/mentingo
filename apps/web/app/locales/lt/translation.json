@@ -4900,6 +4900,7 @@
       "selectVariable": "Pasirinkite trigerio kintamąjį...",
       "noTriggerVariables": "Prie šio veiksmo neprijungtas joks trigeris. Pirmiausia pridėkite trigerį, kad galėtumėte susieti kintamuosius.",
       "defaultEmailNoMapping": "Numatytasis el. pašto šablonas nereikalauja kintamųjų susiejimo.",
+      "systemTemplateNoMapping": "Šis sistemos šablonas automatiškai naudoja trigerio duomenis. Rankinis susiejimas nereikalingas.",
       "defaultTemplatesGroup": "Sistemos šablonai",
       "customTemplatesGroup": "Pasirinktiniai šablonai",
       "noCustomTemplates": "Nėra paskelbtų pasirinktinių šablonų.",

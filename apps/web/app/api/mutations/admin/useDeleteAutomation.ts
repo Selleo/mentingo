@@ -7,11 +7,6 @@ import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
 import { useToast } from "~/components/ui/use-toast";
 
-/**
- * Deletes an automation permanently.
- *
- * Backend endpoint: DELETE /api/automations/:id
- */
 export function useDeleteAutomation() {
   const { toast } = useToast();
   const { t } = useTranslation();
