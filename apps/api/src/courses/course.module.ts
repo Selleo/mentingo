@@ -28,6 +28,7 @@ import { CourseDuplicationQueueService } from "./course-duplication.queue.servic
 import { CourseDuplicationRepository } from "./course-duplication.repository";
 import { CourseDuplicationService } from "./course-duplication.service";
 import { CourseDuplicationWorker } from "./course-duplication.worker";
+import { CourseDurationService } from "./course-duration.service";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseScormAssetsService } from "./course-scorm-assets.service";
 import { CourseScormExportService } from "./course-scorm-export.service";
@@ -39,6 +40,7 @@ import { CourseCron } from "./course.cron";
 import { CourseService } from "./course.service";
 import { GroupCourseDueDateCalendarService } from "./group-course-due-date-calendar.service";
 import { CourseDueDateReminderEmailHandler } from "./handlers/course-due-date-reminder-email.handler";
+import { CourseDurationHandler } from "./handlers/course-duration.handler";
 import { MasterCourseSnapshotService } from "./master-course-snapshot.service";
 import { MasterCourseQueueService } from "./master-course.queue.service";
 import { MasterCourseRepository } from "./master-course.repository";
@@ -70,6 +72,7 @@ import { MasterCourseWorker } from "./master-course.worker";
   controllers: [CourseController],
   providers: [
     CourseService,
+    CourseDurationService,
     CourseScormAssetsService,
     CourseScormExportService,
     CourseScormSnapshotRepository,
@@ -83,6 +86,7 @@ import { MasterCourseWorker } from "./master-course.worker";
     GroupCourseDueDateCalendarService,
     CourseHandler,
     CourseDueDateReminderEmailHandler,
+    CourseDurationHandler,
     LocalizationService,
     CourseCron,
     MasterCourseService,

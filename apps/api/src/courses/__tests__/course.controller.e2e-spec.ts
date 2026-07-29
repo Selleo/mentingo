@@ -18,6 +18,7 @@ import request from "supertest";
 
 import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
+import { CourseDurationService } from "src/courses/course-duration.service";
 import { CourseService } from "src/courses/course.service";
 import { UpdateCourseEvent } from "src/events";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
@@ -79,6 +80,7 @@ describe("CourseController (e2e)", () => {
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
   let mockFileService: {
     getFileUrl: jest.Mock;
+    getResourcesForEntity: jest.Mock;
     getRawFileBuffer: jest.Mock;
     isBunnyConfigured: jest.Mock;
     uploadFile: jest.Mock;
@@ -119,6 +121,7 @@ describe("CourseController (e2e)", () => {
     // It can be crashed, test and reapir it later
     mockFileService = {
       getFileUrl: jest.fn().mockResolvedValue("http://example.com/file"),
+      getResourcesForEntity: jest.fn().mockResolvedValue([]),
       getRawFileBuffer: jest.fn().mockResolvedValue(Buffer.from("mock-file-content")),
       isBunnyConfigured: jest.fn().mockResolvedValue(false),
       uploadFile: jest.fn(),
@@ -3548,14 +3551,13 @@ describe("CourseController (e2e)", () => {
       expect(contentCreatorCoursesResponse.body.data[0].enrolledParticipantCount).toBe(2);
     });
 
-    it("caches and refreshes the duration estimate for content creator courses", async () => {
-      const student = await userFactory
+    it("reads the persisted duration estimate and refreshes it after lesson updates", async () => {
+      const contentCreator = await userFactory
         .withCredentials({ password })
-        .withUserSettings(db)
-        .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
-      const contentCreator = await userFactory.create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
       const category = await categoryFactory.create();
-      const cookies = await cookieFor(student, app);
+      const cookies = await cookieFor(contentCreator, app);
       const course = await courseFactory.create({
         authorId: contentCreator.id,
         categoryId: category.id,
@@ -3580,6 +3582,8 @@ describe("CourseController (e2e)", () => {
         })
         .returning();
 
+      await app.get(CourseDurationService).refreshCourseDurationEstimates(course.id);
+
       const response = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
         .set("Cookie", cookies)
@@ -3592,17 +3596,12 @@ describe("CourseController (e2e)", () => {
         }),
       );
 
-      const [courseWithCachedEstimate] = await db
+      const [courseWithEstimate] = await db
         .select({ durationEstimates: courses.durationEstimates })
         .from(courses)
         .where(eq(courses.id, course.id));
 
-      expect(courseWithCachedEstimate.durationEstimates).toEqual({
-        en: {
-          totalMinutes: 1,
-          sourceSignature: expect.any(String),
-        },
-      });
+      expect(courseWithEstimate.durationEstimates.en).toEqual({ totalMinutes: 1 });
 
       await db
         .update(lessons)
@@ -3613,6 +3612,28 @@ describe("CourseController (e2e)", () => {
           ),
         })
         .where(eq(lessons.id, lesson.id));
+
+      const staleResponse = await request(app.getHttpServer())
+        .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
+        .set("Cookie", cookies)
+        .expect(200);
+
+      expect(staleResponse.body.data[0]).toEqual(
+        expect.objectContaining({
+          id: course.id,
+          estimatedDurationMinutes: 1,
+        }),
+      );
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson")
+        .query({ id: lesson.id })
+        .set("Cookie", cookies)
+        .send({
+          language: SUPPORTED_LANGUAGES.EN,
+          description: Array.from({ length: 500 }, () => "word").join(" "),
+        })
+        .expect(200);
 
       const refreshedResponse = await request(app.getHttpServer())
         .get(`/api/course/content-creator-courses?authorId=${contentCreator.id}&language=en`)
@@ -3632,9 +3653,6 @@ describe("CourseController (e2e)", () => {
         .where(eq(courses.id, course.id));
 
       expect(courseWithRefreshedEstimate.durationEstimates.en?.totalMinutes).toBe(3);
-      expect(courseWithRefreshedEstimate.durationEstimates.en?.sourceSignature).not.toBe(
-        courseWithCachedEstimate.durationEstimates.en?.sourceSignature,
-      );
     });
   });
 

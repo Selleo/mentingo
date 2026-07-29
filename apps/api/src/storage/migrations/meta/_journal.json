@@ -1254,6 +1254,13 @@
       "when": 1785317019083,
       "tag": "0178_add_course_overview_fields_and_duration_estimates",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1785323594928,
+      "tag": "0179_backfill_course_duration_estimates",
+      "breakpoints": true
     }
   ]
 }

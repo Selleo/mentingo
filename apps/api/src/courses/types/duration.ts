@@ -16,12 +16,8 @@ export type CourseDurationMinutes = {
   totalMinutes: number;
 };
 
-export type CourseDurationEstimateCacheEntry = CourseDurationMinutes & {
-  sourceSignature: string;
-};
-
 export type CourseDurationEstimatesByLanguage = Partial<
-  Record<SupportedLanguages, CourseDurationEstimateCacheEntry>
+  Record<SupportedLanguages, CourseDurationMinutes>
 >;
 
 export type DurationEstimatesByCourse = Record<UUIDType, CourseDurationMinutes>;
