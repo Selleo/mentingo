@@ -27,6 +27,7 @@ import {
   DeleteGroupEvent,
   EnrollUserToGroupEvent,
   UpdateGroupEvent,
+  BulkAssignUsersToGroupsEvent,
 } from "src/events";
 import { GROUP_ENROLLMENT_EVENT_BATCH_SIZE } from "src/group/group.constants";
 import { GroupSortFields } from "src/group/group.schema";
@@ -40,6 +41,7 @@ import type { SQL } from "drizzle-orm";
 import type { GroupActivityLogSnapshot } from "src/activity-logs/types";
 import type { PaginatedResponse, Pagination, UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
+import type { BulkAssignUsersToGroupsUpdate } from "src/events";
 import type { GroupSortField, GroupKeywordFilterBody } from "src/group/group.schema";
 import type {
   AllGroupsResponse,
@@ -49,6 +51,10 @@ import type {
   GroupBaseLanguageUpdateBody,
   UpdateGroupBody,
 } from "src/group/group.types";
+import type {
+  ChangeUsersGroupsOptions,
+  UserGroupAssignment,
+} from "src/group/types/group-membership-assignment.types";
 import type { UserGroupAssignmentResult } from "src/group/types/user-group-assignment-result.type";
 import type { UserResponse } from "src/user/schemas/user.schema";
 
@@ -449,6 +455,43 @@ export class GroupService {
     });
   }
 
+  async changeUsersGroups(assignments: UserGroupAssignment[], options: ChangeUsersGroupsOptions) {
+    if (!assignments.length) return;
+
+    const db = options.db ?? this.db;
+
+    await db.transaction(async (trx) => {
+      const changes = await processInBatches(
+        assignments,
+        async ({ userId, groupIds }) => ({
+          userId,
+          ...(await this.replaceUserGroupAssignments(groupIds, userId, trx)),
+        }),
+        { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
+      );
+
+      const changedAssignments = changes.filter(
+        ({ groupIdsToAssign, groupIdsToRemove }) =>
+          groupIdsToAssign.length > 0 || groupIdsToRemove.length > 0,
+      );
+
+      if (!changedAssignments.length) return;
+
+      await this.outboxPublisher.publish(
+        new BulkAssignUsersToGroupsEvent({
+          actor: options.actor,
+          tenantId: options.actor.tenantId,
+          source: options.source,
+          requestedCount: assignments.length,
+          updatedCount: changedAssignments.length,
+          skippedCount: assignments.length - changedAssignments.length,
+          updates: changedAssignments,
+        }),
+        trx,
+      );
+    });
+  }
+
   private async replaceUserGroupAssignments(
     groupIds: UUIDType[],
     userId: UUIDType,
@@ -506,19 +549,6 @@ export class GroupService {
     };
   }
 
-  public async insertUsersGroupAssignmentsBulk(
-    assignments: Array<{ userId: UUIDType; groupIds: UUIDType[] }>,
-    trx: DatabasePg,
-  ) {
-    const groupAssignments = assignments.flatMap(({ userId, groupIds }) =>
-      [...new Set(groupIds)].map((groupId) => ({ userId, groupId })),
-    );
-
-    if (!groupAssignments.length) return;
-
-    await trx.insert(groupUsers).values(groupAssignments).onConflictDoNothing();
-  }
-
   private async syncUserGroupEnrollment(
     userId: UUIDType,
     groupIdsToAssign: UUIDType[],
@@ -554,6 +584,15 @@ export class GroupService {
 
     await Promise.all(
       groupIdsToAssign.map((groupId) => this.enrollUserToCoursesInGroup(groupId, userId, trx)),
+    );
+  }
+
+  async syncUserGroupMembershipEnrollments(updates: BulkAssignUsersToGroupsUpdate[]) {
+    await processInBatches(
+      updates,
+      async ({ userId, groupIdsToAssign, groupIdsToRemove }) =>
+        this.syncUserGroupEnrollment(userId, groupIdsToAssign, groupIdsToRemove, this.db),
+      { batchSize: GROUP_ENROLLMENT_EVENT_BATCH_SIZE },
     );
   }
 

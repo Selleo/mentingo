@@ -167,13 +167,13 @@ export const getNavigationConfig = (
         {
           label: t("navigationSideBar.users"),
           path: "admin/users",
-          iconName: "Hat",
+          iconName: "User",
           testId: NAVIGATION_HANDLES.USERS_LINK,
         },
         {
           label: t("navigationSideBar.groups"),
           path: "admin/groups",
-          iconName: "Share",
+          iconName: "Users",
           testId: NAVIGATION_HANDLES.GROUPS_LINK,
         },
         {
@@ -207,7 +207,7 @@ export const getNavigationConfig = (
         {
           label: t("navigationSideBar.tenants", "Tenants"),
           path: "super-admin/tenants",
-          iconName: "Admin",
+          iconName: "Building",
           testId: NAVIGATION_HANDLES.TENANTS_LINK,
         },
       ],

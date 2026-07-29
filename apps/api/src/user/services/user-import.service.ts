@@ -14,6 +14,7 @@ import { UsersImportInviteEmailsEvent } from "src/events/user/users-import-invit
 import { UsersImportEvent } from "src/events/user/users-import.event";
 import { FileService } from "src/file/file.service";
 import { GroupService } from "src/group/group.service";
+import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
@@ -352,7 +353,7 @@ export class UserImportService {
   private async createUsersCoreBulk(
     trx: DatabasePg,
     userImportRows: CreateUsersCoreBulkItem[],
-    context: Exclude<CreateUserContext, { flowType: typeof USER_CREATION_FLOW_TYPE.REGISTRATION }>,
+    context: Extract<CreateUserContext, { flowType: typeof USER_CREATION_FLOW_TYPE.ADMIN }>,
   ): Promise<CreateUsersCoreBulkResult[]> {
     if (!userImportRows.length) return [];
 
@@ -390,7 +391,11 @@ export class UserImportService {
     const groupAssignments = this.prepareUserGroupAssignments(createdUserImportRows);
 
     if (groupAssignments.length) {
-      await this.groupService.insertUsersGroupAssignmentsBulk(groupAssignments, trx);
+      await this.groupService.changeUsersGroups(groupAssignments, {
+        actor: context.creator,
+        source: BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.IMPORT,
+        db: trx,
+      });
     }
 
     const tokenByUserId = new Map(createTokenRows.map(({ userId, token }) => [userId, token]));

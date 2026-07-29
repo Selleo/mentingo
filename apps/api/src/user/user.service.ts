@@ -57,6 +57,7 @@ import { UserPasswordReminderEvent } from "src/events/user/user-password-reminde
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { GroupService } from "src/group/group.service";
+import { BULK_ASSIGN_USERS_TO_GROUPS_SOURCES } from "src/group/types/group-membership-assignment.types";
 import { LocalizationService } from "src/localization/localization.service";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { SessionRevocationService } from "src/redis";
@@ -953,16 +954,15 @@ export class UserService {
   }
 
   async bulkAssignUsersToGroup(data: BulkAssignUserGroups, actor?: CurrentUserType) {
-    await this.db.transaction(async (trx) => {
-      await Promise.all(
-        data.map((user) =>
-          this.groupService.setUserGroups(user.groups, user.userId, {
-            db: trx,
-            actor,
-          }),
-        ),
-      );
-    });
+    if (!actor) throw new BadRequestException("common.toast.somethingWentWrong");
+
+    await this.groupService.changeUsersGroups(
+      data.map(({ userId, groups }) => ({ userId, groupIds: groups })),
+      {
+        actor,
+        source: BULK_ASSIGN_USERS_TO_GROUPS_SOURCES.BULK_EDIT,
+      },
+    );
   }
 
   public async getAdminsWithSettings() {
