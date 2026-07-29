@@ -1,21 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { EMAIL_TEMPLATE_NODE_TYPES } from "@repo/shared";
-import { and, count, desc, eq, ilike, inArray, ne, or, sql, type SQL } from "drizzle-orm";
+import { and, count, desc, eq, ilike, inArray, ne, sql, type SQL } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { addPagination } from "src/common/pagination";
 import { DB } from "src/storage/db/db.providers";
 import { emailNotificationTemplates } from "src/storage/schema";
 
+import { buildDefaultEmailTemplateBlocks } from "./utils/buildDefaultEmailTemplateBlocks";
+import {
+  collectImageSrcs,
+  extractTenantEmailTemplateImageFileKeyFromUrl,
+} from "./utils/emailTemplateImageUrl";
+
 import type { CreateEmailNotificationTemplate } from "./schemas/createEmailNotificationTemplate.schema";
 import type { UpdateEmailNotificationTemplate } from "./schemas/updateEmailNotificationTemplate.schema";
 import type { EmailTemplateBlocks, EmailTemplateStatus, EmailTemplateStrings } from "@repo/shared";
 import type { UUIDType } from "src/common";
-
-const buildDefaultBlocks = (): EmailTemplateBlocks => ({
-  type: EMAIL_TEMPLATE_NODE_TYPES.DOC,
-  content: [{ type: EMAIL_TEMPLATE_NODE_TYPES.PARAGRAPH, attrs: { uuid: crypto.randomUUID() } }],
-});
 
 @Injectable()
 export class EmailNotificationTemplatesRepository {
@@ -60,7 +60,7 @@ export class EmailNotificationTemplatesRepository {
     return rows;
   }
 
-  async createTemplate(input: CreateEmailNotificationTemplate) {
+  async createTemplate(input: CreateEmailNotificationTemplate & { name: string }) {
     const [row] = await this.db
       .insert(emailNotificationTemplates)
       .values({
@@ -68,7 +68,9 @@ export class EmailNotificationTemplatesRepository {
         baseLanguage: input.baseLanguage,
         availableLocales: input.availableLocales,
         subject: input.subject ?? {},
-        blocks: (input.blocks as EmailTemplateBlocks | undefined) ?? buildDefaultBlocks(),
+        blocks:
+          (input.blocks as EmailTemplateBlocks | undefined) ??
+          buildDefaultEmailTemplateBlocks(input.baseLanguage),
         strings: (input.strings as EmailTemplateStrings | undefined) ?? {},
       })
       .returning();
@@ -188,34 +190,36 @@ export class EmailNotificationTemplatesRepository {
     return row;
   }
 
-  async findReferencedImageSrcs(srcs: string[], excludeId?: UUIDType): Promise<Set<string>> {
-    if (srcs.length === 0) return new Set();
-    const conditions: SQL[] = [
-      or(
-        ...srcs.map(
-          (src) =>
-            sql`strpos(${emailNotificationTemplates.blocks}::text, ${JSON.stringify(src)}) > 0`,
-        ),
-      )!,
-    ];
+  async findReferencedImageKeys(
+    keys: string[],
+    tenantId: UUIDType,
+    excludeId?: UUIDType,
+  ): Promise<Set<string>> {
+    const keySet = new Set(keys);
+    if (keySet.size === 0) return new Set();
+
+    const conditions: SQL[] = [];
     if (excludeId) conditions.push(ne(emailNotificationTemplates.id, excludeId));
     const rows = await this.db
-      .select({ blocks: sql<string>`${emailNotificationTemplates.blocks}::text` })
+      .select({ blocks: emailNotificationTemplates.blocks })
       .from(emailNotificationTemplates)
-      .where(and(...conditions));
+      .where(conditions.length > 0 ? and(...conditions) : undefined);
+
     const out = new Set<string>();
-    for (const src of srcs) {
-      const needle = JSON.stringify(src);
-      if (rows.some((r) => r.blocks.includes(needle))) out.add(src);
+    for (const row of rows) {
+      for (const src of collectImageSrcs(row.blocks as EmailTemplateBlocks)) {
+        const key = extractTenantEmailTemplateImageFileKeyFromUrl(src, tenantId);
+        if (key && keySet.has(key)) out.add(key);
+      }
     }
     return out;
   }
 
   async findMaxAutoTemplateNumber(): Promise<number> {
     const result = await this.db.execute(
-      sql`SELECT COALESCE(MAX((substring(name FROM '^Email template #(\d+)$'))::int), 0) AS max
+      sql`SELECT COALESCE(MAX((substring(name FROM '^Email template #([0-9]+)$'))::int), 0) AS max
           FROM ${emailNotificationTemplates}
-          WHERE name ~ '^Email template #\d+$'`,
+          WHERE name ~ '^Email template #[0-9]+$'`,
     );
     const rows = result as unknown as Array<{ max?: number | string }>;
     const first = rows[0];

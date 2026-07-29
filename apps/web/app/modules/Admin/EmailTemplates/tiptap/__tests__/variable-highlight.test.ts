@@ -51,16 +51,17 @@ const pressKey = (editor: Editor, key: string): boolean => {
   const event = new KeyboardEvent("keydown", { key });
   return (
     (editor.view.someProp("handleKeyDown", (fn) => fn(editor.view, event)) as
-      boolean | undefined) ?? false
+      | boolean
+      | undefined) ?? false
   );
 };
 
 const typeChar = (editor: Editor, ch: string): boolean => {
   const { from, to } = editor.state.selection;
   return (
-    (editor.view.someProp("handleTextInput", (fn) =>
-      fn(editor.view, from, to, ch, () => editor.state.tr),
-    ) as boolean | undefined) ?? false
+    (editor.view.someProp("handleTextInput", (fn) => fn(editor.view, from, to, ch)) as
+      | boolean
+      | undefined) ?? false
   );
 };
 

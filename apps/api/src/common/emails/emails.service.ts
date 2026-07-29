@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { SUPPORTED_LANGUAGES } from "@repo/shared";
+import { DEFAULT_TENANT_PRIMARY_COLOR, SUPPORTED_LANGUAGES, TENANT_LOGO_CID } from "@repo/shared";
 import { sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -19,7 +19,6 @@ import type { DefaultEmailSettings } from "src/events/types";
 
 @Injectable()
 export class EmailService {
-  private readonly usingMailhogAdapter: boolean;
   private readonly fromEmail: string;
 
   constructor(
@@ -29,10 +28,6 @@ export class EmailService {
     private readonly tenantRunner: TenantDbRunnerService,
     private configService: ConfigService,
   ) {
-    this.usingMailhogAdapter =
-      this.configService.get<EmailConfigSchema["EMAIL_ADAPTER"]>("email.EMAIL_ADAPTER") ===
-      "mailhog";
-
     this.fromEmail = this.configService.get<EmailConfigSchema["SMTP_EMAIL_FROM"]>(
       "email.SMTP_EMAIL_FROM",
     ) as string;
@@ -61,7 +56,7 @@ export class EmailService {
         filename: "logo.png",
         content: logoBuffer,
         contentType: "image/png",
-        ...(this.usingMailhogAdapter ? {} : { cid: "logo" }),
+        cid: TENANT_LOGO_CID,
       });
     }
 
@@ -70,7 +65,7 @@ export class EmailService {
         filename: "border-circle.png",
         content: borderCircleBuffer,
         contentType: "image/png",
-        ...(this.usingMailhogAdapter ? {} : { cid: "border-circle" }),
+        cid: "border-circle",
       });
     }
 
@@ -92,7 +87,7 @@ export class EmailService {
       const companyName = globalSettings.companyInformation?.companyName || "Mentingo.com";
 
       return {
-        primaryColor: globalSettings.primaryColor || "#4796FD",
+        primaryColor: globalSettings.primaryColor || DEFAULT_TENANT_PRIMARY_COLOR,
         companyName,
         language:
           language ?? (userId ? await this.getFinalLanguage(userId) : SUPPORTED_LANGUAGES.EN),
@@ -106,7 +101,7 @@ export class EmailService {
         'language',
         ${userSettingsColumn}->>'language',
         'primaryColor',
-        COALESCE(NULLIF(${globalSettingsColumn}->>'primaryColor', ''), '#4796FD'),
+        COALESCE(NULLIF(${globalSettingsColumn}->>'primaryColor', ''), ${DEFAULT_TENANT_PRIMARY_COLOR}),
         'companyName',
         COALESCE(NULLIF(${globalSettingsColumn} #>> '{companyInformation,companyName}', ''), 'Mentingo.com')
       )

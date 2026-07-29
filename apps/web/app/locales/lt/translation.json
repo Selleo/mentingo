@@ -4969,15 +4969,6 @@
       "deleteDescription": "Ištrinti vertimą {{language}}? Jo turinys bus pašalintas."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} klaida — būtina ištaisyti prieš skelbiant",
-      "errorsTitle_few": "{{count}} klaidos — būtina ištaisyti prieš skelbiant",
-      "errorsTitle_many": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
-      "errorsTitle_other": "{{count}} klaidų — būtina ištaisyti prieš skelbiant",
-      "warningsTitle_one": "{{count}} įspėjimas — peržiūrėkite prieš skelbdami",
-      "warningsTitle_few": "{{count}} įspėjimai — peržiūrėkite prieš skelbdami",
-      "warningsTitle_many": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
-      "warningsTitle_other": "{{count}} įspėjimų — peržiūrėkite prieš skelbdami",
-      "elementIndex": "Elementas {{index}}",
       "reasons": {
         "name_missing": "Šablono pavadinimas privalomas",
         "no_language_versions": "Pridėkite bent vieną kalbos versiją",
@@ -4988,14 +4979,8 @@
         "empty_translation": "Vertimas tuščias",
         "invalid_url_protocol": "URL naudoja neleistiną protokolą",
         "unchanged_from_base": "Vertimas identiškas bazinei kalbai",
-        "footer_missing": "Trūksta poraštės"
-      },
-      "nodeTypes": {
-        "heading": "Antraštė",
-        "paragraph": "Tekstas",
-        "button": "Mygtukas",
-        "footer": "Poraštė",
-        "image": "Vaizdas"
+        "footer_missing": "Trūksta poraštės",
+        "logo_branding_missing": "Trūksta logotipo prekės ženklo"
       },
       "blockedToast": {
         "save": "Šablono išsaugoti nepavyko. Žiūrėkite diagnostiką",
@@ -5039,6 +5024,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Visas logotipas."
+        },
+        "variable": {
+          "title": "Kintamasis",
+          "description": "Įterpia {{kintamąjį}}, kuriam vėliau galima priskirti reikšmę automatizavimo variklyje."
         },
         "section": {
           "title": "Sekcija",

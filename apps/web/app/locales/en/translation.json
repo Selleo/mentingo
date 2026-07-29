@@ -5048,11 +5048,6 @@
       "deleteDescription": "Delete the {{language}} translation? Its content will be removed."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} error — must be fixed before publishing",
-      "errorsTitle_other": "{{count}} errors — must be fixed before publishing",
-      "warningsTitle_one": "{{count}} warning — review before publishing",
-      "warningsTitle_other": "{{count}} warnings — review before publishing",
-      "elementIndex": "Element {{index}}",
       "reasons": {
         "name_missing": "Template name is required",
         "no_language_versions": "Add at least one language version",
@@ -5063,14 +5058,8 @@
         "empty_translation": "Translation is empty",
         "invalid_url_protocol": "URL uses a disallowed protocol",
         "unchanged_from_base": "Translation is identical to the base language",
-        "footer_missing": "Footer is missing"
-      },
-      "nodeTypes": {
-        "heading": "Heading",
-        "paragraph": "Text",
-        "button": "Button",
-        "footer": "Footer",
-        "image": "Image"
+        "footer_missing": "Footer is missing",
+        "logo_branding_missing": "Logo branding is missing"
       },
       "blockedToast": {
         "save": "Cannot save template. See diagnostics",
@@ -5114,6 +5103,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Full logo."
+        },
+        "variable": {
+          "title": "Variable",
+          "description": "Inserts a {{variable}} that can be set later to a given value in the automation engine."
         },
         "section": {
           "title": "Section",

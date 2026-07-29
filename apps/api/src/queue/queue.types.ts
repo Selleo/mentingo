@@ -14,6 +14,7 @@ export const QUEUE_NAMES = {
   LUMA_COURSE_GENERATION_SYNC: "luma-course-generation-sync",
   AI_JUDGE_CONFIGURATION_GENERATION: "ai-judge-configuration-generation",
   MICROSOFT_CALENDAR_SYNC: "microsoft-calendar-sync",
+  EMAIL_TEMPLATE_IMAGE_CLEANUP: "email-template-image-cleanup",
 } as const;
 
 export type QueueName = (typeof QUEUE_NAMES)[keyof typeof QUEUE_NAMES];
@@ -74,4 +75,10 @@ export interface CourseDuplicationJobData {
   sourceCourseId: UUIDType;
   targetCourseId: UUIDType;
   actor: CurrentUserType;
+}
+
+export interface EmailTemplateImageCleanupJobData {
+  tenantId: UUIDType;
+  srcs: string[];
+  excludeTemplateId?: UUIDType;
 }

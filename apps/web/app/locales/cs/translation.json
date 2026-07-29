@@ -4967,15 +4967,6 @@
       "deleteDescription": "Smazat překlad {{language}}? Jeho obsah bude odstraněn."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} chyba – před publikací je nutné opravit",
-      "errorsTitle_few": "{{count}} chyby – před publikací je nutné opravit",
-      "errorsTitle_many": "{{count}} chyb – před publikací je nutné opravit",
-      "errorsTitle_other": "{{count}} chyb – před publikací je nutné opravit",
-      "warningsTitle_one": "{{count}} upozornění – zkontrolujte před publikací",
-      "warningsTitle_few": "{{count}} upozornění – zkontrolujte před publikací",
-      "warningsTitle_many": "{{count}} upozornění – zkontrolujte před publikací",
-      "warningsTitle_other": "{{count}} upozornění – zkontrolujte před publikací",
-      "elementIndex": "Prvek {{index}}",
       "reasons": {
         "name_missing": "Název šablony je povinný",
         "no_language_versions": "Přidejte alespoň jednu jazykovou verzi",
@@ -4986,14 +4977,8 @@
         "empty_translation": "Překlad je prázdný",
         "invalid_url_protocol": "URL používá nepovolený protokol",
         "unchanged_from_base": "Překlad je totožný se základním jazykem",
-        "footer_missing": "Chybí zápatí"
-      },
-      "nodeTypes": {
-        "heading": "Nadpis",
-        "paragraph": "Text",
-        "button": "Tlačítko",
-        "footer": "Zápatí",
-        "image": "Obrázek"
+        "footer_missing": "Chybí zápatí",
+        "logo_branding_missing": "Chybí logo značky"
       },
       "blockedToast": {
         "save": "Šablonu nelze uložit. Podívejte se do diagnostiky",
@@ -5037,6 +5022,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Celé logo."
+        },
+        "variable": {
+          "title": "Proměnná",
+          "description": "Vloží {{proměnnou}}, které lze později v automatizačním enginu přiřadit hodnotu."
         },
         "section": {
           "title": "Sekce",

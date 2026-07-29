@@ -8,7 +8,7 @@ import {
 } from "./emailNotificationTemplate.schema";
 
 export const createEmailNotificationTemplateSchema = Type.Object({
-  name: Type.String({ minLength: 1, maxLength: 200 }),
+  name: Type.Optional(Type.String({ minLength: 1, maxLength: 200 })),
   baseLanguage: emailTemplateLanguageSchema,
   availableLocales: Type.Array(emailTemplateLanguageSchema, { minItems: 1 }),
   subject: Type.Optional(localizedTextSchema),

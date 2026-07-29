@@ -169,6 +169,22 @@ describe("flattenTranslationsForRender", () => {
     expect(JSON.stringify(blocks)).toBe(blocksBefore);
   });
 
+  it("ignores strings[baseLanguage] when rendering the base language", () => {
+    const blocks = doc(para(uuid1, textNode("fresh base edit")));
+    const strings: EmailTemplateStrings = {
+      [EN]: { [uuid1]: [textNode("stale leftover")] },
+    };
+
+    const result = flattenTranslationsForRender({
+      blocks,
+      strings,
+      language: EN,
+      baseLanguage: EN,
+    });
+
+    expect(result.content?.[0]?.content).toEqual([textNode("fresh base edit")]);
+  });
+
   it("handles multiple nodes with different uuids independently", () => {
     const enFrag1 = [textNode("EN para 1")];
     const enFrag2 = [textNode("EN para 2")];

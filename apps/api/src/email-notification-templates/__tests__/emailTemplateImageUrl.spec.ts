@@ -1,7 +1,12 @@
 import { EMAIL_TEMPLATE_NODE_TYPES } from "@repo/shared";
 
 import { EMAIL_TEMPLATE_IMAGE_PUBLIC_PATH } from "../email-template-image.constants";
-import { collectImageSrcs, extractFileKeyFromImageUrl } from "../utils/emailTemplateImageUrl";
+import {
+  collectImageSrcs,
+  extractFileKeyFromImageUrl,
+  extractTenantEmailTemplateImageFileKeyFromUrl,
+  isEmailTemplateImageFileKeyForTenant,
+} from "../utils/emailTemplateImageUrl";
 
 import type { EmailTemplateNode } from "@repo/shared";
 
@@ -9,6 +14,8 @@ const imageNode = (src: string): EmailTemplateNode => ({
   type: EMAIL_TEMPLATE_NODE_TYPES.IMAGE,
   attrs: { src },
 });
+const TENANT_ID = "22222222-2222-2222-2222-222222222222";
+const OTHER_TENANT_ID = "99999999-9999-9999-9999-999999999999";
 
 const paraNode = (...children: EmailTemplateNode[]): EmailTemplateNode => ({
   type: EMAIL_TEMPLATE_NODE_TYPES.PARAGRAPH,
@@ -82,5 +89,45 @@ describe("extractFileKeyFromImageUrl", () => {
     const url = `https://example.com${EMAIL_TEMPLATE_IMAGE_PUBLIC_PATH}${encodedKey}`;
     const result = extractFileKeyFromImageUrl(url);
     expect(result).toBe(rawKey);
+  });
+
+  it("returns null when the URL contains malformed URI encoding", () => {
+    const result = extractFileKeyFromImageUrl(
+      `https://example.com${EMAIL_TEMPLATE_IMAGE_PUBLIC_PATH}%E0%A4%A`,
+    );
+    expect(result).toBeNull();
+  });
+});
+
+describe("isEmailTemplateImageFileKeyForTenant", () => {
+  it("accepts keys inside the current tenant email template image category", () => {
+    const key = `${TENANT_ID}/email_template_image/variants/abc.webp`;
+    expect(isEmailTemplateImageFileKeyForTenant(key, TENANT_ID)).toBe(true);
+  });
+
+  it("rejects keys from a different tenant", () => {
+    const key = `${OTHER_TENANT_ID}/email_template_image/variants/abc.webp`;
+    expect(isEmailTemplateImageFileKeyForTenant(key, TENANT_ID)).toBe(false);
+  });
+
+  it("rejects keys from a different category", () => {
+    const key = `${TENANT_ID}/course/variants/abc.webp`;
+    expect(isEmailTemplateImageFileKeyForTenant(key, TENANT_ID)).toBe(false);
+  });
+});
+
+describe("extractTenantEmailTemplateImageFileKeyFromUrl", () => {
+  it("extracts a safe key for the current tenant email template image category", () => {
+    const key = `${TENANT_ID}/email_template_image/variants/abc.webp`;
+    const url = `https://example.com${EMAIL_TEMPLATE_IMAGE_PUBLIC_PATH}${encodeURIComponent(key)}`;
+    const result = extractTenantEmailTemplateImageFileKeyFromUrl(url, TENANT_ID);
+    expect(result).toBe(key);
+  });
+
+  it("returns null for a crafted URL pointing at another category key", () => {
+    const key = `${TENANT_ID}/course/variants/abc.webp`;
+    const url = `https://external.test${EMAIL_TEMPLATE_IMAGE_PUBLIC_PATH}${encodeURIComponent(key)}`;
+    const result = extractTenantEmailTemplateImageFileKeyFromUrl(url, TENANT_ID);
+    expect(result).toBeNull();
   });
 });

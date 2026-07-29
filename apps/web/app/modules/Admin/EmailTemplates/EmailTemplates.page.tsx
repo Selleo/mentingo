@@ -12,16 +12,18 @@ import { isEmpty } from "lodash-es";
 import { Plus, Trash } from "lucide-react";
 import { useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
+import { match } from "ts-pattern";
 
-import { ApiClient } from "~/api/api-client";
+import { useCreateEmailTemplate } from "~/api/mutations/admin/useCreateEmailTemplate";
 import { useDeleteEmailTemplate } from "~/api/mutations/admin/useDeleteEmailTemplate";
 import { useDeleteManyEmailTemplates } from "~/api/mutations/admin/useDeleteManyEmailTemplates";
-import {
-  ALL_EMAIL_TEMPLATES_QUERY_KEY,
-  useAllEmailTemplates,
-} from "~/api/queries/admin/useAllEmailTemplates";
-import { queryClient } from "~/api/queryClient";
+import { useAllEmailTemplates } from "~/api/queries/admin/useAllEmailTemplates";
 import { PageWrapper } from "~/components/PageWrapper";
+import {
+  ITEMS_PER_PAGE_OPTIONS,
+  Pagination,
+  type ItemsPerPageOption,
+} from "~/components/Pagination/Pagination";
 import { Button } from "~/components/ui/button";
 import {
   Dialog,
@@ -57,24 +59,32 @@ import type { EmailTemplateStatus } from "@repo/shared";
 
 export const meta: MetaFunction = ({ matches }) => setPageTitle(matches, "pages.emailTemplates");
 
-type SearchParams = {
+type FilterParams = {
   name?: string;
   status?: EmailTemplateStatus;
 };
+
+const DEFAULT_PER_PAGE: ItemsPerPageOption = 20;
 
 const EmailTemplatesPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
 
-  const [searchParams, setSearchParams] = useState<SearchParams>({});
+  const [filters, setFilters] = useState<FilterParams>({});
+  const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<ItemsPerPageOption>(DEFAULT_PER_PAGE);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number>(0);
 
-  const { data: templates, isLoading, isError } = useAllEmailTemplates(searchParams);
+  const queryParams = useMemo(() => ({ ...filters, page, perPage }), [filters, page, perPage]);
 
-  const [isCreating, setIsCreating] = useState(false);
+  const { data: response, isLoading, isError } = useAllEmailTemplates(queryParams);
+  const templates = response?.data;
+  const paginationInfo = response?.pagination;
+
+  const { mutateAsync: createEmailTemplate, isPending: isCreating } = useCreateEmailTemplate();
   const { mutate: deleteEmailTemplate } = useDeleteEmailTemplate();
   const { mutate: deleteManyEmailTemplates } = useDeleteManyEmailTemplates();
   const uiLanguage = useLanguageStore((state) => state.language);
@@ -104,10 +114,25 @@ const EmailTemplatesPage = () => {
 
   const handleFilterChange = (name: string, value: FilterValue) => {
     startTransition(() => {
-      setSearchParams((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setPage(1);
+      setFilters((prev) => ({ ...prev, [name]: value }));
+    });
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    startTransition(() => setPage(nextPage));
+  };
+
+  const handlePerPageChange = (nextPerPage: string) => {
+    const parsed = Number(nextPerPage);
+    const nextValue = (
+      ITEMS_PER_PAGE_OPTIONS.includes(parsed as (typeof ITEMS_PER_PAGE_OPTIONS)[number])
+        ? parsed
+        : DEFAULT_PER_PAGE
+    ) as ItemsPerPageOption;
+    startTransition(() => {
+      setPage(1);
+      setPerPage(nextValue);
     });
   };
 
@@ -132,44 +157,13 @@ const EmailTemplatesPage = () => {
   const columnCount = columns.length;
 
   const handleCreate = async () => {
-    const fetchNextName = async () => {
-      const { data } = await ApiClient.api.emailNotificationTemplatesControllerGetNextAutoName();
-      return data.data.name;
-    };
-
-    const createTemplate = async (name: string) => {
-      const { data } = await ApiClient.api.emailNotificationTemplatesControllerCreateTemplate({
-        name,
+    const data = await createEmailTemplate({
+      data: {
         baseLanguage: uiLanguage,
         availableLocales: [uiLanguage],
-      });
-      return data;
-    };
-
-    setIsCreating(true);
-    try {
-      let name = await fetchNextName();
-      try {
-        const response = await createTemplate(name);
-        await queryClient.invalidateQueries({ queryKey: [ALL_EMAIL_TEMPLATES_QUERY_KEY] });
-        navigate(`/admin/email-templates/${response.data.id}`);
-      } catch (err: unknown) {
-        const status =
-          err && typeof err === "object" && "status" in err
-            ? (err as { status: number }).status
-            : 0;
-        if (status === 409) {
-          name = await fetchNextName();
-          const response = await createTemplate(name);
-          await queryClient.invalidateQueries({ queryKey: [ALL_EMAIL_TEMPLATES_QUERY_KEY] });
-          navigate(`/admin/email-templates/${response.data.id}`);
-          return;
-        }
-        throw err;
-      }
-    } finally {
-      setIsCreating(false);
-    }
+      },
+    });
+    navigate(`/admin/email-templates/${data.data.id}`);
   };
 
   const handleDelete = () => {
@@ -251,7 +245,7 @@ const EmailTemplatesPage = () => {
         <div className="flex items-center justify-between gap-2">
           <SearchFilter
             filters={filterConfig}
-            values={searchParams}
+            values={filters}
             onChange={handleFilterChange}
             isLoading={isPending}
           />
@@ -269,42 +263,61 @@ const EmailTemplatesPage = () => {
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
-                  {t("emailTemplates.list.loading")}
-                </TableCell>
-              </TableRow>
-            ) : isError ? (
-              <TableRow>
-                <TableCell colSpan={columnCount} className="h-24 text-center text-destructive">
-                  {t("emailTemplates.list.loadFailed")}
-                </TableCell>
-              </TableRow>
-            ) : bodyRows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columnCount} className="h-24 text-center text-muted-foreground">
-                  {t("emailTemplates.list.empty")}
-                </TableCell>
-              </TableRow>
-            ) : (
-              bodyRows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  onClick={() => navigate(`/admin/email-templates/${row.original.id}`)}
-                  className="cursor-pointer hover:bg-neutral-100"
-                >
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+            {match({ isLoading, isError, isEmpty: bodyRows.length === 0 })
+              .with({ isLoading: true }, () => (
+                <TableRow>
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    {t("emailTemplates.list.loading")}
+                  </TableCell>
                 </TableRow>
               ))
-            )}
+              .with({ isError: true }, () => (
+                <TableRow>
+                  <TableCell colSpan={columnCount} className="h-24 text-center text-destructive">
+                    {t("emailTemplates.list.loadFailed")}
+                  </TableCell>
+                </TableRow>
+              ))
+              .with({ isEmpty: true }, () => (
+                <TableRow>
+                  <TableCell
+                    colSpan={columnCount}
+                    className="h-24 text-center text-muted-foreground"
+                  >
+                    {t("emailTemplates.list.empty")}
+                  </TableCell>
+                </TableRow>
+              ))
+              .otherwise(() =>
+                bodyRows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    onClick={() => navigate(`/admin/email-templates/${row.original.id}`)}
+                    className="cursor-pointer hover:bg-neutral-100"
+                  >
+                    {row.getVisibleCells().map((cell, index) => (
+                      <TableCell key={cell.id} className={cn({ "size-12": index === 0 })}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                )),
+              )}
           </TableBody>
         </Table>
+        <Pagination
+          className="border-b border-x bg-neutral-50 rounded-b-lg"
+          emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
+          totalItems={paginationInfo?.totalItems}
+          itemsPerPage={paginationInfo?.perPage as ItemsPerPageOption | undefined}
+          currentPage={paginationInfo?.page}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handlePerPageChange}
+        />
       </div>
     </PageWrapper>
   );

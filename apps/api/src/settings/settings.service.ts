@@ -9,6 +9,7 @@ import {
   ALLOWED_ARTICLES_SETTINGS,
   ALLOWED_NEWS_SETTINGS,
   ALLOWED_QA_SETTINGS,
+  DEFAULT_PLATFORM_LOGO_PATH,
   ENTITY_TYPES,
   FORM_TYPES,
   MAX_LOGIN_PAGE_DOCUMENTS,
@@ -1056,7 +1057,7 @@ export class SettingsService {
       .where(isNull(settings.userId));
 
     const logoUrl =
-      globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
+      globalSettings?.platformLogoS3Key ?? `${CORS_ORIGIN}${DEFAULT_PLATFORM_LOGO_PATH}`;
 
     try {
       return await this.fileService.getFileBuffer(logoUrl);

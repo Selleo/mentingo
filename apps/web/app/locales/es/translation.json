@@ -5034,11 +5034,6 @@
       "deleteDescription": "¿Eliminar la traducción {{language}}? Su contenido se perderá."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} error — debe corregirse antes de publicar",
-      "errorsTitle_other": "{{count}} errores — deben corregirse antes de publicar",
-      "warningsTitle_one": "{{count}} advertencia — revísala antes de publicar",
-      "warningsTitle_other": "{{count}} advertencias — revísalas antes de publicar",
-      "elementIndex": "Elemento {{index}}",
       "reasons": {
         "name_missing": "El nombre de la plantilla es obligatorio",
         "no_language_versions": "Añade al menos una versión de idioma",
@@ -5049,14 +5044,8 @@
         "empty_translation": "La traducción está vacía",
         "invalid_url_protocol": "La URL usa un protocolo no permitido",
         "unchanged_from_base": "La traducción es idéntica al idioma base",
-        "footer_missing": "Falta el pie de página"
-      },
-      "nodeTypes": {
-        "heading": "Encabezado",
-        "paragraph": "Texto",
-        "button": "Botón",
-        "footer": "Pie de página",
-        "image": "Imagen"
+        "footer_missing": "Falta el pie de página",
+        "logo_branding_missing": "Falta la marca del logotipo"
       },
       "blockedToast": {
         "save": "No se puede guardar la plantilla. Consulta el diagnóstico",
@@ -5100,6 +5089,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Logo completo."
+        },
+        "variable": {
+          "title": "Variable",
+          "description": "Inserta una {{variable}} a la que se podrá asignar un valor más adelante en el motor de automatización."
         },
         "section": {
           "title": "Sección",

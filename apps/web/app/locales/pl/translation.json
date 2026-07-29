@@ -5087,15 +5087,6 @@
       "deleteDescription": "Usunąć tłumaczenie {{language}}? Jego treść zostanie usunięta."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} błąd — musi zostać poprawiony przed publikacją",
-      "errorsTitle_few": "{{count}} błędy — muszą zostać poprawione przed publikacją",
-      "errorsTitle_many": "{{count}} błędów — musi zostać poprawionych przed publikacją",
-      "errorsTitle_other": "{{count}} błędów — musi zostać poprawionych przed publikacją",
-      "warningsTitle_one": "{{count}} ostrzeżenie — sprawdź przed publikacją",
-      "warningsTitle_few": "{{count}} ostrzeżenia — sprawdź przed publikacją",
-      "warningsTitle_many": "{{count}} ostrzeżeń — sprawdź przed publikacją",
-      "warningsTitle_other": "{{count}} ostrzeżeń — sprawdź przed publikacją",
-      "elementIndex": "Element {{index}}",
       "reasons": {
         "name_missing": "Nazwa szablonu jest wymagana",
         "no_language_versions": "Dodaj co najmniej jedną wersję językową",
@@ -5106,14 +5097,8 @@
         "empty_translation": "Tłumaczenie jest puste",
         "invalid_url_protocol": "URL używa niedozwolonego protokołu",
         "unchanged_from_base": "Tłumaczenie jest identyczne z językiem bazowym",
-        "footer_missing": "Brakuje stopki"
-      },
-      "nodeTypes": {
-        "heading": "Nagłówek",
-        "paragraph": "Tekst",
-        "button": "Przycisk",
-        "footer": "Stopka",
-        "image": "Obraz"
+        "footer_missing": "Brakuje stopki",
+        "logo_branding_missing": "Brakuje logo marki"
       },
       "blockedToast": {
         "save": "Nie można zapisać szablonu. Zobacz diagnostykę",
@@ -5157,6 +5142,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Pełne logo."
+        },
+        "variable": {
+          "title": "Zmienna",
+          "description": "Wstawia {{zmienną}}, której później można nadać wartość w silniku automatyzacji."
         },
         "section": {
           "title": "Sekcja",

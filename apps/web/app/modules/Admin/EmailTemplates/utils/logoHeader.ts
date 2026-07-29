@@ -1,10 +1,17 @@
-import { EMAIL_TEMPLATE_NODE_TYPES } from "@repo/shared";
+import { EMAIL_TEMPLATE_NODE_TYPES, TENANT_LOGO_VARIABLE } from "@repo/shared";
 import { v4 as uuid } from "uuid";
+
+import mentingoLogoUrl from "~/assets/svgs/app-logo.svg?url";
 
 import type { CommandProps } from "@maily-to/core/blocks";
 import type { EmailTemplateBlocks, EmailTemplateNode } from "@repo/shared";
 
-export const TENANT_LOGO_VARIABLE = "{{tenant.logo_url}}";
+export { TENANT_LOGO_VARIABLE } from "@repo/shared";
+export const TENANT_LOGO_HEIGHT = "32";
+export const TENANT_LOGO_PLACEHOLDER_SRC = mentingoLogoUrl;
+
+export const resolveEffectiveLogoUrl = (tenantLogoUrl: string | null): string =>
+  tenantLogoUrl && tenantLogoUrl.length > 0 ? tenantLogoUrl : TENANT_LOGO_PLACEHOLDER_SRC;
 
 export const insertLogoHeader =
   (logoUrl: string | null) =>
@@ -19,6 +26,8 @@ export const insertLogoHeader =
           uuid: uuid(),
           src: logoUrl ?? TENANT_LOGO_VARIABLE,
           alignment: "center",
+          width: null,
+          height: TENANT_LOGO_HEIGHT,
         },
       })
       .run();
@@ -37,27 +46,46 @@ const hasImageWithSrc = (node: EmailTemplateNode, src: string): boolean => {
   return node.content?.some((child) => hasImageWithSrc(child, src)) ?? false;
 };
 
-const remapImageSrc = (doc: EmailTemplateBlocks, from: string, to: string): EmailTemplateBlocks => {
-  if (!hasImageWithSrc(doc, from)) return doc;
-  return walk(doc, (node) => {
-    if (node.type !== EMAIL_TEMPLATE_NODE_TYPES.IMAGE) return node;
-    if (node.attrs?.src !== from) return node;
-    return { ...node, attrs: { ...node.attrs, src: to } };
-  });
-};
-
 export const resolveTenantLogoInDoc = (
   doc: EmailTemplateBlocks,
   logoUrl: string | null,
 ): EmailTemplateBlocks => {
   if (!logoUrl) return doc;
-  return remapImageSrc(doc, TENANT_LOGO_VARIABLE, logoUrl);
+  if (!hasImageWithSrc(doc, TENANT_LOGO_VARIABLE)) return doc;
+  return walk(doc, (node) => {
+    if (node.type !== EMAIL_TEMPLATE_NODE_TYPES.IMAGE) return node;
+    if (node.attrs?.src !== TENANT_LOGO_VARIABLE) return node;
+    return {
+      ...node,
+      attrs: {
+        ...node.attrs,
+        src: logoUrl,
+        width: null,
+        height: TENANT_LOGO_HEIGHT,
+      },
+    };
+  });
 };
 
 export const packTenantLogoInDoc = (
   doc: EmailTemplateBlocks,
   logoUrl: string | null,
 ): EmailTemplateBlocks => {
-  if (!logoUrl) return doc;
-  return remapImageSrc(doc, logoUrl, TENANT_LOGO_VARIABLE);
+  const targets = new Set<string>([TENANT_LOGO_PLACEHOLDER_SRC]);
+  if (logoUrl) targets.add(logoUrl);
+  if (![...targets].some((t) => hasImageWithSrc(doc, t))) return doc;
+  return walk(doc, (node) => {
+    if (node.type !== EMAIL_TEMPLATE_NODE_TYPES.IMAGE) return node;
+    const src = node.attrs?.src;
+    if (typeof src !== "string" || !targets.has(src)) return node;
+    return {
+      ...node,
+      attrs: {
+        ...node.attrs,
+        src: TENANT_LOGO_VARIABLE,
+        width: "auto",
+        height: TENANT_LOGO_HEIGHT,
+      },
+    };
+  });
 };
