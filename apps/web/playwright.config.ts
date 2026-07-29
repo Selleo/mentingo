@@ -95,7 +95,7 @@ const config: PlaywrightTestConfig = {
 if (process.env.CI) {
   config.webServer = [
     {
-      command: "cd ../api && pnpm db:migrate && pnpm db:seed",
+      command: "cd ../api && pnpm run build && pnpm db:migrate && pnpm db:seed",
       env: {
         ...process.env,
         DATABASE_URL: TEST_DATABASE_URL,
