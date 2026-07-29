@@ -28,11 +28,11 @@ export class PublicEmailTemplateImageController {
     const url = tenantId ? await this.service.resolveSignedUrl(reference, tenantId) : null;
 
     if (!url) {
-      res.setHeader("Content-Type", "image/svg+xml");
       res.setHeader(
         "Cache-Control",
         `public, max-age=${EMAIL_TEMPLATE_IMAGE_PLACEHOLDER_CACHE_MAX_AGE_SECONDS}`,
       );
+      res.type("image/svg+xml; charset=utf-8");
       res.send(EMAIL_TEMPLATE_IMAGE_PLACEHOLDER_SVG);
       return;
     }

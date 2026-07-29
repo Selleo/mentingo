@@ -73,7 +73,7 @@ describe("PublicEmailTemplateImageController (e2e)", () => {
 
       expect(response.headers["content-type"]).toContain("image/svg+xml");
       expect(response.headers["cache-control"]).toContain("max-age=3600");
-      expect(response.text).toContain("<svg");
+      expect(response.body.toString("utf8")).toContain("<svg");
       expect(mockFileService.getImageUrlByQuality).not.toHaveBeenCalled();
     });
   });

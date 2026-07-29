@@ -24,7 +24,7 @@ export const InlineDiagnosticNote = ({ diagnostic, languages }: InlineDiagnostic
       <span className="font-medium">
         {t(`emailTemplates.publishDiagnostics.reasons.${diagnostic.reason}`)}
       </span>
-      {diagnostic.detail ? (
+      {diagnostic.detail && (
         <span
           className={cn("ml-1", {
             "text-red-800": isError,
@@ -33,8 +33,8 @@ export const InlineDiagnosticNote = ({ diagnostic, languages }: InlineDiagnostic
         >
           {diagnostic.detail}
         </span>
-      ) : null}
-      {languageTags.length > 0 ? (
+      )}
+      {languageTags.length > 0 && (
         <span className="ml-1.5 inline-flex flex-wrap gap-0.5 align-middle">
           {languageTags.map((language) => (
             <span
@@ -51,7 +51,7 @@ export const InlineDiagnosticNote = ({ diagnostic, languages }: InlineDiagnostic
             </span>
           ))}
         </span>
-      ) : null}
+      )}
     </div>
   );
 };

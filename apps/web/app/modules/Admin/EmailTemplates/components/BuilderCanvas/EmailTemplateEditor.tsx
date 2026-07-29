@@ -637,7 +637,7 @@ const EmailTemplateEditorInner = ({
       data-language={language}
       style={{ paddingBottom: diagnosticBottomPadding }}
     >
-      {diagnosticSpacingCss ? <style>{diagnosticSpacingCss}</style> : null}
+      {diagnosticSpacingCss && <style>{diagnosticSpacingCss}</style>}
       <MailyEditor
         key={language}
         contentJson={initialContent as never}
