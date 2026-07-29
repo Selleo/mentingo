@@ -5,6 +5,7 @@ import { BaseResponse } from "src/common";
 
 import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
+import { AutomationsSeedDefaultsService } from "./automations-seed-defaults.service";
 import { AutomationsController } from "./automations.controller";
 import { AutomationsService } from "./automations.service";
 
@@ -44,6 +45,12 @@ describe("AutomationsController", () => {
           provide: AutomationSimulationService,
           useValue: {
             runSimulation: jest.fn(),
+          },
+        },
+        {
+          provide: AutomationsSeedDefaultsService,
+          useValue: {
+            seedDefaults: jest.fn(),
           },
         },
       ],
