@@ -23,26 +23,76 @@
       "editDescription": "Aktivieren Sie mindestens ein Widget in der Liste oben."
     },
     "error": {
+      "invalidWidgetLayout": "Das Dashboard-Layout enthält nicht verfügbare oder doppelte Widgets.",
+      "requiredWidgetMissing": "Ein erforderliches Dashboard-Widget fehlt.",
       "title": "Dashboard konnte nicht geladen werden",
       "description": "Versuchen Sie es gleich noch einmal.",
       "retry": "Erneut versuchen",
       "invalidWidgetWidth": "Diese Breite ist für das ausgewählte Widget nicht zulässig."
     },
     "widgets": {
+      "loadError": "Die Daten dieses Widgets konnten nicht geladen werden.",
+      "trainingCompletionChartLabel": "{{completed}} von {{total}} Zuweisungen abgeschlossen, {{percentage}} Prozent.",
+      "deadlineRisksPage": "Seite {{page}} von {{totalPages}}",
       "placeholderDescription": "Dashboard-Widget für eine eigene Datenansicht",
       "placeholderContent": "Dieses Widget ist für funktionsspezifische Inhalte vorbereitet.",
       "placeholderFooter": "Beispiel-Widget",
-      "a_placeholder_1": { "title": "Administrator-Widget 1" },
-      "a_placeholder_2": { "title": "Administrator-Widget 2" },
-      "a_placeholder_3": { "title": "Administrator-Widget 3" },
       "s_placeholder_1": { "title": "Lernenden-Widget 1" },
       "s_placeholder_2": { "title": "Lernenden-Widget 2" },
       "s_placeholder_3": { "title": "Lernenden-Widget 3" },
       "commonDescription": "Wichtige Informationen auf einen Blick",
-      "training_completion": { "title": "Schulungsabschluss" },
-      "deadline_risks": { "title": "Gefährdete Fristen" },
-      "incomplete_courses": { "title": "Unvollständige Kurse" },
-      "event_calendar": { "title": "Veranstaltungskalender" },
+      "training_completion": {
+        "title": "Schulungsabschluss",
+        "description": "Abschlussstatus aller Kurszuweisungen",
+        "completed": "Abgeschlossen",
+        "inProgress": "In Bearbeitung",
+        "notStarted": "Nicht begonnen",
+        "viewAnalytics": "Analysen anzeigen",
+        "empty": "Noch keine Kurszuweisungen.",
+        "assignCourses": "Kurse zuweisen"
+      },
+      "deadline_risks": {
+        "title": "Terminrisiken",
+        "description": "Pflichtkurse, die Aufmerksamkeit benötigen",
+        "overdue": "Überfällig",
+        "dueSoon": "Bald fällig",
+        "empty": "Derzeit keine Terminrisiken.",
+        "overdueTitle": "Überfällige Pflichtkurse",
+        "dueSoonTitle": "Bald fällige Pflichtkurse",
+        "goToCourse": "Zum Kurs",
+        "affected_one": "{{count}} betroffene Person",
+        "affected_other": "{{count}} betroffene Personen"
+      },
+      "incomplete_courses": {
+        "title": "Unvollständige Kurse",
+        "description": "Kurse mit den meisten offenen Zuweisungen",
+        "allCompleted": "Alle zugewiesenen Kurse sind abgeschlossen.",
+        "noEnrollments": "Noch keine Kurszuweisungen.",
+        "enrollments": "Zuweisungen",
+        "notCompleted": "{{count}} nicht abgeschlossen"
+      },
+      "event_calendar": {
+        "title": "Veranstaltungskalender",
+        "description": "Lernveranstaltungen und Termine in diesem Monat",
+        "previousMonth": "Vorheriger Monat",
+        "nextMonth": "Nächster Monat",
+        "selectMonth": "Monat auswählen",
+        "selectYear": "Jahr auswählen",
+        "selectedDay": "Ausgewählter Tag",
+        "upcoming": "Bevorstehende Veranstaltungen",
+        "empty": "Keine Veranstaltungen in diesem Monat.",
+        "liveTraining": "Live-Schulung",
+        "courseDeadline": "Kurstermin",
+        "weekdays": {
+          "mon": "Mo",
+          "tue": "Di",
+          "wed": "Mi",
+          "thu": "Do",
+          "fri": "Fr",
+          "sat": "Sa",
+          "sun": "So"
+        }
+      },
       "continue_learning": { "title": "Weiterlernen" },
       "required_course": { "title": "Pflichtkurse" },
       "course_completion": { "title": "Abgeschlossene Kurse" },
@@ -52,6 +102,8 @@
   },
   "common": {
     "button": {
+      "previous": "Zurück",
+      "next": "Weiter",
       "save": "Speichern",
       "saving": "Sparen...",
       "delete": "Löschen",

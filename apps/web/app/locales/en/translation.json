@@ -26,23 +26,73 @@
       "title": "We could not load the dashboard",
       "description": "Try again in a moment.",
       "retry": "Try again",
-      "invalidWidgetWidth": "This width is not allowed for the selected widget."
+      "invalidWidgetWidth": "This width is not allowed for the selected widget.",
+      "invalidWidgetLayout": "The dashboard layout contains unavailable or duplicate widgets.",
+      "requiredWidgetMissing": "A required dashboard widget is missing."
     },
     "widgets": {
+      "loadError": "This widget could not load its data.",
+      "trainingCompletionChartLabel": "{{completed}} of {{total}} enrollments completed, {{percentage}} percent.",
+      "deadlineRisksPage": "Page {{page}} of {{totalPages}}",
       "placeholderDescription": "Dashboard widget prepared for a dedicated data view",
       "placeholderContent": "This widget is ready for its feature-specific content.",
       "placeholderFooter": "Example widget",
-      "a_placeholder_1": { "title": "Admin widget 1" },
-      "a_placeholder_2": { "title": "Admin widget 2" },
-      "a_placeholder_3": { "title": "Admin widget 3" },
       "s_placeholder_1": { "title": "Learner widget 1" },
       "s_placeholder_2": { "title": "Learner widget 2" },
       "s_placeholder_3": { "title": "Learner widget 3" },
       "commonDescription": "Key information at a glance",
-      "training_completion": { "title": "Training completion" },
-      "deadline_risks": { "title": "Deadline risks" },
-      "incomplete_courses": { "title": "Incomplete courses" },
-      "event_calendar": { "title": "Event calendar" },
+      "training_completion": {
+        "title": "Training completion",
+        "description": "Completion status across all course enrollments",
+        "completed": "Completed",
+        "inProgress": "In progress",
+        "notStarted": "Not started",
+        "viewAnalytics": "View analytics",
+        "empty": "No course enrollments yet.",
+        "assignCourses": "Assign courses"
+      },
+      "deadline_risks": {
+        "title": "Deadline risks",
+        "description": "Required courses that need attention",
+        "overdue": "Overdue",
+        "dueSoon": "Due soon",
+        "empty": "No deadline risks right now.",
+        "overdueTitle": "Overdue required courses",
+        "dueSoonTitle": "Required courses due soon",
+        "goToCourse": "Go to course",
+        "affected_one": "{{count}} affected learner",
+        "affected_other": "{{count}} affected learners"
+      },
+      "incomplete_courses": {
+        "title": "Incomplete courses",
+        "description": "Courses with the most incomplete enrollments",
+        "allCompleted": "All enrolled courses are completed.",
+        "noEnrollments": "No course enrollments yet.",
+        "enrollments": "enrollments",
+        "notCompleted": "{{count}} not completed"
+      },
+      "event_calendar": {
+        "title": "Event calendar",
+        "description": "Learning events and deadlines this month",
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "selectMonth": "Select month",
+        "selectYear": "Select year",
+        "selectedDay": "Selected day",
+        "upcoming": "Upcoming events",
+        "empty": "No events this month.",
+        "liveTraining": "Live training",
+        "courseDeadline": "Course deadline",
+        "weekdays": {
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat",
+          "sun": "Sun"
+        }
+      },
       "continue_learning": { "title": "Continue learning" },
       "required_course": { "title": "Required courses" },
       "course_completion": { "title": "Completed courses" },
@@ -70,7 +120,9 @@
       "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending...",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "previous": "Previous",
+      "next": "Next"
     },
     "toast": {
       "noAccess": "You do not have permission to access this resource",

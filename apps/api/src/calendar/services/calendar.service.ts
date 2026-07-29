@@ -43,6 +43,7 @@ import type {
   LiveTrainingCalendarEventPayload,
   LiveTrainingListItemPayload,
 } from "../types/calendar.types";
+import type { DashboardCalendarEventList } from "../schemas/dashboard-calendar-event-list.schema";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -63,6 +64,23 @@ export class CalendarService {
     const events = sourceEvents.flat().sort(this.sortEventsByStartDate);
 
     return { events };
+  }
+
+  async getDashboardEvents(
+    query: GetCalendarEventsQuery,
+    currentUser: CurrentUserType,
+  ): Promise<DashboardCalendarEventList> {
+    const { events } = await this.getEvents(query, currentUser);
+
+    return events.map((event) => ({
+      id: event.id,
+      sourceType: event.sourceType,
+      targetId:
+        "courseDueDate" in event.payload ? event.payload.courseDueDate.courseId : event.sourceId,
+      title: event.title,
+      startsAt: event.startsAt,
+      allDay: event.allDay,
+    }));
   }
 
   async getEventDetails(

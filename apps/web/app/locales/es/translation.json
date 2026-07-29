@@ -23,26 +23,76 @@
       "editDescription": "Activa al menos un widget de la lista superior."
     },
     "error": {
+      "invalidWidgetLayout": "El diseño del panel contiene widgets no disponibles o duplicados.",
+      "requiredWidgetMissing": "Falta un widget obligatorio del panel.",
       "title": "No se pudo cargar el panel",
       "description": "Vuelve a intentarlo en unos instantes.",
       "retry": "Intentar de nuevo",
       "invalidWidgetWidth": "Este ancho no está permitido para el widget seleccionado."
     },
     "widgets": {
+      "loadError": "No se pudieron cargar los datos de este widget.",
+      "trainingCompletionChartLabel": "{{completed}} de {{total}} inscripciones completadas, {{percentage}} por ciento.",
+      "deadlineRisksPage": "Página {{page}} de {{totalPages}}",
       "placeholderDescription": "Widget del panel preparado para una vista de datos propia",
       "placeholderContent": "Este widget está preparado para el contenido específico de su función.",
       "placeholderFooter": "Widget de ejemplo",
-      "a_placeholder_1": { "title": "Widget de administrador 1" },
-      "a_placeholder_2": { "title": "Widget de administrador 2" },
-      "a_placeholder_3": { "title": "Widget de administrador 3" },
       "s_placeholder_1": { "title": "Widget de estudiante 1" },
       "s_placeholder_2": { "title": "Widget de estudiante 2" },
       "s_placeholder_3": { "title": "Widget de estudiante 3" },
       "commonDescription": "Información clave de un vistazo",
-      "training_completion": { "title": "Finalización de formación" },
-      "deadline_risks": { "title": "Plazos en riesgo" },
-      "incomplete_courses": { "title": "Cursos incompletos" },
-      "event_calendar": { "title": "Calendario de eventos" },
+      "training_completion": {
+        "title": "Finalización de formación",
+        "description": "Estado de todas las inscripciones en cursos",
+        "completed": "Completado",
+        "inProgress": "En curso",
+        "notStarted": "No iniciado",
+        "viewAnalytics": "Ver analítica",
+        "empty": "Aún no hay inscripciones en cursos.",
+        "assignCourses": "Asignar cursos"
+      },
+      "deadline_risks": {
+        "title": "Riesgos de plazos",
+        "description": "Cursos obligatorios que requieren atención",
+        "overdue": "Vencido",
+        "dueSoon": "Próximo a vencer",
+        "empty": "No hay riesgos de plazos ahora.",
+        "overdueTitle": "Cursos obligatorios vencidos",
+        "dueSoonTitle": "Cursos obligatorios próximos a vencer",
+        "goToCourse": "Ir al curso",
+        "affected_one": "{{count}} alumno afectado",
+        "affected_other": "{{count}} alumnos afectados"
+      },
+      "incomplete_courses": {
+        "title": "Cursos incompletos",
+        "description": "Cursos con más inscripciones sin completar",
+        "allCompleted": "Todos los cursos asignados están completados.",
+        "noEnrollments": "Aún no hay inscripciones en cursos.",
+        "enrollments": "inscripciones",
+        "notCompleted": "{{count}} sin completar"
+      },
+      "event_calendar": {
+        "title": "Calendario de eventos",
+        "description": "Eventos de aprendizaje y plazos de este mes",
+        "previousMonth": "Mes anterior",
+        "nextMonth": "Mes siguiente",
+        "selectMonth": "Seleccionar mes",
+        "selectYear": "Seleccionar año",
+        "selectedDay": "Día seleccionado",
+        "upcoming": "Próximos eventos",
+        "empty": "No hay eventos este mes.",
+        "liveTraining": "Formación en directo",
+        "courseDeadline": "Plazo del curso",
+        "weekdays": {
+          "mon": "Lun",
+          "tue": "Mar",
+          "wed": "Mié",
+          "thu": "Jue",
+          "fri": "Vie",
+          "sat": "Sáb",
+          "sun": "Dom"
+        }
+      },
       "continue_learning": { "title": "Continuar aprendiendo" },
       "required_course": { "title": "Cursos obligatorios" },
       "course_completion": { "title": "Cursos completados" },
@@ -52,6 +102,8 @@
   },
   "common": {
     "button": {
+      "previous": "Anterior",
+      "next": "Siguiente",
       "save": "Guardar",
       "saving": "Guardando...",
       "delete": "Eliminar",

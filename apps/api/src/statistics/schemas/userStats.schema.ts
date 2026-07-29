@@ -86,6 +86,53 @@ export const StatsSchema = Type.Object({
   avgQuizScore: QuizScoreSchema,
 });
 
+const DashboardCourseProgressSchema = Type.Object({
+  completed: Type.Number(),
+  inProgress: Type.Number(),
+  notStarted: Type.Number(),
+});
+
+const DashboardDeadlineStudentSchema = Type.Object({
+  id: Type.String(),
+  name: Type.String(),
+  dueDate: Type.String(),
+});
+
+export const DashboardDeadlineRiskTypeSchema = Type.Union([
+  Type.Literal("overdue"),
+  Type.Literal("dueSoon"),
+]);
+
+export const DashboardDeadlineRiskCourseSchema = Type.Object({
+  id: Type.String(),
+  title: Type.String(),
+  students: Type.Array(DashboardDeadlineStudentSchema),
+});
+
+export const DashboardTrainingCompletionSchema = Type.Object({
+  ...DashboardCourseProgressSchema.properties,
+  total: Type.Number(),
+  percentage: Type.Number(),
+});
+
+export const DashboardDeadlineRiskSummarySchema = Type.Object({
+  overdueCount: Type.Number(),
+  dueSoonCount: Type.Number(),
+});
+
+export const DashboardIncompleteCoursesSchema = Type.Object({
+  hasEnrollments: Type.Boolean(),
+  courses: Type.Array(
+    Type.Object({
+      id: Type.String(),
+      title: Type.String(),
+      total: Type.Number(),
+      overdue: Type.Number(),
+      ...DashboardCourseProgressSchema.properties,
+    }),
+  ),
+});
+
 const UserStatisticSchema = Type.Object({
   currentStreak: Type.Number(),
   longestStreak: Type.Number(),
@@ -97,4 +144,9 @@ export type UserStats = Static<typeof UserStatsSchema>;
 export type StatsByMonth = Static<typeof StatsByMonthSchema>;
 export type UserStatistic = Static<typeof UserStatisticSchema>;
 export type Stats = Static<typeof StatsSchema>;
+export type DashboardTrainingCompletion = Static<typeof DashboardTrainingCompletionSchema>;
+export type DashboardDeadlineRiskSummary = Static<typeof DashboardDeadlineRiskSummarySchema>;
+export type DashboardIncompleteCourses = Static<typeof DashboardIncompleteCoursesSchema>;
+export type DashboardDeadlineRiskType = Static<typeof DashboardDeadlineRiskTypeSchema>;
+export type DashboardDeadlineRiskCourse = Static<typeof DashboardDeadlineRiskCourseSchema>;
 export type CourseStudentsStatsByMonth = Static<typeof CourseStudentsStatsByMonthSchema>;

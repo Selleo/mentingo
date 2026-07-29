@@ -17,32 +17,88 @@
       "confirm": "Ano",
       "cancel": "Ne"
     },
+    "empty": {
+      "title": "Váš dashboard je prázdný",
+      "description": "Přizpůsobte dashboard a přidejte widgety, které potřebujete.",
+      "editDescription": "Zapněte alespoň jeden widget v seznamu výše."
+    },
     "preview": {
       "updated": "Aktuální",
       "caption": "Rychlý přehled aktuální vzdělávací aktivity.",
       "progress": "Pokrok"
     },
     "error": {
+      "invalidWidgetLayout": "Rozložení dashboardu obsahuje nedostupné nebo duplicitní widgety.",
+      "requiredWidgetMissing": "Chybí povinný widget dashboardu.",
       "title": "Dashboard se nepodařilo načíst",
       "description": "Zkuste to za chvíli znovu.",
       "retry": "Zkusit znovu",
       "invalidWidgetWidth": "Tato šířka není pro vybraný widget povolena."
     },
     "widgets": {
+      "loadError": "Data tohoto widgetu se nepodařilo načíst.",
+      "trainingCompletionChartLabel": "Dokončeno {{completed}} z {{total}} přiřazení, {{percentage}} procent.",
+      "deadlineRisksPage": "Strana {{page}} z {{totalPages}}",
       "placeholderDescription": "Widget dashboardu připravený pro vlastní datový pohled",
       "placeholderContent": "Tento widget je připravený na obsah konkrétní funkce.",
       "placeholderFooter": "Ukázkový widget",
-      "a_placeholder_1": { "title": "Widget správce 1" },
-      "a_placeholder_2": { "title": "Widget správce 2" },
-      "a_placeholder_3": { "title": "Widget správce 3" },
       "s_placeholder_1": { "title": "Widget studenta 1" },
       "s_placeholder_2": { "title": "Widget studenta 2" },
       "s_placeholder_3": { "title": "Widget studenta 3" },
       "commonDescription": "Klíčové informace na první pohled",
-      "training_completion": { "title": "Dokončení školení" },
-      "deadline_risks": { "title": "Ohrožené termíny" },
-      "incomplete_courses": { "title": "Nedokončené kurzy" },
-      "event_calendar": { "title": "Kalendář událostí" },
+      "training_completion": {
+        "title": "Dokončení školení",
+        "description": "Stav dokončení všech přiřazení kurzů",
+        "completed": "Dokončeno",
+        "inProgress": "Probíhá",
+        "notStarted": "Nezahájeno",
+        "viewAnalytics": "Zobrazit analytiku",
+        "empty": "Zatím žádná přiřazení kurzů.",
+        "assignCourses": "Přiřadit kurzy"
+      },
+      "deadline_risks": {
+        "title": "Rizika termínů",
+        "description": "Povinné kurzy vyžadující pozornost",
+        "overdue": "Po termínu",
+        "dueSoon": "Termín se blíží",
+        "empty": "Aktuálně žádná rizika termínů.",
+        "overdueTitle": "Povinné kurzy po termínu",
+        "dueSoonTitle": "Povinné kurzy s blížícím se termínem",
+        "goToCourse": "Přejít na kurz",
+        "affected_one": "{{count}} dotčený účastník",
+        "affected_few": "{{count}} dotčení účastníci",
+        "affected_other": "{{count}} dotčených účastníků"
+      },
+      "incomplete_courses": {
+        "title": "Nedokončené kurzy",
+        "description": "Kurzy s nejvíce nedokončenými přiřazeními",
+        "allCompleted": "Všechny přiřazené kurzy jsou dokončeny.",
+        "noEnrollments": "Zatím žádná přiřazení kurzů.",
+        "enrollments": "přiřazení",
+        "notCompleted": "{{count}} nedokončeno"
+      },
+      "event_calendar": {
+        "title": "Kalendář událostí",
+        "description": "Vzdělávací události a termíny v tomto měsíci",
+        "previousMonth": "Předchozí měsíc",
+        "nextMonth": "Další měsíc",
+        "selectMonth": "Vybrat měsíc",
+        "selectYear": "Vybrat rok",
+        "selectedDay": "Vybraný den",
+        "upcoming": "Nadcházející události",
+        "empty": "Tento měsíc nejsou žádné události.",
+        "liveTraining": "Živé školení",
+        "courseDeadline": "Termín kurzu",
+        "weekdays": {
+          "mon": "Po",
+          "tue": "Út",
+          "wed": "St",
+          "thu": "Čt",
+          "fri": "Pá",
+          "sat": "So",
+          "sun": "Ne"
+        }
+      },
       "continue_learning": { "title": "Pokračovat ve vzdělávání" },
       "required_course": { "title": "Povinné kurzy" },
       "course_completion": { "title": "Dokončené kurzy" },
@@ -52,6 +108,8 @@
   },
   "common": {
     "button": {
+      "previous": "Předchozí",
+      "next": "Další",
       "save": "Uložit",
       "saving": "Ukládání...",
       "delete": "Vymazat",

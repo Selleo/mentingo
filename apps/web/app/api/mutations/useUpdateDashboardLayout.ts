@@ -20,7 +20,8 @@ export function useUpdateDashboardWidgets() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      queryClient.setQueryData(userSettingsQueryOptions.queryKey, data);
       queryClient.invalidateQueries({
         queryKey: userSettingsQueryOptions.queryKey,
       });

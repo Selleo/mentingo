@@ -23,26 +23,76 @@
       "editDescription": "Įjunkite bent vieną valdiklį aukščiau esančiame sąraše."
     },
     "error": {
+      "invalidWidgetLayout": "Skydelio išdėstyme yra nepasiekiamų arba pasikartojančių valdiklių.",
+      "requiredWidgetMissing": "Trūksta privalomo skydelio valdiklio.",
       "title": "Nepavyko įkelti skydelio",
       "description": "Po akimirkos bandykite dar kartą.",
       "retry": "Bandyti dar kartą",
       "invalidWidgetWidth": "Pasirinktam valdikliui šis plotis neleidžiamas."
     },
     "widgets": {
+      "loadError": "Nepavyko įkelti šio valdiklio duomenų.",
+      "trainingCompletionChartLabel": "Užbaigta {{completed}} iš {{total}} priskyrimų, {{percentage}} procentų.",
+      "deadlineRisksPage": "{{page}} puslapis iš {{totalPages}}",
       "placeholderDescription": "Prietaisų skydelio valdiklis, paruoštas atskiram duomenų rodiniui",
       "placeholderContent": "Šis valdiklis paruoštas konkrečios funkcijos turiniui.",
       "placeholderFooter": "Pavyzdinis valdiklis",
-      "a_placeholder_1": { "title": "Administratoriaus valdiklis 1" },
-      "a_placeholder_2": { "title": "Administratoriaus valdiklis 2" },
-      "a_placeholder_3": { "title": "Administratoriaus valdiklis 3" },
       "s_placeholder_1": { "title": "Besimokančiojo valdiklis 1" },
       "s_placeholder_2": { "title": "Besimokančiojo valdiklis 2" },
       "s_placeholder_3": { "title": "Besimokančiojo valdiklis 3" },
       "commonDescription": "Svarbiausia informacija vienu žvilgsniu",
-      "training_completion": { "title": "Mokymų užbaigimas" },
-      "deadline_risks": { "title": "Rizikingi terminai" },
-      "incomplete_courses": { "title": "Nebaigti kursai" },
-      "event_calendar": { "title": "Įvykių kalendorius" },
+      "training_completion": {
+        "title": "Mokymų užbaigimas",
+        "description": "Visų kursų priskyrimų užbaigimo būsena",
+        "completed": "Užbaigta",
+        "inProgress": "Vykdoma",
+        "notStarted": "Nepradėta",
+        "viewAnalytics": "Peržiūrėti analitiką",
+        "empty": "Kursų priskyrimų dar nėra.",
+        "assignCourses": "Priskirti kursus"
+      },
+      "deadline_risks": {
+        "title": "Terminų rizikos",
+        "description": "Privalomi kursai, kuriems reikia dėmesio",
+        "overdue": "Pavėluota",
+        "dueSoon": "Terminas artėja",
+        "empty": "Šiuo metu terminų rizikų nėra.",
+        "overdueTitle": "Pavėluoti privalomi kursai",
+        "dueSoonTitle": "Artėjantys privalomų kursų terminai",
+        "goToCourse": "Eiti į kursą",
+        "affected_one": "{{count}} paveiktas dalyvis",
+        "affected_other": "{{count}} paveikti dalyviai"
+      },
+      "incomplete_courses": {
+        "title": "Nebaigti kursai",
+        "description": "Kursai su daugiausia nebaigtų priskyrimų",
+        "allCompleted": "Visi priskirti kursai užbaigti.",
+        "noEnrollments": "Kursų priskyrimų dar nėra.",
+        "enrollments": "priskyrimų",
+        "notCompleted": "{{count}} nebaigta"
+      },
+      "event_calendar": {
+        "title": "Įvykių kalendorius",
+        "description": "Mokymosi įvykiai ir terminai šį mėnesį",
+        "previousMonth": "Ankstesnis mėnuo",
+        "nextMonth": "Kitas mėnuo",
+        "selectMonth": "Pasirinkti mėnesį",
+        "selectYear": "Pasirinkti metus",
+        "selectedDay": "Pasirinkta diena",
+        "upcoming": "Artėjantys įvykiai",
+        "empty": "Šį mėnesį įvykių nėra.",
+        "liveTraining": "Tiesioginiai mokymai",
+        "courseDeadline": "Kurso terminas",
+        "weekdays": {
+          "mon": "Pr",
+          "tue": "An",
+          "wed": "Tr",
+          "thu": "Kt",
+          "fri": "Pn",
+          "sat": "Št",
+          "sun": "Sk"
+        }
+      },
       "continue_learning": { "title": "Tęsti mokymąsi" },
       "required_course": { "title": "Privalomi kursai" },
       "course_completion": { "title": "Baigti kursai" },
@@ -52,6 +102,8 @@
   },
   "common": {
     "button": {
+      "previous": "Ankstesnis",
+      "next": "Kitas",
       "save": "Išsaugoti",
       "saving": "Išsaugoma...",
       "delete": "Ištrinti",
