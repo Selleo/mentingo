@@ -1,5 +1,6 @@
 import { Test } from "@nestjs/testing";
 
+import { AutomationStatus } from "src/announcements/types/automations.types";
 import { BaseResponse } from "src/common";
 
 import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
@@ -100,7 +101,7 @@ describe("AutomationsController", () => {
       const input = {
         name: { en: "New Automation" },
         description: { en: "Description" },
-        status: "draft" as const,
+        status: AutomationStatus.Draft,
       };
       const createdAutomation = { id: "auto-new", ...input };
       service.createAutomation.mockResolvedValue(createdAutomation as any);
@@ -130,9 +131,11 @@ describe("AutomationsController", () => {
     it("updates status and returns BaseResponse with id", async () => {
       service.updateStatus.mockResolvedValue("auto-1" as UUIDType);
 
-      const result = await controller.updateStatus("auto-1" as UUIDType, { status: "enabled" });
+      const result = await controller.updateStatus("auto-1" as UUIDType, {
+        status: AutomationStatus.Enabled,
+      });
 
-      expect(service.updateStatus).toHaveBeenCalledWith("auto-1", "enabled");
+      expect(service.updateStatus).toHaveBeenCalledWith("auto-1", AutomationStatus.Enabled);
       expect(result).toBeInstanceOf(BaseResponse);
       expect(result.data).toEqual({ id: "auto-1" });
     });
