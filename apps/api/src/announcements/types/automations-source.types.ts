@@ -12,6 +12,7 @@ import type { UUIDType } from "src/common";
 import type { automationLogs } from "src/storage/schema";
 
 export type AutomationRecordInput = {
+  tenantId: UUIDType;
   name: LocalizedText;
   description: LocalizedText;
   status: AutomationStatus;

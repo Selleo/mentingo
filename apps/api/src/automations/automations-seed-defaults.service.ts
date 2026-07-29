@@ -312,7 +312,8 @@ export class AutomationsSeedDefaultsService {
       }
 
       try {
-        await this.createDefaultAutomation(triggerType, language);
+        // Przekazujemy tenantId do funkcji pomocniczej
+        await this.createDefaultAutomation(tenantId, triggerType, language);
         created++;
       } catch (error) {
         this.logger.error(`Failed to create default automation for trigger: ${triggerType}`, error);
@@ -328,22 +329,27 @@ export class AutomationsSeedDefaultsService {
   }
 
   private async createDefaultAutomation(
+    tenantId: UUIDType,
     triggerType: TriggerType,
     language: SupportedLanguages,
   ): Promise<void> {
     const names = TRIGGER_NAMES[triggerType];
     const templateId = TRIGGER_TO_TEMPLATE[triggerType];
 
-    const name: LocalizedText = {};
-    const description: LocalizedText = {};
+    // Pobieramy etykietę dla wskazanego języka (z fallbackiem do EN)
+    const label = names[language] ?? names.en ?? Object.values(names)[0];
+    const descTemplate = DESCRIPTION_TEMPLATES[language] ?? DESCRIPTION_TEMPLATES.en;
 
-    for (const [lang, label] of Object.entries(names)) {
-      const key = lang as SupportedLanguages;
-      name[key] = label;
-      description[key] = `${DESCRIPTION_TEMPLATES[key]}${label}`;
-    }
+    // Tworzymy obiekty zlokalizowane spersonalizowane pod język użytkownika
+    const name: LocalizedText = {
+      [language]: label,
+    };
+    const description: LocalizedText = {
+      [language]: `${descTemplate}${label}`,
+    };
 
     const input: AutomationRecordInput = {
+      tenantId, // Pamiętaj o przekazaniu tenantId!
       name,
       description,
       status: AutomationStatus.Enabled,
@@ -353,7 +359,7 @@ export class AutomationsSeedDefaultsService {
 
     const triggerDef = STEP_DEFINITIONS.find((s) => s.kind === "trigger" && s.type === triggerType);
 
-    const triggerLabel = names[language] ?? names.en;
+    const triggerLabel = label;
 
     const triggerStepId = await this.automationStepsService.createAutomationStep({
       parentId: null,
@@ -381,7 +387,7 @@ export class AutomationsSeedDefaultsService {
         label: actionLabel,
         config: {
           emailTemplate: templateId,
-          language: "user_default",
+          language: language, // Ustawiamy język użytkownika zamiast "user_default"
           placeholderValues,
         },
         position: { x: 0, y: 150 },
