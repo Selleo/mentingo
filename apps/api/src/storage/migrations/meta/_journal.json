@@ -1240,6 +1240,13 @@
       "when": 1785140655153,
       "tag": "0176_enable_calendar_provider_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 177,
+      "version": "7",
+      "when": 1785267507015,
+      "tag": "0177_delete_student_chapter_progress_with_chapter",
+      "breakpoints": true
     }
   ]
 }
