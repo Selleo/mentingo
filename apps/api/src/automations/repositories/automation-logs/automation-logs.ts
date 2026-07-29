@@ -13,7 +13,17 @@ export class AutomationLogsRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async create(input: AutomationLogRecordInput) {
-    const [log] = await this.db.insert(automationLogs).values(input).returning();
+    const [log] = await this.db
+      .insert(automationLogs)
+      .values({
+        automationId: input.automationId,
+        automationName: input.automationName,
+        eventName: input.eventName,
+        status: input.status,
+        emailAddresses: input.emailAddresses,
+        errorName: input.errorName,
+      })
+      .returning();
 
     return log;
   }
