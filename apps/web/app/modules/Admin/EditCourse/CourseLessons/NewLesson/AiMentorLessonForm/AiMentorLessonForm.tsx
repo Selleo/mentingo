@@ -6,7 +6,7 @@ import {
   AI_MENTOR_TYPE,
   ALLOWED_EXTENSIONS,
 } from "@repo/shared";
-import { useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useReplaceAiJudgeConfiguration } from "~/api/mutations/admin/useReplaceAiJudgeConfiguration";
@@ -77,10 +77,15 @@ import {
   getApplicableAiMentorGeneratedConfiguration,
   mapAiMentorValidationToQualityResult,
 } from "./AiMentorGeneration/aiMentorGeneration.mappers";
+import {
+  buildAiMentorGenerationInput,
+  buildAiMentorValidationInput,
+} from "./AiMentorGeneration/aiMentorGeneration.requests";
 import { AI_MENTOR_GENERATION_MODE } from "./AiMentorGeneration/aiMentorGeneration.types";
 import { AiMentorGenerationDialog } from "./AiMentorGeneration/AiMentorGenerationDialog";
 import { AiMentorQualityCheckDialog } from "./AiMentorGeneration/AiMentorQualityCheckDialog";
 import { useAiMentorConfigurationGeneration } from "./AiMentorGeneration/useAiMentorConfigurationGeneration";
+import { useAiMentorConfigurationValidation } from "./AiMentorGeneration/useAiMentorConfigurationValidation";
 import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import { AiMentorScenarioFields } from "./components/AiMentorScenarioFields";
 import { AiMentorScenarioTemplateSelect } from "./components/AiMentorScenarioTemplateSelect";
@@ -184,10 +189,8 @@ const AiMentorLessonForm = ({
   );
   const [latestAiMentorValidation, setLatestAiMentorValidation] =
     useState<AiMentorValidationResult>();
-  const aiMentorGenerationMode =
-    aiMentorAuthoringState.mode ?? AI_MENTOR_GENERATION_MODE.CREATE;
-  const isAiMentorEditorOpen =
-    aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.EDITOR;
+  const aiMentorGenerationMode = aiMentorAuthoringState.mode ?? AI_MENTOR_GENERATION_MODE.CREATE;
+  const isAiMentorEditorOpen = aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.EDITOR;
   const isAiMentorGenerationDialogOpen =
     aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.GENERATION;
   const isAiMentorQualityDialogOpen =
@@ -213,10 +216,32 @@ const AiMentorLessonForm = ({
   } = useAiJudgeConfigurationGeneration();
   const { mutateAsync: validateAiJudgeConfiguration, isPending: isValidatingAiJudgeConfiguration } =
     useValidateAiJudgeConfiguration();
+  const { mutateAsync: validateAiMentorConfiguration } = useValidateAiMentorConfiguration();
+  const validateCurrentAiMentorConfiguration = useCallback(
+    (configuration: AiMentorConfigurationDraft, signal: AbortSignal) =>
+      validateAiMentorConfiguration({
+        data: buildAiMentorValidationInput(
+          {
+            courseId: id,
+            lessonId: lessonToEdit?.id,
+            lessonContext: {
+              title: form.getValues("title") || undefined,
+              taskDescription: form.getValues("description") || undefined,
+            },
+          },
+          configuration,
+        ),
+        signal,
+      }),
+    [form, id, lessonToEdit?.id, validateAiMentorConfiguration],
+  );
   const {
-    mutateAsync: validateAiMentorConfiguration,
-    isPending: isValidatingAiMentorConfiguration,
-  } = useValidateAiMentorConfiguration();
+    result: aiMentorQualityValidation,
+    isChecking: isValidatingAiMentorConfiguration,
+    validateConfiguration: validateCurrentAiMentorConfigurationDraft,
+    cancel: cancelAiMentorQualityValidation,
+    clearResult: clearAiMentorQualityValidation,
+  } = useAiMentorConfigurationValidation(validateCurrentAiMentorConfiguration);
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
   const {
     mutateAsync: updateAiJudgeConfigurationTranslation,
@@ -393,32 +418,18 @@ const AiMentorLessonForm = ({
     });
   };
 
-  const handleGenerateAiMentorConfiguration = async (
-    request: AiMentorGenerationRequest,
-  ) => {
-    const commonInput = {
-      courseId: id,
-      lessonId: lessonToEdit?.id,
-      lessonContext: getAiMentorLessonContext(),
-    };
-
-    if (request.mode === AI_MENTOR_GENERATION_MODE.CREATE) {
-      await startAiMentorConfigurationGeneration({
-        ...commonInput,
-        mode: AI_MENTOR_GENERATION_MODE.CREATE,
-        configurationType: request.configurationType,
-        brief: request.brief,
-      });
-      return;
-    }
-
-    await startAiMentorConfigurationGeneration({
-      ...commonInput,
-      mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
-      instruction: request.instruction,
-      currentConfiguration: request.currentConfiguration,
-      ...(latestAiMentorValidation && { latestValidation: latestAiMentorValidation }),
-    });
+  const handleGenerateAiMentorConfiguration = async (request: AiMentorGenerationRequest) => {
+    await startAiMentorConfigurationGeneration(
+      buildAiMentorGenerationInput(
+        {
+          courseId: id,
+          lessonId: lessonToEdit?.id,
+          lessonContext: getAiMentorLessonContext(),
+        },
+        request,
+        latestAiMentorValidation,
+      ),
+    );
   };
 
   const handleCheckAiMentorQuality = async () => {
@@ -426,28 +437,15 @@ const AiMentorLessonForm = ({
     if (!currentConfiguration) return;
 
     dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_QUALITY });
-    try {
-      const validation = await validateAiMentorConfiguration({
-        data: {
-          courseId: id,
-          lessonId: lessonToEdit?.id,
-          lessonContext: getAiMentorLessonContext(),
-          configuration: currentConfiguration,
-        },
-      });
-      setLatestAiMentorValidation(validation);
-      dispatchAiMentorAuthoring({
-        type: AI_MENTOR_AUTHORING_ACTION.OPEN_QUALITY,
-        quality: mapAiMentorValidationToQualityResult(validation),
-      });
-    } catch {
+    const validation = await validateCurrentAiMentorConfigurationDraft(currentConfiguration);
+    if (!validation) {
       dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
+      return;
     }
+    setLatestAiMentorValidation(validation);
   };
 
-  const stageGeneratedAiMentorConfiguration = (
-    configuration: AiMentorConfigurationDraft,
-  ) => {
+  const stageGeneratedAiMentorConfiguration = (configuration: AiMentorConfigurationDraft) => {
     hasStagedAiMentorConfigurationRef.current = true;
     form.setValue("aiMentorConfiguration", configuration, {
       shouldDirty: true,
@@ -456,8 +454,7 @@ const AiMentorLessonForm = ({
   };
 
   const handleReviewAiMentorConfiguration = (state: AiMentorGenerationViewState) => {
-    const currentType =
-      form.getValues("aiMentorConfiguration")?.type ?? aiMentorGenerationType;
+    const currentType = form.getValues("aiMentorConfiguration")?.type ?? aiMentorGenerationType;
     const configuration = getApplicableAiMentorGeneratedConfiguration(
       state.draft,
       capturedAiMentorGenerationType,
@@ -492,17 +489,21 @@ const AiMentorLessonForm = ({
 
   const handleAiMentorEditorOpenChange = (open: boolean) => {
     dispatchAiMentorAuthoring({
-      type: open
-        ? AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR
-        : AI_MENTOR_AUTHORING_ACTION.CLOSE,
+      type: open ? AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR : AI_MENTOR_AUTHORING_ACTION.CLOSE,
     });
   };
 
   const handleImproveAiMentorAfterQualityCheck = () => {
+    clearAiMentorQualityValidation();
     dispatchAiMentorAuthoring({
       type: AI_MENTOR_AUTHORING_ACTION.OPEN_GENERATION,
       mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
     });
+  };
+
+  const handleCancelAiMentorQualityCheck = () => {
+    cancelAiMentorQualityValidation();
+    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
   };
 
   const visibleAiMentorGenerationState =
@@ -861,12 +862,8 @@ const AiMentorLessonForm = ({
                   isReplacingAiMentorConfiguration || isUpdatingAiMentorConfigurationTranslation
                 }
                 needsConfiguration={savedAiMentorConfiguration?.needsConfiguration}
-                onCreateWithAi={() =>
-                  openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.CREATE)
-                }
-                onImproveWithAi={() =>
-                  openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.IMPROVE)
-                }
+                onCreateWithAi={() => openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.CREATE)}
+                onImproveWithAi={() => openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.IMPROVE)}
                 onCheckQuality={() => void handleCheckAiMentorQuality()}
                 editorOpen={isAiMentorEditorOpen}
                 onEditorOpenChange={handleAiMentorEditorOpenChange}
@@ -894,13 +891,15 @@ const AiMentorLessonForm = ({
               <AiMentorQualityCheckDialog
                 open={isAiMentorQualityDialogOpen}
                 isLoading={isValidatingAiMentorConfiguration}
-                result={aiMentorAuthoringState.quality}
+                result={
+                  aiMentorQualityValidation
+                    ? mapAiMentorValidationToQualityResult(aiMentorQualityValidation)
+                    : undefined
+                }
                 onOpenChange={(open) => {
-                  if (!open)
-                    dispatchAiMentorAuthoring({
-                      type: AI_MENTOR_AUTHORING_ACTION.CLOSE,
-                    });
+                  if (!open) handleCancelAiMentorQualityCheck();
                 }}
+                onCancel={handleCancelAiMentorQualityCheck}
                 onImprove={handleImproveAiMentorAfterQualityCheck}
               />
               <AiJudgeConfigurationCard

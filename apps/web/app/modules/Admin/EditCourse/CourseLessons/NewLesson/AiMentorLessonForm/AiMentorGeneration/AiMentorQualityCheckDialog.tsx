@@ -17,6 +17,7 @@ type AiMentorQualityCheckDialogProps = {
   isLoading?: boolean;
   result?: AiMentorQualityResult;
   onOpenChange: (open: boolean) => void;
+  onCancel: () => void;
   onImprove?: () => void;
 };
 
@@ -25,6 +26,7 @@ export const AiMentorQualityCheckDialog = ({
   isLoading = false,
   result,
   onOpenChange,
+  onCancel,
   onImprove,
 }: AiMentorQualityCheckDialogProps) => {
   const { t } = useTranslation();
@@ -44,10 +46,7 @@ export const AiMentorQualityCheckDialog = ({
         {result.findings.length > 0 && (
           <ul className="divide-y rounded-md border">
             {result.findings.map((finding) => (
-              <li
-                key={`${finding.code}-${finding.field ?? "configuration"}`}
-                className="p-3"
-              >
+              <li key={`${finding.code}-${finding.field ?? "configuration"}`} className="p-3">
                 <p className="text-sm font-medium">{finding.message}</p>
                 <p className="mt-1 text-sm text-neutral-600">{finding.correction}</p>
               </li>
@@ -59,7 +58,7 @@ export const AiMentorQualityCheckDialog = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={isLoading ? () => undefined : onOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         variant="mobileDrawer"
         className="!flex max-h-[85dvh] !flex-col sm:w-[min(92vw,36rem)] sm:!max-w-none"
@@ -72,21 +71,25 @@ export const AiMentorQualityCheckDialog = ({
             {t("adminCourseView.curriculum.lesson.aiMentorGeneration.quality.description")}
           </DialogDescription>
         </DialogHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-          {renderContent()}
-        </div>
-        {!isLoading && (
-          <DialogFooter className="shrink-0 border-t border-neutral-200 px-5 py-4 sm:px-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {t("common.button.close")}
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">{renderContent()}</div>
+        <DialogFooter className="shrink-0 border-t border-neutral-200 px-5 py-4 sm:px-6">
+          {isLoading ? (
+            <Button type="button" variant="outline" onClick={onCancel}>
+              {t("common.button.cancel")}
             </Button>
-            {result && result.findings.length > 0 && onImprove && (
-              <Button type="button" onClick={onImprove}>
-                {t("adminCourseView.curriculum.lesson.aiMentorGeneration.quality.improve")}
+          ) : (
+            <>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                {t("common.button.close")}
               </Button>
-            )}
-          </DialogFooter>
-        )}
+              {result && result.findings.length > 0 && onImprove && (
+                <Button type="button" onClick={onImprove}>
+                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.quality.improve")}
+                </Button>
+              )}
+            </>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

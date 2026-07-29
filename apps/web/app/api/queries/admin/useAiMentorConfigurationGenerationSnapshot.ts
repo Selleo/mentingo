@@ -12,6 +12,9 @@ const isActiveGenerationStatus = (status?: string) =>
   status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.EVALUATING ||
   status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.REVISING;
 
+export const getAiMentorGenerationRefetchInterval = (status?: string) =>
+  isActiveGenerationStatus(status) ? 2000 : false;
+
 export const useAiMentorConfigurationGenerationSnapshot = (generationId?: string) =>
   useQuery({
     queryKey: [...AI_MENTOR_CONFIGURATION_GENERATION_QUERY_KEY, generationId],
@@ -26,5 +29,5 @@ export const useAiMentorConfigurationGenerationSnapshot = (generationId?: string
       ).data.data;
     },
     refetchInterval: (query) =>
-      isActiveGenerationStatus(query.state.data?.progress.status) ? 2000 : false,
+      getAiMentorGenerationRefetchInterval(query.state.data?.progress.status),
   });

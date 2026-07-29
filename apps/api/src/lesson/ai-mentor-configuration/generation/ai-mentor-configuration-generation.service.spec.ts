@@ -13,11 +13,15 @@ import type { AiMentorConfigurationGenerationWorkflowService } from "src/ai/ment
 import type { AiMentorConfigurationValidatorService } from "src/ai/mentor-configuration-generation/services/ai-mentor-configuration-validator.service";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
-const currentUser = {
+const currentUser: CurrentUserType = {
   userId: "91f378d3-8021-4269-881d-4d896ee61d66",
   tenantId: "242359db-654d-4af2-93ee-71ac0ddb4d9f",
-} as CurrentUserType;
+  email: "creator@example.com",
+  roleSlugs: [],
+  permissions: [],
+};
 const courseId = "4eeb7cf8-c437-4a73-867d-d58e67827eb1";
+const lessonId = "d223ef10-f19e-4af4-9dfc-55b60edc6fc1";
 
 describe("AiMentorConfigurationGenerationService", () => {
   const createService = () => {
@@ -110,7 +114,7 @@ describe("AiMentorConfigurationGenerationService", () => {
   });
 
   it("quality-checks the exact complete unsaved configuration semantically", async () => {
-    const { service, validatorService } = createService();
+    const { configurationService, service, validatorService } = createService();
     const configuration = {
       type: AI_MENTOR_TYPE.ROLEPLAY,
       scenario: "A buyer challenges the price.",
@@ -119,6 +123,8 @@ describe("AiMentorConfigurationGenerationService", () => {
       characterGoal: "Understand the value.",
       difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
     };
+    const before = structuredClone(configuration);
+    Object.freeze(configuration);
     validatorService.validate.mockResolvedValue({
       passed: true,
       summary: "The configuration is ready.",
@@ -128,6 +134,7 @@ describe("AiMentorConfigurationGenerationService", () => {
     await service.validate(
       {
         courseId,
+        lessonId,
         lessonContext: { title: "Negotiation" },
         configuration,
       },
@@ -136,6 +143,13 @@ describe("AiMentorConfigurationGenerationService", () => {
 
     expect(validatorService.validate).toHaveBeenCalledWith(
       expect.objectContaining({ configuration }),
+    );
+    expect(validatorService.validate.mock.calls[0][0].configuration).toBe(configuration);
+    expect(configuration).toEqual(before);
+    expect(configurationService.prepareGenerationAuthoringContext).toHaveBeenCalledWith(
+      courseId,
+      lessonId,
+      currentUser,
     );
   });
 });
