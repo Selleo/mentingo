@@ -152,4 +152,16 @@ describe("navigateToNextLesson", () => {
       state: { chapterId: "chapter-1" },
     });
   });
+
+  it("stays on the course overview after enrollment when the course has no lessons", () => {
+    const courseData = {
+      slug: "course-slug",
+      chapters: [],
+    } as unknown as GetCourseResponse["data"];
+    const navigate = vi.fn() as unknown as NavigateFunction;
+
+    navigateToNextLesson(courseData, navigate, { openFirstLesson: true });
+
+    expect(navigate).not.toHaveBeenCalled();
+  });
 });

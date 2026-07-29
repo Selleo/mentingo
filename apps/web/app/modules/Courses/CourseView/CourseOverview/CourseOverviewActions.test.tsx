@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -54,9 +54,11 @@ vi.mock("../../context/CourseAccessProvider", () => ({
 
 const renderActions = ({
   onContinueLearning = vi.fn(),
+  onEnrollmentCompleted = vi.fn(),
   onToggleLearningMode = vi.fn(),
 }: {
   onContinueLearning?: () => void;
+  onEnrollmentCompleted?: () => void;
   onToggleLearningMode?: () => void;
 } = {}) =>
   renderWith().render(
@@ -68,6 +70,7 @@ const renderActions = ({
             <CourseOverviewActions
               isTogglingLearningMode={false}
               onContinueLearning={onContinueLearning}
+              onEnrollmentCompleted={onEnrollmentCompleted}
               onOpenDetails={vi.fn()}
               onToggleLearningMode={onToggleLearningMode}
             />
@@ -133,6 +136,31 @@ describe("CourseOverviewActions", () => {
     await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON));
 
     expect(onContinueLearning).toHaveBeenCalledOnce();
+  });
+
+  it("continues to the first lesson after enrolling from the course overview", async () => {
+    const user = userEvent.setup();
+    const onEnrollmentCompleted = vi.fn();
+    let resolveEnrollment: () => void = () => undefined;
+    currentUser = { id: "user-1" };
+    enrollCourse.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveEnrollment = resolve;
+      }),
+    );
+
+    renderActions({ onEnrollmentCompleted });
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON));
+
+    expect(enrollCourse).toHaveBeenCalledWith({ id: "course-1" });
+    expect(onEnrollmentCompleted).not.toHaveBeenCalled();
+
+    resolveEnrollment();
+
+    await waitFor(() => {
+      expect(onEnrollmentCompleted).toHaveBeenCalledOnce();
+    });
   });
 
   it("keeps course actions available on small screens", () => {

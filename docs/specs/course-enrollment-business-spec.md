@@ -50,5 +50,5 @@ When a group is enrolled, Mentingo links the group to the course and grants acce
 
 ## Test Evidence
 
-- Web E2E coverage verifies learner self-enrollment, bulk user enrollment, bulk user unenrollment, enrolled-user filtering by keyword and group, group enrollment, and group unenrollment.
+- Web E2E coverage verifies that learner self-enrollment from the course overview opens the first lesson, as well as bulk user enrollment, bulk user unenrollment, enrolled-user filtering by keyword and group, group enrollment, and group unenrollment.
 - API E2E coverage verifies enrolled-student listing, direct enrollment permissions and duplicate handling, progress dependency creation, group enrollment metadata, group due-date calendar events, group unenrollment behavior, multi-group fallback, and protection against directly unenrolling group-enrolled learners.
