@@ -4978,7 +4978,7 @@
       "statistics": "Statistiken",
       "edit": "Inhalt bearbeiten",
       "missingTranslationsTitle": "Fehlende Übersetzungen",
-      "missingTranslationsDescription": "Einige Kapitel- oder Lektionstitel werden in der Standardsprache angezeigt.",
+      "missingTranslationsDescription": "Einige Kursinhalte sind in der ausgewählten Sprache nicht übersetzt.",
       "completedChapters_one": "{{count}} abgeschlossenes Kapitel",
       "completedChapters_other": "{{count}} abgeschlossene Kapitel",
       "lessons_one": "{{count}} Lektion",

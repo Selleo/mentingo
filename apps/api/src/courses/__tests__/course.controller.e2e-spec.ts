@@ -30,7 +30,6 @@ import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
   calendarEvents,
   categories,
-  chapters,
   courses,
   coursesSummaryStats,
   courseStudentsStats,
@@ -3158,24 +3157,6 @@ describe("CourseController (e2e)", () => {
         thumbnailS3Key: null,
         title: "English title",
       });
-      const chapter = await chapterFactory.create({
-        authorId: author.id,
-        courseId: course.id,
-        displayOrder: 1,
-        lessonCount: 1,
-        title: "English chapter",
-      });
-      const [lesson] = await db
-        .insert(lessons)
-        .values({
-          chapterId: chapter.id,
-          type: LESSON_TYPES.EMBED,
-          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "English lesson"),
-          description: buildJsonbField(SUPPORTED_LANGUAGES.EN, ""),
-          displayOrder: 1,
-        })
-        .returning();
-
       const editorResponse = await request(app.getHttpServer())
         .get("/api/course")
         .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
@@ -3188,7 +3169,6 @@ describe("CourseController (e2e)", () => {
           description: "",
           category: "English category",
           learningOutcomes: ["English outcome"],
-          hasMissingCurriculumTranslations: true,
         }),
       );
 
@@ -3204,7 +3184,6 @@ describe("CourseController (e2e)", () => {
           description: "English description",
           category: "English category",
           learningOutcomes: ["English outcome"],
-          hasMissingCurriculumTranslations: false,
         }),
       );
 
@@ -3237,44 +3216,6 @@ describe("CourseController (e2e)", () => {
       expect(studentResponseWithEmptyTranslation.body.data.learningOutcomes).toEqual([
         "English outcome",
       ]);
-
-      await db
-        .update(chapters)
-        .set({
-          title: buildJsonbFieldWithMultipleEntries({
-            [SUPPORTED_LANGUAGES.EN]: "English chapter",
-            [SUPPORTED_LANGUAGES.PL]: "Polski rozdział",
-          }),
-        })
-        .where(eq(chapters.id, chapter.id));
-
-      const missingLessonTranslationResponse = await request(app.getHttpServer())
-        .get("/api/course")
-        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
-        .set("Cookie", await cookieFor(author, app))
-        .expect(200);
-
-      expect(missingLessonTranslationResponse.body.data.hasMissingCurriculumTranslations).toBe(
-        true,
-      );
-
-      await db
-        .update(lessons)
-        .set({
-          title: buildJsonbFieldWithMultipleEntries({
-            [SUPPORTED_LANGUAGES.EN]: "English lesson",
-            [SUPPORTED_LANGUAGES.PL]: "Polska lekcja",
-          }),
-        })
-        .where(eq(lessons.id, lesson.id));
-
-      const translatedEditorResponse = await request(app.getHttpServer())
-        .get("/api/course")
-        .query({ id: course.id, language: SUPPORTED_LANGUAGES.PL })
-        .set("Cookie", await cookieFor(author, app))
-        .expect(200);
-
-      expect(translatedEditorResponse.body.data.hasMissingCurriculumTranslations).toBe(false);
     });
   });
 

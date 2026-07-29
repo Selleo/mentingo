@@ -19,7 +19,6 @@ export const commonShowCourseSchema = Type.Object({
   enrolled: Type.Optional(Type.Boolean()),
   hasFreeChapter: Type.Optional(Type.Boolean()),
   hasCertificate: Type.Optional(Type.Boolean()),
-  hasMissingCurriculumTranslations: Type.Boolean(),
   id: Type.String({ format: "uuid" }),
   status: coursesStatusOptions,
   originType: Type.Enum(COURSE_ORIGIN_TYPES),

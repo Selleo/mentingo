@@ -4,6 +4,7 @@ import { LESSON_TYPES } from "@repo/shared";
 import { useCurrentUser } from "~/api/queries";
 import { cn } from "~/lib/utils";
 import { useCourseAccessProvider } from "~/modules/Courses/context/CourseAccessProvider";
+import { LESSON_PROGRESS_STATUSES } from "~/modules/Courses/Lesson/types";
 
 import LessonStatusIcon from "./LessonStatusIcon";
 import LessonTypeIcon from "./LessonTypeIcon";
@@ -62,7 +63,7 @@ export default function LessonItem({
       (isFreemiumChapter || Boolean(course.enrolled) || isCourseStudentModeActive));
   const canOpenLesson =
     (isPreviewMode && !isPublicVisitor) || (hasCourseLearningAccess && lesson.hasAccess);
-  const lessonStatus = canOpenLesson ? lesson.status : "blocked";
+  const lessonStatus = canOpenLesson ? lesson.status : LESSON_PROGRESS_STATUSES.BLOCKED;
   const lessonContent = (
     <>
       <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-lg md:size-8">

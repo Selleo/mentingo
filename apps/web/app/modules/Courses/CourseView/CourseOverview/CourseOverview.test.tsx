@@ -105,11 +105,30 @@ vi.mock("~/modules/Admin/EditCourse/components/CourseLanguageSelector", () => ({
 }));
 
 vi.mock("./CourseCategoryEditor", () => ({
-  default: () => <div>Category editor</div>,
+  default: ({ onChange }: { onChange: (categoryId: string) => Promise<void> }) => (
+    <button type="button" onClick={() => void onChange("category-2")}>
+      Change category
+    </button>
+  ),
 }));
 
 vi.mock("./CourseDescriptionModal", () => ({
-  default: () => <div>Course description modal</div>,
+  default: ({
+    onChangeDescription,
+    onSaveDescription,
+  }: {
+    onChangeDescription: (description: string) => void;
+    onSaveDescription: () => Promise<void>;
+  }) => (
+    <div>
+      <button type="button" onClick={() => onChangeDescription("Updated description")}>
+        Change description
+      </button>
+      <button type="button" onClick={() => void onSaveDescription()}>
+        Save description
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("./CourseHeroImage", () => ({
@@ -156,7 +175,11 @@ vi.mock("./CourseMediaModal", () => ({
 }));
 
 vi.mock("./CourseOverviewActions", () => ({
-  default: () => <div>Course actions</div>,
+  default: ({ onOpenDetails }: { onOpenDetails: () => void }) => (
+    <button type="button" onClick={onOpenDetails}>
+      Open details
+    </button>
+  ),
 }));
 
 vi.mock("./CourseSettingsDrawer", () => ({
@@ -164,7 +187,22 @@ vi.mock("./CourseSettingsDrawer", () => ({
 }));
 
 vi.mock("./CourseTitleEditor", () => ({
-  default: () => <div>Course title editor</div>,
+  default: ({
+    onChange,
+    onSave,
+  }: {
+    onChange: (title: string) => void;
+    onSave: () => Promise<void>;
+  }) => (
+    <div>
+      <button type="button" onClick={() => onChange("Updated course title")}>
+        Change title
+      </button>
+      <button type="button" onClick={() => void onSave()}>
+        Save title
+      </button>
+    </div>
+  ),
 }));
 
 vi.mock("./CourseWhatYouWillLearn", () => ({
@@ -244,6 +282,53 @@ describe("CourseOverview", () => {
         expect.objectContaining({ name: "course-image.jpg" }),
       );
       expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:course-image");
+    });
+  });
+
+  it("updates metadata from the shared form state", async () => {
+    const user = userEvent.setup();
+    mocks.updateCourse.mockResolvedValue(undefined);
+
+    renderWith().render(
+      <MemoryRouter>
+        <CourseOverview
+          language="en"
+          onLanguageChange={vi.fn()}
+          openGenerateTranslationModal={false}
+          setOpenGenerateTranslationModal={vi.fn()}
+        />
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Change title" }));
+    await user.click(screen.getByRole("button", { name: "Save title" }));
+    await user.click(screen.getByRole("button", { name: "Change category" }));
+    await user.click(screen.getByRole("button", { name: "Open details" }));
+    await user.click(screen.getByRole("button", { name: "Change description" }));
+    await user.click(screen.getByRole("button", { name: "Save description" }));
+
+    await waitFor(() => {
+      expect(mocks.updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          language: "en",
+          title: "Updated course title",
+        },
+      });
+      expect(mocks.updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          categoryId: "category-2",
+          language: "en",
+        },
+      });
+      expect(mocks.updateCourse).toHaveBeenCalledWith({
+        courseId: "course-1",
+        data: {
+          description: "Updated description",
+          language: "en",
+        },
+      });
     });
   });
 });

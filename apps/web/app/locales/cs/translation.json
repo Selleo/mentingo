@@ -4982,7 +4982,7 @@
       "statistics": "Statistiky",
       "edit": "Upravit obsah",
       "missingTranslationsTitle": "Chybějící překlady",
-      "missingTranslationsDescription": "Některé názvy kapitol nebo lekcí se zobrazují ve výchozím jazyce.",
+      "missingTranslationsDescription": "Část obsahu kurzu není přeložena do vybraného jazyka.",
       "completedChapters_one": "{{count}} dokončená kapitola",
       "completedChapters_few": "{{count}} dokončené kapitoly",
       "completedChapters_other": "{{count}} dokončených kapitol",

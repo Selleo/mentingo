@@ -23,6 +23,7 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Add up to five concise learning outcomes so learners can quickly understand what the course delivers.
 - Keep unavailable lessons visible in the Table of Contents without letting learners open content blocked by enrollment, freemium, or lesson-sequence rules.
 - Review and edit localized course metadata in the selected course language from the modern overview, including the title, description, category, learning outcomes, and curriculum titles.
+- See a compact warning when any supported course content is still missing in the selected translation.
 - Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
 - Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
@@ -67,7 +68,7 @@ The course title keeps its edit affordance directly beside the displayed text, m
 
 The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language. Administrators with category-management access can also open the tenant's category administration page directly from the bottom of the selector.
 
-If a chapter or lesson title is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. Its tooltip explains that learners will temporarily see the default-language content, keeping the overview uncluttered while still making curriculum translation gaps discoverable.
+If supported course content is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. The same established translation check used by the full course editor covers course metadata, curriculum, quiz, AI Mentor, and AI Judge content, keeping translation gaps discoverable without adding a second definition of completeness.
 
 The Table of Contents shows the full curriculum so learners can understand the course structure, but only lessons available to the current user are interactive. Enrollment, freemium chapter access, and enforced lesson order determine learner access, while authorized course editors can use Learning Mode or preview access to review the curriculum without weakening learner-facing restrictions. Its heading remains visible on small screens whenever no tab bar is present. On mobile, the collapsed learner view starts with the in-progress chapter and the following chapter; when no chapter is in progress, it shows the first two remaining chapters and reports the exact number still hidden.
 
@@ -90,7 +91,7 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
 - The modern overview stores the selected course language in the URL so course content, media edits, and metadata updates stay aligned with the active translation.
 - The course-details service keeps editable title and description values exact to the selected language. Category names and learning outcomes retain base-language fallback behavior in both learner and administrator Course Overview experiences; missing or empty translated learning-outcome lists fall back to the course base language.
-- Missing curriculum translations are reported separately from displayed chapter and lesson titles, so the warning does not change the existing Table of Contents fallback behavior.
+- The modern overview reuses the existing protected missing-translations query used by the full course editor. It runs only for authorized course editors and does not change the Table of Contents fallback behavior.
 - The modern Table of Contents reuses the established course-wide lesson-sequence calculation and course access context, keeping enrollment, freemium, preview, and Learning Mode behavior consistent with lesson delivery.
 - The shared `MAX_COURSE_LEARNING_OUTCOMES` constant keeps the five-item UI and API validation rules aligned.
 - Trailer videos use the existing resumable video-upload integration and the course `trailer` relationship rather than a separate upload path.
@@ -106,7 +107,7 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Focused component coverage verifies that deleting the active course translation returns the language selector to the base language.
 - Focused frontend and API schema tests verify that only five learning outcomes can be displayed or submitted and that the add action is disabled at the limit.
 - Course API E2E coverage verifies exact-language title and description for editors, category and learning-outcome fallback in the administrator Course Overview, and base-language fallback for learner-facing metadata.
-- Focused API and component coverage verifies that missing chapter or lesson translations produce the administrator-only warning tooltip and that completed translations remove it.
+- Focused component coverage verifies that the modern overview requests the established missing-translations check for the selected course language and shows the administrator-only warning tooltip from its result. API E2E coverage verifies that the shared check detects a missing AI Mentor translation and clears after that translation is completed.
 - Focused frontend coverage verifies that redirects to language-specific course addresses preserve the selected course language instead of falling back to the default language.
 - Focused component coverage verifies that the category selector renders the localized and default-language fallback titles returned by the API.
 - Focused component coverage verifies that permitted users receive the category-management shortcut and other course editors do not.

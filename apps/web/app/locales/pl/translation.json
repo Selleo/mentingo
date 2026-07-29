@@ -5103,7 +5103,7 @@
       "statistics": "Statystyki",
       "edit": "Edytuj treść",
       "missingTranslationsTitle": "Brakujące tłumaczenia",
-      "missingTranslationsDescription": "Niektóre tytuły rozdziałów lub lekcji są wyświetlane w języku domyślnym.",
+      "missingTranslationsDescription": "Niektóre treści kursu nie mają tłumaczenia w wybranym języku.",
       "completedChapters_one": "{{count}} ukończony rozdział",
       "completedChapters_few": "{{count}} ukończone rozdziały",
       "completedChapters_many": "{{count}} ukończonych rozdziałów",

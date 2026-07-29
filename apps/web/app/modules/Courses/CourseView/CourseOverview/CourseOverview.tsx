@@ -1,7 +1,9 @@
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@remix-run/react";
 import { ENTITY_TYPES, PERMISSIONS } from "@repo/shared";
 import { Settings, Upload } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
@@ -38,6 +40,7 @@ import CourseCategoryEditor from "./CourseCategoryEditor";
 import CourseDescriptionModal from "./CourseDescriptionModal";
 import CourseHeroImage from "./CourseHeroImage";
 import CourseMediaModal from "./CourseMediaModal";
+import { courseOverviewFormSchema, type CourseOverviewFormValues } from "./CourseOverview.schema";
 import CourseOverviewActions from "./CourseOverviewActions";
 import CourseSettingsDrawer from "./CourseSettingsDrawer";
 import CourseTitleEditor from "./CourseTitleEditor";
@@ -87,43 +90,45 @@ export default function CourseOverview({
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const trailerInputRef = useRef<HTMLInputElement>(null);
-  const [heroImagePositionDraft, setHeroImagePositionDraft] = useState(savedImagePosition);
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
-  const [selectedTrailerFile, setSelectedTrailerFile] = useState<File | null>(null);
-  const [courseTitle, setCourseTitle] = useState(course.title);
-  const [courseDescription, setCourseDescription] = useState(course.description);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(course.categoryId ?? "");
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [isEditingCategory, setIsEditingCategory] = useState(false);
   const [isMediaModalOpen, setIsMediaModalOpen] = useState(false);
   const [showSettingsDrawer, setShowSettingsDrawer] = useState(false);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
 
-  const selectedImagePreviewUrl = useObjectUrl(selectedImageFile);
+  const { handleSubmit, reset, setValue, watch } = useForm<CourseOverviewFormValues>({
+    resolver: zodResolver(courseOverviewFormSchema),
+    defaultValues: {
+      categoryId: course.categoryId ?? "",
+      description: course.description,
+      heroImagePosition: savedImagePosition,
+      imageFile: null,
+      title: course.title,
+      trailerFile: null,
+    },
+  });
+  const { categoryId, description, heroImagePosition, imageFile, title, trailerFile } = watch();
+
+  const selectedImagePreviewUrl = useObjectUrl(imageFile);
   const imagePreviewUrl = selectedImagePreviewUrl ?? imageUrl;
   const selectedCategoryTitle =
-    categories.find((category) => category.id === selectedCategoryId)?.title ?? course.category;
+    categories.find((category) => category.id === categoryId)?.title ?? course.category;
 
   useEffect(() => {
-    setHeroImagePositionDraft(savedImagePosition);
-  }, [savedImagePosition]);
-
-  useEffect(() => {
-    setCourseTitle(course.title);
-  }, [course.title]);
-
-  useEffect(() => {
-    setCourseDescription(course.description);
-  }, [course.description]);
-
-  useEffect(() => {
-    setSelectedCategoryId(course.categoryId ?? "");
-  }, [course.categoryId]);
+    reset({
+      categoryId: course.categoryId ?? "",
+      description: course.description,
+      heroImagePosition: savedImagePosition,
+      imageFile: null,
+      title: course.title,
+      trailerFile: null,
+    });
+  }, [course.categoryId, course.description, course.title, reset, savedImagePosition]);
 
   const resetMediaDraft = () => {
-    setSelectedImageFile(null);
-    setSelectedTrailerFile(null);
-    setHeroImagePositionDraft(savedImagePosition);
+    setValue("imageFile", null);
+    setValue("trailerFile", null);
+    setValue("heroImagePosition", savedImagePosition);
 
     if (imageInputRef.current) {
       imageInputRef.current.value = "";
@@ -135,11 +140,11 @@ export default function CourseOverview({
   };
 
   const handleImageSelection = (file: File) => {
-    setSelectedImageFile(file);
+    setValue("imageFile", file, { shouldDirty: true, shouldValidate: true });
   };
 
   const handleTrailerSelection = (file: File) => {
-    setSelectedTrailerFile(file);
+    setValue("trailerFile", file, { shouldDirty: true, shouldValidate: true });
   };
 
   const openMediaModal = () => {
@@ -152,16 +157,18 @@ export default function CourseOverview({
     setIsMediaModalOpen(false);
   };
 
-  const saveMediaSettings = async () => {
-    if (selectedTrailerFile) {
+  const saveMediaSettings = handleSubmit(async (values) => {
+    const selectedTrailer = values.trailerFile;
+
+    if (selectedTrailer) {
       const session = await getSessionForFile({
-        file: selectedTrailerFile,
+        file: selectedTrailer,
         init: () =>
           initVideoUpload({
-            filename: selectedTrailerFile.name,
-            sizeBytes: selectedTrailerFile.size,
-            mimeType: selectedTrailerFile.type,
-            title: selectedTrailerFile.name,
+            filename: selectedTrailer.name,
+            sizeBytes: selectedTrailer.size,
+            mimeType: selectedTrailer.type,
+            title: selectedTrailer.name,
             resource: ENTITY_TYPES.COURSE,
             entityId: course.id,
             entityType: ENTITY_TYPES.COURSE,
@@ -169,22 +176,21 @@ export default function CourseOverview({
           }),
       });
 
-      await uploadVideo({ file: selectedTrailerFile, session });
+      await uploadVideo({ file: selectedTrailer, session });
     }
 
     await updateCourseMedia({
       courseId: course.id,
       data: {
         language,
-        thumbnailPositionY: heroImagePositionDraft,
-        ...(selectedImageFile ? { image: selectedImageFile } : {}),
+        thumbnailPositionY: values.heroImagePosition,
+        ...(values.imageFile ? { image: values.imageFile } : {}),
       },
     });
 
-    setSelectedImageFile(null);
-    setSelectedTrailerFile(null);
+    resetMediaDraft();
     setIsMediaModalOpen(false);
-  };
+  });
 
   const isSavingMedia = isUpdatingMedia || isInitializingTrailer || isUploadingTrailer;
 
@@ -206,16 +212,16 @@ export default function CourseOverview({
   };
 
   const handleCancelTitleEdit = () => {
-    setCourseTitle(course.title);
+    setValue("title", course.title);
     setIsEditingTitle(false);
   };
 
   const handleCancelDescriptionEdit = () => {
-    setCourseDescription(course.description);
+    setValue("description", course.description);
   };
 
   const handleDescriptionChange = async () => {
-    const normalizedDescription = courseDescription.trim();
+    const normalizedDescription = description.trim();
 
     if (!normalizedDescription) {
       handleCancelDescriptionEdit();
@@ -235,8 +241,8 @@ export default function CourseOverview({
     });
   };
 
-  const handleCategoryChange = async (categoryId: string) => {
-    if (categoryId === course.categoryId) {
+  const handleCategoryChange = async (nextCategoryId: string) => {
+    if (nextCategoryId === course.categoryId) {
       setIsEditingCategory(false);
       return;
     }
@@ -244,17 +250,17 @@ export default function CourseOverview({
     await updateCourse({
       courseId: course.id,
       data: {
-        categoryId,
+        categoryId: nextCategoryId,
         language,
       },
     });
 
-    setSelectedCategoryId(categoryId);
+    setValue("categoryId", nextCategoryId);
     setIsEditingCategory(false);
   };
 
   const handleSaveCourseTitle = async () => {
-    const normalizedTitle = courseTitle.trim();
+    const normalizedTitle = title.trim();
 
     if (!normalizedTitle) {
       handleCancelTitleEdit();
@@ -346,7 +352,7 @@ export default function CourseOverview({
             className="min-w-0 max-w-full lg:max-w-[62%]"
           >
             <CourseCategoryEditor
-              categoryId={selectedCategoryId}
+              categoryId={categoryId}
               categoryTitle={selectedCategoryTitle}
               categories={categories}
               canEdit={isAdminExperience}
@@ -360,12 +366,14 @@ export default function CourseOverview({
             />
 
             <CourseTitleEditor
-              title={courseTitle}
+              title={title}
               canEdit={isAdminExperience}
               disabled={isUpdatingCourse}
               isEditing={isEditingTitle}
               onCancel={handleCancelTitleEdit}
-              onChange={setCourseTitle}
+              onChange={(nextTitle) =>
+                setValue("title", nextTitle, { shouldDirty: true, shouldValidate: true })
+              }
               onEdit={() => setIsEditingTitle(true)}
               onSave={handleSaveCourseTitle}
               placeholder={t("modernCourseView.overview.titlePlaceholder")}
@@ -385,16 +393,21 @@ export default function CourseOverview({
       {isMediaModalOpen && (
         <CourseMediaModal
           imagePreviewUrl={imagePreviewUrl}
-          heroImagePositionDraft={heroImagePositionDraft}
+          heroImagePositionDraft={heroImagePosition}
           imageInputRef={imageInputRef}
           trailerInputRef={trailerInputRef}
           isSaving={isSavingMedia}
           onClose={closeMediaModal}
           onSave={saveMediaSettings}
-          onPositionChange={setHeroImagePositionDraft}
+          onPositionChange={(position) =>
+            setValue("heroImagePosition", position, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
           onImageSelection={handleImageSelection}
           onTrailerSelection={handleTrailerSelection}
-          selectedTrailerFile={selectedTrailerFile}
+          selectedTrailerFile={trailerFile}
         />
       )}
 
@@ -434,8 +447,13 @@ export default function CourseOverview({
 
       {showDescriptionModal && (
         <CourseDescriptionModal
-          courseDescription={courseDescription}
-          onChangeDescription={setCourseDescription}
+          courseDescription={description}
+          onChangeDescription={(nextDescription) =>
+            setValue("description", nextDescription, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
           onSaveDescription={handleDescriptionChange}
           onClose={() => setShowDescriptionModal(false)}
         />

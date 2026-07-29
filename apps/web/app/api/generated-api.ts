@@ -2087,7 +2087,6 @@ export interface GetCourseResponse {
     enrolled?: boolean;
     hasFreeChapter?: boolean;
     hasCertificate?: boolean;
-    hasMissingCurriculumTranslations: boolean;
     /** @format uuid */
     id: string;
     status: "draft" | "published" | "private";
@@ -4213,7 +4212,10 @@ export type GenerateBody =
       };
       latestValidation?: {
         passed: boolean;
-        /** @minLength 1 */
+        /**
+         * @minLength 1
+         * @maxLength 180
+         */
         summary: string;
         /** @maxItems 3 */
         issues: {
@@ -4303,7 +4305,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -4419,7 +4424,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -4529,7 +4537,10 @@ export interface GetGenerationResponse {
           };
           validation: {
             passed: boolean;
-            /** @minLength 1 */
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
             summary: string;
             /** @maxItems 3 */
             issues: {
@@ -4598,7 +4609,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -4708,7 +4722,10 @@ export interface GetGenerationResponse {
           };
           validation: {
             passed: boolean;
-            /** @minLength 1 */
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
             summary: string;
             /** @maxItems 3 */
             issues: {
@@ -4777,7 +4794,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -4887,7 +4907,10 @@ export interface GetGenerationResponse {
           };
           validation: {
             passed: boolean;
-            /** @minLength 1 */
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
             summary: string;
             /** @maxItems 3 */
             issues: {
@@ -4956,7 +4979,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -5062,7 +5088,10 @@ export interface GetGenerationResponse {
           };
           validation: {
             passed: boolean;
-            /** @minLength 1 */
+            /**
+             * @minLength 1
+             * @maxLength 180
+             */
             summary: string;
             /** @maxItems 3 */
             issues: {
@@ -5131,7 +5160,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -5268,7 +5300,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -5384,7 +5419,10 @@ export interface GetGenerationResponse {
             }[];
             validation: {
               passed: boolean;
-              /** @minLength 1 */
+              /**
+               * @minLength 1
+               * @maxLength 180
+               */
               summary: string;
               /** @maxItems 3 */
               issues: {
@@ -5502,7 +5540,10 @@ export interface ValidateConfigurationBody {
 export interface ValidateConfigurationResponse {
   data: {
     passed: boolean;
-    /** @minLength 1 */
+    /**
+     * @minLength 1
+     * @maxLength 180
+     */
     summary: string;
     /** @maxItems 3 */
     issues: {

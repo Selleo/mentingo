@@ -6,14 +6,30 @@ import { renderWith } from "~/utils/testUtils";
 
 import { TableOfContent } from "./TableOfContent";
 
-const { courseAccessState, currentUserState } = vi.hoisted(() => ({
-  courseAccessState: {
-    hasMissingCurriculumTranslations: false,
-    isAdminExperience: true,
-    isCourseStudentModeActive: false,
-  },
-  currentUserState: { permissions: ["course.statistics"] },
-}));
+const {
+  courseAccessState,
+  currentUserState,
+  missingTranslationsState,
+  useMissingTranslationsMock,
+} = vi.hoisted(() => {
+  const missingTranslationsState = { hasMissingTranslations: false };
+
+  return {
+    courseAccessState: {
+      isAdminExperience: true,
+      isCourseStudentModeActive: false,
+    },
+    currentUserState: { permissions: ["course.statistics"] },
+    missingTranslationsState,
+    useMissingTranslationsMock: vi.fn(() => ({
+      data: {
+        data: {
+          hasMissingTranslations: missingTranslationsState.hasMissingTranslations,
+        },
+      },
+    })),
+  };
+});
 
 vi.mock("@remix-run/react", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@remix-run/react")>()),
@@ -28,12 +44,15 @@ vi.mock("~/api/queries/useGlobalSettings", () => ({
   useGlobalSettings: () => ({ data: { courseDiscussionsEnabled: false } }),
 }));
 
+vi.mock("~/api/queries/admin/useHasMissingTranslations", () => ({
+  useMissingTranslations: useMissingTranslationsMock,
+}));
+
 vi.mock("../../context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
     course: {
       id: "course-1",
       enrolled: false,
-      hasMissingCurriculumTranslations: courseAccessState.hasMissingCurriculumTranslations,
     },
     isAdminExperience: courseAccessState.isAdminExperience,
     isCourseStudentModeActive: courseAccessState.isCourseStudentModeActive,
@@ -54,10 +73,11 @@ describe("TableOfContent", () => {
       configurable: true,
       value: 1280,
     });
-    courseAccessState.hasMissingCurriculumTranslations = false;
     courseAccessState.isAdminExperience = true;
     courseAccessState.isCourseStudentModeActive = false;
     currentUserState.permissions = ["course.statistics"];
+    missingTranslationsState.hasMissingTranslations = false;
+    useMissingTranslationsMock.mockClear();
   });
 
   it("shows the table of contents heading on mobile when there is no tab bar", () => {
@@ -68,14 +88,14 @@ describe("TableOfContent", () => {
     courseAccessState.isAdminExperience = false;
     currentUserState.permissions = [];
 
-    renderWith().render(<TableOfContent />);
+    renderWith().render(<TableOfContent language="en" />);
 
     expect(screen.getByRole("heading", { name: "Table of contents" })).toBeInTheDocument();
   });
 
   it("returns to the table of contents when learning mode hides statistics", async () => {
     const user = userEvent.setup();
-    const view = renderWith().render(<TableOfContent />);
+    const view = renderWith().render(<TableOfContent language="en" />);
 
     await user.click(screen.getByRole("button", { name: "Statistics" }));
 
@@ -83,7 +103,7 @@ describe("TableOfContent", () => {
 
     courseAccessState.isAdminExperience = false;
     courseAccessState.isCourseStudentModeActive = true;
-    view.rerender(<TableOfContent />);
+    view.rerender(<TableOfContent language="en" />);
 
     expect(await screen.findByText("Course chapters content")).toBeInTheDocument();
     expect(screen.queryByText("Course statistics content")).not.toBeInTheDocument();
@@ -93,7 +113,7 @@ describe("TableOfContent", () => {
     courseAccessState.isAdminExperience = false;
     const user = userEvent.setup();
 
-    renderWith().render(<TableOfContent />);
+    renderWith().render(<TableOfContent language="en" />);
     await user.click(screen.getByRole("button", { name: "Statistics" }));
 
     expect(screen.getByText("Course statistics content")).toBeInTheDocument();
@@ -102,8 +122,17 @@ describe("TableOfContent", () => {
   it("hides statistics from an administrator without the statistics permission", () => {
     currentUserState.permissions = [];
 
-    renderWith().render(<TableOfContent />);
+    renderWith().render(<TableOfContent language="en" />);
 
     expect(screen.queryByRole("button", { name: "Statistics" })).not.toBeInTheDocument();
+  });
+
+  it("uses the existing missing translations query for the selected course language", () => {
+    missingTranslationsState.hasMissingTranslations = true;
+
+    renderWith().render(<TableOfContent language="pl" />);
+
+    expect(useMissingTranslationsMock).toHaveBeenCalledWith("course-1", "pl", true);
+    expect(screen.getByRole("button", { name: "Missing translations" })).toBeInTheDocument();
   });
 });

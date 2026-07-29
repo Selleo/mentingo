@@ -4984,7 +4984,7 @@
       "statistics": "Statistika",
       "edit": "Redaguoti turinį",
       "missingTranslationsTitle": "Trūksta vertimų",
-      "missingTranslationsDescription": "Kai kurių skyrių ar pamokų pavadinimai rodomi numatytąja kalba.",
+      "missingTranslationsDescription": "Dalis kurso turinio nėra išversta į pasirinktą kalbą.",
       "completedChapters_one": "Baigtas {{count}} skyrius",
       "completedChapters_few": "Baigti {{count}} skyriai",
       "completedChapters_other": "Baigta {{count}} skyrių",

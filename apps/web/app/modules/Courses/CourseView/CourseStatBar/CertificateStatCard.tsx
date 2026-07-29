@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
+import type { TFunction } from "i18next";
+
 type CertificateStatCardProps = {
   hasCertificate: boolean;
   isAdminExperience: boolean;
@@ -12,7 +14,7 @@ type CertificateStatCardProps = {
 const getCertificateStatusLabel = (
   isAdminExperience: boolean,
   hasCertificate: boolean,
-  t: ReturnType<typeof useTranslation>["t"],
+  t: TFunction,
 ) => {
   if (!isAdminExperience) return t("modernCourseView.stats.uponCompletion");
   return hasCertificate

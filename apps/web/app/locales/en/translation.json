@@ -5061,7 +5061,7 @@
       "statistics": "Statistics",
       "edit": "Edit content",
       "missingTranslationsTitle": "Missing translations",
-      "missingTranslationsDescription": "Some chapter or lesson titles are shown in the default language.",
+      "missingTranslationsDescription": "Some course content is missing a translation in the selected language.",
       "completedChapters_one": "{{count}} completed chapter",
       "completedChapters_other": "{{count}} completed chapters",
       "lessons_one": "{{count}} lesson",

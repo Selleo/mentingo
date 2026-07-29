@@ -39,6 +39,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   const dirtyValuesRef = useRef<ScormRuntimeValues>({});
   const apiRef = useRef<Scorm12API | null>(null);
   const pendingSavesRef = useRef(0);
+  // Keep cache-only runtime updates from recreating the SCORM API and triggering finish twice.
   const initialRuntimeRef = useRef({
     attemptId: launch.attemptId,
     packageId: launch.packageId,

@@ -1215,18 +1215,6 @@ export class CourseService {
       .select({
         id: chapters.id,
         title: this.localizationService.getLocalizedSqlField(chapters.title, language),
-        hasMissingTranslation: sql<boolean>`
-          BTRIM(${this.localizationService.getFieldByLanguage(chapters.title, language)}) = ''
-          OR EXISTS (
-            SELECT 1
-            FROM ${lessons}
-            WHERE ${lessons.chapterId} = ${chapters.id}
-              AND BTRIM(${this.localizationService.getFieldByLanguage(
-                lessons.title,
-                language,
-              )}) = ''
-          )
-        `,
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -1339,21 +1327,14 @@ export class CourseService {
       language,
     );
 
-    const hasMissingCurriculumTranslations =
-      shouldUseExactLanguage &&
-      language !== course.baseLanguage &&
-      courseChapterList.some((chapter) => chapter.hasMissingTranslation);
-
-    const chaptersWithDuration = courseChapterList.map(
-      ({ hasMissingTranslation: _hasMissingTranslation, ...chapter }) => ({
-        ...chapter,
-        estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
-        lessons: chapter.lessons.map((lesson) => ({
-          ...lesson,
-          estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
-        })),
-      }),
-    );
+    const chaptersWithDuration = courseChapterList.map((chapter) => ({
+      ...chapter,
+      estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
+      lessons: chapter.lessons.map((lesson) => ({
+        ...lesson,
+        estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
+      })),
+    }));
 
     const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
       course.thumbnailS3Key,
@@ -1365,7 +1346,6 @@ export class CourseService {
       ...course,
       thumbnailUrl: thumbnailUrl ?? undefined,
       estimatedDurationSeconds: durationHierarchy.totalSeconds,
-      hasMissingCurriculumTranslations,
 
       trailerUrl,
       chapters: chaptersWithDuration,
@@ -2082,7 +2062,7 @@ export class CourseService {
       try {
         const uploadResult = await this.fileService.uploadFile(
           image,
-          "course",
+          ENTITY_TYPES.COURSE,
           currentUser.tenantId,
         );
         thumbnailS3Key = uploadResult.fileKey;

@@ -1,6 +1,7 @@
 import { Check, Clock, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { Button } from "~/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "~/components/ui/dialog";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
@@ -35,14 +36,16 @@ export default function CourseDescriptionModal({
             <DialogTitle className="font-gothic text-xl font-bold text-neutral-950 md:text-2xl">
               {t("modernCourseView.overview.aboutCourse")}
             </DialogTitle>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               aria-label={t("modernCourseView.overview.closeDetails")}
               onClick={onClose}
-              className="flex size-10 items-center justify-center rounded-full transition-colors hover:bg-neutral-100"
+              className="rounded-full"
             >
               <X className="size-5 text-neutral-800" />
-            </button>
+            </Button>
           </div>
 
           <div className="mb-6">
@@ -97,13 +100,14 @@ export default function CourseDescriptionModal({
           )}
 
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
+              variant="primary"
               onClick={onClose}
-              className="rounded-lg bg-primary-700 px-6 py-2 font-semibold text-white transition-colors hover:bg-primary-800"
+              className="px-6 font-semibold"
             >
               {t("modernCourseView.common.close")}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>
