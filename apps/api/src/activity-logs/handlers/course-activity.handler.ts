@@ -7,6 +7,7 @@ import {
   UserCourseFinishedEvent,
   CourseStartedEvent,
   CreateCourseEvent,
+  DeleteCourseEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
 } from "src/events";
@@ -23,7 +24,8 @@ type CourseEventType =
   | BulkUpdateCourseCategoryEvent
   | BulkUpdateCourseStatusEvent
   | UpdateCourseEvent
-  | EnrollCourseEvent;
+  | EnrollCourseEvent
+  | DeleteCourseEvent;
 
 const CourseActivityEvents = [
   CourseStartedEvent,
@@ -33,6 +35,7 @@ const CourseActivityEvents = [
   BulkUpdateCourseStatusEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
+  DeleteCourseEvent,
 ] as const;
 
 @Injectable()
@@ -59,6 +62,8 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
     if (event instanceof UpdateCourseEvent) return await this.handleUpdateCourse(event);
 
     if (event instanceof EnrollCourseEvent) return await this.handleEnrollCourse(event);
+
+    if (event instanceof DeleteCourseEvent) return await this.handleDeleteCourse(event);
   }
 
   private async handleCreateCourse(event: CreateCourseEvent) {
@@ -223,6 +228,30 @@ export class CourseActivityHandler implements IEventHandler<CourseEventType> {
         event.enrollmentData.userId !== event.enrollmentData.actor.userId
           ? { enrolledUserId: event.enrollmentData.userId }
           : null,
+    });
+  }
+
+  private async handleDeleteCourse(event: DeleteCourseEvent) {
+    const { actor, courses } = event.courseDeletionData;
+
+    if (!courses.length) return;
+
+    await this.activityLogsService.recordActivity({
+      actor,
+      tenantId: actor.tenantId,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+      resourceId: courses.length === 1 ? courses[0].courseId : null,
+      context:
+        courses.length === 1
+          ? { courseTitle: courses[0].courseTitle ?? "" }
+          : {
+              deletedCourseIds: JSON.stringify(courses.map(({ courseId }) => courseId)),
+              deletedCourseTitles: JSON.stringify(
+                courses.map(({ courseTitle }) => courseTitle ?? ""),
+              ),
+              deletedCount: String(courses.length),
+            },
     });
   }
 }

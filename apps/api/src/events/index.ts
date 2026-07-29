@@ -26,6 +26,7 @@ export * from "./course/update-course.event";
 export * from "./course/bulk-update-course-category.event";
 export * from "./course/bulk-update-course-status.event";
 export * from "./course/create-course.event";
+export * from "./course/delete-course.event";
 export * from "./course/course-due-date-reminder-email.event";
 export * from "./user/user-login.event";
 export * from "./user/support-mode-enter.event";
