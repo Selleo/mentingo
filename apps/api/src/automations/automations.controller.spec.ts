@@ -123,7 +123,7 @@ describe("AutomationsController", () => {
 
       expect(service.updateAutomation).toHaveBeenCalledWith("auto-1", input);
       expect(result).toBeInstanceOf(BaseResponse);
-      expect(result.data).toBe("auto-1");
+      expect(result.data).toEqual({ id: "auto-1" });
     });
   });
 
