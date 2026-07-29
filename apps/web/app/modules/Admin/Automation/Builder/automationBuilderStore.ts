@@ -8,7 +8,6 @@ interface BuilderActions {
   removeNode: (nodeId: string) => void;
   selectNode: (nodeId: string | null) => void;
   updateNodeConfig: (nodeId: string, config: Record<string, unknown>) => void;
-  /** Update node config without marking as user edit (e.g. simulation results) */
   updateNodeConfigSilent: (nodeId: string, config: Record<string, unknown>) => void;
   updateNodeType: (nodeId: string, type: TriggerType | ActionType, label: string) => void;
   updateNodePosition: (nodeId: string, position: { x: number; y: number }) => void;

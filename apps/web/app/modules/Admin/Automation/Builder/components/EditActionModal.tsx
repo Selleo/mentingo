@@ -25,12 +25,8 @@ import type { BuilderNode, TriggerType, PayloadVariable } from "../automationBui
 import type { AutomationEmailTemplateOption } from "../hooks/useEmailTemplatesForAutomation";
 import type { FC } from "react";
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-/** Prefix to distinguish custom (DB) template IDs from default ones in the select */
 const CUSTOM_TEMPLATE_PREFIX = "custom:";
 
-/** Sentinel value — email will be sent in the recipient's preferred language from their settings */
 const USER_DEFAULT_LANGUAGE = "user_default";
 
 type LanguageOption =
@@ -46,8 +42,6 @@ const LANGUAGE_OPTIONS: LanguageOption[] = [
   { value: "cs", label: "Čeština" },
   { value: "es", label: "Español" },
 ];
-
-// ─── Component ───────────────────────────────────────────────────────────────
 
 interface EditActionModalProps {
   open: boolean;
@@ -82,7 +76,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
     (node.config.placeholderValues as Record<string, string>) ?? {},
   );
 
-  // Get available trigger variables from the shared step definition
   const triggerVariables: PayloadVariable[] = useMemo(() => {
     if (!triggerType) return [];
     const def = getStepDefinition(triggerType);
@@ -91,8 +84,11 @@ export const EditActionModal: FC<EditActionModalProps> = ({
 
   const isDefaultTemplate = selectedTemplate === DEFAULT_EMAIL_TEMPLATE_ID;
   const isCustomTemplate = selectedTemplate.startsWith(CUSTOM_TEMPLATE_PREFIX);
+  const isSystemTemplate =
+    !isDefaultTemplate &&
+    !isCustomTemplate &&
+    EMAIL_TEMPLATES.some((t) => t.id === selectedTemplate);
 
-  // Get placeholders from selected template (default or custom)
   const templatePlaceholders = useMemo(() => {
     if (isCustomTemplate) {
       const customId = selectedTemplate.slice(CUSTOM_TEMPLATE_PREFIX.length);
@@ -122,7 +118,7 @@ export const EditActionModal: FC<EditActionModalProps> = ({
       language: selectedLanguage,
       placeholderValues,
     });
-    // Persist the updated step tree to the backend
+
     setTimeout(() => saveSteps(), 0);
     onClose();
   }, [
@@ -138,7 +134,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="h-[90vh] max-w-[90vw] flex flex-col gap-0 p-0" noCloseButton>
-        {/* Header */}
         <DialogHeader className="flex flex-row items-center justify-between border-b px-6 py-4">
           <div>
             <DialogTitle className="text-xl font-semibold">
@@ -153,16 +148,13 @@ export const EditActionModal: FC<EditActionModalProps> = ({
 
         <Separator />
 
-        {/* Content */}
         <div className="flex flex-1 overflow-hidden">
-          {/* Left side: Template & Language selection */}
           <div className="flex w-1/2 flex-col gap-6 overflow-y-auto border-r p-6">
             <div>
               <h3 className="mb-4 text-base font-semibold">
                 {t("automationBuilder.editAction.sendEmail")}
               </h3>
 
-              {/* Email Template Select */}
               <div className="space-y-2">
                 <Label>{t("automationBuilder.editAction.emailTemplate")}</Label>
                 <Select value={selectedTemplate} onValueChange={handleTemplateChange}>
@@ -170,7 +162,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
                     <SelectValue placeholder={t("automationBuilder.editAction.selectTemplate")} />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Default system templates */}
                     <SelectGroup>
                       <SelectLabel>
                         {t("automationBuilder.editAction.defaultTemplatesGroup")}
@@ -182,7 +173,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
                       ))}
                     </SelectGroup>
 
-                    {/* Custom templates from DB */}
                     <SelectGroup>
                       <SelectLabel>
                         {t("automationBuilder.editAction.customTemplatesGroup")}
@@ -211,7 +201,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
                 </Select>
               </div>
 
-              {/* Language Select */}
               <div className="mt-4 space-y-2">
                 <Label>{t("automationBuilder.editAction.language")}</Label>
                 <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
@@ -230,7 +219,6 @@ export const EditActionModal: FC<EditActionModalProps> = ({
             </div>
           </div>
 
-          {/* Right side: Placeholder mappings */}
           <div className="flex w-1/2 flex-col overflow-y-auto p-6">
             <h3 className="mb-4 text-base font-semibold">
               {t("automationBuilder.editAction.placeholders")}
@@ -242,64 +230,78 @@ export const EditActionModal: FC<EditActionModalProps> = ({
               </p>
             )}
 
-            {!isDefaultTemplate && !selectedTemplate && (
+            {isSystemTemplate && (
+              <p className="text-sm text-muted-foreground">
+                {t("automationBuilder.editAction.systemTemplateNoMapping")}
+              </p>
+            )}
+
+            {!isDefaultTemplate && !isSystemTemplate && !selectedTemplate && (
               <p className="text-sm text-muted-foreground">
                 {t("automationBuilder.editAction.selectTemplateFirst")}
               </p>
             )}
 
-            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                {t("automationBuilder.editAction.noPlaceholders")}
-              </p>
-            )}
-
-            {!isDefaultTemplate && selectedTemplate && templatePlaceholders.length > 0 && (
-              <div className="space-y-4">
+            {!isDefaultTemplate &&
+              !isSystemTemplate &&
+              selectedTemplate &&
+              templatePlaceholders.length === 0 && (
                 <p className="text-sm text-muted-foreground">
-                  {t("automationBuilder.editAction.placeholdersDescription")}
+                  {t("automationBuilder.editAction.noPlaceholders")}
                 </p>
+              )}
 
-                {templatePlaceholders.map((placeholder) => (
-                  <div key={placeholder} className="space-y-1.5">
-                    <Label className="flex items-center gap-2">
-                      <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
-                        {`{{${placeholder}}}`}
-                      </code>
-                    </Label>
-                    <Select
-                      value={placeholderValues[placeholder] ?? ""}
-                      onValueChange={(value) => handlePlaceholderChange(placeholder, value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t("automationBuilder.editAction.selectVariable")}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {triggerVariables.map((variable) => (
-                          <SelectItem key={variable.key} value={variable.key}>
-                            {t(variable.labelKey)} ({`{{${variable.key}}}`})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                ))}
-              </div>
-            )}
+            {!isDefaultTemplate &&
+              !isSystemTemplate &&
+              selectedTemplate &&
+              templatePlaceholders.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    {t("automationBuilder.editAction.placeholdersDescription")}
+                  </p>
 
-            {!isDefaultTemplate && selectedTemplate && triggerVariables.length === 0 && (
-              <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
-                <p className="text-xs text-amber-700">
-                  {t("automationBuilder.editAction.noTriggerVariables")}
-                </p>
-              </div>
-            )}
+                  {templatePlaceholders.map((placeholder) => (
+                    <div key={placeholder} className="space-y-1.5">
+                      <Label className="flex items-center gap-2">
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-xs font-mono">
+                          {`{{${placeholder}}}`}
+                        </code>
+                      </Label>
+                      <Select
+                        value={placeholderValues[placeholder] ?? ""}
+                        onValueChange={(value) => handlePlaceholderChange(placeholder, value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue
+                            placeholder={t("automationBuilder.editAction.selectVariable")}
+                          />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {triggerVariables.map((variable) => (
+                            <SelectItem key={variable.key} value={variable.key}>
+                              {t(variable.labelKey)} ({`{{${variable.key}}}`})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+            {!isDefaultTemplate &&
+              !isSystemTemplate &&
+              selectedTemplate &&
+              triggerVariables.length === 0 && (
+                <div className="mt-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+                  <p className="text-xs text-amber-700">
+                    {t("automationBuilder.editAction.noTriggerVariables")}
+                  </p>
+                </div>
+              )}
           </div>
         </div>
 
-        {/* Footer */}
         <Separator />
         <div className="flex items-center justify-end gap-3 px-6 py-4">
           <Button variant="outline" onClick={onClose}>

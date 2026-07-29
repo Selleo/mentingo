@@ -6,11 +6,6 @@ import { useSaveAutomationSteps } from "./useSaveAutomationSteps";
 
 import type { SimulationPanelState } from "../simulation.types";
 
-/**
- * Persists per-node simulation results to the store and backend when
- * simulation completes successfully. Extracted from useBuilderHeaderActions
- * to separate the side-effect orchestration from the UI logic.
- */
 export function useSimulationPersistence(
   simulationState: SimulationPanelState,
   automationId: string,
@@ -46,7 +41,6 @@ export function useSimulationPersistence(
       updateNodeConfigSilent(triggerNode.id, { simulationPassed: passed });
     }
 
-    // Let store updates settle, then persist
     setTimeout(() => {
       saveStepsRef.current({});
     }, 0);

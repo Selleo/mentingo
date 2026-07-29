@@ -6,11 +6,6 @@ import type { AutomationLogRecord } from "~/modules/Admin/Automation/Logs/automa
 
 export const AUTOMATION_LOGS_QUERY_KEY = "automationLogs";
 
-/**
- * Fetches all automation execution logs.
- *
- * Backend endpoint: GET /api/automation-logs
- */
 export function useAutomationLogs() {
   return useQuery({
     queryKey: [AUTOMATION_LOGS_QUERY_KEY],
@@ -23,11 +18,6 @@ export function useAutomationLogs() {
   });
 }
 
-/**
- * Fetches automation execution logs for a specific automation.
- *
- * Backend endpoint: GET /api/automation-logs/automation/:automationId
- */
 export function useAutomationLogsByAutomationId(automationId: string | undefined) {
   return useQuery({
     queryKey: [AUTOMATION_LOGS_QUERY_KEY, { automationId }],

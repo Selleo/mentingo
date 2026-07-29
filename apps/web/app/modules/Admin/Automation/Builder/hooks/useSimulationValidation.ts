@@ -1,5 +1,5 @@
 import { getStepDefinition } from "../automationBuilder.types";
-import { EMAIL_TEMPLATES } from "../emailTemplates.constants";
+import { DEFAULT_EMAIL_TEMPLATE_ID, EMAIL_TEMPLATES } from "../emailTemplates.constants";
 
 import type { BuilderNode } from "../automationBuilder.types";
 import type {
@@ -9,10 +9,16 @@ import type {
   SimulationResult,
 } from "../simulation.types";
 
-/**
- * Validates the builder node tree and produces node-level validation results.
- * Pure logic — no API calls, no side effects.
- */
+const CUSTOM_TEMPLATE_PREFIX = "custom:";
+
+function isSystemTemplateId(templateId: string): boolean {
+  return (
+    templateId !== DEFAULT_EMAIL_TEMPLATE_ID &&
+    !templateId.startsWith(CUSTOM_TEMPLATE_PREFIX) &&
+    EMAIL_TEMPLATES.some((t) => t.id === templateId)
+  );
+}
+
 export function validateNodes(
   nodes: BuilderNode[],
   t: (key: string, options?: Record<string, string>) => string,
@@ -29,7 +35,6 @@ export function validateNodes(
 
   const nodeResults: NodeValidationResult[] = [];
 
-  // Validate trigger
   if (triggerNode) {
     const triggerErrors: NodeValidationResult["errors"] = [];
 
@@ -66,7 +71,6 @@ export function validateNodes(
     });
   }
 
-  // Validate action nodes
   for (const action of actionNodes) {
     const actionErrors: NodeValidationResult["errors"] = [];
 
@@ -94,7 +98,7 @@ export function validateNodes(
       ? EMAIL_TEMPLATES.find((tmpl) => tmpl.id === selectedTemplateId)
       : undefined;
 
-    if (templateDef) {
+    if (templateDef && selectedTemplateId && !isSystemTemplateId(selectedTemplateId)) {
       const unmappedPlaceholders = templateDef.placeholders.filter((p) => !placeholderValues[p]);
 
       for (const placeholder of unmappedPlaceholders) {
@@ -137,7 +141,6 @@ export function validateNodes(
 
   const overallStatus = nodeResults.every((nr) => nr.status === "valid") ? "success" : "failed";
 
-  // Event data from trigger definition
   const triggerDef = triggerNode ? getStepDefinition(triggerNode.type) : undefined;
   const eventData: EventDataField[] = (triggerDef?.providedVariables ?? []).map(
     (v: { key: string; labelKey: string; dataType?: "string" | "number" | "date" | "url" }) => ({
@@ -147,7 +150,6 @@ export function validateNodes(
     }),
   );
 
-  // Placeholder mappings per action node
   const placeholderMappings: SimulationResult["placeholderMappings"] = {};
   for (const action of actionNodes) {
     const values = (action.config.placeholderValues as Record<string, string>) ?? {};
@@ -166,9 +168,6 @@ export function validateNodes(
   return { nodeResults, overallStatus, eventData, placeholderMappings, sampleValues };
 }
 
-// ─── Sample data for template variable substitution ──────────────────────────
-
-/** URL values that don't need translation */
 const SAMPLE_URLS: Record<string, string> = {
   course_url: "https://app.mentingo.com/courses/abc123",
   invite_link: "https://app.mentingo.com/invite/xyz",
@@ -188,7 +187,6 @@ const SAMPLE_URLS: Record<string, string> = {
   progressLink: "https://app.mentingo.com/progress/abc123",
 };
 
-/** Date/numeric values that don't need translation */
 const SAMPLE_DATES: Record<string, string> = {
   due_date: "2025-08-15",
   login_date: "2025-07-22",

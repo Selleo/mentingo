@@ -9,6 +9,8 @@ import { BaseResponse, UUIDType } from "src/common";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 
+import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
+import { RunSimulationBody } from "./automation-runner/automation-simulation.types";
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
 import { AutomationsService } from "./automations.service";
 
@@ -20,6 +22,7 @@ export class AutomationsController {
   constructor(
     private readonly automationsService: AutomationsService,
     private readonly systemTemplatePreviewService: AutomationSystemTemplatePreviewService,
+    private readonly simulationService: AutomationSimulationService,
   ) {}
 
   @Get()
@@ -40,6 +43,12 @@ export class AutomationsController {
     );
 
     return new BaseResponse(preview ?? { subject: "", html: "" });
+  }
+
+  @Post("simulate")
+  async runSimulation(@Body() body: RunSimulationBody) {
+    const result = await this.simulationService.runSimulation(body);
+    return new BaseResponse(result);
   }
 
   @Get(":id")

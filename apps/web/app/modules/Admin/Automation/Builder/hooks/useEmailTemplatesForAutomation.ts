@@ -6,19 +6,12 @@ import { ApiClient } from "~/api/api-client";
 import type { EmailTemplateBlocks, EmailTemplateStrings } from "@repo/shared";
 import type { ListTemplatesResponse } from "~/api/generated-api";
 
-// ─── Variable extraction from template blocks ────────────────────────────────
-
 const VARIABLE_REGEX = /\{\{([^{}]+)\}\}/g;
 
-/**
- * Recursively collects all `{{variableName}}` placeholders from the template
- * blocks (body) and strings (translations). Returns a deduplicated sorted list.
- */
 function extractVariablesFromBlocks(blocks: EmailTemplateBlocks): string[] {
   const variables = new Set<string>();
 
   const walk = (node: EmailTemplateBlocks) => {
-    // Check text content
     if (typeof node.text === "string") {
       VARIABLE_REGEX.lastIndex = 0;
       let match: RegExpExecArray | null;
@@ -27,7 +20,6 @@ function extractVariablesFromBlocks(blocks: EmailTemplateBlocks): string[] {
       }
     }
 
-    // Check relevant attrs (button text, url, image src/href)
     if (node.attrs) {
       for (const value of Object.values(node.attrs)) {
         if (typeof value === "string") {
@@ -40,7 +32,6 @@ function extractVariablesFromBlocks(blocks: EmailTemplateBlocks): string[] {
       }
     }
 
-    // Recurse into children
     if (node.content) {
       for (const child of node.content) {
         walk(child as EmailTemplateBlocks);
@@ -84,8 +75,6 @@ function extractVariablesFromSubject(subject: Record<string, string | undefined>
   return [...variables].sort();
 }
 
-// ─── Public types ────────────────────────────────────────────────────────────
-
 export interface AutomationEmailTemplateOption {
   id: string;
   name: string;
@@ -93,20 +82,6 @@ export interface AutomationEmailTemplateOption {
   isCustom: true;
 }
 
-// ─── Hook ────────────────────────────────────────────────────────────────────
-
-/**
- * Fetches published email templates from the database for use in the
- * automation builder "send email" action template selector.
- *
- * Returns templates with their extracted placeholders (variables).
- */
-/**
- * Fetches published email templates from the database for use in the
- * automation builder "send email" action template selector.
- *
- * Returns templates with their extracted placeholders (variables).
- */
 export function useEmailTemplatesForAutomation(enabled = true) {
   const { data, isLoading } = useQuery({
     queryKey: ["email-templates-for-automation", { status: "published" }],

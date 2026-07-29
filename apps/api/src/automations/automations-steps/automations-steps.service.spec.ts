@@ -280,7 +280,6 @@ describe("AutomationStepsService", () => {
     });
 
     it("rejects disconnected step tree", async () => {
-      // root → action-1, but action-2 references non-existent parent
       const steps: AutomationStepBulkUpdate[] = [
         {
           id: "root" as UUIDType,
@@ -319,16 +318,12 @@ describe("AutomationStepsService", () => {
         { id: "grandchild", parentId: "child-1", automationId, type: "action", typeContext: {} },
       ];
 
-      // getAutomationStepById for the initial step
       repository.getAutomationStepById.mockResolvedValueOnce(steps[0] as any);
-      // getAllAutomationStepsByAutomationId for building tree
       repository.getAllAutomationStepsByAutomationId.mockResolvedValue(steps as any);
-      // deleteAutomationStep calls
       repository.deleteAutomationStep.mockResolvedValue("id" as UUIDType);
 
       await service.deleteAutomationStep("root" as UUIDType);
 
-      // Should delete grandchild, child-1, and root (3 calls)
       expect(repository.deleteAutomationStep).toHaveBeenCalledTimes(3);
     });
   });

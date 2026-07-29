@@ -1,6 +1,3 @@
-// ─── Email template definitions with their placeholders ──────────────────────
-// Shared between EditActionModal and simulation logic.
-
 export interface EmailTemplateDefinition {
   id: string;
   labelKey: string;

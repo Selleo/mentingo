@@ -23,9 +23,6 @@ import {
 
 import type { ReactNode } from "react";
 
-/**
- * Maps icon slug (from step definition `icon` field) to its React element.
- */
 const ICON_SLUG_MAP: Record<string, ReactNode> = {
   "user-plus": <UserPlus className="size-4" />,
   upload: <Upload className="size-4" />,
@@ -48,15 +45,8 @@ const ICON_SLUG_MAP: Record<string, ReactNode> = {
   mail: <Mail className="size-4" />,
 };
 
-/**
- * Unified icon map keyed by BOTH icon slug (for sidebar/picker)
- * and node type (for canvas nodes). Derived from the shared STEP_DEFINITIONS
- * so new node types are automatically included.
- */
 export const BLOCK_ICON_MAP: Record<string, ReactNode> = {
-  // Base icon slug entries
   ...ICON_SLUG_MAP,
 
-  // Derive node-type entries from shared definitions
   ...Object.fromEntries(STEP_DEFINITIONS.map((def) => [def.type, ICON_SLUG_MAP[def.icon]])),
 };

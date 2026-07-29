@@ -5067,6 +5067,7 @@
       "selectVariable": "Wybierz zmienną triggera...",
       "noTriggerVariables": "Brak triggera podłączonego do tej akcji. Najpierw dodaj trigger, aby mapować zmienne.",
       "defaultEmailNoMapping": "Domyślny szablon email nie wymaga mapowania zmiennych.",
+      "systemTemplateNoMapping": "Ten szablon systemowy automatycznie używa danych z triggera. Ręczne mapowanie nie jest wymagane.",
       "defaultTemplatesGroup": "Szablony systemowe",
       "customTemplatesGroup": "Szablony niestandardowe",
       "noCustomTemplates": "Brak opublikowanych szablonów niestandardowych.",

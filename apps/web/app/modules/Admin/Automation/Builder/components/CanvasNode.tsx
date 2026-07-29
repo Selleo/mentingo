@@ -26,8 +26,6 @@ import { BLOCK_ICON_MAP } from "./automationIcons";
 import type { AutomationStepDefinition, BuilderNode } from "../automationBuilder.types";
 import type { FC } from "react";
 
-// ─── Connector primitives ────────────────────────────────────────────────────
-
 const VLine: FC<{ height: number }> = ({ height }) => (
   <div
     className="mx-auto shrink-0"
@@ -48,8 +46,6 @@ const DownArrow: FC = () => (
   />
 );
 
-// ─── Multi-child horizontal rail segment ─────────────────────────────────────
-
 const RailSegment: FC<{ isFirst: boolean; isLast: boolean }> = ({ isFirst, isLast }) => (
   <div className="relative flex w-full justify-center" style={{ height: 2 }}>
     {!isFirst && (
@@ -66,8 +62,6 @@ const RailSegment: FC<{ isFirst: boolean; isLast: boolean }> = ({ isFirst, isLas
     )}
   </div>
 );
-
-// ─── Main component ──────────────────────────────────────────────────────────
 
 interface CanvasNodeProps {
   node: BuilderNode;

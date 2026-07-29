@@ -27,10 +27,6 @@ import type { SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { EmailSubjectKey } from "src/common/emails/translations";
 
-/**
- * System template IDs that are handled by this renderer.
- * Anything NOT in this set is treated as a custom (DB) template.
- */
 export const SYSTEM_TEMPLATE_IDS = new Set([
   "user_invite",
   "welcome",
@@ -53,22 +49,12 @@ export function isSystemTemplateId(templateId: string): boolean {
   return SYSTEM_TEMPLATE_IDS.has(templateId);
 }
 
-/**
- * Result of rendering a system email template with resolved runtime data.
- */
 export interface RenderedSystemEmail {
   subject: string;
   text: string;
   html: string;
 }
 
-/**
- * Renders system (hardcoded) email templates from `@repo/email-templates`
- * using actual runtime data from the automation data resolver.
- *
- * This service maps the flat `variables` record (provided by the data resolver)
- * to the typed props each system template requires.
- */
 @Injectable()
 export class AutomationSystemTemplateRendererService {
   private readonly logger = new Logger(AutomationSystemTemplateRendererService.name);
@@ -78,15 +64,6 @@ export class AutomationSystemTemplateRendererService {
     @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
   ) {}
 
-  /**
-   * Renders a system email template with actual runtime data.
-   *
-   * @param templateId - System template identifier (e.g. "user_invite")
-   * @param variables - Flat key→value map from data resolver
-   * @param tenantId - Tenant for branding resolution
-   * @param userId - Optional user for language/branding resolution
-   * @param language - Explicit language override
-   */
   async render(
     templateId: string,
     variables: Record<string, string>,
@@ -255,10 +232,6 @@ export class AutomationSystemTemplateRendererService {
     }
   }
 
-  /**
-   * Maps system template IDs to their `getEmailSubject` translation keys
-   * and builds the replacement map for dynamic tokens (e.g. `{{courseName}}`).
-   */
   private resolveSubject(
     templateId: string,
     vars: Record<string, string>,

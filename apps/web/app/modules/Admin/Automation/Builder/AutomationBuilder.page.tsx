@@ -54,12 +54,10 @@ export default function AutomationBuilderPage() {
   const setActive = useBuilderStore((s) => s.setActive);
   const setSimulationPassed = useBuilderStore((s) => s.setSimulationPassed);
 
-  // Load automation data from API when editing existing automation
   const { data: automation } = useAutomationById(automationId);
   const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    // Reset loaded flag when automation ID changes (navigating to a different automation)
     hasLoadedRef.current = false;
   }, [automationId]);
 
@@ -69,7 +67,6 @@ export default function AutomationBuilderPage() {
       reset();
       setAutomationName(automation.name);
 
-      // Load nodes into store without marking dirty
       const builderNodes: BuilderNode[] = automation.nodes.map((node) => ({
         id: node.id,
         kind: node.kind as BuilderNode["kind"],
@@ -82,11 +79,9 @@ export default function AutomationBuilderPage() {
       }));
       loadNodes(builderNodes);
 
-      // Read simulationPassed from trigger node's config
       const triggerNode = automation.nodes.find((n) => n.kind === "trigger");
       const savedSimulationPassed = triggerNode?.config?.simulationPassed === true;
 
-      // If any node has invalid simulation status, override both flags
       const hasInvalidNodes = builderNodes.some((n) => n.config?.simulationStatus === "invalid");
 
       if (hasInvalidNodes) {

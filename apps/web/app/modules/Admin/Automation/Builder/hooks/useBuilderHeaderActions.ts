@@ -39,10 +39,7 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   const { simulationState, isSimulating, panelOpen, runSimulation, closePanel, retry } =
     useSimulation();
 
-  // Persist simulation results to node configs and save to backend
   useSimulationPersistence(simulationState, automationId);
-
-  // ─── Save ──────────────────────────────────────────────────────────────────
 
   const handleSave = useCallback(() => {
     if (automationId === "new") return;
@@ -53,8 +50,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
 
     saveSteps({ name: { [lang]: name }, status });
   }, [automationId, i18n.language, saveSteps]);
-
-  // ─── Navigation ────────────────────────────────────────────────────────────
 
   const handleBack = useCallback(() => {
     if (useBuilderStore.getState().isDirty) {
@@ -75,8 +70,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     navigate("/admin/automation");
   }, [navigate]);
 
-  // ─── Delete ────────────────────────────────────────────────────────────────
-
   const handleDeleteRequest = useCallback(() => {
     if (automationId === "new") return;
     setShowDeleteDialog(true);
@@ -91,8 +84,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     });
   }, [automationId, deleteAutomation, navigate]);
 
-  // ─── Simulation ────────────────────────────────────────────────────────────
-
   const handleSimulate = useCallback(() => {
     if (automationId === "new") return;
     const currentNodes = useBuilderStore.getState().nodes;
@@ -103,8 +94,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     const currentNodes = useBuilderStore.getState().nodes;
     retry(currentNodes);
   }, [retry]);
-
-  // ─── Toggle active/draft ───────────────────────────────────────────────────
 
   const simulationJustPassed =
     simulationState.type === "success" && simulationState.result.overallStatus === "success";
@@ -128,8 +117,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     [automationId, canActivate, hasInvalidNodes, setActive, updateAutomation],
   );
 
-  // ─── Helpers ───────────────────────────────────────────────────────────────
-
   const getToggleTooltip = useCallback((): string | null => {
     if (isDirty) return t("automationBuilder.header.unsavedChangesTooltip");
     if (hasInvalidNodes) return t("automationBuilder.header.invalidNodesTooltip");
@@ -146,7 +133,6 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
   }, [lastSavedAt, t]);
 
   return {
-    // State
     automationName,
     isActive,
     isDirty,
@@ -159,11 +145,9 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     panelOpen,
     nodes,
 
-    // State setters
     setShowLeaveDialog,
     setShowDeleteDialog,
 
-    // Handlers
     handleBack,
     handleSave,
     handleSaveAndLeave,
@@ -175,11 +159,9 @@ export function useBuilderHeaderActions({ automationId }: UseBuilderHeaderAction
     handleToggleActive,
     closePanel,
 
-    // Helpers
     getToggleTooltip,
     formatSavedTime,
 
-    // Mutation states
     isSavePending: updateAutomation.isPending,
     isDeletePending: deleteAutomation.isPending,
   };

@@ -8,11 +8,6 @@ import type { AutomationListItem, AutomationRecord } from "./automation.types";
 
 export const AUTOMATIONS_QUERY_KEY = "automations";
 
-/**
- * Fetches the list of automations for the admin panel.
- *
- * Backend endpoint: GET /api/automations (uses tenantId from auth token via @CurrentUser)
- */
 export function useAutomations() {
   return useQuery({
     queryKey: [AUTOMATIONS_QUERY_KEY],

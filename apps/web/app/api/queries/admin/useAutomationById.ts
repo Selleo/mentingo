@@ -10,13 +10,11 @@ import type { AutomationDetail, AutomationRecord, AutomationStepRaw } from "./au
 const useAutomationByIdQuery = (automationId: string) => ({
   queryKey: [AUTOMATIONS_QUERY_KEY, { automationId }],
   queryFn: async (): Promise<AutomationDetail> => {
-    // Fetch automation record
     const { data: automationRes } = await ApiClient.instance.get<{ data: AutomationRecord }>(
       `/api/automations/${automationId}`,
     );
     const record = automationRes.data;
 
-    // Fetch steps for this automation
     const { data: stepsRes } = await ApiClient.instance.get<{ data: AutomationStepRaw[] }>(
       `/api/automation-steps/automation/${automationId}`,
     );
@@ -35,13 +33,6 @@ const useAutomationByIdQuery = (automationId: string) => ({
   enabled: !!automationId && automationId !== "new",
 });
 
-/**
- * Fetches a single automation with its full step tree.
- *
- * Combines:
- *   GET /api/automations/:id  (automation metadata)
- *   GET /api/automation-steps/automation/:automationId  (step tree)
- */
 export function useAutomationById(automationId: string) {
   return useQuery(useAutomationByIdQuery(automationId));
 }

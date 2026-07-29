@@ -47,7 +47,6 @@ export const EditNodePanel: FC = () => {
 
   const [editActionNode, setEditActionNode] = useState<BuilderNode | null>(null);
 
-  // Fetch custom email templates - always called (stable hook count)
   const { templates: customTemplates, isLoading: isLoadingCustomTemplates } =
     useEmailTemplatesForAutomation();
 

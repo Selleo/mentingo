@@ -4968,6 +4968,7 @@
       "selectVariable": "Selecciona variable del disparador...",
       "noTriggerVariables": "No hay disparador conectado a esta acción. Añade un disparador primero para mapear variables.",
       "defaultEmailNoMapping": "La plantilla de correo predeterminada no requiere mapeo de variables.",
+      "systemTemplateNoMapping": "Esta plantilla del sistema utiliza automáticamente los datos del disparador. No se requiere mapeo manual.",
       "defaultTemplatesGroup": "Plantillas del sistema",
       "customTemplatesGroup": "Plantillas personalizadas",
       "noCustomTemplates": "No hay plantillas personalizadas publicadas disponibles.",

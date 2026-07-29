@@ -108,8 +108,6 @@ export class AutomationDataResolverService {
     return [];
   }
 
-  // ─── Individual resolvers ──────────────────────────────────────────
-
   private async resolveUserInvite(event: UserInviteEvent): Promise<AutomationResolvedRecipient[]> {
     const { email, userId, tenantId, token, invitedByUserName } = event.userInvite;
     const user = await this.getUserSafe(userId);
@@ -612,8 +610,6 @@ export class AutomationDataResolverService {
 
     return results;
   }
-
-  // ─── Helpers ───────────────────────────────────────────────────────
 
   private async getUserSafe(userId: UUIDType) {
     try {

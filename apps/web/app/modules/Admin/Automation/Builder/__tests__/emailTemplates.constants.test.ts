@@ -41,11 +41,4 @@ describe("emailTemplates.constants", () => {
     expect(template.placeholders).toContain("invitedByUserName");
     expect(template.placeholders).toContain("createPasswordLink");
   });
-
-  // TODO: Validate actual email template rendering once email templates are finalized
-  // The following templates are defined but their HTML rendering is not yet complete:
-  // - user_invite, welcome, user_first_login, user_assigned_to_course,
-  //   user_short_inactivity, user_long_inactivity, user_finished_chapter,
-  //   user_finished_course, create_password_reminder, certificate_expiration_warning,
-  //   certificate_expired, announcement, course_due_date_reminder, new_user, finished_course
 });
