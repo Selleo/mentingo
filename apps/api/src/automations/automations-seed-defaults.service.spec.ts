@@ -231,7 +231,7 @@ describe("AutomationsSeedDefaultsService", () => {
       );
 
       const firstAction = actionCalls[0][0];
-      expect(firstAction.typeContext.config).toEqual({
+      expect((firstAction.typeContext as Record<string, unknown>).config).toEqual({
         emailTemplate: "user_invite",
         language: "user_default",
         placeholderValues: {
