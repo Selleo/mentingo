@@ -12,7 +12,12 @@ import { isEqual } from "lodash";
 
 import { DatabasePg } from "src/common";
 import { getSortOptions } from "src/common/helpers/getSortOptions";
-import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import {
+  buildJsonbField,
+  deleteJsonbField,
+  type JsonbFieldUpdate,
+  setJsonbField,
+} from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { hasPermission } from "src/common/permissions/permission.utils";
 import { CreateCategoryEvent, DeleteCategoryEvent, UpdateCategoryEvent } from "src/events";
@@ -178,7 +183,7 @@ export class CategoryService {
 
     const previousSnapshot = await this.getCategorySnapshot(id, language);
 
-    const updateData: { title?: ReturnType<typeof setJsonbField> } = {};
+    const updateData: { title?: JsonbFieldUpdate } = {};
 
     if (updateCategoryBody.title !== undefined) {
       const titleUpdate = setJsonbField(categories.title, language, updateCategoryBody.title);
