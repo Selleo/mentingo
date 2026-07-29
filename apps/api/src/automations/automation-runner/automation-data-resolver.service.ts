@@ -544,7 +544,7 @@ export class AutomationDataResolverService {
   private async resolveCourseChatUserMentioned(
     event: CourseChatUserMentionedEvent,
   ): Promise<AutomationResolvedRecipient[]> {
-    const { tenantId, courseId, actorUserId, messageId, mentionedUserIds } =
+    const { tenantId, courseId, currentUser, messageId, mentionedUserIds } =
       event.courseChatUserMentionedData;
 
     return this.tenantRunner.runWithTenant(tenantId, async () => {
@@ -559,7 +559,7 @@ export class AutomationDataResolverService {
       const results: AutomationResolvedRecipient[] = [];
 
       for (const mentionedUserId of mentionedUserIds) {
-        if (mentionedUserId === actorUserId) continue;
+        if (mentionedUserId === currentUser.userId) continue;
         const user = await this.getUserSafe(mentionedUserId);
         if (!user) continue;
 
