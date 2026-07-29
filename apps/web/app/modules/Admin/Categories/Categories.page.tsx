@@ -68,8 +68,7 @@ const Categories = () => {
 
   const [searchParams, setSearchParams] = useState<{
     title?: string;
-    archived?: boolean;
-  }>({ archived: false });
+  }>({});
 
   const { data } = useCategoriesSuspense({ ...searchParams, language: appLanguage });
 
@@ -86,13 +85,6 @@ const Categories = () => {
       type: "text",
       placeholder: t("adminCategoriesView.filters.placeholder.title"),
       testId: CATEGORIES_PAGE_HANDLES.SEARCH_INPUT,
-    },
-    {
-      name: "archived",
-      type: "status",
-      testId: CATEGORIES_PAGE_HANDLES.STATUS_FILTER,
-      optionTestId: (option) =>
-        CATEGORIES_PAGE_HANDLES.statusFilterOption(option.value as "all" | "active" | "archived"),
     },
   ];
 

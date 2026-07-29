@@ -1024,7 +1024,6 @@ export class CourseService {
       const queryDB = trx
         .select({
           ...getTableColumns(categories),
-          archived: sql<boolean | null>`NULL`,
           createdAt: sql<string | null>`NULL`,
           title: this.localizationService.getLocalizedSqlField(
             categories.title,

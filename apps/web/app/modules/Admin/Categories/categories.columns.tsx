@@ -1,7 +1,6 @@
 import { format } from "date-fns";
 
 import SortButton from "~/components/TableSortButton/TableSortButton";
-import { Badge } from "~/components/ui/badge";
 import { Checkbox } from "~/components/ui/checkbox";
 import { formatHtmlString } from "~/lib/formatters/formatHtmlString";
 import { handleRowSelectionRange } from "~/utils/tableRangeSelection";
@@ -67,19 +66,6 @@ export const getCategoriesColumns = ({
     cell: ({ row }) => (
       <div className="max-w-md truncate">{formatHtmlString(row.original.title)}</div>
     ),
-  },
-  {
-    accessorKey: "archived",
-    header: t("adminCategoriesView.field.status"),
-    cell: ({ row }) => {
-      const isArchived = row.original.archived;
-
-      return (
-        <Badge variant={isArchived ? "outline" : "secondary"} className="w-max">
-          {isArchived ? t("common.other.archived") : t("common.other.active")}
-        </Badge>
-      );
-    },
   },
   {
     accessorKey: "createdAt",

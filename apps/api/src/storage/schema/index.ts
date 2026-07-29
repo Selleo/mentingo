@@ -225,7 +225,6 @@ export const categories = pgTable(
     title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
     baseLanguage,
     availableLocales,
-    archived,
     tenantId,
   },
   (table) => ({

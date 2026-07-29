@@ -68,9 +68,6 @@ export class CategoryService {
       const queryDB = tx
         .select({
           ...getTableColumns(categories),
-          archived: sql<boolean | null>`
-            CASE WHEN ${canManageCategories} = TRUE THEN ${categories.archived} ELSE NULL END
-          `,
           createdAt: sql<string | null>`
             CASE WHEN ${canManageCategories} = TRUE THEN ${categories.createdAt} ELSE NULL END
           `,
@@ -181,14 +178,7 @@ export class CategoryService {
 
     const previousSnapshot = await this.getCategorySnapshot(id, language);
 
-    const updateData: {
-      archived?: boolean;
-      title?: ReturnType<typeof setJsonbField>;
-    } = {};
-
-    if (updateCategoryBody.archived !== undefined) {
-      updateData.archived = updateCategoryBody.archived;
-    }
+    const updateData: { title?: ReturnType<typeof setJsonbField> } = {};
 
     if (updateCategoryBody.title !== undefined) {
       const titleUpdate = setJsonbField(categories.title, language, updateCategoryBody.title);
@@ -310,10 +300,10 @@ export class CategoryService {
 
   private getColumnToSortBy(
     sort: CategorySortField,
-    isAdmin: boolean,
+    canManageCategories: boolean,
     language?: SupportedLanguages,
   ) {
-    if (!isAdmin) return this.getLocalizedCategoryTitle(language);
+    if (!canManageCategories) return this.getLocalizedCategoryTitle(language);
 
     switch (sort) {
       case CategorySortFields.creationDate:
@@ -415,12 +405,11 @@ export class CategoryService {
   }
 
   private async getCategorySnapshot(categoryId: UUIDType, language?: SupportedLanguages) {
-    const { id, title, archived } = await this.getCategoryById(categoryId, language);
+    const { id, title } = await this.getCategoryById(categoryId, language);
 
     return {
       id,
       title,
-      archived,
     };
   }
 
@@ -431,10 +420,6 @@ export class CategoryService {
       conditions.push(
         sql`${this.getLocalizedCategoryTitle(language)} ilike ${`%${filters.title}%`}`,
       );
-    }
-
-    if (filters.archived) {
-      conditions.push(eq(categories.archived, filters.archived === "true"));
     }
 
     return conditions;
