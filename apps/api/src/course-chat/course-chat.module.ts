@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 
+import { AnnouncementsModule } from "src/announcements/announcements.module";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import { CourseChatPresenceStore } from "src/course-chat/course-chat-presence.store";
 import { CourseChatController } from "src/course-chat/course-chat.controller";
@@ -11,7 +12,7 @@ import { LocalizationModule } from "src/localization/localization.module";
 import { SettingsModule } from "src/settings/settings.module";
 
 @Module({
-  imports: [FileModule, LocalizationModule, SettingsModule],
+  imports: [FileModule, LocalizationModule, SettingsModule, AnnouncementsModule],
   controllers: [CourseChatController],
   providers: [
     CourseChatService,

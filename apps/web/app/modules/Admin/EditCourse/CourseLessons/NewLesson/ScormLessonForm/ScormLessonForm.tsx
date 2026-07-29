@@ -190,10 +190,10 @@ export const ScormLessonForm = ({
               <FormItem>
                 <div className="flex items-center gap-2">
                   <Label className="body-base-md">
-                    {!lessonToEdit ? <span className="text-red-500">*</span> : null}{" "}
+                    {!lessonToEdit && <span className="text-red-500">*</span>}{" "}
                     {t("adminScorm.lesson.packageSection")}
                   </Label>
-                  {lessonToEdit ? (
+                  {lessonToEdit && (
                     <TooltipProvider delayDuration={0}>
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -216,7 +216,7 @@ export const ScormLessonForm = ({
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                  ) : null}
+                  )}
                 </div>
                 <FormControl>
                   {currentLanguageHasPackage ? (

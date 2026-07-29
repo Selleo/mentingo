@@ -44,6 +44,7 @@ import { questionAnswerOptions, questions } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { isRichTextEmpty } from "src/utils/isRichTextEmpty";
 
+import { AiJudgeConfigurationGraphService } from "../ai-judge-configuration/ai-judge-configuration-graph.service";
 import { LESSON_TYPES } from "../lesson.type";
 import { AdminLessonRepository } from "../repositories/adminLesson.repository";
 import { LessonRepository } from "../repositories/lesson.repository";
@@ -92,6 +93,7 @@ export class AdminLessonService {
     private readonly resourceLibraryService: ResourceLibraryService,
     private readonly liveTrainingService: LiveTrainingService,
     private readonly searchIndexService: SearchIndexService,
+    private readonly aiJudgeConfigurationGraphService: AiJudgeConfigurationGraphService,
     @Inject("CACHE_MANAGER") private readonly cache: CacheManagerStore,
   ) {}
 
@@ -454,7 +456,7 @@ export class AdminLessonService {
       });
     }
 
-    if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
+    if (isRichTextEmpty(data.aiMentorInstructions))
       throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
     if (!data.name?.trim().length) data.name = "AI Mentor";
@@ -574,7 +576,7 @@ export class AdminLessonService {
 
     if (!lesson) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
 
-    if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
+    if (isRichTextEmpty(data.aiMentorInstructions))
       throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
     const previousLessonSnapshot = await this.buildLessonActivitySnapshot(id, data.language);
@@ -837,11 +839,10 @@ export class AdminLessonService {
         trx,
       );
 
-      await this.adminLessonRepository.createAiMentorLessonData(
+      const [aiMentorLesson] = await this.adminLessonRepository.createAiMentorLessonData(
         {
           lessonId: lesson.id,
           aiMentorInstructions: data.aiMentorInstructions,
-          completionConditions: data.completionConditions,
           type: data.type,
           name: data?.name,
           voiceMode: data.voiceMode ?? AI_MENTOR_VOICE_MODE.PRESET,
@@ -849,6 +850,13 @@ export class AdminLessonService {
           customTtsReference: data.customTtsReference,
           language,
         },
+        trx,
+      );
+
+      await this.aiJudgeConfigurationGraphService.createConfigurationInTransaction(
+        aiMentorLesson.id,
+        data.aiJudgeConfiguration,
+        language,
         trx,
       );
 
@@ -864,7 +872,7 @@ export class AdminLessonService {
     userId: UUIDType,
   ) {
     return await this.db.transaction(async (trx) => {
-      const { type: _type, aiMentorInstructions, completionConditions, name, ...lessonData } = data;
+      const { aiMentorInstructions, type: _type, name, ...lessonData } = data;
 
       const { availableLocales } = await this.localizationService.getBaseLanguage(
         ENTITY_TYPE.LESSON,
@@ -885,7 +893,7 @@ export class AdminLessonService {
         trx,
       );
 
-      if (isRichTextEmpty(data.aiMentorInstructions) || isRichTextEmpty(data.completionConditions))
+      if (isRichTextEmpty(data.aiMentorInstructions))
         throw new BadRequestException("adminCourseView.errors.lesson.aiMentorRequiredContent");
 
       if (data.name?.trim().length === 0) {
@@ -903,7 +911,6 @@ export class AdminLessonService {
         id,
         {
           aiMentorInstructions,
-          completionConditions,
           type: data.type,
           name,
           voiceMode,
@@ -1586,7 +1593,6 @@ export class AdminLessonService {
         lesson.type === LESSON_TYPES.AI_MENTOR
           ? {
               aiMentorInstructions: lesson.aiMentorInstructions,
-              completionConditions: lesson.aiMentorCompletionConditions,
               name: lesson.aiMentorName,
               avatarReference: lesson.aiMentorAvatarReference,
               type: lesson.aiMentorType,

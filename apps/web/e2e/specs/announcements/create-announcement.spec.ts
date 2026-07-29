@@ -31,12 +31,23 @@ test("admin-created announcement appears on the notifications page", async ({
 
   await workspace.page.goto(`${workspace.origin}/notifications`);
   await expect(workspace.page.getByTestId(NOTIFICATIONS_HANDLES.PAGE)).toBeVisible();
+  await expect(workspace.page.getByTestId(NOTIFICATIONS_HANDLES.TAB_ALL)).toBeVisible();
+  await expect(
+    workspace.page.getByTestId(NOTIFICATIONS_HANDLES.TAB_ADMIN_ANNOUNCEMENTS),
+  ).toBeVisible();
+  await expect(workspace.page.getByTestId(NOTIFICATIONS_HANDLES.TAB_SYSTEM)).toBeVisible();
 
   const createdCard = workspace.page.getByTestId(
     NOTIFICATIONS_HANDLES.card(createdAnnouncement.id),
   );
   await expect(createdCard.getByText(title, { exact: true })).toBeVisible();
   await expect(createdCard.getByText(content, { exact: true })).toBeVisible();
+
+  await workspace.page.getByTestId(NOTIFICATIONS_HANDLES.TAB_ADMIN_ANNOUNCEMENTS).click();
+  await expect(createdCard.getByText(title, { exact: true })).toBeVisible();
+
+  await workspace.page.getByTestId(NOTIFICATIONS_HANDLES.TAB_SYSTEM).click();
+  await expect(createdCard).toHaveCount(0);
 });
 
 test("admin can create a localized announcement from the notification center", async ({

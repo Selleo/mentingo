@@ -13,7 +13,7 @@ import request from "supertest";
 
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { buildJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { LEARNING_MODE_REQUIRED_ERROR_KEY } from "src/common/utils/lessonLearningAccess";
 import { RESOURCE_RELATIONSHIP_TYPES } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
@@ -22,9 +22,11 @@ import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiJudgeConfigurations,
   aiMentorLessons,
-  lessons,
   chapters,
+  courses,
+  lessons,
   quizAttempts,
   questions,
   questionAnswerOptions,
@@ -351,7 +353,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           description: "<p>Practice a sales call.</p>",
           chapterId: chapter.id,
           aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
-          completionConditions: "<p>The learner handles objections in English.</p>",
+          aiJudgeConfiguration: {
+            taskGoal: "Complete the negotiation practice",
+            passingThresholdPercent: 0,
+            criteria: [],
+            blockingErrors: [],
+          },
           type: AI_MENTOR_TYPE.MENTOR,
           name: "AI Mentor",
         })
@@ -359,7 +366,7 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
 
       const lessonId = createResponse.body.data.id;
 
-      return { admin, adminCookies, courseId: course.id, lessonId };
+      return { admin, adminCookies, chapterId: chapter.id, courseId: course.id, lessonId };
     };
 
     const getAiMentorFromCourse = async (
@@ -381,7 +388,272 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       return lessonsList.find((lesson: { id: UUIDType }) => lesson.id === lessonId)?.aiMentor;
     };
 
-    it("updates only the selected language and returns localized AI mentor scenario fields", async () => {
+    it("creates an AI mentor lesson and its required Judge graph atomically", async () => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+        availableLocales: [SUPPORTED_LANGUAGES.EN, SUPPORTED_LANGUAGES.PL],
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: admin.id });
+
+      const createResponse = await request(app.getHttpServer())
+        .post("/api/lesson/beta-create-lesson/ai")
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Negotiation practice",
+          description: "<p>Practice a sales call.</p>",
+          chapterId: chapter.id,
+          aiMentorInstructions: "<p>Lead the learner through the scenario.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          aiJudgeConfiguration: {
+            taskGoal: "Handle a sales objection and agree a next step",
+            passingThresholdPercent: 70,
+            criteria: [
+              {
+                title: "Discovery",
+                expectedBehavior: "Asks relevant discovery questions",
+                maxScore: 1,
+                scoreGuidance: [
+                  { score: 0, description: "Does not ask a relevant question" },
+                  { score: 1, description: "Asks a relevant question" },
+                ],
+              },
+              {
+                title: "Response",
+                expectedBehavior: "Responds directly to the objection",
+                maxScore: 1,
+                scoreGuidance: [
+                  { score: 0, description: "Does not address the objection" },
+                  { score: 1, description: "Addresses the objection directly" },
+                ],
+              },
+              {
+                title: "Next step",
+                expectedBehavior: "Agrees a concrete next step",
+                maxScore: 1,
+                scoreGuidance: [
+                  { score: 0, description: "Does not agree a next step" },
+                  { score: 1, description: "Agrees a concrete next step" },
+                ],
+              },
+            ],
+            blockingErrors: [{ description: "Invents unsupported product facts" }],
+          },
+        })
+        .expect(201);
+
+      const response = await request(app.getHttpServer())
+        .get(`/api/lesson/${createResponse.body.data.id}/ai-judge-configuration`)
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        taskGoal: "Handle a sales objection and agree a next step",
+        passingThresholdPercent: 70,
+        totalMaxScore: 3,
+        language: SUPPORTED_LANGUAGES.EN,
+        criteria: [{ title: "Discovery" }, { title: "Response" }, { title: "Next step" }],
+        blockingErrors: [{ description: "Invents unsupported product facts" }],
+      });
+    });
+
+    it("rejects creating an AI mentor lesson without a Judge configuration", async () => {
+      const category = await categoryFactory.create();
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .withAdminRole()
+        .create();
+      const adminCookies = await cookieFor(admin, app);
+      const course = await courseFactory.create({
+        authorId: admin.id,
+        categoryId: category.id,
+        baseLanguage: SUPPORTED_LANGUAGES.EN,
+      });
+      const chapter = await chapterFactory.create({ courseId: course.id, authorId: admin.id });
+
+      await request(app.getHttpServer())
+        .post("/api/lesson/beta-create-lesson/ai")
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Negotiation practice",
+          description: "<p>Practice a sales call.</p>",
+          chapterId: chapter.id,
+          aiMentorInstructions: "<p>Lead the learner through the scenario.</p>",
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+        })
+        .expect(400);
+    });
+
+    it("keeps Judge structure in the base language and updates only translated text", async () => {
+      const { adminCookies, lessonId } = await createAiMentorLessonSetup();
+
+      await request(app.getHttpServer())
+        .put(`/api/lesson/${lessonId}/ai-judge-configuration`)
+        .set("Cookie", adminCookies)
+        .send({
+          taskGoal: "Discover the customer's needs and agree a next step",
+          passingThresholdPercent: 50,
+          criteria: [
+            {
+              title: "Discovery",
+              expectedBehavior: "Asks at least one relevant discovery question",
+              maxScore: 1,
+              scoreGuidance: [
+                {
+                  score: 0,
+                  description: "Does not ask a relevant discovery question",
+                  example: "Immediately presents an offer",
+                },
+                {
+                  score: 1,
+                  description: "Asks a relevant discovery question",
+                  example: "What problem are you trying to solve?",
+                },
+              ],
+            },
+          ],
+          blockingErrors: [{ description: "Invents unsupported product capabilities" }],
+        })
+        .expect(200);
+
+      const englishResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-judge-configuration`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      const englishConfiguration = englishResponse.body.data;
+      const [criterion] = englishConfiguration.criteria;
+      const [zeroScoreGuidance, fullScoreGuidance] = criterion.scoreGuidance;
+      const [blockingError] = englishConfiguration.blockingErrors;
+
+      const translationResponse = await request(app.getHttpServer())
+        .patch(`/api/lesson/${lessonId}/ai-judge-configuration/translations/pl`)
+        .set("Cookie", adminCookies)
+        .send({
+          taskGoal: "Poznaj potrzeby klienta i uzgodnij kolejny krok",
+          criteria: [
+            {
+              id: criterion.id,
+              title: "Analiza potrzeb",
+              expectedBehavior: "Zadaje co najmniej jedno trafne pytanie o potrzeby",
+            },
+          ],
+          scoreGuidance: [
+            {
+              id: zeroScoreGuidance.id,
+              description: "Nie zadaje trafnego pytania o potrzeby",
+              example: "Od razu przedstawia ofertę",
+            },
+            {
+              id: fullScoreGuidance.id,
+              description: "Zadaje trafne pytanie o potrzeby",
+              example: "Jaki problem chcesz rozwiązać?",
+            },
+          ],
+          blockingErrors: [
+            {
+              id: blockingError.id,
+              description: "Wymyśla nieistniejące możliwości produktu",
+            },
+          ],
+        })
+        .expect(200);
+
+      expect(translationResponse.body.data).toMatchObject({
+        taskGoal: "Poznaj potrzeby klienta i uzgodnij kolejny krok",
+        passingThresholdPercent: 50,
+        totalMaxScore: 1,
+        language: SUPPORTED_LANGUAGES.PL,
+        criteria: [
+          {
+            id: criterion.id,
+            title: "Analiza potrzeb",
+            expectedBehavior: "Zadaje co najmniej jedno trafne pytanie o potrzeby",
+            maxScore: 1,
+            scoreGuidance: [
+              {
+                id: zeroScoreGuidance.id,
+                score: 0,
+                description: "Nie zadaje trafnego pytania o potrzeby",
+                example: "Od razu przedstawia ofertę",
+              },
+              {
+                id: fullScoreGuidance.id,
+                score: 1,
+                description: "Zadaje trafne pytanie o potrzeby",
+                example: "Jaki problem chcesz rozwiązać?",
+              },
+            ],
+          },
+        ],
+        blockingErrors: [
+          {
+            id: blockingError.id,
+            description: "Wymyśla nieistniejące możliwości produktu",
+          },
+        ],
+      });
+
+      const unchangedEnglishResponse = await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-judge-configuration`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(unchangedEnglishResponse.body.data).toMatchObject({
+        taskGoal: "Discover the customer's needs and agree a next step",
+        passingThresholdPercent: 50,
+        criteria: [
+          {
+            title: "Discovery",
+            expectedBehavior: "Asks at least one relevant discovery question",
+          },
+        ],
+        blockingErrors: [{ description: "Invents unsupported product capabilities" }],
+      });
+
+      const baseLanguageResponse = await request(app.getHttpServer())
+        .patch(`/api/lesson/${lessonId}/ai-judge-configuration/translations/en`)
+        .set("Cookie", adminCookies)
+        .send({ taskGoal: "A different goal" })
+        .expect(400);
+
+      expect(baseLanguageResponse.body.message).toBe(
+        "aiJudgeConfiguration.errors.translationRequiresNonBaseLanguage",
+      );
+
+      await request(app.getHttpServer())
+        .patch(`/api/lesson/${lessonId}/ai-judge-configuration/translations/pl`)
+        .set("Cookie", adminCookies)
+        .send({ passingThresholdPercent: 80 })
+        .expect(400);
+    });
+
+    it("protects Judge configuration endpoints with course update permissions", async () => {
+      const { lessonId } = await createAiMentorLessonSetup();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const studentCookies = await cookieFor(student, app);
+
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-judge-configuration`)
+        .expect(401);
+
+      await request(app.getHttpServer())
+        .get(`/api/lesson/${lessonId}/ai-judge-configuration`)
+        .set("Cookie", studentCookies)
+        .expect(403);
+    });
+
+    it("updates only the selected language and returns localized AI mentor instructions", async () => {
       const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
 
       await request(app.getHttpServer())
@@ -392,9 +664,8 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "Polish negotiation practice",
           description: "<p>Practice a Polish sales call.</p>",
           aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
-          completionConditions: "<p>The learner handles objections in Polish.</p>",
           type: AI_MENTOR_TYPE.MENTOR,
-          name: "AI Mentor",
+          name: "Mentor PL",
           language: SUPPORTED_LANGUAGES.PL,
         })
         .expect(200);
@@ -413,12 +684,12 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
       );
 
       expect(englishAiMentor).toMatchObject({
+        name: "AI Mentor",
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
-        completionConditions: "<p>The learner handles objections in English.</p>",
       });
       expect(polishAiMentor).toMatchObject({
+        name: "Mentor PL",
         aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
-        completionConditions: "<p>The learner handles objections in Polish.</p>",
       });
     });
 
@@ -447,8 +718,117 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
         .expect(200);
 
       expect(response.body.data).toMatchObject({
+        aiMentor: { name: "AI Mentor" },
         aiMentorInstructions: "<p>Lead the learner through an English scenario.</p>",
-        completionConditions: "<p>The learner handles objections in English.</p>",
+      });
+    });
+
+    it("reports a missing translation when only the AI mentor name is untranslated", async () => {
+      const { adminCookies, chapterId, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      const [aiMentorLesson] = await db
+        .select({ id: aiMentorLessons.id })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      await db
+        .update(aiJudgeConfigurations)
+        .set({
+          taskGoal: setJsonbField(
+            aiJudgeConfigurations.taskGoal,
+            SUPPORTED_LANGUAGES.PL,
+            "Complete the negotiation practice",
+          ),
+        })
+        .where(eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLesson.id));
+
+      await db
+        .update(courses)
+        .set({
+          title: setJsonbField(courses.title, SUPPORTED_LANGUAGES.PL, "Polish course"),
+          description: setJsonbField(
+            courses.description,
+            SUPPORTED_LANGUAGES.PL,
+            "Polish course description",
+          ),
+        })
+        .where(eq(courses.id, courseId));
+      await db
+        .update(chapters)
+        .set({ title: setJsonbField(chapters.title, SUPPORTED_LANGUAGES.PL, "Polish chapter") })
+        .where(eq(chapters.id, chapterId));
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Polish negotiation practice",
+          description: "<p>Practice a Polish sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      const missingResponse = await request(app.getHttpServer())
+        .get("/api/course/beta-course-missing-translations")
+        .query({ id: courseId, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(missingResponse.body.data.hasMissingTranslations).toBe(true);
+
+      await db
+        .update(aiMentorLessons)
+        .set({
+          name: setJsonbField(aiMentorLessons.name, SUPPORTED_LANGUAGES.PL, "Mentor PL"),
+        })
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      const completeResponse = await request(app.getHttpServer())
+        .get("/api/course/beta-course-missing-translations")
+        .query({ id: courseId, language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(completeResponse.body.data.hasMissingTranslations).toBe(false);
+    });
+
+    it("removes localized AI mentor fields when deleting a course language", async () => {
+      const { adminCookies, courseId, lessonId } = await createAiMentorLessonSetup();
+
+      await request(app.getHttpServer())
+        .patch("/api/lesson/beta-update-lesson/ai")
+        .query({ id: lessonId })
+        .set("Cookie", adminCookies)
+        .send({
+          title: "Polish negotiation practice",
+          description: "<p>Practice a Polish sales call.</p>",
+          aiMentorInstructions: "<p>Lead the learner through a Polish scenario.</p>",
+          type: AI_MENTOR_TYPE.MENTOR,
+          name: "Mentor PL",
+          language: SUPPORTED_LANGUAGES.PL,
+        })
+        .expect(200);
+
+      await request(app.getHttpServer())
+        .delete(`/api/course/language/${courseId}`)
+        .query({ language: SUPPORTED_LANGUAGES.PL })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      const [aiMentorLesson] = await db
+        .select({
+          name: aiMentorLessons.name,
+          aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
+        })
+        .from(aiMentorLessons)
+        .where(eq(aiMentorLessons.lessonId, lessonId));
+
+      expect(aiMentorLesson.name).toEqual({ en: "AI Mentor" });
+      expect(aiMentorLesson.aiMentorInstructions).toEqual({
+        en: "<p>Lead the learner through an English scenario.</p>",
       });
     });
 
@@ -463,7 +843,6 @@ describe("LessonController (e2e) - quiz feedback redaction", () => {
           title: "German negotiation practice",
           description: "<p>Practice a German sales call.</p>",
           aiMentorInstructions: "<p>Lead the learner through a German scenario.</p>",
-          completionConditions: "<p>The learner handles objections in German.</p>",
           type: AI_MENTOR_TYPE.MENTOR,
           name: "AI Mentor",
           language: SUPPORTED_LANGUAGES.DE,

@@ -16,6 +16,7 @@
       "clearAll": "Borrar todo",
       "validate": "Validar",
       "edit": "Editar",
+      "delete": "Eliminar",
       "uploading": "Subiendo...",
       "sending": "Enviando..."
     },
@@ -54,7 +55,10 @@
       "live_training": "Formación en vivo"
     },
     "error": {
-      "somethingWentWrong": "¡Ups! Algo salió mal."
+      "somethingWentWrong": "¡Ups! Algo salió mal.",
+      "threadMustBeActive": "El hilo debe estar activo.",
+      "aiJudgeConfigurationMissing": "Falta la configuración de las condiciones de finalización.",
+      "aiJudgeGenerationNotAwaitingRevision": "Esta generación no está esperando una decisión de revisión."
     },
     "loader": {
       "textSequence": {
@@ -359,12 +363,69 @@
     "tenants": "Organizaciones",
     "activityLogs": "Registros de actividad"
   },
+  "microsoftCalendar": {
+    "title": "Calendario de Microsoft",
+    "description": "Consulta tu calendario principal de Outlook en Mentingo. Outlook sigue siendo la fuente de datos.",
+    "account": "Cuenta conectada",
+    "lastSync": "Última sincronización correcta",
+    "status": {
+      "disconnected": "Desconectado",
+      "syncing": "Sincronizando",
+      "connected": "Conectado",
+      "error": "Requiere atención",
+      "reconnect_required": "Es necesario volver a conectar"
+    },
+    "action": {
+      "connect": "Conectar Calendario de Microsoft",
+      "sync": "Sincronizar ahora",
+      "reconnect": "Volver a conectar",
+      "replace": "Usar otra cuenta",
+      "disconnect": "Desconectar",
+      "continue": "Continuar a Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Espera antes de iniciar otra sincronización."
+    },
+    "stale": {
+      "title": "Los datos del calendario pueden estar desactualizados",
+      "description": "Los eventos importados siguen visibles. Vuelve a sincronizar o conecta de nuevo tu cuenta Microsoft."
+    },
+    "adminApproval": {
+      "title": "Se requiere la aprobación del administrador de Microsoft",
+      "description": "Tu organización debe aprobar el acceso al calendario antes de que Mentingo pueda sincronizar eventos de Outlook."
+    },
+    "disconnect": {
+      "title": "¿Desconectar Calendario de Microsoft?",
+      "description": "Los eventos de Outlook importados se eliminarán de Mentingo. Tu calendario de Outlook no cambiará."
+    },
+    "replace": {
+      "title": "¿Conectar otra cuenta Microsoft?",
+      "description": "La conexión de {{email}} y sus eventos importados se eliminarán antes de sincronizar la nueva cuenta."
+    },
+    "toast": {
+      "syncQueued": "La sincronización del Calendario de Microsoft ha comenzado.",
+      "syncFailed": "No se pudo sincronizar el Calendario de Microsoft.",
+      "disconnected": "El Calendario de Microsoft se ha desconectado.",
+      "disconnectFailed": "No se pudo desconectar el Calendario de Microsoft."
+    },
+    "oauth": {
+      "connected": "El Calendario de Microsoft se está conectando y ha comenzado la primera sincronización.",
+      "replacement_required": "Confirma el cambio de cuenta antes de conectar otra cuenta Microsoft.",
+      "admin_approval_required": "Se requiere la aprobación del administrador de Microsoft para acceder al calendario.",
+      "authorization_failed": "La autorización del Calendario de Microsoft ha fallado. Inténtalo de nuevo."
+    }
+  },
   "calendarView": {
     "title": "Calendario",
     "description": "Consulta los eventos de aprendizaje programados.",
     "loading": "Cargando eventos",
     "empty": "No hay eventos para mostrar",
     "today": "Hoy",
+    "legend": { "label": "Fuentes" },
+    "microsoft": {
+      "staleWarning": "Los eventos de Microsoft pueden estar desactualizados. Vuelve a conectar o reintenta desde los ajustes de la cuenta.",
+      "horizonNotice": "Los eventos de Microsoft se importan desde 30 días atrás hasta 6 meses adelante, por lo que este intervalo puede estar incompleto."
+    },
     "view": {
       "month": "Mes",
       "week": "Semana",
@@ -448,11 +509,13 @@
       "action": {
         "edit": "Editar evento",
         "goToLiveTraining": "Ir a la formación en vivo",
-        "goToCourse": "Ir al curso"
+        "goToCourse": "Ir al curso",
+        "openOutlook": "Abrir en Outlook"
       },
       "sourceType": {
         "liveTraining": "Formación en vivo",
-        "courseDueDate": "Fecha límite del curso"
+        "courseDueDate": "Fecha límite del curso",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Hora",
@@ -462,7 +525,9 @@
         "people": "Personas",
         "dueDate": "Fecha límite",
         "course": "Curso",
-        "group": "Grupo"
+        "group": "Grupo",
+        "availability": "Disponibilidad",
+        "privacy": "Privacidad"
       },
       "deliveryType": {
         "online": "En línea",
@@ -474,6 +539,14 @@
         "ended": "Terminado",
         "expired": "Caducado"
       },
+      "availability": {
+        "free": "Libre",
+        "tentative": "Provisional",
+        "busy": "Ocupado",
+        "out_of_office": "Fuera de la oficina",
+        "working_elsewhere": "Trabajando en otro lugar"
+      },
+      "privateEvent": "Los detalles de este evento privado de Outlook están ocultos.",
       "role": {
         "admin": "Administrador",
         "author": "Autor",
@@ -1676,6 +1749,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Secreto del cliente de Microsoft"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "ID de cliente del calendario de Microsoft"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Secreto de cliente del calendario de Microsoft"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Habilitado (verdadero/falso)"
       },
@@ -1896,12 +1975,12 @@
         "chapter": "Capítulo no encontrado.",
         "lesson": "Lección no encontrada."
       },
+      "statisticsAccessForbidden": "No tienes permiso para ver las estadísticas de este curso.",
       "create": {
         "courseFailed": "No se pudo crear el curso.",
         "stripeProductFailed": "No se pudo crear el producto de pago del curso."
       },
       "lesson": {
-        "aiMentorRequiredContent": "Se requieren instrucciones del mentor de IA y condiciones de finalización.",
         "customTtsReferenceRequired": "Se requiere una referencia TTS personalizada para el modo de voz personalizado.",
         "aiMentorCreateFailed": "No se pudo crear la lección de AI Mentor.",
         "questionsRequired": "Se requiere al menos una pregunta.",
@@ -2173,8 +2252,6 @@
           "descriptionRequired": "Se requiere descripción",
           "aiMentorInstructionsRequired": "Se requieren instrucciones del mentor de IA",
           "aiMentorInstructionsMaxLength": "Las instrucciones del mentor de IA son demasiado largas (máximo 20 000 caracteres)",
-          "completionConditionsRequired": "Se requieren condiciones de finalización",
-          "completionConditionsMaxLength": "Las condiciones de finalización son demasiado largas (máximo 20 000 caracteres)",
           "customTTSReferenceRequired": "Se requiere una referencia TTS personalizada en el modo personalizado",
           "taskDescriptionMaxLength": "La descripción de la tarea es demasiado larga (máximo de caracteres {{ count }})",
           "passThresholdMin": "El umbral de aprobación debe ser al menos 1",
@@ -2249,7 +2326,6 @@
           "sentence": "Oración",
           "sourceUrl": "URL de origen",
           "aiMentorInstructions": "Instrucciones del mentor de IA",
-          "completionConditions": "Condiciones de finalización",
           "aiMentor": "AI Mentor",
           "mentorName": "Nombre del mentor",
           "taskDescription": "Descripción de la tarea",
@@ -2275,11 +2351,246 @@
           "sourceUrl": "Introduzca la URL de origen...",
           "allowFullscreen": "Permitir pantalla completa",
           "aiMentorInstructions": "Describe cómo debe comportarse el mentor de IA durante la lección...",
-          "completionConditions": "Enumere lo que el estudiante debe lograr para aprobar esta lección...",
           "taskDescription": "Describa la tarea que el participante debe completar...",
           "passThreshold": "por ejemplo, 70%",
           "customTTSReference": "Ingrese el ID de referencia TTS personalizado...",
           "aiMentorTypes": "Mentor"
+        },
+        "aiJudge": {
+          "cardTitle": "Condiciones de finalización",
+          "configured": "Configurado",
+          "emptyDescription": "Define cómo se evaluará la respuesta del participante y cuándo se aprobará la lección.",
+          "baseLanguageRequired": "Crea la estructura de evaluación en el idioma base del curso antes de traducirla.",
+          "structureLockedTooltip": "La estructura de evaluación solo se puede cambiar en el idioma base del curso.",
+          "summary": "{{criteria}} criterios · {{score}} puntos totales · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
+          "configureWithAi": "Configurar con IA",
+          "createWithAi": "Crear con IA",
+          "improveWithAi": "Mejorar con IA",
+          "checkQualityWithAi": "Comprobar la calidad con IA",
+          "checkingQuality": "Comprobando la calidad...",
+          "checkingQualityDescription": "Revisando el objetivo, los criterios, las pautas de puntuación y los errores bloqueantes.",
+          "aiAssistance": "Asistencia de IA",
+          "qualityCheckResult": "Control de calidad",
+          "qualityCheckResultDescription": "Revisa los hallazgos de la evaluación antes de decidir qué cambiar.",
+          "qualityCheckPassed": "No se requieren cambios. Puedes seguir editando o guardar la evaluación.",
+          "qualityCheckPassedWithSuggestions": "La evaluación es utilizable. Aplica estas mejoras opcionales o continúa sin cambios.",
+          "qualityCheckNeedsChanges": "Revisa los hallazgos o deja que la IA mejore la evaluación con estos comentarios.",
+          "configureManually": "Configurar manualmente",
+          "editAssessment": "Editar evaluación",
+          "dialogTitle": "Configurar condiciones de finalización",
+          "dialogDescription": "Define criterios medibles, pautas de puntuación exactas y errores que siempre suspenden el intento.",
+          "translationModeTitle": "Modo de traducción",
+          "translationModeDescription": "Aquí puedes traducir el texto de la evaluación. Las puntuaciones, los umbrales y la estructura se gestionan en el idioma base del curso.",
+          "taskGoal": "Objetivo de la tarea",
+          "taskGoalPlaceholder": "Describe el resultado medible que debe alcanzar el participante...",
+          "passingThreshold": "Umbral de aprobación",
+          "criteria": "Criterios de evaluación",
+          "addFirstCriterion": "Añade tu primer criterio",
+          "criterionNumber": "Criterio {{number}}",
+          "untitledCriterion": "Criterio sin título",
+          "complete": "Completo",
+          "needsDetails": "Faltan detalles",
+          "criterionDescription": "Describe un comportamiento medible del participante.",
+          "criterionTitle": "Título del criterio",
+          "criterionTitlePlaceholder": "p. ej., descubre las necesidades del cliente",
+          "expectedBehavior": "Comportamiento esperado",
+          "expectedBehaviorPlaceholder": "Explica qué debe decir o hacer el participante...",
+          "maxScore": "Puntos máx.",
+          "score": "Puntuación",
+          "scoringGuidance": "Pautas de puntuación",
+          "advancedScoring": "Pautas de puntuación",
+          "scoreLevelsCount": "{{count}} niveles de puntuación",
+          "scoreBadge": "{{score}} pts",
+          "itemsCount": "{{count}} añadidos",
+          "scoringSummary": "Puntuación",
+          "pointsRequired": "Se requieren {{required}} de {{total}} puntos para aprobar",
+          "scoringGuidanceDescription": "Explica opcionalmente cómo es una respuesta para cada puntuación exacta.",
+          "scoreDescription": "Qué hace el alumno para obtener esta puntuación",
+          "scoreDescriptionPlaceholder": "Describe el nivel medible de rendimiento...",
+          "acceptedExample": "Ejemplo aceptado",
+          "examplePlaceholder": "Añade un ejemplo de respuesta...",
+          "addCriterion": "Añadir criterio",
+          "removeCriterion": "Eliminar criterio",
+          "addScoreGuidance": "Añadir pauta de puntuación",
+          "removeScoreGuidance": "Eliminar pauta de puntuación",
+          "noScoringGuidance": "No se han añadido pautas específicas de puntuación.",
+          "blockingErrors": "Errores bloqueantes",
+          "blockingErrorsDescription": "Si ocurre alguno, el participante suspende independientemente de la puntuación.",
+          "blockingErrorNumber": "Error bloqueante {{number}}",
+          "blockingErrorPlaceholder": "Describe el error que siempre suspende el intento...",
+          "addBlockingError": "Añadir error bloqueante",
+          "removeBlockingError": "Eliminar error bloqueante",
+          "noBlockingErrors": "No hay errores bloqueantes configurados.",
+          "applyConfiguration": "Aplicar configuración",
+          "saveConfiguration": "Guardar configuración",
+          "saveTranslation": "Guardar traducción",
+          "configurationSavedSuccessfully": "Configuración guardada.",
+          "translationSavedSuccessfully": "La traducción de las condiciones de finalización se ha guardado.",
+          "generation": {
+            "create": {
+              "title": "Crear evaluación con IA",
+              "description": "Describe qué debe lograr una buena respuesta. Podrás revisar y editar el borrador antes de aplicarlo.",
+              "fieldLabel": "¿Qué debe demostrar el alumno?",
+              "fieldDescription": "Céntrate en el resultado medible. La IA lo convertirá en una evaluación completa.",
+              "placeholder": "Por ejemplo: descubrir las necesidades del cliente, proponer el siguiente paso y responder profesionalmente a las objeciones."
+            },
+            "improve": {
+              "title": "Mejorar evaluación con IA",
+              "description": "Indica qué debe ser más claro o preciso. La evaluación actual será el punto de partida.",
+              "fieldLabel": "¿Qué debe mejorarse?",
+              "fieldDescription": "Describe el resultado deseado. El resto de la evaluación se conservará.",
+              "placeholder": "Por ejemplo: hacer los criterios más medibles y diferenciar mejor las respuestas parciales y completas."
+            },
+            "instructionRequired": "Describe qué debe crear o mejorar la IA",
+            "willCreate": "La IA generará",
+            "artifacts": {
+              "taskGoal": "Un objetivo medible",
+              "criteria": "Criterios con guía de puntuación",
+              "threshold": "Un umbral de aprobación",
+              "blockingErrors": "Errores bloqueantes, cuando proceda"
+            },
+            "generateDraft": "Generar borrador",
+            "improveAssessment": "Mejorar evaluación",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Criterios más claros",
+                "instruction": "Haz que los criterios sean más claros y directamente medibles."
+              },
+              "betterScoring": {
+                "label": "Mejor puntuación",
+                "instruction": "Facilita la distinción coherente entre niveles de puntuación contiguos."
+              },
+              "reduceOverlap": {
+                "label": "Reducir solapamiento",
+                "instruction": "Elimina el solapamiento para que cada criterio evalúe una conducta distinta."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Aclarar errores bloqueantes",
+                "instruction": "Aclara qué conductas activan cada error bloqueante."
+              }
+            },
+            "progressLabel": "Progreso de generación de la evaluación",
+            "stages": {
+              "draft": "Generando borrador",
+              "qualityCheck": "Control de calidad",
+              "ready": "Listo"
+            },
+            "status": {
+              "drafting": "Generando la evaluación",
+              "evaluating": "Comprobando la calidad",
+              "revising": "Mejorando el borrador",
+              "awaiting_revision": "El control de calidad requiere tu decisión",
+              "completed": "La evaluación está lista",
+              "requires_review": "El borrador requiere tu decisión",
+              "failed": "No se pudo completar la generación",
+              "cancelled": "Generación cancelada"
+            },
+            "statusDescription": {
+              "drafting": "Preparando el objetivo, los criterios, la puntuación y los errores bloqueantes.",
+              "evaluating": "Comprobando que los criterios sean medibles y la puntuación coherente.",
+              "revising": "Aplicando la última corrección del control de calidad.",
+              "awaiting_revision": "Revisa los hallazgos antes de iniciar otro intento de generación.",
+              "completed": "El borrador superó el control de calidad.",
+              "requires_review": "Se conservó el último borrador para que decidas qué cambiar.",
+              "failed": "Inténtalo de nuevo o configura la evaluación manualmente.",
+              "cancelled": "No se aplicaron cambios a la evaluación."
+            },
+            "attempt": "Borrador {{attempt}} de {{maxAttempts}}",
+            "attemptNumber": "Borrador {{attempt}}",
+            "attemptHistory": "Historial de borradores",
+            "viewDetails": "Ver detalles",
+            "attemptPassed": "Control de calidad superado",
+            "attemptNeedsRevision": "El control de calidad encontró problemas",
+            "initialDraftCreated": "Borrador inicial creado.",
+            "changesInAttempt": "Lo que la IA cambió en este borrador",
+            "qualityFeedback": "Lo que detectó después el control de calidad",
+            "currentDraft": "Borrador actual",
+            "draftPreviewPending": "La vista previa del borrador aparecerá aquí cuando termine la generación.",
+            "qualityCheckLabel": "Control de calidad",
+            "qualityDecisionTitle_one": "{{count}} mejora sugerida",
+            "qualityDecisionTitle_other": "{{count}} mejoras sugeridas",
+            "feedbackNotApplied": "Aún no aplicados",
+            "qualityDecisionDescription": "Revisa las sugerencias o continúa con esta evaluación.",
+            "suggestedImprovements": "Mejoras sugeridas",
+            "beforeChange": "Evaluación anterior",
+            "afterChange": "Borrador actual",
+            "showMoreFindings": "Mostrar {{count}} observaciones más",
+            "showFewerFindings": "Mostrar menos observaciones",
+            "showMoreChanges": "Mostrar {{count}} cambios más",
+            "showFewerChanges": "Mostrar menos cambios",
+            "reviewExactChanges": "Qué cambió la IA ({{count}})",
+            "exactChangesDescription": "Detalle opcional: compara la evaluación generada con la versión inicial.",
+            "waitingForDecision": "Usa el borrador actual o crea otro usando los comentarios de calidad anteriores.",
+            "useCurrentDraft": "Continuar",
+            "applyImprovements": "Revisar",
+            "target": {
+              "assessment": "Condiciones de finalización",
+              "criterion": "Criterio",
+              "scoreGuidance": "Nivel de puntuación",
+              "blockingError": "Error bloqueante"
+            },
+            "deterministicValidation": {
+              "summary": "La estructura de la evaluación necesita correcciones.",
+              "guidance_score_out_of_range": {
+                "message": "Un nivel de puntuación está fuera del rango permitido del criterio.",
+                "correction": "Mantén cada nivel entre cero y la puntuación máxima del criterio."
+              },
+              "duplicate_guidance_score": {
+                "message": "Un criterio contiene el mismo nivel de puntuación más de una vez.",
+                "correction": "Mantén exactamente una regla para cada nivel de puntuación."
+              },
+              "missing_guidance_scores": {
+                "message": "A un criterio le faltan uno o más niveles de puntuación obligatorios.",
+                "correction": "Añade una regla para cada nivel desde cero hasta la puntuación máxima."
+              },
+              "duplicate_criterion_ref": {
+                "message": "No se pueden distinguir de forma fiable dos criterios.",
+                "correction": "Mantén cada criterio como un elemento de evaluación independiente."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "No se pueden distinguir de forma fiable dos errores bloqueantes.",
+                "correction": "Mantén cada error bloqueante como un elemento de evaluación independiente."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "No se pudo asociar de forma fiable un criterio nuevo.",
+                "correction": "Mantén estables los criterios existentes y añade el nuevo como un elemento independiente."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "No se pudo asociar de forma fiable un error bloqueante nuevo.",
+                "correction": "Mantén estables los errores existentes y añade el nuevo como un elemento independiente."
+              }
+            },
+            "keepCurrentDraft": "Conservar el borrador actual",
+            "applySuggestedImprovements": "Aplicar mejoras sugeridas",
+            "completedArtifacts": "Preparado hasta ahora",
+            "changedInRevision": "Cambios en esta revisión",
+            "stopAndInspect": "Detener y revisar el borrador actual",
+            "cancel": "Cancelar generación",
+            "draftSummary": "{{criteria}} criterios · {{score}} puntos · {{threshold}}% para aprobar · {{blockingErrors}} errores bloqueantes",
+            "review": {
+              "completedTitle": "El borrador superó el control de calidad",
+              "completedDescription": "Revisa la evaluación antes de aplicarla al formulario de la lección.",
+              "currentDraftTitle": "El borrador actual está listo para revisar",
+              "currentDraftDescription": "Los comentarios de calidad no se han aplicado. Revisa y edita el borrador si es necesario antes de aplicarlo.",
+              "requiresReviewTitle": "El borrador requiere tu decisión",
+              "notSaved": "Nada se ha guardado ni publicado automáticamente."
+            },
+            "reviewAssessment": "Revisar evaluación"
+          },
+          "validation": {
+            "configurationRequired": "Configura las condiciones de finalización antes de guardar esta lección",
+            "taskGoalRequired": "El objetivo de la tarea es obligatorio",
+            "thresholdRange": "El umbral de aprobación debe estar entre 0 y 100",
+            "titleRequired": "El título del criterio es obligatorio",
+            "expectedBehaviorRequired": "El comportamiento esperado es obligatorio",
+            "maxScoreRange": "La puntuación máxima debe estar entre 1 y 5",
+            "scoreRange": "La puntuación no puede ser negativa",
+            "scoreExceedsMaximum": "La puntuación no puede superar el máximo del criterio",
+            "scoreMustBeUnique": "Cada puntuación de una pauta debe ser única dentro del criterio",
+            "guidanceRequired": "La descripción de la pauta de puntuación es obligatoria",
+            "completeGuidanceRequired": "Añada una pauta de puntuación para este criterio",
+            "blockingErrorRequired": "La descripción del error bloqueante es obligatoria"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2340,7 +2651,6 @@
           "aiMentorTypeTooltip": "Actúa como un personaje en un escenario, pero hace preguntas durante la escena y ayuda a sacar conclusiones.\nEjemplo: \"¿Qué harías ahora en el rol de gerente?\"",
           "aiTeacherTypeTooltip": "Explica, enseña y hace preguntas, como un profesor.\nEjemplo: \"En esta situación, el cliente plantea una objeción sobre el precio. ¿Qué debería responder y por qué?\"",
           "aiRoleplayTypeTooltip": "Simula un personaje y una situación realistas, sin romper el personaje.\nEjemplo: \"Esta es la segunda vez que tu servicio falla. ¿Qué vas a hacer al respecto?\"",
-          "completionConditionsTooltip": "Enumere lo que el estudiante debe lograr para aprobar esta lección. Proporcione puntos claros y mensurables. La IA utilizará esta lista para comprobar el progreso. También puede definir un umbral de aprobación (por ejemplo, porcentaje o número mínimo de puntos a cubrir). Si no se proporciona ningún umbral, se deben cumplir todas las condiciones para aprobar la lección.",
           "passThresholdTooltip": "Establezca el porcentaje mínimo (1-100%) requerido para aprobar. Déjelo vacío si no hay umbral.",
           "voiceConfigCartesiaTooltip": "El audio de voz usa Cartesia. Elija Male o Female para usar el mapeo de voces configurado, o elija Custom e introduzca un ID de voz de Cartesia.",
           "voiceConfigOpenAiCompatibleTooltip": "El audio de voz usa un endpoint de texto a voz compatible con OpenAI. Male y Female usan presets de voces de OpenAI. Elija Custom para introducir otro valor de voz compatible con ese endpoint.",
@@ -2374,6 +2684,44 @@
               "problemSolving": "<ul><li>El estudiante reconoce la contribución del empleado.</li><li>El estudiante explica la situación presupuestaria honestamente.</li><li>El estudiante propone una alternativa no financiera (por ejemplo, beneficios adicionales, oportunidades de desarrollo).</li><li>El estudiante acepta volver a abordar el tema en una fecha posterior.</li><li>El estudiante mantiene un tono respetuoso y de apoyo.</li></ul><strong>Umbral:</strong> al menos 3 de 5 condiciones deben cumplirse ser cumplido.",
               "creativeTask": "<ul><li>El estudiante presenta una idea original.</li><li>El estudiante explica quién es el público objetivo.</li><li>El estudiante describe cómo el servicio podría proporcionar valor a los clientes.</li><li>El estudiante identifica desafíos potenciales.</li></ul><em>(No se define ningún umbral; se deben cumplir todas las condiciones).</em>",
               "knowledgeSharing": "<ul><li>El estudiante participa activamente en la conversación (hace preguntas o comparte reflexiones).</li><li>El estudiante puede nombrar al menos una técnica de gestión del tiempo mencionada en el diálogo.</li><li>El estudiante expresa cómo podría aplicar una técnica en su trabajo.</li></ul><em>(No hay umbral definido; todas las condiciones se recomiendan, pero no son obligatorias para aprobar).</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Otorgue 0 puntos cuando el alumno no aporte evidencia clara y medible de este comportamiento, lo evite o actúe en sentido contrario: {{expectedBehavior}} La ausencia del ejemplo exacto no es suficiente; evalúe el significado de toda la respuesta.",
+              "notMetExample": "La respuesta no contiene ninguna afirmación ni acción que demuestre: {{expectedBehavior}}",
+              "metDescription": "Otorgue 1 punto cuando el alumno demuestre claramente este comportamiento de forma relevante y adecuada al contexto: {{expectedBehavior}} Se aceptan formulaciones equivalentes; no es necesario repetir literalmente el ejemplo aceptado."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "¿Qué rango de presupuesto han asignado a este proyecto?",
+                "1": "Mencionó un objetivo de tres meses. ¿Es una fecha de lanzamiento inamovible?",
+                "2": "¿Qué impacto tendría un retraso del lanzamiento en su negocio?",
+                "3": "Parece que la certeza de la entrega y una comunicación clara son sus principales preocupaciones, ¿es correcto?",
+                "4": "Dado el plazo de tres meses y el presupuesto limitado, propongo un MVP por fases con revisiones semanales del progreso."
+              },
+              "problemSolving": {
+                "0": "Tu trabajo reciente ha marcado una diferencia real y entiendo por qué planteas el tema de la remuneración.",
+                "1": "No hay presupuesto para aumentos salariales en el ciclo actual y quiero ser transparente al respecto.",
+                "2": "Aunque ahora no puedo aprobar un aumento, podemos hablar de un presupuesto de desarrollo y días libres adicionales.",
+                "3": "Revisemos el presupuesto de nuevo dentro de tres meses y programemos hoy esa conversación.",
+                "4": "Entiendo que esto sea decepcionante y agradezco que lo hables abiertamente conmigo."
+              },
+              "creativeTask": {
+                "0": "Propongo un servicio de suscripción que ofrezca a los clientes revisiones mensuales de accesibilidad de sus productos digitales.",
+                "1": "El servicio está dirigido a pequeños equipos de comercio electrónico sin un especialista interno en accesibilidad.",
+                "2": "Reduciría el riesgo de incumplimiento y ayudaría a mejorar la conversión eliminando barreras de usabilidad.",
+                "3": "Los principales riesgos son la disponibilidad de expertos y los datos inconsistentes de los clientes, por lo que comenzaríamos con un piloto limitado."
+              },
+              "knowledgeSharing": {
+                "0": "¿Cuál de estas técnicas funciona mejor cuando las prioridades cambian durante el día?",
+                "1": "Una de las técnicas que comentamos es el bloqueo de tiempo.",
+                "2": "Reservaré dos bloques de concentración cada mañana para el trabajo prioritario y revisaré los resultados al final de la semana."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "El alumno asume un compromiso de entrega, precio o alcance que contradice las restricciones indicadas por el cliente.",
+              "problemSolving": "El alumno utiliza lenguaje irrespetuoso, amenazante o discriminatorio hacia el empleado.",
+              "creativeTask": "El alumno propone un servicio claramente ilegal, discriminatorio o perjudicial.",
+              "knowledgeSharing": "El alumno presenta consejos inventados o inseguros como una técnica verificada de gestión del tiempo."
             }
           },
           "betaTooltip": "Esta funcionalidad se proporciona en una versión de prueba. Puede contener errores o no funcionar completamente según lo previsto y se utiliza bajo su propio riesgo.",
@@ -2936,6 +3284,13 @@
           "thresholdLabel": "Umbral de paso",
           "thresholdValue": "{{requiredScore}}/{{maxScore}} requerido ({{threshold}}%)",
           "feedbackTitle": "Qué mejorar",
+          "criticalErrorsTitle": "Qué impidió completar la actividad",
+          "criteriaTitle": "Desglose por criterios",
+          "criterionScore": "{{score}}/{{maxScore}} pts",
+          "noFeedbackTitle": "No hay comentarios detallados disponibles",
+          "noFeedbackDescription": "Esta evaluación no tiene criterios puntuados y no se detectaron errores críticos en su intento.",
+          "loadingTitle": "Comprobando su intento",
+          "loadingDescription": "Estamos comparando la conversación con los criterios de la lección. Esto puede tardar un momento.",
           "openDetails": "Abrir detalles de evaluación"
         },
         "voiceOverlay": {
@@ -3078,6 +3433,7 @@
     },
     "tabs": {
       "account": "Cuenta",
+      "integrations": "Integraciones",
       "organization": "Organización",
       "platformCustomization": "Personalización de la plataforma"
     },
@@ -3359,7 +3715,8 @@
     "title": "Notificaciones",
     "tabs": {
       "all": "Todos",
-      "adminAnnouncements": "Anuncios de administrador"
+      "adminAnnouncements": "Anuncios de administrador",
+      "system": "Sistema"
     },
     "actions": {
       "refresh": "Actualizar",
@@ -4263,16 +4620,28 @@
       "host": "Anfitrión",
       "status": "Estado",
       "managing": "Gestionando",
+      "lastActivity": "Última actividad",
+      "activityCountLast14Days": "Actividades\n(últimos 14 días)",
+      "activeUsersLast14Days": "Usuarios activos\n(últimos 14 días)",
+      "activeUsersValue": "{{active}} / {{total}} usuarios",
+      "recentActivities": "Actividad reciente",
       "loading": "Cargando organizaciones...",
       "empty": "No se encontraron organizaciones.",
       "yes": "Sí",
       "no": "No",
       "edit": "Editar",
+      "delete": "Eliminar",
       "actions": {
         "title": "Acciones",
         "enterSupportMode": "Ingrese al modo de soporte",
-        "impersonateAdmin": "Suplantar administrador"
+        "impersonateAdmin": "Entrar como administrador"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Sin actividad",
+      "increase": "La actividad aumentó un {{percentage}}%",
+      "decrease": "La actividad disminuyó un {{percentage}}%",
+      "unchanged": "La actividad no cambió"
     },
     "supportModePopover": {
       "searchPlaceholder": "Buscar por nombre o correo electrónico...",
@@ -4283,6 +4652,10 @@
     "status": {
       "active": "Activo",
       "inactive": "Inactivo"
+    },
+    "deleteDialog": {
+      "title": "¿Eliminar {{name}}?",
+      "description": "Esto elimina permanentemente la organización y todos sus usuarios, contenido de aprendizaje, actividad y configuración. Esta acción no se puede deshacer."
     },
     "create": {
       "title": "Crear organización",
@@ -4313,7 +4686,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organización creada exitosamente",
-      "tenantUpdatedSuccessfully": "Organización actualizada con éxito"
+      "tenantUpdatedSuccessfully": "Organización actualizada con éxito",
+      "tenantDeletedSuccessfully": "Organización eliminada permanentemente"
     }
   },
   "superAdminTenants": {
@@ -4322,7 +4696,8 @@
       "notFound": "Organización no encontrada",
       "invalidHost": "URL del host de la organización no válida",
       "managingTenantRequired": "Se requiere administrador de la organización gestora",
-      "currentTenantSupportNotAllowed": "El modo de soporte no está disponible para la organización actual"
+      "currentTenantSupportNotAllowed": "El modo de soporte no está disponible para la organización actual",
+      "currentTenantDeleteNotAllowed": "No se puede eliminar la organización gestora actual"
     }
   },
   "auth": {
@@ -4483,7 +4858,12 @@
       "complete_chapter": "Capítulo completado",
       "expire_certificate": "Certificado caducado",
       "reset_certificate": "Restablecimiento del certificado",
-      "view_announcement": "Visto"
+      "view_announcement": "Visto",
+      "enroll_learning_path": "Inscrito en ruta de aprendizaje",
+      "start_learning_path": "Ruta de aprendizaje iniciada",
+      "complete_learning_path": "Ruta de aprendizaje completada",
+      "play_scorm": "SCORM reproducido",
+      "complete_scorm": "SCORM completado"
     },
     "entity": {
       "course": "Curso",
@@ -4502,6 +4882,8 @@
       "qa": "Preguntas y respuestas",
       "announcement": "Anuncio",
       "live_training": "Formación en vivo",
+      "learning_path": "Ruta de aprendizaje",
+      "scorm": "SCORM",
       "global_settings": "Configuración"
     },
     "table": {
@@ -4517,7 +4899,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "El cuestionario generado contiene una identificación de respuesta en blanco no válida. Vuelva a intentar generar el curso."
+      "invalidBlankAnswerId": "El cuestionario generado contiene una identificación de respuesta en blanco no válida. Vuelva a intentar generar el curso.",
+      "invalidAiJudgeConfiguration": "La lección de Mentor de IA generada contiene una configuración de evaluación no válida. Vuelva a generar el curso."
     }
   },
   "liveTraining": {

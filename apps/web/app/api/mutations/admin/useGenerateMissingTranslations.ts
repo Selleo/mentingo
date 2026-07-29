@@ -2,10 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
 import { ApiClient } from "~/api/api-client";
-import { COURSE_QUERY_KEY } from "~/api/queries/admin/useBetaCourse";
-import { COURSE_TRANSLATIONS_QUERY_KEY } from "~/api/queries/admin/useHasMissingTranslations";
-import { queryClient } from "~/api/queryClient";
 import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorMessage";
+import { invalidateGeneratedTranslationQueries } from "~/api/utils/invalidateGeneratedTranslationQueries";
 import { useToast } from "~/components/ui/use-toast";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -30,15 +28,7 @@ export default function useGenerateMissingTranslations() {
       return response.data;
     },
     onSuccess: async (_, variables) => {
-      const { courseId, language } = variables;
-
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_QUERY_KEY, { id: courseId, language }],
-      });
-
-      await queryClient.invalidateQueries({
-        queryKey: [COURSE_TRANSLATIONS_QUERY_KEY, { id: courseId, language }],
-      });
+      await invalidateGeneratedTranslationQueries(variables);
 
       toast({
         description: t("adminCourseView.toast.translationsGeneratedSuccessfully"),

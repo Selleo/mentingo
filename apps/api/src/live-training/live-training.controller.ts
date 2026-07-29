@@ -86,7 +86,7 @@ import {
 } from "./schemas/update-live-training.schema";
 
 @UseGuards(FeaturesGuard, PermissionsGuard)
-@RequireFeature(FEATURES.LIVE_TRAINING)
+@RequireFeature({ features: [FEATURES.LIVE_TRAINING] })
 @Controller("live-training")
 export class LiveTrainingController {
   constructor(private readonly liveTrainingService: LiveTrainingService) {}

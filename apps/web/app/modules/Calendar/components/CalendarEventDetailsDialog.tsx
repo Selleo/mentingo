@@ -1,5 +1,5 @@
 import { CALENDAR_EVENT_SOURCE_TYPES } from "@repo/shared";
-import { useTranslation } from "react-i18next";
+import { useEffect, useRef, useState } from "react";
 import { match } from "ts-pattern";
 
 import { useCalendarEventDetails } from "~/api/queries/calendar/useCalendarEventDetails";
@@ -10,19 +10,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Skeleton } from "~/components/ui/skeleton";
 
 import { CALENDAR_HANDLES } from "../../../../e2e/data/live-training/handles";
 
 import { CalendarCourseDueDateEventDetailsDialog } from "./CalendarCourseDueDateEventDetailsDialog";
 import { CalendarEventDetailsSkeleton } from "./CalendarEventDetailsSkeleton";
 import { CalendarLiveTrainingEventDetailsDialog } from "./CalendarLiveTrainingEventDetailsDialog";
+import { CalendarOutlookEventDetailsDialog } from "./CalendarOutlookEventDetailsDialog";
 
 import type {
   CalendarEventDetails,
   CourseDueDateCalendarEventDetails,
   LiveTrainingCalendarEventDetails,
+  OutlookCalendarEventDetails,
 } from "../calendarEventDetails.types";
 import type { SupportedLanguages } from "@repo/shared";
+import type { ReactNode } from "react";
 
 type CalendarEventDetailsDialogProps = {
   open: boolean;
@@ -43,36 +47,33 @@ const isCourseDueDateEventDetails = (
   eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.COURSE_DUE_DATE &&
   "courseDueDate" in eventDetails.payload;
 
-function CalendarEventDetailsLoadingDialog({
-  open,
-  onOpenChange,
-}: Pick<CalendarEventDetailsDialogProps, "open" | "onOpenChange">) {
-  const { t } = useTranslation();
+const isOutlookEventDetails = (
+  eventDetails: CalendarEventDetails,
+): eventDetails is OutlookCalendarEventDetails =>
+  eventDetails.sourceType === CALENDAR_EVENT_SOURCE_TYPES.MICROSOFT_OUTLOOK &&
+  "outlookCalendar" in eventDetails.payload;
 
+function CalendarEventDetailsLoadingContent() {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        data-testid={CALENDAR_HANDLES.EVENT_DETAILS_DIALOG}
-        className="z-[90] max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]"
-      >
-        <DialogHeader className="border-b border-neutral-200 px-6 py-5">
-          <div className="flex items-start justify-between gap-4 pr-7">
-            <div className="min-w-0">
-              <DialogTitle className="truncate text-xl">
-                {t("calendarView.details.title")}
-              </DialogTitle>
-              <DialogDescription className="mt-1">
-                {t("calendarView.details.description")}
-              </DialogDescription>
-            </div>
+    <>
+      <DialogHeader className="border-b border-neutral-200 px-6 py-5">
+        <div className="flex items-start gap-3 pr-7">
+          <Skeleton className="mt-0.5 size-9 shrink-0 rounded-lg" />
+          <div className="min-w-0">
+            <DialogTitle className="truncate text-xl">
+              <Skeleton className="h-6 w-56" />
+            </DialogTitle>
+            <DialogDescription className="mt-2">
+              <Skeleton className="h-4 w-36" />
+            </DialogDescription>
           </div>
-        </DialogHeader>
-
-        <div className="grid max-h-[calc(88dvh-8rem)] gap-4 overflow-y-auto px-6 py-5">
-          <CalendarEventDetailsSkeleton />
         </div>
-      </DialogContent>
-    </Dialog>
+      </DialogHeader>
+
+      <div className="grid max-h-[calc(88dvh-8rem)] gap-4 overflow-y-auto px-6 py-5">
+        <CalendarEventDetailsSkeleton />
+      </div>
+    </>
   );
 }
 
@@ -85,25 +86,65 @@ export function CalendarEventDetailsDialog({
   const { data: eventDetails, isLoading } = useCalendarEventDetails(eventId, language, {
     enabled: open && Boolean(eventId),
   });
+  const [isMinimumLoadingTimeComplete, setIsMinimumLoadingTimeComplete] = useState(false);
+  const loadingEventIds = useRef(new Set<string>());
 
-  if (isLoading || !eventDetails) {
-    return <CalendarEventDetailsLoadingDialog open={open} onOpenChange={onOpenChange} />;
+  useEffect(() => {
+    if (!open || !eventId || loadingEventIds.current.has(eventId)) {
+      setIsMinimumLoadingTimeComplete(Boolean(eventId && loadingEventIds.current.has(eventId)));
+      return;
+    }
+
+    setIsMinimumLoadingTimeComplete(false);
+    const timeout = window.setTimeout(() => {
+      loadingEventIds.current.add(eventId);
+      setIsMinimumLoadingTimeComplete(true);
+    }, 1_000);
+
+    return () => window.clearTimeout(timeout);
+  }, [eventId, open]);
+
+  const showLoading = isLoading || !eventDetails || !isMinimumLoadingTimeComplete;
+
+  let dialogContent: ReactNode = <CalendarEventDetailsLoadingContent />;
+
+  if (!showLoading && eventDetails) {
+    dialogContent = match(eventDetails)
+      .when(isLiveTrainingEventDetails, (liveTrainingEventDetails) => (
+        <CalendarLiveTrainingEventDetailsDialog
+          eventDetails={liveTrainingEventDetails}
+          insideDialog
+          open={open}
+          onOpenChange={onOpenChange}
+        />
+      ))
+      .when(isCourseDueDateEventDetails, (courseDueDateEventDetails) => (
+        <CalendarCourseDueDateEventDetailsDialog
+          eventDetails={courseDueDateEventDetails}
+          insideDialog
+          open={open}
+          onOpenChange={onOpenChange}
+        />
+      ))
+      .when(isOutlookEventDetails, (outlookEventDetails) => (
+        <CalendarOutlookEventDetailsDialog
+          eventDetails={outlookEventDetails}
+          insideDialog
+          open={open}
+          onOpenChange={onOpenChange}
+        />
+      ))
+      .otherwise(() => <CalendarEventDetailsLoadingContent />);
   }
 
-  return match(eventDetails)
-    .when(isLiveTrainingEventDetails, (liveTrainingEventDetails) => (
-      <CalendarLiveTrainingEventDetailsDialog
-        open={open}
-        eventDetails={liveTrainingEventDetails}
-        onOpenChange={onOpenChange}
-      />
-    ))
-    .when(isCourseDueDateEventDetails, (courseDueDateEventDetails) => (
-      <CalendarCourseDueDateEventDetailsDialog
-        open={open}
-        eventDetails={courseDueDateEventDetails}
-        onOpenChange={onOpenChange}
-      />
-    ))
-    .otherwise(() => <CalendarEventDetailsLoadingDialog open={open} onOpenChange={onOpenChange} />);
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        data-testid={CALENDAR_HANDLES.EVENT_DETAILS_DIALOG}
+        className="z-[90] max-h-[88dvh] overflow-hidden p-0 sm:max-w-[620px]"
+      >
+        {dialogContent}
+      </DialogContent>
+    </Dialog>
+  );
 }

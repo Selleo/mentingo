@@ -1,0 +1,1 @@
+ALTER TABLE "ai_mentor_lessons" ADD COLUMN "name_translations" jsonb DEFAULT '{}'::jsonb NOT NULL;

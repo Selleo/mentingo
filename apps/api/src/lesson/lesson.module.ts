@@ -15,10 +15,20 @@ import { ResourceLibraryModule } from "src/resource-library/resource-library.mod
 import { SettingsModule } from "src/settings/settings.module";
 import { StudentLessonProgressModule } from "src/studentLessonProgress/studentLessonProgress.module";
 
+import { AiJudgeConfigurationGenerationQueueService } from "./ai-judge-configuration/ai-judge-configuration-generation-queue.service";
+import { AiJudgeConfigurationGenerationController } from "./ai-judge-configuration/ai-judge-configuration-generation.controller";
+import { AiJudgeConfigurationGenerationService } from "./ai-judge-configuration/ai-judge-configuration-generation.service";
+import { AiJudgeConfigurationGenerationWorker } from "./ai-judge-configuration/ai-judge-configuration-generation.worker";
+import { AiJudgeConfigurationGraphService } from "./ai-judge-configuration/ai-judge-configuration-graph.service";
+import { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration/ai-judge-configuration-translation.service";
+import { AiJudgeConfigurationController } from "./ai-judge-configuration/ai-judge-configuration.controller";
+import { AiJudgeConfigurationRepository } from "./ai-judge-configuration/ai-judge-configuration.repository";
+import { AiJudgeConfigurationService } from "./ai-judge-configuration/ai-judge-configuration.service";
 import { LessonController } from "./lesson.controller";
 import { AdminLessonRepository } from "./repositories/adminLesson.repository";
 import { LessonRepository } from "./repositories/lesson.repository";
 import { AdminLessonService } from "./services/adminLesson.service";
+import { AiMentorLessonTranslationService } from "./services/aiMentorLessonTranslation.service";
 import { LessonService } from "./services/lesson.service";
 
 @Module({
@@ -37,14 +47,34 @@ import { LessonService } from "./services/lesson.service";
     LessonVideoProgressModule,
     forwardRef(() => CourseModule),
   ],
-  controllers: [LessonController],
+  controllers: [
+    LessonController,
+    AiJudgeConfigurationController,
+    AiJudgeConfigurationGenerationController,
+  ],
   providers: [
+    AiJudgeConfigurationRepository,
+    AiJudgeConfigurationGenerationQueueService,
+    AiJudgeConfigurationGenerationService,
+    AiJudgeConfigurationGenerationWorker,
+    AiJudgeConfigurationGraphService,
+    AiJudgeConfigurationService,
+    AiJudgeConfigurationTranslationService,
+    AiMentorLessonTranslationService,
     LessonRepository,
     AdminLessonService,
     AdminLessonRepository,
     LessonService,
     LocalizationService,
   ],
-  exports: [AdminLessonService, AdminLessonRepository, LessonRepository, LessonService],
+  exports: [
+    AiJudgeConfigurationGraphService,
+    AiJudgeConfigurationTranslationService,
+    AiMentorLessonTranslationService,
+    AdminLessonService,
+    AdminLessonRepository,
+    LessonRepository,
+    LessonService,
+  ],
 })
 export class LessonModule {}

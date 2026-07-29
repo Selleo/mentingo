@@ -16,7 +16,6 @@ import {
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
-  type LocalizedText,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -52,6 +51,7 @@ import { EMAIL_BATCH_SIZE } from "src/common/emails/email.constants";
 import { EmailService } from "src/common/emails/emails.service";
 import { getEmailSubject } from "src/common/emails/translations";
 import { getGroupFilterConditions } from "src/common/helpers/getGroupFilterConditions";
+import { getUserNameSearchCondition } from "src/common/helpers/getUserNameSearchCondition";
 import { buildJsonbField, deleteJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
 import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
@@ -66,6 +66,8 @@ import {
   BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
+  DeleteCourseEvent,
+  DeleteScormEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
 } from "src/events";
@@ -76,10 +78,12 @@ import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
 import { LearningTimeRepository } from "src/learning-time";
+import { AiJudgeConfigurationTranslationService } from "src/lesson/ai-judge-configuration/ai-judge-configuration-translation.service";
 import { createLessonResourceIdRegex } from "src/lesson/lesson-resource-references";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { AdminLessonService } from "src/lesson/services/adminLesson.service";
+import { AiMentorLessonTranslationService } from "src/lesson/services/aiMentorLessonTranslation.service";
 import { LocalizationService } from "src/localization/localization.service";
 import { ENTITY_TYPE } from "src/localization/localization.types";
 import { LumaService } from "src/luma/luma.service";
@@ -112,6 +116,7 @@ import {
   tenants,
   users,
   courseStudentsStats,
+  scormPackages,
 } from "src/storage/schema";
 import { StripeService } from "src/stripe/stripe.service";
 import { UserService } from "src/user/user.service";
@@ -193,7 +198,10 @@ import type {
   CourseDueDateReminderDays,
   CourseDueDateReminderRecipient,
 } from "src/courses/types/course-due-date-reminder.types";
-import type { CourseTranslationType } from "src/courses/types/course.types";
+import type {
+  ContextualCourseTranslationType,
+  CourseTranslationType,
+} from "src/courses/types/course.types";
 import type { DurationEstimatesByCourse } from "src/courses/types/duration";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
@@ -237,6 +245,8 @@ export class CourseService {
     private readonly outboxPublisher: OutboxPublisher,
     private readonly aiService: AiService,
     private readonly adminLessonService: AdminLessonService,
+    private readonly aiMentorLessonTranslationService: AiMentorLessonTranslationService,
+    private readonly aiJudgeConfigurationTranslationService: AiJudgeConfigurationTranslationService,
     private readonly learningTimeRepository: LearningTimeRepository,
     @Inject(forwardRef(() => UserService)) private readonly userService: UserService,
     private readonly emailService: EmailService,
@@ -1015,7 +1025,6 @@ export class CourseService {
       const queryDB = trx
         .select({
           ...getTableColumns(categories),
-          archived: sql<boolean | null>`NULL`,
           createdAt: sql<string | null>`NULL`,
           title: this.localizationService.getLocalizedSqlField(
             categories.title,
@@ -1559,14 +1568,24 @@ export class CourseService {
       currentUser,
     );
 
-    return (
+    const hasMissingCourseFields =
       this.collectMissingTranslationFields(
         id,
         courseInRequestedLanguage,
         courseInBaseLanguage,
         true,
-      ).length > 0
-    );
+      ).length > 0;
+
+    if (hasMissingCourseFields) return true;
+
+    const missingJudgeFields =
+      await this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        id,
+        language,
+        courseInRequestedLanguage.baseLanguage,
+      );
+
+    return missingJudgeFields.length > 0;
   }
 
   async getContentCreatorCourses({
@@ -2611,9 +2630,9 @@ export class CourseService {
     const [course] = await this.db
       .select({
         authorId: courses.authorId,
-        title: sql<LocalizedText>`${courses.title}`,
-        baseLanguage: sql<SupportedLanguages>`${courses.baseLanguage}`,
-        availableLocales: sql<SupportedLanguages[]>`${courses.availableLocales}`,
+        title: courses.title,
+        baseLanguage: courses.baseLanguage,
+        availableLocales: courses.availableLocales,
       })
       .from(courses)
       .where(eq(courses.id, courseId));
@@ -3215,7 +3234,13 @@ export class CourseService {
   }
 
   async deleteCourse(id: UUIDType, currentUser: CurrentUserType) {
-    const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
+    const [course] = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(eq(courses.id, id));
 
     if (!course) {
       throw new NotFoundException("Course not found");
@@ -3231,7 +3256,17 @@ export class CourseService {
 
     const { enabled: isLumaConfigured } = await this.envService.getLumaConfigured();
 
-    return this.db.transaction(async (trx) => {
+    const scormPackageToDelete =
+      course.courseType === COURSE_TYPE.SCORM
+        ? await this.db
+            .select({ id: scormPackages.id })
+            .from(scormPackages)
+            .where(eq(scormPackages.entityId, id))
+            .limit(1)
+            .then(([row]) => row ?? null)
+        : null;
+
+    await this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(eq(quizAttempts.courseId, id));
       await trx.delete(studentCourses).where(eq(studentCourses.courseId, id));
       await trx.delete(studentChapterProgress).where(eq(studentChapterProgress.courseId, id));
@@ -3256,8 +3291,26 @@ export class CourseService {
         db: trx,
       });
 
-      return null;
+      if (scormPackageToDelete) {
+        await this.outboxPublisher.publish(
+          new DeleteScormEvent({
+            scormIds: [{ scormId: scormPackageToDelete.id }],
+            actor: currentUser,
+          }),
+          trx,
+        );
+      }
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: [{ courseId: deletedCourse.id, courseTitle: course.courseTitle }],
+          actor: currentUser,
+        }),
+        trx,
+      );
     });
+
+    return null;
   }
 
   async deleteManyCourses(ids: UUIDType[], currentUser: CurrentUserType) {
@@ -3269,11 +3322,31 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
-    const course = await this.db.select().from(courses).where(inArray(courses.id, ids));
+    const selectedCourses = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(inArray(courses.id, ids));
 
-    if (course.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))) {
+    if (
+      selectedCourses.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))
+    ) {
       throw new ForbiddenException("adminCoursesView.toast.deleteProtectedCourseFailed");
     }
+
+    const scormCourseIds = selectedCourses
+      .filter((course) => course.courseType === COURSE_TYPE.SCORM)
+      .map((course) => course.id);
+
+    const scormPackagesToDelete =
+      scormCourseIds.length > 0
+        ? await this.db
+            .select({ id: scormPackages.id })
+            .from(scormPackages)
+            .where(inArray(scormPackages.entityId, scormCourseIds))
+        : [];
 
     return this.db.transaction(async (trx) => {
       await trx.delete(quizAttempts).where(inArray(quizAttempts.courseId, ids));
@@ -3286,6 +3359,39 @@ export class CourseService {
       if (!deletedCourses.length) {
         throw new ConflictException("Failed to delete courses");
       }
+
+      for (const courseId of ids) {
+        await this.searchIndexService.deleteEntityDocuments({
+          entityType: SEARCH_ENTITY_TYPES.COURSE,
+          entityId: courseId,
+          db: trx,
+        });
+      }
+
+      if (scormPackagesToDelete.length > 0) {
+        await this.outboxPublisher.publish(
+          new DeleteScormEvent({
+            scormIds: scormPackagesToDelete.map((scormPkg) => ({ scormId: scormPkg.id })),
+            actor: currentUser,
+          }),
+          trx,
+        );
+      }
+
+      const selectedCoursesById = new Map(
+        selectedCourses.map((course) => [course.id, course.courseTitle]),
+      );
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: deletedCourses.map((course) => ({
+            courseId: course.id,
+            courseTitle: selectedCoursesById.get(course.id) ?? null,
+          })),
+          actor: currentUser,
+        }),
+        trx,
+      );
 
       return null;
     });
@@ -3798,60 +3904,99 @@ export class CourseService {
     return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
   }
 
+  async assertCanViewCourseStatistics(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
+    }
+  }
+
   async getAverageQuizScoreForCourse(
     courseId: UUIDType,
     query: CourseStatisticsQueryBody,
     language: SupportedLanguages,
   ): Promise<CourseAverageQuizScoresResponse> {
-    const conditions = await this.getStatisticsConditions(query);
+    const groupStudentIds = query.groupId ? await this.getUserIdsByGroup(query.groupId) : [];
+
+    if (query.groupId && groupStudentIds.length === 0) {
+      return { averageScoresPerQuiz: [] };
+    }
+
+    const conditions = [
+      eq(chapters.courseId, courseId),
+      eq(lessons.type, LESSON_TYPES.QUIZ),
+      isNotNull(studentLessonProgress.completedAt),
+      isNotNull(studentLessonProgress.quizScore),
+      eq(studentCourses.status, COURSE_ENROLLMENT.ENROLLED),
+      isNull(users.deletedAt),
+    ];
+
+    if (groupStudentIds.length) {
+      conditions.push(inArray(studentLessonProgress.studentId, groupStudentIds));
+    }
+
+    const quizAverages = this.db
+      .select({
+        quizId: sql<UUIDType>`${lessons.id}`.as("quiz_id"),
+        quizName: this.localizationService
+          .getLocalizedSqlField(lessons.title, language, courses)
+          .as("quiz_name"),
+        lessonOrder: sql<number>`${lessons.displayOrder}`.as("lesson_order"),
+        averageScore: sql<number>`ROUND(AVG(${studentLessonProgress.quizScore}), 0)`.as(
+          "average_score",
+        ),
+        finishedCount: countDistinct(studentLessonProgress.studentId).as("finished_count"),
+      })
+      .from(chapters)
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .innerJoin(lessons, eq(lessons.chapterId, chapters.id))
+      .innerJoin(studentLessonProgress, eq(studentLessonProgress.lessonId, lessons.id))
+      .innerJoin(
+        studentCourses,
+        and(
+          eq(studentCourses.studentId, studentLessonProgress.studentId),
+          eq(studentCourses.courseId, chapters.courseId),
+        ),
+      )
+      .innerJoin(users, eq(users.id, studentCourses.studentId))
+      .where(and(...conditions))
+      .groupBy(
+        lessons.id,
+        lessons.title,
+        lessons.displayOrder,
+        courses.availableLocales,
+        courses.baseLanguage,
+      )
+      .as("quiz_averages");
 
     const [averageScorePerQuiz] = await this.db
       .select({
         averageScoresPerQuiz: sql<CourseAverageQuizScorePerQuiz[]>`COALESCE(
-        (
-          SELECT jsonb_agg(jsonb_build_object('quizId', subquery.quiz_id, 'name', subquery.quiz_name, 'averageScore', subquery.average_score, 'finishedCount', subquery.finished_count, 'lessonOrder', subquery.lesson_order))
-          FROM (
-            SELECT
-              ${lessons.id} AS quiz_id,
-              ${this.localizationService.getLocalizedSqlField(
-                lessons.title,
-                language,
-                courses,
-              )} AS quiz_name,
-              ${lessons.displayOrder} AS lesson_order,
-              ROUND(AVG(${studentLessonProgress.quizScore}), 0) AS average_score,
-              COUNT(DISTINCT ${studentLessonProgress.studentId}) AS finished_count
-            FROM ${lessons}
-            JOIN ${studentLessonProgress} ON ${lessons.id} = ${studentLessonProgress.lessonId}
-            JOIN ${chapters} ON ${lessons.chapterId} = ${chapters.id}
-            JOIN ${studentCourses} ON ${studentLessonProgress.studentId} = ${
-              studentCourses.studentId
-            } AND ${studentCourses.courseId} = ${chapters.courseId}
-            JOIN ${users} AS active_users ON active_users.id = ${
-              studentCourses.studentId
-            } AND active_users.deleted_at IS NULL
-            JOIN ${courses} ON ${courses.id} = ${chapters.courseId}
-            WHERE ${chapters.courseId} = ${courseId}
-              AND ${lessons.type} = 'quiz'
-              AND ${studentLessonProgress.completedAt} IS NOT NULL
-              AND ${studentLessonProgress.quizScore} IS NOT NULL
-              AND ${studentCourses.status} = ${COURSE_ENROLLMENT.ENROLLED}
-              AND ${conditions.length ? sql`${and(...conditions)}` : true}
-            GROUP BY ${lessons.id}, ${lessons.title}, ${lessons.displayOrder}, ${
-              courses.availableLocales
-            }, ${courses.baseLanguage}
-          ) AS subquery
-        ),
-        '[]'::jsonb
-      )`,
+          jsonb_agg(
+            jsonb_build_object(
+              'quizId', ${quizAverages.quizId},
+              'name', ${quizAverages.quizName},
+              'averageScore', ${quizAverages.averageScore},
+              'finishedCount', ${quizAverages.finishedCount},
+              'lessonOrder', ${quizAverages.lessonOrder}
+            )
+            ORDER BY ${quizAverages.lessonOrder}
+          ),
+          '[]'::jsonb
+        )`,
       })
-      .from(studentLessonProgress)
-      .leftJoin(chapters, eq(studentLessonProgress.chapterId, chapters.id))
-      .leftJoin(courses, eq(chapters.courseId, courses.id))
-      .leftJoin(studentCourses, eq(courses.id, studentCourses.courseId))
-      .where(and(eq(courses.id, courseId)));
+      .from(quizAverages);
 
-    return averageScorePerQuiz;
+    return averageScorePerQuiz ?? { averageScoresPerQuiz: [] };
   }
 
   private async getStatisticsConditions(
@@ -4481,6 +4626,14 @@ export class CourseService {
             description: deleteJsonbField(lessons.description, language),
           })
           .where(inArray(lessons.id, lessonIds));
+
+        await trx
+          .update(aiMentorLessons)
+          .set({
+            name: deleteJsonbField(aiMentorLessons.name, language),
+            aiMentorInstructions: deleteJsonbField(aiMentorLessons.aiMentorInstructions, language),
+          })
+          .where(inArray(aiMentorLessons.lessonId, lessonIds));
       }
 
       if (questionIds.length) {
@@ -4842,11 +4995,29 @@ export class CourseService {
 
     const courseInBaseLanguage = await this.getBetaCourseById(courseId, baseLanguage, currentUser);
 
-    const { flat: missingData, withContext } = this.collectMissingTranslationFieldsWithContext(
+    const courseTranslations = this.collectMissingTranslationFieldsWithContext(
       courseId,
       courseInRequestedLanguage,
       courseInBaseLanguage,
     );
+    const [mentorTranslations, judgeTranslations] = await Promise.all([
+      this.aiMentorLessonTranslationService.getMissingTranslations(
+        courseId,
+        language,
+        baseLanguage,
+      ),
+      this.aiJudgeConfigurationTranslationService.getMissingTranslations(
+        courseId,
+        language,
+        baseLanguage,
+      ),
+    ]);
+    const generatedTranslations = [...mentorTranslations, ...judgeTranslations];
+    const missingData = [
+      ...courseTranslations.flat,
+      ...generatedTranslations.map(({ data }) => data),
+    ];
+    const withContext = [...courseTranslations.withContext, ...generatedTranslations];
 
     if (!missingData.length) {
       throw new BadRequestException({ message: "adminCourseView.toast.noMissingTranslations" });
@@ -5038,17 +5209,17 @@ export class CourseService {
         if (lesson.type === LESSON_TYPES.AI_MENTOR) {
           yield {
             id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
-            baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
-            field: aiMentorLessons.aiMentorInstructions,
+            hasValue: Boolean(lesson.aiMentor?.name?.length),
+            baseValue: baseLesson?.aiMentor?.name,
+            field: aiMentorLessons.name,
             idColumn: aiMentorLessons.lessonId,
           };
 
           yield {
             id: lesson.id,
-            hasValue: Boolean(lesson.aiMentor?.completionConditions?.length),
-            baseValue: baseLesson?.aiMentor?.completionConditions,
-            field: aiMentorLessons.completionConditions,
+            hasValue: Boolean(lesson.aiMentor?.aiMentorInstructions?.length),
+            baseValue: baseLesson?.aiMentor?.aiMentorInstructions,
+            field: aiMentorLessons.aiMentorInstructions,
             idColumn: aiMentorLessons.lessonId,
           };
         }
@@ -5172,20 +5343,7 @@ export class CourseService {
         }>;
       }>;
     };
-    withContext: Array<{
-      data: CourseTranslationType;
-      metadata: string;
-      context: {
-        courseTitle?: string;
-        chapterTitle?: string;
-        lessonTitle?: string;
-        lessonDescription?: string;
-        questionTitle?: string;
-        questionDescription?: string;
-        questionOptions?: string;
-        optionText?: string;
-      };
-    }>;
+    withContext: ContextualCourseTranslationType[];
   } {
     const flat = this.collectMissingTranslationFields(courseId, course, baseCourse);
     const grouped = {
@@ -5489,8 +5647,7 @@ export class CourseService {
 
   private getSearchQueryConditions(searchQuery: string, language?: SupportedLanguages) {
     return or(
-      ilike(users.firstName, `%${searchQuery}%`),
-      ilike(users.lastName, `%${searchQuery}%`),
+      getUserNameSearchCondition(searchQuery),
       this.localizationService.getLocalizedFieldSearchCondition(
         groups.name,
         `%${searchQuery}%`,

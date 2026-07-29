@@ -1,7 +1,5 @@
-import { CheckCircle2, XCircle } from "lucide-react";
+import { CheckCircle2, Info, ShieldAlert, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -13,7 +11,6 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { cn } from "~/lib/utils";
-import { variants } from "~/modules/Courses/Lesson/AiMentorLesson/components/variants";
 
 import { LEARNING_HANDLES } from "../../../../../../e2e/data/learning/handles";
 
@@ -59,6 +56,8 @@ export function AiMentorEvaluationDialog({
   const requiredScore = resolveRequiredScore(evaluation);
   const thresholdPercentage = resolveThresholdPercentage(evaluation, requiredScore);
   const hasScore = maxScore > 0;
+  const criteria = evaluation.criteria ?? [];
+  const blockingErrors = evaluation.blockingErrors ?? [];
   const statusLabel = passed
     ? t("studentCourseView.lesson.aiMentorLesson.evaluation.passedTitle")
     : t("studentCourseView.lesson.aiMentorLesson.evaluation.failedTitle");
@@ -68,15 +67,18 @@ export function AiMentorEvaluationDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent variant="mobileDrawer" className="sm:!max-w-xl">
-        <DialogHeader className="border-b border-neutral-100 px-6 py-4 text-left">
+      <DialogContent
+        variant="mobileDrawer"
+        className="!flex h-[85dvh] !flex-col sm:h-auto sm:!max-w-xl"
+      >
+        <DialogHeader className="shrink-0 border-b border-neutral-100 px-6 py-4 text-left">
           <DialogTitle className="text-lg font-semibold text-neutral-950">
             {t("studentCourseView.lesson.aiMentorLesson.resultButton")}
           </DialogTitle>
           <DialogDescription className="sr-only">{statusDescription}</DialogDescription>
         </DialogHeader>
 
-        <div className="min-h-0 overflow-y-auto px-6 py-5">
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-6 py-5 [-webkit-overflow-scrolling:touch]">
           <div className="grid gap-5">
             <DialogHeader
               className={cn(
@@ -135,22 +137,82 @@ export function AiMentorEvaluationDialog({
               </div>
             )}
 
-            {evaluation.summary && (
-              <div className="grid gap-2">
+            {blockingErrors.length > 0 && (
+              <section className="grid gap-3">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-7 items-center justify-center rounded-full bg-red-50 text-red-700">
+                    <ShieldAlert className="size-4" />
+                  </span>
+                  <h3 className="text-sm font-semibold text-neutral-950">
+                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.criticalErrorsTitle")}
+                  </h3>
+                </div>
+                <div className="overflow-hidden rounded-md border border-neutral-200 bg-white">
+                  {blockingErrors.map((blockingError) => (
+                    <div
+                      key={blockingError.blockingErrorId}
+                      className="border-b border-neutral-100 px-4 py-3 last:border-b-0"
+                    >
+                      <div className="grid gap-1">
+                        <p className="text-sm font-semibold text-neutral-950">
+                          {blockingError.description}
+                        </p>
+                        <p className="text-sm leading-relaxed text-neutral-600">
+                          {blockingError.learnerSafeFeedback}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {criteria.length > 0 && (
+              <section className="grid gap-3">
                 <h3 className="text-sm font-semibold text-neutral-950">
-                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.feedbackTitle")}
+                  {t("studentCourseView.lesson.aiMentorLesson.evaluation.criteriaTitle")}
                 </h3>
-                <div className="max-h-60 overflow-y-auto rounded-md border border-neutral-200 bg-white p-4 text-sm leading-relaxed text-neutral-700 [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:space-y-1 [&_p]:my-2 [&_p:first-child]:mt-0 [&_p:last-child]:mb-0 [&_strong]:font-semibold [&_strong]:text-neutral-950 [&_ul]:my-2 [&_ul]:space-y-1">
-                  <Markdown components={variants} remarkPlugins={[remarkGfm]}>
-                    {evaluation.summary}
-                  </Markdown>
+                <div className="grid gap-2">
+                  {criteria.map((criterion) => (
+                    <div
+                      key={criterion.criterionId}
+                      className="grid gap-2 rounded-md border border-neutral-200 bg-white p-3"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="text-sm font-semibold text-neutral-950">{criterion.title}</p>
+                        <span className="shrink-0 rounded-full bg-neutral-100 px-2 py-1 text-xs font-semibold text-neutral-700">
+                          {t("studentCourseView.lesson.aiMentorLesson.evaluation.criterionScore", {
+                            score: criterion.awardedScore,
+                            maxScore: criterion.maxScore,
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-sm leading-relaxed text-neutral-600">
+                        {criterion.learnerSafeFeedback}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {criteria.length === 0 && blockingErrors.length === 0 && (
+              <div className="flex items-start gap-3 rounded-md border border-neutral-200 bg-neutral-50 p-4">
+                <Info className="mt-0.5 size-5 shrink-0 text-neutral-500" />
+                <div className="grid gap-1">
+                  <h3 className="text-sm font-semibold text-neutral-950">
+                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.noFeedbackTitle")}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-neutral-600">
+                    {t("studentCourseView.lesson.aiMentorLesson.evaluation.noFeedbackDescription")}
+                  </p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        <DialogFooter className="border-t border-neutral-100 px-6 py-4">
+        <DialogFooter className="shrink-0 border-t border-neutral-100 px-6 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4">
           <Button
             data-testid={LEARNING_HANDLES.AI_MENTOR_RESULT_CLOSE_BUTTON}
             type="button"

@@ -133,7 +133,6 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   DESCRIPTION_INPUT: "curriculum-ai-mentor-lesson-description-input",
   NAME_INPUT: "curriculum-ai-mentor-lesson-name-input",
   INSTRUCTIONS_INPUT: "curriculum-ai-mentor-lesson-instructions-input",
-  COMPLETION_CONDITIONS_INPUT: "curriculum-ai-mentor-lesson-completion-conditions-input",
   TYPE_SELECT: "curriculum-ai-mentor-lesson-type-select",
   SAVE_BUTTON: "curriculum-ai-mentor-lesson-save-button",
   DELETE_BUTTON: "curriculum-ai-mentor-lesson-delete-button",
@@ -141,6 +140,32 @@ export const AI_MENTOR_LESSON_FORM_HANDLES = {
   PREVIEW_BUTTON: "curriculum-ai-mentor-lesson-preview-button",
   RESOURCE_FILE_INPUT: "curriculum-ai-mentor-lesson-resource-file-input",
   AVATAR_FILE_INPUT: "curriculum-ai-mentor-lesson-avatar-file-input",
+  JUDGE_CONFIGURE_BUTTON: "curriculum-ai-mentor-judge-configure-button",
+  JUDGE_DIALOG: "curriculum-ai-mentor-judge-dialog",
+  JUDGE_TASK_GOAL_INPUT: "curriculum-ai-mentor-judge-task-goal-input",
+  JUDGE_ADD_CRITERION_BUTTON: "curriculum-ai-mentor-judge-add-criterion-button",
+  judgeCriterion: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}`,
+  judgeCriterionToggle: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-toggle`,
+  judgeCriterionTitleInput: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-title-input`,
+  judgeCriterionMaxScoreInput: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-max-score-input`,
+  judgeCriterionExpectedBehaviorInput: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-expected-behavior-input`,
+  judgeScoringGuidanceToggle: (criterionIndex: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-scoring-guidance-toggle`,
+  judgeScoreDescriptionInput: (criterionIndex: number, score: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-score-${score}-description-input`,
+  judgeScoreExampleInput: (criterionIndex: number, score: number) =>
+    `curriculum-ai-mentor-judge-criterion-${criterionIndex}-score-${score}-example-input`,
+  JUDGE_PASSING_THRESHOLD_INPUT: "curriculum-ai-mentor-judge-passing-threshold-input",
+  JUDGE_BLOCKING_ERRORS_SECTION: "curriculum-ai-mentor-judge-blocking-errors-section",
+  JUDGE_ADD_BLOCKING_ERROR_BUTTON: "curriculum-ai-mentor-judge-add-blocking-error-button",
+  judgeBlockingErrorInput: (blockingErrorIndex: number) =>
+    `curriculum-ai-mentor-judge-blocking-error-${blockingErrorIndex}-input`,
+  JUDGE_APPLY_BUTTON: "curriculum-ai-mentor-judge-apply-button",
 } as const;
 
 export const COURSE_GENERATION_HANDLES = {

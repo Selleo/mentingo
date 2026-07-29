@@ -16,6 +16,7 @@
       "clearAll": "Clear All",
       "validate": "Validate",
       "edit": "Edit",
+      "delete": "Delete",
       "uploading": "Uploading...",
       "sending": "Sending..."
     },
@@ -54,7 +55,10 @@
       "live_training": "Live Training"
     },
     "error": {
-      "somethingWentWrong": "Oops! Something went wrong."
+      "somethingWentWrong": "Oops! Something went wrong.",
+      "threadMustBeActive": "The thread must be active.",
+      "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
+      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },
     "loader": {
       "textSequence": {
@@ -359,12 +363,81 @@
     "tenants": "Organizations",
     "activityLogs": "Activity Logs"
   },
+  "microsoftCalendar": {
+    "title": "Microsoft Calendar",
+    "description": "Bring your primary Outlook calendar into Mentingo. Outlook remains the source of truth.",
+    "account": "Connected account",
+    "lastSync": "Last successful sync",
+    "status": {
+      "disconnected": "Disconnected",
+      "syncing": "Syncing",
+      "connected": "Connected",
+      "error": "Needs attention",
+      "reconnect_required": "Reconnect required"
+    },
+    "action": {
+      "connect": "Connect Microsoft Calendar",
+      "sync": "Sync now",
+      "reconnect": "Reconnect",
+      "replace": "Use another account",
+      "disconnect": "Disconnect",
+      "continue": "Continue to Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Please wait before starting another sync."
+    },
+    "stale": {
+      "title": "Calendar data may be out of date",
+      "description": "Your imported events remain visible. Try syncing again or reconnect your Microsoft account."
+    },
+    "adminApproval": {
+      "title": "Microsoft administrator approval required",
+      "description": "Your organization must approve calendar access before Mentingo can synchronize Outlook events."
+    },
+    "disconnect": {
+      "title": "Disconnect Microsoft Calendar?",
+      "description": "This removes imported Outlook events from Mentingo. Your Outlook calendar is not changed."
+    },
+    "replace": {
+      "title": "Connect a different Microsoft account?",
+      "description": "The connection for {{email}} and its imported events will be removed before the new account is synchronized."
+    },
+    "outbound": {
+      "title": "Sync Mentingo events",
+      "description": "Export live trainings and course due dates to a separate Mentingo calendar in Outlook.",
+      "reauthorize": "Enabling this requires Microsoft permission to write calendar events.",
+      "enable": "Enable export",
+      "disable": "Disable export"
+    },
+    "toast": {
+      "syncQueued": "Microsoft Calendar sync has started.",
+      "syncFailed": "Microsoft Calendar could not be synchronized.",
+      "disconnected": "Microsoft Calendar has been disconnected.",
+      "disconnectFailed": "Microsoft Calendar could not be disconnected.",
+      "outboundEnabled": "Mentingo events will be exported to Outlook.",
+      "outboundDisabled": "Mentingo event export has been disabled.",
+      "outboundFailed": "Mentingo events could not be exported."
+    },
+    "oauth": {
+      "connected": "Microsoft Calendar is connecting and the first sync has started.",
+      "replacement_required": "Confirm account replacement before connecting a different Microsoft account.",
+      "admin_approval_required": "Microsoft administrator approval is required for calendar access.",
+      "authorization_failed": "Microsoft Calendar authorization failed. Please try again."
+    }
+  },
   "calendarView": {
     "title": "Calendar",
     "description": "View scheduled learning events.",
     "loading": "Loading events",
     "empty": "No events to display",
     "today": "Today",
+    "legend": {
+      "label": "Sources"
+    },
+    "microsoft": {
+      "staleWarning": "Microsoft events may be out of date. Reconnect or retry from Account settings.",
+      "horizonNotice": "Microsoft events are imported from 30 days ago through 6 months ahead, so this range may be incomplete."
+    },
     "view": {
       "month": "Month",
       "week": "Week",
@@ -448,11 +521,13 @@
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live Training",
-        "goToCourse": "Go to course"
+        "goToCourse": "Go to course",
+        "openOutlook": "Open in Outlook"
       },
       "sourceType": {
         "liveTraining": "Live Training",
-        "courseDueDate": "Course due date"
+        "courseDueDate": "Course due date",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Time",
@@ -462,7 +537,9 @@
         "people": "People",
         "dueDate": "Due date",
         "course": "Course",
-        "group": "Group"
+        "group": "Group",
+        "availability": "Availability",
+        "privacy": "Privacy"
       },
       "deliveryType": {
         "online": "Online",
@@ -474,6 +551,14 @@
         "ended": "Ended",
         "expired": "Expired"
       },
+      "availability": {
+        "free": "Free",
+        "tentative": "Tentative",
+        "busy": "Busy",
+        "out_of_office": "Out of office",
+        "working_elsewhere": "Working elsewhere"
+      },
+      "privateEvent": "Details are hidden for this private Outlook event.",
       "role": {
         "admin": "Admin",
         "author": "Author",
@@ -1676,6 +1761,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft Client Secret"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft Calendar Client ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft Calendar Client Secret"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth Enabled (true/false)"
       },
@@ -1896,12 +1987,12 @@
         "chapter": "Chapter not found.",
         "lesson": "Lesson not found."
       },
+      "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."
       },
       "lesson": {
-        "aiMentorRequiredContent": "AI Mentor instructions and completion conditions are required.",
         "customTtsReferenceRequired": "Custom TTS reference is required for custom voice mode.",
         "aiMentorCreateFailed": "Failed to create AI Mentor lesson.",
         "questionsRequired": "At least one question is required.",
@@ -2173,8 +2264,6 @@
           "descriptionRequired": "Description is required",
           "aiMentorInstructionsRequired": "AI Mentor Instructions are required",
           "aiMentorInstructionsMaxLength": "AI Mentor Instructions are too long (max 20000 characters)",
-          "completionConditionsRequired": "Completion Conditions are required",
-          "completionConditionsMaxLength": "Completion Conditions are too long (max 20000 characters)",
           "customTTSReferenceRequired": "Custom TTS reference is required in custom mode",
           "taskDescriptionMaxLength": "Task description is too long (max {{ count }} characters)",
           "passThresholdMin": "Pass threshold must be at least 1",
@@ -2249,7 +2338,6 @@
           "sentence": "Sentence",
           "sourceUrl": "Source URL",
           "aiMentorInstructions": "AI Mentor Instructions",
-          "completionConditions": "Completion Conditions",
           "aiMentor": "AI Mentor",
           "mentorName": "Mentor Name",
           "taskDescription": "Task description",
@@ -2275,11 +2363,246 @@
           "sourceUrl": "Enter the source URL...",
           "allowFullscreen": "Allow fullscreen",
           "aiMentorInstructions": "Describe how the AI Mentor should behave during the lesson...",
-          "completionConditions": "List what the student must achieve to pass this lesson...",
           "taskDescription": "Describe the task the participant needs to complete...",
           "passThreshold": "e.g., 70%",
           "customTTSReference": "Enter custom TTS reference ID...",
           "aiMentorTypes": "Mentor"
+        },
+        "aiJudge": {
+          "cardTitle": "Completion conditions",
+          "configured": "Configured",
+          "emptyDescription": "Define how the learner's response will be assessed and when the lesson is passed.",
+          "baseLanguageRequired": "Create the assessment structure in the course base language before translating it.",
+          "structureLockedTooltip": "Assessment structure can only be changed in the course base language.",
+          "summary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
+          "configureWithAi": "Configure with AI",
+          "createWithAi": "Create with AI",
+          "improveWithAi": "Improve with AI",
+          "checkQualityWithAi": "Check quality with AI",
+          "checkingQuality": "Checking quality...",
+          "checkingQualityDescription": "Reviewing the task goal, criteria, scoring guidance, and blocking errors.",
+          "aiAssistance": "AI assistance",
+          "qualityCheckResult": "Quality check",
+          "qualityCheckResultDescription": "Review the assessment findings before deciding what to change.",
+          "qualityCheckPassed": "No changes are required. You can continue editing or save the assessment.",
+          "qualityCheckPassedWithSuggestions": "The assessment is usable. Apply these optional improvements or continue as-is.",
+          "qualityCheckNeedsChanges": "Review the findings or let AI improve the assessment using this feedback.",
+          "configureManually": "Configure manually",
+          "editAssessment": "Edit assessment",
+          "dialogTitle": "Configure completion conditions",
+          "dialogDescription": "Set measurable criteria, exact scoring guidance, and errors that always fail the attempt.",
+          "translationModeTitle": "Translation mode",
+          "translationModeDescription": "You can translate assessment text here. Scores, thresholds, and assessment structure are managed in the course base language.",
+          "taskGoal": "Task goal",
+          "taskGoalPlaceholder": "Describe the measurable outcome the learner should achieve...",
+          "passingThreshold": "Passing threshold",
+          "criteria": "Assessment criteria",
+          "addFirstCriterion": "Add your first criterion",
+          "criterionNumber": "Criterion {{number}}",
+          "untitledCriterion": "Untitled criterion",
+          "complete": "Complete",
+          "needsDetails": "Needs details",
+          "criterionDescription": "Describe one measurable learner behavior.",
+          "criterionTitle": "Criterion title",
+          "criterionTitlePlaceholder": "e.g. Discovers the client's needs",
+          "expectedBehavior": "Expected behavior",
+          "expectedBehaviorPlaceholder": "Explain what the learner should say or do...",
+          "maxScore": "Max points",
+          "score": "Score",
+          "scoringGuidance": "Scoring guidelines",
+          "advancedScoring": "Scoring guidelines",
+          "scoreLevelsCount": "{{count}} score levels",
+          "scoreBadge": "{{score}} pts",
+          "itemsCount": "{{count}} added",
+          "scoringSummary": "Scoring",
+          "pointsRequired": "{{required}} of {{total}} points required to pass",
+          "scoringGuidanceDescription": "Optionally explain what an exact score looks like.",
+          "scoreDescription": "What the learner does to earn this score",
+          "scoreDescriptionPlaceholder": "Describe the measurable level of performance...",
+          "acceptedExample": "Accepted example",
+          "examplePlaceholder": "Add one example response...",
+          "addCriterion": "Add criterion",
+          "removeCriterion": "Remove criterion",
+          "addScoreGuidance": "Add score guidance",
+          "removeScoreGuidance": "Remove score guidance",
+          "noScoringGuidance": "No score-specific guidance added.",
+          "blockingErrors": "Blocking errors",
+          "blockingErrorsDescription": "If any of these occurs, the learner fails regardless of the score.",
+          "blockingErrorNumber": "Blocking error {{number}}",
+          "blockingErrorPlaceholder": "Describe the error that always fails the attempt...",
+          "addBlockingError": "Add blocking error",
+          "removeBlockingError": "Remove blocking error",
+          "noBlockingErrors": "No blocking errors configured.",
+          "applyConfiguration": "Apply configuration",
+          "saveConfiguration": "Save configuration",
+          "saveTranslation": "Save translation",
+          "configurationSavedSuccessfully": "Configuration saved.",
+          "translationSavedSuccessfully": "Completion conditions translation saved successfully.",
+          "generation": {
+            "create": {
+              "title": "Create assessment with AI",
+              "description": "Describe what a good learner response should achieve. You can review and edit the draft before applying it.",
+              "fieldLabel": "What should the learner demonstrate?",
+              "fieldDescription": "Focus on the measurable outcome. AI will turn it into a complete assessment.",
+              "placeholder": "For example: The learner should discover the client's needs, propose a suitable next step, and respond professionally to objections."
+            },
+            "improve": {
+              "title": "Improve assessment with AI",
+              "description": "Tell AI what should be clearer or more precise. Your current assessment will be used as the starting point.",
+              "fieldLabel": "What should be improved?",
+              "fieldDescription": "Describe the outcome you want. Unrelated assessment content will be preserved.",
+              "placeholder": "For example: Make the criteria more measurable and distinguish partial from full-score responses more clearly."
+            },
+            "instructionRequired": "Describe what you want AI to create or improve",
+            "willCreate": "AI will generate",
+            "artifacts": {
+              "taskGoal": "A measurable task goal",
+              "criteria": "Criteria with score guidance",
+              "threshold": "A passing threshold",
+              "blockingErrors": "Blocking errors, when relevant"
+            },
+            "generateDraft": "Generate draft",
+            "improveAssessment": "Improve assessment",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Clearer criteria",
+                "instruction": "Make the assessment criteria clearer and directly measurable."
+              },
+              "betterScoring": {
+                "label": "Better scoring",
+                "instruction": "Make adjacent scoring levels easier to distinguish consistently."
+              },
+              "reduceOverlap": {
+                "label": "Reduce overlap",
+                "instruction": "Remove overlap between criteria so each one assesses a distinct behavior."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Clarify blocking errors",
+                "instruction": "Clarify exactly which behaviors trigger each blocking error."
+              }
+            },
+            "progressLabel": "Assessment generation progress",
+            "stages": {
+              "draft": "Generating draft",
+              "qualityCheck": "Quality check",
+              "ready": "Ready"
+            },
+            "status": {
+              "drafting": "Generating the assessment",
+              "evaluating": "Checking assessment quality",
+              "revising": "Improving the draft",
+              "awaiting_revision": "Quality check needs your decision",
+              "completed": "Assessment is ready",
+              "requires_review": "Draft requires your decision",
+              "failed": "Generation could not be completed",
+              "cancelled": "Generation cancelled"
+            },
+            "statusDescription": {
+              "drafting": "Preparing the task goal, criteria, scoring, and blocking errors.",
+              "evaluating": "Checking whether the criteria are measurable and the scoring is coherent.",
+              "revising": "Applying the latest quality-check correction.",
+              "awaiting_revision": "Review the findings before starting another generation attempt.",
+              "completed": "The draft passed the quality check.",
+              "requires_review": "The latest draft was kept so you can decide what to change.",
+              "failed": "Try again or configure the assessment manually.",
+              "cancelled": "No assessment changes were applied."
+            },
+            "attempt": "Draft {{attempt}} of {{maxAttempts}}",
+            "attemptNumber": "Draft {{attempt}}",
+            "attemptHistory": "Draft history",
+            "viewDetails": "View details",
+            "attemptPassed": "Passed quality check",
+            "attemptNeedsRevision": "Quality check found issues",
+            "initialDraftCreated": "Initial draft created.",
+            "changesInAttempt": "What AI changed in this draft",
+            "qualityFeedback": "What the quality check found afterward",
+            "currentDraft": "Current draft",
+            "draftPreviewPending": "The draft preview will appear here when generation is complete.",
+            "qualityCheckLabel": "Quality check",
+            "qualityDecisionTitle_one": "{{count}} improvement suggested",
+            "qualityDecisionTitle_other": "{{count}} improvements suggested",
+            "feedbackNotApplied": "Not applied yet",
+            "qualityDecisionDescription": "Review the suggestions or continue with this assessment.",
+            "suggestedImprovements": "Suggested improvements",
+            "beforeChange": "Previous assessment",
+            "afterChange": "Current draft",
+            "showMoreFindings": "Show {{count}} more findings",
+            "showFewerFindings": "Show fewer findings",
+            "showMoreChanges": "Show {{count}} more changes",
+            "showFewerChanges": "Show fewer changes",
+            "reviewExactChanges": "What AI changed ({{count}})",
+            "exactChangesDescription": "Optional detail: compare the generated assessment with the version you started from.",
+            "waitingForDecision": "Use the current draft, or create another draft using the quality feedback above.",
+            "useCurrentDraft": "Continue",
+            "applyImprovements": "Revise",
+            "target": {
+              "assessment": "Completion conditions",
+              "criterion": "Criterion",
+              "scoreGuidance": "Score guidance",
+              "blockingError": "Blocking error"
+            },
+            "deterministicValidation": {
+              "summary": "The assessment structure needs correction.",
+              "guidance_score_out_of_range": {
+                "message": "A scoring level is outside the criterion's allowed range.",
+                "correction": "Keep every scoring level between zero and the criterion's maximum score."
+              },
+              "duplicate_guidance_score": {
+                "message": "A criterion contains the same scoring level more than once.",
+                "correction": "Keep exactly one guidance item for every scoring level."
+              },
+              "missing_guidance_scores": {
+                "message": "A criterion is missing one or more required scoring levels.",
+                "correction": "Add one guidance item for every scoring level from zero through the maximum."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Two criteria cannot be distinguished reliably.",
+                "correction": "Keep every criterion as a distinct assessment item."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Two blocking errors cannot be distinguished reliably.",
+                "correction": "Keep every blocking error as a distinct assessment item."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "A new criterion could not be matched reliably.",
+                "correction": "Keep existing criteria stable and add the new criterion as a distinct item."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "A new blocking error could not be matched reliably.",
+                "correction": "Keep existing blocking errors stable and add the new error as a distinct item."
+              }
+            },
+            "keepCurrentDraft": "Keep current draft",
+            "applySuggestedImprovements": "Apply suggested improvements",
+            "completedArtifacts": "Prepared so far",
+            "changedInRevision": "Changed in this revision",
+            "stopAndInspect": "Stop and inspect current draft",
+            "cancel": "Cancel generation",
+            "draftSummary": "{{criteria}} criteria · {{score}} total points · {{threshold}}% to pass · {{blockingErrors}} blocking errors",
+            "review": {
+              "completedTitle": "Draft passed the quality check",
+              "completedDescription": "Review the assessment before applying it to the lesson form.",
+              "currentDraftTitle": "Current draft is ready for review",
+              "currentDraftDescription": "The quality feedback remains unapplied. Review the draft, edit it if needed, then apply it to the lesson form.",
+              "requiresReviewTitle": "Draft requires your decision",
+              "notSaved": "Nothing has been saved or published automatically."
+            },
+            "reviewAssessment": "Review assessment"
+          },
+          "validation": {
+            "configurationRequired": "Configure completion conditions before saving this lesson",
+            "taskGoalRequired": "Task goal is required",
+            "thresholdRange": "Passing threshold must be between 0 and 100",
+            "titleRequired": "Criterion title is required",
+            "expectedBehaviorRequired": "Expected behavior is required",
+            "maxScoreRange": "Maximum score must be between 1 and 5",
+            "scoreRange": "Score cannot be negative",
+            "scoreExceedsMaximum": "Score cannot exceed the criterion maximum",
+            "scoreMustBeUnique": "Each guidance score must be unique within the criterion",
+            "guidanceRequired": "Scoring guidance description is required",
+            "completeGuidanceRequired": "Add scoring guidance for this criterion",
+            "blockingErrorRequired": "Blocking error description is required"
+          }
         },
         "courseGenerationComposer": {
           "placeholders": {
@@ -2340,7 +2663,6 @@
           "aiMentorTypeTooltip": "Acts like a character in a scenario, but asks questions during the scene and helps draw conclusions.\nExample: \"What would you do now in the manager's role?\"",
           "aiTeacherTypeTooltip": "Explains, teaches, and asks questions - like a teacher.\nExample: \"In this situation, the client raises a price objection. What should you answer and why?\"",
           "aiRoleplayTypeTooltip": "Simulates a realistic character and situation – without breaking character.\nExample: \"This is the second time your service has failed. What are you going to do about it?\"",
-          "completionConditionsTooltip": "List what the student must achieve to pass this lesson. Provide clear and measurable points. The AI will use this list to check progress. You can also define a pass threshold (e.g. percentage or minimum number of points to cover). If no threshold is provided, all conditions must be met to pass the lesson.",
           "passThresholdTooltip": "Set the minimum percentage (1-100%) required to pass. Leave empty for no threshold.",
           "voiceConfigCartesiaTooltip": "Voice audio uses Cartesia. Choose Male or Female to use the configured voice mapping, or choose Custom and enter a Cartesia voice ID.",
           "voiceConfigOpenAiCompatibleTooltip": "Voice audio uses an OpenAI-compatible text-to-speech endpoint. Male and Female use OpenAI voice presets. Choose Custom to enter another voice value supported by that endpoint.",
@@ -2374,6 +2696,44 @@
               "problemSolving": "<ul><li>The student acknowledges the employee's contribution.</li><li>The student explains the budget situation honestly.</li><li>The student proposes a non-financial alternative (e.g. additional benefits, development opportunity).</li><li>The student agrees to revisit the topic at a later date.</li><li>The student maintains a respectful, supportive tone.</li></ul><strong>Threshold:</strong> at least 3 out of 5 conditions must be met.",
               "creativeTask": "<ul><li>The student presents an original idea.</li><li>The student explains who the target audience is.</li><li>The student describes how the service could provide value to customers.</li><li>The student identifies potential challenges.</li></ul><em>(No threshold defined - all conditions must be met.)</em>",
               "knowledgeSharing": "<ul><li>The student engages actively in the conversation (asks questions or shares reflections).</li><li>The student can name at least one time management technique mentioned in the dialogue.</li><li>The student expresses how they might apply one technique in their work.</li></ul><em>(No threshold defined - all conditions recommended, but not mandatory for passing.)</em>"
+            },
+            "scoreGuidance": {
+              "notMetDescription": "Award 0 points when the learner provides no clear, measurable evidence of this behavior, avoids it, or acts contrary to it: {{expectedBehavior}} The absence of the exact example alone is not enough; judge the meaning of the entire response.",
+              "notMetExample": "The response contains no statement or action that demonstrates: {{expectedBehavior}}",
+              "metDescription": "Award 1 point when the learner clearly demonstrates this behavior in a relevant, context-appropriate way: {{expectedBehavior}} Equivalent wording is valid; the learner does not need to repeat the accepted example verbatim."
+            },
+            "acceptedExamples": {
+              "scenarioSimulation": {
+                "0": "What budget range have you allocated for this project?",
+                "1": "You mentioned a three-month target. Is that a fixed launch deadline?",
+                "2": "What impact would a delayed launch have on your business?",
+                "3": "It sounds like delivery certainty and clear communication are your biggest concerns—is that right?",
+                "4": "Given the three-month deadline and limited budget, I suggest a phased MVP with weekly progress reviews."
+              },
+              "problemSolving": {
+                "0": "Your recent work made a real difference, and I understand why you are raising compensation.",
+                "1": "There is no budget for salary increases in the current cycle, and I want to be transparent about that.",
+                "2": "Although I cannot approve a raise now, we can discuss a development budget and additional leave.",
+                "3": "Let us review the budget again in three months and schedule that conversation today.",
+                "4": "I understand this is disappointing, and I appreciate you discussing it openly with me."
+              },
+              "creativeTask": {
+                "0": "I propose a subscription service that gives customers monthly accessibility reviews of their digital products.",
+                "1": "The service is designed for small e-commerce teams without an in-house accessibility specialist.",
+                "2": "It would reduce compliance risk and help customers improve conversion by removing usability barriers.",
+                "3": "The main risks are expert availability and inconsistent customer data, so we would begin with a limited pilot."
+              },
+              "knowledgeSharing": {
+                "0": "Which of these techniques works best when priorities change during the day?",
+                "1": "One technique we discussed is time blocking.",
+                "2": "I will reserve two focused blocks each morning for high-priority work and review them at the end of the week."
+              }
+            },
+            "blockingErrors": {
+              "scenarioSimulation": "The learner makes a delivery, pricing, or scope commitment that contradicts the client's stated constraints.",
+              "problemSolving": "The learner uses disrespectful, threatening, or discriminatory language toward the employee.",
+              "creativeTask": "The learner proposes a service that is clearly illegal, discriminatory, or harmful.",
+              "knowledgeSharing": "The learner presents fabricated or unsafe advice as a verified time-management technique."
             }
           },
           "betaTooltip": "This functionality is provided in a test version. It may contain errors or may not work fully as intended and is used at your own risk.",
@@ -2936,6 +3296,13 @@
           "thresholdLabel": "Passing threshold",
           "thresholdValue": "{{requiredScore}}/{{maxScore}} required ({{threshold}}%)",
           "feedbackTitle": "What to improve",
+          "criticalErrorsTitle": "What prevented completion",
+          "criteriaTitle": "Criteria breakdown",
+          "criterionScore": "{{score}}/{{maxScore}} pts",
+          "noFeedbackTitle": "No detailed feedback available",
+          "noFeedbackDescription": "This assessment has no scored criteria, and no blocking errors were detected in your attempt.",
+          "loadingTitle": "Checking your attempt",
+          "loadingDescription": "Reviewing the conversation against the lesson criteria. This may take a moment.",
           "openDetails": "Open evaluation details"
         },
         "voiceOverlay": {
@@ -3079,6 +3446,7 @@
     },
     "tabs": {
       "account": "Account",
+      "integrations": "Integrations",
       "organization": "Organization",
       "platformCustomization": "Platform Customization"
     },
@@ -3361,7 +3729,8 @@
     "title": "Notifications",
     "tabs": {
       "all": "All",
-      "adminAnnouncements": "Admin announcements"
+      "adminAnnouncements": "Admin announcements",
+      "system": "System"
     },
     "actions": {
       "refresh": "Refresh",
@@ -4265,16 +4634,28 @@
       "host": "Host",
       "status": "Status",
       "managing": "Managing",
+      "lastActivity": "Last activity",
+      "activityCountLast14Days": "Activities\n(last 14 days)",
+      "activeUsersLast14Days": "Active users\n(last 14 days)",
+      "activeUsersValue": "{{active}} / {{total}} users",
+      "recentActivities": "Recent activities",
       "loading": "Loading organizations...",
       "empty": "No organizations found.",
       "yes": "Yes",
       "no": "No",
       "edit": "Edit",
+      "delete": "Delete",
       "actions": {
         "title": "Actions",
         "enterSupportMode": "Enter support mode",
-        "impersonateAdmin": "Impersonate admin"
+        "impersonateAdmin": "Enter as admin"
       }
+    },
+    "activityTrend": {
+      "noActivity": "No activity",
+      "increase": "Activity increased by {{percentage}}%",
+      "decrease": "Activity decreased by {{percentage}}%",
+      "unchanged": "Activity was unchanged"
     },
     "supportModePopover": {
       "searchPlaceholder": "Search by name or email...",
@@ -4285,6 +4666,10 @@
     "status": {
       "active": "Active",
       "inactive": "Inactive"
+    },
+    "deleteDialog": {
+      "title": "Delete {{name}}?",
+      "description": "This permanently deletes the organization and all of its users, learning content, activity, and settings. This action cannot be undone."
     },
     "create": {
       "title": "Create Organization",
@@ -4315,7 +4700,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organization created successfully",
-      "tenantUpdatedSuccessfully": "Organization updated successfully"
+      "tenantUpdatedSuccessfully": "Organization updated successfully",
+      "tenantDeletedSuccessfully": "Organization deleted permanently"
     }
   },
   "superAdminTenants": {
@@ -4324,7 +4710,8 @@
       "notFound": "Organization not found",
       "invalidHost": "Invalid organization host URL",
       "managingTenantRequired": "Managing organization admin required",
-      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization"
+      "currentTenantSupportNotAllowed": "Support mode is not available for the current organization",
+      "currentTenantDeleteNotAllowed": "The current managing organization cannot be deleted"
     }
   },
   "auth": {
@@ -4485,7 +4872,12 @@
       "complete_chapter": "Chapter completed",
       "expire_certificate": "Certificate expired",
       "reset_certificate": "Certificate reset",
-      "view_announcement": "Viewed"
+      "view_announcement": "Viewed",
+      "enroll_learning_path": "Learning Path enrolled",
+      "start_learning_path": "Learning Path started",
+      "complete_learning_path": "Learning Path completed",
+      "play_scorm": "SCORM played",
+      "complete_scorm": "SCORM completed"
     },
     "entity": {
       "course": "Course",
@@ -4504,6 +4896,8 @@
       "qa": "Q&A",
       "announcement": "Announcement",
       "live_training": "Live Training",
+      "learning_path": "Learning Path",
+      "scorm": "SCORM",
       "global_settings": "Settings"
     },
     "table": {
@@ -4519,7 +4913,8 @@
   },
   "luma": {
     "errors": {
-      "invalidBlankAnswerId": "The generated quiz contains an invalid blank answer id. Please retry course generation."
+      "invalidBlankAnswerId": "The generated quiz contains an invalid blank answer id. Please retry course generation.",
+      "invalidAiJudgeConfiguration": "The generated AI Mentor lesson contains an invalid assessment configuration. Please retry course generation."
     }
   },
   "liveTraining": {

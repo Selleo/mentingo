@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
 
+import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
+
 import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
@@ -10,6 +12,7 @@ import type {
   BetaCreateLessonBody,
   BetaCreateLiveTrainingLessonBody,
   BetaCreateQuizLessonBody,
+  BetaUpdateAiMentorLessonBody,
   BetaUpdateLessonBody,
   BetaUpdateQuizLessonBody,
   CreateEmbedLessonBody,
@@ -174,11 +177,16 @@ export class CurriculumFactory {
     const response = await this.apiClient.api.lessonControllerBetaCreateAiMentorLesson({
       title,
       chapterId: input.chapterId,
-      type: input.type ?? "mentor",
+      type: input.type ?? DEFAULT_AI_MENTOR_TYPE,
       name: input.name ?? "Mentor",
       description: input.description ?? "AI mentor lesson",
       aiMentorInstructions: input.aiMentorInstructions ?? "<p>Help the learner.</p>",
-      completionConditions: input.completionConditions ?? "<p>Complete the conversation.</p>",
+      aiJudgeConfiguration: input.aiJudgeConfiguration ?? {
+        taskGoal: "Complete the AI Mentor exercise",
+        passingThresholdPercent: 0,
+        criteria: [],
+        blockingErrors: [],
+      },
       voiceMode: input.voiceMode ?? "preset",
       ttsPreset: input.ttsPreset ?? "female",
       customTtsReference: input.customTtsReference ?? null,
@@ -186,6 +194,10 @@ export class CurriculumFactory {
     });
 
     return this.findLessonInCourse(courseId, input.chapterId, response.data.data.id);
+  }
+
+  async updateAiMentorLesson(lessonId: string, data: BetaUpdateAiMentorLessonBody) {
+    await this.apiClient.api.lessonControllerBetaUpdateAiMentorLesson(data, { id: lessonId });
   }
 
   async createLiveTrainingLesson(

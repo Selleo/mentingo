@@ -4,6 +4,10 @@ import type { InferInsertModel, InferSelectModel, SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { ResourceRelationshipType } from "src/file/file.constants";
 import type {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
   aiMentorLessons,
   categories,
   chapters,
@@ -180,6 +184,40 @@ export type QuestionAnswerOptionJsonbUpdate = Partial<
 export type AiMentorLessonSelect = InferSelectModel<typeof aiMentorLessons>;
 export type AiMentorLessonInsert = InferInsertModel<typeof aiMentorLessons>;
 
+export type AiJudgeConfigurationSelect = InferSelectModel<typeof aiJudgeConfigurations>;
+export type AiJudgeConfigurationInsert = InferInsertModel<typeof aiJudgeConfigurations>;
+export type AiJudgeConfigurationJsonbInsert = Omit<AiJudgeConfigurationInsert, "taskGoal"> & {
+  taskGoal: SQL<unknown>;
+};
+export type AiJudgeConfigurationJsonbUpdate = Partial<
+  Omit<AiJudgeConfigurationInsert, "taskGoal">
+> & {
+  taskGoal?: SQL<unknown>;
+};
+export type AiJudgeCriterionSelect = InferSelectModel<typeof aiJudgeCriteria>;
+export type AiJudgeCriterionInsert = InferInsertModel<typeof aiJudgeCriteria>;
+export type AiJudgeCriterionJsonbInsert = Omit<
+  AiJudgeCriterionInsert,
+  "title" | "expectedBehavior"
+> & {
+  title: SQL<unknown>;
+  expectedBehavior: SQL<unknown>;
+};
+export type AiJudgeScoreGuidanceSelect = InferSelectModel<typeof aiJudgeScoreGuidance>;
+export type AiJudgeScoreGuidanceInsert = InferInsertModel<typeof aiJudgeScoreGuidance>;
+export type AiJudgeScoreGuidanceJsonbInsert = Omit<
+  AiJudgeScoreGuidanceInsert,
+  "description" | "example"
+> & {
+  description: SQL<unknown>;
+  example?: SQL<unknown> | null;
+};
+export type AiJudgeBlockingErrorSelect = InferSelectModel<typeof aiJudgeBlockingErrors>;
+export type AiJudgeBlockingErrorInsert = InferInsertModel<typeof aiJudgeBlockingErrors>;
+export type AiJudgeBlockingErrorJsonbInsert = Omit<AiJudgeBlockingErrorInsert, "description"> & {
+  description: SQL<unknown>;
+};
+
 export type DocumentSelect = InferSelectModel<typeof documents>;
 export type DocumentInsert = InferInsertModel<typeof documents>;
 
@@ -212,6 +250,10 @@ export type SourceSnapshot = {
   questions: Array<QuestionSelect>;
   options: Array<QuestionAnswerOptionSelect>;
   aiMentors: Array<AiMentorLessonSelect>;
+  aiJudgeConfigurations: Array<AiJudgeConfigurationSelect>;
+  aiJudgeCriteria: Array<AiJudgeCriterionSelect>;
+  aiJudgeScoreGuidance: Array<AiJudgeScoreGuidanceSelect>;
+  aiJudgeBlockingErrors: Array<AiJudgeBlockingErrorSelect>;
   aiMentorDocumentLinks: Array<DocumentToAiMentorLessonSelect>;
   aiMentorDocuments: Array<DocumentSelect>;
   aiMentorDocChunks: Array<DocChunkSelect>;
@@ -229,6 +271,7 @@ export type EnsureCourseExportSyncedParams = {
 };
 
 export type CreateTargetCourseFromSourceParams = {
+  targetCourseId: UUIDType;
   exportLink: MasterCourseExportRecord;
   sourceSnapshot: SourceSnapshot;
   sourceLanguage: string;
@@ -341,7 +384,7 @@ export type AddInternalResourceReferenceParams = {
 };
 
 export type CopySourceResourceReferencesParams = {
-  exportId: UUIDType;
+  targetCourseId: UUIDType;
   sourceTenantId: UUIDType;
   sourceTenantOrigin: string;
   targetTenantId: UUIDType;
@@ -359,7 +402,7 @@ export type CopyVideoReferenceParams = Omit<
 >;
 
 export type BuildCopiedResourceReferenceParams = {
-  exportId: UUIDType;
+  targetCourseId: UUIDType;
   targetTenantId: UUIDType;
   fallbackExtension?: string;
 };

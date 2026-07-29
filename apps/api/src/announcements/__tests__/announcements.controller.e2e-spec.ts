@@ -1,5 +1,11 @@
 import { faker } from "@faker-js/faker";
-import { ANNOUNCEMENT_STATUSES, SUPPORTED_LANGUAGES } from "@repo/shared";
+import {
+  ANNOUNCEMENT_AUDIENCES,
+  ANNOUNCEMENT_FEEDS,
+  ANNOUNCEMENT_SOURCE_TYPES,
+  ANNOUNCEMENT_STATUSES,
+  SUPPORTED_LANGUAGES,
+} from "@repo/shared";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
@@ -86,11 +92,12 @@ describe("AnnouncementsController (e2e)", () => {
     });
 
     it("student can fetch all announcements", async () => {
+      const admin = await userFactory.withAdminSettings(db).create();
       const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
 
-      await announcementsFactory.withEveryone().create({ authorId: student.id });
-      await announcementsFactory.withEveryone().create({ authorId: student.id });
-      await announcementsFactory.withEveryone().create({ authorId: student.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
+      await announcementsFactory.withEveryone().create({ authorId: admin.id });
 
       const studentCookies = await cookieFor(student, app);
 
@@ -103,14 +110,128 @@ describe("AnnouncementsController (e2e)", () => {
       expect(response.body.data.length).toBe(3);
     });
 
+    it("separates admin announcements and system notifications", async () => {
+      const author = await userFactory.withAdminSettings(db).create();
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const otherStudent = await userFactory.withUserSettings(db).create();
+      const manualAnnouncement = await announcementsFactory.withUsers([student.id]).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+      });
+      const systemAnnouncement = await announcementsFactory.withUsers([student.id]).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_CHAT,
+      });
+      await announcementsFactory.withUsers([otherStudent.id]).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
+      });
+
+      const studentCookies = await cookieFor(student, app);
+      const [allResponse, adminResponse, systemResponse] = await Promise.all([
+        request(app.getHttpServer())
+          .get("/api/announcements")
+          .query({ feed: ANNOUNCEMENT_FEEDS.ALL })
+          .set("Cookie", studentCookies)
+          .expect(200),
+        request(app.getHttpServer())
+          .get("/api/announcements")
+          .query({ feed: ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS })
+          .set("Cookie", studentCookies)
+          .expect(200),
+        request(app.getHttpServer())
+          .get("/api/announcements")
+          .query({ feed: ANNOUNCEMENT_FEEDS.SYSTEM })
+          .set("Cookie", studentCookies)
+          .expect(200),
+      ]);
+
+      expect(adminResponse.body.data.map(({ id }: { id: string }) => id)).toEqual([
+        manualAnnouncement.id,
+      ]);
+      expect(systemResponse.body.data.map(({ id }: { id: string }) => id)).toEqual([
+        systemAnnouncement.id,
+      ]);
+      expect(allResponse.body.data.map(({ id }: { id: string }) => id)).toEqual(
+        expect.arrayContaining([manualAnnouncement.id, systemAnnouncement.id]),
+      );
+      expect(allResponse.body.data).toHaveLength(2);
+    });
+
+    it("admin sees all manual announcements but only personally relevant system notifications", async () => {
+      const author = await userFactory.withAdminSettings(db).create();
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const student = await userFactory.withUserSettings(db).create();
+      const group = await groupFactory.create();
+      const untargetedManualAnnouncement = await announcementsFactory
+        .withGroup(group.id)
+        .create({ authorId: author.id, audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS });
+      const relevantSystemAnnouncement = await announcementsFactory.withUsers([admin.id]).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.LIVE_TRAINING,
+        sourceId: faker.string.uuid(),
+      });
+      await announcementsFactory.withUsers([student.id]).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+        sourceType: ANNOUNCEMENT_SOURCE_TYPES.LIVE_TRAINING,
+        sourceId: faker.string.uuid(),
+      });
+
+      const adminCookies = await cookieFor(admin, app);
+      const manualResponse = await request(app.getHttpServer())
+        .get("/api/announcements")
+        .query({ feed: ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS })
+        .set("Cookie", adminCookies)
+        .expect(200);
+      const systemResponse = await request(app.getHttpServer())
+        .get("/api/announcements")
+        .query({ feed: ANNOUNCEMENT_FEEDS.SYSTEM })
+        .set("Cookie", adminCookies)
+        .expect(200);
+
+      expect(manualResponse.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: untargetedManualAnnouncement.id, isRead: null }),
+        ]),
+      );
+      expect(systemResponse.body.data).toEqual([
+        expect.objectContaining({ id: relevantSystemAnnouncement.id, isRead: false }),
+      ]);
+    });
+
+    it("admin group members receive personal read state", async () => {
+      const author = await userFactory.withAdminSettings(db).create();
+      const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
+      const group = await groupFactory.withMembers([admin.id]).create();
+      const announcement = await announcementsFactory.withGroup(group.id).create({
+        authorId: author.id,
+        audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+      });
+
+      const response = await request(app.getHttpServer())
+        .get("/api/announcements")
+        .query({ feed: ANNOUNCEMENT_FEEDS.ADMIN_ANNOUNCEMENTS })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+
+      expect(response.body.data).toEqual([
+        expect.objectContaining({ id: announcement.id, isRead: false }),
+      ]);
+    });
+
     it("unauthenticated request returns 401", async () => {
       await request(app.getHttpServer()).get("/api/announcements").expect(401);
     });
 
     it("returns announcement in requested language", async () => {
       const admin = await userFactory.withCredentials({ password }).withAdminSettings(db).create();
-
       const adminCookies = await cookieFor(admin, app);
+      const student = await userFactory.withCredentials({ password }).withUserSettings(db).create();
+      const studentCookies = await cookieFor(student, app);
 
       await request(app.getHttpServer())
         .post("/api/announcements")
@@ -136,7 +257,7 @@ describe("AnnouncementsController (e2e)", () => {
       const response = await request(app.getHttpServer())
         .get("/api/announcements")
         .query({ language: SUPPORTED_LANGUAGES.PL })
-        .set("Cookie", adminCookies)
+        .set("Cookie", studentCookies)
         .expect(200);
 
       expect(response.body.data[0].title).toBe("Polski tytul");

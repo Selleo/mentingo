@@ -12,6 +12,7 @@ import {
   getCourseChatRoom,
 } from "@repo/shared";
 
+import { AnnouncementsService } from "src/announcements/announcements.service";
 import { BaseResponse, PaginatedResponse, DatabasePg } from "src/common";
 import { CourseChatPresenceService } from "src/course-chat/course-chat-presence.service";
 import { CourseChatRepository } from "src/course-chat/course-chat.repository";
@@ -25,6 +26,7 @@ import { REALTIME_PUBLISHER } from "src/websocket/realtime.publisher";
 
 import type { PermissionKey } from "@repo/shared";
 import type { UUIDType } from "src/common";
+import type { CurrentUserType } from "src/common/types/current-user.type";
 import type {
   CourseChatMessageReactionSummaryRow,
   CourseChatMessageRow,
@@ -51,6 +53,7 @@ export class CourseChatService {
     private readonly courseChatRepository: CourseChatRepository,
     private readonly courseChatPresenceService: CourseChatPresenceService,
     private readonly outboxPublisher: OutboxPublisher,
+    private readonly announcementService: AnnouncementsService,
     @Inject("DB") private readonly db: DatabasePg,
     @Inject(REALTIME_PUBLISHER) private readonly realtimePublisher: CourseChatRealtimePublisher,
     private readonly fileService: FileService,
@@ -129,11 +132,11 @@ export class CourseChatService {
 
   async createMessage(
     courseId: UUIDType,
-    userId: UUIDType,
+    currentUser: CurrentUserType,
     tenantId: UUIDType,
     body: CreateCourseChatMessageBody,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
-    await this.assertUserEnrolledInCourse(courseId, userId);
+    await this.assertUserEnrolledInCourse(courseId, currentUser.userId);
 
     let parentMessage: Awaited<ReturnType<CourseChatRepository["getMessageContext"]>> = null;
     if (body.parentMessageId) {
@@ -151,14 +154,14 @@ export class CourseChatService {
 
     const mentionedUserIds = await this.getMentionedEnrolledUserIds({
       courseId,
-      actorUserId: userId,
+      actorUserId: currentUser.userId,
       mentionedUserIds: body.mentionedUserIds,
     });
 
     const messageId = await this.db.transaction(async (trx) => {
       const createdMessageId = await this.courseChatRepository.createMessage({
         courseId,
-        userId,
+        userId: currentUser.userId,
         content: this.normalizeContent(body.content),
         parentMessageId: body.parentMessageId,
         parentMessage: parentMessage ?? undefined,
@@ -168,7 +171,7 @@ export class CourseChatService {
       await this.publishMessageCreatedEvent(
         {
           courseId,
-          actorUserId: userId,
+          actorUserId: currentUser.userId,
           messageId: createdMessageId,
           parentMessageId: body.parentMessageId,
         },
@@ -179,7 +182,7 @@ export class CourseChatService {
         {
           tenantId,
           courseId,
-          actorUserId: userId,
+          currentUser,
           messageId: createdMessageId,
           mentionedUserIds,
         },
@@ -189,7 +192,7 @@ export class CourseChatService {
       return createdMessageId;
     });
 
-    const message = await this.getMessageResponse(messageId, userId);
+    const message = await this.getMessageResponse(messageId, currentUser.userId);
 
     this.realtimePublisher.emitToRoom(
       COURSE_CHAT_SOCKET_EVENTS.MESSAGE_CREATED,
@@ -553,7 +556,7 @@ export class CourseChatService {
     params: {
       tenantId: UUIDType;
       courseId: UUIDType;
-      actorUserId: UUIDType;
+      currentUser: CurrentUserType;
       messageId: UUIDType;
       mentionedUserIds: UUIDType[];
     },
@@ -565,7 +568,7 @@ export class CourseChatService {
       new CourseChatUserMentionedEvent({
         tenantId: params.tenantId,
         courseId: params.courseId,
-        actorUserId: params.actorUserId,
+        currentUser: params.currentUser,
         messageId: params.messageId,
         mentionedUserIds: params.mentionedUserIds,
       }),

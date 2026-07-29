@@ -1,0 +1,4 @@
+CREATE INDEX IF NOT EXISTS "chapters_tenant_id_course_id_idx" ON "chapters" USING btree ("tenant_id","course_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "lessons_tenant_id_chapter_id_type_idx" ON "lessons" USING btree ("tenant_id","chapter_id","type");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_courses_tenant_id_course_status_student_idx" ON "student_courses" USING btree ("tenant_id","course_id","status","student_id");--> statement-breakpoint
+CREATE INDEX IF NOT EXISTS "student_lesson_progress_completed_quiz_score_idx" ON "student_lesson_progress" USING btree ("tenant_id","lesson_id","student_id") WHERE "student_lesson_progress"."completed_at" IS NOT NULL AND "student_lesson_progress"."quiz_score" IS NOT NULL;

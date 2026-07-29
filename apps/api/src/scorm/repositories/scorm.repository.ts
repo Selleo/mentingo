@@ -416,6 +416,38 @@ export class ScormRepository {
     return completion.totalCount > 0 && completion.totalCount === completion.completedCount;
   }
 
+  async areAllPackageScosCompleted(params: {
+    studentId: string;
+    packageId: string;
+    completedStatuses: ScormCompletionStatus[];
+    excludedSuccessStatuses?: ScormSuccessStatus[];
+  }) {
+    const successStatusCondition = params.excludedSuccessStatuses?.length
+      ? or(
+          isNull(scormRuntimeState.successStatus),
+          notInArray(scormRuntimeState.successStatus, params.excludedSuccessStatuses),
+        )
+      : sql`true`;
+
+    const [completion] = await this.db
+      .select({
+        totalCount: sql<number>`COUNT(DISTINCT ${scormScos.id})::int`,
+        completedCount: sql<number>`COUNT(DISTINCT CASE WHEN ${and(
+          inArray(scormRuntimeState.completionStatus, params.completedStatuses),
+          successStatusCondition,
+        )} THEN ${scormScos.id} END)::int`,
+      })
+      .from(scormScos)
+      .leftJoin(
+        scormAttempts,
+        and(eq(scormAttempts.scoId, scormScos.id), eq(scormAttempts.studentId, params.studentId)),
+      )
+      .leftJoin(scormRuntimeState, eq(scormRuntimeState.attemptId, scormAttempts.id))
+      .where(eq(scormScos.packageId, params.packageId));
+
+    return completion.totalCount > 0 && completion.totalCount === completion.completedCount;
+  }
+
   async findPackageById(packageId: string) {
     const [scormPackage] = await this.db
       .select()

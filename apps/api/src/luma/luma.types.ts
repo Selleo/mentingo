@@ -43,6 +43,7 @@ export type LumaGeneratedCourseQuestionType =
 
 export type LumaGeneratedCourseChapter = GeneratedCourseResponse["chapters"][number];
 export type LumaGeneratedCourseLesson = LumaGeneratedCourseChapter["lessons"][number];
+export type LumaGeneratedCourseAiMentor = NonNullable<LumaGeneratedCourseLesson["aiMentor"]>;
 export type LumaGeneratedCourseQuestion = NonNullable<
   LumaGeneratedCourseLesson["questions"]
 >[number];

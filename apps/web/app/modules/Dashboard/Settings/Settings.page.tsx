@@ -18,6 +18,7 @@ import { studentSettingsSteps } from "../../Onboarding/routes/student";
 
 import AccountTabContent from "./components/AccountTabContent";
 import OrganizationTabContent from "./components/admin/OrganizationTabContent";
+import { IntegrationsTabContent } from "./components/IntegrationsTabContent";
 import { SettingsNavigationTabs } from "./components/SettingsNavigationTabs";
 
 import type { MetaFunction } from "@remix-run/react";
@@ -102,11 +103,15 @@ export default function SettingsPage() {
             !isSupportMode && (
               <AccountTabContent
                 canManageCourses={canManageCourses}
-                canAccessIntegrationApi={canManageIntegrationApi}
                 canResetOnboarding={canUpdateLearningProgress}
                 canManageUsers={canManageUsers}
                 settings={isUserSettings(userSettings) ? userSettings : { language: "en" }}
               />
+            )
+          }
+          integrationsContent={
+            !isSupportMode && (
+              <IntegrationsTabContent canAccessIntegrationApi={canManageIntegrationApi} />
             )
           }
           organizationContent={

@@ -53,15 +53,13 @@ export class AdminLessonRepository {
         courseId: chapters.courseId,
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
         description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        aiMentorInstructions: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.aiMentorInstructions,
-          language,
-        ),
-        aiMentorCompletionConditions: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.completionConditions,
-          language,
-        ),
-        aiMentorName: aiMentorLessons.name,
+        aiMentorInstructions: language
+          ? this.localizationService.getFieldByLanguage(
+              aiMentorLessons.aiMentorInstructions,
+              language,
+            )
+          : this.localizationService.getLocalizedSqlField(aiMentorLessons.aiMentorInstructions),
+        aiMentorName: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
         aiMentorAvatarReference: aiMentorLessons.avatarReference,
         aiMentorType: aiMentorLessons.type,
         aiMentorVoiceMode: aiMentorLessons.voiceMode,
@@ -76,6 +74,22 @@ export class AdminLessonRepository {
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .leftJoin(aiMentorLessons, eq(aiMentorLessons.lessonId, lessons.id))
       .where(eq(lessons.id, id));
+  }
+
+  async getAiMentorInstructionsForCourse(courseId: UUIDType) {
+    return this.db
+      .select({
+        id: aiMentorLessons.id,
+        aiMentorInstructions: aiMentorLessons.aiMentorInstructions,
+        courseTitle: courses.title,
+        lessonTitle: lessons.title,
+        lessonDescription: lessons.description,
+      })
+      .from(aiMentorLessons)
+      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .where(eq(courses.id, courseId));
   }
 
   async getContentLessonsByIds(lessonIds: UUIDType[], language?: SupportedLanguages) {
@@ -311,7 +325,6 @@ export class AdminLessonRepository {
     lessonId: UUIDType,
     data: {
       aiMentorInstructions: string;
-      completionConditions: string;
       type: AiMentorType;
       name?: string;
       voiceMode: AiMentorVoiceMode;
@@ -340,13 +353,8 @@ export class AdminLessonRepository {
           data.language,
           data.aiMentorInstructions,
         ),
-        completionConditions: setJsonbField(
-          aiMentorLessons.completionConditions,
-          data.language,
-          data.completionConditions,
-        ),
         type: data.type,
-        name: data.name,
+        name: setJsonbField(aiMentorLessons.name, data.language, data.name),
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,
         customTtsReference,
@@ -358,7 +366,6 @@ export class AdminLessonRepository {
     data: {
       lessonId: UUIDType;
       aiMentorInstructions: string;
-      completionConditions: string;
       type: AiMentorType;
       name?: string;
       voiceMode: AiMentorVoiceMode;
@@ -373,16 +380,15 @@ export class AdminLessonRepository {
         ? undefined
         : buildJsonbField(data.language, data.customTtsReference, true);
 
-    const { language, aiMentorInstructions, completionConditions } = data;
+    const { language, aiMentorInstructions } = data;
 
     return dbInstance
       .insert(aiMentorLessons)
       .values({
         lessonId: data.lessonId,
         aiMentorInstructions: buildJsonbField(language, aiMentorInstructions),
-        completionConditions: buildJsonbField(language, completionConditions),
         type: data.type,
-        name: data.name,
+        name: buildJsonbField(language, data.name ?? "AI Mentor"),
         voiceMode: data.voiceMode,
         ttsPreset: data.ttsPreset,
         customTtsReference,

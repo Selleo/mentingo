@@ -1,6 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 
+import { ALL_ANNOUNCEMENTS_QUERY_KEY } from "~/api/queries/admin/useAllAnnouncements";
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
@@ -21,6 +22,7 @@ export function useMarkAllAnnouncementsAsRead() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [ANNOUNCEMENTS_FOR_USER_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [ALL_ANNOUNCEMENTS_QUERY_KEY] });
       queryClient.invalidateQueries({ queryKey: [UNREAD_ANNOUNCEMENTS_COUNT_QUERY_KEY] });
 
       toast({ description: t("announcements.toast.markedAsRead") });

@@ -106,6 +106,7 @@ export class CourseDueDateReminderEmailHandler
         scheduledAt: null,
         publishedAt: new Date().toISOString(),
         sendEmail: false,
+        usersToNotify: null,
         emailTemplate: ANNOUNCEMENT_EMAIL_TEMPLATES.DEFAULT,
         sourceType: ANNOUNCEMENT_SOURCE_TYPES.COURSE_DUE_DATE_REMINDER,
         sourceId: recipient.courseId,

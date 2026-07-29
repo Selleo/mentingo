@@ -95,7 +95,7 @@ const CategoryCoursesRow = ({ category, progressByCourseId, rowRef }: CategoryCo
   }
 
   if (!courses.length) {
-    return rowRef ? <div ref={rowRef as Ref<HTMLDivElement>} className="h-px" /> : null;
+    return rowRef && <div ref={rowRef as Ref<HTMLDivElement>} className="h-px" />;
   }
 
   return (
@@ -244,7 +244,7 @@ const ModernCoursesView = () => {
       return (
         <>
           <HeroBannerSkeleton />
-          <div className="relative z-30 -mt-8 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
+          <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
             <ModernCourseRowSkeleton />
             {Array.from({ length: CATEGORY_PAGE_SIZE }).map((_, index) => (
               <ModernCourseRowSkeleton key={index} />
@@ -274,7 +274,7 @@ const ModernCoursesView = () => {
           courseSlug={heroCourse.slug}
         />
 
-        <div className="relative z-30 -mt-8 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
+        <div className="relative z-30 space-y-3 py-6 pb-12 md:-mt-12 md:py-8 md:pb-8">
           {match({ hasCourses: studentCourses.length > 0, isLoading: isStudentCoursesLoading })
             .with({ isLoading: true }, () => (
               <ModernCourseRowSkeleton
@@ -295,7 +295,9 @@ const ModernCoursesView = () => {
 
           {topCourses?.length && (
             <section>
-              <h2 className="h2 px-4 md:px-8">{t("studentCoursesView.modernView.topCourses")}</h2>
+              <h2 className="h2 px-4 text-2xl leading-snug md:px-8 md:text-[32px] md:leading-relaxed">
+                {t("studentCoursesView.modernView.topCourses")}
+              </h2>
               <TopCoursesCarousel courses={topCourses ?? []} />
             </section>
           )}

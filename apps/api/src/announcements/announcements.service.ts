@@ -1,6 +1,10 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import {
+  ANNOUNCEMENT_FEEDS,
+  hasAnyPermission,
+  PERMISSIONS,
   SUPPORTED_LANGUAGES,
+  type AnnouncementFeed,
   type AnnouncementStatus,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -27,13 +31,20 @@ export class AnnouncementsService {
   ) {}
 
   async getAllAnnouncements(
+    currentUser: CurrentUserType,
     language?: SupportedLanguages,
     paginationQuery: AnnouncementPaginationQuery = {},
     status?: AnnouncementStatus,
+    feed: AnnouncementFeed = ANNOUNCEMENT_FEEDS.ALL,
   ) {
     const { page, perPage } = parsePagination(paginationQuery.page, paginationQuery.perPage, {
       perPage: ANNOUNCEMENTS_PAGE_SIZE,
     });
+
+    const canManageAnnouncements = hasAnyPermission(currentUser.permissions, [
+      PERMISSIONS.ANNOUNCEMENT_CREATE,
+      PERMISSIONS.ANNOUNCEMENT_DELETE,
+    ]);
 
     return await this.announcementsRepository.getAllAnnouncements(
       language,
@@ -41,6 +52,9 @@ export class AnnouncementsService {
         page,
         perPage: Math.min(perPage, ANNOUNCEMENTS_PAGE_SIZE),
       },
+      currentUser,
+      canManageAnnouncements,
+      feed,
       status,
     );
   }
@@ -63,7 +77,7 @@ export class AnnouncementsService {
 
     if (!readAnnouncements) throw new BadRequestException("announcements.toast.markAsReadFailed");
 
-    const audience = announcement.isEveryone ? "everyone" : "group";
+    const audience = announcement.audience;
 
     await this.outboxPublisher.publish(
       new ViewAnnouncementEvent({

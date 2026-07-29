@@ -22,6 +22,7 @@ export const LEARNING_HANDLES = {
   aiMentorMessageRole: (role: "assistant" | "user" | "data" | "system") =>
     `learning-ai-mentor-message-${role}`,
   AI_MENTOR_CHECK_BUTTON: "learning-ai-mentor-check-button",
+  AI_MENTOR_RESULT_BUTTON: "learning-ai-mentor-result-button",
   AI_MENTOR_RESULT_CLOSE_BUTTON: "learning-ai-mentor-result-close-button",
   AI_MENTOR_RETAKE_BUTTON: "learning-ai-mentor-retake-button",
   AI_MENTOR_RETAKE_MODAL: "learning-ai-mentor-retake-modal",

@@ -51,6 +51,8 @@ import {
   learningPathExports,
   learningPaths,
   masterCourseExports,
+  permissionRoles,
+  permissionUserRoles,
   studentCourses,
   studentLearningPathCourses,
   studentLearningPaths,
@@ -76,6 +78,7 @@ import type {
   LearningPathUpdateData,
 } from "./learning-path.types";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { ProgressStatus } from "src/utils/types/progress.type";
 
@@ -184,6 +187,39 @@ export class LearningPathRepository {
           language,
           learningPaths,
         ),
+      })
+      .from(learningPaths)
+      .where(eq(learningPaths.id, id))
+      .limit(1);
+
+    return learningPath ?? null;
+  }
+
+  async getLearningPathActivitySnapshot(
+    id: UUIDType,
+    language?: SupportedLanguages,
+    dbInstance: DatabasePg = this.db,
+  ) {
+    const [learningPath] = await dbInstance
+      .select({
+        id: learningPaths.id,
+        title: this.localizationService.getLocalizedSqlField(
+          learningPaths.title,
+          language,
+          learningPaths,
+        ),
+        description: this.localizationService.getLocalizedSqlField(
+          learningPaths.description,
+          language,
+          learningPaths,
+        ),
+        status: learningPaths.status,
+        authorId: learningPaths.authorId,
+        sequenceEnabled: learningPaths.sequenceEnabled,
+        includesCertificate: learningPaths.includesCertificate,
+        baseLanguage: learningPaths.baseLanguage,
+        availableLocales: learningPaths.availableLocales,
+        settings: learningPaths.settings,
       })
       .from(learningPaths)
       .where(eq(learningPaths.id, id))
@@ -1761,6 +1797,38 @@ export class LearningPathRepository {
         eq(studentLearningPaths.studentId, studentId),
       ),
     });
+  }
+
+  async getStudentActorInfo(
+    studentId: UUIDType,
+    dbInstance: DatabasePg = this.db,
+  ): Promise<ActorUserType | null> {
+    const [user] = await dbInstance
+      .select({
+        userId: users.id,
+        email: users.email,
+        tenantId: users.tenantId,
+      })
+      .from(users)
+      .where(and(eq(users.id, studentId), isNull(users.deletedAt)));
+
+    if (!user) return null;
+
+    const roleRows = await dbInstance
+      .select({ slug: permissionRoles.slug })
+      .from(permissionUserRoles)
+      .innerJoin(permissionRoles, eq(permissionRoles.id, permissionUserRoles.roleId))
+      .where(eq(permissionUserRoles.userId, studentId));
+
+    const roleSlugs = roleRows.map(({ slug }) => slug);
+
+    return {
+      userId: user.userId,
+      email: user.email,
+      roleSlugs,
+      permissions: [],
+      tenantId: user.tenantId,
+    };
   }
 
   async getStudentCourseProgressByCourseIds(

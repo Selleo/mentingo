@@ -21,7 +21,8 @@ The feature has three main surfaces: the learner Progress page, the administrato
 - Show administrator analytics charts for popular courses, enrollment, course completion, freemium conversion, and average quiz score.
 - Download an analytics summary report.
 - Show course-level statistics for enrolled learners, completion, average completion, total learning time, and status distribution.
-- Filter course statistics by group, learner search, quiz, or AI mentor lesson.
+- Show quiz lesson names in the manager's selected interface language, with the course base language as fallback.
+- Filter course statistics by group, learner name, quiz, or AI mentor lesson, including searches that combine a learner's given and family names.
 - Show progress, quiz-result, AI mentor, and learning-time tables for a course.
 - Exclude deleted learners from course statistics.
 - Restrict analytics and course-statistics views by permissions.
@@ -36,7 +37,9 @@ A learner opens Progress to see personal learning activity. Mentingo aggregates 
 
 An administrator opens Analytics to review organization-level charts and download a summary report. These charts summarize course popularity, enrollment, completion, freemium conversion, and average quiz performance.
 
-From a course management view, permitted users can open the Statistics tab. Mentingo shows course overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons.
+From a course management view, permitted users can open the Statistics tab. Mentingo shows course overview metrics and detailed tables for learner progress, quiz results, AI mentor results, and learning time, with filters for groups, learners, quizzes, and mentor lessons. Learner search accepts a given name, family name, or a combined full name so course managers can find a specific person using the name format they see in the table.
+
+Quiz names in the average-score chart and quiz-results table follow the manager's selected interface language. If that language is unavailable for the course, Mentingo falls back to the course's base language.
 
 ## Key Technical Context
 
@@ -44,8 +47,9 @@ From a course management view, permitted users can open the Statistics tab. Ment
 - Admin analytics is routed at `/admin/analytics` and implemented in `apps/web/app/modules/Statistics/Admin`.
 - Learner and admin aggregate endpoints live in `apps/api/src/statistics`; course-level statistics endpoints are in `apps/api/src/courses/course.controller.ts`.
 - `STATISTICS_READ` gates admin analytics, and `COURSE_STATISTICS` gates course-level reporting.
+- Course-level quiz statistics pass the selected interface language to the API, which resolves localized lesson titles through the shared localization rules.
 - Statistics draw from course progress, lesson progress, quiz attempts, AI mentor progress, learning-time records, and activity streak data.
 
 ## Test Evidence
 
-Frontend E2E coverage verifies analytics charts, analytics report download, role-based course-statistics tab visibility, course statistics overview, progress and quiz-result filters, learning-time visibility, and AI mentor statistics preview/filter behavior. API E2E coverage in the Course controller verifies that deleted students are excluded from progress, quiz, average quiz, and learning-time statistics. No dedicated Statistics controller backend E2E spec was found in the discovered API tests.
+Frontend E2E coverage verifies analytics charts, analytics report download, role-based course-statistics tab visibility, course statistics overview, localized average-quiz and quiz-result requests, full-name learner search, progress and quiz-result filters, learning-time visibility, and AI mentor statistics preview/filter behavior. API E2E coverage in the Course controller verifies full-name search across progress, quiz-result, and learning-time statistics and verifies that deleted students are excluded from progress, quiz, average quiz, and learning-time statistics. No dedicated Statistics controller backend E2E spec was found in the discovered API tests.

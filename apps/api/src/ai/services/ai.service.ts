@@ -36,6 +36,7 @@ import { stripVoiceControlTags } from "src/ai/utils/voiceControlTags";
 import { DatabasePg } from "src/common";
 import { PermissionsService } from "src/permissions/permissions.service";
 import { dbAls } from "src/storage/db/db-als.store";
+import { DB } from "src/storage/db/db.providers";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { aiMentorThreads } from "src/storage/schema";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
@@ -59,7 +60,10 @@ import type {
 } from "src/ai/utils/ai.schema";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
-import type { CourseTranslationType } from "src/courses/types/course.types";
+import type {
+  ContextualCourseTranslationType,
+  CourseTranslationType,
+} from "src/courses/types/course.types";
 
 @Injectable()
 export class AiService {
@@ -78,7 +82,7 @@ export class AiService {
     private readonly permissionsService: PermissionsService,
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly tenantRunner: TenantDbRunnerService,
-    @Inject("DB")
+    @Inject(DB)
     private readonly db: DatabasePg,
   ) {}
 
@@ -304,15 +308,6 @@ export class AiService {
       true,
     );
 
-    const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, judged.data.summary);
-
-    await this.aiRepository.insertMessage({
-      threadId: data.threadId,
-      content: judged.data.summary,
-      role: MESSAGE_ROLE.MENTOR,
-      tokenCount,
-    });
-
     const { status: _status, ...judgeData } = judged.data;
 
     return {
@@ -329,7 +324,7 @@ export class AiService {
       throw new ForbiddenException("You don't have access to this thread");
 
     if (thread.status !== THREAD_STATUS.ACTIVE)
-      throw new BadRequestException("Thread must be active");
+      throw new BadRequestException("common.error.threadMustBeActive");
 
     return thread;
   }
@@ -442,20 +437,7 @@ export class AiService {
   }
 
   async generateMissingTranslations(
-    data: Array<{
-      data: CourseTranslationType;
-      metadata: string;
-      context: {
-        courseTitle?: string;
-        chapterTitle?: string;
-        lessonTitle?: string;
-        lessonDescription?: string;
-        questionTitle?: string;
-        questionDescription?: string;
-        questionOptions?: string;
-        optionText?: string;
-      };
-    }>,
+    data: ContextualCourseTranslationType[],
     language: SupportedLanguages,
     courseId: string,
     chunkSize: number = 4,
@@ -488,6 +470,12 @@ export class AiService {
                   }`,
                 context.questionOptions && `Options:\n${context.questionOptions}`,
                 context.optionText && `Option: ${context.optionText}`,
+                context.aiJudgeTaskGoal && `AI Judge task goal: ${context.aiJudgeTaskGoal}`,
+                context.aiJudgeCriterionTitle &&
+                  `AI Judge criterion: ${context.aiJudgeCriterionTitle}`,
+                context.aiJudgeExpectedBehavior &&
+                  `Expected behavior: ${context.aiJudgeExpectedBehavior}`,
+                context.aiJudgeScore && `Score guidance: ${context.aiJudgeScore}`,
               ]
                 .filter(Boolean)
                 .join("\n");

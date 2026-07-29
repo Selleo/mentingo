@@ -6,6 +6,7 @@ import {
 } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 
+import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
 import { UUIDSchema, type UUIDType } from "src/common";
 import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
@@ -15,6 +16,7 @@ import { liveTrainingDetailsSchema } from "src/live-training/schemas/live-traini
 import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { PROGRESS_STATUSES } from "src/utils/types/progress.type";
 
+import { aiJudgeConfigurationInputSchema } from "./ai-judge-configuration/ai-judge-configuration.schema";
 import { LESSON_TYPES } from "./lesson.type";
 
 import type { Static } from "@sinclair/typebox";
@@ -80,8 +82,8 @@ export const aiMentorLessonSchema = Type.Object({
   id: UUIDSchema,
   lessonId: UUIDSchema,
   aiMentorInstructions: Type.String(),
-  completionConditions: Type.String(),
   type: Type.Enum(AI_MENTOR_TYPE),
+  name: Type.String(),
   avatarReference: Type.Union([Type.String(), Type.Null()]),
   voiceMode: Type.Enum(AI_MENTOR_VOICE_MODE),
   ttsPreset: Type.Enum(AI_MENTOR_TTS_PRESET),
@@ -134,12 +136,12 @@ export const lessonSchema = Type.Object({
 });
 
 export const createAiMentorLessonSchema = Type.Intersect([
-  Type.Omit(lessonSchema, ["id", "displayOrder", "type"]),
+  Type.Omit(lessonSchema, ["id", "displayOrder", "type", "aiMentor"]),
   Type.Object({
     chapterId: UUIDSchema,
     displayOrder: Type.Optional(Type.Number()),
     aiMentorInstructions: Type.String(),
-    completionConditions: Type.String(),
+    aiJudgeConfiguration: aiJudgeConfigurationInputSchema,
     type: Type.Enum(AI_MENTOR_TYPE),
     name: Type.Optional(Type.String()),
     voiceMode: Type.Optional(Type.Enum(AI_MENTOR_VOICE_MODE)),
@@ -148,7 +150,7 @@ export const createAiMentorLessonSchema = Type.Intersect([
   }),
 ]);
 export const updateAiMentorLessonSchema = Type.Intersect([
-  Type.Omit(createAiMentorLessonSchema, ["chapterId", "displayOrder"]),
+  Type.Omit(createAiMentorLessonSchema, ["chapterId", "displayOrder", "aiJudgeConfiguration"]),
   Type.Object({
     language: supportedLanguagesSchema,
   }),
@@ -246,7 +248,23 @@ export const lessonShowSchema = Type.Object({
         percentage: Type.Union([Type.Number(), Type.Null()]),
         requiredScore: Type.Union([Type.Number(), Type.Null()]),
         passed: Type.Union([Type.Boolean(), Type.Null()]),
-        summary: Type.Union([Type.String(), Type.Null()]),
+        criteria: Type.Array(
+          Type.Object({
+            criterionId: Type.Union([UUIDSchema, Type.Null()]),
+            title: Type.String(),
+            awardedScore: Type.Integer(),
+            maxScore: Type.Integer(),
+            status: Type.Enum(AI_JUDGE_CRITERION_STATUS),
+            learnerSafeFeedback: Type.String(),
+          }),
+        ),
+        blockingErrors: Type.Array(
+          Type.Object({
+            blockingErrorId: Type.Union([UUIDSchema, Type.Null()]),
+            description: Type.String(),
+            learnerSafeFeedback: Type.String(),
+          }),
+        ),
       }),
       Type.Null(),
     ]),

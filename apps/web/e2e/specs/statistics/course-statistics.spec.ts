@@ -14,7 +14,7 @@ import { openCourseStatisticsFlow } from "../../flows/statistics/open-course-sta
 import { searchCourseStatisticsFlow } from "../../flows/statistics/search-course-statistics.flow";
 import { createSingleChoiceQuizLessonCourse } from "../learning/learning-test-helpers";
 
-test("admin can view course statistics overview, progress, quiz results and filters", async ({
+test("admin can view localized course statistics overview, progress, quiz results and filters", async ({
   apiClient,
   cleanup,
   factories,
@@ -121,7 +121,16 @@ test("admin can view course statistics overview, progress, quiz results and filt
           quizRow: true,
         });
 
+      const averageQuizScoreRequest = page.waitForRequest((request) =>
+        new URL(request.url()).pathname.endsWith(
+          `/api/course/${courseId}/statistics/average-quiz-score`,
+        ),
+      );
       await openCourseStatisticsFlow(page, courseId);
+      const localizedAverageQuizScoreRequest = await averageQuizScoreRequest;
+      expect(new URL(localizedAverageQuizScoreRequest.url()).searchParams.get("language")).toBe(
+        "en",
+      );
 
       await expect(
         page.getByTestId(COURSE_STATISTICS_HANDLES.OVERVIEW_ENROLLED_COUNT_CARD),
@@ -153,7 +162,14 @@ test("admin can view course statistics overview, progress, quiz results and filt
         page.getByTestId(COURSE_STATISTICS_HANDLES.progressRow(studentId)),
       ).toBeVisible();
 
+      const quizResultsRequest = page.waitForRequest((request) =>
+        new URL(request.url()).pathname.endsWith(
+          `/api/course/${courseId}/statistics/students-quiz-results`,
+        ),
+      );
       await openCourseStatisticsTabFlow(page, "quizResults");
+      const localizedQuizResultsRequest = await quizResultsRequest;
+      expect(new URL(localizedQuizResultsRequest.url()).searchParams.get("language")).toBe("en");
       await expect(
         page.getByTestId(COURSE_STATISTICS_HANDLES.quizResultsRow(studentId, quizLesson.id)),
       ).toBeVisible();

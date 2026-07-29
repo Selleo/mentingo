@@ -1,0 +1,8 @@
+export const AI_JUDGE_CONFIGURATION_GENERATION_JOB_NAME = "ai-judge-configuration-generation";
+
+export const AI_JUDGE_CONFIGURATION_GENERATION_JOB_RETENTION = {
+  age: 60 * 60,
+  count: 1_000,
+};
+
+export const AI_JUDGE_CONFIGURATION_GENERATION_WORKER_CONCURRENCY = 2;

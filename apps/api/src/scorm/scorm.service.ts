@@ -15,6 +15,7 @@ import {
   SCORM_COMPLETION_STATUS,
   SCORM_IMPORT_ACTION,
   SCORM_IMPORT_SOCKET,
+  SCORM_PACKAGE_ENTITY_TYPE,
   SCORM_PACKAGE_STATUS,
   SCORM_STANDARD,
   SCORM_SUCCESS_STATUS,
@@ -33,6 +34,11 @@ import { AdminLessonService } from "src/lesson/services/adminLesson.service";
 import { S3Service } from "src/s3/s3.service";
 import { StudentLessonProgressService } from "src/studentLessonProgress/studentLessonProgress.service";
 import { WsGateway } from "src/websocket";
+
+import { CompleteScormEvent } from "../events/scorm/complete-scorm.event";
+import { CreateScormEvent } from "../events/scorm/create-scorm.event";
+import { PlayScormEvent } from "../events/scorm/play-scorm.event";
+import { OutboxPublisher } from "../outbox/outbox.publisher";
 
 import { PROMISE_SETTLED_STATUS } from "./promise-settled-status";
 import { ScormRepository } from "./repositories/scorm.repository";
@@ -110,6 +116,7 @@ export class ScormService {
     private readonly studentLessonProgressService: StudentLessonProgressService,
     private readonly wsGateway: WsGateway,
     private readonly scormQueueService: ScormQueueService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   ensureTusVersion(req: Request) {
@@ -505,6 +512,21 @@ export class ScormService {
 
       await this.scormRepository.markPackageReady(jobData.packageId);
 
+      await this.outboxPublisher.publish(
+        new CreateScormEvent({
+          scormId: jobData.packageId,
+          actor: jobData.currentUser,
+          createdScorm: {
+            id: jobData.packageId,
+            entityType:
+              jobData.action === SCORM_IMPORT_ACTION.CREATE_COURSE
+                ? SCORM_PACKAGE_ENTITY_TYPE.COURSE
+                : SCORM_PACKAGE_ENTITY_TYPE.LESSON,
+          },
+        }),
+        this.db,
+      );
+
       this.publishScormImportStatus(jobData, SCORM_PACKAGE_STATUS.READY);
 
       return jobData.result!;
@@ -539,6 +561,23 @@ export class ScormService {
       );
 
       await this.scormRepository.markPackageReady(jobData.packageId);
+
+      await this.outboxPublisher.publish(
+        new CreateScormEvent({
+          scormId: jobData.packageId,
+          actor: jobData.currentUser,
+          createdScorm: {
+            id: jobData.packageId,
+            entityType:
+              jobData.importRequest.action === SCORM_IMPORT_ACTION.CREATE_COURSE
+                ? SCORM_PACKAGE_ENTITY_TYPE.COURSE
+                : SCORM_PACKAGE_ENTITY_TYPE.LESSON,
+            standard: SCORM_STANDARD.SCORM_1_2,
+            status: SCORM_PACKAGE_STATUS.READY,
+          },
+        }),
+        this.db,
+      );
 
       this.publishScormImportStatus(
         {
@@ -833,6 +872,15 @@ export class ScormService {
       scoId: launchableSco.scoId,
     });
 
+    await this.outboxPublisher.publish(
+      new PlayScormEvent({
+        scormId: launchableSco.packageId,
+        actor: currentUser,
+        userId: currentUser.userId,
+      }),
+      this.db,
+    );
+
     return {
       attemptId: attempt.id,
       packageId: launchableSco.packageId,
@@ -891,6 +939,9 @@ export class ScormService {
       ...normalizedRuntimeState,
     });
 
+    const previouslyCompleted =
+      existingRuntimeState?.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
+
     const scoCompleted =
       normalizedRuntimeState.completionStatus === SCORM_COMPLETION_STATUS.COMPLETED;
 
@@ -905,6 +956,26 @@ export class ScormService {
       completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
       excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
     });
+
+    if (scoCompleted && !previouslyCompleted && lessonCompleted) {
+      const packageCompleted = await this.scormRepository.areAllPackageScosCompleted({
+        studentId: currentUser.userId,
+        packageId: body.packageId,
+        completedStatuses: [SCORM_COMPLETION_STATUS.COMPLETED],
+        excludedSuccessStatuses: [SCORM_SUCCESS_STATUS.FAILED],
+      });
+
+      if (packageCompleted) {
+        await this.outboxPublisher.publish(
+          new CompleteScormEvent({
+            scormId: body.packageId,
+            actor: currentUser,
+            userId: currentUser.userId,
+          }),
+          this.db,
+        );
+      }
+    }
 
     const progressResult = lessonCompleted
       ? await this.studentLessonProgressService.markLessonAsCompleted({

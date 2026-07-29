@@ -1,8 +1,8 @@
 import { Readable } from "stream";
 
 import { faker } from "@faker-js/faker";
-import { SYSTEM_ROLE_SLUGS } from "@repo/shared";
-import { and, eq } from "drizzle-orm";
+import { LESSON_TYPES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
+import { and, asc, eq, inArray } from "drizzle-orm";
 import request from "supertest";
 
 import { BunnyStreamService } from "src/bunny/bunnyStream.service";
@@ -14,6 +14,11 @@ import { QUESTION_TYPE } from "src/questions/schema/question.types";
 import { S3Service } from "src/s3/s3.service";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
 import {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
+  aiMentorLessons,
   categories,
   chapters,
   courses,
@@ -97,6 +102,7 @@ describe("Master course export and sync (e2e)", () => {
     getFileExists: jest.Mock;
     getFileStream: jest.Mock;
     isConfigured: jest.Mock;
+    listFileKeysByPrefix: jest.Mock;
     uploadStreamMultipart: jest.Mock;
   };
   let mockBunnyStreamService: {
@@ -130,6 +136,7 @@ describe("Master course export and sync (e2e)", () => {
         contentType: "video/mp4",
       }),
       isConfigured: jest.fn().mockReturnValue(true),
+      listFileKeysByPrefix: jest.fn().mockResolvedValue([]),
       uploadStreamMultipart: jest.fn().mockResolvedValue(undefined),
     };
     mockBunnyStreamService = {
@@ -231,6 +238,10 @@ describe("Master course export and sync (e2e)", () => {
       "resources",
       "question_answer_options",
       "questions",
+      "ai_judge_score_guidance",
+      "ai_judge_blocking_errors",
+      "ai_judge_criteria",
+      "ai_judge_configurations",
       "ai_mentor_lessons",
       "lessons",
       "chapters",
@@ -251,6 +262,7 @@ describe("Master course export and sync (e2e)", () => {
       if (key.includes("/master-course/")) return false;
       return true;
     });
+    mockS3Service.listFileKeysByPrefix.mockResolvedValue([]);
     mockS3Service.isConfigured.mockReturnValue(true);
     mockBunnyStreamService.isConfigured.mockResolvedValue(false);
     mockBunnyStreamService.getMediaConfigurationSignature.mockResolvedValue("source-target-same");
@@ -672,6 +684,54 @@ describe("Master course export and sync (e2e)", () => {
     });
   });
 
+  it("preserves the target course status when source updates are synced", async () => {
+    const { sourceCourseId, targetCourseId } = await setupAndExport();
+    const updatedTitle = "Updated Master Source Course";
+
+    await runAsTenant(targetTenantId, () =>
+      db.update(courses).set({ status: "published" }).where(eq(courses.id, targetCourseId)),
+    );
+    await runAsTenant(sourceTenantId, () =>
+      db
+        .update(courses)
+        .set({
+          title: buildJsonbFieldWithMultipleEntries({
+            en: updatedTitle,
+            pl: "Kurs zrodlowy master",
+          }),
+        })
+        .where(eq(courses.id, sourceCourseId)),
+    );
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(eq(masterCourseExports.sourceCourseId, sourceCourseId))
+      .limit(1);
+
+    expect(exportLink).toBeDefined();
+    await masterCourseService.processSyncJob({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+      triggerEventType: "UpdateCourseEvent",
+    });
+
+    const syncedTargetCourse = await runAsTenant(targetTenantId, async () => {
+      const [targetCourse] = await db
+        .select({ title: courses.title, status: courses.status })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId))
+        .limit(1);
+
+      return targetCourse;
+    });
+
+    expect(syncedTargetCourse?.title.en).toBe(updatedTitle);
+    expect(syncedTargetCourse?.status).toBe("published");
+  });
+
   it("syncs bulk source category changes to exported courses and creates missing target category", async () => {
     const { sourceCourseId, sourceCookie, targetCourseId } = await setupAndExport();
     const categoryTitle = `Bulk synced category ${faker.string.nanoid(8)}`;
@@ -757,6 +817,351 @@ describe("Master course export and sync (e2e)", () => {
       );
 
     expect(links).toHaveLength(1);
+  });
+
+  it("copies every missing course cover image variant when the target has a partial copy", async () => {
+    const sourceThumbnailReference = `${sourceTenantId}/course/variants/${faker.string.uuid()}.webp`;
+    const sourceStem = sourceThumbnailReference.replace(/\.webp$/, "");
+    const sourceVariantKeys = ["160w", "512w", "2560w"].map(
+      (quality) => `${sourceStem}-${quality}.webp`,
+    );
+
+    mockS3Service.listFileKeysByPrefix.mockImplementation(async (prefix: string) =>
+      prefix === `${sourceStem}-` ? sourceVariantKeys : [],
+    );
+
+    mockS3Service.getFileExists.mockImplementation(async (key: string) => {
+      if (!key.includes("/master-course/")) return false;
+      return key.endsWith("-512w.webp");
+    });
+
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceCourseId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          await db
+            .update(courses)
+            .set({ thumbnailS3Key: sourceThumbnailReference })
+            .where(eq(courses.id, sourceCourseId));
+        });
+      },
+    });
+
+    const [targetCourse] = await runAsTenant(targetTenantId, () =>
+      db
+        .select({ thumbnailS3Key: courses.thumbnailS3Key })
+        .from(courses)
+        .where(eq(courses.id, targetCourseId))
+        .limit(1),
+    );
+
+    expect(targetCourse.thumbnailS3Key).toContain(`${targetTenantId}/master-course/`);
+    expect(targetCourse.thumbnailS3Key).toContain(`/${targetCourseId}/variants/`);
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.sourceCourseId, sourceCourseId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    expect(targetCourse.thumbnailS3Key).not.toContain(`/${exportLink.id}/`);
+    expect(mockS3Service.listFileKeysByPrefix).toHaveBeenCalledWith(`${sourceStem}-`);
+
+    const targetStem = targetCourse.thumbnailS3Key!.replace(/\.webp$/, "");
+    const targetVariantKeys = sourceVariantKeys.map(
+      (sourceVariantKey) => `${targetStem}${sourceVariantKey.slice(sourceStem.length)}`,
+    );
+
+    expect(new Set(targetVariantKeys).size).toBe(sourceVariantKeys.length);
+
+    for (const [index, sourceVariantKey] of sourceVariantKeys.entries()) {
+      const targetVariantKey = targetVariantKeys[index];
+
+      if (targetVariantKey.endsWith("-512w.webp")) {
+        expect(mockS3Service.copyFile).not.toHaveBeenCalledWith(
+          sourceVariantKey,
+          targetVariantKey,
+          "image/webp",
+        );
+        continue;
+      }
+
+      expect(mockS3Service.copyFile).toHaveBeenCalledWith(
+        sourceVariantKey,
+        targetVariantKey,
+        "image/webp",
+      );
+    }
+  });
+
+  it("copies and resynchronizes the complete localized AI Judge configuration", async () => {
+    let sourceConfigurationId = "";
+
+    const { sourceCourseId, targetCourseId } = await setupAndExport({
+      beforeExport: async ({ sourceLessonId }) => {
+        await runAsTenant(sourceTenantId, async () => {
+          await db
+            .update(lessons)
+            .set({ type: LESSON_TYPES.AI_MENTOR })
+            .where(eq(lessons.id, sourceLessonId));
+
+          const [sourceAiMentor] = await db
+            .insert(aiMentorLessons)
+            .values({
+              lessonId: sourceLessonId,
+              aiMentorInstructions: buildJsonbFieldWithMultipleEntries({
+                en: "Run a discovery conversation",
+                pl: "Przeprowadz rozmowe discovery",
+              }),
+            })
+            .returning({ id: aiMentorLessons.id });
+
+          const [sourceConfiguration] = await db
+            .insert(aiJudgeConfigurations)
+            .values({
+              aiMentorLessonId: sourceAiMentor.id,
+              taskGoal: buildJsonbFieldWithMultipleEntries({
+                en: "Discover the client's needs",
+                pl: "Odkryj potrzeby klienta",
+              }),
+              passingThresholdPercent: 70,
+            })
+            .returning({ id: aiJudgeConfigurations.id });
+          sourceConfigurationId = sourceConfiguration.id;
+
+          const [sourceCriterion] = await db
+            .insert(aiJudgeCriteria)
+            .values({
+              configurationId: sourceConfiguration.id,
+              title: buildJsonbFieldWithMultipleEntries({
+                en: "Needs discovery",
+                pl: "Badanie potrzeb",
+              }),
+              expectedBehavior: buildJsonbFieldWithMultipleEntries({
+                en: "Asks relevant open questions",
+                pl: "Zadaje trafne pytania otwarte",
+              }),
+              maxScore: 2,
+            })
+            .returning({ id: aiJudgeCriteria.id });
+
+          await db.insert(aiJudgeScoreGuidance).values([
+            {
+              criterionId: sourceCriterion.id,
+              score: 0,
+              description: buildJsonbFieldWithMultipleEntries({
+                en: "Does not explore needs",
+                pl: "Nie bada potrzeb",
+              }),
+              example: buildJsonbFieldWithMultipleEntries({
+                en: "Immediately presents a solution",
+                pl: "Od razu przedstawia rozwiazanie",
+              }),
+            },
+            {
+              criterionId: sourceCriterion.id,
+              score: 1,
+              description: buildJsonbFieldWithMultipleEntries({
+                en: "Explores one relevant need",
+                pl: "Bada jedna istotna potrzebe",
+              }),
+              example: null,
+            },
+            {
+              criterionId: sourceCriterion.id,
+              score: 2,
+              description: buildJsonbFieldWithMultipleEntries({
+                en: "Explores the important needs",
+                pl: "Bada najwazniejsze potrzeby",
+              }),
+              example: buildJsonbFieldWithMultipleEntries({
+                en: "What outcome matters most?",
+                pl: "Jaki rezultat jest najwazniejszy?",
+              }),
+            },
+          ]);
+
+          await db.insert(aiJudgeBlockingErrors).values({
+            configurationId: sourceConfiguration.id,
+            description: buildJsonbFieldWithMultipleEntries({
+              en: "Invents unsupported product claims",
+              pl: "Wymysla niepotwierdzone informacje o produkcie",
+            }),
+          });
+        });
+      },
+    });
+
+    const getTargetGraph = () =>
+      runAsTenant(targetTenantId, async () => {
+        const [configuration] = await db
+          .select({
+            id: aiJudgeConfigurations.id,
+            taskGoal: aiJudgeConfigurations.taskGoal,
+            passingThresholdPercent: aiJudgeConfigurations.passingThresholdPercent,
+          })
+          .from(aiJudgeConfigurations)
+          .innerJoin(
+            aiMentorLessons,
+            eq(aiMentorLessons.id, aiJudgeConfigurations.aiMentorLessonId),
+          )
+          .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+          .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+          .where(eq(chapters.courseId, targetCourseId))
+          .limit(1);
+
+        const criteria = await db
+          .select()
+          .from(aiJudgeCriteria)
+          .where(eq(aiJudgeCriteria.configurationId, configuration.id))
+          .orderBy(asc(aiJudgeCriteria.createdAt));
+        const scoreGuidance = await db
+          .select()
+          .from(aiJudgeScoreGuidance)
+          .where(
+            inArray(
+              aiJudgeScoreGuidance.criterionId,
+              criteria.map(({ id }) => id),
+            ),
+          )
+          .orderBy(asc(aiJudgeScoreGuidance.score));
+        const blockingErrors = await db
+          .select()
+          .from(aiJudgeBlockingErrors)
+          .where(eq(aiJudgeBlockingErrors.configurationId, configuration.id));
+
+        return { configuration, criteria, scoreGuidance, blockingErrors };
+      });
+
+    const initialTargetGraph = await getTargetGraph();
+    expect(initialTargetGraph.configuration).toMatchObject({
+      taskGoal: {
+        en: "Discover the client's needs",
+        pl: "Odkryj potrzeby klienta",
+      },
+      passingThresholdPercent: 70,
+    });
+    expect(initialTargetGraph.configuration.id).not.toBe(sourceConfigurationId);
+    expect(initialTargetGraph.criteria).toEqual([
+      expect.objectContaining({
+        title: { en: "Needs discovery", pl: "Badanie potrzeb" },
+        expectedBehavior: {
+          en: "Asks relevant open questions",
+          pl: "Zadaje trafne pytania otwarte",
+        },
+        maxScore: 2,
+      }),
+    ]);
+    expect(initialTargetGraph.scoreGuidance).toEqual([
+      expect.objectContaining({
+        score: 0,
+        example: expect.objectContaining({ en: expect.any(String) }),
+      }),
+      expect.objectContaining({ score: 1, example: null }),
+      expect.objectContaining({
+        score: 2,
+        example: expect.objectContaining({ pl: expect.any(String) }),
+      }),
+    ]);
+    expect(initialTargetGraph.blockingErrors).toEqual([
+      expect.objectContaining({
+        description: {
+          en: "Invents unsupported product claims",
+          pl: "Wymysla niepotwierdzone informacje o produkcie",
+        },
+      }),
+    ]);
+
+    await runAsTenant(sourceTenantId, async () => {
+      await db
+        .update(aiJudgeConfigurations)
+        .set({
+          taskGoal: buildJsonbFieldWithMultipleEntries({
+            en: "Agree a concrete next step",
+            pl: "Uzgodnij konkretny kolejny krok",
+          }),
+          passingThresholdPercent: 80,
+        })
+        .where(eq(aiJudgeConfigurations.id, sourceConfigurationId));
+      await db
+        .delete(aiJudgeCriteria)
+        .where(eq(aiJudgeCriteria.configurationId, sourceConfigurationId));
+      await db
+        .delete(aiJudgeBlockingErrors)
+        .where(eq(aiJudgeBlockingErrors.configurationId, sourceConfigurationId));
+
+      const [replacementCriterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: sourceConfigurationId,
+          title: buildJsonbFieldWithMultipleEntries({
+            en: "Next step",
+            pl: "Kolejny krok",
+          }),
+          expectedBehavior: buildJsonbFieldWithMultipleEntries({
+            en: "Confirms an owner and date",
+            pl: "Potwierdza osobe odpowiedzialna i termin",
+          }),
+          maxScore: 1,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+
+      await db.insert(aiJudgeScoreGuidance).values([
+        {
+          criterionId: replacementCriterion.id,
+          score: 0,
+          description: buildJsonbField("en", "Does not agree a next step"),
+        },
+        {
+          criterionId: replacementCriterion.id,
+          score: 1,
+          description: buildJsonbField("en", "Agrees a concrete next step"),
+        },
+      ]);
+    });
+
+    const [exportLink] = await baseDb
+      .select({ id: masterCourseExports.id })
+      .from(masterCourseExports)
+      .where(
+        and(
+          eq(masterCourseExports.sourceTenantId, sourceTenantId),
+          eq(masterCourseExports.sourceCourseId, sourceCourseId),
+          eq(masterCourseExports.targetTenantId, targetTenantId),
+        ),
+      )
+      .limit(1);
+
+    await masterCourseService.processSyncJob({
+      exportId: exportLink.id,
+      sourceCourseId,
+      sourceTenantId,
+      targetTenantId,
+      triggerEventType: "test",
+    });
+
+    const synchronizedTargetGraph = await getTargetGraph();
+    expect(synchronizedTargetGraph.configuration.id).toBe(initialTargetGraph.configuration.id);
+    expect(synchronizedTargetGraph.configuration).toMatchObject({
+      taskGoal: {
+        en: "Agree a concrete next step",
+        pl: "Uzgodnij konkretny kolejny krok",
+      },
+      passingThresholdPercent: 80,
+    });
+    expect(synchronizedTargetGraph.criteria).toEqual([
+      expect.objectContaining({
+        title: { en: "Next step", pl: "Kolejny krok" },
+        maxScore: 1,
+      }),
+    ]);
+    expect(synchronizedTargetGraph.scoreGuidance).toHaveLength(2);
+    expect(synchronizedTargetGraph.blockingErrors).toEqual([]);
   });
 
   it("copies rich-text S3 resources, rewrites localized content, and reuses target resource rows on sync", async () => {

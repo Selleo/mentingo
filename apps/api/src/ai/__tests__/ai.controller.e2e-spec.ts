@@ -2,11 +2,20 @@ import { SUPPORTED_LANGUAGES, SYSTEM_ROLE_SLUGS } from "@repo/shared";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 
+import { AI_JUDGE_CRITERION_STATUS } from "src/ai/judge-configuration/judge-configuration.types";
 import { AiRepository } from "src/ai/repositories/ai.repository";
 import { THREAD_STATUS } from "src/ai/utils/ai.type";
-import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
+import { LessonRepository } from "src/lesson/repositories/lesson.repository";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { aiMentorLessons, chapters, courses, lessons } from "src/storage/schema";
+import {
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiMentorLessons,
+  chapters,
+  courses,
+  lessons,
+} from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createSettingsFactory } from "../../../test/factory/settings.factory";
@@ -23,6 +32,7 @@ describe("AiController (e2e)", () => {
   let db: DatabasePg;
   let baseDb: DatabasePg;
   let aiRepository: AiRepository;
+  let lessonRepository: LessonRepository;
 
   let userFactory: ReturnType<typeof createUserFactory>;
   let settingsFactory: ReturnType<typeof createSettingsFactory>;
@@ -37,6 +47,7 @@ describe("AiController (e2e)", () => {
     db = app.get(DB);
     baseDb = app.get(DB_ADMIN);
     aiRepository = moduleFixture.get(AiRepository);
+    lessonRepository = moduleFixture.get(LessonRepository);
 
     userFactory = createUserFactory(db);
     settingsFactory = createSettingsFactory(db);
@@ -75,23 +86,19 @@ describe("AiController (e2e)", () => {
             SUPPORTED_LANGUAGES.PL,
             "Polish mentor instructions",
           ),
-          completionConditions: setJsonbField(
-            aiMentorLessons.completionConditions,
-            SUPPORTED_LANGUAGES.PL,
-            "Polish completion conditions",
-          ),
+          name: setJsonbField(aiMentorLessons.name, SUPPORTED_LANGUAGES.PL, "Polish mentor"),
         })
         .where(eq(aiMentorLessons.id, aiMentorLessonId));
     };
 
-    it("resolves prompt instructions and completion conditions in the thread language", async () => {
+    it("resolves prompt instructions in the thread language", async () => {
       const threadOwner = await userFactory
         .withCredentials({ password })
         .withUserSettings(db)
         .create({ role: SYSTEM_ROLE_SLUGS.STUDENT });
       const aiMentorLesson = await aiMentorLessonFactory.create({
         aiMentorInstructions: "English mentor instructions",
-        completionConditions: "English completion conditions",
+        taskGoal: "English task goal",
       });
       const courseId = await getCourseIdForAiMentorLesson(aiMentorLesson.lessonId);
 
@@ -125,9 +132,82 @@ describe("AiController (e2e)", () => {
       );
 
       expect(polishLesson.instructions).toBe("Polish mentor instructions");
-      expect(polishLesson.conditions).toBe("Polish completion conditions");
+      expect(polishLesson.name).toBe("Polish mentor");
       expect(fallbackLesson.instructions).toBe("English mentor instructions");
-      expect(fallbackLesson.conditions).toBe("English completion conditions");
+      expect(polishLesson.learnerFirstName).toBe(threadOwner.firstName);
+    });
+  });
+
+  describe("persisted AI Judge results", () => {
+    it("returns judgement details without learner progress and restores a blank title snapshot", async () => {
+      const courseAuthor = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const aiMentorLesson = await aiMentorLessonFactory.create();
+      const [configuration] = await db
+        .select({ id: aiJudgeConfigurations.id })
+        .from(aiJudgeConfigurations)
+        .where(eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLesson.id));
+      const [criterion] = await db
+        .insert(aiJudgeCriteria)
+        .values({
+          configurationId: configuration.id,
+          title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "HTML basics"),
+          expectedBehavior: buildJsonbField(
+            SUPPORTED_LANGUAGES.EN,
+            "Demonstrates basic HTML knowledge",
+          ),
+          maxScore: 2,
+        })
+        .returning({ id: aiJudgeCriteria.id });
+      const thread = await aiRepository.createThread({
+        userId: courseAuthor.id,
+        aiMentorLessonId: aiMentorLesson.id,
+        status: THREAD_STATUS.COMPLETED,
+        userLanguage: SUPPORTED_LANGUAGES.EN,
+      });
+      const judgement = await aiRepository.upsertJudgeJudgement({
+        threadId: thread.id,
+        configurationId: configuration.id,
+        language: SUPPORTED_LANGUAGES.EN,
+        earnedPoints: 0,
+        maxScore: 2,
+        percentage: 0,
+        passed: false,
+      });
+
+      await aiRepository.insertJudgeCriterionJudgements([
+        {
+          judgementId: judgement.id,
+          criterionId: criterion.id,
+          criterionTitle: "",
+          awardedPoints: 0,
+          maxScoreAtJudgement: 2,
+          status: AI_JUDGE_CRITERION_STATUS.NOT_MET,
+          learnerSafeFeedback: "No evidence was provided.",
+        },
+      ]);
+
+      const lesson = await lessonRepository.getLessonDetails(
+        aiMentorLesson.lessonId,
+        courseAuthor.id,
+        SUPPORTED_LANGUAGES.EN,
+      );
+
+      expect(lesson.aiMentorDetails).toMatchObject({
+        minScore: 0,
+        maxScore: 2,
+        score: 0,
+        percentage: 0,
+        passed: false,
+        criteria: [
+          expect.objectContaining({
+            criterionId: criterion.id,
+            title: "HTML basics",
+          }),
+        ],
+      });
     });
   });
 

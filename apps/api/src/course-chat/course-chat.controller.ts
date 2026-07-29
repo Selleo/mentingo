@@ -13,6 +13,7 @@ import {
 import { RequireFeature } from "src/common/decorators/require-feature.decorator";
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
+import { CurrentUserType } from "src/common/types/current-user.type";
 import { CourseChatService } from "src/course-chat/course-chat.service";
 import {
   courseChatMessageReactionsUpdatedSchema,
@@ -33,7 +34,7 @@ import {
 } from "src/course-chat/schemas/course-chat.schema";
 
 @Controller("course-chat")
-@RequireFeature(FEATURES.COURSE_DISCUSSIONS)
+@RequireFeature({ features: [FEATURES.COURSE_DISCUSSIONS] })
 export class CourseChatController {
   constructor(private readonly courseChatService: CourseChatService) {}
 
@@ -81,10 +82,10 @@ export class CourseChatController {
   async createMessage(
     @Param("courseId") courseId: UUIDType,
     @Body() body: CreateCourseChatMessageBody,
-    @CurrentUser("userId") userId: UUIDType,
+    @CurrentUser() currentUser: CurrentUserType,
     @CurrentUser("tenantId") tenantId: UUIDType,
   ): Promise<BaseResponse<CourseChatMessageResponse>> {
-    return this.courseChatService.createMessage(courseId, userId, tenantId, body);
+    return this.courseChatService.createMessage(courseId, currentUser, tenantId, body);
   }
 
   @Get("messages/:messageId/replies")

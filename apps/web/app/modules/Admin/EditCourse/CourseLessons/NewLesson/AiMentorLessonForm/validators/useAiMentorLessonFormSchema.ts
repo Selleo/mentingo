@@ -1,6 +1,12 @@
-import { AI_MENTOR_TTS_PRESET, AI_MENTOR_TYPE, AI_MENTOR_VOICE_MODE } from "@repo/shared";
+import {
+  AI_MENTOR_TTS_PRESET,
+  AI_MENTOR_TYPE,
+  AI_MENTOR_VOICE_MODE,
+  DEFAULT_AI_MENTOR_TYPE,
+} from "@repo/shared";
 import { z } from "zod";
 
+import { aiJudgeConfigurationSchema } from "../AiJudge/aiJudgeConfiguration.schema";
 import {
   MAX_AI_MENTOR_TEXT_LENGTH,
   MAX_MB_PER_FILE,
@@ -57,32 +63,8 @@ export const aiMentorLessonFormSchema = (t: TFunction) =>
             ),
           },
         ),
-      completionConditions: z
-        .string()
-        .min(1, {
-          message: t("adminCourseView.curriculum.lesson.validation.completionConditionsRequired"),
-        })
-        .refine(
-          (val) => {
-            const textContent = stripHtmlTags(val);
-            return textContent.length > 0;
-          },
-          {
-            message: t("adminCourseView.curriculum.lesson.validation.completionConditionsRequired"),
-          },
-        )
-        .refine(
-          (val) => {
-            const textContent = stripHtmlTags(val);
-            return textContent.length <= 20_000;
-          },
-          {
-            message: t(
-              "adminCourseView.curriculum.lesson.validation.completionConditionsMaxLength",
-            ),
-          },
-        ),
-      type: z.nativeEnum(AI_MENTOR_TYPE).default(AI_MENTOR_TYPE.MENTOR),
+      aiJudgeConfiguration: aiJudgeConfigurationSchema(t),
+      type: z.nativeEnum(AI_MENTOR_TYPE).default(DEFAULT_AI_MENTOR_TYPE),
       name: z.string(),
       voiceMode: z.nativeEnum(AI_MENTOR_VOICE_MODE).default(AI_MENTOR_VOICE_MODE.PRESET),
       ttsPreset: z.nativeEnum(AI_MENTOR_TTS_PRESET).default(AI_MENTOR_TTS_PRESET.MALE),

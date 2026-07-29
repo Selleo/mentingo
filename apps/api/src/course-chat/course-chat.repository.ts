@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { COURSE_ENROLLMENT } from "@repo/shared";
+import { COURSE_ENROLLMENT, SUPPORTED_LANGUAGES } from "@repo/shared";
 import { and, count, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
@@ -15,6 +15,7 @@ import {
 } from "src/storage/schema";
 
 import type { SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type {
   CourseChatEmailContext,
@@ -204,6 +205,22 @@ export class CourseChatRepository {
       .limit(1);
 
     return course ?? null;
+  }
+
+  async getLocalizedCourseTitles(courseId: UUIDType) {
+    const localizedTitleFields = Object.fromEntries(
+      Object.values(SUPPORTED_LANGUAGES).map((language) => [
+        language,
+        this.localizationService.getLocalizedSqlField(courses.title, language),
+      ]),
+    ) as Record<SupportedLanguages, SQL<string>>;
+
+    const [localizedTitles] = await this.db
+      .select(localizedTitleFields)
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    return localizedTitles ?? null;
   }
 
   async getMessageById(messageId: UUIDType): Promise<CourseChatMessageRow | null> {

@@ -117,14 +117,14 @@ const AnswerSelectQuestion = ({
       <Accordion.Item value={`item-${questionIndex}`}>
         <div className="mt-3 rounded-xl border-0 p-2 transition-all duration-300">
           <div className="ml-14">
-            {!isOptionEmpty ? (
+            {!isOptionEmpty && (
               <>
                 <span className="mr-1 text-red-500">*</span>
                 <Label className="body-sm-md">
                   {t("adminCourseView.curriculum.lesson.field.options")}
                 </Label>
               </>
-            ) : null}
+            )}
             {watchedOptions && watchedOptions.length > 0 && (
               <SortableList
                 items={watchedOptions}

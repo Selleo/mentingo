@@ -3,11 +3,12 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { ApiClient } from "~/api/api-client";
 
 import type { GetAllAnnouncementsResponse } from "./../../generated-api";
-import type { SupportedLanguages } from "@repo/shared";
+import type { AnnouncementFeed, SupportedLanguages } from "@repo/shared";
 
 export const ALL_ANNOUNCEMENTS_QUERY_KEY = "announcements";
 
 export type AllAnnouncementsParams = {
+  feed?: AnnouncementFeed;
   language?: SupportedLanguages;
   page?: number;
   perPage?: number;
@@ -24,6 +25,7 @@ export const allAnnouncementsOptions = (
   queryKey: [ALL_ANNOUNCEMENTS_QUERY_KEY, searchParams],
   queryFn: async () => {
     const { data } = await ApiClient.api.announcementsControllerGetAllAnnouncements({
+      ...(searchParams?.feed && { feed: searchParams.feed }),
       ...(searchParams?.language && { language: searchParams.language }),
       ...(searchParams?.page && { page: searchParams.page }),
       ...(searchParams?.perPage && { perPage: searchParams.perPage }),

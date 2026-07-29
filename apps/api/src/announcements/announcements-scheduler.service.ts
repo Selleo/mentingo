@@ -159,6 +159,7 @@ export class AnnouncementsSchedulerService {
       sourceType: input.sourceType,
       sourceId: input.sourceId,
       status,
+      usersToNotify: null,
       scheduledAt: scheduledDate?.toISOString() ?? null,
       publishedAt: status === ANNOUNCEMENT_STATUSES.PUBLISHED ? new Date().toISOString() : null,
     });

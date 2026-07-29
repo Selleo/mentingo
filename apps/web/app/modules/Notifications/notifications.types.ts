@@ -1,11 +1,6 @@
-import type {
-  GetAllAnnouncementsResponse,
-  GetAnnouncementsForUserResponse,
-} from "~/api/generated-api";
+import type { GetAllAnnouncementsResponse } from "~/api/generated-api";
 
-export type NotificationAnnouncement =
-  | GetAnnouncementsForUserResponse["data"][number]
-  | (GetAllAnnouncementsResponse["data"][number] & { isRead?: boolean });
+export type NotificationAnnouncement = GetAllAnnouncementsResponse["data"][number];
 
 export type NotificationsFeed = {
   announcements: NotificationAnnouncement[];

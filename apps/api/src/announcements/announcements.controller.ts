@@ -9,7 +9,12 @@ import {
   UseGuards,
   Query,
 } from "@nestjs/common";
-import { PERMISSIONS, type AnnouncementStatus, type SupportedLanguages } from "@repo/shared";
+import {
+  PERMISSIONS,
+  type AnnouncementFeed,
+  type AnnouncementStatus,
+  type SupportedLanguages,
+} from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -23,11 +28,13 @@ import {
 import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { PermissionsGuard } from "src/common/guards/permissions.guard";
+import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
 import { AnnouncementsService } from "./announcements.service";
 import {
   allAnnouncementsSchema,
+  announcementFeedSchema,
   announcementLanguageSchema,
   announcementStatusSchema,
   announcementsForUserSchema,
@@ -54,6 +61,7 @@ export class AnnouncementsController {
   @Validate({
     request: [
       { type: "query", name: "language", schema: Type.Optional(announcementLanguageSchema) },
+      { type: "query", name: "feed", schema: Type.Optional(announcementFeedSchema) },
       { type: "query", name: "status", schema: Type.Optional(announcementStatusSchema) },
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
@@ -62,17 +70,31 @@ export class AnnouncementsController {
   })
   async getAllAnnouncements(
     @Query("language") language?: SupportedLanguages,
+    @Query("feed") feed?: AnnouncementFeed,
     @Query("status") status?: AnnouncementStatus,
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
+    @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AllAnnouncements>> {
+    if (!currentUser) {
+      return new PaginatedResponse({
+        data: [],
+        pagination: {
+          page: 1,
+          perPage: DEFAULT_PAGE_SIZE,
+          totalItems: 0,
+        },
+      });
+    }
     const announcements = await this.announcementsService.getAllAnnouncements(
+      currentUser,
       language,
       {
         page,
         perPage,
       },
       status,
+      feed,
     );
 
     return new PaginatedResponse(announcements);

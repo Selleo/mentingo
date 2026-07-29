@@ -2,6 +2,7 @@ import { LangfuseClient } from "@langfuse/client";
 import { observe } from "@langfuse/tracing";
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PROMPT_MAP, promptTemplates } from "@repo/prompts";
+import { DEFAULT_AI_MENTOR_TYPE } from "@repo/shared";
 import { Value } from "@sinclair/typebox/value";
 import { eq } from "drizzle-orm";
 import Handlebars from "handlebars";
@@ -145,9 +146,14 @@ export class PromptService implements OnModuleInit {
 
     const groups = await this.aiRepository.findGroupsByThreadId(data.threadId, userLanguage);
 
-    const mode = (lesson.type ?? "mentor").toLowerCase();
+    const mode = (lesson.type ?? DEFAULT_AI_MENTOR_TYPE).toLowerCase();
 
     const securityAndRagBlock = await this.loadPrompt("securityAndRagBlock", {
+      language: userLanguage,
+    });
+
+    const learnerNameAddon = await this.loadPrompt("learnerNameAddon", {
+      learnerFirstName: lesson.learnerFirstName,
       language: userLanguage,
     });
 
@@ -165,13 +171,15 @@ export class PromptService implements OnModuleInit {
         promptChoice = promptTemplates.mentorPrompt.id;
     }
 
-    const prompt = await this.loadPrompt(promptChoice, {
+    const mentorPrompt = await this.loadPrompt(promptChoice, {
       lessonTitle: lesson.title,
       name: lesson.name,
       lessonInstructions: lesson.instructions,
       groups: groups.map((group) => `${group.name}: ${group.characteristic}\n`),
       securityAndRagBlock: securityAndRagBlock,
     });
+
+    const prompt = `${mentorPrompt}\n\n${learnerNameAddon}`;
 
     const tokenCount = this.tokenService.countTokens(OPENAI_MODELS.BASIC, prompt);
 

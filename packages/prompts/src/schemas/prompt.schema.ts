@@ -1,10 +1,12 @@
 import { Type } from "@sinclair/typebox";
 
+import type { TSchema } from "@sinclair/typebox";
+import type { promptId } from "../generated-prompts";
+
 export const judgePromptSchema = Type.Object({
   language: Type.String(),
-  lessonInstructions: Type.String(),
   lessonTitle: Type.String(),
-  lessonConditions: Type.String(),
+  assessmentConfiguration: Type.String(),
 });
 
 export const aiPromptSchema = Type.Object({
@@ -36,6 +38,30 @@ export const voiceMentorAddonSchema = Type.Object({
   language: Type.String(),
 });
 
+export const learnerNameAddonSchema = Type.Object({
+  learnerFirstName: Type.String({ minLength: 1 }),
+  language: Type.String({ minLength: 1 }),
+});
+
+export const aiJudgeConfigurationGeneratorBaseSchema = Type.Object(
+  {
+    language: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
+export const aiJudgeConfigurationGeneratorModeSchema = Type.Object(
+  {},
+  { additionalProperties: false },
+);
+
+export const aiJudgeConfigurationValidatorSchema = Type.Object(
+  {
+    language: Type.String({ minLength: 1 }),
+  },
+  { additionalProperties: false },
+);
+
 export const PROMPT_MAP = {
   judgePrompt: judgePromptSchema,
   mentorPrompt: aiPromptSchema,
@@ -46,4 +72,10 @@ export const PROMPT_MAP = {
   securityAndRagBlock: securityAndRagBlockSchema,
   translationPrompt: translationPromptSchema,
   voiceMentorAddon: voiceMentorAddonSchema,
-};
+  learnerNameAddon: learnerNameAddonSchema,
+  aiJudgeConfigurationGeneratorBase: aiJudgeConfigurationGeneratorBaseSchema,
+  aiJudgeConfigurationGeneratorCreate: aiJudgeConfigurationGeneratorModeSchema,
+  aiJudgeConfigurationGeneratorImprove: aiJudgeConfigurationGeneratorModeSchema,
+  aiJudgeConfigurationGeneratorRepair: aiJudgeConfigurationGeneratorModeSchema,
+  aiJudgeConfigurationValidator: aiJudgeConfigurationValidatorSchema,
+} satisfies Record<promptId, TSchema>;

@@ -244,6 +244,11 @@ export class StudentLessonProgressService {
     }
 
     if (lesson.type === LESSON_TYPES.AI_MENTOR && aiMentorLessonData) {
+      const {
+        criteria: _criteria,
+        blockingErrors: _blockingErrors,
+        ...aiMentorProgressData
+      } = aiMentorLessonData;
       const [existingAiMentorLesson] = await dbInstance
         .select()
         .from(aiMentorStudentLessonProgress)
@@ -251,13 +256,13 @@ export class StudentLessonProgressService {
 
       if (!existingAiMentorLesson) {
         await dbInstance.insert(aiMentorStudentLessonProgress).values({
-          ...aiMentorLessonData,
+          ...aiMentorProgressData,
           studentLessonProgressId: currentLessonProgress.id,
         });
       } else {
         await dbInstance
           .update(aiMentorStudentLessonProgress)
-          .set(aiMentorLessonData)
+          .set(aiMentorProgressData)
           .where(
             eq(aiMentorStudentLessonProgress.studentLessonProgressId, currentLessonProgress.id),
           );

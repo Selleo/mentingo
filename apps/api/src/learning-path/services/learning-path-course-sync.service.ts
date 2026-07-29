@@ -3,10 +3,17 @@ import {
   COURSE_ENROLLMENT,
   LEARNING_PATH_ENROLLMENT_TYPES,
   LEARNING_PATH_PROGRESS_STATUSES,
+  type LearningPathProgressStatus,
 } from "@repo/shared";
 
 import { DatabasePg } from "src/common";
 import { CourseService } from "src/courses/course.service";
+import {
+  CompleteLearningPathEvent,
+  EnrollLearningPathEvent,
+  StartLearningPathEvent,
+} from "src/events";
+import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { DB } from "src/storage/db/db.providers";
 
 import { LearningPathRepository } from "../learning-path.repository";
@@ -15,6 +22,7 @@ import { LearningPathCertificateService } from "./learning-path-certificate.serv
 
 import type { LearningPathCourseLink } from "../learning-path.types";
 import type { UUIDType } from "src/common";
+import type { ActorUserType } from "src/common/types/actor-user.type";
 
 const PATH_LINK_ENROLLMENT_TIME_TOLERANCE_MS = 1000;
 
@@ -25,6 +33,7 @@ export class LearningPathCourseSyncService {
     private readonly learningPathRepository: LearningPathRepository,
     private readonly courseService: CourseService,
     private readonly learningPathCertificateService: LearningPathCertificateService,
+    private readonly outboxPublisher: OutboxPublisher,
   ) {}
 
   async syncLearningPathEnrollments(learningPathId: string) {
@@ -71,10 +80,48 @@ export class LearningPathCourseSyncService {
     }
   }
 
+  async syncStudentLearningPathsForStartedCourse(
+    studentId: string,
+    courseId: string,
+    actor: ActorUserType,
+  ) {
+    const pathIds = await this.learningPathRepository.getLearningPathIdsForStudentCourse(
+      studentId,
+      courseId,
+    );
+
+    for (const { learningPathId } of pathIds) {
+      const enrollment = await this.learningPathRepository.getStudentLearningPathEnrollment(
+        learningPathId,
+        studentId,
+      );
+
+      if (!enrollment || enrollment.progress !== LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED) {
+        continue;
+      }
+
+      await this.learningPathRepository.updateStudentLearningPathProgress(
+        learningPathId,
+        studentId,
+        LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS,
+        null,
+      );
+
+      await this.outboxPublisher.publish(
+        new StartLearningPathEvent({
+          learningPathId,
+          userId: studentId,
+          actor,
+        }),
+      );
+    }
+  }
+
   async syncLearningPathEnrollmentsForGroupMember(
     groupId: string,
     studentId: string,
     tenantId: string,
+    actor?: ActorUserType,
   ) {
     const pathIds = await this.learningPathRepository.getLearningPathIdsByGroupId(groupId);
 
@@ -100,6 +147,18 @@ export class LearningPathCourseSyncService {
           courseIds,
           tenantId,
         );
+
+        if (actor) {
+          await this.outboxPublisher.publish(
+            new EnrollLearningPathEvent({
+              learningPathId,
+              actor,
+              userIds: newStudentIds,
+              groupIds: [groupId],
+            }),
+            this.db,
+          );
+        }
       }
 
       await this.syncStudentLearningPath(learningPathId, studentId);
@@ -377,11 +436,34 @@ export class LearningPathCourseSyncService {
       (row) => row.completedAt != null,
     );
 
+    const hasStartedCourses = progressState.studentCourseProgressRows.some(
+      (row) => row.progress === "in_progress" || row.completedAt != null,
+    );
+
+    const newProgress = this.resolveLearningPathProgress(
+      progressState.courses.length,
+      completedCourses.length,
+      hasStartedCourses,
+    );
+
+    const enrollment = await this.learningPathRepository.getStudentLearningPathEnrollment(
+      learningPathId,
+      studentId,
+    );
+    const previousProgress = enrollment?.progress ?? LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
+
     await this.learningPathRepository.updateStudentLearningPathProgress(
       learningPathId,
       studentId,
-      this.resolveLearningPathProgress(progressState.courses.length, completedCourses.length),
+      newProgress,
       this.resolveLearningPathCompletedAt(progressState.courses.length, completedCourses),
+    );
+
+    await this.publishProgressTransitionEvents(
+      previousProgress,
+      newProgress,
+      learningPathId,
+      studentId,
     );
 
     if (
@@ -404,8 +486,43 @@ export class LearningPathCourseSyncService {
     }
   }
 
-  private resolveLearningPathProgress(totalCourses: number, completedCourses: number) {
-    if (totalCourses === 0 || completedCourses === 0) {
+  private async publishProgressTransitionEvents(
+    previousProgress: LearningPathProgressStatus,
+    newProgress: LearningPathProgressStatus,
+    learningPathId: string,
+    studentId: string,
+  ) {
+    if (previousProgress === newProgress) return;
+
+    const isStarted =
+      previousProgress === LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED &&
+      newProgress === LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+
+    const isCompleted = newProgress === LEARNING_PATH_PROGRESS_STATUSES.COMPLETED;
+
+    if (!isStarted && !isCompleted) return;
+
+    const actor: ActorUserType | null =
+      await this.learningPathRepository.getStudentActorInfo(studentId);
+
+    if (!actor) return;
+
+    const eventPayload = { learningPathId, actor, userId: studentId };
+
+    if (isStarted) {
+      await this.outboxPublisher.publish(new StartLearningPathEvent(eventPayload));
+      return;
+    }
+
+    await this.outboxPublisher.publish(new CompleteLearningPathEvent(eventPayload));
+  }
+
+  private resolveLearningPathProgress(
+    totalCourses: number,
+    completedCourses: number,
+    hasStartedCourses = false,
+  ) {
+    if (totalCourses === 0) {
       return LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
     }
 
@@ -413,7 +530,11 @@ export class LearningPathCourseSyncService {
       return LEARNING_PATH_PROGRESS_STATUSES.COMPLETED;
     }
 
-    return LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+    if (completedCourses > 0 || hasStartedCourses) {
+      return LEARNING_PATH_PROGRESS_STATUSES.IN_PROGRESS;
+    }
+
+    return LEARNING_PATH_PROGRESS_STATUSES.NOT_STARTED;
   }
 
   private resolveLearningPathCompletedAt(

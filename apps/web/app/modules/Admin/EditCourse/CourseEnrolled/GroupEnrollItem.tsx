@@ -122,7 +122,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
             {t("adminCourseView.enrolled.members", { count: usersCount })}
           </div>
         </div>
-        {showMandatorySection ? (
+        {showMandatorySection && (
           <div className="rounded-xl border border-neutral-200/80 bg-gradient-to-b from-white to-neutral-50 p-4 flex flex-col gap-3 shadow-sm">
             <div
               className={cn("flex items-center justify-between", {
@@ -166,7 +166,7 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
               </div>
             </div>
 
-            {obligatory ? (
+            {obligatory && (
               <div className="pt-2">
                 <FormField
                   control={control}
@@ -258,9 +258,9 @@ export const GroupEnrollItem = ({ index, id, name, usersCount, isGroupEnrolled }
                   )}
                 />
               </div>
-            ) : null}
+            )}
           </div>
-        ) : null}
+        )}
       </div>
     </div>
   );

@@ -3,14 +3,17 @@ import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query"
 import { ApiClient } from "../../api-client";
 
 import type { GetAverageQuizScoresResponse } from "~/api/generated-api";
-import type { CourseStatisticsParams } from "~/api/queries/admin/useCourseStatistics";
 
 export const COURSE_AVERAGE_SCORE_PER_QUIZ_QUERY_KEY = ["course-average-score-per-quiz", "admin"];
+
+export type CourseAverageScorePerQuizQueryParams = NonNullable<
+  Parameters<typeof ApiClient.api.courseControllerGetAverageQuizScores>[1]
+>;
 
 interface CourseAverageScorePerQuizQueryOptions {
   id: string;
   enabled?: boolean;
-  query: CourseStatisticsParams;
+  query: CourseAverageScorePerQuizQueryParams;
 }
 
 export const courseAverageScorePerQuizQueryOptions = ({

@@ -208,6 +208,7 @@ const CourseLessons = ({
           lessonToEdit={selectedLesson}
           setSelectedLesson={setSelectedLesson}
           language={language}
+          baseLanguage={baseLanguage}
         />
       ),
       [ContentTypes.EMBED_FORM]: (

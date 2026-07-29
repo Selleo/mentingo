@@ -55,8 +55,6 @@ export class NewsService {
   ) {}
 
   async createNews(createNewsBody: CreateNews, currentUser: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
-
     const { language } = createNewsBody;
 
     const [createdNews] = await this.db
@@ -96,8 +94,6 @@ export class NewsService {
     currentUser?: CurrentUserType,
     coverFile?: Express.Multer.File,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const { language, ...updateNewsData } = updateNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language);
@@ -178,8 +174,6 @@ export class NewsService {
     page = 1,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
@@ -278,8 +272,6 @@ export class NewsService {
     language: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const existingNews = await this.validateNewsExists(newsId, language);
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
@@ -329,8 +321,6 @@ export class NewsService {
   }
 
   async deleteNews(newsId: UUIDType, currentUser?: CurrentUserType) {
-    await this.checkAccess(currentUser?.userId);
-
     const existingNews = await this.validateNewsExists(newsId, undefined, false);
 
     if (existingNews.archived) return { id: existingNews.id };
@@ -371,8 +361,6 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const isAdminLike = hasAnyPermission(currentUser?.permissions, [
       PERMISSIONS.NEWS_MANAGE,
       PERMISSIONS.NEWS_MANAGE_OWN,
@@ -381,7 +369,6 @@ export class NewsService {
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
     });
-
     const [existingNews] = await this.db
       .select({
         ...getTableColumns(news),
@@ -434,8 +421,6 @@ export class NewsService {
     currentUser?: CurrentUserType,
     preview?: FilePreviewFormat,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const [resource] = await this.db
       .select({
         ...getTableColumns(resources),
@@ -561,8 +546,6 @@ export class NewsService {
     createNewsBody: CreateNews,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const { language } = createNewsBody;
 
     const existingNews = await this.validateNewsExists(newsId, language, false);
@@ -613,8 +596,6 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUserType,
   ) {
-    await this.checkAccess(currentUser?.userId);
-
     const fileTitle = {
       [language]: title,
     };

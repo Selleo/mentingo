@@ -1,7 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -9,7 +12,7 @@ import {
   UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, TENANT_STATUSES } from "@repo/shared";
 import { Type } from "@sinclair/typebox";
 import { Validate } from "nestjs-typebox";
 
@@ -26,12 +29,18 @@ import {
   createSupportSessionResponseSchema,
   createSupportSessionSchema,
   supportAdminUsersSchema,
+  tenantListSortSchema,
   tenantResponseSchema,
   tenantsListSchema,
   updateTenantSchema,
 } from "./schemas/tenant.schema";
 import { TenantsService } from "./tenants.service";
-import { CreateSupportSessionBody, CreateTenantBody, UpdateTenantBody } from "./types";
+import {
+  CreateSupportSessionBody,
+  CreateTenantBody,
+  TenantListSort,
+  UpdateTenantBody,
+} from "./types";
 
 import type {
   CreateSupportSessionResponse,
@@ -39,6 +48,7 @@ import type {
   TenantResponse,
   TenantsListResponse,
   ListSupportAdminUsersQuery,
+  ListTenantsQuery,
 } from "./types";
 
 @Controller("super-admin/tenants")
@@ -56,6 +66,8 @@ export class TenantsController {
       { type: "query", name: "page", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "perPage", schema: Type.Optional(Type.Number({ minimum: 1 })) },
       { type: "query", name: "search", schema: Type.Optional(Type.String()) },
+      { type: "query", name: "status", schema: Type.Optional(Type.Enum(TENANT_STATUSES)) },
+      { type: "query", name: "sort", schema: Type.Optional(tenantListSortSchema) },
     ],
     response: paginatedResponse(tenantsListSchema),
   })
@@ -63,12 +75,14 @@ export class TenantsController {
     @Query("page") page?: number,
     @Query("perPage") perPage?: number,
     @Query("search") search?: string,
+    @Query("status") status?: ListTenantsQuery["status"],
+    @Query("sort") sort?: TenantListSort,
     @CurrentUser("tenantId") currentTenantId?: string,
   ): Promise<PaginatedResponse<TenantsListResponse>> {
     if (!currentTenantId) throw new UnauthorizedException("auth.error.unauthenticated");
 
     const result = await this.tenantsService.findAllTenants(
-      { page, perPage, search },
+      { page, perPage, search, status, sort },
       currentTenantId,
     );
     return new PaginatedResponse(result);
@@ -111,6 +125,18 @@ export class TenantsController {
   ): Promise<BaseResponse<TenantResponse>> {
     const tenant = await this.tenantsService.updateTenantById(id, body);
     return new BaseResponse(tenant);
+  }
+
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Validate({
+    request: [{ type: "param", name: "id", schema: Type.String({ format: "uuid" }) }],
+  })
+  async deleteTenantById(
+    @Param("id") id: string,
+    @CurrentUser("tenantId") currentTenantId: string,
+  ): Promise<void> {
+    await this.tenantsService.deleteTenantById(id, currentTenantId);
   }
 
   @Get(":id/support-users")

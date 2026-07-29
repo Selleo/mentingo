@@ -8,6 +8,8 @@ import { ALL_ANNOUNCEMENTS_QUERY_KEY, type AllAnnouncementsParams } from "./useA
 import type { GetAllAnnouncementsResponse } from "../../generated-api";
 import type { InfiniteData } from "@tanstack/react-query";
 
+const ANNOUNCEMENTS_REFETCH_INTERVAL_MS = 5 * 60 * 1000;
+
 type QueryOptions = {
   enabled?: boolean;
 };
@@ -31,6 +33,7 @@ export function useInfiniteAllAnnouncements(
     queryKey: getInfiniteAllAnnouncementsQueryKey(searchParams),
     queryFn: async ({ pageParam = 1 }) => {
       const { data } = await ApiClient.api.announcementsControllerGetAllAnnouncements({
+        ...(searchParams?.feed && { feed: searchParams.feed }),
         ...(searchParams?.language && { language: searchParams.language }),
         page: pageParam,
         perPage: ANNOUNCEMENTS_PAGE_SIZE,
@@ -45,6 +48,7 @@ export function useInfiniteAllAnnouncements(
 
       return nextPage <= Math.ceil(totalItems / perPage) ? nextPage : undefined;
     },
+    refetchInterval: ANNOUNCEMENTS_REFETCH_INTERVAL_MS,
     ...options,
   });
 }

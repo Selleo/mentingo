@@ -20,6 +20,7 @@ export const ENTITY_TYPE = {
   QA: "qa",
   NEWS: "news",
   ARTICLES: "articles",
+  LEARNING_PATH: "learning_path",
 } as const;
 
 export type EntityType = (typeof ENTITY_TYPE)[keyof typeof ENTITY_TYPE];

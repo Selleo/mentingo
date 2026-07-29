@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import request from "supertest";
 import { v4 as uuidv4 } from "uuid";
 
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
@@ -867,7 +868,7 @@ describe("groupController (e2e)", () => {
       await db.insert(lessons).values({
         chapterId: chapter1.id,
         type: LESSON_TYPES.QUIZ,
-        title: "Quiz",
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
         thresholdScore: 0,
       });
 
@@ -879,7 +880,7 @@ describe("groupController (e2e)", () => {
       await db.insert(lessons).values({
         chapterId: chapter2.id,
         type: LESSON_TYPES.QUIZ,
-        title: "Quiz",
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
         thresholdScore: 0,
       });
 
@@ -959,7 +960,7 @@ describe("groupController (e2e)", () => {
       await db.insert(lessons).values({
         chapterId: chapter.id,
         type: LESSON_TYPES.QUIZ,
-        title: "Quiz",
+        title: buildJsonbField(SUPPORTED_LANGUAGES.EN, "Quiz"),
         thresholdScore: 0,
       });
 

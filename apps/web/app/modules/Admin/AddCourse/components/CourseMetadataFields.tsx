@@ -148,7 +148,7 @@ export const CourseMetadataFields = <TFormValues extends CourseMetadataFormValue
                 <span className="text-red-500">*</span>{" "}
                 {t("adminCourseView.settings.field.baseLanguage")}
               </div>
-              {showBaseLanguageTooltip ? (
+              {showBaseLanguageTooltip && (
                 <TooltipProvider delayDuration={0}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -166,7 +166,7 @@ export const CourseMetadataFields = <TFormValues extends CourseMetadataFormValue
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-              ) : null}
+              )}
             </Label>
             <Select value={field.value} onValueChange={field.onChange}>
               <SelectTrigger data-testid={testIds?.languageSelect}>

@@ -27,12 +27,18 @@ import {
   LearningPathCourseAddedEvent,
   LearningPathCourseRemovedEvent,
   LearningPathCourseSyncEvent,
+  CreateLearningPathEvent,
+  UpdateLearningPathEvent,
+  DeleteLearningPathEvent,
+  EnrollLearningPathEvent,
 } from "src/events";
 import { MAX_FILE_SIZE } from "src/file/file.constants";
 import { FileService } from "src/file/file.service";
 import { IMAGE_QUALITY } from "src/file/image-variants/image-variant.constants";
 import { SEARCH_ENTITY_TYPES } from "src/global-search/global-search.constants";
 import { SearchIndexService } from "src/global-search/search-index.service";
+import { LocalizationService } from "src/localization/localization.service";
+import { ENTITY_TYPE } from "src/localization/localization.types";
 import { OutboxPublisher } from "src/outbox/outbox.publisher";
 import { learningPaths } from "src/storage/schema";
 import { hasDataToUpdate } from "src/utils/hasDataToUpdate";
@@ -81,6 +87,7 @@ export class LearningPathService {
     private readonly learningPathCourseSyncService: LearningPathCourseSyncService,
     private readonly learningPathExportService: LearningPathExportService,
     private readonly searchIndexService: SearchIndexService,
+    private readonly localizationService: LocalizationService,
   ) {}
 
   private assertPermission(currentUser: CurrentUserType, permission: PermissionKey) {
@@ -180,6 +187,36 @@ export class LearningPathService {
     }
 
     return learningPath;
+  }
+
+  private async buildLearningPathActivitySnapshot(
+    learningPathId: UUIDType,
+    language?: SupportedLanguages,
+  ) {
+    const {
+      language: resolvedLanguage,
+      baseLanguage,
+      availableLocales,
+    } = await this.localizationService.getBaseLanguage(
+      ENTITY_TYPE.LEARNING_PATH,
+      learningPathId,
+      language,
+    );
+
+    const snapshot = await this.learningPathRepository.getLearningPathActivitySnapshot(
+      learningPathId,
+      resolvedLanguage,
+    );
+
+    if (!snapshot) {
+      throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
+    }
+
+    return {
+      ...snapshot,
+      baseLanguage,
+      availableLocales: Array.isArray(availableLocales) ? availableLocales : [availableLocales],
+    };
   }
 
   private buildUpdateData(
@@ -346,6 +383,20 @@ export class LearningPathService {
     if (!createdLearningPath) {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.CREATE_FAILED);
     }
+
+    const createdSnapshot = await this.buildLearningPathActivitySnapshot(
+      createdLearningPath.id,
+      body.language,
+    );
+
+    await this.outboxPublisher.publish(
+      new CreateLearningPathEvent({
+        learningPathId: createdLearningPath.id,
+        actor: currentUser,
+        createdLearningPath: createdSnapshot,
+      }),
+      this.db,
+    );
 
     await this.searchIndexService.refreshLearningPath(createdLearningPath.id);
 
@@ -543,6 +594,8 @@ export class LearningPathService {
       updateData.includesCertificate !== undefined &&
       updateData.includesCertificate !== existingLearningPath.includesCertificate;
 
+    const previousSnapshot = await this.buildLearningPathActivitySnapshot(learningPathId, language);
+
     const updatedLearningPath = await this.db.transaction(async (trx) => {
       const learningPath = await this.learningPathRepository.updateLearningPath(
         learningPathId,
@@ -560,6 +613,18 @@ export class LearningPathService {
     if (!updatedLearningPath) {
       throw new UnprocessableEntityException(LEARNING_PATH_ERRORS.UPDATE_FAILED);
     }
+
+    const updatedSnapshot = await this.buildLearningPathActivitySnapshot(learningPathId, language);
+
+    await this.outboxPublisher.publish(
+      new UpdateLearningPathEvent({
+        learningPathId,
+        actor: currentUser,
+        previousLearningPathData: previousSnapshot,
+        updatedLearningPathData: updatedSnapshot,
+      }),
+      this.db,
+    );
 
     await this.learningPathExportService.queueSyncForSourceLearningPath(
       learningPathId,
@@ -625,6 +690,14 @@ export class LearningPathService {
     if (!deletedLearningPath) {
       throw new NotFoundException(LEARNING_PATH_ERRORS.NOT_FOUND);
     }
+
+    await this.outboxPublisher.publish(
+      new DeleteLearningPathEvent({
+        learningPathId,
+        actor: currentUser,
+      }),
+      this.db,
+    );
 
     await this.searchIndexService.deleteEntityDocuments({
       entityType: SEARCH_ENTITY_TYPES.LEARNING_PATH,
@@ -721,11 +794,7 @@ export class LearningPathService {
 
     const uniqueStudentIds = Array.from(new Set(body.studentIds));
 
-    return this.enrollStudentIdsToLearningPath(
-      learningPathId,
-      uniqueStudentIds,
-      currentUser.tenantId,
-    );
+    return this.enrollStudentIdsToLearningPath(learningPathId, uniqueStudentIds, currentUser);
   }
 
   async enrollCurrentUserToLearningPath(learningPathId: UUIDType, currentUser: CurrentUserType) {
@@ -737,17 +806,13 @@ export class LearningPathService {
       throw new ForbiddenException(LEARNING_PATH_ERRORS.MISSING_PERMISSION);
     }
 
-    return this.enrollStudentIdsToLearningPath(
-      learningPathId,
-      [currentUser.userId],
-      currentUser.tenantId,
-    );
+    return this.enrollStudentIdsToLearningPath(learningPathId, [currentUser.userId], currentUser);
   }
 
   private async enrollStudentIdsToLearningPath(
     learningPathId: UUIDType,
     studentIds: UUIDType[],
-    tenantId: UUIDType,
+    currentUser: CurrentUserType,
   ) {
     if (studentIds.length === 0) {
       throw new BadRequestException(LEARNING_PATH_ERRORS.STUDENT_IDS_EMPTY);
@@ -771,7 +836,7 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         LEARNING_PATH_ENROLLMENT_TYPES.DIRECT,
-        tenantId,
+        currentUser.tenantId,
         trx,
       );
 
@@ -779,11 +844,22 @@ export class LearningPathService {
         learningPathId,
         newStudentIds,
         courseIds,
-        tenantId,
+        currentUser.tenantId,
         trx,
       );
 
-      await this.publishLearningPathCourseSyncEvent(learningPathId, tenantId, trx);
+      await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+
+      if (newStudentIds.length > 0) {
+        await this.outboxPublisher.publish(
+          new EnrollLearningPathEvent({
+            learningPathId,
+            actor: currentUser,
+            userIds: newStudentIds,
+          }),
+          trx,
+        );
+      }
 
       return {
         learningPathId,
@@ -924,6 +1000,18 @@ export class LearningPathService {
       );
 
       await this.publishLearningPathCourseSyncEvent(learningPathId, currentUser.tenantId, trx);
+
+      if (studentIds.length > 0) {
+        await this.outboxPublisher.publish(
+          new EnrollLearningPathEvent({
+            learningPathId,
+            actor: currentUser,
+            userIds: studentIds,
+            groupIds: existingGroupIds,
+          }),
+          trx,
+        );
+      }
 
       return {
         learningPathId,

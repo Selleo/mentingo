@@ -1,11 +1,12 @@
 import { faker } from "@faker-js/faker";
 import {
+  ANNOUNCEMENT_AUDIENCES,
   ANNOUNCEMENT_EMAIL_TEMPLATES,
   ANNOUNCEMENT_SOURCE_TYPES,
   ANNOUNCEMENT_STATUSES,
   SUPPORTED_LANGUAGES,
 } from "@repo/shared";
-import { eq, and, not } from "drizzle-orm";
+import { eq, and, isNull, ne } from "drizzle-orm";
 import { Factory } from "fishery";
 
 import {
@@ -15,7 +16,6 @@ import {
   userAnnouncements,
   users,
 } from "../../src/storage/schema";
-import { userLacksPermissionCondition } from "../helpers/permission-role-helpers";
 import { ensureTenant } from "../helpers/tenant-helpers";
 
 import type { InferSelectModel, InferInsertModel } from "drizzle-orm";
@@ -26,7 +26,7 @@ type AnnouncementInsert = InferInsertModel<typeof announcements>;
 
 type AnnouncementWithAssoc = Announcement & {
   groupId?: string;
-  isEveryone?: boolean;
+  userIds?: string[];
 };
 
 class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
@@ -35,7 +35,16 @@ class AnnouncementFactory extends Factory<AnnouncementWithAssoc> {
   }
 
   withEveryone() {
-    return this.associations({ isEveryone: true } as Partial<AnnouncementWithAssoc>);
+    return this.associations({
+      audience: ANNOUNCEMENT_AUDIENCES.ALL_USERS,
+    } as Partial<AnnouncementWithAssoc>);
+  }
+
+  withUsers(userIds: string[]) {
+    return this.associations({
+      audience: ANNOUNCEMENT_AUDIENCES.SELECTED_USERS,
+      userIds,
+    } as Partial<AnnouncementWithAssoc>);
   }
 }
 
@@ -50,22 +59,35 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
         .returning();
 
       const groupId = associations?.groupId;
+      const userIds = associations?.userIds;
 
-      if (groupId) {
-        await createUserAnnouncementsForGroup(db, groupId, inserted.id, tenantId);
+      if (userIds) {
+        await createUserAnnouncements(db, userIds, inserted.id, tenantId);
+
         return inserted;
       }
 
-      await createUserAnnouncementsForAll(db, inserted.authorId, inserted.id, tenantId);
+      if (groupId) {
+        await createUserAnnouncementsForGroup(db, groupId, inserted.id, tenantId);
+
+        return inserted;
+      }
+
+      await createUserAnnouncementsForAll(db, inserted.id, inserted.authorId, tenantId);
+
       return inserted;
     });
 
     return {
       id: faker.string.uuid(),
-      title: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.sentence(3) },
-      content: { [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph() },
+      title: {
+        [SUPPORTED_LANGUAGES.EN]: faker.lorem.sentence(3),
+      },
+      content: {
+        [SUPPORTED_LANGUAGES.EN]: faker.lorem.paragraph(),
+      },
       authorId: faker.string.uuid(),
-      isEveryone: true,
+      audience: ANNOUNCEMENT_AUDIENCES.ALL_USERS,
       status: ANNOUNCEMENT_STATUSES.PUBLISHED,
       scheduledAt: null,
       publishedAt: new Date().toISOString(),
@@ -82,21 +104,43 @@ export const createAnnouncementFactory = (db: DatabasePg) => {
   });
 };
 
+async function createUserAnnouncements(
+  db: DatabasePg,
+  userIds: string[],
+  announcementId: string,
+  tenantId: UUIDType,
+) {
+  if (!userIds.length) return;
+
+  await db.insert(userAnnouncements).values(
+    userIds.map((userId) => ({
+      userId,
+      announcementId,
+      isRead: false,
+      tenantId,
+    })),
+  );
+}
+
 async function createUserAnnouncementsForGroup(
   db: DatabasePg,
   groupId: string,
   announcementId: string,
   tenantId: UUIDType,
 ) {
-  await db.insert(groupAnnouncements).values({ groupId, announcementId, tenantId });
+  await db.insert(groupAnnouncements).values({
+    groupId,
+    announcementId,
+    tenantId,
+  });
 
   const usersRelatedToGroup = await db
-    .select({ userId: groupUsers.userId })
+    .select({
+      userId: groupUsers.userId,
+    })
     .from(groupUsers)
     .leftJoin(users, eq(groupUsers.userId, users.id))
-    .where(
-      and(eq(groupUsers.groupId, groupId), userLacksPermissionCondition(users.id, users.tenantId)),
-    );
+    .where(and(eq(groupUsers.groupId, groupId), isNull(users.deletedAt)));
 
   const userAnnouncementsToInsert = usersRelatedToGroup.map((u) => ({
     userId: u.userId,
@@ -105,22 +149,23 @@ async function createUserAnnouncementsForGroup(
     tenantId,
   }));
 
-  if (userAnnouncementsToInsert.length)
+  if (userAnnouncementsToInsert.length) {
     await db.insert(userAnnouncements).values(userAnnouncementsToInsert);
+  }
 }
 
 async function createUserAnnouncementsForAll(
   db: DatabasePg,
-  authorId: string,
   announcementId: string,
+  authorId: string,
   tenantId: UUIDType,
 ) {
   const allUserIds = await db
-    .select({ id: users.id })
+    .select({
+      id: users.id,
+    })
     .from(users)
-    .where(
-      and(not(eq(users.id, authorId)), userLacksPermissionCondition(users.id, users.tenantId)),
-    );
+    .where(and(ne(users.id, authorId), isNull(users.deletedAt)));
 
   const userAnnouncementsToInsert = allUserIds.map((u) => ({
     userId: u.id,
@@ -129,6 +174,7 @@ async function createUserAnnouncementsForAll(
     tenantId,
   }));
 
-  if (userAnnouncementsToInsert.length)
+  if (userAnnouncementsToInsert.length) {
     await db.insert(userAnnouncements).values(userAnnouncementsToInsert);
+  }
 }

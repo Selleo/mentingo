@@ -11,7 +11,15 @@ import {
 } from "src/ai/utils/ai.type";
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
+import { DB } from "src/storage/db/db.providers";
 import {
+  aiJudgeBlockingErrors,
+  aiJudgeConfigurations,
+  aiJudgeCriteria,
+  aiJudgeScoreGuidance,
+  aiMentorJudgementBlockingErrors,
+  aiMentorJudgementCriteria,
+  aiMentorJudgements,
   aiMentorLessons,
   aiMentorThreadMessages,
   aiMentorThreads,
@@ -33,9 +41,15 @@ import type {
 } from "@repo/shared";
 import type { SQL } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
+import type { AiMentorPromptContext } from "src/ai/ai-prompt.types";
+import type {
+  AiJudgeBlockingErrorJudgementWrite,
+  AiJudgeCriterionJudgementWrite,
+  AiJudgeJudgementWrite,
+  AiJudgeRubricContext,
+} from "src/ai/judge-configuration/judge-configuration.types";
 import type {
   AiMentorGroupsBody,
-  AiMentorLessonBody,
   ThreadBody,
   ThreadMessageBody,
   UpdateThreadBody,
@@ -46,7 +60,7 @@ import type * as schema from "src/storage/schema";
 @Injectable()
 export class AiRepository {
   constructor(
-    @Inject("DB") private readonly db: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly localizationService: LocalizationService,
   ) {}
 
@@ -219,7 +233,7 @@ export class AiRepository {
   async findMentorLessonByThreadId(
     threadId: UUIDType,
     language: SupportedLanguages,
-  ): Promise<AiMentorLessonBody> {
+  ): Promise<AiMentorPromptContext> {
     const [lesson] = await this.db
       .select({
         title: this.localizationService.getLocalizedSqlField(lessons.title, language),
@@ -227,21 +241,170 @@ export class AiRepository {
           aiMentorLessons.aiMentorInstructions,
           language,
         ),
-        conditions: this.localizationService.getLocalizedSqlField(
-          aiMentorLessons.completionConditions,
-          language,
-        ),
         type: sql<AiMentorType>`${aiMentorLessons.type}`,
-        name: aiMentorLessons.name,
+        name: this.localizationService.getLocalizedSqlField(aiMentorLessons.name, language),
+        learnerFirstName: users.firstName,
       })
       .from(aiMentorThreads)
       .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .innerJoin(users, eq(users.id, aiMentorThreads.userId))
       .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
       .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
       .innerJoin(courses, eq(courses.id, chapters.courseId))
       .where(eq(aiMentorThreads.id, threadId));
 
     return lesson;
+  }
+
+  async findJudgeRubricByThreadId(
+    threadId: UUIDType,
+    language: SupportedLanguages,
+  ): Promise<AiJudgeRubricContext | undefined> {
+    const localizedTaskGoal = this.localizationService.getLocalizedSqlField(
+      aiJudgeConfigurations.taskGoal,
+      language,
+    );
+    const localizedCriterionTitle = this.localizationService.getLocalizedSqlField(
+      aiJudgeCriteria.title,
+      language,
+    );
+    const localizedExpectedBehavior = this.localizationService.getLocalizedSqlField(
+      aiJudgeCriteria.expectedBehavior,
+      language,
+    );
+    const localizedGuidanceDescription = this.localizationService.getLocalizedSqlField(
+      aiJudgeScoreGuidance.description,
+      language,
+    );
+    const localizedGuidanceExample = this.localizationService.getLocalizedSqlField(
+      aiJudgeScoreGuidance.example,
+      language,
+    );
+    const localizedBlockingError = this.localizationService.getLocalizedSqlField(
+      aiJudgeBlockingErrors.description,
+      language,
+    );
+
+    const [context] = await this.db
+      .select({
+        lessonTitle: this.localizationService.getLocalizedSqlField(lessons.title, language),
+        rubric: sql<AiJudgeRubricContext["rubric"]>`
+          CASE
+            WHEN ${aiJudgeConfigurations.id} IS NULL
+              OR ${aiJudgeConfigurations.passingThresholdPercent} IS NULL
+            THEN NULL
+            ELSE jsonb_build_object(
+              'configurationId', ${aiJudgeConfigurations.id},
+              'taskGoal', ${localizedTaskGoal},
+              'passingThresholdPercent', ${aiJudgeConfigurations.passingThresholdPercent},
+              'criteria', COALESCE(
+                (
+                  SELECT jsonb_agg(
+                    jsonb_build_object(
+                      'id', ${aiJudgeCriteria.id},
+                      'title', ${localizedCriterionTitle},
+                      'expectedBehavior', ${localizedExpectedBehavior},
+                      'maxScore', ${aiJudgeCriteria.maxScore},
+                      'scoreGuidance', COALESCE(
+                        (
+                          SELECT jsonb_agg(
+                            jsonb_build_object(
+                              'score', ${aiJudgeScoreGuidance.score},
+                              'description', ${localizedGuidanceDescription},
+                              'example', NULLIF(${localizedGuidanceExample}, '')
+                            )
+                            ORDER BY ${aiJudgeScoreGuidance.score}, ${aiJudgeScoreGuidance.createdAt}
+                          )
+                          FROM ${aiJudgeScoreGuidance}
+                          WHERE ${aiJudgeScoreGuidance.criterionId} = ${aiJudgeCriteria.id}
+                        ),
+                        '[]'::jsonb
+                      )
+                    )
+                    ORDER BY ${aiJudgeCriteria.createdAt}
+                  )
+                  FROM ${aiJudgeCriteria}
+                  WHERE ${aiJudgeCriteria.configurationId} = ${aiJudgeConfigurations.id}
+                ),
+                '[]'::jsonb
+              ),
+              'blockingErrors', COALESCE(
+                (
+                  SELECT jsonb_agg(
+                    jsonb_build_object(
+                      'id', ${aiJudgeBlockingErrors.id},
+                      'description', ${localizedBlockingError}
+                    )
+                    ORDER BY ${aiJudgeBlockingErrors.createdAt}
+                  )
+                  FROM ${aiJudgeBlockingErrors}
+                  WHERE ${aiJudgeBlockingErrors.configurationId} = ${aiJudgeConfigurations.id}
+                ),
+                '[]'::jsonb
+              )
+            )
+          END
+        `,
+      })
+      .from(aiMentorThreads)
+      .innerJoin(aiMentorLessons, eq(aiMentorThreads.aiMentorLessonId, aiMentorLessons.id))
+      .innerJoin(lessons, eq(lessons.id, aiMentorLessons.lessonId))
+      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
+      .innerJoin(courses, eq(courses.id, chapters.courseId))
+      .leftJoin(
+        aiJudgeConfigurations,
+        eq(aiJudgeConfigurations.aiMentorLessonId, aiMentorLessons.id),
+      )
+      .where(eq(aiMentorThreads.id, threadId));
+
+    return context;
+  }
+
+  async upsertJudgeJudgement(data: AiJudgeJudgementWrite, dbInstance: DatabasePg = this.db) {
+    const [judgement] = await dbInstance
+      .insert(aiMentorJudgements)
+      .values(data)
+      .onConflictDoUpdate({
+        target: aiMentorJudgements.threadId,
+        set: {
+          configurationId: data.configurationId,
+          language: data.language,
+          earnedPoints: data.earnedPoints,
+          maxScore: data.maxScore,
+          percentage: data.percentage,
+          passed: data.passed,
+          updatedAt: new Date().toISOString(),
+        },
+      })
+      .returning({ id: aiMentorJudgements.id });
+
+    return judgement;
+  }
+
+  deleteJudgeCriterionJudgements(judgementId: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance
+      .delete(aiMentorJudgementCriteria)
+      .where(eq(aiMentorJudgementCriteria.judgementId, judgementId));
+  }
+
+  deleteJudgeBlockingErrorJudgements(judgementId: UUIDType, dbInstance: DatabasePg = this.db) {
+    return dbInstance
+      .delete(aiMentorJudgementBlockingErrors)
+      .where(eq(aiMentorJudgementBlockingErrors.judgementId, judgementId));
+  }
+
+  insertJudgeCriterionJudgements(
+    data: AiJudgeCriterionJudgementWrite[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance.insert(aiMentorJudgementCriteria).values(data);
+  }
+
+  insertJudgeBlockingErrorJudgements(
+    data: AiJudgeBlockingErrorJudgementWrite[],
+    dbInstance: DatabasePg = this.db,
+  ) {
+    return dbInstance.insert(aiMentorJudgementBlockingErrors).values(data);
   }
 
   async findGroupsByThreadId(

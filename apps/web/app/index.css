@@ -398,6 +398,15 @@ html {
   }
 }
 
+@keyframes evaluation-progress {
+  0% {
+    transform: translateX(-110%);
+  }
+  100% {
+    transform: translateX(310%);
+  }
+}
+
 .shimmer-45 {
   position: relative;
   overflow: hidden;

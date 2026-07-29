@@ -13,7 +13,9 @@ import { queryClient } from "~/api/queryClient";
 import {
   type SuggestionType,
   SUGGESTION_EXAMPLES,
+  SUGGESTION_SCORE_GUIDANCE,
 } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentor.constants";
+import { createSuggestedAiJudgeConfiguration } from "~/modules/Admin/EditCourse/CourseLessons/NewLesson/AiMentorLessonForm/utils/AiMentorSuggestion.helpers";
 import {
   type Chapter,
   ContentTypes,
@@ -27,6 +29,7 @@ import {
   type LessonFormScope,
 } from "./useAiMentorLessonForm.helpers";
 
+import type { AiJudgeConfigurationDraft } from "../AiJudge/aiJudgeConfiguration.types";
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -36,6 +39,8 @@ type AiMentorLessonFormProps = {
   setContentTypeToDisplay: (contentTypeToDisplay: string) => void;
   setOpenChapter?: (chapterId: string) => void;
   language: SupportedLanguages;
+  baseLanguage: SupportedLanguages;
+  onSaveStagedAiJudgeConfiguration?: (configuration: AiJudgeConfigurationDraft) => Promise<void>;
 };
 
 export const useAiMentorLessonForm = ({
@@ -44,6 +49,8 @@ export const useAiMentorLessonForm = ({
   setContentTypeToDisplay,
   setOpenChapter,
   language,
+  baseLanguage,
+  onSaveStagedAiJudgeConfiguration,
 }: AiMentorLessonFormProps) => {
   const { id: courseId } = useParams();
   const { t } = useTranslation();
@@ -60,7 +67,8 @@ export const useAiMentorLessonForm = ({
     defaultValues: getAiMentorLessonFormDefaultValues(lessonToEdit),
   });
 
-  const { reset, setValue, watch } = form;
+  const { register, reset, setValue, watch } = form;
+  register("aiJudgeConfiguration");
 
   useEffect(() => {
     if (!lessonToEdit) return;
@@ -79,11 +87,9 @@ export const useAiMentorLessonForm = ({
 
   const handleSuggestionClick = (suggestionType: SuggestionType) => {
     const currentInstructions = watch("aiMentorInstructions");
-    const currentConditions = watch("completionConditions");
-
+    const currentJudgeConfiguration = watch("aiJudgeConfiguration");
     const hasContent =
-      (currentInstructions && currentInstructions.trim() !== "") ||
-      (currentConditions && currentConditions.trim() !== "");
+      Boolean(currentInstructions?.trim()) || currentJudgeConfiguration !== undefined;
 
     if (hasContent) {
       setSelectedSuggestion(suggestionType);
@@ -96,7 +102,30 @@ export const useAiMentorLessonForm = ({
   const applySuggestion = (suggestionType: SuggestionType) => {
     const suggestion = SUGGESTION_EXAMPLES[suggestionType];
     setValue("aiMentorInstructions", t(suggestion.instructions));
-    setValue("completionConditions", t(suggestion.conditions));
+
+    if (language === baseLanguage) {
+      setValue(
+        "aiJudgeConfiguration",
+        createSuggestedAiJudgeConfiguration(
+          t(suggestion.assessmentCriteria),
+          suggestion.passingThresholdPercent,
+          {
+            notMetDescription: (expectedBehavior) =>
+              t(SUGGESTION_SCORE_GUIDANCE.notMetDescription, { expectedBehavior }),
+            notMetExample: (expectedBehavior) =>
+              t(SUGGESTION_SCORE_GUIDANCE.notMetExample, { expectedBehavior }),
+            metDescription: (expectedBehavior) =>
+              t(SUGGESTION_SCORE_GUIDANCE.metDescription, { expectedBehavior }),
+            acceptedExamples: Array.from({ length: suggestion.criteriaCount }, (_, index) =>
+              t(`${suggestion.acceptedExamplesPrefix}.${index}`),
+            ),
+          },
+          [t(suggestion.blockingError)],
+        ),
+        { shouldDirty: true, shouldValidate: true },
+      );
+    }
+
     setIsConfirmDialogOpen(false);
     setSelectedSuggestion(null);
   };
@@ -115,24 +144,41 @@ export const useAiMentorLessonForm = ({
   const onSubmit = async (values: AiMentorLessonFormValues, file?: File | null) => {
     if (!chapterToEdit) return;
 
+    const { aiJudgeConfiguration, ...lessonValues } = values;
+
     const normalizedVoiceValues = {
-      voiceMode: values.voiceMode,
-      ttsPreset: values.ttsPreset,
-      customTtsReference: values.customTtsReference?.trim() || null,
+      voiceMode: lessonValues.voiceMode,
+      ttsPreset: lessonValues.ttsPreset,
+      customTtsReference: lessonValues.customTtsReference?.trim() || null,
     };
 
     try {
       if (lessonToEdit) {
         await updateAiMentorLesson({
-          data: { ...values, ...normalizedVoiceValues, language },
+          data: { ...lessonValues, ...normalizedVoiceValues, language },
           lessonId: lessonToEdit.id,
         });
+
+        if (
+          aiJudgeConfiguration &&
+          form.formState.dirtyFields.aiJudgeConfiguration &&
+          language === baseLanguage &&
+          onSaveStagedAiJudgeConfiguration
+        ) {
+          await onSaveStagedAiJudgeConfiguration(aiJudgeConfiguration);
+        }
+
         if (file !== undefined) {
           await uploadAvatar({ lessonId: lessonToEdit?.id, file });
         }
       } else {
         await createAiMentorLesson({
-          data: { ...values, ...normalizedVoiceValues, chapterId: chapterToEdit.id },
+          data: {
+            ...lessonValues,
+            ...normalizedVoiceValues,
+            chapterId: chapterToEdit.id,
+            aiJudgeConfiguration,
+          },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);
       }
