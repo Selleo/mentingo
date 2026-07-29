@@ -4834,6 +4834,20 @@
       "updateError": "Failed to save automation.",
       "deleted": "Automation deleted.",
       "deleteError": "Failed to delete automation."
+    },
+    "seedDefaults": {
+      "button": "Generate defaults",
+      "dialog": {
+        "title": "Generate default automations?",
+        "description": "All standard automations (e.g. user invitation, welcome, password reminder, etc.) will be created with default email templates. Existing automations will not be overwritten.",
+        "warning": "Warning: New automations will be created in an active state and will start working immediately. Make sure your email templates are properly configured.",
+        "confirm": "Generate",
+        "cancel": "Cancel"
+      },
+      "toasts": {
+        "success": "Generated {{created}} automations (skipped {{skipped}} existing).",
+        "error": "Failed to generate default automations."
+      }
     }
   },
   "automationLogs": {

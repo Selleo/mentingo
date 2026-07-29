@@ -4752,6 +4752,20 @@
       "updateError": "Automatisierung konnte nicht gespeichert werden.",
       "deleted": "Automatisierung gelöscht.",
       "deleteError": "Automatisierung konnte nicht gelöscht werden."
+    },
+    "seedDefaults": {
+      "button": "Standards generieren",
+      "dialog": {
+        "title": "Standard-Automatisierungen generieren?",
+        "description": "Alle Standard-Automatisierungen (z.B. Benutzereinladung, Willkommen, Passworterinnerung usw.) werden mit Standard-E-Mail-Vorlagen erstellt. Bestehende Automatisierungen werden nicht überschrieben.",
+        "warning": "Achtung: Neue Automatisierungen werden im aktiven Zustand erstellt und beginnen sofort zu arbeiten. Stellen Sie sicher, dass Ihre E-Mail-Vorlagen korrekt konfiguriert sind.",
+        "confirm": "Generieren",
+        "cancel": "Abbrechen"
+      },
+      "toasts": {
+        "success": "{{created}} Automatisierungen generiert ({{skipped}} vorhandene übersprungen).",
+        "error": "Standard-Automatisierungen konnten nicht generiert werden."
+      }
     }
   },
   "automationBuilder": {

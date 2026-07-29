@@ -16279,6 +16279,17 @@
         }
       }
     },
+    "/api/automations/seed-defaults": {
+      "post": {
+        "operationId": "AutomationsController_seedDefaults",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/api/automations/{id}": {
       "get": {
         "operationId": "AutomationsController_getAutomationById",

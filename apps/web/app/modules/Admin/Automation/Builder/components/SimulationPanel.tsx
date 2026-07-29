@@ -158,7 +158,6 @@ const FailedResultView: FC<{ result: SimulationResult }> = ({ result }) => {
   return (
     <ScrollArea className="h-full">
       <div className="space-y-6 p-6">
-        {/* Errors Section */}
         <Card className="border-destructive/30">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-sm text-destructive">
@@ -215,7 +214,6 @@ const SuccessResultView: FC<{ result: SimulationResult }> = ({ result }) => {
       <TabsContent value="preview" className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="space-y-6 p-6">
-            {/* Success confirmation */}
             <Alert className="border-emerald-200 bg-emerald-50">
               <CheckCircle2 className="size-4 text-emerald-600" />
               <AlertTitle className="text-emerald-700">
@@ -226,7 +224,6 @@ const SuccessResultView: FC<{ result: SimulationResult }> = ({ result }) => {
               </AlertTitle>
             </Alert>
 
-            {/* Email Previews */}
             {result.emailPreviews.map((preview) => (
               <EmailPreviewCard key={preview.nodeId} preview={preview} />
             ))}
@@ -271,7 +268,6 @@ const EmailPreviewCard: FC<{ preview: EmailPreview }> = ({ preview }) => {
         <CardTitle className="text-sm">{preview.nodeName}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Email metadata */}
         <div className="space-y-1.5 border-b bg-muted/30 px-6 py-4">
           <div className="flex items-center gap-2 text-xs">
             <span className="w-16 font-medium text-muted-foreground">
@@ -293,10 +289,9 @@ const EmailPreviewCard: FC<{ preview: EmailPreview }> = ({ preview }) => {
           </div>
         </div>
 
-        {/* Email body rendered in sandboxed iframe */}
         <iframe
           srcDoc={preview.htmlBody}
-          sandbox=""
+          sandbox="allow-same-origin"
           title={`Email preview: ${preview.nodeName}`}
           className="h-[400px] w-full border-0"
         />

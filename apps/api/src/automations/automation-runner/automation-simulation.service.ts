@@ -142,19 +142,19 @@ export class AutomationSimulationService {
       }
 
       const selectedTemplate = action.config.emailTemplate as string | undefined;
-      if (selectedTemplate && selectedTemplate in SYSTEM_TEMPLATE_PLACEHOLDERS) {
-        const templatePlaceholders = SYSTEM_TEMPLATE_PLACEHOLDERS[selectedTemplate] ?? [];
+      if (selectedTemplate && !(selectedTemplate in SYSTEM_TEMPLATE_PLACEHOLDERS)) {
         const placeholderValues = (action.config.placeholderValues as Record<string, string>) ?? {};
+        const unmappedPlaceholders = Object.keys(placeholderValues).filter(
+          (p) => !placeholderValues[p],
+        );
 
-        for (const placeholder of templatePlaceholders) {
-          if (!placeholderValues[placeholder]) {
-            actionErrors.push({
-              nodeId: action.id,
-              nodeName: action.label || "Akcja",
-              field: `placeholderValues.${placeholder}`,
-              description: this.t("unmappedPlaceholder", language, { placeholder }),
-            });
-          }
+        for (const placeholder of unmappedPlaceholders) {
+          actionErrors.push({
+            nodeId: action.id,
+            nodeName: action.label || "Akcja",
+            field: `placeholderValues.${placeholder}`,
+            description: this.t("unmappedPlaceholder", language, { placeholder }),
+          });
         }
       }
 

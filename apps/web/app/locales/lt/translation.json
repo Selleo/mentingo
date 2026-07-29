@@ -4758,6 +4758,20 @@
       "updateError": "Nepavyko išsaugoti automatizavimo.",
       "deleted": "Automatizavimas ištrintas.",
       "deleteError": "Nepavyko ištrinti automatizavimo."
+    },
+    "seedDefaults": {
+      "button": "Generuoti numatytuosius",
+      "dialog": {
+        "title": "Generuoti numatytąsias automatizacijas?",
+        "description": "Bus sukurti visi standartiniai automatizavimai (pvz., vartotojo pakvietimas, pasisveikinimas, slaptažodžio priminimas ir kt.) su numatytaisiais el. pašto šablonais. Esami automatizavimai nebus perrašyti.",
+        "warning": "Dėmesio: Nauji automatizavimai bus sukurti aktyvios būsenos ir iš karto pradės veikti. Įsitikinkite, kad jūsų el. pašto šablonai yra tinkamai sukonfigūruoti.",
+        "confirm": "Generuoti",
+        "cancel": "Atšaukti"
+      },
+      "toasts": {
+        "success": "Sugeneruota {{created}} automatizavimų (praleista {{skipped}} esamų).",
+        "error": "Nepavyko sugeneruoti numatytųjų automatizavimų."
+      }
     }
   },
   "automationBuilder": {

@@ -4877,6 +4877,20 @@
       "updateError": "Nie udało się zapisać automatyzacji.",
       "deleted": "Automatyzacja usunięta.",
       "deleteError": "Nie udało się usunąć automatyzacji."
+    },
+    "seedDefaults": {
+      "button": "Generuj domyślne",
+      "dialog": {
+        "title": "Wygenerować domyślne automatyzacje?",
+        "description": "Zostaną utworzone wszystkie podstawowe automatyzacje (np. zaproszenie użytkownika, powitanie, przypomnienie hasła itp.) ze standardowymi szablonami email. Już istniejące automatyzacje nie zostaną nadpisane.",
+        "warning": "Uwaga: Nowe automatyzacje zostaną utworzone w stanie aktywnym i będą od razu działać. Upewnij się, że szablony email są poprawnie skonfigurowane.",
+        "confirm": "Generuj",
+        "cancel": "Anuluj"
+      },
+      "toasts": {
+        "success": "Wygenerowano {{created}} automatyzacji (pominięto {{skipped}} istniejących).",
+        "error": "Nie udało się wygenerować domyślnych automatyzacji."
+      }
     }
   },
   "automationLogs": {

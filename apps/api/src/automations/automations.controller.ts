@@ -12,6 +12,7 @@ import { CurrentUser } from "src/common/decorators/user.decorator";
 import { AutomationSimulationService } from "./automation-runner/automation-simulation.service";
 import { RunSimulationBody } from "./automation-runner/automation-simulation.types";
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
+import { AutomationsSeedDefaultsService } from "./automations-seed-defaults.service";
 import { AutomationsService } from "./automations.service";
 
 import type { AutomationStatus } from "src/announcements/types/automations.types";
@@ -23,6 +24,7 @@ export class AutomationsController {
     private readonly automationsService: AutomationsService,
     private readonly systemTemplatePreviewService: AutomationSystemTemplatePreviewService,
     private readonly simulationService: AutomationSimulationService,
+    private readonly seedDefaultsService: AutomationsSeedDefaultsService,
   ) {}
 
   @Get()
@@ -48,6 +50,16 @@ export class AutomationsController {
   @Post("simulate")
   async runSimulation(@Body() body: RunSimulationBody) {
     const result = await this.simulationService.runSimulation(body);
+    return new BaseResponse(result);
+  }
+
+  @Post("seed-defaults")
+  async seedDefaults(
+    @CurrentUser("tenantId") tenantId: UUIDType,
+    @Body() body?: { language?: SupportedLanguages },
+  ) {
+    const language = body?.language ?? SUPPORTED_LANGUAGES.EN;
+    const result = await this.seedDefaultsService.seedDefaults(tenantId, language);
     return new BaseResponse(result);
   }
 

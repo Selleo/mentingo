@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { useCreateAutomation } from "~/api/mutations/admin/useCreateAutomation";
 import { useDeleteAutomation } from "~/api/mutations/admin/useDeleteAutomation";
+import { useSeedDefaultAutomations } from "~/api/mutations/admin/useSeedDefaultAutomations";
 import { useAutomations } from "~/api/queries/admin/useAutomations";
 import {
   AlertDialog,
@@ -31,12 +32,14 @@ export default function AutomationPage() {
   const { data: automations = [], isLoading } = useAutomations();
   const createAutomation = useCreateAutomation();
   const deleteAutomation = useDeleteAutomation();
+  const seedDefaultAutomations = useSeedDefaultAutomations();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedAutomation, setSelectedAutomation] = useState<AutomationListItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [showSeedDefaultsDialog, setShowSeedDefaultsDialog] = useState(false);
 
   const handleCreate = () => {
     const lang = i18n.language || "pl";
@@ -119,7 +122,7 @@ export default function AutomationPage() {
         onEdit={handleEdit}
       />
 
-      <div className="mt-4 flex justify-start">
+      <div className="mt-4 flex justify-start gap-2">
         <Button
           variant="primary"
           className="px-3 py-1.5 text-sm w-auto"
@@ -127,6 +130,15 @@ export default function AutomationPage() {
           data-testid="automation-page-open-logs-button"
         >
           {t("automationView.openLogs")}
+        </Button>
+        <Button
+          variant="outline"
+          className="px-3 py-1.5 text-sm w-auto"
+          onClick={() => setShowSeedDefaultsDialog(true)}
+          disabled={seedDefaultAutomations.isPending}
+          data-testid="automation-page-seed-defaults-button"
+        >
+          {t("automationView.seedDefaults.button")}
         </Button>
       </div>
 
@@ -151,6 +163,40 @@ export default function AutomationPage() {
               data-testid="automation-page-delete-dialog-confirm"
             >
               {t("automationView.deleteDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={showSeedDefaultsDialog}
+        onOpenChange={(open) => !open && setShowSeedDefaultsDialog(false)}
+      >
+        <AlertDialogContent data-testid="automation-page-seed-defaults-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("automationView.seedDefaults.dialog.title")}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t("automationView.seedDefaults.dialog.description")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            {t("automationView.seedDefaults.dialog.warning")}
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => setShowSeedDefaultsDialog(false)}
+              data-testid="automation-page-seed-defaults-dialog-cancel"
+            >
+              {t("automationView.seedDefaults.dialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                seedDefaultAutomations.mutate();
+                setShowSeedDefaultsDialog(false);
+              }}
+              data-testid="automation-page-seed-defaults-dialog-confirm"
+            >
+              {t("automationView.seedDefaults.dialog.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

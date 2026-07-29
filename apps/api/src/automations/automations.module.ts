@@ -15,6 +15,7 @@ import { AutomationSimulationService } from "./automation-runner/automation-simu
 import { AutomationSystemTemplatePreviewService } from "./automation-runner/automation-system-template-preview.service";
 import { AutomationSystemTemplateRendererService } from "./automation-runner/automation-system-template-renderer.service";
 import { AutomationTemplateService } from "./automation-runner/automation-template.service";
+import { AutomationsSeedDefaultsService } from "./automations-seed-defaults.service";
 import { AutomationStepsController } from "./automations-steps/automations-steps.controller";
 import { AutomationStepsService } from "./automations-steps/automations-steps.service";
 import { AutomationsController } from "./automations.controller";
@@ -47,6 +48,7 @@ import { AutomationsRepository } from "./repositories/automations/automations.re
     AutomationSystemTemplatePreviewService,
     AutomationSystemTemplateRendererService,
     AutomationLogsRepository,
+    AutomationsSeedDefaultsService,
   ],
   controllers: [AutomationsController, AutomationStepsController, AutomationLogsController],
   exports: [AutomationsService, AutomationRunnerService, AutomationStepsService],

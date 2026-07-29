@@ -4823,6 +4823,20 @@
       "name": "Nueva automatización (Borrador)",
       "description": "Defina el objetivo y la descripción de esta automatización y luego proceda al constructor de flujo.",
       "triggerPlaceholder": "Por configurar..."
+    },
+    "seedDefaults": {
+      "button": "Generar predeterminados",
+      "dialog": {
+        "title": "¿Generar automatizaciones predeterminadas?",
+        "description": "Se crearán todas las automatizaciones estándar (p. ej. invitación de usuario, bienvenida, recordatorio de contraseña, etc.) con plantillas de email predeterminadas. Las automatizaciones existentes no se sobrescribirán.",
+        "warning": "Advertencia: Las nuevas automatizaciones se crearán en estado activo y comenzarán a funcionar inmediatamente. Asegúrese de que sus plantillas de email estén configuradas correctamente.",
+        "confirm": "Generar",
+        "cancel": "Cancelar"
+      },
+      "toasts": {
+        "success": "Se generaron {{created}} automatizaciones (se omitieron {{skipped}} existentes).",
+        "error": "No se pudieron generar las automatizaciones predeterminadas."
+      }
     }
   },
 

@@ -4757,6 +4757,20 @@
       "updateError": "Nepodařilo se uložit automatizaci.",
       "deleted": "Automatizace smazána.",
       "deleteError": "Nepodařilo se smazat automatizaci."
+    },
+    "seedDefaults": {
+      "button": "Generovat výchozí",
+      "dialog": {
+        "title": "Generovat výchozí automatizace?",
+        "description": "Budou vytvořeny všechny standardní automatizace (např. pozvánka uživatele, přivítání, připomínka hesla atd.) s výchozími e-mailovými šablonami. Stávající automatizace nebudou přepsány.",
+        "warning": "Upozornění: Nové automatizace budou vytvořeny v aktivním stavu a začnou okamžitě fungovat. Ujistěte se, že vaše e-mailové šablony jsou správně nakonfigurovány.",
+        "confirm": "Generovat",
+        "cancel": "Zrušit"
+      },
+      "toasts": {
+        "success": "Vygenerováno {{created}} automatizací (přeskočeno {{skipped}} existujících).",
+        "error": "Nepodařilo se vygenerovat výchozí automatizace."
+      }
     }
   },
   "automationBuilder": {
