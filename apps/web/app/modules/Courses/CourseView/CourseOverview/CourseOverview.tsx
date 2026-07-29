@@ -69,7 +69,6 @@ export default function CourseOverview({
   const { data: currentUser } = useCurrentUser();
   const { data: categories = [] } = useCategories({
     language,
-    archived: false,
   });
   const canManageCategories = hasPermission(
     currentUser?.permissions ?? [],
