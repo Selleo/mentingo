@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { DB } from "src/storage/db/db.providers";
-import { automations } from "src/storage/schema";
+import { automationLogs, automations } from "src/storage/schema";
 
 import type {
   AutomationRecordInput,
@@ -17,7 +17,29 @@ export class AutomationsRepository {
   constructor(@Inject(DB) private readonly db: DatabasePg) {}
 
   async getAllAutomationsByTenantId(tenantId: UUIDType) {
-    return this.db.select().from(automations).where(eq(automations.tenantId, tenantId));
+    return this.db
+      .select({
+        id: automations.id,
+        name: automations.name,
+        description: automations.description,
+        status: automations.status,
+        lastRun: sql<string | null>`max("automation_logs"."created_at")`.mapWith((value) =>
+          value ? new Date(value).toISOString() : null,
+        ),
+        createdAt: automations.createdAt,
+        updatedAt: automations.updatedAt,
+      })
+      .from(automations)
+      .leftJoin(automationLogs, eq(automationLogs.automationId, automations.id))
+      .where(eq(automations.tenantId, tenantId))
+      .groupBy(
+        automations.id,
+        automations.name,
+        automations.description,
+        automations.status,
+        automations.createdAt,
+        automations.updatedAt,
+      );
   }
 
   async getAutomationById(automationId: UUIDType) {

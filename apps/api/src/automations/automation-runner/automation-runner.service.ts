@@ -72,7 +72,7 @@ export class AutomationRunnerService {
     try {
       await this.executeAutomationSteps(automationSteps, resolvedRecipients);
     } catch (error: any) {
-      this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.tenantRunner.runWithTenant(tenantId, async () => {
         await this.automationLogsRepository.create({
           status: "failed",
           automationId: automationToRun.id,
@@ -85,7 +85,7 @@ export class AutomationRunnerService {
 
       return;
     }
-    this.tenantRunner.runWithTenant(tenantId, async () => {
+    await this.tenantRunner.runWithTenant(tenantId, async () => {
       await this.automationLogsRepository.create({
         status: "success",
         automationId: automationToRun.id,

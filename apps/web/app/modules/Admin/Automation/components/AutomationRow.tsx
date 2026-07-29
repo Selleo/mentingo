@@ -41,7 +41,7 @@ export const AutomationRow: FC<AutomationRowProps> = ({ automation, onOpenDrawer
         <StatusBadge status={automation.status} />
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
-        {automation.lastRun ?? t("automationView.table.noRuns")}
+        {automation.lastRun ? formatDate(automation.lastRun) : t("automationView.table.noRuns")}
       </TableCell>
       <TableCell className="text-sm text-muted-foreground">
         {formatDate(automation.updatedAt)}

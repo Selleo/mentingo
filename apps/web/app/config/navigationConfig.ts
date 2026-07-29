@@ -191,7 +191,7 @@ export const getNavigationConfig = (
         {
           label: t("navigationSideBar.automation"),
           path: "admin/automation",
-          iconName: "InProgress",
+          iconName: "Manage",
         },
         ...(isStripeConfigured
           ? [
