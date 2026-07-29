@@ -39,30 +39,6 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
   const dirtyValuesRef = useRef<ScormRuntimeValues>({});
   const apiRef = useRef<Scorm12API | null>(null);
   const pendingSavesRef = useRef(0);
-  // Keep cache-only runtime updates from recreating the SCORM API and triggering finish twice.
-  const initialRuntimeRef = useRef({
-    attemptId: launch.attemptId,
-    packageId: launch.packageId,
-    scoId: launch.scoId,
-    language,
-    runtime: launch.runtime,
-  });
-
-  const initialRuntime = initialRuntimeRef.current;
-  if (
-    initialRuntime.attemptId !== launch.attemptId ||
-    initialRuntime.packageId !== launch.packageId ||
-    initialRuntime.scoId !== launch.scoId ||
-    initialRuntime.language !== language
-  ) {
-    initialRuntimeRef.current = {
-      attemptId: launch.attemptId,
-      packageId: launch.packageId,
-      scoId: launch.scoId,
-      language,
-      runtime: launch.runtime,
-    };
-  }
 
   useEffect(() => {
     commitRuntimeRef.current = commitRuntime;
@@ -71,7 +47,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
 
   useEffect(() => {
     const api = createScorm12Api();
-    const runtimeValues = asRuntimeValues(initialRuntimeRef.current.runtime);
+    const runtimeValues = asRuntimeValues(launch.runtime);
 
     const buildRuntimePayload = (values: ScormRuntimeValues) => ({
       attemptId: launch.attemptId,
@@ -208,6 +184,7 @@ export function useScormRuntime({ launch, language, onSavingChange }: UseScormRu
     launch.courseId,
     launch.lessonId,
     launch.packageId,
+    launch.runtime,
     launch.scoId,
     onSavingChange,
     queryClient,
