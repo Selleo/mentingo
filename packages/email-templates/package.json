@@ -9,7 +9,8 @@
   "scripts": {
     "build": "tsup",
     "clean": "rm -rf dist",
-    "export": "email export --dir ./src/templates"
+    "export": "email export --dir ./src/templates",
+    "test": "pnpm run build && node --test test/*.test.mjs"
   },
   "dependencies": {
     "@react-email/components": "^0.5.1",

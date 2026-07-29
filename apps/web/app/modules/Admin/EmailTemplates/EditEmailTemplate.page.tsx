@@ -334,6 +334,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 <input
                   ref={nameInputRef}
                   value={nameDraft}
+                  data-testid="edit-email-template-name-input"
                   onChange={(e) => setNameDraft(e.target.value)}
                   onBlur={cancelNameEdit}
                   onKeyDown={(e) => {
@@ -356,6 +357,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                   <button
                     ref={nameButtonRef}
                     type="button"
+                    data-testid="edit-email-template-name-button"
                     onClick={() => setIsEditingName(true)}
                     title={t("emailTemplates.actions.rename")}
                     className="block max-w-full overflow-x-auto whitespace-nowrap rounded px-2 py-0.5 text-left text-lg font-semibold hover:bg-neutral-100"
@@ -372,7 +374,11 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handleDuplicate}>
+              <Button
+                variant="outline"
+                onClick={handleDuplicate}
+                data-testid="edit-email-template-duplicate-button"
+              >
                 {t("emailTemplates.actions.duplicate")}
               </Button>
               <Select
@@ -383,6 +389,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 <SelectTrigger
                   className="h-9 w-[160px]"
                   aria-label={t("emailTemplates.list.columns.status")}
+                  data-testid="edit-email-template-status-select"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -400,6 +407,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 className={cn({ "border border-primary-700": isDirty })}
                 onClick={handleSave}
                 disabled={isSubmitting}
+                data-testid="edit-email-template-save-button"
               >
                 {t("common.button.save")}
               </Button>
@@ -427,12 +435,29 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 setBaseTitle: "emailTemplates.language.setBaseTitle",
                 setBaseDescription: "emailTemplates.language.setBaseDescription",
               }}
+              testIds={{
+                select: "edit-email-template-language-select",
+                option: (language) => `edit-email-template-language-option-${language}`,
+                createConfirmButton: "edit-email-template-language-create-confirm-button",
+                deleteButton: "edit-email-template-language-delete-button",
+                deleteConfirmButton: "edit-email-template-language-delete-confirm-button",
+                setBaseLanguageButton: "edit-email-template-language-set-base-button",
+                setBaseLanguageConfirmButton:
+                  "edit-email-template-language-set-base-confirm-button",
+              }}
             />
-            <Button onClick={handleSendTestEmail} disabled={isSendingTestEmail || isSubmitting}>
+            <Button
+              onClick={handleSendTestEmail}
+              disabled={isSendingTestEmail || isSubmitting}
+              data-testid="edit-email-template-send-test-button"
+            >
               {t("emailTemplates.actions.sendTest")}
             </Button>
           </div>
-          <div className="min-h-0 flex-1 space-y-3 overflow-auto py-6">
+          <div
+            className="min-h-0 flex-1 space-y-3 overflow-auto py-6"
+            data-testid="edit-email-template-page"
+          >
             <div className="mx-auto w-[90%] max-w-[500px] rounded-3xl border border-neutral-200 bg-white px-[50px] py-4 shadow-sm">
               <label
                 htmlFor="email-template-subject"
@@ -450,6 +475,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                     : t("emailTemplates.form.field.subjectPlaceholder")
                 }
                 ariaLabel={t("emailTemplates.form.field.subject")}
+                testId="edit-email-template-subject-input"
               />
             </div>
             <Suspense fallback={<Loader />}>

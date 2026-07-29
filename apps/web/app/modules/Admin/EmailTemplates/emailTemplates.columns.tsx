@@ -63,6 +63,7 @@ export const getEmailTemplatesColumns = ({
       <Checkbox
         checked={row.getIsSelected()}
         aria-label={t("emailTemplates.list.columns.selectRow")}
+        data-testid={`email-templates-row-checkbox-${row.original.id}`}
         onClick={(event) => {
           event.stopPropagation();
           handleRowSelectionRange({

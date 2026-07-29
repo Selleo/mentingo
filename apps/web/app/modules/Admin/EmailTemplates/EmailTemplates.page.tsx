@@ -103,12 +103,15 @@ const EmailTemplatesPage = () => {
       name: "name",
       type: "text",
       placeholder: t("emailTemplates.list.searchPlaceholder"),
+      testId: "email-templates-name-filter",
     },
     {
       name: "status",
       type: "select",
       placeholder: t("common.other.allStatuses"),
       options: statusOptions,
+      testId: "email-templates-status-filter",
+      optionTestId: (option) => `email-templates-status-filter-option-${option.value}`,
     },
   ];
 
@@ -206,6 +209,7 @@ const EmailTemplatesPage = () => {
               className="gap-2"
               onClick={handleCreate}
               disabled={isCreating}
+              data-testid="email-templates-create-button"
             >
               <Plus className="size-4" />
               {t("emailTemplates.list.createButton")}
@@ -216,6 +220,7 @@ const EmailTemplatesPage = () => {
                   className="gap-2"
                   variant="destructive"
                   disabled={isEmpty(selectedTemplateIds)}
+                  data-testid="email-templates-delete-selected-button"
                 >
                   <Trash className="size-4" />
                   {t("emailTemplates.list.deleteSelected")}
@@ -233,7 +238,11 @@ const EmailTemplatesPage = () => {
                     </Button>
                   </DialogClose>
                   <DialogClose asChild>
-                    <Button onClick={handleDelete} variant="destructive">
+                    <Button
+                      onClick={handleDelete}
+                      variant="destructive"
+                      data-testid="email-templates-delete-confirm-button"
+                    >
                       {t("common.button.delete")}
                     </Button>
                   </DialogClose>
@@ -250,7 +259,7 @@ const EmailTemplatesPage = () => {
             isLoading={isPending}
           />
         </div>
-        <Table className="border bg-neutral-50">
+        <Table className="border bg-neutral-50" data-testid="email-templates-page">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -295,6 +304,7 @@ const EmailTemplatesPage = () => {
                 bodyRows.map((row) => (
                   <TableRow
                     key={row.id}
+                    data-testid={`email-templates-row-${row.original.id}`}
                     data-state={row.getIsSelected() && "selected"}
                     onClick={() => navigate(`/admin/email-templates/${row.original.id}`)}
                     className="cursor-pointer hover:bg-neutral-100"
@@ -317,6 +327,14 @@ const EmailTemplatesPage = () => {
           currentPage={paginationInfo?.page}
           onPageChange={handlePageChange}
           onItemsPerPageChange={handlePerPageChange}
+          testIds={{
+            next: "email-templates-pagination-next",
+            previous: "email-templates-pagination-previous",
+            page: (page) => `email-templates-pagination-page-${page}`,
+            itemsPerPage: "email-templates-pagination-items-per-page",
+            itemsPerPageOption: (itemsPerPage) =>
+              `email-templates-pagination-items-per-page-option-${itemsPerPage}`,
+          }}
         />
       </div>
     </PageWrapper>
