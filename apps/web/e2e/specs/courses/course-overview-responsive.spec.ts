@@ -152,34 +152,33 @@ test("student course actions stay visible on a small screen", async ({
         await page.setViewportSize(MOBILE_VIEWPORT);
         await openCourseOverviewFlow(page, courseId);
 
-        const continueLearningButton = page.getByTestId(
-          COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON,
-        );
+        const primaryActionButton = page.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON);
         const detailsButton = page.getByTestId(COURSE_OVERVIEW_HANDLES.DETAILS_BUTTON);
         const hero = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO);
         const heroTitle = page.getByTestId(COURSE_OVERVIEW_HANDLES.HERO_TITLE);
 
-        await expect(continueLearningButton).toBeVisible();
+        await expect(primaryActionButton).toBeVisible();
         await expect(detailsButton).toBeVisible();
-        await expect(continueLearningButton).toHaveText("Continue learning");
+        await expect(primaryActionButton).toHaveText("No lessons available");
+        await expect(primaryActionButton).toBeDisabled();
         await expect(detailsButton).toHaveText("Course details");
 
-        const continueLearningBox = await continueLearningButton.boundingBox();
+        const primaryActionBox = await primaryActionButton.boundingBox();
         const detailsBox = await detailsButton.boundingBox();
         const heroBox = await hero.boundingBox();
         const heroTitleBox = await heroTitle.boundingBox();
 
-        expect(continueLearningBox).not.toBeNull();
+        expect(primaryActionBox).not.toBeNull();
         expect(detailsBox).not.toBeNull();
         expect(heroBox).not.toBeNull();
         expect(heroTitleBox).not.toBeNull();
 
-        if (!(continueLearningBox && detailsBox && heroBox && heroTitleBox)) {
+        if (!(primaryActionBox && detailsBox && heroBox && heroTitleBox)) {
           throw new Error("Student course hero and actions must have measurable bounds");
         }
 
         const actionsBottom = Math.max(
-          continueLearningBox.y + continueLearningBox.height,
+          primaryActionBox.y + primaryActionBox.height,
           detailsBox.y + detailsBox.height,
         );
         const heroBottom = heroBox.y + heroBox.height;

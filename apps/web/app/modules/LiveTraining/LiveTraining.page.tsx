@@ -6,7 +6,7 @@ import {
   PERMISSIONS,
 } from "@repo/shared";
 import { isAxiosError } from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteLiveTraining } from "~/api/mutations/live-training/useDeleteLiveTraining";
@@ -127,6 +127,7 @@ export default function LiveTrainingPage() {
   const navigate = useNavigate();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editFormState, setEditFormState] = useState<LiveTrainingEditFormState | null>(null);
+  const editCommitQueueRef = useRef<Promise<void>>(Promise.resolve());
   const [hasAttemptedRoomJoin, setHasAttemptedRoomJoin] = useState(false);
   const [meetingCredentials, setMeetingCredentials] = useState<
     JoinCurrentSessionResponse["data"] | null
@@ -144,7 +145,7 @@ export default function LiveTrainingPage() {
   const { data: liveKitConfigured } = useLiveKitConfigured();
   const isOnlineDeliveryAvailable = Boolean(liveKitConfigured?.enabled);
   const { mutateAsync: deleteLiveTraining, isPending: isDeleting } = useDeleteLiveTraining();
-  const { mutateAsync: updateLiveTraining, isPending: isUpdating } = useUpdateLiveTraining();
+  const { mutateAsync: updateLiveTraining } = useUpdateLiveTraining();
   const { mutateAsync: startSession, isPending: isStartingSession } = useStartLiveTrainingSession();
   const { mutateAsync: joinSession, isPending: isJoiningSession } = useJoinLiveTrainingSession();
   const { mutateAsync: endSession, isPending: isFinishingSession } = useEndLiveTrainingSession();
@@ -198,17 +199,24 @@ export default function LiveTrainingPage() {
     });
   };
 
-  const commitEditFormState = async (nextFormState: LiveTrainingEditFormState) => {
+  const commitEditFormState = (nextFormState: LiveTrainingEditFormState) => {
     setEditFormState(nextFormState);
 
-    if (!id || !liveTraining || isUpdating) return;
+    if (!id || !liveTraining) return;
     if (!isLiveTrainingEditFormDirty(liveTraining, nextFormState)) return;
     if (!isLiveTrainingEditFormValid(nextFormState)) return;
 
-    await updateLiveTraining({
+    const updateOptions = {
       id,
       data: buildUpdateLiveTrainingPayload(nextFormState, liveTraining.timezone, language),
-    });
+    };
+    const runUpdate = async () => {
+      await updateLiveTraining(updateOptions);
+    };
+
+    editCommitQueueRef.current = editCommitQueueRef.current
+      .then(runUpdate, runUpdate)
+      .catch(() => undefined);
   };
 
   const handleDeleteLiveTraining = async () => {

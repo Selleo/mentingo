@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "~/lib/utils";
 import { formatDuration } from "~/modules/Courses/utils/formatDuration";
 
+import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { CHAPTER_PROGRESS_STATUSES } from "../lessonTypes";
 
 import LessonItem from "./LessonItem";
@@ -127,6 +128,7 @@ export default function ChapterItem({
         <div className="flex-1 pb-2">
           <button
             type="button"
+            data-testid={COURSE_OVERVIEW_HANDLES.CHAPTER_TOGGLE}
             onClick={onToggle}
             className={cn(
               "group w-full cursor-pointer rounded-xl p-5 text-left transition-all md:p-4",

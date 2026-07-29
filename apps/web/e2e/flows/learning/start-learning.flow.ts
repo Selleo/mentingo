@@ -10,6 +10,6 @@ export const startLearningFlow = async (page: Page) => {
     return;
   }
 
-  await page.locator('[data-section="toc"] button').first().click();
+  await page.getByTestId(COURSE_OVERVIEW_HANDLES.CHAPTER_TOGGLE).first().click();
   await page.locator('a[href*="/lesson/"]').first().click();
 };

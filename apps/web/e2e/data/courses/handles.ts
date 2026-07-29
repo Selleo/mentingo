@@ -162,6 +162,7 @@ export const COURSE_OVERVIEW_HANDLES = {
   START_LEARNING_BUTTON: "course-overview-start-learning-button",
   DETAILS_BUTTON: "course-overview-details-button",
   LEARNING_OUTCOMES: "course-overview-learning-outcomes",
+  CHAPTER_TOGGLE: "course-overview-chapter-toggle",
 } as const;
 
 const reactionHandleValue = (reaction: string) => reaction.codePointAt(0)?.toString(16) ?? reaction;

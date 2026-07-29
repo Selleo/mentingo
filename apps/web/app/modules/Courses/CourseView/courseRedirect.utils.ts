@@ -4,3 +4,6 @@ export const buildCourseRedirectPath = (requestUrl: string, slug: string) => {
 
   return `${redirectUrl.pathname}${redirectUrl.search}`;
 };
+
+export const shouldRedirectToCourseSlug = (idOrSlug: string, slug?: string): slug is string =>
+  Boolean(slug && slug !== idOrSlug);

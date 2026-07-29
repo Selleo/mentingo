@@ -13,7 +13,7 @@ import CourseOverview from "~/modules/Courses/CourseView/CourseOverview/CourseOv
 import { useLanguageStore } from "~/modules/Dashboard/Settings/Language/LanguageStore";
 import { isSupportedLanguage } from "~/utils/browser-language";
 
-import { buildCourseRedirectPath } from "./courseRedirect.utils";
+import { buildCourseRedirectPath, shouldRedirectToCourseSlug } from "./courseRedirect.utils";
 import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
 import { LearningModeBannerNew } from "./LearningModeBanner";
 import { TableOfContent } from "./TableOfContent/TableOfContent";
@@ -59,9 +59,9 @@ export const clientLoader = async ({
       throw error;
     });
 
-  const { status, slug } = lookupCourse;
+  const { slug } = lookupCourse;
 
-  if (status === "redirect" && slug) {
+  if (shouldRedirectToCourseSlug(idOrSlug, slug)) {
     throw redirect(buildCourseRedirectPath(request.url, slug), 302);
   }
 
