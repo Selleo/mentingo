@@ -8,7 +8,7 @@ import { match } from "ts-pattern";
 import { courseLookupQueryOptions, useCourse, useCurrentUser } from "~/api/queries";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
 import { queryClient } from "~/api/queryClient";
-import { hasPermission } from "~/common/permissions/permission.utils";
+import { canManageCourseByAuthor, hasPermission } from "~/common/permissions/permission.utils";
 import { PageWrapper } from "~/components/PageWrapper";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { ContentAccessGuard } from "~/Guards/AccessGuard";
@@ -128,6 +128,11 @@ export default function CourseViewPage() {
     required: PERMISSIONS.COURSE_STATISTICS,
   });
   const { data: currentUser } = useCurrentUser();
+  const canManageCourse = canManageCourseByAuthor({
+    permissions: currentUser?.permissions ?? [],
+    courseAuthorId: course?.authorId,
+    currentUserId: currentUser?.id,
+  });
 
   const courseViewTabs = useMemo(
     () => [
@@ -178,7 +183,7 @@ export default function CourseViewPage() {
         value: "statistics",
         queryValue: COURSE_VIEW_TAB_QUERY_VALUES.STATISTICS,
         title: t("studentCourseView.tabs.statistics"),
-        content: <CourseAdminStatistics course={course} />,
+        content: <CourseAdminStatistics course={course} canManageCourse={canManageCourse} />,
         isForAdminLike: true,
         isForUnregistered: false,
         isForEnrolled: false,
@@ -189,6 +194,7 @@ export default function CourseViewPage() {
       course,
       currentUser?.id,
       currentUser?.permissions,
+      canManageCourse,
       globalSettings?.courseDiscussionsEnabled,
     ],
   );
@@ -218,7 +224,8 @@ export default function CourseViewPage() {
   ];
 
   const canView = (isForAdminLike: boolean, isForUnregistered: boolean, isForEnrolled: boolean) => {
-    const hideForAdmin = isForAdminLike && (!canViewCourseStatistics || !currentUser);
+    const hideForAdmin =
+      isForAdminLike && (!canViewCourseStatistics || !currentUser || !canManageCourse);
     const hideWhenUnregistered = !isForUnregistered && !currentUser;
     const hideWhenNotEnrolled = isForEnrolled && !course.enrolled;
 

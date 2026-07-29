@@ -344,6 +344,76 @@ describe("CourseController (e2e)", () => {
     });
   });
 
+  describe("course statistics access", () => {
+    it("allows a content creator to view statistics for their own course", async () => {
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: contentCreator.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", await cookieFor(contentCreator, app))
+        .expect(200);
+    });
+
+    it("denies a content creator statistics for another author's course", async () => {
+      const contentCreator = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const otherAuthor = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: otherAuthor.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", await cookieFor(contentCreator, app))
+        .expect(403)
+        .expect(({ body }) => {
+          expect(body.message).toBe("adminCourseView.errors.statisticsAccessForbidden");
+        });
+    });
+
+    it("allows a user with any-course update permission to view another author's statistics", async () => {
+      const admin = await userFactory
+        .withCredentials({ password })
+        .withAdminSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+      const otherAuthor = await userFactory
+        .withCredentials({ password })
+        .withContentCreatorSettings(db)
+        .create({ role: SYSTEM_ROLE_SLUGS.CONTENT_CREATOR });
+      const category = await categoryFactory.create();
+      const course = await courseFactory.create({
+        authorId: otherAuthor.id,
+        categoryId: category.id,
+        status: "published",
+      });
+
+      await request(app.getHttpServer())
+        .get(`/api/course/${course.id}/statistics/average-quiz-score`)
+        .query({ language: SUPPORTED_LANGUAGES.EN })
+        .set("Cookie", await cookieFor(admin, app))
+        .expect(200);
+    });
+  });
+
   describe("GET /api/course/:courseId/statistics/average-quiz-score", () => {
     const createAverageQuizScoreFixture = async () => {
       const admin = await userFactory

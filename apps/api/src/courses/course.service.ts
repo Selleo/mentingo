@@ -3869,6 +3869,22 @@ export class CourseService {
     return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
   }
 
+  async assertCanViewCourseStatistics(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
+    }
+  }
+
   async getAverageQuizScoreForCourse(
     courseId: UUIDType,
     query: CourseStatisticsQueryBody,
