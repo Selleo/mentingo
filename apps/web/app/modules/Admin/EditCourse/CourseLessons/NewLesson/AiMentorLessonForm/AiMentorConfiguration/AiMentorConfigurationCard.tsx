@@ -24,6 +24,11 @@ type AiMentorConfigurationCardProps = {
   isSaving?: boolean;
   needsConfiguration?: boolean;
   error?: string;
+  onCreateWithAi?: () => void;
+  onImproveWithAi?: () => void;
+  onCheckQuality?: () => void;
+  editorOpen?: boolean;
+  onEditorOpenChange?: (open: boolean) => void;
 };
 
 export const AiMentorConfigurationCard = ({
@@ -37,9 +42,16 @@ export const AiMentorConfigurationCard = ({
   isSaving = false,
   needsConfiguration = false,
   error,
+  onCreateWithAi,
+  onImproveWithAi,
+  onCheckQuality,
+  editorOpen,
+  onEditorOpenChange,
 }: AiMentorConfigurationCardProps) => {
   const { t } = useTranslation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const isDialogOpen = editorOpen ?? dialogOpen;
+  const setIsDialogOpen = onEditorOpenChange ?? setDialogOpen;
   const isConfigured = Boolean(value);
   const canOpenDialog =
     !isLoading &&
@@ -109,45 +121,64 @@ export const AiMentorConfigurationCard = ({
               {error && <p className="mt-1 text-sm text-error-700">{error}</p>}
             </div>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span
-                  className={cn("inline-flex shrink-0", { "cursor-not-allowed": !canOpenDialog })}
-                >
-                  <Button
-                    type="button"
-                    variant={isConfigured ? "outline" : "link"}
-                    size="sm"
-                    data-testid="curriculum-ai-mentor-configuration-button"
-                    disabled={!canOpenDialog}
-                    onClick={() => setDialogOpen(true)}
-                    className={cn("h-9 gap-1.5", { "px-1.5": !isConfigured })}
-                  >
-                    {actionLabel}
-                    {isConfigured && <ChevronRight className="size-3.5" />}
-                  </Button>
-                </span>
-              </TooltipTrigger>
-              {requiresBaseConfiguration && (
-                <TooltipContent
-                  side="top"
-                  align="center"
-                  className="max-w-xs rounded bg-black px-2 py-1 text-sm text-white shadow-md"
-                >
-                  {t(
-                    "adminCourseView.curriculum.lesson.aiMentorConfiguration.structureLockedTooltip",
-                  )}
-                  <TooltipArrow className="fill-black" />
-                </TooltipContent>
+            <div className="flex flex-wrap gap-2">
+              {!isConfigured && onCreateWithAi && language === baseLanguage && (
+                <Button type="button" size="sm" onClick={onCreateWithAi}>
+                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.createWithAi")}
+                </Button>
               )}
-            </Tooltip>
+              {isConfigured && language === baseLanguage && onImproveWithAi && (
+                <Button type="button" size="sm" variant="outline" onClick={onImproveWithAi}>
+                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.improveWithAi")}
+                </Button>
+              )}
+              {isConfigured && language === baseLanguage && onCheckQuality && (
+                <Button type="button" size="sm" variant="outline" onClick={onCheckQuality}>
+                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.checkQualityWithAi")}
+                </Button>
+              )}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={cn("inline-flex shrink-0", {
+                      "cursor-not-allowed": !canOpenDialog,
+                    })}
+                  >
+                    <Button
+                      type="button"
+                      variant={isConfigured ? "outline" : "link"}
+                      size="sm"
+                      data-testid="curriculum-ai-mentor-configuration-button"
+                      disabled={!canOpenDialog}
+                      onClick={() => setIsDialogOpen(true)}
+                      className={cn("h-9 gap-1.5", { "px-1.5": !isConfigured })}
+                    >
+                      {actionLabel}
+                      {isConfigured && <ChevronRight className="size-3.5" />}
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {requiresBaseConfiguration && (
+                  <TooltipContent
+                    side="top"
+                    align="center"
+                    className="max-w-xs rounded bg-black px-2 py-1 text-sm text-white shadow-md"
+                  >
+                    {t(
+                      "adminCourseView.curriculum.lesson.aiMentorConfiguration.structureLockedTooltip",
+                    )}
+                    <TooltipArrow className="fill-black" />
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       <AiMentorConfigurationDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         value={value}
         onSaveBaseConfiguration={onSaveBaseConfiguration}
         onSaveTranslation={onSaveTranslation}

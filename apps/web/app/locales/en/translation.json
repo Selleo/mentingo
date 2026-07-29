@@ -60,7 +60,8 @@
       "threadMustBeActive": "The thread must be active.",
       "aiMentorConfigurationIncomplete": "The AI Mentor configuration is incomplete.",
       "aiJudgeConfigurationMissing": "The completion conditions configuration is missing.",
-      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
+      "aiJudgeGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision.",
+      "aiMentorConfigurationGenerationNotAwaitingRevision": "This generation is not waiting for a revision decision."
     },
     "loader": {
       "textSequence": {
@@ -2518,6 +2519,43 @@
           "validation": {
             "required": "This field is required.",
             "configurationRequired": "Configure AI Mentor behavior before saving the lesson."
+          }
+        },
+        "aiMentorGeneration": {
+          "modeLabel": "Mentor mode",
+          "createWithAi": "Create with AI",
+          "improveWithAi": "Improve with AI",
+          "checkQualityWithAi": "Check quality with AI",
+          "improveTypeLocked": "AI will improve the current {{type}} configuration. It cannot change the mode.",
+          "create": {
+            "title": "Create AI Mentor behavior with AI",
+            "description": "Choose the Mentor mode, then describe the experience you want to create.",
+            "fieldLabel": "What should AI create?",
+            "fieldDescription": "AI will return a complete draft for the selected mode. You review it before applying it.",
+            "placeholder": "For example: help new managers practise a difficult feedback conversation.",
+            "submit": "Generate draft"
+          },
+          "improve": {
+            "title": "Improve AI Mentor behavior with AI",
+            "description": "AI uses the current unsaved configuration and its selected mode.",
+            "fieldLabel": "What should AI improve?",
+            "fieldDescription": "Describe the result you want. The selected mode stays unchanged.",
+            "placeholder": "For example: make the scenario more realistic and add clearer constraints.",
+            "submit": "Improve draft"
+          },
+          "progressTitle": "Preparing your draft",
+          "progressDescription": "AI is generating and checking the configuration.",
+          "readyTitle": "Draft ready for review",
+          "revisionTitle": "Draft needs your decision",
+          "failedTitle": "Could not generate a draft",
+          "cancel": "Cancel generation",
+          "revise": "Revise draft",
+          "review": "Review configuration",
+          "quality": {
+            "title": "Check quality with AI",
+            "description": "AI reviews the current unsaved configuration without changing it.",
+            "checking": "Checking the current configuration…",
+            "improve": "Improve with AI"
           }
         },
         "aiJudge": {

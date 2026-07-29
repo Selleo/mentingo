@@ -24,7 +24,11 @@ import { AiJudgeConfigurationTranslationService } from "./ai-judge-configuration
 import { AiJudgeConfigurationController } from "./ai-judge-configuration/ai-judge-configuration.controller";
 import { AiJudgeConfigurationRepository } from "./ai-judge-configuration/ai-judge-configuration.repository";
 import { AiJudgeConfigurationService } from "./ai-judge-configuration/ai-judge-configuration.service";
+import { AiMentorConfigurationGenerationController } from "./ai-mentor-configuration/controllers/ai-mentor-configuration-generation.controller";
 import { AiMentorConfigurationController } from "./ai-mentor-configuration/controllers/ai-mentor-configuration.controller";
+import { AiMentorConfigurationGenerationQueueService } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation-queue.service";
+import { AiMentorConfigurationGenerationService } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation.service";
+import { AiMentorConfigurationGenerationWorker } from "./ai-mentor-configuration/generation/ai-mentor-configuration-generation.worker";
 import { AiMentorConfigurationRepository } from "./ai-mentor-configuration/repositories/ai-mentor-configuration.repository";
 import { AiMentorConfigurationGraphService } from "./ai-mentor-configuration/services/ai-mentor-configuration-graph.service";
 import { AiMentorConfigurationService } from "./ai-mentor-configuration/services/ai-mentor-configuration.service";
@@ -56,6 +60,7 @@ import { LessonService } from "./services/lesson.service";
     AiJudgeConfigurationController,
     AiJudgeConfigurationGenerationController,
     AiMentorConfigurationController,
+    AiMentorConfigurationGenerationController,
   ],
   providers: [
     AiJudgeConfigurationRepository,
@@ -66,6 +71,9 @@ import { LessonService } from "./services/lesson.service";
     AiJudgeConfigurationService,
     AiJudgeConfigurationTranslationService,
     AiMentorConfigurationRepository,
+    AiMentorConfigurationGenerationQueueService,
+    AiMentorConfigurationGenerationService,
+    AiMentorConfigurationGenerationWorker,
     AiMentorConfigurationGraphService,
     AiMentorConfigurationService,
     AiMentorLessonTranslationService,

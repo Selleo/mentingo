@@ -24,10 +24,22 @@ export type AiMentorConfigurationLessonContext = {
 };
 
 export type ConfiguredAiMentorLessonContext = Omit<
-  AiMentorConfigurationLessonContext,
+  AiMentorLessonContext,
   "aiMentorLessonId" | "configurationId" | "configurationType"
 > & {
   aiMentorLessonId: UUIDType;
   configurationId: UUIDType;
   configurationType: AiMentorType;
+};
+
+export type AiMentorLessonContext = Omit<
+  AiMentorConfigurationLessonContext,
+  "aiMentorLessonId"
+> & {
+  aiMentorLessonId: UUIDType;
+};
+
+export type AiMentorGenerationAuthoringContext = {
+  courseId: UUIDType;
+  baseLanguage: SupportedLanguages;
 };

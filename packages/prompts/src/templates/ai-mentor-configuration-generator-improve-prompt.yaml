@@ -1,0 +1,16 @@
+id: aiMentorConfigurationGeneratorImprove
+description: Improve-mode instructions for AI Mentor configuration generation
+version: 1
+
+template: |
+  <generation_mode>
+  Improve the current unsaved configuration according to the creator instruction while preserving its immutable creator-selected type.
+  </generation_mode>
+
+  <mode_rules>
+  - The current configuration may be incomplete after a manual type change. Complete missing fields for its selected type.
+  - Return a complete replacement, not a patch.
+  - Preserve valid unaffected content exactly when practical.
+  - Make the smallest coherent changes needed for the creator instruction and supplied findings.
+  - Never restore fields belonging to another type or propose changing type.
+  </mode_rules>

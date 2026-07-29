@@ -22,7 +22,10 @@ import type {
   UpdateAiMentorRoleplayConfigurationTranslationBody,
   UpdateAiMentorTeacherConfigurationTranslationBody,
 } from "../schemas/ai-mentor-configuration.schema";
-import type { AiMentorConfigurationLessonContext } from "../types/ai-mentor-configuration.types";
+import type {
+  AiMentorConfigurationLessonContext,
+  AiMentorGenerationAuthoringContext,
+} from "../types/ai-mentor-configuration.types";
 import type { SupportedLanguages } from "@repo/shared";
 
 @Injectable()
@@ -53,6 +56,20 @@ export class AiMentorConfigurationRepository {
         eq(aiMentorConfigurations.aiMentorLessonId, aiMentorLessons.id),
       )
       .where(eq(lessons.id, lessonId));
+
+    return context;
+  }
+
+  async findCourseAuthoringContext(
+    courseId: UUIDType,
+  ): Promise<AiMentorGenerationAuthoringContext | undefined> {
+    const [context] = await this.db
+      .select({
+        courseId: courses.id,
+        baseLanguage: courses.baseLanguage,
+      })
+      .from(courses)
+      .where(eq(courses.id, courseId));
 
     return context;
   }

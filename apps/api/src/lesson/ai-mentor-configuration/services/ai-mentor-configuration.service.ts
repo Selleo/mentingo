@@ -21,6 +21,8 @@ import type {
 } from "../schemas/ai-mentor-configuration.schema";
 import type {
   AiMentorConfigurationGraph,
+  AiMentorGenerationAuthoringContext,
+  AiMentorLessonContext,
   ConfiguredAiMentorLessonContext,
 } from "../types/ai-mentor-configuration.types";
 import type { SupportedLanguages } from "@repo/shared";
@@ -64,6 +66,33 @@ export class AiMentorConfigurationService {
     return this.buildResponse({ ...context, configurationType: data.type }, context.baseLanguage);
   }
 
+  async prepareGenerationAuthoringContext(
+    courseId: UUIDType,
+    lessonId: UUIDType | undefined,
+    currentUser: CurrentUserType,
+  ): Promise<AiMentorGenerationAuthoringContext> {
+    if (lessonId) {
+      const context = await this.prepareLessonStructuralWrite(lessonId, currentUser);
+      if (context.courseId !== courseId)
+        throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+
+      return { courseId: context.courseId, baseLanguage: context.baseLanguage };
+    }
+
+    await this.masterCourseService.assertCourseContentEditable(courseId);
+    await this.courseFeaturePolicyService.assertCourseFeatureEnabled(
+      courseId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    await this.adminLessonService.validateAccess(ENTITY_TYPES.COURSE, currentUser, courseId);
+
+    const context =
+      await this.aiMentorConfigurationRepository.findCourseAuthoringContext(courseId);
+    if (!context) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    return context;
+  }
+
   async updateTranslations(
     lessonId: UUIDType,
     language: SupportedLanguages,
@@ -92,6 +121,15 @@ export class AiMentorConfigurationService {
     lessonId: UUIDType,
     currentUser: CurrentUserType,
   ): Promise<ConfiguredAiMentorLessonContext> {
+    await this.prepareLessonStructuralWrite(lessonId, currentUser);
+
+    return this.getConfiguredContext(lessonId);
+  }
+
+  private async prepareLessonStructuralWrite(
+    lessonId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<AiMentorLessonContext> {
     await this.masterCourseService.assertCourseContentEditableByLessonId(lessonId);
     await this.courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId(
       lessonId,
@@ -99,15 +137,11 @@ export class AiMentorConfigurationService {
     );
     await this.adminLessonService.validateAccess(ENTITY_TYPES.LESSON, currentUser, lessonId);
 
-    return this.getConfiguredContext(lessonId);
+    return this.getLessonContext(lessonId);
   }
 
   private async getConfiguredContext(lessonId: UUIDType): Promise<ConfiguredAiMentorLessonContext> {
-    const context = await this.aiMentorConfigurationRepository.findLessonContext(lessonId);
-
-    if (!context) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
-    if (context.lessonType !== LESSON_TYPES.AI_MENTOR || !context.aiMentorLessonId)
-      throw new BadRequestException("aiMentorConfiguration.errors.invalidLessonType");
+    const context = await this.getLessonContext(lessonId);
     if (!context.configurationId || !context.configurationType)
       throw new NotFoundException("aiMentorConfiguration.errors.configurationNotFound");
 
@@ -117,6 +151,18 @@ export class AiMentorConfigurationService {
       configurationId: context.configurationId,
       configurationType: context.configurationType,
     };
+  }
+
+  private async getLessonContext(
+    lessonId: UUIDType,
+  ): Promise<AiMentorLessonContext> {
+    const context = await this.aiMentorConfigurationRepository.findLessonContext(lessonId);
+
+    if (!context) throw new NotFoundException("adminCourseView.errors.notFound.lesson");
+    if (context.lessonType !== LESSON_TYPES.AI_MENTOR || !context.aiMentorLessonId)
+      throw new BadRequestException("aiMentorConfiguration.errors.invalidLessonType");
+
+    return { ...context, aiMentorLessonId: context.aiMentorLessonId };
   }
 
   private async buildResponse(
