@@ -3,7 +3,11 @@ import { Test } from "@nestjs/testing";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { CourseActivityHandler } from "src/activity-logs/handlers/course-activity.handler";
 import { ACTIVITY_LOG_ACTION_TYPES, ACTIVITY_LOG_RESOURCE_TYPES } from "src/activity-logs/types";
-import { BulkUpdateCourseCategoryEvent, BulkUpdateCourseStatusEvent } from "src/events";
+import {
+  BulkUpdateCourseCategoryEvent,
+  BulkUpdateCourseStatusEvent,
+  DeleteCourseEvent,
+} from "src/events";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 describe("CourseActivityHandler", () => {
@@ -281,5 +285,97 @@ describe("CourseActivityHandler", () => {
 
     expect(runWithTenant).not.toHaveBeenCalled();
     expect(recordActivity).not.toHaveBeenCalled();
+  });
+
+  it("records a delete activity for a single course", async () => {
+    const recordActivity = jest.fn();
+    const module = await Test.createTestingModule({
+      providers: [
+        CourseActivityHandler,
+        {
+          provide: ActivityLogsService,
+          useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: { runWithTenant: jest.fn() },
+        },
+      ],
+    }).compile();
+    const handler = module.get(CourseActivityHandler);
+    const actor = {
+      userId: "00000000-0000-0000-0000-000000000001",
+      email: "admin@example.com",
+      roleSlugs: ["admin"],
+      permissions: [],
+      tenantId: "00000000-0000-0000-0000-000000000010",
+    };
+    const courseId = "00000000-0000-0000-0000-000000000101";
+
+    await handler.handle(
+      new DeleteCourseEvent({
+        actor,
+        courses: [{ courseId, courseTitle: "Deleted Course" }],
+      }),
+    );
+
+    expect(recordActivity).toHaveBeenCalledWith({
+      actor,
+      tenantId: actor.tenantId,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+      resourceId: courseId,
+      context: { courseTitle: "Deleted Course" },
+    });
+  });
+
+  it("records one aggregate delete activity for multiple courses", async () => {
+    const recordActivity = jest.fn();
+    const module = await Test.createTestingModule({
+      providers: [
+        CourseActivityHandler,
+        {
+          provide: ActivityLogsService,
+          useValue: { recordActivity },
+        },
+        {
+          provide: TenantDbRunnerService,
+          useValue: { runWithTenant: jest.fn() },
+        },
+      ],
+    }).compile();
+    const handler = module.get(CourseActivityHandler);
+    const actor = {
+      userId: "00000000-0000-0000-0000-000000000001",
+      email: "admin@example.com",
+      roleSlugs: ["admin"],
+      permissions: [],
+      tenantId: "00000000-0000-0000-0000-000000000010",
+    };
+    const courses = [
+      {
+        courseId: "00000000-0000-0000-0000-000000000101",
+        courseTitle: "First Course",
+      },
+      {
+        courseId: "00000000-0000-0000-0000-000000000102",
+        courseTitle: "Second Course",
+      },
+    ];
+
+    await handler.handle(new DeleteCourseEvent({ actor, courses }));
+
+    expect(recordActivity).toHaveBeenCalledWith({
+      actor,
+      tenantId: actor.tenantId,
+      operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+      resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+      resourceId: null,
+      context: {
+        deletedCourseIds: JSON.stringify(courses.map(({ courseId }) => courseId)),
+        deletedCourseTitles: JSON.stringify(courses.map(({ courseTitle }) => courseTitle)),
+        deletedCount: "2",
+      },
+    });
   });
 });
