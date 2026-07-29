@@ -1254,6 +1254,13 @@
       "when": 1785309941472,
       "tag": "0178_remove_category_archiving",
       "breakpoints": true
+    },
+    {
+      "idx": 179,
+      "version": "7",
+      "when": 1785331794294,
+      "tag": "0179_add_automation_tables",
+      "breakpoints": true
     }
   ]
 }
