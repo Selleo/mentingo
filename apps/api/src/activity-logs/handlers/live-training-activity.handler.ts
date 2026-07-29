@@ -92,10 +92,14 @@ export class LiveTrainingActivityHandler implements IEventHandler<LiveTrainingEv
 
   private async handleUpdate(event: UpdateLiveTrainingEvent) {
     const { liveTrainingUpdateData } = event;
+    const context = {
+      ...(liveTrainingUpdateData.context ?? {}),
+      title: liveTrainingUpdateData.updatedLiveTrainingData?.title ?? "",
+    };
     const metadata = buildActivityLogMetadata({
       previous: liveTrainingUpdateData.previousLiveTrainingData,
       updated: liveTrainingUpdateData.updatedLiveTrainingData,
-      context: liveTrainingUpdateData.context ?? null,
+      context,
     });
 
     await this.activityLogsService.recordActivity({
