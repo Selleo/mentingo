@@ -106,6 +106,7 @@ describe("AutomationsController", () => {
   describe("createAutomation", () => {
     it("creates automation and returns BaseResponse", async () => {
       const input = {
+        tenantId,
         name: { en: "New Automation" },
         description: { en: "Description" },
         status: AutomationStatus.Draft,

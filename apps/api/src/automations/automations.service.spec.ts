@@ -44,11 +44,12 @@ describe("AutomationsService", () => {
   describe("createAutomation", () => {
     it("delegates creation to repository and returns result", async () => {
       const input = {
+        tenantId,
         name: { en: "Test Automation" },
         description: { en: "Test description" },
         status: AutomationStatus.Draft,
       };
-      const createdRecord = { id: "auto-1", ...input, tenantId, createdAt: new Date() };
+      const createdRecord = { id: "auto-1", ...input, createdAt: new Date() };
       repository.createAutomation.mockResolvedValue(createdRecord as any);
 
       const result = await service.createAutomation(input);

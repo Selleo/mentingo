@@ -387,7 +387,7 @@ export class AutomationsSeedDefaultsService {
         label: actionLabel,
         config: {
           emailTemplate: templateId,
-          language: language, // Ustawiamy język użytkownika zamiast "user_default"
+          language: "user_default",
           placeholderValues,
         },
         position: { x: 0, y: 150 },
