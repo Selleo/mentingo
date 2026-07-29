@@ -1,1 +1,0 @@
-CREATE UNIQUE INDEX IF NOT EXISTS "email_notification_templates_tenant_id_name_unique_idx" ON "email_notification_templates" USING btree ("tenant_id","name");
