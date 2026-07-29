@@ -220,7 +220,7 @@ describe("computeEmailTemplateDiagnostics — button_label_missing / button_url_
     expect(result.some((d) => d.reason === "button_label_missing")).toBe(true);
   });
 
-  it("flags button with empty url", () => {
+  it("flags button with empty url as a warning", () => {
     const result = computeEmailTemplateDiagnostics({
       name: "T",
       availableLocales: [base],
@@ -229,7 +229,8 @@ describe("computeEmailTemplateDiagnostics — button_label_missing / button_url_
       blocks: doc(button(uuid1, "Click", "")),
       strings: defaultStrings,
     });
-    expect(result.some((d) => d.reason === "button_url_missing")).toBe(true);
+    const diagnostic = result.find((d) => d.reason === "button_url_missing");
+    expect(diagnostic?.severity).toBe("warning");
   });
 
   it("does not flag a complete button", () => {
@@ -500,8 +501,8 @@ describe("groupEmailTemplateDiagnostics", () => {
       language: "pl",
       nodeUuid: uuid1,
     } as const;
-    const error = {
-      severity: "error",
+    const secondWarning = {
+      severity: "warning",
       reason: "button_url_missing",
       language: "en",
       nodeUuid: uuid1,
@@ -513,8 +514,11 @@ describe("groupEmailTemplateDiagnostics", () => {
       nodeUuid: uuid1,
     } as const;
 
-    const result = groupEmailTemplateDiagnostics([warning, error, secondError], new Set([uuid1]));
+    const result = groupEmailTemplateDiagnostics(
+      [warning, secondWarning, secondError],
+      new Set([uuid1]),
+    );
 
-    expect(result.byNodeUuid.get(uuid1)).toEqual([secondError, error, warning]);
+    expect(result.byNodeUuid.get(uuid1)).toEqual([secondError, secondWarning, warning]);
   });
 });

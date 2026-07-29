@@ -4975,7 +4975,7 @@
         "subject_missing": "Numatytosios kalbos temai reikia turinio",
         "body_missing": "El. laiško turinys tuščias",
         "button_label_missing": "Mygtuko etiketė privaloma",
-        "button_url_missing": "Mygtuko paskirties adresas privalomas",
+        "button_url_missing": "Mygtukas neturi paskirties adreso",
         "empty_translation": "Vertimas tuščias",
         "invalid_url_protocol": "URL naudoja neleistiną protokolą",
         "unchanged_from_base": "Vertimas identiškas bazinei kalbai",

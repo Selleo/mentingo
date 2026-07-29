@@ -177,7 +177,7 @@ export const computeEmailTemplateDiagnostics = (input: {
     const buttonUrl = typeof rawUrl === "string" ? rawUrl.trim() : "";
     if (!buttonUrl) {
       diagnostics.push({
-        severity: "error",
+        severity: "warning",
         language: input.baseLanguage,
         nodeUuid: uuid,
         nodeType: node.type,

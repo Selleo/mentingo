@@ -8,6 +8,8 @@ const ALLOWED_SCHEMES = new Set(["http:", "https:", "mailto:"]);
 const SAFE_IMAGE_SRC_PLACEHOLDERS = new Set<string>([TENANT_LOGO_VARIABLE]);
 
 function isSafeUrl(value: string): boolean {
+  if (!value.trim()) return true;
+
   const match = SCHEME_REGEX.exec(value);
   if (match) {
     return ALLOWED_SCHEMES.has(match[0].toLowerCase());

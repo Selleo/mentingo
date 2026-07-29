@@ -4971,7 +4971,7 @@
         "subject_missing": "Betreff ist für die Standardsprache erforderlich",
         "body_missing": "E-Mail-Text ist leer",
         "button_label_missing": "Schaltflächenbeschriftung ist erforderlich",
-        "button_url_missing": "Ziel der Schaltfläche ist erforderlich",
+        "button_url_missing": "Schaltfläche hat kein Ziel",
         "empty_translation": "Übersetzung ist leer",
         "invalid_url_protocol": "URL verwendet ein unzulässiges Protokoll",
         "unchanged_from_base": "Übersetzung ist identisch mit der Basissprache",

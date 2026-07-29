@@ -5054,7 +5054,7 @@
         "subject_missing": "Subject line is required for the default language",
         "body_missing": "Email body is empty",
         "button_label_missing": "Button label is required",
-        "button_url_missing": "Button redirect target is required",
+        "button_url_missing": "Button has no redirect target",
         "empty_translation": "Translation is empty",
         "invalid_url_protocol": "URL uses a disallowed protocol",
         "unchanged_from_base": "Translation is identical to the base language",

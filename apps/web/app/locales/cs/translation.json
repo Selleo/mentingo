@@ -4973,7 +4973,7 @@
         "subject_missing": "Předmět je pro výchozí jazyk povinný",
         "body_missing": "Tělo e-mailu je prázdné",
         "button_label_missing": "Popisek tlačítka je povinný",
-        "button_url_missing": "Cíl tlačítka je povinný",
+        "button_url_missing": "Tlačítko nemá cíl",
         "empty_translation": "Překlad je prázdný",
         "invalid_url_protocol": "URL používá nepovolený protokol",
         "unchanged_from_base": "Překlad je totožný se základním jazykem",

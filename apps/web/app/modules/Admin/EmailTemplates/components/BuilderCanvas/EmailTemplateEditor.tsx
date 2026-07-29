@@ -145,12 +145,56 @@ const buildBlocks = (t: TFunction, tenantLogoUrl: string | null): BlockGroupItem
   ];
 };
 
-const findDiagnosticTarget = (root: HTMLElement, uuid: string): HTMLElement | undefined =>
-  Array.from(root.querySelectorAll<HTMLElement>("[data-uuid]")).find(
+type ResolveDiagnosticNode = (uuid: string) => HTMLElement | null;
+
+const findDiagnosticTarget = (
+  root: HTMLElement,
+  uuid: string,
+  resolveDiagnosticNode?: ResolveDiagnosticNode,
+): HTMLElement | undefined => {
+  const dataUuidTarget = Array.from(root.querySelectorAll<HTMLElement>("[data-uuid]")).find(
     (element) =>
       element.dataset.uuid === uuid &&
       !element.closest<HTMLElement>("[data-inline-diagnostic-layer]"),
   );
+  if (dataUuidTarget) return dataUuidTarget;
+
+  const resolvedTarget = resolveDiagnosticNode?.(uuid);
+  if (!resolvedTarget || !root.contains(resolvedTarget)) return undefined;
+  if (resolvedTarget.closest<HTMLElement>("[data-inline-diagnostic-layer]")) return undefined;
+  return resolvedTarget;
+};
+
+const findEditorNodeByUuid = (
+  editor: Editor | null,
+  root: HTMLElement,
+  uuid: string,
+): HTMLElement | null => {
+  if (!editor) return null;
+
+  let targetPos: number | null = null;
+  editor.state.doc.descendants((node, pos) => {
+    if (targetPos !== null) return false;
+    if (node.attrs?.[EMAIL_TEMPLATE_NODE_UUID_ATTR] === uuid) {
+      targetPos = pos;
+      return false;
+    }
+    return true;
+  });
+
+  if (targetPos === null) return null;
+  const domNode = editor.view.nodeDOM(targetPos);
+  let element: HTMLElement | null = null;
+  if (domNode instanceof HTMLElement) {
+    element = domNode;
+  } else if (domNode instanceof Element) {
+    element = domNode as HTMLElement;
+  } else {
+    element = domNode?.parentElement ?? null;
+  }
+
+  return element && root.contains(element) ? element : null;
+};
 
 const findClosestDiagnosticTarget = (
   root: HTMLElement,
@@ -210,13 +254,14 @@ const buildAnchoredNoteBox = (rootRect: DOMRect, targetRect: DOMRect) => {
 export const measureInlineDiagnosticAnchors = (
   root: HTMLElement,
   diagnosticsByNodeUuid: Map<string, EmailTemplateDiagnostic[]> | undefined,
+  resolveDiagnosticNode?: ResolveDiagnosticNode,
 ): InlineDiagnosticAnchor[] => {
   const anchors: InlineDiagnosticAnchor[] = [];
   const rootRect = root.getBoundingClientRect();
 
   for (const [uuid, diagnostics] of diagnosticsByNodeUuid ?? []) {
     if (diagnostics.length === 0) continue;
-    const target = findDiagnosticTarget(root, uuid);
+    const target = findDiagnosticTarget(root, uuid, resolveDiagnosticNode);
     if (!target) continue;
 
     const targetRect = target.getBoundingClientRect();
@@ -357,6 +402,7 @@ const EmailTemplateEditorInner = ({
   useMailyEditorStyles();
   const isBase = language === baseLanguage;
   const editorRootRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<Editor | null>(null);
   const activeNodeSyncFrameRef = useRef<number | null>(null);
   const knownNodeUuidsRef = useRef<Set<string> | null>(null);
   const pendingDeferredNodeUuidsRef = useRef<Set<string>>(new Set());
@@ -514,6 +560,7 @@ const EmailTemplateEditorInner = ({
   }, [syncActiveDiagnosticNode]);
 
   const handleUpdate = (editor: Editor) => {
+    editorRef.current = editor;
     setEditorUpdateCount((count) => count + 1);
     const doc = editor.getJSON() as EmailTemplateBlocks;
     const packed = packTenantLogoInDoc(doc, logoUrl);
@@ -582,7 +629,9 @@ const EmailTemplateEditorInner = ({
     let frame: number | null = null;
     const measure = () => {
       frame = null;
-      const anchors = measureInlineDiagnosticAnchors(root, visibleDiagnosticsByNodeUuid);
+      const anchors = measureInlineDiagnosticAnchors(root, visibleDiagnosticsByNodeUuid, (uuid) =>
+        findEditorNodeByUuid(editorRef.current, root, uuid),
+      );
       const overlayBottom = anchors.reduce(
         (bottom, anchor) => Math.max(bottom, anchor.top + anchor.height),
         0,
@@ -641,6 +690,9 @@ const EmailTemplateEditorInner = ({
       <MailyEditor
         key={language}
         contentJson={initialContent as never}
+        onCreate={(editor) => {
+          editorRef.current = editor;
+        }}
         onUpdate={handleUpdate}
         extensions={editorExtensions}
         blocks={blockPalette}

@@ -623,6 +623,57 @@ describe("measureInlineDiagnosticAnchors", () => {
     ]);
   });
 
+  it("creates an anchor from the ProseMirror resolver when data-uuid is missing from the DOM", () => {
+    const root = document.createElement("div");
+    const node = document.createElement("a");
+    root.appendChild(node);
+    const diagnostic: EmailTemplateDiagnostic = {
+      severity: "warning",
+      reason: "button_url_missing",
+      nodeUuid: uuid1,
+    };
+
+    root.getBoundingClientRect = vi.fn(() => ({
+      bottom: 200,
+      height: 200,
+      left: 10,
+      right: 210,
+      top: 10,
+      width: 200,
+      x: 10,
+      y: 10,
+      toJSON: vi.fn(),
+    }));
+    node.getBoundingClientRect = vi.fn(() => ({
+      bottom: 57,
+      height: 32,
+      left: 14,
+      right: 114,
+      top: 25,
+      width: 100,
+      x: 14,
+      y: 25,
+      toJSON: vi.fn(),
+    }));
+
+    const anchors = measureInlineDiagnosticAnchors(
+      root,
+      new Map([[uuid1, [diagnostic]]]),
+      () => node,
+    );
+
+    expect(anchors).toEqual([
+      expect.objectContaining({
+        uuid: uuid1,
+        diagnostics: [diagnostic],
+        top: 48,
+        left: 4,
+        width: 100,
+        height: 24,
+      }),
+    ]);
+  });
+
   it("does not create an anchor when a node is no longer targetable", () => {
     const root = document.createElement("div");
 

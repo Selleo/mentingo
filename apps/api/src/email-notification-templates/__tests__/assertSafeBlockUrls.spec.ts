@@ -41,6 +41,18 @@ describe("assertSafeBlockUrls", () => {
     expect(() => assertSafeBlockUrls(doc([textWithLink("mailto:user@example.com")]))).not.toThrow();
   });
 
+  it("allows empty draft button urls", () => {
+    expect(() => assertSafeBlockUrls(doc([button("")]))).not.toThrow();
+  });
+
+  it("allows whitespace-only draft button urls", () => {
+    expect(() => assertSafeBlockUrls(doc([button("  ")]))).not.toThrow();
+  });
+
+  it("allows empty draft link hrefs", () => {
+    expect(() => assertSafeBlockUrls(doc([textWithLink("")]))).not.toThrow();
+  });
+
   it("allows relative image src starting with /", () => {
     expect(() =>
       assertSafeBlockUrls(doc([image("/api/public/email-template-image/key.webp")])),

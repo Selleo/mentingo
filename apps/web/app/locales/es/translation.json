@@ -5040,7 +5040,7 @@
         "subject_missing": "El asunto es obligatorio para el idioma predeterminado",
         "body_missing": "El cuerpo del correo está vacío",
         "button_label_missing": "El texto del botón es obligatorio",
-        "button_url_missing": "El destino del botón es obligatorio",
+        "button_url_missing": "El botón no tiene destino",
         "empty_translation": "La traducción está vacía",
         "invalid_url_protocol": "La URL usa un protocolo no permitido",
         "unchanged_from_base": "La traducción es idéntica al idioma base",

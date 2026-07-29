@@ -14,6 +14,7 @@ jest.mock("../utils/renderTemplateContent", () => ({
 }));
 
 import { EmailNotificationTemplatesService } from "../email-templates.service";
+import { buildDefaultEmailTemplateBlocks } from "../utils/buildDefaultEmailTemplateBlocks";
 
 import type { EmailTemplateBlocks, EmailTemplateStrings } from "@repo/shared";
 import type { CurrentUserType } from "src/common/types/current-user.type";
@@ -219,6 +220,26 @@ describe("EmailNotificationTemplatesService — ensureNameAvailable", () => {
 });
 
 describe("EmailNotificationTemplatesService — rendered URL validation", () => {
+  it("allows saving freshly created default draft blocks with an empty button url", async () => {
+    const { service, repository } = createService();
+    const blocks = buildDefaultEmailTemplateBlocks(EN);
+    const existing = makeTemplate({ blocks, strings: {} });
+    repository.findById.mockResolvedValue(existing);
+    repository.updateTemplate.mockResolvedValue(existing);
+
+    await expect(
+      service.updateTemplate(
+        TEMPLATE_ID,
+        {
+          blocks,
+          strings: {},
+        },
+        TENANT_ID,
+      ),
+    ).resolves.toBe(existing);
+    expect(repository.updateTemplate).toHaveBeenCalled();
+  });
+
   it("rejects unsafe hrefs introduced by translated strings on create", async () => {
     const { service, repository } = createService();
 
@@ -809,6 +830,29 @@ describe("EmailNotificationTemplatesService — status transitions", () => {
       new BadRequestException("emailTemplates.toast.publishBlocked"),
     );
     expect(repository.setStatus).not.toHaveBeenCalled();
+  });
+
+  it("publishTemplate allows templates with a button missing its url warning", async () => {
+    const { service, repository } = createService();
+    const template = makeTemplate({
+      blocks: buildDefaultEmailTemplateBlocks(EN),
+      availableLocales: [EN],
+      strings: {},
+    });
+    repository.findById.mockResolvedValue(template);
+    repository.setStatus.mockResolvedValue({
+      ...template,
+      status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
+    });
+
+    await expect(service.publishTemplate(TEMPLATE_ID)).resolves.toMatchObject({
+      status: EMAIL_TEMPLATE_STATUSES.PUBLISHED,
+    });
+    expect(repository.setStatus).toHaveBeenCalledWith(
+      TEMPLATE_ID,
+      EMAIL_TEMPLATE_STATUSES.PUBLISHED,
+      null,
+    );
   });
 
   it("publishTemplate rejects unsafe hrefs introduced by translated strings", async () => {

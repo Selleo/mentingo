@@ -5093,7 +5093,7 @@
         "subject_missing": "Temat jest wymagany dla języka domyślnego",
         "body_missing": "Treść wiadomości jest pusta",
         "button_label_missing": "Etykieta przycisku jest wymagana",
-        "button_url_missing": "Adres docelowy przycisku jest wymagany",
+        "button_url_missing": "Przycisk nie ma adresu docelowego",
         "empty_translation": "Tłumaczenie jest puste",
         "invalid_url_protocol": "URL używa niedozwolonego protokołu",
         "unchanged_from_base": "Tłumaczenie jest identyczne z językiem bazowym",
