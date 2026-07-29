@@ -35,12 +35,15 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Delete draft courses individually or in bulk while protecting private and published courses.
 - Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
 - Export supported courses as SCORM packages when permissions and configuration allow it.
+- Review learner progress, learning time, quiz outcomes, and AI Mentor results for courses the user manages.
 
 ## End-User Value
 
 The feature gives L&D teams governance over the training library. Teams can prepare courses before learners see them, publish only when content is ready, keep accountability through ownership, and maintain multilingual versions for different learner populations.
 
 Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, private and published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
+
+Course reporting follows the same ownership model. Content creators can review outcomes for their own courses, while users with broader course-management responsibility can review the courses they oversee. This keeps learner reporting useful without exposing another creator's operational data.
 
 ## How It Works
 
@@ -78,6 +81,8 @@ Course administrators can select a trailer video in the same media editor used f
 
 Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. The learner-facing heading presents these outcomes as “What you'll master” in every supported interface language. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
 
+From a course view, an eligible administrator opens the Statistics tab to review course-level completion, learner progress, learning time, quiz results, and—when available—AI Mentor outcomes. Published courses may still be viewed by users who do not manage them, but the Statistics tab and its data are limited to the course owner or users with any-course management responsibility. The API rechecks this boundary for every statistics request so direct links cannot bypass the UI.
+
 ## Key Technical Context
 
 - Admin course pages live under `apps/web/app/modules/Admin/Courses`, `apps/web/app/modules/Admin/AddCourse`, and `apps/web/app/modules/Admin/EditCourse`.
@@ -87,6 +92,9 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; course update snapshots detect learning outcomes, author-section visibility, and cover-image positioning, while both the create and update mappings copy those values to the target course. Copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`. Course Overview editor visibility follows the API update rule: `COURSE_UPDATE` applies to any course, while `COURSE_UPDATE_OWN` additionally requires matching the course author.
 - The category-management shortcut is shown only with `PERMISSIONS.CATEGORY_MANAGE` and uses the tenant-relative `/admin/categories` route.
+- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
+- Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_STATISTICS`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
+- Course statistics require both the statistics capability and resource-level manageability: `COURSE_UPDATE` allows any course, while `COURSE_UPDATE_OWN` requires the requester to match `courses.authorId`.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 - Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
 - The modern overview stores the selected course language in the URL so course content, media edits, and metadata updates stay aligned with the active translation.
@@ -100,6 +108,7 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
+- API E2E coverage verifies that content creators can access their own course statistics, cannot access another author's statistics, and that any-course administrators retain access.
 - Curriculum web E2E coverage verifies an administrator can create, update, reorder, and delete a chapter; chapter API E2E coverage verifies deletion also clears the chapter's learner progress.
 - Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.

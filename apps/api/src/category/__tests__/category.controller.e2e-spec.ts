@@ -55,7 +55,7 @@ describe("CategoryController (e2e)", () => {
 
   describe("POST /api/category", () => {
     describe("when user is a student", () => {
-      it("returns archived and createdAt equal to null", async () => {
+      it("does not expose category administration fields", async () => {
         const user = await userFactory
           .withCredentials({ password })
           .withUserSettings(db)
@@ -70,8 +70,8 @@ describe("CategoryController (e2e)", () => {
 
         expect(responseData[0]).toHaveProperty("id");
         expect(responseData[0]).toHaveProperty("title");
-        expect(responseData[0].archived).toBe(null);
         expect(responseData[0].createdAt).toBe(null);
+        expect(responseData[0]).not.toHaveProperty("archived");
       });
     });
 
@@ -91,7 +91,7 @@ describe("CategoryController (e2e)", () => {
 
         expect(responseData[0]).toHaveProperty("id");
         expect(responseData[0]).toHaveProperty("title");
-        expect(responseData[0]).toHaveProperty("archived");
+        expect(responseData[0]).not.toHaveProperty("archived");
         expect(responseData[0]).toHaveProperty("createdAt");
         expect(responseData[0].createdAt).not.toBe(null);
       });

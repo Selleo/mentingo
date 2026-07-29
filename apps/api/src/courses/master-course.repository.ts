@@ -555,7 +555,6 @@ export class MasterCourseRepository {
         title: values.title,
         baseLanguage: values.baseLanguage,
         availableLocales: values.availableLocales,
-        archived: false,
       })
       .onConflictDoNothing()
       .returning({ id: categories.id });

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useCurrentUser } from "~/api/queries";
 import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { hasPermission } from "~/common/permissions/permission.utils";
+import { canManageCourseByAuthor, hasPermission } from "~/common/permissions/permission.utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStatistics";
@@ -41,6 +41,11 @@ export function TableOfContent({ language }: TableOfContentProps) {
   const [showAllChapters, setShowAllChapters] = useState(false);
 
   const permissions = currentUser?.permissions ?? [];
+  const canManageCourse = canManageCourseByAuthor({
+    permissions,
+    courseAuthorId: course.authorId,
+    currentUserId: currentUser?.id,
+  });
   const canShowChat = Boolean(
     globalSettings?.courseDiscussionsEnabled &&
       course.enrolled &&
@@ -53,7 +58,9 @@ export function TableOfContent({ language }: TableOfContentProps) {
     PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
   );
   const canShowStatistics =
-    !isCourseStudentModeActive && hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
+    !isCourseStudentModeActive &&
+    canManageCourse &&
+    hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
   const shouldShowTabs = isAdminExperience || canShowChat || canShowStatistics;
   const hasMissingTranslations = missingTranslationsResponse?.data.hasMissingTranslations ?? false;
 
@@ -125,7 +132,7 @@ export function TableOfContent({ language }: TableOfContentProps) {
       )}
 
       {canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS && (
-        <CourseAdminStatistics course={course} />
+        <CourseAdminStatistics course={course} canManageCourse={canManageCourse} />
       )}
 
       {canShowChat && activeTab === COURSE_OVERVIEW_TABS.CHAT && currentUser && (

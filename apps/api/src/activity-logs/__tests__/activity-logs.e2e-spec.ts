@@ -371,6 +371,52 @@ describe("Activity Logs E2E", () => {
       expect(updateMetadata.after?.hasCertificate).toBe("true");
     });
 
+    it("should record DELETE activity log when a course is deleted", async () => {
+      const course = await createCourse();
+
+      await courseService.deleteCourse(course.id, currentAdminUser);
+
+      const logsAfterDelete = await waitForLogs(
+        { resourceId: course.id, resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE },
+        2,
+      );
+      const deleteLog = logsAfterDelete[logsAfterDelete.length - 1];
+      const deleteMetadata = parseMetadata(deleteLog.metadata);
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.actorId).toBe(currentAdminUser.userId);
+      expect(deleteLog.resourceType).toBe(ACTIVITY_LOG_RESOURCE_TYPES.COURSE);
+      expect(deleteMetadata.context?.courseTitle).toBe("Initial Course");
+    });
+
+    it("should record one aggregate DELETE activity log for bulk course deletion", async () => {
+      const courses = await Promise.all([createCourse(), createCourse()]);
+
+      await courseService.deleteManyCourses(
+        courses.map(({ id }) => id),
+        currentAdminUser,
+      );
+
+      const logs = await waitForLogs(
+        { resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE },
+        courses.length + 1,
+      );
+      const deleteLog = logs[logs.length - 1];
+      const deleteMetadata = parseMetadata(deleteLog.metadata);
+
+      expect(deleteLog.actionType).toBe(ACTIVITY_LOG_ACTION_TYPES.DELETE);
+      expect(deleteLog.actorId).toBe(currentAdminUser.userId);
+      expect(deleteLog.resourceId).toBeNull();
+      expect(JSON.parse(deleteMetadata.context?.deletedCourseIds).sort()).toEqual(
+        courses.map(({ id }) => id).sort(),
+      );
+      expect(JSON.parse(deleteMetadata.context?.deletedCourseTitles)).toEqual([
+        "Initial Course",
+        "Initial Course",
+      ]);
+      expect(deleteMetadata.context?.deletedCount).toBe("2");
+    });
+
     it("should record ENROLL_COURSE activity log when student self-enrolls", async () => {
       const student = await userFactory.withUserSettings(db).create();
 

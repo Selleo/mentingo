@@ -1734,7 +1734,6 @@ export interface DeleteLanguageResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   };
 }
@@ -1750,7 +1749,6 @@ export interface UpdateBaseLanguageResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   };
 }
@@ -1948,7 +1946,6 @@ export interface GetAvailableCourseCategoriesResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   }[];
   pagination: {
@@ -6782,7 +6779,6 @@ export interface GetAllCategoriesResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   }[];
   pagination: {
@@ -6800,7 +6796,6 @@ export interface GetCategoryByIdResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   };
 }
@@ -6822,7 +6817,6 @@ export interface UpdateCategoryBody {
   /** @format uuid */
   id?: string;
   title?: string;
-  archived?: boolean;
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
 }
 
@@ -6833,7 +6827,6 @@ export interface UpdateCategoryResponse {
     title: string;
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
-    archived: boolean | null;
     createdAt: string | null;
   };
 }
@@ -14310,7 +14303,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
     categoryControllerGetAllCategories: (
       query?: {
         title?: string;
-        archived?: string;
         /** @min 1 */
         page?: number;
         perPage?: number;

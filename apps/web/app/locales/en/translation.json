@@ -1993,6 +1993,7 @@
         "imageUploadFailed": "Failed to upload the course image.",
         "updateFailed": "Failed to update course media."
       },
+      "statisticsAccessForbidden": "You do not have permission to view statistics for this course.",
       "create": {
         "courseFailed": "Failed to create course.",
         "stripeProductFailed": "Failed to create course payment product."

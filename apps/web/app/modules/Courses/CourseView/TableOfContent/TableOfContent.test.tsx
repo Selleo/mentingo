@@ -19,7 +19,10 @@ const {
       isAdminExperience: true,
       isCourseStudentModeActive: false,
     },
-    currentUserState: { permissions: ["course.statistics"] },
+    currentUserState: {
+      id: "user-1",
+      permissions: ["course.statistics", "course.update_own"],
+    },
     missingTranslationsState,
     useMissingTranslationsMock: vi.fn(() => ({
       data: {
@@ -37,7 +40,9 @@ vi.mock("@remix-run/react", async (importOriginal) => ({
 }));
 
 vi.mock("~/api/queries", () => ({
-  useCurrentUser: () => ({ data: { id: "user-1", permissions: currentUserState.permissions } }),
+  useCurrentUser: () => ({
+    data: { id: currentUserState.id, permissions: currentUserState.permissions },
+  }),
 }));
 
 vi.mock("~/api/queries/useGlobalSettings", () => ({
@@ -51,6 +56,7 @@ vi.mock("~/api/queries/admin/useHasMissingTranslations", () => ({
 vi.mock("../../context/CourseAccessProvider", () => ({
   useCourseAccessProvider: () => ({
     course: {
+      authorId: "user-1",
       id: "course-1",
       enrolled: false,
     },
@@ -75,7 +81,8 @@ describe("TableOfContent", () => {
     });
     courseAccessState.isAdminExperience = true;
     courseAccessState.isCourseStudentModeActive = false;
-    currentUserState.permissions = ["course.statistics"];
+    currentUserState.id = "user-1";
+    currentUserState.permissions = ["course.statistics", "course.update_own"];
     missingTranslationsState.hasMissingTranslations = false;
     useMissingTranslationsMock.mockClear();
   });
@@ -109,7 +116,7 @@ describe("TableOfContent", () => {
     expect(screen.queryByText("Course statistics content")).not.toBeInTheDocument();
   });
 
-  it("shows statistics to a user with the statistics permission", async () => {
+  it("shows statistics to the course author with the required permissions", async () => {
     courseAccessState.isAdminExperience = false;
     const user = userEvent.setup();
 
@@ -117,6 +124,14 @@ describe("TableOfContent", () => {
     await user.click(screen.getByRole("button", { name: "Statistics" }));
 
     expect(screen.getByText("Course statistics content")).toBeInTheDocument();
+  });
+
+  it("hides statistics from a non-author with the own-course permission", () => {
+    currentUserState.id = "user-2";
+
+    renderWith().render(<TableOfContent language="en" />);
+
+    expect(screen.queryByRole("button", { name: "Statistics" })).not.toBeInTheDocument();
   });
 
   it("hides statistics from an administrator without the statistics permission", () => {

@@ -10,7 +10,6 @@ export const categorySchema = Type.Object({
   title: Type.String(),
   availableLocales: Type.Array(categoryLanguageSchema),
   baseLanguage: categoryLanguageSchema,
-  archived: Type.Union([Type.Boolean(), Type.Null()]),
   createdAt: Type.Union([Type.String(), Type.Null()]),
 });
 

@@ -1,3 +1,4 @@
+-- Custom SQL migration file, put you code below! --
 WITH "supported_languages" ("language") AS (
   VALUES ('en'), ('pl'), ('de'), ('lt'), ('cs'), ('es')
 ),
@@ -136,3 +137,4 @@ UPDATE "courses"
 SET "duration_estimates" = "course_duration_estimates"."duration_estimates"
 FROM "course_duration_estimates"
 WHERE "courses"."id" = "course_duration_estimates"."course_id";
+

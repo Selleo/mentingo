@@ -10421,14 +10421,6 @@
             }
           },
           {
-            "name": "archived",
-            "required": false,
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
             "name": "page",
             "required": false,
             "in": "query",
@@ -24592,16 +24584,6 @@
                   }
                 ]
               },
-              "archived": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "createdAt": {
                 "anyOf": [
                   {
@@ -24618,7 +24600,6 @@
               "title",
               "availableLocales",
               "baseLanguage",
-              "archived",
               "createdAt"
             ]
           }
@@ -24735,16 +24716,6 @@
                   }
                 ]
               },
-              "archived": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "createdAt": {
                 "anyOf": [
                   {
@@ -24761,7 +24732,6 @@
               "title",
               "availableLocales",
               "baseLanguage",
-              "archived",
               "createdAt"
             ]
           }
@@ -25820,16 +25790,6 @@
                     }
                   ]
                 },
-                "archived": {
-                  "anyOf": [
-                    {
-                      "type": "boolean"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "createdAt": {
                   "anyOf": [
                     {
@@ -25846,7 +25806,6 @@
                 "title",
                 "availableLocales",
                 "baseLanguage",
-                "archived",
                 "createdAt"
               ]
             }
@@ -48663,16 +48622,6 @@
                     }
                   ]
                 },
-                "archived": {
-                  "anyOf": [
-                    {
-                      "type": "boolean"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ]
-                },
                 "createdAt": {
                   "anyOf": [
                     {
@@ -48689,7 +48638,6 @@
                 "title",
                 "availableLocales",
                 "baseLanguage",
-                "archived",
                 "createdAt"
               ]
             }
@@ -48797,16 +48745,6 @@
                   }
                 ]
               },
-              "archived": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "createdAt": {
                 "anyOf": [
                   {
@@ -48823,7 +48761,6 @@
               "title",
               "availableLocales",
               "baseLanguage",
-              "archived",
               "createdAt"
             ]
           }
@@ -48905,9 +48842,6 @@
           },
           "title": {
             "type": "string"
-          },
-          "archived": {
-            "type": "boolean"
           },
           "language": {
             "anyOf": [
@@ -49011,16 +48945,6 @@
                   }
                 ]
               },
-              "archived": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
               "createdAt": {
                 "anyOf": [
                   {
@@ -49037,7 +48961,6 @@
               "title",
               "availableLocales",
               "baseLanguage",
-              "archived",
               "createdAt"
             ]
           }

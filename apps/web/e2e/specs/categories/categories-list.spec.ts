@@ -20,8 +20,6 @@ test("admin can browse, filter, sort, select, and open category details", async 
       title: `${prefix}-${titles[index]}`,
     }));
 
-    await categoryFactory.update(categories[1].id, { archived: true });
-
     cleanup.add(async () => {
       await categoryFactory.deleteMany(categories.map((category) => category.id));
     });
@@ -31,9 +29,6 @@ test("admin can browse, filter, sort, select, and open category details", async 
 
     const visibleRows = page.getByTestId(CATEGORIES_PAGE_HANDLES.TABLE_BODY).getByRole("row");
 
-    await expect(visibleRows).toHaveCount(2);
-
-    await filterCategoriesFlow(page, { archivedStatus: "all" });
     await expect(visibleRows).toHaveCount(3);
 
     await page.getByTestId(CATEGORIES_PAGE_HANDLES.SORT_TITLE).click();
@@ -41,10 +36,6 @@ test("admin can browse, filter, sort, select, and open category details", async 
       "data-testid",
       CATEGORIES_PAGE_HANDLES.row(categories[0].id),
     );
-
-    await filterCategoriesFlow(page, { archivedStatus: "archived" });
-    await expect(visibleRows).toHaveCount(1);
-    await expect(page.getByTestId(CATEGORIES_PAGE_HANDLES.row(categories[1].id))).toBeVisible();
 
     await selectCategoriesFlow(page, [categories[1].id]);
     await expect(

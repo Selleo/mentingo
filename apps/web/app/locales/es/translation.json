@@ -1981,6 +1981,7 @@
         "imageUploadFailed": "No se pudo subir la imagen del curso.",
         "updateFailed": "No se pudieron actualizar los archivos multimedia del curso."
       },
+      "statisticsAccessForbidden": "No tienes permiso para ver las estadísticas de este curso.",
       "create": {
         "courseFailed": "No se pudo crear el curso.",
         "stripeProductFailed": "No se pudo crear el producto de pago del curso."

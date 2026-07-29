@@ -1930,6 +1930,7 @@
         "imageUploadFailed": "Nepodařilo se nahrát obrázek kurzu.",
         "updateFailed": "Nepodařilo se aktualizovat média kurzu."
       },
+      "statisticsAccessForbidden": "Nemáte oprávnění zobrazit statistiky tohoto kurzu.",
       "create": {
         "courseFailed": "Kurz se nepodařilo vytvořit.",
         "stripeProductFailed": "Platební produkt kurzu se nepodařilo vytvořit."

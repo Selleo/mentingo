@@ -1931,6 +1931,7 @@
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
         "updateFailed": "Die Kursmedien konnten nicht aktualisiert werden."
       },
+      "statisticsAccessForbidden": "Sie haben keine Berechtigung, die Statistiken für diesen Kurs anzuzeigen.",
       "create": {
         "courseFailed": "Kurs konnte nicht erstellt werden.",
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
