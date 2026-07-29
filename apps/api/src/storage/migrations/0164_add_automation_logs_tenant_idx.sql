@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "automation_logs_index_tenant_id_idx" ON "automation_logs" USING btree ("tenant_id");

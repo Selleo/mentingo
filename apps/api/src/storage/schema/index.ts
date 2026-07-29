@@ -2558,16 +2558,20 @@ export const automationLogStatusEnum = pgEnum("automation_log_status", [
   "skipped",
 ]);
 
-export const automationLogs = pgTable("automation_logs", {
-  ...id,
-  ...timestamps,
-  tenantId,
-  automationId: uuid("automation_id")
-    .references(() => automations.id, { onDelete: "cascade" })
-    .notNull(),
-  automationName: varchar("automation_name").notNull(),
-  eventName: varchar("event_name").notNull(),
-  errorName: varchar("error_name"),
-  status: automationLogStatusEnum("status").notNull(),
-  emailAddresses: jsonb("email_addresses").$type<string[]>().notNull().default([]),
-});
+export const automationLogs = pgTable(
+  "automation_logs",
+  {
+    ...id,
+    ...timestamps,
+    tenantId,
+    automationId: uuid("automation_id")
+      .references(() => automations.id, { onDelete: "cascade" })
+      .notNull(),
+    automationName: varchar("automation_name").notNull(),
+    eventName: varchar("event_name").notNull(),
+    errorName: varchar("error_name"),
+    status: automationLogStatusEnum("status").notNull(),
+    emailAddresses: jsonb("email_addresses").$type<string[]>().notNull().default([]),
+  },
+  withTenantIdIndex("automation_logs_index"),
+);

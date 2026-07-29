@@ -1,6 +1,6 @@
 {
-  "id": "7a65a5cb-b607-4c25-b981-cd4aea3af5a4",
-  "prevId": "173fbcff-525c-4b41-9424-8bb33e36e881",
+  "id": "54a673e3-7de6-4075-aca3-3006bd54b53e",
+  "prevId": "7a65a5cb-b607-4c25-b981-cd4aea3af5a4",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1240,7 +1240,23 @@
           "default": "'[]'::jsonb"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "automation_logs_index_tenant_id_idx": {
+          "name": "automation_logs_index_tenant_id_idx",
+          "columns": [
+            {
+              "expression": "tenant_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "automation_logs_tenant_id_tenants_id_fk": {
           "name": "automation_logs_tenant_id_tenants_id_fk",

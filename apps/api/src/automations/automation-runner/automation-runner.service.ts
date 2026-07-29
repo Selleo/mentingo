@@ -6,8 +6,11 @@ import { type UUIDType, DatabasePg } from "src/common";
 import { EmailService } from "src/common/emails/emails.service";
 import { SettingsService } from "src/settings/settings.service";
 import { DB_ADMIN } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 
 import { AutomationStepsService } from "../automations-steps/automations-steps.service";
+import { AutomationsService } from "../automations.service";
+import { AutomationLogsRepository } from "../repositories/automation-logs/automation-logs";
 
 import { AutomationDataResolverService } from "./automation-data-resolver.service";
 import {
@@ -38,12 +41,26 @@ export class AutomationRunnerService {
     private readonly systemTemplateRenderer: AutomationSystemTemplateRendererService,
     private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
-    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    private readonly automationService: AutomationsService,
+    private readonly automationLogsRepository: AutomationLogsRepository,
+    private readonly tenantRunner: TenantDbRunnerService,
+
+    @Inject(DB_ADMIN)
+    private readonly dbAdmin: DatabasePg,
   ) {}
 
   async startAutomation(automationId: UUIDType, event: AutomationEventTypes) {
     const automationSteps = await this.automationStepsService.getAllAutomationSteps(automationId);
+
     const resolvedRecipients = await this.dataResolver.resolve(event);
+
+    const automationToRun = await this.automationService.getAutomationById(automationId);
+
+    const emails = resolvedRecipients.map((recipient) => recipient.userEmail);
+
+    const tenantId = automationSteps[0].tenantId;
+
+    console.log(automationId);
 
     if (resolvedRecipients.length === 0) {
       this.logger.warn(
@@ -52,7 +69,31 @@ export class AutomationRunnerService {
       return;
     }
 
-    await this.executeAutomationSteps(automationSteps, resolvedRecipients);
+    try {
+      await this.executeAutomationSteps(automationSteps, resolvedRecipients);
+    } catch (error: any) {
+      this.tenantRunner.runWithTenant(tenantId, async () => {
+        await this.automationLogsRepository.create({
+          status: "failed",
+          automationId: automationToRun.id,
+          automationName: automationToRun.name.en ?? "Unknown",
+          eventName: event.constructor.name,
+          emailAddresses: emails,
+          errorName: error.name,
+        });
+      });
+
+      return;
+    }
+    this.tenantRunner.runWithTenant(tenantId, async () => {
+      await this.automationLogsRepository.create({
+        status: "success",
+        automationId: automationToRun.id,
+        automationName: automationToRun.name.en ?? "Unknown",
+        eventName: event.constructor.name,
+        emailAddresses: emails,
+      });
+    });
   }
 
   private async executeAutomationSteps(
@@ -132,17 +173,13 @@ export class AutomationRunnerService {
       return;
     }
 
-    const cleanTemplateId = templateId.startsWith("custom:")
-      ? templateId.slice("custom:".length)
-      : templateId;
-
     const isUserDefault = language === USER_DEFAULT_LANGUAGE;
 
-    if (isSystemTemplateId(cleanTemplateId)) {
-      await this.handleSystemTemplateEmail(cleanTemplateId, recipients, isUserDefault, language);
+    if (isSystemTemplateId(templateId)) {
+      await this.handleSystemTemplateEmail(templateId, recipients, isUserDefault, language);
     } else {
       await this.handleCustomTemplateEmail(
-        cleanTemplateId,
+        templateId,
         recipients,
         isUserDefault,
         language,
