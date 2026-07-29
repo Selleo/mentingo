@@ -3,6 +3,7 @@ import { userEvent } from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { queryClient } from "~/api/queryClient";
 import { renderWith } from "~/utils/testUtils";
 
 import { COURSE_OVERVIEW_HANDLES } from "../../../../../e2e/data/courses/handles";
@@ -12,7 +13,11 @@ import CourseOverviewActions from "./CourseOverviewActions";
 const enrollCourse = vi.fn();
 let currentUser: { id: string } | undefined;
 let inviteOnlyRegistration = false;
-let course: { enrolled: boolean; id: string };
+let course: {
+  enrolled: boolean;
+  id: string;
+  chapters: { lessons: { id: string }[] }[];
+};
 let isAdminExperience = false;
 let canEditCourse = false;
 let isCourseStudentModeActive = false;
@@ -85,7 +90,11 @@ describe("CourseOverviewActions", () => {
     vi.clearAllMocks();
     currentUser = undefined;
     inviteOnlyRegistration = false;
-    course = { enrolled: false, id: "course-1" };
+    course = {
+      enrolled: false,
+      id: "course-1",
+      chapters: [{ lessons: [{ id: "lesson-1" }] }],
+    };
     isAdminExperience = false;
     canEditCourse = false;
     isCourseStudentModeActive = false;
@@ -129,7 +138,7 @@ describe("CourseOverviewActions", () => {
     const user = userEvent.setup();
     const onContinueLearning = vi.fn();
     currentUser = { id: "user-1" };
-    course = { enrolled: true, id: "course-1" };
+    course = { ...course, enrolled: true };
 
     renderActions({ onContinueLearning });
 
@@ -163,9 +172,72 @@ describe("CourseOverviewActions", () => {
     });
   });
 
+  it("does not continue to a lesson when enrollment fails", async () => {
+    const user = userEvent.setup();
+    const onEnrollmentCompleted = vi.fn();
+    currentUser = { id: "user-1" };
+    enrollCourse.mockRejectedValueOnce(new Error("Enrollment failed"));
+
+    renderActions({ onEnrollmentCompleted });
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON));
+
+    await waitFor(() => {
+      expect(enrollCourse).toHaveBeenCalledWith({ id: "course-1" });
+    });
+    expect(onEnrollmentCompleted).not.toHaveBeenCalled();
+  });
+
+  it("continues after enrollment even when refreshing cached course data fails", async () => {
+    const user = userEvent.setup();
+    const onEnrollmentCompleted = vi.fn();
+    const invalidateQueries = vi
+      .spyOn(queryClient, "invalidateQueries")
+      .mockRejectedValueOnce(new Error("Refresh failed"));
+    currentUser = { id: "user-1" };
+    enrollCourse.mockResolvedValueOnce(undefined);
+
+    renderActions({ onEnrollmentCompleted });
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON));
+
+    await waitFor(() => {
+      expect(onEnrollmentCompleted).toHaveBeenCalledOnce();
+    });
+
+    invalidateQueries.mockRestore();
+  });
+
+  it("shows that an enrolled course without lessons cannot be continued", () => {
+    currentUser = { id: "user-1" };
+    course = { ...course, enrolled: true, chapters: [] };
+
+    renderActions();
+
+    expect(screen.getByTestId(COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON)).toBeDisabled();
+    expect(screen.getByText("No lessons available")).toBeVisible();
+  });
+
+  it("does not try to continue after enrolling in a course without lessons", async () => {
+    const user = userEvent.setup();
+    const onEnrollmentCompleted = vi.fn();
+    currentUser = { id: "user-1" };
+    course = { ...course, chapters: [] };
+    enrollCourse.mockResolvedValueOnce(undefined);
+
+    renderActions({ onEnrollmentCompleted });
+
+    await user.click(screen.getByTestId(COURSE_OVERVIEW_HANDLES.ENROLL_BUTTON));
+
+    await waitFor(() => {
+      expect(enrollCourse).toHaveBeenCalledWith({ id: "course-1" });
+    });
+    expect(onEnrollmentCompleted).not.toHaveBeenCalled();
+  });
+
   it("keeps course actions available on small screens", () => {
     currentUser = { id: "user-1" };
-    course = { enrolled: true, id: "course-1" };
+    course = { ...course, enrolled: true };
 
     renderActions();
 

@@ -34,7 +34,7 @@ Group enrollment also makes recurring HR and L&D workflows easier: onboarding co
 
 ## How It Works
 
-Learners enroll from the course detail experience when the course is published and available to them. After a successful enrollment from the course overview, Mentingo takes them directly to the first lesson and prepares chapter and lesson progress tracking. Selecting an unenrolled course from the course list still opens its overview first, so learners can review the course before enrolling.
+Learners enroll from the course detail experience when the course is published and available to them. After a successful enrollment from the course overview, Mentingo takes them directly to the first lesson and prepares chapter and lesson progress tracking. If the course has no lessons, the learner remains on the overview and sees that there are no lessons available. Selecting an unenrolled course from the course list still opens its overview first, so learners can review the course before enrolling.
 
 Administrators manage assignment from the course edit screen. The enrolled-users table shows direct enrollment, group enrollment, and not-enrolled states. Admins can select rows for direct enrollment or unenrollment, and they can open group dialogs to add or remove group-based access.
 
@@ -50,5 +50,5 @@ When a group is enrolled, Mentingo links the group to the course and grants acce
 
 ## Test Evidence
 
-- Web E2E coverage verifies that learner self-enrollment from the course overview opens the first lesson, as well as bulk user enrollment, bulk user unenrollment, enrolled-user filtering by keyword and group, group enrollment, and group unenrollment.
+- Web E2E coverage verifies that learner self-enrollment from the course overview opens and renders the first lesson, as well as bulk user enrollment, bulk user unenrollment, enrolled-user filtering by keyword and group, group enrollment, and group unenrollment.
 - API E2E coverage verifies enrolled-student listing, direct enrollment permissions and duplicate handling, progress dependency creation, group enrollment metadata, group due-date calendar events, group unenrollment behavior, multi-group fallback, and protection against directly unenrolling group-enrolled learners.

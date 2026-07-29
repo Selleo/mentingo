@@ -41,17 +41,26 @@ export default function CourseOverviewActions({
   const { mutateAsync: enrollCourse, isPending: isEnrolling } = useEnrollCourse();
   const { course, isAdminExperience, canEditCourse, isCourseStudentModeActive } =
     useCourseAccessProvider();
+  const hasLessons = course.chapters.some((chapter) => chapter.lessons.length > 0);
 
   const handleEnrollCourse = async () => {
-    await enrollCourse({ id: course.id });
-    await Promise.all([
+    try {
+      await enrollCourse({ id: course.id });
+    } catch {
+      return;
+    }
+
+    await Promise.allSettled([
       queryClient.invalidateQueries(courseQueryOptions(course.id)),
       queryClient.invalidateQueries(courseQueryOptions(id)),
       queryClient.invalidateQueries(topCoursesQueryOptions({ language })),
       queryClient.invalidateQueries(availableCoursesQueryOptions({ language })),
       queryClient.invalidateQueries(studentCoursesQueryOptions({ language })),
     ]);
-    onEnrollmentCompleted();
+
+    if (hasLessons) {
+      onEnrollmentCompleted();
+    }
   };
 
   const renderPrimaryAction = () => {
@@ -104,6 +113,22 @@ export default function CourseOverviewActions({
           <GraduationCap className="size-4" />
           <span className="text-sm font-semibold">
             {t("studentCourseView.sideSection.button.enrollCourse")}
+          </span>
+        </Button>
+      );
+    }
+
+    if (!hasLessons) {
+      return (
+        <Button
+          data-testid={COURSE_OVERVIEW_HANDLES.START_LEARNING_BUTTON}
+          disabled
+          className="flex items-center gap-2 shadow-2xl"
+        >
+          <Play className="size-4" />
+
+          <span className="text-sm font-semibold">
+            {t("modernCourseView.overview.noLessonsAvailable")}
           </span>
         </Button>
       );
