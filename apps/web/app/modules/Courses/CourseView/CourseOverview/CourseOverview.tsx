@@ -196,6 +196,10 @@ export default function CourseOverview({
     navigateToNextLesson(course, navigate, { openFirstLesson: isPreviewMode });
   };
 
+  const handleEnrollmentCompleted = () => {
+    navigateToNextLesson(course, navigate, { openFirstLesson: true });
+  };
+
   const handleOpenDescriptionModal = () => {
     setShowDescriptionModal(true);
   };
@@ -375,6 +379,7 @@ export default function CourseOverview({
               isTogglingLearningMode={isTogglingLearningMode}
               onToggleLearningMode={handleToggleLearningMode}
               onContinueLearning={handleContinueLearning}
+              onEnrollmentCompleted={handleEnrollmentCompleted}
               onOpenDetails={handleOpenDescriptionModal}
             />
           </div>

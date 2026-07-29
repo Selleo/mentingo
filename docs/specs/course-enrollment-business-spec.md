@@ -34,7 +34,7 @@ Group enrollment also makes recurring HR and L&D workflows easier: onboarding co
 
 ## How It Works
 
-Learners enroll from the course detail experience when the course is published and available to them. Once enrolled, they can begin the course because Mentingo prepares chapter and lesson progress tracking for that learner.
+Learners enroll from the course detail experience when the course is published and available to them. After a successful enrollment from the course overview, Mentingo takes them directly to the first lesson and prepares chapter and lesson progress tracking. Selecting an unenrolled course from the course list still opens its overview first, so learners can review the course before enrolling.
 
 Administrators manage assignment from the course edit screen. The enrolled-users table shows direct enrollment, group enrollment, and not-enrolled states. Admins can select rows for direct enrollment or unenrollment, and they can open group dialogs to add or remove group-based access.
 
@@ -43,7 +43,7 @@ When a group is enrolled, Mentingo links the group to the course and grants acce
 ## Key Technical Context
 
 - Frontend enrollment management lives in `apps/web/app/modules/Admin/EditCourse/CourseEnrolled`.
-- Learner self-enrollment is initiated from the course view.
+- Learner self-enrollment is initiated from the course overview and continues directly to the first lesson after success; course-list cards continue to open the overview.
 - API enrollment operations live in `apps/api/src/courses/course.controller.ts`.
 - Key permissions include `PERMISSIONS.COURSE_ENROLLMENT` for admin assignment and `PERMISSIONS.LEARNING_PROGRESS_UPDATE` for learner-side progress initialization.
 - Group due dates connect enrollment with calendar events and due-date reminders.
