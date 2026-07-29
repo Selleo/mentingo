@@ -40,7 +40,7 @@ For high-volume work, admins select users and apply bulk role, group, password e
 
 Bulk role changes cannot include the current admin's own account. Deletion is limited to users who look like learner/student accounts and cannot include the actor; Mentingo soft-deletes eligible users, anonymizes their core identity fields, and deflates affected course statistics.
 
-For imports, admins upload a supported spreadsheet file. Mentingo creates new users, assigns known groups from the file, reports imported users, and reports skipped users such as duplicate emails. Malformed files show an error without completing the import.
+For imports, admins upload a supported spreadsheet file. Mentingo creates new users, assigns known groups from the file, and gives learners the courses assigned to those groups. It reports imported users and skipped users such as duplicate emails. Malformed files show an error without completing the import.
 
 ## Key Technical Context
 
@@ -49,6 +49,7 @@ For imports, admins upload a supported spreadsheet file. Mentingo creates new us
 - Password access emails are handled by `UserPasswordEmailService`, which prepares reset or creation links according to whether the selected account already has credentials.
 - Administrative user-management endpoints require `PERMISSIONS.USER_MANAGE`; self-service profile, password, and onboarding endpoints use account-level permissions.
 - User creation creates onboarding/settings records, assigns role slugs, and may create a one-year invitation token for password setup.
+- Import and bulk group changes publish one aggregate membership event after the membership update commits, so group-based course and learning-path access can synchronize reliably without one event per learner/group pair.
 - Role changes revoke active sessions and send a websocket permissions-updated notification.
 
 ## Test Evidence
