@@ -36,7 +36,6 @@ export const createCategoryFactory = (db: DatabasePg) => {
       availableLocales: [SUPPORTED_LANGUAGES.EN],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      archived: false,
     };
   });
 };

@@ -303,7 +303,7 @@ export default function RegisterPage() {
                       <PasswordValidationDisplay fieldName="password" />
                     </div>
 
-                    {registrationForm?.fields.length ? (
+                    {registrationForm?.fields.length && (
                       <div className="grid gap-2">
                         {registrationForm.fields.map((field) => {
                           const fieldError = errors.formAnswers?.[field.id]?.message;
@@ -345,7 +345,7 @@ export default function RegisterPage() {
                           );
                         })}
                       </div>
-                    ) : null}
+                    )}
 
                     <Button
                       type="submit"

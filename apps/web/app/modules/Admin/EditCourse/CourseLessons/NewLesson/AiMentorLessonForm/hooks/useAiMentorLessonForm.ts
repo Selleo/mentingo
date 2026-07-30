@@ -29,7 +29,7 @@ import {
   type LessonFormScope,
 } from "./useAiMentorLessonForm.helpers";
 
-import type { AiJudgeConfigurationDraft } from "../ai-judge/aiJudgeConfiguration.types";
+import type { AiJudgeConfigurationDraft } from "../AiJudge/aiJudgeConfiguration.types";
 import type { AiMentorLessonFormValues } from "../validators/useAiMentorLessonFormSchema";
 import type { SupportedLanguages } from "@repo/shared";
 
@@ -67,7 +67,8 @@ export const useAiMentorLessonForm = ({
     defaultValues: getAiMentorLessonFormDefaultValues(lessonToEdit),
   });
 
-  const { reset, setValue, watch } = form;
+  const { register, reset, setValue, watch } = form;
+  register("aiJudgeConfiguration");
 
   useEffect(() => {
     if (!lessonToEdit) return;

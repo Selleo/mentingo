@@ -27,7 +27,7 @@ export { default as StatusIllustration } from "./status-illustration.svg?react";
 export { default as TrashIcon } from "./trash-icon.svg?react";
 export { default as UploadIllustration } from "./upload-illustration.svg?react";
 export { default as UploadImageIcon } from "./upload-image.svg?react";
-export { default as User } from "./user.svg?react";
+export { Building, User, Users } from "lucide-react";
 export { default as Warning } from "./warning.svg?react";
 export { default as Admin } from "./admin.svg?react";
 export { default as Hat } from "./hat.svg?react";
@@ -79,6 +79,7 @@ export { default as BookOpen } from "./book-open.svg?react";
 export { default as WandSparkles } from "./wand-sparkles.svg?react";
 export { default as Timeline } from "./timeline.svg?react";
 export { default as Route } from "./route.svg?react";
+export { default as Categories } from "./categories.svg?react";
 
 export { SegmentedRing } from "./segmented-ring";
 

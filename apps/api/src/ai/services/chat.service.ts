@@ -65,7 +65,7 @@ export class ChatService {
         } catch (error) {
           updateActiveObservation({
             level: "ERROR",
-            statusMessage: error.message,
+            statusMessage: error instanceof Error ? error.message : "Unknown error",
           });
           throw new Error(`Failed to generate result ${error}`);
         }

@@ -29,13 +29,15 @@ The main workflows are split between an admin environment screen for secrets and
 
 ## End-User Value
 
-Administrators can adjust integrations without deployments and without exposing secrets broadly. This makes it easier to maintain SSO, paid-course checkout, AI features, video services, and live-session infrastructure as tenant needs change.
+Administrators can adjust integrations without deployments and without exposing secrets broadly. This makes it easier to maintain SSO, Microsoft Calendar synchronization, paid-course checkout, AI features, video services, and live-session infrastructure as tenant needs change.
 
 External systems can automate repetitive HR and L&D operations instead of relying on spreadsheets or manual updates. A source-of-truth system can provision customer tenants, deactivate tenants that should no longer have access, manage users, align group membership, enroll learners, and read training results through a controlled API boundary.
 
 ## How It Works
 
 On the environment screen, administrators reveal only the secret they want to inspect or edit. Mentingo submits changed values in bulk, stores them server-side, and refreshes the frontend checks that decide whether related features should be visible.
+
+Microsoft Calendar connections use the calendar client ID and client secret saved for the tenant on this screen. Deployment-level environment values do not substitute for missing tenant credentials, so one tenant cannot inherit another installation-wide calendar application configuration.
 
 In account settings, administrators can see integration key status, prefix, creation date, and last-used date. Generating or rotating a key shows the raw key immediately; after that, only metadata remains visible, so the caller must store the key securely.
 
@@ -51,10 +53,11 @@ Tenant lifecycle automation is available only to integration keys owned by a man
 - External integration API implementation: `apps/api/src/integration/integration.controller.ts`.
 - Tenant lifecycle behavior reuses the super-admin tenant service in `apps/api/src/super-admin/tenants.service.ts`.
 - Key permissions are `PERMISSIONS.ENV_MANAGE`, `PERMISSIONS.INTEGRATION_KEY_MANAGE`, `PERMISSIONS.INTEGRATION_API_USE`, and `PERMISSIONS.TENANT_MANAGE` for integration tenant lifecycle calls.
-- Supported environment metadata includes OAuth providers, OpenAI, Bunny Stream, Stripe, Slack, Luma, and LiveKit values.
+- Supported environment metadata includes OAuth providers, Microsoft Calendar client credentials, OpenAI, Bunny Stream, Stripe, Slack, Luma, and LiveKit values. Microsoft Calendar authentication reads its credentials exclusively from tenant-managed secrets.
 
 ## Test Evidence
 
 - Web E2E coverage verifies environment screen access control, loading and updating an env value, SSO button visibility from tenant env values, integration key generation, and confirmation before rotating an existing key.
+- API unit coverage verifies that Microsoft Calendar configuration ignores deployment-level client credential fallbacks.
 - API E2E coverage verifies integration key generation, raw-key-once behavior, hash/prefix storage, rotation rate limiting, missing API key rejection, tenant header enforcement, old-key rejection after rotation, tenant scope restrictions, localized/paginated groups, tenant creation, tenant deactivation, rejection for non-managing tenant keys, and training-results filtering.
 - Activity-log E2E coverage verifies that environment updates are recorded.

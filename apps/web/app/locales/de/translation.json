@@ -16,6 +16,7 @@
       "clearAll": "Alles löschen",
       "validate": "Bestätigen",
       "edit": "Bearbeiten",
+      "delete": "Löschen",
       "uploading": "Hochladen...",
       "sending": "Senden..."
     },
@@ -56,7 +57,8 @@
     "error": {
       "somethingWentWrong": "Hoppla! Etwas ist schief gelaufen.",
       "threadMustBeActive": "Der Thread muss aktiv sein.",
-      "aiJudgeConfigurationMissing": "Die AI-Judge-Konfiguration fehlt."
+      "aiJudgeConfigurationMissing": "Die Konfiguration der Abschlussbedingungen fehlt.",
+      "aiJudgeGenerationNotAwaitingRevision": "Diese Generierung wartet nicht auf eine Überarbeitungsentscheidung."
     },
     "loader": {
       "textSequence": {
@@ -358,12 +360,79 @@
     "qa": "Fragen und Antworten",
     "tenants": "Organisationen"
   },
+  "microsoftCalendar": {
+    "title": "Microsoft-Kalender",
+    "description": "Zeigen Sie Ihren primären Outlook-Kalender in Mentingo an. Outlook bleibt die Datenquelle.",
+    "account": "Verbundenes Konto",
+    "lastSync": "Letzte erfolgreiche Synchronisierung",
+    "status": {
+      "disconnected": "Getrennt",
+      "syncing": "Wird synchronisiert",
+      "connected": "Verbunden",
+      "error": "Aktion erforderlich",
+      "reconnect_required": "Erneute Verbindung erforderlich"
+    },
+    "action": {
+      "connect": "Microsoft-Kalender verbinden",
+      "sync": "Jetzt synchronisieren",
+      "reconnect": "Erneut verbinden",
+      "replace": "Anderes Konto verwenden",
+      "disconnect": "Trennen",
+      "continue": "Weiter zu Microsoft"
+    },
+    "errors": {
+      "syncCooldown": "Bitte warten Sie, bevor Sie eine weitere Synchronisierung starten."
+    },
+    "stale": {
+      "title": "Kalenderdaten sind möglicherweise veraltet",
+      "description": "Importierte Termine bleiben sichtbar. Synchronisieren Sie erneut oder verbinden Sie Ihr Microsoft-Konto neu."
+    },
+    "adminApproval": {
+      "title": "Genehmigung durch Microsoft-Administrator erforderlich",
+      "description": "Ihre Organisation muss den Kalenderzugriff genehmigen, bevor Mentingo Outlook-Termine synchronisieren kann."
+    },
+    "disconnect": {
+      "title": "Microsoft-Kalender trennen?",
+      "description": "Importierte Outlook-Termine werden aus Mentingo entfernt. Ihr Outlook-Kalender bleibt unverändert."
+    },
+    "replace": {
+      "title": "Anderes Microsoft-Konto verbinden?",
+      "description": "Die Verbindung für {{email}} und deren importierte Termine werden vor der Synchronisierung des neuen Kontos entfernt."
+    },
+    "outbound": {
+      "title": "Mentingo-Ereignisse synchronisieren",
+      "description": "Live-Schulungen und Kursfristen in einen separaten Mentingo-Kalender in Outlook exportieren.",
+      "reauthorize": "Dafür benötigt Microsoft die Berechtigung, Kalenderereignisse zu schreiben.",
+      "enable": "Export aktivieren",
+      "disable": "Export deaktivieren"
+    },
+    "toast": {
+      "syncQueued": "Die Microsoft-Kalender-Synchronisierung wurde gestartet.",
+      "syncFailed": "Der Microsoft-Kalender konnte nicht synchronisiert werden.",
+      "disconnected": "Der Microsoft-Kalender wurde getrennt.",
+      "disconnectFailed": "Der Microsoft-Kalender konnte nicht getrennt werden.",
+      "outboundEnabled": "Mentingo-Ereignisse werden nach Outlook exportiert.",
+      "outboundDisabled": "Der Export von Mentingo-Ereignissen wurde deaktiviert.",
+      "outboundFailed": "Mentingo-Ereignisse konnten nicht exportiert werden."
+    },
+    "oauth": {
+      "connected": "Der Microsoft-Kalender wird verbunden und die erste Synchronisierung wurde gestartet.",
+      "replacement_required": "Bestätigen Sie den Kontowechsel, bevor Sie ein anderes Microsoft-Konto verbinden.",
+      "admin_approval_required": "Für den Kalenderzugriff ist die Genehmigung eines Microsoft-Administrators erforderlich.",
+      "authorization_failed": "Die Autorisierung des Microsoft-Kalenders ist fehlgeschlagen. Versuchen Sie es erneut."
+    }
+  },
   "calendarView": {
     "title": "Kalender",
     "description": "Geplante Lernereignisse anzeigen.",
     "loading": "Ereignisse werden geladen",
     "empty": "Keine Ereignisse zum Anzeigen",
     "today": "Heute",
+    "legend": { "label": "Quellen" },
+    "microsoft": {
+      "staleWarning": "Microsoft-Termine sind möglicherweise veraltet. Verbinden Sie das Konto neu oder versuchen Sie es in den Kontoeinstellungen erneut.",
+      "horizonNotice": "Microsoft-Termine werden von 30 Tagen in der Vergangenheit bis 6 Monate im Voraus importiert; dieser Zeitraum kann unvollständig sein."
+    },
     "view": {
       "month": "Monat",
       "week": "Woche",
@@ -447,11 +516,13 @@
       "action": {
         "edit": "Edit event",
         "goToLiveTraining": "Go to Live-Schulung",
-        "goToCourse": "Zum Kurs"
+        "goToCourse": "Zum Kurs",
+        "openOutlook": "In Outlook öffnen"
       },
       "sourceType": {
         "liveTraining": "Live-Schulung",
-        "courseDueDate": "Kursfrist"
+        "courseDueDate": "Kursfrist",
+        "microsoftOutlook": "Microsoft Outlook"
       },
       "field": {
         "time": "Time",
@@ -461,7 +532,9 @@
         "people": "People",
         "dueDate": "Fälligkeitsdatum",
         "course": "Kurs",
-        "group": "Gruppe"
+        "group": "Gruppe",
+        "availability": "Verfügbarkeit",
+        "privacy": "Datenschutz"
       },
       "deliveryType": {
         "online": "Online",
@@ -473,6 +546,14 @@
         "ended": "Ended",
         "expired": "Expired"
       },
+      "availability": {
+        "free": "Frei",
+        "tentative": "Mit Vorbehalt",
+        "busy": "Beschäftigt",
+        "out_of_office": "Außer Haus",
+        "working_elsewhere": "Arbeitet anderswo"
+      },
+      "privateEvent": "Details dieses privaten Outlook-Termins sind ausgeblendet.",
       "role": {
         "admin": "Admin",
         "author": "Author",
@@ -1616,6 +1697,12 @@
       "MICROSOFT_CLIENT_SECRET": {
         "label": "Microsoft-Client-Geheimnis"
       },
+      "MICROSOFT_CALENDAR_CLIENT_ID": {
+        "label": "Microsoft-Kalender-Client-ID"
+      },
+      "MICROSOFT_CALENDAR_CLIENT_SECRET": {
+        "label": "Microsoft-Kalender-Client-Geheimnis"
+      },
       "MICROSOFT_OAUTH_ENABLED": {
         "label": "Microsoft OAuth aktiviert (wahr/falsch)"
       },
@@ -1836,6 +1923,7 @@
         "chapter": "Kapitel nicht gefunden.",
         "lesson": "Lektion nicht gefunden."
       },
+      "statisticsAccessForbidden": "Sie haben keine Berechtigung, die Statistiken für diesen Kurs anzuzeigen.",
       "create": {
         "courseFailed": "Kurs konnte nicht erstellt werden.",
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
@@ -2217,16 +2305,27 @@
           "aiMentorTypes": "Mentor"
         },
         "aiJudge": {
-          "cardTitle": "AI Judge",
+          "cardTitle": "Abschlussbedingungen",
           "configured": "Konfiguriert",
           "emptyDescription": "Legen Sie fest, wie die Antwort des Lernenden bewertet und wann die Lektion bestanden wird.",
           "baseLanguageRequired": "Erstellen Sie die Bewertungsstruktur in der Basissprache des Kurses, bevor Sie sie übersetzen.",
           "structureLockedTooltip": "Die Bewertungsstruktur kann nur in der Basissprache des Kurses geändert werden.",
           "summary": "{{criteria}} Kriterien · {{score}} Punkte gesamt · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
           "configureWithAi": "Mit KI konfigurieren",
+          "createWithAi": "Mit KI erstellen",
+          "improveWithAi": "Mit KI verbessern",
+          "checkQualityWithAi": "Qualität mit KI prüfen",
+          "checkingQuality": "Qualität wird geprüft...",
+          "checkingQualityDescription": "Aufgabenziel, Kriterien, Bewertungshinweise und Ausschlussfehler werden geprüft.",
+          "aiAssistance": "KI-Unterstützung",
+          "qualityCheckResult": "Qualitätsprüfung",
+          "qualityCheckResultDescription": "Prüfen Sie die Bewertungshinweise, bevor Sie Änderungen vornehmen.",
+          "qualityCheckPassed": "Es sind keine Änderungen erforderlich. Sie können weiter bearbeiten oder speichern.",
+          "qualityCheckPassedWithSuggestions": "Die Bewertung ist verwendbar. Wenden Sie die optionalen Verbesserungen an oder fahren Sie unverändert fort.",
+          "qualityCheckNeedsChanges": "Prüfen Sie die Hinweise oder lassen Sie die Bewertung anhand des Feedbacks von der KI verbessern.",
           "configureManually": "Manuell konfigurieren",
           "editAssessment": "Bewertung bearbeiten",
-          "dialogTitle": "AI Judge konfigurieren",
+          "dialogTitle": "Abschlussbedingungen konfigurieren",
           "dialogDescription": "Definieren Sie messbare Kriterien, genaue Bewertungshinweise und Fehler, die immer zum Nichtbestehen führen.",
           "translationModeTitle": "Übersetzungsmodus",
           "translationModeDescription": "Hier können Sie Bewertungstexte übersetzen. Punkte, Schwellenwert und Struktur werden in der Basissprache des Kurses verwaltet.",
@@ -2239,23 +2338,23 @@
           "untitledCriterion": "Unbenanntes Kriterium",
           "complete": "Vollständig",
           "needsDetails": "Details fehlen",
-          "criterionDescription": "Beschreiben Sie ein beobachtbares Verhalten des Lernenden.",
+          "criterionDescription": "Beschreiben Sie ein messbares Verhalten des Lernenden.",
           "criterionTitle": "Kriteriumsname",
           "criterionTitlePlaceholder": "z. B. Erkennt die Bedürfnisse des Kunden",
           "expectedBehavior": "Erwartetes Verhalten",
           "expectedBehaviorPlaceholder": "Erklären Sie, was der Lernende sagen oder tun soll...",
-          "maxScore": "Maximale Punktzahl",
+          "maxScore": "Max. Punkte",
           "score": "Punkte",
-          "scoringGuidance": "Bewertungshinweise",
-          "advancedScoring": "Erweiterte Bewertungshinweise",
+          "scoringGuidance": "Bewertungsrichtlinien",
+          "advancedScoring": "Bewertungsrichtlinien",
           "scoreLevelsCount": "{{count}} Punktestufen",
           "scoreBadge": "{{score}} Pkt.",
           "itemsCount": "{{count}} hinzugefügt",
           "scoringSummary": "Bewertung",
           "pointsRequired": "{{required}} von {{total}} Punkten zum Bestehen erforderlich",
           "scoringGuidanceDescription": "Beschreiben Sie optional, wie eine genaue Punktzahl erreicht wird.",
-          "scoreDescription": "Was diese Punktzahl ergibt",
-          "scoreDescriptionPlaceholder": "Beschreiben Sie das beobachtbare Leistungsniveau...",
+          "scoreDescription": "Was Lernende für diese Punktzahl tun",
+          "scoreDescriptionPlaceholder": "Beschreiben Sie das messbare Leistungsniveau...",
           "acceptedExample": "Akzeptiertes Beispiel",
           "examplePlaceholder": "Fügen Sie eine Beispielantwort hinzu...",
           "addCriterion": "Kriterium hinzufügen",
@@ -2273,12 +2372,163 @@
           "applyConfiguration": "Konfiguration übernehmen",
           "saveConfiguration": "Konfiguration speichern",
           "saveTranslation": "Übersetzung speichern",
-          "configurationSavedSuccessfully": "Die AI-Judge-Konfiguration wurde gespeichert.",
-          "translationSavedSuccessfully": "Die AI-Judge-Übersetzung wurde gespeichert.",
+          "configurationSavedSuccessfully": "Konfiguration gespeichert.",
+          "translationSavedSuccessfully": "Die Übersetzung der Abschlussbedingungen wurde gespeichert.",
+          "generation": {
+            "create": {
+              "title": "Bewertung mit KI erstellen",
+              "description": "Beschreiben Sie, was eine gute Antwort erreichen soll. Den Entwurf können Sie vor der Übernahme prüfen und bearbeiten.",
+              "fieldLabel": "Was soll der Lernende zeigen?",
+              "fieldDescription": "Konzentrieren Sie sich auf das messbare Ergebnis. Die KI erstellt daraus eine vollständige Bewertung.",
+              "placeholder": "Zum Beispiel: Bedürfnisse erkennen, einen passenden nächsten Schritt vorschlagen und professionell auf Einwände reagieren."
+            },
+            "improve": {
+              "title": "Bewertung mit KI verbessern",
+              "description": "Beschreiben Sie, was klarer oder präziser werden soll. Die aktuelle Bewertung dient als Ausgangspunkt.",
+              "fieldLabel": "Was soll verbessert werden?",
+              "fieldDescription": "Beschreiben Sie das gewünschte Ergebnis. Andere Bewertungsinhalte bleiben erhalten.",
+              "placeholder": "Zum Beispiel: Kriterien messbarer machen und Teil- von Vollpunktantworten klarer unterscheiden."
+            },
+            "instructionRequired": "Beschreiben Sie, was die KI erstellen oder verbessern soll",
+            "willCreate": "Die KI generiert",
+            "artifacts": {
+              "taskGoal": "Ein messbares Aufgabenziel",
+              "criteria": "Kriterien mit Bewertungshinweisen",
+              "threshold": "Eine Bestehensgrenze",
+              "blockingErrors": "Ausschlussfehler, falls relevant"
+            },
+            "generateDraft": "Entwurf erstellen",
+            "improveAssessment": "Bewertung verbessern",
+            "suggestions": {
+              "clearerCriteria": {
+                "label": "Klarere Kriterien",
+                "instruction": "Machen Sie die Bewertungskriterien klarer und direkt messbar."
+              },
+              "betterScoring": {
+                "label": "Bessere Bewertung",
+                "instruction": "Machen Sie benachbarte Bewertungsstufen konsistent unterscheidbar."
+              },
+              "reduceOverlap": {
+                "label": "Überschneidungen reduzieren",
+                "instruction": "Entfernen Sie Überschneidungen, damit jedes Kriterium ein eigenes Verhalten bewertet."
+              },
+              "clarifyBlockingErrors": {
+                "label": "Ausschlussfehler klären",
+                "instruction": "Klären Sie, welches Verhalten jeden Ausschlussfehler auslöst."
+              }
+            },
+            "progressLabel": "Fortschritt der Bewertungserstellung",
+            "stages": {
+              "draft": "Entwurf erstellen",
+              "qualityCheck": "Qualitätsprüfung",
+              "ready": "Bereit"
+            },
+            "status": {
+              "drafting": "Bewertung wird erstellt",
+              "evaluating": "Qualität wird geprüft",
+              "revising": "Entwurf wird verbessert",
+              "awaiting_revision": "Qualitätsprüfung wartet auf Ihre Entscheidung",
+              "completed": "Bewertung ist bereit",
+              "requires_review": "Entwurf erfordert Ihre Entscheidung",
+              "failed": "Erstellung konnte nicht abgeschlossen werden",
+              "cancelled": "Erstellung abgebrochen"
+            },
+            "statusDescription": {
+              "drafting": "Aufgabenziel, Kriterien, Bewertung und Ausschlussfehler werden vorbereitet.",
+              "evaluating": "Messbarkeit der Kriterien und Konsistenz der Bewertung werden geprüft.",
+              "revising": "Die aktuelle Korrektur aus der Qualitätsprüfung wird angewendet.",
+              "awaiting_revision": "Prüfen Sie die Hinweise, bevor Sie einen weiteren Generierungsversuch starten.",
+              "completed": "Der Entwurf hat die Qualitätsprüfung bestanden.",
+              "requires_review": "Der neueste Entwurf wurde für Ihre Entscheidung behalten.",
+              "failed": "Versuchen Sie es erneut oder konfigurieren Sie die Bewertung manuell.",
+              "cancelled": "Es wurden keine Änderungen übernommen."
+            },
+            "attempt": "Entwurf {{attempt}} von {{maxAttempts}}",
+            "attemptNumber": "Entwurf {{attempt}}",
+            "attemptHistory": "Entwurfsverlauf",
+            "viewDetails": "Details anzeigen",
+            "attemptPassed": "Qualitätsprüfung bestanden",
+            "attemptNeedsRevision": "Qualitätsprüfung hat Probleme gefunden",
+            "initialDraftCreated": "Erster Entwurf erstellt.",
+            "changesInAttempt": "Was die KI in diesem Entwurf geändert hat",
+            "qualityFeedback": "Was die anschließende Qualitätsprüfung ergab",
+            "currentDraft": "Aktueller Entwurf",
+            "draftPreviewPending": "Die Entwurfsvorschau erscheint hier nach Abschluss der Generierung.",
+            "qualityCheckLabel": "Qualitätsprüfung",
+            "qualityDecisionTitle_one": "{{count}} Verbesserung vorgeschlagen",
+            "qualityDecisionTitle_other": "{{count}} Verbesserungen vorgeschlagen",
+            "feedbackNotApplied": "Noch nicht angewendet",
+            "qualityDecisionDescription": "Prüfen Sie die Vorschläge oder fahren Sie mit dieser Bewertung fort.",
+            "suggestedImprovements": "Vorgeschlagene Verbesserungen",
+            "beforeChange": "Vorherige Bewertung",
+            "afterChange": "Aktueller Entwurf",
+            "showMoreFindings": "{{count}} weitere Hinweise anzeigen",
+            "showFewerFindings": "Weniger Hinweise anzeigen",
+            "showMoreChanges": "{{count}} weitere Änderungen anzeigen",
+            "showFewerChanges": "Weniger Änderungen anzeigen",
+            "reviewExactChanges": "Was die KI geändert hat ({{count}})",
+            "exactChangesDescription": "Optional: Vergleichen Sie die generierte Bewertung mit der Ausgangsversion.",
+            "waitingForDecision": "Verwenden Sie den aktuellen Entwurf oder erstellen Sie anhand des Feedbacks einen neuen.",
+            "useCurrentDraft": "Fortfahren",
+            "applyImprovements": "Überarbeiten",
+            "target": {
+              "assessment": "Abschlussbedingungen",
+              "criterion": "Kriterium",
+              "scoreGuidance": "Bewertungsstufe",
+              "blockingError": "Blockierender Fehler"
+            },
+            "deterministicValidation": {
+              "summary": "Die Bewertungsstruktur muss korrigiert werden.",
+              "guidance_score_out_of_range": {
+                "message": "Eine Bewertungsstufe liegt außerhalb des zulässigen Bereichs des Kriteriums.",
+                "correction": "Jede Bewertungsstufe muss zwischen null und der Höchstpunktzahl des Kriteriums liegen."
+              },
+              "duplicate_guidance_score": {
+                "message": "Ein Kriterium enthält dieselbe Bewertungsstufe mehrfach.",
+                "correction": "Behalten Sie für jede Bewertungsstufe genau einen Bewertungshinweis bei."
+              },
+              "missing_guidance_scores": {
+                "message": "Bei einem Kriterium fehlen eine oder mehrere erforderliche Bewertungsstufen.",
+                "correction": "Fügen Sie für jede Bewertungsstufe von null bis zur Höchstpunktzahl einen Hinweis hinzu."
+              },
+              "duplicate_criterion_ref": {
+                "message": "Zwei Kriterien können nicht zuverlässig unterschieden werden.",
+                "correction": "Behalten Sie jedes Kriterium als eigenständigen Bewertungspunkt bei."
+              },
+              "duplicate_blocking_error_ref": {
+                "message": "Zwei blockierende Fehler können nicht zuverlässig unterschieden werden.",
+                "correction": "Behalten Sie jeden blockierenden Fehler als eigenständigen Bewertungspunkt bei."
+              },
+              "invalid_new_criterion_ref": {
+                "message": "Ein neues Kriterium konnte nicht zuverlässig zugeordnet werden.",
+                "correction": "Lassen Sie bestehende Kriterien unverändert und fügen Sie das neue Kriterium als eigenen Punkt hinzu."
+              },
+              "invalid_new_blocking_error_ref": {
+                "message": "Ein neuer blockierender Fehler konnte nicht zuverlässig zugeordnet werden.",
+                "correction": "Lassen Sie bestehende blockierende Fehler unverändert und fügen Sie den neuen Fehler als eigenen Punkt hinzu."
+              }
+            },
+            "keepCurrentDraft": "Aktuellen Entwurf behalten",
+            "applySuggestedImprovements": "Vorgeschlagene Verbesserungen anwenden",
+            "completedArtifacts": "Bisher vorbereitet",
+            "changedInRevision": "In dieser Überarbeitung geändert",
+            "stopAndInspect": "Anhalten und aktuellen Entwurf prüfen",
+            "cancel": "Erstellung abbrechen",
+            "draftSummary": "{{criteria}} Kriterien · {{score}} Punkte · {{threshold}}% zum Bestehen · {{blockingErrors}} Ausschlussfehler",
+            "review": {
+              "completedTitle": "Entwurf hat die Qualitätsprüfung bestanden",
+              "completedDescription": "Prüfen Sie die Bewertung, bevor Sie sie in das Unterrichtsformular übernehmen.",
+              "currentDraftTitle": "Der aktuelle Entwurf ist zur Prüfung bereit",
+              "currentDraftDescription": "Das Qualitätsfeedback wurde nicht angewendet. Prüfen und bearbeiten Sie den Entwurf bei Bedarf, bevor Sie ihn übernehmen.",
+              "requiresReviewTitle": "Entwurf erfordert Ihre Entscheidung",
+              "notSaved": "Nichts wurde automatisch gespeichert oder veröffentlicht."
+            },
+            "reviewAssessment": "Bewertung prüfen"
+          },
           "validation": {
-            "configurationRequired": "Konfiguriere den AI Judge, bevor du diese Lektion speicherst",
+            "configurationRequired": "Konfiguriere die Abschlussbedingungen, bevor du diese Lektion speicherst",
             "taskGoalRequired": "Das Aufgabenziel ist erforderlich",
-            "thresholdRange": "Die Bestehensschwelle muss zwischen 1 und 100 liegen",
+            "thresholdRange": "Die Bestehensschwelle muss zwischen 0 und 100 liegen",
             "titleRequired": "Der Kriteriumsname ist erforderlich",
             "expectedBehaviorRequired": "Das erwartete Verhalten ist erforderlich",
             "maxScoreRange": "Die maximale Punktzahl muss zwischen 1 und 5 liegen",
@@ -2384,7 +2634,7 @@
               "knowledgeSharing": "<ul><li>Der Student beteiligt sich aktiv an der Konversation (stellt Fragen oder tauscht Überlegungen aus).</li><li>Der Student kann mindestens eine im Dialog erwähnte Zeitmanagementtechnik nennen.</li><li>Der Student drückt aus, wie er eine Technik in seiner Arbeit anwenden könnte.</li></ul><em>(Kein Schwellenwert definiert – alle Bedingungen werden empfohlen, sind aber für das Bestehen nicht zwingend erforderlich.)</em>"
             },
             "scoreGuidance": {
-              "notMetDescription": "Vergeben Sie 0 Punkte, wenn der Lernende keinen klaren, beobachtbaren Nachweis für dieses Verhalten liefert, es vermeidet oder ihm entgegenhandelt: {{expectedBehavior}} Das Fehlen des genauen Beispiels allein reicht nicht aus; bewerten Sie die Bedeutung der gesamten Antwort.",
+              "notMetDescription": "Vergeben Sie 0 Punkte, wenn der Lernende keinen klaren, messbaren Nachweis für dieses Verhalten liefert, es vermeidet oder ihm entgegenhandelt: {{expectedBehavior}} Das Fehlen des genauen Beispiels allein reicht nicht aus; bewerten Sie die Bedeutung der gesamten Antwort.",
               "notMetExample": "Die Antwort enthält keine Aussage oder Handlung, die Folgendes zeigt: {{expectedBehavior}}",
               "metDescription": "Vergeben Sie 1 Punkt, wenn der Lernende dieses Verhalten klar, relevant und kontextgerecht zeigt: {{expectedBehavior}} Gleichwertige Formulierungen sind gültig; das akzeptierte Beispiel muss nicht wörtlich wiederholt werden."
             },
@@ -3132,6 +3382,7 @@
     },
     "tabs": {
       "account": "Konto",
+      "integrations": "Integrationen",
       "organization": "Organisation",
       "platformCustomization": "Plattformanpassung"
     },
@@ -4438,16 +4689,28 @@
       "host": "Gastgeber",
       "status": "Status",
       "managing": "Verwalten",
+      "lastActivity": "Letzte Aktivität",
+      "activityCountLast14Days": "Aktivitäten\n(letzte 14 Tage)",
+      "activeUsersLast14Days": "Aktive Benutzer\n(letzte 14 Tage)",
+      "activeUsersValue": "{{active}} / {{total}} Benutzer",
+      "recentActivities": "Letzte Aktivitäten",
       "loading": "Organisationen werden geladen...",
       "empty": "Keine Organisationen gefunden.",
       "yes": "Ja",
       "no": "NEIN",
       "edit": "Bearbeiten",
+      "delete": "Löschen",
       "actions": {
         "title": "Aktionen",
         "enterSupportMode": "Wechseln Sie in den Support-Modus",
-        "impersonateAdmin": "Admin imitieren"
+        "impersonateAdmin": "Als Admin betreten"
       }
+    },
+    "activityTrend": {
+      "noActivity": "Keine Aktivität",
+      "increase": "Aktivität um {{percentage}}% gestiegen",
+      "decrease": "Aktivität um {{percentage}}% gesunken",
+      "unchanged": "Aktivität unverändert"
     },
     "supportModePopover": {
       "searchPlaceholder": "Nach Name oder E-Mail suchen...",
@@ -4458,6 +4721,10 @@
     "status": {
       "active": "Aktiv",
       "inactive": "Inaktiv"
+    },
+    "deleteDialog": {
+      "title": "{{name}} löschen?",
+      "description": "Dadurch werden die Organisation und alle ihre Benutzer, Lerninhalte, Aktivitäten und Einstellungen dauerhaft gelöscht. Diese Aktion kann nicht rückgängig gemacht werden."
     },
     "create": {
       "title": "Organisation erstellen",
@@ -4488,7 +4755,8 @@
     },
     "toast": {
       "tenantCreatedSuccessfully": "Organisation erfolgreich erstellt",
-      "tenantUpdatedSuccessfully": "Organisation erfolgreich aktualisiert"
+      "tenantUpdatedSuccessfully": "Organisation erfolgreich aktualisiert",
+      "tenantDeletedSuccessfully": "Organisation dauerhaft gelöscht"
     }
   },
   "superAdminTenants": {
@@ -4497,7 +4765,8 @@
       "notFound": "Organisation nicht gefunden",
       "invalidHost": "Ungültige Organisations-Host-URL",
       "managingTenantRequired": "Verwaltender Organisationsadministrator erforderlich",
-      "currentTenantSupportNotAllowed": "Der Support-Modus ist für die aktuelle Organisation nicht verfügbar"
+      "currentTenantSupportNotAllowed": "Der Support-Modus ist für die aktuelle Organisation nicht verfügbar",
+      "currentTenantDeleteNotAllowed": "Die aktuelle verwaltende Organisation kann nicht gelöscht werden"
     }
   },
   "auth": {

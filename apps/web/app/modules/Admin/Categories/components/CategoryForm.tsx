@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { useUpdateCategory } from "~/api/mutations/admin/useUpdateCategory";
 import { Button } from "~/components/ui/button";
 import { Label } from "~/components/ui/label";
-import { cn } from "~/lib/utils";
 
 import { CATEGORY_PAGE_HANDLES } from "../../../../../e2e/data/categories/handles";
 import { CategoryDetails } from "../CategoryDetails";
@@ -14,7 +13,7 @@ import type { CategoryDetailsField } from "../CategoryDetails";
 import type { SupportedLanguages } from "@repo/shared";
 import type { GetCategoryByIdResponse, UpdateCategoryBody } from "~/api/generated-api";
 
-const displayedFields: CategoryDetailsField[] = ["title", "archived"];
+const displayedFields: CategoryDetailsField[] = ["title"];
 
 type CategoryFormProps = {
   category: GetCategoryByIdResponse["data"];
@@ -56,11 +55,9 @@ export const CategoryForm = ({ category, categoryId, language }: CategoryFormPro
       </div>
       <div className="grid gap-4 md:grid-cols-2">
         {displayedFields.map((field) => (
-          <div key={field} className={cn(field === "title" && "md:col-span-2")}>
+          <div key={field} className="md:col-span-2">
             <Label className="mb-2 inline-block text-xs font-semibold uppercase tracking-wide text-neutral-500">
-              {field === "archived"
-                ? t("adminCategoryView.field.status")
-                : startCase(t(`adminCategoryView.field.${field}`))}
+              {startCase(t(`adminCategoryView.field.${field}`))}
             </Label>
             <CategoryDetails name={field} control={control} category={category} />
           </div>

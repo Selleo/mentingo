@@ -19,7 +19,7 @@ export function CourseGenerationCompletedNotice({
 
   return (
     <AnimatePresence initial={false}>
-      {visible ? (
+      {visible && (
         <motion.section
           data-testid={COURSE_GENERATION_HANDLES.COMPLETED_NOTICE}
           key="course-generation-completed-notice"
@@ -51,7 +51,7 @@ export function CourseGenerationCompletedNotice({
             </Button>
           </div>
         </motion.section>
-      ) : null}
+      )}
     </AnimatePresence>
   );
 }

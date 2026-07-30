@@ -132,6 +132,15 @@ describe("GlobalSearchController (e2e)", () => {
     await settingsFactory.create({ userId: null });
   });
 
+  it("returns categories that match the search query", async () => {
+    const cookie = await createAdminCookie();
+    const category = await categoryFactory.create({ title: "Searchable category" });
+
+    const results = await search(cookie, "Searchable", SUPPORTED_LANGUAGES.EN);
+
+    expect(results.categories).toEqual([expect.objectContaining({ id: category.id })]);
+  });
+
   it("uses requested-language search documents when they exist and match", async () => {
     const cookie = await createAdminCookie();
     const qa = await qaFactory.create({

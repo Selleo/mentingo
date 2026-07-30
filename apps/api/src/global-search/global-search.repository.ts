@@ -326,7 +326,7 @@ export class GlobalSearchRepository {
     return this.db
       .select({ id: categories.id, title })
       .from(categories)
-      .where(and(ne(categories.archived, true), sql`${title} ILIKE ${`%${searchQuery}%`}`))
+      .where(sql`${title} ILIKE ${`%${searchQuery}%`}`)
       .limit(10);
   }
 

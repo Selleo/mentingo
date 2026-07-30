@@ -5,7 +5,7 @@ import request from "supertest";
 import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { LESSON_TYPES, type LessonTypes } from "src/lesson/lesson.type";
 import { DB, DB_ADMIN } from "src/storage/db/db.providers";
-import { chapters, lessons, settings } from "src/storage/schema";
+import { chapters, lessons, settings, studentChapterProgress } from "src/storage/schema";
 
 import { createE2ETest } from "../../../test/create-e2e-test";
 import { createChapterFactory } from "../../../test/factory/chapter.factory";
@@ -124,6 +124,38 @@ describe("ChapterController (e2e)", () => {
 
     return chapter?.isFreemium;
   };
+
+  const deleteChapter = (chapterId: UUIDType) => {
+    return request(app.getHttpServer())
+      .delete("/api/chapter")
+      .query({ chapterId })
+      .set("Cookie", adminCookies);
+  };
+
+  describe("DELETE /api/chapter", () => {
+    it("deletes student progress together with the chapter", async () => {
+      const course = await courseFactory.create({ authorId: admin.id, chapterCount: 1 });
+      const chapter = await chapterFactory.create({ authorId: admin.id, courseId: course.id });
+      const student = await userFactory.create();
+
+      await db.insert(studentChapterProgress).values({
+        studentId: student.id,
+        courseId: course.id,
+        chapterId: chapter.id,
+      });
+
+      await deleteChapter(chapter.id).expect(200);
+
+      const [deletedChapter] = await db.select().from(chapters).where(eq(chapters.id, chapter.id));
+      const [deletedProgress] = await db
+        .select()
+        .from(studentChapterProgress)
+        .where(eq(studentChapterProgress.chapterId, chapter.id));
+
+      expect(deletedChapter).toBeUndefined();
+      expect(deletedProgress).toBeUndefined();
+    });
+  });
 
   describe("PATCH /api/chapter/freemium-status", () => {
     it("allows paid course chapters with content lessons to become freemium", async () => {

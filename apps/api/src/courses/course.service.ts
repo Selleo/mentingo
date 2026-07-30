@@ -66,6 +66,7 @@ import {
   BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
+  DeleteCourseEvent,
   DeleteScormEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
@@ -1024,7 +1025,6 @@ export class CourseService {
       const queryDB = trx
         .select({
           ...getTableColumns(categories),
-          archived: sql<boolean | null>`NULL`,
           createdAt: sql<string | null>`NULL`,
           title: this.localizationService.getLocalizedSqlField(
             categories.title,
@@ -3234,7 +3234,13 @@ export class CourseService {
   }
 
   async deleteCourse(id: UUIDType, currentUser: CurrentUserType) {
-    const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
+    const [course] = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(eq(courses.id, id));
 
     if (!course) {
       throw new NotFoundException("Course not found");
@@ -3294,6 +3300,14 @@ export class CourseService {
           trx,
         );
       }
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: [{ courseId: deletedCourse.id, courseTitle: course.courseTitle }],
+          actor: currentUser,
+        }),
+        trx,
+      );
     });
 
     return null;
@@ -3308,7 +3322,13 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
-    const selectedCourses = await this.db.select().from(courses).where(inArray(courses.id, ids));
+    const selectedCourses = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(inArray(courses.id, ids));
 
     if (
       selectedCourses.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))
@@ -3357,6 +3377,21 @@ export class CourseService {
           trx,
         );
       }
+
+      const selectedCoursesById = new Map(
+        selectedCourses.map((course) => [course.id, course.courseTitle]),
+      );
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: deletedCourses.map((course) => ({
+            courseId: course.id,
+            courseTitle: selectedCoursesById.get(course.id) ?? null,
+          })),
+          actor: currentUser,
+        }),
+        trx,
+      );
 
       return null;
     });
@@ -3867,6 +3902,22 @@ export class CourseService {
       userIds.length ? [inArray(lessonLearningTime.userId, userIds)] : [],
     );
     return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
+  }
+
+  async assertCanViewCourseStatistics(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
+    }
   }
 
   async getAverageQuizScoreForCourse(

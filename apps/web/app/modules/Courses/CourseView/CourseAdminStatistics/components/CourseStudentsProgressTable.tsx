@@ -189,16 +189,18 @@ export function CourseStudentsProgressTable({
         cell: ({ row }) => {
           const lastCompletedLessonName = row.original.lastCompletedLessonName;
 
-          return lastCompletedLessonName ? (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="max-w-xs truncate cursor-help">{lastCompletedLessonName}</div>
-                </TooltipTrigger>
-                <TooltipContent>{lastCompletedLessonName}</TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          ) : null;
+          return (
+            lastCompletedLessonName && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <div className="max-w-xs truncate cursor-help">{lastCompletedLessonName}</div>
+                  </TooltipTrigger>
+                  <TooltipContent>{lastCompletedLessonName}</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )
+          );
         },
       },
     ],

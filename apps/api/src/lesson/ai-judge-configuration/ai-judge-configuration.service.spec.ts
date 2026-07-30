@@ -24,6 +24,7 @@ import type { MasterCourseService } from "src/courses/master-course.service";
 import type { AdminLessonService } from "src/lesson/services/adminLesson.service";
 
 const lessonId = "00000000-0000-4000-8000-000000000001" as UUIDType;
+const courseId = "00000000-0000-4000-8000-000000000008" as UUIDType;
 const aiMentorLessonId = "00000000-0000-4000-8000-000000000002" as UUIDType;
 const configurationId = "00000000-0000-4000-8000-000000000003" as UUIDType;
 const criterionId = "00000000-0000-4000-8000-000000000004" as UUIDType;
@@ -38,6 +39,7 @@ const createGuidance = (maxScore: number) =>
   }));
 
 const context = {
+  courseId,
   lessonId,
   lessonType: LESSON_TYPES.AI_MENTOR,
   aiMentorLessonId,
@@ -127,6 +129,7 @@ describe("AiJudgeConfigurationService", () => {
   beforeEach(() => {
     repository = {
       findLessonContext: jest.fn(),
+      findCourseAuthoringContext: jest.fn(),
       getConfigurationGraph: jest.fn(),
       getConfigurationInLanguage: jest.fn(),
       getCriteriaInLanguage: jest.fn(),
@@ -156,13 +159,19 @@ describe("AiJudgeConfigurationService", () => {
       validateAccess: jest.fn().mockResolvedValue(true),
     } as unknown as jest.Mocked<AdminLessonService>;
     masterCourseService = {
+      assertCourseContentEditable: jest.fn().mockResolvedValue(undefined),
       assertCourseContentEditableByLessonId: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<MasterCourseService>;
     courseFeaturePolicyService = {
+      assertCourseFeatureEnabled: jest.fn().mockResolvedValue(undefined),
       assertCourseFeatureEnabledByLessonId: jest.fn().mockResolvedValue(undefined),
     } as unknown as jest.Mocked<CourseFeaturePolicyService>;
 
     repository.findLessonContext.mockResolvedValue(context);
+    repository.findCourseAuthoringContext.mockResolvedValue({
+      courseId,
+      baseLanguage: SUPPORTED_LANGUAGES.EN,
+    });
 
     service = new AiJudgeConfigurationService(
       db,
@@ -172,6 +181,52 @@ describe("AiJudgeConfigurationService", () => {
       adminLessonService,
       masterCourseService,
       courseFeaturePolicyService,
+    );
+  });
+
+  it("prepares generation for an existing lesson and verifies course ownership", async () => {
+    const result = await service.prepareGenerationAuthoringContext(courseId, lessonId, currentUser);
+
+    expect(result).toEqual({ courseId, baseLanguage: SUPPORTED_LANGUAGES.EN });
+    expect(masterCourseService.assertCourseContentEditableByLessonId).toHaveBeenCalledWith(
+      lessonId,
+    );
+    expect(courseFeaturePolicyService.assertCourseFeatureEnabledByLessonId).toHaveBeenCalledWith(
+      lessonId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    expect(adminLessonService.validateAccess).toHaveBeenCalledWith(
+      ENTITY_TYPES.LESSON,
+      currentUser,
+      lessonId,
+    );
+  });
+
+  it("rejects generation when the supplied lesson belongs to another course", async () => {
+    const anotherCourseId = "00000000-0000-4000-8000-000000000009" as UUIDType;
+
+    await expect(
+      service.prepareGenerationAuthoringContext(anotherCourseId, lessonId, currentUser),
+    ).rejects.toThrow("adminCourseView.errors.notFound.lesson");
+  });
+
+  it("prepares generation for an unsaved lesson from the editable course", async () => {
+    const result = await service.prepareGenerationAuthoringContext(
+      courseId,
+      undefined,
+      currentUser,
+    );
+
+    expect(result).toEqual({ courseId, baseLanguage: SUPPORTED_LANGUAGES.EN });
+    expect(masterCourseService.assertCourseContentEditable).toHaveBeenCalledWith(courseId);
+    expect(courseFeaturePolicyService.assertCourseFeatureEnabled).toHaveBeenCalledWith(
+      courseId,
+      COURSE_FEATURE.CURRICULUM_EDITING,
+    );
+    expect(adminLessonService.validateAccess).toHaveBeenCalledWith(
+      ENTITY_TYPES.COURSE,
+      currentUser,
+      courseId,
     );
   });
 

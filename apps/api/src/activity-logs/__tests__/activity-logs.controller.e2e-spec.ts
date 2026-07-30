@@ -208,6 +208,57 @@ describe("ActivityLogsController (e2e)", () => {
     expect(returnedIds).not.toContain(wrongResourceLog.id);
   });
 
+  it("filters course deletion activity logs", async () => {
+    const admin = await userFactory
+      .withCredentials({ password })
+      .withAdminSettings(db)
+      .create({ role: SYSTEM_ROLE_SLUGS.ADMIN });
+
+    const [deletedCourseLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.DELETE,
+          context: { courseTitle: "Deleted course" },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const [updatedCourseLog] = await db
+      .insert(activityLogs)
+      .values({
+        actorId: admin.id,
+        actorEmail: admin.email,
+        actorRole: SYSTEM_ROLE_SLUGS.ADMIN,
+        actionType: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+        metadata: {
+          operation: ACTIVITY_LOG_ACTION_TYPES.UPDATE,
+          after: { title: "Updated course" },
+        },
+      })
+      .returning({ id: activityLogs.id });
+
+    const response = await request(app.getHttpServer())
+      .get("/api/activity-logs")
+      .query({
+        actionTypes: [ACTIVITY_LOG_ACTION_TYPES.DELETE],
+        resourceType: ACTIVITY_LOG_RESOURCE_TYPES.COURSE,
+      })
+      .set("Cookie", await cookieFor(admin, app))
+      .expect(200);
+
+    const returnedIds = response.body.data.map((log: { id: string }) => log.id);
+
+    expect(returnedIds).toContain(deletedCourseLog.id);
+    expect(returnedIds).not.toContain(updatedCourseLog.id);
+  });
+
   it("searches activity logs by keyword across actor email, resource id, and metadata", async () => {
     const admin = await userFactory
       .withCredentials({ password })

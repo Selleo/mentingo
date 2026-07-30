@@ -117,7 +117,7 @@ export default function NewsDetailsPage() {
         )}
 
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 bg-white rounded-3xl mb-8">
-          {headerImageUrl ? (
+          {headerImageUrl && (
             <div className="overflow-hidden bg-white rounded-t-3xl px-10 pt-10 pb-6">
               <img
                 src={headerImageUrl}
@@ -125,7 +125,7 @@ export default function NewsDetailsPage() {
                 className="h-[380px] w-full object-cover md:h-[480px] rounded-3xl"
               />
             </div>
-          ) : null}
+          )}
 
           <div
             className={cn("flex flex-col gap-5 border-b border-neutral-200 pb-8 px-10", {
@@ -158,9 +158,9 @@ export default function NewsDetailsPage() {
             </div>
           </div>
 
-          {news.content ? (
+          {news.content && (
             <Viewer variant="news" content={contentWithIds || news.content} className="px-10" />
-          ) : null}
+          )}
 
           <div className="mx-auto w-full border-b border-primary-100" />
 

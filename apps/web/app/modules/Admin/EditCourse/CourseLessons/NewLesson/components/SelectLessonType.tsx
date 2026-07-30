@@ -115,9 +115,9 @@ const SelectLessonType = ({ setContentTypeToDisplay }: SelectLessonTypeProps) =>
                 >
                   {LucideIcon ? (
                     <LucideIcon className="mb-6 size-8 text-primary-700" aria-hidden="true" />
-                  ) : icon ? (
-                    <Icon name={icon} className="mb-6 size-8 text-primary-700" />
-                  ) : null}
+                  ) : (
+                    icon && <Icon name={icon} className="mb-6 size-8 text-primary-700" />
+                  )}
                   <hgroup className="space-y-3">
                     <div className="flex flex-wrap items-center gap-x-2">
                       <h3 className="h6 text-neutral-950">{t(title)}</h3>

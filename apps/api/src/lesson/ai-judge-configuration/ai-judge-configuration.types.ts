@@ -17,12 +17,18 @@ export type AiJudgeConfigurationGraph = {
 };
 
 export type AiJudgeLessonContext = {
+  courseId: UUIDType;
   lessonId: UUIDType;
   lessonType: string;
   aiMentorLessonId: UUIDType | null;
   configurationId: UUIDType | null;
   baseLanguage: SupportedLanguages;
   availableLocales: SupportedLanguages[];
+};
+
+export type AiJudgeGenerationAuthoringContext = {
+  courseId: UUIDType;
+  baseLanguage: SupportedLanguages;
 };
 
 export type AiMentorLessonContext = Omit<AiJudgeLessonContext, "aiMentorLessonId"> & {
