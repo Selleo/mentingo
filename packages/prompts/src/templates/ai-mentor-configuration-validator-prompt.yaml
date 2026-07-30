@@ -29,6 +29,7 @@ template: |
   - Start with issues = [] and report only high-confidence, actionable defects.
   - Return at most 3 findings and prefer zero.
   - Target the narrowest existing field. The type field is not a valid target.
+  - Write findings for creators, never with internal schema keys. Use human labels such as "AI role", "Learner role", "Character goal", and "Facts and constraints"; always capitalize the acronym "AI".
   - severity error means correction is required; warning means the configuration remains usable.
   - Keep each message and correction to one short sentence.
   - During repair closure, recheck prior findings first and do not raise the bar on untouched fields.
