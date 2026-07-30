@@ -2511,7 +2511,6 @@
           "createWithAi": "Crear con IA",
           "improveWithAi": "Mejorar con IA",
           "checkQualityWithAi": "Comprobar calidad con IA",
-          "improveTypeLocked": "La IA mejorará la configuración {{type}} actual. No puede cambiar el modo.",
           "create": {
             "title": "Crear el comportamiento del mentor de IA con IA",
             "description": "Elige el modo del mentor y describe la experiencia que quieres crear.",

@@ -2461,7 +2461,6 @@
           "improveWithAi": "Vylepšit pomocí AI",
           "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
           "aiAssistance": "Pomoc AI",
-          "improveTypeLocked": "AI zlepší aktuální konfiguraci {{type}}. Režim nelze změnit.",
           "create": {
             "title": "Vytvořit chování AI Mentora pomocí AI",
             "description": "Vyberte režim mentora a popište požadovaný zážitek.",

@@ -2749,7 +2749,6 @@
           "improveWithAi": "Ulepsz z AI",
           "checkQualityWithAi": "Sprawdź jakość z AI",
           "aiAssistance": "Pomoc AI",
-          "improveTypeLocked": "AI ulepszy bieżącą konfigurację {{type}}. Nie może zmienić trybu.",
           "create": {
             "title": "Utwórz zachowanie AI Mentora z AI",
             "description": "Wybierz tryb Mentora, a następnie opisz oczekiwane doświadczenie.",

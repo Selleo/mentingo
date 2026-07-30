@@ -2462,7 +2462,6 @@
           "improveWithAi": "Mit KI verbessern",
           "checkQualityWithAi": "Qualität mit KI prüfen",
           "aiAssistance": "KI-Unterstützung",
-          "improveTypeLocked": "KI verbessert die aktuelle {{type}}-Konfiguration. Der Modus bleibt unverändert.",
           "create": {
             "title": "KI-Mentor-Verhalten mit KI erstellen",
             "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.",
