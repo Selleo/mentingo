@@ -6,7 +6,8 @@ import { TokenService } from "src/auth/token.service";
 import * as schema from "src/storage/schema";
 
 import { DatabaseMigrationService } from "./database-migration.service";
-import { createDbProxy, DB, DB_APP, DB_ADMIN } from "./db.providers";
+import { DB, DB_APP, DB_ADMIN } from "./db.providers";
+import { createTenantAwareDb } from "./tenant-aware-session";
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
 import { TenantResolverService } from "./tenant-resolver.service";
 import { TenantStateService } from "./tenant-state.service";
@@ -49,8 +50,9 @@ import type { DatabasePg } from "src/common";
   providers: [
     {
       provide: DB,
-      inject: [DB_APP],
-      useFactory: (dbApp: DatabasePg) => createDbProxy(dbApp),
+      inject: [DB_APP, TenantDbRunnerService],
+      useFactory: (dbApp: DatabasePg, runner: TenantDbRunnerService) =>
+        createTenantAwareDb(dbApp, runner),
     },
     DatabaseMigrationService,
     TenantDbRunnerService,
