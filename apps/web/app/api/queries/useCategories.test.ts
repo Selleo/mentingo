@@ -18,7 +18,7 @@ describe("categoriesQueryOptions", () => {
     vi.clearAllMocks();
     vi.mocked(ApiClient.api.categoryControllerGetAllCategories).mockResolvedValue({
       data: { data: [], pagination: { page: 1, perPage: 100, totalItems: 0 } },
-    } as Awaited<ReturnType<typeof ApiClient.api.categoryControllerGetAllCategories>>);
+    } as unknown as Awaited<ReturnType<typeof ApiClient.api.categoryControllerGetAllCategories>>);
   });
 
   it("passes the requested language to the categories endpoint", async () => {
