@@ -1,4 +1,5 @@
 import { BadRequestException } from "@nestjs/common";
+import { TENANT_LOGO_VARIABLE } from "@repo/shared";
 
 import { assertSafeBlockUrls } from "../utils/assertSafeBlockUrls";
 
@@ -40,6 +41,18 @@ describe("assertSafeBlockUrls", () => {
     expect(() => assertSafeBlockUrls(doc([textWithLink("mailto:user@example.com")]))).not.toThrow();
   });
 
+  it("allows empty draft button urls", () => {
+    expect(() => assertSafeBlockUrls(doc([button("")]))).not.toThrow();
+  });
+
+  it("allows whitespace-only draft button urls", () => {
+    expect(() => assertSafeBlockUrls(doc([button("  ")]))).not.toThrow();
+  });
+
+  it("allows empty draft link hrefs", () => {
+    expect(() => assertSafeBlockUrls(doc([textWithLink("")]))).not.toThrow();
+  });
+
   it("allows relative image src starting with /", () => {
     expect(() =>
       assertSafeBlockUrls(doc([image("/api/public/email-template-image/key.webp")])),
@@ -76,6 +89,16 @@ describe("assertSafeBlockUrls", () => {
 
   it("rejects button with javascript: url", () => {
     expect(() => assertSafeBlockUrls(doc([button("javascript:alert(1)")]))).toThrow(
+      new BadRequestException("emailTemplates.toast.invalidUrl"),
+    );
+  });
+
+  it("allows the tenant logo placeholder as image src", () => {
+    expect(() => assertSafeBlockUrls(doc([image(TENANT_LOGO_VARIABLE)]))).not.toThrow();
+  });
+
+  it("rejects arbitrary template placeholders in image src", () => {
+    expect(() => assertSafeBlockUrls(doc([image("{{user.avatar_url}}")]))).toThrow(
       new BadRequestException("emailTemplates.toast.invalidUrl"),
     );
   });

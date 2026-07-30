@@ -16,7 +16,6 @@
       "clearAll": "Alles löschen",
       "validate": "Bestätigen",
       "edit": "Bearbeiten",
-      "delete": "Löschen",
       "uploading": "Hochladen...",
       "sending": "Senden..."
     },
@@ -4966,29 +4965,18 @@
       "deleteDescription": "Die Übersetzung {{language}} löschen? Ihr Inhalt geht verloren."
     },
     "publishDiagnostics": {
-      "errorsTitle_one": "{{count}} Fehler – muss vor der Veröffentlichung behoben werden",
-      "errorsTitle_other": "{{count}} Fehler – müssen vor der Veröffentlichung behoben werden",
-      "warningsTitle_one": "{{count}} Hinweis – vor der Veröffentlichung prüfen",
-      "warningsTitle_other": "{{count}} Hinweise – vor der Veröffentlichung prüfen",
-      "elementIndex": "Element {{index}}",
       "reasons": {
         "name_missing": "Vorlagenname ist erforderlich",
         "no_language_versions": "Mindestens eine Sprachversion hinzufügen",
         "subject_missing": "Betreff ist für die Standardsprache erforderlich",
         "body_missing": "E-Mail-Text ist leer",
         "button_label_missing": "Schaltflächenbeschriftung ist erforderlich",
-        "button_url_missing": "Ziel der Schaltfläche ist erforderlich",
+        "button_url_missing": "Schaltfläche hat kein Ziel",
         "empty_translation": "Übersetzung ist leer",
         "invalid_url_protocol": "URL verwendet ein unzulässiges Protokoll",
         "unchanged_from_base": "Übersetzung ist identisch mit der Basissprache",
-        "footer_missing": "Footer fehlt"
-      },
-      "nodeTypes": {
-        "heading": "Überschrift",
-        "paragraph": "Text",
-        "button": "Schaltfläche",
-        "footer": "Footer",
-        "image": "Bild"
+        "footer_missing": "Footer fehlt",
+        "logo_branding_missing": "Logo-Branding fehlt"
       },
       "blockedToast": {
         "save": "Vorlage kann nicht gespeichert werden. Siehe Diagnose",
@@ -5032,6 +5020,10 @@
         "logoHeader": {
           "title": "Logo",
           "description": "Vollständiges Logo."
+        },
+        "variable": {
+          "title": "Variable",
+          "description": "Fügt eine {{Variable}} ein, der später in der Automatisierungs-Engine ein Wert zugewiesen werden kann."
         },
         "section": {
           "title": "Abschnitt",

@@ -18114,6 +18114,10 @@
                       "type": "string"
                     },
                     {
+                      "const": "email_template.manage",
+                      "type": "string"
+                    },
+                    {
                       "const": "news.read_public",
                       "type": "string"
                     },

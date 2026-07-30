@@ -2,7 +2,9 @@ import {
   EMAIL_TEMPLATE_NODE_TYPES,
   EMAIL_TEMPLATE_NODE_UUID_ATTR,
   SUPPORTED_LANGUAGES,
+  TENANT_LOGO_VARIABLE,
   computeEmailTemplateDiagnostics,
+  groupEmailTemplateDiagnostics,
 } from "@repo/shared";
 import { describe, expect, it } from "vitest";
 
@@ -25,6 +27,8 @@ const image = (uuid: string, src: string): EmailTemplateBlocks => ({
   type: EMAIL_TEMPLATE_NODE_TYPES.IMAGE,
   attrs: { [EMAIL_TEMPLATE_NODE_UUID_ATTR]: uuid, src },
 });
+
+const logoBrandingNode = (): EmailTemplateBlocks => image("logo-uuid", TENANT_LOGO_VARIABLE);
 
 const footerNode = (): EmailTemplateBlocks => ({
   type: EMAIL_TEMPLATE_NODE_TYPES.FOOTER,
@@ -175,6 +179,34 @@ describe("computeEmailTemplateDiagnostics — footer_missing", () => {
   });
 });
 
+describe("computeEmailTemplateDiagnostics — logo_branding_missing", () => {
+  it("emits a warning when no tenant logo node is present", () => {
+    const result = computeEmailTemplateDiagnostics({
+      name: "T",
+      availableLocales: [base],
+      baseLanguage: base,
+      subject: defaultSubject,
+      blocks: doc(para(uuid1, "body"), footerNode()),
+      strings: defaultStrings,
+    });
+    const d = result.find((x) => x.reason === "logo_branding_missing");
+    expect(d).toBeDefined();
+    expect(d?.severity).toBe("warning");
+  });
+
+  it("does not flag when a tenant logo node is present", () => {
+    const result = computeEmailTemplateDiagnostics({
+      name: "T",
+      availableLocales: [base],
+      baseLanguage: base,
+      subject: defaultSubject,
+      blocks: doc(logoBrandingNode(), para(uuid1, "body"), footerNode()),
+      strings: defaultStrings,
+    });
+    expect(result.some((d) => d.reason === "logo_branding_missing")).toBe(false);
+  });
+});
+
 describe("computeEmailTemplateDiagnostics — button_label_missing / button_url_missing", () => {
   it("flags button with empty text", () => {
     const result = computeEmailTemplateDiagnostics({
@@ -188,7 +220,7 @@ describe("computeEmailTemplateDiagnostics — button_label_missing / button_url_
     expect(result.some((d) => d.reason === "button_label_missing")).toBe(true);
   });
 
-  it("flags button with empty url", () => {
+  it("flags button with empty url as a warning", () => {
     const result = computeEmailTemplateDiagnostics({
       name: "T",
       availableLocales: [base],
@@ -197,7 +229,8 @@ describe("computeEmailTemplateDiagnostics — button_label_missing / button_url_
       blocks: doc(button(uuid1, "Click", "")),
       strings: defaultStrings,
     });
-    expect(result.some((d) => d.reason === "button_url_missing")).toBe(true);
+    const diagnostic = result.find((d) => d.reason === "button_url_missing");
+    expect(diagnostic?.severity).toBe("warning");
   });
 
   it("does not flag a complete button", () => {
@@ -282,6 +315,18 @@ describe("computeEmailTemplateDiagnostics — invalid_url_protocol", () => {
       baseLanguage: base,
       subject: defaultSubject,
       blocks: doc(button(uuid1, "Click", "https://example.com")),
+      strings: defaultStrings,
+    });
+    expect(result.some((d) => d.reason === "invalid_url_protocol")).toBe(false);
+  });
+
+  it("accepts root-relative image URLs", () => {
+    const result = computeEmailTemplateDiagnostics({
+      name: "T",
+      availableLocales: [base],
+      baseLanguage: base,
+      subject: defaultSubject,
+      blocks: doc(image(uuid1, "/api/public/email-template-image/foo.webp")),
       strings: defaultStrings,
     });
     expect(result.some((d) => d.reason === "invalid_url_protocol")).toBe(false);
@@ -405,5 +450,75 @@ describe("computeEmailTemplateDiagnostics — severity shape", () => {
     });
     const d = result.find((x) => x.reason === "name_missing");
     expect(d?.severity).toBe("error");
+  });
+});
+
+describe("groupEmailTemplateDiagnostics", () => {
+  const unknownUuid = "bbbbbbbb-0000-4000-8000-000000000002";
+
+  it("places diagnostics with a known uuid in byNodeUuid", () => {
+    const diagnostic = {
+      severity: "warning",
+      reason: "empty_translation",
+      nodeUuid: uuid1,
+    } as const;
+
+    const result = groupEmailTemplateDiagnostics([diagnostic], new Set([uuid1]));
+
+    expect(result.byNodeUuid.get(uuid1)).toEqual([diagnostic]);
+    expect(result.orphan).toEqual([]);
+  });
+
+  it("places diagnostics with an unknown uuid in orphan", () => {
+    const diagnostic = {
+      severity: "error",
+      reason: "button_url_missing",
+      nodeUuid: unknownUuid,
+    } as const;
+
+    const result = groupEmailTemplateDiagnostics([diagnostic], new Set([uuid1]));
+
+    expect(result.byNodeUuid.has(unknownUuid)).toBe(false);
+    expect(result.orphan).toEqual([diagnostic]);
+  });
+
+  it("places diagnostics without a uuid in orphan", () => {
+    const diagnostic = {
+      severity: "warning",
+      reason: "footer_missing",
+    } as const;
+
+    const result = groupEmailTemplateDiagnostics([diagnostic], new Set([uuid1]));
+
+    expect(result.byNodeUuid.size).toBe(0);
+    expect(result.orphan).toEqual([diagnostic]);
+  });
+
+  it("orders diagnostics within a bucket with errors first", () => {
+    const warning = {
+      severity: "warning",
+      reason: "empty_translation",
+      language: "pl",
+      nodeUuid: uuid1,
+    } as const;
+    const secondWarning = {
+      severity: "warning",
+      reason: "button_url_missing",
+      language: "en",
+      nodeUuid: uuid1,
+    } as const;
+    const secondError = {
+      severity: "error",
+      reason: "button_label_missing",
+      language: "en",
+      nodeUuid: uuid1,
+    } as const;
+
+    const result = groupEmailTemplateDiagnostics(
+      [warning, secondWarning, secondError],
+      new Set([uuid1]),
+    );
+
+    expect(result.byNodeUuid.get(uuid1)).toEqual([secondError, secondWarning, warning]);
   });
 });

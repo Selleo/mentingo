@@ -3,6 +3,7 @@ import {
   TRANSLATABLE_EMAIL_TEMPLATE_NODE_TYPES,
   EMAIL_TEMPLATE_NODE_UUID_ATTR,
 } from "../constants/emailTemplateNodeTypes";
+import { TENANT_LOGO_VARIABLE } from "../constants/emailTemplates";
 
 import type {
   EmailTemplateBlocks,
@@ -24,7 +25,8 @@ export type EmailTemplateDiagnosticReason =
   | "empty_translation"
   | "invalid_url_protocol"
   | "unchanged_from_base"
-  | "footer_missing";
+  | "footer_missing"
+  | "logo_branding_missing";
 
 export type EmailTemplateDiagnostic = {
   severity: EmailTemplateDiagnosticSeverity;
@@ -35,11 +37,27 @@ export type EmailTemplateDiagnostic = {
   detail?: string;
 };
 
+export type EmailTemplateDiagnosticGroups = {
+  byNodeUuid: Map<string, EmailTemplateDiagnostic[]>;
+  orphan: EmailTemplateDiagnostic[];
+};
+
 const ALLOWED_URL_PROTOCOLS = new Set(["http:", "https:", "mailto:"]);
+const URL_SCHEME_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
 const VARIABLE_PATTERN = /\{\{[^}]+\}\}/g;
 const URL_ATTR_BY_NODE_TYPE: Record<string, string[]> = {
   [EMAIL_TEMPLATE_NODE_TYPES.BUTTON]: ["url"],
   [EMAIL_TEMPLATE_NODE_TYPES.IMAGE]: ["src", "href"],
+};
+
+const compareDiagnostics = (
+  left: EmailTemplateDiagnostic,
+  right: EmailTemplateDiagnostic,
+): number => {
+  if (left.severity !== right.severity) return left.severity === "error" ? -1 : 1;
+  const reasonOrder = left.reason.localeCompare(right.reason);
+  if (reasonOrder !== 0) return reasonOrder;
+  return (left.language ?? "").localeCompare(right.language ?? "");
 };
 
 const flattenText = (nodes: EmailTemplateNode[] | undefined): string => {
@@ -74,6 +92,18 @@ const walkAllNodes = (blocks: EmailTemplateBlocks, visit: (node: EmailTemplateNo
   walk(blocks);
 };
 
+const getInvalidUrlProtocolDetail = (value: string): string | null => {
+  const schemeMatch = URL_SCHEME_PATTERN.exec(value);
+  if (schemeMatch) {
+    const protocol = schemeMatch[0].toLowerCase();
+    return ALLOWED_URL_PROTOCOLS.has(protocol) ? null : protocol;
+  }
+
+  if (value.startsWith("/")) return null;
+
+  return "unparseable";
+};
+
 export const computeEmailTemplateDiagnostics = (input: {
   name?: string;
   availableLocales: SupportedLanguages[];
@@ -103,10 +133,14 @@ export const computeEmailTemplateDiagnostics = (input: {
 
   let translatableNodeCount = 0;
   let hasFooterNode = false;
+  let hasLogoBrandingNode = false;
   walkAllNodes(input.blocks, (node) => {
     if (!node.type) return;
     if (TRANSLATABLE_EMAIL_TEMPLATE_NODE_TYPES.has(node.type)) translatableNodeCount += 1;
     if (node.type === EMAIL_TEMPLATE_NODE_TYPES.FOOTER) hasFooterNode = true;
+    if (node.type === EMAIL_TEMPLATE_NODE_TYPES.IMAGE && node.attrs?.src === TENANT_LOGO_VARIABLE) {
+      hasLogoBrandingNode = true;
+    }
   });
 
   if (translatableNodeCount === 0) {
@@ -119,6 +153,10 @@ export const computeEmailTemplateDiagnostics = (input: {
 
   if (!hasFooterNode) {
     diagnostics.push({ severity: "warning", reason: "footer_missing" });
+  }
+
+  if (!hasLogoBrandingNode) {
+    diagnostics.push({ severity: "warning", reason: "logo_branding_missing" });
   }
 
   walkAllNodes(input.blocks, (node) => {
@@ -139,7 +177,7 @@ export const computeEmailTemplateDiagnostics = (input: {
     const buttonUrl = typeof rawUrl === "string" ? rawUrl.trim() : "";
     if (!buttonUrl) {
       diagnostics.push({
-        severity: "error",
+        severity: "warning",
         language: input.baseLanguage,
         nodeUuid: uuid,
         nodeType: node.type,
@@ -158,29 +196,18 @@ export const computeEmailTemplateDiagnostics = (input: {
       const hasVariable = VARIABLE_PATTERN.test(raw);
       VARIABLE_PATTERN.lastIndex = 0;
       const normalized = hasVariable ? raw.replace(VARIABLE_PATTERN, "x") : raw;
-      try {
-        const url = new URL(normalized);
-        if (!ALLOWED_URL_PROTOCOLS.has(url.protocol)) {
-          diagnostics.push({
-            severity: "error",
-            language: input.baseLanguage,
-            nodeUuid: node.attrs?.[EMAIL_TEMPLATE_NODE_UUID_ATTR] as string | undefined,
-            nodeType: node.type,
-            reason: "invalid_url_protocol",
-            detail: `${attr}: ${url.protocol}`,
-          });
-        }
-      } catch {
-        if (hasVariable) continue;
-        diagnostics.push({
-          severity: "error",
-          language: input.baseLanguage,
-          nodeUuid: node.attrs?.[EMAIL_TEMPLATE_NODE_UUID_ATTR] as string | undefined,
-          nodeType: node.type,
-          reason: "invalid_url_protocol",
-          detail: `${attr}: unparseable`,
-        });
+      const invalidProtocolDetail = getInvalidUrlProtocolDetail(normalized);
+      if (!invalidProtocolDetail || (hasVariable && invalidProtocolDetail === "unparseable")) {
+        continue;
       }
+      diagnostics.push({
+        severity: "error",
+        language: input.baseLanguage,
+        nodeUuid: node.attrs?.[EMAIL_TEMPLATE_NODE_UUID_ATTR] as string | undefined,
+        nodeType: node.type,
+        reason: "invalid_url_protocol",
+        detail: `${attr}: ${invalidProtocolDetail}`,
+      });
     }
   });
 
@@ -230,4 +257,29 @@ export const computeEmailTemplateDiagnostics = (input: {
   }
 
   return diagnostics;
+};
+
+export const groupEmailTemplateDiagnostics = (
+  diagnostics: EmailTemplateDiagnostic[],
+  knownNodeUuids: Set<string>,
+): EmailTemplateDiagnosticGroups => {
+  const byNodeUuid = new Map<string, EmailTemplateDiagnostic[]>();
+  const orphan: EmailTemplateDiagnostic[] = [];
+
+  for (const diagnostic of diagnostics) {
+    if (diagnostic.nodeUuid && knownNodeUuids.has(diagnostic.nodeUuid)) {
+      const nodeDiagnostics = byNodeUuid.get(diagnostic.nodeUuid) ?? [];
+      nodeDiagnostics.push(diagnostic);
+      byNodeUuid.set(diagnostic.nodeUuid, nodeDiagnostics);
+    } else {
+      orphan.push(diagnostic);
+    }
+  }
+
+  for (const nodeDiagnostics of byNodeUuid.values()) {
+    nodeDiagnostics.sort(compareDiagnostics);
+  }
+  orphan.sort(compareDiagnostics);
+
+  return { byNodeUuid, orphan };
 };

@@ -7697,12 +7697,6 @@ export interface ListTemplatesResponse {
   appliedFilters?: object;
 }
 
-export interface GetNextAutoNameResponse {
-  data: {
-    name: string;
-  };
-}
-
 /** @minItems 1 */
 export type DeleteManyTemplatesBody = string[];
 
@@ -7717,7 +7711,7 @@ export interface CreateTemplateBody {
    * @minLength 1
    * @maxLength 200
    */
-  name: string;
+  name?: string;
   baseLanguage: "en" | "pl" | "de" | "lt" | "cs" | "es";
   /** @minItems 1 */
   availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
@@ -15826,20 +15820,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
         method: "POST",
         body: data,
         type: ContentType.Json,
-        format: "json",
-        ...params,
-      }),
-
-    /**
-     * No description
-     *
-     * @name EmailNotificationTemplatesControllerGetNextAutoName
-     * @request GET:/api/email-notification-templates/next-auto-name
-     */
-    emailNotificationTemplatesControllerGetNextAutoName: (params: RequestParams = {}) =>
-      this.request<GetNextAutoNameResponse, any>({
-        path: `/api/email-notification-templates/next-auto-name`,
-        method: "GET",
         format: "json",
         ...params,
       }),

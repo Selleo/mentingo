@@ -16,7 +16,6 @@
       "ignore": "Ignoruj",
       "validate": "Popraw błędy",
       "edit": "Edytuj",
-      "delete": "Usuń",
       "continue": "Kontynuuj",
       "uploading": "Wgrywanie...",
       "sending": "Wysyłanie..."
@@ -365,7 +364,6 @@
     "learningPaths": "Ścieżki Rozwoju",
     "adminLearningPaths": "Ścieżki Rozwoju",
     "adminLearningPathEditor": "Edytor ścieżki rozwoju",
-    "emailTemplates": "Szablony e-mail",
     "editEmailTemplate": "Edytuj szablon e-mail"
   },
   "microsoftCalendar": {

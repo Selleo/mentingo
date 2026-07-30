@@ -188,11 +188,6 @@ export const getNavigationConfig = (
           path: "admin/email-templates",
           iconName: "Email",
         },
-        {
-          label: t("navigationSideBar.automation"),
-          path: "admin/automation",
-          iconName: "Manage",
-        },
         ...(isStripeConfigured
           ? [
               {

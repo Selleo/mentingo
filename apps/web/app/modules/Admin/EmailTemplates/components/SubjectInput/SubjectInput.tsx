@@ -20,6 +20,7 @@ type SubjectInputProps = {
   onChange: (value: string) => void;
   placeholder?: string;
   ariaLabel?: string;
+  testId?: string;
 };
 
 export const SubjectInput = ({
@@ -28,6 +29,7 @@ export const SubjectInput = ({
   onChange,
   placeholder,
   ariaLabel,
+  testId,
 }: SubjectInputProps) => {
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
@@ -70,7 +72,7 @@ export const SubjectInput = ({
   }, [editor, value]);
 
   return (
-    <div className="[&_.ProseMirror]:min-h-[1.25rem] [&_p]:m-0">
+    <div data-testid={testId} className="[&_.ProseMirror]:min-h-[1.25rem] [&_p]:m-0">
       <EditorContent editor={editor} />
     </div>
   );

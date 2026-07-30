@@ -38,6 +38,7 @@ const pickOverride = (
   baseLanguage: SupportedLanguages,
   uuid: string,
 ): TranslationFragment | undefined => {
+  if (language === baseLanguage) return undefined;
   const target = strings[language]?.[uuid];
   if (!isFragmentEmpty(target)) return target;
   const base = strings[baseLanguage]?.[uuid];

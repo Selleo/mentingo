@@ -4,16 +4,14 @@ import { Document } from "@tiptap/extension-document";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { Text } from "@tiptap/extension-text";
 import { TextSelection } from "@tiptap/pm/state";
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { VariableHighlightExtension, variableHighlightPluginKey } from "../variable-highlight";
 
 import type { DecorationSet } from "@tiptap/pm/view";
 
-let activeEditor: Editor | null = null;
-
-const buildEditor = (text = "") => {
-  activeEditor = new Editor({
+const buildEditor = (text = "") =>
+  new Editor({
     extensions: [Document, Paragraph, Text, VariableHighlightExtension],
     content: {
       type: EMAIL_TEMPLATE_NODE_TYPES.DOC,
@@ -25,13 +23,6 @@ const buildEditor = (text = "") => {
       ],
     },
   });
-  return activeEditor;
-};
-
-afterEach(() => {
-  activeEditor?.destroy();
-  activeEditor = null;
-});
 
 const paragraphText = (editor: Editor): string => {
   const first = editor.state.doc.firstChild;
@@ -68,9 +59,9 @@ const pressKey = (editor: Editor, key: string): boolean => {
 const typeChar = (editor: Editor, ch: string): boolean => {
   const { from, to } = editor.state.selection;
   return (
-    (editor.view.someProp("handleTextInput", (fn) =>
-      fn(editor.view, from, to, ch, () => editor.state.tr),
-    ) as boolean | undefined) ?? false
+    (editor.view.someProp("handleTextInput", (fn) => fn(editor.view, from, to, ch)) as
+      | boolean
+      | undefined) ?? false
   );
 };
 

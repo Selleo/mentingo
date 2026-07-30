@@ -79,6 +79,15 @@ button:has(> svg.lucide-eye) {
 div.mly\\:w-px:has(+ button > svg.lucide-eye) {
   display: none !important;
 }
+
+#mly-editor .ProseMirror .mly-image-drop-zone {
+  width: fit-content;
+  max-width: 100%;
+}
+
+#mly-editor.email-template-logo-selected button:has(> svg.lucide-image-down) {
+  display: none !important;
+}
 `;
 
 export const useMailyEditorStyles = (): void => {

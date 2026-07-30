@@ -79,24 +79,14 @@ export class EmailNotificationTemplatesController {
     return new PaginatedResponse(result);
   }
 
-  @Get("next-auto-name")
-  @RequirePermission(PERMISSIONS.EMAIL_TEMPLATE_MANAGE)
-  @Validate({
-    response: baseResponse(Type.Object({ name: Type.String() })),
-  })
-  async getNextAutoName() {
-    const name = await this.emailNotificationTemplatesService.getNextAutoTemplateName();
-    return new BaseResponse({ name });
-  }
-
   @Delete("bulk")
   @RequirePermission(PERMISSIONS.EMAIL_TEMPLATE_MANAGE)
   @Validate({
     request: [{ type: "body", schema: Type.Array(UUIDSchema, { minItems: 1 }) }],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
-  async deleteManyTemplates(@Body() ids: UUIDType[]) {
-    await this.emailNotificationTemplatesService.deleteManyTemplates(ids);
+  async deleteManyTemplates(@Body() ids: UUIDType[], @CurrentUser() currentUser: CurrentUserType) {
+    await this.emailNotificationTemplatesService.deleteManyTemplates(ids, currentUser.tenantId);
 
     return new BaseResponse({ message: "emailTemplates.toast.deletedSuccessfully" });
   }
@@ -134,8 +124,16 @@ export class EmailNotificationTemplatesController {
     ],
     response: baseResponse(emailNotificationTemplateSchema),
   })
-  async updateTemplate(@Param("id") id: UUIDType, @Body() body: UpdateEmailNotificationTemplate) {
-    const template = await this.emailNotificationTemplatesService.updateTemplate(id, body);
+  async updateTemplate(
+    @Param("id") id: UUIDType,
+    @Body() body: UpdateEmailNotificationTemplate,
+    @CurrentUser() currentUser: CurrentUserType,
+  ) {
+    const template = await this.emailNotificationTemplatesService.updateTemplate(
+      id,
+      body,
+      currentUser.tenantId,
+    );
 
     return new BaseResponse(template);
   }
@@ -182,8 +180,8 @@ export class EmailNotificationTemplatesController {
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
     response: baseResponse(Type.Object({ message: Type.String() })),
   })
-  async deleteTemplate(@Param("id") id: UUIDType) {
-    await this.emailNotificationTemplatesService.deleteTemplate(id);
+  async deleteTemplate(@Param("id") id: UUIDType, @CurrentUser() currentUser: CurrentUserType) {
+    await this.emailNotificationTemplatesService.deleteTemplate(id, currentUser.tenantId);
 
     return new BaseResponse({ message: "emailTemplates.toast.deletedSuccessfully" });
   }
@@ -211,9 +209,14 @@ export class EmailNotificationTemplatesController {
   })
   async previewTemplate(
     @Param("id") id: UUIDType,
-    @Query("language") language?: SupportedLanguages,
+    @Query("language") language: SupportedLanguages | undefined,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
-    const preview = await this.emailNotificationTemplatesService.previewTemplate(id, language);
+    const preview = await this.emailNotificationTemplatesService.previewTemplate(
+      id,
+      currentUser.tenantId,
+      language,
+    );
 
     return new BaseResponse(preview);
   }

@@ -1,5 +1,10 @@
 import { useNavigate, useParams } from "@remix-run/react";
-import { EMAIL_TEMPLATE_STATUSES, computeEmailTemplateDiagnostics } from "@repo/shared";
+import {
+  EMAIL_TEMPLATE_NODE_UUID_ATTR,
+  EMAIL_TEMPLATE_STATUSES,
+  computeEmailTemplateDiagnostics,
+  groupEmailTemplateDiagnostics,
+} from "@repo/shared";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -23,12 +28,14 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { toast } from "~/components/ui/use-toast";
+import { cn } from "~/lib/utils";
 import Loader from "~/modules/common/Loader/Loader";
 import { setPageTitle } from "~/utils/setPageTitle";
 
-import { PublishDiagnosticsBanner } from "./components/PublishDiagnosticsBanner/PublishDiagnosticsBanner";
+import { InlineDiagnosticStack } from "./components/InlineDiagnosticNote/InlineDiagnosticStack";
 import { SubjectInput } from "./components/SubjectInput/SubjectInput";
 import { useEditEmailTemplateForm } from "./hooks/useEditEmailTemplateForm";
+import { swapBaseLanguageContent } from "./utils/swapBaseLanguageContent";
 
 import type { MetaFunction } from "@remix-run/react";
 import type {
@@ -38,6 +45,17 @@ import type {
   SupportedLanguages,
   TranslationFragment,
 } from "@repo/shared";
+
+const collectNodeUuids = (blocks: EmailTemplateBlocks): Set<string> => {
+  const uuids = new Set<string>();
+  const walk = (node: EmailTemplateBlocks) => {
+    const uuid = node.attrs?.[EMAIL_TEMPLATE_NODE_UUID_ATTR];
+    if (typeof uuid === "string" && uuid.length > 0) uuids.add(uuid);
+    node.content?.forEach(walk);
+  };
+  walk(blocks);
+  return uuids;
+};
 
 const EmailTemplateEditor = lazy(() =>
   import("./components/BuilderCanvas/EmailTemplateEditor").then((m) => ({
@@ -92,13 +110,13 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
 
   const { form, onSubmit, isSubmitting } = useEditEmailTemplateForm(template);
 
-  const publishMutation = usePublishEmailTemplate();
-  const makeDraftMutation = useMakeDraftEmailTemplate();
-  const archiveMutation = useArchiveEmailTemplate();
-  const unarchiveMutation = useUnarchiveEmailTemplate();
-  const duplicateMutation = useDuplicateEmailTemplate();
-  const renameMutation = useUpdateEmailTemplate();
-  const sendTestEmailMutation = useSendTestEmail();
+  const { mutate: publish, isPending: isPublishing } = usePublishEmailTemplate();
+  const { mutate: makeDraft, isPending: isMakingDraft } = useMakeDraftEmailTemplate();
+  const { mutate: archive, isPending: isArchiving } = useArchiveEmailTemplate();
+  const { mutate: unarchive, isPending: isUnarchiving } = useUnarchiveEmailTemplate();
+  const { mutateAsync: duplicate } = useDuplicateEmailTemplate();
+  const { mutateAsync: rename, isPending: isRenaming } = useUpdateEmailTemplate();
+  const { mutate: sendTestEmail, isPending: isSendingTestEmail } = useSendTestEmail();
 
   const [isEditingName, setIsEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(template.name);
@@ -152,6 +170,11 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
     () => diagnostics.filter((d) => d.severity === "error").length,
     [diagnostics],
   );
+  const knownNodeUuids = useMemo(() => collectNodeUuids(blocks), [blocks]);
+  const diagnosticGroups = useMemo(
+    () => groupEmailTemplateDiagnostics(diagnostics, knownNodeUuids),
+    [diagnostics, knownNodeUuids],
+  );
 
   const submitForm = form.handleSubmit(onSubmit);
   const handleSave = async () => {
@@ -165,11 +188,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
     await submitForm();
   };
 
-  const isStatusChanging =
-    publishMutation.isPending ||
-    makeDraftMutation.isPending ||
-    archiveMutation.isPending ||
-    unarchiveMutation.isPending;
+  const isStatusChanging = isPublishing || isMakingDraft || isArchiving || isUnarchiving;
 
   const handleStatusChange = async (nextStatus: EmailTemplateStatus) => {
     if (nextStatus === template.status || isStatusChanging) return;
@@ -185,31 +204,31 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
     }
     switch (nextStatus) {
       case EMAIL_TEMPLATE_STATUSES.PUBLISHED:
-        publishMutation.mutate(template.id);
+        publish(template.id);
         return;
       case EMAIL_TEMPLATE_STATUSES.DRAFT:
         if (template.status === EMAIL_TEMPLATE_STATUSES.ARCHIVED) {
-          unarchiveMutation.mutate(template.id);
+          unarchive(template.id);
         } else {
-          makeDraftMutation.mutate(template.id);
+          makeDraft(template.id);
         }
         return;
       case EMAIL_TEMPLATE_STATUSES.ARCHIVED:
-        archiveMutation.mutate(template.id);
+        archive(template.id);
         return;
     }
   };
 
   const handleDuplicate = async () => {
-    const duplicate = await duplicateMutation.mutateAsync(template.id);
-    navigate(`/admin/email-templates/${duplicate.data.id}`);
+    const duplicatedTemplate = await duplicate(template.id);
+    navigate(`/admin/email-templates/${duplicatedTemplate.data.id}`);
   };
 
   const handleSendTestEmail = async () => {
     if (form.formState.isDirty) {
       await submitForm();
     }
-    sendTestEmailMutation.mutate({ id: template.id, language: currentLanguage });
+    sendTestEmail({ id: template.id, language: currentLanguage });
   };
 
   const handleBlocksChange = useCallback(
@@ -247,13 +266,13 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
       return;
     }
     try {
-      await renameMutation.mutateAsync({ id: template.id, data: { name: trimmed } });
+      await rename({ id: template.id, data: { name: trimmed } });
       form.setValue("name", trimmed, { shouldDirty: false });
       setIsEditingName(false);
     } catch {
       setNameDraft(template.name);
     }
-  }, [nameDraft, template.id, template.name, renameMutation, form]);
+  }, [nameDraft, template.id, template.name, rename, form]);
 
   const cancelNameEdit = useCallback(() => {
     setNameDraft(template.name);
@@ -276,9 +295,18 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
 
   const handleSetBaseLanguage = useCallback(
     (language: SupportedLanguages) => {
+      if (language === baseLanguage) return;
+      const { blocks: nextBlocks, strings: nextStrings } = swapBaseLanguageContent({
+        blocks,
+        strings,
+        oldBase: baseLanguage,
+        newBase: language,
+      });
+      form.setValue("blocks", nextBlocks, { shouldDirty: true });
+      form.setValue("strings", nextStrings, { shouldDirty: true });
       form.setValue("baseLanguage", language, { shouldDirty: true });
     },
-    [form],
+    [form, baseLanguage, blocks, strings],
   );
 
   const handleLanguageChange = useCallback(
@@ -306,6 +334,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 <input
                   ref={nameInputRef}
                   value={nameDraft}
+                  data-testid="edit-email-template-name-input"
                   onChange={(e) => setNameDraft(e.target.value)}
                   onBlur={cancelNameEdit}
                   onKeyDown={(e) => {
@@ -319,7 +348,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                   }}
                   maxLength={200}
                   size={Math.max(nameDraft.length + 1, 8)}
-                  disabled={renameMutation.isPending}
+                  disabled={isRenaming}
                   className="block max-w-full rounded border border-primary-500 bg-white px-2 py-0.5 text-lg font-semibold whitespace-nowrap focus:outline-none disabled:opacity-60"
                   aria-label={t("emailTemplates.form.field.name")}
                 />
@@ -328,6 +357,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                   <button
                     ref={nameButtonRef}
                     type="button"
+                    data-testid="edit-email-template-name-button"
                     onClick={() => setIsEditingName(true)}
                     title={t("emailTemplates.actions.rename")}
                     className="block max-w-full overflow-x-auto whitespace-nowrap rounded px-2 py-0.5 text-left text-lg font-semibold hover:bg-neutral-100"
@@ -344,7 +374,11 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
               )}
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handleDuplicate}>
+              <Button
+                variant="outline"
+                onClick={handleDuplicate}
+                data-testid="edit-email-template-duplicate-button"
+              >
                 {t("emailTemplates.actions.duplicate")}
               </Button>
               <Select
@@ -355,6 +389,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 <SelectTrigger
                   className="h-9 w-[160px]"
                   aria-label={t("emailTemplates.list.columns.status")}
+                  data-testid="edit-email-template-status-select"
                 >
                   <SelectValue />
                 </SelectTrigger>
@@ -369,9 +404,10 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
               <Button
                 variant={isDirty ? "default" : "outline"}
                 size="sm"
-                className={isDirty ? "border border-primary-700" : undefined}
+                className={cn({ "border border-primary-700": isDirty })}
                 onClick={handleSave}
                 disabled={isSubmitting}
+                data-testid="edit-email-template-save-button"
               >
                 {t("common.button.save")}
               </Button>
@@ -399,16 +435,30 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 setBaseTitle: "emailTemplates.language.setBaseTitle",
                 setBaseDescription: "emailTemplates.language.setBaseDescription",
               }}
+              testIds={{
+                select: "edit-email-template-language-select",
+                option: (language) => `edit-email-template-language-option-${language}`,
+                createConfirmButton: "edit-email-template-language-create-confirm-button",
+                deleteButton: "edit-email-template-language-delete-button",
+                deleteConfirmButton: "edit-email-template-language-delete-confirm-button",
+                setBaseLanguageButton: "edit-email-template-language-set-base-button",
+                setBaseLanguageConfirmButton:
+                  "edit-email-template-language-set-base-confirm-button",
+              }}
             />
             <Button
               onClick={handleSendTestEmail}
-              disabled={sendTestEmailMutation.isPending || isSubmitting}
+              disabled={isSendingTestEmail || isSubmitting}
+              data-testid="edit-email-template-send-test-button"
             >
               {t("emailTemplates.actions.sendTest")}
             </Button>
           </div>
-          <div className="min-h-0 flex-1 space-y-3 overflow-auto py-6">
-            <div className="mx-auto w-full max-w-[600px] rounded-md border border-neutral-200 bg-white px-12 py-3 shadow-sm">
+          <div
+            className="min-h-0 flex-1 space-y-3 overflow-auto py-6"
+            data-testid="edit-email-template-page"
+          >
+            <div className="mx-auto w-[90%] max-w-[500px] rounded-3xl border border-neutral-200 bg-white px-[50px] py-4 shadow-sm">
               <label
                 htmlFor="email-template-subject"
                 className="mb-1 block text-xs font-medium text-neutral-600"
@@ -425,6 +475,7 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                     : t("emailTemplates.form.field.subjectPlaceholder")
                 }
                 ariaLabel={t("emailTemplates.form.field.subject")}
+                testId="edit-email-template-subject-input"
               />
             </div>
             <Suspense fallback={<Loader />}>
@@ -435,12 +486,17 @@ function EditEmailTemplateBuilder({ template, breadcrumbs }: EditEmailTemplateBu
                 baseLanguage={baseLanguage}
                 onBlocksChange={handleBlocksChange}
                 onStringsChange={handleTranslationsChange}
+                diagnosticsByNodeUuid={diagnosticGroups.byNodeUuid}
               />
             </Suspense>
+            {diagnosticGroups.orphan.length > 0 && (
+              <div className="mx-auto mt-8 w-[90%] max-w-[500px] space-y-1">
+                <InlineDiagnosticStack diagnostics={diagnosticGroups.orphan} />
+              </div>
+            )}
           </div>
         </div>
       </FormProvider>
-      <PublishDiagnosticsBanner diagnostics={diagnostics} blocks={blocks} />
     </PageWrapper>
   );
 }

@@ -22,6 +22,7 @@ export const allEmailTemplatesOptions = (
   searchParams?: AllEmailTemplatesParams,
   options: QueryOptions = { enabled: true },
 ) => ({
+  placeholderData: (previousData: ListTemplatesResponse | undefined) => previousData,
   queryKey: [ALL_EMAIL_TEMPLATES_QUERY_KEY, searchParams],
   queryFn: async () => {
     const { data } = await ApiClient.api.emailNotificationTemplatesControllerListTemplates({
@@ -33,7 +34,6 @@ export const allEmailTemplatesOptions = (
 
     return data;
   },
-  select: (data: ListTemplatesResponse) => data.data,
   ...options,
 });
 

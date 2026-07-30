@@ -8,7 +8,35 @@ const supportedLanguageValues = Object.values(SUPPORTED_LANGUAGES) as [
   ...SupportedLanguages[],
 ];
 
-const tiptapJsonSchema = z.any();
+type TiptapJsonNode = {
+  type?: string;
+  attrs?: Record<string, unknown>;
+  content?: TiptapJsonNode[];
+  marks?: {
+    type: string;
+    attrs?: Record<string, unknown>;
+  }[];
+  text?: string;
+};
+
+const tiptapJsonNodeSchema: z.ZodType<TiptapJsonNode> = z
+  .object({
+    type: z.string().optional(),
+    attrs: z.record(z.string(), z.unknown()).optional(),
+    content: z.lazy(() => z.array(tiptapJsonNodeSchema)).optional(),
+    marks: z
+      .array(
+        z
+          .object({
+            type: z.string(),
+            attrs: z.record(z.string(), z.unknown()).optional(),
+          })
+          .passthrough(),
+      )
+      .optional(),
+    text: z.string().optional(),
+  })
+  .passthrough();
 
 export const editEmailTemplateFormSchema = z
   .object({
@@ -21,9 +49,9 @@ export const editEmailTemplateFormSchema = z
       .array(z.enum(supportedLanguageValues))
       .min(1, { message: "emailTemplates.form.errors.localesRequired" }),
     subject: z.record(z.enum(supportedLanguageValues), z.string()).default({}),
-    blocks: tiptapJsonSchema.default({ type: EMAIL_TEMPLATE_NODE_TYPES.DOC, content: [] }),
+    blocks: tiptapJsonNodeSchema.default({ type: EMAIL_TEMPLATE_NODE_TYPES.DOC, content: [] }),
     strings: z
-      .record(z.enum(supportedLanguageValues), z.record(z.string(), z.array(tiptapJsonSchema)))
+      .record(z.enum(supportedLanguageValues), z.record(z.string(), z.array(tiptapJsonNodeSchema)))
       .default({}),
   })
   .refine((data) => data.availableLocales.includes(data.baseLanguage), {

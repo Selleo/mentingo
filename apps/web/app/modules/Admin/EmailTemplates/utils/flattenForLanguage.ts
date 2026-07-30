@@ -45,25 +45,18 @@ export const flattenForLanguage = (params: {
   const blocks = cloneEmailTemplateNode(params.blocks);
 
   const walk = (node: EmailTemplateNode): void => {
-    if (node.type && TRANSLATABLE_EMAIL_TEMPLATE_NODE_TYPES.has(node.type)) {
+    if (node.type && TRANSLATABLE_EMAIL_TEMPLATE_NODE_TYPES.has(node.type) && !isBase) {
       const uuid = readNodeUuid(node);
       if (uuid) {
         const localeOverride = strings[language]?.[uuid];
-
-        if (isBase) {
-          if (localeOverride && !isFragmentEmpty(localeOverride)) {
-            applyOverride(node, localeOverride);
-          }
-        } else if (localeOverride && !isFragmentEmpty(localeOverride)) {
+        if (localeOverride && !isFragmentEmpty(localeOverride)) {
           applyOverride(node, localeOverride);
+        } else if (node.type === EMAIL_TEMPLATE_NODE_TYPES.BUTTON) {
+          const baseButtonText = typeof node.attrs?.text === "string" ? node.attrs.text : "";
+          if (!node.attrs) node.attrs = {};
+          if (baseButtonText) node.attrs[BUTTON_FALLBACK_ATTR] = "true";
         } else {
-          if (node.type === EMAIL_TEMPLATE_NODE_TYPES.BUTTON) {
-            const baseButtonText = typeof node.attrs?.text === "string" ? node.attrs.text : "";
-            if (!node.attrs) node.attrs = {};
-            if (baseButtonText) node.attrs[BUTTON_FALLBACK_ATTR] = "true";
-          } else {
-            node.content = [];
-          }
+          node.content = [];
         }
       }
     }

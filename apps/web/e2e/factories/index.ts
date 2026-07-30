@@ -3,6 +3,7 @@ import { AutomationFactory } from "./automation.factory";
 import { CategoryFactory } from "./category.factory";
 import { CourseFactory } from "./course.factory";
 import { CurriculumFactory } from "./curriculum.factory";
+import { EmailTemplateFactory } from "./email-template.factory";
 import { EnrollmentFactory } from "./enrollment.factory";
 import { GroupFactory } from "./group.factory";
 import { LiveTrainingFactory } from "./live-training.factory";
@@ -20,6 +21,7 @@ export type FixtureFactories = {
   createCourseFactory: () => CourseFactory;
   createCurriculumFactory: () => CurriculumFactory;
   createEnrollmentFactory: () => EnrollmentFactory;
+  createEmailTemplateFactory: () => EmailTemplateFactory;
   createGroupFactory: () => GroupFactory;
   createLiveTrainingFactory: () => LiveTrainingFactory;
   createNewsFactory: () => NewsFactory;
@@ -35,6 +37,7 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
   let courseFactory: CourseFactory | undefined;
   let curriculumFactory: CurriculumFactory | undefined;
   let enrollmentFactory: EnrollmentFactory | undefined;
+  let emailTemplateFactory: EmailTemplateFactory | undefined;
   let groupFactory: GroupFactory | undefined;
   let liveTrainingFactory: LiveTrainingFactory | undefined;
   let newsFactory: NewsFactory | undefined;
@@ -66,6 +69,10 @@ export const createFixtureFactories = (apiClient: FixtureApiClient): FixtureFact
     createEnrollmentFactory: () => {
       enrollmentFactory ??= new EnrollmentFactory(apiClient);
       return enrollmentFactory;
+    },
+    createEmailTemplateFactory: () => {
+      emailTemplateFactory ??= new EmailTemplateFactory(apiClient);
+      return emailTemplateFactory;
     },
     createGroupFactory: () => {
       groupFactory ??= new GroupFactory(apiClient);
@@ -100,6 +107,7 @@ export { CategoryFactory } from "./category.factory";
 export { CourseFactory } from "./course.factory";
 export { CurriculumFactory } from "./curriculum.factory";
 export { EnrollmentFactory } from "./enrollment.factory";
+export { EmailTemplateFactory } from "./email-template.factory";
 export { GroupFactory } from "./group.factory";
 export { NewsFactory } from "./news.factory";
 export { QAFactory } from "./qa.factory";
