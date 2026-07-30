@@ -135,15 +135,6 @@ export const AiMentorGenerationDialog = ({
           </RadioGroup>
         </div>
       )}
-      {!isCreate && (
-        <p className="rounded-md bg-neutral-50 p-3 text-sm text-neutral-600">
-          {t("adminCourseView.curriculum.lesson.aiMentorGeneration.improveTypeLocked", {
-            type: t(
-              `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${selectedType}.label`,
-            ),
-          })}
-        </p>
-      )}
       <div>
         <Label>
           {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.fieldLabel`)}

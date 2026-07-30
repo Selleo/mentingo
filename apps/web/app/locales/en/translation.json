@@ -2521,7 +2521,6 @@
           "improveWithAi": "Improve with AI",
           "checkQualityWithAi": "Check quality with AI",
           "aiAssistance": "AI assistance",
-          "improveTypeLocked": "AI will improve the current {{type}} configuration. It cannot change the mode.",
           "create": {
             "title": "Create AI Mentor behavior with AI",
             "description": "Choose the Mentor mode, then describe the experience you want to create.",

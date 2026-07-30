@@ -2455,7 +2455,6 @@
           "improveWithAi": "Tobulinti su DI",
           "checkQualityWithAi": "Patikrinti kokybę su DI",
           "aiAssistance": "DI pagalba",
-          "improveTypeLocked": "DI pagerins dabartinę {{type}} konfigūraciją. Režimo pakeisti negalima.",
           "create": {
             "title": "Sukurti DI mentoriaus elgesį su DI",
             "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.",
