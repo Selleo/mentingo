@@ -5,7 +5,8 @@ import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useDeleteNews } from "~/api/mutations";
-import { useNews } from "~/api/queries";
+import { useCurrentUser, useNews } from "~/api/queries";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
@@ -33,7 +34,8 @@ export default function NewsDetailsPage() {
   const { newsId } = useParams();
 
   const { language } = useLanguageStore();
-  const { hasAccess: canManageNews } = usePermissions({
+  const { data: currentUser } = useCurrentUser();
+  const { permissions } = usePermissions({
     required: [PERMISSIONS.NEWS_MANAGE, PERMISSIONS.NEWS_MANAGE_OWN],
   });
   const { data: news, isLoading: isLoadingNews } = useNews(
@@ -70,6 +72,9 @@ export default function NewsDetailsPage() {
 
   const headerImageUrl = news.resources?.coverImage?.fileUrl;
   const publishedDate = news.publishedAt ? new Date(news.publishedAt) : null;
+  const canManageNews =
+    hasPermission(permissions, PERMISSIONS.NEWS_MANAGE) ||
+    (hasPermission(permissions, PERMISSIONS.NEWS_MANAGE_OWN) && currentUser?.id === news.authorId);
 
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_NEWS_ACCESS}>

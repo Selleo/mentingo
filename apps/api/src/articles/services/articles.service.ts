@@ -9,7 +9,7 @@ import {
   ARTICLE_STATUS,
   ENTITY_TYPES,
   PERMISSIONS,
-  SUPPORTED_LANGUAGES,
+  isSupportedLanguage,
   type SupportedLanguages,
 } from "@repo/shared";
 import { eq, getTableColumns, sql } from "drizzle-orm";
@@ -51,6 +51,7 @@ import { getLocalizedText } from "src/utils/jsonb";
 import { baseArticleSectionTitle, baseArticleTitle } from "../constants";
 import { ArticlesRepository } from "../repositories/articles.repository";
 
+import type { ArticleRecord } from "../articles.types";
 import type { GetArticleSectionResponse } from "../schemas/articleSection.schema";
 import type { GetArticleTocResponse } from "../schemas/articleToc.schema";
 import type {
@@ -368,18 +369,26 @@ export class ArticlesService {
         .where(eq(articles.id, articleId));
     }
 
-    await Promise.all(
-      Object.entries(mappedCoverFiles).map(([language, coverFile]) =>
-        this.uploadCoverImageToArticle(
-          articleId,
-          coverFile,
-          language as SupportedLanguages,
-          coverFile.originalname,
-          "",
-          currentUser,
-        ),
-      ),
-    );
+    const coverUploads = Object.keys(mappedCoverFiles)
+      .filter(isSupportedLanguage)
+      .flatMap((language) => {
+        const coverFile = mappedCoverFiles[language];
+
+        return coverFile
+          ? [
+              this.uploadCoverImageToArticle(
+                articleId,
+                coverFile,
+                language,
+                coverFile.originalname,
+                "",
+                currentUser,
+              ),
+            ]
+          : [];
+      });
+
+    await Promise.all(coverUploads);
 
     const [updatedArticle] = await this.db
       .select({
@@ -956,7 +965,7 @@ export class ArticlesService {
   }
 
   private buildBatchUpdateData(
-    existingArticle: InferSelectModel<typeof articles>,
+    existingArticle: ArticleRecord,
     translations: UpdateArticleTranslation[],
     updateArticleData: Omit<UpdateArticle, "translations">,
   ): Record<string, unknown> {
@@ -1005,7 +1014,7 @@ export class ArticlesService {
   }
 
   private validateBatchArticleUpdate(
-    existingArticle: InferSelectModel<typeof articles>,
+    existingArticle: ArticleRecord,
     translations: UpdateArticleTranslation[],
     coverFiles: Partial<Record<SupportedLanguages, Express.Multer.File>>,
   ) {
@@ -1018,7 +1027,7 @@ export class ArticlesService {
     ];
     const allowedCoverLanguages = new Set(availableLocales);
     const hasInvalidCoverLanguage = Object.keys(coverFiles).some(
-      (language) => !allowedCoverLanguages.has(language as SupportedLanguages),
+      (language) => !isSupportedLanguage(language) || !allowedCoverLanguages.has(language),
     );
     if (hasInvalidCoverLanguage)
       throw new BadRequestException("adminArticleView.toast.updateError");
@@ -1047,12 +1056,9 @@ export class ArticlesService {
       const language = file.fieldname.startsWith("cover.")
         ? file.fieldname.slice("cover.".length)
         : "";
-      if (
-        !Object.values(SUPPORTED_LANGUAGES).includes(language as SupportedLanguages) ||
-        covers[language as SupportedLanguages]
-      )
+      if (!isSupportedLanguage(language) || covers[language])
         throw new BadRequestException("adminArticleView.toast.updateError");
-      covers[language as SupportedLanguages] = file;
+      covers[language] = file;
     });
 
     return covers;

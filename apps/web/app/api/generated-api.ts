@@ -8114,6 +8114,8 @@ export interface GetDraftNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8193,6 +8195,8 @@ export interface GetNewsResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8251,6 +8255,8 @@ export interface GetNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -16463,7 +16469,6 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       id: string,
       data: {
         translations: string;
-        status?: "draft" | "published";
         isPublic?: boolean;
       },
       params: RequestParams = {},

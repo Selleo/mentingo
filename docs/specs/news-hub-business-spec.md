@@ -37,9 +37,9 @@ News Hub gives learners a clear source for organizational and learning-related u
 
 A news manager opens the News page, creates an empty draft, and fills in the post in the News form. The form has its own active locale and preserves unsaved title, summary, rich content, and selected cover changes when locales are switched. Publication status and public visibility are shared by all locales. Publishing requires a title for every active locale. The preview is content-only and renders the active locale's unsaved rich-text HTML in the browser.
 
-Learners and visitors open the News page to see published items. The list highlights the first item on the first page, paginates the rest, and opens each post into a detailed article view. On the detail page, Mentingo renders the localized content, supporting media, article metadata, table of contents, and previous/next post navigation.
+Learners and signed-in content creators open the News page to see published items, including posts published by other authors. The list highlights the first item on the first page, paginates the rest, and opens each post into a detailed article view. On the detail page, Mentingo renders the localized content, supporting media, article metadata, table of contents, and previous/next post navigation. Public visitors see only posts explicitly available to them.
 
-Drafts are visible only to users who can manage news. Users with `news.manage` can manage every post; users with `news.manage_own` can access only their own posts, resources, uploads, and language changes. Requests for another author's item return Not Found. Public visitors can access the News Hub only when public News access is enabled for the tenant and the post itself is published, public, and translated into the requested locale.
+Drafts are visible only to users who can manage news. Users with `news.manage` can manage every post; users with `news.manage_own` can manage only their own drafts and posts, resources, uploads, and language changes while retaining read access to other authors' published news. On another author's post, edit and delete actions are hidden. Management requests for another author's item return Not Found. Public visitors can access the News Hub only when public News access is enabled for the tenant and the post itself is published, public, and translated into the requested locale.
 
 ## Key Technical Context
 
@@ -52,4 +52,4 @@ Drafts are visible only to users who can manage news. Users with `news.manage` c
 
 ## Test Evidence
 
-Frontend Playwright coverage covers browsing, opening, creating, updating, and deleting news, plus public/private access. The News implementation should additionally be covered with API tests for strict locale filtering, manager fallback, own-only isolation, and batch updates; web coverage should cover staged locale drafts, batch saves, publication title validation, local preview, and the absence of pagination for a one-page result.
+Frontend Playwright coverage covers browsing and opening published news as both content creators and learners, creating, updating, and deleting news with explicit confirmation, plus public/private access. The News implementation should additionally be covered with API tests for strict locale filtering, manager fallback, own-only management isolation, and batch updates; web coverage should cover staged locale drafts, batch saves, publication title validation, local preview, and the absence of pagination for a one-page result.

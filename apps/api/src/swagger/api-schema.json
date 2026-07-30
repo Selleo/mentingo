@@ -55081,6 +55081,10 @@
                 "authorName": {
                   "type": "string"
                 },
+                "authorId": {
+                  "format": "uuid",
+                  "type": "string"
+                },
                 "resources": {
                   "type": "object",
                   "properties": {
@@ -55284,6 +55288,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorId",
                 "createdAt",
                 "updatedAt"
               ]
@@ -55484,6 +55489,10 @@
                 ]
               },
               "authorName": {
+                "type": "string"
+              },
+              "authorId": {
+                "format": "uuid",
                 "type": "string"
               },
               "resources": {
@@ -55690,6 +55699,7 @@
               "availableLocales",
               "publishedAt",
               "authorName",
+              "authorId",
               "createdAt",
               "updatedAt"
             ]
@@ -55797,6 +55807,10 @@
                   ]
                 },
                 "authorName": {
+                  "type": "string"
+                },
+                "authorId": {
+                  "format": "uuid",
                   "type": "string"
                 },
                 "resources": {
@@ -56002,6 +56016,7 @@
                 "availableLocales",
                 "publishedAt",
                 "authorName",
+                "authorId",
                 "createdAt",
                 "updatedAt"
               ]

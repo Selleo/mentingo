@@ -1,6 +1,12 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, NEWS_STATUS, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
-import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
+import {
+  ENTITY_TYPES,
+  NEWS_STATUS,
+  PERMISSIONS,
+  isSupportedLanguage,
+  type SupportedLanguages,
+} from "@repo/shared";
+import { and, count, eq, getTableColumns, gt, lt, ne, or, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
 
@@ -114,18 +120,26 @@ export class NewsService {
       await this.db.update(news).set(finalUpdateData).where(eq(news.id, newsId));
     }
 
-    await Promise.all(
-      Object.entries(coverFiles).map(([coverLanguage, coverFile]) =>
-        this.uploadCoverImageToNews(
-          newsId,
-          coverFile,
-          coverLanguage as SupportedLanguages,
-          coverFile.originalname,
-          "",
-          currentUser,
-        ),
-      ),
-    );
+    const coverUploads = Object.keys(coverFiles)
+      .filter(isSupportedLanguage)
+      .flatMap((language) => {
+        const coverFile = coverFiles[language];
+
+        return coverFile
+          ? [
+              this.uploadCoverImageToNews(
+                newsId,
+                coverFile,
+                language,
+                coverFile.originalname,
+                "",
+                currentUser,
+              ),
+            ]
+          : [];
+      });
+
+    await Promise.all(coverUploads);
 
     const [updatedNews] = await this.db
       .select({
@@ -392,6 +406,7 @@ export class NewsService {
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
+      allowOwnDrafts: isAdminLike,
     });
     const [existingNews] = await this.db
       .select({
@@ -544,7 +559,7 @@ export class NewsService {
 
     const adjacentNewsConditions = this.getNewsAccessConditions(language, currentUser, {
       excludedId: currentNewsId,
-      requirePublished: false,
+      requirePublished: true,
     });
 
     const sortColumn = news.publishedAt;
@@ -812,7 +827,7 @@ export class NewsService {
   private getNewsAccessConditions(
     language: SupportedLanguages,
     currentUser?: CurrentUserType,
-    options?: { excludedId?: UUIDType; requirePublished?: boolean },
+    options?: { allowOwnDrafts?: boolean; excludedId?: UUIDType; requirePublished?: boolean },
   ) {
     const isAdminLike = this.canManageNews(currentUser);
     const canManageAllNews = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
@@ -828,8 +843,15 @@ export class NewsService {
       if (!currentUser) conditions.push(eq(news.isPublic, true));
     }
 
-    if (isAdminLike && !canManageAllNews) {
-      conditions.push(eq(news.authorId, currentUser!.userId));
+    if (options?.allowOwnDrafts && isAdminLike && !canManageAllNews) {
+      const publishedOrOwnedByCurrentUser = or(
+        sql`${news.publishedAt} IS NOT NULL`,
+        eq(news.authorId, currentUser!.userId),
+      );
+
+      if (publishedOrOwnedByCurrentUser) {
+        conditions.push(publishedOrOwnedByCurrentUser);
+      }
     }
 
     if (options?.excludedId) conditions.push(ne(news.id, options.excludedId));
@@ -1036,18 +1058,23 @@ export class NewsService {
   }
 
   private mapCoverFiles(files: Express.Multer.File[]) {
-    return files.reduce<Record<string, Express.Multer.File>>((covers, file) => {
-      if (!file.fieldname.startsWith("cover.")) return covers;
-      const language = file.fieldname.slice("cover.".length);
-      if (language) covers[language] = file;
-      return covers;
-    }, {});
+    return files.reduce<Partial<Record<SupportedLanguages, Express.Multer.File>>>(
+      (covers, file) => {
+        if (!file.fieldname.startsWith("cover.")) return covers;
+        const language = file.fieldname.slice("cover.".length);
+        if (!isSupportedLanguage(language))
+          throw new BadRequestException("adminNewsView.toast.invalidLanguageError");
+        covers[language] = file;
+        return covers;
+      },
+      {},
+    );
   }
 
   private validateBatchUpdate(
     existingNews: InferSelectModel<typeof news>,
     translations: UpdateNewsTranslation[],
-    coverFiles: Record<string, Express.Multer.File>,
+    coverFiles: Partial<Record<SupportedLanguages, Express.Multer.File>>,
     requestedStatus?: UpdateNews["status"],
   ) {
     const languages = new Set(translations.map((translation) => translation.language));
@@ -1055,11 +1082,10 @@ export class NewsService {
     if (languages.size !== translations.length)
       throw new BadRequestException("adminNewsView.toast.updateError");
 
-    for (const language of [...languages, ...Object.keys(coverFiles)]) {
-      if (
-        !existingNews.availableLocales.includes(language as SupportedLanguages) &&
-        !languages.has(language as SupportedLanguages)
-      ) {
+    const coverLanguages = Object.keys(coverFiles).filter(isSupportedLanguage);
+
+    for (const language of [...languages, ...coverLanguages]) {
+      if (!existingNews.availableLocales.includes(language) && !languages.has(language)) {
         throw new BadRequestException("adminNewsView.toast.invalidLanguageError");
       }
     }
