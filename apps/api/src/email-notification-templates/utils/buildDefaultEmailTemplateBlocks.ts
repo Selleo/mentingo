@@ -11,6 +11,7 @@ import type { EmailTemplateBlocks, SupportedLanguages } from "@repo/shared";
 
 const DEFAULT_BUTTON_URL = "";
 const DEFAULT_TENANT_LOGO_HEIGHT = "32";
+const DEFAULT_CONTENT_ALIGNMENT = "center";
 
 const DEFAULT_PLACEHOLDER_TEXT: Record<
   SupportedLanguages,
@@ -82,19 +83,19 @@ export const buildDefaultEmailTemplateBlocks = (
         type: EMAIL_TEMPLATE_NODE_TYPES.IMAGE,
         attrs: withUuid({
           src: TENANT_LOGO_VARIABLE,
-          alignment: "center",
+          alignment: DEFAULT_CONTENT_ALIGNMENT,
           width: null,
           height: DEFAULT_TENANT_LOGO_HEIGHT,
         }),
       },
       {
         type: EMAIL_TEMPLATE_NODE_TYPES.HEADING,
-        attrs: withUuid({ level: 2 }),
+        attrs: withUuid({ level: 2, textAlign: DEFAULT_CONTENT_ALIGNMENT }),
         content: [textNode(placeholders.heading)],
       },
       {
         type: EMAIL_TEMPLATE_NODE_TYPES.PARAGRAPH,
-        attrs: withUuid(),
+        attrs: withUuid({ textAlign: DEFAULT_CONTENT_ALIGNMENT }),
         content: [textNode(placeholders.paragraph)],
       },
       {
@@ -102,7 +103,7 @@ export const buildDefaultEmailTemplateBlocks = (
         attrs: withUuid({
           text: placeholders.button,
           url: DEFAULT_BUTTON_URL,
-          alignment: "left",
+          alignment: DEFAULT_CONTENT_ALIGNMENT,
           variant: "filled",
           borderRadius: "smooth",
         }),
@@ -113,7 +114,7 @@ export const buildDefaultEmailTemplateBlocks = (
       },
       {
         type: EMAIL_TEMPLATE_NODE_TYPES.FOOTER,
-        attrs: withUuid(),
+        attrs: withUuid({ textAlign: DEFAULT_CONTENT_ALIGNMENT }),
         content: [textNode(placeholders.footer)],
       },
     ],

@@ -28,16 +28,18 @@ describe("buildDefaultEmailTemplateBlocks", () => {
       width: null,
       height: "32",
     });
-    expect(content[1]?.attrs?.level).toBe(2);
+    expect(content[1]?.attrs).toMatchObject({ level: 2, textAlign: "center" });
     expect(content[1]?.content?.[0]?.text).toBe("Heading 2");
+    expect(content[2]?.attrs).toMatchObject({ textAlign: "center" });
     expect(content[2]?.content?.[0]?.text).toBe("Paragraph text");
     expect(content[3]?.attrs).toMatchObject({
       text: "Button",
       url: "",
-      alignment: "left",
+      alignment: "center",
       variant: "filled",
       borderRadius: "smooth",
     });
+    expect(content[5]?.attrs).toMatchObject({ textAlign: "center" });
     expect(content[5]?.content?.[0]?.text).toBe("Footer text");
   });
 

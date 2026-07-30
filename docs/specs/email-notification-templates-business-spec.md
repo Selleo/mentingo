@@ -16,7 +16,7 @@ The main workflow starts from the admin email templates list. A manager creates 
 
 ## Feature Functions
 
-- Create and edit email templates with a subject line and visual body blocks; new templates start from a branded logo, heading 2, paragraph, call-to-action button, divider, and footer structure, with starter placeholder text populated in the selected base language.
+- Create and edit email templates with a subject line and visual body blocks; new templates start from a centered branded logo, heading 2, paragraph, call-to-action button, divider, and footer structure, with starter placeholder text populated in the selected base language.
 - Manage multilingual versions by selecting available locales, setting the base language, and editing translated content in the same builder.
 - Show diagnostics inline beside affected builder nodes so missing text, missing button targets, invalid URLs, and untranslated content are easier to fix in context.
 - Keep orphan diagnostics, such as missing template name, missing footer, or missing logo branding, at the bottom of the builder when they do not belong to a specific content block.
@@ -32,7 +32,7 @@ Email templates improve operational consistency by letting non-engineering admin
 
 ## How It Works
 
-An administrator opens the email templates area, filters or selects a template, and edits it in a builder with a subject card and email body canvas. New templates start with a simple branded layout: organization logo, secondary heading, paragraph text, call-to-action button, divider, and footer, and the starter text follows the base language chosen at creation. The builder keeps structural content in the base template and stores translated fragments by language, so the editor can switch languages while preserving the same email layout.
+An administrator opens the email templates area, filters or selects a template, and edits it in a builder with a subject card and email body canvas. New templates start with a simple centered branded layout: organization logo, secondary heading, paragraph text, call-to-action button, divider, and footer, and the starter text follows the base language chosen at creation. The builder keeps structural content in the base template and stores translated fragments by language, so the editor can switch languages while preserving the same email layout.
 
 Mentingo calculates diagnostics from the template name, available languages, subject, body blocks, button configuration, URLs, footer, logo branding, and translation content. Warnings are shown in yellow and do not block publishing. Errors are shown in red and continue to block save/publish flows for published templates or publish attempts. Diagnostics attached to a known block appear next to that block; diagnostics without a live block target appear below the template body with visual spacing.
 
