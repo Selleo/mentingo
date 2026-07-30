@@ -35,7 +35,7 @@ For administrators, the reset and validity tools reduce operational risk. When a
 
 ## How It Works
 
-Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
+Learners access certificates from the profile certificate area. Each certificate can be previewed, rendered as a PDF, and shared when sharing is enabled. Certificate rendering is available in every supported platform language, including Spanish and French, even when the related course or learning path does not have a translation in that language; in that case Mentingo falls back to the base title. Public share endpoints serve external certificate pages and images, while protected certificate listing, rendering, and share-link creation remain permission-gated.
 
 Course certificate settings are managed from the admin course settings workflow. Administrators can enable certificate issuance, define validity, inspect how a validity change affects active certificates, and choose whether the change applies only to future certificates or also to existing active certificates.
 

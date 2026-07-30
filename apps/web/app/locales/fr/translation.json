@@ -2,7 +2,7 @@
   "common": {
     "button": {
       "save": "Enregistrer",
-      "saving": "Sauvegarde...",
+      "saving": "Enregistrement...",
       "delete": "Supprimer",
       "create": "Créer",
       "cancel": "Annuler",
@@ -11,21 +11,21 @@
       "add": "Ajouter",
       "close": "Fermer",
       "goToDashboard": "Aller au tableau de bord",
-      "goBack": "Retourner",
+      "goBack": "Revenir",
       "ignore": "Ignorer",
       "clearAll": "Tout effacer",
       "validate": "Valider",
       "edit": "Modifier",
-      "uploading": "Téléchargement...",
+      "uploading": "Importation...",
       "sending": "Envoi..."
     },
     "toast": {
       "noAccess": "Vous n'êtes pas autorisé à accéder à cette ressource",
       "globalSettingsNotFound": "Paramètres globaux introuvables",
-      "somethingWentWrong": "Quelque chose s'est mal passé...",
+      "somethingWentWrong": "Une erreur est survenue...",
       "notFound": "Ressource introuvable",
       "lessonAccessDenied": "Vous n'avez pas la permission d'accéder à cette leçon.",
-      "tooManyRequests": "Trop de demandes. Réessayez dans {{seconds}} secondes."
+      "tooManyRequests": "Trop de requêtes. Réessayez dans {{seconds}} secondes."
     },
     "tooltip": {
       "soon": "Bientôt disponible"
@@ -35,23 +35,23 @@
       "admin": "Administrateur",
       "contentCreator": "Créateur de contenu",
       "trainer": "Formateur",
-      "student": "Étudiant"
+      "student": "Apprenant"
     },
     "languages": {
       "en": "Anglais",
       "pl": "Polonais",
       "de": "Allemand",
-      "lt": "lituanien",
-      "cs": "tchèque",
+      "lt": "Lituanien",
+      "cs": "Tchèque",
       "es": "Espagnol",
       "fr": "Français"
     },
     "lessonTypes": {
       "content": "Contenu",
       "quiz": "Quiz",
-      "ai_mentor": "Mentor en IA",
-      "embed": "Intégrer",
-      "scorm": "SCORME",
+      "ai_mentor": "AI Mentor",
+      "embed": "Contenu intégré",
+      "scorm": "SCORM",
       "live_training": "Formation en direct"
     },
     "error": {
@@ -63,9 +63,9 @@
     "loader": {
       "textSequence": {
         "aiMentor": {
-          "warmingUp": "Échauffement du mentor en IA...",
-          "preparingSimulation": "Préparation de la simulation pour vous...",
-          "buildingContext": "Construire le contexte du scénario...",
+          "warmingUp": "Démarrage de l'AI Mentor...",
+          "preparingSimulation": "Préparation de votre simulation...",
+          "buildingContext": "Création du contexte du scénario...",
           "takingLonger": "Cela prend plus de temps que d'habitude..."
         }
       }
@@ -76,12 +76,12 @@
       "selected": "Sélectionné",
       "allStatuses": "Tous les statuts",
       "draft": "Brouillon",
-      "all": "Tout",
+      "all": "Tous",
       "search": "Rechercher",
       "published": "Publié",
       "private": "Privé",
       "publish": "Publier",
-      "uploadingImage": "Téléchargement de l'image...",
+      "uploadingImage": "Importation de l'image...",
       "copyUrl": "L'adresse URL a été copiée dans le presse-papiers",
       "dueDate": "Date d'échéance : {{date}}",
       "appVersion": "Version de l'application : {{version}}"
@@ -93,8 +93,8 @@
     "exitFullscreen": "Quitter le plein écran"
   },
   "lessons": {
-    "sequenceUpdatedSuccessfully": "Séquence de cours mise à jour avec succès",
-    "sequenceUpdateFailed": "Échec de la mise à jour de la séquence de cours",
+    "sequenceUpdatedSuccessfully": "L'ordre des leçons a bien été mis à jour",
+    "sequenceUpdateFailed": "Impossible de mettre à jour l'ordre des leçons",
     "quizFeedbackUpdatedSuccessfully": "Option \"Commentaires sur le quiz\" mise à jour avec succès",
     "quizFeedbackUpdateFailed": "Échec de la mise à jour de l'option « Commentaires sur le quiz »",
     "videoCompletionTrackingUpdatedSuccessfully": "Option « Suivi de l'achèvement de la vidéo » mise à jour avec succès",
@@ -103,25 +103,25 @@
     "settingsUpdateFailed": "Échec de la mise à jour des paramètres"
   },
   "uploadFile": {
-    "header": "Cliquez pour télécharger",
+    "header": "Cliquez pour importer",
     "subHeader": "ou glisser-déposer",
     "replace": "Cliquez pour remplacer",
     "toast": {
-      "fileUploadedSuccessfully": "Fichier téléchargé avec succès",
-      "videoFailed": "Échec du téléchargement de la vidéo",
+      "fileUploadedSuccessfully": "Fichier importé avec succès",
+      "videoFailed": "Échec de l'importation de la vidéo",
       "videoTooLarge": "Le fichier vidéo dépasse la taille maximale autorisée",
       "videoReady": "La vidéo est prête à être utilisée",
-      "videoUploading": "Nous mettons en ligne votre vidéo. S'il vous plaît, ne fermez pas l'onglet.",
-      "videoUploadedProcessing": "Votre téléchargement est terminé. Votre vidéo est maintenant en cours de traitement. N'hésitez pas à fermer l'onglet."
+      "videoUploading": "Importation de votre vidéo en cours. Ne fermez pas cet onglet.",
+      "videoUploadedProcessing": "Votre vidéo a bien été importée et son traitement est en cours. Vous pouvez fermer cet onglet."
     },
     "details": {
       "imageCrop": "PNG, JPG, JPEG ou SVG",
-      "video": "MP4, MOV, MPEG-2 ou Hevc (max. 5 Go)",
+      "video": "MP4, MOV, MPEG-2 ou HEVC (max. 5 Go)",
       "presentation": "PPT/PPTX (max. 100 Mo)"
     },
     "processing": {
       "title": "La vidéo est en cours de traitement",
-      "body": "Vous pouvez continuer l'édition. Nous vous informerons quand il sera prêt."
+      "body": "Vous pouvez continuer à modifier le contenu. Nous vous informerons lorsque la vidéo sera prête."
     },
     "remove": {
       "video": "Supprimer la vidéo",
@@ -139,12 +139,12 @@
     },
     "error": {
       "fileRequired": "Le fichier est requis",
-      "assetNotFound": "Actif introuvable",
+      "assetNotFound": "Ressource introuvable",
       "entityNotFound": "Entité introuvable"
     }
   },
   "adminCourseDuplication": {
-    "duplicate": "Cours en double",
+    "duplicate": "Dupliquer le cours",
     "duplicateFailed": "La duplication du cours n'a pas pu démarrer.",
     "processing": "La duplication des cours est en cours. Vous pouvez continuer à travailler jusqu'à la fin.",
     "completed": "La duplication des cours est terminée.",
@@ -152,28 +152,28 @@
     "processingTitle": "Duplication de cours en cours",
     "processingDescription": "La modification du programme et des paramètres est désactivée jusqu'à ce que le contenu copié soit prêt.",
     "failedTitle": "Échec de la duplication du cours",
-    "failedDescription": "Le cours réservé est toujours disponible, mais la modification du programme et des paramètres reste désactivée pour cette tâche de duplication."
+    "failedDescription": "Le cours provisoire reste disponible, mais son programme et ses paramètres ne peuvent pas être modifiés tant que la duplication n'est pas terminée."
   },
   "adminScorm": {
-    "header": "Télécharger SCORM",
-    "subHeader": "Téléchargez votre fichier SCORM .zip.",
+    "header": "Importer un package SCORM",
+    "subHeader": "Importez votre fichier SCORM au format .zip.",
     "field": {
       "price": "Prix",
       "title": "Titre du cours",
       "category": "Catégorie",
-      "description": "Descriptif",
-      "thumbnail": "Télécharger la miniature"
+      "description": "Description",
+      "thumbnail": "Importer une miniature"
     },
     "placeholder": {
       "price": "Montant",
       "title": "Entrez le titre...",
       "category": "Sélectionnez la catégorie",
-      "description": "Donner une description du cours..."
+      "description": "Décrivez le cours..."
     },
     "other": {
       "setUpCourse": "Configurer le cours",
       "provideDetails": "Fournissez les détails pour configurer un nouveau cours",
-      "uploadFileHeader": "Cliquez pour télécharger ou glisser-déposer",
+      "uploadFileHeader": "Cliquez pour importer ou glissez-déposez le fichier",
       "uploadFileBody": "Fichier SCORM .zip (max. 500 Mo)",
       "pricing": "Tarifs",
       "status": "Statut",
@@ -183,11 +183,11 @@
       "untitled": "Sans titre",
       "free": "Gratuit",
       "paidCourse": "Cours payant",
-      "freeCourseBody": "Les étudiants peuvent s'inscrire et accéder au contenu du cours sans payer.",
-      "paidCourseBody": "Les étudiants peuvent acheter et accéder au contenu du cours. Une fois sélectionné, vous pouvez définir la devise et le prix.",
-      "draftBody": "Les étudiants ne peuvent pas acheter ou s'inscrire à ce cours. Pour ceux qui sont déjà inscrits, le cours n'apparaîtra pas dans leur liste de cours pour étudiants.",
-      "publishBody": "Les étudiants peuvent acheter, s'inscrire et accéder au contenu du cours. Une fois inscrit, le cours sera affiché sur leur tableau de bord étudiant.",
-      "charactersLeft": "personnages restants"
+      "freeCourseBody": "Les apprenants peuvent s'inscrire et accéder au contenu du cours sans payer.",
+      "paidCourseBody": "Les apprenants peuvent acheter et accéder au contenu du cours. Une fois sélectionné, vous pouvez définir la devise et le prix.",
+      "draftBody": "Les apprenants ne peuvent pas acheter ou s'inscrire à ce cours. Pour ceux qui sont déjà inscrits, le cours n'apparaîtra pas dans leur liste de cours pour apprenants.",
+      "publishBody": "Les apprenants peuvent acheter, s'inscrire et accéder au contenu du cours. Une fois inscrit, le cours sera affiché sur leur tableau de bord apprenant.",
+      "charactersLeft": "caractères restants"
     },
     "button": {
       "back": "Retour",
@@ -196,8 +196,8 @@
       "createCourse": "Créer un cours"
     },
     "upload": {
-      "uploading": "Téléchargement du package SCORM...",
-      "uploadedProcessing": "Le téléchargement du package SCORM est terminé. Le traitement de l'importation a commencé."
+      "uploading": "Importation du package SCORM...",
+      "uploadedProcessing": "Le package SCORM a bien été importé. Son traitement a commencé."
     },
     "importFailure": {
       "courseDescription": "Le cours a été supprimé car le package SCORM n'a pas pu être importé.",
@@ -259,23 +259,23 @@
       "title": "Créer un cours SCORM",
       "subtitle": "Ajoutez les métadonnées du cours et joignez le package SCORM qui deviendra le contenu du cours.",
       "requirements": {
-        "title": "Exigences du forfait",
-        "version": "Paquet SCORM 1.2",
+        "title": "Exigences du package",
+        "version": "Package SCORM 1.2",
         "archive": "Archive .zip jusqu'à 500 Mo",
         "metadata": "Les métadonnées du cours peuvent être modifiées avant l'importation"
       },
-      "packageSection": "Forfait SCORM",
+      "packageSection": "Package SCORM",
       "packageSectionDescription": "Joignez le package SCORM 1.2 qui doit être importé en tant que contenu de ce cours.",
       "importNotice": "L’importation de gros packages SCORM peut prendre quelques minutes. Gardez cette page ouverte jusqu'à la fin du téléchargement.",
       "metadataSection": "Détails du cours",
       "metadataSectionDescription": "Ces champs correspondent à la configuration standard du cours et seront utilisés comme métadonnées de base du cours.",
-      "uploadPackage": "Télécharger le package SCORM",
+      "uploadPackage": "Importer le package SCORM",
       "dropPackage": "Déposez le package SCORM ici",
       "uploadPackageDescription": "Faites glisser et déposez un fichier .zip SCORM 1.2 ou cliquez pour le choisir sur votre appareil.",
       "packageReady": "prêt à importer",
-      "replacePackage": "Remplacer le paquet",
-      "removePackage": "Supprimer le paquet",
-      "uploadThumbnail": "Télécharger la miniature",
+      "replacePackage": "Remplacer le package",
+      "removePackage": "Supprimer le package",
+      "uploadThumbnail": "Importer une miniature",
       "uploadThumbnailDescription": "PNG, JPG ou JPEG jusqu'à 20 Mo",
       "thumbnailPreviewAlt": "Aperçu miniature du cours",
       "submit": "Créer un cours SCORM",
@@ -283,12 +283,12 @@
       "toastDraftReady": "Le formulaire de cours SCORM est prêt pour l'intégration de l'API"
     },
     "lesson": {
-      "packageSection": "Forfait SCORM",
+      "packageSection": "Package SCORM",
       "packageAttached": "Package SCORM joint",
       "packageLocked": "Ce package ne peut pas être remplacé une fois la leçon créée.",
       "importNotice": "L’importation de gros packages SCORM peut prendre quelques minutes. Gardez cette page ouverte jusqu'à la fin du téléchargement.",
       "replacePackageTooltip": "Si vous souhaitez ajouter un autre package SCORM, supprimez cette leçon et créez-en une nouvelle.",
-      "languagePackageTooltip": "Téléchargez un package SCORM pour la langue sélectionnée. Les packages linguistiques existants ne peuvent pas être remplacés.",
+      "languagePackageTooltip": "Importez un package SCORM pour la langue sélectionnée. Les packages existants ne peuvent pas être remplacés.",
       "validation": {
         "titleRequired": "Le titre est requis",
         "packageRequired": "Le package SCORM est requis",
@@ -313,7 +313,7 @@
       }
     },
     "scorm": {
-      "title": "SCORME",
+      "title": "SCORM",
       "description": "Créez un cours à partir d'un package SCORM 1.2.",
       "features": {
         "import": "Construit à partir d'un package SCORM 1.2 .zip",
@@ -341,7 +341,7 @@
     "progress": "Progrès",
     "findInApplication": "Rechercher dans l'application",
     "courses": "Cours",
-    "learningPaths": "Voies de développement",
+    "learningPaths": "Parcours de développement",
     "calendar": "Calendrier",
     "content": "Contenu",
     "categories": "Catégories",
@@ -351,7 +351,7 @@
     "news": "Actualités",
     "providerInformation": "Informations",
     "announcements": "Annonces",
-    "notifications": "Notifications",
+    "notifications": "Centre de notifications",
     "promotionCodes": "Codes promotionnels",
     "manage": "Gérer",
     "ariaLabels": {
@@ -370,12 +370,12 @@
       "disconnected": "Déconnecté",
       "syncing": "Synchronisation",
       "connected": "Connecté",
-      "error": "A besoin d'attention",
+      "error": "Action requise",
       "reconnect_required": "Reconnexion requise"
     },
     "action": {
       "connect": "Connecter le calendrier Microsoft",
-      "sync": "Synchronisez maintenant",
+      "sync": "Synchroniser maintenant",
       "reconnect": "Reconnecter",
       "replace": "Utiliser un autre compte",
       "disconnect": "Déconnecter",
@@ -460,15 +460,15 @@
       "section": {
         "basics": "Les bases",
         "schedule": "Calendrier",
-        "delivery": "Livraison",
+        "delivery": "Organisation",
         "permissions": "Autorisations"
       },
       "field": {
         "title": "Titre",
-        "description": "Descriptif",
+        "description": "Description",
         "language": "Langue",
         "allDay": "Toute la journée",
-        "deliveryType": "Mode de livraison",
+        "deliveryType": "Mode de formation",
         "startsAt": "Commence à",
         "endsAt": "Se termine à",
         "maxParticipants": "Nombre maximum de participants",
@@ -496,7 +496,7 @@
         "endsAt": "L'heure de fin prévue affichée dans le calendrier.",
         "maxParticipants": "La limite de participants pour cette formation en direct. Le maximum actuel est de 100.",
         "location": "Lieu facultatif pour les formations en présentiel.",
-        "viewerPermissions": "Contrôle ce que les étudiants peuvent utiliser lorsqu'ils rejoignent le groupe en tant que spectateurs.",
+        "viewerPermissions": "Contrôle ce que les apprenants peuvent utiliser lorsqu'ils rejoignent le groupe en tant que spectateurs.",
         "microphoneEnabled": "Autorisez les spectateurs à utiliser leur microphone pendant la session.",
         "cameraEnabled": "Autorisez les spectateurs à utiliser leur caméra pendant la session."
       },
@@ -653,14 +653,14 @@
     },
     "files": {
       "title": "Fichiers de formation en direct",
-      "description": "Le matériel est divisé selon le moment où les étudiants doivent les utiliser.",
+      "description": "Le matériel est divisé selon le moment où les apprenants doivent les utiliser.",
       "beforeHeading": "Avant la formation",
       "beforeDescription": "Matériel disponible avant le début de la formation.",
       "afterHeading": "Après la formation",
       "afterDescription": "Matériel disponible une fois la formation terminée.",
       "empty": "Aucun fichier joint pour l'instant.",
       "afterLocked": "Le matériel sera débloqué une fois la formation terminée.",
-      "addFile": "Téléchargez un fichier ou faites un glisser-déposer ici",
+      "addFile": "Importez un fichier ou glissez-déposez-le ici",
       "download": "Télécharger",
       "removeFile": "Supprimer {{title}}",
       "sizeInMb": "{{size}} Mo",
@@ -845,7 +845,7 @@
       "noSearchResults": "Aucun résultat de recherche pour :",
       "announcements": "Annonces",
       "lessons": "Leçons",
-      "learningPaths": "Voies de développement",
+      "learningPaths": "Parcours de développement",
       "news": "Actualités",
       "articles": "Articles",
       "qa": "Questions et réponses"
@@ -857,10 +857,10 @@
     "editTitle": "Modifier les informations du fournisseur",
     "companyName": "Nom de l'entreprise",
     "companyShortName": "Nom abrégé de l’entreprise",
-    "registeredAddress": "Adresse enregistrée",
+    "registeredAddress": "Adresse du siège social",
     "taxNumber": "Numéro fiscal (NIP)",
     "emailAddress": "Adresse e-mail",
-    "courtRegisterNumber": "Numéro de registre du tribunal (KRS)",
+    "courtRegisterNumber": "Numéro d'immatriculation (KRS)",
     "noDataAvailable": "Aucune information sur le fournisseur disponible",
     "createSuccess": "Informations sur le fournisseur créées avec succès",
     "updateSuccess": "Les informations sur le fournisseur ont été mises à jour avec succès",
@@ -894,28 +894,28 @@
     }
   },
   "resetOnboarding": {
-    "header": "Réinitialiser l'introduction",
-    "subHeader": "Ici, vous pouvez réinitialiser l'introduction de l'application",
+    "header": "Réinitialiser la visite guidée",
+    "subHeader": "Relancez la présentation de l'application pour votre prochaine connexion.",
     "button": {
-      "reset": "Réinitialiser l'introduction"
+      "reset": "Réinitialiser la visite guidée"
     },
     "toast": {
-      "success": "L'introduction a été réinitialisée avec succès",
-      "error": "Échec de la réinitialisation de l'introduction"
+      "success": "La visite guidée a bien été réinitialisée",
+      "error": "Impossible de réinitialiser la visite guidée"
     }
   },
   "changeUserEmailView": {
     "header": "Modifier les informations utilisateur",
     "subHeader": "Mettez à jour vos informations utilisateur ici.",
     "field": {
-      "email": "Courriel"
+      "email": "Adresse e-mail"
     },
     "validation": {
       "email": "L'e-mail est requis"
     }
   },
   "ssoEnforcementView": {
-    "header": "Application de l'authentification unique",
+    "header": "Connexion SSO obligatoire",
     "subHeader": "Appliquer la connexion SSO pour tous les utilisateurs",
     "description": "Ce commutateur imposera la connexion Google/Microsoft à tous les utilisateurs. S'il est désactivé, les utilisateurs pourront se connecter en utilisant le formulaire de connexion traditionnel.",
     "switch": {
@@ -923,13 +923,13 @@
       "disabled": "Désactivé"
     },
     "toast": {
-      "ssoEnforcementUpdatedSuccessfully": "L'application du SSO a été mise à jour avec succès",
-      "ssoEnforcementUpdateFailed": "Échec de la mise à jour de l'application de l'authentification unique",
+      "ssoEnforcementUpdatedSuccessfully": "Les paramètres SSO ont bien été mis à jour",
+      "ssoEnforcementUpdateFailed": "Impossible de mettre à jour les paramètres SSO",
       "registerRedirect": "L'inscription par e-mail est désactivée car le SSO est appliqué."
     }
   },
   "userEmailTriggers": {
-    "header": "Déclencheurs de courrier électronique des utilisateurs",
+    "header": "E-mails automatiques",
     "subHeader": "Gérer les notifications automatiques par e-mail envoyées aux utilisateurs",
     "settings": {
       "userFirstLogin": "Première connexion",
@@ -955,7 +955,7 @@
     }
   },
   "inviteOnlyRegistrationView": {
-    "header": "Application de l'inscription sur invitation uniquement",
+    "header": "Inscription sur invitation",
     "subHeader": "Exiger une invitation pour s'inscrire",
     "description": "Activez ce paramètre pour restreindre l’inscription aux utilisateurs invités uniquement. Lorsqu'il est désactivé, n'importe qui peut s'inscrire sans invitation.",
     "switch": {
@@ -988,7 +988,7 @@
       "aiCapabilities": {
         "title": "Capacités de l'IA",
         "names": {
-          "aiMentor": "Mentor en IA",
+          "aiMentor": "AI Mentor",
           "voiceMentor": "Mentor vocal",
           "courseGeneration": "Génération de cours",
           "assetGeneration": "Génération d'actifs"
@@ -1000,32 +1000,32 @@
       },
       "serviceNames": {
         "stripe": "Paiement Stripe",
-        "bunny": "Lapin CDN",
+        "bunny": "Bunny CDN",
         "google_authorization": "Google OAuth",
         "microsoft_authorization": "Microsoft OAuth",
         "slack_authorization": "Slack OAuth",
         "openAI": "OpenAI",
-        "luma": "Lumia",
-        "livekit": "Kit en direct"
+        "luma": "Luma",
+        "livekit": "LiveKit"
       },
       "serviceDescriptions": {
         "stripe": "Traiter les paiements des cours et gérer les abonnements",
-        "bunny": "Diffusez des vidéos et diffusez du contenu efficacement",
+        "bunny": "Diffuser efficacement les vidéos et autres contenus",
         "google_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Google",
         "microsoft_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Microsoft",
         "slack_authorization": "Autoriser les utilisateurs à se connecter avec leur compte Slack",
         "openAI": "Activer les fonctionnalités d'AI Mentor",
-        "luma": "Activer les fonctionnalités de génération de cours AI",
+        "luma": "Activer les fonctionnalités de génération de cours par l'IA",
         "livekit": "Configurez LiveKit pour activer les sessions vidéo de formation en direct en ligne. Sans cela, seules les formations en direct hors ligne sont disponibles."
       }
     }
   },
   "mostPopularCoursesView": {
     "header": "Les plus populaires",
-    "subHeader": "Les 5 meilleurs cours",
+    "subHeader": "Les 5 cours les plus suivis",
     "other": {
       "noData": "Aucune donnée disponible",
-      "students": "Étudiants"
+      "students": "Apprenants"
     }
   },
   "enrollmentChartView": {
@@ -1091,7 +1091,7 @@
   "contentCreatorView": {
     "button": {
       "collapse": "Réduire",
-      "showMore": "Afficher plus",
+      "showMore": "Voir plus",
       "edit": "Modifier",
       "share": "Partager le profil",
       "cancel": "Annuler",
@@ -1109,9 +1109,9 @@
       "contactPhonePlaceholder": "Entrez votre numéro de téléphone",
       "jobTitle": "Titre",
       "jobTitlePlaceholder": "Entrez votre titre",
-      "description": "Bio-note",
+      "description": "Biographie",
       "descriptionPlaceholder": "Entrez une brève bio-note",
-      "uploadThumbnailLabel": "Télécharger la miniature"
+      "uploadThumbnailLabel": "Importer une miniature"
     },
     "toast": {
       "profileLinkCopied": "Lien du profil copié !",
@@ -1121,9 +1121,9 @@
       "personalInfoTitle": "Informations principales",
       "personalInfoDescription": "Gérez les informations de base de votre compte",
       "aboutTitle": "À propos",
-      "aboutDescription": "Parlez-en davantage sur vous-même",
+      "aboutDescription": "Présentez votre parcours et votre expertise",
       "appearanceTitle": "Apparence",
-      "appearanceDescription": "Téléchargez votre photo de profil",
+      "appearanceDescription": "Importez votre photo de profil",
       "pageTitle": "Profil",
       "about": "À propos",
       "contact": "Contacter",
@@ -1149,8 +1149,8 @@
       "passwordEmailsError": "Échec de l'envoi des e-mails de mot de passe"
     },
     "field": {
-      "description": "Descriptif",
-      "email": "Courriel",
+      "description": "Description",
+      "email": "Adresse e-mail",
       "phoneNumber": "Numéro de téléphone",
       "jobTitle": "Titre du poste"
     },
@@ -1161,7 +1161,7 @@
     }
   },
   "clientStatisticsView": {
-    "header": "Bon retour,",
+    "header": "Bienvenue,",
     "button": {
       "enroll": "S'inscrire",
       "searchCourses": "Rechercher des cours",
@@ -1176,8 +1176,8 @@
       "startedCourses": "Cours commencés",
       "correctAnswers": "Bonnes réponses",
       "wrongAnswers": "Mauvaises réponses",
-      "avgQuizScorePercentage": "Moy. Score en pourcentage des quiz",
-      "avgQuizCompletionPercentage": "Moy. Pourcentage de compétition de cours",
+      "avgQuizScorePercentage": "Score moyen aux quiz (%)",
+      "avgQuizCompletionPercentage": "Taux moyen de progression des cours (%)",
       "noData": "Aucune donnée",
       "courses": "Cours",
       "lessons": "Leçons",
@@ -1186,8 +1186,8 @@
       "noDataAvailable": "Aucune donnée disponible",
       "rates": "Tarifs",
       "numberOf": "Nombre de",
-      "noLessonsToContinue": "Je n'ai actuellement aucune leçon à continuer.",
-      "continueLearning": "Continuez à apprendre dans :"
+      "noLessonsToContinue": "Aucune leçon à poursuivre pour le moment.",
+      "continueLearning": "Poursuivre l'apprentissage dans :"
     }
   },
   "profileWithCalendarView": {
@@ -1196,15 +1196,15 @@
       "settings": "Paramètres"
     },
     "other": {
-      "dailyStreak": "séquence d'une journée"
+      "dailyStreak": "jours consécutifs"
     }
   },
   "adminStatisticsView": {
-    "header": "Bon retour,",
+    "header": "Bienvenue,",
     "other": {
       "courseCompletionPercentage": "Pourcentage d'achèvement des cours",
       "conversionsAfterFreemiumLesson": "Conversions après la leçon Freemium",
-      "avgQuizScore": "Moy. Score dans tous les quiz",
+      "avgQuizScore": "Score moyen aux quiz",
       "purchasedCourse": "Cours acheté",
       "remainedOnFreemium": "Resté sur Freemium",
       "correct": "Correct",
@@ -1236,40 +1236,40 @@
       "usageLimitReached": "Limite d'utilisation atteinte"
     },
     "field": {
-      "code": "Coder",
+      "code": "Code",
       "status": "Statut",
       "uses": "Nombre d'utilisations",
       "associatedCourses": "Cours associés",
       "discountType": "Type de remise",
       "discountTypePercent": "Pourcentage",
-      "discountTypeFixed": "Corrigé",
+      "discountTypeFixed": "Montant fixe",
       "discountValue": "Valeur de remise",
-      "maxRedemptions": "Rachats maximum",
-      "expiresAt": "Expire à",
+      "maxRedemptions": "Nombre maximal d'utilisations",
+      "expiresAt": "Date d'expiration",
       "assignedCourses": "Cours assignés",
-      "type": "Tapez",
+      "type": "Type",
       "associateCourse": {
-        "checkAll": "Postuler à tous les cours"
+        "checkAll": "Appliquer à tous les cours"
       },
       "discount": "Remise",
-      "createdAt": "Créé à"
+      "createdAt": "Date de création"
     },
     "breadcrumbs": {
       "promotionCodes": "Codes promotionnels",
-      "createNew": "Créer nouveau",
+      "createNew": "Créer",
       "update": "Mise à jour",
       "back": "Retour"
     },
     "button": {
-      "createNew": "Créer nouveau",
+      "createNew": "Créer",
       "createCoupon": "Créer un code promotionnel",
       "deactivatePromotionCode": "Ce code promotionnel est actif",
       "activatePromotionCode": "Ce code promotionnel n'est pas actif"
     },
     "other": {
-      "noCourses": "Pas de cours",
+      "noCourses": "Aucun cours",
       "usageInfo": "Informations d'utilisation",
-      "usageAmount": "Montant d'utilisation",
+      "usageAmount": "Nombre d'utilisations",
       "baseInfo": "Informations de base"
     }
   },
@@ -1295,12 +1295,12 @@
       "author": "Auteur",
       "category": "Catégorie",
       "price": "Prix",
-      "type": "Tapez",
-      "scorm": "SCORME",
+      "type": "Type",
+      "scorm": "SCORM",
       "state": "État",
       "status": "Statut",
       "sharedCourse": "Partagé",
-      "createdAt": "Créé à"
+      "createdAt": "Date de création"
     },
     "lessonCard": {
       "mappedTypes": {
@@ -1308,7 +1308,7 @@
         "presentation": "Présentation",
         "content": "Contenu",
         "quiz": "Quiz",
-        "ai_mentor": "Mentor en IA",
+        "ai_mentor": "AI Mentor",
         "embed": "Intégrer"
       }
     },
@@ -1317,8 +1317,8 @@
       "noLessons": "Pas de cours"
     },
     "button": {
-      "uploadScorm": "Télécharger SCORM",
-      "createNew": "Créer nouveau",
+      "uploadScorm": "Importer un package SCORM",
+      "createNew": "Créer",
       "deleteSelected": "Supprimer la sélection",
       "bulkEdit": "Modification groupée"
     },
@@ -1364,10 +1364,10 @@
     "field": {
       "title": "Titre",
       "status": "Statut",
-      "createdAt": "Créé à"
+      "createdAt": "Date de création"
     },
     "button": {
-      "createNew": "Créer nouveau",
+      "createNew": "Créer",
       "clearAll": "Tout effacer",
       "deleteSelected": "Supprimer la sélection"
     },
@@ -1424,7 +1424,7 @@
       "languageNotSupported": "Cette catégorie ne prend pas en charge cette langue.",
       "alreadyExists": "La catégorie existe déjà.",
       "categoryNotCreated": "La catégorie n'a pas pu être créée.",
-      "languageAlreadyExists": "Ce langage de catégorie existe déjà.",
+      "languageAlreadyExists": "Cette langue existe déjà pour la catégorie.",
       "invalidLanguageToDelete": "Cette langue de catégorie ne peut pas être supprimée.",
       "baseLanguageTitleRequired": "La langue par défaut sélectionnée nécessite un titre."
     },
@@ -1449,10 +1449,10 @@
     "field": {
       "firstName": "Prénom",
       "lastName": "Nom de famille",
-      "email": "Courriel",
+      "email": "Adresse e-mail",
       "role": "Rôle",
       "status": "Statut",
-      "createdAt": "Créé à",
+      "createdAt": "Date de création",
       "group": "Groupe"
     },
     "other": {
@@ -1472,7 +1472,7 @@
       }
     },
     "button": {
-      "createNew": "Créer nouveau",
+      "createNew": "Créer",
       "deleteSelected": "Supprimer la sélection",
       "edit": "Modifier",
       "import": "Importer des utilisateurs",
@@ -1495,12 +1495,12 @@
         "delete": "supprimer",
         "share": "partager",
         "render": "générer",
-        "upload": "télécharger",
+        "upload": "importer",
         "use": "utiliser",
         "enrollment": "gérer les inscriptions pour",
         "statistics": "afficher les statistiques pour",
         "export": "exporter",
-        "checkout": "accéder à la caisse pour",
+        "checkout": "effectuer des paiements pour",
         "ai_generation": "générer avec l'IA pour"
       },
       "scopes": {
@@ -1554,15 +1554,15 @@
         "category_manage": "Créez, modifiez et supprimez des catégories de cours.",
         "group_read": "Afficher les groupes d'utilisateurs.",
         "group_manage": "Créez, modifiez et supprimez des groupes d'utilisateurs.",
-        "learning_path_read": "Consultez les chemins de développement.",
+        "learning_path_read": "Consultez les parcours de développement.",
         "learning_path_create": "Créer des parcours de développement.",
-        "learning_path_update": "Modifiez n’importe quel chemin de développement.",
-        "learning_path_update_own": "Modifiez les chemins de développement créés par cet utilisateur.",
-        "learning_path_delete": "Supprimez les chemins de développement.",
-        "learning_path_course_update": "Ajoutez, supprimez et réorganisez des cours dans n'importe quel chemin de développement.",
+        "learning_path_update": "Modifiez n’importe quel parcours de développement.",
+        "learning_path_update_own": "Modifiez les parcours de développement créés par cet utilisateur.",
+        "learning_path_delete": "Supprimez les parcours de développement.",
+        "learning_path_course_update": "Ajoutez, supprimez et réorganisez des cours dans n'importe quel parcours de développement.",
         "learning_path_course_update_own": "Ajoutez, supprimez et réorganisez les cours dans vos propres parcours de développement.",
         "learning_path_enrollment": "Gérer les inscriptions au parcours de développement.",
-        "learning_path_export": "Des parcours de développement export vers les locataires.",
+        "learning_path_export": "Exporter les parcours de développement vers d'autres organisations.",
         "course_read_assigned": "Afficher les cours attribués à cet utilisateur.",
         "course_read_manageable": "Afficher les cours que cet utilisateur peut gérer.",
         "course_read": "Afficher le contenu du cours.",
@@ -1581,11 +1581,11 @@
         "learning_mode_use": "Utilisez les fonctionnalités du mode d’apprentissage.",
         "learning_progress_update": "Mettre à jour le statut de progression de l’apprenant.",
         "certificate_read": "Afficher les certificats.",
-        "certificate_share": "Certificats d'actions.",
+        "certificate_share": "Partager les certificats.",
         "certificate_render": "Générez des fichiers de certificat.",
-        "file_upload": "Téléchargez des fichiers sur la plateforme.",
-        "file_delete": "Supprimez les fichiers téléchargés.",
-        "ai_use": "Utilisez les fonctionnalités de la plate-forme basée sur l'IA.",
+        "file_upload": "Importer des fichiers sur la plateforme.",
+        "file_delete": "Supprimer les fichiers importés.",
+        "ai_use": "Utiliser les fonctionnalités de la plateforme basées sur l'IA.",
         "announcement_read": "Afficher les annonces.",
         "announcement_create": "Créez des annonces.",
         "announcement_delete": "Supprimer les annonces.",
@@ -1664,7 +1664,7 @@
         "passwordReset": "Envoyez des e-mails de réinitialisation de mot de passe aux utilisateurs sélectionnés avec des mots de passe existants. Les utilisateurs sans mot de passe seront ignorés.",
         "passwordCreation": "Renvoyez les e-mails de création de mot de passe aux utilisateurs sélectionnés sans mot de passe. Les utilisateurs avec des mots de passe existants seront ignorés.",
         "archive": "Êtes-vous sûr de vouloir archiver ces comptes ?",
-        "import": "Téléchargez un fichier .csv ou .xlsx avec les colonnes suivantes : prénom, nom, email, rôle (administrateur, étudiant ou content_creator), groupes (\"group1,group2\"), langue (en ou pl).",
+        "import": "Importez un fichier .csv ou .xlsx contenant les colonnes suivantes : prénom, nom, e-mail, rôle (admin, student ou content_creator), groupes (\"group1,group2\") et langue.",
         "noUsersImported": "Aucun utilisateur n'a été importé.",
         "noUsersSkipped": "Aucun utilisateur n'a été ignoré."
       },
@@ -1679,7 +1679,7 @@
         "filename": "utilisateurs-import-sample.csv",
         "row": {
           "firstName": "Échantillon",
-          "lastName": "Étudiant",
+          "lastName": "Apprenant",
           "email": "sample.student@example.com",
           "groupOne": "groupe1",
           "groupTwo": "groupe2"
@@ -1690,7 +1690,7 @@
         "skipped": "Sauté"
       },
       "importResult": {
-        "email": "Courriel",
+        "email": "Adresse e-mail",
         "processed": "{{count}} lignes traitées",
         "reason": "Raison"
       }
@@ -1722,7 +1722,7 @@
     "field": {
       "firstName": "Prénom",
       "lastName": "Nom de famille",
-      "email": "Courriel",
+      "email": "Adresse e-mail",
       "role": "Rôle",
       "language": "Langue",
       "status": "Statut",
@@ -1845,7 +1845,7 @@
     "name": "Nom du groupe",
     "characteristic": "Caractéristique",
     "buttons": {
-      "create": "Créer nouveau",
+      "create": "Créer",
       "deleteSelected": "Supprimer la sélection"
     },
     "groupSelect": {
@@ -1870,7 +1870,7 @@
       "header": "Groupe de mise à jour",
       "fields": {
         "name": "Nom",
-        "description": "Descriptif"
+        "description": "Description"
       },
       "submit": "Modifier le groupe",
       "groupUpdatedSuccessfully": "Groupe mis à jour avec succès",
@@ -1892,7 +1892,7 @@
     },
     "breadcrumbs": {
       "groups": "Groupes",
-      "createNew": "Créer nouveau",
+      "createNew": "Créer",
       "editGroup": "Modifier le groupe",
       "back": "Retour"
     }
@@ -1926,8 +1926,8 @@
       "pricing": "Tarifs",
       "preview": "Aperçu",
       "generateMissingTranslations": "Générer les traductions manquantes",
-      "enrolledStudents": "Étudiants inscrits",
-      "testAiMentor": "Testez le mentor en IA",
+      "enrolledStudents": "Apprenants inscrits",
+      "testAiMentor": "Tester l'AI Mentor",
       "aiCourseCreation": "Création de cours d'IA",
       "notAddedLanguages": "Non ajouté",
       "baseLanguage": "Par défaut",
@@ -1946,7 +1946,7 @@
       "certificatesResetError": "Erreur lors de la réinitialisation des certificats",
       "maxTitleLengthExceeded_one": "Le titre ne peut pas comporter plus de {{count}} caractères",
       "maxTitleLengthExceeded_other": "Le titre ne peut pas comporter plus de {{count}} caractères",
-      "aiMentorAvatarIncorrectType": "Type de fichier invalide. Veuillez télécharger une image JPG, JPEG, PNG ou SVG.",
+      "aiMentorAvatarIncorrectType": "Format non valide. Importez une image JPG, JPEG, PNG ou SVG.",
       "languageNotSupported": "Ce cours ne prend pas en charge cette langue.",
       "updateCourseMissingLanguage": "Aucune langue fournie pour la traduction",
       "successfullyDeletedLanguage": "Langue supprimée du cours avec succès",
@@ -1962,7 +1962,7 @@
       "lumaRequestTimeout": "La demande Luma a expiré.",
       "lumaConflict": "Luma a signalé un conflit.",
       "lumaValidationFailed": "La validation de Luma a échoué.",
-      "lumaRateLimited": "Limite de taux de luminance atteinte. Veuillez réessayer sous peu.",
+      "lumaRateLimited": "La limite de requêtes Luma a été atteinte. Veuillez réessayer dans quelques instants.",
       "lumaServiceUnavailable": "Le service Luma est actuellement indisponible.",
       "courseHasChapters": "Ce cours comporte déjà des chapitres.",
       "courseGeneratedSavedSuccessfully": "Cours généré enregistré avec succès.",
@@ -1970,7 +1970,7 @@
       "lumaCourseGenerationSyncProcessedWithAssetWarnings": "Le cours généré a été enregistré, mais certaines images n'ont pas pu être incluses.",
       "lumaCourseGenerationSyncFailed": "Le cours généré n'a pas pu être enregistré.",
       "lumaCourseGenerationSyncDismissed": "Synchronisation de cours générée rejetée.",
-      "maxOneVideoUploaded": "Vous ne pouvez pas télécharger plus d'une vidéo.",
+      "maxOneVideoUploaded": "Vous ne pouvez importer qu'une seule vidéo.",
       "successfullyTransferredCourseOwnership": "Propriété du cours transférée avec succès"
     },
     "errors": {
@@ -2040,7 +2040,7 @@
       "breadcrumbs": {
         "back": "Retour",
         "myCourses": "Mes cours",
-        "createNew": "Créer nouveau"
+        "createNew": "Créer"
       },
       "button": {
         "removeThumbnail": "Supprimer la vignette",
@@ -2054,12 +2054,12 @@
         "applyToExisting": "Appliquer à tous (y compris les passés)"
       },
       "selectButton": {
-        "uploadFile": "Télécharger le fichier",
+        "uploadFile": "Importer le fichier",
         "External": "Externe (URL)"
       },
       "sideSection": {
         "header": "Aperçu de la carte",
-        "subHeader": "C'est ainsi que votre cours sera visible par les étudiants.",
+        "subHeader": "C'est ainsi que votre cours sera visible par les apprenants.",
         "button": {
           "enroll": "S'inscrire"
         },
@@ -2071,7 +2071,7 @@
       "field": {
         "title": "Titre du cours",
         "category": "Catégorie",
-        "description": "Descriptif",
+        "description": "Description",
         "thumbnail": "Miniature",
         "trailer": "Bande-annonce du cours",
         "baseLanguage": "Langue de base",
@@ -2114,11 +2114,11 @@
         "sendResetEmail": "Envoyer un e-mail de réinitialisation aux utilisateurs concernés",
         "activeCertificateCount": "{{count}} actifs",
         "noActiveCertificate": "Aucun certificat actif",
-        "resetUsersSearchPlaceholder": "Rechercher des étudiants par nom ou par e-mail",
-        "resetUsersStudent": "Étudiant",
-        "resetUsersEmail": "Courriel",
-        "resetUsersLoading": "Chargement des étudiants...",
-        "noResetUsers": "Aucun étudiant avec un certificat actif trouvé",
+        "resetUsersSearchPlaceholder": "Rechercher des apprenants par nom ou par e-mail",
+        "resetUsersStudent": "Apprenant",
+        "resetUsersEmail": "Adresse e-mail",
+        "resetUsersLoading": "Chargement des apprenants...",
+        "noResetUsers": "Aucun apprenant avec un certificat actif trouvé",
         "resetScope": {
           "all": "Tous les utilisateurs",
           "groups": "Groupes",
@@ -2128,16 +2128,16 @@
         "certificatePreviewTitle": "Aperçu du certificat",
         "certificatePreviewDescription": "Ouvrez l'aperçu pour ajuster la langue et la couleur.",
         "certificatePreviewButton": "Aperçu",
-        "certificatePreviewStudentName": "Nom de l'étudiant",
+        "certificatePreviewStudentName": "Nom de l'apprenant",
         "certificatePreviewCourseName": "Nom du cours",
         "enforceLessonSequence": "Appliquer la séquence de cours",
-        "requireSequentialLessons": "Exiger des étudiants qu'ils terminent les leçons afin",
+        "requireSequentialLessons": "Exiger des apprenants qu'ils terminent les leçons afin",
         "enableQuizFeedback": "Commentaires sur le quiz",
-        "enableQuizFeedbackDescription": "Après avoir soumis le quiz, l'étudiant verra quelles réponses étaient correctes, incorrectes ou sans réponse.",
+        "enableQuizFeedbackDescription": "Après avoir soumis le quiz, l'apprenant verra quelles réponses étaient correctes, incorrectes ou sans réponse.",
         "enableVideoCompletionTracking": "Suivi de l'achèvement de la vidéo",
         "enableVideoCompletionTrackingDescription": "Exigez des apprenants qu'ils regardent au moins 90 % de chaque vidéo d'une leçon avant qu'elle ne soit marquée comme terminée.",
         "fallbackLanguageWarningTitle": "Attention : traductions manquantes",
-        "fallbackLanguageWarningDescription": "Certains champs de cette version linguistique sont vides. À ces endroits, les étudiants verront le contenu de la langue par défaut jusqu'à ce que vous ajoutiez des traductions.",
+        "fallbackLanguageWarningDescription": "Certains champs de cette version linguistique sont vides. À ces endroits, les apprenants verront le contenu de la langue par défaut jusqu'à ce que vous ajoutiez des traductions.",
         "baseLanguageTooltip": "Vous ne pouvez pas modifier ou supprimer cette langue. C'est la valeur par défaut et fera toujours partie du cours."
       },
       "validation": {
@@ -2214,7 +2214,7 @@
         },
         "other": {
           "freemium": "Chapitre gratuit",
-          "freemiumToolTip": "Les étudiants peuvent accéder aux chapitres freemium sans s'inscrire au cours.",
+          "freemiumToolTip": "Les apprenants peuvent accéder aux chapitres freemium sans s'inscrire au cours.",
           "public": "Publique",
           "publicToolTip": "Ce chapitre sera accessible à tous.",
           "freemiumDisabledLockedTooltip": "Ce commutateur est désactivé lorsque la génération de cours est en cours."
@@ -2230,7 +2230,7 @@
           "saveLesson": "Enregistrer",
           "addResource": "Ajouter une ressource",
           "removeResource": "Supprimer la ressource",
-          "uploadFiles": "Télécharger des fichiers",
+          "uploadFiles": "Importer des fichiers",
           "addLessonDisabledTooltip": "Pour créer une leçon, vous devez être dans la langue de base."
         },
         "breadcrumbs": {
@@ -2245,8 +2245,8 @@
           "noQuestions": "Aucune question"
         },
         "tooltip": {
-          "switch": "Si cette option est activée, l'étudiant dispose d'un nombre limité de tentatives de quiz.",
-          "passingThreshold": "Le seuil de pourcentage pour réussir le quiz. Si un élève atteint ce score, le quiz sera considéré comme réussi.",
+          "switch": "Si cette option est activée, l'apprenant dispose d'un nombre limité de tentatives de quiz.",
+          "passingThreshold": "Le seuil de pourcentage pour réussir le quiz. Si un apprenant atteint ce score, le quiz sera considéré comme réussi.",
           "attemptsLimit": "Nombre de tentatives de quiz autorisées avant le déclenchement du verrouillage horaire.",
           "quizCooldownInHours": "Durée du verrouillage du quiz une fois que toutes les tentatives ont été utilisées."
         },
@@ -2261,8 +2261,8 @@
           "allOptionsCorrect": "Toutes les options doivent être correctes",
           "titleRequired": "Le titre est requis",
           "descriptionRequired": "Une description est requise",
-          "aiMentorInstructionsRequired": "Les instructions du mentor IA sont requises",
-          "aiMentorInstructionsMaxLength": "Les instructions du mentor IA sont trop longues (maximum 20 000 caractères)",
+          "aiMentorInstructionsRequired": "Les instructions de l'AI Mentor sont requises",
+          "aiMentorInstructionsMaxLength": "Les instructions de l'AI Mentor sont trop longues (20 000 caractères maximum)",
           "customTTSReferenceRequired": "Une référence TTS personnalisée est requise en mode personnalisé",
           "taskDescriptionMaxLength": "La description de la tâche est trop longue ({{ count }} caractères maximum)",
           "passThresholdMin": "Le seuil de réussite doit être d'au moins 1",
@@ -2270,8 +2270,8 @@
           "titleMinLength": "Le titre est trop court (min 2 caractères)",
           "titleMaxLength": "Le titre est trop long (maximum 250 caractères)",
           "maxFileSize": "La taille du fichier doit être inférieure à {{ MAX_MB_PER_FILE }} Mo.",
-          "maxFileNumber_one": "Vous ne pouvez pas télécharger plus d'un fichier",
-          "maxFileNumber_other": "Vous ne pouvez pas télécharger plus de {{ count }} fichiers",
+          "maxFileNumber_one": "Vous ne pouvez importer qu'un seul fichier",
+          "maxFileNumber_other": "Vous ne pouvez pas importer plus de {{ count }} fichiers",
           "maxResources_five": "Vous ne pouvez pas ajouter plus de 5 ressources",
           "sourceUrlRequired": "L'URL source est obligatoire"
         },
@@ -2290,7 +2290,7 @@
           "liveTrainingLessonUpdated": "Leçon de formation en direct mise à jour avec succès",
           "liveTrainingLessonAttached": "Devoir de formation en direct joint avec succès",
           "aiMentorLessonUpdatedSuccessfully": "Leçon AI Mentor mise à jour avec succès",
-          "aiMentorLessonFileAddedSuccessfully": "Fichiers de cours AI Mentor téléchargés avec succès",
+          "aiMentorLessonFileAddedSuccessfully": "Les fichiers de la leçon AI Mentor ont bien été importés",
           "courseGenerationFileAddedToUploadQueue": "Fichier ajouté à la file d'attente de téléchargement",
           "aiMentorLessonFileDeletedSuccessfully": "Fichiers de cours AI Mentor supprimés avec succès",
           "lessonUpdatedSuccessfully": "Leçon mise à jour avec succès",
@@ -2309,7 +2309,7 @@
           "editTitle": "Modifier une leçon de formation en direct",
           "lessonTitle": "Titre de la leçon",
           "lessonTitlePlaceholder": "Titre de la leçon affiché dans le cours",
-          "createNewTab": "Créer nouveau",
+          "createNewTab": "Créer",
           "linkExistingTab": "Lien existant",
           "linkExistingLoading": "Chargement des formations en direct programmées...",
           "linkExistingEmpty": "Aucune formation en direct programmée disponible.",
@@ -2326,23 +2326,23 @@
         "field": {
           "title": "Titre",
           "sourceType": "Type de source",
-          "video": "Télécharger la vidéo",
-          "presentation": "Télécharger la présentation",
-          "description": "Descriptif",
+          "video": "Importer une vidéo",
+          "presentation": "Importer une présentation",
+          "description": "Description",
           "questions": "Questions",
           "options": "Possibilités",
           "image": "Images",
-          "type": "Tapez",
+          "type": "Type",
           "words": "Mots",
           "sentence": "Phrase",
           "sourceUrl": "URL source",
-          "aiMentorInstructions": "Instructions pour le mentor en IA",
-          "aiMentor": "Mentor en IA",
+          "aiMentorInstructions": "Instructions de l'AI Mentor",
+          "aiMentor": "AI Mentor",
           "mentorName": "Nom du mentor",
           "taskDescription": "Description de la tâche",
           "passThreshold": "Seuil de réussite",
           "additionalContext": "Contexte supplémentaire",
-          "aiMentorTypes": "Type de mentor IA",
+          "aiMentorTypes": "Type d'AI Mentor",
           "voiceConfig": "Configuration vocale",
           "voiceMode": "Mode vocal",
           "ttsPreset": "Préréglage TTS",
@@ -2361,7 +2361,7 @@
           "enterURL": "Entrez l'URL…",
           "sourceUrl": "Entrez l'URL source...",
           "allowFullscreen": "Autoriser le plein écran",
-          "aiMentorInstructions": "Décrivez comment le mentor IA doit se comporter pendant la leçon...",
+          "aiMentorInstructions": "Décrivez le comportement attendu de l'AI Mentor pendant la leçon...",
           "taskDescription": "Décrivez la tâche que le participant doit accomplir...",
           "passThreshold": "par exemple, 70 %",
           "customTTSReference": "Entrez l'ID de référence TTS personnalisé...",
@@ -2621,9 +2621,9 @@
           "chooseLessonTypeAriaLabel": "Choisissez {{type}} type de cours",
           "content": "Contenu",
           "quiz": "Quiz",
-          "aiMentor": "Mentor en IA",
+          "aiMentor": "AI Mentor",
           "embed": "Intégrer",
-          "scorm": "SCORME",
+          "scorm": "SCORM",
           "liveTraining": "Formation en direct",
           "correct": "Correct",
           "true": "Vrai",
@@ -2645,29 +2645,29 @@
           "aiMentorLessonDescription": "Conversation interactive avec un mentor virtuel en IA.",
           "scormLessonDescription": "Contenu des leçons du package SCORM.",
           "liveTrainingLessonDescription": "Session en direct programmée connectée à ce cours.",
-          "fillInTheBlanksDescription": "Cette question contient une phrase ; les élèves doivent glisser et déposer le mot correct dans l'espace vide.",
-          "gapFillDescription": "Cette question comportera une phrase avec des mots manquants que les élèves devront saisir.",
+          "fillInTheBlanksDescription": "Cette question contient une phrase ; les apprenants doivent glisser et déposer le mot correct dans l'espace vide.",
+          "gapFillDescription": "Cette question comportera une phrase avec des mots manquants que les apprenants devront saisir.",
           "embedLessonDescription": "Ressource externe (par exemple, formulaire Google, présentation Canva ou diffusion en direct sur YouTube).",
           "fillInTheBlanksSentenceTip": "Écrivez une phrase et ajoutez-y des mots.",
           "fillInTheBlanksWordTip": "Créez et déposez le mot dans la phrase.",
           "leaveContentHeader": "Êtes-vous sûr de vouloir quitter cet éditeur de questions ?",
           "leaveContentBody": "Cela supprimera tous les progrès non enregistrés",
-          "dropOrClick": "Déposez l'image ici ou cliquez pour télécharger",
+          "dropOrClick": "Déposez l'image ici ou cliquez pour l'importer",
           "allowedFormats": "PNG, JPG ou SVG",
           "leaveContentBodyValidate": "Si vous souhaitez enregistrer les modifications, vous devez au préalable valider le formulaire",
-          "aiMentorInstructionsTooltip": "Décrivez comment le mentor IA doit se comporter pendant la leçon. Incluez le contexte, le rôle ou le scénario que l’IA doit suivre. Cela définit comment l’IA guidera la conversation.",
-          "updateAiMentorAvatarDescription": "Téléchargez une nouvelle image pour le mentor IA ou supprimez l'image actuelle.",
-          "updateAiMentorAvatar": "Mettre à jour l'avatar du mentor IA",
-          "aiMentorTypesTooltip": "Choisissez le type de mentor IA : le mentor vous guide vers les réponses, l'enseignant vous instruit directement, le jeu de rôle simule des scénarios réels (par exemple, client et vendeur).",
+          "aiMentorInstructionsTooltip": "Décrivez le comportement attendu de l'AI Mentor pendant la leçon. Précisez le contexte, le rôle ou le scénario à suivre afin de définir la manière dont il guidera la conversation.",
+          "updateAiMentorAvatarDescription": "Importez une nouvelle image pour l'AI Mentor ou supprimez l'image actuelle.",
+          "updateAiMentorAvatar": "Mettre à jour l'avatar de l'AI Mentor",
+          "aiMentorTypesTooltip": "Choisissez le type d'AI Mentor : Mentor guide l'apprenant vers les réponses, Enseignant transmet directement les connaissances et Jeu de rôle simule une situation réelle.",
           "aiMentorTypeTooltip": "Agit comme un personnage dans un scénario, mais pose des questions pendant la scène et aide à tirer des conclusions.\nExemple : « Que feriez-vous maintenant dans le rôle de manager ? »",
           "aiTeacherTypeTooltip": "Explique, enseigne et pose des questions - comme un enseignant.\nExemple : « Dans cette situation, le client soulève une objection de prix. Que devez-vous répondre et pourquoi ?",
           "aiRoleplayTypeTooltip": "Simule un personnage et une situation réalistes – sans briser le personnage.\nExemple : « C'est la deuxième fois que votre service échoue. Qu'allez-vous faire à ce sujet ? »",
           "passThresholdTooltip": "Définissez le pourcentage minimum (1-100 %) requis pour réussir. Laissez vide pour aucun seuil.",
           "voiceConfigCartesiaTooltip": "L'audio vocal utilise Cartesia. Choisissez Homme ou Femme pour utiliser le mappage vocal configuré, ou choisissez Personnalisé et saisissez un identifiant vocal Cartesia.",
           "voiceConfigOpenAiCompatibleTooltip": "L'audio vocal utilise un point de terminaison de synthèse vocale compatible OpenAI. Les hommes et les femmes utilisent les préréglages vocaux OpenAI. Choisissez Personnalisé pour saisir une autre valeur vocale prise en charge par ce point de terminaison.",
-          "aiMentorPersonaTooltip": "Cela définit le personnage de la leçon. Vous pouvez sélectionner un nom et un avatar pour le mentor IA. Le persona s'identifiera par ce nom et l'avatar sélectionné sera affiché pendant les cours.",
+          "aiMentorPersonaTooltip": "Définissez le personnage de la leçon en choisissant un nom et un avatar pour l'AI Mentor. Il utilisera ce nom et cet avatar pendant le cours.",
           "suggestedExamples": "Exemples suggérés",
-          "charactersLeft": "personnages restants",
+          "charactersLeft": "caractères restants",
           "optional": "facultatif",
           "overwriteContent": "Écraser le contenu",
           "overwriteContentDescription": "Cela remplacera votre contenu actuel par l'exemple sélectionné. Êtes-vous sûr de vouloir continuer ?",
@@ -2685,16 +2685,16 @@
           },
           "aiMentorSuggestionExamples": {
             "instructions": {
-              "scenarioSimulation": "Vous jouez le rôle d’un client commercial qui recherche un fournisseur de services de développement de logiciels. Vous avez des exigences particulières : l’application doit être prête dans les 3 mois, vous disposez d’un budget limité et vous attendez une communication claire. L'étudiant joue le rôle du commercial qui souhaite remporter votre marché. Le mentor en IA doit répondre en tant que client, en posant des questions et en exprimant ses préoccupations.",
-              "problemSolving": "Vous jouez le rôle d'un employé qui demande une augmentation de salaire. Vous pensez que vous le méritez en raison de vos récentes contributions. Cependant, l’entreprise ne dispose actuellement d’aucun budget disponible pour des augmentations. L'étudiant incarne le manager qui doit gérer la conversation de manière constructive, en faisant preuve d'empathie et en essayant de trouver une solution alternative.",
-              "creativeTask": "Vous demandez à l'étudiant de proposer une idée de nouveau service que l'entreprise pourrait proposer à ses clients. Votre rôle est d'encourager la créativité, de poser des questions de suivi et d'aider l'étudiant à affiner son concept.",
-              "knowledgeSharing": "Vous jouez le rôle d'un mentor expérimenté qui partage ses connaissances sur les techniques de gestion du temps. La conversation est informelle : vous présentez des concepts, donnez des exemples et encouragez l'élève à réfléchir. De temps en temps, vous posez des questions légères et ouvertes pour vérifier votre compréhension. Le but est de guider, pas de tester."
+              "scenarioSimulation": "Vous jouez le rôle d’un client qui recherche un prestataire de développement logiciel. L’application doit être prête dans les trois mois, votre budget est limité et vous attendez une communication claire. L'apprenant joue le rôle du commercial qui souhaite remporter le contrat. L'AI Mentor répond en tant que client, pose des questions et exprime ses préoccupations.",
+              "problemSolving": "Vous jouez le rôle d'un employé qui demande une augmentation de salaire. Vous pensez que vous le méritez en raison de vos récentes contributions. Cependant, l’entreprise ne dispose actuellement d’aucun budget disponible pour des augmentations. L'apprenant incarne le manager qui doit gérer la conversation de manière constructive, en faisant preuve d'empathie et en essayant de trouver une solution alternative.",
+              "creativeTask": "Vous demandez à l'apprenant de proposer une idée de nouveau service que l'entreprise pourrait proposer à ses clients. Votre rôle est d'encourager la créativité, de poser des questions de suivi et d'aider l'apprenant à affiner son concept.",
+              "knowledgeSharing": "Vous jouez le rôle d'un mentor expérimenté qui partage ses connaissances sur les techniques de gestion du temps. La conversation est informelle : vous présentez des concepts, donnez des exemples et encouragez l'apprenant à réfléchir. De temps en temps, vous posez des questions légères et ouvertes pour vérifier votre compréhension. Le but est de guider, pas de tester."
             },
             "conditions": {
-              "scenarioSimulation": "<ul><li>L'étudiant pose des questions sur le budget du client.</li><li>L'étudiant pose des questions sur le calendrier.</li><li>L'étudiant utilise la vente SPIN ou une autre technique de vente.</li><li>L'étudiant identifie les principaux problèmes du client.</li><li>L'étudiant propose une proposition qui correspond aux contraintes du client.</li></ul><strong>Seuil :</strong> au moins 3 conditions sur 5 doivent être remplies.",
-              "problemSolving": "<ul><li>L'étudiant reconnaît la contribution de l'employé.</li><li>L'étudiant explique honnêtement la situation budgétaire.</li><li>L'étudiant propose une alternative non financière (par exemple, des avantages supplémentaires, une opportunité de développement).</li><li>L'étudiant s'engage à revenir sur le sujet à une date ultérieure.</li><li>L'étudiant maintient un ton respectueux et solidaire.</li></ul><strong>Seuil :</strong> au moins 3 conditions sur 5 doivent être remplies. rencontré.",
-              "creativeTask": "<ul><li>L'étudiant présente une idée originale.</li><li>L'étudiant explique qui est le public cible.</li><li>L'étudiant décrit comment le service pourrait apporter de la valeur aux clients.</li><li>L'étudiant identifie les défis potentiels.</li></ul><em>(Aucun seuil défini - toutes les conditions doivent être remplies.)</em>",
-              "knowledgeSharing": "<ul><li>L'étudiant s'engage activement dans la conversation (pose des questions ou partage ses réflexions).</li><li>L'étudiant peut nommer au moins une technique de gestion du temps mentionnée dans le dialogue.</li><li>L'étudiant exprime comment il pourrait appliquer une technique dans son travail.</li></ul><em>(Aucun seuil défini - toutes les conditions sont recommandées, mais non obligatoires pour la réussite.)</em>"
+              "scenarioSimulation": "<ul><li>L'apprenant pose des questions sur le budget du client.</li><li>L'apprenant pose des questions sur le calendrier.</li><li>L'apprenant utilise la vente SPIN ou une autre technique de vente.</li><li>L'apprenant identifie les principaux problèmes du client.</li><li>L'apprenant propose une proposition qui correspond aux contraintes du client.</li></ul><strong>Seuil :</strong> au moins 3 conditions sur 5 doivent être remplies.",
+              "problemSolving": "<ul><li>L'apprenant reconnaît la contribution de l'employé.</li><li>L'apprenant explique honnêtement la situation budgétaire.</li><li>L'apprenant propose une alternative non financière (par exemple, des avantages supplémentaires, une opportunité de développement).</li><li>L'apprenant s'engage à revenir sur le sujet à une date ultérieure.</li><li>L'apprenant maintient un ton respectueux et solidaire.</li></ul><strong>Seuil :</strong> au moins 3 conditions sur 5 doivent être remplies. rencontré.",
+              "creativeTask": "<ul><li>L'apprenant présente une idée originale.</li><li>L'apprenant explique qui est le public cible.</li><li>L'apprenant décrit comment le service pourrait apporter de la valeur aux clients.</li><li>L'apprenant identifie les défis potentiels.</li></ul><em>(Aucun seuil défini - toutes les conditions doivent être remplies.)</em>",
+              "knowledgeSharing": "<ul><li>L'apprenant s'engage activement dans la conversation (pose des questions ou partage ses réflexions).</li><li>L'apprenant peut nommer au moins une technique de gestion du temps mentionnée dans le dialogue.</li><li>L'apprenant exprime comment il pourrait appliquer une technique dans son travail.</li></ul><em>(Aucun seuil défini - toutes les conditions sont recommandées, mais non obligatoires pour la réussite.)</em>"
             },
             "scoreGuidance": {
               "notMetDescription": "Attribuez 0 point lorsque l'apprenant ne fournit aucune preuve claire et mesurable de ce comportement, l'évite ou agit à l'encontre de celui-ci : {{expectedBehavior}} L'absence d'un exemple exact ne suffit pas ; juger du sens de la réponse entière.",
@@ -2737,7 +2737,7 @@
           },
           "betaTooltip": "Cette fonctionnalité est fournie dans une version de test. Il peut contenir des erreurs ou ne pas fonctionner pleinement comme prévu et est utilisé à vos propres risques.",
           "dragWord": "Faites glisser le mot dans la phrase",
-          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit faire pendant la conversation avec le mentor en IA."
+          "taskDescriptionTooltip": "Décrivez brièvement ce que le participant doit accomplir pendant la conversation avec l'AI Mentor."
         }
       }
     },
@@ -2745,19 +2745,19 @@
       "header": "Statut",
       "subHeader": "Définir l'état du cours",
       "draftHeader": "Brouillon",
-      "draftBody": "Les étudiants ne peuvent pas acheter ou s'inscrire à ce cours. Pour ceux qui sont déjà inscrits, le cours n'apparaîtra pas dans leur liste de cours pour étudiants.",
+      "draftBody": "Les apprenants ne peuvent pas acheter ou s'inscrire à ce cours. Pour ceux qui sont déjà inscrits, le cours n'apparaîtra pas dans leur liste de cours pour apprenants.",
       "publishedHeader": "Publié",
-      "publishedBody": "Les étudiants peuvent acheter, s'inscrire et accéder au contenu du cours. Une fois inscrit, le cours sera affiché sur leur tableau de bord étudiant.",
+      "publishedBody": "Les apprenants peuvent acheter, s'inscrire et accéder au contenu du cours. Une fois inscrit, le cours sera affiché sur leur tableau de bord apprenant.",
       "privateHeader": "Privé",
-      "privateBody": "Les étudiants ne peuvent pas acheter ni s'inscrire à ce cours. Pour les personnes inscrites (par exemple par l'administrateur), le cours apparaîtra dans leur liste de cours pour étudiants et ils pourront le parcourir."
+      "privateBody": "Les apprenants ne peuvent pas acheter ni s'inscrire à ce cours. Pour les personnes inscrites (par exemple par l'administrateur), le cours apparaîtra dans leur liste de cours pour apprenants et ils pourront le parcourir."
     },
     "pricing": {
       "header": "Tarifs",
       "subHeader": "Fixer le prix du cours",
       "freeCourseHeader": "Gratuit",
-      "freeCourseBody": "Les étudiants peuvent s'inscrire et accéder au contenu du cours sans payer.",
+      "freeCourseBody": "Les apprenants peuvent s'inscrire et accéder au contenu du cours sans payer.",
       "paidCourseHeader": "Cours payant",
-      "paidCourseBody": "Les étudiants peuvent acheter et accéder au contenu du cours. Une fois sélectionné, vous pouvez définir la devise et le prix.",
+      "paidCourseBody": "Les apprenants peuvent acheter et accéder au contenu du cours. Une fois sélectionné, vous pouvez définir la devise et le prix.",
       "field": {
         "price": "Prix"
       },
@@ -2782,7 +2782,7 @@
       "table": {
         "name": "Nom",
         "surname": "Nom",
-        "email": "Courriel",
+        "email": "Adresse e-mail",
         "status": "Statut d'inscription",
         "enrollmentDate": "Date d'inscription"
       },
@@ -2794,7 +2794,7 @@
       },
       "confirmation": {
         "title": "Confirmer l'inscription",
-        "description": "Êtes-vous sûr de vouloir inscrire les étudiants sélectionnés à ce cours ?"
+        "description": "Êtes-vous sûr de vouloir inscrire les apprenants sélectionnés à ce cours ?"
       },
       "enrollGroups": "Inscrire des groupes",
       "enrollGroupsModal": {
@@ -2805,17 +2805,17 @@
       "members": "{{count}} membres",
       "unenrollConfirmation": {
         "title": "Confirmation de désinscription",
-        "description": "Êtes-vous sûr de vouloir désinscrire les étudiants sélectionnés de ce cours ?"
+        "description": "Êtes-vous sûr de vouloir désinscrire les apprenants sélectionnés de ce cours ?"
       },
       "toast": {
-        "someStudentsUnenrolled": "Vous ne pouvez pas désinscrire ces étudiants car {{count}} d'entre eux ne sont pas inscrits.",
-        "studentsEnrolledByGroup": "Vous ne pouvez pas désinscrire ces étudiants car {{count}} d'entre eux sont inscrits via un groupe.",
+        "someStudentsUnenrolled": "Vous ne pouvez pas désinscrire ces apprenants car {{count}} d'entre eux ne sont pas inscrits.",
+        "studentsEnrolledByGroup": "Vous ne pouvez pas désinscrire ces apprenants car {{count}} d'entre eux sont inscrits via un groupe.",
         "groupsUnenrolledSuccessfully": "Groupes désinscrits avec succès",
         "alreadyEnrolledByGroup": {
           "title": "Certains utilisateurs sont déjà inscrits par groupe"
         }
       },
-      "successResponse": "Les étudiants ont été affectés au cours."
+      "successResponse": "Les apprenants ont été affectés au cours."
     },
     "breadcrumbs": {
       "courses": "Cours",
@@ -2832,11 +2832,11 @@
       "tabs": {
         "progress": "Progrès",
         "quizResults": "Résultats du quiz",
-        "aiMentorResults": "Résultats du mentorat en IA",
+        "aiMentorResults": "Résultats de l'AI Mentor",
         "learningTime": "Temps d'apprentissage"
       },
       "field": {
-        "studentName": "Étudiant",
+        "studentName": "Apprenant",
         "groupName": "Groupe",
         "completedLessonsCount": "Cours terminés",
         "lastActivity": "Dernière activité",
@@ -2851,7 +2851,7 @@
         "totalTime": "Durée totale"
       },
       "overview": {
-        "enrolledCount": "Nombre d'étudiants inscrits",
+        "enrolledCount": "Nombre d'apprenants inscrits",
         "enrolledCountTooltip": "Nombre d'utilisateurs inscrits à ce cours.",
         "completionRate": "Taux d'achèvement",
         "completionRateTooltip": "Pourcentage d'utilisateurs ayant terminé l'intégralité du cours.",
@@ -2860,14 +2860,14 @@
         "averageScorePerQuiz": "Note moyenne par quiz",
         "averageScorePerQuizSubtitle": "Voir les résultats moyens pour les quiz individuels du cours",
         "averageQuizScore": "Note moyenne au quiz",
-        "completedBy_one": "Terminé par {{count}} élève",
-        "completedBy_other": "Terminé par {{count}} étudiants",
+        "completedBy_one": "Terminé par {{count}} apprenant",
+        "completedBy_other": "Terminé par {{count}} apprenants",
         "courseStatusDistribution": "Répartition du statut des cours",
         "courseStatusDistributionTooltip": "Indique combien d'utilisateurs ont terminé, commencé ou n'ont pas commencé le cours.",
         "averageLearningTime": "Temps d'apprentissage moyen",
         "averageLearningTimeTooltip": "Temps moyen passé par tous les utilisateurs sur ce cours.",
-        "activeStudents": "Étudiants actifs",
-        "activeStudentsTooltip": "Nombre d'étudiants qui se sont engagés dans le cours."
+        "activeStudents": "Apprenants actifs",
+        "activeStudentsTooltip": "Nombre d'apprenants qui se sont engagés dans le cours."
       },
       "empty": {
         "noUsers": "Aucun utilisateur",
@@ -2903,7 +2903,7 @@
       "exportingButton": "Partage..."
     },
     "scormExport": {
-      "title": "Forfait SCORM",
+      "title": "Package SCORM",
       "description": "Exportez ce cours en tant que package SCORM 1.2 autonome pour un autre LMS.",
       "versionBadge": "SCORM1.2",
       "button": "Exporter le package SCORM",
@@ -2928,26 +2928,26 @@
     }
   },
   "registerView": {
-    "header": "S'inscrire",
-    "subHeader": "Entrez vos informations pour créer un compte",
-    "subHeaderSSO": "Inscrivez-vous en utilisant votre compte Google/Microsoft",
+    "header": "Créer un compte",
+    "subHeader": "Renseignez vos informations pour créer votre compte",
+    "subHeaderSSO": "Créez votre compte avec Google ou Microsoft",
     "field": {
       "firstName": "Prénom",
       "lastName": "Nom de famille",
-      "email": "Courriel",
+      "email": "Adresse e-mail",
       "password": "Mot de passe",
       "birthday": "Date de naissance",
-      "birthdayPlaceholder": "Sélectionnez une date",
+      "birthdayPlaceholder": "Choisissez une date",
       "requiredBadge": "Obligatoire",
       "optionalBadge": "Facultatif"
     },
     "other": {
       "alreadyHaveAccount": "Vous avez déjà un compte ?",
-      "orContinueWith": "Ou continuez avec"
+      "orContinueWith": "Ou continuer avec"
     },
     "button": {
       "createAccount": "Créer un compte",
-      "signIn": "Connectez-vous"
+      "signIn": "Se connecter"
     },
     "validation": {
       "firstName": "Le prénom est obligatoire",
@@ -2974,8 +2974,8 @@
     }
   },
   "forgotPasswordView": {
-    "header": "Vous avez oublié votre mot de passe ?",
-    "subHeader": "Entrez l'adresse e-mail associée à votre compte et nous vous enverrons un lien pour réinitialiser votre mot de passe.",
+    "header": "Mot de passe oublié ?",
+    "subHeader": "Saisissez l'adresse e-mail de votre compte. Nous vous enverrons un lien de réinitialisation.",
     "field": {
       "email": "Adresse e-mail"
     },
@@ -2983,34 +2983,34 @@
       "email": "E-mail invalide"
     },
     "button": {
-      "resetPassword": "Réinitialiser le mot de passe",
+      "resetPassword": "Envoyer le lien",
       "backToLogin": "Retour à la connexion"
     },
     "toast": {
-      "resetPassword": "Un lien pour réinitialiser votre mot de passe a été envoyé à votre email."
+      "resetPassword": "Le lien de réinitialisation a été envoyé à votre adresse e-mail."
     }
   },
   "loginView": {
-    "header": "Connexion",
-    "subHeader": "Entrez votre email ci-dessous pour vous connecter à votre compte",
-    "subHeaderSSO": "Connectez-vous en utilisant votre compte Google/Microsoft",
+    "header": "Se connecter",
+    "subHeader": "Saisissez vos identifiants pour accéder à votre compte",
+    "subHeaderSSO": "Connectez-vous avec Google ou Microsoft",
     "validation": {
       "email": "E-mail invalide",
       "password": "Le mot de passe est requis"
     },
     "other": {
-      "forgotPassword": "Vous avez oublié votre mot de passe ?",
-      "useMagicLink": "Envoyez-moi un lien de connexion",
+      "forgotPassword": "Mot de passe oublié ?",
+      "useMagicLink": "Recevoir un lien de connexion",
       "dontHaveAccount": "Vous n'avez pas de compte ?",
-      "rememberMe": "Souviens-toi de moi",
-      "signUp": "Inscrivez-vous",
-      "orContinueWith": "Ou continuez avec"
+      "rememberMe": "Se souvenir de moi",
+      "signUp": "Créer un compte",
+      "orContinueWith": "Ou continuer avec"
     },
     "button": {
-      "login": "Connexion"
+      "login": "Se connecter"
     },
     "field": {
-      "email": "Courriel",
+      "email": "Adresse e-mail",
       "password": "Mot de passe"
     },
     "magicLink": {
@@ -3022,8 +3022,8 @@
     }
   },
   "magicLinkView": {
-    "header": "Obtenez votre lien de connexion",
-    "subHeader": "Entrez votre email et nous vous enverrons un lien de connexion pour vous connecter.",
+    "header": "Recevoir un lien de connexion",
+    "subHeader": "Saisissez votre adresse e-mail pour recevoir un lien de connexion.",
     "validation": {
       "email": "E-mail invalide"
     },
@@ -3031,11 +3031,11 @@
       "email": "Adresse e-mail"
     },
     "button": {
-      "sendLink": "Obtenir le lien de connexion",
+      "sendLink": "Envoyer le lien",
       "backToLogin": "Retour à la connexion"
     },
     "toast": {
-      "sent": "Lien de connexion envoyé à votre email."
+      "sent": "Le lien de connexion a été envoyé à votre adresse e-mail."
     }
   },
   "magicLink": {
@@ -3085,7 +3085,7 @@
         "image": "Images",
         "title": "Nom du cours",
         "category": "Catégorie",
-        "description": "Descriptif",
+        "description": "Description",
         "author": "Auteur"
       }
     },
@@ -3130,7 +3130,7 @@
       "false": "Faux",
       "oneOrTwoWordSentence": "Instruction : Fournissez une brève réponse (1 à 2 phrases).",
       "threeOrFiveWordSentence": "Instruction : Rédigez une réponse détaillée (3 à 5 phrases).",
-      "single": "Célibataire",
+      "single": "Choix unique",
       "multiple": "Plusieurs",
       "fillInTheBlanks": "Remplissez les blancs.",
       "selectQuestion": "sélectionnez la question.",
@@ -3144,7 +3144,7 @@
       "scale_1_5": "Question sur l'échelle (1-5)"
     },
     "aiMentor": {
-      "title": "Séance de mentorat en IA",
+      "title": "Session avec l'AI Mentor",
       "description": "Il s'agit d'une session de mentorat basée sur l'IA. L'IA vous guidera tout au long de la leçon en fonction des directives de l'instructeur."
     },
     "scorm": {
@@ -3259,7 +3259,7 @@
     "lesson": {
       "missingAnswer": "Réponse manquante",
       "yourAnswer": "Votre réponse",
-      "studentsAnswer": "Réponse de l'élève",
+      "studentsAnswer": "Réponse de l'apprenant",
       "singleChoice": "Question à choix unique",
       "multipleChoice": "Question à choix multiples",
       "trueOfFalseChoice": "Question vraie ou fausse",
@@ -3268,7 +3268,7 @@
       "aiMentorLesson": {
         "sendMessage": "Écrivez un message...",
         "check": "Vérifier",
-        "aiMentorName": "Mentor en IA",
+        "aiMentorName": "AI Mentor",
         "retake": "Reprendre",
         "userName": "Utilisateur",
         "typing": "Taper une réponse...",
@@ -3460,12 +3460,12 @@
       "ageLimitUpdatedSuccessfully": "Limite d'âge mise à jour avec succès",
       "newsSettingUpdatedSuccessfully": "Paramètres d'actualités mis à jour avec succès",
       "articlesSettingUpdatedSuccessfully": "Paramètres de la base de connaissances mis à jour avec succès",
-      "learningPathsUpdatedSuccessfully": "Paramètres des chemins de développement mis à jour avec succès"
+      "learningPathsUpdatedSuccessfully": "Paramètres des parcours de développement mis à jour avec succès"
     }
   },
   "certificateBackgroundUpload": {
     "title": "Téléchargement en arrière-plan du certificat",
-    "description": "Téléchargez une image d'arrière-plan pour le certificat.",
+    "description": "Importez une image d'arrière-plan pour le certificat.",
     "button": {
       "removeCertificateBackgroundImage": "Supprimer l'arrière-plan du certificat",
       "preview": "Aperçu"
@@ -3502,13 +3502,13 @@
       "liveTrainingDescription": "Permettez aux formateurs de créer et d’exécuter des sessions de formation en direct",
       "liveTrainingMaxParallelSessions": "Nombre maximum de sessions de formation en direct parallèles",
       "liveTrainingMaxParallelSessionsDescription": "Limitez le nombre de sessions de formation en direct pouvant être actives en même temps.",
-      "liveTrainingTooltip": "Activez cette option uniquement lorsque le locataire doit utiliser des sessions en direct dirigées par un formateur.",
+      "liveTrainingTooltip": "Activez cette option si l'organisation doit utiliser des sessions en direct animées par un formateur.",
       "liveTrainingDisableBlockedTooltip_one": "Actuellement, vous avez {{count}} utilisateur avec le rôle de formateur. Révoquer-le afin de désactiver cette fonctionnalité.",
       "liveTrainingDisableBlockedTooltip_other": "Actuellement, vous avez {{count}} utilisateurs avec le rôle Formateur. Révoquez-les afin de désactiver cette fonctionnalité.",
       "finishedCourseNotification": "Notifications de cours terminés",
       "finishedCourseNotificationDescription": "Recevoir des notifications lorsqu'un utilisateur termine un cours",
-      "studentsWithOverdueCourseNotification": "Étudiants avec notifications de cours en retard",
-      "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les étudiants ont des cours en retard"
+      "studentsWithOverdueCourseNotification": "Apprenants avec notifications de cours en retard",
+      "studentsWithOverdueCourseNotificationDescription": "Recevez des notifications lorsque les apprenants ont des cours en retard"
     },
     "toast": {
       "newUserNotificationsPreferenceChangeSuccess": "Les préférences de notification des nouveaux utilisateurs ont été mises à jour avec succès",
@@ -3592,7 +3592,7 @@
     "description": "Ce paramètre vous permet d'appliquer l'authentification multifacteur (MFA) pour des rôles d'utilisateur spécifiques au sein de votre organisation.",
     "roles": {
       "admin": "Administrateur",
-      "student": "Étudiant",
+      "student": "Apprenant",
       "content_creator": "Créateur de contenu",
       "trainer": "Formateur"
     },
@@ -3653,7 +3653,7 @@
         "markAsRead": "Marquer comme lu"
       },
       "buttons": {
-        "new": "Créer nouveau"
+        "new": "Créer"
       }
     },
     "createPage": {
@@ -3725,10 +3725,10 @@
     }
   },
   "notifications": {
-    "title": "Notifications",
+    "title": "Centre de notifications",
     "tabs": {
-      "all": "Tout",
-      "adminAnnouncements": "Annonces de l'administrateur",
+      "all": "Toutes",
+      "adminAnnouncements": "Annonces de l’administration",
       "system": "Système"
     },
     "actions": {
@@ -3737,9 +3737,9 @@
       "delete": "Supprimer l'annonce",
       "markRead": "Marquer comme lu",
       "markAllRead": "Marquer tout comme lu",
-      "loadMore": "Charger plus",
-      "loadingMore": "Chargement plus...",
-      "goToNotificationCenter": "Aller au centre de notifications"
+      "loadMore": "Afficher plus",
+      "loadingMore": "Chargement...",
+      "goToNotificationCenter": "Ouvrir le centre de notifications"
     },
     "status": {
       "unread": "Non lu",
@@ -3754,7 +3754,7 @@
   },
   "platformLogo": {
     "header": "Logo de la plateforme",
-    "subHeader": "Téléchargez un logo personnalisé pour votre plateforme. Formats pris en charge : PNG, SVG",
+    "subHeader": "Importez un logo personnalisé pour votre plateforme. Formats acceptés : PNG et SVG.",
     "field": {
       "uploadLabel": "Image du logo",
       "imageRequirements": "PNG ou SVG (max. 10 Mo)"
@@ -3770,7 +3770,7 @@
   },
   "platformSimpleLogo": {
     "header": "Logo simple de la plateforme (icône)",
-    "subHeader": "Téléchargez un logo personnalisé qui sera utilisé comme signet et favicon. Formats pris en charge : PNG, SVG",
+    "subHeader": "Importez un logo qui servira de symbole et de favicon. Formats acceptés : PNG et SVG.",
     "field": {
       "uploadLabel": "Image du logo",
       "imageRequirements": "PNG ou SVG (max. 10 Mo)"
@@ -3790,7 +3790,7 @@
   },
   "organizationLoginBackgroundImageUpload": {
     "title": "Téléchargement de l'image d'arrière-plan",
-    "description": "Téléchargez une image d'arrière-plan personnalisée pour la page de connexion de l'organisation.",
+    "description": "Importez une image d'arrière-plan pour la page de connexion de l'organisation.",
     "field": {
       "imageRequirements": "PNG, JPG ou JPEG (max. 20 Mo)"
     },
@@ -3815,7 +3815,7 @@
       "contentTypeMismatch": "Le type de contenu du fichier ne correspond pas au type de contenu fourni",
       "invalidFileType": "Type de fichier invalide.",
       "missingTenantContext": "Contexte de locataire manquant pour le téléchargement de fichiers",
-      "presentationFileTooLarge": "Le fichier de présentation est trop volumineux. Téléchargez une présentation jusqu'à {{size}} {{unit}}."
+      "presentationFileTooLarge": "La présentation est trop volumineuse. Importez un fichier de {{size}} {{unit}} maximum."
     },
     "import": {
       "noFileUploaded": "Aucun fichier téléchargé",
@@ -3823,7 +3823,7 @@
       "fileEmpty": "Le fichier est vide",
       "noValidUsers": "Échec de l'importation – aucun utilisateur valide trouvé.",
       "requiredDataMissing": "Échec de l'importation – données requises manquantes.",
-      "invalidFileType": "Type de fichier invalide. Veuillez télécharger un fichier valide.",
+      "invalidFileType": "Format de fichier non valide. Importez un fichier pris en charge.",
       "userFailReason": {
         "alreadyExists": "L'utilisateur avec cette adresse e-mail existe déjà",
         "duplicateEmail": "E-mail en double dans le fichier d'importation",
@@ -3890,7 +3890,7 @@
       "placeholder": "Entrez le nom"
     },
     "toast": {
-      "invalidFileType": "Type de fichier invalide. Veuillez télécharger un fichier valide.",
+      "invalidFileType": "Format de fichier non valide. Importez un fichier pris en charge.",
       "successfullyUploadedFile": "Fichier téléchargé avec succès",
       "maxResourceCount": "Nombre maximal de ressources atteint ({{count}})",
       "resourceNotFound": "Ressource introuvable",
@@ -3900,7 +3900,7 @@
   },
   "richTextEditor": {
     "placeholder": {
-      "lineHint": "Collez un lien YouTube/Vimeo/Canva, ajoutez Google Docs ou téléchargez un fichier."
+      "lineHint": "Collez un lien YouTube, Vimeo ou Canva, ajoutez un document Google ou importez un fichier."
     },
     "upload": {
       "videoProgress": "Téléchargement de la vidéo..."
@@ -3987,7 +3987,7 @@
       },
       "upload": {
         "uploadFailed": "Échec du téléchargement du fichier",
-        "tooltip": "Télécharger : vous permet de télécharger un fichier"
+        "tooltip": "Importer : ajoute un fichier depuis votre appareil"
       },
       "assetLibrary": {
         "tooltip": "Bibliothèque d'actifs : insérer un fichier précédemment téléchargé"
@@ -3997,14 +3997,14 @@
   "richText": {
     "uploadDisplayModeDialog": {
       "title": "Choisissez comment afficher ce fichier",
-      "description": "Sélectionnez la manière dont « {{name}} » doit apparaître pour les étudiants.",
+      "description": "Sélectionnez la manière dont « {{name}} » doit apparaître pour les apprenants.",
       "options": {
         "preview": {
           "title": "Aperçu",
-          "description": "Afficher le fichier en ligne afin que les étudiants puissent le visualiser directement."
+          "description": "Afficher le fichier en ligne afin que les apprenants puissent le visualiser directement."
         },
         "download": {
-          "title": "Télécharger",
+          "title": "Importer",
           "description": "Insérer comme lien de fichier téléchargeable."
         }
       }
@@ -4052,25 +4052,25 @@
       "processing": "La ressource est en cours de traitement"
     },
     "assetLibrary": {
-      "title": "Bibliothèque d'actifs",
-      "description": "Recherchez, téléchargez, insérez ou supprimez les fichiers utilisés dans le contenu de texte enrichi.",
+      "title": "Bibliothèque de ressources",
+      "description": "Recherchez, importez, insérez ou supprimez les fichiers utilisés dans le contenu enrichi.",
       "searchPlaceholder": "Rechercher par nom de fichier ou par titre...",
-      "upload": "Télécharger l'élément",
+      "upload": "Importer un élément",
       "insert": "Insérer",
       "delete": "Supprimer",
       "loading": "Chargement des éléments...",
       "loadingUsages": "Chargement des utilisations...",
-      "disabledUntilSaved": "Enregistrez ce contenu avant d'insérer ou de supprimer des éléments existants. Le téléchargement d’un nouvel élément est toujours disponible.",
+      "disabledUntilSaved": "Enregistrez ce contenu avant d'insérer ou de supprimer des éléments existants. Vous pouvez toujours importer un nouvel élément.",
       "empty": {
         "title": "Aucun élément trouvé",
-        "description": "Téléchargez un fichier ou ajustez la recherche pour trouver des ressources existantes."
+        "description": "Importez un fichier ou modifiez votre recherche pour trouver une ressource existante."
       },
       "types": {
         "image": "Images",
         "video": "Vidéo",
         "pdf": "PDF",
         "presentation": "Présentation",
-        "document": "Documenter",
+        "document": "Document",
         "other": "Autre"
       },
       "entities": {
@@ -4103,7 +4103,7 @@
     "createNewPassword": "Créer un nouveau mot de passe",
     "createAnnouncement": "Créer une annonce",
     "announcements": "Annonces",
-    "notifications": "Notifications",
+    "notifications": "Centre de notifications",
     "users": "Utilisateurs",
     "userDetails": "Détails de l'utilisateur",
     "createNewUser": "Créer un nouvel utilisateur",
@@ -4128,17 +4128,17 @@
     "tenant": "Détails de l'organisation",
     "createTenant": "Créer une organisation",
     "tenants": "Organisations",
-    "learningPaths": "Voies de développement",
-    "adminLearningPaths": "Voies de développement",
-    "adminLearningPathEditor": "Éditeur de chemin de développement"
+    "learningPaths": "Parcours de développement",
+    "adminLearningPaths": "Parcours de développement",
+    "adminLearningPathEditor": "Éditeur de parcours de développement"
   },
   "learningPathsView": {
-    "title": "Voies de développement",
-    "description": "Parcourez les parcours de développement assignés et continuez à travers leurs séquences de cours ordonnées.",
+    "title": "Parcours de développement",
+    "description": "Consultez les parcours de développement qui vous sont attribués et reprenez votre progression.",
     "searchPlaceholder": "Rechercher des parcours de développement",
-    "summary": "{{count}} chemins de développement sont disponibles.",
-    "detailsTitle": "Chemin de développement",
-    "detailsDescription": "Passez en revue la séquence de cours ordonnée, la progression, les verrous et l'état du certificat.",
+    "summary": "{{count}} parcours de développement sont disponibles.",
+    "detailsTitle": "Parcours de développement",
+    "detailsDescription": "Consultez l'ordre des cours, votre progression, les étapes verrouillées et l'état du certificat.",
     "detailsSummary": "Ce chemin contient {{count}} cours. Progression actuelle : {{progress}}.",
     "emptyDescription": "Aucune description n'a encore été ajoutée.",
     "status": {
@@ -4156,10 +4156,10 @@
       "certificate": "Certificat"
     },
     "card": {
-      "openPath": "Chemin de développement ouvert"
+      "openPath": "Parcours de développement ouvert"
     },
     "empty": {
-      "title": "Aucune voie de développement trouvée",
+      "title": "Aucune parcours de développement trouvée",
       "description": "Ajustez votre recherche ou revenez une fois que les chemins ont été attribués."
     },
     "progress": {
@@ -4189,9 +4189,9 @@
     "enrollment": {
       "manage": "S'inscrire",
       "title": "Inscrire des apprenants",
-      "description": "Gérer les inscriptions des étudiants et des groupes pour ce parcours de développement.",
-      "students": "Étudiants",
-      "selectStudents": "Sélectionnez les étudiants",
+      "description": "Gérer les inscriptions des apprenants et des groupes pour ce parcours de développement.",
+      "students": "Apprenants",
+      "selectStudents": "Sélectionnez les apprenants",
       "groups": "Groupes",
       "selectGroups": "Sélectionnez des groupes",
       "filters": {
@@ -4205,9 +4205,9 @@
       "unenrollGroups": "Désinscrire des groupes",
       "enrolled": "Inscrit",
       "enroll": "S'inscrire",
-      "studentsEnrolled": "Étudiants inscrits",
+      "studentsEnrolled": "Apprenants inscrits",
       "groupsEnrolled": "Groupes inscrits",
-      "studentsUnenrolled": "Étudiants désinscrits",
+      "studentsUnenrolled": "Apprenants désinscrits",
       "groupsUnenrolled": "Groupes non inscrits",
       "enrolledSuccessfully": "Parcours de développement inscrit",
       "enrollGroupsDescription": "Sélectionnez les groupes à inscrire à ce parcours de développement.",
@@ -4216,7 +4216,7 @@
         "selectAll": "Sélectionnez tous les apprenants",
         "select": "Sélectionner un apprenant",
         "name": "Nom",
-        "email": "Courriel",
+        "email": "Adresse e-mail",
         "status": "Statut d'inscription",
         "enrollmentDate": "Date d'inscription"
       },
@@ -4227,16 +4227,16 @@
       },
       "confirmation": {
         "title": "Confirmer l'inscription",
-        "description": "Êtes-vous sûr de vouloir inscrire les étudiants sélectionnés dans ce parcours de développement ? Cette action ne peut pas être annulée."
+        "description": "Êtes-vous sûr de vouloir inscrire les apprenants sélectionnés dans ce parcours de développement ? Cette action ne peut pas être annulée."
       },
       "unenrollConfirmation": {
         "title": "Confirmation de désinscription",
-        "description": "Êtes-vous sûr de vouloir désinscrire les étudiants sélectionnés de ce parcours de développement ? Cette action ne peut pas être annulée."
+        "description": "Êtes-vous sûr de vouloir désinscrire les apprenants sélectionnés de ce parcours de développement ? Cette action ne peut pas être annulée."
       },
       "noGroups": "Aucun groupe disponible"
     },
     "breadcrumbs": {
-      "learningPaths": "Voies de développement",
+      "learningPaths": "Parcours de développement",
       "details": "Détails"
     },
     "buttons": {
@@ -4244,11 +4244,11 @@
     }
   },
   "adminLearningPathsView": {
-    "title": "Voies de développement",
-    "description": "Gérez les métadonnées du chemin, les paramètres de séquence, les cours commandés, les inscriptions, les exportations et les certificats.",
-    "summary": "{{count}} chemins de développement sont disponibles dans cet espace de travail.",
+    "title": "Parcours de développement",
+    "description": "Gérez les informations du parcours, l'ordre des cours, les inscriptions, les exportations et les certificats.",
+    "summary": "{{count}} parcours de développement sont disponibles dans cet espace de travail.",
     "breadcrumbs": {
-      "learningPaths": "Voies de développement",
+      "learningPaths": "Parcours de développement",
       "create": "Créer",
       "edit": "Modifier"
     },
@@ -4260,9 +4260,9 @@
     },
     "editor": {
       "createTitle": "Créer un parcours de développement",
-      "editTitle": "Modifier le chemin de développement",
-      "description": "Configurez les détails du chemin de développement, les paramètres de séquence, les cours et l'état de publication.",
-      "createSummary": "Commencez par les détails du chemin de développement.",
+      "editTitle": "Modifier le parcours de développement",
+      "description": "Configurez les détails du parcours de développement, les paramètres de séquence, les cours et l'état de publication.",
+      "createSummary": "Commencez par les détails du parcours de développement.",
       "editSummary": "Ce parcours de développement comprend actuellement {{coursesCount}} cours.",
       "details": "Détails",
       "courses": "Cours",
@@ -4276,40 +4276,40 @@
       "language": "Langue",
       "createdAt": "Créé",
       "actions": "Actions",
-      "untitled": "Chemin de développement sans titre",
+      "untitled": "Parcours de développement sans titre",
       "emptyDescription": "Pas de description",
       "sequential": "Séquentiel",
       "flexible": "Flexible",
       "certificate": "Certificat",
-      "empty": "Aucune voie de développement n'a encore été créée."
+      "empty": "Aucune parcours de développement n'a encore été créée."
     },
     "form": {
       "language": "Langue",
       "status": "Statut",
       "statusDescription": "Contrôle si ce chemin est visible, en brouillon uniquement ou privé.",
       "title": "Titre",
-      "titlePlaceholder": "Nommer le chemin de développement",
-      "description": "Descriptif",
-      "descriptionPlaceholder": "Décrire ce que les étudiants accompliront dans ce cheminement",
+      "titlePlaceholder": "Nommer le parcours de développement",
+      "description": "Description",
+      "descriptionPlaceholder": "Décrire ce que les apprenants accompliront dans ce cheminement",
       "imageHint": "PNG, JPG ou JPEG (max. 20 Mo, 1 200 x 1 200 ou supérieur recommandé)",
       "sequenceEnabled": "Apprentissage séquentiel",
-      "sequenceEnabledDescription": "Les étudiants doivent suivre les cours dans l'ordre d'affichage.",
+      "sequenceEnabledDescription": "Les apprenants doivent suivre les cours dans l'ordre d'affichage.",
       "includesCertificate": "Certificat",
-      "includesCertificateDescription": "Les étudiants peuvent recevoir un certificat après avoir terminé le parcours.",
+      "includesCertificateDescription": "Les apprenants peuvent recevoir un certificat après avoir terminé le parcours.",
       "certificateSignature": "Signature du certificat",
-      "certificateSignatureDescription": "Téléchargez la signature affichée sur les certificats pour ce chemin de développement.",
+      "certificateSignatureDescription": "Importez la signature à afficher sur les certificats de ce parcours de développement.",
       "certificateFontColor": "Couleur de la police du certificat",
       "certificateFontColorDescription": "Utilisez le sélecteur de couleurs d’aperçu pour mettre à jour le texte du certificat et la couleur de la ligne.",
       "certificatePreview": "Aperçu du certificat",
       "certificatePreviewDescription": "Prévisualisez le certificat et ajustez sa couleur de police."
     },
     "detailsContent": {
-      "title": "Détails du chemin de développement",
-      "description": "Définissez le nom localisé et la description destinée aux étudiants."
+      "title": "Détails du parcours de développement",
+      "description": "Définissez le nom localisé et la description destinée aux apprenants."
     },
     "detailsImage": {
       "title": "Image de couverture",
-      "description": "Utilisez un visuel qui aide les administrateurs et les étudiants à reconnaître ce chemin."
+      "description": "Utilisez un visuel qui aide les administrateurs et les apprenants à reconnaître ce chemin."
     },
     "detailsSettings": {
       "title": "Publication et comportement",
@@ -4319,7 +4319,7 @@
       "baseLanguage": "Langue de base"
     },
     "languageSelector": {
-      "tooltip": "Le langage de base de ce chemin de développement est {{baseLanguage}}."
+      "tooltip": "La langue de base de ce parcours de développement est {{baseLanguage}}."
     },
     "courses": {
       "select": "Sélectionnez un cours",
@@ -4331,13 +4331,13 @@
       "chapter_one": "{{count}} chapitre",
       "chapter_other": "{{count}} chapitres",
       "empty": "Aucun cours n'a encore été ajouté à ce parcours de développement.",
-      "saveFirst": "Enregistrez le chemin de développement avant d'ajouter des cours.",
+      "saveFirst": "Enregistrez le parcours de développement avant d'ajouter des cours.",
       "unknownCourse": "Détails du cours indisponibles"
     },
     "sharedLearningPath": {
       "badgeExported": "Partagé",
       "exportButton": "Partager",
-      "exportSuccess": "Le chemin de développement a été exporté",
+      "exportSuccess": "Le parcours de développement a été exporté",
       "exportsDescription": "Partagez ce parcours de développement avec des organisations sélectionnées.",
       "exportsTitle": "Partage",
       "exportingButton": "Partage...",
@@ -4345,14 +4345,14 @@
       "selectedCount": "Sélectionné :"
     },
     "deleteModal": {
-      "title": "Supprimer le chemin de développement",
-      "description": "Cela supprimera le chemin de développement et supprimera son accès au cours basé sur le chemin."
+      "title": "Supprimer le parcours de développement",
+      "description": "Le parcours de développement sera supprimé ainsi que les accès aux cours accordés par ce parcours."
     },
     "toast": {
       "created": "Parcours de développement créé avec succès",
-      "updated": "Chemin de développement mis à jour avec succès",
-      "deleted": "Chemin de développement supprimé avec succès",
-      "languageCreated": "Langage du chemin de développement créé avec succès",
+      "updated": "Parcours de développement mis à jour avec succès",
+      "deleted": "Parcours de développement supprimé avec succès",
+      "languageCreated": "La traduction du parcours de développement a bien été créée",
       "coursesAdded": "Cours ajoutés au parcours de développement avec succès",
       "courseRemoved": "Cours supprimé du parcours de développement avec succès",
       "coursesReordered": "Les cours du parcours de développement ont été réorganisés avec succès"
@@ -4463,12 +4463,12 @@
     }
   },
   "learningPathsPreferences": {
-    "subHeader": "Configurer les paramètres des chemins de développement",
-    "header": "Paramètres des chemins de développement",
+    "subHeader": "Configurer les paramètres des parcours de développement",
+    "header": "Paramètres des parcours de développement",
     "settings": {
       "learningPathsEnabled": {
-        "label": "Activer les chemins de développement",
-        "description": "Activez les chemins de développement. Lorsqu'ils sont désactivés, les chemins de développement sont masqués et bloqués pour tous les utilisateurs."
+        "label": "Activer les parcours de développement",
+        "description": "Activez les parcours de développement. Lorsqu'ils sont désactivés, les parcours de développement sont masqués et bloqués pour tous les utilisateurs."
       }
     }
   },
@@ -4736,7 +4736,7 @@
     "active": "Actif",
     "inactive": "Non généré",
     "prefix": "Préfixe de clé",
-    "createdAt": "Créé à",
+    "createdAt": "Date de création",
     "lastUsedAt": "Dernière utilisation à",
     "loading": "Chargement des métadonnées clés...",
     "generate": "Générer une clé",
@@ -4790,19 +4790,19 @@
   "learningPathExport": {
     "error": {
       "noTargetTenants": "Sélectionnez au moins un locataire cible",
-      "exportLinkMissing": "Lien d'exportation du chemin de développement introuvable",
+      "exportLinkMissing": "Lien d'exportation du parcours de développement introuvable",
       "noCourses": "Le parcours de développement doit inclure au moins un cours avant l'export",
       "courseExportFailed": "Échec de l'exportation de l'un des cours du parcours de développement",
       "targetAuthorMissing": "Auteur du locataire cible introuvable",
-      "jobNotFound": "Tâche d'exportation du chemin de développement introuvable",
-      "invalidJobData": "Données de tâche d'exportation de chemin de développement non valides",
-      "invalidExportId": "ID d'exportation du chemin de développement non valide",
-      "invalidExportLink": "Lien d'exportation du chemin de développement non valide"
+      "jobNotFound": "Tâche d'exportation du parcours de développement introuvable",
+      "invalidJobData": "Données de tâche d'exportation de parcours de développement non valides",
+      "invalidExportId": "ID d'exportation du parcours de développement non valide",
+      "invalidExportLink": "Lien d'exportation du parcours de développement non valide"
     }
   },
   "learningPathCertificate": {
     "error": {
-      "disabled": "Les certificats du chemin de développement sont désactivés"
+      "disabled": "Les certificats du parcours de développement sont désactivés"
     }
   },
   "activityLogsView": {
@@ -4894,12 +4894,12 @@
       "announcement": "Annonce",
       "live_training": "Formation en direct",
       "learning_path": "Parcours d'apprentissage",
-      "scorm": "SCORME",
+      "scorm": "SCORM",
       "global_settings": "Paramètres"
     },
     "table": {
       "datetime": "Dateheure",
-      "email": "Courriel",
+      "email": "Adresse e-mail",
       "action": "Action",
       "resource": "Ressource",
       "details": "Détails",
