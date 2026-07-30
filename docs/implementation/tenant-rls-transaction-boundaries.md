@@ -485,6 +485,91 @@ Static checks supplement runtime and PostgreSQL enforcement; they are not the se
 - **Test factories:** establish tenant context or use an explicit admin test helper.
 - **Request cancellation:** transaction callback must reject so the driver rolls back and releases the connection.
 
+## Risk Matrix: What Can Break And The Fix
+
+The implementation must treat these as concrete failure modes, not merely code-review guidance.
+
+### Security and tenant-isolation risks
+
+| Risk | Failure mode | Required fix | Proof |
+| --- | --- | --- | --- |
+| Raw connection fallback | A query executes through `DB_APP` without `app.tenant_id`. | Make `DB` fail closed; keep `DB_APP` private to the runner; add a source audit for direct `DB_APP` injection. | Missing-context test fails before a connection is checked out. |
+| RLS policy misconfiguration | A table is missing RLS, uses the wrong tenant column, or is owned by a role that bypasses RLS. | Inventory every tenant table; verify policy, owner, grants, `FORCE ROW LEVEL SECURITY`, and no `BYPASSRLS` for the app role. | Cross-tenant read/write/delete e2e tests plus a database-role inspection check. |
+| Tenant context spoofing | A request body, query parameter, job payload, or stale user object selects another tenant. | Resolve tenant only from the trusted host/auth/session/job boundary; validate the job tenant against its signed/claimed source; never trust arbitrary payload tenant IDs. | Resolver tests for host, auth, support mode, and conflicting IDs. |
+| Context bleed between async work | A callback created for Tenant A runs after the request or under Tenant B. | Never reuse a transaction-bearing ALS context for detached work; require all fire-and-forget work to enqueue a job or explicitly call `runWithTenantContext`; reject tenant changes inside active transactions. | Concurrent tenant stress test with delayed promises and detached-task audit. |
+| Stale transaction in a detached callback | A callback retains an ALS `trx` after its transaction committed and later attempts a query. | Await all work in a transaction; prohibit `void`/fire-and-forget inside transaction callbacks; expose a context-only handoff for asynchronous work. | Unit test that a detached callback cannot use a completed transaction. |
+| Admin/tenant boundary confusion | A mixed repository executes a privileged `DB_ADMIN` query from a tenant-facing method. | Split mixed repositories or mark admin methods explicitly; keep `DB_ADMIN` on an allowlist and never expose it through `DB`. | Static allowlist test and support-mode/cross-tenant e2e tests. |
+| Bypass route regression | A health/webhook/public route has no tenant context but reaches a tenant repository. | Keep bypasses explicit; route public operations to dedicated admin/public providers; fail closed for tenant `DB`. | Bypassed-route integration tests. |
+| Raw SQL or privileged database functions | A repository uses raw SQL or a `SECURITY DEFINER` function that bypasses expected policies. | Audit raw SQL and database functions; restrict `SECURITY DEFINER`, set safe `search_path`, and document approved exceptions. | SQL/static audit and least-privilege database review. |
+
+### Transaction-lifetime and correctness risks
+
+| Risk | Failure mode | Required fix | Proof |
+| --- | --- | --- | --- |
+| Lazy Drizzle builder escapes | Repository returns an unexecuted builder; the wrapper commits before the query runs. | Await/assimilate thenables in the repository wrapper; forbid returning builders, cursors, streams, or async iterators from ordinary methods. | Unit test with a lazy Drizzle thenable and a compile/source audit for streaming methods. |
+| External I/O remains inside a transaction | Luma/S3/email/AI/calendar waits keep a connection checked out. | Split DB and external phases; use outbox/BullMQ for durable post-commit side effects. | Delayed-provider test plus `pg_stat_activity` assertion. |
+| Lost atomicity after splitting | Database commits but the external operation fails, or the reverse. | Persist an outbox event/status in the DB transaction; retry external work idempotently; expose failed/dead-letter state for repair. | Outbox retry, duplicate-delivery, and failure-recovery tests. |
+| Too-small transaction boundary | Two reads that must share a snapshot use separate automatic transactions. | Require `@Transactional()` or `tenantRunner.transaction()` for consistency-sensitive operations; document that ordinary repository calls are independent units. | Snapshot/rollback test for a representative multi-query use case. |
+| Too-large transaction boundary | A service marks itself transactional and performs network/file work inside it. | Review `@Transactional()` methods for external calls; static rule for known provider calls in transaction callbacks; keep transaction decorators narrow. | Architecture lint and transaction-duration metric. |
+| Nested transaction surprise | Calling `db.transaction()` through the proxy creates an accidental savepoint or consumes another connection. | Use `REQUIRED` propagation; expose `transaction()` only through the runner; audit and replace direct `db.transaction()` calls. | Nested transaction test verifies one physical connection and expected rollback behavior. |
+| Parallel work on one transaction | `Promise.all` issues concurrent operations against one reserved connection or creates lock-order deadlocks. | Do not promise parallel DB execution inside one transaction; serialize dependent writes; use separate transactions only when independence is explicit. | Concurrency/lock-order test and deadlock telemetry. |
+| Deadlocks and serialization failures | Shorter transactions change lock ordering or expose existing concurrent writes. | Keep lock ordering stable; do not silently retry non-idempotent callbacks; add bounded, opt-in retry only for classified transient errors. | Database fault-injection tests and retry metrics. |
+| Transaction timeout/cancellation | Request abort or database timeout leaves a callback awaiting while a connection remains checked out. | Propagate cancellation, ensure the driver callback rejects, configure statement/transaction timeouts, and always observe rollback/release. | Abort test and connection-count assertion after timeout. |
+| Pool overhead from one transaction per repository call | High read traffic creates excessive BEGIN/COMMIT overhead or checkout contention. | Keep multi-query reads in an explicit transaction where justified; measure checkout wait and transaction rate; batch repository operations rather than widening every request. | Load test comparing pool wait, throughput, and transaction count. |
+| Retry repeats side effects | A transaction retry repeats emails, events, uploads, or non-idempotent writes. | Never include external side effects in retryable callbacks; use idempotency keys and outbox deduplication. | Duplicate-delivery and retry tests. |
+
+### Application and framework risks
+
+| Risk | Failure mode | Required fix | Proof |
+| --- | --- | --- | --- |
+| Direct service DB usage remains | After request transactions are removed, an unmigrated service gets `MissingTenantTransactionError` or bypasses the wrapper. | Maintain an inventory of all `DB` injections and `db.transaction` calls; migrate by domain; make the cutover gate fail CI if new direct usage appears. | Static audit reaches zero ordinary-service injections before cutover. |
+| Proxy self-invocation bypasses decorators | A service calls its own decorated method through `this`, skipping the provider proxy. | Use `tenantRunner.transaction()` in self-call paths or split the transaction entry point into another provider; test both paths. | Self-invocation unit test. |
+| Provider wrapping/order failure | Nest injects the raw repository or calls it before the wrapper is installed. | Use an explicit provider-factory helper that preserves the class token; avoid lifecycle-dependent discovery; test the compiled Nest module graph. | Module integration test asserts injected instance is wrapped. |
+| Method metadata/`this` loss | Decorators alter method binding, error identity, or return types. | Preserve `this`, arguments, thrown errors, and promise/thenable behavior; avoid wrapping constructors/getters. | Decorator unit tests and API regression tests. |
+| Compatibility parameters bypass context | A legacy `trx`/`dbInstance` argument points to another tenant or raw connection. | During migration, validate any supplied transaction equals the ALS transaction; remove the parameters before final cutover. | Mismatch test rejects foreign transaction instances. |
+| ALS propagation differs across RxJS/jobs/timers | Context is lost or inherited unexpectedly at framework boundaries. | Add explicit context adapters at HTTP, worker, gateway, cron, and handler entry points; avoid relying on undocumented propagation across detached timers. | One context-propagation test per entry-point family. |
+| Error wrapping hides tenant failures | A generic error converts a missing-context or RLS error into a 500 without an actionable signal. | Preserve typed database-boundary errors, map them to safe client responses, and log correlation/tenant metadata without secrets. | Error contract and log-redaction tests. |
+| Tests use unrealistic mocks | Unit mocks allow raw DB access and fail to detect missing RLS context. | Add integration tests against PostgreSQL/RLS, and make mock `DB` fail closed by default. | CI tenant-isolation suite. |
+
+### Operations and compliance risks
+
+| Risk | Failure mode | Required fix | Proof |
+| --- | --- | --- | --- |
+| No forensic signal | Pool exhaustion or RLS rejection cannot be correlated to a request/job. | Emit request/job correlation ID, tenant ID hash or safe identifier, transaction duration, pool wait, and failure class; never log secrets or full SQL parameters. | Dashboard/alert review and redaction tests. |
+| Timeout masks a code defect | `idle_in_transaction_session_timeout` kills work but leaves partial business behavior or noisy errors. | Keep the timeout as defense in depth; alert on terminations; fix transaction boundaries and provide retry/repair semantics where safe. | Preprod reproduction plus timeout-termination alert. |
+| Incomplete rollback/audit semantics | A failed operation leaves an outbox row, status, or audit record inconsistent. | Define transaction ownership for outbox/audit writes; publish durable events inside the same transaction and process them after commit. | Rollback and outbox atomicity tests. |
+| Migration cutover too early | Some route, worker, or test path still depends on a request-wide transaction. | Use a staged feature flag/compatibility phase, inventory gate, and canary load test before switching the interceptor. | CI gate and preprod canary checklist. |
+| Compliance evidence is undocumented | The system may be isolated but reviewers cannot prove it. | Store the final RLS policy/role audit, threat-model decisions, test results, timeout configuration, and rollout/rollback record with the implementation. | Release evidence checklist. |
+
+## Required Mitigations Before Cutover
+
+The request interceptor must not switch to context-only mode until all of these are true:
+
+- [ ] No ordinary service injects tenant `DB` directly.
+- [ ] Every tenant repository is registered through the automatic wrapper.
+- [ ] No ordinary repository method requires a caller-provided `trx` or `dbInstance`.
+- [ ] Every non-HTTP tenant entry point establishes tenant context.
+- [ ] All transaction callbacks containing external I/O are split or explicitly approved.
+- [ ] `DB` has no raw `DB_APP` fallback.
+- [ ] PostgreSQL RLS, ownership, grants, and `BYPASSRLS` checks pass.
+- [ ] Missing-context, cross-tenant, cancellation, nested-transaction, and concurrency tests pass.
+- [ ] Preprod idle-transaction reproduction shows no accumulated sessions.
+- [ ] Rollback procedure is tested: restore request transaction behavior without reintroducing unbounded external waits, or disable the migrated route slice safely.
+
+## Fix Selection Rules
+
+When a failure is found during migration, choose the smallest fix that preserves the boundary:
+
+1. Missing tenant context: fix the entry-point context setup; do not use `DB_ADMIN` or restore a global request transaction.
+2. One method needs atomic multi-query behavior: add `@Transactional()` or a narrow `tenantRunner.transaction()` boundary.
+3. A method performs DB, network, and DB: split it into phases and use an outbox/queue for durable side effects.
+4. A repository needs a caller-specific transaction: first check whether it can reuse ALS; retain a validated compatibility parameter only until the call graph is migrated.
+5. A read needs a shared snapshot: make the service operation explicitly transactional rather than widening all requests.
+6. A stream/cursor needs a long-lived connection: use a dedicated streaming API with explicit close/cancellation semantics; do not pass it through the ordinary repository wrapper.
+7. A privileged query is needed: create or use an explicit admin repository and audit its authorization; never weaken tenant RLS.
+8. A transient database failure occurs: classify and retry only idempotent database work; never retry external side effects inside the transaction.
+9. Pool pressure increases: inspect transaction duration and checkout wait, batch logical work, and fix accidental transaction nesting before increasing pool size.
+
 ## Tests And Validation
 
 ### Unit tests
