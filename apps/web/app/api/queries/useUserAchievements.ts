@@ -12,7 +12,7 @@ export const userAchievementsQueryOptions = (userId?: string, language?: Support
     queryKey: [...USER_ACHIEVEMENTS_QUERY_KEY, { userId, language }],
     queryFn: async () => {
       const response = await ApiClient.api.achievementsControllerGetUserAchievements({
-        userId,
+        userId: userId ?? "",
         language,
       });
       return response.data;
