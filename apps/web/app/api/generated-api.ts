@@ -8114,6 +8114,8 @@ export interface GetDraftNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8193,6 +8195,8 @@ export interface GetNewsResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8251,6 +8255,8 @@ export interface GetNewsListResponse {
     availableLocales: ("en" | "pl" | "de" | "lt" | "cs" | "es")[];
     publishedAt: string | null;
     authorName: string;
+    /** @format uuid */
+    authorId: string;
     resources?: {
       images: {
         /** @format uuid */
@@ -8312,21 +8318,6 @@ export interface CreateNewsResponse {
     id: string;
     title: string;
   };
-}
-
-export interface UpdateNewsBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published";
-  isPublic?: boolean | "true" | "false";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
 }
 
 export interface UpdateNewsResponse {
@@ -8395,9 +8386,11 @@ export interface GetArticleSectionResponse {
 }
 
 export interface UpdateArticleSectionBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
+  translations: {
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    title?: string;
+  }[];
 }
 
 export interface UpdateArticleSectionResponse {
@@ -8625,21 +8618,6 @@ export interface CreateArticleResponse {
     id: string;
     title: string;
   };
-}
-
-export interface UpdateArticleBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published" | "";
-  isPublic?: boolean | "true" | "false" | "";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
 }
 
 export interface UpdateArticleResponse {
@@ -16139,7 +16117,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name NewsControllerUpdateNews
      * @request PATCH:/api/news/{id}
      */
-    newsControllerUpdateNews: (id: string, data: UpdateNewsBody, params: RequestParams = {}) =>
+    newsControllerUpdateNews: (
+      id: string,
+      data: {
+        translations: string;
+        status?: "draft" | "published";
+        isPublic?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<UpdateNewsResponse, any>({
         path: `/api/news/${id}`,
         method: "PATCH",
@@ -16418,7 +16404,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -16461,7 +16447,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -16481,7 +16467,10 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerUpdateArticle: (
       id: string,
-      data: UpdateArticleBody,
+      data: {
+        translations: string;
+        isPublic?: boolean;
+      },
       params: RequestParams = {},
     ) =>
       this.request<UpdateArticleResponse, any>({

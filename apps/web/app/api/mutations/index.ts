@@ -28,7 +28,7 @@ export { useQuizRetakeStatus } from "./useQuizRetakeStatus";
 export { useSetupMFA } from "./useSetupMFA";
 export { useVerifyMFA } from "./useVerifyMFA";
 export { useCreateNews } from "./useCreateNews";
-export { useUpdateNews } from "./useUpdateNews";
+export { useUpdateNews, type UpdateNewsPayload } from "./useUpdateNews";
 export { useDeleteNews } from "./useDeleteNews";
 export { useAddNewsLanguage } from "./useAddNewsLanguage";
 export { useDeleteNewsLanguage } from "./useDeleteNewsLanguage";

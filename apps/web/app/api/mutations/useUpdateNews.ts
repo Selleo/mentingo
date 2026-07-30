@@ -5,12 +5,16 @@ import { NEWS_QUERY_KEY } from "../queries/useNews";
 import { NEWS_LIST_QUERY_KEY } from "../queries/useNewsList";
 import { RESOURCE_LIBRARY_ASSETS_QUERY_KEY } from "../queries/useResourceLibraryAssets";
 
-import type { UpdateNewsBody } from "../generated-api";
 import type { SupportedLanguages } from "@repo/shared";
+
+type GeneratedUpdateNewsPayload = Parameters<typeof ApiClient.api.newsControllerUpdateNews>[1];
+
+export type UpdateNewsPayload = GeneratedUpdateNewsPayload &
+  Partial<Record<`cover.${SupportedLanguages}`, File>>;
 
 type UpdateNewsOptions = {
   id: string;
-  data: UpdateNewsBody;
+  data: UpdateNewsPayload;
   language?: SupportedLanguages;
 };
 

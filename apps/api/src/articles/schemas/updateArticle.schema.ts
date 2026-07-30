@@ -4,28 +4,34 @@ import { supportedLanguagesSchema } from "src/courses/schemas/course.schema";
 
 import type { Static } from "@sinclair/typebox";
 
-export const updateArticleSchema = Type.Object({
+export const updateArticleTranslationSchema = Type.Object({
   language: supportedLanguagesSchema,
   title: Type.Optional(Type.String()),
   summary: Type.Optional(Type.String()),
   content: Type.Optional(Type.String()),
-  status: Type.Optional(
-    Type.Union([Type.Literal("draft"), Type.Literal("published"), Type.Literal("")]),
-  ),
-  isPublic: Type.Optional(
-    Type.Union([Type.Boolean(), Type.Literal("true"), Type.Literal("false"), Type.Literal("")]),
-  ),
-  cover: Type.Optional(
-    Type.String({
-      format: "binary",
-      description: "Cover image file",
-    }),
-  ),
+});
+
+const updateArticleFields = {
+  isPublic: Type.Optional(Type.Boolean()),
+};
+
+export const updateArticleSchema = Type.Object({
+  translations: Type.Array(updateArticleTranslationSchema),
+  ...updateArticleFields,
+});
+
+export const updateArticleMultipartSchema = Type.Object({
+  translations: Type.String(),
+  ...updateArticleFields,
 });
 
 export const updateArticleSectionSchema = Type.Object({
-  language: supportedLanguagesSchema,
-  title: Type.Optional(Type.String()),
+  translations: Type.Array(
+    Type.Object({
+      language: supportedLanguagesSchema,
+      title: Type.Optional(Type.String()),
+    }),
+  ),
 });
 
 export const updateArticleParamsSchema = Type.Object({
@@ -34,4 +40,5 @@ export const updateArticleParamsSchema = Type.Object({
 
 export type UpdateArticleSection = Static<typeof updateArticleSectionSchema>;
 export type UpdateArticle = Static<typeof updateArticleSchema>;
+export type UpdateArticleTranslation = Static<typeof updateArticleTranslationSchema>;
 export type UpdateArticleParams = Static<typeof updateArticleParamsSchema>;

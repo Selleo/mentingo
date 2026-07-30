@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useDeleteArticle } from "~/api/mutations/useDeleteArticle";
 import { useCurrentUser } from "~/api/queries";
 import { useArticle } from "~/api/queries/useArticle";
+import { hasPermission } from "~/common/permissions/permission.utils";
 import { Icon } from "~/components/Icon";
 import { PageWrapper } from "~/components/PageWrapper";
 import Viewer from "~/components/RichText/Viever";
@@ -32,7 +33,7 @@ export default function ArticleDetailsPage() {
 
   const { data: currentUser } = useCurrentUser();
 
-  const { hasAccess: canManageArticles } = usePermissions({
+  const { permissions } = usePermissions({
     required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
   });
   const { data: article, isLoading: isLoadingArticle } = useArticle(articleId ?? "", language);
@@ -64,7 +65,10 @@ export default function ArticleDetailsPage() {
     );
   }
 
-  const canEdit = canManageArticles || currentUser?.id === article?.authorId;
+  const canManageArticle =
+    hasPermission(permissions, PERMISSIONS.ARTICLE_MANAGE) ||
+    (hasPermission(permissions, PERMISSIONS.ARTICLE_MANAGE_OWN) &&
+      currentUser?.id === article.authorId);
 
   const headerImageUrl = article.resources?.coverImage?.fileUrl;
   const publishedDate = article.publishedAt ? new Date(article.publishedAt) : null;
@@ -82,7 +86,7 @@ export default function ArticleDetailsPage() {
           <TOC contentHtml={article.content} onContentWithIds={handleContentWithIds} />
         }
       >
-        {canEdit && (
+        {canManageArticle && (
           <div className="flex justify-end gap-2 max-w-6xl mx-auto w-full">
             <Button
               data-testid={ARTICLE_DETAILS_PAGE_HANDLES.EDIT_BUTTON}

@@ -23,7 +23,6 @@ test("visitor cannot see private article when public articles access is enabled"
     const { article, section } = await articleFactory.createWithSection({
       title: `article-private-${Date.now()}`,
       summary: `article-private-summary-${Date.now()}`,
-      status: "published",
       isPublic: false,
     });
 

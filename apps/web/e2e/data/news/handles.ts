@@ -15,6 +15,8 @@ export const NEWS_DETAILS_PAGE_HANDLES = {
   SUMMARY: "news-details-summary",
   EDIT_BUTTON: "news-details-edit-button",
   DELETE_BUTTON: "news-details-delete-button",
+  DELETE_DIALOG: "news-details-delete-dialog",
+  DELETE_CONFIRM_BUTTON: "news-details-delete-confirm-button",
   PREVIOUS_BUTTON: "news-details-previous-button",
   NEXT_BUTTON: "news-details-next-button",
 } as const;

@@ -39,7 +39,6 @@ const ensureArticleVisibilityForAllLocales = async ({
       language,
       title: `${titlePrefix}-${language}`,
       summary: `${summaryPrefix}-${language}`,
-      status: "published",
       isPublic: true,
     });
   }
@@ -56,7 +55,6 @@ for (const { role, title } of ROLES) {
       const { article, section } = await articleFactory.createWithSection({
         title: `article-role-${title.replace(/\s+/g, "-")}-${Date.now()}`,
         summary: `article-role-summary-${Date.now()}`,
-        status: "published",
         isPublic: true,
       });
 
@@ -82,6 +80,9 @@ for (const { role, title } of ROLES) {
           articleTitlePrefix,
         );
         await expect(page.getByTestId(ARTICLES_TOC_HANDLES.article(articleId))).toBeVisible();
+
+        await expect(page.getByTestId(ARTICLE_DETAILS_PAGE_HANDLES.EDIT_BUTTON)).toHaveCount(0);
+        await expect(page.getByTestId(ARTICLE_DETAILS_PAGE_HANDLES.DELETE_BUTTON)).toHaveCount(0);
       });
     } finally {
       await withReadonlyPage(USER_ROLE.admin, async () => {

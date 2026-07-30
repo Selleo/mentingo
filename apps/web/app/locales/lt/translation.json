@@ -803,6 +803,10 @@
     "button": {
       "delete": "Ištrinti"
     },
+    "deleteModal": {
+      "title": "Ištrinti naujieną",
+      "description": "Ar tikrai norite ištrinti šią naujieną? Šio veiksmo anuliuoti negalima."
+    },
     "validation": {
       "titleRequired": "Pavadinimas būtinas",
       "introRequired": "Būtinas įvadas",
