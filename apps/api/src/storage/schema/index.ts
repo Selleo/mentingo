@@ -30,7 +30,6 @@ import {
   MICROSOFT_CALENDAR_CONNECTION_STATUSES,
   MICROSOFT_CALENDAR_OUTBOUND_STATUSES,
   ANNOUNCEMENT_AUDIENCES,
-  EMAIL_TEMPLATE_STATUSES,
 } from "@repo/shared";
 import { sql } from "drizzle-orm";
 import {

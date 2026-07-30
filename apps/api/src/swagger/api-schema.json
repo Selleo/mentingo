@@ -12621,23 +12621,6 @@
         }
       }
     },
-    "/api/email-notification-templates/next-auto-name": {
-      "get": {
-        "operationId": "EmailNotificationTemplatesController_getNextAutoName",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetNextAutoNameResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/email-notification-templates/bulk": {
       "delete": {
         "operationId": "EmailNotificationTemplatesController_deleteManyTemplates",
@@ -18107,10 +18090,6 @@
                     },
                     {
                       "const": "announcement.delete",
-                      "type": "string"
-                    },
-                    {
-                      "const": "email_template.manage",
                       "type": "string"
                     },
                     {
@@ -54258,25 +54237,6 @@
           "pagination"
         ]
       },
-      "GetNextAutoNameResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name"
-            ]
-          }
-        },
-        "required": [
-          "data"
-        ]
-      },
       "DeleteManyTemplatesBody": {
         "minItems": 1,
         "type": "array",
@@ -54772,7 +54732,6 @@
           }
         },
         "required": [
-          "name",
           "baseLanguage",
           "availableLocales"
         ]

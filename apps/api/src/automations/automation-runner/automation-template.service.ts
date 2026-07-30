@@ -40,6 +40,7 @@ export class AutomationTemplateService {
         subject: template.subject,
         language: resolvedLanguage,
         baseLanguage: template.baseLanguage,
+        primaryColor: "",
       });
 
       return {
