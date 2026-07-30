@@ -75,12 +75,10 @@ describe("Achievements E2E", () => {
       .withUserSettings(db)
       .create();
 
-    adminUserId = adminUser.id;
     studentUserId = studentUser.id;
     tenantId = adminUser.tenantId;
 
     adminCookie = await cookieFor(adminUser, app);
-    studentCookie = await cookieFor(studentUser, app);
   });
 
   // ─── GET /achievements ────────────────────────────────────────────────────
