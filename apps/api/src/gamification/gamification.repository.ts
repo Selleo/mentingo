@@ -1,104 +1,115 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { LocalizationService } from "src/localization/localization.service";
 import { DB } from "src/storage/db/db.providers";
-import { achievements, userAchievementLevels, userProgress } from "src/storage/schema";
-import { WsGateway } from "src/websocket";
+import {
+  achievements,
+  achievementLevels,
+  activityLogs,
+  userAchievementLevels,
+  userProgress,
+  userStatistics,
+} from "src/storage/schema";
 
-import type { AchievementLevel } from "./gamification.types";
-import type { SupportedLanguages } from "@repo/shared";
+import type {
+  ActivityLogActionType,
+  ActivityLogResourceType,
+  SupportedLanguages,
+} from "@repo/shared";
 import type { UUIDType } from "src/common";
-import type { GamificationEventPayload } from "src/websocket";
 
 @Injectable()
 export class GamificationRepository {
   constructor(
     @Inject(DB) private readonly db: DatabasePg,
-    private readonly wsGateway: WsGateway,
     private readonly localizationService: LocalizationService,
   ) {}
-  async createUsersMissingAchievements({
-    achievementLevels,
-    actualThreshold,
-    event,
-  }: {
-    achievementLevels: AchievementLevel[];
-    actualThreshold: number;
-    event: GamificationEventPayload;
-  }) {
-    await this.checkUserProgress(event.userId);
 
-    const qualifedLevels = achievementLevels.filter(
-      (achievementLevel) => achievementLevel.threshold <= actualThreshold,
-    );
-    const userAchievementProgress = await this.db
+  async getAchievementsForEvent(
+    tenantId: string,
+    resourceType: string,
+    canViewHidden: boolean,
+    dbInstance?: DatabasePg,
+  ) {
+    const db = dbInstance ?? this.db;
+
+    return db
       .select()
-      .from(userAchievementLevels)
-      .where(eq(userAchievementLevels.userId, event.userId));
-
-    const missingLevels = qualifedLevels.filter(
-      (level) =>
-        !userAchievementProgress.some((progress) => progress.achievementLevelId == level.id),
-    );
-
-    if (missingLevels.length > 0) {
-      let highestNewLevel: { userAchievementId: string; level: AchievementLevel } | null = null;
-      for (const level of missingLevels) {
-        const [newUserAchievement] = await this.db
-          .insert(userAchievementLevels)
-          .values({
-            userId: event.userId,
-            achievementLevelId: level.id,
-            sourceId: event.sourceId,
-          })
-          .returning();
-        await this.addXpToUser(event.userId, level.xpReward);
-        await this.checkNextLevel(event.userId);
-
-        if (!highestNewLevel || level.levelNumber > highestNewLevel.level.levelNumber) {
-          highestNewLevel = { userAchievementId: newUserAchievement.id, level };
-        }
-      }
-      if (highestNewLevel) {
-        this.wsGateway.emitToUser(event.userId, "gamification:newLevel", {
-          userAchievementId: highestNewLevel.userAchievementId,
-          achievementName: highestNewLevel.level.achievementName,
-          level: highestNewLevel.level.levelNumber,
-          type: "achievement",
-        });
-      }
-    }
+      .from(achievements)
+      .where(
+        and(
+          eq(achievements.tenantId, tenantId),
+          eq(achievements.triggerEventType, resourceType),
+          eq(achievements.isEnabled, true),
+          ...(canViewHidden ? [] : [eq(achievements.visibility, "visible")]),
+        ),
+      );
   }
-  private async checkUserProgress(userId: UUIDType) {
-    const [actualUserProgress] = await this.db
-      .select()
-      .from(userProgress)
-      .where(eq(userProgress.userId, userId));
-    if (!actualUserProgress) {
-      await this.db.insert(userProgress).values({
-        userId: userId,
-      });
-    }
+
+  async getAchievementLevelsWithName(
+    achievementId: UUIDType,
+    language: SupportedLanguages,
+    dbInstance?: DatabasePg,
+  ) {
+    const db = dbInstance ?? this.db;
+
+    return db
+      .select({
+        id: achievementLevels.id,
+        levelNumber: achievementLevels.levelNumber,
+        threshold: achievementLevels.threshold,
+        xpReward: achievementLevels.xpReward,
+        achievementName: this.localizationService.getLocalizedSqlField(
+          achievements.title,
+          language,
+          achievements,
+        ),
+      })
+      .from(achievementLevels)
+      .innerJoin(achievements, eq(achievementLevels.achievementId, achievements.id))
+      .where(eq(achievementLevels.achievementId, achievementId));
   }
-  private async checkNextLevel(userId: UUIDType) {
-    const [actualUserProgress] = await this.db
-      .select()
-      .from(userProgress)
-      .where(eq(userProgress.userId, userId));
-    const nextLevelRequiredXp = 100 * actualUserProgress.currentLevel ** 2;
-    if (nextLevelRequiredXp <= actualUserProgress.lifetimeXp) {
-      await this.db
-        .update(userProgress)
-        .set({
-          currentLevel: sql`${userProgress.currentLevel} + 1`,
-        })
-        .where(eq(userProgress.userId, userId));
-    }
+
+  async getUserAchievementProgress(userId: UUIDType, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    return db.select().from(userAchievementLevels).where(eq(userAchievementLevels.userId, userId));
   }
-  private async addXpToUser(userId: UUIDType, xpReward: number) {
-    await this.db
+
+  async insertUserAchievementLevel(
+    userId: UUIDType,
+    achievementLevelId: UUIDType,
+    sourceId: UUIDType,
+    dbInstance?: DatabasePg,
+  ) {
+    const db = dbInstance ?? this.db;
+
+    const [row] = await db
+      .insert(userAchievementLevels)
+      .values({ userId, achievementLevelId, sourceId })
+      .returning();
+    return row;
+  }
+
+  async getUserProgress(userId: UUIDType, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    const [row] = await db.select().from(userProgress).where(eq(userProgress.userId, userId));
+    return row ?? null;
+  }
+
+  async insertUserProgress(userId: UUIDType, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    await db.insert(userProgress).values({ userId });
+  }
+
+  async addXpToUser(userId: UUIDType, xpReward: number, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    await db
       .update(userProgress)
       .set({
         spendableXp: sql`${userProgress.spendableXp} + ${xpReward}`,
@@ -107,11 +118,43 @@ export class GamificationRepository {
       .where(eq(userProgress.userId, userId));
   }
 
-  getLocalizedAchievementKey(language?: SupportedLanguages) {
-    return this.localizationService.getLocalizedSqlField(
-      achievements.key,
-      language ?? "en",
-      achievements,
-    );
+  async incrementUserLevel(userId: UUIDType, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    await db
+      .update(userProgress)
+      .set({ currentLevel: sql`${userProgress.currentLevel} + 1` })
+      .where(eq(userProgress.userId, userId));
+  }
+
+  async getCurrentStreak(userId: UUIDType, dbInstance?: DatabasePg) {
+    const db = dbInstance ?? this.db;
+
+    const [row] = await db
+      .select({ currentStreak: userStatistics.currentStreak })
+      .from(userStatistics)
+      .where(eq(userStatistics.userId, userId));
+    return row?.currentStreak ?? null;
+  }
+
+  async getActivityLogCount(
+    userId: UUIDType,
+    actionType: ActivityLogActionType,
+    resourceType: ActivityLogResourceType,
+    dbInstance?: DatabasePg,
+  ) {
+    const db = dbInstance ?? this.db;
+
+    const rows = await db
+      .select()
+      .from(activityLogs)
+      .where(
+        and(
+          eq(activityLogs.actorId, userId),
+          eq(activityLogs.actionType, actionType),
+          eq(activityLogs.resourceType, resourceType),
+        ),
+      );
+    return rows.length;
   }
 }

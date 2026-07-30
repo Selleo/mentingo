@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
 
 import { AchievementsModule } from "src/achievements/achievements.module";
 import { LocalizationModule } from "src/localization/localization.module";
@@ -14,7 +15,7 @@ import { GamificationWorker } from "./gamification.worker";
 
 @Module({
   exports: [GamificationModule, GamificationQueueService],
-  imports: [SettingsModule, AchievementsModule, LocalizationModule],
+  imports: [CqrsModule, SettingsModule, AchievementsModule, LocalizationModule],
   controllers: [GamificationController],
   providers: [
     GamificationService,

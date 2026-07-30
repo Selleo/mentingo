@@ -47,4 +47,5 @@ export interface GamificationEventPayload {
   actionType: string;
   resourceType: string | null;
   sourceId: string;
+  canViewHidden: boolean;
 }

@@ -9,10 +9,11 @@ import {
   Post,
   Query,
 } from "@nestjs/common";
-import { GamificationVisibility, SupportedLanguages } from "@repo/shared";
+import { GamificationVisibility, PERMISSIONS, SupportedLanguages } from "@repo/shared";
 import { Validate } from "nestjs-typebox";
 
 import { BaseResponse, baseResponse, UUIDSchema, UUIDType } from "src/common";
+import { RequirePermission } from "src/common/decorators/require-permission.decorator";
 import { CurrentUser } from "src/common/decorators/user.decorator";
 import { CurrentUserType } from "src/common/types/current-user.type";
 
@@ -37,13 +38,16 @@ import {
 @Controller("achievements")
 export class AchievementsController {
   constructor(private readonly achievementsService: AchievementsService) {}
+
   @Get()
   async getAchievementsList(
     @Query("is-enabled") isEnabled: boolean,
     @Query("visibility") visibility: GamificationVisibility,
     @Query("trigger-event-type") triggerEventType: string,
+    @CurrentUser() currentUser: CurrentUserType,
   ) {
     return await this.achievementsService.getAchievementsList(
+      currentUser,
       isEnabled,
       visibility,
       triggerEventType,
@@ -63,11 +67,9 @@ export class AchievementsController {
   })
   async getUserAchievements(
     @Query("language") language: SupportedLanguages,
-    @CurrentUser() currentUser: CurrentUserType,
+    @Query("userId") userId?: UUIDType,
   ) {
-    return new BaseResponse(
-      await this.achievementsService.getUserAchievements(currentUser, language),
-    );
+    return new BaseResponse(await this.achievementsService.getUserAchievements(userId, language));
   }
 
   @Post()
@@ -79,6 +81,7 @@ export class AchievementsController {
       },
     ],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_CREATE)
   async createAchievement(@Body() createAchievementBody: CreateAchievement) {
     await this.achievementsService.createAchievement(createAchievementBody);
   }
@@ -93,6 +96,7 @@ export class AchievementsController {
       },
     ],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_UPDATE)
   async updateAchievement(
     @Param("id") id: UUIDType,
     @Body() updateAchievementBody: UpdateAchievement,
@@ -104,6 +108,7 @@ export class AchievementsController {
   @Validate({
     request: [{ type: "param", name: "id", schema: UUIDSchema }],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_DELETE)
   async deleteAchievement(@Param("id") id: UUIDType) {
     await this.achievementsService.deleteAchievement(id);
   }
@@ -144,6 +149,7 @@ export class AchievementsController {
       },
     ],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_CREATE)
   async createAchievementLevel(
     @Param("achievementId") achievementId: UUIDType,
     @Body() achievementLevelBody: CreateAchievementLevel,
@@ -170,6 +176,7 @@ export class AchievementsController {
       },
     ],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_UPDATE)
   async updateAchievementLevel(
     @Param("achievementId") achievementId: UUIDType,
     @Param("levelNumber") levelNumber: number,
@@ -183,8 +190,9 @@ export class AchievementsController {
   }
 
   @Delete("levels/:achievementId")
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_DELETE)
   async deleteAchievementLevel(@Param("achievementId") achievementId: UUIDType) {
-    await this.achievementsService.deleteAchievemntLevel(achievementId);
+    await this.achievementsService.deleteAchievementLevel(achievementId);
   }
 
   @Post(":achievementId/translation")
@@ -206,12 +214,13 @@ export class AchievementsController {
       },
     ],
   })
+  @RequirePermission(PERMISSIONS.ACHIEVEMENTS_CREATE)
   async createTranslation(
     @Param("achievementId") id: UUIDType,
     @Query("language") language: SupportedLanguages,
     @Body() translationBody: CreateTranslation,
   ) {
-    await this.achievementsService.createTranslation(id, language, translationBody.key);
+    await this.achievementsService.createTranslation(id, language, translationBody.title);
   }
 
   @Get(":id")

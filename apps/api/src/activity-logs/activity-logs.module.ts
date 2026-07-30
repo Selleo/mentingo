@@ -3,7 +3,6 @@ import { CqrsModule } from "@nestjs/cqrs";
 
 import { ArticlesActivityHandler } from "src/activity-logs/handlers/articles-activity.handler";
 import { QAActivityHandler } from "src/activity-logs/handlers/qa-activity.handler";
-import { GamificationModule } from "src/gamification/gamification.module";
 import { LiveTrainingModule } from "src/live-training/live-training.module";
 
 import { ActivityLogsController } from "./activity-logs.controller";
@@ -29,7 +28,7 @@ import { ActivityLogsWorker } from "./workers/activity-logs.worker";
 
 @Global()
 @Module({
-  imports: [CqrsModule, LiveTrainingModule, GamificationModule],
+  imports: [CqrsModule, LiveTrainingModule],
   controllers: [ActivityLogsController],
   providers: [
     ActivityLogsService,

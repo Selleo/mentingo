@@ -104,7 +104,7 @@ function ProfilePageContent({ currentUser }: ProfilePageContentProps) {
     canViewExtendedProfile,
   );
 
-  const { data: achievements } = useUserAchievements(language);
+  const { data: achievements } = useUserAchievements(userDetails?.id, language);
 
   const toggleEditing = () => setIsEditing((prev) => !prev);
 

@@ -1,7 +1,6 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Param } from "@nestjs/common";
 
-import { CurrentUser } from "src/common/decorators/user.decorator";
-import { CurrentUserType } from "src/common/types/current-user.type";
+import { UUIDType } from "src/common";
 
 import { GamificationService } from "./gamification.service";
 
@@ -9,8 +8,8 @@ import { GamificationService } from "./gamification.service";
 export class GamificationController {
   constructor(private readonly gamificationService: GamificationService) {}
 
-  @Get("user-progress")
-  async getUserProgress(@CurrentUser() currentUser: CurrentUserType) {
-    await this.gamificationService.getUserProgress(currentUser);
+  @Get("user-progress/:userId")
+  async getUserProgress(@Param("userId") userId: UUIDType) {
+    return await this.gamificationService.getUserProgress(userId);
   }
 }

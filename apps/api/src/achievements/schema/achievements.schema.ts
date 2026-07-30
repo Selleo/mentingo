@@ -7,7 +7,7 @@ export const achievementsLanguageSchema = Type.Enum(SUPPORTED_LANGUAGES);
 
 export const UserAchievementSchema = Type.Object({
   achievementId: Type.String({ format: "uuid" }),
-  achievementKey: Type.String(),
+  achievementTitle: Type.String(),
 
   visibility: Type.Union([
     Type.Literal(GAMIFICATION_VISIBILITY.VISIBLE),

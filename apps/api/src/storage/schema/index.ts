@@ -2660,7 +2660,7 @@ export const achievements = pgTable(
 
     tenantId,
 
-    key: jsonb("key").$type<LocalizedText>().default({}).notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
 
     visibility: text("visibility").$type<GamificationVisibility>().notNull(),
 
@@ -2754,7 +2754,7 @@ export const challenges = pgTable(
 
     tenantId,
 
-    key: jsonb("key").$type<LocalizedText>().default({}).notNull(),
+    title: jsonb("title").$type<LocalizedText>().default({}).notNull(),
 
     visibility: text("visibility").$type<GamificationVisibility>().notNull(),
 

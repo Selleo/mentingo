@@ -1,138 +1,121 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
-import { DatabasePg } from "src/common";
-import { LocalizationService } from "src/localization/localization.service";
-import { OutboxRepository } from "src/outbox/outbox.repository";
-import { SettingsService } from "src/settings/settings.service";
-import { DB } from "src/storage/db/db.providers";
-import { achievementLevels, achievements, activityLogs, userStatistics } from "src/storage/schema";
+import { Injectable, Logger } from "@nestjs/common";
+import { EventsHandler } from "@nestjs/cqrs";
+import { hasPermission, PERMISSIONS } from "@repo/shared";
+import { match } from "ts-pattern";
 
-import { GamificationRepository } from "./gamification.repository";
+import {
+  LessonCompletedEvent,
+  UserChapterFinishedEvent,
+  UserCourseFinishedEvent,
+  UserLoginEvent,
+} from "src/events";
 
+import { GamificationQueueService } from "./gamification-queue.service";
+
+import type { IEventHandler } from "@nestjs/cqrs";
 import type { GamificationEventPayload } from "src/websocket";
 
+type GamificationEventType =
+  | LessonCompletedEvent
+  | UserChapterFinishedEvent
+  | UserCourseFinishedEvent
+  | UserLoginEvent;
+
+const GamificationEvents = [
+  LessonCompletedEvent,
+  UserChapterFinishedEvent,
+  UserCourseFinishedEvent,
+  UserLoginEvent,
+] as const;
+
 @Injectable()
-export class GamificationHandler {
+@EventsHandler(...GamificationEvents)
+export class GamificationHandler implements IEventHandler<GamificationEventType> {
   private readonly logger = new Logger(GamificationHandler.name);
 
-  constructor(
-    @Inject(DB) private readonly db: DatabasePg,
-    private readonly gamificationRepository: GamificationRepository,
-    private readonly localizationService: LocalizationService,
-    private readonly settingsService: SettingsService,
-    private readonly outboxRepository: OutboxRepository,
-  ) {}
+  constructor(private readonly gamificationQueueService: GamificationQueueService) {}
 
-  async handle(event: GamificationEventPayload): Promise<void> {
-    const userSettings = this.settingsService.getUserSettings(event.userId);
-    const userLanguage = (await userSettings).language;
+  async handle(event: GamificationEventType) {
+    try {
+      const payload = match(event)
+        .when(
+          (e): e is UserLoginEvent => e instanceof UserLoginEvent,
+          (e) => this.mapLoginEvent(e),
+        )
+        .when(
+          (e): e is LessonCompletedEvent => e instanceof LessonCompletedEvent,
+          (e) => this.mapLessonCompletedEvent(e),
+        )
+        .when(
+          (e): e is UserChapterFinishedEvent => e instanceof UserChapterFinishedEvent,
+          (e) => this.mapChapterFinishedEvent(e),
+        )
+        .when(
+          (e): e is UserCourseFinishedEvent => e instanceof UserCourseFinishedEvent,
+          (e) => this.mapCourseFinishedEvent(e),
+        )
+        .otherwise(() => null);
 
-    if (!event.resourceType) throw new Error("common.error.somethingWentWrong");
-    if (!event.userId) throw new Error("common.error.somethingWentWrong");
+      if (!payload) return;
 
-    const isFirstProcessing = await this.outboxRepository.markProcessedOrSkip(
-      event.sourceId,
-      event.tenantId,
-      this.db,
-    );
-
-    if (!isFirstProcessing) {
-      this.logger.warn(`Event ${event.sourceId} already processed`);
-      return;
+      this.logger.log(`Queueing gamification job for action: ${payload.actionType}`);
+      await this.gamificationQueueService.enqueueEvent(payload);
+    } catch (error) {
+      this.logger.error("Error handling gamification event:", error);
     }
+  }
 
-    const achievementsList = await this.db
-      .select()
-      .from(achievements)
-      .where(
-        and(
-          eq(achievements.tenantId, event.tenantId),
-          eq(achievements.triggerEventType, event.resourceType),
-          eq(achievements.isEnabled, true),
-          ...(event.actorRole === "admin" ? [eq(achievements.visibility, "visible")] : []),
-        ),
-      );
+  private mapLoginEvent(event: UserLoginEvent): GamificationEventPayload {
+    const { userId, actor } = event.loginData;
+    return {
+      tenantId: actor.tenantId,
+      userId,
+      actorRole: actor.roleSlugs[0],
+      actionType: "login",
+      resourceType: "user",
+      sourceId: randomUUID(),
+      canViewHidden: hasPermission(actor.permissions, PERMISSIONS.ACHIEVEMENTS_VIEW_HIDDEN),
+    };
+  }
 
-    for (const achievement of achievementsList) {
-      const allAchievementLevels = await this.db
-        .select({
-          id: achievementLevels.id,
-          levelNumber: achievementLevels.levelNumber,
-          threshold: achievementLevels.threshold,
-          xpReward: achievementLevels.xpReward,
-          achievementName: this.localizationService.getLocalizedSqlField(
-            achievements.key,
-            userLanguage,
-            achievements,
-          ),
-        })
-        .from(achievementLevels)
-        .innerJoin(achievements, eq(achievementLevels.achievementId, achievements.id))
-        .where(eq(achievementLevels.achievementId, achievement.id));
+  private mapLessonCompletedEvent(event: LessonCompletedEvent): GamificationEventPayload {
+    const { userId, lessonId, actor } = event.lessonCompletionData;
+    return {
+      tenantId: actor.tenantId,
+      userId,
+      actorRole: actor.roleSlugs[0],
+      actionType: "complete_lesson",
+      resourceType: "lesson",
+      sourceId: lessonId,
+      canViewHidden: hasPermission(actor.permissions, PERMISSIONS.ACHIEVEMENTS_VIEW_HIDDEN),
+    };
+  }
 
-      if (event.resourceType == "user" && event.actionType == "login") {
-        const [userStrike] = await this.db
-          .select({
-            currentStrike: userStatistics.currentStreak,
-          })
-          .from(userStatistics)
-          .where(eq(userStatistics.userId, event.userId));
-        const currentStreak = userStrike.currentStrike;
-        await this.gamificationRepository.createUsersMissingAchievements({
-          achievementLevels: allAchievementLevels,
-          actualThreshold: currentStreak,
-          event,
-        });
-      } else if (event.resourceType == "lesson" && event.actionType == "complete_lesson") {
-        const completedLessons = await this.db
-          .select()
-          .from(activityLogs)
-          .where(
-            and(
-              eq(activityLogs.actorId, event.userId),
-              eq(activityLogs.actionType, "complete_lesson"),
-            ),
-          );
-        const countOfCompletedLessons = completedLessons.length;
-        await this.gamificationRepository.createUsersMissingAchievements({
-          achievementLevels: allAchievementLevels,
-          actualThreshold: countOfCompletedLessons,
-          event,
-        });
-      } else if (event.resourceType == "chapter" && event.actionType == "complete_chapter") {
-        const completedChapters = await this.db
-          .select()
-          .from(activityLogs)
-          .where(
-            and(
-              eq(activityLogs.actorId, event.userId),
-              eq(activityLogs.actionType, "complete_chapter"),
-            ),
-          );
-        const countOfCompletedChapters = completedChapters.length;
-        await this.gamificationRepository.createUsersMissingAchievements({
-          achievementLevels: allAchievementLevels,
-          actualThreshold: countOfCompletedChapters,
-          event,
-        });
-      } else if (event.resourceType == "course" && event.actionType == "complete_course") {
-        const completedCourses = await this.db
-          .select()
-          .from(activityLogs)
-          .where(
-            and(
-              eq(activityLogs.actorId, event.userId),
-              eq(activityLogs.actionType, "complete_course"),
-            ),
-          );
-        const countOfCompletedCourses = completedCourses.length;
-        await this.gamificationRepository.createUsersMissingAchievements({
-          achievementLevels: allAchievementLevels,
-          actualThreshold: countOfCompletedCourses,
-          event,
-        });
-      }
-    }
+  private mapChapterFinishedEvent(event: UserChapterFinishedEvent): GamificationEventPayload {
+    const { userId, chapterId, actor } = event.chapterFinishedData;
+    return {
+      tenantId: actor.tenantId,
+      userId,
+      actorRole: actor.roleSlugs[0],
+      actionType: "complete_chapter",
+      resourceType: "chapter",
+      sourceId: chapterId,
+      canViewHidden: hasPermission(actor.permissions, PERMISSIONS.ACHIEVEMENTS_VIEW_HIDDEN),
+    };
+  }
+
+  private mapCourseFinishedEvent(event: UserCourseFinishedEvent): GamificationEventPayload {
+    const { userId, courseId, actor } = event.courseFinishedData;
+    return {
+      tenantId: actor.tenantId,
+      userId,
+      actorRole: actor.roleSlugs[0],
+      actionType: "complete_course",
+      resourceType: "course",
+      sourceId: courseId,
+      canViewHidden: hasPermission(actor.permissions, PERMISSIONS.ACHIEVEMENTS_VIEW_HIDDEN),
+    };
   }
 }

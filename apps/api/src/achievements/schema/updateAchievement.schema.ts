@@ -7,7 +7,7 @@ import type { Static } from "@sinclair/typebox";
 
 export const updateAchievementSchema = Type.Partial(
   Type.Object({
-    key: Type.String(),
+    title: Type.String(),
     language: achievementsLanguageSchema,
     visibility: Type.Union([
       Type.Literal(GAMIFICATION_VISIBILITY.VISIBLE),

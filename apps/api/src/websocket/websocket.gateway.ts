@@ -199,6 +199,26 @@ export class WsGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayD
   emitToUser(userId: string, event: string, data: unknown) {
     this.server.to(`user:${userId}`).emit(event, data);
   }
+  async waitForConnection(userId: string, timeoutMs = 5000): Promise<boolean> {
+    const sockets = await this.server.in(`user:${userId}`).fetchSockets();
+    if (sockets.length > 0) return true;
+
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        clearInterval(interval);
+        resolve(false);
+      }, timeoutMs);
+
+      const interval = setInterval(async () => {
+        const connected = await this.server.in(`user:${userId}`).fetchSockets();
+        if (connected.length > 0) {
+          clearTimeout(timeout);
+          clearInterval(interval);
+          resolve(true);
+        }
+      }, 200);
+    });
+  }
 }
 
 export const getLiveTrainingRoomName = (liveTrainingId: string) =>

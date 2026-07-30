@@ -1233,6 +1233,13 @@
       "when": 1784720216991,
       "tag": "0175_enable_tenant_rls_for_gamification_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 176,
+      "version": "7",
+      "when": 1785403572706,
+      "tag": "0176_change_columns_name_in_achievements_and_challenges_tables",
+      "breakpoints": true
     }
   ]
 }

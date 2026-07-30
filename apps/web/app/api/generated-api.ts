@@ -6582,7 +6582,7 @@ export interface GetUserAchievementsResponse {
   data: {
     /** @format uuid */
     achievementId: string;
-    achievementKey: string;
+    achievementTitle: string;
     visibility: "visible" | "hidden";
     /** @format uuid */
     levelId: string;
@@ -6595,7 +6595,7 @@ export interface GetUserAchievementsResponse {
 }
 
 export interface CreateAchievementBody {
-  key: string;
+  title: string;
   language: "en" | "pl" | "de" | "lt" | "cs" | "es";
   visibility: "visible" | "hidden";
   isEnabled: boolean;
@@ -6603,7 +6603,7 @@ export interface CreateAchievementBody {
 }
 
 export interface UpdateAchievementBody {
-  key?: string;
+  title?: string;
   language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
   visibility?: "visible" | "hidden";
   isEnabled?: boolean;
@@ -6621,7 +6621,7 @@ export interface UpdateAchievementLevelBody {
 }
 
 export interface CreateTranslationBody {
-  key: string;
+  title: string;
 }
 
 export interface GetQAResponse {
@@ -14357,8 +14357,9 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @request GET:/api/achievements/user-achievements
      */
     achievementsControllerGetUserAchievements: (
-      query?: {
+      query: {
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
+        userId: string;
       },
       params: RequestParams = {},
     ) =>

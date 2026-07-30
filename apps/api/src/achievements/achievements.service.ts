@@ -1,60 +1,55 @@
 import {
   BadRequestException,
   ConflictException,
-  Inject,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, asc, eq } from "drizzle-orm";
+import {
+  hasPermission,
+  PERMISSIONS,
+  type GamificationVisibility,
+  type SupportedLanguages,
+} from "@repo/shared";
+import { eq } from "drizzle-orm";
 
-import { DatabasePg } from "src/common";
-import { buildJsonbField, setJsonbField } from "src/common/helpers/sqlHelpers";
-import { GamificationRepository } from "src/gamification/gamification.repository";
-import { LocalizationService } from "src/localization/localization.service";
-import { DB } from "src/storage/db/db.providers";
-import { achievementLevels, achievements, userAchievementLevels } from "src/storage/schema";
+import { setJsonbField } from "src/common/helpers/sqlHelpers";
+import { achievements } from "src/storage/schema";
 
 import { AchievementsRepository } from "./achievements.repository";
+import { VALIDATE_THRESHOLD_TYPE, type validateThresholdType } from "./achievements.types";
 
 import type { CreateAchievement } from "./schema/createAchievement.schema";
 import type { CreateAchievementLevel } from "./schema/createAchievementLevel.schema";
 import type { UpdateAchievement } from "./schema/updateAchievement.schema";
 import type { UpdateAchievementLevel } from "./schema/updateAchievementLevel.schema";
-import type { GamificationVisibility, SupportedLanguages } from "@repo/shared";
+import type { SQL } from "drizzle-orm";
 import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 
 @Injectable()
 export class AchievementsService {
-  constructor(
-    @Inject(DB) private readonly db: DatabasePg,
-    private readonly achievementsRepository: AchievementsRepository,
-    private readonly gamificationRepository: GamificationRepository,
-    private readonly localizationService: LocalizationService,
-  ) {}
+  constructor(private readonly achievementsRepository: AchievementsRepository) {}
 
   async getAchievementsList(
+    currentUser: CurrentUserType,
     isEnabled?: boolean,
     visibility?: GamificationVisibility,
     triggerEventType?: string,
   ) {
-    const conditions = await this.achievementsRepository.getAchievementsConditions(
-      isEnabled,
-      visibility,
-      triggerEventType,
-    );
+    if (
+      !hasPermission(currentUser.permissions, PERMISSIONS.ACHIEVEMENTS_MANAGE_PARAMS) &&
+      String(isEnabled) === "false"
+    ) {
+      throw new ForbiddenException("common.toast.noAccess");
+    }
 
-    return await this.db
-      .select()
-      .from(achievements)
-      .where(and(...conditions))
-      .orderBy(asc(achievements.key));
+    const conditions = this.buildAchievementsConditions(isEnabled, visibility, triggerEventType);
+    return this.achievementsRepository.getAchievementsList(conditions);
   }
+
   async getAchievement(achievementId: UUIDType) {
-    const [achievement] = await this.db
-      .select()
-      .from(achievements)
-      .where(eq(achievements.id, achievementId));
+    const achievement = await this.achievementsRepository.getAchievementById(achievementId);
 
     if (!achievement) {
       throw new NotFoundException("gamification.errors.achievementNotFound");
@@ -64,66 +59,22 @@ export class AchievementsService {
   }
 
   async createAchievement(createAchievementBody: CreateAchievement) {
-    const { language, key, visibility, isEnabled, triggerEventType } = createAchievementBody;
-
-    const [createdAchievement] = await this.db
-      .insert(achievements)
-      .values({
-        key: buildJsonbField(language, key),
-        visibility: visibility,
-        isEnabled: isEnabled,
-        triggerEventType: triggerEventType,
-        baseLanguage: language,
-        availableLocales: [language],
-      })
-      .returning({
-        id: achievements.id,
-        key: achievements.key,
-      });
-    return createdAchievement;
+    return this.achievementsRepository.insertAchievement(createAchievementBody);
   }
 
   async updateAchievement(achievementId: UUIDType, updateAchievementBody: UpdateAchievement) {
-    const { language, key, visibility, isEnabled, triggerEventType } = updateAchievementBody;
-
-    const updateData: {
-      key?: ReturnType<typeof setJsonbField>;
-      visibility?: GamificationVisibility;
-      isEnabled?: boolean;
-      triggerEventType?: string;
-    } = {};
-
-    if (key !== undefined) {
-      const keyUpdate = setJsonbField(achievements.key, language, key);
-
-      if (keyUpdate) {
-        updateData.key = keyUpdate;
-      }
-    }
-
-    if (visibility !== undefined) {
-      updateData.visibility = visibility;
-    }
-
-    if (isEnabled !== undefined) {
-      updateData.isEnabled = isEnabled;
-    }
-
-    if (triggerEventType !== undefined) {
-      updateData.triggerEventType = triggerEventType;
-    }
+    const updateData = this.buildUpdateData(updateAchievementBody);
 
     if (Object.keys(updateData).length === 0) {
       return this.getAchievement(achievementId);
     }
 
-    const [updatedAchievement] = await this.db
-      .update(achievements)
-      .set(updateData)
-      .where(eq(achievements.id, achievementId))
-      .returning();
+    const updated = await this.achievementsRepository.updateAchievementById(
+      achievementId,
+      updateData,
+    );
 
-    if (!updatedAchievement) {
+    if (!updated) {
       throw new NotFoundException("gamification.errors.achievementNotFound");
     }
 
@@ -131,120 +82,92 @@ export class AchievementsService {
   }
 
   async deleteAchievement(achievementId: UUIDType) {
-    const [deletedAchievement] = await this.db
-      .delete(achievements)
-      .where(eq(achievements.id, achievementId))
-      .returning({ id: achievements.id });
-    if (!deletedAchievement) throw new NotFoundException("gamification.errors.achievementNotFound");
-    return deletedAchievement;
+    const deleted = await this.achievementsRepository.deleteAchievementById(achievementId);
+
+    if (!deleted) {
+      throw new NotFoundException("gamification.errors.achievementNotFound");
+    }
+
+    return deleted;
   }
 
   async getAchievementLevels(achievementId: UUIDType, levelNumber?: number) {
-    if (levelNumber) {
-      return await this.db
-        .select()
-        .from(achievementLevels)
-        .where(
-          and(
-            eq(achievementLevels.achievementId, achievementId),
-            eq(achievementLevels.levelNumber, levelNumber),
-          ),
-        );
-    } else
-      return await this.db
-        .select()
-        .from(achievementLevels)
-        .where(eq(achievementLevels.achievementId, achievementId));
+    if (levelNumber !== undefined) {
+      return this.achievementsRepository.getAchievementLevelByNumber(achievementId, levelNumber);
+    }
+    return this.achievementsRepository.getAchievementLevelsByAchievementId(achievementId);
   }
 
   async createAchievementLevel(
-    achievementLevelBody: CreateAchievementLevel,
+    createAchievementLevelBody: CreateAchievementLevel,
     achievementId: UUIDType,
   ) {
-    const nextLevel = (await this.achievementsRepository.getActualLevelNumber(achievementId)) + 1;
+    const nextLevel = (await this.achievementsRepository.getHighestLevelNumber(achievementId)) + 1;
+
     if (nextLevel > 5) {
       throw new BadRequestException("gamification.errors.wrongAchievementLevel");
     }
-    await this.achievementsRepository.validateThreshold(
+
+    await this.validateThreshold(
       achievementId,
-      achievementLevelBody.threshold,
-      "post",
+      createAchievementLevelBody.threshold,
+      VALIDATE_THRESHOLD_TYPE.POST,
     );
-    const [createdLevel] = await this.db
-      .insert(achievementLevels)
-      .values({ ...achievementLevelBody, levelNumber: nextLevel, achievementId: achievementId })
-      .returning({
-        id: achievementLevels.id,
-      });
-    return createdLevel;
+
+    return this.achievementsRepository.insertAchievementLevel(
+      createAchievementLevelBody,
+      achievementId,
+      nextLevel,
+    );
   }
 
   async updateAchievementLevel(
-    updateAchievementLevel: UpdateAchievementLevel,
+    updateAchievementLevelBody: UpdateAchievementLevel,
     achievementId: UUIDType,
     levelNumber: number,
   ) {
-    await this.achievementsRepository.validateThreshold(
+    await this.validateThreshold(
       achievementId,
-      updateAchievementLevel?.threshold,
-      "update",
+      updateAchievementLevelBody?.threshold,
+      VALIDATE_THRESHOLD_TYPE.UPDATE,
       levelNumber,
     );
-    const [updatedLevel] = await this.db
-      .update(achievementLevels)
-      .set({ ...updateAchievementLevel })
-      .where(
-        and(
-          eq(achievementLevels.achievementId, achievementId),
-          eq(achievementLevels.levelNumber, levelNumber),
-        ),
-      )
-      .returning({
-        id: achievementLevels.id,
-      });
-    if (!updatedLevel) throw new NotFoundException("gamification.errors.achievementLevelNotFound");
-    return updatedLevel;
+
+    const updated = await this.achievementsRepository.updateAchievementLevel(
+      updateAchievementLevelBody,
+      achievementId,
+      levelNumber,
+    );
+
+    if (!updated) {
+      throw new NotFoundException("gamification.errors.achievementLevelNotFound");
+    }
+
+    return updated;
   }
 
-  // DELETE ONLY HIGHEST LEVEL
-  async deleteAchievemntLevel(achievementId: UUIDType) {
-    const levelNumber = await this.achievementsRepository.getActualLevelNumber(achievementId);
-    const [deletedLevel] = await this.db
-      .delete(achievementLevels)
-      .where(
-        and(
-          eq(achievementLevels.achievementId, achievementId),
-          eq(achievementLevels.levelNumber, levelNumber),
-        ),
-      )
-      .returning({ id: achievementLevels.id });
-    if (!deletedLevel) throw new NotFoundException("gamification.errors.achievementLevelNotFound");
-    return deletedLevel;
+  async deleteAchievementLevel(achievementId: UUIDType) {
+    const levelNumber = await this.achievementsRepository.getHighestLevelNumber(achievementId);
+
+    const deleted = await this.achievementsRepository.deleteAchievementLevel(
+      achievementId,
+      levelNumber,
+    );
+
+    if (!deleted) {
+      throw new NotFoundException("gamification.errors.achievementLevelNotFound");
+    }
+
+    return deleted;
   }
 
-  async getUserAchievements(currentUser: CurrentUserType, language?: SupportedLanguages) {
-    return await this.db
-      .select({
-        achievementId: achievements.id,
-        achievementKey: this.gamificationRepository.getLocalizedAchievementKey(language),
-        visibility: achievements.visibility,
+  async getUserAchievements(userId?: UUIDType, language?: SupportedLanguages) {
+    if (!userId) return [];
 
-        levelId: achievementLevels.id,
-        levelNumber: achievementLevels.levelNumber,
-        threshold: achievementLevels.threshold,
-        xpReward: achievementLevels.xpReward,
-
-        earnedAt: userAchievementLevels.earnedAt,
-      })
-      .from(userAchievementLevels)
-      .innerJoin(
-        achievementLevels,
-        eq(userAchievementLevels.achievementLevelId, achievementLevels.id),
-      )
-      .innerJoin(achievements, eq(achievementLevels.achievementId, achievements.id))
-      .where(eq(userAchievementLevels.userId, currentUser.userId));
+    return this.achievementsRepository.getUserAchievements(userId, language);
   }
-  async createTranslation(id: UUIDType, language: SupportedLanguages, key: string) {
+
+  async createTranslation(id: UUIDType, language: SupportedLanguages, title: string) {
     const achievement = await this.getAchievement(id);
 
     if (achievement.availableLocales.includes(language)) {
@@ -253,16 +176,91 @@ export class AchievementsService {
       });
     }
 
-    const keyUpdate = setJsonbField(achievements.key, language, key);
-
-    await this.db
-      .update(achievements)
-      .set({
-        availableLocales: [...achievement.availableLocales, language],
-        ...(keyUpdate ? { key: keyUpdate } : {}),
-      })
-      .where(eq(achievements.id, id));
+    await this.achievementsRepository.updateAchievementLocales(
+      id,
+      [...achievement.availableLocales, language],
+      language,
+      title,
+    );
 
     return this.getAchievement(id);
+  }
+
+  private buildUpdateData(updateAchievementBody: UpdateAchievement) {
+    const { language, title, visibility, isEnabled, triggerEventType } = updateAchievementBody;
+    const updateData: Record<string, unknown> = {};
+
+    if (title !== undefined) {
+      const titleUpdate = setJsonbField(achievements.title, language, title);
+      if (titleUpdate) updateData.title = titleUpdate;
+    }
+
+    if (visibility !== undefined) updateData.visibility = visibility;
+    if (isEnabled !== undefined) updateData.isEnabled = isEnabled;
+    if (triggerEventType !== undefined) updateData.triggerEventType = triggerEventType;
+
+    return updateData;
+  }
+
+  private buildAchievementsConditions(
+    isEnabled?: boolean | string,
+    visibility?: GamificationVisibility,
+    triggerEventType?: string,
+  ) {
+    const conditions: SQL[] = [];
+
+    if (isEnabled !== undefined) {
+      const isEnabledBool = isEnabled === true || isEnabled === "true";
+      conditions.push(eq(achievements.isEnabled, isEnabledBool));
+    }
+    if (visibility) conditions.push(eq(achievements.visibility, visibility));
+    if (triggerEventType) conditions.push(eq(achievements.triggerEventType, triggerEventType));
+
+    return conditions;
+  }
+
+  private async validateThreshold(
+    achievementId: UUIDType,
+    threshold: number | undefined,
+    type: validateThresholdType,
+    levelNumber?: number,
+  ) {
+    if (!threshold) {
+      throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
+    }
+
+    const levels =
+      await this.achievementsRepository.getAchievementLevelsByAchievementId(achievementId);
+    const sortedLevels = [...levels].sort((a, b) => b.levelNumber - a.levelNumber);
+
+    if (sortedLevels.length === 0) return;
+
+    if (type === VALIDATE_THRESHOLD_TYPE.POST) {
+      if (sortedLevels[0].threshold >= threshold) {
+        throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
+      }
+      return;
+    }
+
+    if (type === VALIDATE_THRESHOLD_TYPE.UPDATE) {
+      const idx = sortedLevels.findIndex((l) => l.levelNumber === levelNumber);
+
+      if (idx === 0) {
+        if (sortedLevels[idx + 1]?.threshold >= threshold) {
+          throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
+        }
+      } else if (idx === sortedLevels.length - 1) {
+        if (sortedLevels[idx - 1]?.threshold <= threshold) {
+          throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
+        }
+      } else {
+        if (
+          sortedLevels[idx - 1].threshold <= threshold ||
+          sortedLevels[idx + 1].threshold >= threshold
+        ) {
+          throw new BadRequestException("gamification.errors.wrongAchievementLevelThreshold");
+        }
+      }
+    }
   }
 }

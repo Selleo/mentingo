@@ -6,7 +6,7 @@ import { achievementsLanguageSchema } from "./achievements.schema";
 import type { Static } from "@sinclair/typebox";
 
 export const createAchievementSchema = Type.Object({
-  key: Type.String(),
+  title: Type.String(),
   language: achievementsLanguageSchema,
   visibility: Type.Union([
     Type.Literal(GAMIFICATION_VISIBILITY.VISIBLE),

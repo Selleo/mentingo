@@ -17,12 +17,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "~/components/u
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { cn } from "~/lib/utils";
+import { formatDate } from "~/utils/formatDate";
 
 import type { IconName } from "~/types/shared";
 
 type UserAchievement = {
   achievementId: string;
-  achievementKey: string;
+  achievementTitle: string;
   visibility: "hidden" | "visible";
   levelId: string;
   levelNumber: number;
@@ -33,7 +34,7 @@ type UserAchievement = {
 
 type GroupedAchievement = {
   achievementId: string;
-  achievementKey: string;
+  achievementTitle: string;
   currentLevel: UserAchievement;
   history: UserAchievement[];
 };
@@ -44,10 +45,6 @@ type AchievementsCarouselProps = {
 
 const containerClasses =
   "justify-between flex w-full max-w-[720px] flex-col gap-y-6 rounded-b-lg rounded-t-2xl bg-white p-6 drop-shadow";
-
-function formatDate(date: string, options: Intl.DateTimeFormatOptions, language: string): string {
-  return new Intl.DateTimeFormat(language, options).format(new Date(date));
-}
 
 function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[] {
   const achievementsMap = new Map<string, UserAchievement[]>();
@@ -63,7 +60,7 @@ function groupAchievements(achievements: UserAchievement[]): GroupedAchievement[
 
     return {
       achievementId: sorted[0].achievementId,
-      achievementKey: sorted[0].achievementKey,
+      achievementTitle: sorted[0].achievementTitle,
       currentLevel: sorted[0],
       history: sorted,
     };
@@ -112,8 +109,8 @@ const AchievementHistoryDialog = ({
 
           <DialogTitle className="text-xl">
             {achievement &&
-              t(`gamification.profile.${achievement.achievementKey}.name`, {
-                defaultValue: achievement.achievementKey,
+              t(`gamification.profile.${achievement.achievementTitle}.name`, {
+                defaultValue: achievement.achievementTitle,
               })}
           </DialogTitle>
         </DialogHeader>
@@ -174,8 +171,8 @@ const AchievementCard = ({
       <AchievementIcon levelNumber={achievement.currentLevel.levelNumber} className="size-32" />
 
       <span className="text-sm font-medium text-neutral-950">
-        {t(`gamification.profile.${achievement.achievementKey}.name`, {
-          defaultValue: achievement.achievementKey,
+        {t(`gamification.profile.${achievement.achievementTitle}.name`, {
+          defaultValue: achievement.achievementTitle,
         })}
       </span>
 
