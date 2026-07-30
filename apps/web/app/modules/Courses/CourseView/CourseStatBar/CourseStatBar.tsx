@@ -1,11 +1,14 @@
+import { PERMISSIONS } from "@repo/shared";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useToggleCourseStudentMode } from "~/api/mutations";
 import { useBulkGroupCourseEnroll } from "~/api/mutations/admin/useBulkGroupCourseEnroll";
 import { useUpdateCourse } from "~/api/mutations/admin/useUpdateCourse";
+import { useCurrentUser } from "~/api/queries";
 import { useGroupsByCourseQuery } from "~/api/queries/admin/useGroupsByCourse";
 import { useContentCreatorCourses } from "~/api/queries/useContentCreatorCourses";
 import { useUserDetails } from "~/api/queries/useUserDetails";
+import { hasAllPermissions } from "~/common/permissions/permission.utils";
 import { cn } from "~/lib/utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
@@ -26,22 +29,16 @@ type CourseHeroProps = {
 };
 
 const getGridClassName = ({
-  hasAuthor,
-  hasCertificate,
-  hasDeadline,
-  isAdminExperience,
-  showAuthorSection,
+  showAuthorCard,
+  showCertificateCard,
+  showDeadlineCard,
 }: {
-  hasAuthor: boolean;
-  hasCertificate: boolean;
-  hasDeadline?: boolean;
-  isAdminExperience: boolean;
-  showAuthorSection: boolean;
+  showAuthorCard: boolean;
+  showCertificateCard: boolean;
+  showDeadlineCard: boolean;
 }) => {
-  if (isAdminExperience) return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4";
-
   const visibleCards =
-    1 + (hasDeadline ? 1 : 0) + (hasCertificate ? 1 : 0) + (showAuthorSection && hasAuthor ? 1 : 0);
+    1 + Number(showDeadlineCard) + Number(showCertificateCard) + Number(showAuthorCard);
 
   if (visibleCards === 1) return "grid-cols-1";
   if (visibleCards === 2) return "grid-cols-1 sm:grid-cols-2";
@@ -52,6 +49,11 @@ const getGridClassName = ({
 
 export function CourseStatBar({ language }: CourseHeroProps) {
   const { course, canEditCourse, isAdminExperience } = useCourseAccessProvider();
+  const { data: currentUser } = useCurrentUser();
+  const canManageDeadlines = hasAllPermissions(currentUser?.permissions, [
+    PERMISSIONS.COURSE_ENROLLMENT,
+    PERMISSIONS.GROUP_READ,
+  ]);
 
   const hasCertificate = Boolean(course.hasCertificate);
   const hasAuthor = Boolean(course.authorId);
@@ -81,13 +83,19 @@ export function CourseStatBar({ language }: CourseHeroProps) {
     true,
   );
 
-  const { data: enrolledGroups } = useGroupsByCourseQuery(canEditCourse ? course.id : "", language);
+  const { data: enrolledGroups } = useGroupsByCourseQuery(
+    canEditCourse && canManageDeadlines ? course.id : "",
+    language,
+  );
   const groupDeadlineDueDate = enrolledGroups
     ?.filter((group) => group.isMandatory && group.dueDate)
     .map((group) => group.dueDate)
     .sort()[0];
   const deadlineDueDate = groupDeadlineDueDate ?? course.dueDate;
   const hasDeadline = Boolean(deadlineDueDate);
+  const showDeadlineCard = isAdminExperience ? canManageDeadlines : hasDeadline;
+  const showCertificateCard = isAdminExperience || hasCertificate;
+  const showAuthorCard = isAdminExperience || (showAuthorSection && hasAuthor);
 
   const resetDeadlineDraft = useCallback(() => {
     const groups = enrolledGroups ?? [];
@@ -193,11 +201,9 @@ export function CourseStatBar({ language }: CourseHeroProps) {
       className={cn(
         "mb-4 grid gap-4 md:mb-6",
         getGridClassName({
-          hasAuthor,
-          hasCertificate,
-          hasDeadline,
-          isAdminExperience,
-          showAuthorSection,
+          showAuthorCard,
+          showCertificateCard,
+          showDeadlineCard,
         }),
       )}
     >
@@ -209,7 +215,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         timeLeftSeconds={timeLeftSeconds}
       />
 
-      {(isAdminExperience || hasDeadline) && (
+      {showDeadlineCard && (
         <DeadlineStatCard
           dueDate={deadlineDueDate}
           hasDeadline={hasDeadline}
@@ -218,7 +224,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         />
       )}
 
-      {(isAdminExperience || hasCertificate) && (
+      {showCertificateCard && (
         <CertificateStatCard
           hasCertificate={hasCertificate}
           isAdminExperience={isAdminExperience}
@@ -226,7 +232,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         />
       )}
 
-      {(isAdminExperience || (showAuthorSection && hasAuthor)) && (
+      {showAuthorCard && (
         <AuthorStatCard
           author={author}
           isAdminExperience={isAdminExperience}
@@ -243,7 +249,7 @@ export function CourseStatBar({ language }: CourseHeroProps) {
         />
       )}
 
-      {showDeadlineModal && (
+      {showDeadlineModal && canManageDeadlines && (
         <DeadlineModal
           deadlineEnabledDraft={deadlineEnabledDraft}
           groupDeadlines={groupDeadlines}
