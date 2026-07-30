@@ -25,6 +25,7 @@ The main workflow is simple for learners: choose a preferred interface language 
 - Resolve localized content with fallback behavior when the requested language is unavailable.
 - Lock structural curriculum edits to the base language while allowing translation edits in other languages.
 - Keep localized admin objects such as groups and categories usable in filters and selection lists.
+- Show course category filters and category-based course lists in the active interface language when translations exist.
 
 ## End-User Value
 
@@ -47,6 +48,7 @@ Curriculum has an extra safeguard: chapter and lesson structure is controlled fr
 - Backend localized-field behavior is centralized in `apps/api/src/localization/localization.service.ts`.
 - User language persistence uses the settings API and `PERMISSIONS.SETTINGS_UPDATE_SELF`.
 - Many content endpoints require an explicit `language` parameter to return localized fields.
+- Course and category list screens pass the active UI language into category/course queries so localized database entries can be displayed and filtered consistently.
 
 ## Test Evidence
 
@@ -54,3 +56,4 @@ Curriculum has an extra safeguard: chapter and lesson structure is controlled fr
 - Web E2E coverage verifies localized auth copy for visitor-facing pages.
 - Curriculum E2E coverage verifies that non-base-language curriculum structure is locked while translations can still be edited.
 - API E2E coverage verifies user settings language updates and invalid language-setting rejection.
+- API E2E coverage verifies category and group list localization by requested language; web query coverage verifies category requests include the selected language.

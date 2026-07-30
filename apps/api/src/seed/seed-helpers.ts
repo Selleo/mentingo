@@ -5,13 +5,11 @@ import {
   SYSTEM_ROLE_SLUGS,
   SYSTEM_RULE_SET_SLUGS,
   SUPPORTED_LANGUAGES,
-  isSupportedLanguage,
   type SystemRoleSlug,
-  type LocalizedText,
 } from "@repo/shared";
 import { and, eq, sql } from "drizzle-orm/sql";
 
-import { buildJsonbField, buildJsonbFieldWithMultipleEntries } from "src/common/helpers/sqlHelpers";
+import { buildJsonbField } from "src/common/helpers/sqlHelpers";
 import { EnvRepository } from "src/env/repositories/env.repository";
 import { EnvService } from "src/env/services/env.service";
 import { LESSON_TYPES } from "src/lesson/lesson.type";
@@ -35,58 +33,6 @@ import { StripeService } from "src/stripe/stripe.service";
 
 import type { DatabasePg, UUIDType } from "../common";
 import type { NiceCourseData } from "../utils/types/test-types";
-
-const CATEGORY_TRANSLATIONS: Record<string, LocalizedText> = {
-  "Data Science": {
-    pl: "Nauka o danych",
-    de: "Datenwissenschaft",
-    lt: "Duomenų mokslas",
-    cs: "Datová věda",
-    es: "Ciencia de datos",
-  },
-  "Web Development": {
-    pl: "Tworzenie stron internetowych",
-    de: "Webentwicklung",
-    lt: "Žiniatinklio kūrimas",
-    cs: "Webový vývoj",
-    es: "Desarrollo web",
-  },
-  "Mobile Development": {
-    pl: "Tworzenie aplikacji mobilnych",
-    de: "Mobile Entwicklung",
-    lt: "Mobiliųjų programų kūrimas",
-    cs: "Mobilní vývoj",
-    es: "Desarrollo móvil",
-  },
-  Mathematics: {
-    pl: "Matematyka",
-    de: "Mathematik",
-    lt: "Matematika",
-    cs: "Matematika",
-    es: "Matemáticas",
-  },
-  "Language Learning": {
-    pl: "Nauka języków",
-    de: "Sprachenlernen",
-    lt: "Kalbų mokymasis",
-    cs: "Učení jazyků",
-    es: "Aprendizaje de idiomas",
-  },
-  "Artificial Intelligence": {
-    pl: "Sztuczna inteligencja",
-    de: "Künstliche Intelligenz",
-    lt: "Dirbtinis intelektas",
-    cs: "Umělá inteligence",
-    es: "Inteligencia artificial",
-  },
-  "E2E Testing": {
-    pl: "Testy E2E",
-    de: "E2E-Tests",
-    lt: "E2E testavimas",
-    cs: "E2E testování",
-    es: "Pruebas E2E",
-  },
-};
 
 const BLANK_ANSWER_MARKER_REGEX = /<blank-answer-([^>]+)>/g;
 
@@ -155,19 +101,14 @@ export async function createNiceCourses(
         ),
       );
 
-    const categoryTranslations = {
-      [SUPPORTED_LANGUAGES.EN]: courseData.category,
-      ...(CATEGORY_TRANSLATIONS[courseData.category] ?? {}),
-    };
-
     const [category] = existingCategory
       ? [existingCategory]
       : await db
           .insert(categories)
           .values({
-            title: buildJsonbFieldWithMultipleEntries(categoryTranslations),
+            title: buildJsonbField(SUPPORTED_LANGUAGES.EN, courseData.category),
             baseLanguage: SUPPORTED_LANGUAGES.EN,
-            availableLocales: Object.keys(categoryTranslations).filter(isSupportedLanguage),
+            availableLocales: [SUPPORTED_LANGUAGES.EN],
             tenantId,
           })
           .returning();
