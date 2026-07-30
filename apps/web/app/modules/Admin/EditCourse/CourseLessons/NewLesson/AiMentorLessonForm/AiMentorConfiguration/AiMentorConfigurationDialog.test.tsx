@@ -153,4 +153,69 @@ describe("AiMentorConfigurationDialog", () => {
     expect(screen.getByRole("textbox", { name: "Task goal" })).toHaveValue("");
     expect(screen.getByRole("textbox", { name: "Content scope" })).toHaveValue("");
   });
+
+  it("keeps AI assistance in the bottom toolbar and uses the current unsaved draft", async () => {
+    const user = userEvent.setup();
+    const validation = {
+      passed: false,
+      summary: "The scenario needs a more specific constraint.",
+      issues: [
+        {
+          code: "scenario_constraint",
+          severity: "warning" as const,
+          target: { field: "factsAndConstraints" as const },
+          message: "The scenario is underspecified.",
+          correction: "Add a firm budget or deadline.",
+        },
+      ],
+    };
+    const onValidateConfiguration = vi.fn().mockResolvedValue(validation);
+    const onImproveWithAi = vi.fn();
+
+    renderWith().render(
+      <AiMentorConfigurationDialog
+        open
+        onOpenChange={vi.fn()}
+        value={{
+          type: AI_MENTOR_TYPE.ROLEPLAY,
+          scenario: "A customer questions an invoice.",
+          aiRole: "Concerned customer",
+          learnerRole: "Support representative",
+          characterGoal: "Understand the charge",
+          difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+        }}
+        onSaveBaseConfiguration={vi.fn()}
+        onSaveTranslation={vi.fn()}
+        onValidateConfiguration={onValidateConfiguration}
+        onImproveWithAi={onImproveWithAi}
+        language="en"
+        baseLanguage="en"
+        isPersisted
+      />,
+    );
+
+    await user.clear(screen.getByRole("textbox", { name: "Scenario" }));
+    await user.type(
+      screen.getByRole("textbox", { name: "Scenario" }),
+      "An unsaved invoice dispute.",
+    );
+    await user.click(screen.getByRole("button", { name: "AI assistance" }));
+    await user.click(screen.getByRole("menuitem", { name: "Check quality with AI" }));
+
+    expect(onValidateConfiguration).toHaveBeenCalledWith(
+      expect.objectContaining({ scenario: "An unsaved invoice dispute." }),
+      expect.any(AbortSignal),
+    );
+    expect(await screen.findByText("The scenario needs a more specific constraint.")).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: "Improve with AI" }));
+
+    expect(onImproveWithAi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: AI_MENTOR_TYPE.ROLEPLAY,
+        scenario: "An unsaved invoice dispute.",
+      }),
+      validation,
+    );
+  });
 });

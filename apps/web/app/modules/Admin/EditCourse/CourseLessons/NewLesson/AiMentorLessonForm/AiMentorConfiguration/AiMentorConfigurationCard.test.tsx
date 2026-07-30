@@ -53,10 +53,17 @@ describe("AiMentorConfigurationCard", () => {
   });
 
   it("summarizes a configured Roleplay", () => {
-    renderCard({ value: roleplayConfiguration, isPersisted: true });
+    renderCard({
+      value: roleplayConfiguration,
+      isPersisted: true,
+      onImproveWithAi: vi.fn(),
+      onValidateConfiguration: vi.fn(),
+    });
 
     expect(screen.getByText("Roleplay · Concerned customer · Realistic")).toBeVisible();
     expect(screen.getByRole("button", { name: "Review configuration" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Improve with AI" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Check quality with AI" })).not.toBeInTheDocument();
   });
 
   it("requires the base configuration before opening a translation", () => {

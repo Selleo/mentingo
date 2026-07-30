@@ -16,12 +16,7 @@ describe("AiMentorQualityCheckDialog", () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();
     renderWith().render(
-      <AiMentorQualityCheckDialog
-        open
-        isLoading
-        onOpenChange={vi.fn()}
-        onCancel={onCancel}
-      />,
+      <AiMentorQualityCheckDialog isLoading onOpenChange={vi.fn()} onCancel={onCancel} />,
     );
 
     expect(screen.getByText("Checking the current configuration…")).toBeVisible();

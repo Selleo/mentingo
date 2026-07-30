@@ -2461,11 +2461,86 @@
           "createWithAi": "Mit KI erstellen",
           "improveWithAi": "Mit KI verbessern",
           "checkQualityWithAi": "Qualität mit KI prüfen",
+          "aiAssistance": "KI-Unterstützung",
           "improveTypeLocked": "KI verbessert die aktuelle {{type}}-Konfiguration. Der Modus bleibt unverändert.",
-          "create": { "title": "KI-Mentor-Verhalten mit KI erstellen", "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.", "fieldLabel": "Was soll die KI erstellen?", "fieldDescription": "KI erstellt einen vollständigen Entwurf für den ausgewählten Modus.", "placeholder": "Beschreiben Sie das gewünschte Verhalten…", "submit": "Entwurf erstellen" },
-          "improve": { "title": "KI-Mentor-Verhalten mit KI verbessern", "description": "KI verwendet die aktuelle ungespeicherte Konfiguration und ihren Modus.", "fieldLabel": "Was soll die KI verbessern?", "fieldDescription": "Der ausgewählte Modus bleibt unverändert.", "placeholder": "Beschreiben Sie die gewünschte Änderung…", "submit": "Entwurf verbessern" },
-          "progressTitle": "Entwurf wird vorbereitet", "progressDescription": "KI erstellt und prüft die Konfiguration.", "readyTitle": "Entwurf bereit zur Prüfung", "revisionTitle": "Entwurf benötigt Ihre Entscheidung", "failedTitle": "Entwurf konnte nicht erstellt werden", "cancel": "Generierung abbrechen", "revise": "Entwurf überarbeiten", "review": "Konfiguration prüfen",
-          "quality": { "title": "Qualität mit KI prüfen", "description": "KI prüft die aktuelle ungespeicherte Konfiguration, ohne sie zu ändern.", "checking": "Aktuelle Konfiguration wird geprüft…", "improve": "Mit KI verbessern" }
+          "create": {
+            "title": "KI-Mentor-Verhalten mit KI erstellen",
+            "description": "Wählen Sie den Mentor-Modus und beschreiben Sie die gewünschte Erfahrung.",
+            "fieldLabel": "Was soll die KI erstellen?",
+            "fieldDescription": "KI erstellt einen vollständigen Entwurf für den ausgewählten Modus.",
+            "placeholder": "Beschreiben Sie das gewünschte Verhalten…",
+            "submit": "Entwurf erstellen"
+          },
+          "improve": {
+            "title": "KI-Mentor-Verhalten mit KI verbessern",
+            "description": "KI verwendet die aktuelle ungespeicherte Konfiguration und ihren Modus.",
+            "fieldLabel": "Was soll die KI verbessern?",
+            "fieldDescription": "Der ausgewählte Modus bleibt unverändert.",
+            "placeholder": "Beschreiben Sie die gewünschte Änderung…",
+            "submit": "Entwurf verbessern"
+          },
+          "progressTitle": "Entwurf wird vorbereitet",
+          "progressDescription": "KI erstellt und prüft die Konfiguration.",
+          "readyTitle": "Entwurf bereit zur Prüfung",
+          "revisionTitle": "Entwurf benötigt Ihre Entscheidung",
+          "failedTitle": "Entwurf konnte nicht erstellt werden",
+          "cancel": "Generierung abbrechen",
+          "revise": "Entwurf überarbeiten",
+          "review": "Konfiguration prüfen",
+          "progressLabel": "Fortschritt der KI-Mentor-Generierung",
+          "stages": {
+            "draft": "Entwurf erstellen",
+            "qualityCheck": "Qualitätsprüfung",
+            "ready": "Bereit"
+          },
+          "status": {
+            "drafting": "Konfiguration wird erstellt",
+            "evaluating": "Konfigurationsqualität wird geprüft",
+            "revising": "Entwurf wird verbessert",
+            "awaiting_revision": "Qualitätsprüfung benötigt Ihre Entscheidung",
+            "completed": "Konfiguration ist bereit",
+            "requires_review": "Entwurf benötigt Ihre Entscheidung",
+            "failed": "Generierung konnte nicht abgeschlossen werden",
+            "cancelled": "Generierung abgebrochen"
+          },
+          "statusDescription": {
+            "drafting": "Das Mentor-Verhalten für den ausgewählten Modus wird vorbereitet.",
+            "evaluating": "Es wird geprüft, ob das Verhalten klar, vollständig und konsistent ist.",
+            "revising": "Die letzten Korrekturen der Qualitätsprüfung werden angewendet.",
+            "awaiting_revision": "Prüfen Sie die Hinweise vor einem weiteren Versuch.",
+            "completed": "Der Entwurf hat die Qualitätsprüfung bestanden.",
+            "requires_review": "Der letzte Entwurf wurde für Ihre Entscheidung beibehalten.",
+            "failed": "Versuchen Sie es erneut oder konfigurieren Sie das Mentor-Verhalten manuell.",
+            "cancelled": "Es wurden keine Konfigurationsänderungen angewendet."
+          },
+          "attempt": "Entwurf {{attempt}} von {{maxAttempts}}",
+          "currentDraft": "Aktueller Entwurf",
+          "qualityCheckLabel": "Qualitätsprüfung",
+          "qualityDecisionTitle": "{{count}} Verbesserungen vorgeschlagen",
+          "qualityDecisionDescription": "Prüfen Sie die Vorschläge oder fahren Sie mit dieser Konfiguration fort.",
+          "suggestedImprovements": "Vorgeschlagene Verbesserungen",
+          "applyImprovements": "Überarbeiten",
+          "useCurrentDraft": "Weiter",
+          "reviewExactChanges": "Änderungen durch KI ({{count}})",
+          "reviewConfiguration": "Konfiguration prüfen",
+          "showMoreFindings": "{{count}} weitere Hinweise anzeigen",
+          "showFewerFindings": "Weniger Hinweise anzeigen",
+          "review": {
+            "currentDraftTitle": "Aktuellen Entwurf prüfen",
+            "currentDraftDescription": "Dieser Entwurf enthält noch Qualitätsvorschläge. Prüfen Sie ihn vor der Anwendung.",
+            "requiresReviewTitle": "Generierte Konfiguration prüfen",
+            "requiresReviewDescription": "KI hat den letzten Entwurf für Ihre endgültige Entscheidung beibehalten."
+          },
+          "quality": {
+            "title": "Qualität mit KI prüfen",
+            "resultTitle": "Qualitätsprüfung",
+            "description": "KI prüft die aktuelle ungespeicherte Konfiguration, ohne sie zu ändern.",
+            "checking": "Aktuelle Konfiguration wird geprüft…",
+            "checkingDescription": "Modus, Hinweise, Einschränkungen und Gesprächsverhalten werden geprüft.",
+            "hasFindings": "Prüfen Sie die Hinweise oder lassen Sie die Konfiguration anhand des Feedbacks von KI verbessern.",
+            "passed": "Keine Änderungen erforderlich. Sie können weiter bearbeiten oder speichern.",
+            "improve": "Mit KI verbessern"
+          }
         },
         "aiJudge": {
           "cardTitle": "Abschlussbedingungen",

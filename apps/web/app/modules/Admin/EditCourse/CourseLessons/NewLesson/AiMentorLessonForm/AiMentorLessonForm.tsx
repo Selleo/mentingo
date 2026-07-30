@@ -73,19 +73,14 @@ import {
   aiMentorAuthoringReducer,
   INITIAL_AI_MENTOR_AUTHORING_STATE,
 } from "./AiMentorGeneration/aiMentorAuthoring.reducer";
-import {
-  getApplicableAiMentorGeneratedConfiguration,
-  mapAiMentorValidationToQualityResult,
-} from "./AiMentorGeneration/aiMentorGeneration.mappers";
+import { getApplicableAiMentorGeneratedConfiguration } from "./AiMentorGeneration/aiMentorGeneration.mappers";
 import {
   buildAiMentorGenerationInput,
   buildAiMentorValidationInput,
 } from "./AiMentorGeneration/aiMentorGeneration.requests";
 import { AI_MENTOR_GENERATION_MODE } from "./AiMentorGeneration/aiMentorGeneration.types";
 import { AiMentorGenerationDialog } from "./AiMentorGeneration/AiMentorGenerationDialog";
-import { AiMentorQualityCheckDialog } from "./AiMentorGeneration/AiMentorQualityCheckDialog";
 import { useAiMentorConfigurationGeneration } from "./AiMentorGeneration/useAiMentorConfigurationGeneration";
-import { useAiMentorConfigurationValidation } from "./AiMentorGeneration/useAiMentorConfigurationValidation";
 import { AiMentorIdentityFields } from "./components/AiMentorIdentityFields";
 import { AiMentorScenarioFields } from "./components/AiMentorScenarioFields";
 import { AiMentorScenarioTemplateSelect } from "./components/AiMentorScenarioTemplateSelect";
@@ -193,8 +188,6 @@ const AiMentorLessonForm = ({
   const isAiMentorEditorOpen = aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.EDITOR;
   const isAiMentorGenerationDialogOpen =
     aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.GENERATION;
-  const isAiMentorQualityDialogOpen =
-    aiMentorAuthoringState.view === AI_MENTOR_AUTHORING_VIEW.QUALITY;
   const [previewOpen, setPreviewOpen] = useState(false);
   const {
     generationType: capturedAiMentorGenerationType,
@@ -216,9 +209,12 @@ const AiMentorLessonForm = ({
   } = useAiJudgeConfigurationGeneration();
   const { mutateAsync: validateAiJudgeConfiguration, isPending: isValidatingAiJudgeConfiguration } =
     useValidateAiJudgeConfiguration();
-  const { mutateAsync: validateAiMentorConfiguration } = useValidateAiMentorConfiguration();
+  const {
+    mutateAsync: validateAiMentorConfiguration,
+    isPending: isValidatingAiMentorConfiguration,
+  } = useValidateAiMentorConfiguration();
   const validateCurrentAiMentorConfiguration = useCallback(
-    (configuration: AiMentorConfigurationDraft, signal: AbortSignal) =>
+    (configuration: AiMentorConfigurationDraft, signal?: AbortSignal) =>
       validateAiMentorConfiguration({
         data: buildAiMentorValidationInput(
           {
@@ -235,13 +231,6 @@ const AiMentorLessonForm = ({
       }),
     [form, id, lessonToEdit?.id, validateAiMentorConfiguration],
   );
-  const {
-    result: aiMentorQualityValidation,
-    isChecking: isValidatingAiMentorConfiguration,
-    validateConfiguration: validateCurrentAiMentorConfigurationDraft,
-    cancel: cancelAiMentorQualityValidation,
-    clearResult: clearAiMentorQualityValidation,
-  } = useAiMentorConfigurationValidation(validateCurrentAiMentorConfiguration);
   const { mutateAsync: uploadAvatar } = useUploadAiMentorAvatar();
   const {
     mutateAsync: updateAiJudgeConfigurationTranslation,
@@ -432,19 +421,6 @@ const AiMentorLessonForm = ({
     );
   };
 
-  const handleCheckAiMentorQuality = async () => {
-    const currentConfiguration = form.getValues("aiMentorConfiguration");
-    if (!currentConfiguration) return;
-
-    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_QUALITY });
-    const validation = await validateCurrentAiMentorConfigurationDraft(currentConfiguration);
-    if (!validation) {
-      dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
-      return;
-    }
-    setLatestAiMentorValidation(validation);
-  };
-
   const stageGeneratedAiMentorConfiguration = (configuration: AiMentorConfigurationDraft) => {
     hasStagedAiMentorConfigurationRef.current = true;
     form.setValue("aiMentorConfiguration", configuration, {
@@ -493,17 +469,18 @@ const AiMentorLessonForm = ({
     });
   };
 
-  const handleImproveAiMentorAfterQualityCheck = () => {
-    clearAiMentorQualityValidation();
+  const handleImproveAiMentorConfiguration = (
+    configuration: AiMentorConfigurationDraft,
+    validation?: AiMentorValidationResult,
+  ) => {
+    stageGeneratedAiMentorConfiguration(configuration);
+    resetAiMentorConfigurationGeneration();
+    setAiMentorGenerationType(configuration.type);
+    setLatestAiMentorValidation(validation);
     dispatchAiMentorAuthoring({
       type: AI_MENTOR_AUTHORING_ACTION.OPEN_GENERATION,
       mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
     });
-  };
-
-  const handleCancelAiMentorQualityCheck = () => {
-    cancelAiMentorQualityValidation();
-    dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.CLOSE });
   };
 
   const visibleAiMentorGenerationState =
@@ -863,8 +840,9 @@ const AiMentorLessonForm = ({
                 }
                 needsConfiguration={savedAiMentorConfiguration?.needsConfiguration}
                 onCreateWithAi={() => openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.CREATE)}
-                onImproveWithAi={() => openAiMentorGeneration(AI_MENTOR_GENERATION_MODE.IMPROVE)}
-                onCheckQuality={() => void handleCheckAiMentorQuality()}
+                onImproveWithAi={handleImproveAiMentorConfiguration}
+                onValidateConfiguration={validateCurrentAiMentorConfiguration}
+                isValidating={isValidatingAiMentorConfiguration}
                 editorOpen={isAiMentorEditorOpen}
                 onEditorOpenChange={handleAiMentorEditorOpenChange}
                 error={
@@ -887,20 +865,6 @@ const AiMentorLessonForm = ({
                 onCancel={handleCancelAiMentorConfigurationGeneration}
                 onRevise={reviseAiMentorConfigurationGeneration}
                 onReview={handleReviewAiMentorConfiguration}
-              />
-              <AiMentorQualityCheckDialog
-                open={isAiMentorQualityDialogOpen}
-                isLoading={isValidatingAiMentorConfiguration}
-                result={
-                  aiMentorQualityValidation
-                    ? mapAiMentorValidationToQualityResult(aiMentorQualityValidation)
-                    : undefined
-                }
-                onOpenChange={(open) => {
-                  if (!open) handleCancelAiMentorQualityCheck();
-                }}
-                onCancel={handleCancelAiMentorQualityCheck}
-                onImprove={handleImproveAiMentorAfterQualityCheck}
               />
               <AiJudgeConfigurationCard
                 value={aiJudgeConfiguration}

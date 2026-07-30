@@ -8,7 +8,7 @@ type ValidateAiMentorConfiguration = (
   signal: AbortSignal,
 ) => Promise<AiMentorValidationResult>;
 
-export const useAiMentorConfigurationValidation = (validate: ValidateAiMentorConfiguration) => {
+export const useAiMentorConfigurationValidation = (validate?: ValidateAiMentorConfiguration) => {
   const [result, setResult] = useState<AiMentorValidationResult>();
   const [isChecking, setIsChecking] = useState(false);
   const controllerRef = useRef<AbortController>();
@@ -24,6 +24,8 @@ export const useAiMentorConfigurationValidation = (validate: ValidateAiMentorCon
 
   const validateConfiguration = useCallback(
     async (configuration: AiMentorConfigurationDraft) => {
+      if (!validate) return;
+
       controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;

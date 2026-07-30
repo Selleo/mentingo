@@ -2748,11 +2748,86 @@
           "createWithAi": "Utwórz z AI",
           "improveWithAi": "Ulepsz z AI",
           "checkQualityWithAi": "Sprawdź jakość z AI",
+          "aiAssistance": "Pomoc AI",
           "improveTypeLocked": "AI ulepszy bieżącą konfigurację {{type}}. Nie może zmienić trybu.",
-          "create": { "title": "Utwórz zachowanie AI Mentora z AI", "description": "Wybierz tryb Mentora, a następnie opisz oczekiwane doświadczenie.", "fieldLabel": "Co ma utworzyć AI?", "fieldDescription": "AI zwróci kompletny szkic dla wybranego trybu.", "placeholder": "Opisz oczekiwane zachowanie…", "submit": "Wygeneruj szkic" },
-          "improve": { "title": "Ulepsz zachowanie AI Mentora z AI", "description": "AI używa bieżącej, niezapisanej konfiguracji i jej trybu.", "fieldLabel": "Co ma ulepszyć AI?", "fieldDescription": "Wybrany tryb pozostaje bez zmian.", "placeholder": "Opisz oczekiwaną zmianę…", "submit": "Ulepsz szkic" },
-          "progressTitle": "Przygotowywanie szkicu", "progressDescription": "AI generuje i sprawdza konfigurację.", "readyTitle": "Szkic gotowy do przeglądu", "revisionTitle": "Szkic wymaga decyzji", "failedTitle": "Nie udało się wygenerować szkicu", "cancel": "Anuluj generowanie", "revise": "Popraw szkic", "review": "Przejrzyj konfigurację",
-          "quality": { "title": "Sprawdź jakość z AI", "description": "AI sprawdza bieżącą niezapisaną konfigurację bez jej zmiany.", "checking": "Sprawdzanie bieżącej konfiguracji…", "improve": "Ulepsz z AI" }
+          "create": {
+            "title": "Utwórz zachowanie AI Mentora z AI",
+            "description": "Wybierz tryb Mentora, a następnie opisz oczekiwane doświadczenie.",
+            "fieldLabel": "Co ma utworzyć AI?",
+            "fieldDescription": "AI zwróci kompletny szkic dla wybranego trybu.",
+            "placeholder": "Opisz oczekiwane zachowanie…",
+            "submit": "Wygeneruj szkic"
+          },
+          "improve": {
+            "title": "Ulepsz zachowanie AI Mentora z AI",
+            "description": "AI używa bieżącej, niezapisanej konfiguracji i jej trybu.",
+            "fieldLabel": "Co ma ulepszyć AI?",
+            "fieldDescription": "Wybrany tryb pozostaje bez zmian.",
+            "placeholder": "Opisz oczekiwaną zmianę…",
+            "submit": "Ulepsz szkic"
+          },
+          "progressTitle": "Przygotowywanie szkicu",
+          "progressDescription": "AI generuje i sprawdza konfigurację.",
+          "readyTitle": "Szkic gotowy do przeglądu",
+          "revisionTitle": "Szkic wymaga decyzji",
+          "failedTitle": "Nie udało się wygenerować szkicu",
+          "cancel": "Anuluj generowanie",
+          "revise": "Popraw szkic",
+          "review": "Przejrzyj konfigurację",
+          "progressLabel": "Postęp generowania konfiguracji AI Mentora",
+          "stages": {
+            "draft": "Generowanie szkicu",
+            "qualityCheck": "Kontrola jakości",
+            "ready": "Gotowe"
+          },
+          "status": {
+            "drafting": "Generowanie konfiguracji",
+            "evaluating": "Sprawdzanie jakości konfiguracji",
+            "revising": "Ulepszanie szkicu",
+            "awaiting_revision": "Kontrola jakości wymaga decyzji",
+            "completed": "Konfiguracja jest gotowa",
+            "requires_review": "Szkic wymaga decyzji",
+            "failed": "Nie udało się ukończyć generowania",
+            "cancelled": "Generowanie anulowane"
+          },
+          "statusDescription": {
+            "drafting": "Przygotowywanie zachowania Mentora dla wybranego trybu.",
+            "evaluating": "Sprawdzanie, czy zachowanie jest jasne, kompletne i spójne.",
+            "revising": "Wprowadzanie poprawek z ostatniej kontroli jakości.",
+            "awaiting_revision": "Przejrzyj uwagi przed rozpoczęciem kolejnej próby.",
+            "completed": "Szkic przeszedł kontrolę jakości.",
+            "requires_review": "Zachowano najnowszy szkic, aby umożliwić podjęcie decyzji.",
+            "failed": "Spróbuj ponownie lub skonfiguruj zachowanie Mentora ręcznie.",
+            "cancelled": "Nie zastosowano żadnych zmian konfiguracji."
+          },
+          "attempt": "Szkic {{attempt}} z {{maxAttempts}}",
+          "currentDraft": "Bieżący szkic",
+          "qualityCheckLabel": "Kontrola jakości",
+          "qualityDecisionTitle": "Sugerowane ulepszenia: {{count}}",
+          "qualityDecisionDescription": "Przejrzyj sugestie lub kontynuuj z tą konfiguracją.",
+          "suggestedImprovements": "Sugerowane ulepszenia",
+          "applyImprovements": "Popraw",
+          "useCurrentDraft": "Kontynuuj",
+          "reviewExactChanges": "Zmiany wprowadzone przez AI ({{count}})",
+          "reviewConfiguration": "Przejrzyj konfigurację",
+          "showMoreFindings": "Pokaż więcej uwag: {{count}}",
+          "showFewerFindings": "Pokaż mniej uwag",
+          "review": {
+            "currentDraftTitle": "Przejrzyj bieżący szkic",
+            "currentDraftDescription": "Szkic nadal ma sugestie jakościowe. Przejrzyj go przed zastosowaniem.",
+            "requiresReviewTitle": "Przejrzyj wygenerowaną konfigurację",
+            "requiresReviewDescription": "AI zachowało najnowszy szkic, aby umożliwić podjęcie ostatecznej decyzji."
+          },
+          "quality": {
+            "title": "Sprawdź jakość z AI",
+            "resultTitle": "Kontrola jakości",
+            "description": "AI sprawdza bieżącą niezapisaną konfigurację bez jej zmiany.",
+            "checking": "Sprawdzanie bieżącej konfiguracji…",
+            "checkingDescription": "Sprawdzanie trybu, wskazówek, ograniczeń i zachowania w rozmowie.",
+            "hasFindings": "Przejrzyj uwagi lub pozwól AI ulepszyć konfigurację na ich podstawie.",
+            "passed": "Nie są wymagane zmiany. Możesz kontynuować edycję lub zapisać konfigurację.",
+            "improve": "Ulepsz z AI"
+          }
         },
         "aiJudge": {
           "cardTitle": "Warunki zaliczenia",

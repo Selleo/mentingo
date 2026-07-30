@@ -2460,11 +2460,86 @@
           "createWithAi": "Vytvořit pomocí AI",
           "improveWithAi": "Vylepšit pomocí AI",
           "checkQualityWithAi": "Zkontrolovat kvalitu pomocí AI",
+          "aiAssistance": "Pomoc AI",
           "improveTypeLocked": "AI zlepší aktuální konfiguraci {{type}}. Režim nelze změnit.",
-          "create": { "title": "Vytvořit chování AI Mentora pomocí AI", "description": "Vyberte režim mentora a popište požadovaný zážitek.", "fieldLabel": "Co má AI vytvořit?", "fieldDescription": "AI vrátí úplný návrh pro vybraný režim.", "placeholder": "Popište požadované chování…", "submit": "Vygenerovat návrh" },
-          "improve": { "title": "Vylepšit chování AI Mentora pomocí AI", "description": "AI používá aktuální neuloženou konfiguraci a její režim.", "fieldLabel": "Co má AI vylepšit?", "fieldDescription": "Vybraný režim zůstává beze změny.", "placeholder": "Popište požadovanou změnu…", "submit": "Vylepšit návrh" },
-          "progressTitle": "Připravuje se návrh", "progressDescription": "AI vytváří a kontroluje konfiguraci.", "readyTitle": "Návrh je připraven k revizi", "revisionTitle": "Návrh vyžaduje vaše rozhodnutí", "failedTitle": "Návrh se nepodařilo vytvořit", "cancel": "Zrušit generování", "revise": "Upravit návrh", "review": "Zkontrolovat konfiguraci",
-          "quality": { "title": "Zkontrolovat kvalitu pomocí AI", "description": "AI zkontroluje aktuální neuloženou konfiguraci bez její změny.", "checking": "Kontroluje se aktuální konfigurace…", "improve": "Vylepšit pomocí AI" }
+          "create": {
+            "title": "Vytvořit chování AI Mentora pomocí AI",
+            "description": "Vyberte režim mentora a popište požadovaný zážitek.",
+            "fieldLabel": "Co má AI vytvořit?",
+            "fieldDescription": "AI vrátí úplný návrh pro vybraný režim.",
+            "placeholder": "Popište požadované chování…",
+            "submit": "Vygenerovat návrh"
+          },
+          "improve": {
+            "title": "Vylepšit chování AI Mentora pomocí AI",
+            "description": "AI používá aktuální neuloženou konfiguraci a její režim.",
+            "fieldLabel": "Co má AI vylepšit?",
+            "fieldDescription": "Vybraný režim zůstává beze změny.",
+            "placeholder": "Popište požadovanou změnu…",
+            "submit": "Vylepšit návrh"
+          },
+          "progressTitle": "Připravuje se návrh",
+          "progressDescription": "AI vytváří a kontroluje konfiguraci.",
+          "readyTitle": "Návrh je připraven k revizi",
+          "revisionTitle": "Návrh vyžaduje vaše rozhodnutí",
+          "failedTitle": "Návrh se nepodařilo vytvořit",
+          "cancel": "Zrušit generování",
+          "revise": "Upravit návrh",
+          "review": "Zkontrolovat konfiguraci",
+          "progressLabel": "Průběh generování AI Mentora",
+          "stages": {
+            "draft": "Generování návrhu",
+            "qualityCheck": "Kontrola kvality",
+            "ready": "Připraveno"
+          },
+          "status": {
+            "drafting": "Generuje se konfigurace",
+            "evaluating": "Kontroluje se kvalita konfigurace",
+            "revising": "Vylepšuje se návrh",
+            "awaiting_revision": "Kontrola kvality vyžaduje vaše rozhodnutí",
+            "completed": "Konfigurace je připravena",
+            "requires_review": "Návrh vyžaduje vaše rozhodnutí",
+            "failed": "Generování se nepodařilo dokončit",
+            "cancelled": "Generování zrušeno"
+          },
+          "statusDescription": {
+            "drafting": "Připravuje se chování Mentora pro vybraný režim.",
+            "evaluating": "Kontroluje se, zda je chování jasné, úplné a konzistentní.",
+            "revising": "Používají se nejnovější opravy z kontroly kvality.",
+            "awaiting_revision": "Před dalším pokusem si projděte zjištění.",
+            "completed": "Návrh prošel kontrolou kvality.",
+            "requires_review": "Nejnovější návrh byl zachován pro vaše rozhodnutí.",
+            "failed": "Zkuste to znovu nebo nastavte chování Mentora ručně.",
+            "cancelled": "Nebyly použity žádné změny konfigurace."
+          },
+          "attempt": "Návrh {{attempt}} z {{maxAttempts}}",
+          "currentDraft": "Aktuální návrh",
+          "qualityCheckLabel": "Kontrola kvality",
+          "qualityDecisionTitle": "Navrhovaná vylepšení: {{count}}",
+          "qualityDecisionDescription": "Projděte si návrhy nebo pokračujte s touto konfigurací.",
+          "suggestedImprovements": "Navrhovaná vylepšení",
+          "applyImprovements": "Upravit",
+          "useCurrentDraft": "Pokračovat",
+          "reviewExactChanges": "Změny provedené AI ({{count}})",
+          "reviewConfiguration": "Zkontrolovat konfiguraci",
+          "showMoreFindings": "Zobrazit dalších {{count}} zjištění",
+          "showFewerFindings": "Zobrazit méně zjištění",
+          "review": {
+            "currentDraftTitle": "Zkontrolovat aktuální návrh",
+            "currentDraftDescription": "Tento návrh stále obsahuje doporučení ke kvalitě. Před použitím jej zkontrolujte.",
+            "requiresReviewTitle": "Zkontrolovat vygenerovanou konfiguraci",
+            "requiresReviewDescription": "AI zachovala nejnovější návrh pro vaše konečné rozhodnutí."
+          },
+          "quality": {
+            "title": "Zkontrolovat kvalitu pomocí AI",
+            "resultTitle": "Kontrola kvality",
+            "description": "AI zkontroluje aktuální neuloženou konfiguraci bez její změny.",
+            "checking": "Kontroluje se aktuální konfigurace…",
+            "checkingDescription": "Kontroluje se režim, pokyny, omezení a chování konverzace.",
+            "hasFindings": "Projděte si zjištění nebo nechte AI konfiguraci podle nich vylepšit.",
+            "passed": "Nejsou potřeba žádné změny. Můžete pokračovat v úpravách nebo konfiguraci uložit.",
+            "improve": "Vylepšit pomocí AI"
+          }
         },
         "aiJudge": {
           "cardTitle": "Podmínky dokončení",

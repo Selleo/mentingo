@@ -2526,6 +2526,7 @@
           "createWithAi": "Create with AI",
           "improveWithAi": "Improve with AI",
           "checkQualityWithAi": "Check quality with AI",
+          "aiAssistance": "AI assistance",
           "improveTypeLocked": "AI will improve the current {{type}} configuration. It cannot change the mode.",
           "create": {
             "title": "Create AI Mentor behavior with AI",
@@ -2551,10 +2552,58 @@
           "cancel": "Cancel generation",
           "revise": "Revise draft",
           "review": "Review configuration",
+          "progressLabel": "AI Mentor generation progress",
+          "stages": {
+            "draft": "Generating draft",
+            "qualityCheck": "Quality check",
+            "ready": "Ready"
+          },
+          "status": {
+            "drafting": "Generating the configuration",
+            "evaluating": "Checking configuration quality",
+            "revising": "Improving the draft",
+            "awaiting_revision": "Quality check needs your decision",
+            "completed": "Configuration is ready",
+            "requires_review": "Draft requires your decision",
+            "failed": "Generation could not be completed",
+            "cancelled": "Generation cancelled"
+          },
+          "statusDescription": {
+            "drafting": "Preparing the Mentor behavior for the selected mode.",
+            "evaluating": "Checking whether the behavior is clear, complete, and consistent.",
+            "revising": "Applying the latest quality-check corrections.",
+            "awaiting_revision": "Review the findings before starting another generation attempt.",
+            "completed": "The draft passed the quality check.",
+            "requires_review": "The latest draft was kept so you can decide what to change.",
+            "failed": "Try again or configure the Mentor behavior manually.",
+            "cancelled": "No configuration changes were applied."
+          },
+          "attempt": "Draft {{attempt}} of {{maxAttempts}}",
+          "currentDraft": "Current draft",
+          "qualityCheckLabel": "Quality check",
+          "qualityDecisionTitle": "{{count}} improvements suggested",
+          "qualityDecisionDescription": "Review the suggestions or continue with this configuration.",
+          "suggestedImprovements": "Suggested improvements",
+          "applyImprovements": "Revise",
+          "useCurrentDraft": "Continue",
+          "reviewExactChanges": "What AI changed ({{count}})",
+          "reviewConfiguration": "Review configuration",
+          "showMoreFindings": "Show {{count}} more findings",
+          "showFewerFindings": "Show fewer findings",
+          "review": {
+            "currentDraftTitle": "Review the current draft",
+            "currentDraftDescription": "This draft still has quality suggestions. Review it before applying it.",
+            "requiresReviewTitle": "Review the generated configuration",
+            "requiresReviewDescription": "AI kept the latest draft so you can make the final decision."
+          },
           "quality": {
             "title": "Check quality with AI",
+            "resultTitle": "Quality check",
             "description": "AI reviews the current unsaved configuration without changing it.",
             "checking": "Checking the current configuration…",
+            "checkingDescription": "Reviewing the selected mode, guidance, constraints, and conversation behavior.",
+            "hasFindings": "Review the findings or let AI improve the configuration using this feedback.",
+            "passed": "No changes are required. You can continue editing or save the configuration.",
             "improve": "Improve with AI"
           }
         },

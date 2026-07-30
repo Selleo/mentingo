@@ -1,8 +1,6 @@
-import {
-  AI_MENTOR_CONFIGURATION_GENERATION_STATUS,
-  AI_MENTOR_TYPE,
-} from "@repo/shared";
-import { useState } from "react";
+import { AI_MENTOR_CONFIGURATION_GENERATION_STATUS, AI_MENTOR_TYPE } from "@repo/shared";
+import { AlertCircle, CircleAlert } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { BaseEditor } from "~/components/RichText/Editor";
@@ -21,6 +19,16 @@ import { cn } from "~/lib/utils";
 import { stripHtmlTags } from "~/utils/stripHtmlTags";
 
 import { AI_MENTOR_GENERATION_MODE } from "./aiMentorGeneration.types";
+import { AiMentorGenerationProgressView } from "./AiMentorGenerationProgressView";
+import {
+  AiMentorGenerationQualityReviewFooter,
+  AiMentorGenerationQualityReviewView,
+} from "./AiMentorGenerationQualityReview";
+import {
+  AiMentorGenerationReviewFooter,
+  AiMentorGenerationReviewView,
+} from "./AiMentorGenerationReview";
+import { AiMentorGenerationStageTracker } from "./AiMentorGenerationStageTracker";
 
 import type {
   AiMentorGenerationMode,
@@ -67,8 +75,14 @@ export const AiMentorGenerationDialog = ({
 }: AiMentorGenerationDialogProps) => {
   const { t } = useTranslation();
   const [brief, setBrief] = useState("");
+  const [isReviewingCurrentDraft, setIsReviewingCurrentDraft] = useState(false);
   const active = isActive(state);
   const isCreate = mode === AI_MENTOR_GENERATION_MODE.CREATE;
+
+  useEffect(() => {
+    if (!open || state?.status !== AI_MENTOR_CONFIGURATION_GENERATION_STATUS.AWAITING_REVISION)
+      setIsReviewingCurrentDraft(false);
+  }, [open, state?.status]);
 
   const submit = () => {
     const normalizedBrief = stripHtmlTags(brief).trim();
@@ -105,10 +119,14 @@ export const AiMentorGenerationDialog = ({
               >
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold">
-                    {t(`adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.label`)}
+                    {t(
+                      `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.label`,
+                    )}
                   </span>
                   <span className="mt-1 block text-xs text-neutral-600">
-                    {t(`adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.description`)}
+                    {t(
+                      `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${type}.description`,
+                    )}
                   </span>
                 </span>
                 <RadioGroupItem id={`ai-mentor-generation-${type}`} value={type} />
@@ -120,12 +138,16 @@ export const AiMentorGenerationDialog = ({
       {!isCreate && (
         <p className="rounded-md bg-neutral-50 p-3 text-sm text-neutral-600">
           {t("adminCourseView.curriculum.lesson.aiMentorGeneration.improveTypeLocked", {
-            type: t(`adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${selectedType}.label`),
+            type: t(
+              `adminCourseView.curriculum.lesson.aiMentorConfiguration.mode.${selectedType}.label`,
+            ),
           })}
         </p>
       )}
       <div>
-        <Label>{t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.fieldLabel`)}</Label>
+        <Label>
+          {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.fieldLabel`)}
+        </Label>
         <p className="mt-1 text-sm text-neutral-600">
           {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.fieldDescription`)}
         </p>
@@ -136,124 +158,132 @@ export const AiMentorGenerationDialog = ({
           parentClassName="mt-3 flex h-44 flex-col"
           contentClassName="min-h-0 flex-1 overflow-y-auto"
           editorClassName="!min-h-0"
-          placeholder={t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.placeholder`)}
+          placeholder={t(
+            `adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.placeholder`,
+          )}
         />
       </div>
     </div>
   );
 
-  const renderProgress = () => (
-    <div className="flex min-h-48 flex-col items-center justify-center text-center">
-      <p className="font-semibold">{t("adminCourseView.curriculum.lesson.aiMentorGeneration.progressTitle")}</p>
-      <p className="mt-2 text-sm text-neutral-600">
-        {t("adminCourseView.curriculum.lesson.aiMentorGeneration.progressDescription")}
-      </p>
-    </div>
-  );
-
-  const renderTerminal = () => {
+  const content = (() => {
     if (!state) return renderBrief();
-    const requiresRevision =
-      state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.AWAITING_REVISION;
-    const failed =
-      state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.FAILED ||
-      state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.CANCELLED;
-    const titleKey = (() => {
-      if (failed) return "adminCourseView.curriculum.lesson.aiMentorGeneration.failedTitle";
-      if (requiresRevision) return "adminCourseView.curriculum.lesson.aiMentorGeneration.revisionTitle";
-      return "adminCourseView.curriculum.lesson.aiMentorGeneration.readyTitle";
-    })();
-    return (
-      <div className="space-y-4">
-        <p className="font-semibold">{t(titleKey)}</p>
-        {state.quality && <p className="text-sm text-neutral-600">{state.quality.summary}</p>}
-        {state.changes.length > 0 && (
-          <ul className="divide-y rounded-md border">
-            {state.changes.map((change) => (
-              <li key={change.field} className="p-3 text-sm">
-                <span className="font-medium">{change.field}</span>
-                <span className="block text-neutral-600">{change.after}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {state.error && <p className="text-sm text-error-700">{state.error}</p>}
-      </div>
+
+    if (isReviewingCurrentDraft)
+      return <AiMentorGenerationReviewView state={state} mode={mode} isCurrentDraftReview />;
+
+    switch (state.status) {
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.DRAFTING:
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.EVALUATING:
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.REVISING:
+        return <AiMentorGenerationProgressView state={state} mode={mode} onCancel={onCancel} />;
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.AWAITING_REVISION:
+        return <AiMentorGenerationQualityReviewView state={state} />;
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.COMPLETED:
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.REQUIRES_REVIEW:
+        return <AiMentorGenerationReviewView state={state} mode={mode} />;
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.FAILED:
+      case AI_MENTOR_CONFIGURATION_GENERATION_STATUS.CANCELLED:
+        return (
+          <div className="flex items-start gap-3 rounded-lg border border-neutral-200 p-4">
+            {state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.FAILED ? (
+              <AlertCircle className="mt-0.5 size-5 shrink-0 text-error-700" aria-hidden />
+            ) : (
+              <CircleAlert className="mt-0.5 size-5 shrink-0 text-neutral-600" aria-hidden />
+            )}
+            <div>
+              <p className="font-semibold text-neutral-950">
+                {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.status.${state.status}`)}
+              </p>
+              <p className="mt-1 text-sm text-neutral-600">
+                {state.error ??
+                  t(
+                    `adminCourseView.curriculum.lesson.aiMentorGeneration.statusDescription.${state.status}`,
+                  )}
+              </p>
+            </div>
+          </div>
+        );
+    }
+  })();
+  const qualityReviewFooter = state?.status ===
+    AI_MENTOR_CONFIGURATION_GENERATION_STATUS.AWAITING_REVISION &&
+    !isReviewingCurrentDraft && (
+      <AiMentorGenerationQualityReviewFooter
+        state={state}
+        onRevise={() => onRevise?.()}
+        onContinue={() => setIsReviewingCurrentDraft(true)}
+      />
     );
-  };
-
-  const showProgress = active;
-  const isAwaitingRevision =
-    state?.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.AWAITING_REVISION;
-  const canReview = Boolean(
-    state &&
-      (state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.COMPLETED ||
-        state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.REQUIRES_REVIEW),
+  const shouldShowReviewFooter =
+    isReviewingCurrentDraft ||
+    state?.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.COMPLETED ||
+    state?.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.REQUIRES_REVIEW;
+  const reviewFooter = shouldShowReviewFooter && state?.draft && (
+    <AiMentorGenerationReviewFooter
+      draft={state.draft}
+      onReviewConfiguration={() => onReview?.(state)}
+    />
   );
-
-  const renderFooter = () => {
-    if (active)
-      return (
-        <Button type="button" variant="outline" onClick={() => void onCancel?.()}>
-          {t("adminCourseView.curriculum.lesson.aiMentorGeneration.cancel")}
-        </Button>
-      );
-
-    if (isAwaitingRevision)
-      return (
-        <Button type="button" onClick={() => void onRevise?.()}>
-          {t("adminCourseView.curriculum.lesson.aiMentorGeneration.revise")}
-        </Button>
-      );
-
-    if (canReview && state)
-      return (
-        <Button type="button" onClick={() => onReview?.(state)}>
-          {t("adminCourseView.curriculum.lesson.aiMentorGeneration.review")}
-        </Button>
-      );
-
-    if (state)
-      return (
+  const terminalFooter = state &&
+    (state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.FAILED ||
+      state.status === AI_MENTOR_CONFIGURATION_GENERATION_STATUS.CANCELLED) && (
+      <DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:py-4">
         <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
           {t("common.button.close")}
         </Button>
-      );
-
-    return (
-      <>
-        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-          {t("common.button.cancel")}
-        </Button>
-        <Button type="button" onClick={submit}>
-          {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.submit`)}
-        </Button>
-      </>
+      </DialogFooter>
     );
-  };
+  const briefFooter = !state && (
+    <DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-4 sm:px-6 sm:py-4">
+      <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        {t("common.button.cancel")}
+      </Button>
+      <Button type="button" onClick={submit}>
+        {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.submit`)}
+      </Button>
+    </DialogFooter>
+  );
 
   return (
     <Dialog open={open} onOpenChange={active ? () => undefined : onOpenChange}>
       <DialogContent
         variant="mobileDrawer"
         data-testid="curriculum-ai-mentor-generation-dialog"
-        className="!flex h-[85dvh] !flex-col sm:h-auto sm:w-[min(92vw,48rem)] sm:!max-w-none"
+        className={cn("!flex h-[88dvh] !flex-col sm:h-auto sm:max-h-[92dvh] sm:!max-w-none", {
+          "sm:w-[min(92vw,48rem)]": !state,
+          "sm:w-[min(92vw,52rem)]": Boolean(state),
+        })}
         noCloseButton={active}
       >
-        <DialogHeader className="shrink-0 border-b border-neutral-200 px-5 py-4 pr-14 sm:px-6">
-          <DialogTitle>
+        <DialogHeader className="shrink-0 border-b border-neutral-200 px-5 py-4 pr-14 sm:px-6 sm:py-5">
+          <DialogTitle className="text-xl">
             {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.title`)}
           </DialogTitle>
           <DialogDescription>
             {t(`adminCourseView.curriculum.lesson.aiMentorGeneration.${mode}.description`)}
           </DialogDescription>
         </DialogHeader>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
-          {showProgress ? renderProgress() : renderTerminal()}
+
+        {state && (
+          <div className="shrink-0 border-b border-neutral-100 px-5 py-4 sm:px-6">
+            <AiMentorGenerationStageTracker
+              status={
+                isReviewingCurrentDraft
+                  ? AI_MENTOR_CONFIGURATION_GENERATION_STATUS.COMPLETED
+                  : state.status
+              }
+            />
+          </div>
+        )}
+
+        <div className="min-h-0 flex-1 overscroll-contain overflow-y-auto px-5 py-5 [-webkit-overflow-scrolling:touch] sm:px-6">
+          {content}
         </div>
-        <DialogFooter className="shrink-0 border-t border-neutral-200 px-5 py-4 sm:px-6">
-          {renderFooter()}
-        </DialogFooter>
+        {briefFooter}
+        {qualityReviewFooter}
+        {reviewFooter}
+        {terminalFooter}
       </DialogContent>
     </Dialog>
   );
