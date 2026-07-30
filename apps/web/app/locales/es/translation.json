@@ -44,7 +44,8 @@
       "de": "Alemán",
       "lt": "Lituano",
       "cs": "Checo",
-      "es": "Español"
+      "es": "Español",
+      "fr": "Francés"
     },
     "lessonTypes": {
       "content": "Contenido",
@@ -877,7 +878,8 @@
       "german": "Alemán",
       "czech": "Checo",
       "lithuanian": "Lituano",
-      "spanish": "Español"
+      "spanish": "Español",
+      "french": "Francés"
     }
   },
   "resetOnboarding": {

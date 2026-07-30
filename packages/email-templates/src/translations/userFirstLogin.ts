@@ -51,6 +51,14 @@ export const getUserFirstLoginEmailTranslations = (language: SupportedLanguages,
       ],
       buttonText: "MIS CURSOS",
     },
+    fr: {
+      heading: "Bienvenue",
+      paragraphs: [
+        "Nous sommes ravis de vous accueillir 🙂",
+        `Votre première connexion a réussi. ${name}, consultez les cours qui vous sont attribués.`,
+      ],
+      buttonText: "MES COURS",
+    },
   };
 
   return emailContent[language];

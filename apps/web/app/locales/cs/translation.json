@@ -44,7 +44,8 @@
       "de": "Němčina",
       "lt": "Litevština",
       "cs": "Čeština",
-      "es": "španělština"
+      "es": "Španělština",
+      "fr": "Francouzština"
     },
     "lessonTypes": {
       "content": "Obsah",
@@ -886,7 +887,8 @@
       "german": "Němčina",
       "czech": "Čeština",
       "lithuanian": "Litevština",
-      "spanish": "Španělština"
+      "spanish": "Španělština",
+      "french": "Francouzština"
     }
   },
   "resetOnboarding": {

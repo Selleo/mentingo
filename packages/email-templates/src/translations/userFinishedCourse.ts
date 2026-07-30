@@ -55,6 +55,14 @@ export const getUserFinishedCourseEmailTranslations = (
       ],
       buttonText: hasCertificate ? "DESCARGAR CERTIFICADO" : "CONTINUAR APRENDIENDO",
     },
+    fr: {
+      heading: "Cours terminé",
+      paragraphs: [
+        "Félicitations ! 🏁",
+        `Vous avez terminé le cours ${courseName}. ${hasCertificate ? "Votre certificat est prêt à être téléchargé ; consultez également les prochaines étapes recommandées." : ""}`,
+      ],
+      buttonText: hasCertificate ? "TÉLÉCHARGER LE CERTIFICAT" : "CONTINUER À APPRENDRE",
+    },
   };
 
   return emailContent[language];

@@ -45,7 +45,8 @@
       "de": "Niemiecki",
       "lt": "Litewski",
       "cs": "Czeski",
-      "es": "hiszpański"
+      "es": "Hiszpański",
+      "fr": "Francuski"
     },
     "lessonTypes": {
       "content": "Treść",
@@ -1126,7 +1127,8 @@
       "german": "Niemiecki",
       "czech": "Czeski",
       "lithuanian": "Litewski",
-      "spanish": "Hiszpański"
+      "spanish": "Hiszpański",
+      "french": "Francuski"
     }
   },
   "resetOnboarding": {
