@@ -1,5 +1,4 @@
 import { TabsList } from "@radix-ui/react-tabs";
-import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { match } from "ts-pattern";
@@ -19,7 +18,6 @@ import {
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsTrigger } from "~/components/ui/tabs";
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { usePermissions } from "~/hooks/usePermissions";
 import { LessonType } from "~/modules/Admin/EditCourse/EditCourse.types";
 import {
   SearchFilter,
@@ -54,6 +52,7 @@ import type { CourseStudentsQuizResultsQueryParams } from "~/api/queries/admin/u
 
 interface CourseAdminStatisticsProps {
   course?: GetCourseResponse["data"];
+  canManageCourse: boolean;
 }
 
 export const formatLearningTime = (totalSeconds: number) => {
@@ -70,14 +69,10 @@ export const formatLearningTime = (totalSeconds: number) => {
   return `${seconds}s`;
 };
 
-export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
+export function CourseAdminStatistics({ course, canManageCourse }: CourseAdminStatisticsProps) {
   const { t } = useTranslation();
   const language = useLanguageStore((state) => state.language);
   const courseId = course?.id || "";
-
-  const { hasAccess: canManageCourses } = usePermissions({
-    required: [PERMISSIONS.COURSE_UPDATE, PERMISSIONS.COURSE_UPDATE_OWN],
-  });
 
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
 
@@ -128,18 +123,18 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
   const { data: learningTimeFilterOptions } = useCourseStatisticsFilter({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canManageCourse,
     language,
   });
 
   const { data: courseStatistics } = useCourseStatistics({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canManageCourse,
     query: courseStatisticsParams,
   });
   const { data: averageQuizScores } = useCourseAverageScorePerQuiz({
     id: courseId,
-    enabled: canManageCourses,
+    enabled: canManageCourse,
     query: { ...courseStatisticsParams, language },
   });
   const { data: aiConfigured } = useAIConfigured();
@@ -148,7 +143,7 @@ export function CourseAdminStatistics({ course }: CourseAdminStatisticsProps) {
 
   const { data: aiMentorResultsPreview } = useCourseStudentsAiMentorResults({
     id: courseId,
-    enabled: canManageCourses && Boolean(courseId),
+    enabled: canManageCourse && Boolean(courseId),
     query: {
       page: 1,
       perPage: 1,

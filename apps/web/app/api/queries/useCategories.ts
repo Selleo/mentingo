@@ -11,7 +11,6 @@ import type { SupportedLanguages } from "@repo/shared";
 
 type CategorySearchParams = {
   title?: string;
-  archived?: boolean;
   language?: SupportedLanguages;
 };
 
@@ -31,9 +30,6 @@ const getCategoriesRequestParams = (
   page,
   perPage,
   ...(searchParams?.title && { title: searchParams.title }),
-  ...(searchParams?.archived !== undefined && {
-    archived: String(searchParams.archived),
-  }),
   ...(searchParams?.language && { language: searchParams.language }),
 });
 

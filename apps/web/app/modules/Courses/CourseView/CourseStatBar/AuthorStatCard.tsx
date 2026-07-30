@@ -43,7 +43,7 @@ export default function AuthorStatCard({
       <div className="absolute inset-y-0 left-0 w-1 bg-primary-700" aria-hidden="true" />
       <div className="flex items-center gap-4">
         <UserAvatar
-          userName={`${author?.firstName} ${author?.lastName}`}
+          userName={authorName}
           profilePictureUrl={author?.profilePictureUrl}
           className="size-8"
         />

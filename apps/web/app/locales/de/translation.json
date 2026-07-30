@@ -1931,6 +1931,7 @@
         "imageUploadFailed": "Das Kursbild konnte nicht hochgeladen werden.",
         "updateFailed": "Die Kursmedien konnten nicht aktualisiert werden."
       },
+      "statisticsAccessForbidden": "Sie haben keine Berechtigung, die Statistiken für diesen Kurs anzuzeigen.",
       "create": {
         "courseFailed": "Kurs konnte nicht erstellt werden.",
         "stripeProductFailed": "Zahlungsprodukt für den Kurs konnte nicht erstellt werden."
@@ -4979,7 +4980,7 @@
       "statistics": "Statistiken",
       "edit": "Inhalt bearbeiten",
       "missingTranslationsTitle": "Fehlende Übersetzungen",
-      "missingTranslationsDescription": "Einige Kapitel- oder Lektionstitel werden in der Standardsprache angezeigt.",
+      "missingTranslationsDescription": "Einige Kursinhalte sind in der ausgewählten Sprache nicht übersetzt.",
       "completedChapters_one": "{{count}} abgeschlossenes Kapitel",
       "completedChapters_other": "{{count}} abgeschlossene Kapitel",
       "lessons_one": "{{count}} Lektion",

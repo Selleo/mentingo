@@ -179,7 +179,7 @@ export const getNavigationConfig = (
         {
           label: t("navigationSideBar.categories"),
           path: "admin/categories",
-          iconName: "Category",
+          iconName: "Categories",
           testId: NAVIGATION_HANDLES.CATEGORIES_LINK,
         },
         ...(isStripeConfigured

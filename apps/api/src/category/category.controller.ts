@@ -42,7 +42,6 @@ export class CategoryController {
     response: paginatedResponse(Type.Array(categorySchema)),
     request: [
       { type: "query", name: "title", schema: Type.String() },
-      { type: "query", name: "archived", schema: Type.String() },
       { type: "query", name: "page", schema: Type.Number({ minimum: 1 }) },
       { type: "query", name: "perPage", schema: Type.Number() },
       { type: "query", name: "sort", schema: sortCategoryFieldsOptions },
@@ -51,14 +50,13 @@ export class CategoryController {
   })
   async getAllCategories(
     @Query("title") title: string,
-    @Query("archived") archived: string,
     @Query("page") page: number,
     @Query("perPage") perPage: number,
     @Query("sort") sort: SortCategoryFieldsOptions,
     @Query("language") language: SupportedLanguages | undefined,
     @CurrentUser() currentUser?: CurrentUserType,
   ): Promise<PaginatedResponse<AllCategoriesResponse>> {
-    const filters = { archived, title };
+    const filters = { title };
     const query = { filters, language, page, perPage, sort };
 
     const data = await this.categoryService.getCategories(query, currentUser?.permissions);

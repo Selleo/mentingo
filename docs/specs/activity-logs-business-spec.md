@@ -23,6 +23,7 @@ The main workflow is investigation: an admin opens Activity Logs, searches for a
 - Narrow investigations to a date range.
 - Expand individual rows to inspect structured details such as changed fields, before/after values, and event context.
 - Track key platform events across authentication, users, groups, courses, lessons, chapters, announcements, settings, categories, Q&A, news, articles, live training, certificates, and integrations.
+- Record successful single-course and bulk-course deletions, including enough course context to investigate hard-deleted courses later.
 - Preserve actor identity, actor role, timestamp, action type, resource type, and resource reference where the source event provides it.
 
 ## End-User Value
@@ -37,7 +38,7 @@ An administrator opens `/admin/activity-logs` from the admin navigation. Menting
 
 The general search is intentionally broader than the older email-only filter: it can find values stored in the actor email, actor role, resource ID, and serialized event metadata. The backend still accepts the previous actor-email query parameter for compatibility, and when both the old email filter and the broader keyword search are present, both filters must match.
 
-When supported domain events happen elsewhere in Mentingo, the activity-log handlers translate those events into audit entries. In normal runtime those entries are queued for persistence so user workflows are not blocked by log writing. In test mode they can be written directly so behavior is deterministic.
+When supported domain events happen elsewhere in Mentingo, the activity-log handlers translate those events into audit entries. Course deletion is recorded only after the deletion succeeds: a single deletion keeps the course reference and title, while a bulk deletion keeps one aggregate entry with the deleted course IDs, titles, and count. In normal runtime those entries are queued for persistence so user workflows are not blocked by log writing. In test mode they can be written directly so behavior is deterministic.
 
 ## Key Technical Context
 
@@ -46,10 +47,10 @@ When supported domain events happen elsewhere in Mentingo, the activity-log hand
 - Route and API access require `ACTIVITY_LOG_READ`.
 - `ActivityLogsService` supports pagination, backward-compatible actor-email filtering, broad keyword search, multi-value `actionTypes` filtering, exact `resourceType` filtering, and `from`/`to` date filters; `to` is handled as the end of the selected day.
 - Activity-log action, resource, and resource-to-action mapping values are exposed from `packages/shared` so API validation and web filter options use the same contract.
-- Activity handlers under `apps/api/src/activity-logs/handlers` convert domain events into user-readable audit metadata.
+- Activity handlers under `apps/api/src/activity-logs/handlers` convert domain events into user-readable audit metadata, including the course deletion event emitted by the course service.
 
 ## Test Evidence
 
-API E2E coverage verifies paginated retrieval, date filtering including logs created on the selected `to` date, multi-action/resource filtering, broad keyword matching across actor email, resource ID, and metadata, and pagination totals with active filters. Broader activity-log E2E coverage verifies records for many source events such as course, lesson, chapter, enrollment, announcement, group, category, settings, environment, login, refresh, and logout activity.
+API E2E coverage verifies paginated retrieval, date filtering including logs created on the selected `to` date, multi-action/resource filtering, broad keyword matching across actor email, resource ID, and metadata, and pagination totals with active filters. Broader activity-log E2E coverage verifies records for many source events such as course creation/update/deletion, lesson, chapter, enrollment, announcement, group, category, settings, environment, login, refresh, and logout activity.
 
 No dedicated frontend Activity Logs E2E spec was found; the page behavior is evidenced from the Activity Logs module implementation.

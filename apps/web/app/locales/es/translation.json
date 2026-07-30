@@ -1981,6 +1981,7 @@
         "imageUploadFailed": "No se pudo subir la imagen del curso.",
         "updateFailed": "No se pudieron actualizar los archivos multimedia del curso."
       },
+      "statisticsAccessForbidden": "No tienes permiso para ver las estadísticas de este curso.",
       "create": {
         "courseFailed": "No se pudo crear el curso.",
         "stripeProductFailed": "No se pudo crear el producto de pago del curso."
@@ -5048,7 +5049,7 @@
       "statistics": "Estadísticas",
       "edit": "Editar contenido",
       "missingTranslationsTitle": "Faltan traducciones",
-      "missingTranslationsDescription": "Algunos títulos de capítulos o lecciones se muestran en el idioma predeterminado.",
+      "missingTranslationsDescription": "Falta la traducción de parte del contenido del curso al idioma seleccionado.",
       "completedChapters_one": "{{count}} capítulo completado",
       "completedChapters_other": "{{count}} capítulos completados",
       "lessons_one": "{{count}} lección",

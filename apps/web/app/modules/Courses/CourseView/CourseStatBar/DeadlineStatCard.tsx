@@ -3,6 +3,9 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "~/lib/utils";
 
+// 24 hours expressed in milliseconds.
+const MILLISECONDS_PER_DAY = 86_400_000;
+
 type DeadlineStatCardProps = {
   dueDate?: string | null;
   hasDeadline?: boolean;
@@ -18,7 +21,7 @@ export default function DeadlineStatCard({
 }: DeadlineStatCardProps) {
   const { t } = useTranslation();
   const daysLeft = dueDate
-    ? Math.max(0, Math.ceil((new Date(dueDate).getTime() - Date.now()) / 86_400_000))
+    ? Math.max(0, Math.ceil((new Date(dueDate).getTime() - Date.now()) / MILLISECONDS_PER_DAY))
     : 0;
   const formattedDueDate = dueDate ? new Date(dueDate).toLocaleDateString() : null;
 

@@ -25,6 +25,8 @@ export const calendarEventsQueryOptions = (
   queryOptions({
     queryKey: [...CALENDAR_EVENTS_QUERY_KEY, params],
     queryFn: async () => {
+      if (!params.start || !params.end) return [];
+
       const response = await ApiClient.api.calendarControllerGetEvents({
         start: params.start,
         end: params.end,

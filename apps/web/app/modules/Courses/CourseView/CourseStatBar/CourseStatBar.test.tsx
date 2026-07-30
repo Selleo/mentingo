@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "@repo/shared";
 import { screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -24,6 +25,14 @@ const mocks = vi.hoisted(() => ({
   useContentCreatorCourses: vi.fn(() => ({
     data: [],
   })),
+  useGroupsByCourseQuery: vi.fn(),
+  permissions: [] as string[],
+  isAuthenticated: true,
+  courseAccessState: {
+    canEditCourse: true,
+    dueDate: null as string | null,
+    isAdminExperience: true,
+  },
   toggleLearningMode: vi.fn(),
   updateCourse: vi.fn(),
   updateGroupDeadlines: vi.fn(),
@@ -50,8 +59,18 @@ vi.mock("~/api/mutations/admin/useUpdateCourse", () => ({
 }));
 
 vi.mock("~/api/queries/admin/useGroupsByCourse", () => ({
-  useGroupsByCourseQuery: () => ({
-    data: mocks.enrolledGroups,
+  useGroupsByCourseQuery: (courseId: string, language: string) => {
+    mocks.useGroupsByCourseQuery(courseId, language);
+
+    return {
+      data: courseId ? mocks.enrolledGroups : undefined,
+    };
+  },
+}));
+
+vi.mock("~/api/queries", () => ({
+  useCurrentUser: () => ({
+    data: mocks.isAuthenticated ? { permissions: mocks.permissions } : undefined,
   }),
 }));
 
@@ -73,13 +92,13 @@ vi.mock("../../context/CourseAccessProvider", () => ({
       chapters: [],
       completedChapterCount: 0,
       courseChapterCount: 0,
-      dueDate: null,
+      dueDate: mocks.courseAccessState.dueDate,
       hasCertificate: false,
       showAuthorSection: true,
       title: "Course title",
     },
-    canEditCourse: true,
-    isAdminExperience: true,
+    canEditCourse: mocks.courseAccessState.canEditCourse,
+    isAdminExperience: mocks.courseAccessState.isAdminExperience,
   }),
 }));
 
@@ -88,11 +107,14 @@ vi.mock("./ProgressStatCard", () => ({
 }));
 
 vi.mock("./DeadlineStatCard", () => ({
-  default: ({ onOpen }: { onOpen: () => void }) => (
-    <button type="button" onClick={onOpen}>
-      Open deadline settings
-    </button>
-  ),
+  default: ({ isAdminExperience, onOpen }: { isAdminExperience: boolean; onOpen: () => void }) =>
+    isAdminExperience ? (
+      <button type="button" onClick={onOpen}>
+        Open deadline settings
+      </button>
+    ) : (
+      <div>Deadline information</div>
+    ),
 }));
 
 vi.mock("./CertificateStatCard", () => ({
@@ -106,6 +128,11 @@ vi.mock("./AuthorStatCard", () => ({
 describe("CourseStatBar", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.permissions = [PERMISSIONS.COURSE_ENROLLMENT, PERMISSIONS.GROUP_READ];
+    mocks.isAuthenticated = true;
+    mocks.courseAccessState.canEditCourse = true;
+    mocks.courseAccessState.dueDate = null;
+    mocks.courseAccessState.isAdminExperience = true;
   });
 
   it("loads all other published courses by the author", () => {
@@ -150,5 +177,43 @@ describe("CourseStatBar", () => {
         onSuccess: expect.any(Function),
       }),
     );
+  });
+
+  it("hides deadline management from a content creator", () => {
+    mocks.permissions = [PERMISSIONS.COURSE_UPDATE_OWN];
+
+    renderWith().render(<CourseStatBar language="en" />);
+
+    expect(
+      screen.queryByRole("button", { name: "Open deadline settings" }),
+    ).not.toBeInTheDocument();
+    expect(mocks.useGroupsByCourseQuery).toHaveBeenCalledWith("", "en");
+  });
+
+  it("hides deadline management without group read access", () => {
+    mocks.permissions = [PERMISSIONS.COURSE_ENROLLMENT];
+
+    renderWith().render(<CourseStatBar language="en" />);
+
+    expect(
+      screen.queryByRole("button", { name: "Open deadline settings" }),
+    ).not.toBeInTheDocument();
+    expect(mocks.useGroupsByCourseQuery).toHaveBeenCalledWith("", "en");
+  });
+
+  it("shows an assigned deadline as read-only to an unauthenticated visitor", () => {
+    mocks.isAuthenticated = false;
+    mocks.permissions = [];
+    mocks.courseAccessState.canEditCourse = false;
+    mocks.courseAccessState.dueDate = "2026-08-01T00:00:00Z";
+    mocks.courseAccessState.isAdminExperience = false;
+
+    renderWith().render(<CourseStatBar language="en" />);
+
+    expect(screen.getByText("Deadline information")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Open deadline settings" }),
+    ).not.toBeInTheDocument();
+    expect(mocks.useGroupsByCourseQuery).toHaveBeenCalledWith("", "en");
   });
 });

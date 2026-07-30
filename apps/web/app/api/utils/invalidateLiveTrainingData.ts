@@ -7,6 +7,22 @@ import { LIVE_TRAINING_SESSION_QUERY_KEY } from "~/api/queries/live-training/use
 import { LIVE_TRAINING_SESSIONS_QUERY_KEY } from "~/api/queries/live-training/useLiveTrainingSessions";
 import { queryClient } from "~/api/queryClient";
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const hasCalendarEventsRange = (queryKey: readonly unknown[]) => {
+  const params = queryKey[1];
+
+  if (!isRecord(params)) return false;
+
+  return (
+    typeof params.start === "string" &&
+    params.start.length > 0 &&
+    typeof params.end === "string" &&
+    params.end.length > 0
+  );
+};
+
 type InvalidateLiveTrainingDataOptions = {
   includeCalendar?: boolean;
   includeCoursesAndLessons?: boolean;
@@ -40,7 +56,11 @@ export async function invalidateLiveTrainingData({
       queryClient.invalidateQueries({ queryKey: CALENDAR_EVENT_DETAILS_QUERY_KEY }),
     );
     refetches.push(
-      queryClient.refetchQueries({ queryKey: CALENDAR_EVENTS_QUERY_KEY }),
+      queryClient.refetchQueries({
+        queryKey: CALENDAR_EVENTS_QUERY_KEY,
+        type: "active",
+        predicate: (query) => hasCalendarEventsRange(query.queryKey),
+      }),
       queryClient.refetchQueries({ queryKey: CALENDAR_EVENT_DETAILS_QUERY_KEY }),
     );
   }

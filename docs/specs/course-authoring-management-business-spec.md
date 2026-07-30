@@ -23,23 +23,28 @@ For HR and L&D teams, this is the control center for the learning catalog. It ke
 - Add up to five concise learning outcomes so learners can quickly understand what the course delivers.
 - Keep unavailable lessons visible in the Table of Contents without letting learners open content blocked by enrollment, freemium, or lesson-sequence rules.
 - Review and edit localized course metadata in the selected course language from the modern overview, including the title, description, category, learning outcomes, and curriculum titles.
+- See a compact warning when any supported course content is still missing in the selected translation.
 - Drag and drop or browse for a course thumbnail, reposition it, and add a course trailer from the modern media editor, with server-side file validation and storage.
 - Change course category and status individually or in bulk, including draft, private, and published states.
 - Configure course settings such as certificate behavior and lesson sequencing options.
 - Manage course pricing when Stripe pricing is configured.
 - Add, switch, delete, and generate course language variants directly from the modern course overview while editing media and metadata.
 - Manage course enrollment for users and groups from the course edit area.
+- Manage group assignment deadlines only when the user can manage course enrollments and view groups.
 - Create, reorder, edit, and remove chapters while maintaining the course curriculum.
 - Transfer course ownership to another eligible user.
 - Delete draft courses individually or in bulk while protecting private and published courses.
 - Share eligible master courses with managed tenants while preserving course content, cover-image quality, trailers, and future source updates.
 - Export supported courses as SCORM packages when permissions and configuration allow it.
+- Review learner progress, learning time, quiz outcomes, and AI Mentor results for courses the user manages.
 
 ## End-User Value
 
 The feature gives L&D teams governance over the training library. Teams can prepare courses before learners see them, publish only when content is ready, keep accountability through ownership, and maintain multilingual versions for different learner populations.
 
 Operational controls reduce mistakes. Permissions distinguish full course management from own-course editing, private and published courses are protected from draft-delete flows, and optional capabilities such as pricing, certificates, SCORM, and master exports appear only when the course and tenant support them.
+
+Course reporting follows the same ownership model. Content creators can review outcomes for their own courses, while users with broader course-management responsibility can review the courses they oversee. This keeps learner reporting useful without exposing another creator's operational data.
 
 ## How It Works
 
@@ -67,15 +72,17 @@ The course title keeps its edit affordance directly beside the displayed text, m
 
 The category selector requests category titles in the active course language. When a category does not have that translation, it keeps the standard category-service fallback to the category's default language. Administrators with category-management access can also open the tenant's category administration page directly from the bottom of the selector.
 
-If a chapter or lesson title is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. Its tooltip explains that learners will temporarily see the default-language content, keeping the overview uncluttered while still making curriculum translation gaps discoverable.
+If supported course content is missing in the selected non-default language, administrators see a compact warning icon next to the Table of Contents edit action. The same established translation check used by the full course editor covers course metadata, curriculum, quiz, AI Mentor, and AI Judge content, keeping translation gaps discoverable without adding a second definition of completeness.
 
 The Table of Contents shows the full curriculum so learners can understand the course structure, but only lessons available to the current user are interactive. Enrollment, freemium chapter access, and enforced lesson order determine learner access, while authorized course editors can use Learning Mode or preview access to review the curriculum without weakening learner-facing restrictions. Its heading remains visible on small screens whenever no tab bar is present. On mobile, the collapsed learner view starts with the in-progress chapter and the following chapter; when no chapter is in progress, it shows the first two remaining chapters and reports the exact number still hidden.
 
-Course statistics are available only to users with the dedicated statistics permission and are hidden while the user is in Learning Mode. If Learning Mode is enabled while Statistics is active, the overview returns to the table of contents. Course description, deadline, and media editors use accessible dialogs with keyboard dismissal and managed focus. Changing or removing group deadlines from the Course Overview preserves whether each group assignment is mandatory or optional.
+Course statistics are available only to users with the dedicated statistics permission and are hidden while the user is in Learning Mode. If Learning Mode is enabled while Statistics is active, the overview returns to the table of contents. Course description, deadline, and media editors use accessible dialogs with keyboard dismissal and managed focus. Deadline management additionally requires both course-enrollment and group-view access, so default content creators with own-course editing access do not see the deadline card in the administrator experience or trigger its protected group query. Learners and public visitors with an assigned deadline still see its read-only countdown. Changing or removing group deadlines from the Course Overview preserves whether each group assignment is mandatory or optional.
 
 Course administrators can select a trailer video in the same media editor used for the hero image. Mentingo uploads the video through the resumable video-upload flow, associates it with the course as its trailer, and refreshes course and catalog data after the media update completes.
 
 Course administrators can add, edit, and remove learning outcomes directly from the modern course overview. The learner-facing heading presents these outcomes as “What you'll master” in every supported interface language. Mentingo displays no more than five outcomes and prevents adding another after the limit is reached, keeping the course summary compact for learners. The API applies the same five-item limit to course creation and updates.
+
+From a course view, an eligible administrator opens the Statistics tab to review course-level completion, learner progress, learning time, quiz results, and—when available—AI Mentor outcomes. Published courses may still be viewed by users who do not manage them, but the Statistics tab and its data are limited to the course owner or users with any-course management responsibility. The API rechecks this boundary for every statistics request so direct links cannot bypass the UI.
 
 ## Key Technical Context
 
@@ -86,11 +93,15 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 - Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; course update snapshots detect learning outcomes, author-section visibility, and cover-image positioning, while both the create and update mappings copy those values to the target course. Copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
 - Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`. Course Overview editor visibility follows the API update rule: `COURSE_UPDATE` applies to any course, while `COURSE_UPDATE_OWN` additionally requires matching the course author.
 - The category-management shortcut is shown only with `PERMISSIONS.CATEGORY_MANAGE` and uses the tenant-relative `/admin/categories` route.
+- Master-course sharing and synchronization run as queued work in `apps/api/src/courses/master-course.service.ts`; copied storage references are tenant- and target-course-prefixed, and every discovered image variant is checked independently so retries repair partial copies and preserve future image sizes.
+- Key permissions include `PERMISSIONS.COURSE_CREATE`, `PERMISSIONS.COURSE_READ_MANAGEABLE`, `PERMISSIONS.COURSE_UPDATE`, `PERMISSIONS.COURSE_UPDATE_OWN`, `PERMISSIONS.COURSE_STATISTICS`, `PERMISSIONS.COURSE_DELETE`, `PERMISSIONS.COURSE_ENROLLMENT`, and `PERMISSIONS.COURSE_EXPORT`.
+- Course statistics require both the statistics capability and resource-level manageability: `COURSE_UPDATE` allows any course, while `COURSE_UPDATE_OWN` requires the requester to match `courses.authorId`.
+- Deadline management requires `PERMISSIONS.COURSE_ENROLLMENT` for saving assignments and deadlines plus `PERMISSIONS.GROUP_READ` for loading the enrolled groups. The UI requires both before showing the administrator card or enabling its query.
 - The edit UI adapts to course type, enabled integrations, available locales, Stripe configuration, AI/Luma configuration, and managing-tenant status.
 - Modern course overview translations are maintained under the shared `modernCourseView` locale namespace in every supported web locale.
 - The modern overview stores the selected course language in the URL so course content, media edits, and metadata updates stay aligned with the active translation.
 - The course-details service keeps editable title and description values exact to the selected language. Category names and learning outcomes retain base-language fallback behavior in both learner and administrator Course Overview experiences; missing or empty translated learning-outcome lists fall back to the course base language.
-- Missing curriculum translations are reported separately from displayed chapter and lesson titles, so the warning does not change the existing Table of Contents fallback behavior.
+- The modern overview reuses the existing protected missing-translations query used by the full course editor. It runs only for authorized course editors and does not change the Table of Contents fallback behavior.
 - The modern Table of Contents reuses the established course-wide lesson-sequence calculation and course access context, keeping enrollment, freemium, preview, and Learning Mode behavior consistent with lesson delivery.
 - The shared `MAX_COURSE_LEARNING_OUTCOMES` constant keeps the five-item UI and API validation rules aligned.
 - Trailer videos use the existing resumable video-upload integration and the course `trailer` relationship rather than a separate upload path.
@@ -99,14 +110,15 @@ Course administrators can add, edit, and remove learning outcomes directly from 
 
 - Web E2E coverage verifies course creation, invalid create-form validation, course list browsing/filtering, opening the create page, updating settings, updating status, bulk category updates, bulk status updates, deleting draft courses, bulk deleting draft courses, transferring ownership, student-mode preview, course pricing, course language variants, SCORM course creation/import behavior, unsupported SCORM feature hiding, and SCORM export flows.
 - API E2E coverage verifies draft course deletion and rejects deletion of private or published courses for single-course deletion and protected bulk selections.
+- API E2E coverage verifies that content creators can access their own course statistics, cannot access another author's statistics, and that any-course administrators retain access.
 - Curriculum web E2E coverage verifies an administrator can create, update, reorder, and delete a chapter; chapter API E2E coverage verifies deletion also clears the chapter's learner progress.
 - Master-course API E2E coverage verifies eligible tenant selection, queued export and synchronization, read-only target copies, category and lesson updates, tenant-owned resource copying, Bunny/S3 video handling, and complete course-cover variant copying when the target already has only part of the image set.
 - Source-level API evidence covers permission checks and service paths for course creation, updates, bulk category updates, bulk status updates, settings, language management, enrollment, deletion, ownership transfer, and export operations.
-- Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, accessible keyboard dismissal for the description, deadline, and media dialogs, preservation of each group's mandatory/optional assignment status when deadlines change, complete published-course loading plus modal-closing navigation from related-author course cards, expanded lesson links to course lesson routes, and allowed trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.
+- Component-level coverage verifies permission-based statistics visibility and the return to the table of contents in Learning Mode, hides administrator deadline management unless both enrollment and group-view access are present, preserves the read-only deadline for unauthenticated visitors, verifies accessible keyboard dismissal for the description, deadline, and media dialogs, preserves each group's mandatory/optional assignment status when deadlines change, loads all published related-author courses with modal-closing navigation, links expanded lessons to course lesson routes, and allows trailer selection in the modern media editor. The upload service itself remains covered through the existing course settings flow and source-level integration evidence.
 - Focused component coverage verifies that deleting the active course translation returns the language selector to the base language.
 - Focused frontend and API schema tests verify that only five learning outcomes can be displayed or submitted and that the add action is disabled at the limit.
 - Course API E2E coverage verifies exact-language title and description for editors, category and learning-outcome fallback in the administrator Course Overview, and base-language fallback for learner-facing metadata.
-- Focused API and component coverage verifies that missing chapter or lesson translations produce the administrator-only warning tooltip and that completed translations remove it.
+- Focused component coverage verifies that the modern overview requests the established missing-translations check for the selected course language and shows the administrator-only warning tooltip from its result. API E2E coverage verifies that the shared check detects a missing AI Mentor translation and clears after that translation is completed.
 - Focused frontend coverage verifies that redirects to language-specific course addresses preserve the selected course language instead of falling back to the default language.
 - Focused component coverage verifies that the category selector renders the localized and default-language fallback titles returned by the API.
 - Focused component coverage verifies that permitted users receive the category-management shortcut and other course editors do not.

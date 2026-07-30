@@ -5,7 +5,7 @@ import { useToggleCourseStudentMode } from "~/api/mutations/useToggleCourseStude
 
 import { useCourseAccessProvider } from "../context/CourseAccessProvider";
 
-export function LearningModeBannerNew() {
+export function LearningModeBanner() {
   const { t } = useTranslation();
   const { course, isCourseStudentModeActive } = useCourseAccessProvider();
   const { mutate: toggleLearningMode } = useToggleCourseStudentMode(course.id);

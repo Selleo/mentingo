@@ -1,36 +1,51 @@
 import { useNavigate } from "@remix-run/react";
-import { PERMISSIONS } from "@repo/shared";
+import { PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { useCurrentUser } from "~/api/queries";
+import { useMissingTranslations } from "~/api/queries/admin/useHasMissingTranslations";
 import { useGlobalSettings } from "~/api/queries/useGlobalSettings";
-import { hasPermission } from "~/common/permissions/permission.utils";
+import { canManageCourseByAuthor, hasPermission } from "~/common/permissions/permission.utils";
 
 import { useCourseAccessProvider } from "../../context/CourseAccessProvider";
 import { CourseAdminStatistics } from "../CourseAdminStatistics/CourseAdminStatistics";
 import { CourseChatTab } from "../CourseChat/CourseChatTab";
 
 import ChapterList from "./ChapterList";
-import TableOfContentTabs, {
-  TABLE_OF_CONTENT_TABS,
-  type TableOfContentTab,
-} from "./TableOfContentTabs";
+import CourseOverviewTabs, {
+  COURSE_OVERVIEW_TABS,
+  type CourseOverviewTab,
+} from "./CourseOverviewTabs";
 
-export function TableOfContent() {
+type TableOfContentProps = {
+  language: SupportedLanguages;
+};
+
+export function TableOfContent({ language }: TableOfContentProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { course, isAdminExperience, isCourseStudentModeActive } = useCourseAccessProvider();
   const { data: currentUser } = useCurrentUser();
   const { data: globalSettings } = useGlobalSettings();
+  const { data: missingTranslationsResponse } = useMissingTranslations(
+    course.id,
+    language,
+    isAdminExperience,
+  );
 
   const [completedExpanded, setCompletedExpanded] = useState(false);
-  const [activeTab, setActiveTab] = useState<TableOfContentTab>(TABLE_OF_CONTENT_TABS.TOC);
+  const [activeTab, setActiveTab] = useState<CourseOverviewTab>(COURSE_OVERVIEW_TABS.TOC);
   const [expandedChapters, setExpandedChapters] = useState<string[]>([]);
   const [isMobile, setIsMobile] = useState(false);
   const [showAllChapters, setShowAllChapters] = useState(false);
 
   const permissions = currentUser?.permissions ?? [];
+  const canManageCourse = canManageCourseByAuthor({
+    permissions,
+    courseAuthorId: course.authorId,
+    currentUserId: currentUser?.id,
+  });
   const canShowChat = Boolean(
     globalSettings?.courseDiscussionsEnabled &&
       course.enrolled &&
@@ -43,8 +58,11 @@ export function TableOfContent() {
     PERMISSIONS.COURSE_DISCUSSION_MESSAGE_DELETE,
   );
   const canShowStatistics =
-    !isCourseStudentModeActive && hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
+    !isCourseStudentModeActive &&
+    canManageCourse &&
+    hasPermission(permissions, PERMISSIONS.COURSE_STATISTICS);
   const shouldShowTabs = isAdminExperience || canShowChat || canShowStatistics;
+  const hasMissingTranslations = missingTranslationsResponse?.data.hasMissingTranslations ?? false;
 
   const toggleChapter = (id: string) => {
     setExpandedChapters((prev) =>
@@ -74,20 +92,20 @@ export function TableOfContent() {
   }, []);
 
   useEffect(() => {
-    if (!canShowStatistics && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS) {
-      setActiveTab(TABLE_OF_CONTENT_TABS.TOC);
+    if (!canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS) {
+      setActiveTab(COURSE_OVERVIEW_TABS.TOC);
     }
   }, [activeTab, canShowStatistics]);
 
   return (
     <div data-section="toc" className="rounded-2xl bg-white p-4 shadow-lg md:p-6">
       {shouldShowTabs && (
-        <TableOfContentTabs
+        <CourseOverviewTabs
           activeTab={activeTab}
           canEditContent={isAdminExperience}
           canShowChat={canShowChat}
           canShowStatistics={canShowStatistics}
-          hasMissingCurriculumTranslations={course.hasMissingCurriculumTranslations}
+          hasMissingTranslations={hasMissingTranslations}
           onEditContent={navigateToCourseEditor}
           onTabChange={setActiveTab}
         />
@@ -101,7 +119,7 @@ export function TableOfContent() {
         </div>
       )}
 
-      {activeTab === TABLE_OF_CONTENT_TABS.TOC && (
+      {activeTab === COURSE_OVERVIEW_TABS.TOC && (
         <ChapterList
           completedExpanded={completedExpanded}
           expandedChapters={expandedChapters}
@@ -113,11 +131,11 @@ export function TableOfContent() {
         />
       )}
 
-      {canShowStatistics && activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
-        <CourseAdminStatistics course={course} />
+      {canShowStatistics && activeTab === COURSE_OVERVIEW_TABS.STATISTICS && (
+        <CourseAdminStatistics course={course} canManageCourse={canManageCourse} />
       )}
 
-      {canShowChat && activeTab === TABLE_OF_CONTENT_TABS.CHAT && currentUser && (
+      {canShowChat && activeTab === COURSE_OVERVIEW_TABS.CHAT && currentUser && (
         <CourseChatTab
           courseId={course.id}
           currentUserId={currentUser.id}

@@ -4,20 +4,20 @@ import { describe, expect, it, vi } from "vitest";
 
 import { renderWith } from "~/utils/testUtils";
 
-import TableOfContentTabs, { TABLE_OF_CONTENT_TABS } from "./TableOfContentTabs";
+import CourseOverviewTabs, { COURSE_OVERVIEW_TABS } from "./CourseOverviewTabs";
 
-describe("TableOfContentTabs", () => {
+describe("CourseOverviewTabs", () => {
   it("shows the chat tab to learners and selects it", async () => {
     const user = userEvent.setup();
     const onTabChange = vi.fn();
 
     renderWith().render(
-      <TableOfContentTabs
-        activeTab={TABLE_OF_CONTENT_TABS.TOC}
+      <CourseOverviewTabs
+        activeTab={COURSE_OVERVIEW_TABS.TOC}
         canEditContent={false}
         canShowChat
         canShowStatistics={false}
-        hasMissingCurriculumTranslations={false}
+        hasMissingTranslations={false}
         onEditContent={vi.fn()}
         onTabChange={onTabChange}
       />,
@@ -28,19 +28,19 @@ describe("TableOfContentTabs", () => {
 
     await user.click(screen.getByRole("button", { name: "Discussion" }));
 
-    expect(onTabChange).toHaveBeenCalledWith(TABLE_OF_CONTENT_TABS.CHAT);
+    expect(onTabChange).toHaveBeenCalledWith(COURSE_OVERVIEW_TABS.CHAT);
   });
 
   it("shows the missing translation tooltip next to the edit action", async () => {
     const user = userEvent.setup();
 
     renderWith().render(
-      <TableOfContentTabs
-        activeTab={TABLE_OF_CONTENT_TABS.TOC}
+      <CourseOverviewTabs
+        activeTab={COURSE_OVERVIEW_TABS.TOC}
         canEditContent
         canShowChat={false}
         canShowStatistics={false}
-        hasMissingCurriculumTranslations
+        hasMissingTranslations
         onEditContent={vi.fn()}
         onTabChange={vi.fn()}
       />,
@@ -55,19 +55,19 @@ describe("TableOfContentTabs", () => {
 
     expect(
       await screen.findAllByText(
-        "Some chapter or lesson titles are shown in the default language.",
+        "Some course content is missing a translation in the selected language.",
       ),
     ).not.toHaveLength(0);
   });
 
   it("hides the warning when curriculum translations are complete", () => {
     renderWith().render(
-      <TableOfContentTabs
-        activeTab={TABLE_OF_CONTENT_TABS.TOC}
+      <CourseOverviewTabs
+        activeTab={COURSE_OVERVIEW_TABS.TOC}
         canEditContent
         canShowChat={false}
         canShowStatistics={false}
-        hasMissingCurriculumTranslations={false}
+        hasMissingTranslations={false}
         onEditContent={vi.fn()}
         onTabChange={vi.fn()}
       />,

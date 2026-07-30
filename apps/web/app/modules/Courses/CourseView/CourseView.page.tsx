@@ -15,7 +15,7 @@ import { isSupportedLanguage } from "~/utils/browser-language";
 
 import { buildCourseRedirectPath, shouldRedirectToCourseSlug } from "./courseRedirect.utils";
 import { CourseStatBar } from "./CourseStatBar/CourseStatBar";
-import { LearningModeBannerNew } from "./LearningModeBanner";
+import { LearningModeBanner } from "./LearningModeBanner";
 import { TableOfContent } from "./TableOfContent/TableOfContent";
 
 import type { SupportedLanguages } from "@repo/shared";
@@ -130,7 +130,7 @@ export default function CourseViewPage() {
   return (
     <ContentAccessGuard type={ACCESS_GUARD.UNREGISTERED_COURSE_ACCESS}>
       <CourseAccessProvider course={course}>
-        <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBannerNew />}>
+        <PageWrapper breadcrumbs={breadcrumbs} aboveBreadcrumbs={<LearningModeBanner />}>
           <div className="flex w-full min-w-0 max-w-full flex-col">
             <div className="flex min-w-0 flex-col gap-y-6 overflow-hidden">
               <CourseOverview
@@ -140,7 +140,7 @@ export default function CourseViewPage() {
                 setOpenGenerateTranslationModal={setOpenGenerateTranslationModal}
               />
               <CourseStatBar language={language} />
-              <TableOfContent />
+              <TableOfContent language={language} />
             </div>
           </div>
         </PageWrapper>

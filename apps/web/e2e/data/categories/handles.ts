@@ -3,9 +3,6 @@ export const CATEGORIES_PAGE_HANDLES = {
   HEADING: "categories-page-heading",
   CREATE_BUTTON: "categories-page-create-button",
   SEARCH_INPUT: "categories-page-search-input",
-  STATUS_FILTER: "categories-page-status-filter",
-  statusFilterOption: (status: "all" | "active" | "archived") =>
-    `categories-page-status-filter-option-${status}`,
   SELECT_ALL_CHECKBOX: "categories-page-select-all-checkbox",
   TABLE: "categories-page-table",
   TABLE_BODY: "categories-page-table-body",
@@ -33,7 +30,6 @@ export const CATEGORY_PAGE_HANDLES = {
   PAGE: "category-page",
   HEADING: "category-page-heading",
   TITLE: "category-title-input",
-  ARCHIVED: "category-archived-checkbox",
   SAVE: "category-save-button",
   LANGUAGE_SELECT: "category-language-select",
   SET_BASE_LANGUAGE_BUTTON: "category-language-set-base-button",

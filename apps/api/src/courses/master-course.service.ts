@@ -31,6 +31,7 @@ import {
   QUIZ_FEEDBACK_ENABLED,
   VIDEO_COMPLETION_TRACKING_ENABLED,
 } from "src/courses/constants";
+import { CourseDurationService } from "src/courses/course-duration.service";
 import {
   SCORM_MASTER_COURSE_COPY_BATCH_SIZE,
   SCORM_MASTER_COURSE_PACKAGE_UUID_NAMESPACE,
@@ -116,6 +117,7 @@ export class MasterCourseService {
     private readonly tenantRunner: TenantDbRunnerService,
     private readonly s3Service: S3Service,
     private readonly bunnyStreamService: BunnyStreamService,
+    private readonly courseDurationService: CourseDurationService,
   ) {}
 
   async exportCourseToTenants(
@@ -359,6 +361,8 @@ export class MasterCourseService {
       params.targetCourseId,
       sourceSnapshot.chapters.length,
     );
+
+    await this.courseDurationService.refreshCourseDurationEstimates(params.targetCourseId);
   }
 
   async assertCourseContentEditable(
@@ -673,6 +677,8 @@ export class MasterCourseService {
         resolvedTargetCourseId,
         sourceSnapshot.chapters.length,
       );
+
+      await this.courseDurationService.refreshCourseDurationEstimates(resolvedTargetCourseId);
 
       return resolvedTargetCourseId;
     });

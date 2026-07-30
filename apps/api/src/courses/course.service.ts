@@ -16,7 +16,6 @@ import {
   COURSE_TYPE,
   ENTITY_TYPES,
   PERMISSIONS,
-  SUPPORTED_LANGUAGES,
   type PermissionKey,
   type SupportedLanguages,
 } from "@repo/shared";
@@ -64,8 +63,8 @@ import { addPagination, DEFAULT_PAGE_SIZE } from "src/common/pagination";
 import { canUpdateCourseByAuthor } from "src/common/permissions/course-permission.utils";
 import { userHasAnyPermissionsCondition } from "src/common/permissions/permission-sql.utils";
 import { hasPermission } from "src/common/permissions/permission.utils";
-import { injectResourcesIntoContent } from "src/common/utils/injectResourcesIntoContent";
 import { processInBatches } from "src/common/utils/processInBatches";
+import { CourseDurationService } from "src/courses/course-duration.service";
 import { UpdateHasCertificateEvent } from "src/courses/events/updateHasCertificate.event";
 import { EnvService } from "src/env/services/env.service";
 import {
@@ -73,6 +72,7 @@ import {
   BulkUpdateCourseStatusEvent,
   CourseDueDateReminderEmailEvent,
   CreateCourseEvent,
+  DeleteCourseEvent,
   DeleteScormEvent,
   UpdateCourseEvent,
   EnrollCourseEvent,
@@ -142,7 +142,6 @@ import {
   VIDEO_COMPLETION_TRACKING_ENABLED,
 } from "./constants";
 import { COURSE_DUE_DATE_REMINDER_DAYS } from "./constants/course-due-date-reminders.constants";
-import { DURATION_DEFAULTS } from "./constants/duration-defaults";
 import { CourseFeaturePolicyService } from "./course-feature-policy.service";
 import { CourseSlugService } from "./course-slug.service";
 import {
@@ -213,10 +212,6 @@ import type {
   ContextualCourseTranslationType,
   CourseTranslationType,
 } from "src/courses/types/course.types";
-import type {
-  CourseDurationHierarchy,
-  DurationEstimatesByCourse,
-} from "src/courses/types/duration";
 import type { ImageQuality } from "src/file/image-variants/image-variant.types";
 import type {
   AdminLessonWithContentSchema,
@@ -271,6 +266,7 @@ export class CourseService {
     private readonly certificatesService: CertificatesService,
     private readonly groupCourseDueDateCalendarService: GroupCourseDueDateCalendarService,
     private readonly searchIndexService: SearchIndexService,
+    private readonly courseDurationService: CourseDurationService,
   ) {}
 
   async getAllCourses(query: CoursesQuery): Promise<{
@@ -732,284 +728,6 @@ export class CourseService {
     }
   }
 
-  private countWordsFromHtml(content: string): number {
-    const $ = loadHtml(content);
-    const text = $.text();
-    return text.trim().split(/\s+/).filter(Boolean).length;
-  }
-
-  private lessonSeconds(params: {
-    descriptionHtml?: string | null;
-    quizQuestionCount: number;
-    lessonType: string;
-  }): number {
-    const { descriptionHtml, quizQuestionCount, lessonType } = params;
-
-    const wordCount = this.countWordsFromHtml(descriptionHtml || "");
-    const readingSeconds = Math.ceil((wordCount / DURATION_DEFAULTS.wordsPerMinute) * 60);
-
-    const embeddedCounts = this.countEmbeddedResourcesFromHtml(descriptionHtml || "");
-    return match(lessonType)
-      .with(
-        LESSON_TYPES.CONTENT,
-        () =>
-          readingSeconds +
-          embeddedCounts.video * DURATION_DEFAULTS.videoMinutes * 60 +
-          embeddedCounts.image * DURATION_DEFAULTS.imageSeconds +
-          embeddedCounts.download * DURATION_DEFAULTS.downloadSeconds +
-          embeddedCounts.presentation * DURATION_DEFAULTS.embedMinutes * 60 +
-          quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(
-        LESSON_TYPES.QUIZ,
-        () => readingSeconds + quizQuestionCount * DURATION_DEFAULTS.quizSeconds,
-      )
-      .with(LESSON_TYPES.AI_MENTOR, () => readingSeconds + DURATION_DEFAULTS.aiMentorMinutes * 60)
-      .with(LESSON_TYPES.EMBED, () => readingSeconds + DURATION_DEFAULTS.embedMinutes * 60)
-      .otherwise(() => readingSeconds);
-  }
-
-  private async computeCourseDurationHierarchy(
-    courseId: UUIDType,
-    language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<CourseDurationHierarchy> {
-    const courseLessonIds = dbInstance
-      .select({
-        id: lessons.id,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(eq(chapters.courseId, courseId));
-
-    const questionCounts = dbInstance
-      .select({
-        lessonId: questions.lessonId,
-        questionCount: count(questions.id).as("questionCount"),
-      })
-      .from(questions)
-      .where(inArray(questions.lessonId, courseLessonIds))
-      .groupBy(questions.lessonId)
-      .as("question_counts");
-
-    const lessonRows = await dbInstance
-      .select({
-        id: lessons.id,
-        chapterId: lessons.chapterId,
-        type: lessons.type,
-
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-
-        questionCount: sql<number>`
-        COALESCE(${questionCounts.questionCount}, 0)
-      `,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .where(eq(chapters.courseId, courseId));
-
-    const result: CourseDurationHierarchy = {
-      totalSeconds: 0,
-      byChapterId: {},
-      byLessonId: {},
-    };
-
-    for (const lesson of lessonRows) {
-      const estimatedSeconds = this.lessonSeconds({
-        descriptionHtml: typeof lesson.description === "string" ? lesson.description : null,
-
-        quizQuestionCount: Number(lesson.questionCount) || 0,
-
-        lessonType: lesson.type,
-      });
-
-      result.byLessonId[lesson.id] = estimatedSeconds;
-
-      result.byChapterId[lesson.chapterId] =
-        (result.byChapterId[lesson.chapterId] ?? 0) + estimatedSeconds;
-
-      result.totalSeconds += estimatedSeconds;
-    }
-
-    return result;
-  }
-
-  private countEmbeddedResourcesFromHtml(content: string): {
-    video: number;
-    image: number;
-    download: number;
-    presentation: number;
-  } {
-    const supportedNodeTypes = ["video", "image", "downloadable-file", "presentation"];
-
-    const { contentCount } = injectResourcesIntoContent(content, [], {
-      resourceIdRegex: createLessonResourceIdRegex(),
-      trackNodeTypes: supportedNodeTypes,
-      convertImageAnchors: false,
-    });
-    const videoCount = Number(contentCount.video) || 0;
-    const imageCount = Number(contentCount.image) || 0;
-    const downloadCount = Number(contentCount["downloadable-file"]) || 0;
-    const presentationCount = Number(contentCount.presentation) || 0;
-
-    return {
-      video: videoCount,
-      image: imageCount,
-      download: downloadCount,
-      presentation: presentationCount,
-    };
-  }
-
-  private async computeCourseDurationEstimates(
-    courseIds: UUIDType[],
-    language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<DurationEstimatesByCourse> {
-    if (!courseIds.length) return {};
-
-    const scopedLessonIds = dbInstance
-      .select({ id: lessons.id })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const questionCounts = dbInstance
-      .select({
-        lessonId: questions.lessonId,
-        questionCount: count(questions.id).as("questionCount"),
-      })
-      .from(questions)
-      .where(inArray(questions.lessonId, scopedLessonIds))
-      .groupBy(questions.lessonId)
-      .as("question_counts");
-
-    const lessonRows = await dbInstance
-      .select({
-        id: lessons.id,
-        courseId: chapters.courseId,
-        type: lessons.type,
-        description: this.localizationService.getLocalizedSqlField(lessons.description, language),
-        questionCount: sql<number>`COALESCE(${questionCounts.questionCount}, 0)`,
-      })
-      .from(lessons)
-      .innerJoin(chapters, eq(chapters.id, lessons.chapterId))
-      .innerJoin(courses, eq(courses.id, chapters.courseId))
-      .leftJoin(questionCounts, eq(questionCounts.lessonId, lessons.id))
-      .where(inArray(chapters.courseId, courseIds));
-
-    const secondsByCourse = new Map<UUIDType, number>();
-
-    for (const lesson of lessonRows) {
-      const lessonSeconds = this.lessonSeconds({
-        descriptionHtml: lesson.description as string,
-        quizQuestionCount: Number(lesson.questionCount) || 0,
-        lessonType: lesson.type,
-      });
-
-      secondsByCourse.set(
-        lesson.courseId,
-        (secondsByCourse.get(lesson.courseId) ?? 0) + lessonSeconds,
-      );
-    }
-
-    const estimates: DurationEstimatesByCourse = {};
-
-    for (const [courseId, totalSeconds] of secondsByCourse) {
-      const totalMinutes = totalSeconds > 0 ? Math.ceil(totalSeconds / 60) : 0;
-      estimates[courseId] = { totalMinutes };
-    }
-
-    return estimates;
-  }
-
-  private async getCourseDurationEstimates(
-    courseIds: UUIDType[],
-    language: SupportedLanguages | undefined,
-    dbInstance: DatabasePg = this.db,
-  ): Promise<DurationEstimatesByCourse> {
-    if (!courseIds.length) return {};
-
-    const durationLanguage = language ?? SUPPORTED_LANGUAGES.EN;
-    const courseRows = await dbInstance
-      .select({
-        id: courses.id,
-        durationEstimates: courses.durationEstimates,
-        sourceSignature: sql<string>`
-          CONCAT_WS(
-            '|',
-            ${courses.baseLanguage},
-            ARRAY_TO_STRING(${courses.availableLocales}, ','),
-            COUNT(DISTINCT ${chapters.id})::text,
-            COALESCE(MAX(${chapters.updatedAt})::text, ''),
-            COUNT(DISTINCT ${lessons.id})::text,
-            COALESCE(MAX(${lessons.updatedAt})::text, ''),
-            COUNT(DISTINCT ${questions.id})::text,
-            COALESCE(MAX(${questions.updatedAt})::text, '')
-          )
-        `,
-      })
-      .from(courses)
-      .leftJoin(chapters, eq(chapters.courseId, courses.id))
-      .leftJoin(lessons, eq(lessons.chapterId, chapters.id))
-      .leftJoin(questions, eq(questions.lessonId, lessons.id))
-      .where(inArray(courses.id, courseIds))
-      .groupBy(courses.id);
-
-    const estimates: DurationEstimatesByCourse = {};
-    const staleRows = courseRows.filter((course) => {
-      const cachedEstimate = course.durationEstimates[durationLanguage];
-
-      if (cachedEstimate?.sourceSignature !== course.sourceSignature) return true;
-
-      estimates[course.id] = { totalMinutes: cachedEstimate.totalMinutes };
-      return false;
-    });
-
-    if (!staleRows.length) return estimates;
-
-    const computedEstimates = await this.computeCourseDurationEstimates(
-      staleRows.map(({ id }) => id),
-      durationLanguage,
-      dbInstance,
-    );
-
-    await Promise.all(
-      staleRows.map(async ({ id, sourceSignature }) => {
-        const estimate = computedEstimates[id] ?? { totalMinutes: 0 };
-
-        estimates[id] = estimate;
-
-        await dbInstance
-          .update(courses)
-          .set({
-            durationEstimates: sql`
-              (
-                CASE
-                  WHEN JSONB_TYPEOF(${courses.durationEstimates}) = 'object'
-                    THEN ${courses.durationEstimates}
-                  ELSE '{}'::jsonb
-                END
-              ) || JSONB_BUILD_OBJECT(
-                ${durationLanguage}::text,
-                JSONB_BUILD_OBJECT(
-                  'totalMinutes',
-                  ${estimate.totalMinutes}::int,
-                  'sourceSignature',
-                  ${sourceSignature}::text
-                )
-              )
-            `,
-            updatedAt: sql`${courses.updatedAt}`,
-          })
-          .where(eq(courses.id, id));
-      }),
-    );
-
-    return estimates;
-  }
-
   private async getAvailableCoursesConditions(
     trx: DatabasePg,
     query: CoursesQuery,
@@ -1177,7 +895,11 @@ export class CourseService {
         slug: slugsMap.get(item.id) || item.id,
       }));
 
-      const durationEstimates = await this.getCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+        courseIds,
+        language,
+        trx,
+      );
       const dataWithDuration = dataWithSlugs.map((item) => {
         const duration = durationEstimates[item.id];
         return {
@@ -1218,7 +940,6 @@ export class CourseService {
       const queryDB = trx
         .select({
           ...getTableColumns(categories),
-          archived: sql<boolean | null>`NULL`,
           createdAt: sql<string | null>`NULL`,
           title: this.localizationService.getLocalizedSqlField(
             categories.title,
@@ -1345,7 +1066,11 @@ export class CourseService {
 
       const trailerUrls = await this.getCourseTrailerUrls(courseIds);
       const slugsMap = await this.courseSlugService.getCoursesSlugs(language || "en", courseIds);
-      const durationEstimates = await this.getCourseDurationEstimates(courseIds, language, trx);
+      const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+        courseIds,
+        language,
+        trx,
+      );
 
       const coursesWithSignedUrls = await Promise.all(
         coursesRows.map(async (course) => {
@@ -1490,18 +1215,6 @@ export class CourseService {
       .select({
         id: chapters.id,
         title: this.localizationService.getLocalizedSqlField(chapters.title, language),
-        hasMissingTranslation: sql<boolean>`
-          BTRIM(${this.localizationService.getFieldByLanguage(chapters.title, language)}) = ''
-          OR EXISTS (
-            SELECT 1
-            FROM ${lessons}
-            WHERE ${lessons.chapterId} = ${chapters.id}
-              AND BTRIM(${this.localizationService.getFieldByLanguage(
-                lessons.title,
-                language,
-              )}) = ''
-          )
-        `,
         isSubmitted: sql<boolean>`
           EXISTS (
             SELECT 1
@@ -1609,23 +1322,19 @@ export class CourseService {
       .where(and(eq(chapters.courseId, id), isNotNull(chapters.title)))
       .orderBy(chapters.displayOrder);
 
-    const durationHierarchy = await this.computeCourseDurationHierarchy(id, language);
-
-    const hasMissingCurriculumTranslations =
-      shouldUseExactLanguage &&
-      language !== course.baseLanguage &&
-      courseChapterList.some((chapter) => chapter.hasMissingTranslation);
-
-    const chaptersWithDuration = courseChapterList.map(
-      ({ hasMissingTranslation: _hasMissingTranslation, ...chapter }) => ({
-        ...chapter,
-        estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
-        lessons: chapter.lessons.map((lesson) => ({
-          ...lesson,
-          estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
-        })),
-      }),
+    const durationHierarchy = await this.courseDurationService.getCourseDurationHierarchy(
+      id,
+      language,
     );
+
+    const chaptersWithDuration = courseChapterList.map((chapter) => ({
+      ...chapter,
+      estimatedDurationSeconds: durationHierarchy.byChapterId[chapter.id] ?? 0,
+      lessons: chapter.lessons.map((lesson) => ({
+        ...lesson,
+        estimatedDurationSeconds: durationHierarchy.byLessonId[lesson.id] ?? 0,
+      })),
+    }));
 
     const thumbnailUrl = await this.getSignedCourseThumbnailUrl(
       course.thumbnailS3Key,
@@ -1637,7 +1346,6 @@ export class CourseService {
       ...course,
       thumbnailUrl: thumbnailUrl ?? undefined,
       estimatedDurationSeconds: durationHierarchy.totalSeconds,
-      hasMissingCurriculumTranslations,
 
       trailerUrl,
       chapters: chaptersWithDuration,
@@ -1992,7 +1700,10 @@ export class CourseService {
 
     const courseIds = contentCreatorCourses.map((course) => course.id);
     const slugsMap = await this.courseSlugService.getCoursesSlugs(language, courseIds);
-    const durationEstimates = await this.getCourseDurationEstimates(courseIds, language);
+    const durationEstimates = await this.courseDurationService.getCourseDurationEstimates(
+      courseIds,
+      language,
+    );
 
     return await Promise.all(
       contentCreatorCourses.map(async (course) => {
@@ -2351,7 +2062,7 @@ export class CourseService {
       try {
         const uploadResult = await this.fileService.uploadFile(
           image,
-          "course",
+          ENTITY_TYPES.COURSE,
           currentUser.tenantId,
         );
         thumbnailS3Key = uploadResult.fileKey;
@@ -3571,7 +3282,13 @@ export class CourseService {
   }
 
   async deleteCourse(id: UUIDType, currentUser: CurrentUserType) {
-    const [course] = await this.db.select().from(courses).where(eq(courses.id, id));
+    const [course] = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(eq(courses.id, id));
 
     if (!course) {
       throw new NotFoundException("adminCourseView.errors.notFound.course");
@@ -3631,6 +3348,14 @@ export class CourseService {
           trx,
         );
       }
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: [{ courseId: deletedCourse.id, courseTitle: course.courseTitle }],
+          actor: currentUser,
+        }),
+        trx,
+      );
     });
 
     return null;
@@ -3645,7 +3370,13 @@ export class CourseService {
       throw new ForbiddenException("You don't have permission to delete these courses");
     }
 
-    const selectedCourses = await this.db.select().from(courses).where(inArray(courses.id, ids));
+    const selectedCourses = await this.db
+      .select({
+        ...getTableColumns(courses),
+        courseTitle: this.localizationService.getLocalizedSqlField(courses.title),
+      })
+      .from(courses)
+      .where(inArray(courses.id, ids));
 
     if (
       selectedCourses.some((course) => PROTECTED_COURSE_DELETE_STATUSES.includes(course.status))
@@ -3694,6 +3425,21 @@ export class CourseService {
           trx,
         );
       }
+
+      const selectedCoursesById = new Map(
+        selectedCourses.map((course) => [course.id, course.courseTitle]),
+      );
+
+      await this.outboxPublisher.publish(
+        new DeleteCourseEvent({
+          courses: deletedCourses.map((course) => ({
+            courseId: course.id,
+            courseTitle: selectedCoursesById.get(course.id) ?? null,
+          })),
+          actor: currentUser,
+        }),
+        trx,
+      );
 
       return null;
     });
@@ -4204,6 +3950,22 @@ export class CourseService {
       userIds.length ? [inArray(lessonLearningTime.userId, userIds)] : [],
     );
     return { ...courseStats, averageSeconds: courseLearningTime.averageSeconds };
+  }
+
+  async assertCanViewCourseStatistics(
+    courseId: UUIDType,
+    currentUser: CurrentUserType,
+  ): Promise<void> {
+    const [course] = await this.db
+      .select({ authorId: courses.authorId })
+      .from(courses)
+      .where(eq(courses.id, courseId));
+
+    if (!course) throw new NotFoundException("adminCourseView.errors.notFound.course");
+
+    if (!canUpdateCourseByAuthor(currentUser, course.authorId)) {
+      throw new ForbiddenException("adminCourseView.errors.statisticsAccessForbidden");
+    }
   }
 
   async getAverageQuizScoreForCourse(
@@ -4866,6 +4628,8 @@ export class CourseService {
 
       await this.searchIndexService.refreshCourse(courseId, trx);
     });
+
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
   }
 
   async deleteLanguage(
@@ -5013,6 +4777,8 @@ export class CourseService {
 
       await this.searchIndexService.refreshLessons(lessonIds, trx);
     });
+
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
   }
 
   async getStudentsDueDatesForCourse(
@@ -5402,6 +5168,8 @@ export class CourseService {
           .where(eq(currData.idColumn, currData.id));
       }
     });
+
+    await this.courseDurationService.refreshCourseDurationEstimates(courseId);
 
     this.logger.debug(
       `Imported missing course translations courseId=${courseId} language=${language} count=${flat.length}`,

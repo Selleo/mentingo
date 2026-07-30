@@ -160,7 +160,6 @@ export type GroupActivityLogSnapshot = {
 export type CategoryActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
-  archived?: boolean | null;
 };
 
 export type NewsActivityLogSnapshot = {

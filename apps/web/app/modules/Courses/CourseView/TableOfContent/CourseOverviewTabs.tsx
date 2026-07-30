@@ -8,33 +8,33 @@ import { cn } from "~/lib/utils";
 import { COURSE_DISCUSSION_HANDLES } from "../../../../../e2e/data/courses/handles";
 import { COURSE_STATISTICS_HANDLES } from "../../../../../e2e/data/statistics/handles";
 
-export const TABLE_OF_CONTENT_TABS = {
+export const COURSE_OVERVIEW_TABS = {
   TOC: "toc",
   STATISTICS: "statistics",
   CHAT: "chat",
 } as const;
 
-export type TableOfContentTab = (typeof TABLE_OF_CONTENT_TABS)[keyof typeof TABLE_OF_CONTENT_TABS];
+export type CourseOverviewTab = (typeof COURSE_OVERVIEW_TABS)[keyof typeof COURSE_OVERVIEW_TABS];
 
-type TableOfContentTabsProps = {
-  activeTab: TableOfContentTab;
+type CourseOverviewTabsProps = {
+  activeTab: CourseOverviewTab;
   canEditContent: boolean;
   canShowChat: boolean;
   canShowStatistics: boolean;
-  hasMissingCurriculumTranslations: boolean;
+  hasMissingTranslations: boolean;
   onEditContent: () => void;
-  onTabChange: (tab: TableOfContentTab) => void;
+  onTabChange: (tab: CourseOverviewTab) => void;
 };
 
-export default function TableOfContentTabs({
+export default function CourseOverviewTabs({
   activeTab,
   canEditContent,
   canShowChat,
   canShowStatistics,
-  hasMissingCurriculumTranslations,
+  hasMissingTranslations,
   onEditContent,
   onTabChange,
-}: TableOfContentTabsProps) {
+}: CourseOverviewTabsProps) {
   const { t } = useTranslation();
 
   return (
@@ -42,16 +42,16 @@ export default function TableOfContentTabs({
       <div className="flex w-full items-center gap-4 overflow-x-auto sm:w-auto md:gap-6">
         <button
           type="button"
-          onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.TOC)}
+          onClick={() => onTabChange(COURSE_OVERVIEW_TABS.TOC)}
           className={cn(
             "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-            activeTab === TABLE_OF_CONTENT_TABS.TOC
+            activeTab === COURSE_OVERVIEW_TABS.TOC
               ? "text-primary-700"
               : "text-neutral-800 hover:text-neutral-950",
           )}
         >
           {t("modernCourseView.contents.title")}
-          {activeTab === TABLE_OF_CONTENT_TABS.TOC && (
+          {activeTab === COURSE_OVERVIEW_TABS.TOC && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
           )}
         </button>
@@ -59,17 +59,17 @@ export default function TableOfContentTabs({
           <button
             type="button"
             data-testid={COURSE_STATISTICS_HANDLES.COURSE_VIEW_STATISTICS_TAB}
-            data-state={activeTab === TABLE_OF_CONTENT_TABS.STATISTICS ? "active" : "inactive"}
-            onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.STATISTICS)}
+            data-state={activeTab === COURSE_OVERVIEW_TABS.STATISTICS ? "active" : "inactive"}
+            onClick={() => onTabChange(COURSE_OVERVIEW_TABS.STATISTICS)}
             className={cn(
               "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-              activeTab === TABLE_OF_CONTENT_TABS.STATISTICS
+              activeTab === COURSE_OVERVIEW_TABS.STATISTICS
                 ? "text-primary-700"
                 : "text-neutral-800 hover:text-neutral-950",
             )}
           >
             {t("modernCourseView.contents.statistics")}
-            {activeTab === TABLE_OF_CONTENT_TABS.STATISTICS && (
+            {activeTab === COURSE_OVERVIEW_TABS.STATISTICS && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
             )}
           </button>
@@ -78,16 +78,16 @@ export default function TableOfContentTabs({
           <button
             type="button"
             data-testid={COURSE_DISCUSSION_HANDLES.TAB}
-            onClick={() => onTabChange(TABLE_OF_CONTENT_TABS.CHAT)}
+            onClick={() => onTabChange(COURSE_OVERVIEW_TABS.CHAT)}
             className={cn(
               "relative whitespace-nowrap px-1 pb-3 text-sm font-semibold transition-colors",
-              activeTab === TABLE_OF_CONTENT_TABS.CHAT
+              activeTab === COURSE_OVERVIEW_TABS.CHAT
                 ? "text-primary-700"
                 : "text-neutral-800 hover:text-neutral-950",
             )}
           >
             {t("studentCourseView.tabs.chat")}
-            {activeTab === TABLE_OF_CONTENT_TABS.CHAT && (
+            {activeTab === COURSE_OVERVIEW_TABS.CHAT && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary-700" />
             )}
           </button>
@@ -95,7 +95,7 @@ export default function TableOfContentTabs({
       </div>
       {canEditContent && (
         <div className="mb-3 flex items-center gap-2">
-          {hasMissingCurriculumTranslations && (
+          {hasMissingTranslations && (
             <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
