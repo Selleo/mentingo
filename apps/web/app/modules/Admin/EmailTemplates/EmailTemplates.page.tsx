@@ -158,6 +158,7 @@ const EmailTemplatesPage = () => {
   const selectedTemplateIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
   const bodyRows = table.getRowModel().rows;
   const columnCount = columns.length;
+  const totalItems = paginationInfo?.totalItems ?? 0;
 
   const handleCreate = async () => {
     const data = await createEmailTemplate({
@@ -201,19 +202,30 @@ const EmailTemplatesPage = () => {
       ]}
     >
       <div className="flex flex-col">
-        <div className="flex flex-wrap justify-between gap-3">
-          <h4 className="h4">{t("emailTemplates.list.title")}</h4>
+        <div className="mb-6 flex flex-col lg:p-0">
+          <h4 className="h4 pb-1 text-neutral-950">{t("emailTemplates.list.title")}</h4>
+          <p className="body-lg-md text-neutral-800">{t("emailTemplates.list.subHeader")}</p>
+        </div>
+        <div className="ml-auto flex gap-3">
+          <Button
+            variant="primary"
+            className="gap-2"
+            onClick={handleCreate}
+            disabled={isCreating}
+            data-testid="email-templates-create-button"
+          >
+            <Plus className="size-4" />
+            {t("emailTemplates.list.createButton")}
+          </Button>
+        </div>
+        <div className="flex items-center justify-between gap-2">
+          <SearchFilter
+            filters={filterConfig}
+            values={filters}
+            onChange={handleFilterChange}
+            isLoading={isPending}
+          />
           <div className="flex gap-3">
-            <Button
-              variant="primary"
-              className="gap-2"
-              onClick={handleCreate}
-              disabled={isCreating}
-              data-testid="email-templates-create-button"
-            >
-              <Plus className="size-4" />
-              {t("emailTemplates.list.createButton")}
-            </Button>
             <Dialog>
               <DialogTrigger asChild>
                 <Button
@@ -250,14 +262,6 @@ const EmailTemplatesPage = () => {
               </DialogContent>
             </Dialog>
           </div>
-        </div>
-        <div className="flex items-center justify-between gap-2">
-          <SearchFilter
-            filters={filterConfig}
-            values={filters}
-            onChange={handleFilterChange}
-            isLoading={isPending}
-          />
         </div>
         <Table className="border bg-neutral-50" data-testid="email-templates-page">
           <TableHeader>
@@ -319,23 +323,24 @@ const EmailTemplatesPage = () => {
               )}
           </TableBody>
         </Table>
-        <Pagination
-          className="border-b border-x bg-neutral-50 rounded-b-lg"
-          emptyDataClassName="border-b border-x bg-neutral-50 rounded-b-lg"
-          totalItems={paginationInfo?.totalItems}
-          itemsPerPage={paginationInfo?.perPage as ItemsPerPageOption | undefined}
-          currentPage={paginationInfo?.page}
-          onPageChange={handlePageChange}
-          onItemsPerPageChange={handlePerPageChange}
-          testIds={{
-            next: "email-templates-pagination-next",
-            previous: "email-templates-pagination-previous",
-            page: (page) => `email-templates-pagination-page-${page}`,
-            itemsPerPage: "email-templates-pagination-items-per-page",
-            itemsPerPageOption: (itemsPerPage) =>
-              `email-templates-pagination-items-per-page-option-${itemsPerPage}`,
-          }}
-        />
+        {totalItems > 0 && (
+          <Pagination
+            className="border-b border-x bg-neutral-50 rounded-b-lg"
+            totalItems={totalItems}
+            itemsPerPage={paginationInfo?.perPage as ItemsPerPageOption | undefined}
+            currentPage={paginationInfo?.page}
+            onPageChange={handlePageChange}
+            onItemsPerPageChange={handlePerPageChange}
+            testIds={{
+              next: "email-templates-pagination-next",
+              previous: "email-templates-pagination-previous",
+              page: (page) => `email-templates-pagination-page-${page}`,
+              itemsPerPage: "email-templates-pagination-items-per-page",
+              itemsPerPageOption: (itemsPerPage) =>
+                `email-templates-pagination-items-per-page-option-${itemsPerPage}`,
+            }}
+          />
+        )}
       </div>
     </PageWrapper>
   );

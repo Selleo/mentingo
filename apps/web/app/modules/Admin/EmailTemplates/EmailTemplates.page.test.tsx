@@ -260,5 +260,6 @@ describe("EmailTemplatesPage", () => {
     });
     renderPage();
     expect(screen.getByText("No email templates yet.")).toBeInTheDocument();
+    expect(screen.queryByText("No data found")).not.toBeInTheDocument();
   });
 });

@@ -4939,6 +4939,7 @@
     },
     "list": {
       "title": "Plantillas de correo",
+      "subHeader": "Crea y administra plantillas reutilizables para correos de notificación.",
       "createButton": "Crear nueva",
       "deleteSelected": "Eliminar seleccionadas",
       "searchPlaceholder": "Buscar por nombre",

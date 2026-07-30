@@ -4953,6 +4953,7 @@
     },
     "list": {
       "title": "Email templates",
+      "subHeader": "Create and manage reusable notification email templates.",
       "createButton": "Create new",
       "deleteSelected": "Delete selected",
       "searchPlaceholder": "Search by name",

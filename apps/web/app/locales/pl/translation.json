@@ -4992,6 +4992,7 @@
     },
     "list": {
       "title": "Szablony e‑maili",
+      "subHeader": "Twórz i zarządzaj szablonami e-maili z powiadomieniami.",
       "createButton": "Utwórz nowy",
       "deleteSelected": "Usuń zaznaczone",
       "searchPlaceholder": "Szukaj po nazwie",

@@ -4870,6 +4870,7 @@
     },
     "list": {
       "title": "E‑Mail‑Vorlagen",
+      "subHeader": "Erstellen und verwalten Sie wiederverwendbare E-Mail-Vorlagen für Benachrichtigungen.",
       "createButton": "Neu erstellen",
       "deleteSelected": "Ausgewählte löschen",
       "searchPlaceholder": "Nach Name suchen",

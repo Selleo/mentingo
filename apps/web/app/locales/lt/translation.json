@@ -4874,6 +4874,7 @@
     },
     "list": {
       "title": "El. laiškų šablonai",
+      "subHeader": "Kurkite ir tvarkykite daugkartinio naudojimo pranešimų el. laiškų šablonus.",
       "createButton": "Sukurti naują",
       "deleteSelected": "Ištrinti pasirinktus",
       "searchPlaceholder": "Ieškoti pagal pavadinimą",

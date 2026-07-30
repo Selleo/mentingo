@@ -4872,6 +4872,7 @@
     },
     "list": {
       "title": "E‑mailové šablony",
+      "subHeader": "Vytvářejte a spravujte opakovaně použitelné šablony e-mailových oznámení.",
       "createButton": "Vytvořit novou",
       "deleteSelected": "Smazat vybrané",
       "searchPlaceholder": "Hledat podle názvu",
