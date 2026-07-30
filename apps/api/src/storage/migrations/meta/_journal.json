@@ -1219,27 +1219,6 @@
       "when": 1784632054907,
       "tag": "0173_remove_announcement_is_everyone",
       "breakpoints": true
-    },
-    {
-      "idx": 174,
-      "version": "7",
-      "when": 1784720083807,
-      "tag": "0174_add_gamification_schema",
-      "breakpoints": true
-    },
-    {
-      "idx": 175,
-      "version": "7",
-      "when": 1784720216991,
-      "tag": "0175_enable_tenant_rls_for_gamification_tables",
-      "breakpoints": true
-    },
-    {
-      "idx": 176,
-      "version": "7",
-      "when": 1785403572706,
-      "tag": "0176_change_columns_name_in_achievements_and_challenges_tables",
-      "breakpoints": true
     }
   ]
 }
