@@ -10,13 +10,41 @@ import type {
   AiMentorQualityFinding,
 } from "./aiMentorGeneration.types";
 
+const FIELD_LABELS: Record<string, string> = {
+  additionalInstructions: "Additional instructions",
+  aiRole: "AI role",
+  characterGoal: "Character goal",
+  contentScope: "Content scope",
+  difficulty: "Difficulty",
+  expertise: "Expertise",
+  factsAndConstraints: "Facts and constraints",
+  feedbackGuidance: "Feedback guidance",
+  learnerRole: "Learner role",
+  openingInstruction: "Opening instruction",
+  scenario: "Scenario",
+  taskGoal: "Task goal",
+  teachingStyle: "Teaching style",
+};
+
 const formatFieldName = (field: string) => {
+  const knownLabel = FIELD_LABELS[field];
+  if (knownLabel) return knownLabel;
+
   const words = field
     .replace(/([a-z])([A-Z])/g, "$1 $2")
     .replaceAll("_", " ")
     .toLowerCase();
-  return words.charAt(0).toUpperCase() + words.slice(1);
+  const label = words.charAt(0).toUpperCase() + words.slice(1);
+  return label.replace(/^Ai\b/, "AI");
 };
+
+export const humanizeAiMentorFieldReferences = (text: string) =>
+  Object.entries(FIELD_LABELS)
+    .filter(([field]) => /[A-Z]/.test(field))
+    .reduce(
+      (result, [field, label]) => result.replace(new RegExp(`\\b${field}\\b`, "g"), label),
+      text,
+    );
 
 export const AiMentorGenerationDraftSummary = ({ draft }: { draft: AiMentorGeneratedDraft }) => {
   const { t } = useTranslation();
@@ -50,14 +78,18 @@ export const AiMentorGenerationFindingList = ({
           className="px-4 py-3"
         >
           <div className="flex items-start gap-2">
-            <p className="min-w-0 flex-1 text-sm font-medium text-neutral-900">{finding.message}</p>
+            <p className="min-w-0 flex-1 text-sm font-medium text-neutral-900">
+              {humanizeAiMentorFieldReferences(finding.message)}
+            </p>
             {finding.field && (
               <span className="shrink-0 rounded bg-neutral-100 px-1.5 py-0.5 text-xs font-semibold text-neutral-600">
                 {formatFieldName(finding.field)}
               </span>
             )}
           </div>
-          <p className="mt-1 text-sm leading-5 text-neutral-600">{finding.correction}</p>
+          <p className="mt-1 text-sm leading-5 text-neutral-600">
+            {humanizeAiMentorFieldReferences(finding.correction)}
+          </p>
         </li>
       ))}
     </ul>

@@ -23,4 +23,26 @@ describe("AiMentorQualityCheckDialog", () => {
     await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(onCancel).toHaveBeenCalledOnce();
   });
+
+  it("renders creator-facing labels for schema field references", () => {
+    renderWith().render(
+      <AiMentorQualityCheckDialog
+        onOpenChange={vi.fn()}
+        result={{
+          passed: false,
+          summary: "The configuration needs changes.",
+          issues: [
+            {
+              code: "role_mismatch",
+              message: "aiRole does not match the scenario.",
+              correction: "Update aiRole to identify the Mentor clearly.",
+            },
+          ],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("AI role does not match the scenario.")).toBeVisible();
+    expect(screen.getByText("Update AI role to identify the Mentor clearly.")).toBeVisible();
+  });
 });

@@ -473,6 +473,7 @@ const AiMentorLessonForm = ({
     configuration: AiMentorConfigurationDraft,
     validation?: AiMentorValidationResult,
   ) => {
+    const lessonContext = getAiMentorLessonContext();
     stageGeneratedAiMentorConfiguration(configuration);
     resetAiMentorConfigurationGeneration();
     setAiMentorGenerationType(configuration.type);
@@ -480,6 +481,28 @@ const AiMentorLessonForm = ({
     dispatchAiMentorAuthoring({
       type: AI_MENTOR_AUTHORING_ACTION.OPEN_GENERATION,
       mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
+    });
+
+    if (!validation) return;
+
+    const instruction = validation.issues.map(({ correction }) => correction).join("\n\n");
+    void startAiMentorConfigurationGeneration(
+      buildAiMentorGenerationInput(
+        {
+          courseId: id,
+          lessonId: lessonToEdit?.id,
+          lessonContext,
+        },
+        {
+          mode: AI_MENTOR_GENERATION_MODE.IMPROVE,
+          instruction: instruction || validation.summary,
+          currentConfiguration: mapAiMentorConfigurationDraftToBaseInput(configuration),
+        },
+        validation,
+      ),
+    ).catch(() => {
+      resetAiMentorConfigurationGeneration();
+      dispatchAiMentorAuthoring({ type: AI_MENTOR_AUTHORING_ACTION.OPEN_EDITOR });
     });
   };
 

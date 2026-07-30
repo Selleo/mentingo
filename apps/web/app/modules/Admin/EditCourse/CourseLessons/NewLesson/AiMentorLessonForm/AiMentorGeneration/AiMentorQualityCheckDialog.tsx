@@ -12,6 +12,8 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 
+import { humanizeAiMentorFieldReferences } from "./AiMentorGenerationSummary";
+
 import type { AiMentorValidationResult } from "./aiMentorGeneration.types";
 
 type AiMentorQualityCheckDialogProps = {
@@ -102,8 +104,12 @@ export const AiMentorQualityCheckDialog = ({
                 <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
                   {visibleIssues.map((issue, index) => (
                     <li key={`${issue.code}-${index}`} className="px-4 py-3">
-                      <p className="text-sm font-medium text-neutral-900">{issue.message}</p>
-                      <p className="mt-1 text-sm leading-5 text-neutral-600">{issue.correction}</p>
+                      <p className="text-sm font-medium text-neutral-900">
+                        {humanizeAiMentorFieldReferences(issue.message)}
+                      </p>
+                      <p className="mt-1 text-sm leading-5 text-neutral-600">
+                        {humanizeAiMentorFieldReferences(issue.correction)}
+                      </p>
                     </li>
                   ))}
                 </ul>
