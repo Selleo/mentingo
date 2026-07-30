@@ -12,6 +12,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       lt: "netrukus",
       cs: "brzy",
       es: "pronto",
+      fr: "bientôt",
     };
 
     return labels[language];
@@ -25,6 +26,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       lt: "rytoj",
       cs: "zítra",
       es: "mañana",
+      fr: "demain",
     };
 
     return labels[language];
@@ -38,6 +40,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
       lt: "šiandien",
       cs: "dnes",
       es: "hoy",
+      fr: "aujourd'hui",
     };
 
     return labels[language];
@@ -50,6 +53,7 @@ const getDaysLabel = (language: SupportedLanguages, daysBeforeDueDate: number) =
     lt: `po ${daysBeforeDueDate} dienų`,
     cs: `za ${daysBeforeDueDate} dní`,
     es: `en ${normalizedDaysBeforeDueDate} días`,
+    fr: `dans ${normalizedDaysBeforeDueDate} jours`,
   };
 
   return labels[language];
@@ -93,6 +97,11 @@ export const getCourseDueDateReminderEmailTranslations = (
       heading: "Se acerca la fecha límite del curso",
       paragraphs: [`La fecha límite para completar el curso "${courseName}" es ${daysLabel}.`],
       buttonText: "ABRIR CURSO",
+    },
+    fr: {
+      heading: "L'échéance du cours approche",
+      paragraphs: [`La date limite pour terminer le cours « ${courseName} » est ${daysLabel}.`],
+      buttonText: "OUVRIR LE COURS",
     },
   };
 
