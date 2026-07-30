@@ -23,12 +23,12 @@ export class TenantDbRunnerService {
       throw new TenantContextConflictError(current.tenantId, tenantId);
     }
 
-    return dbAls.run({ tenantId, trx: current?.trx }, fn);
+    return dbAls.run({ tenantId, trx: current?.trx }, async () => await fn());
   }
 
   async transaction<T>(fn: TenantCallback<T>): Promise<T> {
     if (dbAls.getStore()?.trx) {
-      return fn();
+      return await fn();
     }
 
     return this.transactionWithHandle(() => fn());
@@ -46,13 +46,13 @@ export class TenantDbRunnerService {
 
     if (current.trx) {
       return await current.trx.transaction(async (nestedTrx) =>
-        dbAls.run({ ...current, trx: nestedTrx }, () => fn(nestedTrx)),
+        dbAls.run({ ...current, trx: nestedTrx }, async () => await fn(nestedTrx)),
       );
     }
 
     return this.dbBase.transaction(async (trx) => {
       await trx.execute(sql`SELECT set_config('app.tenant_id', ${current.tenantId}, true)`);
-      return dbAls.run({ ...current, trx }, () => fn(trx));
+      return dbAls.run({ ...current, trx }, async () => await fn(trx));
     }, config);
   }
 

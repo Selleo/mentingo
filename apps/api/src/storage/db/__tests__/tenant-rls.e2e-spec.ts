@@ -1,8 +1,12 @@
 import request from "supertest";
 
+import { DEFAULT_STUDENT_SETTINGS } from "src/settings/constants/settings.constants";
+import { settingsToJSONBuildObject } from "src/utils/settings-to-json-build-object";
+
 import { createE2ETest } from "../../../../test/create-e2e-test";
 import { createUserFactory } from "../../../../test/factory/user.factory";
-import { tenants } from "../../schema";
+import { DEFAULT_E2E_GLOBAL_SETTINGS } from "../../../../test/helpers/e2e-settings";
+import { settings, tenants } from "../../schema";
 
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg, UUIDType } from "src/common";
@@ -32,18 +36,36 @@ describe("tenant RLS isolation (e2e)", () => {
 
     const email = `same-email-${crypto.randomUUID()}@example.com`;
     const password = "Password123@";
-    const userFactory = createUserFactory(dbAdmin).withCredentials({ password });
+    const userFactory = createUserFactory(dbAdmin);
 
-    const firstTenantUser = await userFactory.create({
+    const firstTenantUser = await userFactory.withCredentials({ password }).create({
       email,
       firstName: "First tenant",
       tenantId: defaultTenantId,
     });
-    const secondTenantUser = await userFactory.create({
+    const secondTenantUser = await userFactory.withCredentials({ password }).create({
       email,
       firstName: "Second tenant",
       tenantId: secondTenant.id,
     });
+
+    await dbAdmin.insert(settings).values([
+      {
+        userId: null,
+        tenantId: secondTenant.id,
+        settings: settingsToJSONBuildObject(DEFAULT_E2E_GLOBAL_SETTINGS),
+      },
+      {
+        userId: firstTenantUser.id,
+        tenantId: defaultTenantId,
+        settings: settingsToJSONBuildObject(DEFAULT_STUDENT_SETTINGS),
+      },
+      {
+        userId: secondTenantUser.id,
+        tenantId: secondTenant.id,
+        settings: settingsToJSONBuildObject(DEFAULT_STUDENT_SETTINGS),
+      },
+    ]);
 
     const login = async (host: string) => {
       const response = await request(app.getHttpServer())

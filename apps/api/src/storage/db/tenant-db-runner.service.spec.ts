@@ -47,6 +47,21 @@ describe("TenantDbRunnerService", () => {
     expect(dbBase.transaction).not.toHaveBeenCalled();
   });
 
+  it("keeps tenant context while awaiting a lazy query thenable", async () => {
+    let tenantIdAtExecution: string | undefined;
+    const lazyQuery = {
+      then: (resolve: (value: string) => void) => {
+        tenantIdAtExecution = dbAls.getStore()?.tenantId;
+        resolve("ok");
+      },
+    } as PromiseLike<string>;
+
+    const result = await runner.runWithTenant("tenant-a", () => lazyQuery);
+
+    expect(result).toBe("ok");
+    expect(tenantIdAtExecution).toBe("tenant-a");
+  });
+
   it("starts a transaction and sets the tenant locally", async () => {
     const result = await runner.runWithTenantContext("tenant-a", () =>
       runner.transaction(async () => {

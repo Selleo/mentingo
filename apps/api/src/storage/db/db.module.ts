@@ -6,6 +6,7 @@ import { TokenService } from "src/auth/token.service";
 import * as schema from "src/storage/schema";
 
 import { DatabaseMigrationService } from "./database-migration.service";
+import { TENANT_DB_IDLE_TRANSACTION_TIMEOUT_MS } from "./db.constants";
 import { DB, DB_APP, DB_ADMIN } from "./db.providers";
 import { createTenantAwareDb } from "./tenant-aware-session";
 import { TenantDbRunnerService } from "./tenant-db-runner.service";
@@ -38,6 +39,11 @@ import type { DatabasePg } from "src/common";
         return {
           postgres: {
             url: configService.get<string>("database.urlApp")!,
+            config: {
+              connection: {
+                idle_in_transaction_session_timeout: TENANT_DB_IDLE_TRANSACTION_TIMEOUT_MS,
+              },
+            },
           },
           config: {
             schema: { ...schema },
