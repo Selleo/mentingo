@@ -6,7 +6,7 @@ import { TEST_DATA } from "../data/test-data/entity-name.data";
 
 import type { FixtureApiClient } from "../utils/api-client";
 import type { SupportedLanguages } from "@repo/shared";
-import type { GetNewsResponse, UpdateNewsBody } from "~/api/generated-api";
+import type { GetNewsResponse } from "~/api/generated-api";
 
 export type NewsFactoryRecord = GetNewsResponse["data"];
 export type NewsFactoryCreateInput = {
@@ -38,10 +38,17 @@ const toUpdateNewsFormData = (
 ): FormData => {
   const formData = new FormData();
 
-  formData.append("language", language);
-  if (data.title !== undefined) formData.append("title", data.title);
-  if (data.summary !== undefined) formData.append("summary", data.summary);
-  if (data.content !== undefined) formData.append("content", data.content);
+  formData.append(
+    "translations",
+    JSON.stringify([
+      {
+        language,
+        title: data.title,
+        summary: data.summary,
+        content: data.content,
+      },
+    ]),
+  );
   if (data.status !== undefined) formData.append("status", data.status);
   if (data.isPublic !== undefined) formData.append("isPublic", String(data.isPublic));
 

@@ -1,12 +1,26 @@
 import { PERMISSIONS } from "@repo/shared";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 
+import { useDeleteArticleSection } from "~/api/mutations/admin/useDeleteArticleSection";
+import { Icon } from "~/components/Icon";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
 import { usePermissions } from "~/hooks/usePermissions";
+import { cn } from "~/lib/utils";
 
-import { ARTICLES_TOC_HANDLES } from "../../../../../e2e/data/articles/handles";
+import {
+  ARTICLES_TOC_HANDLES,
+  ARTICLE_SECTION_FORM_HANDLES,
+} from "../../../../../e2e/data/articles/handles";
 
-import { ArticlesTOCAddFab } from "./ArticlesTOCAddFab";
 import { ArticlesTOCHeader } from "./ArticlesTOCHeader";
 import { ArticlesTOCSection } from "./ArticlesTOCSection";
 import { EditArticleSectionSheet } from "./EditArticleSectionSheet";
@@ -18,7 +32,7 @@ type ArticlesTOCPanelProps = {
   activeArticleId?: string;
   onRequestClose?: () => void;
   onCreateSection: () => Promise<void>;
-  onOpenCreateArticle: () => void;
+  onOpenCreateArticle: (sectionId: string) => void;
   onNavigate: (articleId: string) => void;
 };
 
@@ -30,10 +44,16 @@ export function ArticlesTOCPanel({
   onOpenCreateArticle,
   onNavigate,
 }: ArticlesTOCPanelProps) {
+  const { t } = useTranslation();
   const sectionIds = useMemo(() => sections.map((s) => s.id), [sections]);
   const [expanded, setExpanded] = useState<string[]>([]);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editSectionId, setEditSectionId] = useState<string | undefined>(undefined);
+  const [deleteSectionTarget, setDeleteSectionTarget] = useState<{
+    id: string;
+    articlesCount: number;
+  }>();
+  const { mutateAsync: deleteSection, isPending: isDeleting } = useDeleteArticleSection();
   const { hasAccess: canManageArticles } = usePermissions({
     required: [PERMISSIONS.ARTICLE_MANAGE, PERMISSIONS.ARTICLE_MANAGE_OWN],
   });
@@ -56,11 +76,7 @@ export function ArticlesTOCPanel({
       className="relative border-l flex size-full min-h-0 flex-col bg-white pt-4"
       data-testid={ARTICLES_TOC_HANDLES.PANEL}
     >
-      <ArticlesTOCHeader
-        onRequestClose={onRequestClose}
-        onCreateSection={onCreateSection}
-        onCreateArticle={onOpenCreateArticle}
-      />
+      <ArticlesTOCHeader />
 
       <Separator className="mb-3" />
 
@@ -80,6 +96,16 @@ export function ArticlesTOCPanel({
               setEditSectionId(section.id);
               setIsEditOpen(true);
             }}
+            onDelete={() =>
+              setDeleteSectionTarget({
+                id: section.id,
+                articlesCount: section.articles.length,
+              })
+            }
+            onCreateArticle={() => {
+              onRequestClose?.();
+              onOpenCreateArticle(section.id);
+            }}
             activeArticleId={activeArticleId}
             onNavigate={(id) => {
               onRequestClose?.();
@@ -87,17 +113,25 @@ export function ArticlesTOCPanel({
             }}
           />
         ))}
-      </div>
 
-      {onRequestClose && canManageArticles && (
-        <div className="2xl:hidden">
-          <ArticlesTOCAddFab
-            onRequestClose={onRequestClose}
-            onCreateSection={onCreateSection}
-            onCreateArticle={onOpenCreateArticle}
-          />
-        </div>
-      )}
+        {canManageArticles && (
+          <div className={cn("px-1 pt-2", sections.length > 0 && "mt-2")}>
+            <Button
+              data-testid={ARTICLES_TOC_HANDLES.CREATE_SECTION_ACTION}
+              type="button"
+              variant="ghost"
+              className="h-auto w-full justify-start gap-2 rounded-md px-2 py-2 text-neutral-600 hover:bg-primary-50 hover:text-primary-700"
+              onClick={() => {
+                onRequestClose?.();
+                void onCreateSection();
+              }}
+            >
+              <Icon name="Plus" className="size-4" />
+              {t("adminArticleView.toc.actions.newSection")}
+            </Button>
+          </div>
+        )}
+      </div>
 
       <EditArticleSectionSheet
         open={isEditOpen}
@@ -107,6 +141,46 @@ export function ArticlesTOCPanel({
           if (!open) setEditSectionId(undefined);
         }}
       />
+
+      <Dialog
+        open={Boolean(deleteSectionTarget)}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) setDeleteSectionTarget(undefined);
+        }}
+      >
+        <DialogContent
+          className="max-w-md"
+          noCloseButton={isDeleting}
+          data-testid={ARTICLE_SECTION_FORM_HANDLES.DELETE_DIALOG}
+        >
+          <DialogTitle>{t("adminArticleView.section.delete.title")}</DialogTitle>
+          <DialogDescription>
+            {deleteSectionTarget?.articlesCount
+              ? t("adminArticleView.section.cannotDeleteWithArticles")
+              : t("adminArticleView.section.delete.description")}
+          </DialogDescription>
+          <div className="flex justify-end gap-2">
+            <DialogClose asChild>
+              <Button variant="ghost" disabled={isDeleting}>
+                {t("common.button.cancel")}
+              </Button>
+            </DialogClose>
+            <Button
+              data-testid={ARTICLE_SECTION_FORM_HANDLES.DELETE_CONFIRM_BUTTON}
+              type="button"
+              variant="destructive"
+              disabled={isDeleting || !deleteSectionTarget || deleteSectionTarget.articlesCount > 0}
+              onClick={async () => {
+                if (!deleteSectionTarget) return;
+                await deleteSection({ sectionId: deleteSectionTarget.id });
+                setDeleteSectionTarget(undefined);
+              }}
+            >
+              {t("common.button.delete")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

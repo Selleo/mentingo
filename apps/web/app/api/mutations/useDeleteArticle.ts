@@ -8,7 +8,6 @@ import { getTranslatedApiErrorMessage } from "~/api/utils/getTranslatedApiErrorM
 import { useToast } from "~/components/ui/use-toast";
 
 import { ApiClient } from "../api-client";
-import { ARTICLE_QUERY_KEY } from "../queries/useArticle";
 import { ARTICLES_TOC_QUERY_KEY } from "../queries/useArticlesToc";
 
 export function useDeleteArticle() {
@@ -21,13 +20,12 @@ export function useDeleteArticle() {
       await ApiClient.api.articlesControllerDeleteArticle(id);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: [ARTICLE_QUERY_KEY] });
-      await queryClient.invalidateQueries({ queryKey: [ARTICLES_TOC_QUERY_KEY] });
-      await queryClient.invalidateQueries({
-        queryKey: [ARTICLE_SECTION_QUERY_KEY],
-      });
+      navigate("/articles", { replace: true });
 
-      navigate("/articles");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: [ARTICLES_TOC_QUERY_KEY] }),
+        queryClient.invalidateQueries({ queryKey: [ARTICLE_SECTION_QUERY_KEY] }),
+      ]);
     },
     onError: (error) => {
       toast({

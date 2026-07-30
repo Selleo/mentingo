@@ -23,7 +23,7 @@ import { useTusVideoUpload } from "~/hooks/useTusVideoUpload";
 import { useUploadDisplayModeDialog } from "~/hooks/useUploadDisplayModeDialog";
 
 import { NEWS_FORM_PAGE_HANDLES } from "../../../e2e/data/news/handles";
-import { useDeleteNewsLanguage, useUpdateNews } from "../../api/mutations";
+import { useDeleteNewsLanguage, useUpdateNews, type UpdateNewsPayload } from "../../api/mutations";
 import { useNews } from "../../api/queries";
 import ImageUploadInput from "../../components/FileUploadInput/ImageUploadInput";
 import { FormTextField } from "../../components/Form/FormTextField";
@@ -239,21 +239,20 @@ function NewsFormPage() {
       .filter((language) => hasDirtyTranslation(language) || !persistedLocales.includes(language))
       .map((language) => ({ language, ...values.translations[language] }));
 
-    const formData = new FormData();
-
-    formData.append(
-      "translations",
-      JSON.stringify(translations.map(({ cover: _cover, ...draft }) => draft)),
-    );
-
-    if (formState.dirtyFields.status) formData.append("status", values.status);
-    if (formState.dirtyFields.isPublic) formData.append("isPublic", String(values.isPublic));
-
+    const covers: Partial<Record<`cover.${SupportedLanguages}`, File>> = {};
     translations.forEach(({ language, cover }) => {
-      if (cover) formData.append(`cover.${language}`, cover);
+      if (cover) covers[`cover.${language}`] = cover;
     });
+    const data: UpdateNewsPayload = {
+      translations: JSON.stringify(
+        translations.map(({ cover: _cover, ...translation }) => translation),
+      ),
+      ...(formState.dirtyFields.status ? { status: values.status } : {}),
+      ...(formState.dirtyFields.isPublic ? { isPublic: values.isPublic } : {}),
+      ...covers,
+    };
 
-    await updateNews({ id, data: formData as never });
+    await updateNews({ id, data });
     navigate(`/news/${id}`);
   };
 

@@ -224,6 +224,16 @@ export type ArticleActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   summary?: string | null;
+  translations?: Partial<
+    Record<
+      SupportedLanguages,
+      {
+        title?: string;
+        summary?: string;
+        content?: string;
+      }
+    >
+  >;
   status?: string | null;
   content?: string | null;
   isPublic?: boolean | null;
@@ -236,6 +246,7 @@ export type ArticleActivityLogSnapshot = {
 export type ArticleSectionActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
+  translations?: Partial<Record<SupportedLanguages, { title?: string }>>;
   baseLanguage?: string;
   availableLocales?: string[];
 };

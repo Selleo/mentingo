@@ -8380,9 +8380,11 @@ export interface GetArticleSectionResponse {
 }
 
 export interface UpdateArticleSectionBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
+  translations: {
+    /** @default "en" */
+    language: "en" | "pl" | "de" | "lt" | "cs" | "es";
+    title?: string;
+  }[];
 }
 
 export interface UpdateArticleSectionResponse {
@@ -8610,21 +8612,6 @@ export interface CreateArticleResponse {
     id: string;
     title: string;
   };
-}
-
-export interface UpdateArticleBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published" | "";
-  isPublic?: boolean | "true" | "false" | "";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
 }
 
 export interface UpdateArticleResponse {
@@ -16411,7 +16398,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -16454,7 +16441,7 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
       query?: {
         /** @default "en" */
         language?: "en" | "pl" | "de" | "lt" | "cs" | "es";
-        isDraftMode?: boolean;
+        isDraftMode?: boolean | "true" | "false";
       },
       params: RequestParams = {},
     ) =>
@@ -16474,7 +16461,11 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      */
     articlesControllerUpdateArticle: (
       id: string,
-      data: UpdateArticleBody,
+      data: {
+        translations: string;
+        status?: "draft" | "published";
+        isPublic?: boolean;
+      },
       params: RequestParams = {},
     ) =>
       this.request<UpdateArticleResponse, any>({

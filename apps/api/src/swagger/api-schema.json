@@ -15567,7 +15567,19 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -15666,7 +15678,19 @@
             "required": false,
             "in": "query",
             "schema": {
-              "type": "boolean"
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "const": "true",
+                  "type": "string"
+                },
+                {
+                  "const": "false",
+                  "type": "string"
+                }
+              ]
             }
           }
         ],
@@ -15700,7 +15724,18 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateArticleBody"
+                "type": "object",
+                "properties": {
+                  "translations": {
+                    "type": "string"
+                  },
+                  "isPublic": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "translations"
+                ]
               }
             }
           }
@@ -56367,41 +56402,52 @@
       "UpdateArticleSectionBody": {
         "type": "object",
         "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
+          "translations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "default": "en",
+                  "anyOf": [
+                    {
+                      "const": "en",
+                      "type": "string"
+                    },
+                    {
+                      "const": "pl",
+                      "type": "string"
+                    },
+                    {
+                      "const": "de",
+                      "type": "string"
+                    },
+                    {
+                      "const": "lt",
+                      "type": "string"
+                    },
+                    {
+                      "const": "cs",
+                      "type": "string"
+                    },
+                    {
+                      "const": "es",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "title": {
+                  "type": "string"
+                }
               },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
+              "required": [
+                "language"
+              ]
+            }
           }
         },
         "required": [
-          "language"
+          "translations"
         ]
       },
       "UpdateArticleSectionResponse": {
@@ -57438,92 +57484,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "UpdateArticleBody": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "const": "draft",
-                "type": "string"
-              },
-              {
-                "const": "published",
-                "type": "string"
-              },
-              {
-                "const": "",
-                "type": "string"
-              }
-            ]
-          },
-          "isPublic": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "const": "true",
-                "type": "string"
-              },
-              {
-                "const": "false",
-                "type": "string"
-              },
-              {
-                "const": "",
-                "type": "string"
-              }
-            ]
-          },
-          "cover": {
-            "format": "binary",
-            "description": "Cover image file",
-            "type": "string"
-          }
-        },
-        "required": [
-          "language"
         ]
       },
       "UpdateArticleResponse": {
