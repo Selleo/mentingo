@@ -34,25 +34,6 @@ export type TypeContext = {
   }>;
 };
 
-/**
- * Extended context for the `send_email` action step.
- * `templateId` references a user-created email template.
- * `variableMapping` maps template placeholders to trigger-provided variable keys.
- *
- * Example:
- * ```
- * {
- *   name: "send_email",
- *   templateId: "uuid-of-user-template",
- *   variableMapping: {
- *     "{{recipient_name}}": "userFirstName",
- *     "{{course_title}}": "courseName",
- *     "{{link}}": "courseUrl"
- *   },
- *   providedVariables: [...]
- * }
- * ```
- */
 export type SendEmailActionContext = TypeContext & {
   templateId: string;
   language?: string;
