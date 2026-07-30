@@ -1,4 +1,4 @@
-import type { ActivityLogActionType } from "@repo/shared";
+import type { ActivityLogActionType, SupportedLanguages } from "@repo/shared";
 import type { UUIDType } from "src/common";
 import type { LessonTypes } from "src/lesson/lesson.type";
 import type { QuestionType } from "src/questions/schema/question.types";
@@ -163,6 +163,16 @@ export type NewsActivityLogSnapshot = {
   id: UUIDType;
   title?: string | null;
   summary?: string | null;
+  translations?: Partial<
+    Record<
+      SupportedLanguages,
+      {
+        title?: string;
+        summary?: string;
+        content?: string;
+      }
+    >
+  >;
   status?: string | null;
   isPublic?: boolean | null;
   publishedAt?: string | null;

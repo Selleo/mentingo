@@ -14912,7 +14912,42 @@
           "content": {
             "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateNewsBody"
+                "type": "object",
+                "properties": {
+                  "translations": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "anyOf": [
+                      {
+                        "const": "draft",
+                        "type": "string"
+                      },
+                      {
+                        "const": "published",
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "isPublic": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "const": "true",
+                        "type": "string"
+                      },
+                      {
+                        "const": "false",
+                        "type": "string"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "translations"
+                ]
               }
             }
           }
@@ -56026,84 +56061,6 @@
         },
         "required": [
           "data"
-        ]
-      },
-      "UpdateNewsBody": {
-        "type": "object",
-        "properties": {
-          "language": {
-            "default": "en",
-            "anyOf": [
-              {
-                "const": "en",
-                "type": "string"
-              },
-              {
-                "const": "pl",
-                "type": "string"
-              },
-              {
-                "const": "de",
-                "type": "string"
-              },
-              {
-                "const": "lt",
-                "type": "string"
-              },
-              {
-                "const": "cs",
-                "type": "string"
-              },
-              {
-                "const": "es",
-                "type": "string"
-              }
-            ]
-          },
-          "title": {
-            "type": "string"
-          },
-          "summary": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "const": "draft",
-                "type": "string"
-              },
-              {
-                "const": "published",
-                "type": "string"
-              }
-            ]
-          },
-          "isPublic": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "const": "true",
-                "type": "string"
-              },
-              {
-                "const": "false",
-                "type": "string"
-              }
-            ]
-          },
-          "cover": {
-            "format": "binary",
-            "description": "Cover image file",
-            "type": "string"
-          }
-        },
-        "required": [
-          "language"
         ]
       },
       "UpdateNewsResponse": {

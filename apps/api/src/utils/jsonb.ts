@@ -19,7 +19,11 @@ export const normalizeJsonb = <T>(value: unknown, fallback: T): T => {
   return value as T;
 };
 
-export const getLocalizedText = (value: unknown, language: string): string | null | undefined => {
+export const getLocalizedText = (
+  value: unknown,
+  language: string,
+  fallbackToFirst = true,
+): string | null | undefined => {
   if (value === undefined) return undefined;
   if (value === null) return null;
 
@@ -27,7 +31,11 @@ export const getLocalizedText = (value: unknown, language: string): string | nul
 
   if (typeof normalizedValue === "string") return normalizedValue;
   if (typeof normalizedValue === "object") {
-    return extractLocalizedFromRecord(normalizedValue as Record<string, unknown>, language);
+    return extractLocalizedFromRecord(
+      normalizedValue as Record<string, unknown>,
+      language,
+      fallbackToFirst,
+    );
   }
 
   return String(normalizedValue);
@@ -45,9 +53,11 @@ export const toNullableJsonbBuildObject = (value: unknown) => {
 const extractLocalizedFromRecord = (
   record: Record<string, unknown>,
   language: string,
+  fallbackToFirst: boolean,
 ): string | null => {
   const byLanguage = record[language];
   if (typeof byLanguage === "string") return byLanguage;
+  if (!fallbackToFirst) return null;
 
   const firstText = Object.values(record).find((item): item is string => typeof item === "string");
 

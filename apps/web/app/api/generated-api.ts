@@ -8314,21 +8314,6 @@ export interface CreateNewsResponse {
   };
 }
 
-export interface UpdateNewsBody {
-  /** @default "en" */
-  language: "en" | "pl" | "de" | "lt" | "cs" | "es";
-  title?: string;
-  summary?: string;
-  content?: string;
-  status?: "draft" | "published";
-  isPublic?: boolean | "true" | "false";
-  /**
-   * Cover image file
-   * @format binary
-   */
-  cover?: File;
-}
-
 export interface UpdateNewsResponse {
   data: {
     id: string;
@@ -16139,7 +16124,15 @@ export class API<SecurityDataType extends unknown> extends HttpClient<SecurityDa
      * @name NewsControllerUpdateNews
      * @request PATCH:/api/news/{id}
      */
-    newsControllerUpdateNews: (id: string, data: UpdateNewsBody, params: RequestParams = {}) =>
+    newsControllerUpdateNews: (
+      id: string,
+      data: {
+        translations: string;
+        status?: "draft" | "published";
+        isPublic?: boolean | "true" | "false";
+      },
+      params: RequestParams = {},
+    ) =>
       this.request<UpdateNewsResponse, any>({
         path: `/api/news/${id}`,
         method: "PATCH",

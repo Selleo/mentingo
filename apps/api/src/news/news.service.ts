@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ENTITY_TYPES, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
+import { ENTITY_TYPES, NEWS_STATUS, PERMISSIONS, type SupportedLanguages } from "@repo/shared";
 import { and, count, eq, getTableColumns, gt, lt, ne, sql } from "drizzle-orm";
 import { isEmpty, isEqual } from "lodash";
 import { match } from "ts-pattern";
@@ -23,13 +23,14 @@ import { ResourceLibraryService } from "src/resource-library/resource-library.se
 import { SettingsService } from "src/settings/settings.service";
 import { DB } from "src/storage/db/db.providers";
 import { news, resourceEntity, resources, users } from "src/storage/schema";
+import { getLocalizedText } from "src/utils/jsonb";
 
 import { baseNewsTitle } from "./constants";
 
 import type { StoredNewsResource } from "./news.types";
 import type { CreateNews } from "./schemas/createNews.schema";
 import type { NewsResource, NewsResources } from "./schemas/selectNews.schema";
-import type { UpdateNews } from "./schemas/updateNews.schema";
+import type { UpdateNews, UpdateNewsTranslation } from "./schemas/updateNews.schema";
 import type { InferSelectModel } from "drizzle-orm";
 import type { Request, Response } from "express";
 import type { NewsActivityLogSnapshot } from "src/activity-logs/types";
@@ -92,53 +93,57 @@ export class NewsService {
     newsId: UUIDType,
     updateNewsBody: UpdateNews,
     currentUser?: CurrentUserType,
-    coverFile?: Express.Multer.File,
+    uploadedFiles: Express.Multer.File[] = [],
   ) {
-    const { language, ...updateNewsData } = updateNewsBody;
+    const { translations, ...updateNewsData } = updateNewsBody;
+    const existingNews = await this.validateManageableNews(newsId, currentUser, undefined, false);
+    const responseLanguage = existingNews.baseLanguage;
+    const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, responseLanguage);
+    const coverFiles = this.mapCoverFiles(uploadedFiles);
 
-    const existingNews = await this.validateNewsExists(newsId, language);
+    this.validateBatchUpdate(existingNews, translations, coverFiles, updateNewsData.status);
 
-    const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
-
-    const finalUpdateData = this.buildUpdateData(existingNews, updateNewsData, language);
+    const finalUpdateData = this.buildBatchUpdateData(existingNews, translations, updateNewsData);
     const hasNewsDataToUpdate = !isEmpty(finalUpdateData);
 
-    if (!hasNewsDataToUpdate && !coverFile) {
+    if (!hasNewsDataToUpdate && !Object.keys(coverFiles).length) {
       throw new BadRequestException("adminNewsView.toast.updateError");
-    }
-
-    if (coverFile) {
-      await this.uploadCoverImageToNews(
-        newsId,
-        coverFile,
-        language,
-        coverFile.originalname,
-        "",
-        currentUser,
-      );
     }
 
     if (hasNewsDataToUpdate) {
       await this.db.update(news).set(finalUpdateData).where(eq(news.id, newsId));
     }
 
+    await Promise.all(
+      Object.entries(coverFiles).map(([coverLanguage, coverFile]) =>
+        this.uploadCoverImageToNews(
+          newsId,
+          coverFile,
+          coverLanguage as SupportedLanguages,
+          coverFile.originalname,
+          "",
+          currentUser,
+        ),
+      ),
+    );
+
     const [updatedNews] = await this.db
       .select({
         id: news.id,
-        title: this.localizationService.getFieldByLanguage(news.title, language),
+        title: this.localizationService.getFieldByLanguage(news.title, responseLanguage),
       })
       .from(news)
       .where(eq(news.id, newsId));
 
     if (!updatedNews) throw new BadRequestException("adminNewsView.toast.updateError");
 
-    if ("content" in updateNewsData && updateNewsData.content !== undefined) {
+    if (translations.some((translation) => translation.content !== undefined)) {
       await this.resourceLibraryService.syncNewsAssetRelations(newsId);
     }
 
     await this.searchIndexService.refreshNews(newsId);
 
-    const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
+    const updatedSnapshot = await this.buildNewsActivitySnapshot(newsId, responseLanguage);
 
     if (currentUser && !this.areNewsSnapshotsEqual(previousSnapshot, updatedSnapshot)) {
       await this.outboxPublisher.publish(
@@ -147,7 +152,7 @@ export class NewsService {
           actor: currentUser,
           previousNewsData: previousSnapshot,
           updatedNewsData: updatedSnapshot,
-          language,
+          language: responseLanguage,
           action: "update",
         }),
       );
@@ -177,13 +182,20 @@ export class NewsService {
     const pagination = this.getPaginationForNews(page);
 
     const conditions = this.getVisibleNewsConditions(requestedLanguage, currentUser);
+    const canUseFallback = this.canManageNews(currentUser);
 
     const newsList = await this.db
       .select({
         ...getTableColumns(news),
-        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
-        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
-        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        title: canUseFallback
+          ? this.localizationService.getLocalizedSqlField(news.title, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: canUseFallback
+          ? this.localizationService.getLocalizedSqlField(news.content, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: canUseFallback
+          ? this.localizationService.getLocalizedSqlField(news.summary, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
@@ -195,7 +207,11 @@ export class NewsService {
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
-    const newsListWithCoverImage = await this.mapNewsWithCoverImage(newsList, requestedLanguage);
+    const newsListWithCoverImage = await this.mapNewsWithCoverImage(
+      newsList,
+      requestedLanguage,
+      canUseFallback,
+    );
 
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
@@ -224,26 +240,36 @@ export class NewsService {
     const newsList = await this.db
       .select({
         ...getTableColumns(news),
-        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
-        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
-        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        title: this.canManageNews(currentUser)
+          ? this.localizationService.getLocalizedSqlField(news.title, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: this.canManageNews(currentUser)
+          ? this.localizationService.getLocalizedSqlField(news.content, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: this.canManageNews(currentUser)
+          ? this.localizationService.getLocalizedSqlField(news.summary, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
       })
       .from(news)
       .leftJoin(users, eq(users.id, news.authorId))
-      .where(and(ne(news.archived, true), sql`${news.publishedAt} IS NULL`))
+      .where(and(...this.getDraftNewsConditions(currentUser)))
       .orderBy(sql`${news.createdAt} DESC`)
       .limit(pagination.perPage)
       .offset(pagination.offset);
 
-    const newsListWithCoverImage = await this.mapNewsWithCoverImage(newsList, requestedLanguage);
+    const newsListWithCoverImage = await this.mapNewsWithCoverImage(
+      newsList,
+      requestedLanguage,
+      true,
+    );
 
     const [{ totalItems }] = await this.db
       .select({ totalItems: count() })
       .from(news)
-      .where(and(ne(news.archived, true), sql`${news.publishedAt} IS NULL`));
+      .where(and(...this.getDraftNewsConditions(currentUser)));
 
     return {
       data: newsListWithCoverImage,
@@ -261,7 +287,7 @@ export class NewsService {
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
-      { quality: IMAGE_QUALITY.SM },
+      { quality: IMAGE_QUALITY.SM, requireLanguage: true },
     );
 
     return cover ? this.mapResourceToNewsResource(cover) : undefined;
@@ -272,7 +298,7 @@ export class NewsService {
     language: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    const existingNews = await this.validateNewsExists(newsId, language);
+    const existingNews = await this.validateManageableNews(newsId, currentUser, language);
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
@@ -321,7 +347,7 @@ export class NewsService {
   }
 
   async deleteNews(newsId: UUIDType, currentUser?: CurrentUserType) {
-    const existingNews = await this.validateNewsExists(newsId, undefined, false);
+    const existingNews = await this.validateManageableNews(newsId, currentUser, undefined, false);
 
     if (existingNews.archived) return { id: existingNews.id };
 
@@ -348,7 +374,8 @@ export class NewsService {
           actor: currentUser,
           baseLanguage: existingNews.baseLanguage,
           availableLocales: existingNews.availableLocales,
-          title: this.extractTitleByLanguage(existingNews.title, existingNews.baseLanguage),
+          title:
+            getLocalizedText(existingNews.title, existingNews.baseLanguage, false) ?? undefined,
         }),
       );
     }
@@ -361,10 +388,7 @@ export class NewsService {
     requestedLanguage: SupportedLanguages,
     currentUser?: CurrentUserType,
   ) {
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.NEWS_MANAGE,
-      PERMISSIONS.NEWS_MANAGE_OWN,
-    ]);
+    const isAdminLike = this.canManageNews(currentUser);
 
     const accessConditions = this.getNewsAccessConditions(requestedLanguage, currentUser, {
       requirePublished: !isAdminLike,
@@ -373,9 +397,15 @@ export class NewsService {
       .select({
         ...getTableColumns(news),
         authorName: sql<string>`CONCAT(${users.firstName}, ' ', ${users.lastName})`,
-        title: this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
-        content: this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
-        summary: this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
+        title: isAdminLike
+          ? this.localizationService.getLocalizedSqlField(news.title, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.title, requestedLanguage),
+        content: isAdminLike
+          ? this.localizationService.getLocalizedSqlField(news.content, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.content, requestedLanguage),
+        summary: isAdminLike
+          ? this.localizationService.getLocalizedSqlField(news.summary, requestedLanguage, news)
+          : this.localizationService.getFieldByLanguage(news.summary, requestedLanguage),
         baseLanguage: sql<SupportedLanguages>`${news.baseLanguage}`,
         availableLocales: sql<SupportedLanguages[]>`${news.availableLocales}`,
       })
@@ -388,7 +418,11 @@ export class NewsService {
     if (existingNews.publishedAt === null && !isAdminLike)
       throw new NotFoundException("adminNewsView.toast.notFoundError");
 
-    const resources = await this.getNewsResources(newsId, requestedLanguage);
+    const resources = await this.getNewsResources(
+      newsId,
+      requestedLanguage,
+      isAdminLike ? existingNews.baseLanguage : undefined,
+    );
 
     const { html: contentWithResources } = injectResourcesIntoContent(
       existingNews.content,
@@ -441,13 +475,10 @@ export class NewsService {
       throw new NotFoundException("newsView.resourceNotFound");
     }
 
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.NEWS_MANAGE,
-      PERMISSIONS.NEWS_MANAGE_OWN,
-    ]);
+    const canManageAllNews = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
 
     if (!resource.entityId || resource.entityType !== ENTITY_TYPES.NEWS) {
-      if (isAdminLike) {
+      if (canManageAllNews) {
         return this.streamNewsResource(req, res, resource.reference, {
           contentType: resource.contentType,
           preview,
@@ -467,14 +498,11 @@ export class NewsService {
 
     if (!existingNews) throw new NotFoundException("News not found");
 
-    const isAuthor = Boolean(
-      currentUser?.userId &&
-        hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE_OWN) &&
-        existingNews.authorId === currentUser.userId,
-    );
+    const isAuthor =
+      this.canManageOwnNews(currentUser) && existingNews.authorId === currentUser?.userId;
     const isPublic = Boolean(existingNews.isPublic && existingNews.publishedAt !== null);
 
-    if (!isAdminLike && !isAuthor && !isPublic) {
+    if (!canManageAllNews && !isAuthor && !isPublic) {
       throw new NotFoundException("newsView.resourceNotFound");
     }
 
@@ -548,7 +576,7 @@ export class NewsService {
   ) {
     const { language } = createNewsBody;
 
-    const existingNews = await this.validateNewsExists(newsId, language, false);
+    const existingNews = await this.validateManageableNews(newsId, currentUser, language, false);
 
     const previousSnapshot = await this.buildNewsActivitySnapshot(newsId, language);
 
@@ -596,6 +624,8 @@ export class NewsService {
     description: string,
     currentUser?: CurrentUserType,
   ) {
+    await this.validateManageableNews(newsId, currentUser, language);
+
     const fileTitle = {
       [language]: title,
     };
@@ -629,13 +659,14 @@ export class NewsService {
   ) {
     await this.checkAccess(currentUser?.userId);
 
-    await this.validateNewsExists(newsId, language, false);
+    await this.validateManageableNews(newsId, currentUser, language, false);
 
     const existingCover = await this.fileService.getResourcesForEntity(
       newsId,
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
+      { requireLanguage: true },
     );
 
     if (existingCover.length) {
@@ -661,7 +692,11 @@ export class NewsService {
     return fileData;
   }
 
-  private async getNewsResources(newsId: UUIDType, language: SupportedLanguages) {
+  private async getNewsResources(
+    newsId: UUIDType,
+    language: SupportedLanguages,
+    coverFallbackLanguage?: SupportedLanguages,
+  ) {
     const resources = await this.fileService.getResourcesForEntity(
       newsId,
       ENTITY_TYPES.NEWS,
@@ -696,13 +731,23 @@ export class NewsService {
         .otherwise(() => groupedResources.attachments.push(baseResource));
     });
 
-    const [cover] = await this.fileService.getResourcesForEntity(
+    let [cover] = await this.fileService.getResourcesForEntity(
       newsId,
       ENTITY_TYPES.NEWS,
       RESOURCE_RELATIONSHIP_TYPES.COVER,
       language,
-      { quality: IMAGE_QUALITY.LG },
+      { quality: IMAGE_QUALITY.LG, requireLanguage: true },
     );
+
+    if (!cover && coverFallbackLanguage && coverFallbackLanguage !== language) {
+      [cover] = await this.fileService.getResourcesForEntity(
+        newsId,
+        ENTITY_TYPES.NEWS,
+        RESOURCE_RELATIONSHIP_TYPES.COVER,
+        coverFallbackLanguage,
+        { quality: IMAGE_QUALITY.LG, requireLanguage: true },
+      );
+    }
 
     if (cover) groupedResources.coverImage = this.mapResourceToNewsResource(cover);
 
@@ -716,7 +761,7 @@ export class NewsService {
     currentUser: CurrentUserType,
   ): Promise<string> {
     await this.checkAccess(currentUser?.userId);
-    await this.validateNewsExists(newsId, language);
+    await this.validateManageableNews(newsId, currentUser, language);
 
     const resources = await this.getNewsResources(newsId, language);
 
@@ -753,45 +798,6 @@ export class NewsService {
     return existingNews;
   }
 
-  private buildUpdateData(
-    existingNews: InferSelectModel<typeof news>,
-    updateNewsData: Partial<Omit<UpdateNews, "language">>,
-    language: SupportedLanguages,
-  ): Record<string, unknown> {
-    const localizableFields = ["title", "content", "summary"] as const;
-    const directFields: Array<keyof Omit<UpdateNews, "language">> = ["status", "isPublic"];
-
-    if ("content" in updateNewsData && typeof updateNewsData.content === "string") {
-      updateNewsData.content =
-        annotateVideoAutoplayAndBlockIndexesInContent(updateNewsData.content) ?? undefined;
-    }
-
-    const updateData: Record<string, unknown> = {
-      ...this.localizationService.updateLocalizableFields(
-        localizableFields,
-        existingNews,
-        updateNewsData,
-        language,
-      ),
-    };
-
-    directFields.map((field) => {
-      if (field in updateNewsData && updateNewsData[field] !== undefined)
-        updateData[field] = updateNewsData[field];
-
-      if (field === "status" && !isEmpty(updateData[field])) {
-        if (updateData[field] === "published") updateData["publishedAt"] = new Date().toISOString();
-        if (updateData[field] === "draft") updateData["publishedAt"] = null;
-      }
-
-      if (updateNewsData[field] === "true" || updateNewsData[field] === "false") {
-        updateData[field] = updateNewsData[field] === "true" ? true : false;
-      }
-    });
-
-    return updateData;
-  }
-
   private getVisibleNewsConditions(
     language: SupportedLanguages,
     currentUser?: CurrentUserType,
@@ -808,10 +814,8 @@ export class NewsService {
     currentUser?: CurrentUserType,
     options?: { excludedId?: UUIDType; requirePublished?: boolean },
   ) {
-    const isAdminLike = hasAnyPermission(currentUser?.permissions, [
-      PERMISSIONS.NEWS_MANAGE,
-      PERMISSIONS.NEWS_MANAGE_OWN,
-    ]);
+    const isAdminLike = this.canManageNews(currentUser);
+    const canManageAllNews = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
 
     const conditions = [ne(news.archived, true)];
 
@@ -822,6 +826,10 @@ export class NewsService {
     if (!isAdminLike) {
       conditions.push(sql`${language} = ANY(${news.availableLocales})`);
       if (!currentUser) conditions.push(eq(news.isPublic, true));
+    }
+
+    if (isAdminLike && !canManageAllNews) {
+      conditions.push(eq(news.authorId, currentUser!.userId));
     }
 
     if (options?.excludedId) conditions.push(ne(news.id, options.excludedId));
@@ -890,6 +898,9 @@ export class NewsService {
         ...getTableColumns(news),
         title: this.localizationService.getFieldByLanguage(news.title, resolvedLanguage),
         summary: this.localizationService.getFieldByLanguage(news.summary, resolvedLanguage),
+        titleTranslations: news.title,
+        summaryTranslations: news.summary,
+        contentTranslations: news.content,
         publishedAt: sql<string | null>`${news.publishedAt}`,
         baseLanguage: sql<string>`${news.baseLanguage}`,
       })
@@ -898,21 +909,45 @@ export class NewsService {
 
     if (!snapshot) throw new NotFoundException("adminNewsView.toast.notFoundError");
 
+    const {
+      titleTranslations,
+      summaryTranslations,
+      contentTranslations,
+      content: _content,
+      ...snapshotData
+    } = snapshot;
+    const availableLocales = Array.isArray(snapshot.availableLocales)
+      ? snapshot.availableLocales
+      : [snapshot.availableLocales];
+
     return {
-      ...snapshot,
-      availableLocales: Array.isArray(snapshot.availableLocales)
-        ? snapshot.availableLocales
-        : [snapshot.availableLocales],
+      ...snapshotData,
+      availableLocales,
+      translations: Object.fromEntries(
+        availableLocales.map((locale) => [
+          locale,
+          {
+            title: getLocalizedText(titleTranslations, locale, false) ?? undefined,
+            summary: getLocalizedText(summaryTranslations, locale, false) ?? undefined,
+            content: getLocalizedText(contentTranslations, locale, false) ?? undefined,
+          },
+        ]),
+      ),
     };
   }
 
-  private async mapNewsWithCoverImage<T extends { id: UUIDType }>(
+  private async mapNewsWithCoverImage<T extends { id: UUIDType; baseLanguage: SupportedLanguages }>(
     newsList: T[],
     requestedLanguage: SupportedLanguages,
+    useBaseLanguageFallback = false,
   ): Promise<Array<T & { resources: NewsResources }>> {
     return Promise.all(
       newsList.map(async (newsItem) => {
-        const coverImage = await this.getNewsCoverImage(newsItem.id, requestedLanguage);
+        let coverImage = await this.getNewsCoverImage(newsItem.id, requestedLanguage);
+
+        if (!coverImage && useBaseLanguageFallback && newsItem.baseLanguage !== requestedLanguage) {
+          coverImage = await this.getNewsCoverImage(newsItem.id, newsItem.baseLanguage);
+        }
 
         return {
           ...newsItem,
@@ -946,15 +981,6 @@ export class NewsService {
     return isEqual(previousSnapshot, updatedSnapshot);
   }
 
-  private extractTitleByLanguage(titleField: unknown, language: SupportedLanguages) {
-    if (!titleField || typeof titleField !== "object") return undefined;
-
-    const titleMap = titleField as Record<string, unknown>;
-    const title = titleMap[language];
-
-    return typeof title === "string" ? title : undefined;
-  }
-
   private async checkAccess(currentUserId?: UUIDType) {
     const { newsEnabled, unregisteredUserNewsAccessibility } =
       await this.settingsService.getGlobalSettings();
@@ -964,5 +990,159 @@ export class NewsService {
     if (!hasAccess) {
       throw new BadRequestException({ message: "common.toast.noAccess" });
     }
+  }
+
+  private canManageNews(currentUser?: CurrentUserType) {
+    return hasAnyPermission(currentUser?.permissions, [
+      PERMISSIONS.NEWS_MANAGE,
+      PERMISSIONS.NEWS_MANAGE_OWN,
+    ]);
+  }
+
+  private canManageOwnNews(currentUser?: CurrentUserType) {
+    return Boolean(
+      currentUser?.userId && hasPermission(currentUser.permissions, PERMISSIONS.NEWS_MANAGE_OWN),
+    );
+  }
+
+  private getDraftNewsConditions(currentUser?: CurrentUserType) {
+    const conditions = [ne(news.archived, true), sql`${news.publishedAt} IS NULL`];
+
+    if (!hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE)) {
+      conditions.push(eq(news.authorId, currentUser!.userId));
+    }
+
+    return conditions;
+  }
+
+  private async validateManageableNews(
+    newsId: UUIDType,
+    currentUser: CurrentUserType | undefined,
+    language?: SupportedLanguages,
+    shouldIncludeLanguage = true,
+  ) {
+    const existingNews = await this.validateNewsExists(newsId, language, shouldIncludeLanguage);
+    const canManageAllNews = hasPermission(currentUser?.permissions, PERMISSIONS.NEWS_MANAGE);
+    const canManageOwnNews = this.canManageOwnNews(currentUser);
+
+    if (
+      existingNews.archived ||
+      (!canManageAllNews && (!canManageOwnNews || existingNews.authorId !== currentUser?.userId))
+    ) {
+      throw new NotFoundException("adminNewsView.toast.notFoundError");
+    }
+
+    return existingNews;
+  }
+
+  private mapCoverFiles(files: Express.Multer.File[]) {
+    return files.reduce<Record<string, Express.Multer.File>>((covers, file) => {
+      if (!file.fieldname.startsWith("cover.")) return covers;
+      const language = file.fieldname.slice("cover.".length);
+      if (language) covers[language] = file;
+      return covers;
+    }, {});
+  }
+
+  private validateBatchUpdate(
+    existingNews: InferSelectModel<typeof news>,
+    translations: UpdateNewsTranslation[],
+    coverFiles: Record<string, Express.Multer.File>,
+    requestedStatus?: UpdateNews["status"],
+  ) {
+    const languages = new Set(translations.map((translation) => translation.language));
+
+    if (languages.size !== translations.length)
+      throw new BadRequestException("adminNewsView.toast.updateError");
+
+    for (const language of [...languages, ...Object.keys(coverFiles)]) {
+      if (
+        !existingNews.availableLocales.includes(language as SupportedLanguages) &&
+        !languages.has(language as SupportedLanguages)
+      ) {
+        throw new BadRequestException("adminNewsView.toast.invalidLanguageError");
+      }
+    }
+
+    const isPublished =
+      requestedStatus === NEWS_STATUS.PUBLISHED ||
+      (requestedStatus === undefined && existingNews.status === NEWS_STATUS.PUBLISHED);
+
+    if (!isPublished) return;
+
+    const titles =
+      existingNews.title && typeof existingNews.title === "object"
+        ? { ...(existingNews.title as Record<string, unknown>) }
+        : {};
+
+    translations.forEach((translation) => {
+      if (translation.title !== undefined) titles[translation.language] = translation.title;
+    });
+
+    const finalLocales = [...new Set([...existingNews.availableLocales, ...languages])];
+
+    const hasMissingTitle = finalLocales.some((language) => {
+      const title = titles[language];
+      return typeof title !== "string" || !title.trim();
+    });
+
+    if (hasMissingTitle) throw new BadRequestException("newsView.validation.titleRequired");
+  }
+
+  private buildBatchUpdateData(
+    existingNews: InferSelectModel<typeof news>,
+    translations: UpdateNewsTranslation[],
+    sharedData: Omit<UpdateNews, "translations">,
+  ) {
+    const updateData: Record<string, unknown> = {};
+    const localizableFields = ["title", "summary", "content"] as const;
+
+    const localizableNewsFields = {
+      title: news.title,
+      summary: news.summary,
+      content: news.content,
+    };
+
+    const normalizedTranslations = translations.map((translation) => {
+      if (translation.content === undefined) return translation;
+
+      return {
+        ...translation,
+        content: annotateVideoAutoplayAndBlockIndexesInContent(translation.content) ?? "",
+      };
+    });
+
+    normalizedTranslations.forEach((translation) => {
+      Object.assign(
+        updateData,
+        this.localizationService.updateLocalizableFields(
+          localizableFields,
+          { ...localizableNewsFields, ...updateData },
+          translation,
+          translation.language,
+          true,
+        ),
+      );
+    });
+
+    const newLocales = translations
+      .map((translation) => translation.language)
+      .filter((language) => !existingNews.availableLocales.includes(language));
+
+    if (newLocales.length) {
+      updateData.availableLocales = [...existingNews.availableLocales, ...newLocales];
+    }
+
+    if (sharedData.status) {
+      updateData.status = sharedData.status;
+      updateData.publishedAt =
+        sharedData.status === NEWS_STATUS.PUBLISHED ? new Date().toISOString() : null;
+    }
+
+    if (sharedData.isPublic !== undefined) {
+      updateData.isPublic = sharedData.isPublic === true || sharedData.isPublic === "true";
+    }
+
+    return updateData;
   }
 }

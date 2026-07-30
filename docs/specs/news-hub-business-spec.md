@@ -4,7 +4,7 @@
 
 The News Hub gives HR, L&D, and internal communications teams a governed place to publish company and learning updates inside Mentingo. It turns ad hoc messages into structured news posts that learners can browse, open, and return to later.
 
-The feature supports both everyday learner communication and editorial work. Learners see published news in their current interface language, while authorized news managers can create drafts, prepare localized versions, add rich content, and decide whether a published item can also be read by public visitors.
+The feature supports both everyday learner communication and editorial work. Learners see only published news that has a translation in their current interface language. Authorized managers and content creators can create drafts, prepare localized versions, add rich content, and decide whether a published item can also be read by public visitors. Manager and creator views use the immutable base language as a fallback when a requested locale is unavailable.
 
 For HR and L&D, the value is consistency: policy updates, program announcements, platform changes, or training-related messages can live in the same learning environment where employees already complete courses and check announcements.
 
@@ -17,11 +17,14 @@ For HR and L&D, the value is consistency: policy updates, program announcements,
 
 ## Feature Functions
 
+- Preserve title, summary, and content changes for every affected language in the news activity history.
+- Require explicit confirmation before permanently deleting news to prevent accidental content loss.
 - Browse published news in a paginated News Hub.
 - Open a news detail page with title, summary, cover image, author, publication date, rich content, table of contents, and previous or next navigation.
 - Create draft news posts from the News page.
-- Edit title, summary, content, status, visibility, and cover image before publishing.
-- Manage localized news versions so different audiences can read the same update in their selected language.
+- Edit title, summary, content, status, visibility, and locale-specific cover images before publishing.
+- Stage multiple localized versions in one editor session and save changed translations in one multipart request.
+- Manage localized news versions so different audiences can read the same update in their selected language. New locales start blank and remain local until saved.
 - Upload and embed supporting files, images, and videos in rich news content.
 - Preview rich content before publishing.
 - Limit draft, edit, delete, and public-read behavior through tenant settings, post visibility, publication status, and news permissions.
@@ -32,20 +35,21 @@ News Hub gives learners a clear source for organizational and learning-related u
 
 ## How It Works
 
-A news manager opens the News page, creates an empty draft, and fills in the post in the News form. The form supports a cover image, title, summary, rich content, publication status, public visibility, and language selection. Managers can preview the rich content before saving and can return later to update or delete the post.
+A news manager opens the News page, creates an empty draft, and fills in the post in the News form. The form has its own active locale and preserves unsaved title, summary, rich content, and selected cover changes when locales are switched. Publication status and public visibility are shared by all locales. Publishing requires a title for every active locale. The preview is content-only and renders the active locale's unsaved rich-text HTML in the browser.
 
 Learners and visitors open the News page to see published items. The list highlights the first item on the first page, paginates the rest, and opens each post into a detailed article view. On the detail page, Mentingo renders the localized content, supporting media, article metadata, table of contents, and previous/next post navigation.
 
-Drafts are visible only to users who can manage news. Public visitors can access the News Hub only when public News access is enabled for the tenant and the post itself is published and public.
+Drafts are visible only to users who can manage news. Users with `news.manage` can manage every post; users with `news.manage_own` can access only their own posts, resources, uploads, and language changes. Requests for another author's item return Not Found. Public visitors can access the News Hub only when public News access is enabled for the tenant and the post itself is published, public, and translated into the requested locale.
 
 ## Key Technical Context
 
 - The user-facing web routes are `/news`, `/news/:newsId`, `/news/add`, and `/news/:newsId/edit`, implemented under `apps/web/app/modules/News`.
-- The backend News API lives in `apps/api/src/news`; it exposes public read routes, manager draft routes, preview generation, localized updates, deletion, and resource upload.
+- The backend News API lives in `apps/api/src/news`; it exposes public read routes, manager draft routes, batched localized updates, deletion, and resource upload.
 - News management uses `PERMISSIONS.NEWS_MANAGE` and `PERMISSIONS.NEWS_MANAGE_OWN`; public reading is gated by tenant News settings, post status, post visibility, and `PERMISSIONS.NEWS_READ_PUBLIC`.
-- News content follows the active content language and supports localized resource handling through the shared language selector pattern.
+- Learner and visitor reads are locale-strict. Manager and creator reads use the immutable base language as fallback for title, summary, content, and cover imagery.
+- News content supports localized resource handling through the shared language selector pattern; cover images are locale-specific and selecting a replacement cover does not upload it until Save.
 - Rich text uploads reuse the existing Mentingo upload pipeline for images, documents, and videos attached to the news entity.
 
 ## Test Evidence
 
-Frontend Playwright coverage proves that admins can browse, open, create, update, and delete news, and that visitors can access published public news while private news stays hidden. The current source search did not find dedicated backend News E2E specs, so backend behavior is evidenced primarily by controller/service implementation and the frontend E2E flows that exercise the API.
+Frontend Playwright coverage covers browsing, opening, creating, updating, and deleting news, plus public/private access. The News implementation should additionally be covered with API tests for strict locale filtering, manager fallback, own-only isolation, and batch updates; web coverage should cover staged locale drafts, batch saves, publication title validation, local preview, and the absence of pagination for a one-page result.

@@ -806,6 +806,10 @@
     "button": {
       "delete": "Delete"
     },
+    "deleteModal": {
+      "title": "Delete news",
+      "description": "Are you sure you want to delete this news? This action cannot be undone."
+    },
     "validation": {
       "titleRequired": "Title is required",
       "introRequired": "Introduction is required",
