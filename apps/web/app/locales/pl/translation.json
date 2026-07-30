@@ -1044,6 +1044,10 @@
     "button": {
       "delete": "Usuń"
     },
+    "deleteModal": {
+      "title": "Usuń aktualność",
+      "description": "Czy na pewno chcesz usunąć tę aktualność? Tej czynności nie można cofnąć."
+    },
     "validation": {
       "titleRequired": "Tytuł jest wymagany",
       "introRequired": "Wprowadzenie jest wymagane",

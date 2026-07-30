@@ -795,6 +795,10 @@
     "button": {
       "delete": "Eliminar"
     },
+    "deleteModal": {
+      "title": "Eliminar noticia",
+      "description": "¿Seguro que quieres eliminar esta noticia? Esta acción no se puede deshacer."
+    },
     "validation": {
       "titleRequired": "Se requiere título",
       "introRequired": "Se requiere introducción",

@@ -804,6 +804,10 @@
     "button": {
       "delete": "Vymazat"
     },
+    "deleteModal": {
+      "title": "Smazat novinku",
+      "description": "Opravdu chcete tuto novinku smazat? Tuto akci nelze vrátit zpět."
+    },
     "validation": {
       "titleRequired": "Název je povinný",
       "introRequired": "Úvod je povinný",
