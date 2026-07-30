@@ -143,8 +143,56 @@ describe("useAiMentorLessonForm", () => {
     expect(mocks.createAiMentorLesson).toHaveBeenCalledWith({
       data: expect.objectContaining({
         chapterId: "chapter-id",
-        aiMentorConfiguration: values.aiMentorConfiguration,
-        aiJudgeConfiguration: values.aiJudgeConfiguration,
+        aiMentorConfiguration: expect.objectContaining(values.aiMentorConfiguration ?? {}),
+        aiJudgeConfiguration: expect.objectContaining(values.aiJudgeConfiguration ?? {}),
+      }),
+    });
+  });
+
+  it("normalizes empty optional Mentor fields before creating a lesson", async () => {
+    mocks.createAiMentorLesson.mockResolvedValue(undefined);
+    const { result } = renderHook(() =>
+      useAiMentorLessonForm({
+        chapterToEdit,
+        lessonToEdit: null,
+        setContentTypeToDisplay: vi.fn(),
+        language: "en",
+        baseLanguage: "en",
+      }),
+    );
+    const configuration = {
+      type: AI_MENTOR_TYPE.ROLEPLAY,
+      scenario: "Discovery call",
+      aiRole: "Customer",
+      learnerRole: "Sales representative",
+      characterGoal: "Assess whether the offer is relevant",
+      difficulty: AI_MENTOR_ROLEPLAY_DIFFICULTY.REALISTIC,
+      factsAndConstraints: "",
+      openingInstruction: "",
+      additionalInstructions: "",
+    } as const;
+
+    act(() => {
+      result.current.form.setValue("aiMentorConfiguration", configuration);
+      result.current.form.setValue("aiJudgeConfiguration", {
+        taskGoal: "Complete the discovery call",
+        passingThresholdPercent: 0,
+        criteria: [],
+        blockingErrors: [],
+      });
+    });
+
+    await act(async () => {
+      await result.current.onSubmit(result.current.form.getValues());
+    });
+
+    expect(mocks.createAiMentorLesson).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        aiMentorConfiguration: expect.objectContaining({
+          factsAndConstraints: null,
+          openingInstruction: null,
+          additionalInstructions: null,
+        }),
       }),
     });
   });

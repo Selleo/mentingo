@@ -16,6 +16,8 @@ import {
   type Lesson,
 } from "~/modules/Admin/EditCourse/EditCourse.types";
 
+import { mapAiJudgeConfigurationDraftToBaseInput } from "../AiJudge/aiJudgeConfiguration.mappers";
+import { mapAiMentorConfigurationDraftToBaseInput } from "../AiMentorConfiguration/aiMentorConfiguration.mappers";
 import { aiMentorLessonFormSchema } from "../validators/useAiMentorLessonFormSchema";
 
 import {
@@ -128,8 +130,8 @@ export const useAiMentorLessonForm = ({
             ...lessonValues,
             ...normalizedVoiceValues,
             chapterId: chapterToEdit.id,
-            aiMentorConfiguration,
-            aiJudgeConfiguration,
+            aiMentorConfiguration: mapAiMentorConfigurationDraftToBaseInput(aiMentorConfiguration),
+            aiJudgeConfiguration: mapAiJudgeConfigurationDraftToBaseInput(aiJudgeConfiguration),
           },
         });
         setOpenChapter && setOpenChapter(chapterToEdit.id);

@@ -21,7 +21,7 @@ template: |
 
   <quality_checks>
   For Teacher, verify that task goal, expertise, scope, and teaching style are coherent; the configuration teaches rather than only tests; feedback guidance does not contradict Teacher behavior; and it does not require invented knowledge.
-  For Roleplay, verify that roles are distinct and clear; scenario and character goal create a plausible interaction; difficulty is achievable; facts do not contradict the scenario; and the character participates rather than coaches or evaluates.
+  For Roleplay, verify that aiRole and learnerRole are distinct, clear, and concise participant identities rather than descriptions of actions, services, relationships, goals, or scenario facts; scenario and character goal create a plausible interaction; difficulty is achievable; facts do not contradict the scenario; and the character participates rather than coaches or evaluates the learner.
   For both, verify alignment with the learner-facing task, internal coherence, and that optional instructions do not override the selected behavior.
   </quality_checks>
 

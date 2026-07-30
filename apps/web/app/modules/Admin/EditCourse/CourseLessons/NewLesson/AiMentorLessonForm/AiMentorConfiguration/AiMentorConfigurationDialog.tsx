@@ -15,16 +15,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
-import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Form } from "~/components/ui/form";
+
+import { AiMentorQualityCheckDialog } from "../AiMentorGeneration/AiMentorQualityCheckDialog";
+import { useAiMentorConfigurationValidation } from "../AiMentorGeneration/useAiMentorConfigurationValidation";
 
 import {
   createEmptyAiMentorConfiguration,
@@ -32,9 +33,11 @@ import {
   switchAiMentorConfigurationType,
 } from "./aiMentorConfiguration.defaults";
 import { aiMentorConfigurationSchema } from "./aiMentorConfiguration.schema";
+import { AiMentorConfigurationDialogFooter } from "./AiMentorConfigurationDialogFooter";
 import { AiMentorConfigurationFields } from "./AiMentorConfigurationFields";
 
 import type { AiMentorConfigurationDraft } from "./aiMentorConfiguration.types";
+import type { AiMentorValidationResult } from "../AiMentorGeneration/aiMentorGeneration.types";
 import type { AiMentorType, SupportedLanguages } from "@repo/shared";
 
 type AiMentorConfigurationDialogProps = {
@@ -47,6 +50,15 @@ type AiMentorConfigurationDialogProps = {
   baseLanguage: SupportedLanguages;
   isPersisted: boolean;
   isSaving?: boolean;
+  onValidateConfiguration?: (
+    value: AiMentorConfigurationDraft,
+    signal?: AbortSignal,
+  ) => Promise<AiMentorValidationResult>;
+  onImproveWithAi?: (
+    value: AiMentorConfigurationDraft,
+    validation?: AiMentorValidationResult,
+  ) => void;
+  isValidating?: boolean;
 };
 
 export const AiMentorConfigurationDialog = ({
@@ -59,6 +71,9 @@ export const AiMentorConfigurationDialog = ({
   baseLanguage,
   isPersisted,
   isSaving = false,
+  onValidateConfiguration,
+  onImproveWithAi,
+  isValidating = false,
 }: AiMentorConfigurationDialogProps) => {
   const { t } = useTranslation();
   const [pendingType, setPendingType] = useState<AiMentorType | null>(null);
@@ -67,6 +82,13 @@ export const AiMentorConfigurationDialog = ({
     resolver: zodResolver(aiMentorConfigurationSchema(t)),
     defaultValues: value ?? createEmptyAiMentorConfiguration(),
   });
+  const {
+    result: validationResult,
+    isChecking: isCheckingQuality,
+    validateConfiguration,
+    cancel: cancelQualityCheck,
+    clearResult: clearValidationResult,
+  } = useAiMentorConfigurationValidation(onValidateConfiguration);
   const submitLabelKey = match({ canEditStructure, isPersisted })
     .with(
       { canEditStructure: true, isPersisted: true },
@@ -83,8 +105,15 @@ export const AiMentorConfigurationDialog = ({
   useEffect(() => {
     if (!open) return;
     setPendingType(null);
+    clearValidationResult();
     form.reset(value ?? createEmptyAiMentorConfiguration());
-  }, [form, open, value]);
+  }, [clearValidationResult, form, open, value]);
+
+  useEffect(() => {
+    if (!open) return;
+    const subscription = form.watch(clearValidationResult);
+    return () => subscription.unsubscribe();
+  }, [clearValidationResult, form, open]);
 
   const applyTypeChange = (type: AiMentorType) => {
     const currentConfiguration = form.getValues();
@@ -124,6 +153,12 @@ export const AiMentorConfigurationDialog = ({
     else await onSaveTranslation(configuration);
     onOpenChange(false);
   });
+  const handleValidate = form.handleSubmit(validateConfiguration);
+  const handleImprove = () => {
+    if (!onImproveWithAi) return;
+    clearValidationResult();
+    onImproveWithAi(form.getValues(), validationResult);
+  };
 
   return (
     <>
@@ -157,23 +192,17 @@ export const AiMentorConfigurationDialog = ({
                 />
               </div>
 
-              <DialogFooter className="shrink-0 border-t border-neutral-200 bg-white px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isSaving}
-                  onClick={() => onOpenChange(false)}
-                >
-                  {t("common.button.cancel")}
-                </Button>
-                <Button
-                  type="submit"
-                  data-testid="curriculum-ai-mentor-configuration-apply-button"
-                  disabled={isSaving}
-                >
-                  {t(submitLabelKey)}
-                </Button>
-              </DialogFooter>
+              <AiMentorConfigurationDialogFooter
+                canEditStructure={canEditStructure}
+                canImprove={Boolean(onImproveWithAi) && Boolean(value)}
+                canValidate={Boolean(onValidateConfiguration) && Boolean(value)}
+                isAiBusy={isValidating || isCheckingQuality}
+                isSaving={isSaving}
+                submitLabelKey={submitLabelKey}
+                onCancel={() => onOpenChange(false)}
+                onImprove={handleImprove}
+                onValidate={() => void handleValidate()}
+              />
             </form>
           </Form>
         </DialogContent>
@@ -220,6 +249,16 @@ export const AiMentorConfigurationDialog = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AiMentorQualityCheckDialog
+        isLoading={isCheckingQuality || isValidating}
+        result={validationResult}
+        onCancel={cancelQualityCheck}
+        onOpenChange={(resultOpen) => {
+          if (!resultOpen) clearValidationResult();
+        }}
+        onImprove={onImproveWithAi ? handleImprove : undefined}
+      />
     </>
   );
 };

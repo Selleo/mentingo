@@ -31,7 +31,9 @@ template: |
 
   <roleplay_rules>
   - scenario establishes the situation and relevant starting state.
-  - aiRole and learnerRole are distinct, unambiguous fictional roles.
+  - aiRole and learnerRole are distinct, unambiguous fictional roles expressed as short noun phrases (normally 2-8 words), such as "Prospective software client" or "Sales representative".
+  - Role fields name only who the participant is or what position they occupy. Do not put actions, services being sold, counterpart relationships, goals, requirements, motivations, dialogue instructions, or scenario facts in a role field. For example, use "Sales representative", not "Sales representative selling software services to the client".
+  - Put the situation and relationship in scenario, the character's objective in characterGoal, and non-negotiable details in factsAndConstraints. Move any extra information out of role fields instead of duplicating it.
   - characterGoal states what the AI character wants, protects, or needs.
   - difficulty must be cooperative, realistic, or challenging and changes resistance without making the interaction impossible.
   - factsAndConstraints contains only scenario truths and boundaries that must not be invented past.

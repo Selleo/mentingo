@@ -2454,11 +2454,86 @@
           "createWithAi": "Kurti su DI",
           "improveWithAi": "Tobulinti su DI",
           "checkQualityWithAi": "Patikrinti kokybę su DI",
+          "aiAssistance": "DI pagalba",
           "improveTypeLocked": "DI pagerins dabartinę {{type}} konfigūraciją. Režimo pakeisti negalima.",
-          "create": { "title": "Sukurti DI mentoriaus elgesį su DI", "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.", "fieldLabel": "Ką DI turėtų sukurti?", "fieldDescription": "DI pateiks visą pasirinkto režimo juodraštį.", "placeholder": "Aprašykite norimą elgesį…", "submit": "Generuoti juodraštį" },
-          "improve": { "title": "Pagerinti DI mentoriaus elgesį su DI", "description": "DI naudoja dabartinę neišsaugotą konfigūraciją ir jos režimą.", "fieldLabel": "Ką DI turėtų pagerinti?", "fieldDescription": "Pasirinktas režimas nesikeičia.", "placeholder": "Aprašykite norimą pakeitimą…", "submit": "Pagerinti juodraštį" },
-          "progressTitle": "Ruošiamas juodraštis", "progressDescription": "DI generuoja ir tikrina konfigūraciją.", "readyTitle": "Juodraštis paruoštas peržiūrai", "revisionTitle": "Juodraščiui reikia jūsų sprendimo", "failedTitle": "Nepavyko sugeneruoti juodraščio", "cancel": "Atšaukti generavimą", "revise": "Taisyti juodraštį", "review": "Peržiūrėti konfigūraciją",
-          "quality": { "title": "Patikrinti kokybę su DI", "description": "DI tikrina dabartinę neišsaugotą konfigūraciją jos nekeisdamas.", "checking": "Tikrinama dabartinė konfigūracija…", "improve": "Pagerinti su DI" }
+          "create": {
+            "title": "Sukurti DI mentoriaus elgesį su DI",
+            "description": "Pasirinkite mentoriaus režimą ir aprašykite norimą patirtį.",
+            "fieldLabel": "Ką DI turėtų sukurti?",
+            "fieldDescription": "DI pateiks visą pasirinkto režimo juodraštį.",
+            "placeholder": "Aprašykite norimą elgesį…",
+            "submit": "Generuoti juodraštį"
+          },
+          "improve": {
+            "title": "Pagerinti DI mentoriaus elgesį su DI",
+            "description": "DI naudoja dabartinę neišsaugotą konfigūraciją ir jos režimą.",
+            "fieldLabel": "Ką DI turėtų pagerinti?",
+            "fieldDescription": "Pasirinktas režimas nesikeičia.",
+            "placeholder": "Aprašykite norimą pakeitimą…",
+            "submit": "Pagerinti juodraštį"
+          },
+          "progressTitle": "Ruošiamas juodraštis",
+          "progressDescription": "DI generuoja ir tikrina konfigūraciją.",
+          "readyTitle": "Juodraštis paruoštas peržiūrai",
+          "revisionTitle": "Juodraščiui reikia jūsų sprendimo",
+          "failedTitle": "Nepavyko sugeneruoti juodraščio",
+          "cancel": "Atšaukti generavimą",
+          "revise": "Taisyti juodraštį",
+          "review": "Peržiūrėti konfigūraciją",
+          "progressLabel": "DI mentoriaus generavimo eiga",
+          "stages": {
+            "draft": "Generuojamas juodraštis",
+            "qualityCheck": "Kokybės patikra",
+            "ready": "Paruošta"
+          },
+          "status": {
+            "drafting": "Generuojama konfigūracija",
+            "evaluating": "Tikrinama konfigūracijos kokybė",
+            "revising": "Tobulinamas juodraštis",
+            "awaiting_revision": "Kokybės patikrai reikia jūsų sprendimo",
+            "completed": "Konfigūracija paruošta",
+            "requires_review": "Juodraščiui reikia jūsų sprendimo",
+            "failed": "Generavimo nepavyko užbaigti",
+            "cancelled": "Generavimas atšauktas"
+          },
+          "statusDescription": {
+            "drafting": "Ruošiamas mentoriaus elgesys pasirinktam režimui.",
+            "evaluating": "Tikrinama, ar elgesys aiškus, išsamus ir nuoseklus.",
+            "revising": "Taikomi naujausi kokybės patikros pataisymai.",
+            "awaiting_revision": "Peržiūrėkite pastabas prieš kitą generavimo bandymą.",
+            "completed": "Juodraštis išlaikė kokybės patikrą.",
+            "requires_review": "Naujausias juodraštis paliktas jūsų sprendimui.",
+            "failed": "Bandykite dar kartą arba konfigūruokite mentoriaus elgesį rankiniu būdu.",
+            "cancelled": "Konfigūracijos pakeitimai nebuvo pritaikyti."
+          },
+          "attempt": "Juodraštis {{attempt}} iš {{maxAttempts}}",
+          "currentDraft": "Dabartinis juodraštis",
+          "qualityCheckLabel": "Kokybės patikra",
+          "qualityDecisionTitle": "Siūlomi patobulinimai: {{count}}",
+          "qualityDecisionDescription": "Peržiūrėkite pasiūlymus arba tęskite su šia konfigūracija.",
+          "suggestedImprovements": "Siūlomi patobulinimai",
+          "applyImprovements": "Taisyti",
+          "useCurrentDraft": "Tęsti",
+          "reviewExactChanges": "DI pakeitimai ({{count}})",
+          "reviewConfiguration": "Peržiūrėti konfigūraciją",
+          "showMoreFindings": "Rodyti dar {{count}} pastabų",
+          "showFewerFindings": "Rodyti mažiau pastabų",
+          "review": {
+            "currentDraftTitle": "Peržiūrėti dabartinį juodraštį",
+            "currentDraftDescription": "Šiame juodraštyje dar yra kokybės pasiūlymų. Peržiūrėkite jį prieš pritaikydami.",
+            "requiresReviewTitle": "Peržiūrėti sugeneruotą konfigūraciją",
+            "requiresReviewDescription": "DI paliko naujausią juodraštį jūsų galutiniam sprendimui."
+          },
+          "quality": {
+            "title": "Patikrinti kokybę su DI",
+            "resultTitle": "Kokybės patikra",
+            "description": "DI tikrina dabartinę neišsaugotą konfigūraciją jos nekeisdamas.",
+            "checking": "Tikrinama dabartinė konfigūracija…",
+            "checkingDescription": "Tikrinamas režimas, gairės, apribojimai ir pokalbio elgesys.",
+            "hasFindings": "Peržiūrėkite pastabas arba leiskite DI patobulinti konfigūraciją pagal jas.",
+            "passed": "Pakeitimų nereikia. Galite toliau redaguoti arba išsaugoti konfigūraciją.",
+            "improve": "Pagerinti su DI"
+          }
         },
         "aiJudge": {
           "cardTitle": "Baigimo sąlygos",

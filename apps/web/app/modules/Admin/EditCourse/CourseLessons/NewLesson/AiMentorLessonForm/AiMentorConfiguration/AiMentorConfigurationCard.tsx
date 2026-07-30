@@ -11,6 +11,7 @@ import { cn } from "~/lib/utils";
 import { AiMentorConfigurationDialog } from "./AiMentorConfigurationDialog";
 
 import type { AiMentorConfigurationDraft } from "./aiMentorConfiguration.types";
+import type { AiMentorValidationResult } from "../AiMentorGeneration/aiMentorGeneration.types";
 import type { SupportedLanguages } from "@repo/shared";
 
 type AiMentorConfigurationCardProps = {
@@ -25,8 +26,15 @@ type AiMentorConfigurationCardProps = {
   needsConfiguration?: boolean;
   error?: string;
   onCreateWithAi?: () => void;
-  onImproveWithAi?: () => void;
-  onCheckQuality?: () => void;
+  onImproveWithAi?: (
+    value: AiMentorConfigurationDraft,
+    validation?: AiMentorValidationResult,
+  ) => void;
+  onValidateConfiguration?: (
+    value: AiMentorConfigurationDraft,
+    signal?: AbortSignal,
+  ) => Promise<AiMentorValidationResult>;
+  isValidating?: boolean;
   editorOpen?: boolean;
   onEditorOpenChange?: (open: boolean) => void;
 };
@@ -44,7 +52,8 @@ export const AiMentorConfigurationCard = ({
   error,
   onCreateWithAi,
   onImproveWithAi,
-  onCheckQuality,
+  onValidateConfiguration,
+  isValidating = false,
   editorOpen,
   onEditorOpenChange,
 }: AiMentorConfigurationCardProps) => {
@@ -121,20 +130,15 @@ export const AiMentorConfigurationCard = ({
               {error && <p className="mt-1 text-sm text-error-700">{error}</p>}
             </div>
 
-            <div className="flex flex-wrap gap-2">
+            <div className="flex max-w-full shrink-0 flex-nowrap items-center gap-2 overflow-x-auto">
               {!isConfigured && onCreateWithAi && language === baseLanguage && (
-                <Button type="button" size="sm" onClick={onCreateWithAi}>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="shrink-0 whitespace-nowrap"
+                  onClick={onCreateWithAi}
+                >
                   {t("adminCourseView.curriculum.lesson.aiMentorGeneration.createWithAi")}
-                </Button>
-              )}
-              {isConfigured && language === baseLanguage && onImproveWithAi && (
-                <Button type="button" size="sm" variant="outline" onClick={onImproveWithAi}>
-                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.improveWithAi")}
-                </Button>
-              )}
-              {isConfigured && language === baseLanguage && onCheckQuality && (
-                <Button type="button" size="sm" variant="outline" onClick={onCheckQuality}>
-                  {t("adminCourseView.curriculum.lesson.aiMentorGeneration.checkQualityWithAi")}
                 </Button>
               )}
               <Tooltip>
@@ -151,7 +155,9 @@ export const AiMentorConfigurationCard = ({
                       data-testid="curriculum-ai-mentor-configuration-button"
                       disabled={!canOpenDialog}
                       onClick={() => setIsDialogOpen(true)}
-                      className={cn("h-9 gap-1.5", { "px-1.5": !isConfigured })}
+                      className={cn("h-9 shrink-0 gap-1.5 whitespace-nowrap", {
+                        "px-1.5": !isConfigured,
+                      })}
                     >
                       {actionLabel}
                       {isConfigured && <ChevronRight className="size-3.5" />}
@@ -186,6 +192,9 @@ export const AiMentorConfigurationCard = ({
         baseLanguage={baseLanguage}
         isPersisted={isPersisted}
         isSaving={isSaving}
+        onImproveWithAi={onImproveWithAi}
+        onValidateConfiguration={onValidateConfiguration}
+        isValidating={isValidating}
       />
     </>
   );
