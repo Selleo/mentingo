@@ -103,19 +103,17 @@ const applyEmailLayout = (rawHtml: string, primaryColor: string): string => {
   const wrapperTd = outerTable.find("tbody > tr > td").first();
   if (wrapperTd.length === 0) return rawHtml;
 
-  const cardTable = wrapperTd.children("table").first();
-  if (cardTable.length === 0) return rawHtml;
-
-  const cardInnerTd = cardTable
+  const nodes = wrapperTd
+    .children("table")
+    .first()
     .children("tbody")
     .first()
     .children("tr")
     .first()
     .children("td")
-    .first();
-  if (cardInnerTd.length === 0) return rawHtml;
-
-  const nodes = cardInnerTd.children().toArray();
+    .first()
+    .children()
+    .toArray();
   if (nodes.length === 0) return rawHtml;
 
   const topCount = Math.ceil(nodes.length / 2);

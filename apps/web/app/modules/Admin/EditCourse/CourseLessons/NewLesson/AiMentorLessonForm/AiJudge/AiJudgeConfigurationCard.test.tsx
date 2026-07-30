@@ -41,7 +41,7 @@ type AiJudgeConfigurationCardOverrides = Partial<
 
 const renderCard = (props: AiJudgeConfigurationCardOverrides = {}) =>
   renderWith().render(
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delayDuration={0} skipDelayDuration={0}>
       <AiJudgeConfigurationCard
         onSaveBaseConfiguration={vi.fn()}
         onSaveTranslation={vi.fn()}

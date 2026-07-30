@@ -199,12 +199,23 @@ describe("EmailTemplatesPage", () => {
       { timeout: 1000 },
     );
 
-    await userEvent.click(screen.getByTestId("email-templates-status-filter"));
-    await userEvent.click(
-      await screen.findByTestId(
-        `email-templates-status-filter-option-${EMAIL_TEMPLATE_STATUSES.PUBLISHED}`,
-      ),
-    );
+    const publishedStatusOptionTestId = `email-templates-status-filter-option-${EMAIL_TEMPLATE_STATUSES.PUBLISHED}`;
+    let publishedStatusOption = screen.queryByTestId(publishedStatusOptionTestId);
+
+    for (let attempt = 0; attempt < 3 && !publishedStatusOption; attempt++) {
+      const statusFilter = screen.getByTestId("email-templates-status-filter");
+      await waitFor(() => expect(statusFilter).toBeEnabled());
+      await userEvent.click(statusFilter);
+      publishedStatusOption = await screen
+        .findByTestId(publishedStatusOptionTestId, {}, { timeout: 1000 })
+        .catch(() => null);
+    }
+
+    if (!publishedStatusOption) {
+      throw new Error("Email template status filter did not open.");
+    }
+
+    await userEvent.click(publishedStatusOption);
 
     await waitFor(() => {
       expect(mocks.useAllEmailTemplates).toHaveBeenLastCalledWith(

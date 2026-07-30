@@ -52,12 +52,12 @@ export class EmailNotificationTemplatesRepository {
   }
 
   async deleteManyTemplates(ids: UUIDType[]) {
-    const rows = await this.db
-      .delete(emailNotificationTemplates)
-      .where(inArray(emailNotificationTemplates.id, ids))
-      .returning({ id: emailNotificationTemplates.id });
-
-    return rows;
+    return this.db.transaction(async (trx) => {
+      return trx
+        .delete(emailNotificationTemplates)
+        .where(inArray(emailNotificationTemplates.id, ids))
+        .returning({ id: emailNotificationTemplates.id });
+    });
   }
 
   async createTemplate(input: CreateEmailNotificationTemplate & { name: string }) {
@@ -79,12 +79,14 @@ export class EmailNotificationTemplatesRepository {
   }
 
   async deleteTemplate(id: UUIDType) {
-    const [row] = await this.db
-      .delete(emailNotificationTemplates)
-      .where(eq(emailNotificationTemplates.id, id))
-      .returning({ id: emailNotificationTemplates.id });
+    return this.db.transaction(async (trx) => {
+      const [row] = await trx
+        .delete(emailNotificationTemplates)
+        .where(eq(emailNotificationTemplates.id, id))
+        .returning({ id: emailNotificationTemplates.id });
 
-    return row;
+      return row;
+    });
   }
 
   async findById(id: UUIDType) {
@@ -181,13 +183,15 @@ export class EmailNotificationTemplatesRepository {
     if (input.blocks !== undefined) updates.blocks = input.blocks as EmailTemplateBlocks;
     if (input.strings !== undefined) updates.strings = input.strings as EmailTemplateStrings;
 
-    const [row] = await this.db
-      .update(emailNotificationTemplates)
-      .set(updates)
-      .where(eq(emailNotificationTemplates.id, id))
-      .returning();
+    return this.db.transaction(async (trx) => {
+      const [row] = await trx
+        .update(emailNotificationTemplates)
+        .set(updates)
+        .where(eq(emailNotificationTemplates.id, id))
+        .returning();
 
-    return row;
+      return row;
+    });
   }
 
   async findReferencedImageKeys(
