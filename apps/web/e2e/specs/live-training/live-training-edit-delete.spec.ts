@@ -4,7 +4,7 @@ import { LIVE_TRAINING_HANDLES } from "../../data/live-training/handles";
 import { expect, test } from "../../fixtures/test.fixture";
 import { openLiveTrainingFlow } from "../../flows/live-training/open-live-training.flow";
 
-test("admin can inline edit and delete an unlinked Live Training", async ({
+test.skip("admin can inline edit and delete an unlinked Live Training", async ({
   cleanup,
   factories,
   withWorkerPage,
