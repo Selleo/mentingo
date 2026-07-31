@@ -59,6 +59,16 @@ const linkedText = (href: string): EmailTemplateBlocks => ({
   marks: [{ type: "link", attrs: { href } }],
 });
 
+const imageBlocks = (src: string): EmailTemplateBlocks => ({
+  type: EMAIL_TEMPLATE_NODE_TYPES.DOC,
+  content: [
+    {
+      type: EMAIL_TEMPLATE_NODE_TYPES.IMAGE,
+      attrs: { src },
+    },
+  ],
+});
+
 const makeTemplate = (overrides?: Record<string, unknown>) => ({
   id: TEMPLATE_ID,
   name: "My Template",
@@ -90,13 +100,13 @@ const makeRepository = () => {
     findExistingNames: fn(),
     findBlocksByIds: fn(),
     duplicateFrom: fn(),
-    findReferencedImageKeys: fn(),
-    findMaxAutoTemplateNumber: fn(),
+    findTemplateBlocks: fn(),
+    findAutoTemplateNames: fn(),
   };
   return r;
 };
 
-const makeImageService = () => ({ deleteByKey: fn() });
+const makeFileService = () => ({ deleteFile: fn() });
 const makeEmailService = () => {
   const service = {
     sendEmailWithLogo: fn(),
@@ -119,19 +129,19 @@ const makeCleanupQueue = () => ({
 
 const createService = () => {
   const repository = makeRepository();
-  const imageService = makeImageService();
+  const fileService = makeFileService();
   const emailService = makeEmailService();
   const settingsService = makeSettingsService();
   const cleanupQueue = makeCleanupQueue();
   cleanupQueue.enqueueImageCleanup.mockResolvedValue(undefined);
   const service = new EmailNotificationTemplatesService(
     repository as never,
-    imageService as never,
+    fileService as never,
     emailService as never,
     settingsService as never,
     cleanupQueue as never,
   );
-  return { service, repository, imageService, emailService, settingsService, cleanupQueue };
+  return { service, repository, fileService, emailService, settingsService, cleanupQueue };
 };
 
 describe("EmailNotificationTemplatesService — validateLocales", () => {
@@ -287,7 +297,7 @@ describe("EmailNotificationTemplatesService — auto-name on create", () => {
 
   it("assigns 'Email template #<max+1>' when name is omitted", async () => {
     const { service, repository } = createService();
-    repository.findMaxAutoTemplateNumber.mockResolvedValue(4);
+    repository.findAutoTemplateNames.mockResolvedValue(["Email template #2", "Email template #4"]);
     repository.createTemplate.mockResolvedValue(makeTemplate({ name: "Email template #5" }));
 
     const result = await service.createTemplate(autoNameInput);
@@ -298,29 +308,26 @@ describe("EmailNotificationTemplatesService — auto-name on create", () => {
     expect(result.name).toBe("Email template #5");
   });
 
-  it("recomputes max and retries on unique-violation", async () => {
+  it("ignores names that do not match the auto-name pattern", async () => {
     const { service, repository } = createService();
-    repository.findMaxAutoTemplateNumber.mockResolvedValueOnce(4).mockResolvedValueOnce(5);
-    repository.createTemplate
-      .mockRejectedValueOnce(uniqueViolation())
-      .mockResolvedValueOnce(makeTemplate({ name: "Email template #6" }));
+    repository.findAutoTemplateNames.mockResolvedValue([
+      "Email template #2",
+      "Email template #abc",
+      "Custom Email template #12",
+    ]);
+    repository.createTemplate.mockResolvedValue(makeTemplate({ name: "Email template #3" }));
 
     const result = await service.createTemplate(autoNameInput);
 
-    expect(repository.createTemplate).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({ name: "Email template #5" }),
+    expect(repository.createTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({ name: "Email template #3" }),
     );
-    expect(repository.createTemplate).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ name: "Email template #6" }),
-    );
-    expect(result.name).toBe("Email template #6");
+    expect(result.name).toBe("Email template #3");
   });
 
   it("rethrows unique-violation errors when no constraint field is present", async () => {
     const { service, repository } = createService();
-    repository.findMaxAutoTemplateNumber.mockResolvedValueOnce(4);
+    repository.findAutoTemplateNames.mockResolvedValue(["Email template #4"]);
     const err = uniqueNameViolation({ constraint_name: undefined, constraint: undefined });
     repository.createTemplate.mockRejectedValueOnce(err);
 
@@ -328,20 +335,20 @@ describe("EmailNotificationTemplatesService — auto-name on create", () => {
     expect(repository.createTemplate).toHaveBeenCalledTimes(1);
   });
 
-  it("throws ConflictException after 5 unsuccessful attempts", async () => {
+  it("throws ConflictException when the generated name conflicts", async () => {
     const { service, repository } = createService();
-    repository.findMaxAutoTemplateNumber.mockResolvedValue(4);
+    repository.findAutoTemplateNames.mockResolvedValue(["Email template #4"]);
     repository.createTemplate.mockRejectedValue(uniqueViolation());
 
     await expect(service.createTemplate(autoNameInput)).rejects.toThrow(
       new ConflictException("emailTemplates.toast.nameAlreadyExists"),
     );
-    expect(repository.createTemplate).toHaveBeenCalledTimes(5);
+    expect(repository.createTemplate).toHaveBeenCalledTimes(1);
   });
 
   it("rethrows non-unique errors without retrying", async () => {
     const { service, repository } = createService();
-    repository.findMaxAutoTemplateNumber.mockResolvedValue(4);
+    repository.findAutoTemplateNames.mockResolvedValue(["Email template #4"]);
     const other = Object.assign(new Error("boom"), { code: "42P01" });
     repository.createTemplate.mockRejectedValue(other);
 
@@ -623,7 +630,6 @@ describe("EmailNotificationTemplatesService — updateTemplate", () => {
     );
     repository.findByName.mockResolvedValue(undefined);
     repository.updateTemplate.mockResolvedValue(makeTemplate());
-    repository.findReferencedImageKeys.mockResolvedValue(new Set());
 
     await service.updateTemplate(TEMPLATE_ID, {}, TENANT_ID);
 
@@ -757,13 +763,13 @@ describe("EmailNotificationTemplatesService — deleteManyTemplates", () => {
 
 describe("EmailNotificationTemplatesService — purgeOrphanedImages", () => {
   it("deletes unreferenced image keys and keeps referenced images", async () => {
-    const { service, repository, imageService } = createService();
+    const { service, repository, fileService } = createService();
     const removedSrc = `/api/public/email-template-image/${TENANT_ID}/email_template_image/old-key.webp`;
     const keptSrc = `/api/public/email-template-image/${TENANT_ID}/email_template_image/kept-key.webp`;
     const removedKey = `${TENANT_ID}/email_template_image/old-key.webp`;
     const keptKey = `${TENANT_ID}/email_template_image/kept-key.webp`;
-    repository.findReferencedImageKeys.mockResolvedValue(new Set([keptKey]));
-    imageService.deleteByKey.mockResolvedValue(undefined);
+    repository.findTemplateBlocks.mockResolvedValue([imageBlocks(keptSrc)]);
+    fileService.deleteFile.mockResolvedValue(undefined);
 
     await service.purgeOrphanedImages({
       tenantId: TENANT_ID,
@@ -771,23 +777,19 @@ describe("EmailNotificationTemplatesService — purgeOrphanedImages", () => {
       excludeTemplateId: TEMPLATE_ID,
     });
 
-    expect(repository.findReferencedImageKeys).toHaveBeenCalledWith(
-      [removedKey, keptKey],
-      TENANT_ID,
-      TEMPLATE_ID,
-    );
-    expect(imageService.deleteByKey).toHaveBeenCalledWith(removedKey);
-    expect(imageService.deleteByKey).not.toHaveBeenCalledWith(keptKey);
+    expect(repository.findTemplateBlocks).toHaveBeenCalledWith(TEMPLATE_ID);
+    expect(fileService.deleteFile).toHaveBeenCalledWith(removedKey);
+    expect(fileService.deleteFile).not.toHaveBeenCalledWith(keptKey);
   });
 
   it("does not delete extracted keys outside the current tenant email template image category", async () => {
-    const { service, repository, imageService } = createService();
+    const { service, repository, fileService } = createService();
     const safeSrc = `/api/public/email-template-image/${TENANT_ID}/email_template_image/current.webp`;
     const differentTenantSrc =
       "https://external.test/api/public/email-template-image/99999999-9999-9999-9999-999999999999/email_template_image/alien.webp";
     const differentCategorySrc = `https://external.test/api/public/email-template-image/${TENANT_ID}/course/course.webp`;
-    repository.findReferencedImageKeys.mockResolvedValue(new Set());
-    imageService.deleteByKey.mockResolvedValue(undefined);
+    repository.findTemplateBlocks.mockResolvedValue([]);
+    fileService.deleteFile.mockResolvedValue(undefined);
 
     await service.purgeOrphanedImages({
       tenantId: TENANT_ID,
@@ -795,20 +797,20 @@ describe("EmailNotificationTemplatesService — purgeOrphanedImages", () => {
       excludeTemplateId: TEMPLATE_ID,
     });
 
-    expect(imageService.deleteByKey).toHaveBeenCalledTimes(1);
-    expect(imageService.deleteByKey).toHaveBeenCalledWith(
+    expect(fileService.deleteFile).toHaveBeenCalledTimes(1);
+    expect(fileService.deleteFile).toHaveBeenCalledWith(
       `${TENANT_ID}/email_template_image/current.webp`,
     );
   });
 
   it("keeps a same-tenant image when another template references its canonical key", async () => {
-    const { service, repository, imageService } = createService();
+    const { service, repository, fileService } = createService();
     const key = `${TENANT_ID}/email_template_image/current.webp`;
     const craftedSrc = `https://external.test/api/public/email-template-image/${encodeURIComponent(
       key,
     )}`;
-    repository.findReferencedImageKeys.mockResolvedValue(new Set([key]));
-    imageService.deleteByKey.mockResolvedValue(undefined);
+    repository.findTemplateBlocks.mockResolvedValue([imageBlocks(craftedSrc)]);
+    fileService.deleteFile.mockResolvedValue(undefined);
 
     await service.purgeOrphanedImages({
       tenantId: TENANT_ID,
@@ -816,8 +818,8 @@ describe("EmailNotificationTemplatesService — purgeOrphanedImages", () => {
       excludeTemplateId: TEMPLATE_ID,
     });
 
-    expect(repository.findReferencedImageKeys).toHaveBeenCalledWith([key], TENANT_ID, TEMPLATE_ID);
-    expect(imageService.deleteByKey).not.toHaveBeenCalled();
+    expect(repository.findTemplateBlocks).toHaveBeenCalledWith(TEMPLATE_ID);
+    expect(fileService.deleteFile).not.toHaveBeenCalled();
   });
 });
 

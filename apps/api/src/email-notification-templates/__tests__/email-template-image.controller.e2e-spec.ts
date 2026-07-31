@@ -13,6 +13,24 @@ import { cookieFor, truncateAllTables } from "../../../test/helpers/test-helpers
 import type { INestApplication } from "@nestjs/common";
 import type { DatabasePg } from "src/common";
 
+jest.mock("load-esm", () => ({
+  loadEsm: jest.fn(async () => ({
+    fileTypeFromBuffer: async (buffer: Buffer) => {
+      if (
+        buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+      ) {
+        return { mime: "image/png", ext: "png" };
+      }
+
+      if (buffer.subarray(0, 4).toString("ascii") === "%PDF") {
+        return { mime: "application/pdf", ext: "pdf" };
+      }
+
+      return undefined;
+    },
+  })),
+}));
+
 const validPngBuffer = Buffer.from([
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
   0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,

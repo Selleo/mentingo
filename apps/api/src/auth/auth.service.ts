@@ -665,8 +665,9 @@ export class AuthService {
       }),
       ...defaultEmailSettings,
     });
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
-    return { createToken, emailTemplate };
+    return { createToken, emailContent: { text, html } };
   }
 
   private async sendEmailAndUpdateDatabase(
@@ -675,7 +676,7 @@ export class AuthService {
     email: string,
     oldTokenHash: string,
     createToken: string,
-    emailTemplate: { text: Promise<string> | string; html: Promise<string> | string },
+    emailContent: { text: string; html: string },
     expiryDate: Date,
     reminderCount: number,
   ) {
@@ -695,14 +696,11 @@ export class AuthService {
           userId,
         );
 
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
-
         await this.emailService.sendEmailWithLogo(
           {
             to: email,
             subject: getEmailSubject("passwordReminderEmail", defaultEmailSettings.language),
-            text,
-            html,
+            ...emailContent,
           },
           { tenantId },
         );
@@ -724,7 +722,7 @@ export class AuthService {
 
     expiryTokens.map(async ({ userId, email, oldTokenHash, reminderCount }) => {
       const user = await this.userService.getUserById(userId);
-      const { createToken, emailTemplate } = await this.generateNewTokenAndEmail(userId);
+      const { createToken, emailContent } = await this.generateNewTokenAndEmail(userId);
 
       await this.sendEmailAndUpdateDatabase(
         user.tenantId,
@@ -732,7 +730,7 @@ export class AuthService {
         email,
         oldTokenHash,
         createToken,
-        emailTemplate,
+        emailContent,
         expiryDate,
         reminderCount + 1,
       );

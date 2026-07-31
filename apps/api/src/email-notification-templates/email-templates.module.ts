@@ -8,7 +8,6 @@ import { SettingsModule } from "src/settings/settings.module";
 import { EmailTemplateCleanupQueueService } from "./email-template-cleanup.queue.service";
 import { EmailTemplateCleanupWorker } from "./email-template-cleanup.worker";
 import { EmailTemplateImageController } from "./email-template-image.controller";
-import { EmailTemplateImageService } from "./email-template-image.service";
 import { EmailNotificationTemplatesController } from "./email-templates.controller";
 import { EmailNotificationTemplatesRepository } from "./email-templates.repository";
 import { EmailNotificationTemplatesService } from "./email-templates.service";
@@ -19,7 +18,6 @@ import { EmailNotificationTemplatesService } from "./email-templates.service";
   providers: [
     EmailNotificationTemplatesService,
     EmailNotificationTemplatesRepository,
-    EmailTemplateImageService,
     EmailTemplateCleanupQueueService,
     EmailTemplateCleanupWorker,
   ],

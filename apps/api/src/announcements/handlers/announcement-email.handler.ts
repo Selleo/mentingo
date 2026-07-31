@@ -64,7 +64,7 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
           announcement.baseLanguage,
         );
         const content = htmlToPlainText(localizedContent);
-        const emailTemplate = this.buildEmail({
+        const { text, html } = await this.buildEmail({
           title,
           content,
           template: announcement.emailTemplate,
@@ -72,7 +72,6 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
           ...defaultEmailSettings,
           language: emailLanguage,
         });
-        const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
 
         await this.emailService.sendEmailWithLogo(
           {
@@ -118,7 +117,22 @@ export class AnnouncementEmailHandler implements IEventHandler<AnnouncementPubli
     return Object.keys(value).find(isSupportedLanguage) ?? baseLanguage;
   }
 
-  private buildEmail(input: {
+  private async buildEmail(input: {
+    title: string;
+    content: string;
+    template: AnnouncementEmailTemplate;
+    link: string;
+    primaryColor: string;
+    companyName: string;
+    language: SupportedLanguages;
+  }) {
+    const emailTemplate = this.buildEmailTemplate(input);
+    const [text, html] = await Promise.all([emailTemplate.text, emailTemplate.html]);
+
+    return { text, html };
+  }
+
+  private buildEmailTemplate(input: {
     title: string;
     content: string;
     template: AnnouncementEmailTemplate;

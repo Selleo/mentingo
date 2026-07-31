@@ -5,6 +5,8 @@ import { createSelectSchema } from "drizzle-typebox";
 import { emailNotificationTemplates } from "src/storage/schema";
 import { omitTenantId } from "src/utils/omitTenantId";
 
+import type { EmailTemplateBlocks, EmailTemplateStrings, LocalizedText } from "@repo/shared";
+
 export const emailTemplateLanguageSchema = Type.Enum(SUPPORTED_LANGUAGES);
 export const emailTemplateStatusSchema = Type.Enum(EMAIL_TEMPLATE_STATUSES);
 
@@ -33,17 +35,19 @@ export const tiptapJsonNodeSchema = Type.Recursive(
   { $id: "TiptapJsonNode" },
 );
 
-export const emailTemplateBlocksSchema = tiptapJsonNodeSchema;
+export const emailTemplateBlocksSchema = Type.Unsafe<EmailTemplateBlocks>(tiptapJsonNodeSchema);
 
-export const emailTemplateStringsSchema = Type.Partial(
-  Type.Record(
-    emailTemplateLanguageSchema,
-    Type.Record(Type.String(), Type.Array(tiptapJsonNodeSchema)),
+export const emailTemplateStringsSchema = Type.Unsafe<EmailTemplateStrings>(
+  Type.Partial(
+    Type.Record(
+      emailTemplateLanguageSchema,
+      Type.Record(Type.String(), Type.Array(tiptapJsonNodeSchema)),
+    ),
   ),
 );
 
-export const localizedTextSchema = Type.Partial(
-  Type.Record(emailTemplateLanguageSchema, Type.String()),
+export const localizedTextSchema = Type.Unsafe<LocalizedText>(
+  Type.Partial(Type.Record(emailTemplateLanguageSchema, Type.String())),
 );
 
 export const emailNotificationTemplateSchema = Type.Composite([

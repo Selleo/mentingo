@@ -13,16 +13,19 @@ import {
   SUPPORTED_LANGUAGES,
   TENANT_LOGO_CID_SRC,
 } from "@repo/shared";
+import { eq, ilike, ne, type SQL } from "drizzle-orm";
 
 import { EmailService } from "src/common/emails/emails.service";
 import { DEFAULT_PAGE_SIZE, parsePagination } from "src/common/pagination";
 import { isPostgresUniqueViolation } from "src/common/utils/postgresErrors";
+import { FileService } from "src/file/file.service";
 import { SettingsService } from "src/settings/settings.service";
+import { emailNotificationTemplates } from "src/storage/schema";
 
 import { EmailTemplateCleanupQueueService } from "./email-template-cleanup.queue.service";
-import { EmailTemplateImageService } from "./email-template-image.service";
 import { EmailNotificationTemplatesRepository } from "./email-templates.repository";
 import { assertSafeBlockUrls } from "./utils/assertSafeBlockUrls";
+import { buildDefaultEmailTemplateBlocks } from "./utils/buildDefaultEmailTemplateBlocks";
 import {
   collectImageSrcs,
   extractTenantEmailTemplateImageFileKeyFromUrl,
@@ -44,7 +47,8 @@ import type { UUIDType } from "src/common";
 import type { CurrentUserType } from "src/common/types/current-user.type";
 import type { EmailTemplateImageCleanupJobData } from "src/queue";
 
-const TEMPLATE_NAME_UNIQUE_INDEX = "email_notification_templates_tenant_id_name_unique_idx";
+const EMAIL_TEMPLATE_NAME_UNIQUE_INDEX = "email_notification_templates_tenant_id_name_unique_idx";
+const EMAIL_TEMPLATE_AUTO_NAME_REGEX = /^Email template #([0-9]+)$/;
 
 @Injectable()
 export class EmailNotificationTemplatesService {
@@ -52,7 +56,7 @@ export class EmailNotificationTemplatesService {
 
   constructor(
     private readonly repository: EmailNotificationTemplatesRepository,
-    private readonly imageService: EmailTemplateImageService,
+    private readonly fileService: FileService,
     private readonly emailService: EmailService,
     private readonly settingsService: SettingsService,
     private readonly cleanupQueue: EmailTemplateCleanupQueueService,
@@ -65,48 +69,50 @@ export class EmailNotificationTemplatesService {
     const { page, perPage } = parsePagination(paginationQuery.page, paginationQuery.perPage, {
       perPage: DEFAULT_PAGE_SIZE,
     });
+    const conditions = this.buildListConditions(filters);
 
-    return this.repository.listTemplates({ page, perPage }, filters);
+    return this.repository.listTemplates({ page, perPage }, conditions);
   }
 
   async createTemplate(input: CreateEmailNotificationTemplate) {
     this.validateLocales(input.baseLanguage, input.availableLocales);
-    const blocks = input.blocks as EmailTemplateBlocks | undefined;
-    const strings = (input.strings as EmailTemplateStrings | undefined) ?? {};
-    if (blocks) {
-      this.assertSafeRenderedBlockUrls({
-        blocks,
-        strings,
-        availableLocales: input.availableLocales,
-        baseLanguage: input.baseLanguage,
-      });
-    }
+    const blocks = input.blocks ?? buildDefaultEmailTemplateBlocks(input.baseLanguage);
+    const strings = input.strings ?? {};
+    const subject = input.subject ?? {};
+
+    this.assertSafeRenderedBlockUrls({
+      blocks,
+      strings,
+      availableLocales: input.availableLocales,
+      baseLanguage: input.baseLanguage,
+    });
 
     if (input.name) {
       await this.ensureNameAvailable(input.name);
       const template = await this.createTemplateOrThrowNameConflict({
         ...input,
         name: input.name,
+        subject,
+        blocks,
+        strings,
       });
       if (!template) throw new BadRequestException("emailTemplates.toast.createFailed");
       return template;
     }
 
-    return this.createWithAutoName(input);
+    return this.createWithAutoName({ ...input, subject, blocks, strings });
   }
 
-  private async createWithAutoName(input: CreateEmailNotificationTemplate) {
-    const MAX_ATTEMPTS = 5;
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-      const nextNumber = (await this.repository.findMaxAutoTemplateNumber()) + 1;
-      const candidate = `Email template #${nextNumber}`;
-      try {
-        return await this.repository.createTemplate({ ...input, name: candidate });
-      } catch (err) {
-        if (!isPostgresUniqueViolation(err, TEMPLATE_NAME_UNIQUE_INDEX)) throw err;
-      }
-    }
-    throw new ConflictException("emailTemplates.toast.nameAlreadyExists");
+  private async createWithAutoName(
+    input: CreateEmailNotificationTemplate & {
+      subject: LocalizedText;
+      blocks: EmailTemplateBlocks;
+      strings: EmailTemplateStrings;
+    },
+  ) {
+    const name = await this.buildNextAutoTemplateName();
+
+    return this.createTemplateOrThrowNameConflict({ ...input, name });
   }
 
   async getTemplateById(id: UUIDType) {
@@ -129,8 +135,8 @@ export class EmailNotificationTemplatesService {
       await this.ensureNameAvailable(input.name, id);
     }
 
-    const nextBlocks = (input.blocks as EmailTemplateBlocks | undefined) ?? existing.blocks;
-    const nextStrings = (input.strings as EmailTemplateStrings | undefined) ?? existing.strings;
+    const nextBlocks = input.blocks ?? existing.blocks;
+    const nextStrings = input.strings ?? existing.strings;
     const pruned = pruneOrphanStrings(nextBlocks, nextStrings);
     if (
       input.blocks !== undefined ||
@@ -152,13 +158,12 @@ export class EmailNotificationTemplatesService {
 
     let template;
     try {
-      template = await this.repository.updateTemplate(id, {
-        ...input,
-        blocks: nextBlocks,
-        strings: pruned,
-      });
+      template = await this.repository.updateTemplate(
+        id,
+        this.buildTemplateUpdates(input, nextBlocks, pruned),
+      );
     } catch (err) {
-      if (isPostgresUniqueViolation(err, TEMPLATE_NAME_UNIQUE_INDEX)) {
+      if (isPostgresUniqueViolation(err, EMAIL_TEMPLATE_NAME_UNIQUE_INDEX)) {
         throw new ConflictException("emailTemplates.toast.nameAlreadyExists");
       }
       throw err;
@@ -317,19 +322,24 @@ export class EmailNotificationTemplatesService {
   }
 
   private async ensureNameAvailable(name: string, excludeId?: UUIDType) {
-    const existing = await this.repository.findByName(name, excludeId);
+    const existing = await this.findTemplateByName(name, excludeId);
     if (existing) {
       throw new ConflictException("emailTemplates.toast.nameAlreadyExists");
     }
   }
 
   private async createTemplateOrThrowNameConflict(
-    input: CreateEmailNotificationTemplate & { name: string },
+    input: CreateEmailNotificationTemplate & {
+      name: string;
+      subject: LocalizedText;
+      blocks: EmailTemplateBlocks;
+      strings: EmailTemplateStrings;
+    },
   ) {
     try {
       return await this.repository.createTemplate(input);
     } catch (err) {
-      if (isPostgresUniqueViolation(err, TEMPLATE_NAME_UNIQUE_INDEX)) {
+      if (isPostgresUniqueViolation(err, EMAIL_TEMPLATE_NAME_UNIQUE_INDEX)) {
         throw new ConflictException("emailTemplates.toast.nameAlreadyExists");
       }
       throw err;
@@ -346,7 +356,7 @@ export class EmailNotificationTemplatesService {
     }
 
     let counter = candidates.length + 1;
-    while (await this.repository.findByName(`${base} (${counter})`)) counter += 1;
+    while (await this.findTemplateByName(`${base} (${counter})`)) counter += 1;
     return `${base} (${counter})`;
   }
 
@@ -481,7 +491,7 @@ export class EmailNotificationTemplatesService {
           .filter((key): key is string => Boolean(key)),
       ),
     ];
-    const stillReferenced = await this.repository.findReferencedImageKeys(
+    const stillReferenced = await this.findReferencedImageKeys(
       keyList,
       tenantId,
       excludeTemplateId,
@@ -489,8 +499,73 @@ export class EmailNotificationTemplatesService {
     const orphaned = keyList.filter((key) => !stillReferenced.has(key));
     await Promise.all(
       orphaned.map(async (key) => {
-        await this.imageService.deleteByKey(key);
+        await this.fileService.deleteFile(key);
       }),
     );
+  }
+
+  private buildListConditions(filters: { status?: EmailTemplateStatus; name?: string }): SQL[] {
+    const conditions: SQL[] = [];
+    if (filters.status) conditions.push(eq(emailNotificationTemplates.status, filters.status));
+    if (filters.name) conditions.push(ilike(emailNotificationTemplates.name, `%${filters.name}%`));
+
+    return conditions;
+  }
+
+  private buildTemplateUpdates(
+    input: UpdateEmailNotificationTemplate,
+    blocks: EmailTemplateBlocks,
+    strings: EmailTemplateStrings,
+  ): Partial<typeof emailNotificationTemplates.$inferInsert> {
+    const updates: Partial<typeof emailNotificationTemplates.$inferInsert> = {};
+
+    if (input.name !== undefined) updates.name = input.name;
+    if (input.baseLanguage !== undefined) updates.baseLanguage = input.baseLanguage;
+    if (input.availableLocales !== undefined) updates.availableLocales = input.availableLocales;
+    if (input.subject !== undefined) updates.subject = input.subject;
+    updates.blocks = blocks;
+    updates.strings = strings;
+
+    return updates;
+  }
+
+  private async findTemplateByName(name: string, excludeId?: UUIDType) {
+    const conditions: SQL[] = [eq(emailNotificationTemplates.name, name)];
+    if (excludeId) conditions.push(ne(emailNotificationTemplates.id, excludeId));
+
+    return this.repository.findByName(conditions);
+  }
+
+  private async buildNextAutoTemplateName() {
+    const names = await this.repository.findAutoTemplateNames();
+    const maxNumber = names.reduce((max, name) => {
+      const match = EMAIL_TEMPLATE_AUTO_NAME_REGEX.exec(name);
+      if (!match) return max;
+
+      const value = Number(match[1]);
+      return Number.isInteger(value) && value > max ? value : max;
+    }, 0);
+
+    return `Email template #${maxNumber + 1}`;
+  }
+
+  private async findReferencedImageKeys(
+    keys: string[],
+    tenantId: UUIDType,
+    excludeTemplateId?: UUIDType,
+  ): Promise<Set<string>> {
+    const keySet = new Set(keys);
+    if (keySet.size === 0) return new Set();
+
+    const blocksList = await this.repository.findTemplateBlocks(excludeTemplateId);
+    const out = new Set<string>();
+    for (const blocks of blocksList) {
+      for (const src of collectImageSrcs(blocks)) {
+        const key = extractTenantEmailTemplateImageFileKeyFromUrl(src, tenantId);
+        if (key && keySet.has(key)) out.add(key);
+      }
+    }
+
+    return out;
   }
 }

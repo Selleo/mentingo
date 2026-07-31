@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { DatabasePg } from "src/common";
 import { FileService } from "src/file/file.service";
-import { DB_ADMIN } from "src/storage/db/db.providers";
+import { DB } from "src/storage/db/db.providers";
+import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import { courses } from "src/storage/schema";
 
 import type { UUIDType } from "src/common";
@@ -11,16 +12,21 @@ import type { UUIDType } from "src/common";
 @Injectable()
 export class PublicCourseThumbnailService {
   constructor(
-    @Inject(DB_ADMIN) private readonly dbAdmin: DatabasePg,
+    @Inject(DB) private readonly db: DatabasePg,
     private readonly fileService: FileService,
+    private readonly tenantRunner: TenantDbRunnerService,
   ) {}
 
   async resolveSignedUrl(courseId: UUIDType, tenantId: UUIDType): Promise<string | null> {
-    const [course] = await this.dbAdmin
-      .select({ thumbnailS3Key: courses.thumbnailS3Key })
-      .from(courses)
-      .where(and(eq(courses.id, courseId), eq(courses.tenantId, tenantId)))
-      .limit(1);
+    const course = await this.tenantRunner.runWithTenant(tenantId, async () => {
+      const [row] = await this.db
+        .select({ thumbnailS3Key: courses.thumbnailS3Key })
+        .from(courses)
+        .where(eq(courses.id, courseId))
+        .limit(1);
+
+      return row;
+    });
 
     if (!course) return null;
 

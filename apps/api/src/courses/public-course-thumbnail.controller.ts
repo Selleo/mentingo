@@ -15,7 +15,7 @@ const REDIRECT_CACHE_MAX_AGE_SECONDS = 1800;
 @Controller("public/course-thumbnail")
 export class PublicCourseThumbnailController {
   constructor(
-    private readonly service: PublicCourseThumbnailService,
+    private readonly publicCourseThumbnailService: PublicCourseThumbnailService,
     private readonly tenantResolver: TenantResolverService,
   ) {}
 
@@ -32,7 +32,7 @@ export class PublicCourseThumbnailController {
     const tenantId = await this.tenantResolver.resolveTenantId(req);
     if (!tenantId) throw new ForbiddenException("tenant.error.unresolved");
 
-    const url = await this.service.resolveSignedUrl(courseId, tenantId);
+    const url = await this.publicCourseThumbnailService.resolveSignedUrl(courseId, tenantId);
 
     if (!url) {
       res.setHeader("Content-Type", "image/svg+xml");

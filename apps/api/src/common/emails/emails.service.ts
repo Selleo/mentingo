@@ -69,11 +69,24 @@ export class EmailService {
       });
     }
 
-    const payload = {
-      ...(email as Email),
+    const baseEmail = {
+      to: email.to,
+      subject: email.subject,
       from: this.fromEmail,
       attachments: attachments.length > 0 ? attachments : undefined,
     };
+
+    let payload: Email;
+    if (email.text !== undefined && email.html !== undefined) {
+      payload = { ...baseEmail, text: email.text, html: email.html };
+    } else if (email.text !== undefined) {
+      payload = { ...baseEmail, text: email.text };
+    } else if (email.html !== undefined) {
+      payload = { ...baseEmail, html: email.html };
+    } else {
+      throw new Error("Email content is missing");
+    }
+
     await this.emailAdapter.sendMail(payload);
   }
 
