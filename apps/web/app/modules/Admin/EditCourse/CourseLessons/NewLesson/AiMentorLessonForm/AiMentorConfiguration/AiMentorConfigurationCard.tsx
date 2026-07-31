@@ -109,7 +109,7 @@ export const AiMentorConfigurationCard = ({
     return t("adminCourseView.curriculum.lesson.aiMentorConfiguration.baseLanguageRequired");
   })();
   const actionLabel = isConfigured
-    ? t("adminCourseView.curriculum.lesson.aiMentorConfiguration.reviewConfiguration")
+    ? t("adminCourseView.curriculum.lesson.aiMentorConfiguration.editConfiguration")
     : t("adminCourseView.curriculum.lesson.aiMentorConfiguration.configureManually");
 
   return (

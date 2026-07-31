@@ -18,7 +18,7 @@ Administrators create sessions from the Live Training or Calendar workflow, trai
 ## Feature Functions
 
 - Create, edit, and delete standalone or course-linked live training events.
-- Configure delivery type, date, time, location, hosts, maximum participants, and viewer permissions.
+- Configure delivery type, inclusive all-day date ranges or timed schedules, location, hosts, maximum participants, and viewer permissions.
 - Start, join, and end live training sessions through permission-controlled actions.
 - Keep online room participants arranged in a stable responsive grid, including balanced 2x2 layout for four participants.
 - Attach before-session and after-session materials.
@@ -35,7 +35,7 @@ L&D teams can coordinate blended programs more reliably because scheduling, cour
 
 ## How It Works
 
-Administrators create a live training item with title, schedule, delivery type, hosts, location or online room behavior, participant visibility, and optional course links. Sessions can also be created from the calendar, which pre-fills scheduling context.
+Administrators create a live training item with title, schedule, delivery type, hosts, location or online room behavior, participant visibility, and optional course links. All-day schedules remain inclusive of the dates shown to the administrator when the session is edited. Sessions can also be created from the calendar, which pre-fills scheduling context.
 
 When LiveKit is configured, online sessions expose join-room behavior. When it is not configured, online delivery is not selectable and offline sessions remain available. Hosts can start and end sessions. For course-linked offline sessions, ending the session can complete the linked lesson for enrolled learners.
 

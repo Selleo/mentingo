@@ -2317,7 +2317,7 @@
           "baseLanguageRequired": "Nejprve nakonfigurujte chování AI Mentora v základním jazyce kurzu.",
           "incompleteDescription": "Tato konfigurace vyžaduje doplnění několika údajů.",
           "configureManually": "Nastavit ručně",
-          "reviewConfiguration": "Zkontrolovat konfiguraci",
+          "editConfiguration": "Upravit konfiguraci",
           "dialogTitle": "Nastavení AI Mentora",
           "dialogDescription": "Zvolte režim a definujte chování, které má student zažít.",
           "optional": "(volitelné)",

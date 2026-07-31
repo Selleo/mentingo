@@ -2368,7 +2368,7 @@
           "baseLanguageRequired": "Configura primero el comportamiento del mentor de IA en el idioma base del curso.",
           "incompleteDescription": "Faltan algunos datos para completar esta configuración.",
           "configureManually": "Configurar manualmente",
-          "reviewConfiguration": "Revisar configuración",
+          "editConfiguration": "Editar configuración",
           "dialogTitle": "Configurar mentor de IA",
           "dialogDescription": "Elige un modo y define la experiencia que tendrán los alumnos.",
           "optional": "(opcional)",

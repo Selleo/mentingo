@@ -2318,7 +2318,7 @@
           "baseLanguageRequired": "Konfigurieren Sie das Verhalten des KI-Mentors zuerst in der Basissprache des Kurses.",
           "incompleteDescription": "Für diese Konfiguration fehlen noch einige Angaben.",
           "configureManually": "Manuell konfigurieren",
-          "reviewConfiguration": "Konfiguration prüfen",
+          "editConfiguration": "Konfiguration bearbeiten",
           "dialogTitle": "KI-Mentor konfigurieren",
           "dialogDescription": "Wählen Sie einen Modus und definieren Sie das gewünschte Lernerlebnis.",
           "optional": "(optional)",

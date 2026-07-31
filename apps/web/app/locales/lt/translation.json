@@ -2317,7 +2317,7 @@
           "baseLanguageRequired": "Pirmiausia sukonfigūruokite AI mentoriaus elgseną pagrindine kurso kalba.",
           "incompleteDescription": "Šiai konfigūracijai dar trūksta kelių duomenų.",
           "configureManually": "Konfigūruoti rankiniu būdu",
-          "reviewConfiguration": "Peržiūrėti konfigūraciją",
+          "editConfiguration": "Redaguoti konfigūraciją",
           "dialogTitle": "AI mentoriaus konfigūracija",
           "dialogDescription": "Pasirinkite režimą ir apibrėžkite besimokančiojo patirtį.",
           "optional": "(neprivaloma)",

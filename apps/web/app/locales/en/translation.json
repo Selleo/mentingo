@@ -2380,7 +2380,7 @@
           "baseLanguageRequired": "Configure AI Mentor behavior in the course base language before translating it.",
           "incompleteDescription": "This configuration needs a few details before it can be edited or translated.",
           "configureManually": "Configure manually",
-          "reviewConfiguration": "Review configuration",
+          "editConfiguration": "Edit configuration",
           "dialogTitle": "Configure AI Mentor",
           "dialogDescription": "Choose a mode and define the behavior learners should experience.",
           "optional": "(optional)",

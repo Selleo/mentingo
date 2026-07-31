@@ -2605,7 +2605,7 @@
           "baseLanguageRequired": "Najpierw skonfiguruj zachowanie Mentora AI w języku bazowym kursu.",
           "incompleteDescription": "Ta konfiguracja wymaga uzupełnienia kilku informacji.",
           "configureManually": "Skonfiguruj ręcznie",
-          "reviewConfiguration": "Sprawdź konfigurację",
+          "editConfiguration": "Edytuj konfigurację",
           "dialogTitle": "Konfiguracja Mentora AI",
           "dialogDescription": "Wybierz tryb i określ zachowanie, którego doświadczy uczestnik.",
           "optional": "(opcjonalne)",

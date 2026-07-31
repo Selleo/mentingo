@@ -61,9 +61,20 @@ describe("AiMentorConfigurationCard", () => {
     });
 
     expect(screen.getByText("Roleplay · Concerned customer · Realistic")).toBeVisible();
-    expect(screen.getByRole("button", { name: "Review configuration" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Edit configuration" })).toBeVisible();
     expect(screen.queryByRole("button", { name: "Improve with AI" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Check quality with AI" })).not.toBeInTheDocument();
+  });
+
+  it("labels a translated configuration as editable", () => {
+    renderCard({
+      value: roleplayConfiguration,
+      language: "pl",
+      baseLanguage: "en",
+      isPersisted: true,
+    });
+
+    expect(screen.getByRole("button", { name: "Edit configuration" })).toBeVisible();
   });
 
   it("requires the base configuration before opening a translation", () => {

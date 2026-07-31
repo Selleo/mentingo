@@ -24,11 +24,19 @@ const buildAllDayEndDateTime = (date: string) => {
   return endsAt;
 };
 
+const getInclusiveAllDayEndDate = (date: Date) => {
+  const inclusiveEndDate = new Date(date);
+  inclusiveEndDate.setDate(inclusiveEndDate.getDate() - 1);
+
+  return inclusiveEndDate;
+};
+
 export const buildLiveTrainingEditFormState = (
   liveTraining: LiveTrainingDetails,
 ): LiveTrainingEditFormState => {
   const startsAt = new Date(liveTraining.startsAt);
   const endsAt = new Date(liveTraining.endsAt);
+  const endDate = liveTraining.allDay ? getInclusiveAllDayEndDate(endsAt) : endsAt;
 
   return {
     title: liveTraining.title,
@@ -36,7 +44,7 @@ export const buildLiveTrainingEditFormState = (
     allDay: liveTraining.allDay,
     startDate: toDateInputValue(startsAt),
     startTime: toTimeInputValue(startsAt),
-    endDate: toDateInputValue(endsAt),
+    endDate: toDateInputValue(endDate),
     endTime: toTimeInputValue(endsAt),
     deliveryType: liveTraining.deliveryType,
     location: liveTraining.location ?? "",
