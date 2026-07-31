@@ -391,6 +391,8 @@ export class MasterCourseRepository {
   }
 
   async getSourceAiMentorConfigurations(aiMentorLessonIds: UUIDType[]) {
+    if (!aiMentorLessonIds.length) return [];
+
     return this.db
       .select()
       .from(aiMentorConfigurations)
