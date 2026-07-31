@@ -1,6 +1,8 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { getStepDefinition, type SupportedLanguages, type TriggerType } from "@repo/shared";
 
+import { CORS_ORIGIN } from "src/auth/consts";
+
 import { AutomationSystemTemplatePreviewService } from "./automation-system-template-preview.service";
 import { AutomationTemplateService } from "./automation-template.service";
 
@@ -297,7 +299,7 @@ export class AutomationSimulationService {
       html = html.replace(regex, sampleValue);
     }
 
-    return { subject, html };
+    return { subject, html: this.replaceCidReferences(html) };
   }
 
   private getSampleValues(language: string): Record<string, string> {
@@ -452,5 +454,12 @@ export class AutomationSimulationService {
 
   private escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  private replaceCidReferences(html: string): string {
+    const logoUrl = `${CORS_ORIGIN}/app/assets/svgs/app-logo.svg`;
+    const borderCircleUrl = `${CORS_ORIGIN}/app/assets/svgs/app-email-border-circle.svg`;
+
+    return html.replace(/cid:logo/g, logoUrl).replace(/cid:border-circle/g, borderCircleUrl);
   }
 }
