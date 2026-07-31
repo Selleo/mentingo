@@ -12,8 +12,6 @@ import {
 } from "./aiMentorConfiguration.mappers";
 
 import type { AiMentorConfigurationResponse } from "./aiMentorConfiguration.types";
-import type { SupportedLanguages } from "@repo/shared";
-
 const commonResponse = {
   id: "00000000-0000-4000-8000-000000000001",
   aiMentorLessonId: "00000000-0000-4000-8000-000000000002",
@@ -21,7 +19,7 @@ const commonResponse = {
   hasMissingTranslations: false,
   language: "en",
   baseLanguage: "en",
-  availableLocales: ["en", "pl"] as SupportedLanguages[],
+  availableLocales: ["en", "pl"],
 } satisfies Pick<
   AiMentorConfigurationResponse,
   | "id"
