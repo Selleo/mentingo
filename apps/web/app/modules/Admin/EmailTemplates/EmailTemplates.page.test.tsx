@@ -199,6 +199,9 @@ describe("EmailTemplatesPage", () => {
       { timeout: 1000 },
     );
 
+    await waitFor(() => {
+      expect(screen.getByTestId("email-templates-status-filter")).not.toBeDisabled();
+    });
     await userEvent.click(screen.getByTestId("email-templates-status-filter"));
     await userEvent.click(
       await screen.findByTestId(
@@ -217,6 +220,9 @@ describe("EmailTemplatesPage", () => {
       );
     });
 
+    await waitFor(() => {
+      expect(screen.getByTestId("email-templates-pagination-items-per-page")).not.toBeDisabled();
+    });
     await userEvent.click(screen.getByTestId("email-templates-pagination-items-per-page"));
     await userEvent.click(
       await screen.findByTestId("email-templates-pagination-items-per-page-option-50"),
