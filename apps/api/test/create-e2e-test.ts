@@ -7,7 +7,8 @@ import postgres from "postgres";
 import { ActivityLogsService } from "src/activity-logs/activity-logs.service";
 import { AppModule } from "src/app.module";
 import { EmailAdapter } from "src/common/emails/adapters/email.adapter";
-import { createDbProxy, DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
+import { DB, DB_ADMIN, DB_APP } from "src/storage/db/db.providers";
+import { createTenantAwareDb } from "src/storage/db/tenant-aware-session";
 import { TenantDbRunnerService } from "src/storage/db/tenant-db-runner.service";
 import * as schema from "src/storage/schema";
 
@@ -100,18 +101,22 @@ export async function createE2ETest(optionsOrProviders: E2ETestOptions | Provide
     await pgSqlApp`SELECT set_config('app.tenant_id', ${defaultTenantId}, false)`;
   }
 
+  const dbForApp = options.useDbProxy
+    ? createTenantAwareDb(dbApp, new TenantDbRunnerService(dbApp))
+    : db;
+
   let testModuleBuilder = Test.createTestingModule({
     imports: [AppModule],
     providers: [...customProviders],
   })
-    .overrideProvider(DB)
-    .useValue(options.useDbProxy ? createDbProxy(dbApp) : db)
     .overrideProvider(DB_APP)
     .useValue(dbApp)
     .overrideProvider(DB_ADMIN)
     .useValue(dbAdmin)
     .overrideProvider(EmailAdapter)
     .useClass(EmailTestingAdapter);
+
+  testModuleBuilder = testModuleBuilder.overrideProvider(DB).useValue(dbForApp);
 
   // Disable activity logging by default to prevent deadlocks between
   // async activity log INSERTs and TRUNCATE during test cleanup.
